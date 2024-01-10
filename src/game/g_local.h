@@ -210,9 +210,9 @@ typedef struct {
   char *animatingParams; // Gordon: read 8 lines up for why i love this
                          // code ;)
 } g_script_status_t;
-//
-#define G_MAX_SCRIPT_ACCUM_BUFFERS 10
-//
+
+constexpr int MAX_SCRIPT_ACCUM_BUFFERS = 10;
+
 void G_Script_ScriptEvent(gentity_t *ent, const char *eventStr,
                           const char *params);
 //====================================================================
@@ -474,7 +474,7 @@ struct gentity_s {
                                   // perform for each event type
   g_script_status_t scriptStatus; // current status of scripting
   // the accumulation buffer
-  int scriptAccumBuffer[G_MAX_SCRIPT_ACCUM_BUFFERS];
+  int scriptAccumBuffer[MAX_SCRIPT_ACCUM_BUFFERS];
 
   qboolean AASblocking;
   vec3_t AASblocking_mins, AASblocking_maxs;
@@ -1190,9 +1190,6 @@ typedef struct ipMute_s {
 #define MAX_SPAWN_VARS 128
 #define MAX_SPAWN_VARS_CHARS 2048
 #define VOTE_MAXSTRING 256 // Same value as MAX_STRING_TOKENS
-
-// was incorrectly set to 8
-constexpr int MAX_SCRIPT_ACCUM_BUFFERS = 10;
 
 #define MAX_BUFFERED_CONFIGSTRINGS 128
 
