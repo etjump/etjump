@@ -137,6 +137,12 @@ void RtvDrawable::drawMenuText(panel_button_t *button) {
   auto rtvMaps = rtvHandler->getRtvMaps();
 
   for (int i = 0; i < arrSize; i++) {
+    // skip empty entries
+    if (rtvMenuStrings[i][0] == '\0') {
+      y += button->rect.h;
+      continue;
+    }
+
     std::string str = stringFormat("%i. %s", (i + 1) % 10, rtvMenuStrings[i]);
 
     // last entry is current map, so we need 'No' vote count for that
@@ -147,12 +153,9 @@ void RtvDrawable::drawMenuText(panel_button_t *button) {
       str += stringFormat(" (%i)", (*rtvMaps)[i].second);
     }
 
-    // only draw entries which are filled
-    if (rtvMenuStrings[i][0]) {
-      CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
-                        button->font->scaley, button->font->colour, str, 0, 0,
-                        button->font->style, button->font->font);
-    }
+    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
+                      button->font->scaley, button->font->colour, str, 0, 0,
+                      button->font->style, button->font->font);
 
     y += button->rect.h;
   }
