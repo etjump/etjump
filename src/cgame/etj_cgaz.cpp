@@ -26,6 +26,7 @@
 // https://github.com/Jelvan1/cgame_proxymod/
 
 #include "etj_cgaz.h"
+#include "etj_snaphud.h"
 #include "etj_utilities.h"
 #include "etj_pmove_utils.h"
 #include "../game/etj_numeric_utilities.h"
@@ -115,10 +116,43 @@ void CGaz::UpdateDraw(float wishspeed, float accel) {
 
   drawMin = UpdateDrawMin(&state);
   drawOpt = UpdateDrawOpt(&state);
-  drawMaxCos = UpdateDrawMaxCos(&state, drawOpt);
-  drawMax = UpdateDrawMax(&state, drawMaxCos);
-
+  drawMaxCos = UpdateDrawMaxCos(&state);
+  drawMax = UpdateDrawMax(&state);
+  drawSnap = UpdateDrawSnap();
   drawVel = atan2f(pm->pmext->velocity[1], pm->pmext->velocity[0]);
+}
+
+float CGaz::UpdateDrawSnap() {
+  // don't highligh snapzone on very low velocities
+  if (!etj_CGazDrawAccelZone.integer || state.vf < state.wishspeed) {
+    return NAN;
+  }
+
+  const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, CMDSCALE_DEFAULT);
+  Snaphud::CurrentSnap cs = Snaphud::getCurrentSnap(*ps, pm);
+
+  if (std::isnan(cs.snap)) {
+    return NAN;
+  }
+
+  float snap = cs.snap;
+
+  // edge case, solution from snaphud code
+  if (cs.rightStrafe && snap > 90) {
+    snap = 90 - std::fmod(snap, 90);
+  }
+
+  const float viewOffset = AngleNormalize180(cs.yaw - RAD2DEG(yaw));
+
+  // convert grid based snap angle to cgaz's velocity vector based
+  float snapInCgazAngles =
+      std::fmod(!cs.rightStrafe ? snap - viewOffset : viewOffset - snap, 90);
+
+  if (snapInCgazAngles < 0.0f) {
+    snapInCgazAngles += 90.0f;
+  }
+
+  return DEG2RAD(snapInCgazAngles);
 }
 
 float CGaz::UpdateDrawMin(state_t const *state) {
@@ -134,16 +168,13 @@ float CGaz::UpdateDrawOpt(state_t const *state) {
   return num >= state->vf ? 0 : acosf(num / state->vf);
 }
 
-float CGaz::UpdateDrawMaxCos(state_t const *state, float drawOpt) {
+float CGaz::UpdateDrawMaxCos(state_t const *state) {
   float const num = sqrtf(state->vSquared - state->gSquared) - state->vf;
   float drawMaxCos = num >= state->a ? 0 : acosf(num / state->a);
-  if (drawMaxCos < drawOpt) {
-    drawMaxCos = drawOpt;
-  }
   return drawMaxCos;
 }
 
-float CGaz::UpdateDrawMax(state_t const *state, float drawMaxCos) {
+float CGaz::UpdateDrawMax(state_t const *state) {
   float const num =
       state->vSquared - state->vfSquared - state->aSquared - state->gSquared;
   float const den = 2 * state->a * state->vf;
@@ -153,10 +184,6 @@ float CGaz::UpdateDrawMax(state_t const *state, float drawMaxCos) {
     return (float)M_PI;
   }
   float drawMax = acosf(num / den);
-  if (drawMax < drawMaxCos) {
-    drawMax = drawMaxCos;
-    return drawMax;
-  }
   return drawMax;
 }
 
@@ -232,20 +259,30 @@ void CGaz::render() const {
       fov = Numeric::clamp(etj_CGazFov.value, 1, 179);
     }
 
+    const auto zone1 = drawMin;
+
+    const auto zone2 = std::isnan(drawSnap) ? drawOpt
+                       : drawSnap < drawMin ? drawMaxCos
+                                            : drawSnap;
+    // if snap < min angle, the accel zone fills the whole snapzone
+
+    const auto zone3 = std::max(zone2, drawMaxCos);
+    const auto zone4 = drawMax == 0 || drawMax == (float)M_PI || drawMax >= zone3 ? drawMax : zone3;
+
     // No accel zone
-    CG_FillAngleYaw(-drawMin, +drawMin, yaw, y, h, fov, CGaz1Colors[0]);
+    CG_FillAngleYaw(-zone1, +zone1, yaw, y, h, fov, CGaz1Colors[0]);
 
     // Min angle
-    CG_FillAngleYaw(+drawMin, +drawOpt, yaw, y, h, fov, CGaz1Colors[1]);
-    CG_FillAngleYaw(-drawOpt, -drawMin, yaw, y, h, fov, CGaz1Colors[1]);
+    CG_FillAngleYaw(+zone1, +zone2, yaw, y, h, fov, CGaz1Colors[1]);
+    CG_FillAngleYaw(-zone2, -zone1, yaw, y, h, fov, CGaz1Colors[1]);
 
-    // Accel zone
-    CG_FillAngleYaw(+drawOpt, +drawMaxCos, yaw, y, h, fov, CGaz1Colors[2]);
-    CG_FillAngleYaw(-drawMaxCos, -drawOpt, yaw, y, h, fov, CGaz1Colors[2]);
+    // Accel/snap zone
+    CG_FillAngleYaw(+zone2, +zone3, yaw, y, h, fov, CGaz1Colors[2]);
+    CG_FillAngleYaw(-zone3, -zone2, yaw, y, h, fov, CGaz1Colors[2]);
 
     // Max angle
-    CG_FillAngleYaw(+drawMaxCos, +drawMax, yaw, y, h, fov, CGaz1Colors[3]);
-    CG_FillAngleYaw(-drawMax, -drawMaxCos, yaw, y, h, fov, CGaz1Colors[3]);
+    CG_FillAngleYaw(+zone3, +zone4, yaw, y, h, fov, CGaz1Colors[3]);
+    CG_FillAngleYaw(-zone4, -zone3, yaw, y, h, fov, CGaz1Colors[3]);
   }
 
   // Dzikie Weze's 2D-CGaz
