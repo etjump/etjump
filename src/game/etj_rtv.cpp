@@ -36,7 +36,6 @@ RockTheVote::RockTheVote() {
   isRtvVote = false;
   autoRtvStartTime = level.startTime;
   anyonePlayedSinceLastVote = false;
-  twoMinWarningGiven = false;
 }
 
 std::vector<std::string> RockTheVote::getMostVotedMaps() {
@@ -140,11 +139,14 @@ bool RockTheVote::checkAutoRtv() {
   const int autoRtvMsec = g_autoRtv.integer * 1000 * 60;
   const int autoRtvCooldown = autoRtvStartTime + autoRtvMsec;
 
-  if (!twoMinWarningGiven && level.time > autoRtvCooldown - (1000 * 60 * 2) &&
+  // checks for exactly 2 minutes until vote, this should be fine as long as
+  // server doesn't randomly lag or something and skip a frame, but this
+  // isn't really critical anyway and is the simplest way to solve this getting
+  // printed when adjusting auto rtv time so that it gets instantly called
+  if (level.time == autoRtvCooldown - (1000 * 60 * 2) &&
       g_autoRtv.integer >= 2) {
     Printer::BroadcastChatMessage(
         "^gServer: automatic Rock The Vote will be called in ^32 ^gminutes.");
-    twoMinWarningGiven = true;
     return false;
   }
 
@@ -187,7 +189,6 @@ void RockTheVote::callAutoRtv() {
 
   autoRtvStartTime = level.time; // reset cooldown in case this vote fails
   anyonePlayedSinceLastVote = false;
-  twoMinWarningGiven = false;
   isRtvVote = true;
 
   std::string voteMsg = stringFormat("Server called an automatic %s.\n",

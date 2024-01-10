@@ -1291,7 +1291,7 @@ static qboolean CG_RW_ParseClient(int handle, weaponInfo_t *weaponInfo) {
     return CG_RW_ParseError(handle, "expected '{'");
   }
 
-  while (1) {
+  while (true) {
     if (!trap_PC_ReadToken(handle, &token)) {
       break;
     }
@@ -1303,48 +1303,39 @@ static qboolean CG_RW_ParseClient(int handle, weaponInfo_t *weaponInfo) {
     if (!Q_stricmp(token.string, "standModel")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected standModel filename");
-      } else {
-        weaponInfo->standModel = trap_R_RegisterModel(filename);
       }
+
+      weaponInfo->standModel = trap_R_RegisterModel(filename);
     } else if (!Q_stricmp(token.string, "droppedAnglesHack")) {
       weaponInfo->droppedAnglesHack = qtrue;
     } else if (!Q_stricmp(token.string, "pickupModel")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected pickupModel filename");
-      } else {
-        strncpy(weaponInfo->pickupModelPath, filename, MAX_QPATH);
-        weaponInfo->weaponModel[W_PU_MODEL].model =
-            trap_R_RegisterModel(filename);
       }
+
+      Q_strncpyz(weaponInfo->pickupModelPath, filename, MAX_QPATH);
+      weaponInfo->weaponModel[W_PU_MODEL].model =
+          trap_R_RegisterModel(filename);
+
     } else if (!Q_stricmp(token.string, "pickupSound")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected pickupSound filename");
-      } else {
-        // weaponInfo->pickupSound =
-        // trap_S_RegisterSound( filename,
-        // qfalse );
       }
     } else if (!Q_stricmp(token.string, "weaponConfig")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected weaponConfig filename");
-      } else {
-        if (!CG_ParseWeaponConfig(filename, weaponInfo)) {
-          //					CG_Error(
-          //"Couldn't register weapon %i
-          //(failed to parse %s)",
-          // weaponNum, filename );
-        }
+      } else if (!CG_ParseWeaponConfig(filename, weaponInfo)) {
+        CG_Error("Couldn't register weapon (failed to parse %s)", filename);
       }
     } else if (!Q_stricmp(token.string, "handsModel")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected handsModel filename");
-      } else {
-        weaponInfo->handsModel = trap_R_RegisterModel(filename);
       }
+
+      weaponInfo->handsModel = trap_R_RegisterModel(filename);
     } else if (!Q_stricmp(token.string, "flashDlightColor")) {
       if (!PC_Vec_Parse(handle, &weaponInfo->flashDlightColor)) {
-        return CG_RW_ParseError(handle, "expected flashDlightColor "
-                                        "as r g b");
+        return CG_RW_ParseError(handle, "expected flashDlightColor as r g b");
       }
     } else if (!Q_stricmp(token.string, "flashSound")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
@@ -1356,10 +1347,10 @@ static qboolean CG_RW_ParseClient(int handle, weaponInfo_t *weaponInfo) {
             break;
           }
         }
+
         if (i == 4) {
-          CG_Printf(S_COLOR_YELLOW "WARNING: only up to 4 "
-                                   "flashSounds supported "
-                                   "per weapon\n");
+          CG_Printf(S_COLOR_YELLOW
+                    "WARNING: only up to 4 flashSounds supported per weapon\n");
         }
       }
     } else if (!Q_stricmp(token.string, "flashEchoSound")) {
@@ -1373,10 +1364,11 @@ static qboolean CG_RW_ParseClient(int handle, weaponInfo_t *weaponInfo) {
             break;
           }
         }
+
         if (i == 4) {
-          CG_Printf(S_COLOR_YELLOW "WARNING: only up to 4 "
-                                   "flashEchoSounds "
-                                   "supported per weapon\n");
+          CG_Printf(
+              S_COLOR_YELLOW
+              "WARNING: only up to 4 flashEchoSounds supported per weapon\n");
         }
       }
     } else if (!Q_stricmp(token.string, "lastShotSound")) {
@@ -1390,105 +1382,97 @@ static qboolean CG_RW_ParseClient(int handle, weaponInfo_t *weaponInfo) {
             break;
           }
         }
+
         if (i == 4) {
-          CG_Printf(S_COLOR_YELLOW "WARNING: only up to 4 "
-                                   "lastShotSound supported "
-                                   "per weapon\n");
+          CG_Printf(
+              S_COLOR_YELLOW
+              "WARNING: only up to 4 lastShotSound supported per weapon\n");
         }
       }
     } else if (!Q_stricmp(token.string, "readySound")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected readySound filename");
-      } else {
-        weaponInfo->readySound = trap_S_RegisterSound(filename, qfalse);
       }
+
+      weaponInfo->readySound = trap_S_RegisterSound(filename, qfalse);
     } else if (!Q_stricmp(token.string, "firingSound")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected firingSound filename");
-      } else {
-        weaponInfo->firingSound = trap_S_RegisterSound(filename, qfalse);
       }
+
+      weaponInfo->firingSound = trap_S_RegisterSound(filename, qfalse);
     } else if (!Q_stricmp(token.string, "overheatSound")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected overheatSound filename");
-      } else {
-        weaponInfo->overheatSound = trap_S_RegisterSound(filename, qfalse);
       }
+
+      weaponInfo->overheatSound = trap_S_RegisterSound(filename, qfalse);
     } else if (!Q_stricmp(token.string, "reloadSound")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected reloadSound filename");
-      } else {
-        weaponInfo->reloadSound = trap_S_RegisterSound(filename, qfalse);
       }
+
+      weaponInfo->reloadSound = trap_S_RegisterSound(filename, qfalse);
     } else if (!Q_stricmp(token.string, "reloadFastSound")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
-        return CG_RW_ParseError(handle, "expected reloadFastSound "
-                                        "filename");
-      } else {
-        weaponInfo->reloadFastSound = trap_S_RegisterSound(filename, qfalse);
+        return CG_RW_ParseError(handle, "expected reloadFastSound filename");
       }
+
+      weaponInfo->reloadFastSound = trap_S_RegisterSound(filename, qfalse);
     } else if (!Q_stricmp(token.string, "spinupSound")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected spinupSound filename");
-      } else {
-        weaponInfo->spinupSound = trap_S_RegisterSound(filename, qfalse);
       }
+
+      weaponInfo->spinupSound = trap_S_RegisterSound(filename, qfalse);
     } else if (!Q_stricmp(token.string, "spindownSound")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected spindownSound filename");
-      } else {
-        weaponInfo->spindownSound = trap_S_RegisterSound(filename, qfalse);
       }
+
+      weaponInfo->spindownSound = trap_S_RegisterSound(filename, qfalse);
     } else if (!Q_stricmp(token.string, "switchSound")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected switchSound filename");
-      } else {
-        weaponInfo->switchSound = trap_S_RegisterSound(filename, qfalse);
       }
+
+      weaponInfo->switchSound = trap_S_RegisterSound(filename, qfalse);
     } else if (!Q_stricmp(token.string, "weaponIcon")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected weaponIcon filename");
-      } else {
-        weaponInfo->weaponIcon[0] = trap_R_RegisterShader(filename);
       }
+
+      weaponInfo->weaponIcon[0] = trap_R_RegisterShader(filename);
     } else if (!Q_stricmp(token.string, "weaponSelectedIcon")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
-        return CG_RW_ParseError(handle, "expected weaponSelectedIcon "
-                                        "filename");
-      } else {
-        weaponInfo->weaponIcon[1] = trap_R_RegisterShader(filename);
+        return CG_RW_ParseError(handle, "expected weaponSelectedIcon filename");
       }
-      /*} else if( !Q_stricmp( token.string, "ammoIcon"
-         ) ) { if( !PC_String_ParseNoAlloc( handle,
-         filename, sizeof(filename) ) ) { return
-         CG_RW_ParseError( handle, "expected ammoIcon
-         filename" ); } else { weaponInfo->ammoIcon =
-         trap_R_RegisterShader( filename );
-          }*/
+
+      weaponInfo->weaponIcon[1] = trap_R_RegisterShader(filename);
     } else if (!Q_stricmp(token.string, "missileModel")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected missileModel filename");
-      } else {
-        weaponInfo->missileModel = trap_R_RegisterModel(filename);
       }
+
+      weaponInfo->missileModel = trap_R_RegisterModel(filename);
     } else if (!Q_stricmp(token.string, "missileAlliedSkin")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected skin filename");
-      } else {
-        weaponInfo->missileAlliedSkin = trap_R_RegisterSkin(filename);
       }
+
+      weaponInfo->missileAlliedSkin = trap_R_RegisterSkin(filename);
     } else if (!Q_stricmp(token.string, "missileAxisSkin")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected skin filename");
-      } else {
-        weaponInfo->missileAxisSkin = trap_R_RegisterSkin(filename);
       }
+
+      weaponInfo->missileAxisSkin = trap_R_RegisterSkin(filename);
     } else if (!Q_stricmp(token.string, "missileSound")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected missileSound filename");
-      } else {
-        weaponInfo->missileSound = trap_S_RegisterSound(filename, qfalse);
       }
+
+      weaponInfo->missileSound = trap_S_RegisterSound(filename, qfalse);
     } else if (!Q_stricmp(token.string, "missileTrailFunc")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected missileTrailFunc");
@@ -1509,8 +1493,7 @@ static qboolean CG_RW_ParseClient(int handle, weaponInfo_t *weaponInfo) {
       }
     } else if (!Q_stricmp(token.string, "missileDlightColor")) {
       if (!PC_Vec_Parse(handle, &weaponInfo->missileDlightColor)) {
-        return CG_RW_ParseError(handle, "expected missileDlightColor as r "
-                                        "g b");
+        return CG_RW_ParseError(handle, "expected missileDlightColor as r g b");
       }
     } else if (!Q_stricmp(token.string, "ejectBrassFunc")) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
@@ -1518,8 +1501,7 @@ static qboolean CG_RW_ParseClient(int handle, weaponInfo_t *weaponInfo) {
       } else {
         if (!Q_stricmp(filename, "MachineGunEjectBrass")) {
           weaponInfo->ejectBrassFunc = CG_MachineGunEjectBrass;
-        } else if (!Q_stricmp(filename, "PanzerFaustEject"
-                                        "Brass")) {
+        } else if (!Q_stricmp(filename, "PanzerFaustEjectBrass")) {
           weaponInfo->ejectBrassFunc = CG_PanzerFaustEjectBrass;
         }
       }
