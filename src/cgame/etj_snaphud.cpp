@@ -340,8 +340,10 @@ void Snaphud::render() const {
   }
 }
 
-bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
+Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
+                                              pmove_t *pm) {
   static Snaphud s;
+  CurrentSnap cs{};
 
   // get player yaw
   float yaw = ps.viewangles[YAW];
@@ -385,7 +387,8 @@ bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
   // moment when swapping teams since we're transitioning from
   // cg.snap->ps to cg.predictedPlayerstate
   if (s.snap.zones.size() == 0) {
-    return false;
+    cs.snap = NAN;
+    return cs;
   }
 
   // necessary 45 degrees shift to match snapzones
@@ -417,14 +420,32 @@ bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
   }
 
   // get the snapzone
-  const float &snap = SHORT2DEG(s.snap.zones[i]);
+  const float snap = SHORT2DEG(s.snap.zones[i]);
   // snap now contains the yaw value corresponding to the start of the
   // next snapzone, or equivalently the end of the current snapzone
+
+  cs.opt = opt;
+  cs.yaw = yaw;
+  cs.snap = snap;
+  cs.rightStrafe = rightStrafe;
+  return cs;
+}
+
+bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
+  auto cs = getCurrentSnap(ps, pm);
+
+  if (std::isnan(cs.snap)) {
+    return false;
+  }
+
+  auto yaw = cs.yaw;
+  auto opt = cs.opt;
+  auto snap = cs.snap;
 
   // return true if yaw is between opt angle and end of the current
   // snapzone also account for jumps at the boundary (e.g. 100 and 10
   // both have to be valid)
-  if (rightStrafe) {
+  if (cs.rightStrafe) {
     if (yaw < opt && yaw > snap) {
       return true;
     }

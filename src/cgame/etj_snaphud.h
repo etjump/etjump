@@ -30,8 +30,16 @@
 namespace ETJump {
 class Snaphud : public IRenderable {
 public:
+  struct CurrentSnap {
+    float snap;
+    float yaw;
+    float opt;
+    bool rightStrafe;
+  };
+
   void render() const override;
   bool beforeRender() override;
+  static CurrentSnap getCurrentSnap(const playerState_t &ps, pmove_t *pm);
   static bool inMainAccelZone(const playerState_t &ps, pmove_t *pm);
 
   Snaphud();
