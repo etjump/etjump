@@ -258,15 +258,20 @@ void CGaz::render() const {
       fov = Numeric::clamp(etj_CGazFov.value, 1, 179);
     }
 
-    const auto zone1 = drawMin;
+    const float zone1 = drawMin;
 
-    const auto zone2 = std::isnan(drawSnap) ? drawOpt
-                       : drawSnap < drawMin ? drawMaxCos
-                                            : drawSnap;
-    // if snap < min angle, the accel zone fills the whole snapzone
+    float zone2 = drawOpt;
 
-    const auto zone3 = std::max(zone2, drawMaxCos);
-    const auto zone4 = drawMax == 0 || drawMax == (float)M_PI || drawMax >= zone3 ? drawMax : zone3;
+    if (!std::isnan(drawSnap)) {
+      // if snap < min angle, the accel zone fills the whole snapzone
+      zone2 = drawSnap < drawMin ? drawMaxCos : drawSnap;
+    }
+
+    const float zone3 = std::max(zone2, drawMaxCos);
+
+    const float zone4 =
+        drawMax == 0 || drawMax == (float)M_PI || drawMax >= zone3 ? drawMax
+                                                                   : zone3;
 
     // No accel zone
     CG_FillAngleYaw(-zone1, +zone1, yaw, y, h, fov, CGaz1Colors[0]);
