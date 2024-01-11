@@ -243,7 +243,8 @@ void ETJump::DisplaySpeed::render() const {
 
         if (maxAccelx > 0 && _accelx >= 0 || maxAccelx < 0 && _accelx <= 0) {
           frac = std::min(
-              std::max((static_cast<float>(_accelx) / maxAccelx) -
+              std::max(1.0f -
+                           (abs(maxAccelx) - abs(_accelx + maxAccelx) / 2.0f) -
                            (abs(_accely) -
                             abs(std::max(abs(optAccely), abs(altOptAccely)))),
                        0.0f),
@@ -256,7 +257,8 @@ void ETJump::DisplaySpeed::render() const {
 
         if (maxAccely > 0 && _accely >= 0 || maxAccely < 0 && _accely <= 0) {
           frac = std::min(
-              std::max((static_cast<float>(_accely) / maxAccely) -
+              std::max(1.0f -
+                           (abs(maxAccely) - abs(_accely + maxAccely) / 2.0f) -
                            (abs(_accelx) -
                             abs(std::max(abs(optAccelx), abs(altOptAccelx)))),
                        0.0f),
