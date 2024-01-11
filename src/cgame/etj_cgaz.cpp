@@ -342,9 +342,6 @@ bool CGaz::strafingForwards(const playerState_t &ps, pmove_t *pm) {
 
 float CGaz::getFrameAccel(const playerState_t& ps, pmove_t* pm)
 {
-  // get sprint scale
-  const float scale = PmoveUtils::PM_SprintScale(&ps);
-
   // get usercmd
   const auto ucmdScale =
       static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
@@ -444,9 +441,6 @@ float CGaz::getAltOptAngle(const playerState_t &ps, pmove_t *pm) {
 
   // determine whether strafing "forwards"
   const bool forwards = strafingForwards(ps, pm);
-
-  // get accel defined by physics
-  const float accel = static_cast<float>(ps.speed) * pm->pmext->frametime;
 
   // get variables associated with optimal angle
   const float velAngle = RAD2DEG(std::atan2(ps.velocity[1], ps.velocity[0]));

@@ -110,11 +110,6 @@ bool ETJump::DisplaySpeed::beforeRender() {
 
   _lastUpdateTime = frameTime;
   
-  // get sprint scale
-  const float scale = PmoveUtils::PM_SprintScale(&ps);
-
-  const float accelAngle = RAD2DEG(std::atan2(-cmd.rightmove, cmd.forwardmove));
-  
   _accelx = static_cast<int>(speedx - _lastSpeed[0]);
   _accely = static_cast<int>(speedy - _lastSpeed[1]);
 
@@ -241,7 +236,8 @@ void ETJump::DisplaySpeed::render() const {
       if (isMovingx) {
         float frac{0};
 
-        if (maxAccelx > 0 && _accelx >= 0 || maxAccelx < 0 && _accelx <= 0) {
+        if ((maxAccelx > 0 && _accelx >= 0) ||
+            (maxAccelx < 0 && _accelx <= 0)) {
           frac = std::min(
               std::max(1.0f -
                            (abs(maxAccelx) - abs(_accelx + maxAccelx) / 2.0f) -
@@ -255,7 +251,8 @@ void ETJump::DisplaySpeed::render() const {
       } else {
         float frac{0};
 
-        if (maxAccely > 0 && _accely >= 0 || maxAccely < 0 && _accely <= 0) {
+        if ((maxAccely > 0 && _accely >= 0) ||
+            (maxAccely < 0 && _accely <= 0)) {
           frac = std::min(
               std::max(1.0f -
                            (abs(maxAccely) - abs(_accely + maxAccely) / 2.0f) -

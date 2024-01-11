@@ -468,7 +468,6 @@ bool Snaphud::shouldSwitch(const playerState_t &ps, pmove_t *pm) {
 
   // get opt angle
   float opt = CGaz::getOptAngle(ps, pm);
-  float altOpt = CGaz::getAltOptAngle(ps, pm);
 
   // update snapzones even if snaphud is not drawn
   vec3_t wishvel;
