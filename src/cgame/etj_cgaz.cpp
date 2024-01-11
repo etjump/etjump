@@ -340,7 +340,85 @@ bool CGaz::strafingForwards(const playerState_t &ps, pmove_t *pm) {
   return false;
 }
 
+float CGaz::getFrameAccel(const playerState_t& ps, pmove_t* pm)
+{
+  // get sprint scale
+  const float scale = PmoveUtils::PM_SprintScale(&ps);
+
+  // get usercmd
+  const auto ucmdScale =
+      static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
+                              ? CMDSCALE_WALK
+                              : CMDSCALE_DEFAULT);
+  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
+
+  // no meaningful value if speed lower than ground speed or no user
+  // input
+  if (cmd.forwardmove == 0 && cmd.rightmove == 0) {
+    return 0;
+  }
+
+  // get accel defined by physics
+  const float accel = static_cast<float>(ps.speed) * pm->pmext->frametime;
+
+  return accel;
+}
+
 float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm) {
+  // get player speed
+  const float speed = VectorLength2(ps.velocity);
+
+  // get sprint scale
+  const float scale = PmoveUtils::PM_SprintScale(&ps);
+
+  // get usercmd
+  const auto ucmdScale =
+      static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
+                              ? CMDSCALE_WALK
+                              : CMDSCALE_DEFAULT);
+  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
+
+  // no meaningful value if speed lower than ground speed or no user
+  // input
+  if (speed < static_cast<float>(ps.speed) * scale ||
+      (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
+    return 0;
+  }
+
+  // get player yaw
+  const float &yaw = ps.viewangles[YAW];
+
+  // determine whether strafing "forwards"
+  const bool forwards = strafingForwards(ps, pm);
+
+
+  // get variables associated with optimal angle
+  const float velAngle = RAD2DEG(std::atan2(ps.velocity[1], ps.velocity[0]));
+  const float accelAngle = RAD2DEG(std::atan2(-cmd.rightmove, cmd.forwardmove));
+  float perAngle =
+      RAD2DEG(std::acos((ps.speed - getFrameAccel(ps, pm)) / speed * scale));
+  if (!forwards) {
+    perAngle *= -1;
+  }
+
+  // shift yaw to optimal angle for all strafe styles
+  float opt = yaw;
+  if (cmd.rightmove < 0) {
+    // fullbeat / halfbeat / invert (holding +moveleft)
+    opt -= AngleDelta(yaw + accelAngle, velAngle + perAngle);
+  } else if (cmd.rightmove > 0) {
+    // fullbeat / halfbeat / invert (holding +moveright)
+    opt -= AngleDelta(yaw + accelAngle, velAngle - perAngle);
+  } else if (cmd.forwardmove != 0) {
+    // nobeat
+    opt = velAngle + perAngle;
+  }
+
+  // return minimum angle for which you still gain the highest accel
+  return AngleNormalize180(opt);
+}
+
+float CGaz::getAltOptAngle(const playerState_t &ps, pmove_t *pm) {
   // get player speed
   const float speed = VectorLength2(ps.velocity);
 
@@ -372,23 +450,24 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm) {
 
   // get variables associated with optimal angle
   const float velAngle = RAD2DEG(std::atan2(ps.velocity[1], ps.velocity[0]));
-  const float accelAngle = RAD2DEG(std::atan2(-cmd.rightmove, cmd.forwardmove));
-  float perAngle = RAD2DEG(std::acos((ps.speed - accel) / speed * scale));
+  const float accelAngle = RAD2DEG(std::atan2(cmd.rightmove, cmd.forwardmove));
+  float perAngle =
+      RAD2DEG(std::acos((ps.speed - getFrameAccel(ps, pm)) / speed * scale));
   if (!forwards) {
     perAngle *= -1;
   }
 
   // shift yaw to optimal angle for all strafe styles
   float opt = yaw;
-  if (cmd.rightmove < 0) {
+  if (cmd.rightmove > 0) {
     // fullbeat / halfbeat / invert (holding +moveleft)
     opt -= AngleDelta(yaw + accelAngle, velAngle + perAngle);
-  } else if (cmd.rightmove > 0) {
+  } else if (cmd.rightmove < 0) {
     // fullbeat / halfbeat / invert (holding +moveright)
     opt -= AngleDelta(yaw + accelAngle, velAngle - perAngle);
   } else if (cmd.forwardmove != 0) {
     // nobeat
-    opt = velAngle + perAngle;
+    opt = velAngle - perAngle;
   }
 
   // return minimum angle for which you still gain the highest accel

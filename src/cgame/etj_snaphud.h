@@ -33,6 +33,7 @@ public:
   void render() const override;
   bool beforeRender() override;
   static bool inMainAccelZone(const playerState_t &ps, pmove_t *pm);
+  static bool shouldSwitch(const playerState_t &ps, pmove_t *pm);
 
   Snaphud();
   ~Snaphud(){};

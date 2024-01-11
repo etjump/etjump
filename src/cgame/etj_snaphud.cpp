@@ -445,6 +445,112 @@ bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
   return false;
 }
 
+bool Snaphud::shouldSwitch(const playerState_t &ps, pmove_t *pm) {
+  static Snaphud s;
+
+  // get player yaw
+  float yaw = ps.viewangles[YAW];
+
+  // get usercmd
+  const int8_t ucmdScale =
+      ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8) ? CMDSCALE_WALK
+                                                             : CMDSCALE_DEFAULT;
+  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
+
+  // determine whether strafestyle is "forwards"
+  const bool forwards = CGaz::strafingForwards(ps, pm);
+
+  // determine whether strafing to the right ("moving mouse rightwards")
+  const bool rightStrafe =
+      (forwards && cmd.rightmove > 0) ||
+      (!forwards &&
+       (cmd.rightmove < 0 || (cmd.forwardmove != 0 && cmd.rightmove == 0)));
+
+  // get opt angle
+  float opt = CGaz::getOptAngle(ps, pm);
+  float altOpt = CGaz::getAltOptAngle(ps, pm);
+
+  // update snapzones even if snaphud is not drawn
+  vec3_t wishvel;
+  const float wishspeed = PmoveUtils::PM_GetWishspeed(
+      wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
+      pm->pmext->up, ps, pm);
+  float speed = wishspeed * pm->pmext->frametime;
+
+  // clamp the max value to match max scaling of target_scale_velocity
+  if (speed > 85) {
+    speed = 85;
+  }
+  if (speed != s.snap.a) {
+    s.snap.a = speed;
+    s.UpdateMaxSnapZones(wishspeed, pm);
+    s.UpdateSnapState();
+  }
+
+  // early out if we have no snapzones yet, this can happen for a brief
+  // moment when swapping teams since we're transitioning from
+  // cg.snap->ps to cg.predictedPlayerstate
+  if (s.snap.zones.size() == 0) {
+    return false;
+  }
+
+  // necessary 45 degrees shift to match snapzones
+  if ((cmd.forwardmove != 0 && cmd.rightmove != 0) ||
+      (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
+    yaw += 45;
+    opt += 45;
+  }
+
+  // snapzones only cover (a bit more than) one fourth of all
+  // viewangles, therefore crop yaw and opt to [0,90)
+  yaw = std::fmod(AngleNormalize360(yaw), 90);
+  opt = std::fmod(AngleNormalize360(opt), 90);
+
+  // get number of snapzones
+  auto snapCount = s.snap.zones.size() - 1;
+
+  // get snapzone index which corresponds to the *next* snapzone
+  // linear search is good enough here as snapCount is always relatively
+  // small
+  unsigned int i = 0;
+  while (i < snapCount && opt >= SHORT2DEG(s.snap.zones[i])) {
+    ++i;
+  }
+
+  // adjust snapzone index for rightStrafe
+  if (rightStrafe) {
+    i = (i == 0 ? snapCount : i - 1);
+  }
+
+  // get the snapzone
+  const float &snap = SHORT2DEG(s.snap.zones[i]);
+  // snap now contains the yaw value corresponding to the start of the
+  // next snapzone, or equivalently the end of the current snapzone
+
+  // return true if yaw is between opt angle and end of the current
+  // snapzone also account for jumps at the boundary (e.g. 100 and 10
+  // both have to be valid)
+  if (rightStrafe) {
+    if (yaw < opt && yaw > snap) {
+      return true;
+    }
+    // this is awkward because can not check for yaw >= 0 since
+    // that is always true
+    if (snap > 90 && (yaw > 90 - std::fmod(snap, 90) || yaw < opt)) {
+      return true;
+    }
+  } else {
+    if (yaw > opt && yaw < snap) {
+      return true;
+    }
+    if (snap > 90 && yaw < std::fmod(snap, 90)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 bool Snaphud::canSkipDraw() const {
   if (!etj_drawSnapHUD.integer) {
     return true;

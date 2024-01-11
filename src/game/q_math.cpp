@@ -613,6 +613,25 @@ float AngleNormalize180(float angle) {
   return angle;
 }
 
+
+/*
+=================
+AngleNormalize90
+
+returns angle normalized to the range [0 <= angle < 90]
+=================
+*/
+float AngleNormalize90(float angle) {
+  angle = AngleNormalize180(angle);
+  if (angle >= 90.0) {
+    angle -= 180.0;
+  }
+  else if (angle < 0) {
+    angle = 90 + angle;
+  }
+  return angle;
+}
+
 /*
 ================
 AngleNormalize65536

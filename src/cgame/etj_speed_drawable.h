@@ -24,6 +24,7 @@
 
 #pragma once
 #include "etj_irenderable.h"
+#include "etj_pmove_utils.h"
 #include "cg_local.h"
 #include <string>
 #include <list>
@@ -37,14 +38,19 @@ class DisplaySpeed : public IRenderable {
 
   std::list<StoredSpeed> _storedSpeeds;
   float _maxSpeed{0};
+  vec2_t _lastSpeed{0, 0};
+  int _accelx{0}, _accely{0};
   vec4_t _color;
+  pmove_t *pm;
   bool _shouldDrawShadow{false};
+  int _lastUpdateTime{0};
   static void parseColor(const std::string &color, vec4_t &out);
   void resetMaxSpeed();
   void checkShadow();
   void startListeners();
   std::string getStatus() const;
   bool canSkipDraw() const;
+  bool canSkipUpdate(usercmd_t cmd, int frameTime) const;
   void popOldStoredSpeeds();
   float calcAvgAccel() const;
 
