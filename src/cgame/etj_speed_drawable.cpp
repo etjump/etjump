@@ -115,10 +115,10 @@ bool ETJump::DisplaySpeed::beforeRender() {
 
   const float accelAngle = RAD2DEG(std::atan2(-cmd.rightmove, cmd.forwardmove));
   
-  _accelx = static_cast<int>(std::round(CGaz::getFrameAccel(ps, pm) *
-                cos(DEG2RAD(accelAngle + ps.viewangles[YAW])) * scale));
-  _accely = static_cast<int>(std::round(CGaz::getFrameAccel(ps, pm) *
-                sin(DEG2RAD(accelAngle + ps.viewangles[YAW])) * scale));
+  _accelx = static_cast<int>(speedx - _lastSpeed[0]);
+  _accely = static_cast<int>(speedy - _lastSpeed[1]);
+
+  Vector2Copy(cg.predictedPlayerState.velocity, _lastSpeed);
 
   return true;
 }
@@ -242,9 +242,12 @@ void ETJump::DisplaySpeed::render() const {
         float frac{0};
 
         if (maxAccelx > 0 && _accelx >= 0 || maxAccelx < 0 && _accelx <= 0) {
-          frac = std::min(std::max(static_cast<float>(_accelx) /
-                                       maxAccelx,
-                                   0.0f), 1.0f);
+          frac = std::min(
+              std::max((static_cast<float>(_accelx) / maxAccelx) -
+                           (abs(_accely) -
+                            abs(std::max(abs(optAccely), abs(altOptAccely)))),
+                       0.0f),
+              1.0f);
         }
 
         LerpColor(colorRed, colorGreen, color, frac);
@@ -252,8 +255,12 @@ void ETJump::DisplaySpeed::render() const {
         float frac{0};
 
         if (maxAccely > 0 && _accely >= 0 || maxAccely < 0 && _accely <= 0) {
-          frac = std::min(std::max(
-              static_cast<float>(_accely) / maxAccely, 0.0f), 1.0f);
+          frac = std::min(
+              std::max((static_cast<float>(_accely) / maxAccely) -
+                           (abs(_accelx) -
+                            abs(std::max(abs(optAccelx), abs(altOptAccelx)))),
+                       0.0f),
+              1.0f);
         }
 
         LerpColor(colorRed, colorGreen, color, frac);
