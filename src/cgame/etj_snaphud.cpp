@@ -285,11 +285,30 @@ bool Snaphud::beforeRender() {
   edgesOnly = etj_drawSnapHUD.integer == 2;
   edgeThickness = Numeric::clamp(etj_snapHUDEdgeThickness.integer, 1, 128);
 
+  PrepareDrawables();
+
   return true;
 }
 
-void Snaphud::render() const {
+void Snaphud::PrepareDrawables() {
+  isCurrentAlt = false;
+  drawableSnaps.clear();
 
+  for (int i = 0; i < 2 * snap.maxAccel; ++i) {
+    for (int j = 0; j < 65536; j += 16384) {
+      const int bSnap = snap.zones[i] + 1 + j;
+      const int eSnap = snap.zones[i + 1] + j;
+      const bool active = AngleNormalize65536(yaw - bSnap) <=
+                          AngleNormalize65536(eSnap - bSnap);
+      const bool isAlt = i % 2;
+      isCurrentAlt |= active && isAlt;
+
+      drawableSnaps.push_back(DrawableSnap{bSnap, eSnap, isAlt, active});
+    }
+  }
+}
+
+void Snaphud::render() const {
   float h = etj_snapHUDHeight.value;
   float y = 240 + etj_snapHUDOffsetY.value;
 
@@ -300,49 +319,24 @@ void Snaphud::render() const {
     fov = Numeric::clamp(etj_snapHUDFov.value, 1, 179);
   }
 
-  struct HudSnap {
-    int bSnap;
-    int eSnap;
-    bool alt;
-    bool active;
-  };
+  for (const DrawableSnap &ds : drawableSnaps) {
+    int8_t color = ds.alt ? 1 : 0;
 
-  std::vector<HudSnap> hudSnaps;
-  hudSnaps.reserve(8 * static_cast<int>(snap.maxAccel));
-
-  bool currentIsAlt = false;
-
-  for (int i = 0; i < 2 * snap.maxAccel; ++i) {
-    for (int j = 0; j < 65536; j += 16384) {
-      const int bSnap = snap.zones[i] + 1 + j;
-      const int eSnap = snap.zones[i + 1] + j;
-      const bool active = AngleNormalize65536(yaw - bSnap) <=
-                          AngleNormalize65536(eSnap - bSnap);
-      const bool isAlt = i % 2;
-      currentIsAlt |= active && isAlt;
-
-      hudSnaps.push_back(HudSnap{bSnap, eSnap, isAlt, active});
-    }
-  }
-
-  for (const HudSnap &hs : hudSnaps) {
-    int8_t color = hs.alt ? 1 : 0;
-
-    if (etj_snapHUDColorFollow.integer && currentIsAlt) {
+    if (etj_snapHUDColorFollow.integer && isCurrentAlt) {
       color ^= 1;
     }
 
-    if (etj_snapHUDHLActive.integer && hs.active) {
+    if (etj_snapHUDHLActive.integer && ds.active) {
       color += 2;
     }
 
     if (edgesOnly) {
-      CG_FillAngleYaw(SHORT2RAD(hs.bSnap), SHORT2RAD(hs.bSnap + edgeThickness),
+      CG_FillAngleYaw(SHORT2RAD(ds.bSnap), SHORT2RAD(ds.bSnap + edgeThickness),
                       SHORT2RAD(yaw), y, h, fov, snaphudColors[color]);
-      CG_FillAngleYaw(SHORT2RAD(hs.eSnap), SHORT2RAD(hs.eSnap - edgeThickness),
+      CG_FillAngleYaw(SHORT2RAD(ds.eSnap), SHORT2RAD(ds.eSnap - edgeThickness),
                       SHORT2RAD(yaw), y, h, fov, snaphudColors[color]);
     } else {
-      CG_FillAngleYaw(SHORT2RAD(hs.bSnap), SHORT2RAD(hs.eSnap), SHORT2RAD(yaw),
+      CG_FillAngleYaw(SHORT2RAD(ds.bSnap), SHORT2RAD(ds.eSnap), SHORT2RAD(yaw),
                       y, h, fov, snaphudColors[color]);
     }
   }

@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <vector>
 #include "etj_irenderable.h"
 #include "cg_local.h"
 
@@ -42,6 +43,7 @@ private:
   void InitSnaphud(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
   void UpdateMaxSnapZones(float wishspeed, pmove_t *pm);
   void UpdateSnapState(void);
+  void PrepareDrawables();
   void startListeners();
 
   enum class SnapTrueness { SNAP_JUMPCROUCH = 1, SNAP_GROUND = 2 };
@@ -66,5 +68,15 @@ private:
 
   playerState_t *ps = &cg.predictedPlayerState;
   pmove_t *pm;
+
+  struct DrawableSnap {
+    int bSnap;
+    int eSnap;
+    bool alt;
+    bool active;
+  };
+
+  std::vector<DrawableSnap> drawableSnaps{};
+  bool isCurrentAlt;
 };
 } // namespace ETJump
