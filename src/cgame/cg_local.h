@@ -2829,7 +2829,8 @@ void CG_DrawRotatedPic(float x, float y, float width, float height,
 void CG_DrawChar(int x, int y, int width, int height, int ch,
                  qboolean isShadow);
 void CG_FilledBar(float x, float y, float w, float h, float *startColor,
-                  float *endColor, const float *bgColor, float frac, int flags);
+                  const float *endColor, const float *bgColor, float frac,
+                  int flags);
 // JOSEPH 10-26-99
 void CG_DrawStretchPic(float x, float y, float width, float height,
                        qhandle_t hShader);
@@ -2981,6 +2982,22 @@ void CG_Fade(int r, int g, int b, int a, int time, int duration);
 int CG_PlayerAmmoValue(int *ammo, int *clips, int *akimboammo);
 
 void CG_DrawMortarReticle();
+
+// flags for CG_FilledBar
+enum class FilledBarFlags {
+  BAR_LEFT = 1 << 0,
+  BAR_CENTER = 1 << 1,
+  BAR_VERT = 1 << 2,
+  BAR_NOHUDALPHA = 1 << 3,
+  BAR_BG = 1 << 4,
+  // different spacing modes for use w/ BAR_BG
+  BAR_BGSPACING_X0Y5 = 1 << 5,
+  BAR_BGSPACING_X0Y0 = 1 << 6,
+
+  BAR_LERP_COLOR = 1 << 8,
+  BAR_BORDER = 1 << 9,
+  BAR_BORDER_SMALL = 1 << 10,
+};
 
 //
 // cg_player.c
