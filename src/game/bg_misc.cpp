@@ -4119,12 +4119,10 @@ void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s,
                                  qboolean snap) {
   int i;
 
-  if (ps->pm_type == PM_INTERMISSION ||
-      ps->pm_type == PM_SPECTATOR) // || ps->pm_flags & PMF_LIMBO ) { //
-                                   // JPW NERVE limbo
-  {
-    s->eType = ET_INVISIBLE;
-  } else if (ps->stats[STAT_HEALTH] <= GIB_HEALTH) {
+  if (ps->pm_type == PM_INTERMISSION || ps->pm_type == PM_SPECTATOR ||
+      ps->stats[STAT_HEALTH] <= GIB_HEALTH ||
+      (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR &&
+       ps->pm_type == PM_NOCLIP)) {
     s->eType = ET_INVISIBLE;
   } else {
     s->eType = ET_PLAYER;
