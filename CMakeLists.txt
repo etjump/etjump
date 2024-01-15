@@ -47,14 +47,14 @@ add_subdirectory(deps/gtest)
 add_subdirectory(deps/uuid4)
 add_subdirectory(deps/fmt EXCLUDE_FROM_ALL)
 
-target_link_libraries(libjson PRIVATE cxx_compiler_opts_w0)
+target_link_libraries(jsoncpp_lib PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsha1 PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libuuid4 PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsqlite PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(fmt PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsqlite_modern_cpp INTERFACE cxx_compiler_opts_w0)
 
-set_target_properties(gmock gmock_main gtest gtest_main libjson libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt
+set_target_properties(gmock gmock_main gtest gtest_main jsoncpp_lib libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt
                       PROPERTIES FOLDER ${BUNDLED_TARGETS_FOLDER})
 
 add_subdirectory(src/cgame)

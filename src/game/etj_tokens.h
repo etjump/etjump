@@ -26,7 +26,7 @@
 #define TOKENS_HH
 #include <string>
 #include <array>
-#include "json/json-forwards.h"
+#include "json/forwards.h"
 #include <memory>
 
 typedef struct gentity_s gentity_t;
