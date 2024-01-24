@@ -3626,7 +3626,8 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
 
   vectoangles(tr.plane.normal, t_portalAngles);
 
-  if (tr.entityNum < MAX_GENTITIES &&
+  if (tr.entityNum != ENTITYNUM_WORLD &&
+      tr.entityNum < MAX_GENTITIES &&
       !Q_stricmp(g_entities[tr.entityNum].classname, "func_portaltarget")) {
 
     gentity_t *brushEnt = &g_entities[tr.entityNum];
