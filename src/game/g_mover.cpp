@@ -3816,6 +3816,17 @@ void SP_func_door_rotating(gentity_t *ent) {
   trap_LinkEntity(ent);
 }
 
+void SP_func_portaltarget(gentity_t* ent) {
+  trap_SetBrushModel(ent, ent->model);
+  
+  ent->moverState = MOVER_POS1;
+  ent->r.svFlags &= SVF_IGNOREBMODELEXTENTS;
+  ent->s.eType = ET_MOVER;
+
+  VectorCopy(ent->s.origin, ent->s.pos.trBase);
+  VectorCopy(ent->s.origin, ent->r.currentOrigin);
+}
+
 /*
 ===============================================================================
 
