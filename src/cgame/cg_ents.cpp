@@ -294,6 +294,12 @@ static void CG_EntityEffects(centity_t *cent) {
                            0);
   }
 
+  // by default smoking/smokingblack eflags are only used on entities or weapons,
+  // add early exit so they can be repurposed for mod use
+  if (cent->currentState.eType == ET_PLAYER) {
+      return;
+  }
+
   // ydnar: overheating is a special effect
   if ((cent->currentState.eFlags & EF_OVERHEATING) == EF_OVERHEATING) {
     if (cent->overheatTime < (cg.time - 3000)) {

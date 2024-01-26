@@ -838,10 +838,13 @@ constexpr int EF_BOBBING = EF_SPARE0;        // controls bobbing for pickup item
 constexpr int EF_SPARE3 = 0x40000000;        // unused
 constexpr int EF_SPARE4 = 0x80000000;        // unused
 
-constexpr int EF_PLAYER_UNUSED1 = EF_NONSOLID_BMODEL; // etjump: up for grabs
-constexpr int EF_PLAYER_UNUSED2 = EF_FAKEBMODEL;      // etjump: up for grabs
-constexpr int EF_PLAYER_UNUSED3 = EF_PATH_LINK;       // etjump: up for grabs
-constexpr int EF_PLAYER_UNUSED4 = EF_SPARE0;          // etjump: up for grabs
+// etjump:
+constexpr int EF_PLAYER_UNUSED1 = EF_NONSOLID_BMODEL; // used only on entities
+constexpr int EF_PLAYER_UNUSED2 = EF_SMOKING;         // player never gets this flag, only ent/weapon
+constexpr int EF_PLAYER_UNUSED3 = EF_SMOKINGBLACK;    // player never gets this flag, only ent/weapon
+constexpr int EF_PLAYER_UNUSED4 = EF_FAKEBMODEL;      // used only on entities
+constexpr int EF_PLAYER_UNUSED5 = EF_PATH_LINK;       // used only on entities
+constexpr int EF_PLAYER_UNUSED6 = EF_SPARE0;          // used only on entities
 // clang-format on
 
 
