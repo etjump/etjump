@@ -781,72 +781,69 @@ typedef enum {
 } persEnum_t;
 
 // entityState_t->eFlags
-#define EF_DEAD 0x00000001 // don't draw a foe marker over players with EF_DEAD
-#define EF_NONSOLID_BMODEL 0x00000002 // bmodel is visible, but not solid
-#define EF_FORCE_END_FRAME                                                     \
-  EF_NONSOLID_BMODEL // force client to end of current animation (after
-                     // loading a savegame)
-#define EF_TELEPORT_BIT                                                        \
-  0x00000004                // toggled every time the origin abruptly changes
-#define EF_READY 0x00000008 // player is ready
 
-#define EF_CROUCHING 0x00000010   // player is crouching
-#define EF_MG42_ACTIVE 0x00000020 // currently using an MG42
-#define EF_NODRAW                                                              \
-  0x00000040 // may have an event, but no model (unspawned items)
-#define EF_FIRING 0x00000080 // for lightning gun
-#define EF_INHERITSHADER                                                       \
-  EF_FIRING // some ents will never use EF_FIRING, hijack it for
-            // "USESHADER"
+// clang-format off
+constexpr int EF_DEAD = 0x00000001;                    // don't draw a foe marker over players with EF_DEAD
+constexpr int EF_NONSOLID_BMODEL = 0x00000002;         // bmodel is visible, but not solid
+constexpr int EF_FORCE_END_FRAME = EF_NONSOLID_BMODEL; // force client to end of current animation (after
+                                                       // loading a savegame)
+constexpr int EF_TELEPORT_BIT = 0x00000004;            // toggled every time the origin abruptly changes
+constexpr int EF_READY = 0x00000008;                   // player is ready
 
-#define EF_SPINNING                                                            \
-  0x00000100 // (SA) added for level editor control of spinning pickup
-             // items
-#define EF_BREATH                                                              \
-  EF_SPINNING // Characters will not have EF_SPINNING set, hijack for
-              // drawing character breath
-#define EF_TALK 0x00000200       // draw a talk balloon
-#define EF_CONNECTION 0x00000400 // draw a connection trouble sprite
-#define EF_SMOKINGBLACK                                                        \
-  0x00000800 // JPW NERVE -- like EF_SMOKING only darker & bigger
+constexpr int EF_CROUCHING = 0x00000010;    // player is crouching
+constexpr int EF_MG42_ACTIVE = 0x00000020;  // currently using an MG42
+constexpr int EF_NODRAW = 0x00000040;       // may have an event, but no model (unspawned items)
+constexpr int EF_FIRING = 0x00000080;       // for lightning gun
+constexpr int EF_INHERITSHADER = EF_FIRING; // some ents will never use EF_FIRING, hijack it for
+                                            // "USESHADER"
 
-#define EF_HEADSHOT                                                            \
-  0x00001000 // last hit to player was head shot (Gordon: NOTE: not last
-             // hit, but has BEEN shot in the head since respawn)
-#define EF_SMOKING                                                             \
-  0x00002000 // DHM - Nerve :: ET_GENERAL ents will emit smoke if set //
-             // JPW switched to this after my code change
-#define EF_OVERHEATING                                                         \
-  (EF_SMOKING | EF_SMOKINGBLACK)     // ydnar: light smoke/steam effect
-#define EF_VOTED 0x00004000          // already cast a vote
-#define EF_TAGCONNECT 0x00008000     // connected to another entity via tag
-#define EF_MOUNTEDTANK EF_TAGCONNECT // Gordon: duplicated for clarity
+constexpr int EF_SPINNING = 0x00000100;     // (SA) added for level editor control
+                                            // of spinning pickup items
+constexpr int EF_BREATH = EF_SPINNING;      // Characters will not have EF_SPINNING set, hijack for
+                                            // drawing character breath
+constexpr int EF_TALK = 0x00000200;         // draw a talk balloon
+constexpr int EF_CONNECTION = 0x00000400;   // draw a connection trouble sprite
+constexpr int EF_SMOKINGBLACK = 0x00000800; // JPW NERVE -- like EF_SMOKING only darker & bigger
 
-#define EF_FAKEBMODEL 0x00010000 // Gordon: freed
-#define EF_PATH_LINK 0x00020000  // Gordon: linking trains together
-#define EF_ZOOMING 0x00040000    // client is zooming
-#define EF_PRONE 0x00080000      // player is prone
+constexpr int EF_HEADSHOT = 0x00001000;                        // last hit to player was head shot (Gordon: NOTE: not last
+                                                               // hit, but has BEEN shot in the head since respawn)
+constexpr int EF_SMOKING = 0x00002000;                         // DHM - Nerve :: ET_GENERAL ents will emit smoke if set
+                                                               // JPW switched to this after my code change
+constexpr int EF_OVERHEATING = (EF_SMOKING | EF_SMOKINGBLACK); // ydnar: light smoke/steam effect
+constexpr int EF_VOTED = 0x00004000;                           // already cast a vote;
+constexpr int EF_TAGCONNECT = 0x00008000;                      // connected to another entity via tag;
+constexpr int EF_MOUNTEDTANK = EF_TAGCONNECT;                  // Gordon: duplicated for clarity
 
-#define EF_PRONE_MOVING 0x00100000   // player is prone and moving
-#define EF_VIEWING_CAMERA 0x00200000 // player is viewing a camera
-#define EF_AAGUN_ACTIVE 0x00400000   // Gordon: player is manning an AA gun
-#define EF_SPARE0 0x00800000         // Gordon: freed
+constexpr int EF_FAKEBMODEL = 0x00010000;  // Gordon: freed
+constexpr int EF_PATH_LINK = 0x00020000;   // Gordon: linking trains together
+constexpr int EF_ZOOMING = 0x00040000;     // client is zooming;
+constexpr int EF_PRONE = 0x00080000;       // player is prone
 
-// !! NOTE: only place flags that don't need to go to the client beyond
-// 0x00800000
-#define EF_SPARE1 0x01000000      // Gordon: freed
-#define EF_SPARE2 0x02000000      // Gordon: freed
-#define EF_BOUNCE 0x04000000      // for missiles
-#define EF_BOUNCE_HALF 0x08000000 // for missiles
-#define EF_MOVER_STOP                                                          \
-  0x10000000 // will push otherwise	// (SA) moved down to make space
-             // for one more client flag
-#define EF_MOVER_BLOCKED                                                       \
-  0x20000000 // mover was blocked dont lerp on the client // xkan, moved
-             // down to make space for client flag
-#define EF_BOBBING                                                             \
-  EF_SPARE0 // controls bobbing for pickup items (using existed one
-            // because eFlags are transmited as 24 bit)
+constexpr int EF_PRONE_MOVING = 0x00100000;   // player is prone and moving
+constexpr int EF_VIEWING_CAMERA = 0x00200000; // player is viewing a camera
+constexpr int EF_AAGUN_ACTIVE = 0x00400000;   // Gordon: player is manning an AA gun
+constexpr int EF_SPARE0 = 0x00800000;         // Gordon: freed
+
+// !! NOTE: only place flags that don't need to go to the client beyond 0x00800000
+constexpr int EF_SPARE1 = 0x01000000;        // Gordon: freed
+constexpr int EF_SPARE2 = 0x02000000;        // Gordon: freed
+constexpr int EF_BOUNCE = 0x04000000;        // for missiles
+constexpr int EF_BOUNCE_HALF = 0x08000000;   // for missiles
+
+constexpr int EF_MOVER_STOP = 0x10000000;    // will push otherwise	// (SA) moved down to make space for one more client flag
+constexpr int EF_MOVER_BLOCKED = 0x20000000; // mover was blocked dont lerp on the client // xkan, moved
+                                             // down to make space for client flag
+constexpr int EF_BOBBING = EF_SPARE0;        // controls bobbing for pickup items (using existed one
+                                             // because eFlags are transmited as 24 bit)
+constexpr int EF_SPARE3 = 0x40000000;        // unused
+constexpr int EF_SPARE4 = 0x80000000;        // unused
+
+constexpr int EF_PLAYER_UNUSED1 = EF_NONSOLID_BMODEL; // etjump: up for grabs
+constexpr int EF_PLAYER_UNUSED2 = EF_FAKEBMODEL;      // etjump: up for grabs
+constexpr int EF_PLAYER_UNUSED3 = EF_PATH_LINK;       // etjump: up for grabs
+constexpr int EF_PLAYER_UNUSED4 = EF_SPARE0;          // etjump: up for grabs
+// clang-format on
+
 
 #define BG_PlayerMounted(eFlags)                                               \
   ((eFlags & EF_MG42_ACTIVE) || (eFlags & EF_MOUNTEDTANK) ||                   \
