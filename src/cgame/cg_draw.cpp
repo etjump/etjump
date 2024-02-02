@@ -1981,7 +1981,7 @@ static void CG_DrawMoverHealthBar(float frac, const vec4_t color) {
 
   Vector4Set(bgcolor, 1.f, 1.f, 1.f, .25f * color[3]);
   CG_FilledBar(SCREEN_CENTER_X - 110 / 2.0f, 190, 110, 10, c, nullptr, bgcolor,
-               barFrac, static_cast<int>(FilledBarFlags::BAR_BG));
+               barFrac, FilledBarFlags::BAR_BG);
 }
 
 static void CG_DrawPlyerName(vec4_t color) {
@@ -3843,10 +3843,9 @@ static void CG_DrawPlayerHealthBar(rectDef_t *rect) {
   const vec4_t bgcolour = {1.f, 1.f, 1.f, 0.3f};
   vec4_t colour;
 
-  const int flags = (static_cast<int>(FilledBarFlags::BAR_LEFT) |
-                     static_cast<int>(FilledBarFlags::BAR_VERT) |
-                     static_cast<int>(FilledBarFlags::BAR_BG) |
-                     static_cast<int>(FilledBarFlags::BAR_BGSPACING_X0Y0));
+  const int flags =
+      (FilledBarFlags::BAR_LEFT | FilledBarFlags::BAR_VERT |
+       FilledBarFlags::BAR_BG | FilledBarFlags::BAR_BGSPACING_X0Y0);
   float frac;
 
   CG_ColorForHealth(colour);
@@ -3874,10 +3873,9 @@ static void CG_DrawStaminaBar(rectDef_t *rect) {
   vec4_t colourlow = {1.0f, 0.1f, 0.1f, 0.5f};
   vec4_t colour = {0.1f, 1.0f, 0.1f, 0.5f};
   vec_t *color = colour;
-  const int flags = (static_cast<int>(FilledBarFlags::BAR_LEFT) |
-                     static_cast<int>(FilledBarFlags::BAR_VERT) |
-                     static_cast<int>(FilledBarFlags::BAR_BG) |
-                     static_cast<int>(FilledBarFlags::BAR_BGSPACING_X0Y0));
+  const int flags =
+      (FilledBarFlags::BAR_LEFT | FilledBarFlags::BAR_VERT |
+       FilledBarFlags::BAR_BG | FilledBarFlags::BAR_BGSPACING_X0Y0);
   float frac = static_cast<float>(cg.pmext.sprintTime) / SPRINTTIME;
 
   // make sure we only draw adrenaline visual if we actually used adrenaline
@@ -3917,9 +3915,8 @@ static void CG_DrawWeapRecharge(rectDef_t *rect) {
   const vec4_t bgcolor = {1.0f, 1.0f, 1.0f, 0.25f};
   vec4_t color;
 
-  const int flags = (static_cast<int>(FilledBarFlags::BAR_LEFT) |
-                     static_cast<int>(FilledBarFlags::BAR_VERT) |
-                     static_cast<int>(FilledBarFlags::BAR_BG));
+  const int flags = (FilledBarFlags::BAR_LEFT | FilledBarFlags::BAR_VERT |
+                     FilledBarFlags::BAR_BG);
 
   // Draw power bar
   switch (cg.snap->ps.stats[STAT_PLAYER_CLASS]) {

@@ -332,9 +332,7 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor,
                   int flags) {
   // colorAtPos is the lerped color if necessary
   vec4_t backgroundcolor = {1, 1, 1, 0.25f}, colorAtPos;
-  int indent = (flags & static_cast<int>(FilledBarFlags::BAR_BORDER_SMALL)
-                    ? BAR_BORDERSIZE_SMALL
-                    : BAR_BORDERSIZE);
+  int indent = (flags & FilledBarFlags::BAR_BORDER_SMALL) ? BAR_BORDERSIZE_SMALL : BAR_BORDERSIZE;
 
   if (frac > 1) {
     frac = 1.f;
@@ -345,26 +343,26 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor,
   }
 
   // BAR_BG set, and color specified, use specified bg color
-  if ((flags & static_cast<int>(FilledBarFlags::BAR_BG)) && bgColor) {
+  if ((flags & FilledBarFlags::BAR_BG) && bgColor) {
     Vector4Copy(bgColor, backgroundcolor);
   }
 
-  if (flags & static_cast<int>(FilledBarFlags::BAR_LERP_COLOR)) {
+  if (flags & FilledBarFlags::BAR_LERP_COLOR) {
     Vector4Average(startColor, endColor, frac, colorAtPos);
   }
 
   // background
-  if ((flags & static_cast<int>(FilledBarFlags::BAR_BG))) {
+  if (flags & FilledBarFlags::BAR_BG) {
     // draw background at full size and shrink the remaining box
     // to fit inside with a border
     // (alternate border may be specified by a BAR_BGSPACING_xx)
     CG_FillRect(x, y, w, h, backgroundcolor);
 
     // fill the whole box (no border)
-    if (flags & static_cast<int>(FilledBarFlags::BAR_BGSPACING_X0Y0)) {
+    if (flags & FilledBarFlags::BAR_BGSPACING_X0Y0) {
     }
     // spacing created for weapon heat
-    else if (flags & static_cast<int>(FilledBarFlags::BAR_BGSPACING_X0Y5)) {
+    else if (flags & FilledBarFlags::BAR_BGSPACING_X0Y5) {
       indent *= 3;
       y += static_cast<float>(indent);
       h -= static_cast<float>(2 * indent);
@@ -376,8 +374,8 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor,
       w -= static_cast<float>(2 * indent);
       h -= static_cast<float>(2 * indent);
     }
-  } else if (flags & static_cast<int>(FilledBarFlags::BAR_BORDER) ||
-             flags & static_cast<int>(FilledBarFlags::BAR_BORDER_SMALL)) {
+  } else if ((flags & FilledBarFlags::BAR_BORDER) ||
+             (flags & FilledBarFlags::BAR_BORDER_SMALL)) {
     const vec4_t borderColor = {1.0f, 1.0f, 1.0f, 0.5f};
 
     CG_DrawRect_FixedBorder(x, y, w, h, indent, borderColor);
@@ -389,15 +387,15 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor,
   }
 
   // adjust for horiz/vertical and draw the fractional box
-  if (flags & static_cast<int>(FilledBarFlags::BAR_VERT)) {
+  if (flags & FilledBarFlags::BAR_VERT) {
     // TODO: remember to swap colors on the ends here
-    if (flags & static_cast<int>(FilledBarFlags::BAR_LEFT)) {
+    if (flags & FilledBarFlags::BAR_LEFT) {
       y += (h * (1 - frac));
-    } else if (flags & static_cast<int>(FilledBarFlags::BAR_CENTER)) {
+    } else if (flags & FilledBarFlags::BAR_CENTER) {
       y += (h * (1 - frac) / 2);
     }
 
-    if (flags & static_cast<int>(FilledBarFlags::BAR_LERP_COLOR)) {
+    if (flags & FilledBarFlags::BAR_LERP_COLOR) {
       CG_FillRect(x, y, w, h * frac, colorAtPos);
     } else {
       CG_FillRect(x, y, w, h * frac, startColor);
@@ -405,13 +403,13 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor,
 
   } else {
     // TODO: remember to swap colors on the ends here
-    if (flags & static_cast<int>(FilledBarFlags::BAR_LEFT)) {
+    if (flags & FilledBarFlags::BAR_LEFT) {
       x += (w * (1 - frac));
-    } else if (flags & static_cast<int>(FilledBarFlags::BAR_CENTER)) {
+    } else if (flags & FilledBarFlags::BAR_CENTER) {
       x += (w * (1 - frac) / 2);
     }
 
-    if (flags & static_cast<int>(FilledBarFlags::BAR_LERP_COLOR)) {
+    if (flags & FilledBarFlags::BAR_LERP_COLOR) {
       CG_FillRect(x, y, w * frac, h, colorAtPos);
     } else {
       CG_FillRect(x, y, w * frac, h, startColor);
@@ -427,9 +425,9 @@ CG_HorizontalPercentBar
 void CG_HorizontalPercentBar(float x, float y, float width, float height,
                              float percent) {
   vec4_t bgcolor = {0.5f, 0.5f, 0.5f, 0.3f}, color = {1.0f, 1.0f, 1.0f, 0.3f};
-  CG_FilledBar(x, y, width, height, color, NULL, bgcolor, percent,
-               static_cast<int>(FilledBarFlags::BAR_BG) |
-                   static_cast<int>(FilledBarFlags::BAR_NOHUDALPHA));
+  const int flags = (FilledBarFlags::BAR_BG | FilledBarFlags::BAR_NOHUDALPHA);
+
+  CG_FilledBar(x, y, width, height, color, nullptr, bgcolor, percent, flags);
 }
 
 /*

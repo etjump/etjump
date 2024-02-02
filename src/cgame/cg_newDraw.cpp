@@ -451,11 +451,13 @@ void CG_DrawCursorhint(rectDef_t *rect) {
     } else {
       Vector4Set(color, 0, 0, 1, 0.5f);
     }
+
+    const int flags =
+        (FilledBarFlags::BAR_BORDER_SMALL | FilledBarFlags::BAR_LERP_COLOR);
+
     CG_FilledBar(rect->x, rect->y + rect->h + 4, rect->w, 8, colorRed,
                  colorGreen, nullptr,
-                 static_cast<float>(cg.cursorHintValue) / 255.0f,
-                 static_cast<int>(FilledBarFlags::BAR_BORDER_SMALL) |
-                     static_cast<int>(FilledBarFlags::BAR_LERP_COLOR));
+                 static_cast<float>(cg.cursorHintValue) / 255.0f, flags);
   }
 }
 
@@ -507,11 +509,11 @@ void CG_DrawWeapStability(rectDef_t *rect) {
     return;
   }
 
+  const int flags = (FilledBarFlags::BAR_CENTER | FilledBarFlags::BAR_VERT |
+                     FilledBarFlags::BAR_LERP_COLOR);
+
   CG_FilledBar(rect->x, rect->y, rect->w, rect->h, goodColor, badColor, nullptr,
-               static_cast<float>(cg.snap->ps.aimSpreadScale) / 255.0f,
-               static_cast<int>(FilledBarFlags::BAR_CENTER) |
-                   static_cast<int>(FilledBarFlags::BAR_VERT) |
-                   static_cast<int>(FilledBarFlags::BAR_LERP_COLOR));
+               static_cast<float>(cg.snap->ps.aimSpreadScale) / 255.0f, flags);
 }
 
 /*
@@ -529,12 +531,12 @@ void CG_DrawWeapHeat(rectDef_t *rect, int align) {
   }
 
   if (align != HUD_HORIZONTAL) {
-    flags |= static_cast<int>(FilledBarFlags::BAR_VERT);
+    flags |= FilledBarFlags::BAR_VERT;
   }
 
-  flags |= static_cast<int>(FilledBarFlags::BAR_LEFT);
-  flags |= static_cast<int>(FilledBarFlags::BAR_BG);
-  flags |= static_cast<int>(FilledBarFlags::BAR_LERP_COLOR);
+  flags |= FilledBarFlags::BAR_LEFT;
+  flags |= FilledBarFlags::BAR_BG;
+  flags |= FilledBarFlags::BAR_LERP_COLOR;
 
   CG_FilledBar(rect->x, rect->y, rect->w, rect->h, color, color2, nullptr,
                static_cast<float>(cg.snap->ps.curWeapHeat) / 255.0f, flags);

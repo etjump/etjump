@@ -2984,7 +2984,7 @@ int CG_PlayerAmmoValue(int *ammo, int *clips, int *akimboammo);
 void CG_DrawMortarReticle();
 
 // flags for CG_FilledBar
-enum class FilledBarFlags {
+enum FilledBarFlags {
   BAR_LEFT = 1 << 0,
   BAR_CENTER = 1 << 1,
   BAR_VERT = 1 << 2,
