@@ -73,9 +73,9 @@ static qboolean Menu_OverActiveItem(menuDef_t *menu, float x, float y);
   #endif
 #else
   #if id386
-    #define MEM_POOL_SIZE (2048 * 1024) // Arnout: was 1024
+    #define MEM_POOL_SIZE (4096 * 1024) // Arnout: was 1024
   #else
-    #define MEM_POOL_SIZE (4096 * 1024)
+    #define MEM_POOL_SIZE (8192 * 1024)
   #endif
 #endif
 
