@@ -4088,24 +4088,24 @@ void BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm,
   ps->eventSequence++;
 }
 
-// Gordon: would like to just inline this but would likely break qvm support
-#define SETUP_MOUNTEDGUN_STATUS(ps)                                            \
-  switch (ps->persistant[PERS_HWEAPON_USE]) {                                  \
-    case 1:                                                                    \
-      ps->eFlags |= EF_MG42_ACTIVE;                                            \
-      ps->eFlags &= ~EF_AAGUN_ACTIVE;                                          \
-      ps->powerups[PW_OPS_DISGUISED] = 0;                                      \
-      break;                                                                   \
-    case 2:                                                                    \
-      ps->eFlags |= EF_AAGUN_ACTIVE;                                           \
-      ps->eFlags &= ~EF_MG42_ACTIVE;                                           \
-      ps->powerups[PW_OPS_DISGUISED] = 0;                                      \
-      break;                                                                   \
-    default:                                                                   \
-      ps->eFlags &= ~EF_MG42_ACTIVE;                                           \
-      ps->eFlags &= ~EF_AAGUN_ACTIVE;                                          \
-      break;                                                                   \
+void BG_SetupMountedGunStatus(playerState_t *ps) {
+  switch (ps->persistant[PERS_HWEAPON_USE]) {
+    case 1:
+      ps->eFlags |= EF_MG42_ACTIVE;
+      ps->eFlags &= ~EF_AAGUN_ACTIVE;
+      ps->powerups[PW_OPS_DISGUISED] = 0;
+      break;
+    case 2:
+      ps->eFlags |= EF_AAGUN_ACTIVE;
+      ps->eFlags &= ~EF_MG42_ACTIVE;
+      ps->powerups[PW_OPS_DISGUISED] = 0;
+      break;
+    default:
+      ps->eFlags &= ~EF_MG42_ACTIVE;
+      ps->eFlags &= ~EF_AAGUN_ACTIVE;
+      break;
   }
+}
 
 /*
 ========================
@@ -4117,52 +4117,50 @@ and after local prediction on the client
 */
 void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s,
                                  qboolean snap) {
-  int i;
-
-  if (ps->pm_type == PM_INTERMISSION ||
-      ps->pm_type == PM_SPECTATOR) // || ps->pm_flags & PMF_LIMBO ) { //
-                                   // JPW NERVE limbo
-  {
-    s->eType = ET_INVISIBLE;
-  } else if (ps->stats[STAT_HEALTH] <= GIB_HEALTH) {
+  if (ps->pm_type == PM_INTERMISSION || ps->pm_type == PM_SPECTATOR ||
+      ps->stats[STAT_HEALTH] <= GIB_HEALTH ||
+      (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR &&
+       ps->pm_type == PM_NOCLIP)) {
     s->eType = ET_INVISIBLE;
   } else {
     s->eType = ET_PLAYER;
   }
 
   s->number = ps->clientNum;
-
   s->pos.trType = TR_INTERPOLATE;
   VectorCopy(ps->origin, s->pos.trBase);
+
   if (snap) {
     SnapVector(s->pos.trBase);
   }
 
   s->apos.trType = TR_INTERPOLATE;
   VectorCopy(ps->viewangles, s->apos.trBase);
+
   if (snap) {
     SnapVector(s->apos.trBase);
   }
 
   if (ps->movementDir > 128) {
-    s->angles2[YAW] = (float)ps->movementDir - 256;
+    s->angles2[YAW] = static_cast<float>(ps->movementDir) - 256;
   } else {
-    s->angles2[YAW] = ps->movementDir;
+    s->angles2[YAW] = static_cast<float>(ps->movementDir);
   }
 
   s->legsAnim = ps->legsAnim;
   s->torsoAnim = ps->torsoAnim;
-  s->clientNum =
-      ps->clientNum; // ET_PLAYER looks here instead of at number
-                     // so corpses can also reference the proper config
-  // Ridah, let clients know if this person is using a mounted weapon
-  // so they don't show any client muzzle flashes
 
+  // ET_PLAYER looks here instead of at number
+  // so corpses can also reference the proper config
+  s->clientNum = ps->clientNum;
+
+  // Ridah, let clients know if this person is using a mounted weapon,
+  // so they don't show any client muzzle flashes
   if (ps->eFlags & EF_MOUNTEDTANK) {
     ps->eFlags &= ~EF_MG42_ACTIVE;
     ps->eFlags &= ~EF_AAGUN_ACTIVE;
   } else {
-    SETUP_MOUNTEDGUN_STATUS(ps);
+    BG_SetupMountedGunStatus(ps);
   }
 
   s->eFlags = ps->eFlags;
@@ -4178,41 +4176,40 @@ void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s,
     s->event = ps->externalEvent;
     s->eventParm = ps->externalEventParm;
   } else if (ps->entityEventSequence < ps->eventSequence) {
-    int seq;
-
     if (ps->entityEventSequence < ps->eventSequence - MAX_EVENTS) {
       ps->entityEventSequence = ps->eventSequence - MAX_EVENTS;
     }
-    seq = ps->entityEventSequence & (MAX_EVENTS - 1);
+
+    const int seq = ps->entityEventSequence & (MAX_EVENTS - 1);
     s->event = ps->events[seq] | ((ps->entityEventSequence & 3) << 8);
     s->eventParm = ps->eventParms[seq];
     ps->entityEventSequence++;
   }
   // end
+
   // Ridah, now using a circular list of events for all entities
   // add any new events that have been added to the playerState_t
   // (possibly overwriting entityState_t events)
-  for (i = ps->oldEventSequence; i != ps->eventSequence; i++) {
+  for (int i = ps->oldEventSequence; i != ps->eventSequence; i++) {
     s->events[s->eventSequence & (MAX_EVENTS - 1)] =
         ps->events[i & (MAX_EVENTS - 1)];
     s->eventParms[s->eventSequence & (MAX_EVENTS - 1)] =
         ps->eventParms[i & (MAX_EVENTS - 1)];
     s->eventSequence++;
   }
-  ps->oldEventSequence = ps->eventSequence;
 
+  ps->oldEventSequence = ps->eventSequence;
   s->weapon = ps->weapon;
   s->groundEntityNum = ps->groundEntityNum;
-
   s->powerups = 0;
-  for (i = 0; i < MAX_POWERUPS; i++) {
+
+  for (int i = 0; i < MAX_POWERUPS; i++) {
     if (ps->powerups[i]) {
       s->powerups |= 1 << i;
     }
   }
 
-  s->nextWeapon = ps->nextWeapon; // Ridah
-                                  //	s->loopSound = ps->loopSound;
+  s->nextWeapon = ps->nextWeapon; // Ridah, s->loopSound = ps->loopSound;
   s->teamNum = ps->teamNum;
   s->aiState = ps->aiState; // xkan, 1/10/2003
 }
@@ -4271,7 +4268,7 @@ void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
     ps->eFlags &= ~EF_MG42_ACTIVE;
     ps->eFlags &= ~EF_AAGUN_ACTIVE;
   } else {
-    SETUP_MOUNTEDGUN_STATUS(ps);
+    BG_SetupMountedGunStatus(ps);
   }
 
   s->eFlags = ps->eFlags;
