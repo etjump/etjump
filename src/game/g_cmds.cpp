@@ -963,27 +963,32 @@ void setPlayerOffset(gentity_t *ent) {
     return;
   }
 
-  vec3_t origin;
-  vec3_t angles;
-  VectorCopy(ent->client->ps.origin, origin);
-  VectorCopy(ent->client->ps.viewangles, angles);
-
-  decreaseNoclipCount(ent, "setoffset");
+  vec3_t dst{};
+  VectorCopy(ent->client->ps.origin, dst);
 
   for (auto i = 0; i < 3; i++) {
     trap_Argv(i + 1, buffer, sizeof buffer);
-    float value = Q_atof(buffer);
-    if (value > MaxAxisOffset) {
-      value = MaxAxisOffset;
-    } else if (value < -MaxAxisOffset) {
-      value = -MaxAxisOffset;
-    }
-    origin[i] += value;
+    const float value = Q_atof(buffer);
+    dst[i] += Numeric::clamp(value, -MaxAxisOffset, MaxAxisOffset);
   }
+
+  // check if there is a non-noclippable content between our position and current target
+  trace_t trace;
+  trap_TraceCapsule(&trace, ent->client->ps.origin, ent->client->ps.mins,
+                  ent->client->ps.maxs, dst, ent->client->ps.clientNum,
+                  CONTENTS_NONOCLIP);
+
+  if (level.noNoclip == (trace.fraction == 1.0f)) {
+    Printer::SendConsoleMessage(clientNum, "^7You cannot ^3setoffset ^7to this area.\n");
+    return;
+  }
+
+  decreaseNoclipCount(ent, "setoffset");
+  ent->client->setoffsetThisLife = true;
 
   // reset speed
   VectorClear(ent->client->ps.velocity);
-  DirectTeleport(ent, origin, angles);
+  DirectTeleport(ent, dst, ent->client->ps.viewangles);
 }
 
 void interruptRun(gentity_t *ent) {
@@ -1719,7 +1724,8 @@ void Cmd_Team_f(gentity_t *ent) {
     G_SetClientWeapons(ent, w, w2, qtrue);
   }
 
-  if (!ent->client->sess.runSpawnflags ||
+  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR ||
+      !ent->client->sess.runSpawnflags ||
       ent->client->sess.runSpawnflags &
           static_cast<int>(ETJump::TimerunSpawnflags::ResetTeamChange)) {
     InterruptRun(ent);

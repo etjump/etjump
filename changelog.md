@@ -1,3 +1,21 @@
+# ETJump 3.1.1
+
+* fixed regression in OB detector causing it drawing too high [#1162](https://github.com/etjump/etjump/pull/1162)
+* fixed being unable to activate multiple `trigger_multiple` entities simultaneously [#1163](https://github.com/etjump/etjump/pull/1163)
+* auto rtv improvements [#1164](https://github.com/etjump/etjump/pull/1164) [#1174](https://github.com/etjump/etjump/pull/1174)
+  * auto rtv can no longer be voted off if it's already off
+  * successful auto rtv vote now displays if it was turned on or adjusted, and displays the correct time until next vote
+  * auto rtv no longer gets blocked if `vote_allow_rtv 0` is set
+  * 2 minute warning no longer prints if time gets adjusted so that there is less than 2 minutes until the next vote
+* fixed double footsteps and prediction errors on `surfaceparm nodamage` [#1166](https://github.com/etjump/etjump/pull/1166)
+* fixed rtv menu not drawing if client connected after rtv had already been called previously during the map, or an rtv vote was active while connecting [#1167](https://github.com/etjump/etjump/pull/1167)
+* timeruns which don't reset on team change are now reset if a client goes to spec, only allies <-> axis switches don't interrupt [#1168](https://github.com/etjump/etjump/pull/1168)
+* fixed (globa)accum indices 8 and 9 working unreliably [#1170](https://github.com/etjump/etjump/pull/1170)
+* fixed potential div by 0 in accum and playanim script functions [#1173](https://github.com/etjump/etjump/pull/1173)
+* updated `g_oss` value to reflect correct macOS support - only x86_64 is supported [#1177](https://github.com/etjump/etjump/pull/1177)
+* using `setoffset` now requires `/kill` like `noclip` before a timerun can be started [#1178](https://github.com/etjump/etjump/pull/1178)
+* fixed potential buffer overflow in client rtv menu when `g_rtvMapCount` was set to < 9 [#1180](https://github.com/etjump/etjump/pull/1180)
+
 # ETJump 3.1.0
 
 * deprecated `target_printname` entity - all functionality is included in `target_print` [#1080](https://github.com/etjump/etjump/pull/1080)

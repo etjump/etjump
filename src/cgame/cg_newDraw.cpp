@@ -258,7 +258,7 @@ void CG_DrawCursorhint(rectDef_t *rect) {
   float *color;
   qhandle_t icon;
   float scale, halfscale;
-  qboolean yellowbar = qfalse;
+  bool yellowbar = false;
 
   if (!cg_cursorHints.integer) {
     return;
@@ -267,7 +267,6 @@ void CG_DrawCursorhint(rectDef_t *rect) {
   CG_CheckForCursorHints();
 
   switch (cg.cursorHintIcon) {
-
     case HINT_NONE:
     case HINT_FORCENONE:
       icon = 0;
@@ -310,24 +309,6 @@ void CG_DrawCursorhint(rectDef_t *rect) {
       break;
     case HINT_CHAIR:
       icon = cgs.media.notUsableHintShader;
-
-      // only show 'pickupable' if you're not armed, or
-      // are armed with a single handed weapon
-
-      // rain - WEAPS_ONE_HANDED isn't valid anymore,
-      // because WP_SILENCED_COLT uses a bit >31 (and,
-      // therefore, is too large to be shifted in the
-      // way WEAPS_ONE_HANDED does on a 32-bit system.)
-      // If you want to use HINT_CHAIR, you'll need to
-      // fix this.
-#if 0
-		if (!(cg.predictedPlayerState.weapon) ||
-		    WEAPS_ONE_HANDED & (1 << (cg.predictedPlayerState.weapon))
-		    )
-		{
-			icon = cgs.media.chairHintShader;
-		}
-#endif
       break;
     case HINT_ALARM:
       icon = cgs.media.alarmHintShader;
@@ -398,7 +379,6 @@ void CG_DrawCursorhint(rectDef_t *rect) {
     case HINT_PLYR_UNKNOWN:
       icon = cgs.media.hintPlrUnknownShader;
       break;
-
     // DHM - Nerve :: multiplayer hints
     case HINT_BUILD:
       icon = cgs.media.buildHintShader;
@@ -413,14 +393,12 @@ void CG_DrawCursorhint(rectDef_t *rect) {
       icon = cgs.media.dynamiteHintShader;
       break;
     // dhm - end
-
     // Mad Doc - TDF
     case HINT_LOCKPICK:
-      icon = cgs.media.doorLockHintShader; // TAT 1/30/2003 - use the locked
-                                           // door hint cursor
-      yellowbar = qtrue; // draw the status bar in yellow, so it shows up better
+      // TAT 1/30/2003 - use the locked door hint cursor
+      icon = cgs.media.doorLockHintShader;
+      yellowbar = true; // draw the status bar in yellow, so it shows up better
       break;
-
     case HINT_ACTIVATE:
     case HINT_PLAYER:
     default:
@@ -434,6 +412,7 @@ void CG_DrawCursorhint(rectDef_t *rect) {
 
   // color
   color = CG_FadeColor(cg.cursorHintTime, cg.cursorHintFade);
+
   if (!color) {
     trap_R_SetColor(nullptr);
     return;
@@ -444,16 +423,16 @@ void CG_DrawCursorhint(rectDef_t *rect) {
   }
 
   // size
-  if (cg_cursorHints.integer >= 3) // no size pulsing
-  {
+  // no size pulsing
+  if (cg_cursorHints.integer >= 3) {
     scale = halfscale = 0;
   } else {
     if (cg_cursorHints.integer == 2) {
-      scale = static_cast<float>((cg.cursorHintTime) % 1000) /
-              100.0f; // one way size pulse
+      // one way size pulse
+      scale = static_cast<float>((cg.cursorHintTime) % 1000) / 100.0f;
     } else {
-      scale = CURSORHINT_SCALE *
-              (0.5 + 0.5 * std::sin(cg.time / 150.0)); // sin pulse
+      // sin pulse
+      scale = CURSORHINT_SCALE * (0.5 + 0.5 * std::sin(cg.time / 150.0));
     }
     halfscale = scale * 0.5f;
   }
@@ -472,8 +451,13 @@ void CG_DrawCursorhint(rectDef_t *rect) {
     } else {
       Vector4Set(color, 0, 0, 1, 0.5f);
     }
-    CG_FilledBar(rect->x, rect->y + rect->h + 4, rect->w, 8, color, nullptr,
-                 nullptr, static_cast<float>(cg.cursorHintValue) / 255.0f, 0);
+
+    const int flags =
+        (FilledBarFlags::BAR_BORDER_SMALL | FilledBarFlags::BAR_LERP_COLOR);
+
+    CG_FilledBar(rect->x, rect->y + rect->h + 4, rect->w, 8, colorRed,
+                 colorGreen, nullptr,
+                 static_cast<float>(cg.cursorHintValue) / 255.0f, flags);
   }
 }
 
@@ -499,7 +483,8 @@ weapon/ability, and 'perfect' reference mark
 ==============
 */
 void CG_DrawWeapStability(rectDef_t *rect) {
-  vec4_t goodColor = {0, 1, 0, 0.5f}, badColor = {1, 0, 0, 0.5f};
+  vec4_t goodColor = {0, 1, 0, 0.5f};
+  const vec4_t badColor = {1, 0, 0, 0.5f};
 
   if (!cg_drawSpreadScale.integer) {
     return;
@@ -524,9 +509,11 @@ void CG_DrawWeapStability(rectDef_t *rect) {
     return;
   }
 
-  CG_FilledBar(rect->x, rect->y, rect->w, rect->h, goodColor, badColor, NULL,
-               (float)cg.snap->ps.aimSpreadScale / 255.0f,
-               2 | 4 | 256); // flags (BAR_CENTER|BAR_VERT|BAR_LERP_COLOR)
+  const int flags = (FilledBarFlags::BAR_CENTER | FilledBarFlags::BAR_VERT |
+                     FilledBarFlags::BAR_LERP_COLOR);
+
+  CG_FilledBar(rect->x, rect->y, rect->w, rect->h, goodColor, badColor, nullptr,
+               static_cast<float>(cg.snap->ps.aimSpreadScale) / 255.0f, flags);
 }
 
 /*
@@ -535,7 +522,8 @@ CG_DrawWeapHeat
 ==============
 */
 void CG_DrawWeapHeat(rectDef_t *rect, int align) {
-  vec4_t color = {1, 0, 0, 0.2f}, color2 = {1, 0, 0, 0.5f};
+  vec4_t color = {1, 0, 0, 0.2f};
+  const vec4_t color2 = {1, 0, 0, 0.5f};
   int flags = 0;
 
   if (!(cg.snap->ps.curWeapHeat)) {
@@ -543,19 +531,15 @@ void CG_DrawWeapHeat(rectDef_t *rect, int align) {
   }
 
   if (align != HUD_HORIZONTAL) {
-    flags |= 4; // BAR_VERT
+    flags |= FilledBarFlags::BAR_VERT;
   }
 
-  flags |= 1;  // BAR_LEFT			- this is hardcoded now,
-               // but will be decided by the menu script
-  flags |= 16; // BAR_BG			- draw the filled contrast box
-               //	flags|=32;		// BAR_BGSPACING_X0Y5	-
-               // different style
+  flags |= FilledBarFlags::BAR_LEFT;
+  flags |= FilledBarFlags::BAR_BG;
+  flags |= FilledBarFlags::BAR_LERP_COLOR;
 
-  flags |= 256; // BAR_COLOR_LERP
-
-  CG_FilledBar(rect->x, rect->y, rect->w, rect->h, color, color2, NULL,
-               (float)cg.snap->ps.curWeapHeat / 255.0f, flags);
+  CG_FilledBar(rect->x, rect->y, rect->w, rect->h, color, color2, nullptr,
+               static_cast<float>(cg.snap->ps.curWeapHeat) / 255.0f, flags);
 }
 
 int old_mouse_x_pos = 0, old_mouse_y_pos = 0;

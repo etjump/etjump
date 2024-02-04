@@ -31,6 +31,7 @@ inline int PASSFLOAT(const float &f) noexcept {
 
 void trap_Printf(const char *fmt) { SystemCall(G_PRINT, fmt); }
 
+// coverity[+kill]
 void trap_Error(const char *fmt) { SystemCall(G_ERROR, fmt); }
 
 int trap_Milliseconds(void) { return SystemCall(G_MILLISECONDS); }
@@ -237,7 +238,7 @@ sfxHandle_t trap_RegisterSound(const char *sample, qboolean compressed) {
 }
 
 #ifdef DEBUG
-  //#define FAKELAG
+  // #define FAKELAG
   #ifdef FAKELAG
     #define MAX_USERCMD_BACKUP 256
     #define MAX_USERCMD_MASK (MAX_USERCMD_BACKUP - 1)

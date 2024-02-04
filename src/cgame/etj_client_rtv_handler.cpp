@@ -32,6 +32,17 @@ ClientRtvHandler::ClientRtvHandler() {
   isRtvVote = false;
 }
 
+void ClientRtvHandler::initialize() {
+  setRtvVoteStatus();
+
+  if (!rtvVoteActive()) {
+    return;
+  }
+
+  setRtvConfigStrings(CG_ConfigString(CS_VOTE_YES));
+  countRtvVotes();
+}
+
 void ClientRtvHandler::setRtvConfigStrings(const char *cs) {
   char key[MAX_QPATH]; // these are map names so MAX_QPATH is sufficient
   char value[3];       // can't exceed MAX_CLIENTS + null terminator

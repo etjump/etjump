@@ -1970,18 +1970,18 @@ void CG_CheckForCursorHints(void) {
   }
 }
 
-static void CG_DrawMoverHealthBar(float frac, vec4_t color) {
+static void CG_DrawMoverHealthBar(float frac, const vec4_t color) {
   vec4_t bgcolor;
   vec4_t c;
   float barFrac = Numeric::clamp(frac, 0, 1.0);
 
   c[0] = 1.0f;
   c[1] = c[2] = barFrac;
-  c[3] = (0 + barFrac * 0.5) * color[3];
+  c[3] = (0 + barFrac * 0.5f) * color[3];
 
   Vector4Set(bgcolor, 1.f, 1.f, 1.f, .25f * color[3]);
-  CG_FilledBar(SCREEN_CENTER_X - 110 / 2, 190, 110, 10, c, nullptr, bgcolor,
-               barFrac, 16);
+  CG_FilledBar(SCREEN_CENTER_X - 110 / 2.0f, 190, 110, 10, c, nullptr, bgcolor,
+               barFrac, FilledBarFlags::BAR_BG);
 }
 
 static void CG_DrawPlyerName(vec4_t color) {
@@ -3840,10 +3840,12 @@ static void CG_DrawPlayerStatusHead(void) {
 }
 
 static void CG_DrawPlayerHealthBar(rectDef_t *rect) {
-  vec4_t bgcolour = {1.f, 1.f, 1.f, 0.3f};
+  const vec4_t bgcolour = {1.f, 1.f, 1.f, 0.3f};
   vec4_t colour;
 
-  int flags = 1 | 4 | 16 | 64;
+  const int flags =
+      (FilledBarFlags::BAR_LEFT | FilledBarFlags::BAR_VERT |
+       FilledBarFlags::BAR_BG | FilledBarFlags::BAR_BGSPACING_X0Y0);
   float frac;
 
   CG_ColorForHealth(colour);
@@ -3858,20 +3860,22 @@ static void CG_DrawPlayerHealthBar(rectDef_t *rect) {
   }
 
   CG_FilledBar(rect->x, rect->y + (rect->h * 0.1f), rect->w, rect->h * 0.84f,
-               colour, NULL, bgcolour, frac, flags);
+               colour, nullptr, bgcolour, frac, flags);
 
-  trap_R_SetColor(NULL);
+  trap_R_SetColor(nullptr);
   CG_DrawPic(rect->x, rect->y, rect->w, rect->h, cgs.media.hudSprintBar);
   CG_DrawPic(rect->x, rect->y + rect->h + 4, rect->w, rect->w,
              cgs.media.hudHealthIcon);
 }
 
 static void CG_DrawStaminaBar(rectDef_t *rect) {
-  vec4_t bgcolour = {1.f, 1.f, 1.f, 0.3f};
-  vec4_t colour = {0.1f, 1.0f, 0.1f, 0.5f};
+  const vec4_t bgcolour = {1.f, 1.f, 1.f, 0.3f};
   vec4_t colourlow = {1.0f, 0.1f, 0.1f, 0.5f};
+  vec4_t colour = {0.1f, 1.0f, 0.1f, 0.5f};
   vec_t *color = colour;
-  int flags = 1 | 4 | 16 | 64;
+  const int flags =
+      (FilledBarFlags::BAR_LEFT | FilledBarFlags::BAR_VERT |
+       FilledBarFlags::BAR_BG | FilledBarFlags::BAR_BGSPACING_X0Y0);
   float frac = static_cast<float>(cg.pmext.sprintTime) / SPRINTTIME;
 
   // make sure we only draw adrenaline visual if we actually used adrenaline
@@ -3907,33 +3911,43 @@ static void CG_DrawStaminaBar(rectDef_t *rect) {
 }
 
 static void CG_DrawWeapRecharge(rectDef_t *rect) {
-  float barFrac, chargeTime;
-  int flags;
-
-  vec4_t bgcolor = {1.0f, 1.0f, 1.0f, 0.25f};
+  float chargeTime;
+  const vec4_t bgcolor = {1.0f, 1.0f, 1.0f, 0.25f};
   vec4_t color;
 
-  flags = 1 | 4 | 16;
+  const int flags = (FilledBarFlags::BAR_LEFT | FilledBarFlags::BAR_VERT |
+                     FilledBarFlags::BAR_BG);
 
   // Draw power bar
-  if (cg.snap->ps.stats[STAT_PLAYER_CLASS] == PC_ENGINEER) {
-    chargeTime = cg.engineerChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
-  } else if (cg.snap->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC) {
-    chargeTime = cg.medicChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
-  } else if (cg.snap->ps.stats[STAT_PLAYER_CLASS] == PC_FIELDOPS) {
-    chargeTime = cg.ltChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
-  } else if (cg.snap->ps.stats[STAT_PLAYER_CLASS] == PC_COVERTOPS) {
-    chargeTime = cg.covertopsChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
-  } else {
-    chargeTime = cg.soldierChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
+  switch (cg.snap->ps.stats[STAT_PLAYER_CLASS]) {
+    case PC_ENGINEER:
+      chargeTime = static_cast<float>(
+          cg.engineerChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1]);
+      break;
+    case PC_MEDIC:
+      chargeTime = static_cast<float>(
+          cg.medicChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1]);
+      break;
+    case PC_FIELDOPS:
+      chargeTime = static_cast<float>(
+          cg.ltChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1]);
+      break;
+    case PC_COVERTOPS:
+      chargeTime = static_cast<float>(
+          cg.covertopsChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1]);
+      break;
+    default:
+      chargeTime = static_cast<float>(
+          cg.soldierChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1]);
+      break;
   }
 
-  barFrac = (chargeTime == 0
-                 ? 1.0f
-                 : std::min(static_cast<float>(cg.time -
-                                               cg.snap->ps.classWeaponTime) /
-                                chargeTime,
-                            1.0f));
+  const float barFrac =
+      (chargeTime == 0 ? 1.0f
+                       : std::min(static_cast<float>(
+                                      cg.time - cg.snap->ps.classWeaponTime) /
+                                      chargeTime,
+                                  1.0f));
 
   color[0] = 1.0f;
   color[1] = color[2] = barFrac;

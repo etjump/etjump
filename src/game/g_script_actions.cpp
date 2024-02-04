@@ -736,10 +736,10 @@ qboolean G_ScriptAction_FollowSpline(gentity_t *ent, char *params) {
       }
 
       bufferIndex = Q_atoi(token);
-      if (bufferIndex < 0 || bufferIndex >= G_MAX_SCRIPT_ACCUM_BUFFERS) {
+      if (bufferIndex < 0 || bufferIndex >= MAX_SCRIPT_ACCUM_BUFFERS) {
         G_Error("G_Scripting: accum buffer is "
                 "outside range (0 - %i)\n",
-                G_MAX_SCRIPT_ACCUM_BUFFERS - 1);
+                MAX_SCRIPT_ACCUM_BUFFERS - 1);
       }
 
       backward = ent->scriptAccumBuffer[bufferIndex] != 0 ? qtrue : qfalse;
@@ -753,10 +753,10 @@ qboolean G_ScriptAction_FollowSpline(gentity_t *ent, char *params) {
       }
 
       bufferIndex = Q_atoi(token);
-      if (bufferIndex < 0 || bufferIndex >= G_MAX_SCRIPT_ACCUM_BUFFERS) {
+      if (bufferIndex < 0 || bufferIndex >= MAX_SCRIPT_ACCUM_BUFFERS) {
         G_Error("G_Scripting: accum buffer is "
                 "outside range (0 - %i)\n",
-                G_MAX_SCRIPT_ACCUM_BUFFERS - 1);
+                MAX_SCRIPT_ACCUM_BUFFERS - 1);
       }
 
       backward = level.globalAccumBuffer[bufferIndex] != 0 ? qtrue : qfalse;
@@ -1934,9 +1934,9 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
 
   for (i = 0; i < 2; i++) {
     token = COM_ParseExt(&pString, qfalse);
+
     if (!token || !token[0]) {
-      G_Printf("G_Scripting: syntax error\n\nplayanim "
-               "<startframe> <endframe> "
+      G_Printf("G_Scripting: syntax error\n\nplayanim <startframe> <endframe> "
                "[LOOPING <duration>]\n");
       return qtrue;
     } else {
@@ -1955,12 +1955,11 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
 
       token = COM_ParseExt(&pString, qfalse);
       if (!token || !token[0]) {
-        G_Printf("G_Scripting: syntax "
-                 "error\n\nplayanim <startframe> "
-                 "<endframe> [LOOPING "
-                 "<duration>]\n");
+        G_Printf("G_Scripting: syntax error\n\nplayanim <startframe> "
+                 "<endframe> [LOOPING <duration>]\n");
         return qtrue;
       }
+
       if (!Q_stricmp(token, "untilreachmarker")) {
         if (level.time < ent->s.pos.trTime + ent->s.pos.trDuration) {
           endtime = level.time + 100;
@@ -1970,8 +1969,8 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
       } else if (!Q_stricmp(token, "forever")) {
         ent->scriptStatus.animatingParams = params;
         ent->scriptStatus.scriptFlags |= SCFL_ANIMATING;
-        endtime = level.time + 100; // we don't care when it ends,
-                                    // since we are going forever!
+        // we don't care when it ends, since we are going forever!
+        endtime = level.time + 100;
         forever = qtrue;
       } else {
         endtime = ent->scriptStatus.scriptStackChangeTime + Q_atoi(token);
@@ -1983,11 +1982,18 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
     if (token[0] && !Q_stricmp(token, "rate")) {
       token = COM_ParseExt(&pString, qfalse);
       if (!token[0]) {
-        G_Error("G_Scripting: playanim has RATE "
-                "parameter without an actual "
+        G_Error("G_Scripting: playanim has RATE parameter without an actual "
                 "rate specified");
       }
+
       rate = Q_atoi(token);
+
+      // ensure we don't div by 0 for idealFrame below
+      if (rate <= 0 || rate > 1000) {
+        rate = 20;
+        G_Printf("G_ScriptAction_PlayAnim: rate out of range (1 - 1000), "
+                 "setting default 20\n");
+      }
     }
 
     if (!looping) {
@@ -1996,10 +2002,12 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
     }
   }
 
-  idealframe =
-      startframe +
-      (int)floor((float)(level.time - ent->scriptStatus.scriptStackChangeTime) /
-                 (1000.0 / (float)rate));
+  idealframe = startframe +
+               static_cast<int>(std::floor(
+                   static_cast<float>(level.time -
+                                      ent->scriptStatus.scriptStackChangeTime) /
+                   (1000.0 / static_cast<float>(rate))));
+
   if (looping) {
     ent->s.frame =
         startframe + (idealframe - startframe) % (endframe - startframe);
@@ -2229,9 +2237,9 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
   }
 
   bufferIndex = Q_atoi(token);
-  if (bufferIndex >= G_MAX_SCRIPT_ACCUM_BUFFERS) {
+  if (bufferIndex >= MAX_SCRIPT_ACCUM_BUFFERS) {
     G_Error("G_Scripting: accum buffer is outside range (0 - %i)\n",
-            G_MAX_SCRIPT_ACCUM_BUFFERS);
+            MAX_SCRIPT_ACCUM_BUFFERS);
   }
 
   token = COM_ParseExt(&pString, qfalse);
@@ -2246,11 +2254,13 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     ent->scriptAccumBuffer[bufferIndex] += Q_atoi(token);
   } else if (!Q_stricmp(lastToken, "abort_if_less_than")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] < Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2260,6 +2270,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] > Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2270,6 +2281,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] != Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2279,6 +2291,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] == Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2288,16 +2301,19 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     ent->scriptAccumBuffer[bufferIndex] |= (1 << Q_atoi(token));
   } else if (!Q_stricmp(lastToken, "bitreset")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     ent->scriptAccumBuffer[bufferIndex] &= ~(1 << Q_atoi(token));
   } else if (!Q_stricmp(lastToken, "abort_if_bitset")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] & (1 << Q_atoi(token))) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2307,6 +2323,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (!(ent->scriptAccumBuffer[bufferIndex] & (1 << Q_atoi(token)))) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2316,62 +2333,72 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     ent->scriptAccumBuffer[bufferIndex] = Q_atoi(token);
   } else if (!Q_stricmp(lastToken, "random")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
-    ent->scriptAccumBuffer[bufferIndex] = rand() % Q_atoi(token);
+
+    const int randomValue = Q_atoi(token);
+
+    if (randomValue == 0) {
+      G_Error("G_ScriptAction_Accum: random requires a non-zero value\n");
+    }
+
+    ent->scriptAccumBuffer[bufferIndex] = rand() % randomValue;
   } else if (!Q_stricmp(lastToken, "trigger_if_equal")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] == Q_atoi(token)) {
       gentity_t *trent;
       int oldId;
-      //			qboolean loop = qfalse;
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(lastToken, token, sizeof(lastToken));
+
       if (!*lastToken) {
-        G_Error("G_Scripting: trigger must have a "
-                "name and an identifier: %s\n",
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
                 params);
       }
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(name, token, sizeof(name));
+
       if (!*name) {
-        G_Error("G_Scripting: trigger must have a "
-                "name and an identifier: %s\n",
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
                 params);
       }
-      //
+
       terminate = qfalse;
       found = qfalse;
       // for all entities/bots with this scriptName
-      trent = G_Find(NULL, FOFS(scriptName), lastToken);
+      trent = G_Find(nullptr, FOFS(scriptName), lastToken);
+
       while (trent) {
         found = qtrue;
         oldId = trent->scriptStatus.scriptId;
         G_Script_ScriptEvent(trent, "trigger", name);
-        // if the script changed, return false
-        // so we don't muck with it's variables
+
+        // if the script changed, return false,
+        // so we don't muck with its variables
         if ((trent == ent) && (oldId != trent->scriptStatus.scriptId)) {
           terminate = qtrue;
         }
+
         trent = G_Find(trent, FOFS(scriptName), lastToken);
       }
-      //
+
       if (terminate) {
         return qfalse;
       }
+
       if (found) {
         return qtrue;
       }
-      //
-      //			G_Error( "G_Scripting:
-      // trigger has unknown name: %s\n", name );
+
       G_Printf("G_Scripting: trigger has unknown name: %s\n", name);
       return qtrue;
     }
@@ -2379,6 +2406,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] == Q_atoi(token)) {
       return qfalse;
     }
@@ -2431,9 +2459,9 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
   }
 
   bufferIndex = Q_atoi(token);
-  if (bufferIndex >= G_MAX_SCRIPT_ACCUM_BUFFERS) {
+  if (bufferIndex >= MAX_SCRIPT_ACCUM_BUFFERS) {
     G_Error("G_Scripting: accum buffer is outside range (0 - %i)\n",
-            G_MAX_SCRIPT_ACCUM_BUFFERS);
+            MAX_SCRIPT_ACCUM_BUFFERS);
   }
 
   token = COM_ParseExt(&pString, qfalse);
@@ -2448,11 +2476,13 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     level.globalAccumBuffer[bufferIndex] += Q_atoi(token);
   } else if (!Q_stricmp(lastToken, "abort_if_less_than")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (level.globalAccumBuffer[bufferIndex] < Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2462,6 +2492,7 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (level.globalAccumBuffer[bufferIndex] > Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2472,6 +2503,7 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (level.globalAccumBuffer[bufferIndex] != Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2481,6 +2513,7 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (level.globalAccumBuffer[bufferIndex] == Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2490,16 +2523,19 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     level.globalAccumBuffer[bufferIndex] |= (1 << Q_atoi(token));
   } else if (!Q_stricmp(lastToken, "bitreset")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     level.globalAccumBuffer[bufferIndex] &= ~(1 << Q_atoi(token));
   } else if (!Q_stricmp(lastToken, "abort_if_bitset")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (level.globalAccumBuffer[bufferIndex] & (1 << Q_atoi(token))) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2518,62 +2554,71 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     level.globalAccumBuffer[bufferIndex] = Q_atoi(token);
   } else if (!Q_stricmp(lastToken, "random")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
-    level.globalAccumBuffer[bufferIndex] = rand() % Q_atoi(token);
+
+    const int randomValue = Q_atoi(token);
+
+    if (randomValue == 0) {
+      G_Error("G_ScriptAction_GlobalAccum: random requires a non-zero value\n");
+    }
+
+    level.globalAccumBuffer[bufferIndex] = rand() % randomValue;
   } else if (!Q_stricmp(lastToken, "trigger_if_equal")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (level.globalAccumBuffer[bufferIndex] == Q_atoi(token)) {
       gentity_t *trent;
       int oldId;
-      //			qboolean loop = qfalse;
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(lastToken, token, sizeof(lastToken));
+
       if (!*lastToken) {
-        G_Error("G_Scripting: trigger must have a "
-                "name and an identifier: %s\n",
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
                 params);
       }
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(name, token, sizeof(name));
+
       if (!*name) {
-        G_Error("G_Scripting: trigger must have a "
-                "name and an identifier: %s\n",
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
                 params);
       }
 
       terminate = qfalse;
       found = qfalse;
       // for all entities/bots with this scriptName
-      trent = G_Find(NULL, FOFS(scriptName), lastToken);
+      trent = G_Find(nullptr, FOFS(scriptName), lastToken);
       while (trent) {
         found = qtrue;
         oldId = trent->scriptStatus.scriptId;
         G_Script_ScriptEvent(trent, "trigger", name);
-        // if the script changed, return false
-        // so we don't muck with it's variables
+
+        // if the script changed, return false,
+        // so we don't muck with its variables
         if ((trent == ent) && (oldId != trent->scriptStatus.scriptId)) {
           terminate = qtrue;
         }
+
         trent = G_Find(trent, FOFS(scriptName), lastToken);
       }
       //
       if (terminate) {
         return qfalse;
       }
+
       if (found) {
         return qtrue;
       }
 
-      //			G_Error( "G_Scripting:
-      // trigger has unknown name: %s\n", name );
       G_Printf("G_Scripting: trigger has unknown name: %s\n", name);
       return qtrue;
     }
@@ -2581,6 +2626,7 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (level.globalAccumBuffer[bufferIndex] == Q_atoi(token)) {
       return qfalse;
     }

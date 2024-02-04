@@ -3578,6 +3578,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   vec3_t trace_start; // Actual trace start
   vec3_t trace_end;   // trace end point
   trace_t tr;         // trace results..
+  vec3_t tr_end;      // trace end adjusted for possible func_portaltarget
 
   // BBox info
   vec3_t t_portalAngles; // Could be used for all angles conversions...
@@ -3623,10 +3624,36 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
     return;
   }
 
-  // Go ahead and calc new endpos just in case....
-  VectorMA(tr.endpos, 5, tr.plane.normal,
-           t_endpos); // Changed from 32..
   vectoangles(tr.plane.normal, t_portalAngles);
+
+  if (tr.entityNum != ENTITYNUM_WORLD &&
+      tr.entityNum < MAX_GENTITIES &&
+      !Q_stricmp(g_entities[tr.entityNum].classname, "func_portaltarget")) {
+
+    gentity_t *brushEnt = &g_entities[tr.entityNum];
+
+    vec3_t be_position; // brush ent position
+    vec3_t delta; // delta between brushent position and trace end
+    vec3_t normalScaled; // plane normal scaled by dotproduct of delta and itself
+
+    // use explicit origin if set, center of brush model otherwise
+    if (!VectorCompare(brushEnt->r.currentOrigin, vec3_origin)) {
+      VectorCopy(brushEnt->r.currentOrigin, be_position);
+    } else {
+      be_position[0] = (brushEnt->r.absmax[0] + brushEnt->r.absmin[0]) / 2;
+      be_position[1] = (brushEnt->r.absmax[1] + brushEnt->r.absmin[1]) / 2;
+      be_position[2] = (brushEnt->r.absmax[2] + brushEnt->r.absmin[2]) / 2;
+    }
+
+    VectorSubtract(be_position, tr.endpos, delta);
+    const float dotProduct = DotProduct(delta, tr.plane.normal);
+    VectorScale(tr.plane.normal, dotProduct, normalScaled);
+    VectorSubtract(be_position, normalScaled, tr_end);
+  } else {
+    VectorCopy(tr.endpos, tr_end);
+  }
+
+  VectorMA(tr_end, 5, tr.plane.normal, t_endpos);
 
   // check that portals aren't overlapping..
   if ((ent->portalBlue) || (ent->portalRed)) {
@@ -3635,7 +3662,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
 
       if (Distance(t_portalAngles, ent->portalRed->s.angles) <
               MIN_ANGLES_DIFF &&
-          Distance(tr.endpos, ent->portalRed->s.origin) < MIN_PORTALS_DIST) {
+          Distance(tr_end, ent->portalRed->s.origin) < MIN_PORTALS_DIST) {
         return;
       }
 
@@ -3643,7 +3670,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
 
       if (Distance(t_portalAngles, ent->portalBlue->s.angles) <
               MIN_ANGLES_DIFF &&
-          Distance(tr.endpos, ent->portalBlue->s.origin) < MIN_PORTALS_DIST) {
+          Distance(tr_end, ent->portalBlue->s.origin) < MIN_PORTALS_DIST) {
         return;
       }
     }
@@ -3668,8 +3695,8 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   portalNumber == 1 ? VectorCopy(blueTrail, tent->s.angles)
                     : VectorCopy(redTrail, tent->s.angles);
 
-  SnapVectorTowards(tr.endpos, start);
-  VectorCopy(tr.endpos, tent->s.origin2);
+  SnapVectorTowards(tr_end, start);
+  VectorCopy(tr_end, tent->s.origin2);
   tent->s.otherEntityNum2 = ent->s.number;
   // END - Rail
 

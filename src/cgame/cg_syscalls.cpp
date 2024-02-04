@@ -35,6 +35,7 @@ void trap_PumpEventLoop(void) {
 
 void trap_Print(const char *fmt) { SystemCall(CG_PRINT, fmt); }
 
+// coverity[+kill]
 void trap_Error(const char *fmt) { SystemCall(CG_ERROR, fmt); }
 
 int trap_Milliseconds(void) { return SystemCall(CG_MILLISECONDS); }
@@ -478,7 +479,7 @@ void trap_GetGameState(gameState_t *gamestate) {
 }
 
 #ifdef _DEBUG
-  //#define FAKELAG
+  // #define FAKELAG
   #ifdef FAKELAG
     #define MAX_SNAPSHOT_BACKUP 256
     #define MAX_SNAPSHOT_MASK (MAX_SNAPSHOT_BACKUP - 1)
