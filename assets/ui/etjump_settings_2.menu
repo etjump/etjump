@@ -19,7 +19,7 @@
 // Right side menus
 #define SUBW_CGAZ_Y SUBW_Y
 #define SUBW_CGAZ_ITEM_Y SUBW_CGAZ_Y + SUBW_HEADER_HEIGHT
-#define SUBW_CGAZ_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 14)
+#define SUBW_CGAZ_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 15)
 
 #define SUBW_POPUPS_Y SUBW_CGAZ_Y + SUBW_CGAZ_HEIGHT + SUBW_SPACING_Y
 #define SUBW_POPUPS_ITEM_Y SUBW_POPUPS_Y + SUBW_HEADER_HEIGHT
@@ -105,6 +105,7 @@ menuDef {
         CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_CGaz2FixedSpeed", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz fixed speed:", 0.2, SUBW_ITEM_HEIGHT, etj_CGaz2FixedSpeed 0 0 1200 50, "Fixed speed value to use for drawing CGaz 2 instead of real speed\netj_CGaz2FixedSpeed")
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 14), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide velocity dir:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz2NoVelocityDir", "Hide velocity direction line on CGaz2\netj_CGaz2NoVelocityDir")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 15), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw snap zone:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGazDrawSnapZone", "Extend minimum angle drawing to the end of current snap zone (CGaz 1 only)\netj_CGazDrawSnapZone")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_POPUPS_Y, SUBW_WIDTH, SUBW_POPUPS_HEIGHT, "POPUPS")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw popups:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_popup", cvarFloatList { "No" 0 "Left" 1 "Right" 2 }, "Draw popups on HUD\netj_HUD_popup")

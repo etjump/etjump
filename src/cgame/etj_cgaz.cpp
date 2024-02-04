@@ -123,8 +123,10 @@ void CGaz::UpdateDraw(float wishspeed, float accel) {
 }
 
 float CGaz::UpdateDrawSnap() {
-  // don't highligh snapzone on very low velocities
-  if (!etj_CGazDrawSnapZone.integer || state.vf < state.wishspeed) {
+  // don't highlight snapzone on very low velocities,
+  // or if drawing isn't requested
+  if (!etj_CGazDrawSnapZone.integer || !(etj_drawCGaz.integer & 1) ||
+      state.vf < state.wishspeed) {
     return NAN;
   }
 
@@ -137,15 +139,16 @@ float CGaz::UpdateDrawSnap() {
   float snap = cs.snap;
 
   // edge case, solution from snaphud code
-  if (cs.rightStrafe && snap > 90) {
-    snap = 90 - std::fmod(snap, 90);
+  if (cs.rightStrafe && snap > 90.0f) {
+    snap = 90.0f - std::fmod(snap, 90.0f);
   }
 
   // snaps are in absolute angles, calculate it relative to yaw
-  const float viewOffset = AngleNormalize180(cs.yaw - RAD2DEG(yaw));
+  const float viewOffset =
+      AngleNormalize180(cs.yaw - static_cast<float>(RAD2DEG(yaw)));
 
   float snapInCgazAngles =
-      std::fmod(!cs.rightStrafe ? snap - viewOffset : viewOffset - snap, 90);
+      std::fmod(!cs.rightStrafe ? snap - viewOffset : viewOffset - snap, 90.0f);
 
   if (snapInCgazAngles < 0.0f) {
     snapInCgazAngles += 90.0f;
