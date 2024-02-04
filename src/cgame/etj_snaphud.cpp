@@ -285,11 +285,30 @@ bool Snaphud::beforeRender() {
   edgesOnly = etj_drawSnapHUD.integer == 2;
   edgeThickness = Numeric::clamp(etj_snapHUDEdgeThickness.integer, 1, 128);
 
+  PrepareDrawables();
+
   return true;
 }
 
-void Snaphud::render() const {
+void Snaphud::PrepareDrawables() {
+  isCurrentAlt = false;
+  drawableSnaps.clear();
 
+  for (int i = 0; i < 2 * snap.maxAccel; ++i) {
+    for (int j = 0; j < 65536; j += 16384) {
+      const int bSnap = snap.zones[i] + 1 + j;
+      const int eSnap = snap.zones[i + 1] + j;
+      const bool active = AngleNormalize65536(yaw - bSnap) <=
+                          AngleNormalize65536(eSnap - bSnap);
+      const bool isAlt = i % 2;
+      isCurrentAlt |= active && isAlt;
+
+      drawableSnaps.push_back(DrawableSnap{bSnap, eSnap, isAlt, active});
+    }
+  }
+}
+
+void Snaphud::render() const {
   float h = etj_snapHUDHeight.value;
   float y = 240 + etj_snapHUDOffsetY.value;
 
@@ -300,46 +319,28 @@ void Snaphud::render() const {
     fov = Numeric::clamp(etj_snapHUDFov.value, 1, 179);
   }
 
-  int8_t altColor = 0;
-  for (int i = 0; i < 2 * snap.maxAccel; ++i) {
-    for (int j = 0; j < 65536; j += 16384) {
-      int const bSnap = snap.zones[i] + 1 + j;
-      int const eSnap = snap.zones[i + 1] + j;
+  for (const DrawableSnap &ds : drawableSnaps) {
+    int8_t color = ds.alt ? 1 : 0;
 
-      if (edgesOnly) {
-        // highlight active snapzone?
-        if (etj_snapHUDHLActive.integer &&
-            AngleNormalize65536(yaw - bSnap) <=
-                AngleNormalize65536(eSnap - bSnap)) {
-          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(bSnap + edgeThickness),
-                          SHORT2RAD(yaw), y, h, fov,
-                          snaphudColors[2 + altColor]);
-          CG_FillAngleYaw(SHORT2RAD(eSnap), SHORT2RAD(eSnap - edgeThickness),
-                          SHORT2RAD(yaw), y, h, fov,
-                          snaphudColors[2 + altColor]);
-        } else {
-          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(bSnap + edgeThickness),
-                          SHORT2RAD(yaw), y, h, fov, snaphudColors[altColor]);
-          CG_FillAngleYaw(SHORT2RAD(eSnap), SHORT2RAD(eSnap - edgeThickness),
-                          SHORT2RAD(yaw), y, h, fov, snaphudColors[altColor]);
-        }
-      } else {
-        // highlight active snapzone?
-        if (etj_snapHUDHLActive.integer &&
-            AngleNormalize65536(yaw - bSnap) <=
-                AngleNormalize65536(eSnap - bSnap)) {
-          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y,
-                          h, fov, snaphudColors[2 + altColor]);
-        } else {
-          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y,
-                          h, fov, snaphudColors[altColor]);
-        }
-      }
+    if (etj_snapHUDActiveIsPrimary.integer && isCurrentAlt) {
+      color ^= 1;
     }
-    altColor ^= 1;
+
+    if (etj_snapHUDHLActive.integer && ds.active) {
+      color += 2;
+    }
+
+    if (edgesOnly) {
+      CG_FillAngleYaw(SHORT2RAD(ds.bSnap), SHORT2RAD(ds.bSnap + edgeThickness),
+                      SHORT2RAD(yaw), y, h, fov, snaphudColors[color]);
+      CG_FillAngleYaw(SHORT2RAD(ds.eSnap), SHORT2RAD(ds.eSnap - edgeThickness),
+                      SHORT2RAD(yaw), y, h, fov, snaphudColors[color]);
+    } else {
+      CG_FillAngleYaw(SHORT2RAD(ds.bSnap), SHORT2RAD(ds.eSnap), SHORT2RAD(yaw),
+                      y, h, fov, snaphudColors[color]);
+    }
   }
 }
-
 bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
   static Snaphud s;
 
