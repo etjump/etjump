@@ -33,7 +33,7 @@ jobs:
     - name: Archive linux-x86_64 artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: etjump-artifacts
+        name: etjump-artifacts-${{ github.job }}
         path: |
           ${{github.workspace}}/build/etjump
 
@@ -63,7 +63,7 @@ jobs:
     - name: Archive linux-x86 artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: etjump-artifacts
+        name: etjump-artifacts-${{ github.job }}
         path: |
           ${{github.workspace}}/build/etjump
   
@@ -88,7 +88,7 @@ jobs:
     - name: Archive windows-x86_64 artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: etjump-artifacts
+        name: etjump-artifacts-${{ github.job }}
         path: |
           ${{github.workspace}}/build/etjump
   
@@ -113,7 +113,7 @@ jobs:
     - name: Archive windows-x86 artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: etjump-artifacts
+        name: etjump-artifacts-${{ github.job }}
         path: |
           ${{github.workspace}}/build/etjump
       
@@ -138,7 +138,7 @@ jobs:
     - name: Archive macos-11 artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: etjump-artifacts
+        name: etjump-artifacts-${{ github.job }}
         path: |
           ${{github.workspace}}/build/etjump
 
@@ -155,7 +155,8 @@ jobs:
     - name: Download artifacts
       uses: actions/download-artifact@v3
       with: 
-        name: etjump-artifacts
+        pattern: etjump-artifacts-*
+        merge-multiple: true
         path: ${{github.workspace}}/build/etjump
 
     - name: Pack release zip
