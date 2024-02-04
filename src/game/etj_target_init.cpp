@@ -131,6 +131,8 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
         activator->client->ps.weapon = WP_KNIFE;
       }
     }
+
+    activator->client->ps.grenadeTimeLeft = 0;
   }
 }
 } // namespace ETJump
