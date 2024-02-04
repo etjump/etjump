@@ -154,11 +154,14 @@ static char *BuildOSPath(const char *file) {
 
 void Utilities::RemovePlayerWeapons(int clientNum) {
   auto *cl = (g_entities + clientNum)->client;
-  for (auto i = 0; i < WP_NUM_WEAPONS; i++) {
+
+  for (int i = 0; i < WP_NUM_WEAPONS; i++) {
     if (BG_WeaponDisallowedInTimeruns(i)) {
       COM_BitClear(cl->ps.weapons, i);
     }
   }
+
+  cl->ps.grenadeTimeLeft = 0;
 }
 
 bool Utilities::inNoNoclipArea(gentity_t *ent) {
