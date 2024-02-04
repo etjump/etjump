@@ -549,6 +549,28 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
   // ent->delay carries secondary weapon ammo
   const int quantityAlt = static_cast<int>(ent->delay);
 
+  const weapon_t grenadeType = BG_GrenadeTypeForTeam(other->client->sess.sessionTeam);
+
+  if (grenadeType != WP_NONE) {
+    if (quantity > 0 && ent->item->giTag == grenadeType) {
+      // add weapon if client doesn't have it
+      COM_BitSet(other->client->ps.weapons, grenadeType);
+      other->client->ps.ammoclip[grenadeType] += quantity;
+
+      const int maxGrenades =
+        BG_GrenadesForClass(other->client->ps.stats[STAT_PLAYER_CLASS],
+                            other->client->sess.skill);
+
+      if (other->client->ps.ammoclip[grenadeType] > maxGrenades) {
+        other->client->ps.ammoclip[grenadeType] = maxGrenades;
+      }
+      return -1;
+    }
+
+    return 0;
+  }
+
+
   // JPW NERVE -- magic ammo for any two-handed weapon
   if (ent->item->giTag == WP_AMMO) {
     AddMagicAmmo(other, ent->count);
@@ -1249,6 +1271,13 @@ void G_SpawnItem(gentity_t *ent, gitem_t *item) {
     G_SpawnInt("speedscale", "100", &ent->splashDamage);
     if (!ent->splashDamage) {
       ent->splashDamage = 100;
+    }
+  } else if (item->giTag == WP_GRENADE_PINEAPPLE ||
+             item->giTag == WP_GRENADE_LAUNCHER) {
+    G_SpawnInt("count", "1", &ent->count);
+    
+    if (ent->count < 0) {
+      ent->count = 0;
     }
   }
 }

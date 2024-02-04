@@ -1873,6 +1873,9 @@ weapon_t BG_WeaponForMOD(int MOD);
 qboolean BG_WeaponInWolfMP(int weapon);
 qboolean BG_PlayerTouchesItem(playerState_t *ps, entityState_t *item,
                               int atTime);
+int BG_GrenadesForClass(int cls, int *skills);
+weapon_t BG_GrenadeTypeForTeam(team_t team);
+
 qboolean BG_PlayerSeesItem(playerState_t *ps, entityState_t *item, int atTime);
 qboolean BG_CheckMagicAmmo(const playerState_t *ps, int *skill, int teamNum);
 qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
