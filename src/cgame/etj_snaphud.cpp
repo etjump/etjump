@@ -322,7 +322,7 @@ void Snaphud::render() const {
   for (const DrawableSnap &ds : drawableSnaps) {
     int8_t color = ds.alt ? 1 : 0;
 
-    if (etj_snapHUDColorFollow.integer && isCurrentAlt) {
+    if (etj_snapHUDActiveIsPrimary.integer && isCurrentAlt) {
       color ^= 1;
     }
 
