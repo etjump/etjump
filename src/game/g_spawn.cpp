@@ -229,6 +229,7 @@ void SP_func_brushmodel(gentity_t *ent);
 void SP_misc_constructiblemarker(gentity_t *ent);
 void SP_target_explosion(gentity_t *ent);
 void SP_misc_landmine(gentity_t *ent);
+void SP_func_portaltarget(gentity_t *ent);
 
 void SP_trigger_always(gentity_t *ent);
 void SP_trigger_multiple(gentity_t *ent);
@@ -512,6 +513,8 @@ spawn_t spawns[] = {
     {"func_timer", SP_func_timer}, // rename trigger_timer?
 
     {"func_invisible_user", SP_func_invisible_user},
+
+    {"func_portaltarget", SP_func_portaltarget},
 
     // Triggers are brush objects that cause an effect when contacted
     // by a living player, usually involving firing targets.
