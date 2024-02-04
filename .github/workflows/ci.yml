@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: '0'
 
@@ -31,7 +31,7 @@ jobs:
       run: ctest -C ${{env.BUILD_TYPE}}
 
     - name: Archive linux-x86_64 artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: etjump-artifacts
         path: |
@@ -46,7 +46,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install gcc-multilib g++-multilib
     
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: '0'
 
@@ -61,7 +61,7 @@ jobs:
       run: ctest -C ${{env.BUILD_TYPE}}
     
     - name: Archive linux-x86 artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: etjump-artifacts
         path: |
@@ -71,7 +71,7 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: '0'
 
@@ -86,7 +86,7 @@ jobs:
       run: ctest -C ${{env.BUILD_TYPE}}
 
     - name: Archive windows-x86_64 artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: etjump-artifacts
         path: |
@@ -96,7 +96,7 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: '0'
 
@@ -111,7 +111,7 @@ jobs:
       run: ctest -C ${{env.BUILD_TYPE}}
 
     - name: Archive windows-x86 artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: etjump-artifacts
         path: |
@@ -121,7 +121,7 @@ jobs:
     runs-on: macos-11
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: '0'
 
@@ -136,7 +136,7 @@ jobs:
       run: ctest -C ${{env.BUILD_TYPE}}  
 
     - name: Archive macos-11 artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: etjump-artifacts
         path: |
@@ -148,7 +148,7 @@ jobs:
     needs: [linux-x86, linux-x86_64, windows-x86, windows-x86_64, macOS]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: '0'
 
@@ -165,7 +165,7 @@ jobs:
         make mod_release
 
     - name: Upload release 
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: etjump-snapshot-release
         path: ${{github.workspace}}/build/*.zip
