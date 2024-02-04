@@ -61,6 +61,7 @@ private:
   float drawOpt{};
   float drawMaxCos{};
   float drawMax{};
+  float drawSnap{}; // NaN if disabled or not applicable
   float drawVel{};
   float yaw{};
   vec4_t CGaz1Colors[4]{};
@@ -73,8 +74,9 @@ private:
   void UpdateDraw(float wishspeed, float accel);
   static float UpdateDrawMin(state_t const *state);
   static float UpdateDrawOpt(state_t const *state);
-  static float UpdateDrawMaxCos(state_t const *state, float d_opt);
-  static float UpdateDrawMax(state_t const *state, float d_max_cos);
+  static float UpdateDrawMaxCos(state_t const *state);
+  static float UpdateDrawMax(state_t const *state);
+  float UpdateDrawSnap();
   void startListeners();
 
   playerState_t *ps = &cg.predictedPlayerState;

@@ -308,6 +308,7 @@ vmCvar_t etj_CGazTrueness;
 vmCvar_t etj_CGazOnTop;
 vmCvar_t etj_CGaz2FixedSpeed;
 vmCvar_t etj_CGaz2NoVelocityDir;
+vmCvar_t etj_CGazDrawSnapZone;
 
 vmCvar_t etj_drawOB;
 // Aciz: movable drawOB
@@ -858,6 +859,7 @@ cvarTable_t cvarTable[] = {
     {&etj_CGazOnTop, "etj_CGazOnTop", "0", CVAR_ARCHIVE | CVAR_LATCH},
     {&etj_CGaz2FixedSpeed, "etj_CGaz2FixedSpeed", "0", CVAR_ARCHIVE},
     {&etj_CGaz2NoVelocityDir, "etj_CGaz2NoVelocityDir", "0", CVAR_ARCHIVE},
+    {&etj_CGazDrawSnapZone, "etj_CGazDrawSnapZone", "0", CVAR_ARCHIVE},
 
     {&cl_yawspeed, "cl_yawspeed", "0", CVAR_ARCHIVE},
     {&cl_freelook, "cl_freelook", "1", CVAR_ARCHIVE},

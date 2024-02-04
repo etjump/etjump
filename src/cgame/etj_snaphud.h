@@ -31,8 +31,16 @@
 namespace ETJump {
 class Snaphud : public IRenderable {
 public:
+  struct CurrentSnap {
+    float snap; // next snap in strafe dir, NaN if snap can't be fetched
+    float yaw; // view yaw
+    float opt; // optimal angle
+    bool rightStrafe; // whether turning right
+  };
+
   void render() const override;
   bool beforeRender() override;
+  static CurrentSnap getCurrentSnap(const playerState_t &ps, pmove_t *pm);
   static bool inMainAccelZone(const playerState_t &ps, pmove_t *pm);
 
   Snaphud();
