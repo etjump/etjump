@@ -1171,7 +1171,7 @@ qboolean CG_SpeakerEditor_NoiseEdit_KeyDown(panel_button_t *button, int key) {
       char *fileptr;
 
       COM_StripFilename(button->text.c_str(), dirname);
-      const std::size_t rfind = button->text.rfind("/");
+      const std::size_t rfind = button->text.rfind('/');
       const std::string textNoPath = button->text.substr(
           rfind == std::string::npos ? 0 : rfind + 1, button->text.size());
       Q_strncpyz(filename, textNoPath.c_str(), sizeof(filename));
@@ -1245,7 +1245,7 @@ qboolean CG_SpeakerEditor_NoiseEdit_KeyDown(panel_button_t *button, int key) {
       }
 
       button->text = std::string(dirname) + std::string(match);
-      button->text.resize(button->data[0]);
+      button->text.resize(button->text.length());
 
       return qtrue;
     } else {
