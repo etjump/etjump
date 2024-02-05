@@ -27,11 +27,13 @@
 
 namespace ETJump {
 void Missilepad::touch(gentity_t *self, gentity_t *other) {
-  // could check for classnames "m7_grenade" and "gpg40_grenade" here
-  // but MOD is likely the simplest and marginally faster than string compare
+  // could check for classnames here but MOD is likely the simplest
+  // and marginally faster than string compare
   // we CANNOT check for ent->s.weapon here
   // because a client might be holding the weapon
-  if (!(other->methodOfDeath == MOD_GPG40 || other->methodOfDeath == MOD_M7)) {
+  if (!(other->methodOfDeath == MOD_GPG40 || other->methodOfDeath == MOD_M7 ||
+        other->methodOfDeath == MOD_GRENADE_LAUNCHER ||
+        other->methodOfDeath == MOD_GRENADE_PINEAPPLE)) {
     return;
   }
 
@@ -69,6 +71,7 @@ void Missilepad::spawn(gentity_t *ent) {
   InitMover(ent);
   VectorCopy(ent->s.origin, ent->s.pos.trBase);
   VectorCopy(ent->s.origin, ent->r.currentOrigin);
+
   ent->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator) {
     Missilepad::use(ent);
   };

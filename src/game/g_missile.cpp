@@ -176,9 +176,11 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage) {
     }
   }
 
-  // ignore bounces for rifle grenades hitting a func_missilepad
+  // ignore bounces for grenades hitting a func_missilepad
   // and call the touch function instead
-  if ((ent->s.weapon == WP_GPG40 || ent->s.weapon == WP_M7) &&
+  if ((ent->s.weapon == WP_GPG40 || ent->s.weapon == WP_M7 ||
+       ent->s.weapon == WP_GRENADE_LAUNCHER ||
+       ent->s.weapon == WP_GRENADE_PINEAPPLE) &&
       !Q_stricmp(other->classname, "func_missilepad")) {
     other->touch(other, ent, trace);
 
