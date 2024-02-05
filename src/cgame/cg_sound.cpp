@@ -1019,27 +1019,6 @@ void CG_SpeakerEditor_RenderButton(panel_button_t *button) {
   button->rect.y -= 9.f;
 }
 
-static const char *CG_GetStrFromStrArray(const char *in, const int index) {
-  const char *ptr, *s;
-  int i;
-
-  s = ptr = in;
-  i = 0;
-  while (1) {
-    if (i == index) {
-      return s;
-    }
-
-    while (*ptr) {
-      ptr++;
-    }
-    ptr++;
-
-    s = ptr;
-    i++;
-  }
-}
-
 void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
   vec4_t colour;
   float textboxW;
@@ -1203,13 +1182,6 @@ qboolean CG_SpeakerEditor_NoiseEdit_KeyDown(panel_button_t *button, int key) {
             Q_strncpyz(match, fileptr, sizeof(match));
             continue;
           }
-
-          /*if( strlen(fileptr) <
-          strlen(match) ) { Q_strncpyz(
-          match, fileptr, sizeof(match)
-          ); noiseMatchIndex++;
-              continue;
-          }*/
         }
       } else {
         if (noiseMatchCount == 1) {
