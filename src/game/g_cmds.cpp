@@ -972,14 +972,16 @@ void setPlayerOffset(gentity_t *ent) {
     dst[i] += Numeric::clamp(value, -MaxAxisOffset, MaxAxisOffset);
   }
 
-  // check if there is a non-noclippable content between our position and current target
+  // check if there is a non-noclippable content between our position and
+  // current target
   trace_t trace;
   trap_TraceCapsule(&trace, ent->client->ps.origin, ent->client->ps.mins,
-                  ent->client->ps.maxs, dst, ent->client->ps.clientNum,
-                  CONTENTS_NONOCLIP);
+                    ent->client->ps.maxs, dst, ent->client->ps.clientNum,
+                    CONTENTS_NONOCLIP);
 
   if (level.noNoclip == (trace.fraction == 1.0f)) {
-    Printer::SendConsoleMessage(clientNum, "^7You cannot ^3setoffset ^7to this area.\n");
+    Printer::SendConsoleMessage(clientNum,
+                                "^7You cannot ^3setoffset ^7to this area.\n");
     return;
   }
 
@@ -2136,7 +2138,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   escapedName = EscapeString(name);
 
   if (g_chatOptions.integer & CHAT_OPTIONS_INTERPOLATE_NAME_TAGS) {
-    printText = interpolateNametags(text);
+    printText = interpolateNametags(text, color);
   }
 
   if (target) {

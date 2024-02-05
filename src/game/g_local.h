@@ -2879,7 +2879,7 @@ void C_ChatPrintTo(gentity_t *target, const char *msg);
 void C_ConsolePrintAll(const char *msg);
 void C_ConsolePrintTo(gentity_t *target, const char *msg);
 const char *EscapeString(const char *in);
-const char *interpolateNametags(const char *text);
+const char *interpolateNametags(const char *text, const int color);
 const char *findAndReplaceNametags(const char *text, const char *name);
 
 // Returns clientnum from ent
