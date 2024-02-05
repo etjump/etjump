@@ -4632,6 +4632,13 @@ void CG_DrawMiscGamemodels(void) {
   }
 }
 
+void CG_DrawCoronas() {
+  for (int i = 0; i < cg.numCoronas; i++) {
+    centity_t *corona = &cgs.coronas[i];
+    CG_Corona(corona);
+  }
+}
+
 void SetFov(float fov) {
   char buf[16];
 
@@ -4774,6 +4781,8 @@ void CG_DrawActive(stereoFrame_t stereoView) {
 
   // Gordon
   CG_DrawMiscGamemodels();
+
+  CG_DrawCoronas();
 
   if (!(cg.limboEndCinematicTime > cg.time && cg.showGameView)) {
     for (int i = 0; i < MAX_RENDER_STRINGS; i++) {

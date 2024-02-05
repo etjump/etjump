@@ -1437,7 +1437,7 @@ static void CG_Trap(centity_t *cent) {
 CG_Corona
 ==============
 */
-static void CG_Corona(centity_t *cent) {
+void CG_Corona(centity_t *cent) {
   trace_t tr;
   int r, g, b;
   int dli;
