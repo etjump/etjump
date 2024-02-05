@@ -1199,6 +1199,82 @@ typedef enum {
 // from it.
 //
 // NOTE: all fields in here must be 32 bits (or those within sub-structures)
+
+// actual communicated field sizes (msg.c)
+// unless mentioned otherwise, everything is unsigned
+// floats might be short packed if they fit within range
+
+// commandTime              32
+// pm_type                  8
+// bobCycle                 8
+// pm_flags                 16
+// pm_time                  16 (signed)
+// origin[0-2]              32.f
+// velocity[0-2]            32.f
+// weaponTime               16 (signed)
+// weaponDelay              16 (signed)
+// grenadeTimeLeft          16 (signed)
+// gravity                  16
+// leanf                    32.f
+// speed                    16
+// delta_angles[0-2]        16
+// groundEntityNum          10 (GENTITYNUM_BITS)
+// legsTimer                16
+// legsAnim                 10 (ANIM_BITS)
+// torsoTimer               16
+// torsoAnim                10 (ANIM_BITS)
+// movementDir              8
+// eFlags                   24
+// eventSequence            8
+// events[0-3]              8
+// eventParms[0-3]          8
+// oldEventSequence         ??? (not in msg.c)
+// externalEvent            ??? (not in msg.c)
+// externalEventParm        ??? (not in msg.c)
+// externalEventTime        ??? (not in msg.c)
+// clientNum                8
+// weapon                   7
+// weaponstate              4
+// item                     ??? (not in msg.c)
+// viewangles[0-2]          32.f
+// viewheight               8 (signed)
+// damageEvent              8
+// damageYaw                8
+// damagePitch              8
+// damageCount              8
+// stats[0-15]              16
+// persistant[0-15]         16
+// powerups[0-15]           32
+// ammo[0-63]               16
+// ammoclip[0-63]           16
+// holdable[0-15]           16
+// holding                  ??? (not in msg.c)
+// weapons[0-1]             32
+// weapAnim                 10
+// mins[0-2]                32.f
+// maxs[0-2]                32.f
+// crouchMaxZ               32.f
+// crouchViewHeight         32.f
+// standViewHeight          32.f
+// deadViewHeight           32.f
+// runSpeedScale            32.f
+// sprintSpeedScale         32.f
+// crouchSpeedScale         32.f
+// friction                 32.f
+// viewlocked               8
+// viewlocked_entNum        16
+// nextWeapon               8
+// teamNum                  8
+// onFireStart              32
+// curWeapHeat              8
+// aimSpreadScale           8
+// serverCursorHint         8
+// serverCursorHintVal      8
+// classWeaponTime          32
+// identifyClient           8
+// identifyClientHealth     8
+// aiState[0-4]             2
+
 typedef struct playerState_s {
   int commandTime; // cmd->serverTime of last executed command
   int pm_type;
@@ -1599,6 +1675,59 @@ typedef enum {
              // by setting eType to ET_EVENTS + eventNum
              // this avoids having to set eFlags and eventNum
 } entityType_t;
+
+// actual communicated field sizes (msg.c)
+
+// number                  not communicated?
+// eType                   8
+// eFlags                  24
+// pos.trType              8
+// pos.trTime              32
+// pos.trDuration          32
+// pos.trBase[0-2]         32.f
+// pos.trDelta[0-2]        32.f
+// apos.trType             8
+// apos.trTime             32
+// apos.trDuration         32
+// apos.trBase[0-2]        32.f
+// apos.trDelta[0-2]       32.f
+// time                    32
+// time2                   32
+// origin[0-2]             32.f
+// origin2[0-2]            32.f
+// angles[0-2]             32.f
+// angles2[0-2]            32.f
+// otherEntityNum          10 (GENTITYNUM_BITS)
+// otherEntityNum2         10 (GENTITYNUM_BITS)
+// groundEntityNum         10 (GENTITYNUM_BITS)
+// constantLight           32
+// dl_intensity            32
+// loopSound               8
+// modelindex              9
+// modelindex2             9
+// clientNum               8
+// frame                   16
+// solid                   24
+// event                   10
+// eventParm               8
+// eventSequence           8
+// events[0-3]             8
+// eventParms[0-3]         8
+// powerups                16
+// weapon                  8
+// legsAnim                10 (ANIM_BITS)
+// torsoAnim               10 (ANIM_BITS)
+// density                 10
+// dmgFlags                32
+// onFireStart             32
+// onFireEnd               32
+// nextWeapon              8
+// teamNum                 8
+// effect1Time             32
+// effect2Time             32
+// effect3Time             32
+// aiState[0-4]            2
+// animMovetype            4
 
 typedef struct entityState_s {
   int number; // entity index
