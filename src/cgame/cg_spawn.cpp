@@ -188,6 +188,45 @@ void SP_misc_gamemodel(void) {
   }
 }
 
+void SP_corona() {
+  char *tmp;
+
+  // server-side coronas
+  if (CG_SpawnString("targetname", "", &tmp) ||
+      CG_SpawnString("spawnflags", "", &tmp)) {
+    return;
+  }
+
+  if (cg.numCoronas >= MAX_STATIC_CORONAS) {
+    CG_Error("SP_Corona: MAX_STATIC_CORONAS (%i) exceeded", MAX_STATIC_CORONAS);
+  }
+
+  centity_t *corona = &cgs.coronas[cg.numCoronas++];
+  corona->currentState.number = cg.numCoronas;
+  corona->currentState.eType = ET_CORONA;
+
+  vec3_t origin{};
+  CG_SpawnVector("origin", "", origin);
+  VectorCopy(origin, corona->lerpOrigin);
+
+  vec3_t color = {1.0f, 1.0f, 1.0f}; // default to white
+
+  // both 'color' and '_color' are valid keys
+  if (!CG_SpawnVector("color", "", color)) {
+    CG_SpawnVector("_color", "", color);
+  }
+
+  VectorScale(color, 255, color);
+
+  corona->currentState.dl_intensity =
+      ((static_cast<int>(color[0])) | (static_cast<int>(color[1]) << 8) |
+       (static_cast<int>(color[2]) << 16));
+
+  float scale;
+  CG_SpawnFloat("scale", "1", &scale);
+  corona->currentState.density = static_cast<int>(scale * 255);
+}
+
 void SP_trigger_objective_info(void) {
   char *temp;
 
@@ -213,6 +252,7 @@ spawn_t spawns[] = {
 
     {"trigger_objective_info", SP_trigger_objective_info},
     {"misc_gamemodel", SP_misc_gamemodel},
+    {"corona", SP_corona},
 };
 
 #define NUMSPAWNS (sizeof(spawns) / sizeof(spawn_t))

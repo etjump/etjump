@@ -1442,6 +1442,12 @@ SP_corona
 void SP_corona(gentity_t *ent) {
   float scale;
 
+  // static corona, handle on client side only
+  if (!ent->targetname && !ent->spawnflags) {
+    G_FreeEntity(ent);
+    return;
+  }
+
   ent->s.eType = ET_CORONA;
 
   if (ent->dl_color[0] <= 0 && // if it's black or has no color assigned

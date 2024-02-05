@@ -1098,6 +1098,7 @@ typedef struct {
   qboolean mapcoordsValid;
 
   int numMiscGameModels;
+  int numCoronas;
 
   qboolean showCampaignBriefing;
   qboolean showGameView;
@@ -1877,6 +1878,7 @@ typedef struct {
 #define MAX_COMMAND_INFO MAX_CLIENTS
 
 #define MAX_STATIC_GAMEMODELS 1024
+constexpr int MAX_STATIC_CORONAS = 1024;
 
 typedef struct cg_gamemodel_s {
   qhandle_t model;
@@ -2116,6 +2118,7 @@ typedef struct {
   int thirdpersonUpdate;
 
   cg_gamemodel_t miscGameModels[MAX_STATIC_GAMEMODELS];
+  centity_t coronas[MAX_STATIC_CORONAS];
 
   vec2_t ccMenuPos;
   qboolean ccMenuShowing;
@@ -3065,6 +3068,7 @@ void CG_PositionEntityOnTag(refEntity_t *entity, const refEntity_t *parent,
 void CG_PositionRotatedEntityOnTag(refEntity_t *entity,
                                    const refEntity_t *parent,
                                    const char *tagName);
+void CG_Corona(centity_t *cent);
 
 //
 // cg_weapons.c
