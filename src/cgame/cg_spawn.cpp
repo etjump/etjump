@@ -201,8 +201,16 @@ void SP_corona() {
     CG_Error("SP_Corona: MAX_STATIC_CORONAS (%i) exceeded", MAX_STATIC_CORONAS);
   }
 
-  centity_t *corona = &cgs.coronas[cg.numCoronas++];
+  centity_t *corona = &cgs.coronas[cg.numCoronas];
+
+  // this does not need to be the actual entity number,
+  // it just needs to be unique per corona for portal camera drawing
+  // realistically this might break if static and non-static coronas are
+  // in the same portal scene but that is a minor inconvenience
+  // as opposed to the benefit of freeing these from the server
   corona->currentState.number = cg.numCoronas;
+  cg.numCoronas++;
+
   corona->currentState.eType = ET_CORONA;
 
   vec3_t origin{};
