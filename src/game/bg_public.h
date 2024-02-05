@@ -838,7 +838,7 @@ constexpr int EF_BOBBING = EF_SPARE0;        // controls bobbing for pickup item
 constexpr int EF_SPARE3 = 0x40000000;        // unused
 constexpr int EF_SPARE4 = 0x80000000;        // unused
 
-// etjump:
+// etjump: flags that can be used for player effects that need prediction
 constexpr int EF_PLAYER_UNUSED1 = EF_NONSOLID_BMODEL; // used only on entities
 constexpr int EF_PLAYER_UNUSED2 = EF_SMOKING;         // player never gets this flag, only ent/weapon
 constexpr int EF_PLAYER_UNUSED3 = EF_SMOKINGBLACK;    // player never gets this flag, only ent/weapon

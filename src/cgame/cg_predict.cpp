@@ -49,6 +49,7 @@ void CG_BuildSolidList(void) {
     // SOLID_BMODELS (e.g. constructibles); use current state so
     // prediction isn't fubar
     if (cent->currentState.solid == SOLID_BMODEL &&
+        cent->currentState.eType != ET_PLAYER && // etjump: flag repurposed for players
         (cent->currentState.eFlags & EF_NONSOLID_BMODEL)) {
       continue;
     }
@@ -149,7 +150,7 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
                             qfalse, cent->currentState.effect2Time);
     } else {
       // see g_misc.c SP_func_fakebrush...
-      if (ent->eFlags & EF_FAKEBMODEL) {
+      if (ent->eFlags & EF_FAKEBMODEL && ent->eType != ET_PLAYER) {
         VectorCopy(ent->origin2, bmins);
         VectorCopy(ent->angles2, bmaxs);
       } else {
