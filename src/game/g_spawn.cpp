@@ -12,6 +12,7 @@
 #include "etj_save_system.h"
 #include "etj_string_utilities.h"
 #include "etj_timerun_entities.h"
+#include "etj_missilepad.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -729,6 +730,7 @@ spawn_t spawns[] = {
     {"target_displaytjl", SP_target_tjldisplay},
     {"target_cleartjl", SP_target_tjlclear},
     {"target_init", SP_target_init},
+    {"func_missilepad", ETJump::Missilepad::spawn},
     {nullptr, nullptr},
 };
 

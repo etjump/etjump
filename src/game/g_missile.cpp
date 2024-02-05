@@ -168,7 +168,7 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage) {
       }
 
       // its possible of the func_explosive not to die
-      // from this and it should reflect the missile or
+      // from this, and it should reflect the missile or
       // explode it not vanish into oblivion
       if (other->health <= 0) {
         return;
@@ -176,30 +176,33 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage) {
     }
   }
 
-  // check for bounce
-  if ((!other->takedamage || !ent->damage) &&
-      (ent->s.eFlags & (EF_BOUNCE | EF_BOUNCE_HALF))) {
-    G_BounceMissile(ent, trace);
-    // JPW NERVE -- spotter White Phosphorous rounds shouldn't
-    // bounce noise
-    if (!Q_stricmp(ent->classname, "WP")) {
+  // ignore bounces for grenades hitting a func_missilepad
+  // and call the touch function instead
+  if ((ent->s.weapon == WP_GPG40 || ent->s.weapon == WP_M7 ||
+       ent->s.weapon == WP_GRENADE_LAUNCHER ||
+       ent->s.weapon == WP_GRENADE_PINEAPPLE) &&
+      !Q_stricmp(other->classname, "func_missilepad")) {
+    other->touch(other, ent, trace);
+
+    // copy over 'scale' and spawnflags from the missilepad to the grenade
+    // so that we can scale things in G_Damage
+    ent->speed = other->speed;
+    ent->spawnflags = other->spawnflags;
+  } else {
+    // check for bounce
+    if ((!other->takedamage || !ent->damage) &&
+        (ent->s.eFlags & (EF_BOUNCE | EF_BOUNCE_HALF))) {
+      G_BounceMissile(ent, trace);
+      // JPW NERVE -- spotter White Phosphorous rounds shouldn't
+      // bounce noise
+      if (!Q_stricmp(ent->classname, "WP")) {
+        return;
+      }
+      G_AddEvent(ent, EV_GRENADE_BOUNCE,
+                 BG_FootstepForSurface(trace->surfaceFlags));
       return;
     }
-    // jpw
-    /*		if (!Q_stricmp (ent->classname, "flamebarrel"))
-       { G_AddEvent( ent, EV_FLAMEBARREL_BOUNCE, 0 ); } else {*/
-    G_AddEvent(ent, EV_GRENADE_BOUNCE,
-               BG_FootstepForSurface(trace->surfaceFlags));
-    //		}
-    return;
   }
-
-  // Gordon: unused?
-  /*	if (other->takedamage && ent->s.density == 1)
-      {
-          G_ExplodeMissilePoisonGas (ent);
-          return;
-      }*/
 
   // impact damage
   if (other->takedamage || other->dmgparent) {
@@ -207,7 +210,7 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage) {
       AccuracyHit(other, &g_entities[ent->r.ownerNum]);
       BG_EvaluateTrajectoryDelta(&ent->s.pos, level.time, velocity, qfalse,
                                  ent->s.effect2Time);
-      if (!VectorLengthSquared(velocity)) {
+      if (VectorLengthSquared(velocity) == 0) {
         velocity[2] = 1; // stepped on a grenade
       }
       G_Damage(other->dmgparent ? other->dmgparent : other, ent,
@@ -228,10 +231,6 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage) {
     event = EV_MISSILE_HIT;
     param = DirToByte(trace->plane.normal);
     otherentnum = other->s.number;
-    //		G_AddEvent( ent, EV_MISSILE_HIT, DirToByte(
-    // trace->plane.normal
-    //)
-    //); 		ent->s.otherEntityNum = other->s.number;
   } else {
     // Ridah, try projecting it in the direction it came from,
     // for better decals
@@ -242,32 +241,10 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage) {
 
     event = EV_MISSILE_MISS;
     param = DirToByte(dir);
-    //		G_AddEvent( ent, EV_MISSILE_MISS, DirToByte( dir )
-    //);
   }
-
-  //	ent->freeAfterEvent = qtrue;
-
-  // change over to a normal entity right at the point of impact
-  //	etype = ent->s.eType;
-  //	ent->s.eType = ET_GENERAL;
-
-  //	SnapVectorTowards( trace->endpos, ent->s.pos.trBase );	// save
-  // net
-  // bandwidth
-  /*	{
-          gentity_t* tent;
-
-          tent = G_TempEntity( trace->endpos, EV_RAILTRAIL );
-          VectorMA(trace->endpos, 16, trace->plane.normal,
-     tent->s.origin2); tent->s.dmgFlags = 0;
-      }*/
-
-  //	G_SetOrigin( ent, trace->endpos );
 
   temp = G_TempEntity(trace->endpos, event);
   temp->s.otherEntityNum = otherentnum;
-  //	temp->r.svFlags |= SVF_BROADCAST;
   temp->s.eventParm = param;
   temp->s.weapon = ent->s.weapon;
   temp->s.clientNum = ent->r.ownerNum;
@@ -279,11 +256,10 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage) {
 
   // splash damage (doesn't apply to person directly hit)
   if (ent->splashDamage) {
-    G_RadiusDamage(trace->endpos, ent, ent->parent, ent->splashDamage,
-                   ent->splashRadius, other, ent->splashMethodOfDeath);
+    G_RadiusDamage(
+        trace->endpos, ent, ent->parent, static_cast<float>(ent->splashDamage),
+        static_cast<float>(ent->splashRadius), other, ent->splashMethodOfDeath);
   }
-
-  //	trap_LinkEntity( ent );
 
   G_FreeEntity(ent);
 }
@@ -1148,9 +1124,9 @@ void G_RunFlamechunk(gentity_t *ent) {
   gentity_t *ignoreent = NULL;
 
   // TAT 11/12/2002
-  //		vel was only being set if (level.time - ent->timestamp >
-  // 50 		However, below, it was being used when we hit something
-  // and it was 		uninitialized
+  // vel was only being set if (level.time - ent->timestamp > 50)
+  // However, below, it was being used when we hit something,
+  // and it was uninitialized
   VectorCopy(ent->s.pos.trDelta, vel);
 
   // Adust the current speed of the chunk
