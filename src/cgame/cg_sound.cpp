@@ -1089,7 +1089,8 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
       button->rect.y + 9.f, button->font->scalex, button->font->scaley, colour,
       "V", 0, 0, 0, button->font->font);
 
-  s = CG_GetStrFromStrArray(button->text.c_str(), button->data[1]);
+  const auto buttonStrings = ETJump::StringUtil::split(button->text, "\\");
+  s = buttonStrings[button->data[1]].c_str();
 
   CG_Text_Paint_Ext(
       button->rect.x + (textboxW - CG_Text_Width_Ext(s, button->font->scalex, 0,
@@ -1118,7 +1119,7 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
 
       CG_FillRect(rect.x, rect.y, rect.w, rect.h, colour);
 
-      s = CG_GetStrFromStrArray(button->text.c_str(), i);
+      s = buttonStrings[i].c_str();
 
       CG_Text_Paint_Ext(
           rect.x + (textboxW - CG_Text_Width_Ext(s, button->font->scalex, 0,
@@ -1535,7 +1536,7 @@ char noiseEditBuffer[MAX_QPATH];
 
 panel_button_t speakerEditorNoiseEdit = {
     NULL,
-    noiseEditBuffer,
+    "",
     {430, 344, 200, 12},
     {MAX_QPATH, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,                  /* font		*/
@@ -1561,7 +1562,7 @@ char targetnameEditBuffer[32];
 
 panel_button_t speakerEditorTargetnameEdit = {
     NULL,
-    targetnameEditBuffer,
+    "",
     {430, 358, 200, 12},
     {32, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,        /* font		*/
@@ -1585,7 +1586,7 @@ panel_button_t speakerEditorLoopedLabel = {
 
 panel_button_t speakerEditorLoopedDropdown = {
     NULL,
-    "no\0on\0off",
+    "no\\on\\off",
     {430, 372, 60, 12},
     {3, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,                 /* font		*/
@@ -1609,7 +1610,7 @@ panel_button_t speakerEditorBroadcastLabel = {
 
 panel_button_t speakerEditorBroadcastDropdown = {
     NULL,
-    "no\0global\0nopvs",
+    "no\\global\\nopvs",
     {430, 386, 60, 12},
     {3, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,                 /* font		*/
@@ -1635,7 +1636,7 @@ char waitEditBuffer[12];
 
 panel_button_t speakerEditorWaitEdit = {
     NULL,
-    waitEditBuffer,
+    "",
     {430, 400, 200, 12},
     {12, 2, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,        /* font		*/
@@ -1661,7 +1662,7 @@ char randomEditBuffer[12];
 
 panel_button_t speakerEditorRandomEdit = {
     NULL,
-    randomEditBuffer,
+    "",
     {430, 414, 200, 12},
     {12, 2, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,        /* font		*/
@@ -1687,7 +1688,7 @@ char volumeEditBuffer[12];
 
 panel_button_t speakerEditorVolumeEdit = {
     NULL,
-    volumeEditBuffer,
+    "",
     {430, 428, 200, 12},
     {12, 2, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,        /* font		*/
@@ -1713,7 +1714,7 @@ char rangeEditBuffer[12];
 
 panel_button_t speakerEditorRangeEdit = {
     NULL,
-    rangeEditBuffer,
+    "",
     {430, 442, 200, 12},
     {12, 2, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,        /* font		*/
@@ -1770,7 +1771,7 @@ static panel_button_t *speakerEditorButtons[] = {
     &speakerEditorCancelButton, &speakerEditorDeleteButton,
 
     // Below here all components that should draw on top
-    &speakerEditorBroadcastDropdown, &speakerEditorLoopedDropdown, NULL};
+    &speakerEditorBroadcastDropdown, &speakerEditorLoopedDropdown, nullptr};
 
 std::vector<panel_button_t> speakerEditorButtonsLayout;
 
@@ -1972,7 +1973,7 @@ void CG_ActivateEditSoundMode(void) {
   CG_Printf("Activating Speaker Edit mode.\n");
   cg.editingSpeakers = qtrue;
 
-  editSpeaker = NULL;
+  editSpeaker = nullptr;
   editSpeakerActive = qfalse;
   editSpeakerHandle.activeAxis = -1;
   undoSpeakerIndex = -2;
@@ -1996,8 +1997,8 @@ void CG_ActivateEditSoundMode(void) {
       }
     }
 
-    BG_PanelButtonsSetup(speakerInfoButtonsLayout);
-    BG_PanelButtonsSetup(speakerEditorButtonsLayout);
+    BG_PanelButtonsSetupWide(speakerInfoButtonsLayout);
+    BG_PanelButtonsSetupWide(speakerEditorButtonsLayout);
   }
 }
 
@@ -2041,6 +2042,32 @@ void CG_ModifyEditSpeaker(void) {
               editSpeaker->volume);
   Com_sprintf(rangeEditBuffer, sizeof(rangeEditBuffer), "%i",
               editSpeaker->range);
+
+  for (auto &button : speakerEditorButtons) {
+    if (button == &speakerEditorNoiseEdit) {
+      button->text = noiseEditBuffer;
+    } else if (button == &speakerEditorTargetnameEdit) {
+      button->text = targetnameEditBuffer;
+    } else if (button == &speakerEditorWaitEdit) {
+      button->text = waitEditBuffer;
+    } else if (button == &speakerEditorRandomEdit) {
+      button->text = randomEditBuffer;
+    } else if (button == &speakerEditorVolumeEdit) {
+      button->text = volumeEditBuffer;
+    } else if (button == &speakerEditorRangeEdit) {
+      button->text = rangeEditBuffer;
+    }
+  }
+
+  speakerEditorButtonsLayout.clear();
+
+  for (auto btnptr : speakerEditorButtons) {
+    if (btnptr) {
+      speakerEditorButtonsLayout.push_back(*btnptr);
+    }
+  }
+
+  BG_PanelButtonsSetupWide(speakerEditorButtonsLayout);
 }
 
 void CG_UndoEditSpeaker(void) {
