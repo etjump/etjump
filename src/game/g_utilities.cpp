@@ -619,7 +619,7 @@ std::vector<int> getMatchingIds(const std::string &name) {
   return pidsVector;
 }
 
-std::string interpolateNametags(std::string input) {
+std::string interpolateNametags(std::string input, const int color) {
   std::string interpolated;
   std::vector<std::string> split = ETJump::StringUtil::split(input, "@");
 
@@ -627,17 +627,22 @@ std::string interpolateNametags(std::string input) {
     return input;
   }
 
-  auto i = 1;
-  auto len = 0;
-  for (len = split.size(); i < len; i += 2) {
+  int i = 1;
+  int len;
+  std::string colorCode = "^";
+  colorCode += static_cast<char>(color);
+
+  for (len = static_cast<int>(split.size()); i < len; i += 2) {
     interpolated += split[i - 1];
 
-    if (split[i].length() == 0) {
+    if (split[i].empty()) {
       interpolated += "@";
     } else {
       auto names = getNames(getMatchingIds(split[i]));
-      if (names.size() > 0) {
-        interpolated += "^7" + ETJump::StringUtil::join(names, "^2, ^7") + "^2";
+      if (!names.empty()) {
+        const std::string &splitStr = colorCode + ", ^7";
+        interpolated +=
+            "^7" + ETJump::StringUtil::join(names, splitStr) + colorCode;
       } else {
         interpolated += "@" + split[i] + "@";
       }
@@ -650,10 +655,10 @@ std::string interpolateNametags(std::string input) {
   return interpolated;
 }
 
-const char *interpolateNametags(const char *text) {
+const char *interpolateNametags(const char *text, const int color) {
   static char buf[MAX_SAY_TEXT] = "\0";
 
-  auto interpolated = interpolateNametags(std::string(text));
+  auto interpolated = interpolateNametags(std::string(text), color);
 
   Q_strncpyz(buf, interpolated.c_str(), sizeof(buf));
   return buf;
