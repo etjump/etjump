@@ -1678,7 +1678,7 @@ typedef enum {
 
 // actual communicated field sizes (msg.c)
 
-// number                  not communicated?
+// number                  10 (GENTITYNUM_BITS)
 // eType                   8
 // eFlags                  24
 // pos.trType              8
