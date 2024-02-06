@@ -4501,3 +4501,79 @@ qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params) {
 
   return qtrue;
 }
+
+qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
+  const auto activator = ent->activator;
+
+  if (!activator || !activator->client) {
+    // if we don't error out here, script execution hangs in the block where
+    // this gets called, so better to error out to avoid any confusion
+    G_Error("G_ScriptAction_Tracker: call to client only script action with no activator\n");
+  }
+
+  const auto progression = activator->client->sess.progression;
+
+  const char *pString, *token;
+  char command[MAX_QPATH];
+
+  pString = params;
+
+  token = COM_ParseExt(&pString, qfalse);
+  if (!token[0]) {
+    G_Error("G_ScriptAction_Tracker: tracker without an index\n");
+  }
+
+  // trackers are 1 indexed in user code
+  const int trackerIndex = Q_atoi(token) - 1;
+  if (trackerIndex < 0 || trackerIndex >= MAX_PROGRESSION_TRACKERS) {
+    G_Error("G_ScriptAction_Tracker: tracker index (%i) is outside range (0 - %i)\n",
+      trackerIndex + 1, MAX_PROGRESSION_TRACKERS);
+  }
+
+  token = COM_ParseExt(&pString, qfalse);
+  if (!token[0]) {
+    G_Error("G_ScriptAction_Tracker: tracker without a command\n");
+  }
+
+  Q_strncpyz(command, token, sizeof(command));
+  token = COM_ParseExt(&pString, qfalse);
+
+  if (!token[0]) {
+    G_Error("G_ScriptAction_Tracker: tracker %s requires a value\n", command);
+  }
+
+  const int trackerValue = Q_atoi(token);
+  const int clientTracker = progression[trackerIndex];
+
+  bool abort = false;
+
+  if (!Q_stricmp(command, "inc")) {
+    progression[trackerIndex] += trackerValue;
+  } else if (!Q_stricmp(command, "abort_if_less_than")) {
+    abort = clientTracker < trackerValue;
+  } else if (!Q_stricmp(command, "abort_if_greater_than")) {
+    abort = clientTracker > trackerValue;
+  } else if (!Q_stricmp(command, "abort_if_not_equal") ||
+             !Q_stricmp(command, "abort_if_not_equals")) {
+    abort = clientTracker != trackerValue;
+  } else if (!Q_stricmp(command, "abort_if_equal")) {
+    abort = clientTracker == trackerValue;
+  } else if (!Q_stricmp(command, "bitset")) {
+    progression[trackerIndex] |= (1 << trackerValue);
+  } else if (!Q_stricmp(command, "bitreset")) {
+    progression[trackerIndex] &= ~(1 << trackerValue);
+  } else if (!Q_stricmp(command, "abort_if_bitset")) {
+    abort = static_cast<bool>(clientTracker & (1 << trackerValue));
+  } else if (!Q_stricmp(command, "abort_if_not_bitset")) {
+    abort = !(static_cast<bool>(clientTracker & (1 << trackerValue)));
+  } else if (!Q_stricmp(command, "set")) {
+    progression[trackerIndex] = trackerValue;
+  } else {
+    G_Error("G_ScriptAction_Tracker: unknown tracker command %s\n", command);
+  }
+
+  if (abort) {
+    ent->scriptStatus.scriptStackHead =
+      ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+  }
+}
