@@ -683,33 +683,6 @@ static void CG_RenderScriptSpeakers(void) {
   closest = -1;
   minDist = Square(8.f);
 
-  /*{
-      float	r, u;
-      vec3_t	axisOrg, dir;
-
-      closest = -1;
-      minDist = Square( 32.f );
-
-      r = -(cg.refdef_current->fov_x / 90.f) * (float)(cgs.cursorX -
-  320) / 320; u = -(cg.refdef_current->fov_y / 90.f) *
-  (float)(cgs.cursorY - 240) / 240;
-
-      for( i = 0; i < 3; i++ ) {
-          dir[i] = cg.refdef_current->viewaxis[0][i] * 1.f +
-                   cg.refdef_current->viewaxis[1][i] * r +
-                   cg.refdef_current->viewaxis[2][i] * u;
-      }
-      VectorNormalizeFast( dir );
-
-      VectorMA( cg.refdef_current->vieworg, 512, dir, vec );
-      //VectorCopy( cg.refdef_current->vieworg, axisOrg );
-      //axisOrg[2]+=.1f;
-      VectorMA( cg.refdef_current->vieworg, .1f,
-  cg.refdef_current->viewaxis[0], axisOrg ); CG_AddLineToScene( vec,
-  axisOrg, colorOrange );
-
-  }*/
-
   numSpeakersInPvs = 0;
 
   for (i = 0; i < BG_NumScriptSpeakers(); i++) {
@@ -811,10 +784,22 @@ static void CG_RenderScriptSpeakers(void) {
   }
 }
 
+constexpr vec4_t fillColor = {0.0f, 0.0f, 0.0f, 0.6f};
+constexpr vec4_t borderColor = {0.5f, 0.5f, 0.5f, 0.5f};
+
+constexpr vec4_t buttonBorderColor = {0.1f, 0.1f, 0.1f, 0.5f};
+constexpr vec4_t buttonFillColor = {0.3f, 0.3f, 0.3f, 0.4f};
+constexpr vec4_t buttonHoverFillColor = {0.5f, 0.5f, 0.5f, 0.4f};
+constexpr vec4_t buttonDownFillColor = {0.4f, 0.4f, 0.4f, 0.4f};
+
+constexpr vec4_t editFieldFillColor = {0.5f, 0.5f, 0.5f, 0.2f};
+
+constexpr vec4_t textColor = {1.0f, 1.0f, 1.0f, 0.6f};
+constexpr vec4_t textActiveColor = {1.0f, 1.0f, 1.0f, 0.9f};
+
 void CG_SpeakerInfo_Text(panel_button_t *button) {
   char *s, *ptr, *strptr;
   float y, wMax, w, h;
-  vec4_t colour;
   char originStr[96];
   char filenameStr[96] = "";
   char targetnameStr[56] = "";
@@ -915,13 +900,10 @@ void CG_SpeakerInfo_Text(panel_button_t *button) {
     }
     h += 8.5f;
   }
-
-  VectorCopy(colorMdBlue, colour);
-  colour[3] = .5f;
-  CG_FillRect(button->rect.x - 2, button->rect.y - 2, wMax + 4, h + 4, colour);
-  VectorCopy(colorBlue, colour);
+  CG_FillRect(button->rect.x - 2, button->rect.y - 2, wMax + 4, h + 4,
+              fillColor);
   CG_DrawRect(button->rect.x - 2, button->rect.y - 2, wMax + 4, h + 4, 1.f,
-              colour);
+              borderColor);
 
   s = va("%s%s%s%s%s%s%s%s%s", originStr, filenameStr, targetnameStr, loopedStr,
          broadcastStr, waitStr, randomStr, volumeStr, rangeStr);
@@ -943,7 +925,7 @@ void CG_SpeakerInfo_Text(panel_button_t *button) {
 panel_button_text_t speakerEditorTxt = {
     0.2f,
     0.2f,
-    {1.0f, 1.0f, 1.0f, 0.5f},
+    {1.0f, 1.0f, 1.0f, 0.6f},
     ITEM_TEXTSTYLE_SHADOWED,
     0,
     &cgs.media.limboFont2,
@@ -969,12 +951,12 @@ void CG_SpeakerEditor_RenderEdit(panel_button_t *button) {
   vec4_t colour;
 
   if (button == BG_PanelButtons_GetFocusButton()) {
-    VectorCopy(colorYellow, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonHoverFillColor, colour);
+    Vector4Copy(textActiveColor, button->font->colour);
   } else {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .3f;
+    Vector4Copy(editFieldFillColor, colour);
   }
+
   CG_FillRect(button->rect.x, button->rect.y, button->rect.w, button->rect.h,
               colour);
 
@@ -983,6 +965,9 @@ void CG_SpeakerEditor_RenderEdit(panel_button_t *button) {
   BG_PanelButton_RenderEdit(button);
   button->rect.x -= 2.f;
   button->rect.h += 3.f;
+
+  // reset to default to ensure next element is at default color
+  Vector4Copy(textColor, button->font->colour);
 }
 
 void CG_SpeakerEditor_RenderButton(panel_button_t *button) {
@@ -990,22 +975,19 @@ void CG_SpeakerEditor_RenderButton(panel_button_t *button) {
   float oldX;
 
   if (button == BG_PanelButtons_GetFocusButton()) {
-    VectorCopy(colorMdBlue, colour);
-    colour[3] = .5f;
-  } else if (BG_PanelButtons_GetFocusButton() == NULL &&
+    Vector4Copy(buttonDownFillColor, colour);
+  } else if (BG_PanelButtons_GetFocusButton() == nullptr &&
              BG_CursorInRect(&button->rect)) {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .5f;
+    Vector4Copy(buttonHoverFillColor, colour);
+    Vector4Copy(textActiveColor, button->font->colour);
   } else {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonFillColor, colour);
   }
   CG_FillRect(button->rect.x, button->rect.y, button->rect.w, button->rect.h,
               colour);
 
-  VectorCopy(colorBlue, colour);
   CG_DrawRect(button->rect.x, button->rect.y, button->rect.w, button->rect.h,
-              1.f, colour);
+              1.f, buttonBorderColor);
 
   oldX = button->rect.x;
   button->rect.x =
@@ -1017,27 +999,9 @@ void CG_SpeakerEditor_RenderButton(panel_button_t *button) {
   BG_PanelButtonsRender_Text(button);
   button->rect.x = oldX;
   button->rect.y -= 9.f;
-}
 
-static const char *CG_GetStrFromStrArray(const char *in, const int index) {
-  const char *ptr, *s;
-  int i;
-
-  s = ptr = in;
-  i = 0;
-  while (1) {
-    if (i == index) {
-      return s;
-    }
-
-    while (*ptr) {
-      ptr++;
-    }
-    ptr++;
-
-    s = ptr;
-    i++;
-  }
+  // reset to default to ensure next element is at default color
+  Vector4Copy(textColor, button->font->colour);
 }
 
 void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
@@ -1054,34 +1018,30 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
   rect.w = rect.h;
 
   if (button == BG_PanelButtons_GetFocusButton()) {
-    VectorCopy(colorYellow, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonDownFillColor, colour);
   } else {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonFillColor, colour);
   }
+
   CG_FillRect(button->rect.x, button->rect.y, textboxW, button->rect.h, colour);
-  VectorCopy(colorBlue, colour);
   CG_DrawRect(button->rect.x, button->rect.y, textboxW, button->rect.h, 1.f,
-              colour);
+              buttonBorderColor);
 
   if (button == BG_PanelButtons_GetFocusButton()) {
-    VectorCopy(colorYellow, colour);
-    colour[3] = .3f;
-  } else if (BG_PanelButtons_GetFocusButton() == NULL &&
+    Vector4Copy(buttonDownFillColor, colour);
+  } else if (BG_PanelButtons_GetFocusButton() == nullptr &&
              BG_CursorInRect(&button->rect)) {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .5f;
+    Vector4Copy(buttonHoverFillColor, colour);
+    Vector4Copy(textActiveColor, button->font->colour);
   } else {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonFillColor, colour);
   }
 
   CG_FillRect(rect.x, rect.y, rect.w, rect.h, colour);
-  VectorCopy(colorBlue, colour);
+  Vector4Copy(buttonBorderColor, colour);
   CG_DrawRect(rect.x, rect.y, rect.w, rect.h, 1.f, colour);
 
-  VectorCopy(button->font->colour, colour);
+  Vector4Copy(button->font->colour, colour);
   CG_Text_Paint_Ext(
       rect.x + (rect.w - CG_Text_Width_Ext("V", button->font->scalex, 0,
                                            button->font->font)) /
@@ -1089,7 +1049,8 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
       button->rect.y + 9.f, button->font->scalex, button->font->scaley, colour,
       "V", 0, 0, 0, button->font->font);
 
-  s = CG_GetStrFromStrArray(button->text.c_str(), button->data[1]);
+  const auto buttonStrings = ETJump::StringUtil::split(button->text, " ");
+  s = buttonStrings[button->data[1]].c_str();
 
   CG_Text_Paint_Ext(
       button->rect.x + (textboxW - CG_Text_Width_Ext(s, button->font->scalex, 0,
@@ -1109,16 +1070,17 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
       rect.y += 12.f;
 
       if (BG_CursorInRect(&rect)) {
-        VectorScale(colorYellow, .3f, colour);
+        VectorScale(buttonHoverFillColor, .3f, colour);
         colour[3] = 1.f;
+        Vector4Copy(textActiveColor, button->font->colour);
       } else {
-        VectorScale(colorWhite, .3f, colour);
+        VectorScale(buttonFillColor, .3f, colour);
         colour[3] = 1.f;
       }
 
       CG_FillRect(rect.x, rect.y, rect.w, rect.h, colour);
 
-      s = CG_GetStrFromStrArray(button->text.c_str(), i);
+      s = buttonStrings[i].c_str();
 
       CG_Text_Paint_Ext(
           rect.x + (textboxW - CG_Text_Width_Ext(s, button->font->scalex, 0,
@@ -1127,25 +1089,26 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
           rect.y + 9.f, button->font->scalex, button->font->scaley,
           button->font->colour, s, 0, 0, button->font->style,
           button->font->font);
+
+      // reset so next item is default color
+      Vector4Copy(textColor, button->font->colour);
     }
 
-    VectorCopy(colorBlue, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonBorderColor, colour);
     CG_DrawRect(button->rect.x, button->rect.y + 12.f, button->rect.w,
                 rect.y - button->rect.y, 1.f, colour);
   }
+
+  // reset to default to ensure next element is at default color
+  Vector4Copy(textColor, button->font->colour);
 }
 
 void CG_SpeakerEditor_Back(panel_button_t *button) {
-  vec4_t colour;
 
-  VectorCopy(colorMdBlue, colour);
-  colour[3] = .5f;
   CG_FillRect(button->rect.x - 2, button->rect.y - 2, button->rect.w + 4,
-              button->rect.h + 4, colour);
-  VectorCopy(colorBlue, colour);
+              button->rect.h + 4, fillColor);
   CG_DrawRect(button->rect.x - 2, button->rect.y - 2, button->rect.w + 4,
-              button->rect.h + 4, 1.f, colour);
+              button->rect.h + 4, 1.f, borderColor);
 }
 
 void CG_SpeakerEditor_LocInfo(panel_button_t *button) {
@@ -1170,7 +1133,7 @@ qboolean CG_SpeakerEditor_NoiseEdit_KeyDown(panel_button_t *button, int key) {
       char *fileptr;
 
       COM_StripFilename(button->text.c_str(), dirname);
-      const std::size_t rfind = button->text.rfind("/");
+      const std::size_t rfind = button->text.rfind('/');
       const std::string textNoPath = button->text.substr(
           rfind == std::string::npos ? 0 : rfind + 1, button->text.size());
       Q_strncpyz(filename, textNoPath.c_str(), sizeof(filename));
@@ -1202,13 +1165,6 @@ qboolean CG_SpeakerEditor_NoiseEdit_KeyDown(panel_button_t *button, int key) {
             Q_strncpyz(match, fileptr, sizeof(match));
             continue;
           }
-
-          /*if( strlen(fileptr) <
-          strlen(match) ) { Q_strncpyz(
-          match, fileptr, sizeof(match)
-          ); noiseMatchIndex++;
-              continue;
-          }*/
         }
       } else {
         if (noiseMatchCount == 1) {
@@ -1244,7 +1200,7 @@ qboolean CG_SpeakerEditor_NoiseEdit_KeyDown(panel_button_t *button, int key) {
       }
 
       button->text = std::string(dirname) + std::string(match);
-      button->text.resize(button->data[0]);
+      button->text.resize(button->text.length());
 
       return qtrue;
     } else {
@@ -1495,10 +1451,13 @@ qboolean CG_SpeakerEditor_Delete_KeyUp(panel_button_t *button, int key) {
   return qfalse;
 }
 
+constexpr float speakerEditorBaseX = 360.0f;
+constexpr float speakerEditorBaseW = 272.0f;
+
 panel_button_t speakerEditorBack = {
     NULL,
     "",
-    {360, 330, 272, 142},
+    {speakerEditorBaseX, 330, speakerEditorBaseW, 142},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
     NULL, /* keyDown	*/
@@ -1535,7 +1494,7 @@ char noiseEditBuffer[MAX_QPATH];
 
 panel_button_t speakerEditorNoiseEdit = {
     NULL,
-    noiseEditBuffer,
+    "",
     {430, 344, 200, 12},
     {MAX_QPATH, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,                  /* font		*/
@@ -1561,7 +1520,7 @@ char targetnameEditBuffer[32];
 
 panel_button_t speakerEditorTargetnameEdit = {
     NULL,
-    targetnameEditBuffer,
+    "",
     {430, 358, 200, 12},
     {32, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,        /* font		*/
@@ -1585,7 +1544,7 @@ panel_button_t speakerEditorLoopedLabel = {
 
 panel_button_t speakerEditorLoopedDropdown = {
     NULL,
-    "no\0on\0off",
+    "no on off",
     {430, 372, 60, 12},
     {3, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,                 /* font		*/
@@ -1609,7 +1568,7 @@ panel_button_t speakerEditorBroadcastLabel = {
 
 panel_button_t speakerEditorBroadcastDropdown = {
     NULL,
-    "no\0global\0nopvs",
+    "no global nopvs",
     {430, 386, 60, 12},
     {3, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,                 /* font		*/
@@ -1635,7 +1594,7 @@ char waitEditBuffer[12];
 
 panel_button_t speakerEditorWaitEdit = {
     NULL,
-    waitEditBuffer,
+    "",
     {430, 400, 200, 12},
     {12, 2, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,        /* font		*/
@@ -1661,7 +1620,7 @@ char randomEditBuffer[12];
 
 panel_button_t speakerEditorRandomEdit = {
     NULL,
-    randomEditBuffer,
+    "",
     {430, 414, 200, 12},
     {12, 2, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,        /* font		*/
@@ -1687,7 +1646,7 @@ char volumeEditBuffer[12];
 
 panel_button_t speakerEditorVolumeEdit = {
     NULL,
-    volumeEditBuffer,
+    "",
     {430, 428, 200, 12},
     {12, 2, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,        /* font		*/
@@ -1713,7 +1672,7 @@ char rangeEditBuffer[12];
 
 panel_button_t speakerEditorRangeEdit = {
     NULL,
-    rangeEditBuffer,
+    "",
     {430, 442, 200, 12},
     {12, 2, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,        /* font		*/
@@ -1770,7 +1729,7 @@ static panel_button_t *speakerEditorButtons[] = {
     &speakerEditorCancelButton, &speakerEditorDeleteButton,
 
     // Below here all components that should draw on top
-    &speakerEditorBroadcastDropdown, &speakerEditorLoopedDropdown, NULL};
+    &speakerEditorBroadcastDropdown, &speakerEditorLoopedDropdown, nullptr};
 
 std::vector<panel_button_t> speakerEditorButtonsLayout;
 
@@ -1885,11 +1844,13 @@ void CG_SpeakerEditor_KeyHandling(int key, qboolean down) {
 
           closest = -1;
           minDist = Square(16.f);
+          const float halfScreenX = SCREEN_WIDTH * 0.5f;
+          const float halfScreenY = SCREEN_HEIGHT * 0.5f;
 
-          r = -(cg.refdef_current->fov_x / 90.f) * (float)(cgs.cursorX - 320) /
-              320;
-          u = -(cg.refdef_current->fov_y / 90.f) * (float)(cgs.cursorY - 240) /
-              240;
+          r = -(cg.refdef_current->fov_x / cg_fov.value) *
+              (static_cast<float>(cgs.cursorX) - halfScreenX) / halfScreenX;
+          u = -(cg.refdef_current->fov_y / cg_fov.value) *
+              (static_cast<float>(cgs.cursorY) - halfScreenY) / halfScreenY;
 
           for (i = 0; i < 3; i++) {
             dir[i] = cg.refdef_current->viewaxis[0][i] * 1.f +
@@ -1938,25 +1899,28 @@ void CG_SpeakerEditorMouseMove_Handling(int x, int y) {
     return;
   }
 
+  const float halfScreenX = SCREEN_WIDTH * 0.5f;
+  const auto floatX = static_cast<float>(x);
+
   if (editSpeakerActive) {
     if (editSpeakerHandle.activeAxis >= 0) {
       if (editSpeakerHandle.activeAxis == 0) {
         // this one and the next one are quite
         // nasty, so do it the hacky way
-        if (cgs.cursorX - x < 320) {
-          editSpeaker->origin[0] -= x;
+        if (static_cast<float>(cgs.cursorX) - floatX < halfScreenX) {
+          editSpeaker->origin[0] -= floatX;
         } else {
-          editSpeaker->origin[0] += x;
+          editSpeaker->origin[0] += floatX;
         }
       } else if (editSpeakerHandle.activeAxis == 1) {
-        if (cgs.cursorX - x < 320) {
-          editSpeaker->origin[1] -= x;
+        if (static_cast<float>(cgs.cursorX) - floatX < halfScreenX) {
+          editSpeaker->origin[1] -= floatX;
         } else {
-          editSpeaker->origin[1] += x;
+          editSpeaker->origin[1] += floatX;
         }
       } else if (editSpeakerHandle.activeAxis == 2) {
         // but this one is easy
-        editSpeaker->origin[2] -= y;
+        editSpeaker->origin[2] -= static_cast<float>(y);
       }
 
       cgs.cursorX -= x;
@@ -1968,11 +1932,20 @@ void CG_SpeakerEditorMouseMove_Handling(int x, int y) {
   }
 }
 
+void CG_AdjustRectX(panel_button_t *button) {
+  const float wideX = SCREEN_WIDTH - 8 - speakerEditorBaseW;
+  const float xAdj = wideX - speakerEditorBaseX;
+
+  if (xAdj > 0) {
+    button->rect.x += xAdj;
+  }
+}
+
 void CG_ActivateEditSoundMode(void) {
   CG_Printf("Activating Speaker Edit mode.\n");
   cg.editingSpeakers = qtrue;
 
-  editSpeaker = NULL;
+  editSpeaker = nullptr;
   editSpeakerActive = qfalse;
   editSpeakerHandle.activeAxis = -1;
   undoSpeakerIndex = -2;
@@ -1986,12 +1959,14 @@ void CG_ActivateEditSoundMode(void) {
 
     for (auto btnptr : speakerInfoButtons) {
       if (btnptr) {
+        ETJump_AdjustPosition(&btnptr->rect.x);
         speakerInfoButtonsLayout.push_back(*btnptr);
       }
     }
 
     for (auto btnptr : speakerEditorButtons) {
       if (btnptr) {
+        CG_AdjustRectX(btnptr);
         speakerEditorButtonsLayout.push_back(*btnptr);
       }
     }
@@ -2041,6 +2016,32 @@ void CG_ModifyEditSpeaker(void) {
               editSpeaker->volume);
   Com_sprintf(rangeEditBuffer, sizeof(rangeEditBuffer), "%i",
               editSpeaker->range);
+
+  for (auto &button : speakerEditorButtons) {
+    if (button == &speakerEditorNoiseEdit) {
+      button->text = noiseEditBuffer;
+    } else if (button == &speakerEditorTargetnameEdit) {
+      button->text = targetnameEditBuffer;
+    } else if (button == &speakerEditorWaitEdit) {
+      button->text = waitEditBuffer;
+    } else if (button == &speakerEditorRandomEdit) {
+      button->text = randomEditBuffer;
+    } else if (button == &speakerEditorVolumeEdit) {
+      button->text = volumeEditBuffer;
+    } else if (button == &speakerEditorRangeEdit) {
+      button->text = rangeEditBuffer;
+    }
+  }
+
+  speakerEditorButtonsLayout.clear();
+
+  for (auto btnptr : speakerEditorButtons) {
+    if (btnptr) {
+      speakerEditorButtonsLayout.push_back(*btnptr);
+    }
+  }
+
+  BG_PanelButtonsSetup(speakerEditorButtonsLayout);
 }
 
 void CG_UndoEditSpeaker(void) {

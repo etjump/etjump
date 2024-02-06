@@ -8056,7 +8056,7 @@ qboolean BG_PanelButton_EditClick(panel_button_t *button, int key) {
       len = strlen(buffer);
     } else {
       maxlen = button->data[0];
-      len = button->text.size();
+      len = button->text.length();
     }
 
     if (key & K_CHAR_FLAG) {
@@ -8069,7 +8069,7 @@ qboolean BG_PanelButton_EditClick(panel_button_t *button, int key) {
             buffer[len - 1] = '\0';
             DC->setCVar(button->text.c_str(), buffer);
           } else {
-            button->text[len - 1] = '\0';
+            button->text.pop_back();
           }
         }
         return qtrue;
