@@ -784,10 +784,22 @@ static void CG_RenderScriptSpeakers(void) {
   }
 }
 
+constexpr vec4_t fillColor = {0.0f, 0.0f, 0.0f, 0.6f};
+constexpr vec4_t borderColor = {0.5f, 0.5f, 0.5f, 0.5f};
+
+constexpr vec4_t buttonBorderColor = {0.1f, 0.1f, 0.1f, 0.5f};
+constexpr vec4_t buttonFillColor = {0.3f, 0.3f, 0.3f, 0.4f};
+constexpr vec4_t buttonHoverFillColor = {0.5f, 0.5f, 0.5f, 0.4f};
+constexpr vec4_t buttonDownFillColor = {0.4f, 0.4f, 0.4f, 0.4f};
+
+constexpr vec4_t editFieldFillColor = {0.5f, 0.5f, 0.5f, 0.2f};
+
+constexpr vec4_t textColor = {1.0f, 1.0f, 1.0f, 0.6f};
+constexpr vec4_t textActiveColor = {1.0f, 1.0f, 1.0f, 0.9f};
+
 void CG_SpeakerInfo_Text(panel_button_t *button) {
   char *s, *ptr, *strptr;
   float y, wMax, w, h;
-  vec4_t colour;
   char originStr[96];
   char filenameStr[96] = "";
   char targetnameStr[56] = "";
@@ -888,13 +900,10 @@ void CG_SpeakerInfo_Text(panel_button_t *button) {
     }
     h += 8.5f;
   }
-
-  VectorCopy(colorMdBlue, colour);
-  colour[3] = .5f;
-  CG_FillRect(button->rect.x - 2, button->rect.y - 2, wMax + 4, h + 4, colour);
-  VectorCopy(colorBlue, colour);
+  CG_FillRect(button->rect.x - 2, button->rect.y - 2, wMax + 4, h + 4,
+              fillColor);
   CG_DrawRect(button->rect.x - 2, button->rect.y - 2, wMax + 4, h + 4, 1.f,
-              colour);
+              borderColor);
 
   s = va("%s%s%s%s%s%s%s%s%s", originStr, filenameStr, targetnameStr, loopedStr,
          broadcastStr, waitStr, randomStr, volumeStr, rangeStr);
@@ -916,7 +925,7 @@ void CG_SpeakerInfo_Text(panel_button_t *button) {
 panel_button_text_t speakerEditorTxt = {
     0.2f,
     0.2f,
-    {1.0f, 1.0f, 1.0f, 0.5f},
+    {1.0f, 1.0f, 1.0f, 0.6f},
     ITEM_TEXTSTYLE_SHADOWED,
     0,
     &cgs.media.limboFont2,
@@ -942,12 +951,12 @@ void CG_SpeakerEditor_RenderEdit(panel_button_t *button) {
   vec4_t colour;
 
   if (button == BG_PanelButtons_GetFocusButton()) {
-    VectorCopy(colorYellow, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonHoverFillColor, colour);
+    Vector4Copy(textActiveColor, button->font->colour);
   } else {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .3f;
+    Vector4Copy(editFieldFillColor, colour);
   }
+
   CG_FillRect(button->rect.x, button->rect.y, button->rect.w, button->rect.h,
               colour);
 
@@ -956,6 +965,9 @@ void CG_SpeakerEditor_RenderEdit(panel_button_t *button) {
   BG_PanelButton_RenderEdit(button);
   button->rect.x -= 2.f;
   button->rect.h += 3.f;
+
+  // reset to default to ensure next element is at default color
+  Vector4Copy(textColor, button->font->colour);
 }
 
 void CG_SpeakerEditor_RenderButton(panel_button_t *button) {
@@ -963,22 +975,19 @@ void CG_SpeakerEditor_RenderButton(panel_button_t *button) {
   float oldX;
 
   if (button == BG_PanelButtons_GetFocusButton()) {
-    VectorCopy(colorMdBlue, colour);
-    colour[3] = .5f;
-  } else if (BG_PanelButtons_GetFocusButton() == NULL &&
+    Vector4Copy(buttonDownFillColor, colour);
+  } else if (BG_PanelButtons_GetFocusButton() == nullptr &&
              BG_CursorInRect(&button->rect)) {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .5f;
+    Vector4Copy(buttonHoverFillColor, colour);
+    Vector4Copy(textActiveColor, button->font->colour);
   } else {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonFillColor, colour);
   }
   CG_FillRect(button->rect.x, button->rect.y, button->rect.w, button->rect.h,
               colour);
 
-  VectorCopy(colorBlue, colour);
   CG_DrawRect(button->rect.x, button->rect.y, button->rect.w, button->rect.h,
-              1.f, colour);
+              1.f, buttonBorderColor);
 
   oldX = button->rect.x;
   button->rect.x =
@@ -990,6 +999,9 @@ void CG_SpeakerEditor_RenderButton(panel_button_t *button) {
   BG_PanelButtonsRender_Text(button);
   button->rect.x = oldX;
   button->rect.y -= 9.f;
+
+  // reset to default to ensure next element is at default color
+  Vector4Copy(textColor, button->font->colour);
 }
 
 void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
@@ -1006,34 +1018,30 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
   rect.w = rect.h;
 
   if (button == BG_PanelButtons_GetFocusButton()) {
-    VectorCopy(colorYellow, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonDownFillColor, colour);
   } else {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonFillColor, colour);
   }
+
   CG_FillRect(button->rect.x, button->rect.y, textboxW, button->rect.h, colour);
-  VectorCopy(colorBlue, colour);
   CG_DrawRect(button->rect.x, button->rect.y, textboxW, button->rect.h, 1.f,
-              colour);
+              buttonBorderColor);
 
   if (button == BG_PanelButtons_GetFocusButton()) {
-    VectorCopy(colorYellow, colour);
-    colour[3] = .3f;
-  } else if (BG_PanelButtons_GetFocusButton() == NULL &&
+    Vector4Copy(buttonDownFillColor, colour);
+  } else if (BG_PanelButtons_GetFocusButton() == nullptr &&
              BG_CursorInRect(&button->rect)) {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .5f;
+    Vector4Copy(buttonHoverFillColor, colour);
+    Vector4Copy(textActiveColor, button->font->colour);
   } else {
-    VectorCopy(colorWhite, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonFillColor, colour);
   }
 
   CG_FillRect(rect.x, rect.y, rect.w, rect.h, colour);
-  VectorCopy(colorBlue, colour);
+  Vector4Copy(buttonBorderColor, colour);
   CG_DrawRect(rect.x, rect.y, rect.w, rect.h, 1.f, colour);
 
-  VectorCopy(button->font->colour, colour);
+  Vector4Copy(button->font->colour, colour);
   CG_Text_Paint_Ext(
       rect.x + (rect.w - CG_Text_Width_Ext("V", button->font->scalex, 0,
                                            button->font->font)) /
@@ -1062,10 +1070,11 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
       rect.y += 12.f;
 
       if (BG_CursorInRect(&rect)) {
-        VectorScale(colorYellow, .3f, colour);
+        VectorScale(buttonHoverFillColor, .3f, colour);
         colour[3] = 1.f;
+        Vector4Copy(textActiveColor, button->font->colour);
       } else {
-        VectorScale(colorWhite, .3f, colour);
+        VectorScale(buttonFillColor, .3f, colour);
         colour[3] = 1.f;
       }
 
@@ -1080,25 +1089,26 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
           rect.y + 9.f, button->font->scalex, button->font->scaley,
           button->font->colour, s, 0, 0, button->font->style,
           button->font->font);
+
+      // reset so next item is default color
+      Vector4Copy(textColor, button->font->colour);
     }
 
-    VectorCopy(colorBlue, colour);
-    colour[3] = .3f;
+    Vector4Copy(buttonBorderColor, colour);
     CG_DrawRect(button->rect.x, button->rect.y + 12.f, button->rect.w,
                 rect.y - button->rect.y, 1.f, colour);
   }
+
+  // reset to default to ensure next element is at default color
+  Vector4Copy(textColor, button->font->colour);
 }
 
 void CG_SpeakerEditor_Back(panel_button_t *button) {
-  vec4_t colour;
 
-  VectorCopy(colorMdBlue, colour);
-  colour[3] = .5f;
   CG_FillRect(button->rect.x - 2, button->rect.y - 2, button->rect.w + 4,
-              button->rect.h + 4, colour);
-  VectorCopy(colorBlue, colour);
+              button->rect.h + 4, fillColor);
   CG_DrawRect(button->rect.x - 2, button->rect.y - 2, button->rect.w + 4,
-              button->rect.h + 4, 1.f, colour);
+              button->rect.h + 4, 1.f, borderColor);
 }
 
 void CG_SpeakerEditor_LocInfo(panel_button_t *button) {
