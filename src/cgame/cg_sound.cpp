@@ -683,33 +683,6 @@ static void CG_RenderScriptSpeakers(void) {
   closest = -1;
   minDist = Square(8.f);
 
-  /*{
-      float	r, u;
-      vec3_t	axisOrg, dir;
-
-      closest = -1;
-      minDist = Square( 32.f );
-
-      r = -(cg.refdef_current->fov_x / 90.f) * (float)(cgs.cursorX -
-  320) / 320; u = -(cg.refdef_current->fov_y / 90.f) *
-  (float)(cgs.cursorY - 240) / 240;
-
-      for( i = 0; i < 3; i++ ) {
-          dir[i] = cg.refdef_current->viewaxis[0][i] * 1.f +
-                   cg.refdef_current->viewaxis[1][i] * r +
-                   cg.refdef_current->viewaxis[2][i] * u;
-      }
-      VectorNormalizeFast( dir );
-
-      VectorMA( cg.refdef_current->vieworg, 512, dir, vec );
-      //VectorCopy( cg.refdef_current->vieworg, axisOrg );
-      //axisOrg[2]+=.1f;
-      VectorMA( cg.refdef_current->vieworg, .1f,
-  cg.refdef_current->viewaxis[0], axisOrg ); CG_AddLineToScene( vec,
-  axisOrg, colorOrange );
-
-  }*/
-
   numSpeakersInPvs = 0;
 
   for (i = 0; i < BG_NumScriptSpeakers(); i++) {
@@ -1858,11 +1831,13 @@ void CG_SpeakerEditor_KeyHandling(int key, qboolean down) {
 
           closest = -1;
           minDist = Square(16.f);
+          const float halfScreenX = SCREEN_WIDTH * 0.5f;
+          const float halfScreenY = SCREEN_HEIGHT * 0.5f;
 
-          r = -(cg.refdef_current->fov_x / 90.f) * (float)(cgs.cursorX - 320) /
-              320;
-          u = -(cg.refdef_current->fov_y / 90.f) * (float)(cgs.cursorY - 240) /
-              240;
+          r = -(cg.refdef_current->fov_x / cg_fov.value) *
+              (static_cast<float>(cgs.cursorX) - halfScreenX) / halfScreenX;
+          u = -(cg.refdef_current->fov_y / cg_fov.value) *
+              (static_cast<float>(cgs.cursorY) - halfScreenY) / halfScreenY;
 
           for (i = 0; i < 3; i++) {
             dir[i] = cg.refdef_current->viewaxis[0][i] * 1.f +
@@ -1911,25 +1886,28 @@ void CG_SpeakerEditorMouseMove_Handling(int x, int y) {
     return;
   }
 
+  const float halfScreenX = SCREEN_WIDTH * 0.5f;
+  const auto floatX = static_cast<float>(x);
+
   if (editSpeakerActive) {
     if (editSpeakerHandle.activeAxis >= 0) {
       if (editSpeakerHandle.activeAxis == 0) {
         // this one and the next one are quite
         // nasty, so do it the hacky way
-        if (cgs.cursorX - x < 320) {
-          editSpeaker->origin[0] -= x;
+        if (static_cast<float>(cgs.cursorX) - floatX < halfScreenX) {
+          editSpeaker->origin[0] -= floatX;
         } else {
-          editSpeaker->origin[0] += x;
+          editSpeaker->origin[0] += floatX;
         }
       } else if (editSpeakerHandle.activeAxis == 1) {
-        if (cgs.cursorX - x < 320) {
-          editSpeaker->origin[1] -= x;
+        if (static_cast<float>(cgs.cursorX) - floatX < halfScreenX) {
+          editSpeaker->origin[1] -= floatX;
         } else {
-          editSpeaker->origin[1] += x;
+          editSpeaker->origin[1] += floatX;
         }
       } else if (editSpeakerHandle.activeAxis == 2) {
         // but this one is easy
-        editSpeaker->origin[2] -= y;
+        editSpeaker->origin[2] -= static_cast<float>(y);
       }
 
       cgs.cursorX -= x;
@@ -1959,6 +1937,7 @@ void CG_ActivateEditSoundMode(void) {
 
     for (auto btnptr : speakerInfoButtons) {
       if (btnptr) {
+        ETJump_AdjustPosition(&btnptr->rect.x);
         speakerInfoButtonsLayout.push_back(*btnptr);
       }
     }
@@ -1969,8 +1948,8 @@ void CG_ActivateEditSoundMode(void) {
       }
     }
 
-    BG_PanelButtonsSetupWide(speakerInfoButtonsLayout);
-    BG_PanelButtonsSetupWide(speakerEditorButtonsLayout);
+    BG_PanelButtonsSetup(speakerInfoButtonsLayout);
+    BG_PanelButtonsSetup(speakerEditorButtonsLayout);
   }
 }
 
@@ -2039,7 +2018,7 @@ void CG_ModifyEditSpeaker(void) {
     }
   }
 
-  BG_PanelButtonsSetupWide(speakerEditorButtonsLayout);
+  BG_PanelButtonsSetup(speakerEditorButtonsLayout);
 }
 
 void CG_UndoEditSpeaker(void) {
