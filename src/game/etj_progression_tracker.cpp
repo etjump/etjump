@@ -204,34 +204,7 @@ void ETJump::ProgressionTrackers::useTargetTracker(gentity_t *ent,
 }
 
 void SP_target_tracker(gentity_t *self) {
-  ETJump::ProgressionTrackers::ProgressionTrackerKeys keys;
-
-  G_SpawnString(
-      "tracker_eq",
-      ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET,
-      &keys.equal);
-  G_SpawnString(
-      "tracker_not_eq",
-      ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET,
-      &keys.notEqual);
-  G_SpawnString(
-      "tracker_gt",
-      ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET,
-      &keys.greaterThan);
-  G_SpawnString(
-      "tracker_lt",
-      ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET,
-      &keys.lessThan);
-  G_SpawnString(
-      "tracker_set",
-      ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET,
-      &keys.set);
-  G_SpawnString(
-      "tracker_set_if",
-      ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET,
-      &keys.setIf);
-  G_SpawnString("tracker_inc", "0", &keys.increment);
-  G_SpawnString("tracker_inc_if", "0", &keys.incrementIf);
+  const auto keys = ParseTrackerKeys();
 
   self->key = ETJump::progressionTrackers->registerTracker(keys);
   self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator) {
@@ -244,9 +217,21 @@ void SP_trigger_tracker(gentity_t *self) {
   // just make it same type as trigger multiple for now
   self->s.eType = ET_TRIGGER_MULTIPLE;
 
-  ETJump::ProgressionTrackers::ProgressionTrackerKeys keys;
+  const auto keys = ParseTrackerKeys();
 
-  G_SpawnString(
+  self->key = ETJump::progressionTrackers->registerTracker(keys);
+  self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator) {
+    ETJump::progressionTrackers->useTriggerTracker(ent, activator);
+  };
+  self->touch = [](gentity_t *ent, gentity_t *activator, trace_t *trace) {
+    ETJump::progressionTrackers->useTriggerTracker(ent, activator);
+  };
+}
+
+static ETJump::ProgressionTrackers::ProgressionTrackerKeys ParseTrackerKeys() {
+    ETJump::ProgressionTrackers::ProgressionTrackerKeys keys{};
+
+    G_SpawnString(
       "tracker_eq",
       ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET,
       &keys.equal);
@@ -273,11 +258,5 @@ void SP_trigger_tracker(gentity_t *self) {
   G_SpawnString("tracker_inc", "0", &keys.increment);
   G_SpawnString("tracker_inc_if", "0", &keys.incrementIf);
 
-  self->key = ETJump::progressionTrackers->registerTracker(keys);
-  self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator) {
-    ETJump::progressionTrackers->useTriggerTracker(ent, activator);
-  };
-  self->touch = [](gentity_t *ent, gentity_t *activator, trace_t *trace) {
-    ETJump::progressionTrackers->useTriggerTracker(ent, activator);
-  };
-}
+  return keys;
+} 
