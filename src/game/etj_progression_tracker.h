@@ -43,19 +43,29 @@ public:
     char *setIf;
     char *increment;
     char *incrementIf;
+    char *bitIsSet;
+    char *bitNotSet;
+    char *bitSet;
+    char *bitReset;
   };
 
   static const int MaxProgressionTrackers = 50;
+  static ETJump::ProgressionTrackers::ProgressionTrackerKeys ParseTrackerKeys();
+
   struct ProgressionTracker {
     ProgressionTracker() {
-      for (auto &v : equal) v = -1;
-      for (auto &v : notEqual) v = -1;
-      for (auto &v : greaterThan) v = -1;
-      for (auto &v : lessThan) v = -1;
-      for (auto &v : set) v = -1;
-      for (auto &v : setIf) v = -1;
-      for (auto &v : increment) v = 0;
-      for (auto &v : incrementIf) v = 0;
+      std::fill_n(equal, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(notEqual, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(greaterThan, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(lessThan, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(set, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(setIf, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(increment, MaxProgressionTrackers, 0); // increments default to 0
+      std::fill_n(incrementIf, MaxProgressionTrackers, 0); // increments default to 0
+      std::fill_n(bitIsSet, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(bitNotSet, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(bitSet, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(bitReset, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
     }
     int equal[MaxProgressionTrackers];
     int notEqual[MaxProgressionTrackers];
@@ -65,6 +75,10 @@ public:
     int setIf[MaxProgressionTrackers];
     int increment[MaxProgressionTrackers];
     int incrementIf[MaxProgressionTrackers];
+    int bitIsSet[MaxProgressionTrackers];
+    int bitNotSet[MaxProgressionTrackers];
+    int bitSet[MaxProgressionTrackers];
+    int bitReset[MaxProgressionTrackers];
   };
 
   ProgressionTrackers();
