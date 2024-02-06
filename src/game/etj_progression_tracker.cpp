@@ -131,18 +131,17 @@ void ETJump::ProgressionTrackers::useTracker(
     }
   }
 
-  // notEqual must be checked in a separate loop, otherwise it will work
-  // as an OR statement instead of AND
-  for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
-    clientTracker = activator->client->sess.progression[idx];
+  if (activate) {
+    // notEqual must be checked in a separate loop, otherwise it will work
+    // as an OR statement instead of AND
+    for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
+      clientTracker = activator->client->sess.progression[idx];
 
-    if (tracker.notEqual[idx] != ProgressionTrackerValueNotSet) {
-      if (tracker.notEqual[idx] == clientTracker) {
-        activate = false;
-        continue;
-      } else { // value set but not matched - break and fire targets
-        activate = true;
-        break;
+      if (tracker.notEqual[idx] != ProgressionTrackerValueNotSet) {
+        if (tracker.notEqual[idx] == clientTracker) {
+          activate = false;
+          break;
+        }
       }
     }
   }
