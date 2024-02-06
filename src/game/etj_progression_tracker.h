@@ -54,18 +54,18 @@ public:
 
   struct ProgressionTracker {
     ProgressionTracker() {
-      std::fill_n(equal, MaxProgressionTrackers, -1);
-      std::fill_n(notEqual, MaxProgressionTrackers, -1);
-      std::fill_n(greaterThan, MaxProgressionTrackers, -1);
-      std::fill_n(lessThan, MaxProgressionTrackers, -1);
-      std::fill_n(set, MaxProgressionTrackers, -1);
-      std::fill_n(setIf, MaxProgressionTrackers, -1);
-      std::fill_n(increment, MaxProgressionTrackers, 0);
-      std::fill_n(incrementIf, MaxProgressionTrackers, 0);
-      std::fill_n(bitIsSet, MaxProgressionTrackers, -1);
-      std::fill_n(bitNotSet, MaxProgressionTrackers, -1);
-      std::fill_n(bitSet, MaxProgressionTrackers, -1);
-      std::fill_n(bitReset, MaxProgressionTrackers, -1);
+      std::fill_n(equal, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(notEqual, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(greaterThan, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(lessThan, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(set, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(setIf, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(increment, MaxProgressionTrackers, 0); // increments default to 0
+      std::fill_n(incrementIf, MaxProgressionTrackers, 0); // increments default to 0
+      std::fill_n(bitIsSet, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(bitNotSet, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(bitSet, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
+      std::fill_n(bitReset, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
     }
     int equal[MaxProgressionTrackers];
     int notEqual[MaxProgressionTrackers];
