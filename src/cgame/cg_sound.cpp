@@ -1441,10 +1441,13 @@ qboolean CG_SpeakerEditor_Delete_KeyUp(panel_button_t *button, int key) {
   return qfalse;
 }
 
+constexpr float speakerEditorBaseX = 360.0f;
+constexpr float speakerEditorBaseW = 272.0f;
+
 panel_button_t speakerEditorBack = {
     NULL,
     "",
-    {360, 330, 272, 142},
+    {speakerEditorBaseX, 330, speakerEditorBaseW, 142},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
     NULL, /* keyDown	*/
@@ -1919,6 +1922,15 @@ void CG_SpeakerEditorMouseMove_Handling(int x, int y) {
   }
 }
 
+void CG_AdjustRectX(panel_button_t *button) {
+  const float wideX = SCREEN_WIDTH - 8 - speakerEditorBaseW;
+  const float xAdj = wideX - speakerEditorBaseX;
+
+  if (xAdj > 0) {
+    button->rect.x += xAdj;
+  }
+}
+
 void CG_ActivateEditSoundMode(void) {
   CG_Printf("Activating Speaker Edit mode.\n");
   cg.editingSpeakers = qtrue;
@@ -1944,6 +1956,7 @@ void CG_ActivateEditSoundMode(void) {
 
     for (auto btnptr : speakerEditorButtons) {
       if (btnptr) {
+        CG_AdjustRectX(btnptr);
         speakerEditorButtonsLayout.push_back(*btnptr);
       }
     }
