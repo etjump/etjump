@@ -1,3 +1,34 @@
+# ETJump 3.1.2
+
+* fixed being able go go through/into no-noclip areas with `setoffset` [#1192](https://github.com/etjump/etjump/pull/1192)
+* increased UI memory pool, fixing the mod not running on 2.60b linux [#1191](https://github.com/etjump/etjump/pull/1191)
+* added `func_portaltarget` entity [#1188](https://github.com/etjump/etjump/pull/1188)
+  * portals fired on this entity will always center on the face they were fired onto
+* fixed noclipping spectators appearing as axis soldiers in 3rd person and freecam [#1186](https://github.com/etjump/etjump/pull/1186)
+* improved entity health bar visuals - bar now has gradient color to indicate progress & small border [#1185](https://github.com/etjump/etjump/pull/1185)
+* added `etj_snapHUDActiveIsPrimary` [#1182](https://github.com/etjump/etjump/pull/1182)
+  * colors active snapzone with `etj_snapHUDColor1` in all scenarios, and flips the colors accordingly
+* added `etj_CGazDrawSnapZone` [#1175](https://github.com/etjump/etjump/pull/1175)
+  * draws the remainder of the current snapzone on CGaz 1, to visualize snap zones without snaphud
+  * uses `etj_CGazFov`, will not align correctly to snaphud if CGaz and snaphud use different fov
+* added support for `weapon_grenadelauncher` and `weapon_grenadepineapple` entities for spawning axis and allies grenades, respectively [#1195](https://github.com/etjump/etjump/pull/1195)
+* fixed a crash when starting a timerun or activating `target_init` with `REMOVE_STARTING_WEAPONS` spawnflag while cooking a grenade, and selfkilling afterwards [#1196](https://github.com/etjump/etjump/pull/1196)
+* added `func_missilepad` entity [#881](https://github.com/etjump/etjump/pull/881)
+  * explodes hand & rifle grenades on impact
+  * keys:
+    * `scale` - scales the explosion amount for more knockback
+    * `target` - targets to fire when activated
+    * `noise` - sound to play when grenade explodes
+    * `volume` - volume of the sound
+  * spawnflags:
+    * `1` - start invisible, toggle existence when activated
+    * `2` - scale applies to horizontal velocity only
+    * `4` - scale applies to vertical velocity only
+* fixed chat mentions breaking team/fireteam chat color [#1200](https://github.com/etjump/etjump/pull/1200)
+* static coronas are no longer handled on server, and are purely client sided to not take up entity slots [#1201](https://github.com/etjump/etjump/pull/1201)
+* fixed `tracker_not_eq` overriding other tracker keys - targets would fire if e.g. `_eq` check had failed, but `_not_eq` passed [#1204](https://github.com/etjump/etjump/pull/1204)
+* fixed speaker editor and improved it's visuals [#1203](https://github.com/etjump/etjump/pull/1203)
+
 # ETJump 3.1.1
 
 * fixed regression in OB detector causing it drawing too high [#1162](https://github.com/etjump/etjump/pull/1162)
