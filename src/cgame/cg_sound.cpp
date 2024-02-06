@@ -1068,7 +1068,7 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
       button->rect.y + 9.f, button->font->scalex, button->font->scaley, colour,
       "V", 0, 0, 0, button->font->font);
 
-  const auto buttonStrings = ETJump::StringUtil::split(button->text, "\\");
+  const auto buttonStrings = ETJump::StringUtil::split(button->text, " ");
   s = buttonStrings[button->data[1]].c_str();
 
   CG_Text_Paint_Ext(
@@ -1558,7 +1558,7 @@ panel_button_t speakerEditorLoopedLabel = {
 
 panel_button_t speakerEditorLoopedDropdown = {
     NULL,
-    "no\\on\\off",
+    "no on off",
     {430, 372, 60, 12},
     {3, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,                 /* font		*/
@@ -1582,7 +1582,7 @@ panel_button_t speakerEditorBroadcastLabel = {
 
 panel_button_t speakerEditorBroadcastDropdown = {
     NULL,
-    "no\\global\\nopvs",
+    "no global nopvs",
     {430, 386, 60, 12},
     {3, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt,                 /* font		*/
