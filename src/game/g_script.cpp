@@ -124,6 +124,8 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params);
 
 qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params);
 
+qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params);
+
 // these are the actions that each event can call
 g_script_stack_action_t gScriptActions[] = {
     {"gotomarker", G_ScriptAction_GotoMarker},
@@ -237,6 +239,7 @@ g_script_stack_action_t gScriptActions[] = {
     {"constructible_duration", G_ScriptAction_ConstructibleDuration},
 
     {"wm_announce_private", G_ScriptAction_Announce_Private},
+    {"tracker", G_ScriptAction_Tracker},
     {nullptr, nullptr}};
 
 qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event,
