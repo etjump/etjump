@@ -190,11 +190,11 @@ void ETJump::ProgressionTrackers::useTracker(
       }
     }
 
-    PrintTrackerChanges(activator, oldValues);
+    printTrackerChanges(activator, oldValues);
   }
 }
 
-void ETJump::ProgressionTrackers::PrintTrackerChanges(gentity_t *activator,
+void ETJump::ProgressionTrackers::printTrackerChanges(gentity_t *activator,
                                                       int *oldValues) {
   if (g_debugTrackers.integer <= 0) {
     return;
@@ -204,10 +204,7 @@ void ETJump::ProgressionTrackers::PrintTrackerChanges(gentity_t *activator,
   for (int i = 0; i < MaxProgressionTrackers; i++) {
     if (oldValues[i] != activator->client->sess.progression[i]) {
       const std::string &trackerChangeMsg = stringFormat(
-          "^7Tracker change - "
-          "index: ^3%i "
-          "^7value: ^2%i "
-          "^7from: ^9%i^7\n",
+          "^7Tracker change - index: ^3%i ^7value: ^2%i ^7from: ^9%i^7\n",
           i + 1, activator->client->sess.progression[i], oldValues[i]);
       Printer::SendPopupMessage(clientNum, trackerChangeMsg);
     }

@@ -4540,7 +4540,7 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
 
     if (trackerIndex < 0 || trackerIndex >= MAX_PROGRESSION_TRACKERS) {
       G_Error("G_ScriptAction_Tracker: parsed tracker index (%i) is outside "
-              "range (0 - %i)\n",
+              "range (1 - %i)\n",
               trackerIndex + 1, MAX_PROGRESSION_TRACKERS);
     }
 
@@ -4556,7 +4556,8 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
   token = COM_ParseExt(&pString, qfalse);
 
   if (!token[0]) {
-    G_Error("G_ScriptAction_Tracker: tracker %s requires a value\n", command);
+    G_Error("G_ScriptAction_Tracker: tracker commands require a value\n",
+            command);
   }
 
   const int trackerValue = Q_atoi(token);
@@ -4594,7 +4595,7 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
       ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
   }
 
-  ETJump::ProgressionTrackers::PrintTrackerChanges(activator, oldValues);
+  ETJump::ProgressionTrackers::printTrackerChanges(activator, oldValues);
 
   return qtrue;
 }
