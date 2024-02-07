@@ -82,11 +82,6 @@ void DemoCompatibility::fillVersionInfo(Version *version,
 }
 
 bool DemoCompatibility::isCompatible(Version minimum) const {
-  // parsing failed
-  if (!minimum.major && !minimum.minor && !minimum.patch) {
-    return false;
-  }
-
   if (demoVersion.major != minimum.major) {
     return demoVersion.major > minimum.major;
   }
