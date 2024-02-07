@@ -26,24 +26,23 @@
 
 namespace ETJump {
 class DemoCompatibility {
+public:
   struct Version {
-    Version() : major(0), minor(0), patch(0) {}
     int major;
     int minor;
     int patch;
   };
-
-  void parseDemoVersion();
-  static void fillVersionInfo(Version *version, const std::string &versionStr,
-                              const std::string &delimiter);
-
-  Version demoVersion;
-
-public:
   DemoCompatibility();
   ~DemoCompatibility() = default;
 
   // returns true if the demo version is newer or same as minimumVersion
-  bool isCompatible(const std::string &minimumVersion) const;
+  bool isCompatible(Version minimum) const;
+
+private:
+  void parseDemoVersion();
+  static void fillVersionInfo(Version *version, const std::string &versionStr,
+                              const std::string &delimiter);
+
+  Version demoVersion{};
 };
 } // namespace ETJump

@@ -81,10 +81,7 @@ void DemoCompatibility::fillVersionInfo(Version *version,
   version->patch = std::stoi(splits[2].substr(0, 1));
 }
 
-bool DemoCompatibility::isCompatible(const std::string &minimumVersion) const {
-  Version minimum;
-  fillVersionInfo(&minimum, minimumVersion, ".");
-
+bool DemoCompatibility::isCompatible(Version minimum) const {
   // parsing failed
   if (!minimum.major && !minimum.minor && !minimum.patch) {
     return false;
