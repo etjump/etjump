@@ -4520,17 +4520,26 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
 
   token = COM_ParseExt(&pString, qfalse);
   if (!token[0]) {
-    G_Error("G_ScriptAction_Tracker: tracker without an index\n");
+    G_Error("G_ScriptAction_Tracker: tracker without an index/command\n");
   }
 
-  // trackers are 1 indexed in user code
-  const int trackerIndex = Q_atoi(token) - 1;
-  if (trackerIndex < 0 || trackerIndex >= MAX_PROGRESSION_TRACKERS) {
-    G_Error("G_ScriptAction_Tracker: tracker index (%i) is outside range (0 - %i)\n",
-      trackerIndex + 1, MAX_PROGRESSION_TRACKERS);
+  int trackerIndex = 0;
+
+  // if index is omitted, token is the command
+  if (Q_isnumeric(token[0])) {
+    // trackers are 1 indexed in user code
+    trackerIndex = Q_atoi(token) - 1;
+
+    if (trackerIndex < 0 || trackerIndex >= MAX_PROGRESSION_TRACKERS) {
+      G_Error("G_ScriptAction_Tracker: parsed tracker index (%i) is outside "
+              "range (0 - %i)\n",
+              trackerIndex + 1, MAX_PROGRESSION_TRACKERS);
+    }
+
+    // parse next arg as command instead
+    token = COM_ParseExt(&pString, qfalse);
   }
 
-  token = COM_ParseExt(&pString, qfalse);
   if (!token[0]) {
     G_Error("G_ScriptAction_Tracker: tracker without a command\n");
   }
