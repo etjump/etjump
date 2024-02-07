@@ -29,7 +29,11 @@
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
-DemoCompatibility::DemoCompatibility() { parseDemoVersion(); }
+DemoCompatibility::DemoCompatibility() {
+  if (cg.demoPlayback) {
+    parseDemoVersion();
+  }
+}
 
 void DemoCompatibility::parseDemoVersion() {
   const char *serverInfoCS = CG_ConfigString(CS_SERVERINFO);
