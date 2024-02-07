@@ -54,6 +54,7 @@ add_library(cgame MODULE
 	"etj_cvar_master_drawer.cpp"
 	"etj_cvar_shadow.cpp"
 	"etj_cvar_update_handler.cpp"
+	"etj_demo_compatibility.cpp"
 	"etj_demo_recorder.cpp"
 	"etj_draw_leaves_handler.cpp"
 	"etj_drawable.cpp"

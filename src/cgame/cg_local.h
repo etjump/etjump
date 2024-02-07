@@ -4205,6 +4205,7 @@ class PlayerEventsHandler;
 class PmoveUtils;
 class CvarShadow;
 class ClientRtvHandler;
+class DemoCompatibility;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4217,6 +4218,7 @@ extern std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 extern std::shared_ptr<EventLoop> eventLoop;
 extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 extern std::shared_ptr<ClientRtvHandler> rtvHandler;
+extern std::shared_ptr<DemoCompatibility> demoCompatibility;
 
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume, int soundTime);

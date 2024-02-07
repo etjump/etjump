@@ -10,6 +10,7 @@
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 #include "etj_client_rtv_handler.h"
+#include "etj_demo_compatibility.h"
 
 #define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
@@ -4633,6 +4634,10 @@ void CG_DrawMiscGamemodels(void) {
 }
 
 void CG_DrawCoronas() {
+  if (cg.demoPlayback && !ETJump::demoCompatibility->isCompatible("3.1.2")) {
+    return;
+  }
+
   for (int i = 0; i < cg.numCoronas; i++) {
     centity_t *corona = &cgs.coronas[i];
     CG_Corona(corona);
