@@ -10,6 +10,7 @@
 #include "../game/q_shared.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
+#include "etj_progression_tracker.h"
 
 /*
 Contains the code to handle the various commands available with an event script.
@@ -4513,6 +4514,13 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
 
   const auto progression = activator->client->sess.progression;
 
+  // keep track of old values for debug print
+  int oldValues[MAX_PROGRESSION_TRACKERS];
+
+  if (g_debugTrackers.integer > 0) {
+    memcpy(oldValues, progression, sizeof(oldValues));
+  }
+
   const char *pString, *token;
   char command[MAX_QPATH];
 
@@ -4585,4 +4593,8 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
     ent->scriptStatus.scriptStackHead =
       ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
   }
+
+  ETJump::ProgressionTrackers::PrintTrackerChanges(activator, oldValues);
+
+  return qtrue;
 }

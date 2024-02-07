@@ -51,6 +51,7 @@ public:
 
   static const int MaxProgressionTrackers = 50;
   static ETJump::ProgressionTrackers::ProgressionTrackerKeys ParseTrackerKeys();
+  static void PrintTrackerChanges(gentity_t *activator, int *oldValues);
 
   struct ProgressionTracker {
     ProgressionTracker() {

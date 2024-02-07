@@ -190,20 +190,26 @@ void ETJump::ProgressionTrackers::useTracker(
       }
     }
 
-    if (g_debugTrackers.integer > 0) {
-      const auto clientNum = ClientNum(activator);
+    PrintTrackerChanges(activator, oldValues);
+  }
+}
 
-      for (int i = 0; i < MaxProgressionTrackers; i++) {
-        if (oldValues[i] != activator->client->sess.progression[i]) {
-          std::string trackerChangeMsg = stringFormat(
-              "^7Tracker change - "
-              "index: ^3%i "
-              "^7value: ^2%i "
-              "^7from: ^9%i^7\n",
-              i + 1, activator->client->sess.progression[i], oldValues[i]);
-          Printer::SendPopupMessage(clientNum, trackerChangeMsg);
-        }
-      }
+void ETJump::ProgressionTrackers::PrintTrackerChanges(gentity_t *activator,
+                                                      int *oldValues) {
+  if (g_debugTrackers.integer <= 0) {
+    return;
+  }
+  const auto clientNum = ClientNum(activator);
+
+  for (int i = 0; i < MaxProgressionTrackers; i++) {
+    if (oldValues[i] != activator->client->sess.progression[i]) {
+      const std::string &trackerChangeMsg = stringFormat(
+          "^7Tracker change - "
+          "index: ^3%i "
+          "^7value: ^2%i "
+          "^7from: ^9%i^7\n",
+          i + 1, activator->client->sess.progression[i], oldValues[i]);
+      Printer::SendPopupMessage(clientNum, trackerChangeMsg);
     }
   }
 }
