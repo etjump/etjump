@@ -4478,6 +4478,9 @@ void use_invisible_user(gentity_t *ent, gentity_t *other,
   }
 
   if (other->client) {
+    if (activator && (ent->spawnflags & 8)) { // ETJump
+      ent->activator = activator;
+    }
     G_Script_ScriptEvent(
         ent, "activate",
         other->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
