@@ -4476,6 +4476,47 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params) {
   return qtrue;
 }
 
+// alertentity -equivalent that passes activator
+qboolean G_ScriptAction_UseTarget(gentity_t *ent, char *params) {
+  if (!ent->activator) {
+    G_Error("G_ScriptAction_UseTarget: no activator found, consider using "
+            "alertentity instead\n");
+  }
+
+  if (!params || !*params) {
+    G_Error("G_ScriptAction_UseTarget: no targetname given\n");
+  }
+
+  const int hash = BG_StringHashValue(params);
+
+  qboolean foundalertent = qfalse;
+  gentity_t *alertent = nullptr;
+
+  while (true) {
+    alertent = G_FindByTargetnameFast(alertent, params, hash);
+    if (!alertent) {
+      if (!foundalertent) {
+        G_Error("G_ScriptAction_UseTarget: cannot find targetname \"%s\"\n",
+                params);
+        return qfalse;
+      } else {
+        break;
+      }
+    }
+
+    foundalertent = qtrue;
+
+    if (!alertent->use) {
+      G_Error("G_ScriptAction_UseTarget: \"%s\" "
+              "(classname = %s) doesn't have a \"use\" function\n",
+              params, alertent->classname);
+    }
+    G_UseEntity(alertent, nullptr, ent->activator);
+  }
+
+  return qtrue;
+}
+
 qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params) {
   const char *pString, *token;
 
