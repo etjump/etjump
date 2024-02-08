@@ -4553,15 +4553,6 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
     G_Error("G_ScriptAction_Tracker: call to client only script action with no activator\n");
   }
 
-  const auto progression = activator->client->sess.progression;
-
-  // keep track of old values for debug print
-  int oldValues[MAX_PROGRESSION_TRACKERS];
-
-  if (g_debugTrackers.integer > 0) {
-    memcpy(oldValues, progression, sizeof(oldValues));
-  }
-
   const char *pString, *token;
   char command[MAX_QPATH];
 
@@ -4602,41 +4593,46 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
   }
 
   const int trackerValue = Q_atoi(token);
-  const int clientTracker = progression[trackerIndex];
 
-  bool abort = false;
+  using PT = ETJump::ProgressionTrackers;
+  PT::ChangeFunc changeFn = nullptr;
+  PT::CheckFunc checkFn = nullptr;
 
   if (!Q_stricmp(command, "inc")) {
-    progression[trackerIndex] += trackerValue;
+    changeFn = PT::Change::Increment;
   } else if (!Q_stricmp(command, "abort_if_less_than")) {
-    abort = clientTracker < trackerValue;
+    checkFn = PT::Check::LessThan;
   } else if (!Q_stricmp(command, "abort_if_greater_than")) {
-    abort = clientTracker > trackerValue;
+    checkFn = PT::Check::GreaterThan;
   } else if (!Q_stricmp(command, "abort_if_not_equal") ||
              !Q_stricmp(command, "abort_if_not_equals")) {
-    abort = clientTracker != trackerValue;
+    checkFn = PT::Check::NotEqual;
   } else if (!Q_stricmp(command, "abort_if_equal")) {
-    abort = clientTracker == trackerValue;
+    checkFn = PT::Check::Equal;
   } else if (!Q_stricmp(command, "bitset")) {
-    progression[trackerIndex] |= (1 << trackerValue);
+    changeFn = PT::Change::SetBit;
   } else if (!Q_stricmp(command, "bitreset")) {
-    progression[trackerIndex] &= ~(1 << trackerValue);
+    changeFn = PT::Change::ResetBit;
   } else if (!Q_stricmp(command, "abort_if_bitset")) {
-    abort = static_cast<bool>(clientTracker & (1 << trackerValue));
+    checkFn = PT::Check::BitSet;
   } else if (!Q_stricmp(command, "abort_if_not_bitset")) {
-    abort = !(static_cast<bool>(clientTracker & (1 << trackerValue)));
+    checkFn = PT::Check::BitNotSet;
   } else if (!Q_stricmp(command, "set")) {
-    progression[trackerIndex] = trackerValue;
+    changeFn = PT::Change::Set;
   } else {
     G_Error("G_ScriptAction_Tracker: unknown tracker command %s\n", command);
   }
 
-  if (abort) {
-    ent->scriptStatus.scriptStackHead =
-      ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+  if (changeFn != nullptr) {
+    PT::executeChange(activator, command, trackerIndex, trackerValue, changeFn);
+  } else if (checkFn != nullptr) {
+    const bool abort = PT::executeCheck(activator, command, trackerIndex,
+                                        trackerValue, checkFn);
+    if (abort) {
+      ent->scriptStatus.scriptStackHead =
+          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+    }
   }
-
-  ETJump::ProgressionTrackers::printTrackerChanges(activator, oldValues);
 
   return qtrue;
 }

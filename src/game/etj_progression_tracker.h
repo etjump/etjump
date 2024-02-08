@@ -30,6 +30,7 @@
 #include "etj_progression_tracker_parser.h"
 
 namespace ETJump {
+
 class ProgressionTrackers {
 public:
   static const char *ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET;
@@ -48,57 +49,82 @@ public:
     char *bitSet;
     char *bitReset;
   };
-
   static const int MaxProgressionTrackers = 50;
-  static ETJump::ProgressionTrackers::ProgressionTrackerKeys ParseTrackerKeys();
-  static void printTrackerChanges(gentity_t *activator, int *oldValues);
+  static ETJump::ProgressionTrackers::ProgressionTrackerKeys parseTrackerKeys();
 
-  struct ProgressionTracker {
-    ProgressionTracker() {
-      std::fill_n(equal, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
-      std::fill_n(notEqual, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
-      std::fill_n(greaterThan, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
-      std::fill_n(lessThan, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
-      std::fill_n(set, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
-      std::fill_n(setIf, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
-      std::fill_n(increment, MaxProgressionTrackers, 0); // increments default to 0
-      std::fill_n(incrementIf, MaxProgressionTrackers, 0); // increments default to 0
-      std::fill_n(bitIsSet, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
-      std::fill_n(bitNotSet, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
-      std::fill_n(bitSet, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
-      std::fill_n(bitReset, MaxProgressionTrackers, ProgressionTrackerValueNotSet);
-    }
-    int equal[MaxProgressionTrackers];
-    int notEqual[MaxProgressionTrackers];
-    int greaterThan[MaxProgressionTrackers];
-    int lessThan[MaxProgressionTrackers];
-    int set[MaxProgressionTrackers];
-    int setIf[MaxProgressionTrackers];
-    int increment[MaxProgressionTrackers];
-    int incrementIf[MaxProgressionTrackers];
-    int bitIsSet[MaxProgressionTrackers];
-    int bitNotSet[MaxProgressionTrackers];
-    int bitSet[MaxProgressionTrackers];
-    int bitReset[MaxProgressionTrackers];
+  typedef void (*ChangeFunc)(int* progression, int index, int value);
+  typedef bool (*CheckFunc)(int* progression, int index, int value);
+
+  template<typename T>
+  struct TrackerDef {
+    const int index;
+    const int value;
+    const std::string name;
+    const T execute;
+
+    TrackerDef(const int index, const int value, const std::string &name,
+      T execute)
+      : index(index), value(value), name(name), execute(execute) {}
+  };
+
+  static bool executeCheck(
+    const gentity_t *ent,
+    const std::string &name,
+    const int index,
+    const int value,
+    const CheckFunc &exec);
+  static void executeChange(
+    const gentity_t *ent,
+    const std::string &name,
+    const int index,
+    const int value,
+    const ChangeFunc &exec);
+
+  class Check {
+  public:
+    static bool Equal(int *p, int i, int v) { return v == p[i]; };
+    static bool NotEqual(int *p, int i, int v) { return v != p[i]; };
+    static bool GreaterThan(int *p, int i, int v) { return v > p[i]; };
+    static bool LessThan(int *p, int i, int v) { return v < p[i]; };
+    static bool BitSet(int *p, int i, int v) {
+      return static_cast<bool>((1 << v) & p[i]);
+    };
+    static bool BitNotSet(int *p, int i, int v) {
+      return !static_cast<bool>((1 << v) & p[i]);
+    };
+  };
+
+  class Change {
+  public:
+    static void Set(int *p, int i, int v) { p[i] = v; };
+    static void Increment(int *p, int i, int v) { p[i] += v; };
+    static void SetBit(int *p, int i, int v) { p[i] |= (1 << v); };
+    static void ResetBit(int *p, int i, int v) { p[i] &= ~(1 << v); }
   };
 
   ProgressionTrackers();
   ~ProgressionTrackers();
   void printParserErrors(const std::vector<std::string> &errors,
                          const std::string &text);
-  std::vector<ProgressionTrackerParser::IndexValuePair>
-  parseKey(const std::string &key);
-  void
-  updateTracker(std::vector<ProgressionTrackerParser::IndexValuePair> pairs,
-                int tracker[MaxProgressionTrackers]);
   int registerTracker(ProgressionTrackerKeys keys);
   void useTargetTracker(gentity_t *ent, gentity_t *other, gentity_t *activator);
   void useTriggerTracker(gentity_t *ent, gentity_t *activator);
 
 private:
-  void useTracker(gentity_t *ent, gentity_t *activator,
-                  const ProgressionTracker &tracker);
+  struct TrackerCollection {
+    const std::vector<TrackerDef<ChangeFunc>> changes;
+    const std::vector<TrackerDef<CheckFunc>> checks;
+    const std::vector<TrackerDef<ChangeFunc>> conditionalChanges;
+  };
 
-  std::vector<ProgressionTracker> _progressionTrackers;
+  template<typename T>
+  void addDef(const std::string &key, int defaultValue,
+              std::vector<TrackerDef<T>> &defs, const std::string &name,
+              T func);
+
+  void useTracker(gentity_t *ent, gentity_t *activator,
+                  const TrackerCollection &tracker);
+
+  std::vector<TrackerCollection> _progressionTrackers;
 };
 } // namespace ETJump
