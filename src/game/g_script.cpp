@@ -122,6 +122,7 @@ qboolean G_ScriptAction_ConstructibleDuration(gentity_t *ent, char *params);
 qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params);
 qboolean G_ScriptAction_Create(gentity_t *ent, char *params);
 
+qboolean G_ScriptAction_UseTarget(gentity_t *ent, char *params);
 qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params);
 
 qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params);
@@ -238,6 +239,7 @@ g_script_stack_action_t gScriptActions[] = {
     {"constructible_weaponclass", G_ScriptAction_ConstructibleWeaponclass},
     {"constructible_duration", G_ScriptAction_ConstructibleDuration},
 
+    {"usetarget", G_ScriptAction_UseTarget},
     {"wm_announce_private", G_ScriptAction_Announce_Private},
     {"tracker", G_ScriptAction_Tracker},
     {nullptr, nullptr}};
