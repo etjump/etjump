@@ -28,6 +28,7 @@
 #include <iterator>
 #include <vector>
 #include "etj_levels.h"
+#include "g_local.h"
 
 namespace Utilities {
 /**
@@ -108,4 +109,6 @@ void RemovePlayerWeapons(int clientNum);
  * and not touching any solids
  */
 bool inNoNoclipArea(gentity_t *ent);
+
+void getOriginOrBmodelCenter(gentity_t *ent, vec3_t dst);
 } // namespace Utilities

@@ -9,6 +9,7 @@
 
 #include "g_local.h"
 #include "etj_printer.h"
+#include "etj_utilities.h"
 
 vec3_t forward, right, up;
 vec3_t muzzleEffect;
@@ -3636,14 +3637,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
     vec3_t delta; // delta between brushent position and trace end
     vec3_t normalScaled; // plane normal scaled by dotproduct of delta and itself
 
-    // use explicit origin if set, center of brush model otherwise
-    if (!VectorCompare(brushEnt->r.currentOrigin, vec3_origin)) {
-      VectorCopy(brushEnt->r.currentOrigin, be_position);
-    } else {
-      be_position[0] = (brushEnt->r.absmax[0] + brushEnt->r.absmin[0]) / 2;
-      be_position[1] = (brushEnt->r.absmax[1] + brushEnt->r.absmin[1]) / 2;
-      be_position[2] = (brushEnt->r.absmax[2] + brushEnt->r.absmin[2]) / 2;
-    }
+    Utilities::getOriginOrBmodelCenter(brushEnt, be_position);
 
     VectorSubtract(be_position, tr.endpos, delta);
     const float dotProduct = DotProduct(delta, tr.plane.normal);
