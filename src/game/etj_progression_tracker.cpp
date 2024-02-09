@@ -51,9 +51,19 @@ void ETJump::ProgressionTrackers::printParserErrors(
   G_Error(buffer.c_str());
 }
 
-void ETJump::ProgressionTrackers::updateTracker(
-    std::vector<ProgressionTrackerParser::IndexValuePair> pairs,
-    int tracker[MaxProgressionTrackers]) {
+template<typename T>
+void ETJump::ProgressionTrackers::addDef(const std::string &key,
+                                         int defaultValue,
+                                         std::vector<TrackerDef<T>> &defs,
+                                         const std::string &name, T func) {
+
+  auto parser = ProgressionTrackerParser(key);
+  auto errors = parser.getErrors();
+  if (errors.size()) {
+    printParserErrors(errors, key);
+  }
+  const auto pairs = parser.getParsedPairs();
+
   for (const auto &pair : pairs) {
     if (pair.index >= MaxProgressionTrackers) {
       G_Error("Tracker error: specified index (%d) is "
@@ -63,151 +73,104 @@ void ETJump::ProgressionTrackers::updateTracker(
       return;
     }
 
-    tracker[pair.index] = pair.value;
+    if (pair.value != defaultValue) {
+      defs.push_back(TrackerDef<T>(pair.index, pair.value, name, func));
+    }
   }
-}
-
-std::vector<ETJump::ProgressionTrackerParser::IndexValuePair>
-ETJump::ProgressionTrackers::parseKey(const std::string &key) {
-  auto parser = ProgressionTrackerParser(key);
-  auto errors = parser.getErrors();
-  if (errors.size()) {
-    printParserErrors(errors, key);
-  }
-  return parser.getParsedPairs();
 }
 
 int ETJump::ProgressionTrackers::registerTracker(ProgressionTrackerKeys keys) {
-  auto progressionTracker = ProgressionTracker();
+  std::vector<TrackerDef<ChangeFunc>> changes;
+  std::vector<TrackerDef<ChangeFunc>> optionalChanges;
+  std::vector<TrackerDef<CheckFunc>> checks;
 
-  updateTracker(parseKey(keys.equal), progressionTracker.equal);
-  updateTracker(parseKey(keys.notEqual), progressionTracker.notEqual);
-  updateTracker(parseKey(keys.greaterThan), progressionTracker.greaterThan);
-  updateTracker(parseKey(keys.lessThan), progressionTracker.lessThan);
-  updateTracker(parseKey(keys.set), progressionTracker.set);
-  updateTracker(parseKey(keys.setIf), progressionTracker.setIf);
-  updateTracker(parseKey(keys.increment), progressionTracker.increment);
-  updateTracker(parseKey(keys.incrementIf), progressionTracker.incrementIf);
-  updateTracker(parseKey(keys.bitIsSet), progressionTracker.bitIsSet);
-  updateTracker(parseKey(keys.bitNotSet), progressionTracker.bitNotSet);
-  updateTracker(parseKey(keys.bitSet), progressionTracker.bitSet);
-  updateTracker(parseKey(keys.bitReset), progressionTracker.bitReset);
+  using PT = ETJump::ProgressionTrackers;
 
-  _progressionTrackers.push_back(progressionTracker);
+  constexpr int notset = ProgressionTrackerValueNotSet;
+  addDef(keys.set, notset, changes, "set", PT::Change::Set);
+  addDef(keys.increment, 0, changes, "inc", PT::Change::Increment);
+  addDef(keys.bitSet, notset, changes, "bit_set", PT::Change::SetBit);
+  addDef(keys.bitReset, notset, changes, "bit_reset", PT::Change::ResetBit);
+
+  addDef(keys.set, notset, optionalChanges, "set_if", PT::Change::Set);
+  addDef(keys.incrementIf, 0, optionalChanges, "inc_if", PT::Change::Increment);
+
+  addDef(keys.equal, notset, checks, "eq", PT::Check::Equal);
+  addDef(keys.notEqual, notset, checks, "not_eq", PT::Check::NotEqual);
+  addDef(keys.greaterThan, notset, checks, "gt", PT::Check::GreaterThan);
+  addDef(keys.lessThan, notset, checks, "lt", PT::Check::LessThan);
+  addDef(keys.bitIsSet, notset, checks, "bitset", PT::Check::BitSet);
+  addDef(keys.bitNotSet, notset, checks, "bitnotset", PT::Check::BitNotSet);
+
+  _progressionTrackers.push_back({changes, checks, optionalChanges});
   return _progressionTrackers.size() - 1;
 }
 
-void ETJump::ProgressionTrackers::useTracker(
-    gentity_t *ent, gentity_t *activator, const ProgressionTracker &tracker) {
-  int oldValues[MaxProgressionTrackers];
-
-  if (g_debugTrackers.integer > 0) {
-    memcpy(oldValues, activator->client->sess.progression, sizeof(oldValues));
+void ETJump::ProgressionTrackers::useTracker(gentity_t *ent,
+                                             gentity_t *activator,
+                                             const TrackerCollection &tracker) {
+  for (const auto &def : tracker.changes) {
+    executeChange(activator, def.name, def.index, def.value, def.execute);
   }
 
-  auto idx = 0;
+  bool activate = true;
 
-  for (auto &v : tracker.set) {
-    if (v >= 0) {
-      activator->client->sess.progression[idx] = v;
-    }
-
-    ++idx;
-  }
-
-  idx = 0;
-  for (auto &v : tracker.increment) {
-    if (v != 0) {
-      activator->client->sess.progression[idx] += v;
-    }
-    ++idx;
-  }
-
-  idx = 0;
-  for (auto &v : tracker.bitSet) {
-    if (v >= 0) {
-      activator->client->sess.progression[idx] |= (1 << v);
-    }
-    ++idx;
-  }
-
-  idx = 0;
-  for (auto &v : tracker.bitReset) {
-    if (v >= 0) {
-      activator->client->sess.progression[idx] &= ~(1 << v);
-    }
-    ++idx;
-  }
-
-  auto activate = true;
-  int clientTracker;
-
-  for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
-    clientTracker = activator->client->sess.progression[idx];
-
-    if ((tracker.equal[idx] != ProgressionTrackerValueNotSet &&
-         tracker.equal[idx] != clientTracker) ||
-        (tracker.lessThan[idx] != ProgressionTrackerValueNotSet &&
-         tracker.lessThan[idx] <= clientTracker) ||
-        (tracker.greaterThan[idx] != ProgressionTrackerValueNotSet &&
-         tracker.greaterThan[idx] >= clientTracker) ||
-        (tracker.notEqual[idx] != ProgressionTrackerValueNotSet &&
-         tracker.notEqual[idx] == clientTracker)) {
+  for (const auto &def : tracker.checks) {
+    if (!executeCheck(activator, def.name, def.index, def.value, def.execute)) {
       activate = false;
-      break;
     }
-  }
 
-  if (activate) {
-    for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
-      const auto clientBits =
-          std::bitset<32>(activator->client->sess.progression[idx]);
-
-      if (tracker.bitIsSet[idx] != ProgressionTrackerValueNotSet &&
-          !clientBits.test(tracker.bitIsSet[idx])) {
-        activate = false;
-        break;
-      }
-
-      if (tracker.bitNotSet[idx] != ProgressionTrackerValueNotSet &&
-          clientBits.test(tracker.bitNotSet[idx])) {
-        activate = false;
-        break;
-      }
+    // short circuit if not debugging trackers
+    if (!activate && g_debugTrackers.integer <= 0) {
+      break;
     }
   }
 
   if (activate) {
     G_UseTargetedEntities(ent, activator);
 
-    for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
-      if (tracker.setIf[idx] >= 0) {
-        activator->client->sess.progression[idx] = tracker.setIf[idx];
-      }
-
-      if (tracker.incrementIf[idx] != 0) {
-        activator->client->sess.progression[idx] += tracker.incrementIf[idx];
-      }
+    for (const auto &def : tracker.conditionalChanges) {
+      executeChange(activator, def.name, def.index, def.value, def.execute);
     }
-
-    printTrackerChanges(activator, oldValues);
   }
 }
 
-void ETJump::ProgressionTrackers::printTrackerChanges(gentity_t *activator,
-                                                      int *oldValues) {
-  if (g_debugTrackers.integer <= 0) {
-    return;
-  }
-  const auto clientNum = ClientNum(activator);
+bool ETJump::ProgressionTrackers::executeCheck(const gentity_t *ent,
+                                               const std::string &name,
+                                               const int index, const int value,
+                                               const CheckFunc &exec) {
 
-  for (int i = 0; i < MaxProgressionTrackers; i++) {
-    if (oldValues[i] != activator->client->sess.progression[i]) {
-      const std::string &trackerChangeMsg = stringFormat(
-          "^7Tracker change - index: ^3%i ^7value: ^2%i ^7from: ^9%i^7\n",
-          i + 1, activator->client->sess.progression[i], oldValues[i]);
-      Printer::SendPopupMessage(clientNum, trackerChangeMsg);
-    }
+  const bool result = exec(ent->client->sess.progression, index, value);
+
+  if (g_debugTrackers.integer > 0) {
+    const auto clientNum = ClientNum(ent);
+
+    const auto resultString = result ? "^hPASS" : "^jFAIL";
+    const std::string &msg = stringFormat(
+        "^7Tracker ^3%i ^7check %s^7: ^2%i ^9%s ^l%i", index + 1, resultString,
+        ent->client->sess.progression[index], name, value);
+    Printer::SendPopupMessage(clientNum, msg);
+  }
+
+  return result;
+}
+
+void ETJump::ProgressionTrackers::executeChange(const gentity_t *ent,
+                                                const std::string &name,
+                                                const int index,
+                                                const int value,
+                                                const ChangeFunc &exec) {
+  const int oldValue = ent->client->sess.progression[index];
+  exec(ent->client->sess.progression, index, value);
+
+  if (g_debugTrackers.integer > 0 &&
+      oldValue != ent->client->sess.progression[index]) {
+    const auto clientNum = ClientNum(ent);
+
+    const std::string &msg =
+        stringFormat("^7Tracker ^3%i ^7change: ^l%i ^7-> ^2%i ^9(%s %i)", index + 1,
+                     oldValue, ent->client->sess.progression[index], name, value);
+    Printer::SendPopupMessage(clientNum, msg);
   }
 }
 
@@ -235,7 +198,7 @@ void ETJump::ProgressionTrackers::useTargetTracker(gentity_t *ent,
 }
 
 void SP_target_tracker(gentity_t *self) {
-  const auto keys = ETJump::ProgressionTrackers::ParseTrackerKeys();
+  const auto keys = ETJump::ProgressionTrackers::parseTrackerKeys();
 
   self->key = ETJump::progressionTrackers->registerTracker(keys);
   self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator) {
@@ -248,7 +211,7 @@ void SP_trigger_tracker(gentity_t *self) {
   // just make it same type as trigger multiple for now
   self->s.eType = ET_TRIGGER_MULTIPLE;
 
-  const auto keys = ETJump::ProgressionTrackers::ParseTrackerKeys();
+  const auto keys = ETJump::ProgressionTrackers::parseTrackerKeys();
 
   self->key = ETJump::progressionTrackers->registerTracker(keys);
   self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator) {
@@ -260,7 +223,7 @@ void SP_trigger_tracker(gentity_t *self) {
 }
 
 ETJump::ProgressionTrackers::ProgressionTrackerKeys
-ETJump::ProgressionTrackers::ParseTrackerKeys() {
+ETJump::ProgressionTrackers::parseTrackerKeys() {
   ETJump::ProgressionTrackers::ProgressionTrackerKeys keys{};
 
   const char *VALUE_NOT_SET =

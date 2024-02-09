@@ -2885,9 +2885,9 @@ const char *interpolateNametags(const char *text, const int color);
 const char *findAndReplaceNametags(const char *text, const char *name);
 
 // Returns clientnum from ent
-int ClientNum(gentity_t *ent);
+int ClientNum(const gentity_t *ent);
 // Returns clientnum from client
-int ClientNum(gclient_t *client);
+int ClientNum(const gclient_t *client);
 
 // mainext.cpp
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
