@@ -862,7 +862,7 @@ typedef enum {
   // (SA) for Wolf
   PW_INVULNERABLE,
   PW_FIRE,      //----(SA)
-  PW_ELECTRIC,  //----(SA)
+  PW_PUSHERPREDICT, // used for pusher prediction, was PW_ELECTRIC
   PW_BREATHER,  //----(SA)
   PW_NOFATIGUE, //----(SA)
 
@@ -1855,10 +1855,9 @@ void BG_GetMarkDir(const vec3_t dir, const vec3_t normal, vec3_t out);
 void BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm,
                                          playerState_t *ps);
 
-void BG_TouchJumpPad(
-    playerState_t *ps,
-    entityState_t *jumppad); // Aciz: uncommented for trigger_push
-void BG_TouchVelocityJumpPad(playerState_t *ps, entityState_t *jumppad);
+void BG_TouchJumpPad(playerState_t *ps, int time, entityState_t *jumppad);
+void BG_TouchVelocityJumpPad(playerState_t *ps, int time,
+                             entityState_t *jumppad);
 void BG_GetPushVelocity(playerState_t *ps, vec3_t origin, int spawnflags,
                         vec3_t outVelocity);
 

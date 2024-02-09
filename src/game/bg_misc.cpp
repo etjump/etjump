@@ -5592,7 +5592,7 @@ void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB) {
 BG_TouchJumpPad
 ================
 */
-void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad) {
+void BG_TouchJumpPad(playerState_t *ps, int time, entityState_t *jumppad) {
   float s;
   vec3_t dir;
 
@@ -5600,6 +5600,12 @@ void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad) {
   if (ps->pm_type != PM_NORMAL) {
     return;
   }
+
+  if (ps->powerups[PW_PUSHERPREDICT] + jumppad->frame > time) {
+    return;
+  }
+
+  ps->powerups[PW_PUSHERPREDICT] = time;
 
   if (jumppad->constantLight & 0xff) {
     VectorNormalize2(jumppad->origin2, dir);
@@ -5652,7 +5658,8 @@ Additive pusher, adding horizontal and/or vertical speed
 to players current speed rather than setting it.
 ================
 */
-void BG_TouchVelocityJumpPad(playerState_t *ps, entityState_t *jumppad) {
+void BG_TouchVelocityJumpPad(playerState_t *ps, int time,
+                             entityState_t *jumppad) {
   float s;
   vec3_t dir;
   vec3_t outVelocity;
@@ -5661,6 +5668,12 @@ void BG_TouchVelocityJumpPad(playerState_t *ps, entityState_t *jumppad) {
   if (ps->pm_type != PM_NORMAL) {
     return;
   }
+
+  if (ps->powerups[PW_PUSHERPREDICT] + jumppad->frame > time) {
+    return;
+  }
+
+  ps->powerups[PW_PUSHERPREDICT] = time;
 
   if (jumppad->constantLight & 0xff) {
     VectorNormalize2(jumppad->origin2, dir);

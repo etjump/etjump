@@ -199,11 +199,6 @@ void UseHoldableItem(gentity_t *ent, int item) {
       ent->client->ps.powerups[PW_BREATHER] = 30000;
       break;
 
-    case HI_ELECTRIC: // protection from electric attacks -
-                      // absorbs 500 points of electric damage
-      ent->client->ps.powerups[PW_ELECTRIC] = 500;
-      break;
-
     case HI_FIRE: // protection from fire attacks - absorbs 500
                   // points of fire damage
       ent->client->ps.powerups[PW_FIRE] = 500;
