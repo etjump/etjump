@@ -5601,7 +5601,7 @@ void BG_TouchJumpPad(playerState_t *ps, int time, entityState_t *jumppad) {
     return;
   }
 
-  if (ps->powerups[PW_PUSHERPREDICT] + FRAMETIME > time) {
+  if (ps->powerups[PW_PUSHERPREDICT] + jumppad->frame > time) {
     return;
   }
 
@@ -5658,7 +5658,8 @@ Additive pusher, adding horizontal and/or vertical speed
 to players current speed rather than setting it.
 ================
 */
-void BG_TouchVelocityJumpPad(playerState_t *ps, int time, entityState_t *jumppad) {
+void BG_TouchVelocityJumpPad(playerState_t *ps, int time,
+                             entityState_t *jumppad) {
   float s;
   vec3_t dir;
   vec3_t outVelocity;
@@ -5668,7 +5669,7 @@ void BG_TouchVelocityJumpPad(playerState_t *ps, int time, entityState_t *jumppad
     return;
   }
 
-  if (ps->powerups[PW_PUSHERPREDICT] + FRAMETIME > time) {
+  if (ps->powerups[PW_PUSHERPREDICT] + jumppad->frame > time) {
     return;
   }
 
