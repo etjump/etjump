@@ -1323,9 +1323,8 @@ void Database::SaveNameOperation::Execute() {
     PrintPrepareError(op);
     return;
   }
-  char sanitizedName[MAX_TOKEN_CHARS]; // MAX_TOKEN_CHARS is more than
-                                       // enough
-  SanitizeConstString(name_.c_str(), sanitizedName, qtrue);
+
+  std::string sanitizedName = ETJump::sanitize(name_, true);
 
   if (!BindString(1, sanitizedName) || !BindString(2, name_) ||
       !BindInt(3, id_)) {
