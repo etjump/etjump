@@ -2901,6 +2901,7 @@ void OnGameShutdown();
 qboolean G_MapExists(const char *map);
 const char *GetRandomMap();
 const char *GetRandomMapByType(const char *customType);
+std::vector<std::string> getMapsOnList(const std::string &name);
 qboolean AdminCommandCheck(gentity_t *ent);
 // void StartRace(gentity_t *ent);
 const char *CustomMapTypeExists(const char *mapType);

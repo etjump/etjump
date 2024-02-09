@@ -408,6 +408,20 @@ std::string CustomMapVotes::ListInfo(const std::string &type) {
   return buffer;
 }
 
+std::vector<std::string>
+CustomMapVotes::getMapsOnList(const std::string &name) {
+  std::vector<std::string> mapList{};
+
+  for (const auto &list : customMapVotes_) {
+    if (list.type == name) {
+      mapList = list.mapsOnServer;
+      break;
+    }
+  }
+
+  return mapList;
+}
+
 std::string const CustomMapVotes::RandomMap(std::string const &type) {
   for (unsigned i = 0; i < customMapVotes_.size(); i++) {
     auto &customMapVote = customMapVotes_[i];

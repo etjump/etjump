@@ -490,11 +490,45 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       }
     }
 
-    const auto mapsOnServer = game.mapStatistics->getCurrentMaps();
-    // - 1 since we don't want to include the current map
-    const auto numMapsOnServer = static_cast<int>(mapsOnServer->size() - 1);
+    std::vector<std::string> maps{};
+    int numMaps;
+    const int clientNum = ClientNum(ent);
 
-    if (numMapsOnServer < 2) {
+    if (arg2) {
+      if (!CustomMapTypeExists(arg2)) {
+        Printer::SendPopupMessage(
+            clientNum,
+            stringFormat(
+                "Specified custom vote type ^3'%s' ^7does not exist.\n", arg2));
+        return G_INVALID;
+      }
+
+      maps = getMapsOnList(arg2);
+      numMaps = static_cast<int>(maps.size());
+
+      // in case someone made an empty map list
+      if (numMaps == 0) {
+        Printer::SendPopupMessage(
+            clientNum,
+            stringFormat("Specified custom vote type ^3'%s' ^7is empty.\n",
+                         arg2));
+        return G_INVALID;
+      }
+
+      // exclude current map if present on the list
+      for (const auto &map : maps) {
+        if (level.rawmapname == map) {
+          numMaps -= 1;
+          break;
+        }
+      }
+    } else {
+      maps = (*game.mapStatistics->getCurrentMaps());
+      // -1 to exclude current maps
+      numMaps = static_cast<int>(maps.size() - 1);
+    }
+
+    if (numMaps < 2) {
       // auto rtv
       if (ent == nullptr) {
         G_LogPrintf(
@@ -503,29 +537,29 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
             arg);
       } else {
         Printer::SendPopupMessage(
-            ClientNum(ent),
-            ETJump::stringFormat("Sorry, calling [lof]^3%s^7[lon] with less "
-                                 "than 3 maps on the server is not possible.",
-                                 arg));
+            clientNum, stringFormat("Sorry, calling [lof]^3%s^7[lon] with less "
+                                    "than 3 maps on %s is not possible.",
+                                    arg, arg2 ? "a list" : "the server"));
       }
       return G_INVALID;
     }
 
     const size_t maxMaps =
-        Numeric::clamp(g_rtvMapCount.integer, 2, std::min(numMapsOnServer, 9));
+        Numeric::clamp(g_rtvMapCount.integer, 2, std::min(numMaps, 9));
     std::set<std::string> uniqueMaps;
     auto rtvMaps = game.rtv->getRtvMaps();
 
     game.rtv->clearRtvMaps();
 
     // just copy all the maps if we don't have more maps than requested
-    if (numMapsOnServer <= maxMaps) {
-      std::copy(mapsOnServer->begin(), mapsOnServer->end(),
+    if (numMaps <= maxMaps) {
+      std::copy(maps.begin(), maps.end(),
                 std::inserter(uniqueMaps, uniqueMaps.begin()));
       uniqueMaps.erase(level.rawmapname);
     } else {
       while (uniqueMaps.size() <= maxMaps) {
-        const char *map = GetRandomMap();
+        // neither of these functions ever return the current map
+        const char *map = arg2 ? GetRandomMapByType(arg2) : GetRandomMap();
         uniqueMaps.insert(map);
       }
     }
@@ -536,9 +570,13 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 
     for (size_t i = 0; i < maxMaps; ++i, ++it) {
       (*rtvMaps)[i].first = *it;
-      cs += ETJump::stringFormat("%s\\0%s", (*rtvMaps)[i].first,
-                                 i == maxMaps - 1 ? "" : "\\");
+      cs += stringFormat("%s\\0%s", (*rtvMaps)[i].first,
+                         i == maxMaps - 1 ? "" : "\\");
     }
+
+    const char *mapTypeDesc = CustomMapTypeExists(arg2);
+    // array size is set in Cmd_CallVote_f
+    Q_strncpyz(arg2, mapTypeDesc ? mapTypeDesc : "", MAX_STRING_TOKENS);
 
     // this will never overflow as MAX_QPATH is 64 and rtv supports max 9 maps
     trap_SetConfigstring(CS_VOTE_YES, cs.c_str());

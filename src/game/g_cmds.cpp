@@ -2636,7 +2636,7 @@ void setCvString(char *voteMsg, char *voteArg) {
   if (func == G_DevMap_v_Wrapper) {
     voteString = stringFormat("%s (cheats enabled)", voteArg);
     Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
-  } else if (func == G_RandomMap_v) {
+  } else if (func == G_RandomMap_v || func == G_RockTheVote_v) {
     if (voteArg[0]) {
       voteString = stringFormat("from %s", voteArg);
       Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
