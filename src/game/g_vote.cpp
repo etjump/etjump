@@ -537,10 +537,9 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
             arg);
       } else {
         Printer::SendPopupMessage(
-            clientNum,
-            stringFormat("Sorry, calling [lof]^3%s^7[lon] with less than 3 "
-                         "maps on the server is not possible.",
-                         arg));
+            clientNum, stringFormat("Sorry, calling [lof]^3%s^7[lon] with less "
+                                    "than 3 maps on %s is not possible.",
+                                    arg, arg2 ? "a list" : "the server"));
       }
       return G_INVALID;
     }
