@@ -24,6 +24,7 @@
 
 #include "g_local.h"
 #include "etj_missilepad.h"
+#include "etj_utilities.h"
 
 namespace ETJump {
 void Missilepad::touch(gentity_t *self, gentity_t *other) {
@@ -39,19 +40,10 @@ void Missilepad::touch(gentity_t *self, gentity_t *other) {
 
   G_UseTargets(self, other);
 
-  vec3_t noiseOrigin;
-
-  if (!VectorCompare(self->r.currentOrigin, vec3_origin)) {
-    VectorCopy(self->r.currentOrigin, noiseOrigin);
-  } else {
-    const vec3_t bmodelCenter = {(self->r.absmax[0] + self->r.absmin[0]) / 2,
-                                 (self->r.absmax[1] + self->r.absmin[1]) / 2,
-                                 (self->r.absmax[2] + self->r.absmin[2]) / 2};
-
-    VectorCopy(bmodelCenter, noiseOrigin);
-  }
-
   if (self->noise_index) {
+    vec3_t noiseOrigin;
+    Utilities::getOriginOrBmodelCenter(self, noiseOrigin);
+  
     const auto te =
         soundEvent(noiseOrigin, EV_GENERAL_SOUND_VOLUME, self->noise_index);
     te->s.onFireStart = self->s.onFireStart;

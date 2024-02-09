@@ -108,4 +108,9 @@ void RemovePlayerWeapons(int clientNum);
  * and not touching any solids
  */
 bool inNoNoclipArea(gentity_t *ent);
+
+/**
+ * Writes to dst the origin of the entity, or the center of it's brush model.
+ */
+void getOriginOrBmodelCenter(const gentity_t *ent, float dst[3]);
 } // namespace Utilities
