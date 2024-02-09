@@ -571,11 +571,11 @@ static void CG_TouchTriggerPrediction() {
       }
 
       if (ent->eType == ET_PUSH_TRIGGER) {
-        BG_TouchJumpPad(&cg.predictedPlayerState, ent);
+        BG_TouchJumpPad(&cg.predictedPlayerState, cg.physicsTime, ent);
       }
 
       if (ent->eType == ET_VELOCITY_PUSH_TRIGGER) {
-        BG_TouchVelocityJumpPad(&cg.predictedPlayerState, ent);
+        BG_TouchVelocityJumpPad(&cg.predictedPlayerState, cg.physicsTime, ent);
       }
 
       continue;

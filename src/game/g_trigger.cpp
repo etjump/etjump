@@ -227,20 +227,12 @@ void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace) {
     return;
   }
 
-  // Avoid multiple activations while player travels through the trigger
-  // towards target
-  if (other->client->pushTriggerActivationTime + FRAMETIME > level.time) {
-    return;
-  }
-
-  other->client->pushTriggerActivationTime = level.time;
-
   switch (self->s.eType) {
     case ET_PUSH_TRIGGER:
-      BG_TouchJumpPad(&other->client->ps, &self->s);
+      BG_TouchJumpPad(&other->client->ps, level.time, &self->s);
       break;
     case ET_VELOCITY_PUSH_TRIGGER:
-      BG_TouchVelocityJumpPad(&other->client->ps, &self->s);
+      BG_TouchVelocityJumpPad(&other->client->ps, level.time, &self->s);
       break;
     default:
       break;

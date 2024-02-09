@@ -1830,9 +1830,13 @@ void ClientEndFrame(gentity_t *ent) {
   // turn off any expired powerups
   // OSP -- range changed for MV
   for (i = 0; i < PW_NUM_POWERUPS; i++) {
+    // etjump: repurposed powerups
+    if (i == PW_PUSHERPREDICT) {
+      continue;
+    }
 
-    if (i == PW_FIRE || // these aren't dependant on level.time
-        i == PW_ELECTRIC || i == PW_BREATHER || i == PW_NOFATIGUE ||
+    // these aren't dependant on level.time
+    if (i == PW_FIRE || i == PW_BREATHER || i == PW_NOFATIGUE ||
         ent->client->ps.powerups[i] == 0 // OSP
         || i == PW_OPS_CLASS_1 || i == PW_OPS_CLASS_2 || i == PW_OPS_CLASS_3 ||
         i == PW_OPS_DISGUISED || i == PW_ADRENALINE) {
