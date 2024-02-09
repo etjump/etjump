@@ -1574,6 +1574,20 @@ bool Rename(gentity_t *ent, Arguments argv) {
     return false;
   }
 
+  if (ent) {
+    if (IsTargetHigherLevel(ent, target, true)) {
+      if (ent != target) {
+        Printer::SendChatMessage(
+            ClientNum(ent), "^3rename: ^7you cannot rename a fellow admin.");
+        return false;
+      }
+    }
+
+    if (ent != target) {
+      target->client->forceRename = true;
+    }
+  }
+
   char userinfo[MAX_INFO_STRING] = "\0";
   int cn = ClientNum(target);
   trap_GetUserinfo(cn, userinfo, sizeof(userinfo));

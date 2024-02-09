@@ -1161,6 +1161,9 @@ struct gclient_s {
 
   // Amount of portalgun portals shot since last reset
   int numPortals;
+
+  // true if name change was issues by someone using !rename command on us
+  bool forceRename;
 };
 
 typedef struct {
