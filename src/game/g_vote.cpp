@@ -45,20 +45,20 @@ static int G_Map_v_Wrapper(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
   return G_Map_v(ent, dwVoteIndex, arg, arg2, false);
 }
 
-static int G_DevMap_v_Wrapper(gentity_t *ent, unsigned int dwVoteIndex,
-                              char *arg, char *arg2) {
+int G_DevMap_v_Wrapper(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
+                       char *arg2) {
   return G_Map_v(ent, dwVoteIndex, arg, arg2, true);
 }
 
 // VC optimizes for dup strings :)
 static const vote_reference_t aVoteInfo[] = {
-    {0x1ff, "map", G_Map_v_Wrapper, "Map",
+    {0x1ff, "map", G_Map_v_Wrapper, "Change map to",
      " <mapname>^7\n  Votes for a map to be loaded with cheats disabled"},
-    {0x1ff, "devmap", G_DevMap_v_Wrapper, "Devmap",
+    {0x1ff, "devmap", G_DevMap_v_Wrapper, "Change map to",
      " <mapname>^7\n  Votes for a map to be loaded with cheats enabled"},
-    {0x1ff, "maprestart", G_MapRestart_v, "Map Restart",
+    {0x1ff, "maprestart", G_MapRestart_v, "Map restart",
      "^7\n  Restarts the current map in progress"},
-    {0x1ff, "randommap", G_RandomMap_v, "Random Map",
+    {0x1ff, "randommap", G_RandomMap_v, "Random map",
      " ^7\n Votes a new random map to be loaded"},
     {0x1ff, "rtv", ETJump::G_RockTheVote_v, "Rock The Vote",
      " ^7\n Initiates Rock The Vote"},
