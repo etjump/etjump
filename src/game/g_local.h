@@ -2760,6 +2760,8 @@ void G_voteFlags(void);
 void G_voteHelp(gentity_t *ent, qboolean fShowVote);
 void G_playersMessage(gentity_t *ent);
 // Actual voting commands
+int G_DevMap_v_Wrapper(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
+                       char *arg2);
 int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
             const bool &cheats);
 int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
@@ -2899,6 +2901,7 @@ void OnGameShutdown();
 qboolean G_MapExists(const char *map);
 const char *GetRandomMap();
 const char *GetRandomMapByType(const char *customType);
+std::vector<std::string> getMapsOnList(const std::string &name);
 qboolean AdminCommandCheck(gentity_t *ent);
 // void StartRace(gentity_t *ent);
 const char *CustomMapTypeExists(const char *mapType);

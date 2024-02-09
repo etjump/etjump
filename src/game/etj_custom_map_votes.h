@@ -54,6 +54,7 @@ public:
   static bool isValidMap(const std::string &mapName);
   std::string ListTypes() const;
   std::string ListInfo(const std::string &name);
+  std::vector<std::string> getMapsOnList(const std::string &name);
   void GenerateVotesFile();
 
   void addCustomvoteList(int clientNum, const std::string &name,

@@ -317,6 +317,10 @@ qboolean OnConsoleCommand() {
 
 const char *GetRandomMap() { return game.mapStatistics->randomMap(); }
 
+std::vector<std::string> getMapsOnList(const std::string &name) {
+  return game.customMapVotes->getMapsOnList(name);
+}
+
 const char *G_MatchOneMap(const char *arg) {
   auto currentMaps = game.mapStatistics->getCurrentMaps();
   std::vector<std::string> matchingMaps;

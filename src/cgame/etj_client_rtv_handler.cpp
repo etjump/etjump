@@ -75,7 +75,7 @@ const std::vector<std::pair<std::string, int>> *ClientRtvHandler::getRtvMaps() {
 int ClientRtvHandler::getRtvYesVotes() const { return rtvVoteYes; }
 
 void ClientRtvHandler::setRtvVoteStatus() {
-  isRtvVote = !Q_stricmp(cgs.voteString, "Rock The Vote");
+  isRtvVote = !Q_stricmpn(cgs.voteString, "Rock The Vote", 13);
 }
 
 bool ClientRtvHandler::rtvVoteActive() const {

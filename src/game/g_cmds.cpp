@@ -2627,6 +2627,36 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
   return true;
 }
 
+namespace ETJump {
+void setCvString(char *voteMsg, char *voteArg) {
+  const auto voteStringFormat = voteArg[0] ? "%s %s" : "%s";
+  std::string voteString;
+  const auto func = level.voteInfo.vote_fn;
+
+  if (func == G_DevMap_v_Wrapper) {
+    voteString = stringFormat("%s (cheats enabled)", voteArg);
+    Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
+  } else if (func == G_RandomMap_v || func == G_RockTheVote_v) {
+    if (voteArg[0]) {
+      voteString = stringFormat("from %s", voteArg);
+      Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
+    }
+  } else if (func == G_AutoRtv_v) {
+    const int voteArgInt = Q_atoi(voteArg);
+
+    if (voteArgInt == 0) {
+      Q_strncpyz(voteArg, "Off", MAX_STRING_TOKENS);
+    } else {
+      voteString = stringFormat("%s", getMinutesString(voteArgInt));
+      Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
+    }
+  }
+
+  Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString),
+              voteStringFormat, voteMsg, voteArg);
+}
+} // namespace ETJump
+
 /*
 ==================
 Cmd_CallVote_f
@@ -2663,20 +2693,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     return;
   }
 
-  auto voteStringFormat = arg2[0] ? "%s %s" : "%s";
-
-  // make the vote message a bit nicer if users vote for auto rtv
-  if (level.voteInfo.vote_fn == ETJump::G_AutoRtv_v) {
-    if (Q_atoi(arg2) == 0) {
-      Q_strncpyz(arg2, "Off", sizeof(arg2));
-    } else {
-      Q_strncpyz(arg2, va("%s", ETJump::getMinutesString(Q_atoi(arg2)).c_str()),
-                 sizeof(arg2));
-    }
-  }
-
-  Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString),
-              voteStringFormat, arg1, arg2);
+  ETJump::setCvString(arg1, arg2);
 
   if (level.voteInfo.vote_fn == ETJump::G_RockTheVote_v) {
     game.rtv->setRtvStatus(true);
