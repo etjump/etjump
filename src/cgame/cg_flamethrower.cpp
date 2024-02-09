@@ -233,7 +233,12 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
               (FLAME_CHUNK_DIST / (FLAME_START_SPEED * speedScale));
     ft = ((double)of->timeStart + timeInc);
     t = (int)ft;
-    fracInc = timeInc / (double)(cg.time - of->timeStart);
+
+    // this is supposed to be roughly cg.time - cg.oldTime but
+    // cgame timers are garbage and this leads to div by 0 sometimes
+    const double fracDiv = std::max(1, cg.time - of->timeStart);
+
+    fracInc = timeInc / fracDiv;
     backLerp = 1.0 - fracInc;
 
     numFrameChunks = 0; // CHANGE: id
