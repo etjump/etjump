@@ -2760,6 +2760,8 @@ void G_voteFlags(void);
 void G_voteHelp(gentity_t *ent, qboolean fShowVote);
 void G_playersMessage(gentity_t *ent);
 // Actual voting commands
+int G_DevMap_v_Wrapper(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
+                       char *arg2);
 int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
             const bool &cheats);
 int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
