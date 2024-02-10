@@ -267,6 +267,13 @@ void SaveSystem::load(gentity_t *ent) {
   const auto pos = getValidTeamSaveForSlot(ent, client->sess.sessionTeam, slot);
 
   if (pos) {
+    if (pos->stance == SaveStance::Prone &&
+        client->ps.weapon == WP_MORTAR_SET) {
+      CPTo(ent,
+           "You cannot ^3load ^7to this position while using a mortar set.");
+      return;
+    }
+
     saveLastLoadPos(ent); // store position for unload command
     restoreStanceFromSave(ent, pos);
 
@@ -404,6 +411,11 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
     pos = &_clients[clientNum].axisBackups[slot];
   }
 
+  if (pos->stance == SaveStance::Prone && client->ps.weapon == WP_MORTAR_SET) {
+    CPTo(ent, "You cannot ^3load ^7to this position while using a mortar set.");
+    return;
+  }
+
   if (pos->isValid) {
     restoreStanceFromSave(ent, pos);
 
@@ -466,6 +478,13 @@ void SaveSystem::unload(gentity_t *ent) {
   const auto pos = getValidTeamUnloadPos(ent, client->sess.sessionTeam);
 
   if (pos) {
+    if (pos->stance == SaveStance::Prone &&
+        client->ps.weapon == WP_MORTAR_SET) {
+      CPTo(ent,
+           "You cannot ^3unload ^7to this position while using a mortar set.");
+      return;
+    }
+
     if (!g_cheats.integer) {
       // check for nosave areas only if we have valid pos
       trace_t trace;
