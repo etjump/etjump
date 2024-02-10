@@ -113,4 +113,9 @@ bool inNoNoclipArea(gentity_t *ent);
  * Writes to dst the origin of the entity, or the center of it's brush model.
  */
 void getOriginOrBmodelCenter(const gentity_t *ent, float dst[3]);
+
+/**
+ * Copies the target clients stance (crouch/prone/stand)
+ */
+void copyStanceFromClient(gentity_t *self, const gentity_t *target);
 } // namespace Utilities

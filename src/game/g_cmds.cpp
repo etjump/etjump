@@ -4457,14 +4457,18 @@ void Cmd_Goto_f(gentity_t *ent) {
     }
   }
 
+  Utilities::copyStanceFromClient(ent, other);
   VectorCopy(other->client->ps.origin, ent->client->ps.origin);
   VectorClear(ent->client->ps.velocity);
-  trap_SendServerCommand(ClientNum(ent),
-                         va("cpm \"%s^7 -> %s\n\"", ent->client->pers.netname,
-                            other->client->pers.netname));
-  trap_SendServerCommand(ClientNum(other),
-                         va("cpm \"%s^7 -> %s\n\"", ent->client->pers.netname,
-                            other->client->pers.netname));
+
+  Printer::SendPopupMessage(ClientNum(ent),
+                            ETJump::stringFormat("%s ^7-> %s\n",
+                                                 ent->client->pers.netname,
+                                                 other->client->pers.netname));
+  Printer::SendPopupMessage(ClientNum(other),
+                            ETJump::stringFormat("%s ^7-> %s\n",
+                                                 ent->client->pers.netname,
+                                                 other->client->pers.netname));
 }
 
 void Cmd_Call_f(gentity_t *ent) {
@@ -4540,14 +4544,18 @@ void Cmd_Call_f(gentity_t *ent) {
     }
   }
 
+  Utilities::copyStanceFromClient(other, ent);
   VectorClear(other->client->ps.velocity);
   VectorCopy(ent->client->ps.origin, other->client->ps.origin);
-  trap_SendServerCommand(ClientNum(ent),
-                         va("cpm \"%s^7 -> %s\n\"", other->client->pers.netname,
-                            ent->client->pers.netname));
-  trap_SendServerCommand(ClientNum(other),
-                         va("cpm \"%s^7 -> %s\n\"", other->client->pers.netname,
-                            ent->client->pers.netname));
+
+  Printer::SendPopupMessage(ClientNum(ent),
+                            ETJump::stringFormat("%s ^7-> %s\n",
+                                                 other->client->pers.netname,
+                                                 ent->client->pers.netname));
+  Printer::SendPopupMessage(ClientNum(other),
+                            ETJump::stringFormat("%s ^7-> %s\n",
+                                                 other->client->pers.netname,
+                                                 ent->client->pers.netname));
 }
 
 void Cmd_PrivateMessage_f(gentity_t *ent) {
