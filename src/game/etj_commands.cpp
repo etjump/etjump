@@ -2220,7 +2220,13 @@ bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
 }
 
 bool RockTheVote(gentity_t *ent, Arguments argv) {
-  trap_SendServerCommand(ClientNum(ent), "callvote rtv");
+  std::string cmd = "callvote rtv";
+
+  if (argv->size() > 1) {
+    cmd += " " + argv->at(1);
+  }
+
+  trap_SendServerCommand(ClientNum(ent), cmd.c_str());
   return true;
 }
 

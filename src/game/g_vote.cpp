@@ -494,7 +494,7 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     int numMaps;
     const int clientNum = ClientNum(ent);
 
-    if (arg2) {
+    if (arg2[0]) {
       if (!CustomMapTypeExists(arg2)) {
         Printer::SendPopupMessage(
             clientNum,
@@ -539,7 +539,7 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
         Printer::SendPopupMessage(
             clientNum, stringFormat("Sorry, calling [lof]^3%s^7[lon] with less "
                                     "than 3 maps on %s is not possible.",
-                                    arg, arg2 ? "a list" : "the server"));
+                                    arg, arg2[0] ? "a list" : "the server"));
       }
       return G_INVALID;
     }
@@ -559,7 +559,7 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     } else {
       while (uniqueMaps.size() <= maxMaps) {
         // neither of these functions ever return the current map
-        const char *map = arg2 ? GetRandomMapByType(arg2) : GetRandomMap();
+        const char *map = arg2[0] ? GetRandomMapByType(arg2) : GetRandomMap();
         uniqueMaps.insert(map);
       }
     }
