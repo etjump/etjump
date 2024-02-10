@@ -1692,6 +1692,12 @@ static void ClientCleanName(const char *in, char *out, int outSize) {
 void G_NameChanged(gentity_t *ent) {
   gclient_t *client = ent->client;
 
+  // don't take away name change limits if an admin renamed us
+  if (client->forceRename) {
+    client->forceRename = false;
+    return;
+  }
+
   if (level.time >
       client->sess.lastNameChangeTime + (g_nameChangeInterval.integer) * 1000) {
     client->sess.nameChangeCount = 0;
