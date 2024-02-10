@@ -2846,7 +2846,13 @@ static void CG_ServerCommand(void) {
 
   // for !rtv admin command
   if (!Q_stricmp(cmd, "callvote")) {
-    trap_SendConsoleCommand(va("%s %s", cmd, arguments[0].c_str()));
+    std::string command = va("%s %s", cmd, arguments[0].c_str());
+
+    if (arguments.size() > 1) {
+      command += " " + arguments[1];
+    }
+
+    trap_SendConsoleCommand(command.c_str());
     return;
   }
 
