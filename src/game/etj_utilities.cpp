@@ -314,3 +314,24 @@ void Utilities::getOriginOrBmodelCenter(const gentity_t *ent, float dst[3]) {
     dst[2] = (ent->r.absmax[2] + ent->r.absmin[2]) / 2;
   }
 }
+
+void Utilities::copyStanceFromClient(gentity_t *self, const gentity_t *target) {
+  // safeguards
+  if (!target || !target->client || !self || !self->client) {
+    return;
+  }
+
+  if (target->client->ps.eFlags & EF_CROUCHING) {
+    self->client->ps.eFlags &= ~EF_PRONE;
+    self->client->ps.eFlags &= ~EF_PRONE_MOVING;
+    self->client->ps.pm_flags |= PMF_DUCKED;
+  } else if (target->client->ps.eFlags & EF_PRONE ||
+             target->client->ps.eFlags & EF_PRONE_MOVING) {
+    self->client->ps.eFlags |= EF_PRONE;
+    SetClientViewAngle(self, target->client->ps.viewangles);
+  } else {
+    self->client->ps.eFlags &= ~EF_PRONE;
+    self->client->ps.eFlags &= ~EF_PRONE_MOVING;
+    self->client->ps.pm_flags &= ~PMF_DUCKED;
+  }
+}
