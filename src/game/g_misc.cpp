@@ -2175,7 +2175,8 @@ void mg42_think(gentity_t *self) {
 
   // heat handling
   if (owner->client) {
-    self->mg42weapHeat = owner->client->ps.weapHeat[WP_DUMMY_MG42];
+    self->mg42weapHeat =
+        static_cast<int>(owner->client->pmext.weapHeat[WP_DUMMY_MG42]);
   }
 
   // overheated mg42 smokes
@@ -2285,7 +2286,8 @@ void mg42_stopusing(gentity_t *self) {
     // owner->client->ps.gunfx = 0;
 
     // owner->client->ps.weapHeat[WP_DUMMY_MG42] = 0;
-    self->mg42weapHeat = owner->client->ps.weapHeat[WP_DUMMY_MG42];
+    self->mg42weapHeat =
+        static_cast<int>(owner->client->pmext.weapHeat[WP_DUMMY_MG42]);
     self->backupWeaponTime = owner->client->ps.weaponTime;
     owner->client->ps.weaponTime = owner->backupWeaponTime;
 
@@ -2368,7 +2370,8 @@ void mg42_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
     owner->client->ps.viewlocked = 0; // let them look around
     owner->active = qfalse;
     // owner->client->ps.gunfx = 0;
-    other->client->ps.weapHeat[WP_DUMMY_MG42] = ent->mg42weapHeat;
+    other->client->pmext.weapHeat[WP_DUMMY_MG42] =
+        static_cast<float>(ent->mg42weapHeat);
     ent->backupWeaponTime = owner->client->ps.weaponTime;
     owner->backupWeaponTime = owner->client->ps.weaponTime;
   }

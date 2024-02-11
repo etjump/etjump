@@ -3517,7 +3517,8 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt) {
       Q_strncpyz(ent->tagName, "tag_player", MAX_QPATH);
       ent->backupWeaponTime = ent->client->ps.weaponTime;
       ent->client->ps.weaponTime = traceEnt->backupWeaponTime;
-      ent->client->ps.weapHeat[WP_DUMMY_MG42] = traceEnt->mg42weapHeat;
+      ent->client->pmext.weapHeat[WP_DUMMY_MG42] =
+          static_cast<float>(traceEnt->mg42weapHeat);
 
       ent->tankLink = traceEnt;
       traceEnt->tankLink = ent;
@@ -3557,7 +3558,8 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt) {
 
       ent->backupWeaponTime = ent->client->ps.weaponTime;
       ent->client->ps.weaponTime = traceEnt->backupWeaponTime;
-      ent->client->ps.weapHeat[WP_DUMMY_MG42] = traceEnt->mg42weapHeat;
+      ent->client->pmext.weapHeat[WP_DUMMY_MG42] =
+          static_cast<float>(traceEnt->mg42weapHeat);
 
       G_UseTargets(traceEnt,
                    ent); //----(SA)	added for Mike so
@@ -3648,7 +3650,8 @@ void G_LeaveTank(gentity_t *ent, qboolean position) {
     TeleportPlayer(ent, pos, ent->client->ps.viewangles);
   }
 
-  tank->mg42weapHeat = ent->client->ps.weapHeat[WP_DUMMY_MG42];
+  tank->mg42weapHeat =
+      static_cast<int>(ent->client->pmext.weapHeat[WP_DUMMY_MG42]);
   tank->backupWeaponTime = ent->client->ps.weaponTime;
   ent->client->ps.weaponTime = ent->backupWeaponTime;
 
@@ -3705,7 +3708,8 @@ void Cmd_Activate_f(gentity_t *ent) {
       for (i = 0; i < level.num_entities; i++) {
         if (g_entities[i].s.eType == ET_MG42_BARREL &&
             g_entities[i].r.ownerNum == ent->s.number) {
-          g_entities[i].mg42weapHeat = ent->client->ps.weapHeat[WP_DUMMY_MG42];
+          g_entities[i].mg42weapHeat =
+              static_cast<int>(ent->client->pmext.weapHeat[WP_DUMMY_MG42]);
           g_entities[i].backupWeaponTime = ent->client->ps.weaponTime;
           break;
         }
