@@ -46,8 +46,13 @@ void DemoCompatibility::parseDemoVersion() {
   } else {
     const char *sysInfoCS = CG_ConfigString(CS_SYSTEMINFO);
     const char *pakNames = Info_ValueForKey(sysInfoCS, "sv_referencedPakNames");
-    versionStr = std::strchr(pakNames, '/'); // etjump/...
 
+    // sanity check, shouldn't happen
+    if (pakNames == nullptr) {
+      return;
+    }
+
+    versionStr = std::strchr(pakNames, '/'); // etjump/...
     size_t idx = std::string::npos;
 
     for (size_t i = 0; i < versionStr.length(); i++) {
