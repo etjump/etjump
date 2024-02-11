@@ -630,7 +630,7 @@ void Weapon_Syringe(gentity_t *ent) {
 ======================
 */
 void Weapon_AdrenalineSyringe(gentity_t *ent) {
-  ent->client->ps.powerups[PW_ADRENALINE] = level.time + 10000;
+  ent->client->ps.powerups[PW_ADRENALINE] = 1;
 }
 
 void G_ExplodeMissile(gentity_t *ent);
@@ -3627,15 +3627,15 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
 
   vectoangles(tr.plane.normal, t_portalAngles);
 
-  if (tr.entityNum != ENTITYNUM_WORLD &&
-      tr.entityNum < MAX_GENTITIES &&
+  if (tr.entityNum != ENTITYNUM_WORLD && tr.entityNum < MAX_GENTITIES &&
       !Q_stricmp(g_entities[tr.entityNum].classname, "func_portaltarget")) {
 
     gentity_t *brushEnt = &g_entities[tr.entityNum];
 
     vec3_t be_position; // brush ent position
-    vec3_t delta; // delta between brushent position and trace end
-    vec3_t normalScaled; // plane normal scaled by dotproduct of delta and itself
+    vec3_t delta;       // delta between brushent position and trace end
+    vec3_t
+        normalScaled; // plane normal scaled by dotproduct of delta and itself
 
     Utilities::getOriginOrBmodelCenter(brushEnt, be_position);
 
@@ -3789,7 +3789,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   portal->s.otherEntityNum =
       ent->s.clientNum; // HACK: Using this for render checks.....
 
-    // Set portal team to shooters team. Anyone with same team can use the portal
+  // Set portal team to shooters team. Anyone with same team can use the portal
   portal->portalTeam = ent->client->sess.portalTeam;
 
   // Set angle of entity based on normal of plane....
@@ -4604,7 +4604,13 @@ void FireWeapon(gentity_t *ent) {
       break;
     case WP_MEDIC_ADRENALINE:
       ent->client->ps.classWeaponTime = level.time;
-      Weapon_AdrenalineSyringe(ent);
+
+      // we get PW_ADRENALINE automatically if we have nofatigue,
+      // so we don't need to actually do anything if it's enabled
+      if (!ent->client->pers.nofatigue) {
+        Weapon_AdrenalineSyringe(ent);
+      }
+
       break;
     case WP_AMMO:
       Weapon_MagicAmmo(ent);
