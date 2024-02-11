@@ -7968,6 +7968,15 @@ qboolean BG_CursorInRect(rectDef_t *rect) {
                               DC->cursory);
 }
 
+// applies SCREEN_OFFSET_X to rect->x to compare cursor position
+// with widescreen corrected rect->x, used when you have to compare
+// widescreen corrected panel with the original rect
+qboolean BG_CursorInRectWide(rectDef_t *rect) {
+  return BG_RectContainsPoint(rect->x + SCREEN_OFFSET_X, rect->y, rect->w,
+                              rect->h, static_cast<float>(DC->cursorx),
+                              static_cast<float>(DC->cursory));
+}
+
 void BG_PanelButton_RenderEdit(panel_button_t *button) {
   qboolean useCvar = button->data[0] ? qfalse : qtrue;
   int offset = -1;

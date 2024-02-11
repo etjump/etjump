@@ -662,6 +662,7 @@ panel_button_t *BG_PanelButtons_GetFocusButton(void);
 qboolean BG_RectContainsPoint(float x, float y, float w, float h, float px,
                               float py);
 qboolean BG_CursorInRect(rectDef_t *rect);
+qboolean BG_CursorInRectWide(rectDef_t *rect);
 
 void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size,
                            fontInfo_t *font);
