@@ -568,7 +568,7 @@ typedef struct {
   int silencedSideArm; // Gordon: Keep track of whether the luger/colt
                        // is silenced "in holster", prolly want to do
                        // this for the kar98 etc too
-  int sprintTime;
+  float sprintTime;
 
   int airleft;
 
@@ -847,7 +847,6 @@ constexpr int EF_PLAYER_UNUSED5 = EF_PATH_LINK;       // used only on entities
 constexpr int EF_PLAYER_UNUSED6 = EF_SPARE0;          // used only on entities
 // clang-format on
 
-
 #define BG_PlayerMounted(eFlags)                                               \
   ((eFlags & EF_MG42_ACTIVE) || (eFlags & EF_MOUNTEDTANK) ||                   \
    (eFlags & EF_AAGUN_ACTIVE))
@@ -861,10 +860,10 @@ typedef enum {
 
   // (SA) for Wolf
   PW_INVULNERABLE,
-  PW_FIRE,      //----(SA)
+  PW_FIRE,          //----(SA)
   PW_PUSHERPREDICT, // used for pusher prediction, was PW_ELECTRIC
-  PW_BREATHER,  //----(SA)
-  PW_NOFATIGUE, //----(SA)
+  PW_BREATHER,      //----(SA)
+  PW_NOFATIGUE,     //----(SA)
 
   PW_REDFLAG,
   PW_BLUEFLAG,
