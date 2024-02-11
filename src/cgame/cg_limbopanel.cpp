@@ -1207,31 +1207,31 @@ void CG_LimboPanel_ClassBar_Draw(panel_button_t *button) {
   char buffer[64];
   float w;
 
-  if (BG_CursorInRect(&medalPic0.rect)) {
+  if (BG_CursorInRectWide(&medalPic0.rect)) {
     text = skillNames[0];
-  } else if (BG_CursorInRect(&medalPic1.rect)) {
+  } else if (BG_CursorInRectWide(&medalPic1.rect)) {
     text = skillNames[1];
-  } else if (BG_CursorInRect(&medalPic2.rect)) {
+  } else if (BG_CursorInRectWide(&medalPic2.rect)) {
     text = skillNames[2];
-  } else if (BG_CursorInRect(&medalPic3.rect)) {
+  } else if (BG_CursorInRectWide(&medalPic3.rect)) {
     text = skillNames[3];
-  } else if (BG_CursorInRect(&medalPic4.rect)) {
+  } else if (BG_CursorInRectWide(&medalPic4.rect)) {
     text = skillNames[4];
-  } else if (BG_CursorInRect(&medalPic5.rect)) {
+  } else if (BG_CursorInRectWide(&medalPic5.rect)) {
     text = skillNames[5];
-  } else if (BG_CursorInRect(&medalPic6.rect)) {
+  } else if (BG_CursorInRectWide(&medalPic6.rect)) {
     text = skillNames[6];
   } else if (CG_LimboPanel_GetTeam() == TEAM_SPECTATOR) {
     text = "JOIN A TEAM";
-  } else if (BG_CursorInRect(&classButton0.rect)) {
+  } else if (BG_CursorInRectWide(&classButton0.rect)) {
     text = BG_ClassnameForNumber(0);
-  } else if (BG_CursorInRect(&classButton1.rect)) {
+  } else if (BG_CursorInRectWide(&classButton1.rect)) {
     text = BG_ClassnameForNumber(1);
-  } else if (BG_CursorInRect(&classButton2.rect)) {
+  } else if (BG_CursorInRectWide(&classButton2.rect)) {
     text = BG_ClassnameForNumber(2);
-  } else if (BG_CursorInRect(&classButton3.rect)) {
+  } else if (BG_CursorInRectWide(&classButton3.rect)) {
     text = BG_ClassnameForNumber(3);
-  } else if (BG_CursorInRect(&classButton4.rect)) {
+  } else if (BG_CursorInRectWide(&classButton4.rect)) {
     text = BG_ClassnameForNumber(4);
   }
 
@@ -1516,8 +1516,8 @@ void CG_LimboPanel_RenderLight(panel_button_t *button) {
     button->data[3] = button->data[3] ^ 1;
     //			if( button->data[3] ) {
     //				button->data[2] = cg.time + rand() %
-    // 200; 			} else { 				button->data[2] = cg.time +
-    // rand() % 1000;
+    // 200; 			} else {
+    // button->data[2] = cg.time + rand() % 1000;
     //			}
     //		}
 
