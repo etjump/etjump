@@ -3580,6 +3580,49 @@ void PM_AdjustAimSpreadScale(void) {
       (int)pm->ps->aimSpreadScaleFloat; // update the int for the client
 }
 
+static void PM_HandleRecoil() {
+  vec3_t muzzlebounce;
+  const int deltaTime = pm->cmd.serverTime - pm->pmext->weapRecoilTime;
+
+  if (deltaTime > pm->pmext->weapRecoilDuration) {
+    pm->pmext->weapRecoilTime = 0;
+    pm->pmext->lastRecoilDeltaTime = 0;
+    return;
+  }
+
+  VectorCopy(pm->ps->viewangles, muzzlebounce);
+  const double frac = pml.frametime * 125; // fix recoil to ~125fps
+  const auto recoilDuration = static_cast<float>(pm->pmext->weapRecoilDuration);
+
+  for (int i = pm->pmext->lastRecoilDeltaTime; i < deltaTime; i += pml.msec) {
+    const auto msec = static_cast<float>(i);
+
+    if (pm->pmext->weapRecoilPitch > 0.f) {
+      muzzlebounce[PITCH] -=
+          static_cast<float>(frac * 2 * pm->pmext->weapRecoilPitch *
+                             std::cos(2.5 * msec / recoilDuration));
+      muzzlebounce[PITCH] -= static_cast<float>(frac * 0.25 * random() *
+                                                (1.0f - msec / recoilDuration));
+    }
+
+    if (pm->pmext->weapRecoilYaw > 0.f) {
+      muzzlebounce[YAW] +=
+          static_cast<float>(frac * 0.5 * pm->pmext->weapRecoilYaw *
+                             std::cos(1.0 - msec * 3 / recoilDuration));
+      muzzlebounce[YAW] += static_cast<float>(frac * 0.5 * crandom() *
+                                              (1.0f - msec / recoilDuration));
+    }
+  }
+
+  // set the delta angle
+  for (int i = 0; i < 3; i++) {
+    pm->ps->delta_angles[i] = ANGLE2SHORT(muzzlebounce[i]) - pm->cmd.angles[i];
+  }
+
+  VectorCopy(muzzlebounce, pm->ps->viewangles);
+  pm->pmext->lastRecoilDeltaTime = deltaTime;
+}
+
 #define weaponstateFiring                                                      \
   (pm->ps->weaponstate == WEAPON_FIRING ||                                     \
    pm->ps->weaponstate == WEAPON_FIRINGALT)
@@ -3910,47 +3953,7 @@ static void PM_Weapon(void) {
   // do the recoil before setting the values, that way it will be shown
   // next frame and not this
   if (pm->pmext->weapRecoilTime) {
-    vec3_t muzzlebounce;
-    int i, deltaTime;
-
-    deltaTime = pm->cmd.serverTime - pm->pmext->weapRecoilTime;
-    VectorCopy(pm->ps->viewangles, muzzlebounce);
-
-    if (deltaTime > pm->pmext->weapRecoilDuration) {
-      deltaTime = pm->pmext->weapRecoilDuration;
-    }
-
-    for (i = pm->pmext->lastRecoilDeltaTime; i < deltaTime; i += 15) {
-      if (pm->pmext->weapRecoilPitch > 0.f) {
-        muzzlebounce[PITCH] -= 2 * pm->pmext->weapRecoilPitch *
-                               cos(2.5 * (i) / pm->pmext->weapRecoilDuration);
-        muzzlebounce[PITCH] -=
-            0.25 * random() * (1.0f - (i) / pm->pmext->weapRecoilDuration);
-      }
-
-      if (pm->pmext->weapRecoilYaw > 0.f) {
-        muzzlebounce[YAW] += 0.5 * pm->pmext->weapRecoilYaw *
-                             cos(1.0 - (i)*3 / pm->pmext->weapRecoilDuration);
-        muzzlebounce[YAW] +=
-            0.5 * crandom() * (1.0f - (i) / pm->pmext->weapRecoilDuration);
-      }
-    }
-
-    // set the delta angle
-    for (i = 0; i < 3; i++) {
-      int cmdAngle;
-
-      cmdAngle = ANGLE2SHORT(muzzlebounce[i]);
-      pm->ps->delta_angles[i] = cmdAngle - pm->cmd.angles[i];
-    }
-    VectorCopy(muzzlebounce, pm->ps->viewangles);
-
-    if (deltaTime == pm->pmext->weapRecoilDuration) {
-      pm->pmext->weapRecoilTime = 0;
-      pm->pmext->lastRecoilDeltaTime = 0;
-    } else {
-      pm->pmext->lastRecoilDeltaTime = deltaTime;
-    }
+    PM_HandleRecoil();
   }
 
   delayedFire = qfalse;
