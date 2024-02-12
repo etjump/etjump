@@ -4358,6 +4358,7 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
   const char *token, *p;
   char key[MAX_TOKEN_CHARS], value[MAX_TOKEN_CHARS];
   bool classchanged = false;
+  bool nospawn = false;
 
   // rain - reset and fill in the spawnVars info so that spawn
   // functions can use them
@@ -4388,6 +4389,11 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
                ent->scriptName, GAME_VERSION, ent->scriptName, key, value);
     }
 
+    if (!Q_stricmp(key, "classname_nospawn")) {
+      Q_strncpyz(key, "classname", sizeof(key));
+      nospawn = true;
+    } 
+    
     if (!Q_stricmp(key, "classname")) {
       if (Q_stricmp(value, ent->classname)) {
         classchanged = true;
@@ -4422,9 +4428,12 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
 
   // rain - if the classname was changed, call the spawn func again
   if (classchanged) {
-    level.spawning = qtrue;
-    G_CallSpawn(ent);
-    level.spawning = qfalse;
+    if (!nospawn) {
+      level.spawning = qtrue;
+      G_CallSpawn(ent);
+      level.spawning = qfalse;
+    }
+
     trap_LinkEntity(ent);
   }
 
