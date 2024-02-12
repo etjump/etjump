@@ -49,7 +49,8 @@ void CG_BuildSolidList(void) {
     // SOLID_BMODELS (e.g. constructibles); use current state so
     // prediction isn't fubar
     if (cent->currentState.solid == SOLID_BMODEL &&
-        cent->currentState.eType != ET_PLAYER && // etjump: flag repurposed for players
+        cent->currentState.eType !=
+            ET_PLAYER && // etjump: flag repurposed for players
         (cent->currentState.eFlags & EF_NONSOLID_BMODEL)) {
       continue;
     }
@@ -1332,22 +1333,33 @@ void CG_PredictPlayerState() {
   if (cg.time > cg.cameraShakeTime) {
     cg.cameraShakeScale = 0;
   } else {
-    float x;
-
     // starts at 1, approaches 0 over time
-    x = static_cast<float>(cg.cameraShakeTime - cg.time) / cg.cameraShakeLength;
-
-    // move
-    cg.predictedPlayerState.origin[2] +=
-        static_cast<float>(std::sin(M_PI * 8 * 13 + cg.cameraShakePhase) * x *
-                           6.0f * cg.cameraShakeScale);
-
-    cg.predictedPlayerState.origin[1] +=
-        static_cast<float>(std::sin(M_PI * 17 * x + cg.cameraShakePhase) * x *
-                           6.0f * cg.cameraShakeScale);
-
-    cg.predictedPlayerState.origin[0] +=
+    const auto x = static_cast<double>(cg.cameraShakeTime - cg.time) /
+                   cg.cameraShakeLength;
+    const auto shakeX =
         static_cast<float>(std::cos(M_PI * 7 * x + cg.cameraShakePhase) * x *
                            6.0f * cg.cameraShakeScale);
+    const auto shakeY =
+        static_cast<float>(std::sin(M_PI * 17 * x + cg.cameraShakePhase) * x *
+                           6.0f * cg.cameraShakeScale);
+    const auto shakeZ =
+        static_cast<float>(std::sin(M_PI * 8 * 13 + cg.cameraShakePhase) * x *
+                           6.0f * cg.cameraShakeScale);
+    const float frameTime = 8.0f; // 125fps
+    const float scale = static_cast<float>(cg.frametime) / frameTime;
+
+    const vec3_t shake = {shakeX * scale, shakeY * scale, shakeZ * scale};
+
+    const int time = cg.time - cg.predictedErrorTime;
+    float frac =
+        (cg_errorDecay.value - static_cast<float>(time)) / cg_errorDecay.value;
+
+    if (frac < 0) {
+      frac = 0;
+    }
+
+    VectorScale(cg.predictedError, frac, cg.predictedError);
+    VectorAdd(shake, cg.predictedError, cg.predictedError);
+    cg.predictedErrorTime = cg.oldTime;
   }
 }
