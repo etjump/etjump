@@ -369,7 +369,7 @@ void CG_KickAngles(void) {
   float idealCenterSpeed, kickChange;
   int i, frametime, t;
   float ft;
-#define STEP 20
+  constexpr int STEP = 3;
   char buf[32]; // NERVE - SMF
 
   // this code is frametime-dependant, so split it up into small chunks
