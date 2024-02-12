@@ -4404,6 +4404,11 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
 
     G_ParseField(key, value, ent);
 
+    if (!Q_stricmp(ent->classname, "trigger_objective_info") && !classchanged) {
+      G_Error("etpro_ScriptAction_SetValues: updating trigger_objective_info "
+              "is not supported\n");
+    }
+
     if (!Q_stricmp(key, "targetname")) {
       // need to hash this ent targetname for setstate script targets...
       ent->targetnamehash =
