@@ -1437,6 +1437,8 @@ typedef struct playerState_s {
   // transmission "weapstatus" value.
 
   // ETJump: unused, we track this in pmext instead
+  // this doesn't get communicated though, weapHeat is communicated
+  // by storing currently held weapon's heat to curWeapHeat
   int weapHeat[MAX_WEAPONS]; // some weapons can overheat.  this tracks
                              // (server-side) how hot each weapon
                              // currently is.
