@@ -1004,6 +1004,16 @@ void ClientThink_real(gentity_t *ent) {
     msec = 200;
   }
 
+  const int clientNum = ClientNum(client);
+
+  if (!g_cheats.integer) {
+    if (ent->client->noclip && Utilities::inNoNoclipArea(ent)) {
+      ent->client->noclip = qfalse;
+      Printer::SendCenterMessage(clientNum,
+                                 "^7You cannot ^3noclip ^7inside this area.\n");
+    }
+  }
+
   if (client->wantsscore) {
     G_SendScore(ent);
     client->wantsscore = qfalse;
@@ -1115,14 +1125,14 @@ void ClientThink_real(gentity_t *ent) {
   // Stop lagging through triggers in timeruns
   if (client->sess.timerunActive) {
     if (client->ps.ping > 400) {
-      Printer::SendCenterMessage(ClientNum(ent), "^3WARNING: ^7Timerun "
-                                                 "stopped due to high ping!");
+      Printer::SendCenterMessage(
+          clientNum, "^3WARNING: ^7Timerun stopped due to high ping!");
       InterruptRun(ent);
       client->sess.timerunActive = qfalse;
     }
     if (client->pers.maxFPS < 25) {
-      Printer::SendCenterMessage(ClientNum(ent), "^3WARNING: ^7Timerun "
-                                                 "stopped due to low FPS!");
+      Printer::SendCenterMessage(
+          clientNum, "^3WARNING: ^7Timerun stopped due to low FPS!");
       InterruptRun(ent);
       client->sess.timerunActive = qfalse;
     }
@@ -1445,24 +1455,16 @@ void ClientThink_real(gentity_t *ent) {
         client->sess.sessionTeam == TEAM_AXIS) {
       if (G_SweepForLandmines(ent->r.currentOrigin, 256.f, TEAM_AXIS)) {
         client->pers.lastHQMineReportTime = level.timeCurrent;
-        trap_SendServerCommand(ent - g_entities,
-                               "cp \"Mines have been reported in "
-                               "this area.\" 1");
+        trap_SendServerCommand(
+            clientNum, "cp \"Mines have been reported in this area.\" 1");
       }
     } else if (level.gameManager->s.modelindex2 &&
                client->sess.sessionTeam == TEAM_ALLIES) {
       if (G_SweepForLandmines(ent->r.currentOrigin, 256.f, TEAM_ALLIES)) {
         client->pers.lastHQMineReportTime = level.timeCurrent;
-        trap_SendServerCommand(ent - g_entities,
-                               "cp \"Mines have been reported in "
-                               "this area.\" 1");
+        trap_SendServerCommand(
+            clientNum, "cp \"Mines have been reported in this area.\" 1");
       }
-    }
-  }
-
-  if (!g_cheats.integer) {
-    if (Utilities::inNoNoclipArea(ent)) {
-      ent->client->noclip = qfalse;
     }
   }
 
