@@ -6020,6 +6020,10 @@ void PmoveSingle(pmove_t *pmove) {
   if (pm->ps->stats[STAT_HEALTH] <= 0) {
     pm->tracemask &= ~CONTENTS_BODY; // corpses can fly through bodies
     pm->ps->eFlags &= ~EF_ZOOMING;
+
+    if (pm->ps->pm_type == PM_NOCLIP){
+      pm->ps->pm_type = PM_DEAD;
+    }
   }
 
   // ETJump: no activate lean
