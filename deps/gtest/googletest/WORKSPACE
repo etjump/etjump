@@ -1,30 +1,27 @@
 workspace(name = "com_google_googletest")
 
+load("//:googletest_deps.bzl", "googletest_deps")
+googletest_deps()
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
-    name = "com_google_absl",  # 2020-10-13T16:49:13Z
-    sha256 = "00c3707bf9cd5eabd1ec6932cc65b97378c043f22573be3adf7d11bb7af17d06",
-    strip_prefix = "abseil-cpp-f3f785ab59478dd0312bf1b5df65d380650bf0dc",
-    urls = [
-        "https://github.com/abseil/abseil-cpp/archive/f3f785ab59478dd0312bf1b5df65d380650bf0dc.zip",
-    ],
+  name = "rules_python",  # 2023-07-31T20:39:27Z
+  sha256 = "1250b59a33c591a1c4ba68c62e95fc88a84c334ec35a2e23f46cbc1b9a5a8b55",
+  strip_prefix = "rules_python-e355becc30275939d87116a4ec83dad4bb50d9e1",
+  urls = ["https://github.com/bazelbuild/rules_python/archive/e355becc30275939d87116a4ec83dad4bb50d9e1.zip"],
 )
 
 http_archive(
-    name = "rules_cc",  # 2020-10-05T06:01:24Z
-    sha256 = "35ea62c63cd71d4000efe85f9f4f17e8afb23896c37ee9510952db2e9d8fbb70",
-    strip_prefix = "rules_cc-f055da4ff0cb2b3c73de1fe2f094ebdfb8b3acb9",
-    urls = [
-        "https://github.com/bazelbuild/rules_cc/archive/f055da4ff0cb2b3c73de1fe2f094ebdfb8b3acb9.zip",
-    ],
+  name = "bazel_skylib",  # 2023-05-31T19:24:07Z
+  sha256 = "08c0386f45821ce246bbbf77503c973246ed6ee5c3463e41efc197fa9bc3a7f4",
+  strip_prefix = "bazel-skylib-288731ef9f7f688932bd50e704a91a45ec185f9b",
+  urls = ["https://github.com/bazelbuild/bazel-skylib/archive/288731ef9f7f688932bd50e704a91a45ec185f9b.zip"],
 )
 
 http_archive(
-    name = "rules_python",  # 2020-09-30T13:50:21Z
-    sha256 = "6e49996ad3cf45b2232b8f94ca1e3ead369c28394c51632be8d85fe826383012",
-    strip_prefix = "rules_python-c064f7008a30f307ea7516cf52358a653011f82b",
-    urls = [
-        "https://github.com/bazelbuild/rules_python/archive/c064f7008a30f307ea7516cf52358a653011f82b.zip",
-    ],
+  name = "platforms",  # 2023-07-28T19:44:27Z
+  sha256 = "40eb313613ff00a5c03eed20aba58890046f4d38dec7344f00bb9a8867853526",
+  strip_prefix = "platforms-4ad40ef271da8176d4fc0194d2089b8a76e19d7b",
+  urls = ["https://github.com/bazelbuild/platforms/archive/4ad40ef271da8176d4fc0194d2089b8a76e19d7b.zip"],
 )
