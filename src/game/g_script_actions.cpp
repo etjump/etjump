@@ -4357,7 +4357,8 @@ new ones
 qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
   const char *token, *p;
   char key[MAX_TOKEN_CHARS], value[MAX_TOKEN_CHARS];
-  int classchanged = 0;
+  bool classchanged = false;
+  bool nospawn = false;
 
   // rain - reset and fill in the spawnVars info so that spawn
   // functions can use them
@@ -4388,9 +4389,14 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
                ent->scriptName, GAME_VERSION, ent->scriptName, key, value);
     }
 
+    if (!Q_stricmp(key, "classname_nospawn")) {
+      Q_strncpyz(key, "classname", sizeof(key));
+      nospawn = true;
+    } 
+    
     if (!Q_stricmp(key, "classname")) {
       if (Q_stricmp(value, ent->classname)) {
-        classchanged = 1;
+        classchanged = true;
       }
     }
 
@@ -4403,6 +4409,11 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
     level.numSpawnVars++;
 
     G_ParseField(key, value, ent);
+
+    if (!Q_stricmp(ent->classname, "trigger_objective_info") && !classchanged) {
+      G_Error("etpro_ScriptAction_SetValues: updating trigger_objective_info "
+              "is not supported\n");
+    }
 
     if (!Q_stricmp(key, "targetname")) {
       // need to hash this ent targetname for setstate script targets...
@@ -4417,7 +4428,12 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
 
   // rain - if the classname was changed, call the spawn func again
   if (classchanged) {
-    G_CallSpawn(ent);
+    if (!nospawn) {
+      level.spawning = qtrue;
+      G_CallSpawn(ent);
+      level.spawning = qfalse;
+    }
+
     trap_LinkEntity(ent);
   }
 
