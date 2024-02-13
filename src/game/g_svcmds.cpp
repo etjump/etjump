@@ -387,10 +387,11 @@ extern const char *eventnames[];
 Svcmd_EntityList_f
 ===================
 */
-static void Svcmd_EntityList_f(void) {
+static void Svcmd_EntityList_f() {
   int e;
   const gentity_t *check;
   int not_inuse = 0;
+  int numBrushEnts = 0;
   int max_type_length = 20; // starting point, no less than 11
 
   check = g_entities;
@@ -399,109 +400,53 @@ static void Svcmd_EntityList_f(void) {
       continue;
     }
 
-    int l;
+    size_t l;
     if (check->s.eType < ET_EVENTS) {
-      l = (int)strlen(entityTypeNames[check->s.eType]);
+      l = std::strlen(entityTypeNames[check->s.eType]);
     } else {
-      l = (int)strlen(eventnames[check->s.eType - ET_EVENTS]);
+      l = std::strlen(eventnames[check->s.eType - ET_EVENTS]);
     }
     if (l > max_type_length) {
-      max_type_length = l;
+      max_type_length = static_cast<int>(l);
     }
   }
 
   check = g_entities;
-  G_Printf("%-4s  %-*s %-20s\n", " Num", max_type_length, "Entity Type",
-           "Class");
-  G_Printf(
-      "--------------------------------------------------------------------\n");
+  G_Printf("%-4s  %-*s %-28s %-32s\n", " Num", max_type_length, "Entity Type",
+           "Class", "Scriptname");
+  G_Printf("-------------------------------------------------------------------"
+           "--------\n");
   for (e = 0; e < level.num_entities; e++, check++) {
     if (!check->inuse) {
       ++not_inuse;
       continue;
     }
 
+    if (check->model) {
+      ++numBrushEnts;
+    }
+
     if (check->s.eType < ET_EVENTS) {
-      G_Printf("%4i: %-*s %-20s\n", e, max_type_length,
+      G_Printf("^7%4i: %-*s %-28s ^9%-32s\n", e, max_type_length,
                entityTypeNames[check->s.eType],
                check->classname && check->classname[0] ? check->classname
-                                                       : "noclass");
+                                                       : "noclass",
+               check->scriptName && check->scriptName[0] ? check->scriptName
+                                                         : "");
     } else {
-      G_Printf("%4i: %-*s %-20s\n", e, max_type_length,
+      G_Printf("^7%4i: %-*s %-28s ^9%-32s\n", e, max_type_length,
                eventnames[check->s.eType - ET_EVENTS],
                check->classname && check->classname[0] ? check->classname
-                                                       : "noclass");
+                                                       : "noclass",
+               check->scriptName && check->scriptName[0] ? check->scriptName
+                                                         : "");
     }
   }
-  G_Printf(
-      "--------------------------------------------------------------------\n");
+  G_Printf("-------------------------------------------------------------------"
+           "--------\n");
   G_Printf("%4i / %4i total entities\n", level.num_entities, MAX_GENTITIES);
+  G_Printf("%4i / %4i brush entities\n", numBrushEnts, MAX_MODELS);
   G_Printf("%4i / %4i entities inactive\n", not_inuse, level.num_entities);
-}
-
-int refClientNumFromString(char *s) {
-  gclient_t *cl;
-  int idnum;
-  char s2[MAX_STRING_CHARS];
-  char n2[MAX_STRING_CHARS];
-  qboolean fIsNumber = qtrue;
-  int partialMatchs = 0;
-  int partialMatchId = -1;
-
-  // See if its a number or string
-  for (idnum = 0; idnum < static_cast<int>(strlen(s)) && s[idnum] != 0;
-       idnum++) {
-    if (s[idnum] < '0' || s[idnum] > '9') {
-      fIsNumber = qfalse;
-      break;
-    }
-  }
-
-  // check for a name match
-  SanitizeString(s, s2, qtrue);
-  for (idnum = 0, cl = level.clients; idnum < level.maxclients; idnum++, cl++) {
-    if (cl->pers.connected != CON_CONNECTED) {
-      continue;
-    }
-
-    SanitizeString(cl->pers.netname, n2, qtrue);
-
-    if (!strcmp(n2, s2)) {
-      return (idnum);
-    }
-
-    if (strstr(n2, s2) != NULL) {
-      partialMatchs++;
-      partialMatchId = idnum;
-    }
-  }
-
-  // numeric values are just slot numbers
-  if (fIsNumber) {
-    idnum = Q_atoi(s);
-    if (idnum < 0 || idnum >= level.maxclients) {
-      G_Printf("Bad client slot: ^3%i\n", idnum);
-      return -1;
-    }
-
-    cl = &level.clients[idnum];
-    if (cl->pers.connected != CON_CONNECTED) {
-      G_Printf("Client ^3%i^7 is not active\n", idnum);
-      return -1;
-    }
-
-    return (idnum);
-  }
-
-  if (partialMatchs > 1) {
-    G_Printf("Several partial matches\n");
-    return -1;
-  } else if (partialMatchs == 1) {
-    return partialMatchId;
-  }
-
-  G_Printf("User ^3%s^7 is not on the server\n", s);
-  return (-1);
 }
 
 // fretn, note: if a player is called '3' and there are only 2 players
@@ -612,7 +557,7 @@ void Svcmd_RevivePlayer(char *name) {
 
   if (!g_cheats.integer) {
     trap_SendServerCommand(-1, va("print \"Cheats are not enabled "
-                               "on this server.\n\""));
+                                  "on this server.\n\""));
     return;
   }
 
