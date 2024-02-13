@@ -545,8 +545,8 @@ extern vec4_t g_color_table[32];
    ishex(*((p) + 3)) && ishex(*((p) + 4)) && ishex(*((p) + 5)))
 #define Q_HexColorStringHasAlpha(p) (ishex(*((p) + 6)) && ishex(*((p) + 7)))
 
-#define DEG2RAD(a) (((a)*M_PI) / 180.0F)
-#define RAD2DEG(a) (((a)*180.0f) / M_PI)
+#define DEG2RAD(a) (((a) * M_PI) / 180.0F)
+#define RAD2DEG(a) (((a) * 180.0f) / M_PI)
 #define RAD2SHORT(a) ((a) * (32768.f / (float)M_PI))
 #define SHORT2RAD(a) ((a) * ((float)M_PI / 32768.f))
 #define SHORT2DEG(a) (((a) / 32768.f) * 180.0f)
@@ -1076,7 +1076,7 @@ typedef enum {
 */
 #define ANIM_BITS 10
 
-#define ANGLE2SHORT(x) ((int)((x)*65536 / 360) & 65535)
+#define ANGLE2SHORT(x) ((int)((x) * 65536 / 360) & 65535)
 #define SHORT2ANGLE(x) ((x) * (360.0 / 65536))
 
 #define SNAPFLAG_RATE_DELAYED 1
@@ -1435,6 +1435,10 @@ typedef struct playerState_s {
   // however, they (appear to) change at different rates and I can't
   // currently see how to optimize this to one server->client
   // transmission "weapstatus" value.
+
+  // ETJump: unused, we track this in pmext instead
+  // this doesn't get communicated though, weapHeat is communicated
+  // by storing currently held weapon's heat to curWeapHeat
   int weapHeat[MAX_WEAPONS]; // some weapons can overheat.  this tracks
                              // (server-side) how hot each weapon
                              // currently is.

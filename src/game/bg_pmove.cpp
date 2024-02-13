@@ -1724,7 +1724,7 @@ static void PM_DeadMove(void) {
   // extra friction
 
   forward = VectorLength(pm->ps->velocity);
-  forward -= 20;
+  forward -= 2500 * pml.frametime;
   if (forward <= 0) {
     VectorClear(pm->ps->velocity);
   } else {
@@ -1961,6 +1961,7 @@ static void PM_CrashLand(void) {
 
   // start footstep cycle over
   pm->ps->bobCycle = 0;
+  pm->pmext->bobCycle = 0;
   pm->pmext->isJumpLand = false;
 }
 
@@ -2315,7 +2316,7 @@ PM_Footsteps
 */
 static void PM_Footsteps() {
   float bobmove;
-  int old;
+  float old;
   qboolean footstep;
   int animResult = -1;
 
@@ -2395,7 +2396,9 @@ static void PM_Footsteps() {
   // if not trying to move
   if (!pm->cmd.forwardmove && !pm->cmd.rightmove) {
     if (pm->xyspeed < 5) {
-      pm->ps->bobCycle = 0; // start at beginning of cycle again
+      // start at beginning of cycle again
+      pm->ps->bobCycle = 0;
+      pm->pmext->bobCycle = 0;
     }
     if (pm->xyspeed > 120) {
       return; // continue what they were doing last frame, until we stop
@@ -2523,11 +2526,17 @@ static void PM_Footsteps() {
   }
 
   // check for footstep / splash sounds
-  old = pm->ps->bobCycle;
-  pm->ps->bobCycle = static_cast<int>(old + bobmove * pml.msec) & 255;
+  old = pm->pmext->bobCycle;
+  pm->pmext->bobCycle = static_cast<float>(old + bobmove * pml.msec);
+  pm->ps->bobCycle = static_cast<int>(pm->pmext->bobCycle);
+
+  if (pm->ps->bobCycle > 255) {
+    pm->ps->bobCycle = pm->ps->bobCycle & 255;
+    pm->pmext->bobCycle = static_cast<float>(pm->ps->bobCycle & 255);
+  }
 
   // if we just crossed a cycle boundary, play an appropriate footstep event
-  if (((old + 64) ^ (pm->ps->bobCycle + 64)) & 128) {
+  if (((static_cast<int>(old) + 64) ^ (pm->ps->bobCycle + 64)) & 128) {
     if (pm->waterlevel == 0) {
       // on ground will only play sounds if running
       if (footstep && !pm->noFootsteps) {
@@ -3386,18 +3395,20 @@ void PM_CoolWeapons(void) {
     // if you have the weapon
     if (COM_BitCheck(pm->ps->weapons, wp)) {
       // and it's hot
-      if (pm->ps->weapHeat[wp]) {
+      if (pm->pmext->weapHeat[wp] != 0) {
         if (pm->skill[SK_HEAVY_WEAPONS] >= 2 &&
             pm->ps->stats[STAT_PLAYER_CLASS] == PC_SOLDIER) {
-          pm->ps->weapHeat[wp] -=
-              ((float)GetAmmoTableData(wp)->coolRate * 2.f * pml.frametime);
+          pm->pmext->weapHeat[wp] -=
+              static_cast<float>(GetAmmoTableData(wp)->coolRate) * 2.f *
+              pml.frametime;
         } else {
-          pm->ps->weapHeat[wp] -=
-              ((float)GetAmmoTableData(wp)->coolRate * pml.frametime);
+          pm->pmext->weapHeat[wp] -=
+              static_cast<float>(GetAmmoTableData(wp)->coolRate) *
+              pml.frametime;
         }
 
-        if (pm->ps->weapHeat[wp] < 0) {
-          pm->ps->weapHeat[wp] = 0;
+        if (pm->pmext->weapHeat[wp] < 0) {
+          pm->pmext->weapHeat[wp] = 0;
         }
       }
     }
@@ -3409,25 +3420,24 @@ void PM_CoolWeapons(void) {
     if (pm->ps->persistant[PERS_HWEAPON_USE] ||
         pm->ps->eFlags & EF_MOUNTEDTANK) {
       // rain - floor to prevent 8-bit wrap
-      pm->ps->curWeapHeat = floor(
-          (((float)pm->ps->weapHeat[WP_DUMMY_MG42] / MAX_MG42_HEAT)) * 255.0f);
+      pm->ps->curWeapHeat =
+          std::floor(((static_cast<float>(pm->pmext->weapHeat[WP_DUMMY_MG42]) /
+                       MAX_MG42_HEAT)) *
+                     255.0f);
     } else {
       // rain - #172 - don't divide by 0
       maxHeat = GetAmmoTableData(pm->ps->weapon)->maxHeat;
 
       // rain - floor to prevent 8-bit wrap
       if (maxHeat != 0) {
-        pm->ps->curWeapHeat =
-            floor((((float)pm->ps->weapHeat[pm->ps->weapon] / (float)maxHeat)) *
-                  255.0f);
+        pm->ps->curWeapHeat = std::floor(
+            ((static_cast<float>(pm->pmext->weapHeat[pm->ps->weapon]) /
+              static_cast<float>(maxHeat))) *
+            255.0f);
       } else {
         pm->ps->curWeapHeat = 0;
       }
     }
-
-    //		if(pm->ps->weapHeat[pm->ps->weapon])
-    //			Com_Printf("pm heat: %d, %d\n",
-    // pm->ps->weapHeat[pm->ps->weapon], pm->ps->curWeapHeat);
   }
 }
 
@@ -3580,6 +3590,49 @@ void PM_AdjustAimSpreadScale(void) {
       (int)pm->ps->aimSpreadScaleFloat; // update the int for the client
 }
 
+static void PM_HandleRecoil() {
+  vec3_t muzzlebounce;
+  const int deltaTime = pm->cmd.serverTime - pm->pmext->weapRecoilTime;
+
+  if (deltaTime > pm->pmext->weapRecoilDuration) {
+    pm->pmext->weapRecoilTime = 0;
+    pm->pmext->lastRecoilDeltaTime = 0;
+    return;
+  }
+
+  VectorCopy(pm->ps->viewangles, muzzlebounce);
+  const double frac = pml.frametime * 125; // fix recoil to ~125fps
+  const auto recoilDuration = static_cast<float>(pm->pmext->weapRecoilDuration);
+
+  for (int i = pm->pmext->lastRecoilDeltaTime; i < deltaTime; i += pml.msec) {
+    const auto msec = static_cast<float>(i);
+
+    if (pm->pmext->weapRecoilPitch > 0.f) {
+      muzzlebounce[PITCH] -=
+          static_cast<float>(frac * 2 * pm->pmext->weapRecoilPitch *
+                             std::cos(2.5 * msec / recoilDuration));
+      muzzlebounce[PITCH] -= static_cast<float>(frac * 0.25 * random() *
+                                                (1.0f - msec / recoilDuration));
+    }
+
+    if (pm->pmext->weapRecoilYaw > 0.f) {
+      muzzlebounce[YAW] +=
+          static_cast<float>(frac * 0.5 * pm->pmext->weapRecoilYaw *
+                             std::cos(1.0 - msec * 3 / recoilDuration));
+      muzzlebounce[YAW] += static_cast<float>(frac * 0.5 * crandom() *
+                                              (1.0f - msec / recoilDuration));
+    }
+  }
+
+  // set the delta angle
+  for (int i = 0; i < 3; i++) {
+    pm->ps->delta_angles[i] = ANGLE2SHORT(muzzlebounce[i]) - pm->cmd.angles[i];
+  }
+
+  VectorCopy(muzzlebounce, pm->ps->viewangles);
+  pm->pmext->lastRecoilDeltaTime = deltaTime;
+}
+
 #define weaponstateFiring                                                      \
   (pm->ps->weaponstate == WEAPON_FIRING ||                                     \
    pm->ps->weaponstate == WEAPON_FIRINGALT)
@@ -3711,17 +3764,18 @@ static void PM_Weapon(void) {
       // how it's wanted ( bleugh ) no cooldown on weaps
       // while using mg42, but need to update heat on
       // mg42 itself
-      if (pm->ps->weapHeat[WP_DUMMY_MG42]) {
-        pm->ps->weapHeat[WP_DUMMY_MG42] -= (300.f * pml.frametime);
+      if (pm->pmext->weapHeat[WP_DUMMY_MG42] != 9) {
+        pm->pmext->weapHeat[WP_DUMMY_MG42] -= (300.f * pml.frametime);
 
-        if (pm->ps->weapHeat[WP_DUMMY_MG42] < 0) {
-          pm->ps->weapHeat[WP_DUMMY_MG42] = 0;
+        if (pm->pmext->weapHeat[WP_DUMMY_MG42] < 0) {
+          pm->pmext->weapHeat[WP_DUMMY_MG42] = 0;
         }
 
         // rain - floor() to prevent 8-bit wrap
-        pm->ps->curWeapHeat =
-            floor((((float)pm->ps->weapHeat[WP_DUMMY_MG42] / MAX_MG42_HEAT)) *
-                  255.0f);
+        pm->ps->curWeapHeat = std::floor(
+            ((static_cast<float>(pm->pmext->weapHeat[WP_DUMMY_MG42]) /
+              MAX_MG42_HEAT)) *
+            255.0f);
       }
 
       if (pm->ps->weaponTime > 0) {
@@ -3738,9 +3792,9 @@ static void PM_Weapon(void) {
 
       if (pm->cmd.buttons & BUTTON_ATTACK) {
         if (PM_IsSinglePlayerGame()) {
-          pm->ps->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_SP;
+          pm->pmext->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_SP;
         } else {
-          pm->ps->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_MP;
+          pm->pmext->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_MP;
         }
 
         PM_AddEvent(EV_FIRE_WEAPON_MG42);
@@ -3756,7 +3810,7 @@ static void PM_Weapon(void) {
         pm->ps->viewlocked = 2; // this enable screen jitter when
                                 // firing
 
-        if (pm->ps->weapHeat[WP_DUMMY_MG42] >= MAX_MG42_HEAT) {
+        if (pm->pmext->weapHeat[WP_DUMMY_MG42] >= MAX_MG42_HEAT) {
           pm->ps->weaponTime = MAX_MG42_HEAT; // cap heat
                                               // to max
           PM_AddEvent(EV_WEAP_OVERHEAT);
@@ -3799,16 +3853,18 @@ static void PM_Weapon(void) {
     // it's wanted ( bleugh ) no cooldown on weaps while using
     // mg42, but need to update heat
     // on mg42 itself
-    if (pm->ps->weapHeat[WP_DUMMY_MG42]) {
-      pm->ps->weapHeat[WP_DUMMY_MG42] -= (300.f * pml.frametime);
+    if (pm->pmext->weapHeat[WP_DUMMY_MG42] != 0) {
+      pm->pmext->weapHeat[WP_DUMMY_MG42] -= (300.f * pml.frametime);
 
-      if (pm->ps->weapHeat[WP_DUMMY_MG42] < 0) {
-        pm->ps->weapHeat[WP_DUMMY_MG42] = 0;
+      if (pm->pmext->weapHeat[WP_DUMMY_MG42] < 0) {
+        pm->pmext->weapHeat[WP_DUMMY_MG42] = 0;
       }
 
       // rain - floor() to prevent 8-bit wrap
-      pm->ps->curWeapHeat = floor(
-          (((float)pm->ps->weapHeat[WP_DUMMY_MG42] / MAX_MG42_HEAT)) * 255.0f);
+      pm->ps->curWeapHeat =
+          std::floor(((static_cast<float>(pm->pmext->weapHeat[WP_DUMMY_MG42]) /
+                       MAX_MG42_HEAT)) *
+                     255.0f);
     }
 
     if (pm->ps->weaponTime > 0) {
@@ -3824,7 +3880,7 @@ static void PM_Weapon(void) {
     }
 
     if (pm->cmd.buttons & BUTTON_ATTACK) {
-      pm->ps->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_MP;
+      pm->pmext->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_MP;
 
       PM_AddEvent(EV_FIRE_WEAPON_MOUNTEDMG42);
 
@@ -3835,7 +3891,7 @@ static void PM_Weapon(void) {
       // pm->ps->viewlocked = 2;		// this
       // enable screen jitter when firing
 
-      if (pm->ps->weapHeat[WP_DUMMY_MG42] >= MAX_MG42_HEAT) {
+      if (pm->pmext->weapHeat[WP_DUMMY_MG42] >= MAX_MG42_HEAT) {
         pm->ps->weaponTime = MAX_MG42_HEAT; // cap heat to max
         PM_AddEvent(EV_WEAP_OVERHEAT);
         pm->ps->weaponTime = 2000; // force "heat recovery
@@ -3910,47 +3966,7 @@ static void PM_Weapon(void) {
   // do the recoil before setting the values, that way it will be shown
   // next frame and not this
   if (pm->pmext->weapRecoilTime) {
-    vec3_t muzzlebounce;
-    int i, deltaTime;
-
-    deltaTime = pm->cmd.serverTime - pm->pmext->weapRecoilTime;
-    VectorCopy(pm->ps->viewangles, muzzlebounce);
-
-    if (deltaTime > pm->pmext->weapRecoilDuration) {
-      deltaTime = pm->pmext->weapRecoilDuration;
-    }
-
-    for (i = pm->pmext->lastRecoilDeltaTime; i < deltaTime; i += 15) {
-      if (pm->pmext->weapRecoilPitch > 0.f) {
-        muzzlebounce[PITCH] -= 2 * pm->pmext->weapRecoilPitch *
-                               cos(2.5 * (i) / pm->pmext->weapRecoilDuration);
-        muzzlebounce[PITCH] -=
-            0.25 * random() * (1.0f - (i) / pm->pmext->weapRecoilDuration);
-      }
-
-      if (pm->pmext->weapRecoilYaw > 0.f) {
-        muzzlebounce[YAW] += 0.5 * pm->pmext->weapRecoilYaw *
-                             cos(1.0 - (i)*3 / pm->pmext->weapRecoilDuration);
-        muzzlebounce[YAW] +=
-            0.5 * crandom() * (1.0f - (i) / pm->pmext->weapRecoilDuration);
-      }
-    }
-
-    // set the delta angle
-    for (i = 0; i < 3; i++) {
-      int cmdAngle;
-
-      cmdAngle = ANGLE2SHORT(muzzlebounce[i]);
-      pm->ps->delta_angles[i] = cmdAngle - pm->cmd.angles[i];
-    }
-    VectorCopy(muzzlebounce, pm->ps->viewangles);
-
-    if (deltaTime == pm->pmext->weapRecoilDuration) {
-      pm->pmext->weapRecoilTime = 0;
-      pm->pmext->lastRecoilDeltaTime = 0;
-    } else {
-      pm->pmext->lastRecoilDeltaTime = deltaTime;
-    }
+    PM_HandleRecoil();
   }
 
   delayedFire = qfalse;
@@ -4702,7 +4718,7 @@ static void PM_Weapon(void) {
 
   // add weapon heat
   if (GetAmmoTableData(pm->ps->weapon)->maxHeat) {
-    pm->ps->weapHeat[pm->ps->weapon] +=
+    pm->pmext->weapHeat[pm->ps->weapon] +=
         GetAmmoTableData(pm->ps->weapon)->nextShotTime;
   }
 
@@ -5046,11 +5062,11 @@ static void PM_Weapon(void) {
 
   // the weapon can overheat, and it's hot
   if (GetAmmoTableData(pm->ps->weapon)->maxHeat &&
-      pm->ps->weapHeat[pm->ps->weapon]) {
+      (pm->pmext->weapHeat[pm->ps->weapon] != 0)) {
     // it is overheating
-    if (pm->ps->weapHeat[pm->ps->weapon] >=
+    if (pm->pmext->weapHeat[pm->ps->weapon] >=
         GetAmmoTableData(pm->ps->weapon)->maxHeat) {
-      pm->ps->weapHeat[pm->ps->weapon] =
+      pm->pmext->weapHeat[pm->ps->weapon] =
           GetAmmoTableData(pm->ps->weapon)->maxHeat; // cap heat to max
       PM_AddEvent(EV_WEAP_OVERHEAT);
       //			PM_StartWeaponAnim(WEAP_IDLE1);
