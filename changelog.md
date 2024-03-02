@@ -1,6 +1,6 @@
-# ETJump 3.1.2
+# ETJump 3.2.0
 
-* fixed being able go go through/into no-noclip areas with `setoffset` [#1192](https://github.com/etjump/etjump/pull/1192)
+* fixed being able to go through/into no-noclip areas with `setoffset` [#1192](https://github.com/etjump/etjump/pull/1192)
 * increased UI memory pool, fixing the mod not running on 2.60b linux [#1191](https://github.com/etjump/etjump/pull/1191)
 * added `func_portaltarget` entity [#1188](https://github.com/etjump/etjump/pull/1188)
   * portals fired on this entity will always center on the face they were fired onto
@@ -28,6 +28,60 @@
 * static coronas are no longer handled on server, and are purely client sided to not take up entity slots [#1201](https://github.com/etjump/etjump/pull/1201)
 * fixed `tracker_not_eq` overriding other tracker keys - targets would fire if e.g. `_eq` check had failed, but `_not_eq` passed [#1204](https://github.com/etjump/etjump/pull/1204)
 * fixed speaker editor and improved it's visuals [#1203](https://github.com/etjump/etjump/pull/1203)
+* added bit support for tracker entities [#1205](https://github.com/etjump/etjump/pull/1205)
+  * `tracker_bit_is_set` - check if a bit is set
+  * `tracker_bit_not_set` - check if a bit is not set
+  * `tracker_bit_set` - set a bit
+  * `tracker_bit_reset` - reset a bit
+* added support for arm64 on macOS with dual architecture binaries - mod is now natively compatible with Apple Silicon chips [#1208](https://github.com/etjump/etjump/pull/1208)
+* added mapscripting support for trackers [#1207](https://github.com/etjump/etjump/pull/1207)
+  * syntax: `tracker [optional index] [command] [value]`
+  * if index is not set, defaults to index **1**
+  * available commands:
+    * `inc`
+    * `abort_if_less_than`
+    * `abort_if_greater_than`
+    * `abort_if_not_equal`
+    * `abort_if_equal`
+    * `bitset`
+    * `bitreset`
+    * `abort_if_bitset`
+    * `abort_if_not_bitset`
+    * `set`
+* added `spawnflags 8` to `func_invisible_user` to pass in `activator` to mapscript [#1209](https://github.com/etjump/etjump/pull/1209)
+* added `usetarget` mapscript command - similar to `alertentity` but carries activator data [#1209](https://github.com/etjump/etjump/pull/1209)
+* improved callvote texts on some votes [#1214](https://github.com/etjump/etjump/pull/1214)
+  * `cv map` -> `Change map to <mapname>`
+  * `cv devmap` -> `Change map to <mapname> (cheats enabled)`
+  * `cv randommap <maplist>` -> `Random map from <listname>`
+* fixed a long standing bug that could rarely cause user database corruption due to writing memory that was already freed to user db [#1206](https://github.com/etjump/etjump/pull/1206)
+* added support for calling Rock The Vote from a custom vote list [#1215](https://github.com/etjump/etjump/pull/1215) [#1224](https://github.com/etjump/etjump/pull/1224)
+* added `wait` key to `trigger_push` and fixed multiple activations on client side, causing prediction errors when traveling through large triggers [#1217](https://github.com/etjump/etjump/pull/1217)
+  * default **100ms**, valid range is **0 - 65535**
+* loading to a prone position while using mortar set is no longer possible [#1221](https://github.com/etjump/etjump/pull/1221)
+* `goto/call/iwant` now teleport you to the same stance as the target/caller`[#1223](https://github.com/etjump/etjump/pull/1223)
+* fixed issues with `!rename` command
+  * `!rename` no longer works on admins that are same/higher level than you
+  * `!rename` no longer reduced name change limit (unless using it on yourself)
+* fixed class and skill icon mouseover hints being misaligned on limbo panel on widescreen resolutions [#1225](https://github.com/etjump/etjump/pull/1225)
+* fixed crash when using `set` mapscript command to change entity classname [#1228](https://github.com/etjump/etjump/pull/1228)
+  * modifying `trigger_objective_info` is disallowed for now
+  * added option to change entity classname without calling spawn function again with `classname_nospawn`
+* fixed multiple client side (`com_maxFPS`) dependencies [#1229](https://github.com/etjump/etjump/pull/1229)
+  * pmove related (most of these are not noticeble as they only appear with `pmove_fixed 0`):
+    * weapon recoil normalized to ~125fps (slightly deviates on >333fps)
+    * stamina recharge is now consistent on any fps
+    * weapon overheating normalized to 125fps
+    * bobcycle + footsteps normalized to 125fps
+    * PM_DeadMove (corpse physics) normalized to 125fps
+  * visual fixes
+    * screenshakes from explosions normalized to 125fps
+    * kickangles (viewkick from shooting) normalized to 333fps
+    * particle effect rotation (`cg_wolfparticles`) normalized to 125fps
+* fixed noclip not deactivating for spectators when entering `nonoclip` area [#1231](https://github.com/etjump/etjump/pull/1231)
+  * clients also now get a print when noclip gets deactivated
+* noclipping while dead is no longer possible by using noclip on the same frame as dying [#1232](https://github.com/etjump/etjump/pull/1232)
+* `entitylist` now displays `scriptname` field of entites and the amount of brush entities in a map [#1235](https://github.com/etjump/etjump/pull/1235)
 
 # ETJump 3.1.1
 
