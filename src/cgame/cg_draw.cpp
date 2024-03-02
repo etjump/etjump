@@ -4635,7 +4635,7 @@ void CG_DrawMiscGamemodels(void) {
 
 void CG_DrawCoronas() {
   static bool clientSideCoronas =
-      ETJump::demoCompatibility->isCompatible({3, 1, 2});
+      ETJump::demoCompatibility->isCompatible({3, 2, 0});
 
   if (cg.demoPlayback && !clientSideCoronas) {
     return;
