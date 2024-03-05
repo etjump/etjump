@@ -510,6 +510,7 @@ void CG_ParseEntitiesFromString(void) {
   cg.spawning = qtrue;
   cg.numSpawnVars = 0;
   cg.numMiscGameModels = 0;
+  cg.numCoronas = 0;
 
   // the worldspawn is not an actual entity, but it still
   // has a "spawn" function to perform any global setup
