@@ -546,8 +546,8 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
 
   const weapon_t grenadeType = BG_GrenadeTypeForTeam(other->client->sess.sessionTeam);
 
-  if (grenadeType != WP_NONE) {
-    if (quantity > 0 && ent->item->giTag == grenadeType) {
+  if (grenadeType != WP_NONE && ent->item->giTag == grenadeType) {
+    if (quantity > 0) {
       // add weapon if client doesn't have it
       COM_BitSet(other->client->ps.weapons, grenadeType);
       other->client->ps.ammoclip[grenadeType] += quantity;
@@ -561,8 +561,6 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
       }
       return -1;
     }
-
-    return 0;
   }
 
 
