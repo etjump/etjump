@@ -2807,6 +2807,7 @@ void CG_DrawSkyBoxPortal(qboolean fLocalView);
 void CG_Concussive(centity_t *cent);
 
 void CG_Letterbox(float xsize, float ysize, qboolean center);
+void CG_SetupDlightstyles();
 
 //
 // cg_drawtools.c
