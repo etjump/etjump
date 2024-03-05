@@ -69,7 +69,7 @@ bool Overbounce::isOverbounce(float zVel, float startHeight, float endHeight,
 }
 
 bool Overbounce::surfaceAllowsOverbounce(trace_t *trace) {
-  if (cg_pmove.shared & BG_LEVEL_NO_OVERBOUNCE) {
+  if (cgs.shared & BG_LEVEL_NO_OVERBOUNCE) {
     return ((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
   } else {
     return (trace->surfaceFlags & SURF_OVERBOUNCE) == 0;
