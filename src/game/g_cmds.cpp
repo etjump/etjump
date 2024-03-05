@@ -22,8 +22,8 @@ enum class VotingTypes {
   RevoteRtv
 };
 
-const static int VOTING_ATTEMPTS{3};
-const static int VOTING_TIMEOUT{2000};
+static constexpr int VOTING_ATTEMPTS{3};
+static constexpr int VOTING_TIMEOUT{1000};
 } // namespace ETJump
 
 /*
@@ -3077,13 +3077,13 @@ void Cmd_Vote_f(gentity_t *ent) {
       // stops excessive spam from server if user keeps voting in timeouts
       if (!client->pers.votingInfo.isWarned) {
         client->pers.votingInfo.isWarned = true;
+        // if vote timeout ever gets changed to other than 1s,
+        // this will need to be adjusted!
         Printer::SendPopupMessage(
             clientNum,
             ETJump::stringFormat(
-                "You must wait for %s before re-voting.\n",
-                ETJump::getSecondsString((client->pers.votingInfo.time +
-                                          ETJump::VOTING_TIMEOUT - level.time) /
-                                         1000)));
+                "^7You must wait for ^3%s ^7before re-voting.\n",
+                ETJump::getSecondsString(ETJump::VOTING_TIMEOUT / 1000)));
       }
       return;
     }
