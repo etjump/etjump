@@ -506,11 +506,12 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       maps = getMapsOnList(arg2);
       numMaps = static_cast<int>(maps.size());
 
-      // in case someone made an empty map list
+      // in case someone made an empty map list, or none are available
       if (numMaps == 0) {
         Printer::SendPopupMessage(
             clientNum,
-            stringFormat("Specified custom vote type ^3'%s' ^7is empty.\n",
+            stringFormat("Specified custom vote type ^3'%s' ^7is empty or none "
+                         "of the maps are available.\n",
                          arg2));
         return G_INVALID;
       }
@@ -524,21 +525,21 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       }
     } else {
       maps = (*game.mapStatistics->getCurrentMaps());
-      // -1 to exclude current maps
+      // -1 to exclude current map
       numMaps = static_cast<int>(maps.size() - 1);
     }
 
     if (numMaps < 2) {
       // auto rtv
       if (ent == nullptr) {
-        G_LogPrintf(
-            "Automatic %s is not possible on a server with less than 3 maps, "
-            "please add more maps to the server to use this feature.\n",
-            arg);
+        G_LogPrintf("Automatic %s is not possible on a server with less than 3 "
+                    "valid maps, consider adding more maps to the server to "
+                    "use this feature.\n",
+                    arg);
       } else {
         Printer::SendPopupMessage(
             clientNum, stringFormat("Sorry, calling [lof]^3%s^7[lon] with less "
-                                    "than 3 maps on %s is not possible.",
+                                    "than 3 valid maps on %s is not possible.",
                                     arg, arg2[0] ? "a list" : "the server"));
       }
       return G_INVALID;
