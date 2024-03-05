@@ -65,7 +65,6 @@
   * `!rename` no longer reduced name change limit (unless using it on yourself)
 * fixed class and skill icon mouseover hints being misaligned on limbo panel on widescreen resolutions [#1225](https://github.com/etjump/etjump/pull/1225)
 * fixed crash when using `set` mapscript command to change entity classname [#1228](https://github.com/etjump/etjump/pull/1228)
-  * modifying `trigger_objective_info` is disallowed for now
   * added option to change entity classname without calling spawn function again with `classname_nospawn`
 * fixed multiple client side (`com_maxFPS`) dependencies [#1229](https://github.com/etjump/etjump/pull/1229)
   * pmove related (most of these are not noticeble as they only appear with `pmove_fixed 0`):
@@ -82,6 +81,9 @@
   * clients also now get a print when noclip gets deactivated
 * noclipping while dead is no longer possible by using noclip on the same frame as dying [#1232](https://github.com/etjump/etjump/pull/1232)
 * `entitylist` now displays `scriptname` field of entites and the amount of brush entities in a map [#1235](https://github.com/etjump/etjump/pull/1235)
+* reduced re-vote cooldown from 2 seconds to 1 [#1241](https://github.com/etjump/etjump/pull/1241)
+* fixed OB detector ignoring `nooverbounce` on demo playback [#1243](https://github.com/etjump/etjump/pull/1243)
+* fixed dlights not updating if spawned after initial map load by using `set` to change an existing entity to a dlight [#1245](https://github.com/etjump/etjump/pull/1245)
 
 # ETJump 3.1.1
 
