@@ -52,7 +52,14 @@ void DemoCompatibility::parseDemoVersion() {
       return;
     }
 
-    versionStr = std::strchr(pakNames, '/'); // etjump/...
+    const char *pak = std::strchr(pakNames, '/'); // etjump/...
+
+    // should not happen
+    if (pak == nullptr) {
+      return;
+    }
+
+    versionStr = pak;
     size_t idx = std::string::npos;
 
     for (size_t i = 0; i < versionStr.length(); i++) {
