@@ -4338,6 +4338,89 @@ qboolean G_ScriptAction_AbortIfNotSinglePlayer(gentity_t *ent, char *params) {
 }
 
 /*
+====================
+ G_ModifyTOI
+
+ Sets up necessary updates for 'trigger_objective_info'
+ after it's modified via 'set' script action
+====================
+*/
+void G_ModifyTOI(gentity_t *ent) {
+  char *scorestring;
+  char *customimage;
+  int cix, cia, objflags;
+
+  if (G_SpawnString("customimage", "", &customimage)) {
+    cix = cia = G_ShaderIndex(customimage);
+  } else {
+    cix = cia = 0;
+
+    if (G_SpawnString("customaxisimage", "", &customimage)) {
+      cix = G_ShaderIndex(customimage);
+      G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "cix",
+                             va("%i", cix));
+    }
+
+    if (G_SpawnString("customalliesimage", "", &customimage) ||
+        G_SpawnString("customalliedimage", "", &customimage)) {
+      cia = G_ShaderIndex(customimage);
+      G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "cia",
+                             va("%i", cia));
+    }
+  }
+
+  G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "e",
+                         va("%i", static_cast<int>(ent - g_entities)));
+
+  if (G_SpawnInt("objflags", "0", &objflags)) {
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "o",
+                           va("%i", objflags));
+  }
+
+  G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "s",
+                         va("%i", ent->spawnflags));
+  G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "n",
+                         ent->message ? ent->message : "");
+
+  if (G_SpawnString("score", "0", &scorestring)) {
+    ent->accuracy = Q_atof(scorestring);
+  }
+
+  trap_SetConfigstring(CS_OID_TRIGGERS + ent->s.teamNum, ent->track);
+
+  if (ent->s.origin[0] != 0.f || ent->s.origin[1] != 0.f ||
+      ent->s.origin[2] != 0.f) {
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "x",
+                           va("%i", static_cast<int>(ent->s.origin[0])));
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "y",
+                           va("%i", static_cast<int>(ent->s.origin[1])));
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "z",
+                           va("%i", static_cast<int>(ent->s.origin[2])));
+  } else {
+    vec3_t mid;
+    VectorAdd(ent->r.absmin, ent->r.absmax, mid);
+    VectorScale(mid, 0.5f, mid);
+
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "x",
+                           va("%i", static_cast<int>(mid[0])));
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "y",
+                           va("%i", static_cast<int>(mid[1])));
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "z",
+                           va("%i", static_cast<int>(mid[2])));
+  }
+
+  if (!ent->target) {
+    // no target - just link and go
+    trap_LinkEntity(ent);
+  } else {
+    // finalize spawning on fourth frame
+    // to allow for proper linking with targets
+    ent->nextthink = level.time + (3 * FRAMETIME);
+    ent->think = Think_SetupObjectiveInfo;
+  }
+}
+
+/*
 ===================
 etpro_ScriptAction_SetValues
 
@@ -4392,8 +4475,8 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
     if (!Q_stricmp(key, "classname_nospawn")) {
       Q_strncpyz(key, "classname", sizeof(key));
       nospawn = true;
-    } 
-    
+    }
+
     if (!Q_stricmp(key, "classname")) {
       if (Q_stricmp(value, ent->classname)) {
         classchanged = true;
@@ -4411,8 +4494,7 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
     G_ParseField(key, value, ent);
 
     if (!Q_stricmp(ent->classname, "trigger_objective_info") && !classchanged) {
-      G_Error("etpro_ScriptAction_SetValues: updating trigger_objective_info "
-              "is not supported\n");
+      G_ModifyTOI(ent);
     }
 
     if (!Q_stricmp(key, "targetname")) {
@@ -4566,7 +4648,8 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
   if (!activator || !activator->client) {
     // if we don't error out here, script execution hangs in the block where
     // this gets called, so better to error out to avoid any confusion
-    G_Error("G_ScriptAction_Tracker: call to client only script action with no activator\n");
+    G_Error("G_ScriptAction_Tracker: call to client only script action with no "
+            "activator\n");
   }
 
   const auto progression = activator->client->sess.progression;
@@ -4649,7 +4732,7 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
 
   if (abort) {
     ent->scriptStatus.scriptStackHead =
-      ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+        ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
   }
 
   ETJump::ProgressionTrackers::printTrackerChanges(activator, oldValues);
