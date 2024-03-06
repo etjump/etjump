@@ -1552,23 +1552,20 @@ void SpectatorClientEndFrame(gentity_t *ent) {
       (ent->client->ps.pm_flags & PMF_LIMBO)) {
     int clientNum;
     gclient_t *cl;
-    qboolean do_respawn = qfalse; // JPW NERVE
+    bool do_respawn = false; // JPW NERVE
 
-    if (ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
-      do_respawn = qtrue;
+    if (ent->client->ps.pm_flags & PMF_LIMBO) {
+      do_respawn = true;
     }
 
     if (do_respawn) {
       reinforce(ent);
-      if (ent->client->pers.autoLoad == qtrue) {
-        // need to do this here as reinforce
-        // will override any value set in
-        // clientspawn (ClientSpawn gets called
-        // twice and we only want to call this
-        // once --> first call sets the origin,
-        // second call resets the origin (since
-        // we're no longer setting the origin as
-        // we already set it))
+      if (ent->client->pers.autoLoad) {
+        // need to do this here as reinforce will override any value set in
+        // clientspawn (ClientSpawn gets called twice, and we only want to
+        // call this once --> first call sets the origin, second call resets
+        // the origin (since we're no longer setting the origin
+        // as we already set it))
         ETJump::saveSystem->loadOnceTeamQuickDeployPosition(
             ent, ent->client->sess.sessionTeam);
       }
@@ -1577,8 +1574,7 @@ void SpectatorClientEndFrame(gentity_t *ent) {
 
     clientNum = ent->client->sess.spectatorClient;
 
-    // team follow1 and team follow2 go to whatever clients are
-    // playing
+    // team follow1 and team follow2 go to whatever clients are playing
     if (clientNum == -1) {
       clientNum = level.follow1;
     } else if (clientNum == -2) {
@@ -1601,25 +1597,20 @@ void SpectatorClientEndFrame(gentity_t *ent) {
 
         if (ent->client->sess.sessionTeam != TEAM_SPECTATOR &&
             (ent->client->ps.pm_flags & PMF_LIMBO)) {
-          int savedScore = ent->client->ps.persistant[PERS_SCORE];
-          int savedClass = ent->client->ps.stats[STAT_PLAYER_CLASS];
-          int savedMVList = ent->client->ps.powerups[PW_MVCLIENTLIST];
-
-          do_respawn = static_cast<qboolean>(ent->client->ps.pm_time);
+          const int savedScore = ent->client->ps.persistant[PERS_SCORE];
+          const int savedClass = ent->client->ps.stats[STAT_PLAYER_CLASS];
+          const int savedMVList = ent->client->ps.powerups[PW_MVCLIENTLIST];
+          const int savedPMTime = ent->client->ps.pm_time;
 
           ent->client->ps = cl->ps;
           ent->client->ps.pm_flags |= PMF_FOLLOW;
           ent->client->ps.pm_flags |= PMF_LIMBO;
 
-          ent->client->ps.pm_time = do_respawn;                // put pm_time
-                                                               // back
-          ent->client->ps.persistant[PERS_SCORE] = savedScore; // put score
-                                                               // back
+          ent->client->ps.pm_time = savedPMTime; // put pm_time back
+          ent->client->ps.persistant[PERS_SCORE] = savedScore; // put score back
           ent->client->ps.powerups[PW_MVCLIENTLIST] = savedMVList;
-          ent->client->ps.stats[STAT_PLAYER_CLASS] = savedClass; // NERVE - SMF
-                                                                 // - put
-                                                                 // player
-                                                                 // class back
+          // NERVE - SMF - put player class back
+          ent->client->ps.stats[STAT_PLAYER_CLASS] = savedClass;
         } else {
           ent->client->ps = cl->ps;
           ent->client->ps.pm_flags |= PMF_FOLLOW;
@@ -1635,24 +1626,17 @@ void SpectatorClientEndFrame(gentity_t *ent) {
         // they are dedicated camera followers
         if (ent->client->sess.spectatorClient >= 0) {
           ent->client->sess.spectatorState = SPECTATOR_FREE;
-          ClientBegin(ent->client - level.clients);
+          ClientBegin(ClientNum(ent->client));
         }
       }
     } else {
       ent->client->sess.spectatorState = SPECTATOR_FREE;
-      ClientBegin(ent->client - level.clients);
+      ClientBegin(ClientNum(ent->client));
     }
   }
 
-  /*if ( ent->client->sess.spectatorState == SPECTATOR_SCOREBOARD ) {
-      ent->client->ps.pm_flags |= PMF_SCOREBOARD;
-  } else {
-      ent->client->ps.pm_flags &= ~PMF_SCOREBOARD;
-  }*/
-
-  // we are at a free-floating spec state for a player,
-  // set speclock status, as appropriate
-  //	 --> Can we use something besides a powerup slot?
+  // we are at a free-floating spec state for a player, set speclock status,
+  // as appropriate --> Can we use something besides a powerup slot?
   ent->client->ps.powerups[PW_BLACKOUT] =
       (G_blockoutTeam(ent, TEAM_AXIS) * TEAM_AXIS) |
       (G_blockoutTeam(ent, TEAM_ALLIES) * TEAM_ALLIES);
