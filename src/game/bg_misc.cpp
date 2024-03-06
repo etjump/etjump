@@ -2027,7 +2027,7 @@ gitem_t bg_itemlist[] = {
 
         "icons/iconw_flamethrower_1", // icon
         "icons/ammo10",               // ammo icon
-        "portalgun",                  // pickup
+        "Portalgun",                  // pickup
         50,
         IT_WEAPON,
         WP_PORTAL_GUN,
