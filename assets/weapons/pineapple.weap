@@ -3,7 +3,7 @@ weaponDef
 	// This basically fills out weaponInfo_t
 	client {
 		//standModel		""										// weapon pickup 'stand' (do we still use this?)
-		pickupModel			"models/weapons2/grenade/pineapple.md3"
+		pickupModel			"models/weapons2/grenade/pu_pineapple.md3"
 		//pickupSound		"sound/misc/w_pkup.wav"
 		
 		weaponConfig		"models/weapons2/grenade/weapon.cfg"
