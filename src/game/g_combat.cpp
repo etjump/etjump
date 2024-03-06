@@ -316,9 +316,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
 
     if (g_gamestate.integer == GS_PLAYING) {
       if (attacker->client) {
-        const auto state =
-            attacker->client->combatState | (1 << COMBATSTATE_KILLEDPLAYER);
-        attacker->client->combatState = static_cast<combatstate_t>(state);
+        attacker->client->combatState |= (1 << COMBATSTATE_KILLEDPLAYER);
       }
     }
   }
@@ -1025,15 +1023,8 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if (targ->client && attacker && attacker->client && attacker != targ) {
     if (g_gamestate.integer == GS_PLAYING) {
       if (!OnSameTeam(attacker, targ)) {
-        const auto targetCombatState =
-            targ->client->combatState | (1 << COMBATSTATE_DAMAGERECEIVED);
-        const auto attackerCombatState =
-            attacker->client->combatState | (1 << COMBATSTATE_DAMAGEDEALT);
-
-        targ->client->combatState =
-            static_cast<combatstate_t>(targetCombatState);
-        attacker->client->combatState =
-            static_cast<combatstate_t>(attackerCombatState);
+        targ->client->combatState |= (1 << COMBATSTATE_DAMAGERECEIVED);
+        attacker->client->combatState |= (1 << COMBATSTATE_DAMAGEDEALT);
       }
     }
   }
