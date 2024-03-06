@@ -109,6 +109,12 @@ void CG_ShowHelp_Off(int *status) {
 void CG_DemoClick(int key, qboolean down) {
   int milli = trap_Milliseconds();
 
+  if (key & K_CHAR_FLAG) {
+    return;
+  }
+
+  key &= ~K_CHAR_FLAG;
+
   // Avoid active console keypress issues
   if (!down && !cgs.fKeyPressed[key]) {
     return;
