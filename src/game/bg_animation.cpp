@@ -23,8 +23,8 @@ extern vmCvar_t g_gametype;
 #endif
 
 // debug defines, to prevent doing costly string cvar lookups
-//#define	DBGANIMS
-//#define	DBGANIMEVENTS
+// #define	DBGANIMS
+// #define	DBGANIMEVENTS
 
 // this is used globally within this file to reduce redundant params
 static animScriptData_t *globalScriptData = NULL;
@@ -476,7 +476,7 @@ BG_InitWeaponStrings
   than hardcoded to ease the process of modifying the weapons.
 ============
 */
-void BG_InitWeaponStrings(void) {
+void BG_InitWeaponStrings() {
   int i;
   gitem_t *item;
 
@@ -488,14 +488,25 @@ void BG_InitWeaponStrings(void) {
       if (item->giType == IT_WEAPON && item->giTag == i) {
         // found a match
         weaponStrings[i].string = item->pickup_name;
-        weaponStrings[i].hash = BG_StringHashValue(weaponStrings[i].string);
+        weaponStrings[i].hash =
+            static_cast<int>(BG_StringHashValue(weaponStrings[i].string));
+
+        // hack for allies grenade
+        // FIXME: should probably edit animations/scripts/human_base.script
+        //  instead but need to make sure it doesn't cause
+        //  compatibility issues in demos with animations
+        if (item->giTag == WP_GRENADE_PINEAPPLE) {
+          item->pickup_name = "Grenade";
+        }
+
         break;
       }
     }
 
     if (!item->classname) {
       weaponStrings[i].string = "(unknown)";
-      weaponStrings[i].hash = BG_StringHashValue(weaponStrings[i].string);
+      weaponStrings[i].hash =
+          static_cast<int>(BG_StringHashValue(weaponStrings[i].string));
     }
   }
 }
