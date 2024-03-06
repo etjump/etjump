@@ -631,6 +631,13 @@ const char *CG_PickupItemText(int item) {
         bg_itemlist[item].pickup_name[0] == 'A') {
       return va("an %s", bg_itemlist[item].pickup_name);
     } else {
+      // hack for allies grenade
+      // FIXME: should edit animations/scripts/human_base.script instead
+      //  but need to make sure it doesn't cause compatibility issues in demos
+      if (bg_itemlist[item].giTag == WP_GRENADE_PINEAPPLE) {
+        return "a Grenade";
+      }
+
       return va("a %s", bg_itemlist[item].pickup_name);
     }
   }
