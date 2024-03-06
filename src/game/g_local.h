@@ -1110,7 +1110,7 @@ struct gclient_s {
 
   int speedScale;
 
-  combatstate_t combatState;
+  unsigned int combatState;
 
   int topMarker;
   clientMarker_t clientMarkers[MAX_CLIENT_MARKERS];
