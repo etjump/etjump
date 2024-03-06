@@ -1601,7 +1601,6 @@ SP_dlight
 */
 void SP_dlight(gentity_t *ent) {
   char *snd, *shader;
-  int i;
   int offset, style, atten;
 
   G_SpawnInt("offset", "0",
@@ -1658,11 +1657,14 @@ void SP_dlight(gentity_t *ent) {
   ent->dl_color[1] = ent->dl_color[1] * 255;
   ent->dl_color[2] = ent->dl_color[2] * 255;
 
-  i = (int)(ent->dl_stylestring[offset]) - (int)'a';
-  i = i * (1000.0f / 24.0f);
+  auto intensity = static_cast<float>(ent->dl_stylestring[offset] - 'a');
+  intensity *= (1000.0f / 24.0f);
+  intensity = std::min(255.0f, intensity / 4);
 
-  ent->s.constantLight = (int)ent->dl_color[0] | ((int)ent->dl_color[1] << 8) |
-                         ((int)ent->dl_color[2] << 16) | (i / 4 << 24);
+  ent->s.constantLight = static_cast<int>(ent->dl_color[0]) |
+                         (static_cast<int>(ent->dl_color[1]) << 8) |
+                         (static_cast<int>(ent->dl_color[2]) << 16) |
+                         (static_cast<int>(intensity) << 24);
 
   ent->use = use_dlight;
 
