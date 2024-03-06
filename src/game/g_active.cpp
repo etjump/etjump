@@ -1554,7 +1554,7 @@ void SpectatorClientEndFrame(gentity_t *ent) {
     gclient_t *cl;
     qboolean do_respawn = qfalse; // JPW NERVE
 
-    if (ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
+    if (ent->client->ps.pm_flags & PMF_LIMBO) {
       do_respawn = qtrue;
     }
 
