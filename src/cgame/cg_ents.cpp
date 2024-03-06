@@ -294,10 +294,10 @@ static void CG_EntityEffects(centity_t *cent) {
                            0);
   }
 
-  // by default smoking/smokingblack eflags are only used on entities or weapons,
-  // add early exit so they can be repurposed for mod use
+  // by default smoking/smokingblack eflags are only used on entities or
+  // weapons, add early exit so they can be repurposed for mod use
   if (cent->currentState.eType == ET_PLAYER) {
-      return;
+    return;
   }
 
   // ydnar: overheating is a special effect
@@ -2202,7 +2202,6 @@ void CG_Cabinet(centity_t *cent, cabinetType_t type) {
   refEntity_t cabinet{};
   refEntity_t mini_me{};
   int i, cnt;
-  //	int k;
 
   if (type < 0 || type >= CT_MAX) {
     return;
@@ -2212,7 +2211,6 @@ void CG_Cabinet(centity_t *cent, cabinetType_t type) {
   ETJump_SetEntityRGBA(&mini_me, 1.0, 1.0, 1.0, 1.0);
 
   cabinet.hModel = cabinetInfo[type].model;
-  //	cabinet.hModel =	cabinetInfo[type].itemmodels[0];
   cabinet.frame = 0;
   cabinet.oldframe = 0;
   cabinet.backlerp = 0.f;
@@ -2224,33 +2222,34 @@ void CG_Cabinet(centity_t *cent, cabinetType_t type) {
   cabinet.renderfx |= RF_MINLIGHT;
   AnglesToAxis(cent->lerpAngles, cabinet.axis);
 
-  if (cent->currentState.onFireStart == -9999) {
-    cnt = MAX_CABINET_TAGS;
-  } else {
-    cnt = MAX_CABINET_TAGS * (cent->currentState.onFireStart /
-                              (float)cent->currentState.onFireEnd);
-    if (cnt == 0 && cent->currentState.onFireStart) {
-      cnt = 1;
+  // avoid div by 0 if a cabinet has no trigger targeting it
+  if (cent->currentState.onFireStart && cent->currentState.onFireEnd) {
+    if (cent->currentState.onFireStart == -9999) {
+      cnt = MAX_CABINET_TAGS;
+    } else {
+      if (!cent->currentState.onFireEnd) {
+      }
+      cnt = MAX_CABINET_TAGS *
+            (static_cast<float>(cent->currentState.onFireStart) /
+             static_cast<float>(cent->currentState.onFireEnd));
+      if (cnt == 0 && cent->currentState.onFireStart) {
+        cnt = 1;
+      }
+    }
+
+    for (i = 0; i < cnt; i++) {
+      mini_me.hModel = cabinetInfo[type].itemmodels[i];
+
+      CG_PositionEntityOnTag(&mini_me, &cabinet, cabinetInfo[type].tagsnames[i],
+                             0, nullptr);
+
+      VectorCopy(mini_me.origin, mini_me.oldorigin);
+      VectorCopy(mini_me.origin, mini_me.lightingOrigin);
+      mini_me.renderfx |= RF_MINLIGHT;
+
+      trap_R_AddRefEntityToScene(&mini_me);
     }
   }
-
-  for (i = 0; i < cnt; i++) {
-    mini_me.hModel = cabinetInfo[type].itemmodels[i];
-
-    CG_PositionEntityOnTag(&mini_me, &cabinet, cabinetInfo[type].tagsnames[i],
-                           0, NULL);
-
-    VectorCopy(mini_me.origin, mini_me.oldorigin);
-    VectorCopy(mini_me.origin, mini_me.lightingOrigin);
-    mini_me.renderfx |= RF_MINLIGHT;
-
-    trap_R_AddRefEntityToScene(&mini_me);
-  }
-
-  /*	for( k = 0; k < 3; k++ ) {
-          VectorScale( cabinet.axis[k], 2.f, cabinet.axis[k] );
-      }
-      cabinet.nonNormalizedAxes = qtrue;*/
 
   trap_R_AddRefEntityToScene(&cabinet);
 }
