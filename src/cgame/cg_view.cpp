@@ -1880,8 +1880,6 @@ qboolean CG_CullPointAndRadius(const vec3_t pt, vec_t radius) {
 
 //=========================================================================
 
-extern void CG_SetupDlightstyles(void);
-
 // #define DEBUGTIME_ENABLED
 #ifdef DEBUGTIME_ENABLED
   #define DEBUGTIME                                                            \
