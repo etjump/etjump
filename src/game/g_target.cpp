@@ -566,14 +566,6 @@ void SP_target_laser(gentity_t *self) {
 /*
 target_teleporter
 =====================
-spawnflags:
-        0	Sets destination angles, but preserves player's velocity
-direction, so we move exactly same direction as before
-        1	Sets destination angles and resets velocity
-        2	Sets destination angles and converts velocity to match
-destination direction, so we are now moving same way as our teleporter_dest
-angle is pointing at 4	Converts player's angles(yaw) and velocity to be
-relative to the new destination angles 8   Same as 4 but also preserves pitch
 */
 void target_teleporter_use(gentity_t *self, gentity_t *other,
                            gentity_t *activator) {
@@ -583,54 +575,52 @@ void target_teleporter_use(gentity_t *self, gentity_t *other,
     return;
   }
 
+  dest = G_PickTarget(self->target);
+
+  if (!dest) {
+    G_Printf("Couldn't find teleporter destination\n");
+    return;
+  }
+
   if (self->outSpeed > 0) {
-    if (VectorCompare(activator->client->ps.velocity,
-                      vec3_origin)) // If we don't have any velocity when
-                                    // teleporting, theres nothing to
-                                    // scale from, so let's add some
-    {
+    // If we don't have any velocity when teleporting,
+    // there's nothing to scale from, so let's add some
+    if (VectorCompare(activator->client->ps.velocity, vec3_origin)) {
       VectorSet(activator->client->ps.velocity, 0.01, 0.01, 0.0);
     }
-    VectorNormalize(activator->client->ps.velocity); // normalize velocity
+
+    VectorNormalize(activator->client->ps.velocity);
     VectorScale(activator->client->ps.velocity, self->outSpeed,
-                activator->client->ps.velocity); // scale it up again
+                activator->client->ps.velocity);
   }
 
   if (self->noise_index) {
     G_AddEvent(activator, EV_GENERAL_SOUND, self->noise_index);
   }
 
-  dest = G_PickTarget(self->target);
-  if (!dest) {
-    G_Printf("Couldn't find teleporter destination\n");
-    return;
-  }
-
-  if (self->spawnflags & 16) {
+  if (self->spawnflags & TeleporterSpawnflags::Knockback) {
     activator->client->ps.pm_time = 160; // hold time
     activator->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
   }
 
-  if (self->spawnflags & 1) {
-    // ETJump: we we need atleast minimal speed to make
-    // TeleportPlayerKeepAngles working with this
-    //         spawnflag, else it doesn't know which trigger
-    //         side we enter
+  if (self->spawnflags & TeleporterSpawnflags::ResetSpeed) {
+    // We need some speed to make TeleportPlayerKeepAngles work with
+    // this spawnflag, else it doesn't know which trigger side we enter
     VectorSet(activator->client->ps.velocity, 0.01, 0.01, 0.0);
   }
 
-  if (self->spawnflags & 2) {
+  if (self->spawnflags & TeleporterSpawnflags::ConvertSpeed) {
     TeleportPlayerExt(activator, dest->s.origin, dest->s.angles);
     return;
   }
 
-  if (self->spawnflags & 4) {
+  if (self->spawnflags & TeleporterSpawnflags::RelativePitch) {
     TeleportPlayerKeepAngles_Clank(activator, other, dest->s.origin,
                                    dest->s.angles);
     return;
   }
 
-  if (self->spawnflags & 8) {
+  if (self->spawnflags & TeleporterSpawnflags::RelativePitchYaw) {
     TeleportPlayerKeepAngles(activator, other, dest->s.origin, dest->s.angles);
     return;
   }
@@ -1590,20 +1580,21 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
 
     // play sound to client
     if (self->noise_index) {
-      gentity_t *noiseEnt = ETJump::soundEvent(
-          activator->r.currentOrigin,
-          EV_GENERAL_CLIENT_SOUND_VOLUME,
-          self->noise_index);
+      gentity_t *noiseEnt =
+          ETJump::soundEvent(activator->r.currentOrigin,
+                             EV_GENERAL_CLIENT_SOUND_VOLUME, self->noise_index);
 
       noiseEnt->s.onFireStart = self->s.onFireStart;
     }
 
     if (!(self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)) {
-      Printer::SendCenterMessage(ClientNum(activator), "^7Your portal gun portals have been reset.");
+      Printer::SendCenterMessage(ClientNum(activator),
+                                 "^7Your portal gun portals have been reset.");
     }
   }
 
-  // reset numPortals after everything else so the targeted entity can potentially use it
+  // reset numPortals after everything else so the targeted entity can
+  // potentially use it
   activator->client->numPortals = 0;
 }
 
@@ -1623,11 +1614,9 @@ void SP_target_remove_portals(gentity_t *self) {
 }
 
 void target_portal_relay_use(gentity_t *self, gentity_t *other,
-                               gentity_t *activator) {
-  if (!activator ||
-      !activator->client ||
-      activator->client->sess.sessionTeam == TEAM_SPECTATOR ||
-      !self->target) {
+                             gentity_t *activator) {
+  if (!activator || !activator->client ||
+      activator->client->sess.sessionTeam == TEAM_SPECTATOR || !self->target) {
     return;
   }
 

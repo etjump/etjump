@@ -696,6 +696,15 @@ enum class TriggerMultipleFlags {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+enum TeleporterSpawnflags {
+  None = 0,
+  ResetSpeed = 1 << 0,
+  ConvertSpeed = 1 << 1,
+  RelativePitch = 1 << 2,
+  RelativePitchYaw = 1 << 3,
+  Knockback = 1 << 4
+};
+
 #define MAX_IP_LEN 15
 
 // client data that stays across multiple levels or tournament restarts

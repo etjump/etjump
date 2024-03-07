@@ -382,69 +382,60 @@ void SP_target_push(gentity_t *self) {
 /*
 trigger_teleporter
 =====================
-spawnflags:
-        0	Sets destination angles, but preserves player's velocity
-direction, so we move exactly same direction as before
-        1	Sets destination angles and resets velocity
-        2	Sets destination angles and converts velocity to match
-destination direction, so we are now moving same way as our teleporter_dest
-angle is pointing at 4	Converts player's angles(yaw) and velocity to be
-relative to the new destination angles 8   Same as 4 but also preserves pitch
 */
 void trigger_teleporter_touch(gentity_t *self, gentity_t *other,
                               trace_t *trace) {
   gentity_t *dest;
 
-  if (!other->client) {
+  if (!other->client || other->client->ps.pm_type == PM_DEAD) {
     return;
   }
-  if (other->client->ps.pm_type == PM_DEAD) {
+
+  dest = G_PickTarget(self->target);
+
+  if (!dest) {
+    G_Printf("Couldn't find teleporter destination\n");
     return;
   }
 
   if (self->outSpeed > 0) {
-    if (VectorCompare(other->client->ps.velocity,
-                      vec3_origin)) // If we don't have any velocity when
-                                    // teleporting, theres nothing to
-                                    // scale from, so let's add some
-    {
+    // If we don't have any velocity when teleporting,
+    // there's nothing to scale from, so let's add some
+    if (VectorCompare(other->client->ps.velocity, vec3_origin)) {
       VectorSet(other->client->ps.velocity, 0.01, 0.01, 0.0);
     }
-    VectorNormalize(other->client->ps.velocity); // normalize velocity
+
+    VectorNormalize(other->client->ps.velocity);
     VectorScale(other->client->ps.velocity, self->outSpeed,
-                other->client->ps.velocity); // scale it up again
+                other->client->ps.velocity);
   }
 
   if (self->noise_index) {
     G_AddEvent(other, EV_GENERAL_SOUND, self->noise_index);
   }
 
-  dest = G_PickTarget(self->target);
-  if (!dest) {
-    G_Printf("Couldn't find teleporter destination\n");
-    return;
-  }
-
-  if (self->spawnflags & 16) {
+  if (self->spawnflags & TeleporterSpawnflags::Knockback) {
     other->client->ps.pm_time = 160; // hold time
     other->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
   }
 
-  if (self->spawnflags & 1) {
+  if (self->spawnflags & TeleporterSpawnflags::ResetSpeed) {
+    // We need some speed to make TeleportPlayerKeepAngles work with
+    // this spawnflag, else it doesn't know which trigger side we enter
     VectorSet(other->client->ps.velocity, 0.01, 0.01, 0.0);
   }
 
-  if (self->spawnflags & 2) {
+  if (self->spawnflags & TeleporterSpawnflags::ConvertSpeed) {
     TeleportPlayerExt(other, dest->s.origin, dest->s.angles);
     return;
   }
 
-  if (self->spawnflags & 4) {
+  if (self->spawnflags & TeleporterSpawnflags::RelativePitch) {
     TeleportPlayerKeepAngles_Clank(other, self, dest->s.origin, dest->s.angles);
     return;
   }
 
-  if (self->spawnflags & 8) {
+  if (self->spawnflags & TeleporterSpawnflags::RelativePitchYaw) {
     TeleportPlayerKeepAngles(other, self, dest->s.origin, dest->s.angles);
     return;
   }
