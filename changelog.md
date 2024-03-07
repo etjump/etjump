@@ -11,7 +11,7 @@
 * added `etj_CGazDrawSnapZone` [#1175](https://github.com/etjump/etjump/pull/1175)
   * draws the remainder of the current snapzone on CGaz 1, to visualize snap zones without snaphud
   * uses `etj_CGazFov`, will not align correctly to snaphud if CGaz and snaphud use different fov
-* added support for `weapon_grenadelauncher` and `weapon_grenadepineapple` entities for spawning axis and allies grenades, respectively [#1195](https://github.com/etjump/etjump/pull/1195)
+* added support for `weapon_grenadelauncher` and `weapon_grenadepineapple` entities for spawning axis and allies grenades, respectively [#1195](https://github.com/etjump/etjump/pull/1195) [#1246](https://github.com/etjump/etjump/pull/1246)
 * fixed a crash when starting a timerun or activating `target_init` with `REMOVE_STARTING_WEAPONS` spawnflag while cooking a grenade, and selfkilling afterwards [#1196](https://github.com/etjump/etjump/pull/1196)
 * added `func_missilepad` entity [#881](https://github.com/etjump/etjump/pull/881)
   * explodes hand & rifle grenades on impact
@@ -84,6 +84,7 @@
 * reduced re-vote cooldown from 2 seconds to 1 [#1241](https://github.com/etjump/etjump/pull/1241)
 * fixed OB detector ignoring `nooverbounce` on demo playback [#1243](https://github.com/etjump/etjump/pull/1243)
 * fixed dlights not updating if spawned after initial map load by using `set` to change an existing entity to a dlight [#1245](https://github.com/etjump/etjump/pull/1245)
+* fixed `etj_autoLoad` not working when switching between Axis <-> Allies [#1252](https://github.com/etjump/etjump/pull/1252)
 
 # ETJump 3.1.1
 
