@@ -97,7 +97,7 @@ bool ETJump::DisplaySpeed::beforeRender() {
   _maxSpeed = speed > _maxSpeed ? speed : _maxSpeed;
 
   if (etj_speedColorUsesAccel.integer == 1 ||
-      (etj_speedColorUsesAccel.integer == 2 && speed <= 452 &&
+      (etj_speedColorUsesAccel.integer == 2 && speed <= MAX_GROUNDSTRAFE &&
        ps.groundEntityNum != ENTITYNUM_NONE)) {
     _storedSpeeds.push_back({cg.time, speed});
 
@@ -111,7 +111,7 @@ bool ETJump::DisplaySpeed::beforeRender() {
   }
 
   _lastUpdateTime = frameTime;
-  
+
   _accelx = static_cast<int>(speedx - _lastSpeed[0]);
   _accely = static_cast<int>(speedy - _lastSpeed[1]);
 
@@ -249,7 +249,6 @@ void ETJump::DisplaySpeed::render() const {
   float speedY = etj_speedY.integer;
   ETJump_AdjustPosition(&speedX);
 
-  
   float accelSize = 0.1f * etj_accelSize.value;
   float accelX = etj_accelX.integer;
   float accelY = etj_accelY.integer;
@@ -266,12 +265,12 @@ void ETJump::DisplaySpeed::render() const {
       break;
     case 2: // right align
       speedW = CG_Text_Width_Ext(status.c_str(), speedSize, 0,
-                                  &cgs.media.limboFont2);
+                                 &cgs.media.limboFont2);
       break;
     default: // center align
       speedW = CG_Text_Width_Ext(status.c_str(), speedSize, 0,
-                                  &cgs.media.limboFont2) /
-                2.0f;
+                                 &cgs.media.limboFont2) /
+               2.0f;
       break;
   }
 
@@ -286,12 +285,12 @@ void ETJump::DisplaySpeed::render() const {
       break;
     case 2: // right align
       accelW = CG_Text_Width_Ext(accel_string.c_str(), accelSize, 0,
-                                  &cgs.media.limboFont2);
+                                 &cgs.media.limboFont2);
       break;
     default: // center align
       accelW = CG_Text_Width_Ext(accel_string.c_str(), accelSize, 0,
-                                  &cgs.media.limboFont2) /
-          2.0f;
+                                 &cgs.media.limboFont2) /
+               2.0f;
       break;
   }
 
@@ -307,7 +306,7 @@ void ETJump::DisplaySpeed::render() const {
   const float xyVelocity = VectorLength2(ps->velocity);
 
   if (etj_speedColorUsesAccel.integer == 1 ||
-      (etj_speedColorUsesAccel.integer == 2 && xyVelocity <= 452 &&
+      (etj_speedColorUsesAccel.integer == 2 && xyVelocity <= MAX_GROUNDSTRAFE &&
        ps->groundEntityNum != ENTITYNUM_NONE)) {
     float accel = calcAvgAccel();
     float *accelColor = colorGreen;
@@ -327,16 +326,16 @@ void ETJump::DisplaySpeed::render() const {
     Vector4Copy(_color, color);
   }
 
-  CG_Text_Paint_Ext(speedX - speedW, speedY, speedSize, speedSize, color,
-                    status.c_str(), 0, 0, speedStyle,
-                    &cgs.media.limboFont1);
+  if (etj_drawSpeed2.integer) {
+    CG_Text_Paint_Ext(speedX - speedW, speedY, speedSize, speedSize, color,
+                      status.c_str(), 0, 0, speedStyle, &cgs.media.limboFont1);
+  }
 
   if (etj_drawAccel.integer) {
     CG_Text_Paint_Ext(accelX - accelW, accelY, accelSize, accelSize, color,
                       accel_string.c_str(), 0, 0, accelStyle,
                       &cgs.media.limboFont1);
   }
-
 }
 
 std::string ETJump::DisplaySpeed::getStatus() const {
@@ -377,8 +376,7 @@ bool ETJump::DisplaySpeed::canSkipUpdate(usercmd_t cmd, int frameTime) const {
   // only count this frame if it's relevant to pmove
   // this makes sure that if clients FPS > 125
   // we only count frames at pmove_msec intervals
-  if (!pm->ps || _lastUpdateTime + pm->pmove_msec > frameTime)
-  {
+  if (!pm->ps || _lastUpdateTime + pm->pmove_msec > frameTime) {
     return true;
   }
 
