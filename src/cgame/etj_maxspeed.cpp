@@ -84,7 +84,7 @@ bool ETJump::DisplayMaxSpeed::beforeRender() {
 
 void ETJump::DisplayMaxSpeed::render() const {
 
-  vec4_t color;
+  vec4_t color = {1, 1, 1, 1};
   auto fade = CG_FadeAlpha(_animationStartTime, etj_maxSpeedDuration.integer);
   Vector4Copy(_color, color);
   color[3] *= fade;
@@ -102,7 +102,7 @@ void ETJump::DisplayMaxSpeed::render() const {
       w = CG_Text_Width_Ext(str, size, 0, &cgs.media.limboFont2);
       break;
     default: // center align
-      w = CG_Text_Width_Ext(str, size, 0, &cgs.media.limboFont2) / 2;
+      w = CG_Text_Width_Ext(str, size, 0, &cgs.media.limboFont2) / 2.0f;
       break;
   }
 

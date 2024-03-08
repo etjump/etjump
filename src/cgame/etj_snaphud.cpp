@@ -366,7 +366,7 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
        (cmd.rightmove < 0 || (cmd.forwardmove != 0 && cmd.rightmove == 0)));
 
   // get opt angle
-  float opt = CGaz::getOptAngle(ps, pm);
+  float opt = CGaz::getOptAngle(ps, pm, false);
 
   // update snapzones even if snaphud is not drawn
   vec3_t wishvel;
@@ -467,6 +467,7 @@ bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
 
   return false;
 }
+
 
 bool Snaphud::canSkipDraw() const {
   if (!etj_drawSnapHUD.integer) {

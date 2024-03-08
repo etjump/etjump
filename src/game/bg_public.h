@@ -2810,5 +2810,7 @@ enum class CheatCvarFlags {
 }
 
 const int JUMP_VELOCITY = 270;
+// FIXME: this is incorrect when ps.speed is modified
+constexpr int MAX_GROUNDSTRAFE = 452;
 
 #endif // __BG_PUBLIC_H__
