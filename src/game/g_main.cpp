@@ -1881,8 +1881,16 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   G_SoundIndex("sound/player/gurp2.wav");
 
   trap_GetServerinfo(cs, sizeof(cs));
-  Q_strncpyz(level.rawmapname, Info_ValueForKey(cs, "mapname"),
-             sizeof(level.rawmapname));
+
+  // ensure map name is always lowercase, even if map is loaded
+  // with upper/mixed case name (e.g. /map OASIS)
+  // callvote already turns the name to all lower case, which means
+  // custom mapscripts are required to be lower case on Linux
+  const std::string &mapName =
+      ETJump::StringUtil::toLowerCase(Info_ValueForKey(cs, "mapname"));
+  Info_SetValueForKey(cs, "mapname", mapName.c_str());
+  trap_Cvar_Set("mapname", mapName.c_str());
+  Q_strncpyz(level.rawmapname, mapName.c_str(), sizeof(level.rawmapname));
 
   G_ExecMapSpecificConfig();
 
