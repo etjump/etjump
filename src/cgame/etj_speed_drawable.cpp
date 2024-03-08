@@ -280,7 +280,7 @@ void ETJump::DisplaySpeed::render() const {
   }
 
   float accelW;
-  switch (etj_speedAlign.integer) {
+  switch (etj_accelAlign.integer) {
     case 1: // left align
       accelW = 0;
       break;

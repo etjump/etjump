@@ -356,7 +356,7 @@ float CGaz::getFrameAccel(const playerState_t& ps, pmove_t* pm)
   }
 
   // get accel defined by physics
-  float accel = static_cast<float>(ps.speed) * pm->pmext->frametime;
+  const float accel = static_cast<float>(ps.speed) * pm->pmext->frametime;
 
   return accel;
 }

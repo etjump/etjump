@@ -893,7 +893,7 @@ cvarTable_t cvarTable[] = {
     {&etj_speedColorUsesAccel, "etj_speedColorUsesAccel", "0", CVAR_ARCHIVE},
     {&etj_speedAlign, "etj_speedAlign", "0", CVAR_ARCHIVE},
 
-    {&etj_drawAccel, "etj_drawAccel", "1", CVAR_ARCHIVE},
+    {&etj_drawAccel, "etj_drawAccel", "0", CVAR_ARCHIVE},
     {&etj_accelX, "etj_accelX", "320", CVAR_ARCHIVE},
     {&etj_accelY, "etj_accelY", "350", CVAR_ARCHIVE},
     {&etj_accelSize, "etj_accelSize", "3", CVAR_ARCHIVE},
