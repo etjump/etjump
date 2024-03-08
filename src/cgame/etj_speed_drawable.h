@@ -41,8 +41,10 @@ class DisplaySpeed : public IRenderable {
   vec2_t _lastSpeed{0, 0};
   int _accelx{0}, _accely{0};
   vec4_t _color;
+  vec4_t accelColor;
   pmove_t *pm;
-  bool _shouldDrawShadow{false};
+  bool _shouldDrawSpeedShadow{false};
+  bool _shouldDrawAccelShadow{false};
   int _lastUpdateTime{0};
   static void parseColor(const std::string &color, vec4_t &out);
   void resetMaxSpeed();
@@ -57,6 +59,7 @@ class DisplaySpeed : public IRenderable {
 public:
   DisplaySpeed();
   ~DisplaySpeed();
+  void calcAccelColor();
   void render() const override;
   bool beforeRender() override;
 };

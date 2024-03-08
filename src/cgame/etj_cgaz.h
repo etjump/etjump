@@ -31,8 +31,7 @@ namespace ETJump {
 class CGaz : public IRenderable {
 public:
   static bool strafingForwards(const playerState_t &ps, pmove_t *pm);
-  static float getOptAngle(const playerState_t &ps, pmove_t *pm);
-  static float getAltOptAngle(const playerState_t &ps, pmove_t *pm);
+  static float getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate);
   static float getFrameAccel(const playerState_t &ps, pmove_t *pm);
 
   CGaz();
