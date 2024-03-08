@@ -226,7 +226,7 @@ void ETJump::DisplaySpeed::calcAccelColor() {
       LerpColor(colorRed, colorGreen, color, frac);
     }
   } else {
-    Vector4Copy(colorRed, color);
+    Vector4Copy(colorWhite, color);
   }
 
   // we want a solid color all the time, no dark tints
