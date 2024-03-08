@@ -369,7 +369,8 @@ std::string ETJump::DisplaySpeed::getStatus() const {
 }
 
 bool ETJump::DisplaySpeed::canSkipDraw() const {
-  return !etj_drawSpeed2.integer || ETJump::showingScores();
+  return (!etj_drawSpeed2.integer && !etj_drawAccel.integer) ||
+         ETJump::showingScores();
 }
 
 bool ETJump::DisplaySpeed::canSkipUpdate(usercmd_t cmd, int frameTime) const {
