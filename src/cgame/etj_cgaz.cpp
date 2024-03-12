@@ -127,13 +127,13 @@ float CGaz::UpdateDrawSnap() {
   // or if drawing isn't requested
   if (!etj_CGazDrawSnapZone.integer || !(etj_drawCGaz.integer & 1) ||
       state.vf < state.wishspeed) {
-    return NAN;
+    return Snaphud::INVALID_SNAP_DIR;
   }
 
   const Snaphud::CurrentSnap cs = Snaphud::getCurrentSnap(*ps, pm);
 
-  if (std::isnan(cs.snap)) {
-    return NAN;
+  if (cs.snap == Snaphud::INVALID_SNAP_DIR) {
+    return Snaphud::INVALID_SNAP_DIR;
   }
 
   float snap = cs.snap;
@@ -265,7 +265,7 @@ void CGaz::render() const {
 
     float zone2 = drawOpt;
 
-    if (!std::isnan(drawSnap)) {
+    if (drawSnap != Snaphud::INVALID_SNAP_DIR) {
       // if snap < min angle, the accel zone fills the whole snapzone
       zone2 = drawSnap < drawMin ? drawMaxCos : drawSnap;
     }
@@ -384,8 +384,7 @@ bool CGaz::strafingForwards(const playerState_t &ps, pmove_t *pm) {
   return false;
 }
 
-float CGaz::getFrameAccel(const playerState_t& ps, pmove_t* pm)
-{
+float CGaz::getFrameAccel(const playerState_t &ps, pmove_t *pm) {
   // get usercmd
   const auto ucmdScale =
       static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
@@ -432,10 +431,10 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
   // determine whether strafing "forwards"
   const bool forwards = strafingForwards(ps, pm);
 
-
   // get variables associated with optimal angle
   const float velAngle = RAD2DEG(std::atan2(ps.velocity[1], ps.velocity[0]));
-  const float accelAngle = RAD2DEG(std::atan2(alternate ? cmd.rightmove : -cmd.rightmove, cmd.forwardmove));
+  const float accelAngle = RAD2DEG(
+      std::atan2(alternate ? cmd.rightmove : -cmd.rightmove, cmd.forwardmove));
   float perAngle =
       RAD2DEG(std::acos((ps.speed - getFrameAccel(ps, pm)) / speed * scale));
   if (!forwards) {

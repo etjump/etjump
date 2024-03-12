@@ -343,7 +343,7 @@ void Snaphud::render() const {
 }
 
 Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
-                                              pmove_t *pm) {
+                                             pmove_t *pm) {
   static Snaphud s;
   CurrentSnap cs{};
 
@@ -389,7 +389,7 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
   // moment when swapping teams since we're transitioning from
   // cg.snap->ps to cg.predictedPlayerstate
   if (s.snap.zones.size() == 0) {
-    cs.snap = NAN;
+    cs.snap = INVALID_SNAP_DIR;
     return cs;
   }
 
@@ -436,7 +436,7 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
 bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
   const Snaphud::CurrentSnap cs = getCurrentSnap(ps, pm);
 
-  if (std::isnan(cs.snap)) {
+  if (cs.snap == INVALID_SNAP_DIR) {
     return false;
   }
 
@@ -467,7 +467,6 @@ bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
 
   return false;
 }
-
 
 bool Snaphud::canSkipDraw() const {
   if (!etj_drawSnapHUD.integer) {

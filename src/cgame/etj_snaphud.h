@@ -31,10 +31,11 @@
 namespace ETJump {
 class Snaphud : public IRenderable {
 public:
+  static constexpr float INVALID_SNAP_DIR = -9999;
   struct CurrentSnap {
-    float snap; // next snap in strafe dir, NaN if snap can't be fetched
-    float yaw; // view yaw
-    float opt; // optimal angle
+    float snap; // next snap in strafe dir, INVALID_SNAP_DIR if not available
+    float yaw;  // view yaw
+    float opt;  // optimal angle
     bool rightStrafe; // whether turning right
   };
 
