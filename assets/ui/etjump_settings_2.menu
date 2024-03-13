@@ -104,7 +104,7 @@ menuDef {
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz over Snaphud:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGazOnTop", "Draw CGaz on top of snaphud (vid_restart required)\netj_CGazOnTop")
         CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_CGaz2FixedSpeed", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz fixed speed:", 0.2, SUBW_ITEM_HEIGHT, etj_CGaz2FixedSpeed 0 0 1200 50, "Fixed speed value to use for drawing CGaz 2 instead of real speed\netj_CGaz2FixedSpeed")
-        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 14), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide velocity dir:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz2NoVelocityDir", "Hide velocity direction line on CGaz2\netj_CGaz2NoVelocityDir")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 14), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide velocity dir:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz2NoVelocityDir", cvarFloatList { "No" 0 "Always" 1 "When over wishspeed" 2 }, "Hide velocity direction line on CGaz2\netj_CGaz2NoVelocityDir")
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 15), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw snap zone:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGazDrawSnapZone", "Extend minimum angle drawing to the end of current snap zone (CGaz 1 only)\netj_CGazDrawSnapZone")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_POPUPS_Y, SUBW_WIDTH, SUBW_POPUPS_HEIGHT, "POPUPS")
