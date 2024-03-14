@@ -26,390 +26,196 @@
 #include "etj_utilities.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_client_commands_handler.h"
-#include "etj_cgaz.h"
-#include "etj_snaphud.h"
-#include <string>
+#include "etj_pmove_utils.h"
 #include "../game/etj_string_utilities.h"
-#include "../game/etj_numeric_utilities.h"
 
-constexpr int ACCEL_COLOR_SMOOTHING_TIME = 250;
-constexpr float ACCEL_FOR_SOLID_COLOR = 100;
+namespace ETJump {
 
-ETJump::DisplaySpeed::DisplaySpeed() {
-  parseColor(etj_speedColor.string, _color);
-  checkShadow();
+DrawSpeed::DrawSpeed() {
+  parseColor(etj_speedColor.string, speedColor);
+  setTextStyle();
+  setAccelColorStyle();
+  setSize();
   startListeners();
 }
 
-ETJump::DisplaySpeed::~DisplaySpeed() {}
+DrawSpeed::~DrawSpeed() {
+  consoleCommandsHandler->unsubscribe("resetmaxspeed");
+}
 
-void ETJump::DisplaySpeed::parseColor(const std::string &color, vec4_t &out) {
+void DrawSpeed::parseColor(const std::string &color, vec4_t &out) {
   parseColorString(color, out);
   out[3] *= etj_speedAlpha.value;
 }
 
-void ETJump::DisplaySpeed::startListeners() {
+void DrawSpeed::startListeners() {
   cvarUpdateHandler->subscribe(&etj_speedColor, [&](const vmCvar_t *cvar) {
-    parseColor(etj_speedColor.string, _color);
+    parseColor(etj_speedColor.string, speedColor);
   });
 
   cvarUpdateHandler->subscribe(&etj_speedAlpha, [&](const vmCvar_t *cvar) {
-    parseColor(etj_speedColor.string, _color);
+    parseColor(etj_speedColor.string, speedColor);
   });
 
+  cvarUpdateHandler->subscribe(&etj_speedSize,
+                               [&](const vmCvar_t *cvar) { setSize(); });
+
   cvarUpdateHandler->subscribe(&etj_speedShadow,
-                               [&](const vmCvar_t *cvar) { checkShadow(); });
+                               [&](const vmCvar_t *cvar) { setTextStyle(); });
+
+  cvarUpdateHandler->subscribe(
+      &etj_speedColorUsesAccel,
+      [&](const vmCvar_t *cvar) { setAccelColorStyle(); });
 
   consoleCommandsHandler->subscribe(
       "resetmaxspeed",
       [&](const std::vector<std::string> &args) { resetMaxSpeed(); });
 }
 
-bool ETJump::DisplaySpeed::beforeRender() {
+bool DrawSpeed::beforeRender() {
   if (canSkipDraw()) {
     return false;
   }
 
   const playerState_t &ps = cg.predictedPlayerState;
-
-  // get usercmd
-  // cmdScale is only checked here to be 0 or !0
-  // so we can just use CMDSCALE_DEFAULT
   const int8_t ucmdScale = CMDSCALE_DEFAULT;
   const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
 
   pm = PmoveUtils::getPmove(cmd);
+  currentSpeed = VectorLength2(ps.velocity);
 
-  float speedx = cg.predictedPlayerState.velocity[0];
-  float speedy = cg.predictedPlayerState.velocity[1];
-
-  auto speed = std::sqrt(speedx * speedx + speedy * speedy);
-
-  // check if current frame should count towards strafe quality
+  // check if current frame should update speed meter
   // we check for framerate dependency here by comparing current time
   // to last update time, using commandTime for clients for 100%
   // accuracy and cg.time for spectators/demos as an approximation note:
   // this will be wrong for clients running < 125FPS... oh well
-  const auto frameTime = (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback)
-                             ? cg.time
-                             : pm->ps->commandTime;
+  const int frameTime = (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback)
+                            ? cg.time
+                            : pm->ps->commandTime;
 
-  _maxSpeed = speed > _maxSpeed ? speed : _maxSpeed;
-
-  if (etj_speedColorUsesAccel.integer == 1 ||
-      (etj_speedColorUsesAccel.integer == 2 && speed <= MAX_GROUNDSTRAFE &&
-       ps.groundEntityNum != ENTITYNUM_NONE)) {
-    _storedSpeeds.push_back({cg.time, speed});
-
-    popOldStoredSpeeds();
-  } else if (!_storedSpeeds.empty()) {
-    _storedSpeeds.clear();
-  }
-
-  if (canSkipUpdate(cmd, frameTime)) {
+  if (canSkipUpdate(frameTime)) {
     return true;
   }
 
-  _lastUpdateTime = frameTime;
+  lastUpdateTime = frameTime;
+  maxSpeed = currentSpeed > maxSpeed ? currentSpeed : maxSpeed;
 
-  _accelx = static_cast<int>(speedx - _lastSpeed[0]);
-  _accely = static_cast<int>(speedy - _lastSpeed[1]);
+  if (accelColorStyle == AccelColor::Style::Simple ||
+      (accelColorStyle == AccelColor::Style::Advanced &&
+       AccelColor::lowSpeedOnGround(currentSpeed, ps.groundEntityNum))) {
+    storedSpeeds.push_back({cg.time, currentSpeed});
+    AccelColor::popOldStoredSpeeds(storedSpeeds);
+  } else if (!storedSpeeds.empty()) {
+    storedSpeeds.clear();
+  }
 
-  Vector2Copy(cg.predictedPlayerState.velocity, _lastSpeed);
+  VectorSubtract(ps.velocity, lastSpeed, accel);
+  VectorCopy(ps.velocity, lastSpeed);
 
-  if (etj_speedColorUsesAccel.integer == 2 || etj_drawAccel.integer) {
-    calcAccelColor();
+  if (accelColorStyle) {
+    AccelColor::setAccelColor(accelColorStyle, currentSpeed,
+                              etj_speedAlpha.value, pm, storedSpeeds, accel,
+                              speedColor);
+  }
+
+  speedStr = getSpeedString();
+  y = etj_speedY.value;
+
+  // need to calculate this every frame because speed string changes
+  switch (etj_speedAlign.integer) {
+    case Alignment::Left:
+      w = 0;
+      break;
+    case Alignment::Right:
+      w = static_cast<float>(
+          CG_Text_Width_Ext(speedStr, size, 0, &cgs.media.limboFont2));
+      break;
+    default: // center align
+      w = static_cast<float>(
+              CG_Text_Width_Ext(speedStr, size, 0, &cgs.media.limboFont2)) *
+          0.5f;
+      break;
   }
 
   return true;
 }
 
-void ETJump::DisplaySpeed::resetMaxSpeed() {
-  _maxSpeed = 0;
+void DrawSpeed::render() const {
+  float speedX = etj_speedX.value;
+  ETJump_AdjustPosition(&speedX);
+
+  vec4_t color;
+  Vector4Copy(speedColor, color);
+
+  CG_Text_Paint_Ext(speedX - w, y, size, size, color, speedStr, 0, 0, textStyle,
+                    &cgs.media.limboFont1);
+}
+
+void DrawSpeed::resetMaxSpeed() {
+  maxSpeed = 0;
   cg.resetmaxspeed = qtrue; // fix me
 }
 
-void ETJump::DisplaySpeed::checkShadow() {
-  _shouldDrawSpeedShadow = etj_speedShadow.integer > 0 ? true : false;
-  _shouldDrawAccelShadow = etj_accelShadow.integer > 0 ? true : false;
+void DrawSpeed::setTextStyle() {
+  textStyle =
+      etj_speedShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
 }
 
-void ETJump::DisplaySpeed::calcAccelColor() {
-  vec4_t color;
-
-  float speedx = cg.predictedPlayerState.velocity[0];
-  float speedy = cg.predictedPlayerState.velocity[1];
-
-  const playerState_t ps = cg.predictedPlayerState;
-  const int8_t ucmdScale = CMDSCALE_DEFAULT;
-  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
-
-  const float scale = PmoveUtils::PM_SprintScale(&ps);
-
-  const float accelAngle = RAD2DEG(std::atan2(-cmd.rightmove, cmd.forwardmove));
-  const float accelAngleAlt =
-      RAD2DEG(std::atan2(cmd.rightmove, cmd.forwardmove));
-
-  // max acceleration possible per frame
-  const float frameAccel = CGaz::getFrameAccel(ps, pm);
-  if (_accelx || _accely) {
-    // get opt angles on both sides of velocity vector
-    const float optAngle = CGaz::getOptAngle(ps, pm, false);
-    const float altOptAngle = CGaz::getOptAngle(ps, pm, true);
-
-    // get accels for opt angle
-    const int optAccelx = static_cast<int>(
-        std::round(frameAccel * cos(DEG2RAD(accelAngle + optAngle)) * scale));
-    const int optAccely = static_cast<int>(
-        std::round(frameAccel * sin(DEG2RAD(accelAngle + optAngle)) * scale));
-
-    // get accels for alt angle
-    const int altOptAccelx = static_cast<int>(std::round(
-        frameAccel * cos(DEG2RAD(accelAngleAlt + altOptAngle)) * scale));
-    const int altOptAccely = static_cast<int>(std::round(
-        frameAccel * sin(DEG2RAD(accelAngleAlt + altOptAngle)) * scale));
-
-    // find max accel possible between opt and altOpt angles
-    int maxAccelx{0}, maxAccely{0};
-    bool isMovingx = false;
-
-    if (abs(speedx) > abs(speedy)) {
-      // we're advancing on x axis
-      isMovingx = true;
-      if (abs(optAccelx) >= abs(altOptAccelx)) {
-        maxAccelx = optAccelx;
-        maxAccely = optAccely;
-      } else {
-        maxAccelx = altOptAccelx;
-        maxAccely = altOptAccely;
-      }
-    } else {
-      isMovingx = false;
-      // we're advancing on y axis
-      if (abs(optAccely) >= abs(altOptAccely)) {
-        maxAccelx = optAccelx;
-        maxAccely = optAccely;
-      } else {
-        maxAccelx = altOptAccelx;
-        maxAccely = altOptAccely;
-      }
-    }
-
-    // Generate the color based on the average normalized acceleration
-    // Interpolate between red and green based on the average normalized
-    // acceleration
-    if (isMovingx) {
-      float frac{0};
-
-      if ((maxAccelx > 0 && _accelx >= 0) || (maxAccelx < 0 && _accelx <= 0)) {
-        frac = std::min(
-            std::max(1.0f - (abs(maxAccelx) - abs(_accelx + maxAccelx) / 2.0f) -
-                         (abs(_accely) -
-                          abs(std::max(abs(optAccely), abs(altOptAccely)))),
-                     0.0f),
-            1.0f);
-      }
-
-      LerpColor(colorRed, colorGreen, color, frac);
-    } else {
-      float frac{0};
-
-      if ((maxAccely > 0 && _accely >= 0) || (maxAccely < 0 && _accely <= 0)) {
-        frac = std::min(
-            std::max(1.0f - (abs(maxAccely) - abs(_accely + maxAccely) / 2.0f) -
-                         (abs(_accelx) -
-                          abs(std::max(abs(optAccelx), abs(altOptAccelx)))),
-                     0.0f),
-            1.0f);
-      }
-
-      LerpColor(colorRed, colorGreen, color, frac);
-    }
-  } else {
-    Vector4Copy(colorWhite, color);
+void DrawSpeed::setAccelColorStyle() {
+  if (!etj_speedColorUsesAccel.integer) {
+    parseColor(etj_speedColor.string, speedColor);
   }
 
-  // we want a solid color all the time, no dark tints
-  if (color[0] && color[1]) { // if we have a mix of R & G
-    size_t maxColorIndex = color[0] > color[1] ? 0 : 1;
-    float maxShade = 1.0f; // min value to show per color
-    float coef = maxShade / color[maxColorIndex];
-    VectorScale(color, coef, color);
-  }
-
-  // LerpColor adjusts alpha, make sure we still respect etj_speedAlpha
-  color[3] = etj_speedAlpha.value;
-
-  Vector4Copy(color, accelColor);
+  accelColorStyle = etj_speedColorUsesAccel.integer;
 }
 
-void ETJump::DisplaySpeed::render() const {
-  float speedSize = 0.1f * etj_speedSize.value;
-  float speedX = etj_speedX.integer;
-  float speedY = etj_speedY.integer;
-  ETJump_AdjustPosition(&speedX);
+void DrawSpeed::setSize() { size = 0.1f * etj_speedSize.value; }
 
-  float accelSize = 0.1f * etj_accelSize.value;
-  float accelX = etj_accelX.integer;
-  float accelY = etj_accelY.integer;
-  ETJump_AdjustPosition(&accelX);
-
-  auto status = getStatus();
-
-  auto accel_string = stringFormat("%3d %3d", _accelx, _accely);
-
-  float speedW;
-  switch (etj_speedAlign.integer) {
-    case 1: // left align
-      speedW = 0;
-      break;
-    case 2: // right align
-      speedW = CG_Text_Width_Ext(status.c_str(), speedSize, 0,
-                                 &cgs.media.limboFont2);
-      break;
-    default: // center align
-      speedW = CG_Text_Width_Ext(status.c_str(), speedSize, 0,
-                                 &cgs.media.limboFont2) /
-               2.0f;
-      break;
-  }
-
-  if (etj_drawSpeed2.integer == 8) {
-    speedW = 0;
-  }
-
-  float accelW;
-  switch (etj_accelAlign.integer) {
-    case 1: // left align
-      accelW = 0;
-      break;
-    case 2: // right align
-      accelW = CG_Text_Width_Ext(accel_string.c_str(), accelSize, 0,
-                                 &cgs.media.limboFont2);
-      break;
-    default: // center align
-      accelW = CG_Text_Width_Ext(accel_string.c_str(), accelSize, 0,
-                                 &cgs.media.limboFont2) /
-               2.0f;
-      break;
-  }
-
-  int speedStyle =
-      _shouldDrawSpeedShadow ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
-
-  int accelStyle =
-      _shouldDrawAccelShadow ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
-
-  vec4_t color = {1, 1, 1, 1};
-
-  playerState_t *ps = &cg.predictedPlayerState;
-  const float xyVelocity = VectorLength2(ps->velocity);
-
-  if (etj_speedColorUsesAccel.integer == 1 ||
-      (etj_speedColorUsesAccel.integer == 2 && xyVelocity <= MAX_GROUNDSTRAFE &&
-       ps->groundEntityNum != ENTITYNUM_NONE)) {
-    float accel = calcAvgAccel();
-    float *accelColor = colorGreen;
-
-    if (accel < 0) {
-      accelColor = colorRed;
-      accel = -accel;
-    }
-
-    float frac = accel / ACCEL_FOR_SOLID_COLOR;
-    frac = std::min(frac, 1.f);
-
-    LerpColor(colorWhite, accelColor, color, frac);
-  } else if (etj_speedColorUsesAccel.integer == 2) {
-    Vector4Copy(accelColor, color);
-  } else {
-    Vector4Copy(_color, color);
-  }
-
-  if (etj_drawSpeed2.integer) {
-    CG_Text_Paint_Ext(speedX - speedW, speedY, speedSize, speedSize, color,
-                      status.c_str(), 0, 0, speedStyle, &cgs.media.limboFont1);
-  }
-
-  if (etj_drawAccel.integer) {
-    CG_Text_Paint_Ext(accelX - accelW, accelY, accelSize, accelSize, color,
-                      accel_string.c_str(), 0, 0, accelStyle,
-                      &cgs.media.limboFont1);
-  }
-}
-
-std::string ETJump::DisplaySpeed::getStatus() const {
-  float speed = sqrt(cg.predictedPlayerState.velocity[0] *
-                         cg.predictedPlayerState.velocity[0] +
-                     cg.predictedPlayerState.velocity[1] *
-                         cg.predictedPlayerState.velocity[1]);
-
+std::string DrawSpeed::getSpeedString() const {
   switch (etj_drawSpeed2.integer) {
     case 2:
-      return stringFormat("%.0f %.0f", speed, _maxSpeed);
+      return stringFormat("%.0f %.0f", currentSpeed, maxSpeed);
     case 3:
-      return stringFormat("%.0f ^z%.0f", speed, _maxSpeed);
+      return stringFormat("%.0f ^z%.0f", currentSpeed, maxSpeed);
     case 4:
-      return stringFormat("%.0f (%.0f)", speed, _maxSpeed);
+      return stringFormat("%.0f (%.0f)", currentSpeed, maxSpeed);
     case 5:
-      return stringFormat("%.0f ^z(%.0f)", speed, _maxSpeed);
+      return stringFormat("%.0f ^z(%.0f)", currentSpeed, maxSpeed);
     case 6:
-      return stringFormat("%.0f ^z[%.0f]", speed, _maxSpeed);
+      return stringFormat("%.0f ^z[%.0f]", currentSpeed, maxSpeed);
     case 7:
-      return stringFormat("%.0f | %.0f", speed, _maxSpeed);
+      return stringFormat("%.0f | %.0f", currentSpeed, maxSpeed);
     case 8:
-      return stringFormat("Speed: %.0f", speed);
+      return stringFormat("Speed: %.0f", currentSpeed);
     // tens
     case 9:
-      return stringFormat("%02i", static_cast<int>(speed) / 10 % 10 * 10);
+      return stringFormat("%02i",
+                          static_cast<int>(currentSpeed) / 10 % 10 * 10);
     default:
-      return stringFormat("%.0f", speed);
+      return stringFormat("%.0f", currentSpeed);
   }
 }
 
-bool ETJump::DisplaySpeed::canSkipDraw() const {
-  return (!etj_drawSpeed2.integer && !etj_drawAccel.integer) ||
-         ETJump::showingScores();
-}
-
-bool ETJump::DisplaySpeed::canSkipUpdate(usercmd_t cmd, int frameTime) const {
+bool DrawSpeed::canSkipUpdate(int frameTime) const {
   // only count this frame if it's relevant to pmove
   // this makes sure that if clients FPS > 125
   // we only count frames at pmove_msec intervals
-  if (!pm->ps || _lastUpdateTime + pm->pmove_msec > frameTime) {
+  if (!pm->ps || lastUpdateTime + pm->pmove_msec > frameTime) {
     return true;
   }
 
   return false;
 }
 
-void ETJump::DisplaySpeed::popOldStoredSpeeds() {
-  do {
-    auto &front = _storedSpeeds.front();
-
-    if (cg.time - front.time > ACCEL_COLOR_SMOOTHING_TIME) { // too old
-      _storedSpeeds.pop_front();
-      continue;
-    } else if (cg.time < front.time) { // we went back in time!
-      _storedSpeeds.pop_front();
-      continue;
-    }
-  } while (false);
-}
-
-float ETJump::DisplaySpeed::calcAvgAccel() const {
-  if (_storedSpeeds.size() < 2) { // need 2 speed points to compute acceleration
-    return 0;
+bool DrawSpeed::canSkipDraw() {
+  if (!etj_drawSpeed2.integer) {
+    return true;
   }
 
-  float totalSpeedDelta = 0;
-  auto iter = _storedSpeeds.begin();
-  for (auto prevIter = iter++; iter != _storedSpeeds.end(); prevIter = iter++) {
-    totalSpeedDelta += iter->speed - prevIter->speed;
+  if (showingScores()) {
+    return true;
   }
 
-  float timeDeltaMs = _storedSpeeds.back().time - _storedSpeeds.front().time;
-  float accel = totalSpeedDelta / (timeDeltaMs / 1000.f);
-
-  return accel;
+  return false;
 }
+} // namespace ETJump

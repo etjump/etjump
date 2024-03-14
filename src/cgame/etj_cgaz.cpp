@@ -398,10 +398,7 @@ float CGaz::getFrameAccel(const playerState_t &ps, pmove_t *pm) {
     return 0;
   }
 
-  // get accel defined by physics
-  const float accel = static_cast<float>(ps.speed) * pm->pmext->frametime;
-
-  return accel;
+  return static_cast<float>(ps.speed) * pm->pmext->frametime;
 }
 
 float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {

@@ -16,14 +16,18 @@
 #define SUBW_MAX_SPEED_ITEM_Y SUBW_MAX_SPEED_Y + SUBW_HEADER_HEIGHT
 #define SUBW_MAX_SPEED_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 3)
 
-#define SUBW_FIRETEAM_Y SUBW_MAX_SPEED_Y + SUBW_MAX_SPEED_HEIGHT + SUBW_SPACING_Y
-#define SUBW_FIRETEAM_ITEM_Y SUBW_FIRETEAM_Y + SUBW_HEADER_HEIGHT
-#define SUBW_FIRETEAM_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 3)
+#define SUBW_ACCEL_Y SUBW_MAX_SPEED_Y + SUBW_MAX_SPEED_HEIGHT + SUBW_SPACING_Y
+#define SUBW_ACCEL_ITEM_Y SUBW_ACCEL_Y + SUBW_HEADER_HEIGHT
+#define SUBW_ACCEL_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 8)
 
 // Right side menus
 #define SUBW_INDICATORS_Y SUBW_Y
 #define SUBW_INDICATORS_ITEM_Y SUBW_INDICATORS_Y + SUBW_HEADER_HEIGHT
 #define SUBW_INDICATORS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 23)
+
+#define SUBW_FIRETEAM_Y SUBW_INDICATORS_Y + SUBW_INDICATORS_HEIGHT + SUBW_SPACING_Y
+#define SUBW_FIRETEAM_ITEM_Y SUBW_FIRETEAM_Y + SUBW_HEADER_HEIGHT
+#define SUBW_FIRETEAM_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 3)
 
 #define GROUP_NAME "group_etjump_settings_3"
 
@@ -53,10 +57,10 @@ menuDef {
         CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_SPEED2_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_speedX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_LEFT_X, SUBW_SPEED2_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Speed meter X:", 0.2, SUBW_ITEM_HEIGHT, etj_speedX 320 0 640 10, "Sets X position of ETJump speed meter\netj_speedX")
         CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_SPEED2_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_speedY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_SPEED2_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Speed meter Y:", 0.2, SUBW_ITEM_HEIGHT, etj_speedY 340 0 480 10, "Sets Y position of ETJump speed meter\netj_speedY")
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_SPEED2_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Speed meter Y:", 0.2, SUBW_ITEM_HEIGHT, etj_speedY 320 0 480 10, "Sets Y position of ETJump speed meter\netj_speedY")
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_SPEED2_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Speed meter size:", 0.2, SUBW_ITEM_HEIGHT, "etj_speedSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of ETJump speed meter\netj_speedSize")
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_SPEED2_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Speed meter color:", 0.2, SUBW_ITEM_HEIGHT, "etj_speedColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of ETJump speed meter\netj_speedColor")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_SPEED2_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Accel-based color:", 0.2, SUBW_ITEM_HEIGHT, "etj_speedColorUsesAccel", "Color ETJump speed meter based on accel/decel\netj_speedColorUsesAccel")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_SPEED2_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Accel-based color:", 0.2, SUBW_ITEM_HEIGHT, "etj_speedColorUsesAccel", cvarFloatList { "Off" 0 "Simple" 1 "Advanced" 2 }, "Color ETJump speed meter based on accel/decel\netj_speedColorUsesAccel")
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_SPEED2_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Speed meter shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_speedShadow", "Draw shadow on ETJump speed meter\netj_speedShadow")
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_SPEED2_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Speed meter align:", 0.2, SUBW_ITEM_HEIGHT, "etj_speedAlign", cvarFloatList { "Center" 0 "Left" 1 "Right" 2 }, "Sets alignment of ETJump speed meter\netj_speedAlign")
 
@@ -65,18 +69,23 @@ menuDef {
         CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_MAX_SPEED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_maxSpeedX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_LEFT_X, SUBW_MAX_SPEED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Max speed X:", 0.2, SUBW_ITEM_HEIGHT, etj_maxSpeedX 320 0 640 10, "Sets X position of max speed\netj_maxSpeedX")
         CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_MAX_SPEED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_maxSpeedY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_MAX_SPEED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Max speed Y:", 0.2, SUBW_ITEM_HEIGHT, etj_maxSpeedY 320 0 480 10, "Sets Y position of max speed\netj_maxSpeedY")
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_MAX_SPEED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Max speed Y:", 0.2, SUBW_ITEM_HEIGHT, etj_maxSpeedY 300 0 480 10, "Sets Y position of max speed\netj_maxSpeedY")
         CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_MAX_SPEED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_maxSpeedDuration", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_LEFT_X, SUBW_MAX_SPEED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Max speed duration:", 0.2, SUBW_ITEM_HEIGHT, etj_maxSpeedDuration 2000 0 15000 250, "How long in milliseconds to display max speed\netj_maxSpeedDuration")
 
-    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_FIRETEAM_Y, SUBW_WIDTH, SUBW_FIRETEAM_HEIGHT, "FIRETEAM")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Fireteam:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_fireteam", "Draw fireteam on HUD\netj_HUD_fireteam")
-        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_fireteamAlpha", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Fireteam alpha:", 0.2, SUBW_ITEM_HEIGHT, etj_fireteamAlpha 1 0 1 0.05, "Sets transparency of fireteam\netj_fireteamAlpha")
-        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_fireteamPosX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Fireteam X:", 0.2, SUBW_ITEM_HEIGHT, etj_fireteamPosX 0 -640 640 10, "Sets X offset for fireteam\netj_fireteamPosX")
-        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_fireteamPosY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Fireteam Y:", 0.2, SUBW_ITEM_HEIGHT, etj_fireteamPosY 0 -480 480 10, "Sets Y offset for fireteam\netj_fireteamPosY")
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_ACCEL_Y, SUBW_WIDTH, SUBW_ACCEL_HEIGHT, "ACCEL")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw accel meter:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawAccel", "Draw per-vector acceleration meter\netj_drawAccel")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_accelX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Accel meter X:", 0.2, SUBW_ITEM_HEIGHT, etj_accelX 320 0 640 10, "Sets X position of acceleration meter\netj_accelX")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_accelY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Accel meter Y:", 0.2, SUBW_ITEM_HEIGHT, etj_accelY 340 0 480 10, "Sets Y position of acceleration meter\netj_accelY")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Accel meter size:", 0.2, SUBW_ITEM_HEIGHT, "etj_accelSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of acceleration meter\netj_accelSize")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Accel meter color:", 0.2, SUBW_ITEM_HEIGHT, "etj_accelColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of acceleration meter\netj_accelColor")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_accelAlpha", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Accel meter alpha:", 0.2, SUBW_ITEM_HEIGHT, etj_accelAlpha 1.0 0 1 0.05, "Sets transparency of acceleration meter\netj_speedAlpha")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Accel based color:", 0.2, SUBW_ITEM_HEIGHT, "etj_accelColorUsesAccel", cvarFloatList { "Off" 0 "Simple" 1 "Advanced" 2 }, "Color acceleration meter based on accel/decel\netj_accelColorUsesAccel")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Accel meter shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_accelShadow", "Draw shadow on acceleration meter\netj_accelShadow")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_ACCEL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Accel meter align:", 0.2, SUBW_ITEM_HEIGHT, "etj_accelAlign", cvarFloatList { "Center" 0 "Left" 1 "Right" 2 }, "Sets alignment of acceleration meter\netj_accelAlign")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_INDICATORS_Y, SUBW_WIDTH, SUBW_INDICATORS_HEIGHT, "INDICATORS")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_INDICATORS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Overbounce detector:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawOB", cvarFloatList { "No" 0 "Yes" 1 "Advanced" 2 }, "Draw overbounce detector\netj_drawOB")
@@ -117,6 +126,15 @@ menuDef {
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_INDICATORS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 21), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "OB watcher size:", 0.2, SUBW_ITEM_HEIGHT, "etj_obWatcherSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of overbounce watcher\netj_obWatcherSize")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_INDICATORS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 22), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "OB watcher color:", 0.2, SUBW_ITEM_HEIGHT, "etj_obWatcherColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of overbounce watcher\netj_obWatcherColor")
         EDITFIELD           (SUBW_ITEM_RIGHT_X, SUBW_INDICATORS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 23), SUBW_ITEM_WIDTH, 10, "Extra trace:", 0.2, SUBW_ITEM_HEIGHT, "etj_extraTrace", SUBW_EDITFIELD_MAXCHARS, SUBW_EDITFIELD_MAXPAINTCHARS, "Trace playerclips for various indicators (bitmask)\netj_extraTrace (see /extraTrace command)")
+
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_FIRETEAM_Y, SUBW_WIDTH, SUBW_FIRETEAM_HEIGHT, "FIRETEAM")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Fireteam:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_fireteam", "Draw fireteam on HUD\netj_HUD_fireteam")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_fireteamAlpha", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Fireteam alpha:", 0.2, SUBW_ITEM_HEIGHT, etj_fireteamAlpha 1 0 1 0.05, "Sets transparency of fireteam\netj_fireteamAlpha")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_fireteamPosX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Fireteam X:", 0.2, SUBW_ITEM_HEIGHT, etj_fireteamPosX 0 -640 640 10, "Sets X offset for fireteam\netj_fireteamPosX")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_fireteamPosY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_FIRETEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Fireteam Y:", 0.2, SUBW_ITEM_HEIGHT, etj_fireteamPosY 0 -480 480 10, "Sets Y offset for fireteam\netj_fireteamPosY")
         
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 0), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "BACK", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_3; open etjump)
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 1), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 1", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_3; open etjump_settings_1)
