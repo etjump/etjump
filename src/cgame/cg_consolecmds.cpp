@@ -933,10 +933,10 @@ void CG_portalinfo_f() {
   CG_Printf(
       "^7The ^jsecond ^7portal is placed using ^3+attack2 ^7which you will "
       "need to bind by typing ^3'bind key +attack2' ^7in the console.\n\n");
-  CG_Printf("^7Alternatively, you can set ^3'etj_autoPortalBinds 1' ^7 to "
-            "automatically swap your ^3weapalt ^7bindings to ^3+attack2\n"
-            "^7when switching to portal gun, and restoring the old bindings "
-            "when switching off from portal gun.\n");
+  CG_Printf("^7Alternatively, if ^3'etj_autoPortalBinds 1'^7 is set, swapping "
+            "to portal gun will automatically swap your\n^3weapalt ^7bindings "
+            "to ^3+attack2^7, and restores the old bindings when switching off "
+            "from portal gun.\n");
 }
 
 void CG_FreecamTurnLeftDown_f(void) { cgs.demoCam.turn |= 0x01; }
