@@ -59,6 +59,8 @@
 #include "etj_client_rtv_handler.h"
 #include "etj_areaindicator_drawable.h"
 #include "etj_demo_compatibility.h"
+#include "etj_accelmeter_drawable.h"
+#include "etj_accel_color.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -81,6 +83,7 @@ std::shared_ptr<TrickjumpLines> trickjumpLines;
 std::shared_ptr<ClientRtvHandler> rtvHandler;
 std::shared_ptr<AreaIndicator> areaIndicator;
 std::shared_ptr<DemoCompatibility> demoCompatibility;
+std::shared_ptr<AccelColor> accelColor;
 } // namespace ETJump
 
 static bool isInitialized{false};
@@ -224,6 +227,7 @@ void init() {
   rtvHandler->initialize();
 
   demoCompatibility = std::make_shared<DemoCompatibility>();
+  accelColor = std::make_shared<AccelColor>();
 
   // initialize renderables
   // Overbounce watcher
@@ -233,7 +237,8 @@ void init() {
   // Display max speed from previous load session
   ETJump::renderables.push_back(
       std::make_shared<DisplayMaxSpeed>(ETJump::entityEventsHandler.get()));
-  ETJump::renderables.push_back(std::make_shared<DisplaySpeed>());
+  ETJump::renderables.push_back(std::make_shared<DrawSpeed>());
+  ETJump::renderables.push_back(std::make_shared<AccelMeter>());
   ETJump::renderables.push_back(std::make_shared<StrafeQuality>());
   ETJump::renderables.push_back(
       std::make_shared<JumpSpeeds>(ETJump::entityEventsHandler.get()));

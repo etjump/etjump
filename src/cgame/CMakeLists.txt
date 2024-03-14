@@ -40,6 +40,8 @@ add_library(cgame MODULE
 	"cg_view.cpp"
 	"cg_weapons.cpp"
 	"cg_window.cpp"
+	"etj_accel_color.cpp"
+	"etj_accelmeter_drawable.cpp"
 	"etj_areaindicator_drawable.cpp"
 	"etj_autodemo_recorder.cpp"
 	"etj_awaited_command_handler.cpp"

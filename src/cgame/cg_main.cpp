@@ -352,6 +352,9 @@ vmCvar_t etj_drawAccel;
 vmCvar_t etj_accelX;
 vmCvar_t etj_accelY;
 vmCvar_t etj_accelSize;
+vmCvar_t etj_accelColor;
+vmCvar_t etj_accelAlpha;
+vmCvar_t etj_accelColorUsesAccel;
 vmCvar_t etj_accelShadow;
 vmCvar_t etj_accelAlign;
 
@@ -884,22 +887,26 @@ cvarTable_t cvarTable[] = {
     {&etj_drawClock, "etj_drawClock", "1", CVAR_ARCHIVE},
     {&etj_drawSpeed2, "etj_drawSpeed2", "1", CVAR_ARCHIVE},
     {&etj_speedX, "etj_speedX", "320", CVAR_ARCHIVE},
-    {&etj_speedY, "etj_speedY", "340", CVAR_ARCHIVE},
+    {&etj_speedY, "etj_speedY", "320", CVAR_ARCHIVE},
     {&etj_speedSize, "etj_speedSize", "3", CVAR_ARCHIVE},
     {&etj_speedColor, "etj_speedColor", "White", CVAR_ARCHIVE},
     {&etj_speedAlpha, "etj_speedAlpha", "1.0", CVAR_ARCHIVE},
     {&etj_speedShadow, "etj_speedShadow", "0", CVAR_ARCHIVE},
     {&etj_drawMaxSpeed, "etj_drawMaxSpeed", "0", CVAR_ARCHIVE},
     {&etj_maxSpeedX, "etj_maxSpeedX", "320", CVAR_ARCHIVE},
-    {&etj_maxSpeedY, "etj_maxSpeedY", "320", CVAR_ARCHIVE},
+    {&etj_maxSpeedY, "etj_maxSpeedY", "300", CVAR_ARCHIVE},
     {&etj_maxSpeedDuration, "etj_maxSpeedDuration", "2000", CVAR_ARCHIVE},
     {&etj_speedColorUsesAccel, "etj_speedColorUsesAccel", "0", CVAR_ARCHIVE},
     {&etj_speedAlign, "etj_speedAlign", "0", CVAR_ARCHIVE},
 
     {&etj_drawAccel, "etj_drawAccel", "0", CVAR_ARCHIVE},
     {&etj_accelX, "etj_accelX", "320", CVAR_ARCHIVE},
-    {&etj_accelY, "etj_accelY", "350", CVAR_ARCHIVE},
+    {&etj_accelY, "etj_accelY", "340", CVAR_ARCHIVE},
     {&etj_accelSize, "etj_accelSize", "3", CVAR_ARCHIVE},
+    {&etj_accelColor, "etj_accelColor", "white", CVAR_ARCHIVE},
+    {&etj_accelAlpha, "etj_accelAlpha", "1.0", CVAR_ARCHIVE},
+    {&etj_accelColorUsesAccel, "etj_accelColorUsesAccel", "0", CVAR_ARCHIVE},
+    {&etj_accelShadow, "etj_accelShadow", "1", CVAR_ARCHIVE},
     {&etj_accelAlign, "etj_accelAlign", "0", CVAR_ARCHIVE},
 
     {&etj_popupTime, "etj_popupTime", "1000", CVAR_ARCHIVE},

@@ -2450,6 +2450,9 @@ extern vmCvar_t etj_drawAccel;
 extern vmCvar_t etj_accelX;
 extern vmCvar_t etj_accelY;
 extern vmCvar_t etj_accelSize;
+extern vmCvar_t etj_accelColor;
+extern vmCvar_t etj_accelAlpha;
+extern vmCvar_t etj_accelColorUsesAccel;
 extern vmCvar_t etj_accelShadow;
 extern vmCvar_t etj_accelAlign;
 
@@ -4214,6 +4217,7 @@ class PmoveUtils;
 class CvarShadow;
 class ClientRtvHandler;
 class DemoCompatibility;
+class AccelColor;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4227,6 +4231,7 @@ extern std::shared_ptr<EventLoop> eventLoop;
 extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 extern std::shared_ptr<ClientRtvHandler> rtvHandler;
 extern std::shared_ptr<DemoCompatibility> demoCompatibility;
+extern std::shared_ptr<AccelColor> accelColor;
 
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume, int soundTime);

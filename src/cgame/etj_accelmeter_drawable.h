@@ -25,52 +25,43 @@
 #pragma once
 
 #include "etj_irenderable.h"
-#include "etj_accel_color.h"
 #include "cg_local.h"
+#include "etj_accel_color.h"
 #include <list>
 
 namespace ETJump {
-class DrawSpeed : public IRenderable {
+class AccelMeter : public IRenderable {
+  int textStyle{};
+  float y{};
+  float halfW{};
+  float size{};
+  int accelColorStyle{};
+  std::vector<std::string> accelStr{};
+
   std::list<AccelColor::StoredSpeed> storedSpeeds;
 
-  float maxSpeed{0};
-  float currentSpeed{};
-  std::string speedStr;
-  float y{};
-  float w{};
-  float size{};
-
-  enum Alignment {
-    Left = 1,
-    Right = 2,
-  };
-
-  vec3_t lastSpeed{};
   vec3_t accel{};
-  vec4_t speedColor{};
+  vec4_t accelColor{};
+  int lastUpdateTime{};
+  vec3_t lastSpeed{};
+
+  enum Alignment { Left = 1, Right = 2 };
+
+  static void parseColor(const std::string &color, vec4_t &out);
+  void setTextStyle();
+  void setSize();
+  void setAccelColorStyle();
+  void startListeners();
+  bool canSkipUpdate(int frameTime) const;
+  static bool canSkipDraw();
 
   pmove_t *pm{};
-  int textStyle{};
-  int lastUpdateTime{0};
-  int accelColorStyle{};
-
-  std::string getSpeedString() const;
-
-  void resetMaxSpeed();
-  void setTextStyle();
-  void setAccelColorStyle();
-  void setSize();
-
-  void startListeners();
-  static void parseColor(const std::string &color, vec4_t &out);
-  static bool canSkipDraw();
-  bool canSkipUpdate(int frameTime) const;
 
 public:
-  DrawSpeed();
-  ~DrawSpeed() override;
+  AccelMeter();
+  ~AccelMeter() override = default;
 
-  void render() const override;
   bool beforeRender() override;
+  void render() const override;
 };
 } // namespace ETJump
