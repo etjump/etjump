@@ -162,7 +162,7 @@ void AccelColor::calcAccelColor(pmove_t *pm, vec3_t &accel, vec4_t &outColor) {
             std::abs(accel[1]) -
             std::abs(std::max(std::abs(optAccelY), std::abs(altOptAccelY)));
 
-        frac = std::min(std::max(1.0f - absDiffX - absDiffY, 0.0f), 1.0f);
+        frac = Numeric::clamp(0.0f, 1.0f, 1.0f - absDiffX - absDiffY);
       }
     } else {
       if ((maxAccelY > 0 && accel[1] >= 0) ||
@@ -172,7 +172,7 @@ void AccelColor::calcAccelColor(pmove_t *pm, vec3_t &accel, vec4_t &outColor) {
             std::abs(accel[0]) -
             std::abs(std::max(std::abs(optAccelX), std::abs(altOptAccelX)));
 
-        frac = std::min(std::max(1.0f - absDiffY - absDiffX, 0.0f), 1.0f);
+        frac = Numeric::clamp(0.0f, 1.0f, 1.0f - absDiffY - absDiffX);
       }
     }
 
