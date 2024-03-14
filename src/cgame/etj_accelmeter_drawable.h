@@ -33,8 +33,6 @@ namespace ETJump {
 class AccelMeter : public IRenderable {
   int textStyle{};
   float y{};
-  float wX{};
-  float wY{};
   float halfW{};
   float size{};
   int accelColorStyle{};
