@@ -317,7 +317,8 @@ void CGaz::render() const {
       velSize = SCREEN_HEIGHT * 0.5f;
     }
 
-    if (!etj_CGaz2NoVelocityDir.integer) {
+    if (!etj_CGaz2NoVelocityDir.integer ||
+        (!drawSides && etj_CGaz2NoVelocityDir.integer == 2)) {
       DrawLine(scx, scy, scx + velSize * std::sin(drawVel),
                scy - velSize * std::cos(drawVel), CGaz2Colors[0]);
     }
