@@ -36,6 +36,8 @@ AccelMeter::AccelMeter() {
   setAccelColorStyle();
   startListeners();
 
+  // add dummy elements here, so we don't try to read an empty vector
+  // at the very beginning of a map when we don't have a valid update yet
   accelStr.emplace_back("0");
   accelStr.emplace_back("0");
 }
