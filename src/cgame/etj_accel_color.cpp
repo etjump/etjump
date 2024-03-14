@@ -152,24 +152,31 @@ void AccelColor::calcAccelColor(pmove_t *pm, vec3_t &accel, vec4_t &outColor) {
     // interpolate between red and green based on
     // the average normalized acceleration
     float frac = 0.0f;
+    float absDiffX, absDiffY;
 
     if (isMovingX) {
       if ((maxAccelX > 0 && accel[0] >= 0) ||
           (maxAccelX < 0 && accel[0] <= 0)) {
-        frac = 1.0f -
-               (std::abs(maxAccelX) - std::abs(accel[0] + maxAccelX) * 0.5f) -
-               (std::abs(accel[1]) - std::abs(maxAccelY));
+        absDiffX = std::abs(maxAccelX) - std::abs(accel[0] + maxAccelX) / 2.0f;
+        absDiffY =
+            std::abs(accel[1]) -
+            std::abs(std::max(std::abs(optAccelY), std::abs(altOptAccelY)));
+
+        frac = std::min(std::max(1.0f - absDiffX - absDiffY, 0.0f), 1.0f);
       }
     } else {
       if ((maxAccelY > 0 && accel[1] >= 0) ||
           (maxAccelY < 0 && accel[1] <= 0)) {
-        frac = 1.0f -
-               (std::abs(maxAccelY) - std::abs(accel[1] + maxAccelY) * 0.5f) -
-               (std::abs(accel[0]) - std::abs(maxAccelX));
+        absDiffY = std::abs(maxAccelY) - std::abs(accel[1] + maxAccelY) / 2.0f;
+        absDiffX =
+            std::abs(accel[0]) -
+            std::abs(std::max(std::abs(optAccelX), std::abs(altOptAccelX)));
+
+        frac = std::min(std::max(1.0f - absDiffY - absDiffX, 0.0f), 1.0f);
       }
     }
 
-    LerpColor(colorRed, colorGreen, color, Numeric::clamp(0.0f, 1.0f, frac));
+    LerpColor(colorRed, colorGreen, color, frac);
   } else {
     Vector4Copy(colorWhite, color);
   }
