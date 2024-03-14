@@ -35,6 +35,9 @@ AccelMeter::AccelMeter() {
   setSize();
   setAccelColorStyle();
   startListeners();
+
+  accelStr.emplace_back("0");
+  accelStr.emplace_back("0");
 }
 
 void AccelMeter::startListeners() {
@@ -143,12 +146,6 @@ bool AccelMeter::beforeRender() {
 }
 
 void AccelMeter::render() const {
-  // this happens for a few frames when spawning in a map
-  // because canSkipUpdate exits beforeRender early
-  if (accelStr.empty()) {
-    return;
-  }
-
   float accelX = etj_accelX.value;
   ETJump_AdjustPosition(&accelX);
 

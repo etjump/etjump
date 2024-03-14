@@ -36,7 +36,7 @@ class AccelMeter : public IRenderable {
   float halfW{};
   float size{};
   int accelColorStyle{};
-  std::vector<std::string> accelStr;
+  std::vector<std::string> accelStr{};
 
   std::list<AccelColor::StoredSpeed> storedSpeeds;
 
