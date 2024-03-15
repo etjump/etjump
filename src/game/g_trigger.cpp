@@ -22,7 +22,7 @@ void multi_trigger(gentity_t *ent, gentity_t *activator) {
 
   // old constant triggers: set wait to server frame time for spawnflags 512
   if (ent->spawnflags & static_cast<int>(TriggerMultipleFlags::Constant)) {
-    wait = level.frameMsec;
+    wait = level.frameTime;
   }
 
   if (activator && activator->client) {
