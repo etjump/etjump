@@ -66,7 +66,7 @@
 * fixed class and skill icon mouseover hints being misaligned on limbo panel on widescreen resolutions [#1225](https://github.com/etjump/etjump/pull/1225)
 * fixed crash when using `set` mapscript command to change entity classname [#1228](https://github.com/etjump/etjump/pull/1228)
   * added option to change entity classname without calling spawn function again with `classname_nospawn`
-* fixed multiple client side (`com_maxFPS`) dependencies [#1229](https://github.com/etjump/etjump/pull/1229)
+* fixed multiple client side framerate (`com_maxFPS`) dependencies [#1229](https://github.com/etjump/etjump/pull/1229)
   * pmove related (most of these are not noticeble as they only appear with `pmove_fixed 0`):
     * weapon recoil normalized to ~125fps (slightly deviates on >333fps)
     * stamina recharge is now consistent on any fps
@@ -85,6 +85,27 @@
 * fixed OB detector ignoring `nooverbounce` on demo playback [#1243](https://github.com/etjump/etjump/pull/1243)
 * fixed dlights not updating if spawned after initial map load by using `set` to change an existing entity to a dlight [#1245](https://github.com/etjump/etjump/pull/1245)
 * fixed `etj_autoLoad` not working when switching between Axis <-> Allies [#1252](https://github.com/etjump/etjump/pull/1252)
+* added `etj_drawAccel` to display acceleration on x/y vectors [#1183](https://github.com/etjump/etjump/pull/1183) [#1258](https://github.com/etjump/etjump/pull/1258)
+  * `etj_drawAccel` - draw acceleration
+  * `etj_accelX/Y` - X/Y position
+  * `etj_accelSize` - size of accel meter
+  * `etj_accelColor` - color for accel meter
+  * `etj_accelAlpha ` - alpha for color
+  * `etj_accelShadow` - toggle shadow
+  * `etj_accelColorUsesAccel` - color based off acceleration
+  * `etj_accelAlign` - alignement, 0 = center, 1 = left, 2 = right
+  * new option `2` for both accel meter and speed meter for displaying acceleration
+    * green - optimal acceleration
+    * yellow - suboptimal acceleration, should switch
+    * red - no forwards acceleration
+    * white - no acceleration
+    * not available while spectating/on demo playback due to interpolation inaccuracy
+* fixed teleporters without target processing teleporter outspeed and noise [#1253](https://github.com/etjump/etjump/pull/1253)
+* `map/devmap` commands now force mapname to lowercase for consistency with callvote [#1254](https://github.com/etjump/etjump/pull/1254)
+* added option to draw CGaz2 velocity direction only while under wishspeed with `etj_CGaz2NoVelocityDir 2` [#1257](https://github.com/etjump/etjump/pull/1257)
+* `etj_autoPortalBinds` now defaults to `1` [#1259](https://github.com/etjump/etjump/pull/1259)
+* fixed div by 0 on 1st server frame [#1260](https://github.com/etjump/etjump/pull/1260)
+  * mod is now aware of `sv_fps` changes on server and changes are applied without reloading a map
 
 # ETJump 3.1.1
 
