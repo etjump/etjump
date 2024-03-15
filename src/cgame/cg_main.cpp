@@ -2086,8 +2086,6 @@ static void CG_RegisterSounds(void) {
 
 //===================================================================================
 
-static std::vector<std::string> dynamicallyLoadedShaders;
-
 /*
 =================
 CG_RegisterGraphics
@@ -2391,7 +2389,6 @@ static void CG_RegisterGraphics(void) {
                 "rgbGen identity",
             }});
         trap_R_LoadDynamicShader(shaderName, shader.c_str());
-        dynamicallyLoadedShaders.push_back(shaderName);
 
         cgs.media.commandCentreAutomapShader[i] =
             trap_R_RegisterShaderNoMip(shaderName);
@@ -4071,10 +4068,8 @@ void CG_Shutdown(void) {
   ETJump::shutdown();
 
   // unload dynamically loaded shaders
-  for (const auto &shaderName : dynamicallyLoadedShaders) {
-    trap_R_LoadDynamicShader(shaderName.c_str(), nullptr);
-  }
-  dynamicallyLoadedShaders.clear();
+  // single call will clear all dynamic shaders
+  trap_R_LoadDynamicShader(nullptr, nullptr);
 
   Shutdown_Display();
 }

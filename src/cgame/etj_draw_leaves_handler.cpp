@@ -60,7 +60,4 @@ void DrawLeavesHandler::turnOffLeaves() {
   }
 }
 
-DrawLeavesHandler::~DrawLeavesHandler() {
-  trap_R_LoadDynamicShader(shaderName, nullptr);
-  turnOnLeaves();
-}
+DrawLeavesHandler::~DrawLeavesHandler() { turnOnLeaves(); }
