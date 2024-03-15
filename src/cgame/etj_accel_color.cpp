@@ -57,28 +57,28 @@ void AccelColor::setAccelColor(int &style, float &speed, float &alpha,
 
 void AccelColor::calcAccelColor(pmove_t *pm, vec3_t &accel, vec4_t &outColor) {
   vec4_t color;
-  const playerState_t &ps = cg.predictedPlayerState;
+  const playerState_t *ps = getValidPlayerState();
   const int8_t ucmdScale = CMDSCALE_DEFAULT;
-  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
+  const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, ucmdScale);
 
-  float speedX = ps.velocity[0];
-  float speedY = ps.velocity[1];
+  float speedX = pm->ps->velocity[0];
+  float speedY = pm->ps->velocity[1];
 
-  const float scale = PmoveUtils::PM_SprintScale(&ps);
+  const float scale = PmoveUtils::PM_SprintScale(ps);
 
   const float accelAngle = RAD2DEG(std::atan2(-cmd.rightmove, cmd.forwardmove));
   const float accelAngleAlt =
       RAD2DEG(std::atan2(cmd.rightmove, cmd.forwardmove));
 
   // max acceleration possible per frame
-  const float frameAccel = CGaz::getFrameAccel(ps, pm);
+  const float frameAccel = CGaz::getFrameAccel(*ps, pm);
   const float gravityAccel =
-      -std::round(static_cast<float>(ps.gravity) * pm->pmext->frametime);
+      -std::round(static_cast<float>(ps->gravity) * pm->pmext->frametime);
 
   if (accel[0] != 0.0f || accel[1] != 0.0f) {
     // get opt angles on both sides of velocity vector
-    const float optAngle = CGaz::getOptAngle(ps, pm, false);
-    const float altOptAngle = CGaz::getOptAngle(ps, pm, true);
+    const float optAngle = CGaz::getOptAngle(*ps, pm, false);
+    const float altOptAngle = CGaz::getOptAngle(*ps, pm, true);
 
     // get accels for opt angle
     float optAccelX = std::roundf(
@@ -210,12 +210,12 @@ float AccelColor::calcAvgAccel(std::list<StoredSpeed> &storedSpeeds) {
   return totalSpeedDelta / (timeDeltaMs / 1000.f);
 }
 
-void AccelColor::popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds) {
+void AccelColor::popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds,
+                                    int time) {
   while (!storedSpeeds.empty()) {
     auto &front = storedSpeeds.front();
 
-    if (cg.time - front.time > ACCEL_COLOR_SMOOTHING_TIME ||
-        cg.time < front.time) {
+    if (time - front.time > ACCEL_COLOR_SMOOTHING_TIME || time < front.time) {
       storedSpeeds.pop_front();
     } else {
       break;

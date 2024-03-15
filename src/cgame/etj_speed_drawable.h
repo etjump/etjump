@@ -53,6 +53,7 @@ class DrawSpeed : public IRenderable {
   int textStyle{};
   int lastUpdateTime{0};
   int accelColorStyle{};
+  bool playing{};
 
   std::string getSpeedString() const;
 
