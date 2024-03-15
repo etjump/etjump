@@ -120,6 +120,7 @@ vmCvar_t g_banIPs;
 vmCvar_t g_filterBan;
 vmCvar_t g_smoothClients;
 vmCvar_t pmove_msec;
+vmCvar_t sv_fps;
 
 // Rafael
 vmCvar_t g_scriptName; // name of script file to run (instead of default for
@@ -409,6 +410,7 @@ cvarTable_t gameCvarTable[] = {
 
     {&g_smoothClients, "g_smoothClients", "1", 0, 0, qfalse},
     {&pmove_msec, "pmove_msec", "8", CVAR_SYSTEMINFO, 0, qfalse},
+    {&sv_fps, "sv_fps", "20", CVAR_SYSTEMINFO, 0, qfalse},
 
     {&g_scriptName, "g_scriptName", "", CVAR_CHEAT, 0, qfalse},
 
@@ -1615,6 +1617,14 @@ void G_UpdateCvars(void) {
           } else if (pmove_msec.integer > 33) {
             trap_Cvar_Set(cv->cvarName, "33");
           }
+        } else if (cv->vmCvar == &sv_fps) {
+          if (sv_fps.integer < 10) {
+            trap_Cvar_Set(cv->cvarName, "10");
+          } else if (sv_fps.integer > 125) {
+            trap_Cvar_Set(cv->cvarName, "125");
+          }
+
+          level.frameTime = 1000 / sv_fps.integer;
         }
         // OSP - Update vote info for clients,
         // if necessary
@@ -1827,6 +1837,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   level.time = levelTime;
   level.startTime = levelTime;
   level.server_settings = i;
+  level.frameTime = 1000 / sv_fps.integer;
 
   for (i = 0; i < level.numConnectedClients; i++) {
     level.clients[level.sortedClients[i]].sess.spawnObjectiveIndex = 0;
@@ -3704,16 +3715,12 @@ void G_RunFrame(int levelTime) {
     }
   }
 
-  level.frameTime = trap_Milliseconds();
-
   level.framenum++;
   level.previousTime = level.time;
   level.time = levelTime;
 
-  level.frameMsec = level.time - level.previousTime;
-
-  level.axisBombCounter -= level.frameMsec;
-  level.alliedBombCounter -= level.frameMsec;
+  level.axisBombCounter -= level.frameTime;
+  level.alliedBombCounter -= level.frameTime;
 
   if (level.axisBombCounter < 0) {
     level.axisBombCounter = 0;
@@ -3753,7 +3760,7 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 
   // go through all allocated objects
   for (i = 0; i < level.num_entities; i++) {
-    G_RunEntity(&g_entities[i], level.frameMsec);
+    G_RunEntity(&g_entities[i], level.frameTime);
   }
 
   for (i = 0; i < level.numConnectedClients; i++) {

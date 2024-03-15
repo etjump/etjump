@@ -1244,8 +1244,7 @@ typedef struct {
   int framenum;
   int time;         // in msec
   int previousTime; // so movers can back up when blocked
-  int frameTime;    // Gordon: time the frame started, for antilag stuff
-  int frameMsec;    // server frame time
+  int frameTime;    // server frame time
 
   int startTime; // level.time the map was started
 
