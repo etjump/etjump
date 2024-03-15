@@ -40,7 +40,8 @@ public:
 
   enum Style { Simple = 1, Advanced = 2 };
 
-  static void popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds);
+  static void popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds,
+                                 int time);
   static void setAccelColor(int &style, float &speed, float &alpha, pmove_t *pm,
                             std::list<StoredSpeed> &storedSpeeds, vec3_t &accel,
                             vec4_t &color);

@@ -92,9 +92,11 @@ bool AccelMeter::beforeRender() {
     return false;
   }
 
-  const playerState_t &ps = cg.predictedPlayerState;
+  playing = cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback;
+
+  const playerState_t *ps = playing ? &cg.predictedPlayerState : &cg.snap->ps;
   const int8_t ucmdScale = CMDSCALE_DEFAULT;
-  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
+  const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, ucmdScale);
 
   pm = PmoveUtils::getPmove(cmd);
 
@@ -110,19 +112,19 @@ bool AccelMeter::beforeRender() {
   }
 
   lastUpdateTime = frameTime;
-  float currentSpeed = VectorLength2(ps.velocity);
+  float currentSpeed = VectorLength2(pm->ps->velocity);
 
   if (accelColorStyle == AccelColor::Style::Simple ||
       (accelColorStyle == AccelColor::Style::Advanced &&
-       AccelColor::lowSpeedOnGround(currentSpeed, ps.groundEntityNum))) {
-    storedSpeeds.push_back({cg.time, currentSpeed});
-    AccelColor::popOldStoredSpeeds(storedSpeeds);
+       AccelColor::lowSpeedOnGround(currentSpeed, pm->ps->groundEntityNum))) {
+    storedSpeeds.push_back({frameTime, currentSpeed});
+    AccelColor::popOldStoredSpeeds(storedSpeeds, frameTime);
   } else if (!storedSpeeds.empty()) {
     storedSpeeds.clear();
   }
 
-  VectorSubtract(ps.velocity, lastSpeed, accel);
-  VectorCopy(ps.velocity, lastSpeed);
+  VectorSubtract(pm->ps->velocity, lastSpeed, accel);
+  VectorCopy(pm->ps->velocity, lastSpeed);
 
   if (pm->ps->pm_type == PM_NOCLIP) {
     VectorClear(accel);
@@ -133,6 +135,10 @@ bool AccelMeter::beforeRender() {
       parseColor(etj_accelColor.string, accelColor);
     }
   } else if (accelColorStyle) {
+    if (!playing) {
+      accelColorStyle = AccelColor::Style::Simple;
+    }
+
     AccelColor::setAccelColor(accelColorStyle, currentSpeed,
                               etj_accelAlpha.value, pm, storedSpeeds, accel,
                               accelColor);
