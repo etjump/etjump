@@ -92,8 +92,5 @@ std::string ConsoleAlphaHandler::createSolidBackground() {
 }
 
 ConsoleAlphaHandler::~ConsoleAlphaHandler() {
-  // unload dynamic shader, so if you do `vid_restart` you won't
-  // accidently load it twice
-  trap_R_LoadDynamicShader(shaderName, nullptr);
   trap_R_RemapShader("console-16bit", "console-16bit", "0");
 }
