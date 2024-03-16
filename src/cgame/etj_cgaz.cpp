@@ -385,30 +385,10 @@ bool CGaz::strafingForwards(const playerState_t &ps, pmove_t *pm) {
   return false;
 }
 
-float CGaz::getFrameAccel(const playerState_t &ps, pmove_t *pm) {
-  // get usercmd
-  const auto ucmdScale =
-      static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
-                              ? CMDSCALE_WALK
-                              : CMDSCALE_DEFAULT);
-  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
-
-  // no meaningful value if speed lower than ground speed or no user
-  // input
-  if (cmd.forwardmove == 0 && cmd.rightmove == 0) {
-    return 0;
-  }
-
-  return static_cast<float>(ps.speed) * pm->pmext->frametime;
-}
-
 float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
   // get player speed
   const float speed = VectorLength2(ps.velocity);
 
-  // get sprint scale
-  const float scale = PmoveUtils::PM_SprintScale(&ps);
-
   // get usercmd
   const auto ucmdScale =
       static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
@@ -416,10 +396,13 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
                               : CMDSCALE_DEFAULT);
   const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
 
-  // no meaningful value if speed lower than ground speed or no user
-  // input
-  if (speed < static_cast<float>(ps.speed) * scale ||
-      (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
+  vec3_t wishvel;
+  const float wishspeed = PmoveUtils::PM_GetWishspeed(
+      wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
+      pm->pmext->up, ps, pm);
+
+  // no meaningful value if speed lower than ground speed or no user input
+  if (speed < wishspeed || (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
     return 0;
   }
 
@@ -433,8 +416,9 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
   const float velAngle = RAD2DEG(std::atan2(ps.velocity[1], ps.velocity[0]));
   const float accelAngle = RAD2DEG(
       std::atan2(alternate ? cmd.rightmove : -cmd.rightmove, cmd.forwardmove));
-  float perAngle =
-      RAD2DEG(std::acos((ps.speed - getFrameAccel(ps, pm)) / speed * scale));
+  float perAngle = RAD2DEG(
+      std::acos((wishspeed - PmoveUtils::getFrameAccel(ps, pm)) / speed));
+
   if (!forwards) {
     perAngle *= -1;
   }

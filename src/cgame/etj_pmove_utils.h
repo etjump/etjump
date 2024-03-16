@@ -51,5 +51,8 @@ public:
   static void PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward,
                                vec3_t right, vec3_t up,
                                const playerState_t &ps);
+
+  // returns total acceleration per frame
+  static float getFrameAccel(const playerState_t &ps, pmove_t *pm);
 };
 } // namespace ETJump
