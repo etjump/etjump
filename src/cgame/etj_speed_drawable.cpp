@@ -84,7 +84,6 @@ bool DrawSpeed::beforeRender() {
   const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, ucmdScale);
 
   pm = PmoveUtils::getPmove(cmd);
-  currentSpeed = VectorLength2(pm->ps->velocity);
 
   // check if current frame should update speed meter
   // we check for framerate dependency here by comparing current time
@@ -99,6 +98,7 @@ bool DrawSpeed::beforeRender() {
     return true;
   }
 
+  currentSpeed = VectorLength2(pm->ps->velocity);
   lastUpdateTime = frameTime;
   maxSpeed = currentSpeed > maxSpeed ? currentSpeed : maxSpeed;
 
