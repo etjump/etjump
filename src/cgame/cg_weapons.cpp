@@ -5013,12 +5013,11 @@ void CG_FireWeapon(centity_t *cent) {
   int muzzleTime = cg.time;
 
   ent = &cent->currentState;
+  const bool selfMuzzle = ent->clientNum == cg.snap->ps.clientNum;
 
   if (!etj_muzzleFlash.integer ||
-      (etj_muzzleFlash.integer == 2 &&
-       ent->clientNum == cg.snap->ps.clientNum) ||
-      (etj_muzzleFlash.integer == 3 &&
-       ent->clientNum != cg.snap->ps.clientNum)) {
+      (etj_muzzleFlash.integer == 2 && selfMuzzle) ||
+      (etj_muzzleFlash.integer == 3 && !selfMuzzle)) {
     muzzleTime = 0;
   }
 
