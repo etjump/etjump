@@ -2756,6 +2756,8 @@ extern vmCvar_t etj_noPanzerAutoswitch;
 
 extern vmCvar_t etj_autoPortalBinds;
 
+extern vmCvar_t etj_muzzleFlash;
+
 //
 // cg_main.c
 //

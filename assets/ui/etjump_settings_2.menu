@@ -10,7 +10,7 @@
 
 #define SUBW_GUN_Y SUBW_HUD_Y + SUBW_HUD_HEIGHT + SUBW_SPACING_Y
 #define SUBW_GUN_ITEM_Y SUBW_GUN_Y + SUBW_HEADER_HEIGHT
-#define SUBW_GUN_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 4)
+#define SUBW_GUN_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 5)
 
 #define SUBW_KEYS_Y SUBW_GUN_Y + SUBW_GUN_HEIGHT + SUBW_SPACING_Y
 #define SUBW_KEYS_ITEM_Y SUBW_KEYS_Y + SUBW_HEADER_HEIGHT
@@ -73,6 +73,7 @@ menuDef {
         CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "cg_gunZ", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Gun Z:", 0.2, SUBW_ITEM_HEIGHT, cg_gunZ 0 -30 30 0.5, "Sets Z position of gun\ncg_gunz")
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Gun sway:", 0.2, SUBW_ITEM_HEIGHT, "etj_gunSway", "Enable gun sway/bobbing\netj_gunSway")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Muzzleflash:", 0.2, SUBW_ITEM_HEIGHT, "etj_muzzleFlash", cvarFloatList { "Off" 0 "On" 1 "Only for others" 2 "Only for self" 3 }, "Enable muzzleflash\netj_muzzleFlash")
 
     SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_KEYS_Y, SUBW_WIDTH, SUBW_KEYS_HEIGHT, "KEYS")
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_KEYS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Pressed keys:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawKeys", cvarFloatList { "No" 0 "ETJump 1" 1 "DeFRaG default" 2 "ETJump 2" 3 "ETJump 3" 4 "ETJump 4" 5 }, "Draw pressed keys\netj_drawKeys")
