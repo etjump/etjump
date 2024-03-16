@@ -64,14 +64,12 @@ void AccelColor::calcAccelColor(pmove_t *pm, vec3_t &accel, vec4_t &outColor) {
   float speedX = pm->ps->velocity[0];
   float speedY = pm->ps->velocity[1];
 
-  const float scale = PmoveUtils::PM_SprintScale(ps);
-
   const float accelAngle = RAD2DEG(std::atan2(-cmd.rightmove, cmd.forwardmove));
   const float accelAngleAlt =
       RAD2DEG(std::atan2(cmd.rightmove, cmd.forwardmove));
 
   // max acceleration possible per frame
-  const float frameAccel = CGaz::getFrameAccel(*ps, pm);
+  const float frameAccel = PmoveUtils::getFrameAccel(*ps, pm);
   const float gravityAccel =
       -std::round(static_cast<float>(ps->gravity) * pm->pmext->frametime);
 
@@ -81,22 +79,20 @@ void AccelColor::calcAccelColor(pmove_t *pm, vec3_t &accel, vec4_t &outColor) {
     const float altOptAngle = CGaz::getOptAngle(*ps, pm, true);
 
     // get accels for opt angle
-    float optAccelX = std::roundf(
-        frameAccel *
-        static_cast<float>(std::cos(DEG2RAD(accelAngle + optAngle)) * scale));
-    float optAccelY = std::roundf(
-        frameAccel *
-        static_cast<float>(std::sin(DEG2RAD(accelAngle + optAngle)) * scale));
+    float optAccelX =
+        std::roundf(frameAccel * static_cast<float>(
+                                     std::cos(DEG2RAD(accelAngle + optAngle))));
+    float optAccelY =
+        std::roundf(frameAccel * static_cast<float>(
+                                     std::sin(DEG2RAD(accelAngle + optAngle))));
 
     // get accels for alt opt angle
-    float altOptAccelX =
-        std::round(frameAccel *
-                   static_cast<float>(
-                       std::cos(DEG2RAD(accelAngleAlt + altOptAngle)) * scale));
-    float altOptAccelY =
-        std::round(frameAccel *
-                   static_cast<float>(
-                       std::sin(DEG2RAD(accelAngleAlt + altOptAngle)) * scale));
+    float altOptAccelX = std::round(
+        frameAccel *
+        static_cast<float>(std::cos(DEG2RAD(accelAngleAlt + altOptAngle))));
+    float altOptAccelY = std::round(
+        frameAccel *
+        static_cast<float>(std::sin(DEG2RAD(accelAngleAlt + altOptAngle))));
 
     if (pm->groundPlane) {
       vec3_t optAccel = {optAccelX, optAccelY, gravityAccel};

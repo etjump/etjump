@@ -153,4 +153,23 @@ void PmoveUtils::PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward,
     wishvel[i] = cmd.forwardmove * forward[i] + cmd.rightmove * right[i];
   }
 }
+
+float PmoveUtils::getFrameAccel(const playerState_t &ps, pmove_t *pm) {
+  const auto ucmdScale =
+      static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
+                              ? CMDSCALE_WALK
+                              : CMDSCALE_DEFAULT);
+  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
+
+  // no meaningful value if no user input
+  if (cmd.forwardmove == 0 && cmd.rightmove == 0) {
+    return 0;
+  }
+
+  vec3_t wishvel;
+  const float wishspeed = PmoveUtils::PM_GetWishspeed(
+      wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
+      pm->pmext->up, ps, pm);
+  return wishspeed * pm->pmext->frametime;
+}
 } // namespace ETJump
