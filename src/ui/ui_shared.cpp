@@ -5944,7 +5944,8 @@ void Item_ValidateTypeData(itemDef_t *item) {
              item->type == ITEM_TYPE_SLIDER || item->type == ITEM_TYPE_TEXT) {
     item->typeData = UI_Alloc(sizeof(editFieldDef_t));
     memset(item->typeData, 0, sizeof(editFieldDef_t));
-    if (item->type == ITEM_TYPE_EDITFIELD) {
+    if (item->type == ITEM_TYPE_EDITFIELD ||
+        item->type == ITEM_TYPE_NUMERICFIELD) {
       if (!((editFieldDef_t *)item->typeData)->maxPaintChars) {
         ((editFieldDef_t *)item->typeData)->maxPaintChars = MAX_EDITFIELD;
       }
