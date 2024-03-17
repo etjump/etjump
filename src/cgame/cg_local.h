@@ -2409,7 +2409,7 @@ extern vmCvar_t etj_CGazTrueness;
 extern vmCvar_t etj_CGazOnTop;
 extern vmCvar_t etj_CGaz2FixedSpeed;
 extern vmCvar_t etj_CGaz2NoVelocityDir;
-extern vmCvar_t etj_CGazDrawSnapZone;
+extern vmCvar_t etj_CGaz1DrawSnapZone;
 
 extern vmCvar_t etj_drawOB;
 // Aciz: movable drawOB

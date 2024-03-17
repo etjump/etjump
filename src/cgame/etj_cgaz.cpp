@@ -125,7 +125,7 @@ void CGaz::UpdateDraw(float wishspeed, float accel) {
 float CGaz::UpdateDrawSnap() {
   // don't highlight snapzone on very low velocities,
   // or if drawing isn't requested
-  if (!etj_CGazDrawSnapZone.integer || !(etj_drawCGaz.integer & 1) ||
+  if (!etj_CGaz1DrawSnapZone.integer || !(etj_drawCGaz.integer & 1) ||
       state.vf < state.wishspeed) {
     return Snaphud::INVALID_SNAP_DIR;
   }
