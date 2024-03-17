@@ -3057,6 +3057,13 @@ void CG_EDV_RunInput(void);
 //
 // cg_events.c
 //
+enum AutoSwitchFlags {
+  Disabled = 0 << 0,
+  Enabled = 1 << 0,
+  IfReplacingPrimary = 1 << 1,
+  IgnorePortalGun = 1 << 2,
+};
+
 void CG_CheckEvents(centity_t *cent);
 void CG_EntityEvent(centity_t *cent, vec3_t position);
 void CG_PainEvent(centity_t *cent, int health, qboolean crouching);

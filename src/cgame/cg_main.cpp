@@ -666,7 +666,7 @@ typedef struct {
 
 cvarTable_t cvarTable[] = {
     {&cg_ignore, "cg_ignore", "0", 0}, // used for debugging
-    {&cg_autoswitch, "cg_autoswitch", "2", CVAR_ARCHIVE},
+    {&cg_autoswitch, "cg_autoswitch", "0", CVAR_ARCHIVE},
     {&cg_drawGun, "cg_drawGun", "1", CVAR_ARCHIVE},
     {&cg_gun_frame, "cg_gun_frame", "0", CVAR_TEMP},
     {&cg_cursorHints, "cg_cursorHints", "1", CVAR_ARCHIVE},

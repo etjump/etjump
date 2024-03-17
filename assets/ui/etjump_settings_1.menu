@@ -6,7 +6,7 @@
 // Left side menus
 #define SUBW_GENERAL_Y SUBW_Y
 #define SUBW_GENERAL_ITEM_Y SUBW_GENERAL_Y + SUBW_HEADER_HEIGHT
-#define SUBW_GENERAL_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 22)
+#define SUBW_GENERAL_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 23)
 
 #define SUBW_SOUNDS_Y SUBW_GENERAL_Y + SUBW_GENERAL_HEIGHT + SUBW_SPACING_Y
 #define SUBW_SOUNDS_ITEM_Y SUBW_SOUNDS_Y + SUBW_HEADER_HEIGHT
@@ -70,6 +70,7 @@ menuDef {
         SLIDER              (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 20), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Menu sensitivity:", 0.2, SUBW_ITEM_HEIGHT, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 21), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "No panzer autoswitch:", 0.2, SUBW_ITEM_HEIGHT, "etj_noPanzerAutoswitch", "Toggle automatic weapon switching after firing a panzerfaust\netj_noPanzerAutoswitch")
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 22), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Portalgun auto binds:", 0.2, SUBW_ITEM_HEIGHT, "etj_autoPortalBinds", "Automatically set 'weapalt' bindings to '+attack2' and back when switching to/from portalgun\netj_autoPortalBinds")
+        NUMERICFIELD        (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 23), SUBW_ITEM_WIDTH, SUBW_EDITFIELD_HEIGHT, "Auto switch weapon:", 0.2, SUBW_ITEM_HEIGHT, "cg_autoswitch", 1, "Automatically switch weapon when picking up a new one (bitflag)\n0 = disabled\n1 = enabled\n2 = don't autoswitch unless replacing current weapon\n4 = don't autoswitch to portal gun\ncg_autoswitch")
 
     SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_SOUNDS_Y, SUBW_WIDTH, SUBW_SOUNDS_HEIGHT, "SOUNDS")
         CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_weaponVolume", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
