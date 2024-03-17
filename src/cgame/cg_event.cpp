@@ -12,6 +12,32 @@ extern void CG_Tracer(vec3_t source, vec3_t dest, int sparks);
 // from cg_weapons.c
 extern int CG_WeaponIndex(int weapnum, int *bank, int *cycle);
 
+static bool CG_IsPrimaryWeapon(int weapon, const playerState_t *ps) {
+  const auto team = static_cast<team_t>(ps->persistant[PERS_TEAM]);
+
+  if (team == TEAM_AXIS) {
+    if (weapon == WP_THOMPSON) {
+      weapon = WP_MP40;
+    } else if (weapon == WP_CARBINE) {
+      weapon = WP_KAR98;
+    } else if (weapon == WP_GARAND) {
+      weapon = WP_K43;
+    }
+
+  } else if (team == TEAM_ALLIES) {
+    if (weapon == WP_MP40) {
+      weapon = WP_THOMPSON;
+    } else if (weapon == WP_KAR98) {
+      weapon = WP_CARBINE;
+    } else if (weapon == WP_K43) {
+      weapon = WP_GARAND;
+    }
+  }
+
+  return BG_WeaponIsPrimaryForClassAndTeam(ps->stats[STAT_PLAYER_CLASS], team,
+                                           static_cast<weapon_t>(weapon));
+}
+
 /*
 ================
 CG_ItemPickup
@@ -20,98 +46,62 @@ A new item was picked up this frame
 ================
 */
 static void CG_ItemPickup(int itemNum) {
-  int itemid;
-  int wpbank_cur, wpbank_pickup;
+  const int itemID = bg_itemlist[itemNum].giTag;
+  const int autoSwitch = cg_autoswitch.integer;
 
-  itemid = bg_itemlist[itemNum].giTag;
   if (etj_itemPickupText.integer) {
     CG_AddPMItem(PM_MESSAGE, va("Picked up %s", CG_PickupItemText(itemNum)),
                  cgs.media.pmImages[PM_MESSAGE]);
   }
 
-  //	cg.itemPickup			= itemNum;
-  //	cg.itemPickupTime		= cg.time;
-  //	cg.itemPickupBlendTime	= cg.time;
+  if (autoSwitch == AutoSwitchFlags::Disabled ||
+      bg_itemlist[itemNum].giType != IT_WEAPON) {
+    return;
+  }
 
-  // see if it should be the grabbed weapon
-  if (bg_itemlist[itemNum].giType == IT_WEAPON) {
+  // never autoswitch to scopes (this shouldn't happen anyway) or to ammo pack
+  if (itemID == WP_FG42SCOPE || itemID == WP_GARAND_SCOPE ||
+      itemID == WP_K43_SCOPE || itemID == WP_AMMO) {
+    return;
+  }
 
-    if (cg_autoswitch.integer &&
-        cg.predictedPlayerState.weaponstate != WEAPON_RELOADING) {
+  // don't allow bypassing reload animation with autoswitch
+  if (cg.predictedPlayerState.weaponstate == WEAPON_RELOADING) {
+    return;
+  }
 
-      //	0 - "Off"
-      //	1 - "Always Switch"
-      //	2 - "If New"
-      //	3 - "If Better"
-      //	4 - "New or Better"
+  // always switch if we have no weapon selected
+  if (!cg.weaponSelect) {
+    cg.weaponSelect = itemID;
+    cg.weaponSelectTime = cg.time;
+    return;
+  }
 
-      // don't ever autoswitch to secondary fire weapons
-      // Gordon: Leave autoswitch to secondary
-      // kar/carbine as they use alt ammo and arent
-      // zoomed: Note, not that it would do this anyway
-      // as it isnt in a bank....
-      if (itemid != WP_FG42SCOPE && itemid != WP_GARAND_SCOPE &&
-          itemid != WP_K43_SCOPE && itemid != WP_AMMO) //----(SA)	modified
-      { // no weap currently selected, always just
-        // select the new one
-        if (!cg.weaponSelect) {
-          cg.weaponSelectTime = cg.time;
-          cg.weaponSelect = itemid;
-        }
-        // 1 - always switch to new weap (Q3A
-        // default)
-        else if (cg_autoswitch.integer == 1) {
-          cg.weaponSelectTime = cg.time;
-          cg.weaponSelect = itemid;
-        } else {
+  const bool isPrimary = CG_IsPrimaryWeapon(itemID, &cg.snap->ps);
+  const bool primaryActive = CG_IsPrimaryWeapon(cg.weaponSelect, &cg.snap->ps);
 
-          // 2 - switch to weap if it's
-          // not already in the player's
-          // inventory (Wolf default) 4
-          // - both 2 and 3
+  bool doSwitch = false;
 
-          // FIXME:	this works fine
-          // for predicted pickups (when
-          // you walk over the weapon),
-          // but not for
-          //			manual pickups
-          //(activate item)
-          if (cg_autoswitch.integer == 2 || cg_autoswitch.integer == 4) {
-            if (!COM_BitCheck(cg.snap->ps.weapons, itemid)) {
-              cg.weaponSelectTime = cg.time;
-              cg.weaponSelect = itemid;
-            }
-          } // end 2
+  if (autoSwitch & AutoSwitchFlags::Enabled) {
+    doSwitch = true;
+  }
 
-          // 3 - switch to weap if it's
-          // in a bank greater than the
-          // current weap 4 - both 2 and
-          // 3
-          if (cg_autoswitch.integer == 3 || cg_autoswitch.integer == 4) {
-            // switch away only
-            // if a primary
-            // weapon is
-            // selected (read:
-            // don't switch away
-            // if current weap
-            // is a secondary
-            // mode)
-            if (CG_WeaponIndex(cg.weaponSelect, &wpbank_cur, NULL)) {
-              if (CG_WeaponIndex(itemid, &wpbank_pickup, NULL)) {
-                if (wpbank_pickup > wpbank_cur) {
-                  cg.weaponSelectTime = cg.time;
-                  cg.weaponSelect = itemid;
-                }
-              }
-            }
-          } // end 3
+  if (autoSwitch & AutoSwitchFlags::IfReplacingPrimary) {
+    if (isPrimary && !primaryActive) {
+      doSwitch = false;
+    }
+  }
 
-        } // end cg_autoswitch.integer != 1
-      }
+  if (autoSwitch & AutoSwitchFlags::IgnorePortalGun) {
+    if (itemID == WP_PORTAL_GUN) {
+      doSwitch = false;
+    }
+  }
 
-    } // end cg_autoswitch.integer
-
-  } // end bg_itemlist[itemNum].giType == IT_WEAPON
+  if (doSwitch) {
+    cg.weaponSelect = itemID;
+    cg.weaponSelectTime = cg.time;
+  }
 }
 
 /*
@@ -2013,14 +2003,15 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       if (es->number == cg.snap->ps.clientNum &&
           ((cg_noAmmoAutoSwitch.integer > 0 &&
             !CG_WeaponSelectable(cg.weaponSelect)) ||
-           es->weapon == WP_MORTAR_SET || es->weapon == WP_MOBILE_MG42_SET ||
-           es->weapon == WP_GRENADE_LAUNCHER ||
-           es->weapon == WP_GRENADE_PINEAPPLE || es->weapon == WP_DYNAMITE ||
-           es->weapon == WP_SMOKE_MARKER || es->weapon == WP_PANZERFAUST ||
-           es->weapon == WP_ARTY || es->weapon == WP_LANDMINE ||
-           es->weapon == WP_SATCHEL || es->weapon == WP_SATCHEL_DET ||
-           es->weapon == WP_TRIPMINE || es->weapon == WP_SMOKE_BOMB ||
-           es->weapon == WP_AMMO || es->weapon == WP_MEDKIT)) {
+           (cg_autoswitch.integer == AutoSwitchFlags::Enabled &&
+            (es->weapon == WP_MORTAR_SET || es->weapon == WP_MOBILE_MG42_SET ||
+             es->weapon == WP_GRENADE_LAUNCHER ||
+             es->weapon == WP_GRENADE_PINEAPPLE || es->weapon == WP_DYNAMITE ||
+             es->weapon == WP_SMOKE_MARKER || es->weapon == WP_PANZERFAUST ||
+             es->weapon == WP_ARTY || es->weapon == WP_LANDMINE ||
+             es->weapon == WP_SATCHEL || es->weapon == WP_SATCHEL_DET ||
+             es->weapon == WP_TRIPMINE || es->weapon == WP_SMOKE_BOMB ||
+             es->weapon == WP_AMMO || es->weapon == WP_MEDKIT)))) {
         CG_OutOfAmmoChange(event == EV_WEAPONSWITCHED ? qfalse : qtrue);
       }
       break;
