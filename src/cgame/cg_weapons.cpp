@@ -5010,8 +5010,16 @@ void CG_FireWeapon(centity_t *cent) {
   weaponInfo_t *weap;
   sfxHandle_t *firesound;
   sfxHandle_t *fireEchosound;
+  int muzzleTime = cg.time;
 
   ent = &cent->currentState;
+  const bool selfMuzzle = ent->clientNum == cg.snap->ps.clientNum;
+
+  if (!etj_muzzleFlash.integer ||
+      (etj_muzzleFlash.integer == 2 && selfMuzzle) ||
+      (etj_muzzleFlash.integer == 3 && !selfMuzzle)) {
+    muzzleTime = 0;
+  }
 
   // Arnout: quick hack for EF_MOUNTEDTANK, need to change this - likely
   // it needs to use viewlocked as well
@@ -5030,7 +5038,7 @@ void CG_FireWeapon(centity_t *cent) {
                                 cgs.media.hWeaponSnd,
                                 DEFAULT_VOLUME * etj_weaponVolume.value);
     }
-    cent->muzzleFlashTime = cg.time;
+    cent->muzzleFlashTime = muzzleTime;
     return;
   }
 
@@ -5050,7 +5058,7 @@ void CG_FireWeapon(centity_t *cent) {
       CG_MachineGunEjectBrass(cent);
     }
 
-    cent->muzzleFlashTime = cg.time;
+    cent->muzzleFlashTime = muzzleTime;
 
     return;
   }
@@ -5070,7 +5078,7 @@ void CG_FireWeapon(centity_t *cent) {
 
   // mark the entity as muzzle flashing, so when it is added it will
   // append the flash to the weapon model
-  cent->muzzleFlashTime = cg.time;
+  cent->muzzleFlashTime = muzzleTime;
 
   // RF, kick angles
   if (ent->number == cg.snap->ps.clientNum) {
