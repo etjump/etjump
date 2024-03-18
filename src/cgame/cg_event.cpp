@@ -2003,15 +2003,14 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       if (es->number == cg.snap->ps.clientNum &&
           ((cg_noAmmoAutoSwitch.integer > 0 &&
             !CG_WeaponSelectable(cg.weaponSelect)) ||
-           (cg_autoswitch.integer == AutoSwitchFlags::Enabled &&
-            (es->weapon == WP_MORTAR_SET || es->weapon == WP_MOBILE_MG42_SET ||
-             es->weapon == WP_GRENADE_LAUNCHER ||
-             es->weapon == WP_GRENADE_PINEAPPLE || es->weapon == WP_DYNAMITE ||
-             es->weapon == WP_SMOKE_MARKER || es->weapon == WP_PANZERFAUST ||
-             es->weapon == WP_ARTY || es->weapon == WP_LANDMINE ||
-             es->weapon == WP_SATCHEL || es->weapon == WP_SATCHEL_DET ||
-             es->weapon == WP_TRIPMINE || es->weapon == WP_SMOKE_BOMB ||
-             es->weapon == WP_AMMO || es->weapon == WP_MEDKIT)))) {
+           es->weapon == WP_MORTAR_SET || es->weapon == WP_MOBILE_MG42_SET ||
+           es->weapon == WP_GRENADE_LAUNCHER ||
+           es->weapon == WP_GRENADE_PINEAPPLE || es->weapon == WP_DYNAMITE ||
+           es->weapon == WP_SMOKE_MARKER || es->weapon == WP_PANZERFAUST ||
+           es->weapon == WP_ARTY || es->weapon == WP_LANDMINE ||
+           es->weapon == WP_SATCHEL || es->weapon == WP_SATCHEL_DET ||
+           es->weapon == WP_TRIPMINE || es->weapon == WP_SMOKE_BOMB ||
+           es->weapon == WP_AMMO || es->weapon == WP_MEDKIT)) {
         CG_OutOfAmmoChange(event == EV_WEAPONSWITCHED ? qfalse : qtrue);
       }
       break;

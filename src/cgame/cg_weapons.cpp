@@ -4741,6 +4741,23 @@ void CG_OutOfAmmoChange(qboolean allowforceswitch) {
     }
   }
 
+  // When we drop a weapon by picking up a new one, we end up here.
+  // This is because EV_NOAMMO event gets added since we lose our primary
+  // weapon (there is no ammo left) so the game thinks we might want to switch.
+  // This happens if 'cg_noAmmoAutoSwitch' is enabled, and we have no ammo
+  // in our equipped weapon, which is fine, EXCEPT the game also forces this
+  // behavior for certain other weapons, e.g. grenades (see EV_NOAMMO
+  // event handling). This makes sense, as you don't want to end up with 0
+  // grenades in hand after throwing out the last one. This means that if we
+  // are not holding our primary weapon while picking up a new one, and we are
+  // also holding one of the weapons defined in the event handling, we are
+  // forced to switch to the newly picked up weapon. We don't want that,
+  // it's stupid, so if the currently selected weapon is still valid,
+  // exit out here before we are forced into a weapon switch.
+  if (CG_WeaponSelectable(cg.weaponSelect)) {
+    return;
+  }
+
   //
   // more complicated selection
   //
