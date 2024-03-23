@@ -170,6 +170,6 @@ float PmoveUtils::getFrameAccel(const playerState_t &ps, pmove_t *pm) {
   const float wishspeed = PmoveUtils::PM_GetWishspeed(
       wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
       pm->pmext->up, ps, pm);
-  return wishspeed * pm->pmext->frametime;
+  return pm->pmext->accel * wishspeed * pm->pmext->frametime;
 }
 } // namespace ETJump
