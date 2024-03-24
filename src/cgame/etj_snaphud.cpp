@@ -303,7 +303,28 @@ void Snaphud::PrepareDrawables() {
       const bool isAlt = i % 2;
       isCurrentAlt |= active && isAlt;
 
-      drawableSnaps.push_back(DrawableSnap{bSnap, eSnap, isAlt, active});
+      if (etj_drawSnapHUD.integer == 3) {
+        float snapAngRad = SHORT2RAD(bSnap);
+
+        const float frameAccel = PmoveUtils::getFrameAccel(*ps, pm);
+        const float maxAccel = std::roundf(frameAccel);
+
+        float accelX =
+            std::roundf(frameAccel * static_cast<float>(std::cos(snapAngRad)));
+        float accelY =
+            std::roundf(frameAccel * static_cast<float>(std::sin(snapAngRad)));
+
+        if (std::abs(pm->ps->velocity[0]) >= std::abs(pm->ps->velocity[1])) {
+        drawableSnaps.push_back(
+            DrawableSnap{bSnap, eSnap, isAlt, active, accelX});
+        } else {
+        drawableSnaps.push_back(
+            DrawableSnap{bSnap, eSnap, isAlt, active, accelY});
+        }
+      } else {
+        drawableSnaps.push_back(
+            DrawableSnap{bSnap, eSnap, isAlt, active, 0.f});
+      }
     }
   }
 }
@@ -319,8 +340,17 @@ void Snaphud::render() const {
     fov = Numeric::clamp(etj_snapHUDFov.value, 1, 179);
   }
 
+  float lastAccel = 0.0f;
+  int8_t lastColor = 0;
+
   for (const DrawableSnap &ds : drawableSnaps) {
-    int8_t color = ds.alt ? 1 : 0;
+    int8_t color = 0;
+
+    if (etj_drawSnapHUD.integer == 3) {
+      color = (abs(static_cast<int>(ds.fwAccel)) % 2) ^ 1;
+    } else {
+      color = ds.alt ? 1 : 0;
+    }
 
     if (etj_snapHUDActiveIsPrimary.integer && isCurrentAlt) {
       color ^= 1;

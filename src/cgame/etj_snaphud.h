@@ -83,6 +83,7 @@ private:
     int eSnap;
     bool alt;
     bool active;
+    float fwAccel;
   };
 
   std::vector<DrawableSnap> drawableSnaps{};
