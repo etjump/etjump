@@ -347,7 +347,7 @@ void Snaphud::render() const {
     int8_t color = 0;
 
     if (etj_drawSnapHUD.integer == 3) {
-      color = (abs(static_cast<int>(ds.fwAccel)) % 2) ^ 1;
+      color = abs(static_cast<int>(ds.fwAccel)) % 2;
     } else {
       color = ds.alt ? 1 : 0;
     }
