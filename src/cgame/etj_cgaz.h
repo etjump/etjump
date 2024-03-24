@@ -34,15 +34,6 @@ public:
   static float getOptAngle(const playerState_t &ps, pmove_t *pm,
                            bool alternate);
 
-  CGaz();
-  ~CGaz() override = default;
-
-  void render() const override;
-  bool beforeRender() override;
-
-private:
-  enum class CGazTrueness { CGAZ_JUMPCROUCH = 1, CGAZ_GROUND = 2 };
-
   struct state_t {
     float gSquared;  // 0 when not on slick
     float vSquared;  // previous_velocity squared
@@ -56,28 +47,36 @@ private:
     float wishspeed;
   };
 
-  state_t state{};
+  static float drawMin;
+  static float drawOpt;
+  static float drawMaxCos;
+  static float drawMax;
+  static float drawSnap; // NaN if disabled or not applicable
+  static float drawVel;
+  static float yaw;
 
-  float drawMin{};
-  float drawOpt{};
-  float drawMaxCos{};
-  float drawMax{};
-  float drawSnap{}; // NaN if disabled or not applicable
-  float drawVel{};
-  float yaw{};
+  CGaz();
+  ~CGaz() override = default;
+
+  void render() const override;
+  bool beforeRender() override;
+
+private:
+  enum class CGazTrueness { CGAZ_JUMPCROUCH = 1, CGAZ_GROUND = 2 };
+
   vec4_t CGaz1Colors[4]{};
   vec4_t CGaz2Colors[2]{};
 
   bool canSkipDraw() const;
   void UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
   void UpdateCGaz2();
-  float GetSlickGravity();
-  void UpdateDraw(float wishspeed, float accel);
+  static float GetSlickGravity(const playerState_t *ps, pmove_t *pm);
   static float UpdateDrawMin(state_t const *state);
   static float UpdateDrawOpt(state_t const *state);
   static float UpdateDrawMaxCos(state_t const *state);
   static float UpdateDrawMax(state_t const *state);
-  float UpdateDrawSnap();
+  static float UpdateDrawSnap(const playerState_t *ps, pmove_t *pm);
+  static void UpdateDraw(float wishspeed, const playerState_t *ps, pmove_t *pm);
   void startListeners();
 
   playerState_t *ps = &cg.predictedPlayerState;
