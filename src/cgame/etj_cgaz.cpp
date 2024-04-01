@@ -38,9 +38,9 @@ namespace ETJump {
   float CGaz::drawOpt{};
   float CGaz::drawMaxCos{};
   float CGaz::drawMax{};
-  float CGaz::drawSnap{}; // NaN if disabled or not applicable
   float CGaz::drawVel{};
   float CGaz::yaw{};
+  float CGaz::drawSnap{};
 
 CGaz::CGaz() {
   // CGaz 1

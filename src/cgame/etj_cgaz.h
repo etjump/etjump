@@ -51,9 +51,11 @@ public:
   static float drawOpt;
   static float drawMaxCos;
   static float drawMax;
-  static float drawSnap; // NaN if disabled or not applicable
   static float drawVel;
   static float yaw;
+
+  // next snap in strafe dir, INVALID_SNAP_DIR if not available
+  static float drawSnap;
 
   CGaz();
   ~CGaz() override = default;
