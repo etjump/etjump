@@ -94,7 +94,8 @@ void AccelColor::calcAccelColor(pmove_t *pm, vec3_t &accel, vec4_t &outColor) {
         frameAccel *
         static_cast<float>(std::sin(DEG2RAD(accelAngleAlt + altOptAngle))));
 
-    if (pm->groundPlane) {
+    if (pm->groundPlane && (pm->pmext->groundTrace.plane.normal[0] ||
+                            pm->pmext->groundTrace.plane.normal[1])) {
       vec3_t optAccel = {optAccelX, optAccelY, gravityAccel};
       vec3_t altOptAccel = {altOptAccelX, altOptAccelY, gravityAccel};
       vec3_t normal = {0, 0, 0};

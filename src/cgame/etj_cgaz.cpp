@@ -33,6 +33,15 @@
 #include "etj_cvar_update_handler.h"
 
 namespace ETJump {
+  CGaz::state_t state;
+  float CGaz::drawMin{};
+  float CGaz::drawOpt{};
+  float CGaz::drawMaxCos{};
+  float CGaz::drawMax{};
+  float CGaz::drawVel{};
+  float CGaz::yaw{};
+  float CGaz::drawSnap{};
+
 CGaz::CGaz() {
   // CGaz 1
   parseColorString(etj_CGaz1Color1.string, CGaz1Colors[0]);
@@ -90,14 +99,16 @@ void CGaz::UpdateCGaz2() {
   drawVel = DEG2RAD(drawVel);
 }
 
-void CGaz::UpdateDraw(float wishspeed, float accel) {
+void CGaz::UpdateDraw(float wishspeed, const playerState_t* ps, pmove_t *pm) {
   // this can happen when running > 125fps, set default wishspeed to
   // avoid div by 0 later
   if (wishspeed == 0) {
     wishspeed = static_cast<float>(ps->speed) * ps->sprintSpeedScale;
   }
 
-  state.gSquared = GetSlickGravity();
+  const float accel = pm->pmext->accel;
+
+  state.gSquared = GetSlickGravity(ps, pm);
   state.vSquared = VectorLengthSquared2(pm->pmext->previous_velocity);
   state.vfSquared = VectorLengthSquared2(pm->pmext->velocity);
   state.wishspeed = wishspeed;
@@ -118,11 +129,11 @@ void CGaz::UpdateDraw(float wishspeed, float accel) {
   drawOpt = UpdateDrawOpt(&state);
   drawMaxCos = UpdateDrawMaxCos(&state);
   drawMax = UpdateDrawMax(&state);
-  drawSnap = UpdateDrawSnap();
+  drawSnap = UpdateDrawSnap(ps, pm);
   drawVel = atan2f(pm->pmext->velocity[1], pm->pmext->velocity[0]);
 }
 
-float CGaz::UpdateDrawSnap() {
+float CGaz::UpdateDrawSnap(const playerState_t *ps, pmove_t *pm) {
   // don't highlight snapzone on very low velocities,
   // or if drawing isn't requested
   if (!etj_CGaz1DrawSnapZone.integer || !(etj_drawCGaz.integer & 1) ||
@@ -189,7 +200,7 @@ float CGaz::UpdateDrawMax(state_t const *state) {
   return drawMax;
 }
 
-float CGaz::GetSlickGravity() {
+float CGaz::GetSlickGravity(const playerState_t *ps, pmove_t *pm) {
   if ((pm->pmext->groundTrace.surfaceFlags & SURF_SLICK) ||
       (ps->pm_flags & PMF_TIME_KNOCKBACK)) {
     return powf(static_cast<float>(ps->gravity) * pm->pmext->frametime, 2);
@@ -235,7 +246,7 @@ bool CGaz::beforeRender() {
     wishspeed = static_cast<float>(ps->speed) * ps->sprintSpeedScale;
   }
 
-  UpdateDraw(wishspeed, pm->pmext->accel);
+  UpdateDraw(wishspeed, ps, pm);
 
   if (etj_drawCGaz.integer & 1) {
     UpdateCGaz1(wishvel, uCmdScale, cmd);
@@ -386,23 +397,42 @@ bool CGaz::strafingForwards(const playerState_t &ps, pmove_t *pm) {
 }
 
 float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
-  // get player speed
-  const float speed = VectorLength2(ps.velocity);
+  const auto uCmdScale = static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] &
+                                                     (BUTTON_WALKING << 8)
+                                                 ? CMDSCALE_WALK
+                                                 : CMDSCALE_DEFAULT);
+  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, uCmdScale);
 
-  // get usercmd
-  const auto ucmdScale =
-      static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
-                              ? CMDSCALE_WALK
-                              : CMDSCALE_DEFAULT);
-  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
+  // get correct pmove state
+  pm = PmoveUtils::getPmove(cmd);
+
+  // water and ladder movement are not important
+  // since speed is capped anyway
+  // check this only after we have a valid pmove
+  if (pm->pmext->waterlevel > 1 || pm->pmext->ladder) {
+    return false;
+  }
+
+  // show upmove influence?
+  const float scale =
+      etj_CGazTrueness.integer & static_cast<int>(CGazTrueness::CGAZ_JUMPCROUCH)
+          ? pm->pmext->scale
+          : pm->pmext->scaleAlt;
 
   vec3_t wishvel;
-  const float wishspeed = PmoveUtils::PM_GetWishspeed(
-      wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
-      pm->pmext->up, ps, pm);
+  float wishspeed =
+      PmoveUtils::PM_GetWishspeed(wishvel, scale, cmd, pm->pmext->forward,
+                                  pm->pmext->right, pm->pmext->up, ps, pm);
+
+  // set default wishspeed for drawing if no user input
+  if (!cmd.forwardmove && !cmd.rightmove) {
+    wishspeed = static_cast<float>(ps.speed) * ps.sprintSpeedScale;
+  }
+
+  UpdateDraw(wishspeed, &ps, pm);
 
   // no meaningful value if speed lower than ground speed or no user input
-  if (speed < wishspeed || (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
+  if (state.vf < state.wishspeed || (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
     return 0;
   }
 
@@ -416,8 +446,10 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
   const float velAngle = RAD2DEG(std::atan2(ps.velocity[1], ps.velocity[0]));
   const float accelAngle = RAD2DEG(
       std::atan2(alternate ? cmd.rightmove : -cmd.rightmove, cmd.forwardmove));
+
+  const float frameAccel = PmoveUtils::getFrameAccel(ps, pm);
   float perAngle = RAD2DEG(
-      std::acos((wishspeed - PmoveUtils::getFrameAccel(ps, pm)) / speed));
+      std::acos((pm->pmext->accel * state.wishspeed - frameAccel) / state.vf));
 
   if (!forwards) {
     perAngle *= -1;
