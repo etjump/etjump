@@ -112,7 +112,7 @@ void CGaz::UpdateDraw(float wishspeed, const playerState_t* ps, pmove_t *pm) {
   state.vSquared = VectorLengthSquared2(pm->pmext->previous_velocity);
   state.vfSquared = VectorLengthSquared2(pm->pmext->velocity);
   state.wishspeed = wishspeed;
-  state.a = accel * state.wishspeed * pm->pmext->frametime;
+  state.a = std::roundf(accel * state.wishspeed * pm->pmext->frametime);
   state.aSquared = powf(state.a, 2);
   // show true ground zones?
   if (!(etj_CGazTrueness.integer &
@@ -443,43 +443,32 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
   const bool forwards = strafingForwards(ps, pm);
 
   // get variables associated with optimal angle
-  const float velAngle = RAD2DEG(std::atan2(ps.velocity[1], ps.velocity[0]));
   const float accelAngle = RAD2DEG(
       std::atan2(alternate ? cmd.rightmove : -cmd.rightmove, cmd.forwardmove));
 
-  const float frameAccel = PmoveUtils::getFrameAccel(ps, pm);
-  float perAngle = RAD2DEG(
-      std::acos((pm->pmext->accel * state.wishspeed - frameAccel) / state.vf));
+  float perAngle = RAD2DEG(drawOpt);
+  float velAngle = RAD2DEG(drawVel);
 
   if (!forwards) {
     perAngle *= -1;
   }
 
-  // shift yaw to optimal angle for all strafe styles
-  float opt = yaw;
-
   if (alternate) {
-    if (cmd.rightmove > 0) {
-      // fullbeat / halfbeat / invert (holding +moveleft)
-      opt -= AngleDelta(yaw + accelAngle, velAngle + perAngle);
-    } else if (cmd.rightmove < 0) {
-      // fullbeat / halfbeat / invert (holding +moveright)
-      opt -= AngleDelta(yaw + accelAngle, velAngle - perAngle);
-    } else if (cmd.forwardmove != 0) {
-      // nobeat
-      opt = velAngle - perAngle;
-    }
-  } else {
-    if (cmd.rightmove < 0) {
-      // fullbeat / halfbeat / invert (holding +moveleft)
-      opt -= AngleDelta(yaw + accelAngle, velAngle + perAngle);
-    } else if (cmd.rightmove > 0) {
-      // fullbeat / halfbeat / invert (holding +moveright)
-      opt -= AngleDelta(yaw + accelAngle, velAngle - perAngle);
-    } else if (cmd.forwardmove != 0) {
-      // nobeat
-      opt = velAngle + perAngle;
-    }
+    perAngle *= -1;
+  }
+
+  // shift yaw to optimal angle for all strafe styles
+  float opt;
+
+  if (cmd.rightmove < 0) {
+    // fullbeat / halfbeat / invert (holding +moveleft)
+    opt = velAngle + perAngle - accelAngle;
+  } else if (cmd.rightmove > 0) {
+    // fullbeat / halfbeat / invert (holding +moveright)
+    opt = velAngle - perAngle - accelAngle;
+  } else if (cmd.forwardmove != 0) {
+    // nobeat
+    opt = velAngle + perAngle;
   }
 
   // return minimum angle for which you still gain the highest accel

@@ -206,15 +206,17 @@ void Snaphud::UpdateSnapState(void) {
   snap.zones[2 * snap.maxAccel] = snap.zones[0] + 16384;
 }
 
-void Snaphud::UpdateMaxSnapZones(float wishspeed, pmove_t *pm) {
+void Snaphud::UpdateMaxSnapZones() {
   // calculate max number of snapzones in 1 quadrant
   // this needs to be dynamically calculated because
   // ps->speed can be modified by target_scale_velocity
   // default: 57 on ground, 7 in air (352 wishspeed)
-  const int maxSnaphudZonesQ1 = static_cast<int>(
-      std::round(wishspeed / (1000.0f / pm->pmove_msec) * pm->pmext->accel) *
-          2 +
-      1);
+  const int maxSnaphudZonesQ1 = static_cast<int>(std::roundf(snap.a) * 2 + 1);
+
+  // need to add rounded xy clipped to normal gravity influence to frame accel
+  // 11 snap zones for ~78deg slope, 9 zones for 60deg slope, etc.
+  // const int maxSnaphudZonesQ1 = 
+  //    static_cast<int>(std::roundf(snap.a + gravityAccelxy) * 2 + 1);
 
   snap.zones.resize(maxSnaphudZonesQ1);
   snap.xAccel.resize(maxSnaphudZonesQ1);
@@ -278,7 +280,7 @@ bool Snaphud::beforeRender() {
 
   if (a != snap.a || a == 0.0f) {
     snap.a = a;
-    UpdateMaxSnapZones(wishspeed, pm);
+    UpdateMaxSnapZones();
     UpdateSnapState();
   }
 
@@ -373,15 +375,15 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
   const float wishspeed = PmoveUtils::PM_GetWishspeed(
       wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
       pm->pmext->up, ps, pm);
-  float speed = wishspeed * pm->pmext->frametime;
+  float frameAccel = PmoveUtils::getFrameAccel(ps, pm);
 
   // clamp the max value to match max scaling of target_scale_velocity
-  if (speed > 85) {
-    speed = 85;
+  if (frameAccel > 85) {
+    frameAccel = 85;
   }
-  if (speed != s.snap.a) {
-    s.snap.a = speed;
-    s.UpdateMaxSnapZones(wishspeed, pm);
+  if (frameAccel != s.snap.a) {
+    s.snap.a = frameAccel;
+    s.UpdateMaxSnapZones();
     s.UpdateSnapState();
   }
 
