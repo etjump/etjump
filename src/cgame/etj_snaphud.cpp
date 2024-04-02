@@ -370,11 +370,6 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
   // get opt angle
   float opt = CGaz::getOptAngle(ps, pm, false);
 
-  // update snapzones even if snaphud is not drawn
-  vec3_t wishvel;
-  const float wishspeed = PmoveUtils::PM_GetWishspeed(
-      wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
-      pm->pmext->up, ps, pm);
   float frameAccel = PmoveUtils::getFrameAccel(ps, pm);
 
   // clamp the max value to match max scaling of target_scale_velocity

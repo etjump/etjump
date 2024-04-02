@@ -429,8 +429,6 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
     wishspeed = static_cast<float>(ps.speed) * ps.sprintSpeedScale;
   }
 
-  UpdateDraw(wishspeed, &ps, pm);
-
   // no meaningful value if speed lower than ground speed or no user input
   if (state.vf < state.wishspeed || (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
     return 0;
