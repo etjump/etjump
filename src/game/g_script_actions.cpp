@@ -3510,6 +3510,11 @@ G_ScriptAction_RemoveEntity
 ===================
 */
 qboolean G_ScriptAction_RemoveEntity(gentity_t *ent, char *params) {
+  // keep track of removed bmodels for 'entitylist' cmd
+  if (ent->model && ent->model[0] == '*') {
+    level.numRemovedBModels++;
+  }
+
   ent->think = G_FreeEntity;
   ent->nextthink = level.time + FRAMETIME;
 

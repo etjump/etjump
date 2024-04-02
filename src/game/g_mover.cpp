@@ -3817,9 +3817,9 @@ void SP_func_door_rotating(gentity_t *ent) {
   trap_LinkEntity(ent);
 }
 
-void SP_func_portaltarget(gentity_t* ent) {
+void SP_func_portaltarget(gentity_t *ent) {
   trap_SetBrushModel(ent, ent->model);
-  
+
   ent->moverState = MOVER_POS1;
   ent->r.svFlags &= SVF_IGNOREBMODELEXTENTS;
   ent->s.eType = ET_MOVER;
@@ -4945,8 +4945,8 @@ void func_constructible_explode(gentity_t *self, gentity_t *inflictor,
 func_constructible_underconstructionthink
 ==============
 */
-//#define CONSTRUCT_PREDECAY_TIME	3000	// if not under construction for
-// this duration, start decaying
+// #define CONSTRUCT_PREDECAY_TIME	3000	// if not under construction for
+//  this duration, start decaying
 #define CONSTRUCT_PREDECAY_TIME                                                \
   30000 // if not under construction for this duration, start decaying
 void func_constructible_underconstructionthink(gentity_t *ent) {
@@ -5399,7 +5399,10 @@ A brushmodel that gets deleted on the fourth frame. We use this to hijack it's
 brushmodel in func_constructible entities that are based around staged
 construction.
 */
-void func_brushmodel_delete(gentity_t *ent) { G_FreeEntity(ent); }
+void func_brushmodel_delete(gentity_t *ent) {
+  level.numRemovedBModels++;
+  G_FreeEntity(ent);
+}
 
 void SP_func_brushmodel(gentity_t *ent) {
   if (!ent->model) {

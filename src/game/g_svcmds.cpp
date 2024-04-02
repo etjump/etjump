@@ -391,8 +391,11 @@ static void Svcmd_EntityList_f() {
   int e;
   const gentity_t *check;
   int not_inuse = 0;
-  int numBrushEnts = 0;
+  int numBrushEnts = 1;     // bmodel count is 1-indexed for some reason
   int max_type_length = 20; // starting point, no less than 11
+
+  // add removed bmodels since these are still part of bmodel limit
+  numBrushEnts += level.numRemovedBModels;
 
   check = g_entities;
   for (e = 0; e < level.num_entities; e++, check++) {
@@ -422,7 +425,7 @@ static void Svcmd_EntityList_f() {
       continue;
     }
 
-    if (check->model) {
+    if (check->model && check->model[0] == '*') {
       ++numBrushEnts;
     }
 
