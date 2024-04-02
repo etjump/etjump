@@ -14,11 +14,11 @@ function(create_compiler_opts target)
 
 	# GCC flags
 	set(GCC_LINK_FLAGS
-		$<IF:$<PLATFORM_ID:Darwin>,-Wl$<COMMA>-undefined$<COMMA>error,-Wl$<COMMA>--no-undefined>
+		-Wl,--no-undefined
 		$<$<CONFIG:Release>:
-			-flto                                # link time optimizations
-			-O3                                  # max optimization
-			$<IF:$<STREQUAL:${APPLE},1>,,-s>>)   # strip symbols
+			-flto=auto			# link time optimizations
+			-O3					# max optimization
+			-s>)				# strip symbols
 
 	set(GCC_CXX_FLAGS
 		-pipe
@@ -29,13 +29,37 @@ function(create_compiler_opts target)
 		-Wno-unused-parameter
 		-Wno-missing-field-initializers
 		$<$<CONFIG:Release>:
-			-flto              # link time optimizations
-			-O3                # max optimization
-			-ffast-math>       # fast floating point math
+			-flto=auto			# link time optimizations
+			-O3					# max optimization
+			-ffast-math>		# fast floating point math
 		$<$<CONFIG:Debug>:
-			-Og                # supress optimizations
-			-g3                # generate debug info
-			-ggdb3>)           # generate gdb friendly debug info
+			-Og					# supress optimizations
+			-g3					# generate debug info
+			-ggdb3>)			# generate gdb friendly debug info
+
+	# Clang flags
+	set (CLANG_LINK_FLAGS
+		$<IF:$<PLATFORM_ID:Darwin>,-Wl$<COMMA>-undefined$<COMMA>error,-Wl$<COMMA>--no-undefined>
+		-flto								# link time optimizations
+		-O3									# max optimization
+		$<IF:$<PLATFORM_ID:Darwin>,,-s>)	# strip symbols (if not on macOS)
+
+	set (CLANG_CXX_FLAGS
+		-pipe
+		-fPIC
+		-fvisibility=hidden
+		-fdiagnostics-color=always
+		$<IF:$<STREQUAL:${WARN_LEVEL},0>,-w,-Wall -Wextra -Wpedantic -Wcast-qual>
+		-Wno-unused-parameter
+		-Wno-missing-field-initializers
+		$<$<CONFIG:Release>:
+			-O3					# max optimization
+			-flto				# link time optimizations
+			-ffast-math>		# fast floating point math
+		$<$<CONFIG:Debug>:
+			-Og					# supress optimizations
+			-g3					# generate debug info
+			-ggdb3>)			# generate gdb friendly debug info
 
 	# MSVC flags
 	# link time optimizations disabled for now, possibly due to MSVC 2019-specific bug
@@ -66,8 +90,18 @@ function(create_compiler_opts target)
 			/RTC1>)            # run-time checking
 
 	add_library(${target} INTERFACE)
-	target_compile_options(${target} INTERFACE $<IF:$<CXX_COMPILER_ID:MSVC>,${MSVC_CXX_FLAGS},${GCC_CXX_FLAGS}>)
-	target_link_options(${target} INTERFACE $<IF:$<CXX_COMPILER_ID:MSVC>,${MSVC_LINK_FLAGS},${GCC_LINK_FLAGS}>)
+
+	if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+		target_compile_options(${target} INTERFACE ${MSVC_CXX_FLAGS})
+		target_link_options(${target} INTERFACE ${MSVC_LINK_LAGS})
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+		target_compile_options(${target} INTERFACE ${CLANG_CXX_FLAGS})
+		target_link_options(${target} INTERFACE ${CLANG_LINK_FLAGS})
+	else() # default to GCC
+		target_compile_options(${target} INTERFACE ${GCC_CXX_FLAGS})
+		target_link_options(${target} INTERFACE ${GCC_LINK_FLAGS})
+	endif()
+	
 	target_compile_definitions(${target} INTERFACE 
 		$<$<CONFIG:Release>:NDEBUG>
 		$<$<CONFIG:Debug>:_DEBUG>
@@ -78,5 +112,6 @@ function(create_compiler_opts target)
 			_CRT_NONSTDC_NO_WARNING
 			_SCL_SECURE_NO_WARNINGS>
 		${arg_DEFINE})
+
 	target_compile_features(${target} INTERFACE cxx_std_14)
 endfunction()
