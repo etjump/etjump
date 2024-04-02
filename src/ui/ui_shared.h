@@ -107,6 +107,10 @@
 #define SLIDER_THUMB_HEIGHT 12.0 // 20.0
 #define NUM_CROSSHAIRS 17
 
+#define ASSET_REPLAY_DIRECTORY "gfx/2d/directory"
+#define ASSET_REPLAY_HOME "gfx/2d/home"
+#define ASSET_REPLAY_UP "gfx/2d/up"
+
 typedef struct scriptDef_s {
   const char *command;
   const char *args[MAX_SCRIPT_ARGS];
@@ -389,6 +393,10 @@ typedef struct {
   qhandle_t fxPic[7];
   qhandle_t crosshairShader[NUM_CROSSHAIRS];
   qhandle_t crosshairAltShader[NUM_CROSSHAIRS];
+
+  qhandle_t replayDirectory;
+  qhandle_t replayHome;
+  qhandle_t replayUp;
 
 } cachedAssets_t;
 
