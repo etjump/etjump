@@ -112,7 +112,7 @@ void CGaz::UpdateDraw(float wishspeed, const playerState_t* ps, pmove_t *pm) {
   state.vSquared = VectorLengthSquared2(pm->pmext->previous_velocity);
   state.vfSquared = VectorLengthSquared2(pm->pmext->velocity);
   state.wishspeed = wishspeed;
-  state.a = std::roundf(accel * state.wishspeed * pm->pmext->frametime);
+  state.a = accel * state.wishspeed * pm->pmext->frametime;
   state.aSquared = powf(state.a, 2);
   // show true ground zones?
   if (!(etj_CGazTrueness.integer &
