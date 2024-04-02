@@ -867,3 +867,43 @@ gfx/2d/logo_cc_automap	// default compass shader
 		rgbGen identity
 	}
 }
+
+////////////////
+// Replay menu
+////////////////
+
+gfx/2d/directory
+{
+	noPicMip
+	noMipMaps
+	nocompress
+	{
+		map gfx/2d/directory.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+
+gfx/2d/home
+{
+	noPicMip
+	noMipMaps
+	nocompress
+	{
+		map gfx/2d/home.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+
+gfx/2d/up
+{
+	noPicMip
+	noMipMaps
+	nocompress
+	{
+		map gfx/2d/up.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}

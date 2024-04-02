@@ -369,6 +369,11 @@ void AssetCache() {
     uiInfo.uiDC.Assets.crosshairAltShader[n] =
         ETJump::shaderForCrosshair(n, true);
   }
+
+  uiInfo.uiDC.Assets.replayDirectory =
+      trap_R_RegisterShaderNoMip(ASSET_REPLAY_DIRECTORY);
+  uiInfo.uiDC.Assets.replayHome = trap_R_RegisterShaderNoMip(ASSET_REPLAY_HOME);
+  uiInfo.uiDC.Assets.replayUp = trap_R_RegisterShaderNoMip(ASSET_REPLAY_UP);
 }
 
 void _UI_DrawSides(float x, float y, float w, float h, float size) {
@@ -3777,8 +3782,7 @@ static void UI_LoadDemos() {
     FileSystemObjectInfo objectInfo;
     objectInfo.type = FileSystemObjectType::Folder;
     objectInfo.name = std::string(dirPtr);
-    objectInfo.displayName =
-        "^7" + ETJump::sanitize(objectInfo.name, false) + "/";
+    objectInfo.displayName = "^7" + ETJump::sanitize(objectInfo.name, false);
     if (objectInfo.name != "." && objectInfo.name != "..") {
       directories.push_back(objectInfo);
     }
@@ -3807,11 +3811,20 @@ static void UI_LoadDemos() {
     FileSystemObjectInfo back;
     back.type = FileSystemObjectType::Folder;
     back.name = ".";
-    back.displayName = ".";
+
+    std::string currentPath;
+
+    for (size_t i = 0; i < uiInfo.currentDemoPath.size() - 1; i++) {
+      currentPath += uiInfo.currentDemoPath[i] + '/';
+    }
+
+    // remove trailing slash
+    currentPath.pop_back();
+    back.displayName = "^7" + ETJump::sanitize(currentPath, false);
     FileSystemObjectInfo beginning;
     beginning.type = FileSystemObjectType::Folder;
     beginning.name = "..";
-    beginning.displayName = "..";
+    beginning.displayName = "^7demos";
 
     uiInfo.demoObjects.push_back(beginning);
     uiInfo.demoObjects.push_back(back);
@@ -6814,6 +6827,18 @@ const char *UI_FeederItemText(float feederID, int index, int column,
     }
   } else if (feederID == FEEDER_DEMOS) {
     if (index >= 0 && index < static_cast<int>(uiInfo.demoObjects.size())) {
+      if (uiInfo.demoObjects[index].type == FileSystemObjectType::Folder) {
+        *numhandles = 1;
+
+        if (uiInfo.demoObjects[index].name == ".") {
+          handles[0] = uiInfo.uiDC.Assets.replayUp;
+        } else if (uiInfo.demoObjects[index].name == "..") {
+          handles[0] = uiInfo.uiDC.Assets.replayHome;
+        } else {
+          handles[0] = uiInfo.uiDC.Assets.replayDirectory;
+        }
+      }
+
       return uiInfo.demoObjects[index].displayName.c_str();
     }
   } else if (feederID == FEEDER_PROFILES) {
