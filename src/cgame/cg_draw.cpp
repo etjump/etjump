@@ -4572,11 +4572,13 @@ void CG_ShakeCamera() {
 }
 // -NERVE - SMF
 
-void CG_DrawMiscGamemodels(void) {
+void CG_DrawMiscGamemodels() {
   int i, j;
   refEntity_t ent;
 
   memset(&ent, 0, sizeof(ent));
+
+  ETJump_SetEntityRGBA(&ent, 1.0f, 1.0f, 1.0f, 1.0f);
 
   ent.reType = RT_MODEL;
   ent.nonNormalizedAxes = qtrue;
@@ -4599,37 +4601,6 @@ void CG_DrawMiscGamemodels(void) {
     VectorCopy(cgs.miscGameModels[i].org, ent.origin);
     VectorCopy(cgs.miscGameModels[i].org, ent.oldorigin);
     VectorCopy(cgs.miscGameModels[i].org, ent.lightingOrigin);
-
-    /*		{
-                vec3_t v;
-                vec3_t vu = { 0.f, 0.f, 1.f };
-                vec3_t vl = { 0.f, 1.f, 0.f };
-                vec3_t vf = { 1.f, 0.f, 0.f };
-
-                VectorCopy( cgs.miscGameModels[i].org, v );
-                VectorMA( v, cgs.miscGameModels[i].radius, vu, v
-       ); CG_RailTrail2( NULL, cgs.miscGameModels[i].org, v );
-
-                VectorCopy( cgs.miscGameModels[i].org, v );
-                VectorMA( v, cgs.miscGameModels[i].radius, vf, v
-       ); CG_RailTrail2( NULL, cgs.miscGameModels[i].org, v );
-
-                VectorCopy( cgs.miscGameModels[i].org, v );
-                VectorMA( v, cgs.miscGameModels[i].radius, vl, v
-       ); CG_RailTrail2( NULL, cgs.miscGameModels[i].org, v );
-
-                VectorCopy( cgs.miscGameModels[i].org, v );
-                VectorMA( v, -cgs.miscGameModels[i].radius, vu,
-       v ); CG_RailTrail2( NULL, cgs.miscGameModels[i].org, v );
-
-                VectorCopy( cgs.miscGameModels[i].org, v );
-                VectorMA( v, -cgs.miscGameModels[i].radius, vf,
-       v ); CG_RailTrail2( NULL, cgs.miscGameModels[i].org, v );
-
-                VectorCopy( cgs.miscGameModels[i].org, v );
-                VectorMA( v, -cgs.miscGameModels[i].radius, vl,
-       v ); CG_RailTrail2( NULL, cgs.miscGameModels[i].org, v );
-            }*/
 
     for (j = 0; j < 3; j++) {
       VectorCopy(cgs.miscGameModels[i].axes[j], ent.axis[j]);
