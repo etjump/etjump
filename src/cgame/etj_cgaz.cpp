@@ -129,7 +129,6 @@ void CGaz::UpdateDraw(float wishspeed, const playerState_t* ps, pmove_t *pm) {
   drawOpt = UpdateDrawOpt(&state);
   drawMaxCos = UpdateDrawMaxCos(&state);
   drawMax = UpdateDrawMax(&state);
-  drawSnap = UpdateDrawSnap(ps, pm);
   drawVel = atan2f(pm->pmext->velocity[1], pm->pmext->velocity[0]);
 }
 
@@ -247,6 +246,9 @@ bool CGaz::beforeRender() {
   }
 
   UpdateDraw(wishspeed, ps, pm);
+
+  // cgaz1snapzone
+  drawSnap = UpdateDrawSnap(ps, pm);
 
   if (etj_drawCGaz.integer & 1) {
     UpdateCGaz1(wishvel, uCmdScale, cmd);
@@ -429,13 +431,12 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
     wishspeed = static_cast<float>(ps.speed) * ps.sprintSpeedScale;
   }
 
+  UpdateDraw(wishspeed, &ps, pm);
+
   // no meaningful value if speed lower than ground speed or no user input
   if (state.vf < state.wishspeed || (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
     return 0;
   }
-
-  // get player yaw
-  const float &yaw = ps.viewangles[YAW];
 
   // determine whether strafing "forwards"
   const bool forwards = strafingForwards(ps, pm);
@@ -456,7 +457,7 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
   }
 
   // shift yaw to optimal angle for all strafe styles
-  float opt;
+  float opt = ps.viewangles[YAW];
 
   if (cmd.rightmove < 0) {
     // fullbeat / halfbeat / invert (holding +moveleft)
