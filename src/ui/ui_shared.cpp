@@ -82,6 +82,8 @@ static qboolean Menu_OverActiveItem(menuDef_t *menu, float x, float y);
 static char memoryPool[MEM_POOL_SIZE];
 static int allocPoint, outOfMemory;
 
+static bool uiShowBackground = true;
+
 void Tooltip_Initialize(itemDef_t *item) {
   item->text = NULL;
   item->font = UI_FONT_COURBD_21;
@@ -1565,7 +1567,19 @@ void Script_ConditionalScript(itemDef_t *item, qboolean *bAbort,
             }
             Item_RunScript(item, bAbort, script2);
           }
+        } else if (!Q_stricmp(cvar, "uiToggleBackground")) {
+          if (uiShowBackground) {
+            uiShowBackground = false;
+            Item_RunScript(item, bAbort, script1);
+          } else {
+            uiShowBackground = true;
+            Item_RunScript(item, bAbort, script2);
+          }
+        } else if (!Q_stricmp(cvar, "uiCheckBackground")) {
+          const char *script = uiShowBackground ? script1 : script2;
+          Item_RunScript(item, bAbort, script);
         }
+
         break;
     }
   }

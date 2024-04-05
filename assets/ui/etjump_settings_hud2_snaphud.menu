@@ -1,0 +1,77 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_settings_hud2_snaphud"
+#define GROUP_NAME "group_etjump_settings_hud2"
+
+#define NUM_SUBMENUS 9
+#define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
+
+menuDef {
+    name MENU_NAME
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+
+    onOpen {
+        conditionalscript uiCheckBackground 2
+            ( BACKGROUND_ON )
+            ( BACKGROUND_OFF )
+    }
+
+    onESC {
+        close MENU_NAME; open etjump
+    }
+
+    WINDOW("ETJUMP SETTINGS", 90)
+
+    MAINBUTTON          (1, "GENERAL", close MENU_NAME; open etjump_settings_general_gameplay)
+    MAINBUTTON          (2, "GRAPHICS", close MENU_NAME; open etjump_settings_graphics_visuals)
+    MAINBUTTON          (3, "BASIC HUD", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    MAINBUTTON_ACTIVE   (4, "ADV HUD", close MENU_NAME; open MENU_NAME)
+    MAINBUTTON          (5, "AUDIO", close MENU_NAME; open etjump_settings_audio)
+    MAINBUTTON          (6, "TIMERUNS", close MENU_NAME; open etjump_settings_timeruns_runtimer)
+    MAINBUTTON          (7, "DEMOS", close MENU_NAME; open etjump_settings_demos_autodemo)
+
+    WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
+
+    SIDEBUTTON          (1, "CGAZ", close MENU_NAME; open etjump_settings_hud2_cgaz)
+    SIDEBUTTON_ACTIVE   (2, "SNAPHUD", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (3, "CHS", close MENU_NAME; open etjump_settings_hud2_chs)
+    SIDEBUTTON          (4, "CHS 1", close MENU_NAME; open etjump_settings_hud2_chs1)
+    SIDEBUTTON          (5, "CHS 2", close MENU_NAME; open etjump_settings_hud2_chs2)
+    SIDEBUTTON          (6, "ACCEL SPEED", close MENU_NAME; open etjump_settings_hud2_accelspeed)
+    SIDEBUTTON          (7, "JUMP SPEEDS", close MENU_NAME; open etjump_settings_hud2_jumpspeeds)
+    SIDEBUTTON          (8, "STRAFE QUALITY", close MENU_NAME; open etjump_settings_hud2_strafequality)
+    SIDEBUTTON          (9, "UPMOVE METER", close MENU_NAME; open etjump_settings_hud2_upmove)
+
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "SNAPHUD")
+    
+        MULTI               (SETTINGS_ITEM_POS(1), "Draw snaphud:", 0.2, SETTINGS_ITEM_H, "etj_drawSnapHUD", cvarFloatList { "No" 0 "Full zones" 1 "Edges only" 2 }, "Draw velocity snapping HUD\netj_drawSnapHUD")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_snapHUDOffsetY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(2), "Snaphud offset Y:", 0.2, SETTINGS_ITEM_H, etj_snapHUDOffsetY 0 -240 240 5, "Sets Y offset of snaphud\netj_snapHUDOffsetY")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_snapHUDHeight", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(3), "Snaphud height:", 0.2, SETTINGS_ITEM_H, etj_snapHUDHeight 10 1 100 1, "Sets the height of snaphud\netj_snapHUDHeight")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_snapHUDFov", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(4), "Snaphud FOV:", 0.2, SETTINGS_ITEM_H, etj_snapHUDFov 0 0 179 5, "Sets FOV of snaphud, 0 to use your current FOV\netj_snapHUDFov")
+        YESNO               (SETTINGS_ITEM_POS(5), "Highlight active zone:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDHLActive", "Highlight active snaphud zone HUD\netj_snapHUDHLActive")
+        MULTI               (SETTINGS_ITEM_POS(6), "Snaphud trueness:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDTrueness", cvarFloatList { "Off" 0 "Upmove" 1 "Groundzones" 2 "Upmove + Groundzones" 3 }, "Sets trueness of snaphud\netj_snapHUDTrueness")
+        MULTI               (SETTINGS_ITEM_POS(7), "Snaphud color 1:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDColor1", COLOR_LIST, "Sets primary color of snaphud\netj_snapHUDColor1")
+        MULTI               (SETTINGS_ITEM_POS(8), "Snaphud color 2:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDColor2", COLOR_LIST, "Sets secondary color of snaphud\netj_snapHUDColor2")
+        MULTI               (SETTINGS_ITEM_POS(9), "Highlight color 1:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDHLColor1", COLOR_LIST, "Sets color of active primary snapzone\netj_snapHUDHLColor1")
+        MULTI               (SETTINGS_ITEM_POS(10), "Highlight color 2:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDHLColor2", COLOR_LIST, "Sets color of active secondary snapzone\netj_snapHUDHLColor2")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(11), "etj_snapHUDEdgeThickness", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(11), "Edge thickness:", 0.2, SETTINGS_ITEM_H, etj_snapHUDEdgeThickness 10 1 128 1, "Thickness of snapzone edges when using edge-only snaphud\netj_snapHUDEdgeThickness")
+        YESNO               (SETTINGS_ITEM_POS(12), "Color 1 is active zone:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDActiveIsPrimary", "Always use primary color for currently active snapzone and flip colors when switching zones\netj_snapHUDActiveIsPrimary")
+
+    LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
+    LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
+
+#ifndef FUI
+    LOWERBUTTON(3, "TOGGLE BACKGROUND", conditionalscript uiToggleBackground 2 ( BACKGROUND_OFF ) ( BACKGROUND_ON ) )
+#endif
+
+}

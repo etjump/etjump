@@ -69,14 +69,50 @@
 
 	// ETJump
 	loadMenu { "ui/etjump.menu" }
-	loadMenu { "ui/etjump_settings_1.menu" }
-	loadMenu { "ui/etjump_settings_2.menu" }
-	loadMenu { "ui/etjump_settings_3.menu" }
-	loadMenu { "ui/etjump_settings_4.menu" }
-	loadMenu { "ui/etjump_settings_5.menu" }
-	loadMenu { "ui/etjump_settings_6.menu" }
 	loadMenu { "ui/etjump_controls.menu" }
 	loadMenu { "ui/etjump_credits.menu" }
+
 	loadMenu { "ui/ingame_map_details.menu" }
 	loadMenu { "ui/ingame_ft_savelimit.menu" }
+
+	loadMenu { "ui/etjump_settings_general_gameplay.menu" }
+	loadMenu { "ui/etjump_settings_general_client.menu" }
+	loadMenu { "ui/etjump_settings_general_console.menu" }
+
+	loadMenu { "ui/etjump_settings_graphics_visuals.menu" }
+	loadMenu { "ui/etjump_settings_graphics_players.menu" }
+	loadMenu { "ui/etjump_settings_graphics_gun.menu" }
+
+	loadMenu { "ui/etjump_settings_hud1_crosshair.menu" }
+	loadMenu { "ui/etjump_settings_hud1_keys.menu" }
+	loadMenu { "ui/etjump_settings_hud1_speed1.menu" }
+	loadMenu { "ui/etjump_settings_hud1_speed2.menu" }
+	loadMenu { "ui/etjump_settings_hud1_maxspeed.menu" }
+	loadMenu { "ui/etjump_settings_hud1_indicators.menu" }
+	loadMenu { "ui/etjump_settings_hud1_chat.menu" }
+	loadMenu { "ui/etjump_settings_hud1_popups.menu" }
+	loadMenu { "ui/etjump_settings_hud1_fireteam.menu" }
+	loadMenu { "ui/etjump_settings_hud1_specinfo.menu" }
+	loadMenu { "ui/etjump_settings_hud1_scoreboard.menu" }
+	loadMenu { "ui/etjump_settings_hud1_misc.menu" }
+
+	loadMenu { "ui/etjump_settings_hud2_cgaz.menu" }
+	loadMenu { "ui/etjump_settings_hud2_snaphud.menu" }
+	loadMenu { "ui/etjump_settings_hud2_chs.menu" }
+	loadMenu { "ui/etjump_settings_hud2_chs1.menu" }
+	loadMenu { "ui/etjump_settings_hud2_chs2.menu" }
+	loadMenu { "ui/etjump_settings_hud2_accelspeed.menu" }
+	loadMenu { "ui/etjump_settings_hud2_jumpspeeds.menu" }
+	loadMenu { "ui/etjump_settings_hud2_strafequality.menu" }
+	loadMenu { "ui/etjump_settings_hud2_upmove.menu" }
+
+	loadMenu { "ui/etjump_settings_audio.menu" }
+
+	loadMenu { "ui/etjump_settings_timeruns_runtimer.menu" }
+	loadMenu { "ui/etjump_settings_timeruns_checkpoints.menu" }
+
+	loadMenu { "ui/etjump_settings_demos_autodemo.menu" }
+	loadMenu { "ui/etjump_settings_demos_playback.menu" }
+
+	loadMenu { "ui/etjump_settings_popup_writeconfig.menu" }
 }

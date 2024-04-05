@@ -1,0 +1,58 @@
+#include "ui/menudef.h"Trace
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_settings_demos_autodemo"
+#define GROUP_NAME "group_etjump_settings_demos"
+
+#define NUM_SUBMENUS 2
+#define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
+
+menuDef {
+    name MENU_NAME
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+
+    onOpen {
+        conditionalscript uiCheckBackground 2
+            ( BACKGROUND_ON )
+            ( BACKGROUND_OFF )
+    }
+
+    onESC {
+        close MENU_NAME; open etjump
+    }
+
+    WINDOW("ETJUMP SETTINGS", 90)
+
+    MAINBUTTON          (1, "GENERAL", close MENU_NAME; open etjump_settings_general_gameplay)
+    MAINBUTTON          (2, "GRAPHICS", close MENU_NAME; open etjump_settings_graphics_visuals)
+    MAINBUTTON          (3, "BASIC HUD", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    MAINBUTTON          (4, "ADV HUD", close MENU_NAME; open etjump_settings_hud2_cgaz)
+    MAINBUTTON          (5, "AUDIO", close MENU_NAME; open etjump_settings_audio)
+    MAINBUTTON          (6, "TIMERUNS", close MENU_NAME; open etjump_settings_timeruns_runtimer)
+    MAINBUTTON_ACTIVE   (7, "DEMOS", close MENU_NAME; open MENU_NAME)
+
+    WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
+
+    SIDEBUTTON_ACTIVE   (1, "AUTODEMO", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (2, "PLAYBACK", close MENU_NAME; open etjump_settings_demos_playback)
+
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "AUTODEMO")
+
+        MULTI               (SETTINGS_ITEM_POS(1), "Enable autodemo:", 0.2, SETTINGS_ITEM_H, "etj_autoDemo", cvarFloatList { "No" 0 "Timeruns only" 1 "Always" 2 }, "Enable autodemo\netj_autoDemo")
+        YESNO               (SETTINGS_ITEM_POS(2), "Save personal bests only:", 0.2, SETTINGS_ITEM_H, "etj_ad_savePBOnly", "Save only demos that beat or tie your personal best times\netj_ad_savePBOnly")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_ad_stopDelay", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(3), "Demo stop delay:", 0.2, SETTINGS_ITEM_H, etj_ad_stopDelay 2000 0 10000 100, "Delay in milliseconds to wait before stopping demo recording when timerun finishes\netj_ad_stopDelay")
+        EDITFIELD_EXT       (SETTINGS_EF_POS(4), "Autodemo path:", 0.2, SETTINGS_ITEM_H, "etj_ad_targetPath", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Path to store autodemo demos in (demos/...)\netj_ad_targetPath")
+
+    LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
+    LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
+
+#ifndef FUI
+    LOWERBUTTON(3, "TOGGLE BACKGROUND", conditionalscript uiToggleBackground 2 ( BACKGROUND_OFF ) ( BACKGROUND_ON ) )
+#endif
+}

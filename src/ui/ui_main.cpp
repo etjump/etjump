@@ -66,6 +66,8 @@ static int uitogamecode[] = {4, 6, 2, 3, 1, 5, 7};
 
 static int ui_serverFilterType = 0;
 
+static char uiPreviousMenu[256]{};
+
 // NERVE - SMF - enabled for multiplayer
 static void UI_StartServerRefresh(qboolean full);
 static void UI_StopServerRefresh(void);
@@ -5600,6 +5602,32 @@ void UI_RunMenuScript(const char **args) {
           EXEC_APPEND,
           va("callvote autoRtv %i\n",
              static_cast<int>(trap_Cvar_VariableValue("ui_voteAutoRtv"))));
+      return;
+    }
+
+    if (!Q_stricmp(name, "uiPreviousMenu")) {
+      if (String_Parse(args, &name2)) {
+        if (!Q_stricmp(name2, "restore")) {
+          Menus_OpenByName(uiPreviousMenu);
+        } else {
+          Q_strncpyz(uiPreviousMenu, name2, 256);
+        }
+      } else {
+        uiPreviousMenu[0] = '\0';
+        Com_Printf(
+            S_COLOR_YELLOW
+            "WARNING: uiScript 'uiPreviousMenu' called with no arguments\n");
+      }
+
+      return;
+    }
+
+    if (!Q_stricmp(name, "writeConfig")) {
+      char buf[MAX_CVAR_VALUE_STRING];
+
+      trap_Cvar_VariableStringBuffer("ui_writeconfig_name", buf, sizeof(buf));
+      trap_Cmd_ExecuteText(EXEC_NOW, va("writeconfig %s", buf));
+
       return;
     }
 

@@ -1,0 +1,66 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_settings_hud1_scoreboard"
+#define GROUP_NAME "group_etjump_settings_hud1"
+
+#define NUM_SUBMENUS 12
+#define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
+
+menuDef {
+    name MENU_NAME
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+
+    onOpen {
+        conditionalscript uiCheckBackground 2
+            ( BACKGROUND_ON )
+            ( BACKGROUND_OFF )
+    }
+
+    onESC {
+        close MENU_NAME; open etjump
+    }
+
+    WINDOW("ETJUMP SETTINGS", 90)
+
+    MAINBUTTON          (1, "GENERAL", close MENU_NAME; open etjump_settings_general_gameplay)
+    MAINBUTTON          (2, "GRAPHICS", close MENU_NAME; open etjump_settings_graphics_visuals)
+    MAINBUTTON_ACTIVE   (3, "BASIC HUD", close MENU_NAME; open MENU_NAME)
+    MAINBUTTON          (4, "ADV HUD", close MENU_NAME; open etjump_settings_hud2_cgaz)
+    MAINBUTTON          (5, "AUDIO", close MENU_NAME; open etjump_settings_audio)
+    MAINBUTTON          (6, "TIMERUNS", close MENU_NAME; open etjump_settings_timeruns_runtimer)
+    MAINBUTTON          (7, "DEMOS", close MENU_NAME; open etjump_settings_demos_autodemo)
+
+    WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
+
+    SIDEBUTTON          (1, "CROSSHAIR", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    SIDEBUTTON          (2, "KEYS", close MENU_NAME; open etjump_settings_hud1_keys)
+    SIDEBUTTON          (3, "SPEED 1", close MENU_NAME; open etjump_settings_hud1_speed1)
+    SIDEBUTTON          (4, "SPEED 2", close MENU_NAME; open etjump_settings_hud1_speed2)
+    SIDEBUTTON          (5, "MAX SPEED", close MENU_NAME; open etjump_settings_hud1_maxspeed)
+    SIDEBUTTON          (6, "INDICATORS", close MENU_NAME; open etjump_settings_hud1_indicators)
+    SIDEBUTTON          (7, "CHAT", close MENU_NAME; open etjump_settings_hud1_chat)
+    SIDEBUTTON          (8, "POPUPS", close MENU_NAME; open etjump_settings_hud1_popups)
+    SIDEBUTTON          (9, "FIRETEAM", close MENU_NAME; open etjump_settings_hud1_fireteam)
+    SIDEBUTTON          (10, "SPECTATOR INFO", close MENU_NAME; open etjump_settings_hud1_specinfo)
+    SIDEBUTTON_ACTIVE   (11, "SCOREBOARD", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (12, "MISC", close MENU_NAME; open etjump_settings_hud1_misc)
+
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "SCOREBOARD")
+
+        MULTI               (SETTINGS_ITEM_POS(1), "Alternative scoreboard:", 0.2, SETTINGS_ITEM_H, "etj_altScoreboard", cvarFloatList { "No" 0 "ETJump 1" 1 "ETJump 2" 2 "ETJump 3" 3 }, "Displays alternative scoreboard\netj_altScoreboard")
+        YESNO               (SETTINGS_ITEM_POS(2), "Draw idle indicator:", 0.2, SETTINGS_ITEM_H, "etj_drawScoreboardInactivity", "Draw idle indicator on inactive clients\netj_drawScoreboardInactivity")
+
+    LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
+    LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
+
+#ifndef FUI
+    LOWERBUTTON(3, "TOGGLE BACKGROUND", conditionalscript uiToggleBackground 2 ( BACKGROUND_OFF ) ( BACKGROUND_ON ) )
+#endif
+
+}

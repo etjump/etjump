@@ -15,7 +15,7 @@
 #define MAX_ITEMACTION 64
 #define MAX_MENUDEFFILE 4096
 #define MAX_MENUFILE 32768
-#define MAX_MENUS 128
+#define MAX_MENUS 256 // was 128
 // #define MAX_MENUITEMS 256
 #define MAX_MENUITEMS 128 // JPW NERVE q3ta was 96
 #define MAX_COLOR_RANGES 10
@@ -69,9 +69,9 @@
 #define CURSOR_SIZER 0x00000004
 
 #ifdef CGAME
-  #define STRING_POOL_SIZE 128 * 1024
+  #define STRING_POOL_SIZE 128 * 2048
 #else
-  #define STRING_POOL_SIZE 384 * 1024
+  #define STRING_POOL_SIZE 384 * 2048
 #endif
 
 #define MAX_STRING_HANDLES 4096
