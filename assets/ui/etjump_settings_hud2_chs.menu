@@ -1,0 +1,66 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_settings_hud2_chs"
+#define GROUP_NAME "group_etjump_settings_hud2"
+
+#define NUM_SUBMENUS 9
+#define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
+
+menuDef {
+    name MENU_NAME
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+
+    onOpen {
+        conditionalscript uiCheckBackground 2
+            ( BACKGROUND_ON )
+            ( BACKGROUND_OFF )
+    }
+
+    onESC {
+        close MENU_NAME; open etjump
+    }
+
+    WINDOW("ETJUMP SETTINGS", 90)
+
+    MAINBUTTON          (1, "GENERAL", close MENU_NAME; open etjump_settings_general_gameplay)
+    MAINBUTTON          (2, "GRAPHICS", close MENU_NAME; open etjump_settings_graphics_visuals)
+    MAINBUTTON          (3, "BASIC HUD", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    MAINBUTTON_ACTIVE   (4, "ADV HUD", close MENU_NAME; open MENU_NAME)
+    MAINBUTTON          (5, "AUDIO", close MENU_NAME; open etjump_settings_audio)
+    MAINBUTTON          (6, "TIMERUNS", close MENU_NAME; open etjump_settings_timeruns_runtimer)
+    MAINBUTTON          (7, "DEMOS", close MENU_NAME; open etjump_settings_demos_autodemo)
+
+    WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
+
+    SIDEBUTTON          (1, "CGAZ", close MENU_NAME; open etjump_settings_hud2_cgaz)
+    SIDEBUTTON          (2, "SNAPHUD", close MENU_NAME; open etjump_settings_hud2_snaphud)
+    SIDEBUTTON_ACTIVE   (3, "CHS", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (4, "CHS 1", close MENU_NAME; open etjump_settings_hud2_chs1)
+    SIDEBUTTON          (5, "CHS 2", close MENU_NAME; open etjump_settings_hud2_chs2)
+    SIDEBUTTON          (6, "ACCEL SPEED", close MENU_NAME; open etjump_settings_hud2_accelspeed)
+    SIDEBUTTON          (7, "JUMP SPEEDS", close MENU_NAME; open etjump_settings_hud2_jumpspeeds)
+    SIDEBUTTON          (8, "STRAFE QUALITY", close MENU_NAME; open etjump_settings_hud2_strafequality)
+    SIDEBUTTON          (9, "UPMOVE METER", close MENU_NAME; open etjump_settings_hud2_upmove)
+
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CROSSHAIR STATS")
+
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(1), "etj_CHSAlpha", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(1), "CHS alpha:", 0.2, SETTINGS_ITEM_H, etj_CHSAlpha 1 0 1 0.05, "Sets transparency of CHS\netj_CHSAlpha")
+        MULTI               (SETTINGS_ITEM_POS(2), "CHS color:", 0.2, SETTINGS_ITEM_H, "etj_CHSColor", COLOR_LIST, "Sets color of CHS\netj_CHSColor")
+        YESNO               (SETTINGS_ITEM_POS(3), "CHS shadow:", 0.2, SETTINGS_ITEM_H, "etj_CHSShadow", "Draw shadow on CHS\netj_CHSShadow")
+        YESNO               (SETTINGS_ITEM_POS(4), "Offset Z origin:", 0.2, SETTINGS_ITEM_H, "etj_CHSUseFeet", "Offset Z origin to feet level in positional calculations\netj_CHSUseFeet")
+
+    LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
+    LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
+
+#ifndef FUI
+    LOWERBUTTON(3, "TOGGLE BACKGROUND", conditionalscript uiToggleBackground 2 ( BACKGROUND_OFF ) ( BACKGROUND_ON ) )
+#endif
+
+}

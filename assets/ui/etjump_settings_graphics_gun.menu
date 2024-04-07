@@ -1,0 +1,64 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_settings_graphics_gun"
+#define GROUP_NAME "group_etjump_settings_graphics"
+
+#define NUM_SUBMENUS 3
+#define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
+
+menuDef {
+    name MENU_NAME
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+
+    onOpen {
+        conditionalscript uiCheckBackground 2
+            ( BACKGROUND_ON )
+            ( BACKGROUND_OFF )
+    }
+
+    onESC {
+        close MENU_NAME; open etjump
+    }
+
+    WINDOW("ETJUMP SETTINGS", 90)
+
+    MAINBUTTON          (1, "GENERAL", close MENU_NAME; open etjump_settings_general_gameplay)
+    MAINBUTTON_ACTIVE   (2, "GRAPHICS", close MENU_NAME; open MENU_NAME)
+    MAINBUTTON          (3, "BASIC HUD", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    MAINBUTTON          (4, "ADV HUD", close MENU_NAME; open etjump_settings_hud2_cgaz)
+    MAINBUTTON          (5, "AUDIO", close MENU_NAME; open etjump_settings_audio)
+    MAINBUTTON          (6, "TIMERUNS", close MENU_NAME; open etjump_settings_timeruns_runtimer)
+    MAINBUTTON          (7, "DEMOS", close MENU_NAME; open etjump_settings_demos_autodemo)
+
+    WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
+
+    SIDEBUTTON          (1, "VISUALS", close MENU_NAME; open etjump_settings_graphics_visuals)
+    SIDEBUTTON          (2, "PLAYERS", close MENU_NAME; open etjump_settings_graphics_players)
+    SIDEBUTTON_ACTIVE   (3, "GUN", close MENU_NAME; open MENU_NAME)
+
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "GUN")
+
+        YESNO               (SETTINGS_ITEM_POS(1), "Draw gun:", 0.2, SETTINGS_ITEM_H, "cg_drawGun", "Draw gun viewmodel\ncg_drawGun")
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(2), "cg_gunX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SETTINGS_ITEM_W), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(2), "Gun X:", 0.2, SETTINGS_ITEM_H, cg_gunX 0 -30 30 0.5, "Sets X position of gun\ncg_gunx")
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(3), "cg_gunY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SETTINGS_ITEM_W), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(3), "Gun Y:", 0.2, SETTINGS_ITEM_H, cg_gunY 0 -30 30 0.5, "Sets Y position of gun\ncg_guny")
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(4), "cg_gunZ", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SETTINGS_ITEM_W), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(4), "Gun Z:", 0.2, SETTINGS_ITEM_H, cg_gunZ 0 -30 30 0.5, "Sets Z position of gun\ncg_gunz")
+        YESNO               (SETTINGS_ITEM_POS(5), "Gun sway:", 0.2, SETTINGS_ITEM_H, "etj_gunSway", "Enable gun sway/bobbing\netj_gunSway")
+        MULTI               (SETTINGS_ITEM_POS(6), "Muzzleflash:", 0.2, SETTINGS_ITEM_H, "etj_muzzleFlash", cvarFloatList { "Off" 0 "On" 1 "Only for others" 2 "Only for self" 3 }, "Enable muzzleflash\netj_muzzleFlash")
+
+    LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
+    LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
+
+#ifndef FUI
+    LOWERBUTTON(3, "TOGGLE BACKGROUND", conditionalscript uiToggleBackground 2 ( BACKGROUND_OFF ) ( BACKGROUND_ON ) )
+#endif
+
+}

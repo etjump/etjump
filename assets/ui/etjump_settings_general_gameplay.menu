@@ -1,0 +1,69 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_settings_general_gameplay"
+#define GROUP_NAME "group_etjump_settings_general"
+
+#define NUM_SUBMENUS 3
+#define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
+
+menuDef {
+    name MENU_NAME
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+
+    onOpen {
+        conditionalscript uiCheckBackground 2
+            ( BACKGROUND_ON )
+            ( BACKGROUND_OFF )
+    }
+
+    onESC {
+        close MENU_NAME; open etjump
+    }
+
+    WINDOW("ETJUMP SETTINGS", 90)
+
+    MAINBUTTON_ACTIVE   (1, "GENERAL", close MENU_NAME; open MENU_NAME)
+    MAINBUTTON          (2, "GRAPHICS", close MENU_NAME; open etjump_settings_graphics_visuals)
+    MAINBUTTON          (3, "BASIC HUD", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    MAINBUTTON          (4, "ADV HUD", close MENU_NAME; open etjump_settings_hud2_cgaz)
+    MAINBUTTON          (5, "AUDIO", close MENU_NAME; open etjump_settings_audio)
+    MAINBUTTON          (6, "TIMERUNS", close MENU_NAME; open etjump_settings_timeruns_runtimer)
+    MAINBUTTON          (7, "DEMOS", close MENU_NAME; open etjump_settings_demos_autodemo)
+
+    WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
+
+    SIDEBUTTON_ACTIVE   (1, "GAMEPLAY", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (2, "CLIENT", close MENU_NAME; open etjump_settings_general_client)
+    SIDEBUTTON          (3, "CONSOLE", close MENU_NAME; open etjump_settings_general_console)
+
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "GAMEPLAY")
+
+        YESNO               (SETTINGS_ITEM_POS(1), "Fixed physics:", 0.2, SETTINGS_ITEM_H, "pmove_fixed", "Enable fixed 125 FPS movement physics\npmove_fixed")
+        YESNO               (SETTINGS_ITEM_POS(2), "Unlimited stamina:", 0.2, SETTINGS_ITEM_H, "etj_nofatigue", "Enable unlimited stamina\netj_nofatigue")
+        YESNO               (SETTINGS_ITEM_POS(3), "Load view angles:", 0.2, SETTINGS_ITEM_H, "etj_loadviewangles", "Load view angles when loading position\netj_loadviewangles")
+        YESNO               (SETTINGS_ITEM_POS(4), "Auto load:", 0.2, SETTINGS_ITEM_H, "etj_autoLoad", "Automatically load to latest saved position when joining team\netj_autoLoad")
+        YESNO               (SETTINGS_ITEM_POS(5), "Enable timeruns:", 0.2, SETTINGS_ITEM_H, "etj_enableTimeruns", "Enable timeruns\netj_enableTimeruns")
+        MULTI               (SETTINGS_ITEM_POS(6), "Enable +activate lean:", 0.2, SETTINGS_ITEM_H, "etj_noActivateLean", cvarFloatList { "Yes" 0 "No" 1 }, "Enable leaning by pressing left/right movement keys when '+activate' is held\netj_noActivateLean")
+        MULTI               (SETTINGS_ITEM_POS(7), "Quick follow:", 0.2, SETTINGS_ITEM_H, "etj_quickFollow", cvarFloatList { "No" 0 "Yes" 1 "Yes + draw hint" 2 }, "Spectate other players by aiming and pressing '+activate'\netj_quickFollow")
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(8), "etj_noclipScale", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(8), "Noclip scale:", 0.2, SETTINGS_ITEM_H, etj_noclipScale 1 0 10 0.2, "Scales the speed of noclip\netj_noclipScale")
+        MULTI               (SETTINGS_ITEM_POS(9), "Auto weapon pickup:", 0.2, SETTINGS_ITEM_H, "etj_touchPickupWeapons", cvarFloatList { "No" 0 "Own + Spawned" 1 "All" 2 }, "Automatically pickup weapons when touching them\netj_touchPickupWeapons")
+        YESNO               (SETTINGS_ITEM_POS(10), "Optimized prediction:", 0.2, SETTINGS_ITEM_H, "etj_optimizePrediction", "Enable optimized playerstate prediction to improve client side prediction performance\netj_optimizePrediction")
+        YESNO               (SETTINGS_ITEM_POS(11), "No panzer autoswitch:", 0.2, SETTINGS_ITEM_H, "etj_noPanzerAutoswitch", "Disable automatic weapon switching after firing a panzerfaust\netj_noPanzerAutoswitch")
+        YESNO               (SETTINGS_ITEM_POS(12), "Portalgun auto binds:", 0.2, SETTINGS_ITEM_H, "etj_autoPortalBinds", "Automatically set 'weapalt' bindings to '+attack2' and back when switching to/from portalgun\netj_autoPortalBinds")
+        NUMERICFIELD_EXT    (SETTINGS_EF_POS(13), "Auto switch weapons:", 0.2, SETTINGS_ITEM_H, "cg_autoswitch", 1, "Automatically switch weapon when picking up a new one (bitflag)\n0 = disabled\n1 = enabled\n2 = don't autoswitch unless replacing current weapon\n4 = don't autoswitch to portal gun\ncg_autoswitch")
+
+
+    LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
+    LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
+
+#ifndef FUI
+    LOWERBUTTON(3, "TOGGLE BACKGROUND", conditionalscript uiToggleBackground 2 ( BACKGROUND_OFF ) ( BACKGROUND_ON ) )
+#endif
+}

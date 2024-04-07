@@ -1,0 +1,80 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_settings_graphics_visuals"
+#define GROUP_NAME "group_etjump_settings_graphics"
+
+#define NUM_SUBMENUS 3
+#define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
+
+menuDef {
+    name MENU_NAME
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+
+    onOpen {
+        conditionalscript uiCheckBackground 2
+            ( BACKGROUND_ON )
+            ( BACKGROUND_OFF )
+    }
+
+    onESC {
+        close MENU_NAME; open etjump
+    }
+
+    WINDOW("ETJUMP SETTINGS", 90)
+
+    MAINBUTTON          (1, "GENERAL", close MENU_NAME; open etjump_settings_general_gameplay)
+    MAINBUTTON_ACTIVE   (2, "GRAPHICS", close MENU_NAME; open MENU_NAME)
+    MAINBUTTON          (3, "BASIC HUD", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    MAINBUTTON          (4, "ADV HUD", close MENU_NAME; open etjump_settings_hud2_cgaz)
+    MAINBUTTON          (5, "AUDIO", close MENU_NAME; open etjump_settings_audio)
+    MAINBUTTON          (6, "TIMERUNS", close MENU_NAME; open etjump_settings_timeruns_runtimer)
+    MAINBUTTON          (7, "DEMOS", close MENU_NAME; open etjump_settings_demos_autodemo)
+
+    WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
+
+    SIDEBUTTON_ACTIVE   (1, "VISUALS", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (2, "PLAYERS", close MENU_NAME; open etjump_settings_graphics_players)
+    SIDEBUTTON          (3, "GUN", close MENU_NAME; open etjump_settings_graphics_gun)
+
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "VISUALS")
+
+        YESNO               (SETTINGS_ITEM_POS(1), "Hor+ FOV:", 0.2, SETTINGS_ITEM_H, "etj_realFov", "Use hor+ FOV calculation instead of vert-\netj_realFov")
+        MULTI               (SETTINGS_ITEM_POS(2), "Draw other players' portals:", 0.2, SETTINGS_ITEM_H, "etj_viewPlayerPortals", cvarFloatList { "No" 0 "Yes" 1 "Only when spectating" 2 }, "Draw other players' portalgun portals\netj_viewPlayerPortals")
+        MULTI               (SETTINGS_ITEM_POS(3), "Explosion screenshake:", 0.2, SETTINGS_ITEM_H, "etj_explosivesShake", cvarFloatList { "No" 0 "From others" 1 "From own" 2 "Yes" 3 }, "Shake screen from explosions\netj_explosivesShake")
+        YESNO               (SETTINGS_ITEM_POS(4), "Draw tokens:", 0.2, SETTINGS_ITEM_H, "etj_drawTokens", "Draw collectible tokens placed by server admins\netj_drawTokens")
+        MULTI               (SETTINGS_ITEM_POS(5), "Show tris:", 0.2, SETTINGS_ITEM_H, "etj_showTris", cvarFloatList { "No" 0 "1" 1 "2" 2 }, "Draw edges of triangles\nET 2.60b/ET: Legacy:\n- 1: Draw in POV\n- 2: Draw in PVS\nETe:\n- 1: Exclude 2D elements\n- 2: Include 2D elements\netj_showTris (r_showtris)")
+        MULTI               (SETTINGS_ITEM_POS(6), "Tris mode:", 0.2, SETTINGS_ITEM_H, "r_trisMode", cvarFloatList { "POV" 0 "PVS" 1 }, "Changes tris rendering mode (ETe only)\nr_trisMode")
+        YESNO               (SETTINGS_ITEM_POS(7), "Draw foliage:", 0.2, SETTINGS_ITEM_H, "etj_drawFoliage", "Draw foliage\netj_drawFoliage (r_drawfoliage)")
+        YESNO               (SETTINGS_ITEM_POS(8), "Draw leaves:", 0.2, SETTINGS_ITEM_H, "etj_drawLeaves", "Draw leaves on trees\netj_drawLeaves")
+        YESNO               (SETTINGS_ITEM_POS(9), "Fog:", 0.2, SETTINGS_ITEM_H, "etj_wolfFog", "Draw fog\netj_wolfFog (r_wolffog)")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(10), "etj_zFar", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(10), "Draw distance:", 0.2, SETTINGS_ITEM_H, etj_zFar 0 0 30000 500, "Draw distance of world in in-game units, 0 for unlimited/map controlled\netj_zFar (r_zfar)")
+        MULTI               (SETTINGS_ITEM_POS(11), "Draw lightmaps:", 0.2, SETTINGS_ITEM_H, "etj_lightmap", cvarFloatList { "No" 0 "Yes" 1 "Show 'temperature'" 2 "Show 'temperature' inverted" 3 }, "Draw lightmaps on surfaces (vid_restart required for 'temperature' maps)\netj_lightmap (r_lightmap)")
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(12), "etj_offsetUnits", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(12), "Decal offset amount:", 0.2, SETTINGS_ITEM_H, etj_offsetUnits -2 -20 0 0.5, "Distance from decal shaders to the surface below it\netj_offsetUnits (r_offsetunits)")
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(13), "etj_offsetFactor", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(13), "Decal offset scale:", 0.2, SETTINGS_ITEM_H, etj_offsetFactor -1 -5 0 0.1, "Factor of polygon offset amount\netj_offsetFactor (r_offsetfactor)")
+        YESNO               (SETTINGS_ITEM_POS(14), "Draw clips:", 0.2, SETTINGS_ITEM_H, "etj_drawClips", "Draw clip brushes (ETe only)\netj_drawClips (r_drawClips)")
+        EDITFIELD_EXT       (SETTINGS_EF_POS(15), "Clip shader:", 0.2, SETTINGS_ITEM_H, "r_drawClipsShader", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Shader to use for clip drawing\n(ETe only, vid_restart required)\nr_drawClipsShader")
+        YESNO               (SETTINGS_ITEM_POS(16), "Draw triggers:", 0.2, SETTINGS_ITEM_H, "etj_drawTriggers", "Draw trigger brushes (ETe only)\netj_drawTriggers (r_drawTriggers)")
+        EDITFIELD_EXT       (SETTINGS_EF_POS(17), "Trigger shader:", 0.2, SETTINGS_ITEM_H, "r_drawTriggersShader", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Shader to use for trigger drawing\n(ETe only, vid_restart required)\nr_drawTriggersShader")
+        YESNO               (SETTINGS_ITEM_POS(18), "Draw slicks:", 0.2, SETTINGS_ITEM_H, "etj_drawSlicks", "Draw slick brushes & angle slicks (ETe only)\netj_drawSlicks (r_drawSlicks)")
+        EDITFIELD_EXT       (SETTINGS_EF_POS(19), "Slick shader:", 0.2, SETTINGS_ITEM_H, "r_drawSlicksShader", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Shader to use for slick drawing\n(ETe only, vid_restart required)\nr_drawSlicksShader")
+        YESNO               (SETTINGS_ITEM_POS(20), "Clear screen:", 0.2, SETTINGS_ITEM_H, "etj_clear", "Force screen clearing every frame, eliminating 'Hall of mirrors' effect outside the map\netj_clear (r_clear)")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(21), "etj_flareSize", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(21), "Flare size:", 0.2, SETTINGS_ITEM_H, etj_flareSize 40 0 80 1, "Size of flares and coronas\netj_flareSize (r_flareSize)")
+
+    LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
+    LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
+
+#ifndef FUI
+    LOWERBUTTON(3, "TOGGLE BACKGROUND", conditionalscript uiToggleBackground 2 ( BACKGROUND_OFF ) ( BACKGROUND_ON ) )
+#endif
+
+}

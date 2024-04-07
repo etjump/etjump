@@ -1,0 +1,71 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_settings_timeruns_checkpoints"
+#define GROUP_NAME "group_etjump_settings_timeruns"
+
+#define NUM_SUBMENUS 2
+#define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
+
+menuDef {
+    name MENU_NAME
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+
+    onOpen {
+        conditionalscript uiCheckBackground 2
+            ( BACKGROUND_ON )
+            ( BACKGROUND_OFF )
+    }
+
+    onESC {
+        close MENU_NAME; open etjump
+    }
+
+    WINDOW("ETJUMP SETTINGS", 90)
+
+    MAINBUTTON          (1, "GENERAL", close MENU_NAME; open etjump_settings_general_gameplay)
+    MAINBUTTON          (2, "GRAPHICS", close MENU_NAME; open etjump_settings_graphics_visuals)
+    MAINBUTTON          (3, "BASIC HUD", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    MAINBUTTON          (4, "ADV HUD", close MENU_NAME; open etjump_settings_hud2_cgaz)
+    MAINBUTTON          (5, "AUDIO", close MENU_NAME; open etjump_settings_audio)
+    MAINBUTTON_ACTIVE   (6, "TIMERUNS", close MENU_NAME; open MENU_NAME)
+    MAINBUTTON          (7, "DEMOS", close MENU_NAME; open etjump_settings_demos_autodemo)
+
+    WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
+
+    SIDEBUTTON          (1, "RUN TIMER", close MENU_NAME; open etjump_settings_timeruns_runtimer)
+    SIDEBUTTON_ACTIVE   (2, "CHECKPOINTS", close MENU_NAME; open MENU_NAME)
+
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CHECKPOINTS")
+
+        MULTI               (SETTINGS_ITEM_POS(1), "Draw checkpoint timer:", 0.2, SETTINGS_ITEM_H, "etj_drawCheckpoints", cvarFloatList { "No" 0 "Below runtimer" 1 "Detached" 2 }, "Draw checkpoint timer\netj_drawCheckpoints")
+        MULTI               (SETTINGS_ITEM_POS(2), "Checkpoint timer style:", 0.2, SETTINGS_ITEM_H, "etj_checkpointsStyle", cvarFloatList { "Relative time" 0 "Absolute time" 1 }, "Set display style of checkpoints timer\netj_checkpointsStyle")
+        MULTI               (SETTINGS_ITEM_POS(3), "Max checkpoint times:", 0.2, SETTINGS_ITEM_H, "etj_checkpointsCount", cvarFloatList { "1" 1 "2" 2 "3" 3 "4" 4 "5" 5 }, "Number of checkpoint times to draw\netj_checkpointsCount")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_checkpointsX", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(4), "Checkpoints timer X:", 0.2, SETTINGS_ITEM_H, etj_checkpointsX 320 0 640 10, "Sets X position of checkpoint timer, no effect unless checkpoint timer is in detached mode\netj_checkpointsX")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(5), "etj_checkpointsY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(5), "Checkpoints timer Y:", 0.2, SETTINGS_ITEM_H, etj_checkpointsY 380 0 480 10, "Sets Y position of checkpoint timer, no effect unless checkpoint timer is in detached mode\netj_checkpointsY")
+        MULTI               (SETTINGS_ITEM_POS(6), "Checkpoints timer size:", 0.2, SETTINGS_ITEM_H, "etj_checkpointsSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of checkpoint timer\netj_checkpointsSize")
+        YESNO               (SETTINGS_ITEM_POS(7), "Checkpoints timer shadow:", 0.2, SETTINGS_ITEM_H, "etj_checkpointsShadow", "Draw shadow on checkpoint timer\netj_checkpointsShadow")
+        YESNO               (SETTINGS_ITEM_POS(8), "Checkpoint popups:", 0.2, SETTINGS_ITEM_H, "etj_checkpointsPopup", "Draw a checkpoint popup when hitting a checkpoint\netj_checkpointsPopup")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(9), "etj_checkpointsPopupDuration", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(9), "Checkpoint popup duration:", 0.2, SETTINGS_ITEM_H, etj_checkpointsPopupDuration 1000 0 5000 100, "How long a checkpoint popup stays on screen, in milliseconds\netj_checkpointsPopupDuration")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(10), "etj_checkpointsPopupX", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(10), "Checkpoint popup X:", 0.2, SETTINGS_ITEM_H, etj_checkpointsPopupX 320 0 640 10, "Sets X position of checkpoint popup\netj_checkpointsPopupX")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(11), "etj_checkpointsPopupY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(11), "Checkpoint popup Y:", 0.2, SETTINGS_ITEM_H, etj_checkpointsPopupY 200 0 480 10, "Sets Y position of checkpoint popup\netj_checkpointsPopupY")
+        MULTI               (SETTINGS_ITEM_POS(12), "Checkpoint popup size:", 0.2, SETTINGS_ITEM_H, "etj_checkpointsPopupSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of checkpoint popups\netj_checkpointsPopupSize")
+        YESNO               (SETTINGS_ITEM_POS(13), "Checkpoint popup shadow:", 0.2, SETTINGS_ITEM_H, "etj_checkpointsPopupShadow", "Draw shadow on checkpoint popups\netj_checkpointsPopupShadow")
+
+    LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
+    LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
+
+#ifndef FUI
+    LOWERBUTTON(3, "TOGGLE BACKGROUND", conditionalscript uiToggleBackground 2 ( BACKGROUND_OFF ) ( BACKGROUND_ON ) )
+#endif
+}
