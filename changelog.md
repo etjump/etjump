@@ -1,6 +1,6 @@
 # ETJump 3.2.0
 
-* fixed being able to go through/into no-noclip areas with `setoffset` [#1192](https://github.com/etjump/etjump/pull/1192)
+* fixed being able to go through/into no-noclip areas with `setoffset` [#1192](https://github.com/etjump/etjump/pull/1192) [#1287](https://github.com/etjump/etjump/pull/1287)
 * increased UI memory pool, fixing the mod not running on 2.60b linux [#1191](https://github.com/etjump/etjump/pull/1191)
 * added `func_portaltarget` entity [#1188](https://github.com/etjump/etjump/pull/1188)
   * portals fired on this entity will always center on the face they were fired onto
@@ -8,7 +8,7 @@
 * improved entity health bar visuals - bar now has gradient color to indicate progress & small border [#1185](https://github.com/etjump/etjump/pull/1185)
 * added `etj_snapHUDActiveIsPrimary` [#1182](https://github.com/etjump/etjump/pull/1182)
   * colors active snapzone with `etj_snapHUDColor1` in all scenarios, and flips the colors accordingly
-* added `etj_CGazDrawSnapZone` [#1175](https://github.com/etjump/etjump/pull/1175)
+* added `etj_CGaz1DrawSnapZone` [#1175](https://github.com/etjump/etjump/pull/1175) [#1268](https://github.com/etjump/etjump/pull/1268)
   * draws the remainder of the current snapzone on CGaz 1, to visualize snap zones without snaphud
   * uses `etj_CGazFov`, will not align correctly to snaphud if CGaz and snaphud use different fov
 * added support for `weapon_grenadelauncher` and `weapon_grenadepineapple` entities for spawning axis and allies grenades, respectively [#1195](https://github.com/etjump/etjump/pull/1195) [#1246](https://github.com/etjump/etjump/pull/1246)
@@ -80,7 +80,7 @@
 * fixed noclip not deactivating for spectators when entering `nonoclip` area [#1231](https://github.com/etjump/etjump/pull/1231)
   * clients also now get a print when noclip gets deactivated
 * noclipping while dead is no longer possible by using noclip on the same frame as dying [#1232](https://github.com/etjump/etjump/pull/1232)
-* `entitylist` now displays `scriptname` field of entites and the amount of brush entities in a map [#1235](https://github.com/etjump/etjump/pull/1235)
+* `entitylist` now displays `scriptname` field of entites and the amount of brush entities in a map [#1235](https://github.com/etjump/etjump/pull/1235) [#1275](https://github.com/etjump/etjump/pull/1275)
 * reduced re-vote cooldown from 2 seconds to 1 [#1241](https://github.com/etjump/etjump/pull/1241)
 * fixed OB detector ignoring `nooverbounce` on demo playback [#1243](https://github.com/etjump/etjump/pull/1243)
 * fixed dlights not updating if spawned after initial map load by using `set` to change an existing entity to a dlight [#1245](https://github.com/etjump/etjump/pull/1245)
@@ -106,6 +106,24 @@
 * `etj_autoPortalBinds` now defaults to `1` [#1259](https://github.com/etjump/etjump/pull/1259)
 * fixed div by 0 on 1st server frame [#1260](https://github.com/etjump/etjump/pull/1260)
   * mod is now aware of `sv_fps` changes on server and changes are applied without reloading a map
+* added `etj_muzzleFlash` to control muzzleflash drawing [#1265](https://github.com/etjump/etjump/pull/1265)
+  * **0** - off
+  * **1** - on
+  * **2** - only draw on onther players
+  * **3** - only draw on yourself
+* reworked `cg_autoswitch` cvar - now acts as a bitflag value with various options [#1266](https://github.com/etjump/etjump/pull/1266) [#1269](https://github.com/etjump/etjump/pull/1269)
+  * **0** - disabled
+  * **1** - enabled
+  * **2** - don't autoswitch unless replacing currently held weapon
+  * **4** - don't autoswitch to portal gun
+* fixed `HOME/END` keys breaking input of numeric fields in menus [#1267](https://github.com/etjump/etjump/pull/1267)
+* added icons to replay menu for folders and up/home options [#1278](https://github.com/etjump/etjump/pull/1278)
+* fixed weapons added to maps as `misc_gamemodel` drawing with a semi-transparent shader [#1282](https://github.com/etjump/etjump/pull/1281)
+* fixed `target_remove_portals` noise playing for incorrect client(s) [#1286](https://github.com/etjump/etjump/pull/1286)
+* overhauled to look of settings menu [#1284](https://github.com/etjump/etjump/pull/1284)
+  * new layout with 7 main categories, each with some sub-categories
+  * added a button to toggle background in the menus to improve visibility when changing settings
+  * added a button to execute `writeconfig` directly from the settings menu
 
 # ETJump 3.1.1
 
