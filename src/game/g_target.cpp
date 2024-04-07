@@ -1585,6 +1585,7 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
                              EV_GENERAL_CLIENT_SOUND_VOLUME, self->noise_index);
 
       noiseEnt->s.onFireStart = self->s.onFireStart;
+      noiseEnt->s.teamNum = ClientNum(activator);
     }
 
     if (!(self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)) {
