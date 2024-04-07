@@ -979,7 +979,7 @@ void setPlayerOffset(gentity_t *ent) {
                     ent->client->ps.maxs, dst, ent->client->ps.clientNum,
                     CONTENTS_NONOCLIP);
 
-  if (level.noNoclip == (trace.fraction == 1.0f)) {
+  if (!g_cheats.integer && level.noNoclip == (trace.fraction == 1.0f)) {
     Printer::SendConsoleMessage(clientNum,
                                 "^7You cannot ^3setoffset ^7to this area.\n");
     return;
