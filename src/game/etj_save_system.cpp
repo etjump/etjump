@@ -250,13 +250,6 @@ void SaveSystem::load(gentity_t *ent) {
       CPTo(ent, "^7Invalid save slot.");
       return;
     }
-
-    if (!g_cheats.integer && slot > 0 && client->sess.timerunActive &&
-        client->sess.runSpawnflags &
-            static_cast<int>(ETJump::TimerunSpawnflags::NoBackups)) {
-      CPTo(ent, "Save slots are disabled for this timerun.");
-      return;
-    }
   }
 
   if (client->sess.sessionTeam == TEAM_SPECTATOR) {
@@ -272,6 +265,17 @@ void SaveSystem::load(gentity_t *ent) {
       CPTo(ent,
            "You cannot ^3load ^7to this position while using a mortar set.");
       return;
+    }
+
+    if (!g_cheats.integer && slot > 0 && client->sess.timerunActive &&
+        client->sess.runSpawnflags &
+            static_cast<int>(ETJump::TimerunSpawnflags::NoBackups)) {
+      if (!pos->isTimerunSave) {
+        InterruptRun(ent);
+      } else {
+        CPTo(ent, "Save slots are disabled for this timerun.");
+        return;
+      }
     }
 
     saveLastLoadPos(ent); // store position for unload command
