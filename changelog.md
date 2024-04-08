@@ -124,6 +124,9 @@
   * new layout with 7 main categories, each with some sub-categories
   * added a button to toggle background in the menus to improve visibility when changing settings
   * added a button to execute `writeconfig` directly from the settings menu
+* fixed timeruns with `NoBackups` blocking usage of `load 1-3` when the slot was not a timerun save [#1289](https://github.com/etjump/etjump/pull/1289)
+* fixed multiline tooltips sometimes rendering at incorrect height [#1290](https://github.com/etjump/etjump/pull/1290)
+* fixed `target_init` with `KeepWeapons` or `RemoveStartingWeapons` not respecting `KeepPortalgun` spawnflag [#1291](https://github.com/etjump/etjump/pull/1291)
 
 # ETJump 3.1.1
 
