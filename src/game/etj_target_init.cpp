@@ -29,6 +29,11 @@
 #include "etj_target_init.h"
 
 namespace ETJump {
+std::vector<weapon_t> allowedWeapons = {
+    WP_NONE,   WP_KNIFE,      WP_MEDKIT, WP_MEDIC_SYRINGE, WP_MEDIC_ADRENALINE,
+    WP_PLIERS, WP_BINOCULARS,
+};
+
 void TargetInit::spawn(gentity_t *self) { self->use = TargetInit::use; }
 
 void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
@@ -49,7 +54,15 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   }
 
   if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepWeapons))) {
-    auto weapon = activator->client->sess.playerWeapon;
+    const int weapon = activator->client->sess.playerWeapon;
+
+    // we might have picked up the portal gun and are not removing it
+    bool keepPortalgun = false;
+
+    if (self->spawnflags & static_cast<int>(SpawnFlags::KeepPortalgun) &&
+        COM_BitCheck(activator->client->ps.weapons, WP_PORTAL_GUN)) {
+      keepPortalgun = true;
+    }
 
     // restore the ammo we spawned with in case we don't have our weapon anymore
     if (!(COM_BitCheck(activator->client->ps.weapons, weapon))) {
@@ -62,6 +75,11 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
     memcpy(activator->client->ps.weapons,
            activator->client->sess.weaponsOnSpawn,
            sizeof(activator->client->sess.weaponsOnSpawn));
+
+    if (keepPortalgun &&
+        !COM_BitCheck(activator->client->ps.weapons, WP_PORTAL_GUN)) {
+      COM_BitSet(activator->client->ps.weapons, WP_PORTAL_GUN);
+    }
 
     // remove any disallowed weapons we might have restored if timerun is active
     if (activator->client->sess.timerunActive) {
@@ -92,6 +110,7 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
         activator->client->ps.weapon = WP_KNIFE;
       }
     }
+
     COM_BitClear(activator->client->ps.weapons, WP_PORTAL_GUN);
   }
 
@@ -105,26 +124,25 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   }
 
   if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepTracker))) {
-    for (int &i : activator->client->sess.progression) {
-      i = 0;
+    for (auto &tracker : activator->client->sess.progression) {
+      tracker = 0;
     }
   }
 
   if (self->spawnflags & static_cast<int>(SpawnFlags::RemoveStartingWeapons) &&
       !(self->spawnflags & static_cast<int>(SpawnFlags::KeepWeapons))) {
-    auto allowedWeapons = std::array<int, NUM_KEPT_WEAPONS>{WP_NONE,
-                                                            WP_KNIFE,
-                                                            WP_MEDKIT,
-                                                            WP_MEDIC_SYRINGE,
-                                                            WP_MEDIC_ADRENALINE,
-                                                            WP_PLIERS,
-                                                            WP_BINOCULARS};
-
     for (int i = 0; i < WP_NUM_WEAPONS; i++) {
       if (std::find(allowedWeapons.begin(), allowedWeapons.end(), i) !=
           allowedWeapons.end()) {
         continue;
       }
+
+      // skip portal gun if 'KeepPortalgun' is set
+      if (i == WP_PORTAL_GUN &&
+          self->spawnflags & static_cast<int>(SpawnFlags::KeepPortalgun)) {
+        continue;
+      }
+
       COM_BitClear(activator->client->ps.weapons, i);
       // swap to knife if our weapon was removed
       if (activator->client->ps.weapon == i) {
@@ -136,5 +154,3 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   }
 }
 } // namespace ETJump
-
-void SP_target_init(gentity_t *self) { ETJump::TargetInit::spawn(self); }
