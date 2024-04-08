@@ -572,72 +572,64 @@ int Text_Height(const char *text, float scale, int limit) {
 
 // despite the name, this is also used for single line tooltips
 int Multiline_Text_Height(const char *text, float scale, int limit) {
-  int len, count;
-  float heightMin, heightMax;
-  float lineHeight = 0;
+  size_t len, count;
+  int topMin, heightMax;
+  int lineHeight = 0;
   glyphInfo_t *glyph;
   const char *s = text;
   fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
   bool multiline = false;
 
-  heightMin = 0;
+  // default item->textaligny for tooltips
+  // FIXME: this is bad, make this be aware of the actual textaligny value
+  constexpr int LINE_SPACING = 10.0f;
+
+  topMin = 0;
   heightMax = 0;
+
   if (text) {
-    len = strlen(text);
-    if (limit > 0 && len > limit) {
+    len = std::strlen(text);
+
+    if (limit > 0 && len > static_cast<size_t>(limit)) {
       len = limit;
     }
+
     count = 0;
+
     while (s && *s && count < len) {
       if (Q_IsColorString(s)) {
         s += 2;
         continue;
       } else {
         if (*s == '\n') {
-          lineHeight += abs(heightMin - heightMax);
-          lineHeight += 5; // 5 is the vertical
-                           // spacing that
-                           // autowrap painting
-                           // uses
-          heightMin = 0;
+          lineHeight += std::abs(topMin) + heightMax;
+          lineHeight += LINE_SPACING;
+          topMin = 0;
           heightMax = 0;
           multiline = true;
         } else {
-          glyph = &font->glyphs[(unsigned char)*s]; // NERVE
-                                                    // -
-                                                    // SMF
-                                                    // -
-                                                    // this
-                                                    // needs
-                                                    // to
-                                                    // be
-                                                    // an
-                                                    // unsigned
-                                                    // cast
-                                                    // for
-                                                    // localization
+          // NERVE - SMF - this needs to be an unsigned cast for localization
+          glyph = &font->glyphs[static_cast<unsigned char>(*s)];
+
           if (heightMax < glyph->height) {
             heightMax = glyph->height;
           }
-          // some glyphs (mainly '_')
-          // use negative top position
-          if (glyph->top < 0) {
-            if (heightMin < glyph->top - glyph->height) {
-              heightMin = glyph->top - glyph->height;
-            }
+
+          if (glyph->top < topMin) {
+            topMin = glyph->top;
           }
         }
+
         s++;
         count++;
       }
     }
   }
 
-  lineHeight += multiline ? abs(heightMin - heightMax) + 5
-                          : heightMax; // 5 is the vertical spacing that
-                                       // autowrap painting uses
+  lineHeight += multiline ? std::abs(topMin) + heightMax : heightMax;
 
-  return lineHeight * scale * font->glyphScale;
+  return static_cast<int>(
+      std::ceil(static_cast<float>(lineHeight) * scale * font->glyphScale));
 }
 
 void Text_PaintCharExt(float x, float y, float w, float h, float scalex,
