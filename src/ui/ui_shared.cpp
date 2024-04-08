@@ -4032,7 +4032,6 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr,
   fontInfo_t *font = DC->getActiveFont();
   float lineWidth = 0;
   float lineHeight = 0;
-  constexpr float DEFAULT_LINEHEIGHT = 11.0f;
 
   newLinePtr = nullptr;
 

@@ -246,6 +246,8 @@ typedef struct modelDef_s {
 
 #define UI_MAX_TEXT_LINES 64
 
+constexpr float DEFAULT_LINEHEIGHT = 11.0f;
+
 typedef struct itemDef_s {
   Window window;      // common positional, border, style, layout info
   rectDef_t textRect; // rectangle the text ( if any ) consumes
@@ -255,7 +257,7 @@ typedef struct itemDef_s {
   int textalignment; // ( optional ) alignment for text within rect
                      // based on text width
   float textalignx;  // ( optional ) text alignment x coord
-  float textaligny;  // ( optional ) text alignment x coord
+  float textaligny;  // ( optional ) text alignment y coord
   float textscale;   // scale percentage from 72pts
   int font;          // (SA)
   int textStyle;     // ( optional ) style, normal and shadowed are it for
