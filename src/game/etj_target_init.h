@@ -39,8 +39,6 @@ private:
     RemoveStartingWeapons = 128
   };
 
-  static constexpr int NUM_KEPT_WEAPONS = 7;
-
   static void use(gentity_t *self, gentity_t *other, gentity_t *activator);
 
 public:
