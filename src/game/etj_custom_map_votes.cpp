@@ -24,6 +24,7 @@
 
 #include <fstream>
 #include <algorithm>
+#include <set>
 
 #include "etj_custom_map_votes.h"
 #include "etj_map_statistics.h"
@@ -77,20 +78,36 @@ bool CustomMapVotes::Load() {
   }
 
   try {
-    for (int i = 0; i < static_cast<int>(root.size()); i++) {
-      customMapVotes_.push_back(MapType());
+    for (const auto &list : root) {
+      customMapVotes_.emplace_back();
       unsigned curr = customMapVotes_.size() - 1;
-      Json::Value maps = root[i]["maps"];
-      customMapVotes_[curr].type = root[i]["name"].asString();
-      customMapVotes_[curr].callvoteText = root[i]["callvote_text"].asString();
-      for (int j = 0; j < static_cast<int>(maps.size()); j++) {
-        auto mapName = maps[j].asString();
+
+      Json::Value maps = list["maps"];
+      customMapVotes_[curr].type = list["name"].asString();
+      customMapVotes_[curr].callvoteText = list["callvote_text"].asString();
+
+      std::set<std::string> uniqueMapsOnServer{};
+      std::set<std::string> uniqueMapsOther{};
+
+      // clean up the list from potential duplicates
+      // FIXME: we should rather erase the duplicates from the json file itself
+      for (const auto &map : maps) {
+        const std::string &mapName = map.asString();
+
         if (std::binary_search(_currentMapsOnServer->begin(),
                                _currentMapsOnServer->end(), mapName)) {
-          customMapVotes_[curr].mapsOnServer.push_back(mapName);
+          uniqueMapsOnServer.insert(mapName);
         } else {
-          customMapVotes_[curr].otherMaps.push_back(mapName);
+          uniqueMapsOther.insert(mapName);
         }
+      }
+
+      for (const auto &map : uniqueMapsOnServer) {
+        customMapVotes_[curr].mapsOnServer.emplace_back(map);
+      }
+
+      for (const auto &map : uniqueMapsOther) {
+        customMapVotes_[curr].otherMaps.emplace_back(map);
       }
     }
   } catch (...) {
