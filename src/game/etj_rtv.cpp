@@ -156,6 +156,9 @@ bool RockTheVote::checkAutoRtv() {
 void RockTheVote::callAutoRtv() {
   int i;
   char voteArg[MAX_STRING_TOKENS];
+  // send an empty secondary arg to G_voteCmdCheck rather than nullptr,
+  // so we don't need to dance around nullptr dereferences in the vote cmd
+  char arg2[2] = "\0";
 
   Q_strncpyz(voteArg, "rtv", sizeof(voteArg));
 
@@ -163,7 +166,7 @@ void RockTheVote::callAutoRtv() {
   // if vote_allow_rtv is set to 0
   level.voteInfo.isAutoRtvVote = true;
 
-  if ((i = G_voteCmdCheck(nullptr, voteArg, nullptr)) != G_OK) {
+  if ((i = G_voteCmdCheck(nullptr, voteArg, arg2)) != G_OK) {
     if (i == G_NOTFOUND) {
       G_LogPrintf(
           "callAutoRtv: Could not find vote command for '%s'. This should not "
