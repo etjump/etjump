@@ -29,12 +29,12 @@
 
 namespace ETJump {
 void AccelColor::setAccelColor(int &style, float &speed, float &alpha,
-                               pmove_t *pm,
+                               const pmove_t *pm, const playerState_t *ps,
                                std::list<StoredSpeed> &storedSpeeds,
                                vec3_t &accel, vec4_t &color) {
   if (style == Style::Simple ||
       (style == Style::Advanced &&
-       lowSpeedOnGround(speed, pm->ps->groundEntityNum))) {
+       lowSpeedOnGround(speed, ps->groundEntityNum))) {
     float avgAccel = calcAvgAccel(storedSpeeds);
     vec4_t currentAccelColor;
     Vector4Copy(colorGreen, currentAccelColor);
@@ -49,20 +49,20 @@ void AccelColor::setAccelColor(int &style, float &speed, float &alpha,
 
     LerpColor(colorWhite, currentAccelColor, color, frac);
   } else if (style == Style::Advanced) {
-    calcAccelColor(pm, accel, color);
+    calcAccelColor(pm, ps, accel, color);
   }
 
   color[3] *= Numeric::clamp(0.0f, 1.0f, alpha);
 }
 
-void AccelColor::calcAccelColor(pmove_t *pm, vec3_t &accel, vec4_t &outColor) {
+void AccelColor::calcAccelColor(const pmove_t *pm, const playerState_t *ps,
+                                vec3_t &accel, vec4_t &outColor) {
   vec4_t color;
-  const playerState_t *ps = getValidPlayerState();
   const int8_t ucmdScale = CMDSCALE_DEFAULT;
   const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, ucmdScale);
 
-  float speedX = pm->ps->velocity[0];
-  float speedY = pm->ps->velocity[1];
+  float speedX = ps->velocity[0];
+  float speedY = ps->velocity[1];
 
   const float accelAngle = RAD2DEG(std::atan2(-cmd.rightmove, cmd.forwardmove));
   const float accelAngleAlt =
@@ -94,13 +94,14 @@ void AccelColor::calcAccelColor(pmove_t *pm, vec3_t &accel, vec4_t &outColor) {
         frameAccel *
         static_cast<float>(std::sin(DEG2RAD(accelAngleAlt + altOptAngle))));
 
-    if (pm->groundPlane && (pm->pmext->groundTrace.plane.normal[0] ||
-                            pm->pmext->groundTrace.plane.normal[1])) {
+    if (pm->pmext->groundPlane &&
+        (pm->pmext->groundTrace.plane.normal[0] != 0 ||
+         pm->pmext->groundTrace.plane.normal[1] != 0)) {
       vec3_t optAccel = {optAccelX, optAccelY, gravityAccel};
       vec3_t altOptAccel = {altOptAccelX, altOptAccelY, gravityAccel};
       vec3_t normal = {0, 0, 0};
 
-      VectorCopy(pm->groundTrace.plane.normal, normal);
+      VectorCopy(pm->pmext->groundTrace.plane.normal, normal);
 
       PM_ClipVelocity(optAccel, normal, optAccel, OVERCLIP);
       PM_ClipVelocity(altOptAccel, normal, altOptAccel, OVERCLIP);

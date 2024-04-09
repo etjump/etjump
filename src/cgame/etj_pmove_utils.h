@@ -43,7 +43,7 @@ public:
   // calculates wishspeed projected onto flat ground plane
   static float PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd,
                                vec3_t forward, vec3_t right, vec3_t up,
-                               const playerState_t &ps, pmove_t *pm);
+                               const playerState_t &ps, const pmove_t *pm);
 
   // updates XY wishvel based on cmdScale and angle vectors
   // projects velocity down to a flat ground plane
@@ -53,6 +53,6 @@ public:
                                const playerState_t &ps);
 
   // returns total acceleration per frame
-  static float getFrameAccel(const playerState_t &ps, pmove_t *pm);
+  static float getFrameAccel(const playerState_t &ps, const pmove_t *pm);
 };
 } // namespace ETJump

@@ -30,8 +30,8 @@
 namespace ETJump {
 class CGaz : public IRenderable {
 public:
-  static bool strafingForwards(const playerState_t &ps, pmove_t *pm);
-  static float getOptAngle(const playerState_t &ps, pmove_t *pm,
+  static bool strafingForwards(const playerState_t &ps, const pmove_t *pm);
+  static float getOptAngle(const playerState_t &ps, const pmove_t *pm,
                            bool alternate);
 
   struct state_t {
@@ -72,13 +72,14 @@ private:
   bool canSkipDraw() const;
   void UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
   void UpdateCGaz2();
-  static float GetSlickGravity(const playerState_t *ps, pmove_t *pm);
+  static float GetSlickGravity(const playerState_t *ps, const pmove_t *pm);
   static float UpdateDrawMin(state_t const *state);
   static float UpdateDrawOpt(state_t const *state);
   static float UpdateDrawMaxCos(state_t const *state);
   static float UpdateDrawMax(state_t const *state);
   static float UpdateDrawSnap(const playerState_t *ps, pmove_t *pm);
-  static void UpdateDraw(float wishspeed, const playerState_t *ps, pmove_t *pm);
+  static void UpdateDraw(float wishspeed, const playerState_t *ps,
+                         const pmove_t *pm);
   void startListeners();
 
   playerState_t *ps = &cg.predictedPlayerState;

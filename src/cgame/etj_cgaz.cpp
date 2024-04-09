@@ -33,14 +33,14 @@
 #include "etj_cvar_update_handler.h"
 
 namespace ETJump {
-  CGaz::state_t state;
-  float CGaz::drawMin{};
-  float CGaz::drawOpt{};
-  float CGaz::drawMaxCos{};
-  float CGaz::drawMax{};
-  float CGaz::drawVel{};
-  float CGaz::yaw{};
-  float CGaz::drawSnap{};
+CGaz::state_t state;
+float CGaz::drawMin{};
+float CGaz::drawOpt{};
+float CGaz::drawMaxCos{};
+float CGaz::drawMax{};
+float CGaz::drawVel{};
+float CGaz::yaw{};
+float CGaz::drawSnap{};
 
 CGaz::CGaz() {
   // CGaz 1
@@ -99,7 +99,8 @@ void CGaz::UpdateCGaz2() {
   drawVel = DEG2RAD(drawVel);
 }
 
-void CGaz::UpdateDraw(float wishspeed, const playerState_t* ps, pmove_t *pm) {
+void CGaz::UpdateDraw(float wishspeed, const playerState_t *ps,
+                      const pmove_t *pm) {
   // this can happen when running > 125fps, set default wishspeed to
   // avoid div by 0 later
   if (wishspeed == 0) {
@@ -199,7 +200,7 @@ float CGaz::UpdateDrawMax(state_t const *state) {
   return drawMax;
 }
 
-float CGaz::GetSlickGravity(const playerState_t *ps, pmove_t *pm) {
+float CGaz::GetSlickGravity(const playerState_t *ps, const pmove_t *pm) {
   if ((pm->pmext->groundTrace.surfaceFlags & SURF_SLICK) ||
       (ps->pm_flags & PMF_TIME_KNOCKBACK)) {
     return powf(static_cast<float>(ps->gravity) * pm->pmext->frametime, 2);
@@ -350,7 +351,7 @@ void CGaz::render() const {
   }
 }
 
-bool CGaz::strafingForwards(const playerState_t &ps, pmove_t *pm) {
+bool CGaz::strafingForwards(const playerState_t &ps, const pmove_t *pm) {
   // "forwards" means player viewangles naturally match keys pressed,
   // i.e. looking ahead with +forward and looking backwards with +back,
   // except for nobeat: looking to the left with +forward only and
@@ -398,11 +399,12 @@ bool CGaz::strafingForwards(const playerState_t &ps, pmove_t *pm) {
   return false;
 }
 
-float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
-  const auto uCmdScale = static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] &
-                                                     (BUTTON_WALKING << 8)
-                                                 ? CMDSCALE_WALK
-                                                 : CMDSCALE_DEFAULT);
+float CGaz::getOptAngle(const playerState_t &ps, const pmove_t *pm,
+                        bool alternate) {
+  const auto uCmdScale =
+      static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
+                              ? CMDSCALE_WALK
+                              : CMDSCALE_DEFAULT);
   const usercmd_t cmd = PmoveUtils::getUserCmd(ps, uCmdScale);
 
   // get correct pmove state
@@ -434,7 +436,8 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
   UpdateDraw(wishspeed, &ps, pm);
 
   // no meaningful value if speed lower than ground speed or no user input
-  if (state.vf < state.wishspeed || (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
+  if (state.vf < state.wishspeed ||
+      (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
     return 0;
   }
 
