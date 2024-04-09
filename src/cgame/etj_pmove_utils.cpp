@@ -100,7 +100,7 @@ float PmoveUtils::PM_SprintScale(const playerState_t *ps) {
 
 float PmoveUtils::PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd,
                                   vec3_t forward, vec3_t right, vec3_t up,
-                                  const playerState_t &ps, pmove_t *pm) {
+                                  const playerState_t &ps, const pmove_t *pm) {
   PM_UpdateWishvel(wishvel, cmd, forward, right, up, ps);
 
   float wishspeed = scale * VectorLength2(wishvel);
@@ -154,7 +154,7 @@ void PmoveUtils::PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward,
   }
 }
 
-float PmoveUtils::getFrameAccel(const playerState_t &ps, pmove_t *pm) {
+float PmoveUtils::getFrameAccel(const playerState_t &ps, const pmove_t *pm) {
   const auto ucmdScale =
       static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
                               ? CMDSCALE_WALK

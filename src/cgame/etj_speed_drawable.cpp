@@ -79,7 +79,6 @@ bool DrawSpeed::beforeRender() {
 
   playing = cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback;
 
-  const playerState_t *ps = playing ? &cg.predictedPlayerState : &cg.snap->ps;
   const int8_t ucmdScale = CMDSCALE_DEFAULT;
   const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, ucmdScale);
 
@@ -92,36 +91,40 @@ bool DrawSpeed::beforeRender() {
   // this will be wrong for clients running < 125FPS... oh well
   const int frameTime = (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback)
                             ? cg.time
-                            : pm->ps->commandTime;
+                            : ps->commandTime;
 
   if (canSkipUpdate(frameTime)) {
     return true;
   }
 
-  currentSpeed = VectorLength2(pm->ps->velocity);
+  currentSpeed = VectorLength2(ps->velocity);
   lastUpdateTime = frameTime;
   maxSpeed = currentSpeed > maxSpeed ? currentSpeed : maxSpeed;
 
-  if (accelColorStyle == AccelColor::Style::Simple ||
-      (accelColorStyle == AccelColor::Style::Advanced &&
-       AccelColor::lowSpeedOnGround(currentSpeed, pm->ps->groundEntityNum))) {
+  int style = accelColorStyle;
+
+  // force simple coloring instead of advanced on spec/demo
+  // due to interpolation inaccuracy
+  if (!playing && style == AccelColor::Style::Advanced) {
+    style = static_cast<int>(AccelColor::Style::Simple);
+  }
+
+  if (style == AccelColor::Style::Simple ||
+      (style == AccelColor::Style::Advanced &&
+       AccelColor::lowSpeedOnGround(currentSpeed, ps->groundEntityNum))) {
     storedSpeeds.push_back({frameTime, currentSpeed});
     AccelColor::popOldStoredSpeeds(storedSpeeds, frameTime);
   } else if (!storedSpeeds.empty()) {
     storedSpeeds.clear();
   }
 
-  VectorSubtract(pm->ps->velocity, lastSpeed, accel);
-  VectorCopy(pm->ps->velocity, lastSpeed);
+  VectorSubtract(ps->velocity, lastSpeed, accel);
+  VectorCopy(ps->velocity, lastSpeed);
 
   if (accelColorStyle) {
-    if (!playing) {
-      accelColorStyle = AccelColor::Style::Simple;
-    }
 
-    AccelColor::setAccelColor(accelColorStyle, currentSpeed,
-                              etj_speedAlpha.value, pm, storedSpeeds, accel,
-                              speedColor);
+    AccelColor::setAccelColor(style, currentSpeed, etj_speedAlpha.value, pm, ps,
+                              storedSpeeds, accel, speedColor);
   }
 
   speedStr = getSpeedString();
