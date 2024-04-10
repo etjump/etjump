@@ -45,7 +45,7 @@ menuDef {
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CLIENT")
 
         MULTI               (SETTINGS_ITEM_POS(1), "Max FPS:", 0.2, SETTINGS_ITEM_H, "com_maxfps", cvarFloatList { "43" 43 "76" 76 "125" 125 "250" 250 "333" 333 }, "Sets the FPS limit\ncom_maxfps")
-        MULTI               (SETTINGS_ITEM_POS(2), "Memory limit:", 0.2, SETTINGS_ITEM_H, "com_hunkmegs", cvarFloatList { "56MB" 56 "64MB" 64 "128MB" 128 "256MB" 256 "512MB" 512 }, "How much the client is allowed to use (restart required)\ncom_hunkmegs")
+        MULTI               (SETTINGS_ITEM_POS(2), "Memory limit:", 0.2, SETTINGS_ITEM_H, "com_hunkmegs", cvarFloatList { "56MB" 56 "64MB" 64 "128MB" 128 "256MB" 256 "512MB" 512 }, "How much memory the client is allowed to use (restart required)\ncom_hunkmegs")
         MULTI               (SETTINGS_ITEM_POS(3), "Rendering primitives:", 0.2, SETTINGS_ITEM_H, "r_primitives", cvarFloatList { "Auto" 0 "Multiple glArrayElement" 1 "Single glDrawElements" 2 }, "Sets rendering primitives mode (ET 2.60b only)\nSetting this to 'Single glDrawElements' is recommended on modern systems for best performance\nr_primitives")
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(4), "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(4), "Menu sensitivity:", 0.2, SETTINGS_ITEM_H, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
