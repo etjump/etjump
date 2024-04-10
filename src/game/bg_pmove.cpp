@@ -891,8 +891,8 @@ static qboolean PM_CheckWaterJump(void) {
     return qfalse;
   }
 
-  flatforward[0] = pml.forward[0];
-  flatforward[1] = pml.forward[1];
+  flatforward[0] = pm->forward[0];
+  flatforward[1] = pm->forward[1];
   flatforward[2] = 0;
   VectorNormalize(flatforward);
 
@@ -910,7 +910,7 @@ static qboolean PM_CheckWaterJump(void) {
   }
 
   // jump out of water
-  VectorScale(pml.forward, 200, pm->ps->velocity);
+  VectorScale(pm->forward, 200, pm->ps->velocity);
   pm->ps->velocity[2] = 350;
 
   pm->ps->pm_flags |= PMF_TIME_WATERJUMP;
@@ -1264,8 +1264,8 @@ static void PM_WaterMove(void) {
                       ////----(SA)	mod for DM
   } else {
     for (i = 0; i < 3; i++)
-      wishvel[i] = scale * pml.forward[i] * pm->cmd.forwardmove +
-                   scale * pml.right[i] * pm->cmd.rightmove;
+      wishvel[i] = scale * pm->forward[i] * pm->cmd.forwardmove +
+                   scale * pm->right[i] * pm->cmd.rightmove;
 
     wishvel[2] += scale * pm->cmd.upmove;
   }
@@ -1349,8 +1349,8 @@ static void PM_FlyMove(void) {
     wishvel[2] = 0;
   } else {
     for (i = 0; i < 3; i++) {
-      wishvel[i] = scale * pml.forward[i] * pm->cmd.forwardmove +
-                   scale * pml.right[i] * pm->cmd.rightmove;
+      wishvel[i] = scale * pm->forward[i] * pm->cmd.forwardmove +
+                   scale * pm->right[i] * pm->cmd.rightmove;
     }
 
     wishvel[2] += scale * pm->cmd.upmove;
@@ -1388,7 +1388,7 @@ void PM_CheckPortal(void) {
 
   straightdown[0] = 0;
   straightdown[1] = 0;
-  straightdown[2] = pml.forward[2];
+  straightdown[2] = pm->forward[2];
   VectorNormalize(straightdown);
 
   VectorMA(pm->ps->origin, 32.0f, straightdown,
@@ -1398,7 +1398,7 @@ void PM_CheckPortal(void) {
   // check for portal below us
   straightdown[0] = 0;
   straightdown[1] = 0;
-  straightdown[2] = -pml.forward[2];
+  straightdown[2] = -pm->forward[2];
   VectorNormalize(straightdown);
 
   VectorMA(pm->ps->origin, TRACE_PORTAL_DIST, straightdown, spot);
@@ -1447,7 +1447,7 @@ static void PM_AirMove(void) {
 
   // project moves down to flat plane
   if (pm->cmd.serverTime - pm->pmext->dodgeTime < 350) {
-    pml.forward[2] = fmove = 0;
+    pm->forward[2] = fmove = 0;
     smove = pm->pmext->dtmove == DT_MOVELEFT ? -2070 : 2070;
     scale = 1.f;
     scaleAlt = 1.f;
@@ -1461,14 +1461,14 @@ static void PM_AirMove(void) {
     // legs for strafing
     //	PM_SetMovementDir();
 
-    pml.forward[2] = 0;
-    pml.right[2] = 0;
+    pm->forward[2] = 0;
+    pm->right[2] = 0;
   }
-  VectorNormalize(pml.forward);
-  VectorNormalize(pml.right);
+  VectorNormalize(pm->forward);
+  VectorNormalize(pm->right);
 
   for (i = 0; i < 2; i++) {
-    wishvel[i] = pml.forward[i] * fmove + pml.right[i] * smove;
+    wishvel[i] = pm->forward[i] * fmove + pm->right[i] * smove;
   }
   wishvel[2] = 0;
 
@@ -1539,7 +1539,7 @@ static void PM_WalkMove(void) {
   #endif*/
 
   if (pm->waterlevel > 2 &&
-      DotProduct(pml.forward, pm->groundTrace.plane.normal) > 0) {
+      DotProduct(pm->forward, pm->groundTrace.plane.normal) > 0) {
     // begin swimming
     PM_WaterMove();
     return;
@@ -1594,19 +1594,19 @@ static void PM_WalkMove(void) {
   //	PM_SetMovementDir();
 
   // project moves down to flat plane
-  pml.forward[2] = 0;
-  pml.right[2] = 0;
+  pm->forward[2] = 0;
+  pm->right[2] = 0;
 
   // project the forward and right directions onto the ground plane
-  PM_ClipVelocity(pml.forward, pm->groundTrace.plane.normal, pml.forward,
+  PM_ClipVelocity(pm->forward, pm->groundTrace.plane.normal, pm->forward,
                   OVERCLIP);
-  PM_ClipVelocity(pml.right, pm->groundTrace.plane.normal, pml.right, OVERCLIP);
+  PM_ClipVelocity(pm->right, pm->groundTrace.plane.normal, pm->right, OVERCLIP);
   //
-  VectorNormalize(pml.forward);
-  VectorNormalize(pml.right);
+  VectorNormalize(pm->forward);
+  VectorNormalize(pm->right);
 
   for (i = 0; i < 3; i++) {
-    wishvel[i] = pml.forward[i] * fmove + pml.right[i] * smove;
+    wishvel[i] = pm->forward[i] * fmove + pm->right[i] * smove;
   }
   // when going up or down slopes the wish velocity should Not be zero
   //	wishvel[2] = 0;
@@ -1779,7 +1779,7 @@ static void PM_NoclipMove(void) {
   smove = pm->cmd.rightmove;
 
   for (i = 0; i < 3; i++)
-    wishvel[i] = pml.forward[i] * fmove + pml.right[i] * smove;
+    wishvel[i] = pm->forward[i] * fmove + pm->right[i] * smove;
   wishvel[2] += pm->cmd.upmove;
 
   VectorCopy(wishvel, wishdir);
@@ -2846,8 +2846,8 @@ void PM_BeginWeaponChange(
 
         switchtime = 0;
 
-        VectorCopy(pml.forward, axis[0]);
-        VectorCopy(pml.right, axis[2]);
+        VectorCopy(pm->forward, axis[0]);
+        VectorCopy(pm->right, axis[2]);
         CrossProduct(axis[0], axis[2], axis[1]);
         AxisToAngles(axis, pm->pmext->mountedWeaponAngles);
       }
@@ -2863,8 +2863,8 @@ void PM_BeginWeaponChange(
 
         switchtime = 0;
 
-        VectorCopy(pml.forward, axis[0]);
-        VectorCopy(pml.right, axis[2]);
+        VectorCopy(pm->forward, axis[0]);
+        VectorCopy(pm->right, axis[2]);
         CrossProduct(axis[0], axis[2], axis[1]);
         AxisToAngles(axis, pm->pmext->mountedWeaponAngles);
       }
@@ -4687,12 +4687,12 @@ static void PM_Weapon(void) {
       vec3_t kvel;
       float mass = 200;
 
-      if (DotProduct(pml.forward, pm->ps->velocity) > 0) {
-        VectorScale(pml.forward, -1.f * (fwdmove_knockback / mass),
+      if (DotProduct(pm->forward, pm->ps->velocity) > 0) {
+        VectorScale(pm->forward, -1.f * (fwdmove_knockback / mass),
                     kvel); // -1 as we get knocked
                            // backwards
       } else {
-        VectorScale(pml.forward, -1.f * (fwdmove_knockback / mass),
+        VectorScale(pm->forward, -1.f * (fwdmove_knockback / mass),
                     kvel); // -1 as we get knocked
                            // backwards
       }
@@ -5708,8 +5708,8 @@ void PM_CheckLadderMove(void) {
   }
 
   // check for ladder
-  flatforward[0] = pml.forward[0];
-  flatforward[1] = pml.forward[1];
+  flatforward[0] = pm->forward[0];
+  flatforward[1] = pm->forward[1];
   flatforward[2] = 0;
   VectorNormalize(flatforward);
 
@@ -5804,7 +5804,7 @@ void PM_LadderMove(void) {
     pm->ps->velocity[1] = wishvel[1];
   }
 
-  upscale = (pml.forward[2] + 0.5) * 2.5;
+  upscale = (pm->forward[2] + 0.5) * 2.5;
   if (upscale > 1.0) {
     upscale = 1.0;
   } else if (upscale < -1.0) {
@@ -5812,10 +5812,10 @@ void PM_LadderMove(void) {
   }
 
   // forward/right should be horizontal only
-  pml.forward[2] = 0;
-  pml.right[2] = 0;
-  VectorNormalize(pml.forward);
-  VectorNormalize(pml.right);
+  pm->forward[2] = 0;
+  pm->right[2] = 0;
+  VectorNormalize(pm->forward);
+  VectorNormalize(pm->right);
 
   // move depending on the view, if view is straight forward, then go up
   // if view is down more then X degrees, start going down
@@ -5837,7 +5837,7 @@ void PM_LadderMove(void) {
 
     // if we are looking away from the ladder, reverse the right
     // vector
-    if (DotProduct(laddervec, pml.forward) < 0) {
+    if (DotProduct(laddervec, pm->forward) < 0) {
       VectorInverse(ladder_right);
     }
 
@@ -5986,9 +5986,9 @@ static void PM_StorePmoveValues(void) {
   VectorCopy(pm->maxs, pm->pmext->maxs);
 
   VectorCopy(pml.previous_velocity, pm->pmext->previous_velocity);
-  VectorCopy(pml.forward, pm->pmext->forward);
-  VectorCopy(pml.right, pm->pmext->right);
-  VectorCopy(pml.up, pm->pmext->up);
+  VectorCopy(pm->forward, pm->pmext->forward);
+  VectorCopy(pm->right, pm->pmext->right);
+  VectorCopy(pm->up, pm->pmext->up);
   pm->pmext->frametime =
       pm->pmove_msec / 1000.0f; // pml.frametime is different for spectators
   pm->pmext->ladder = pml.ladder;
@@ -6188,6 +6188,10 @@ void PmoveSingle(pmove_t *pmove) {
   pmove->groundPlane = qfalse;
   memset(&pmove->groundTrace, 0, sizeof(pmove->groundTrace));
 
+  VectorClear(pm->forward);
+  VectorClear(pm->right);
+  VectorClear(pm->up);
+
   // determine the time
   pml.msec = pmove->cmd.serverTime - pm->ps->commandTime;
   if (pml.msec < 1) {
@@ -6218,7 +6222,7 @@ void PmoveSingle(pmove_t *pmove) {
                           pm->tracemask); //----(SA)	modified
     }
   }
-  AngleVectors(pm->ps->viewangles, pml.forward, pml.right, pml.up);
+  AngleVectors(pm->ps->viewangles, pm->forward, pm->right, pm->up);
 
   if (pm->cmd.upmove < 10) {
     // not holding jump
