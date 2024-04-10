@@ -41,7 +41,8 @@ public:
 
   void render() const override;
   bool beforeRender() override;
-  static CurrentSnap getCurrentSnap(const playerState_t &ps, pmove_t *pm);
+  static CurrentSnap getCurrentSnap(const playerState_t &ps, pmove_t *pm,
+                                    bool upmoveTrueness);
   static bool inMainAccelZone(const playerState_t &ps, pmove_t *pm);
 
   Snaphud();

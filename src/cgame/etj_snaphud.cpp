@@ -349,7 +349,8 @@ void Snaphud::render() const {
 }
 
 Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
-                                             pmove_t *pm) {
+                                             pmove_t *pm,
+                                             const bool upmoveTrueness) {
   static Snaphud s;
   CurrentSnap cs{};
 
@@ -374,7 +375,7 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
   // get opt angle
   float opt = CGaz::getOptAngle(ps, pm, false);
 
-  float frameAccel = PmoveUtils::getFrameAccel(ps, pm);
+  float frameAccel = PmoveUtils::getFrameAccel(ps, pm, upmoveTrueness);
 
   // clamp the max value to match max scaling of target_scale_velocity
   if (frameAccel > 85) {
@@ -435,7 +436,7 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
 }
 
 bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
-  const Snaphud::CurrentSnap cs = getCurrentSnap(ps, pm);
+  const Snaphud::CurrentSnap cs = getCurrentSnap(ps, pm, true);
 
   if (cs.snap == INVALID_SNAP_DIR) {
     return false;

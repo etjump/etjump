@@ -141,7 +141,10 @@ float CGaz::UpdateDrawSnap(const playerState_t *ps, pmove_t *pm) {
     return Snaphud::INVALID_SNAP_DIR;
   }
 
-  const Snaphud::CurrentSnap cs = Snaphud::getCurrentSnap(*ps, pm);
+  const Snaphud::CurrentSnap cs = Snaphud::getCurrentSnap(
+      *ps, pm,
+      etj_CGazTrueness.integer &
+          static_cast<int>(CGazTrueness::CGAZ_JUMPCROUCH));
 
   if (cs.snap == Snaphud::INVALID_SNAP_DIR) {
     return Snaphud::INVALID_SNAP_DIR;

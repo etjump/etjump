@@ -69,7 +69,7 @@ void AccelColor::calcAccelColor(const pmove_t *pm, const playerState_t *ps,
       RAD2DEG(std::atan2(cmd.rightmove, cmd.forwardmove));
 
   // max acceleration possible per frame
-  const float frameAccel = PmoveUtils::getFrameAccel(*ps, pm);
+  const float frameAccel = PmoveUtils::getFrameAccel(*ps, pm, true);
   const float gravityAccel =
       -std::round(static_cast<float>(ps->gravity) * pm->pmext->frametime);
 
