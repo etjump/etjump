@@ -47,7 +47,7 @@ class StrafeQuality : public IRenderable {
   void parseColor();
   void resetStrafeQuality();
   bool canSkipDraw() const;
-  bool canSkipUpdate(usercmd_t cmd, int frameTime);
+  bool canSkipUpdate(usercmd_t cmd);
 
   pmove_t *pm;
 

@@ -215,7 +215,7 @@ void Snaphud::UpdateMaxSnapZones() {
 
   // need to add rounded xy clipped to normal gravity influence to frame accel
   // 11 snap zones for ~78deg slope, 9 zones for 60deg slope, etc.
-  // const int maxSnaphudZonesQ1 = 
+  // const int maxSnaphudZonesQ1 =
   //    static_cast<int>(std::roundf(snap.a + gravityAccelxy) * 2 + 1);
 
   snap.zones.resize(maxSnaphudZonesQ1);
@@ -243,6 +243,10 @@ bool Snaphud::beforeRender() {
   // check this only after we have a valid pmove
   if (pm->pmext->waterlevel > 1 || pm->pmext->ladder) {
     return false;
+  }
+
+  if (PmoveUtils::skipUpdate(lastUpdateTime, pm, ps)) {
+    return true;
   }
 
   // show upmove influence?

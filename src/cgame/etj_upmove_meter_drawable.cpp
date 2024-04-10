@@ -122,17 +122,15 @@ bool UpmoveMeter::beforeRender() {
   // get correct pmove
   pm = PmoveUtils::getPmove(cmd);
 
+  if (PmoveUtils::skipUpdate(lastUpdateTime, pm, &ps)) {
+    return true;
+  }
+
   // just skip update, but return true so that we actually still draw
   if (canSkipUpdate()) {
     return true;
   }
 
-  int now;
-  if (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback) {
-    now = ((cg.time >> 3) << 3) + ((cg.time % 8) >= 4 ? 8 : 0);
-  } else {
-    now = pm->ps->commandTime;
-  }
   const bool inAir = ps.groundEntityNum == ENTITYNUM_NONE;
   const bool jumping = cmd.upmove > 0;
 
@@ -170,7 +168,7 @@ bool UpmoveMeter::beforeRender() {
                      // that is why here we show the last jump
                      // stats
       if (jump_.lastState == GROUND_NOJUMP) {
-        jump_.preDelay = jump_.t_jumpPreGround - now;
+        jump_.preDelay = jump_.t_jumpPreGround - lastUpdateTime;
         jump_.postDelay = 0;
         jump_.fullDelay = 0;
       } else if (jump_.lastState == AIR_JUMP) {
@@ -186,12 +184,12 @@ bool UpmoveMeter::beforeRender() {
 
     case AIR_JUMP:
       if (jump_.lastState == AIR_NOJUMP)
-        jump_.t_jumpPreGround = now;
-      jump_.preDelay = now - jump_.t_jumpPreGround; // ms
+        jump_.t_jumpPreGround = lastUpdateTime;
+      jump_.preDelay = lastUpdateTime - jump_.t_jumpPreGround; // ms
       break;
 
     case GROUND_JUMP:
-      jump_.t_groundTouch = now;
+      jump_.t_groundTouch = lastUpdateTime;
       break;
 
     case GROUND_NOJUMP:
@@ -199,17 +197,17 @@ bool UpmoveMeter::beforeRender() {
         jump_.postDelay = 0;
         jump_.fullDelay = jump_.preDelay;
       } else if (jump_.lastState == AIR_NOJUMP) {
-        jump_.t_jumpPreGround = now; // groundtime
+        jump_.t_jumpPreGround = lastUpdateTime; // groundtime
       }
-      jump_.preDelay = jump_.t_jumpPreGround - now;
-      jump_.t_groundTouch = now;
+      jump_.preDelay = jump_.t_jumpPreGround - lastUpdateTime;
+      jump_.t_groundTouch = lastUpdateTime;
       break;
 
     case AIR_JUMPNORELEASE:
       if (jump_.lastState == GROUND_NOJUMP) {
-        jump_.preDelay = jump_.t_jumpPreGround - now;
+        jump_.preDelay = jump_.t_jumpPreGround - lastUpdateTime;
       }
-      jump_.postDelay = now - jump_.t_groundTouch; // ms
+      jump_.postDelay = lastUpdateTime - jump_.t_groundTouch; // ms
       break;
 
     default:
@@ -287,13 +285,6 @@ void UpmoveMeter::render() const {
 }
 
 bool UpmoveMeter::canSkipUpdate() const {
-  // do not try to update if we don't have a valid playerState yet
-  // this is usually the case for few frames at the start of a map
-  // especially on high client frame rates
-  if (!pm->ps) {
-    return true;
-  }
-
   if (pm->ps->pm_type == PM_NOCLIP || pm->ps->pm_type == PM_DEAD) {
     return true;
   }

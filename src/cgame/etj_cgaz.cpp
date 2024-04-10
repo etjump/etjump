@@ -230,6 +230,10 @@ bool CGaz::beforeRender() {
     return false;
   }
 
+  if (PmoveUtils::skipUpdate(lastUpdateTime, pm, ps)) {
+    return true;
+  }
+
   // show upmove influence?
   const float scale =
       etj_CGazTrueness.integer & static_cast<int>(CGazTrueness::CGAZ_JUMPCROUCH)
