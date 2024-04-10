@@ -692,6 +692,8 @@ typedef struct {
   qboolean groundPlane;
   trace_t groundTrace;
 
+  vec3_t forward, right, up;
+
   // callbacks to test the world
   // these will be different functions during game and cgame
   void (*trace)(trace_t *results, const vec3_t start, const vec3_t mins,
