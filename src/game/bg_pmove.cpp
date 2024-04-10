@@ -2526,7 +2526,8 @@ static void PM_Footsteps() {
   }
 
   // check for footstep / splash sounds
-  old = pm->pmext->bobCycle;
+  old =
+      static_cast<float>(pm->ps->bobCycle + std::fmod(pm->pmext->bobCycle, 1));
   pm->pmext->bobCycle = static_cast<float>(old + bobmove * pml.msec);
   pm->ps->bobCycle = static_cast<int>(pm->pmext->bobCycle);
 
@@ -6021,7 +6022,7 @@ void PmoveSingle(pmove_t *pmove) {
     pm->tracemask &= ~CONTENTS_BODY; // corpses can fly through bodies
     pm->ps->eFlags &= ~EF_ZOOMING;
 
-    if (pm->ps->pm_type == PM_NOCLIP){
+    if (pm->ps->pm_type == PM_NOCLIP) {
       pm->ps->pm_type = PM_DEAD;
     }
   }
