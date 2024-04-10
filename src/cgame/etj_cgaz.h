@@ -57,6 +57,8 @@ public:
   // next snap in strafe dir, INVALID_SNAP_DIR if not available
   static float drawSnap;
 
+  int lastUpdateTime{};
+
   CGaz();
   ~CGaz() override = default;
 

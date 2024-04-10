@@ -87,22 +87,16 @@ bool StrafeQuality::beforeRender() {
   // get correct pmove
   pm = PmoveUtils::getPmove(cmd);
 
-  // check if current frame should count towards strafe quality
-  // we check for framerate dependency here by comparing current time
-  // to last update time, using commandTime for clients for 100%
-  // accuracy and cg.time for spectators/demos as an approximation note:
-  // this will be wrong for clients running < 125FPS... oh well
-  const auto frameTime = (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback)
-                             ? cg.time
-                             : pm->ps->commandTime;
+  if (PmoveUtils::skipUpdate(_lastUpdateTime, pm, &ps)) {
+    return true;
+  }
 
   // just skip update, but return true so that we actually still draw
-  if (canSkipUpdate(cmd, frameTime)) {
+  if (canSkipUpdate(cmd)) {
     return true;
   }
 
   // count this frame towards strafe quality
-  _lastUpdateTime = frameTime;
   ++_totalFrames;
 
   // check whether user input is good
@@ -185,21 +179,7 @@ void StrafeQuality::render() const {
                     &cgs.media.limboFont1);
 }
 
-bool StrafeQuality::canSkipUpdate(usercmd_t cmd, int frameTime) {
-  // do not try to update if we don't have a valid playerState yet
-  // this is usually the case for few frames at the start of a map
-  // especially on high client frame rates
-  if (!pm->ps) {
-    return true;
-  }
-
-  // only count this frame if it's relevant to pmove
-  // this makes sure that if clients FPS > 125
-  // we only count frames at pmove_msec intervals
-  if (_lastUpdateTime + pm->pmove_msec > frameTime) {
-    return true;
-  }
-
+bool StrafeQuality::canSkipUpdate(usercmd_t cmd) {
   // not strafing
   if (cmd.forwardmove == 0 && cmd.rightmove == 0) {
     return true;

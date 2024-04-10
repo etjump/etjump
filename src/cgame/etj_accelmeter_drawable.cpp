@@ -99,18 +99,10 @@ bool AccelMeter::beforeRender() {
 
   pm = PmoveUtils::getPmove(cmd);
 
-  // FIXME: this whole update check thing for non-pmove frames should be
-  //  moved to PmoveUtils so it can be done everywhere it needs to be done
-  //  with a single function call
-  const int frameTime = (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback)
-                            ? cg.time
-                            : ps->commandTime;
-
-  if (canSkipUpdate(frameTime)) {
+  if (PmoveUtils::skipUpdate(lastUpdateTime, pm, ps)) {
     return true;
   }
 
-  lastUpdateTime = frameTime;
   float currentSpeed = VectorLength2(ps->velocity);
 
   int style = accelColorStyle;
@@ -124,8 +116,8 @@ bool AccelMeter::beforeRender() {
   if (style == AccelColor::Style::Simple ||
       (style == AccelColor::Style::Advanced &&
        AccelColor::lowSpeedOnGround(currentSpeed, ps->groundEntityNum))) {
-    storedSpeeds.push_back({frameTime, currentSpeed});
-    AccelColor::popOldStoredSpeeds(storedSpeeds, frameTime);
+    storedSpeeds.push_back({lastUpdateTime, currentSpeed});
+    AccelColor::popOldStoredSpeeds(storedSpeeds, lastUpdateTime);
   } else if (!storedSpeeds.empty()) {
     storedSpeeds.clear();
   }
@@ -185,17 +177,6 @@ void AccelMeter::render() const {
                                 &cgs.media.limboFont1);
       break;
   }
-}
-
-bool AccelMeter::canSkipUpdate(int frameTime) const {
-  // only count this frame if it's relevant to pmove
-  // this makes sure that if clients FPS > 125
-  // we only count frames at pmove_msec intervals
-  if (!pm->ps || lastUpdateTime + pm->pmove_msec > frameTime) {
-    return true;
-  }
-
-  return false;
 }
 
 bool AccelMeter::canSkipDraw() {

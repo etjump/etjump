@@ -51,7 +51,7 @@ private:
   bool canSkipDraw() const;
   void InitSnaphud(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
   void UpdateMaxSnapZones();
-  void UpdateSnapState(void);
+  void UpdateSnapState();
   void PrepareDrawables();
   void startListeners();
 
@@ -70,13 +70,14 @@ private:
 
   snaphud_t snap;
 
-  int yaw;
-  vec4_t snaphudColors[4];
-  bool edgesOnly;
-  int edgeThickness;
+  int yaw{};
+  vec4_t snaphudColors[4]{};
+  bool edgesOnly{};
+  int edgeThickness{};
+  int lastUpdateTime{};
 
   playerState_t *ps = &cg.predictedPlayerState;
-  pmove_t *pm;
+  pmove_t *pm{};
 
   struct DrawableSnap {
     int bSnap;
@@ -86,6 +87,6 @@ private:
   };
 
   std::vector<DrawableSnap> drawableSnaps{};
-  bool isCurrentAlt;
+  bool isCurrentAlt{};
 };
 } // namespace ETJump

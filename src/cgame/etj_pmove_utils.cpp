@@ -172,4 +172,18 @@ float PmoveUtils::getFrameAccel(const playerState_t &ps, const pmove_t *pm) {
       pm->pmext->up, ps, pm);
   return pm->pmext->accel * wishspeed * pm->pmext->frametime;
 }
+
+bool PmoveUtils::skipUpdate(int &lastUpdateTime, const pmove_t *pm,
+                            const playerState_t *ps) {
+  const int frameTime = (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback)
+                            ? cg.time
+                            : ps->commandTime;
+
+  if (!pm->ps || lastUpdateTime + pm->pmove_msec > frameTime) {
+    return true;
+  }
+
+  lastUpdateTime = frameTime;
+  return false;
+}
 } // namespace ETJump

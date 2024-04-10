@@ -84,21 +84,11 @@ bool DrawSpeed::beforeRender() {
 
   pm = PmoveUtils::getPmove(cmd);
 
-  // check if current frame should update speed meter
-  // we check for framerate dependency here by comparing current time
-  // to last update time, using commandTime for clients for 100%
-  // accuracy and cg.time for spectators/demos as an approximation note:
-  // this will be wrong for clients running < 125FPS... oh well
-  const int frameTime = (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback)
-                            ? cg.time
-                            : ps->commandTime;
-
-  if (canSkipUpdate(frameTime)) {
+  if (PmoveUtils::skipUpdate(lastUpdateTime, pm, ps)) {
     return true;
   }
 
   currentSpeed = VectorLength2(ps->velocity);
-  lastUpdateTime = frameTime;
   maxSpeed = currentSpeed > maxSpeed ? currentSpeed : maxSpeed;
 
   int style = accelColorStyle;
@@ -112,8 +102,8 @@ bool DrawSpeed::beforeRender() {
   if (style == AccelColor::Style::Simple ||
       (style == AccelColor::Style::Advanced &&
        AccelColor::lowSpeedOnGround(currentSpeed, ps->groundEntityNum))) {
-    storedSpeeds.push_back({frameTime, currentSpeed});
-    AccelColor::popOldStoredSpeeds(storedSpeeds, frameTime);
+    storedSpeeds.push_back({lastUpdateTime, currentSpeed});
+    AccelColor::popOldStoredSpeeds(storedSpeeds, lastUpdateTime);
   } else if (!storedSpeeds.empty()) {
     storedSpeeds.clear();
   }
@@ -203,17 +193,6 @@ std::string DrawSpeed::getSpeedString() const {
     default:
       return stringFormat("%.0f", currentSpeed);
   }
-}
-
-bool DrawSpeed::canSkipUpdate(int frameTime) const {
-  // only count this frame if it's relevant to pmove
-  // this makes sure that if clients FPS > 125
-  // we only count frames at pmove_msec intervals
-  if (!pm->ps || lastUpdateTime + pm->pmove_msec > frameTime) {
-    return true;
-  }
-
-  return false;
 }
 
 bool DrawSpeed::canSkipDraw() {

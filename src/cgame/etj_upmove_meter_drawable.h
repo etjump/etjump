@@ -62,7 +62,7 @@ class UpmoveMeter : public IRenderable {
     mutable vec4_t text_rgba;
   } jump_t;
 
-  jump_t jump_;
+  jump_t jump_{};
 
   int team_;
 
@@ -70,7 +70,8 @@ class UpmoveMeter : public IRenderable {
   static constexpr float graphX_ = 8.0f;
   static constexpr float graphY_ = 8.0f;
 
-  pmove_t *pm;
+  int lastUpdateTime{};
+  pmove_t *pm{};
 
   void startListeners();
   void parseAllColors();

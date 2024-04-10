@@ -54,5 +54,10 @@ public:
 
   // returns total acceleration per frame
   static float getFrameAccel(const playerState_t &ps, const pmove_t *pm);
+
+  // if an update should happen, updates lastUpdateTime to current frametime
+  // and returns false
+  static bool skipUpdate(int &lastUpdateTime, const pmove_t *pm,
+                         const playerState_t *ps);
 };
 } // namespace ETJump

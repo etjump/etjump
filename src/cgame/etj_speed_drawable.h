@@ -66,7 +66,6 @@ class DrawSpeed : public IRenderable {
   void startListeners();
   static void parseColor(const std::string &color, vec4_t &out);
   static bool canSkipDraw();
-  bool canSkipUpdate(int frameTime) const;
 
 public:
   DrawSpeed();

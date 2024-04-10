@@ -53,7 +53,6 @@ class AccelMeter : public IRenderable {
   void setSize();
   void setAccelColorStyle();
   void startListeners();
-  bool canSkipUpdate(int frameTime) const;
   static bool canSkipDraw();
 
   pmove_t *pm{};
