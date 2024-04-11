@@ -340,8 +340,15 @@ void CGaz::render() const {
 
     if (!etj_CGaz2NoVelocityDir.integer ||
         (!drawSides && etj_CGaz2NoVelocityDir.integer == 2)) {
-      DrawLine(scx, scy, scx + velSize * std::sin(drawVel),
-               scy - velSize * std::cos(drawVel), CGaz2Colors[0]);
+      float dirSize = velSize;
+
+      if (!drawSides && etj_CGaz2FixedSpeed.value > 0) {
+        // prevent comically long velocity direction lines on fixed speeds
+        dirSize = std::min(128.0f, dirSize);
+      }
+
+      DrawLine(scx, scy, scx + dirSize * std::sin(drawVel),
+               scy - dirSize * std::cos(drawVel), CGaz2Colors[0]);
     }
 
     if (drawSides) {
