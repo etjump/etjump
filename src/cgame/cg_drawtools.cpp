@@ -164,21 +164,19 @@ void DrawLine(float x1, float y1, float x2, float y2, float w, float h,
     return;
   }
 
-  const auto scrw = SCREEN_WIDTH;
-  const auto scrh = SCREEN_HEIGHT;
+  const auto scrw = static_cast<float>(SCREEN_WIDTH);
+  const auto scrh = static_cast<float>(SCREEN_HEIGHT);
 
   trap_R_SetColor(color);
 
   // Use a single DrawPic for horizontal or vertical lines
   if (x1 == x2) {
     x1 = Numeric::clamp(x1, 0, scrw);
-    x2 = Numeric::clamp(x2, 0, scrw);
 
     CG_DrawPic(x1, std::min(y1, y2), w, std::abs(y1 - y2),
                cgs.media.whiteShader);
   } else if (y1 == y2) {
     y1 = Numeric::clamp(y1, 0, scrh);
-    y2 = Numeric::clamp(y2, 0, scrh);
 
     CG_DrawPic(std::min(x1, x2), y1, std::abs(x1 - x2), h,
                cgs.media.whiteShader);
@@ -345,7 +343,8 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor,
                   int flags) {
   // colorAtPos is the lerped color if necessary
   vec4_t backgroundcolor = {1, 1, 1, 0.25f}, colorAtPos;
-  int indent = (flags & FilledBarFlags::BAR_BORDER_SMALL) ? BAR_BORDERSIZE_SMALL : BAR_BORDERSIZE;
+  int indent = (flags & FilledBarFlags::BAR_BORDER_SMALL) ? BAR_BORDERSIZE_SMALL
+                                                          : BAR_BORDERSIZE;
 
   if (frac > 1) {
     frac = 1.f;
