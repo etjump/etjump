@@ -336,8 +336,8 @@ void CGaz::render() const {
 
       if (etj_CGaz2WishDirUniformLength.integer && cmd.rightmove &&
           cmd.forwardmove) {
-        constexpr float isqrt2 = 0.70710678118;
-        mult *= isqrt2;
+        static const float sqrt2 = std::sqrtf(2.0f);
+        mult /= sqrt2;
       }
 
       DrawLine(scx, scy, scx + mult * static_cast<float>(cmd.rightmove),
