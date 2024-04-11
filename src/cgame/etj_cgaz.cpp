@@ -323,8 +323,27 @@ void CGaz::render() const {
       ETJump_EnableWidthScale(false);
       scx -= SCREEN_OFFSET_X;
     }
-    DrawLine(scx, scy, scx + static_cast<float>(cmd.rightmove),
-             scy - static_cast<float>(cmd.forwardmove), CGaz2Colors[1]);
+
+    // draw movement keys direction
+    if (cmd.rightmove || cmd.forwardmove) {
+      float mult = 1.0f;
+
+      if (etj_CGaz2WishDirFixedSpeed.value > 0) {
+        // scale to get same lengths as minline fixed speed
+        constexpr float wishDirScale = 2.0f * 5.0f * 127.0f;
+        mult = etj_CGaz2WishDirFixedSpeed.value / wishDirScale;
+      }
+
+      if (etj_CGaz2WishDirUniformLength.integer && cmd.rightmove &&
+          cmd.forwardmove) {
+        constexpr float isqrt2 = 0.70710678118;
+        mult *= isqrt2;
+      }
+
+      DrawLine(scx, scy, scx + mult * static_cast<float>(cmd.rightmove),
+               scy - mult * static_cast<float>(cmd.forwardmove),
+               CGaz2Colors[1]);
+    }
 
     // When under wishspeed velocity, most accel happens when
     // you move straight towards your current velocity, so skip
