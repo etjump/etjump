@@ -1,6 +1,7 @@
 // cg_drawtools.c -- helper functions called by cg_draw, cg_scoreboard, cg_info,
 // etc
 #include "cg_local.h"
+#include "../game/etj_numeric_utilities.h"
 
 /*
 ================
@@ -163,22 +164,32 @@ void DrawLine(float x1, float y1, float x2, float y2, float w, float h,
     return;
   }
 
+  const auto scrw = static_cast<float>(SCREEN_WIDTH);
+  const auto scrh = static_cast<float>(SCREEN_HEIGHT);
+
   trap_R_SetColor(color);
 
   // Use a single DrawPic for horizontal or vertical lines
   if (x1 == x2) {
-    CG_DrawPic(x1, y1 < y2 ? y1 : y2, w, std::abs(y1 - y2),
+    x1 = Numeric::clamp(x1, 0, scrw);
+
+    CG_DrawPic(x1, std::min(y1, y2), w, std::abs(y1 - y2),
                cgs.media.whiteShader);
   } else if (y1 == y2) {
-    CG_DrawPic(x1 < x2 ? x1 : x2, y1, std::abs(x1 - x2), h,
+    y1 = Numeric::clamp(y1, 0, scrh);
+
+    CG_DrawPic(std::min(x1, x2), y1, std::abs(x1 - x2), h,
                cgs.media.whiteShader);
   } else {
     len = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
     len = std::sqrt(len);
     stepX = (x2 - x1) / len;
     stepY = (y2 - y1) / len;
+
     while (i < len) {
-      CG_DrawPic(x1, y1, w, h, cgs.media.whiteShader);
+      if (x1 >= 0 && x1 <= scrw && y1 >= 0 && y1 <= scrh) {
+        CG_DrawPic(x1, y1, w, h, cgs.media.whiteShader);
+      }
       x1 += stepX;
       y1 += stepY;
       i++;
@@ -332,7 +343,8 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor,
                   int flags) {
   // colorAtPos is the lerped color if necessary
   vec4_t backgroundcolor = {1, 1, 1, 0.25f}, colorAtPos;
-  int indent = (flags & FilledBarFlags::BAR_BORDER_SMALL) ? BAR_BORDERSIZE_SMALL : BAR_BORDERSIZE;
+  int indent = (flags & FilledBarFlags::BAR_BORDER_SMALL) ? BAR_BORDERSIZE_SMALL
+                                                          : BAR_BORDERSIZE;
 
   if (frac > 1) {
     frac = 1.f;

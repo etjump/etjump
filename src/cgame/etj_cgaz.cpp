@@ -323,25 +323,53 @@ void CGaz::render() const {
       ETJump_EnableWidthScale(false);
       scx -= SCREEN_OFFSET_X;
     }
-    DrawLine(scx, scy, scx + static_cast<float>(cmd.rightmove),
-             scy - static_cast<float>(cmd.forwardmove), CGaz2Colors[1]);
+
+    // draw movement keys direction
+    if (cmd.rightmove || cmd.forwardmove) {
+      float mult = 1.0f;
+
+      if (etj_CGaz2WishDirFixedSpeed.value > 0) {
+        // scale to get same lengths as minline fixed speed
+        constexpr float wishDirScale = 2.0f * 5.0f * CMDSCALE_DEFAULT;
+        mult = etj_CGaz2WishDirFixedSpeed.value / wishDirScale;
+      }
+
+      if (etj_CGaz2WishDirUniformLength.integer && cmd.rightmove &&
+          cmd.forwardmove) {
+        static const float sqrt2 = std::sqrt(2.0f);
+        mult /= sqrt2;
+      }
+
+      DrawLine(scx, scy, scx + mult * static_cast<float>(cmd.rightmove),
+               scy - mult * static_cast<float>(cmd.forwardmove),
+               CGaz2Colors[1]);
+    }
 
     // When under wishspeed velocity, most accel happens when
     // you move straight towards your current velocity, so skip
     // drawing the "wings" on the sides
     const bool drawSides = state.vf > state.wishspeed;
 
-    auto velSize =
-        etj_CGaz2FixedSpeed.value > 0 ? etj_CGaz2FixedSpeed.value : state.vf;
-    velSize /= 5;
-    if (velSize > SCREEN_HEIGHT * 0.5f) {
-      velSize = SCREEN_HEIGHT * 0.5f;
+    // minline length, either fixed or from current speed
+    float velSize;
+
+    if (etj_CGaz2FixedSpeed.value > 0) {
+      velSize = etj_CGaz2FixedSpeed.value / 5.0f;
+    } else {
+      velSize = std::min(state.vf / 5.0f, SCREEN_HEIGHT / 2.0f);
     }
 
     if (!etj_CGaz2NoVelocityDir.integer ||
         (!drawSides && etj_CGaz2NoVelocityDir.integer == 2)) {
-      DrawLine(scx, scy, scx + velSize * std::sin(drawVel),
-               scy - velSize * std::cos(drawVel), CGaz2Colors[0]);
+      float dirSize = velSize;
+
+      if (!drawSides && etj_CGaz2FixedSpeed.value > 0) {
+        // prevent comically long velocity direction lines on fixed speeds
+        dirSize = std::min(static_cast<float>(CMDSCALE_DEFAULT), dirSize);
+      }
+
+      DrawLine(scx, scy, scx + dirSize * std::sin(drawVel),
+               scy - dirSize * std::cos(drawVel), CGaz2Colors[0]);
     }
 
     if (drawSides) {
