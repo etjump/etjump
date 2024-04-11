@@ -330,7 +330,7 @@ void CGaz::render() const {
 
       if (etj_CGaz2WishDirFixedSpeed.value > 0) {
         // scale to get same lengths as minline fixed speed
-        constexpr float wishDirScale = 2.0f * 5.0f * 127.0f;
+        constexpr float wishDirScale = 2.0f * 5.0f * CMDSCALE_DEFAULT;
         mult = etj_CGaz2WishDirFixedSpeed.value / wishDirScale;
       }
 
@@ -365,7 +365,7 @@ void CGaz::render() const {
 
       if (!drawSides && etj_CGaz2FixedSpeed.value > 0) {
         // prevent comically long velocity direction lines on fixed speeds
-        dirSize = std::min(127.0f, dirSize);
+        dirSize = std::min(static_cast<float>(CMDSCALE_DEFAULT), dirSize);
       }
 
       DrawLine(scx, scy, scx + dirSize * std::sin(drawVel),
