@@ -492,7 +492,9 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 
     std::vector<std::string> maps{};
     int numMaps;
-    const int clientNum = level.voteInfo.voter_cn;
+    const int clientNum = !level.voteInfo.isAutoRtvVote
+                              ? ClientNum(ent)
+                              : level.voteInfo.voter_cn;
 
     if (arg2[0]) {
       if (!CustomMapTypeExists(arg2)) {
