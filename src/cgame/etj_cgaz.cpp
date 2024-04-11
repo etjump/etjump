@@ -336,7 +336,7 @@ void CGaz::render() const {
 
       if (etj_CGaz2WishDirUniformLength.integer && cmd.rightmove &&
           cmd.forwardmove) {
-        static const float sqrt2 = std::sqrtf(2.0f);
+        static const float sqrt2 = std::sqrt(2.0f);
         mult /= sqrt2;
       }
 
