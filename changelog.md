@@ -1,3 +1,20 @@
+# ETJump 3.2.1
+
+* fixed server crash when Auto RTV was called [#1293](https://github.com/etjump/etjump/pull/1293)
+* fixed server crash with `cv rtv <list>` if a list had less valid maps that `g_rtvMapCount` [#1294](https://github.com/etjump/etjump/pull/1294)
+* fixed issues with speedmeter and accel meter [#1296](https://github.com/etjump/etjump/pull/1296)
+  * fixed speedmeter showing 0ups sometimes when landing on spec/demo playback
+  * fixed accel speed flickering on spec/demoplayback
+  * fixed advanced accel not turning back on automatically after joining a team from spec
+* fixed footstep cycle getting desynced in some scenarios [#1297](https://github.com/etjump/etjump/pull/1297)
+* fixed typo in `com_hunkmegs` menu tooltip [#1298](https://github.com/etjump/etjump/pull/1298)
+* fixed flickering issues with `etj_CGaz1DrawSnapZone` [#1300](https://github.com/etjump/etjump/pull/1300) [#1301](https://github.com/etjump/etjump/pull/1301)
+* fixed `etj_CGaz1DrawSnapZone` not respecting `etj_CGazTrueness` [#1302](https://github.com/etjump/etjump/pull/1302)
+* added `etj_CGaz2WishDirUniformLength` & `etj_CGaz2WishDirFixedSpeed` cvars [#1303](https://github.com/etjump/etjump/pull/1303)
+  * `etj_CGaz2WishDirUniformLength` - draws CGaz 2 wishdir line on consistent length regardless of wishdir  direction
+  * `etj_CGaz2WishDirFixedSpeed` - draw wishdir line based off speed rather than movespeed values, similar to `etj_CGaz2FixedSpeed`
+  * `etj_CGaz2FixedSpeed` is no longer capped to 1200ups
+
 # ETJump 3.2.0
 
 * fixed being able to go through/into no-noclip areas with `setoffset` [#1192](https://github.com/etjump/etjump/pull/1192) [#1287](https://github.com/etjump/etjump/pull/1287)
