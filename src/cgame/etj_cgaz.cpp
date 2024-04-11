@@ -331,11 +331,13 @@ void CGaz::render() const {
     // drawing the "wings" on the sides
     const bool drawSides = state.vf > state.wishspeed;
 
-    auto velSize =
-        etj_CGaz2FixedSpeed.value > 0 ? etj_CGaz2FixedSpeed.value : state.vf;
-    velSize /= 5;
-    if (velSize > SCREEN_HEIGHT * 0.5f) {
-      velSize = SCREEN_HEIGHT * 0.5f;
+    // minline length, either fixed or from current speed
+    float velSize;
+
+    if (etj_CGaz2FixedSpeed.value > 0) {
+      velSize = etj_CGaz2FixedSpeed.value / 5.0f;
+    } else {
+      velSize = std::min(state.vf / 5.0f, SCREEN_HEIGHT / 2.0f);
     }
 
     if (!etj_CGaz2NoVelocityDir.integer ||
@@ -344,7 +346,7 @@ void CGaz::render() const {
 
       if (!drawSides && etj_CGaz2FixedSpeed.value > 0) {
         // prevent comically long velocity direction lines on fixed speeds
-        dirSize = std::min(128.0f, dirSize);
+        dirSize = std::min(127.0f, dirSize);
       }
 
       DrawLine(scx, scy, scx + dirSize * std::sin(drawVel),
