@@ -83,7 +83,8 @@ function(create_compiler_opts target)
 			# /GL                # full exe/dll optimization
 			/Gy                # generate useful information for optimizer
 			/Ob2               # let compiler inline freely
-			/fp:strict>        # disable user facing math trapping (implies /fp:except)
+			/fp:strict         # disable user facing math trapping
+			/fp:except->       # disable floating point exceptions
 		$<$<CONFIG:Debug>:
 			/Ob0               # no inlining
 			/Od                # no optimizations
