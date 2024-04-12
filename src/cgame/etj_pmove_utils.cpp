@@ -186,7 +186,10 @@ bool PmoveUtils::skipUpdate(int &lastUpdateTime, const pmove_t *pm,
     return true;
   }
 
-  lastUpdateTime = frameTime;
+  // ensure lastUpdateTime is always aligned to pmove_msec interval
+  // even if cg.time does not exactly align to it correctly to prevent
+  // uneven update rates across various drawables that utilize this
+  lastUpdateTime = frameTime - (frameTime % pm->pmove_msec);
   return false;
 }
 } // namespace ETJump
