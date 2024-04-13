@@ -110,7 +110,7 @@ bool StrafeQuality::beforeRender() {
   vec3_t wishvel;
   const float wishspeed = PmoveUtils::PM_GetWishspeed(
       wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
-      pm->pmext->up, ps, pm);
+      pm->pmext->up, ps, pm, true); // TODO slope trueness always on?
   if (speed < wishspeed) {
     // possibly good frame under ground speed if speed increased
     // note that without speed increased you could go forward in

@@ -70,7 +70,7 @@ void Snaphud::InitSnaphud(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd) {
 
     // recalculate wishvel with defaulted forward/rightmove
     PmoveUtils::PM_UpdateWishvel(wishvel, cmd, pm->pmext->forward,
-                                 pm->pmext->right, pm->pmext->up, *ps);
+                                 pm->pmext->right, pm->pmext->up, *ps, true);
   }
 
   // set correct yaw based on strafe style/keys pressed
@@ -253,7 +253,7 @@ bool Snaphud::beforeRender() {
   vec3_t wishvel;
   float wishspeed =
       PmoveUtils::PM_GetWishspeed(wishvel, scale, cmd, pm->pmext->forward,
-                                  pm->pmext->right, pm->pmext->up, *ps, pm);
+                                  pm->pmext->right, pm->pmext->up, *ps, pm, true);
 
   // set default wishspeed for drawing if no user input
   if (!cmd.forwardmove && !cmd.rightmove) {
@@ -372,7 +372,7 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
   vec3_t wishvel;
   const float wishspeed = PmoveUtils::PM_GetWishspeed(
       wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
-      pm->pmext->up, ps, pm);
+      pm->pmext->up, ps, pm, true);
   float speed = wishspeed * pm->pmext->frametime;
 
   // clamp the max value to match max scaling of target_scale_velocity

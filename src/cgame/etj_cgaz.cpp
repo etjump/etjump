@@ -78,7 +78,7 @@ void CGaz::UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd) {
 
     // recalculate wishvel with defaulted forwardmove
     PmoveUtils::PM_UpdateWishvel(wishvel, cmd, pm->pmext->forward,
-                                 pm->pmext->right, pm->pmext->up, *ps);
+                                 pm->pmext->right, pm->pmext->up, *ps, true);
   }
 
   yaw = atan2f(wishvel[1], wishvel[0]) - drawVel;
@@ -228,7 +228,7 @@ bool CGaz::beforeRender() {
   vec3_t wishvel;
   float wishspeed =
       PmoveUtils::PM_GetWishspeed(wishvel, scale, cmd, pm->pmext->forward,
-                                  pm->pmext->right, pm->pmext->up, *ps, pm);
+                                  pm->pmext->right, pm->pmext->up, *ps, pm, true);
 
   // set default wishspeed for drawing if no user input
   if (!cmd.forwardmove && !cmd.rightmove) {
@@ -365,7 +365,7 @@ bool CGaz::strafingForwards(const playerState_t &ps, pmove_t *pm) {
   // get wishvel
   vec3_t wishvel;
   PmoveUtils::PM_UpdateWishvel(wishvel, cmd, pm->pmext->forward,
-                               pm->pmext->right, pm->pmext->up, ps);
+                               pm->pmext->right, pm->pmext->up, ps, true);
 
   // get angle between wishvel and player velocity
   const float wishvelAngle = RAD2DEG(std::atan2(wishvel[1], wishvel[0]));
@@ -399,7 +399,7 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm, bool alternate) {
   vec3_t wishvel;
   const float wishspeed = PmoveUtils::PM_GetWishspeed(
       wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
-      pm->pmext->up, ps, pm);
+      pm->pmext->up, ps, pm, true);
 
   // no meaningful value if speed lower than ground speed or no user input
   if (speed < wishspeed || (cmd.forwardmove == 0 && cmd.rightmove == 0)) {

@@ -100,10 +100,15 @@ float PmoveUtils::PM_SprintScale(const playerState_t *ps) {
 
 float PmoveUtils::PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd,
                                   vec3_t forward, vec3_t right, vec3_t up,
-                                  const playerState_t &ps, pmove_t *pm) {
-  PM_UpdateWishvel(wishvel, cmd, forward, right, up, ps);
+                                  const playerState_t &ps, pmove_t *pm, bool trueness) {
+  PM_UpdateWishvel(wishvel, cmd, forward, right, up, ps, trueness);
 
-  float wishspeed = scale * VectorLength2(wishvel);
+  vec3_t wishdir;
+  VectorCopy(wishvel, wishdir);
+
+  // wishdir[2] = 0;
+  float wishspeed = VectorNormalize(wishdir);
+  wishspeed *= scale;
 
   // if walking, account for prone, crouch and water
   if (pm->pmext->walking) {
@@ -140,16 +145,26 @@ float PmoveUtils::PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd,
 
 void PmoveUtils::PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward,
                                   vec3_t right, vec3_t up,
-                                  const playerState_t &ps) {
+                                  const playerState_t &ps, bool trueness) {
   AngleVectors(ps.viewangles, forward, right, up);
 
   // project moves down to flat plane
-  forward[2] = 0;
-  right[2] = 0;
+  forward[2] = 0.f;
+  right[2] = 0.f;
+
+  if (trueness) { 
+    // project the forward and right directions onto the ground
+    // plane
+    PM_ClipVelocity(forward, pm->pmext->groundTrace.plane.normal, forward,
+                    OVERCLIP);
+    PM_ClipVelocity(right, pm->pmext->groundTrace.plane.normal, right,
+                    OVERCLIP);
+  }
+
   VectorNormalize(forward);
   VectorNormalize(right);
 
-  for (uint8_t i = 0; i < 2; ++i) {
+  for (uint8_t i = 0; i < 3; ++i) {
     wishvel[i] = cmd.forwardmove * forward[i] + cmd.rightmove * right[i];
   }
 }
@@ -169,7 +184,7 @@ float PmoveUtils::getFrameAccel(const playerState_t &ps, pmove_t *pm) {
   vec3_t wishvel;
   const float wishspeed = PmoveUtils::PM_GetWishspeed(
       wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
-      pm->pmext->up, ps, pm);
+      pm->pmext->up, ps, pm, true); // FIXME do we want trueness always on?
   return wishspeed * pm->pmext->frametime;
 }
 } // namespace ETJump

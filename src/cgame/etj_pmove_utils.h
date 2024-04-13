@@ -29,6 +29,10 @@
 namespace ETJump {
 class PmoveUtils {
 public:
+  
+  
+  static float PM_CmdScale(pmove_t *pm, usercmd_t *cmd);
+
   // returns real userCmd for players and a faked
   // one for spectators/demo playback
   static usercmd_t getUserCmd(const playerState_t &ps, int8_t uCmdScale);
@@ -43,14 +47,15 @@ public:
   // calculates wishspeed projected onto flat ground plane
   static float PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd,
                                vec3_t forward, vec3_t right, vec3_t up,
-                               const playerState_t &ps, pmove_t *pm);
+                               const playerState_t &ps, pmove_t *pm,
+                               bool trueness);
 
   // updates XY wishvel based on cmdScale and angle vectors
   // projects velocity down to a flat ground plane
   // Z vector is taken as input for AngleVectors
   static void PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward,
-                               vec3_t right, vec3_t up,
-                               const playerState_t &ps);
+                               vec3_t right, vec3_t up, const playerState_t &ps,
+                               bool trueness);
 
   // returns total acceleration per frame
   static float getFrameAccel(const playerState_t &ps, pmove_t *pm);
