@@ -2533,6 +2533,10 @@ qboolean CG_GetTag(int clientNum, char *tagname, orientation_t *orientation) {
   vec3_t org;
   int i;
 
+  if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
+    return qfalse;
+  }
+
   ci = &cgs.clientinfo[clientNum];
 
   if (cg.snap && clientNum == cg.snap->ps.clientNum &&
