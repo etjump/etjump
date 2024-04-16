@@ -874,8 +874,10 @@ cvarTable_t cvarTable[] = {
     {&etj_CGaz2FixedSpeed, "etj_CGaz2FixedSpeed", "0", CVAR_ARCHIVE},
     {&etj_CGaz2NoVelocityDir, "etj_CGaz2NoVelocityDir", "0", CVAR_ARCHIVE},
     {&etj_CGaz1DrawSnapZone, "etj_CGaz1DrawSnapZone", "0", CVAR_ARCHIVE},
-    {&etj_CGaz2WishDirFixedSpeed, "etj_CGaz2WishDirFixedSpeed", "0", CVAR_ARCHIVE},
-    {&etj_CGaz2WishDirUniformLength, "etj_CGaz2WishDirUniformLength", "0", CVAR_ARCHIVE},
+    {&etj_CGaz2WishDirFixedSpeed, "etj_CGaz2WishDirFixedSpeed", "0",
+     CVAR_ARCHIVE},
+    {&etj_CGaz2WishDirUniformLength, "etj_CGaz2WishDirUniformLength", "0",
+     CVAR_ARCHIVE},
 
     {&cl_yawspeed, "cl_yawspeed", "0", CVAR_ARCHIVE},
     {&cl_freelook, "cl_freelook", "1", CVAR_ARCHIVE},
@@ -2881,6 +2883,11 @@ static void CG_RegisterGraphics(void) {
       break;
     }
     cgs.gameModels[i] = trap_R_RegisterModel(modelName);
+
+    if (!cgs.gameModels[i]) {
+      CG_Printf(S_COLOR_YELLOW "WARNING: failed to register server model %s\n",
+                modelName);
+    }
   }
 
   for (i = 1; i < MAX_MODELS; i++) {
