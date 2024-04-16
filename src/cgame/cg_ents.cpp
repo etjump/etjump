@@ -1439,66 +1439,55 @@ CG_Corona
 */
 void CG_Corona(centity_t *cent) {
   trace_t tr;
-  int r, g, b;
+  float r, g, b;
   int dli;
   qboolean visible = qfalse, behind = qfalse, toofar = qfalse;
 
   float dot, dist;
   vec3_t dir;
 
-  if (cg_coronas.integer == 0) // if set to '0' no coronas
-  {
-    return;
-  }
-
   dli = cent->currentState.dl_intensity;
-  r = dli & 255;
-  g = (dli >> 8) & 255;
-  b = (dli >> 16) & 255;
+  r = static_cast<float>(dli & 255);
+  g = static_cast<float>((dli >> 8) & 255);
+  b = static_cast<float>((dli >> 16) & 255);
 
-  // only coronas that are in your PVS are being added
-
-  VectorSubtract(cg.refdef_current->vieworg, cent->lerpOrigin, dir);
-
-  dist = VectorNormalize2(dir, dir);
-  if (dist > cg_coronafardist.integer) // performance variable cg_coronafardist
-                                       // will keep down super long traces
-  {
-    toofar = qtrue;
-  }
-
-  dot = DotProduct(dir, cg.refdef_current->viewaxis[0]);
-  if (dot >= -0.6) // assumes ~90 deg fov	(SA) changed value to
-                   // 0.6 (screen corner at 90 fov)
-  {
-    behind = qtrue; // use the dot to at least do trivial
-                    // removal of those behind you.
-  }
-  // yeah, I could calc side planes to clip against, but would that be
-  // worth it? (much better than dumb dot>= thing?)
-
-  //	CG_Printf("dot: %f\n", dot);
-
-  if (cg_coronas.integer == 2) // if set to '2' trace everything
-  {
+  // if set to '2' trace everything
+  if (cg_coronas.integer == 2) {
     behind = qfalse;
     toofar = qfalse;
+  } else {
+    VectorSubtract(cg.refdef_current->vieworg, cent->lerpOrigin, dir);
+    dist = VectorNormalize2(dir, dir);
+
+    // performance variable cg_coronafardist will keep down super long traces
+    if (dist > static_cast<float>(cg_coronafardist.integer)) {
+      toofar = qtrue;
+    }
+
+    // use the dot to at least do trivial removal of those behind you.
+    dot = DotProduct(dir, cg.refdef_current->viewaxis[0]);
+    const auto fov = static_cast<float>(
+        std::cos((cg.refdef_current->fov_x / 2) * (M_PI / 180)));
+
+    if (dot >= -fov) {
+      behind = qtrue;
+    }
   }
 
   if (!behind && !toofar) {
-    CG_Trace(&tr, cg.refdef_current->vieworg, NULL, NULL, cent->lerpOrigin, -1,
-             MASK_SOLID); // added blockage by players.  not sure how
-                          // this is going to be since this is their
-                          // bb, not their model (too much blockage)
+    // added blockage by players. Not sure how this is going to be
+    // since this is their bb, not their model (too much blockage)
+    CG_Trace(&tr, cg.refdef_current->vieworg, nullptr, nullptr,
+             cent->lerpOrigin, -1, MASK_SOLID);
 
-    if (tr.fraction == 1) {
+    if (tr.fraction == 1.0f) {
       visible = qtrue;
     }
 
-    trap_R_AddCoronaToScene(cent->lerpOrigin, (float)r / 255.0f,
-                            (float)g / 255.0f, (float)b / 255.0f,
-                            (float)cent->currentState.density / 255.0f,
-                            cent->currentState.number, visible);
+    trap_R_AddCoronaToScene(
+        cent->lerpOrigin, r / 255.0f, g / 255.0f, b / 255.0f,
+        static_cast<float>(cent->currentState.density) / 255.0f,
+        cent->currentState.number, visible);
   }
 }
 

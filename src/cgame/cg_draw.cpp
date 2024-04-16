@@ -4619,8 +4619,18 @@ void CG_DrawCoronas() {
     return;
   }
 
+  if (!cg_coronas.integer || !cg_coronafardist.integer) {
+    return;
+  }
+
   for (int i = 0; i < cg.numCoronas; i++) {
     centity_t *corona = &cgs.coronas[i];
+
+    // only coronas that are in your PVS are being added
+    if (!trap_R_inPVS(cg.refdef_current->vieworg, corona->lerpOrigin)) {
+      continue;
+    }
+
     CG_Corona(corona);
   }
 }
