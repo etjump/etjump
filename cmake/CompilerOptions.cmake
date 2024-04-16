@@ -29,10 +29,9 @@ function(create_compiler_opts target)
 		-Wno-unused-parameter
 		-Wno-missing-field-initializers
 		$<$<CONFIG:Release>:
-			-flto=auto				# link time optimizations
-			-O3						# max optimization
-			-fno-math-errno			# disable math function errors
-			-fno-trapping-math>		# disable user visible traps
+			-flto=auto			# link time optimizations
+			-O3					# max optimization
+			-ffast-math>		# fast floating point math
 		$<$<CONFIG:Debug>:
 			-Og					# supress optimizations
 			-g3					# generate debug info
@@ -54,10 +53,9 @@ function(create_compiler_opts target)
 		-Wno-unused-parameter
 		-Wno-missing-field-initializers
 		$<$<CONFIG:Release>:
-			-O3						# max optimization
-			-flto					# link time optimizations
-			-fno-math-errno			# disable math function errors
-			-fno-trapping-math>		# disable user visible traps
+			-O3					# max optimization
+			-flto				# link time optimizations
+			-ffast-math>		# fast floating point math
 		$<$<CONFIG:Debug>:
 			-Og					# supress optimizations
 			-g3					# generate debug info
@@ -83,8 +81,7 @@ function(create_compiler_opts target)
 			# /GL                # full exe/dll optimization
 			/Gy                # generate useful information for optimizer
 			/Ob2               # let compiler inline freely
-			/fp:strict         # disable user facing math trapping
-			/fp:except->       # disable floating point exceptions
+			/fp:fast>          # fast floating point math
 		$<$<CONFIG:Debug>:
 			/Ob0               # no inlining
 			/Od                # no optimizations
