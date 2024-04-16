@@ -79,7 +79,13 @@ CG_FillAngleYaw
 */
 void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
                      float fov, vec4_t const color) {
-  range_t const range = AnglesToRange(start, end, yaw, fov);
+  // don't try to lines with no width
+  if (start == end) {
+    return;
+  }
+
+  const range_t range = AnglesToRange(start, end, yaw, fov);
+
   if (!range.split) {
     CG_FillRect(range.x1, y, range.x2 - range.x1, h, color);
   } else {
