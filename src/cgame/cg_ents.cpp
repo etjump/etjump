@@ -1466,7 +1466,10 @@ void CG_Corona(centity_t *cent) {
 
     // use the dot to at least do trivial removal of those behind you.
     dot = DotProduct(dir, cg.refdef_current->viewaxis[0]);
-    if (dot >= cg.refdef_current->fov_x) {
+    const auto fov = static_cast<float>(
+        std::cos((cg.refdef_current->fov_x / 2) * (M_PI / 180)));
+
+    if (dot >= -fov) {
       behind = qtrue;
     }
   }
