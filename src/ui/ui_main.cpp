@@ -4286,9 +4286,20 @@ void UI_RunMenuScript(const char **args) {
           // appends demos/ to the beginning of the path
           const auto &front = uiInfo.currentDemoPath.front();
           uiInfo.currentDemoPath.pop_front();
-          auto demoPath =
-              ETJump::StringUtil::join(uiInfo.currentDemoPath, "/") + "/" +
-              uiInfo.demoObjects[uiInfo.demoIndex].name;
+
+          std::string demoPath;
+
+          // only append '/' in front of the name if we're inside a subfolder
+          // otherwise the demo command will be '/demo /demoname.dm_84'
+          // and ET: Legacy will try to open it as an absolute
+          // system file system path and will fail on Linux
+          if (uiInfo.currentDemoPath.empty()) {
+            demoPath = uiInfo.demoObjects[uiInfo.demoIndex].name;
+          } else {
+            demoPath = ETJump::StringUtil::join(uiInfo.currentDemoPath, "/") +
+                       "/" + uiInfo.demoObjects[uiInfo.demoIndex].name;
+          }
+
           uiInfo.currentDemoPath.push_front(front);
           trap_Cmd_ExecuteText(EXEC_APPEND,
                                va("demo \"%s\"\n", demoPath.c_str()));
