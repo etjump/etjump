@@ -1,3 +1,12 @@
+# ETJump 3.2.2
+
+* fixed CGaz 2 velocity direction lines flickering on spec/demo playback when playing at > 125FPS [#1307](https://github.com/etjump/etjump/pull/1307)
+* fixed `etj_CGaz1DrawSnap` flickering on GCC builds due to fast math optimizations [#1316](https://github.com/etjump/etjump/pull/1316)
+* fixed fixed being unable to playback demos from the root of `demos` folder on ET: Legacy clients on Linux [#1310](https://github.com/etjump/etjump/pull/1310)
+* added warning messages to client if a model required during runtime cannot be loaded [#1313](https://github.com/etjump/etjump/pull/1313)
+* fixed coronas getting culled from view too early with `etj_realFov 1` and > 4:3 aspect ratio [#1311](https://github.com/etjump/etjump/pull/1311)
+* fixed out of bounds access in tag loader causing a crash [#1317](https://github.com/etjump/etjump/pull/1317)
+
 # ETJump 3.2.1
 
 * fixed server crash when Auto RTV was called [#1293](https://github.com/etjump/etjump/pull/1293)
