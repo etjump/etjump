@@ -185,6 +185,8 @@ void SP_misc_gamemodel(void) {
     gamemodel->radius = RadiusFromBounds(mins, maxs);
   } else {
     gamemodel->radius = 0;
+    CG_Printf(S_COLOR_YELLOW "WARNING: failed to register misc_gamemodel %s\n",
+              model);
   }
 }
 
