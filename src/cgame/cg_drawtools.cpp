@@ -79,7 +79,7 @@ CG_FillAngleYaw
 */
 void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
                      float fov, vec4_t const color) {
-  // don't try to lines with no width
+  // don't try to draw lines with no width
   if (start == end) {
     return;
   }
