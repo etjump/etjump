@@ -643,7 +643,8 @@ void runFrameEnd() {
       // binds should reset at the very beginning of a level too
     } else if ((cg.weaponSelect != WP_PORTAL_GUN &&
                 cg.portalgunBindingsAdjusted) ||
-               cg.clientFrame < 10) {
+               cg.clientFrame < 10 ||
+               cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
       cgDC.getKeysForBinding("+attack2", &cg.weapAltB1, &cg.weapAltB2);
       if (cg.weapAltB1 != -1) {
         trap_Key_SetBinding(cg.weapAltB1, "weapalt");
