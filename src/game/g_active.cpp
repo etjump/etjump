@@ -1128,13 +1128,11 @@ void ClientThink_real(gentity_t *ent) {
       Printer::SendCenterMessage(
           clientNum, "^3WARNING: ^7Timerun stopped due to high ping!");
       InterruptRun(ent);
-      client->sess.timerunActive = qfalse;
     }
     if (client->pers.maxFPS < 25) {
       Printer::SendCenterMessage(
           clientNum, "^3WARNING: ^7Timerun stopped due to low FPS!");
       InterruptRun(ent);
-      client->sess.timerunActive = qfalse;
     }
   }
 
