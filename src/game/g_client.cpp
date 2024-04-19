@@ -423,10 +423,11 @@ void CopyToBodyQue(gentity_t *ent) {
   BODY_CLASS(body) = ent->client->sess.playerType;
   BODY_CHARACTER(body) = ent->client->pers.characterIndex;
   BODY_VALUE(body) = 0;
+  body->s.time = level.time;
 
   body->s.time2 = 0;
 
-  body->activator = NULL;
+  body->activator = nullptr;
 
   body->nextthink = level.time + BODY_TIME(ent->client->sess.sessionTeam);
 
