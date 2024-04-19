@@ -3826,11 +3826,18 @@ void Portal_Think(gentity_t *self) {
     VectorCopy(b2, bboxEnt->s.origin2);
     bboxEnt->s.dmgFlags = 1; // CG_RailTrail type. Indicates bounding box draw
 
+    // blue bbox on primary portal (railtrails are red by default)
+    if (self->s.eType == ET_PORTAL_BLUE) {
+      bboxEnt->s.angles[0] = 0.0f;
+      bboxEnt->s.angles[1] = 0.0f;
+      bboxEnt->s.angles[2] = 1.0f;
+    }
+
     self->nextthink = level.time + 500;
 
   } else {
 
-    self->nextthink = level.time + 100; //
+    self->nextthink = level.time + 1000; //
   }
 }
 
