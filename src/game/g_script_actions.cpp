@@ -1534,6 +1534,14 @@ qboolean G_ScriptAction_Wait(gentity_t *ent, char *params) {
     }
     max = Q_atoi(token);
 
+    // get as close as possible to sv_fps 20 intervals for compatibility
+    if (sv_fps.integer > 20) {
+      min = min + DEFAULT_SV_FRAMETIME - (min & DEFAULT_SV_FRAMETIME) -
+            level.frameTime;
+      max = max + DEFAULT_SV_FRAMETIME - (max & DEFAULT_SV_FRAMETIME) -
+            level.frameTime;
+    }
+
     if (ent->scriptStatus.scriptStackChangeTime + min > level.time) {
       return qfalse;
     }
@@ -1546,6 +1554,13 @@ qboolean G_ScriptAction_Wait(gentity_t *ent, char *params) {
   }
 
   duration = Q_atoi(token);
+
+  // get as close as possible to sv_fps 20 intervals for compatibility
+  if (sv_fps.integer > 20) {
+    duration = duration + DEFAULT_SV_FRAMETIME -
+               (duration % DEFAULT_SV_FRAMETIME) - level.frameTime;
+  }
+
   return (ent->scriptStatus.scriptStackChangeTime + duration < level.time)
              ? qtrue
              : qfalse;

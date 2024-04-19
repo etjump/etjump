@@ -1989,6 +1989,7 @@ extern vmCvar_t g_banIPs;
 extern vmCvar_t g_filterBan;
 extern vmCvar_t g_smoothClients;
 extern vmCvar_t pmove_msec;
+extern vmCvar_t sv_fps;
 
 // Rafael
 extern vmCvar_t g_scriptName; // name of script file to run (instead of default
