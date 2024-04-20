@@ -565,6 +565,8 @@ vmCvar_t etj_onRunStart;
 vmCvar_t etj_onRunEnd;
 vmCvar_t etj_lagometerX;
 vmCvar_t etj_lagometerY;
+vmCvar_t etj_lagometerShader;
+vmCvar_t etj_lagometerAlpha;
 vmCvar_t etj_spectatorVote;
 vmCvar_t etj_extraTrace;
 
@@ -1118,6 +1120,8 @@ cvarTable_t cvarTable[] = {
     {&etj_onRunEnd, "etj_onRunEnd", "", CVAR_ARCHIVE},
     {&etj_lagometerX, "etj_lagometerX", "0", CVAR_ARCHIVE},
     {&etj_lagometerY, "etj_lagometerY", "0", CVAR_ARCHIVE},
+    {&etj_lagometerShader, "etj_lagometerShader", "1", CVAR_ARCHIVE},
+    {&etj_lagometerAlpha, "etj_lagometerAlpha", "1.0", CVAR_ARCHIVE},
     {&etj_spectatorVote, "", "0", 0},
     {&etj_extraTrace, "etj_extraTrace", "0", CVAR_ARCHIVE},
     // Autodemo
@@ -2217,7 +2221,7 @@ static void CG_RegisterGraphics(void) {
   cgs.media.smokePuffRageProShader = trap_R_RegisterShader("smokePuffRagePro");
   cgs.media.shotgunSmokePuffShader = trap_R_RegisterShader("shotgunSmokePuff");
   cgs.media.bloodTrailShader = trap_R_RegisterShader("bloodTrail");
-  cgs.media.lagometerShader = trap_R_RegisterShader("lagometer");
+  cgs.media.lagometerShader = trap_R_RegisterShader("gfx/2d/lagometer");
   cgs.media.reticleShaderSimple =
       trap_R_RegisterShader("gfx/misc/reticlesimple");
   cgs.media.binocShaderSimple = trap_R_RegisterShader("gfx/misc/binocsimple");
