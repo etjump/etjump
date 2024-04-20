@@ -1679,7 +1679,7 @@ qboolean G_HasDroppedItem(gentity_t *ent, int modType);
 void G_RunFlamechunk(gentity_t *ent);
 
 //----(SA) removed unused q3a weapon firing
-gentity_t *fire_flamechunk(gentity_t *self, vec3_t start, vec3_t dir);
+gentity_t *fire_flamechunk(gentity_t *self, const vec3_t start, vec3_t dir);
 
 gentity_t *fire_grenade(gentity_t *self, const vec3_t start,
                         const vec3_t aimdir, int grenadeWPID);
