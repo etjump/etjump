@@ -1686,7 +1686,7 @@ qboolean G_ScriptAction_PlaySound(gentity_t *ent, char *params) {
   char sound[MAX_QPATH];
   qboolean looping = qfalse;
   int volume = 255;
-  bool _private = false;
+  bool onlyActivator = false;
 
   if (!params) {
     G_Error("G_Scripting: syntax error\n\nplaysound <soundname "
@@ -1708,13 +1708,13 @@ qboolean G_ScriptAction_PlaySound(gentity_t *ent, char *params) {
         volume = 255;
       }
     } else if (!Q_stricmp(token, "private")) {
-      _private = true;
+      onlyActivator = true;
     }
 
     token = COM_ParseExt(&pString, qfalse);
   }
 
-  if (_private) {
+  if (onlyActivator) {
     if (looping) {
       G_Error("G_ScriptAction_PlaySound: can't play looping private sound\n");
     }
