@@ -1536,9 +1536,9 @@ qboolean G_ScriptAction_Wait(gentity_t *ent, char *params) {
 
     // get as close as possible to sv_fps 20 intervals for compatibility
     if (sv_fps.integer > 20) {
-      min = min + DEFAULT_SV_FRAMETIME - (min & DEFAULT_SV_FRAMETIME) -
+      min = min + DEFAULT_SV_FRAMETIME - (min % DEFAULT_SV_FRAMETIME) -
             level.frameTime;
-      max = max + DEFAULT_SV_FRAMETIME - (max & DEFAULT_SV_FRAMETIME) -
+      max = max + DEFAULT_SV_FRAMETIME - (max % DEFAULT_SV_FRAMETIME) -
             level.frameTime;
     }
 
