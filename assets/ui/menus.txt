@@ -93,6 +93,7 @@
 	loadMenu { "ui/etjump_settings_hud1_popups.menu" }
 	loadMenu { "ui/etjump_settings_hud1_fireteam.menu" }
 	loadMenu { "ui/etjump_settings_hud1_specinfo.menu" }
+	loadMenu { "ui/etjump_settings_hud1_lagometer.menu" }
 	loadMenu { "ui/etjump_settings_hud1_scoreboard.menu" }
 	loadMenu { "ui/etjump_settings_hud1_misc.menu" }
 

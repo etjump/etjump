@@ -6,7 +6,7 @@
 #define MENU_NAME "etjump_settings_hud1_maxspeed"
 #define GROUP_NAME "group_etjump_settings_hud1"
 
-#define NUM_SUBMENUS 12
+#define NUM_SUBMENUS 13
 #define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
 
 menuDef {
@@ -48,8 +48,9 @@ menuDef {
     SIDEBUTTON          (8, "POPUPS", close MENU_NAME; open etjump_settings_hud1_popups)
     SIDEBUTTON          (9, "FIRETEAM", close MENU_NAME; open etjump_settings_hud1_fireteam)
     SIDEBUTTON          (10, "SPECTATOR INFO", close MENU_NAME; open etjump_settings_hud1_specinfo)
-    SIDEBUTTON          (11, "SCOREBOARD", close MENU_NAME; open etjump_settings_hud1_scoreboard)
-    SIDEBUTTON          (12, "MISC", close MENU_NAME; open etjump_settings_hud1_misc)
+    SIDEBUTTON          (11, "LAGOMETER", close MENU_NAME; open etjump_settings_hud1_lagometer)
+    SIDEBUTTON          (12, "SCOREBOARD", close MENU_NAME; open etjump_settings_hud1_scoreboard)
+    SIDEBUTTON          (13, "MISC", close MENU_NAME; open etjump_settings_hud1_misc)
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "MAX SPEED")
     

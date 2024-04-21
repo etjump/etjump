@@ -784,8 +784,24 @@ static void CG_DrawLagometer() {
   x = SCREEN_WIDTH - 48 + ETJump_AdjustPosition(etj_lagometerX.value);
   y = 480 - 200 + etj_lagometerY.value;
 
-  trap_R_SetColor(nullptr);
-  CG_DrawPic(x, y, 48, 48, cgs.media.lagometerShader);
+  const float alpha = Numeric::clamp(etj_lagometerAlpha.value, 0.0f, 1.0f);
+
+  if (etj_lagometerShader.integer) {
+    vec4_t mainColor;
+    Vector4Copy(colorWhite, mainColor);
+    mainColor[3] *= alpha;
+
+    ETJump::drawPic(x, y, 48, 48, cgs.media.lagometerShader, mainColor);
+  } else {
+    vec4_t borderColor = {0.5f, 0.5f, 0.5f, 0.5f};
+    vec4_t backgroundColor = {0.16f, 0.2f, 0.17f, 0.8f};
+
+    borderColor[3] *= alpha;
+    backgroundColor[3] *= alpha;
+
+    CG_FillRect(x, y, 48, 48, backgroundColor);
+    CG_DrawRect_FixedBorder(x, y, 48, 48, 1, borderColor);
+  }
 
   ax = x;
   ay = y;

@@ -3,7 +3,7 @@
 #include "ui/menumacros.h"
 #include "ui/menumacros_ext.h"
 
-#define MENU_NAME "etjump_settings_hud1_scoreboard"
+#define MENU_NAME "etjump_settings_hud1_lagometer"
 #define GROUP_NAME "group_etjump_settings_hud1"
 
 #define NUM_SUBMENUS 13
@@ -39,7 +39,7 @@ menuDef {
     WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
 
     SIDEBUTTON          (1, "CROSSHAIR", close MENU_NAME; open etjump_settings_hud1_crosshair)
-    SIDEBUTTON          (2, "KEYS", close MENU_NAME; open etjump_settings_hud1_keys)
+    SIDEBUTTON          (2, "KEYS", close MENU_NAME; open MENU_NAME)
     SIDEBUTTON          (3, "SPEED 1", close MENU_NAME; open etjump_settings_hud1_speed1)
     SIDEBUTTON          (4, "SPEED 2", close MENU_NAME; open etjump_settings_hud1_speed2)
     SIDEBUTTON          (5, "MAX SPEED", close MENU_NAME; open etjump_settings_hud1_maxspeed)
@@ -48,14 +48,21 @@ menuDef {
     SIDEBUTTON          (8, "POPUPS", close MENU_NAME; open etjump_settings_hud1_popups)
     SIDEBUTTON          (9, "FIRETEAM", close MENU_NAME; open etjump_settings_hud1_fireteam)
     SIDEBUTTON          (10, "SPECTATOR INFO", close MENU_NAME; open etjump_settings_hud1_specinfo)
-    SIDEBUTTON          (11, "LAGOMETER", close MENU_NAME; open etjump_settings_hud1_lagometer)
-    SIDEBUTTON_ACTIVE   (12, "SCOREBOARD", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON_ACTIVE   (11, "LAGOMETER", close MENU_NAME; open etjump_settings_hud1_lagometer)
+    SIDEBUTTON          (12, "SCOREBOARD", close MENU_NAME; open etjump_settings_hud1_scoreboard)
     SIDEBUTTON          (13, "MISC", close MENU_NAME; open etjump_settings_hud1_misc)
 
-    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "SCOREBOARD")
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "LAGOMETER")
 
-        MULTI               (SETTINGS_ITEM_POS(1), "Alternative scoreboard:", 0.2, SETTINGS_ITEM_H, "etj_altScoreboard", cvarFloatList { "No" 0 "ETJump 1" 1 "ETJump 2" 2 "ETJump 3" 3 }, "Displays alternative scoreboard\netj_altScoreboard")
-        YESNO               (SETTINGS_ITEM_POS(2), "Draw idle indicator:", 0.2, SETTINGS_ITEM_H, "etj_drawScoreboardInactivity", "Draw idle indicator on inactive clients\netj_drawScoreboardInactivity")
+        MULTI               (SETTINGS_ITEM_POS(1), "Draw lagometer:", 0.2, SETTINGS_ITEM_H, "cg_lagometer", cvarFloatList { "No" 0 "Online only" 1 "Always" 2 }, "Draw lagometer on HUD\ncg_lagometer")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_lagometerX", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(2), "Lagometer X:", 0.2, SETTINGS_ITEM_H, etj_lagometerX 0 -640 640 10, "Sets X offset for lagometer\netj_lagometerX")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_lagometerY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(3), "Lagometer Y:", 0.2, SETTINGS_ITEM_H, etj_lagometerY 0 -480 480 10, "Sets Y offset for lagometer\netj_lagometerY")
+        YESNO               (SETTINGS_ITEM_POS(4), "Lagometer shader:", 0.2, SETTINGS_ITEM_H, "etj_lagometerShader", "Use shader for lagometer instead of solid color\netj_lagometerAlpha")
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(5), "etj_lagometerAlpha", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(5), "Lagometer alpha:", 0.2, SETTINGS_ITEM_H, etj_lagometerAlpha 1 0 1 0.05, "Sets transparency of lagometer background\netj_lagometerAlpha")
+        YESNO               (SETTINGS_ITEM_POS(6), "Draw connection issues:", 0.2, SETTINGS_ITEM_H, "etj_drawConnectionIssues", "Draw connection interrupted message with high ping\netj_drawConnectionIssues")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
