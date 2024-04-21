@@ -646,8 +646,7 @@ void G_RunMissile(gentity_t *ent) {
        ent->s.weapon == WP_GRENADE_PINEAPPLE || ent->s.weapon == WP_LANDMINE ||
        ent->s.weapon == WP_SATCHEL || ent->s.weapon == WP_SMOKE_BOMB)) {
 
-    if (!ent->s.pos.trDelta[0] && !ent->s.pos.trDelta[1] &&
-        !ent->s.pos.trDelta[2]) {
+    if (VectorCompare(ent->s.pos.trDelta, vec3_origin)) {
       ent->clipmask &= ~CONTENTS_BODY;
     }
   }
@@ -673,7 +672,7 @@ void G_RunMissile(gentity_t *ent) {
       } else {
         float skyHeight = BG_GetSkyHeightAtPoint(origin);
 
-        if (origin[2] < BG_GetTracemapGroundFloor()) {
+        if (origin[2] < static_cast<float>(BG_GetTracemapGroundFloor())) {
           gentity_t *tent;
 
           tent = G_TempEntity(ent->r.currentOrigin, EV_MORTAR_MISS);
@@ -685,23 +684,12 @@ void G_RunMissile(gentity_t *ent) {
           return;
         }
 
-        // are we in worldspace again - or did
-        // we hit a ceiling from the outside of
-        // the world
-        if (skyHeight == 65536) {
-          //			if(
-          // BG_GetSkyGroundHeightAtPoint(
-          // origin ) >=
-          // origin[2]
-          //) {
-          // G_FreeEntity( ent ); return;
-          // } else {
+        // are we in worldspace again
+        // or did we hit a ceiling from the outside of the world
+        if (skyHeight == MAX_MAP_SIZE) {
           G_RunThink(ent);
           VectorCopy(origin, ent->r.currentOrigin);
-          //				trap_LinkEntity(
-          // ent );
           return; // keep flying
-                  //			}
         }
 
         if (skyHeight <= origin[2]) {
@@ -709,8 +697,7 @@ void G_RunMissile(gentity_t *ent) {
           return; // keep flying
         }
 
-        // back in the world, keep going like
-        // normal
+        // back in the world, keep going like normal
         VectorCopy(origin, ent->r.currentOrigin);
         ent->count = 0;
         ent->count2 = 1;
@@ -755,19 +742,6 @@ void G_RunMissile(gentity_t *ent) {
 
         ent->count2 = 2;
         ent->s.legsAnim = 1;
-
-        /*{
-            gentity_t *tent;
-
-            tent = G_TempEntity( origin,
-        EV_RAILTRAIL ); VectorCopy( impactpos,
-        tent->s.origin2 ); tent->s.dmgFlags = 0;
-
-            tent = G_TempEntity( origin,
-        EV_RAILTRAIL ); VectorCopy(
-        ent->r.currentOrigin, tent->s.origin2 );
-            tent->s.dmgFlags = 0;
-        }*/
       }
     }
   }
@@ -776,6 +750,10 @@ void G_RunMissile(gentity_t *ent) {
 
   if (tr.startsolid) {
     tr.fraction = 0;
+  } else {
+    // mark last surfaceFlags for potentially ignoring trace if a projectile
+    // gets stuck inside a skybox brush, so we can just keep traveling forward
+    ent->lastSurfaceFlag = tr.surfaceFlags;
   }
 
   trap_LinkEntity(ent);
@@ -785,7 +763,7 @@ void G_RunMissile(gentity_t *ent) {
         (ent->s.weapon == WP_MORTAR_SET || ent->s.weapon == WP_GPG40 ||
          ent->s.weapon == WP_M7 || ent->s.weapon == WP_GRENADE_LAUNCHER ||
          ent->s.weapon == WP_GRENADE_PINEAPPLE) &&
-        tr.surfaceFlags & SURF_SKY) {
+        (tr.surfaceFlags & SURF_SKY || ent->lastSurfaceFlag & SURF_SKY)) {
       // goes through sky
       ent->count = 1;
       trap_UnlinkEntity(ent);
@@ -797,20 +775,19 @@ void G_RunMissile(gentity_t *ent) {
         // If grapple, reset owner
         if (ent->parent && ent->parent->client &&
             ent->parent->client->hook == ent) {
-          ent->parent->client->hook = NULL;
+          ent->parent->client->hook = nullptr;
         }
+
         G_FreeEntity(ent);
         return;
       }
-
-    //		G_SetOrigin( ent, tr.endpos );
-
     if (ent->s.weapon == WP_PANZERFAUST || ent->s.weapon == WP_MORTAR_SET) {
-      impactDamage = 999; // goes through pretty much
-                          // any func_explosives
+      // goes through pretty much any func_explosives
+      impactDamage = 999;
     } else {
-      impactDamage = 20; // "grenade"/"dynamite"		//
-                         // probably adjust this based on velocity
+      // "grenade"/"dynamite"
+      // probably adjust this based on velocity
+      impactDamage = 20;
     }
     if (ent->s.weapon == WP_DYNAMITE || ent->s.weapon == WP_LANDMINE ||
         ent->s.weapon == WP_SATCHEL) {
@@ -827,9 +804,8 @@ void G_RunMissile(gentity_t *ent) {
       tent->r.svFlags |= SVF_BROADCAST;
       return; // exploded
     }
-  } else if (VectorLengthSquared(
-                 ent->s.pos.trDelta)) // free fall/no intersection
-  {
+  } else if (VectorLengthSquared(ent->s.pos.trDelta) != 0.0f) {
+    // free fall/no intersection
     ent->s.groundEntityNum = ENTITYNUM_NONE;
   }
 
@@ -1259,7 +1235,6 @@ gentity_t *fire_flamechunk(gentity_t *self, const vec3_t start, vec3_t dir) {
   // the flamechunk has reached its minimum speed after ~500ms, we use this as
   // a timestamp for checking whether we should keep decreasing or not
   bolt->s.pos.trDuration = 550;
-
 
   // 'speed' will be the current size radius of the chunk
   bolt->speed = FLAME_START_SIZE;
