@@ -1117,35 +1117,38 @@ void G_FlameDamage(gentity_t *self, gentity_t *ignoreent) {
 }
 
 void G_RunFlamechunk(gentity_t *ent) {
-  vec3_t vel, add;
+  vec3_t vel;
   vec3_t neworg;
   trace_t tr;
   float speed, dot;
-  gentity_t *ignoreent = NULL;
+  gentity_t *ignoreent = nullptr;
+  const auto deltaTime =
+      static_cast<float>(level.time - ent->s.pos.trTime) / 1000.0f;
 
   // TAT 11/12/2002
   // vel was only being set if (level.time - ent->timestamp > 50)
   // However, below, it was being used when we hit something,
   // and it was uninitialized
   VectorCopy(ent->s.pos.trDelta, vel);
+  speed = VectorNormalize(vel);
 
   // Adust the current speed of the chunk
-  if (level.time - ent->timestamp > 50) {
-    speed = VectorNormalize(vel);
-    speed -= (50.f / 1000.f) * FLAME_FRICTION_PER_SEC;
-
-    if (speed < FLAME_MIN_SPEED) {
-      speed = FLAME_MIN_SPEED;
-    }
+  // ent->s.pos.trDuration is set to 550ms as that is the time window
+  // after which the speed will always be at FLAME_MIN_SPEED,
+  // so we just short circuit some unnecessary math with that
+  if (level.time - ent->timestamp <= MISSILE_PRESTEP_TIME) {
+    speed = FLAME_START_SPEED;
+  } else if (level.time - ent->timestamp <= ent->s.pos.trDuration) {
+    speed -= deltaTime * static_cast<float>(FLAME_FRICTION_PER_SEC);
+    speed = std::max(speed, static_cast<float>(FLAME_MIN_SPEED));
 
     VectorScale(vel, speed, ent->s.pos.trDelta);
-  } else {
-    speed = FLAME_START_SPEED;
   }
 
+  ent->s.pos.trTime = level.time;
+
   // Move the chunk
-  VectorScale(ent->s.pos.trDelta, 50.f / 1000.f, add);
-  VectorAdd(ent->r.currentOrigin, add, neworg);
+  VectorMA(ent->r.currentOrigin, deltaTime, ent->s.pos.trDelta, neworg);
 
   trap_Trace(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, neworg,
              ent->r.ownerNum,
@@ -1160,7 +1163,9 @@ void G_RunFlamechunk(gentity_t *ent) {
     dot = DotProduct(vel, tr.plane.normal);
     VectorMA(vel, -2 * dot, tr.plane.normal, vel);
     VectorNormalize(vel);
-    speed *= 0.5 * (0.25 + 0.75 * ((dot + 1.0) * 0.5));
+    speed *= 0.5f * (0.25f + 0.75f * ((dot + 1.0f) * 0.5f));
+    speed = std::max(speed, static_cast<float>(FLAME_MIN_SPEED));
+
     VectorScale(vel, speed, ent->s.pos.trDelta);
 
     if (tr.entityNum != ENTITYNUM_WORLD && tr.entityNum != ENTITYNUM_NONE) {
@@ -1222,13 +1227,13 @@ void G_RunFlamechunk(gentity_t *ent) {
 fire_flamechunk
 =================
 */
-gentity_t *fire_flamechunk(gentity_t *self, vec3_t start, vec3_t dir) {
+gentity_t *fire_flamechunk(gentity_t *self, const vec3_t start, vec3_t dir) {
   gentity_t *bolt;
 
   // Only spawn every other frame
   if (self->count2) {
     self->count2--;
-    return NULL;
+    return nullptr;
   }
 
   self->count2 = 1;
@@ -1249,9 +1254,12 @@ gentity_t *fire_flamechunk(gentity_t *self, vec3_t start, vec3_t dir) {
   bolt->count2 = 0; // how often it bounced off of something
 
   bolt->s.pos.trType = TR_DECCELERATE;
-  bolt->s.pos.trTime =
-      level.time - MISSILE_PRESTEP_TIME; // move a bit on the very first frame
-  bolt->s.pos.trDuration = 800;
+  // move a bit on the very first frame
+  bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;
+  // the flamechunk has reached its minimum speed after ~500ms, we use this as
+  // a timestamp for checking whether we should keep decreasing or not
+  bolt->s.pos.trDuration = 550;
+
 
   // 'speed' will be the current size radius of the chunk
   bolt->speed = FLAME_START_SIZE;

@@ -3355,7 +3355,8 @@ qboolean Do_Activate2_f(gentity_t *ent, gentity_t *traceEnt) {
     if (!ent->client->ps.powerups[PW_BLUEFLAG] &&
         !ent->client->ps.powerups[PW_REDFLAG]) {
       if (traceEnt->s.eType == ET_CORPSE) {
-        if (BODY_TEAM(traceEnt) < 4 &&
+        if (level.time - traceEnt->s.time >= DEFAULT_SV_FRAMETIME &&
+            BODY_TEAM(traceEnt) < 4 &&
             BODY_TEAM(traceEnt) != ent->client->sess.sessionTeam) {
           found = qtrue;
 
@@ -3363,17 +3364,6 @@ qboolean Do_Activate2_f(gentity_t *ent, gentity_t *traceEnt) {
 
             traceEnt->nextthink =
                 traceEnt->timestamp + BODY_TIME(BODY_TEAM(traceEnt));
-
-            //						BG_AnimScriptEvent(
-            //&ent->client->ps,
-            // ent->client->pers.character->animModelInfo,
-            // ANIM_ET_PICKUPGRENADE,
-            // qfalse, qtrue );
-            // ent->client->ps.pm_flags
-            // |=
-            // PMF_TIME_LOCKPLAYER;
-            //						ent->client->ps.pm_time
-            //= 2100;
 
             ent->client->ps.powerups[PW_OPS_DISGUISED] = 1;
             ent->client->ps.powerups[PW_OPS_CLASS_1] = BODY_CLASS(traceEnt) & 1;
@@ -3406,6 +3396,7 @@ qboolean Do_Activate2_f(gentity_t *ent, gentity_t *traceEnt) {
             ClientUserinfoChanged(ent->s.clientNum);
           } else {
             BODY_VALUE(traceEnt) += 5;
+            traceEnt->s.time = level.time;
           }
         }
       }

@@ -257,6 +257,9 @@ typedef struct TokenInformation_s TokenInformation;
 constexpr int MAX_TIMERUNS = 20;
 constexpr int MAX_TIMERUN_NAME_LENGTH = 64;
 
+// default sv_fps 20 frametime for framerate independent server timings
+constexpr int DEFAULT_SV_FRAMETIME = 50;
+
 //====================================================================
 
 #define MAX_NETNAME 36
@@ -1173,6 +1176,8 @@ struct gclient_s {
 
   // true if name change was issues by someone using !rename command on us
   bool forceRename;
+
+  int lastRevivePushTime;
 };
 
 typedef struct {
@@ -1676,7 +1681,7 @@ qboolean G_HasDroppedItem(gentity_t *ent, int modType);
 void G_RunFlamechunk(gentity_t *ent);
 
 //----(SA) removed unused q3a weapon firing
-gentity_t *fire_flamechunk(gentity_t *self, vec3_t start, vec3_t dir);
+gentity_t *fire_flamechunk(gentity_t *self, const vec3_t start, vec3_t dir);
 
 gentity_t *fire_grenade(gentity_t *self, const vec3_t start,
                         const vec3_t aimdir, int grenadeWPID);
@@ -1986,6 +1991,7 @@ extern vmCvar_t g_banIPs;
 extern vmCvar_t g_filterBan;
 extern vmCvar_t g_smoothClients;
 extern vmCvar_t pmove_msec;
+extern vmCvar_t sv_fps;
 
 // Rafael
 extern vmCvar_t g_scriptName; // name of script file to run (instead of default
