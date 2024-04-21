@@ -3565,11 +3565,13 @@ Portal Gun
 
 void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   // max range where you can place next portal gate
-  const float MAX_PORTAL_RANGE = 2 << 16;
-  // min distance between two portal center points, used to avoid overlapping
-  const float MIN_PORTALS_DIST = 75.0f;
+  static const float MAX_PORTAL_RANGE = 2 << 16;
   // min angle difference between two portals, used to avoid overlapping
-  const float MIN_ANGLES_DIFF = 100.0f;
+  static const float MIN_ANGLES_DIFF = 100.0f;
+  // min distance between two portal center points, used to avoid overlapping
+  static const float MIN_PORTALS_DIST = 75.0f / 2.0f;
+
+  float scale = 1.0f;
 
   gentity_t *portal, *tent;
   vec3_t t_endpos;
@@ -3643,6 +3645,10 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
     const float dotProduct = DotProduct(delta, tr.plane.normal);
     VectorScale(tr.plane.normal, dotProduct, normalScaled);
     VectorSubtract(be_position, normalScaled, tr_end);
+
+    if (brushEnt->count > 0) {
+      scale = static_cast<float>(brushEnt->count) / 48.0f;
+    }
   } else {
     VectorCopy(tr.endpos, tr_end);
   }
@@ -3651,20 +3657,21 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
 
   // check that portals aren't overlapping..
   if ((ent->portalBlue) || (ent->portalRed)) {
+    gentity_t* otherPortal = nullptr;
 
     if (portalNumber == 1 && ent->portalRed) {
-
-      if (Distance(t_portalAngles, ent->portalRed->s.angles) <
-              MIN_ANGLES_DIFF &&
-          Distance(tr_end, ent->portalRed->s.origin) < MIN_PORTALS_DIST) {
-        return;
-      }
-
+      otherPortal = ent->portalRed;
     } else if (portalNumber == 2 && ent->portalBlue) {
+      otherPortal = ent->portalBlue;
+    }
 
-      if (Distance(t_portalAngles, ent->portalBlue->s.angles) <
-              MIN_ANGLES_DIFF &&
-          Distance(tr_end, ent->portalBlue->s.origin) < MIN_PORTALS_DIST) {
+    if (otherPortal) {
+      const float otherScale = static_cast<float>(otherPortal->s.onFireStart) / 48.0f;
+      const float min_dist =
+          MIN_PORTALS_DIST * scale + MIN_PORTALS_DIST * otherScale;
+
+      if (Distance(t_portalAngles, otherPortal->s.angles) < MIN_ANGLES_DIFF &&
+          Distance(tr_end, otherPortal->s.origin) < min_dist) {
         return;
       }
     }
@@ -3699,6 +3706,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
 
   portal = G_Spawn();
   portal->classname = "portal_gate";
+  portal->s.onFireStart = static_cast<int>(48.0f * scale);
 
   // Assign ent to player as well as the portal type..
   if (portalNumber == 1) {
@@ -3735,7 +3743,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
       (t_portalAngles[PITCH] >= -315 &&
        t_portalAngles[PITCH] <= -225)) // Horizontal portal (floor/ceiling)
   {
-    P_DEPTH = P_WIDTH = 30.0f;
+    P_DEPTH = P_WIDTH = 30.0f * scale;
     P_HEIGHT = 15.0f;
 
     VectorSet(portal->r.mins, -P_DEPTH, -P_WIDTH,
@@ -3744,7 +3752,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   } else if (t_portalAngles[PITCH] == -0) // Vertical Portals (On walls)
   {
     P_DEPTH = 5.0f;
-    P_HEIGHT = P_WIDTH = 30.0f;
+    P_HEIGHT = P_WIDTH = 30.0f * scale;
 
     if ((t_portalAngles[YAW] >= 45 && t_portalAngles[YAW] <= 135) ||
         (t_portalAngles[YAW] >= 225 && t_portalAngles[YAW] <= 315)) {
@@ -3761,7 +3769,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
     }
   } else // Slanted (not quite vertical) portals get the largest bbox...
   {
-    P_DEPTH = P_WIDTH = 30.0f;
+    P_DEPTH = P_WIDTH = 30.0f * scale;
     P_HEIGHT = 15.0f;
 
     VectorSet(portal->r.mins, -P_DEPTH, -P_WIDTH,
@@ -3818,11 +3826,18 @@ void Portal_Think(gentity_t *self) {
     VectorCopy(b2, bboxEnt->s.origin2);
     bboxEnt->s.dmgFlags = 1; // CG_RailTrail type. Indicates bounding box draw
 
+    // blue bbox on primary portal (railtrails are red by default)
+    if (self->s.eType == ET_PORTAL_BLUE) {
+      bboxEnt->s.angles[0] = 0.0f;
+      bboxEnt->s.angles[1] = 0.0f;
+      bboxEnt->s.angles[2] = 1.0f;
+    }
+
     self->nextthink = level.time + 500;
 
   } else {
 
-    self->nextthink = level.time + 100; //
+    self->nextthink = level.time + 1000; //
   }
 }
 

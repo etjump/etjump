@@ -3826,6 +3826,17 @@ void SP_func_portaltarget(gentity_t *ent) {
 
   VectorCopy(ent->s.origin, ent->s.pos.trBase);
   VectorCopy(ent->s.origin, ent->r.currentOrigin);
+
+  int portalSize = 0;
+  G_SpawnInt("portalsize", "0", &portalSize);
+
+  if (portalSize > 512) {
+    portalSize = 512;
+  }
+
+  if (portalSize > 0) {
+    ent->count = portalSize;
+  }
 }
 
 /*
