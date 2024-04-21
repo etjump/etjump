@@ -2425,8 +2425,9 @@ static void CG_PortalGate(centity_t *cent) {
   vec3_t verts[4];
   vec3_t pushedOrigin, angleInverse;
   vec3_t axis[3];
-  const float radius = 48.0f;
-  int i;
+  const float radius = !cent->currentState.onFireStart
+                           ? 48.0f
+                           : static_cast<float>(cent->currentState.onFireStart);
 
   // not our portal
   if (!etj_viewPlayerPortals.integer &&
@@ -2449,7 +2450,7 @@ static void CG_PortalGate(centity_t *cent) {
            pushedOrigin);
 
   /* create the full polygon */
-  for (i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++) {
     /* new */
     verts[0][i] = pushedOrigin[i] - radius * axis[1][i] - radius * axis[2][i];
     verts[1][i] = pushedOrigin[i] - radius * axis[1][i] + radius * axis[2][i];
@@ -2457,7 +2458,7 @@ static void CG_PortalGate(centity_t *cent) {
     verts[3][i] = pushedOrigin[i] + radius * axis[1][i] - radius * axis[2][i];
   }
 
-  for (i = 0; i < 4; ++i) {
+  for (int i = 0; i < 4; ++i) {
     VectorCopy(verts[i], polyVerts[i].xyz);
   }
 

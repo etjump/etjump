@@ -7,6 +7,7 @@
 * fixed coronas getting culled from view too early with `etj_realFov 1` and > 4:3 aspect ratio [#1311](https://github.com/etjump/etjump/pull/1311)
 * fixed out of bounds access in tag loader causing a crash [#1317](https://github.com/etjump/etjump/pull/1317)
 * fixed `etj_autoPortalBinds` not resetting bindings when switching to spectators to restore `followprev` behavior for weapalt [#1318](https://github.com/etjump/etjump/pull/1318)
+* fixed being able to noclip inside `nonoclip` zones if player was crouched/prone with no room to stand up [#1323](https://github.com/etjump/etjump/pull/1323)
 
 # ETJump 3.2.1
 

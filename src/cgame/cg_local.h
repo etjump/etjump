@@ -2667,6 +2667,8 @@ extern vmCvar_t etj_onRunStart;
 extern vmCvar_t etj_onRunEnd;
 extern vmCvar_t etj_lagometerX;
 extern vmCvar_t etj_lagometerY;
+extern vmCvar_t etj_lagometerShader;
+extern vmCvar_t etj_lagometerAlpha;
 extern vmCvar_t etj_spectatorVote;
 extern vmCvar_t etj_extraTrace;
 

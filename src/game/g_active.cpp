@@ -1692,7 +1692,7 @@ extern vec3_t playerMins, playerMaxs;
 static constexpr float WR_PUSHAMOUNT = 25.0f;
 
 void WolfRevivePushEnt(gentity_t *self, gentity_t *other) {
-  if (!g_ghostPlayers.integer || g_ghostPlayers.integer == 2) {
+  if (!g_ghostPlayers.integer || g_ghostPlayers.integer >= 2) {
     vec3_t dir, push;
 
     // push only every 50ms to normalize push amount to 'sv_fps 20'

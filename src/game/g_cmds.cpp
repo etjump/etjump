@@ -576,11 +576,8 @@ Give items to a client
 */
 void Cmd_Give_f(gentity_t *ent) {
   char *name, *amt;
-  //	gitem_t		*it;
   int i;
   qboolean give_all;
-  //	gentity_t		*it_ent;
-  //	trace_t		trace;
   int amount;
   qboolean hasAmount = qfalse;
   if (!CheatsOk(ent)) {
@@ -627,14 +624,26 @@ void Cmd_Give_f(gentity_t *ent) {
         ent->client->sess.medals[i] = 1;
       }
     }
-    ClientUserinfoChanged(ent - g_entities);
+    ClientUserinfoChanged(ClientNum(ent));
     return;
   }
 
   if (give_all || Q_stricmpn(name, "health", 6) == 0) {
     //----(SA)	modified
     if (amount) {
-      ent->health += amount;
+      // go through proper damage routine for negative give health,
+      // so we set up things correctly in case this kills us
+      if (amount < 0) {
+        // ignore nofatigue permanent adrenaline
+        if (ent->client && ent->client->pers.nofatigue) {
+          amount *= 2;
+        }
+
+        G_Damage(ent, ent, ent, nullptr, nullptr, std::abs(amount),
+                 DAMAGE_NO_PROTECTION, MOD_UNKNOWN);
+      } else {
+        ent->health += amount;
+      }
     } else {
       ent->health = ent->client->ps.stats[STAT_MAX_HEALTH];
     }
@@ -642,26 +651,6 @@ void Cmd_Give_f(gentity_t *ent) {
       return;
     }
   }
-
-  /*if ( Q_stricmpn( name, "damage", 6) == 0)
-  {
-      if(amount) {
-          name = ConcatArgs( 3 );
-
-          if( *name ) {
-              int client = ClientNumberFromString( ent, name );
-              if( client >= 0 ) {
-                  G_Damage( &g_entities[client], ent, ent, NULL, NULL,
-  amount, DAMAGE_NO_PROTECTION, MOD_UNKNOWN );
-              }
-          } else {
-              G_Damage( ent, ent, ent, NULL, NULL, amount,
-  DAMAGE_NO_PROTECTION, MOD_UNKNOWN );
-          }
-      }
-
-      return;
-  }*/
 
   if (give_all || Q_stricmp(name, "weapons") == 0) {
     for (i = 0; i < WP_NUM_WEAPONS; i++) {
@@ -715,27 +704,6 @@ void Cmd_Give_f(gentity_t *ent) {
     }
   }
   //---- (SA) end
-
-  // spawn a specific item right on the player
-  /*if ( !give_all ) {
-      it = BG_FindItem (name);
-      if (!it) {
-          return;
-      }
-
-      it_ent = G_Spawn();
-      VectorCopy( ent->r.currentOrigin, it_ent->s.origin );
-      it_ent->classname = it->classname;
-      G_SpawnItem (it_ent, it);
-      FinishSpawningItem(it_ent );
-      memset( &trace, 0, sizeof( trace ) );
-      it_ent->active = qtrue;
-      Touch_Item (it_ent, ent, &trace);
-      it_ent->active = qfalse;
-      if (it_ent->inuse) {
-          G_FreeEntity( it_ent );
-      }
-  }*/
 }
 
 /*

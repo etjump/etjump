@@ -907,3 +907,15 @@ gfx/2d/up
 		rgbGen vertex
 	}
 }
+
+gfx/2d/lagometer
+{
+	noPicMip
+	noMipMaps
+	nocompress
+	{
+		map gfx/2d/lag.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
