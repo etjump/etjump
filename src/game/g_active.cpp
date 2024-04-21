@@ -1693,7 +1693,7 @@ extern vec3_t playerMins, playerMaxs;
 
 void WolfRevivePushEnt(gentity_t *self, gentity_t *other) {
 
-  if (!g_ghostPlayers.integer || g_ghostPlayers.integer == 2) {
+  if (!g_ghostPlayers.integer || g_ghostPlayers.integer >= 2) {
 
     vec3_t dir, push;
 
