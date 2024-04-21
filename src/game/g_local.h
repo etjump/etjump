@@ -1176,6 +1176,8 @@ struct gclient_s {
 
   // true if name change was issues by someone using !rename command on us
   bool forceRename;
+
+  int lastRevivePushTime;
 };
 
 typedef struct {

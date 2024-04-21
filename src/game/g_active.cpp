@@ -1689,13 +1689,22 @@ qboolean StuckInClient(gentity_t *self) {
 }
 
 extern vec3_t playerMins, playerMaxs;
-#define WR_PUSHAMOUNT 25
+static constexpr float WR_PUSHAMOUNT = 25.0f;
 
 void WolfRevivePushEnt(gentity_t *self, gentity_t *other) {
-
   if (!g_ghostPlayers.integer || g_ghostPlayers.integer == 2) {
-
     vec3_t dir, push;
+
+    // push only every 50ms to normalize push amount to 'sv_fps 20'
+    // we cannot simply scale the push amount to lower on higher sv_fps
+    // values because friction will have more impact on lower speeds,
+    // resulting in a smaller push overall
+    if ((self->client &&
+         self->client->lastRevivePushTime + DEFAULT_SV_FRAMETIME >
+             level.time) ||
+        other->client->lastRevivePushTime + DEFAULT_SV_FRAMETIME > level.time) {
+      return;
+    }
 
     VectorSubtract(self->r.currentOrigin, other->r.currentOrigin, dir);
     dir[2] = 0;
@@ -1706,6 +1715,8 @@ void WolfRevivePushEnt(gentity_t *self, gentity_t *other) {
     if (self->client) {
       VectorAdd(self->s.pos.trDelta, push, self->s.pos.trDelta);
       VectorAdd(self->client->ps.velocity, push, self->client->ps.velocity);
+      self->client->lastRevivePushTime =
+          level.time - (level.time % DEFAULT_SV_FRAMETIME);
     }
 
     VectorScale(dir, -WR_PUSHAMOUNT, push);
@@ -1713,6 +1724,8 @@ void WolfRevivePushEnt(gentity_t *self, gentity_t *other) {
 
     VectorAdd(other->s.pos.trDelta, push, other->s.pos.trDelta);
     VectorAdd(other->client->ps.velocity, push, other->client->ps.velocity);
+    other->client->lastRevivePushTime =
+        level.time - (level.time % DEFAULT_SV_FRAMETIME);
   }
 }
 
