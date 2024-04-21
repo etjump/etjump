@@ -776,6 +776,10 @@ void G_RunMissile(gentity_t *ent) {
 
   if (tr.startsolid) {
     tr.fraction = 0;
+  } else {
+    // mark last surfaceFlags for potentially ignoring trace if a projectile
+    // gets stuck inside a skybox brush, so we can just keep traveling forward
+    ent->lastSurfaceFlag = tr.surfaceFlags;
   }
 
   trap_LinkEntity(ent);
@@ -785,7 +789,7 @@ void G_RunMissile(gentity_t *ent) {
         (ent->s.weapon == WP_MORTAR_SET || ent->s.weapon == WP_GPG40 ||
          ent->s.weapon == WP_M7 || ent->s.weapon == WP_GRENADE_LAUNCHER ||
          ent->s.weapon == WP_GRENADE_PINEAPPLE) &&
-        tr.surfaceFlags & SURF_SKY) {
+        (tr.surfaceFlags & SURF_SKY || ent->lastSurfaceFlag & SURF_SKY)) {
       // goes through sky
       ent->count = 1;
       trap_UnlinkEntity(ent);
@@ -1259,7 +1263,6 @@ gentity_t *fire_flamechunk(gentity_t *self, const vec3_t start, vec3_t dir) {
   // the flamechunk has reached its minimum speed after ~500ms, we use this as
   // a timestamp for checking whether we should keep decreasing or not
   bolt->s.pos.trDuration = 550;
-
 
   // 'speed' will be the current size radius of the chunk
   bolt->speed = FLAME_START_SIZE;

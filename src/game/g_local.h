@@ -601,6 +601,8 @@ struct gentity_s {
 
   // last activation time of trigger_multiple for each client
   int triggerActivationTime[MAX_CLIENTS];
+  // for tracking projectiles entering skybox
+  int lastSurfaceFlag;
 };
 
 // Ridah
