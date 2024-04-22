@@ -674,7 +674,25 @@ static int getDemoSnapshotInterval() {
 }
 }
 
-#define LAG_SAMPLES 128
+// lagometer sample count, enough for ~5ms server frame intervals
+static constexpr int LAG_SAMPLES = 1024;
+static constexpr int LAG_PERIOD = 5000;
+
+struct sample_t {
+  int elapsed;
+  int time;
+};
+
+struct sampledStat_t {
+  unsigned int count;
+  int avg;
+  int lastSampleTime;
+  int samplesTotalElapsed;
+
+  sample_t samples[LAG_SAMPLES];
+};
+
+static sampledStat_t sampledStat;
 
 typedef struct {
   int frameSamples[LAG_SAMPLES];
@@ -684,7 +702,7 @@ typedef struct {
   int snapshotCount;
 } lagometer_t;
 
-lagometer_t lagometer;
+static lagometer_t lagometer;
 
 /*
 ==============
@@ -712,7 +730,7 @@ Pass NULL for a dropped packet.
 ==============
 */
 void CG_AddLagometerSnapshotInfo(snapshot_t *snap) {
-  int index = lagometer.snapshotCount & (LAG_SAMPLES - 1);
+  unsigned int index = lagometer.snapshotCount & (LAG_SAMPLES - 1);
 
   // dropped packet
   if (!snap) {
@@ -737,6 +755,48 @@ void CG_AddLagometerSnapshotInfo(snapshot_t *snap) {
 
   lagometer.snapshotFlags[index] = snap->snapFlags;
   lagometer.snapshotCount++;
+
+  // calculate received snapshots
+  index = sampledStat.count;
+
+  if (sampledStat.count < LAG_SAMPLES) {
+    sampledStat.count++;
+  } else {
+    index--;
+  }
+
+  sampledStat.samples[index].elapsed =
+      snap->serverTime - sampledStat.lastSampleTime;
+  sampledStat.samples[index].elapsed =
+      std::max(sampledStat.samples[index].elapsed, 0);
+
+  sampledStat.samples[index].time = snap->serverTime;
+  sampledStat.lastSampleTime = snap->serverTime;
+  sampledStat.samplesTotalElapsed += sampledStat.samples[index].elapsed;
+
+  const int oldest = snap->serverTime - LAG_PERIOD;
+
+  for (index = 0; index < sampledStat.count; index++) {
+    if (sampledStat.samples[index].time > oldest) {
+      break;
+    }
+
+    sampledStat.samplesTotalElapsed -= sampledStat.samples[index].elapsed;
+  }
+
+  if (index) {
+    std::memmove(sampledStat.samples, sampledStat.samples + index,
+                 sizeof(sample_t) * (sampledStat.count - index));
+    sampledStat.count -= index;
+  }
+
+  sampledStat.avg =
+      sampledStat.samplesTotalElapsed > 0
+          ? static_cast<int>(std::round(
+                static_cast<float>(sampledStat.count) /
+                (static_cast<float>(sampledStat.samplesTotalElapsed) /
+                 1000.0f)))
+          : 0;
 }
 
 /*
@@ -924,6 +984,51 @@ static void CG_DrawLagometer() {
   ) {
     CG_DrawBigString(ax, ay, "snc", 1.0);
   }
+
+  // snapshot display
+  vec4_t textColor = {0.625f, 0.625f, 0.6f, 1.0f};
+  float fps;
+
+  if (cg.demoPlayback) {
+    static bool svFpsAvailable =
+        ETJump::demoCompatibility->isCompatible({3, 3, 0});
+    static bool csAvailable =
+        ETJump::demoCompatibility->isCompatible({3, 2, 0});
+
+    if (svFpsAvailable) {
+      fps = static_cast<float>(cgs.sv_fps);
+    } else if (csAvailable) {
+      const char *cs = CG_ConfigString(CS_SYSTEMINFO);
+      fps = Q_atof(Info_ValueForKey(cs, "sv_fps"));
+    } else {
+      // assume default sv_fps 20
+      fps = 1000.0f / DEFAULT_SV_FRAMETIME;
+    }
+  } else {
+    fps = static_cast<float>(cgs.sv_fps);
+  }
+
+  const size_t pad = std::strlen(std::to_string(static_cast<int>(fps)).c_str());
+
+  // server snapshot rate (sv_fps)
+  std::string svStr = ETJump::stringFormat(
+      "sv: %*s", pad, std::to_string(static_cast<int>(fps)));
+  CG_Text_Paint_Ext(x + 2, y + 13, 0.16f, 0.16f, textColor, svStr.c_str(), 0, 0,
+                    ITEM_TEXTSTYLE_NORMAL, &cgs.media.limboFont2);
+
+  // client received snapshots
+  const auto avg = static_cast<float>(sampledStat.avg);
+
+  if (avg < fps * 0.5f) {
+    Vector4Copy(colorRed, textColor);
+  } else if (avg < fps * 0.75f) {
+    Vector4Copy(colorYellow, textColor);
+  }
+
+  std::string clStr = ETJump::stringFormat(
+      "cl: %*s", pad, std::to_string(static_cast<int>(avg)));
+  CG_Text_Paint_Ext(x + 2, y + 7, 0.16f, 0.16f, textColor, clStr.c_str(), 0, 0,
+                    ITEM_TEXTSTYLE_NORMAL, &cgs.media.limboFont2);
 
   CG_DrawDisconnect();
 }
