@@ -936,9 +936,9 @@ void TeamplayInfoMessage(team_t team) {
   bufferedData = team == TEAM_AXIS ? level.tinfoAxis : level.tinfoAllies;
 
   tinfo = va("tinfo %i%s", cnt, string);
-  if (!Q_stricmp(bufferedData,
-                 tinfo)) // Gordon: no change so just return
-  {
+
+  // Gordon: no change so just return
+  if (!Q_stricmp(bufferedData, tinfo)) {
     return;
   }
 
@@ -946,11 +946,12 @@ void TeamplayInfoMessage(team_t team) {
 
   for (i = 0; i < level.numConnectedClients; i++) {
     player = g_entities + level.sortedClients[i];
-    if (player->inuse && player->client->sess.sessionTeam == team) {
-      if (player->client->pers.connected == CON_CONNECTED) {
-        trap_SendServerCommand(player - g_entities, tinfo);
-      }
+
+    if (!player->inuse || player->client->pers.connected != CON_CONNECTED) {
+      continue;
     }
+
+    trap_SendServerCommand(ClientNum(player), tinfo);
   }
 }
 
