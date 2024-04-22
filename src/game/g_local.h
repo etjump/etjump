@@ -257,9 +257,6 @@ typedef struct TokenInformation_s TokenInformation;
 constexpr int MAX_TIMERUNS = 20;
 constexpr int MAX_TIMERUN_NAME_LENGTH = 64;
 
-// default sv_fps 20 frametime for framerate independent server timings
-constexpr int DEFAULT_SV_FRAMETIME = 50;
-
 //====================================================================
 
 #define MAX_NETNAME 36

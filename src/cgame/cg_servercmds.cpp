@@ -150,6 +150,7 @@ void CG_ParseSysteminfo(void) {
   }
 
   cgs.cheats = Q_atoi(Info_ValueForKey(info, "sv_cheats"));
+  cgs.sv_fps = Q_atoi(Info_ValueForKey(info, "sv_fps"));
 
 #ifdef ALLOW_GSYNC
   cgs.synchronousClients =
