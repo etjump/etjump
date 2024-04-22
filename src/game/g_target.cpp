@@ -598,29 +598,31 @@ void target_teleporter_use(gentity_t *self, gentity_t *other,
     G_AddEvent(activator, EV_GENERAL_SOUND, self->noise_index);
   }
 
-  if (self->spawnflags & TeleporterSpawnflags::Knockback) {
+  if (self->spawnflags & static_cast<int>(TeleporterSpawnflags::Knockback)) {
     activator->client->ps.pm_time = 160; // hold time
     activator->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
   }
 
-  if (self->spawnflags & TeleporterSpawnflags::ResetSpeed) {
+  if (self->spawnflags & static_cast<int>(TeleporterSpawnflags::ResetSpeed)) {
     // We need some speed to make TeleportPlayerKeepAngles work with
     // this spawnflag, else it doesn't know which trigger side we enter
     VectorSet(activator->client->ps.velocity, 0.01, 0.01, 0.0);
   }
 
-  if (self->spawnflags & TeleporterSpawnflags::ConvertSpeed) {
+  if (self->spawnflags & static_cast<int>(TeleporterSpawnflags::ConvertSpeed)) {
     TeleportPlayerExt(activator, dest->s.origin, dest->s.angles);
     return;
   }
 
-  if (self->spawnflags & TeleporterSpawnflags::RelativePitch) {
+  if (self->spawnflags &
+      static_cast<int>(TeleporterSpawnflags::RelativePitch)) {
     TeleportPlayerKeepAngles_Clank(activator, other, dest->s.origin,
                                    dest->s.angles);
     return;
   }
 
-  if (self->spawnflags & TeleporterSpawnflags::RelativePitchYaw) {
+  if (self->spawnflags &
+      static_cast<int>(TeleporterSpawnflags::RelativePitchYaw)) {
     TeleportPlayerKeepAngles(activator, other, dest->s.origin, dest->s.angles);
     return;
   }

@@ -698,7 +698,7 @@ enum class TriggerMultipleFlags {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum TeleporterSpawnflags {
+enum class TeleporterSpawnflags {
   None = 0,
   ResetSpeed = 1 << 0,
   ConvertSpeed = 1 << 1,

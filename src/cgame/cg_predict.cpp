@@ -6,6 +6,7 @@
 // It also handles local physics interaction, like fragments bouncing off walls
 
 #include "cg_local.h"
+#include "../game/etj_entity_utilities_shared.h"
 
 /*static*/ pmove_t cg_pmove;
 
@@ -571,12 +572,10 @@ static void CG_TouchTriggerPrediction() {
         CG_ObjectivePrint(va("You are near %s\n", cs), SMALLCHAR_WIDTH);
       }
 
-      if (ent->eType == ET_PUSH_TRIGGER) {
-        BG_TouchJumpPad(&cg.predictedPlayerState, cg.physicsTime, ent);
-      }
-
-      if (ent->eType == ET_VELOCITY_PUSH_TRIGGER) {
-        BG_TouchVelocityJumpPad(&cg.predictedPlayerState, cg.physicsTime, ent);
+      if (ent->eType == ET_PUSH_TRIGGER ||
+          ent->eType == ET_VELOCITY_PUSH_TRIGGER) {
+        ETJump::EntityUtilsShared::touchPusher(&cg.predictedPlayerState,
+                                               cg.physicsTime, ent);
       }
 
       continue;

@@ -1859,12 +1859,6 @@ void BG_GetMarkDir(const vec3_t dir, const vec3_t normal, vec3_t out);
 void BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm,
                                          playerState_t *ps);
 
-void BG_TouchJumpPad(playerState_t *ps, int time, entityState_t *jumppad);
-void BG_TouchVelocityJumpPad(playerState_t *ps, int time,
-                             entityState_t *jumppad);
-void BG_GetPushVelocity(playerState_t *ps, vec3_t origin, int spawnflags,
-                        vec3_t outVelocity);
-
 void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s,
                                  qboolean snap);
 void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
@@ -2809,7 +2803,15 @@ enum class CheatCvarFlags {
   LookYaw = 1,
   PmoveFPS = 2,
 };
-}
+
+enum class PusherSpawnFlags {
+  None = 0,
+  // reserved by 'target_push' but unused as the sounds don't exist in ET
+  AltSound = 1 << 0,
+  AddXY = 1 << 1,
+  AddZ = 1 << 2
+};
+} // namespace ETJump
 
 const int JUMP_VELOCITY = 270;
 // FIXME: this is incorrect when ps.speed is modified

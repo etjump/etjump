@@ -60,6 +60,7 @@ add_library(qagame MODULE
 	"etj_database_v2.cpp"
 	"etj_deathrun_system.cpp"
 	"etj_entity_utilities.cpp"
+	"etj_entity_utilities_shared.cpp"
 	"etj_file.cpp"
 	"etj_filesystem.cpp"
 	"etj_inactivity_timer.cpp"
