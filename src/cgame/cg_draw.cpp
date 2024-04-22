@@ -651,6 +651,29 @@ LAGOMETER
 ===============================================================================
 */
 
+namespace ETJump {
+static int getDemoSnapshotInterval() {
+  int interval;
+
+  // cgs.sv_fps is present
+  static bool svFpsAvailable = demoCompatibility->isCompatible({3, 3, 0});
+  // CS_SYSTEMINFO contains sv_fps key
+  static bool csAvailable = demoCompatibility->isCompatible({3, 2, 0});
+
+  if (svFpsAvailable) {
+    interval = 1000 / cgs.sv_fps;
+  } else if (csAvailable) {
+    const char *cs = CG_ConfigString(CS_SYSTEMINFO);
+    interval = 1000 / Q_atoi(Info_ValueForKey(cs, "sv_fps"));
+  } else {
+    // no way to determine for sure, assume default sv_fps 20
+    interval = DEFAULT_SV_FRAMETIME;
+  }
+
+  return interval;
+}
+}
+
 #define LAG_SAMPLES 128
 
 typedef struct {
@@ -689,18 +712,30 @@ Pass NULL for a dropped packet.
 ==============
 */
 void CG_AddLagometerSnapshotInfo(snapshot_t *snap) {
+  int index = lagometer.snapshotCount & (LAG_SAMPLES - 1);
+
   // dropped packet
   if (!snap) {
-    lagometer.snapshotSamples[lagometer.snapshotCount & (LAG_SAMPLES - 1)] = -1;
+    lagometer.snapshotSamples[index] = -1;
     lagometer.snapshotCount++;
     return;
   }
 
   // add this snapshot's info
-  lagometer.snapshotSamples[lagometer.snapshotCount & (LAG_SAMPLES - 1)] =
-      snap->ping;
-  lagometer.snapshotFlags[lagometer.snapshotCount & (LAG_SAMPLES - 1)] =
-      snap->snapFlags;
+  // demo playback displays snapshot delta values instead of ping (ala ETPro)
+  // https://bani.anime.net/banimod/forums/viewtopic.php?t=6381
+  if (cg.demoPlayback) {
+    static int lastUpdate = 0;
+    const int interval = ETJump::getDemoSnapshotInterval();
+
+    snap->ping = (snap->serverTime - snap->ps.commandTime) - interval;
+    lagometer.snapshotSamples[index] = snap->serverTime - lastUpdate;
+    lastUpdate = snap->serverTime;
+  } else {
+    lagometer.snapshotSamples[index] = snap->ping;
+  }
+
+  lagometer.snapshotFlags[index] = snap->snapFlags;
   lagometer.snapshotCount++;
 }
 

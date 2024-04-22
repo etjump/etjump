@@ -2815,4 +2815,7 @@ const int JUMP_VELOCITY = 270;
 // FIXME: this is incorrect when ps.speed is modified
 constexpr int MAX_GROUNDSTRAFE = 452;
 
+// default sv_fps 20 frametime for framerate independent server timings
+constexpr int DEFAULT_SV_FRAMETIME = 50;
+
 #endif // __BG_PUBLIC_H__

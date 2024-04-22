@@ -2153,6 +2153,8 @@ typedef struct {
   qboolean initing;
 
   demoCam_t demoCam;
+
+  int sv_fps;
 } cgs_t;
 
 // CGaz 5
