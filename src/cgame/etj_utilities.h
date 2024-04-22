@@ -66,5 +66,8 @@ void execFile(const std::string &filename);
 // returns true if client is currently playing (team axis/allies)
 bool isPlaying(int clientNum);
 
+// returns the server snapshot rate (sv_fps)
+int getSvFps();
+
 #endif
 } // namespace ETJump

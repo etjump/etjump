@@ -32,6 +32,7 @@
 #include "etj_event_loop.h"
 #include "../game/etj_string_utilities.h"
 #include "cg_local.h"
+#include "etj_demo_compatibility.h"
 
 namespace ETJump {
 extern std::shared_ptr<EventLoop> eventLoop;
@@ -206,6 +207,29 @@ void ETJump::execFile(const std::string &filename) {
 bool ETJump::isPlaying(const int clientNum) {
   return (cgs.clientinfo[clientNum].team == TEAM_ALLIES ||
           cgs.clientinfo[clientNum].team == TEAM_AXIS);
+}
+
+int ETJump::getSvFps() {
+  int fps;
+
+  if (cg.demoPlayback) {
+    static bool svFpsAvailable = demoCompatibility->isCompatible({3, 3, 0});
+    static bool csAvailable = demoCompatibility->isCompatible({3, 2, 0});
+
+    if (svFpsAvailable) {
+      fps = cgs.sv_fps;
+    } else if (csAvailable) {
+      const char *cs = CG_ConfigString(CS_SYSTEMINFO);
+      fps = Q_atoi(Info_ValueForKey(cs, "sv_fps"));
+    } else {
+      // no way to know for sure, assume default
+      fps = 1000 / DEFAULT_SV_FRAMETIME;
+    }
+  } else {
+    fps = cgs.sv_fps;
+  }
+
+  return fps;
 }
 
 #endif

@@ -651,29 +651,6 @@ LAGOMETER
 ===============================================================================
 */
 
-namespace ETJump {
-static int getDemoSnapshotInterval() {
-  int interval;
-
-  // cgs.sv_fps is present
-  static bool svFpsAvailable = demoCompatibility->isCompatible({3, 3, 0});
-  // CS_SYSTEMINFO contains sv_fps key
-  static bool csAvailable = demoCompatibility->isCompatible({3, 2, 0});
-
-  if (svFpsAvailable) {
-    interval = 1000 / cgs.sv_fps;
-  } else if (csAvailable) {
-    const char *cs = CG_ConfigString(CS_SYSTEMINFO);
-    interval = 1000 / Q_atoi(Info_ValueForKey(cs, "sv_fps"));
-  } else {
-    // no way to determine for sure, assume default sv_fps 20
-    interval = DEFAULT_SV_FRAMETIME;
-  }
-
-  return interval;
-}
-}
-
 // lagometer sample count, enough for ~5ms server frame intervals
 static constexpr int LAG_SAMPLES = 1024;
 static constexpr int LAG_PERIOD = 5000;
@@ -744,7 +721,7 @@ void CG_AddLagometerSnapshotInfo(snapshot_t *snap) {
   // https://bani.anime.net/banimod/forums/viewtopic.php?t=6381
   if (cg.demoPlayback) {
     static int lastUpdate = 0;
-    const int interval = ETJump::getDemoSnapshotInterval();
+    const int interval = 1000 / ETJump::getSvFps();
 
     snap->ping = (snap->serverTime - snap->ps.commandTime) - interval;
     lagometer.snapshotSamples[index] = snap->serverTime - lastUpdate;
@@ -987,26 +964,7 @@ static void CG_DrawLagometer() {
 
   // snapshot display
   vec4_t textColor = {0.625f, 0.625f, 0.6f, 1.0f};
-  float fps;
-
-  if (cg.demoPlayback) {
-    static bool svFpsAvailable =
-        ETJump::demoCompatibility->isCompatible({3, 3, 0});
-    static bool csAvailable =
-        ETJump::demoCompatibility->isCompatible({3, 2, 0});
-
-    if (svFpsAvailable) {
-      fps = static_cast<float>(cgs.sv_fps);
-    } else if (csAvailable) {
-      const char *cs = CG_ConfigString(CS_SYSTEMINFO);
-      fps = Q_atof(Info_ValueForKey(cs, "sv_fps"));
-    } else {
-      // assume default sv_fps 20
-      fps = 1000.0f / DEFAULT_SV_FRAMETIME;
-    }
-  } else {
-    fps = static_cast<float>(cgs.sv_fps);
-  }
+  const auto fps = static_cast<float>(ETJump::getSvFps());
 
   const size_t pad = std::strlen(std::to_string(static_cast<int>(fps)).c_str());
 
