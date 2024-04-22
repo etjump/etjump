@@ -1701,6 +1701,7 @@ qboolean G_ScriptAction_PlaySound(gentity_t *ent, char *params) {
   char sound[MAX_QPATH];
   qboolean looping = qfalse;
   int volume = 255;
+  bool onlyActivator = false;
 
   if (!params) {
     G_Error("G_Scripting: syntax error\n\nplaysound <soundname "
@@ -1721,20 +1722,37 @@ qboolean G_ScriptAction_PlaySound(gentity_t *ent, char *params) {
       if (!volume) {
         volume = 255;
       }
+    } else if (!Q_stricmp(token, "private")) {
+      onlyActivator = true;
     }
 
     token = COM_ParseExt(&pString, qfalse);
   }
 
-  if (!looping) {
+  if (onlyActivator) {
+    if (looping) {
+      G_Error("G_ScriptAction_PlaySound: can't play looping private sound\n");
+    }
+
+    if (!ent->activator) {
+      G_Error("G_ScriptAction_PlaySound: no activator on playsound private\n");
+      return qfalse;
+    }
+
+    gentity_t *noiseEnt =
+        ETJump::soundEvent(ent->activator->r.currentOrigin,
+                           EV_GENERAL_CLIENT_SOUND_VOLUME, G_SoundIndex(sound));
+    noiseEnt->s.onFireStart = volume >> 1;
+    noiseEnt->s.teamNum = ClientNum(ent->activator);
+  } else if (!looping) {
     if (volume == 255) {
       G_AddEvent(ent, EV_GENERAL_SOUND, G_SoundIndex(sound));
     } else {
       G_AddEvent(ent, EV_GENERAL_SOUND_VOLUME, G_SoundIndex(sound));
       ent->s.onFireStart = volume >> 1;
     }
-  } else // looping channel
-  {
+  } else {
+    // looping channel
     ent->s.loopSound = G_SoundIndex(sound);
     ent->s.onFireStart = volume >> 1;
   }
