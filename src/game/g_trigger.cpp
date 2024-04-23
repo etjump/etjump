@@ -442,10 +442,7 @@ void trigger_teleporter_think(gentity_t *self) {
     VectorCopy(target->s.angles, self->s.angles2);
   }
 
-  // we have to keep running think every once in a while,
-  // otherwise origin2/angles2 get cleared, and we lose the destination data
-  // FIXME: this seems like it shouldn't happen? not sure where it gets cleared
-  self->nextthink = level.time + 1000;
+  self->nextthink = 0;
 }
 
 /*QUAKED trigger_teleport (.5 .5 .5) ?
