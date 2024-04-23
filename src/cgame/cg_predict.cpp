@@ -600,8 +600,7 @@ static void CG_TouchTriggerPrediction() {
                                                cg.physicsTime, ent);
       } else if (ent->eType == ET_TELEPORT_TRIGGER) {
         if (!ETJump::EntityUtilsShared::canPredictTeleport(
-                &cg.predictedPlayerState, ent,
-                (ent->constantLight >> 8) & 0xffffff)) {
+                &cg.snap->ps, ent, (ent->constantLight >> 8) & 0xffffff)) {
           continue;
         }
 

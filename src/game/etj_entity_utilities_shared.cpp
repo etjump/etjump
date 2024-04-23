@@ -360,7 +360,7 @@ bool EntityUtilsShared::canPredictTeleport(const playerState_t *ps,
 
 #ifdef CGAMEDLL
   // can't predict if target isn't in PVS
-  if (trap_R_inPVS(teleporter->origin2, ps->origin)) {
+  if (!trap_R_inPVS(teleporter->origin2, ps->origin)) {
     return false;
   }
 #endif
