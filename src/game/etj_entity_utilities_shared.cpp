@@ -342,7 +342,8 @@ void EntityUtilsShared::calcRelativeAngles(playerState_t *ps, const vec3_t mins,
   VectorCopy(newViewAngles, angles);
 }
 
-bool EntityUtilsShared::canPredictTeleport(const entityState_t *teleporter,
+bool EntityUtilsShared::canPredictTeleport(const playerState_t *ps,
+                                           const entityState_t *teleporter,
                                            const int &spawnflags) {
   // FIXME: I'd like to make these work but they just completely break
   //  since they run the angle calculations on same values multiple times
@@ -356,6 +357,13 @@ bool EntityUtilsShared::canPredictTeleport(const entityState_t *teleporter,
       VectorCompare(teleporter->angles2, vec3_origin)) {
     return false;
   }
+
+#ifdef CGAMEDLL
+  // can't predict if target isn't in PVS
+  if (trap_R_inPVS(teleporter->origin2, ps->origin)) {
+    return false;
+  }
+#endif
 
   return true;
 }

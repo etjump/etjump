@@ -51,7 +51,8 @@ public:
                                  const vec3_t maxs, const int &spawnflags,
                                  vec3_t origin, vec3_t angles);
 
-  static bool canPredictTeleport(const entityState_t *teleporter,
+  static bool canPredictTeleport(const playerState_t *ps,
+                                 const entityState_t *teleporter,
                                  const int &spawnflags);
 };
 } // namespace ETJump
