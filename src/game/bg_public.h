@@ -2804,6 +2804,15 @@ enum class CheatCvarFlags {
   PmoveFPS = 2,
 };
 
+enum class TeleporterSpawnflags {
+  None = 0,
+  ResetSpeed = 1 << 0,
+  ConvertSpeed = 1 << 1,
+  RelativePitch = 1 << 2,
+  RelativePitchYaw = 1 << 3,
+  Knockback = 1 << 4
+};
+
 enum class PusherSpawnFlags {
   None = 0,
   // reserved by 'target_push' but unused as the sounds don't exist in ET

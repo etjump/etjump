@@ -567,6 +567,7 @@ void SP_target_laser(gentity_t *self) {
 target_teleporter
 =====================
 */
+// FIXME: use the teleporter stuff in EntityUtilsShared
 void target_teleporter_use(gentity_t *self, gentity_t *other,
                            gentity_t *activator) {
   gentity_t *dest;
@@ -582,7 +583,7 @@ void target_teleporter_use(gentity_t *self, gentity_t *other,
     return;
   }
 
-  if (self->outSpeed > 0) {
+  if (self->speed > 0) {
     // If we don't have any velocity when teleporting,
     // there's nothing to scale from, so let's add some
     if (VectorCompare(activator->client->ps.velocity, vec3_origin)) {
@@ -590,7 +591,7 @@ void target_teleporter_use(gentity_t *self, gentity_t *other,
     }
 
     VectorNormalize(activator->client->ps.velocity);
-    VectorScale(activator->client->ps.velocity, self->outSpeed,
+    VectorScale(activator->client->ps.velocity, static_cast<int>(self->speed),
                 activator->client->ps.velocity);
   }
 
@@ -598,31 +599,34 @@ void target_teleporter_use(gentity_t *self, gentity_t *other,
     G_AddEvent(activator, EV_GENERAL_SOUND, self->noise_index);
   }
 
-  if (self->spawnflags & static_cast<int>(TeleporterSpawnflags::Knockback)) {
+  if (self->spawnflags &
+      static_cast<int>(ETJump::TeleporterSpawnflags::Knockback)) {
     activator->client->ps.pm_time = 160; // hold time
     activator->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
   }
 
-  if (self->spawnflags & static_cast<int>(TeleporterSpawnflags::ResetSpeed)) {
+  if (self->spawnflags &
+      static_cast<int>(ETJump::TeleporterSpawnflags::ResetSpeed)) {
     // We need some speed to make TeleportPlayerKeepAngles work with
     // this spawnflag, else it doesn't know which trigger side we enter
     VectorSet(activator->client->ps.velocity, 0.01, 0.01, 0.0);
   }
 
-  if (self->spawnflags & static_cast<int>(TeleporterSpawnflags::ConvertSpeed)) {
+  if (self->spawnflags &
+      static_cast<int>(ETJump::TeleporterSpawnflags::ConvertSpeed)) {
     TeleportPlayerExt(activator, dest->s.origin, dest->s.angles);
     return;
   }
 
   if (self->spawnflags &
-      static_cast<int>(TeleporterSpawnflags::RelativePitch)) {
+      static_cast<int>(ETJump::TeleporterSpawnflags::RelativePitch)) {
     TeleportPlayerKeepAngles_Clank(activator, other, dest->s.origin,
                                    dest->s.angles);
     return;
   }
 
   if (self->spawnflags &
-      static_cast<int>(TeleporterSpawnflags::RelativePitchYaw)) {
+      static_cast<int>(ETJump::TeleporterSpawnflags::RelativePitchYaw)) {
     TeleportPlayerKeepAngles(activator, other, dest->s.origin, dest->s.angles);
     return;
   }
@@ -643,7 +647,7 @@ void SP_target_teleporter(gentity_t *self) {
   G_SpawnString("noise", "", &s);
   self->noise_index = G_SoundIndex(s);
 
-  G_SpawnInt("outspeed", "0", &self->outSpeed);
+  G_SpawnFloat("outspeed", "0", &self->speed);
 
   self->use = target_teleporter_use;
 }

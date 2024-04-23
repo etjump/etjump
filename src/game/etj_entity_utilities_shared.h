@@ -35,7 +35,23 @@ class EntityUtilsShared {
 public:
   static void touchPusher(playerState_t *ps, int time,
                           const entityState_t *pusher);
+
   static void setPushVelocity(const playerState_t *ps, const vec3_t origin2,
                               const int &spawnflags, vec3_t pushVel);
+
+  static void teleportPlayer(playerState_t *ps, entityState_t *player,
+                             entityState_t *teleporter, usercmd_t *cmd,
+                             vec3_t origin, vec3_t angles, vec3_t mins,
+                             vec3_t maxs);
+
+  static void setViewAngles(playerState_t *ps, entityState_t *es,
+                            usercmd_t *cmd, const vec3_t angle);
+
+  static void calcRelativeAngles(playerState_t *ps, const vec3_t mins,
+                                 const vec3_t maxs, const int &spawnflags,
+                                 vec3_t origin, vec3_t angles);
+
+  static bool canPredictTeleport(const entityState_t *teleporter,
+                                 const int &spawnflags);
 };
 } // namespace ETJump

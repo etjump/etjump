@@ -1,6 +1,7 @@
 #include "g_local.h"
 #include "etj_save_system.h"
 #include "etj_entity_utilities_shared.h"
+#include "etj_numeric_utilities.h"
 
 #include <algorithm>
 
@@ -382,64 +383,69 @@ trigger_teleporter
 */
 void trigger_teleporter_touch(gentity_t *self, gentity_t *other,
                               trace_t *trace) {
-  gentity_t *dest;
-
   if (!other->client || other->client->ps.pm_type == PM_DEAD) {
     return;
   }
 
-  dest = G_PickTarget(self->target);
+  // single target teleporter, destination origin and angles are set
+  // in origin2/angles2, we can predict this
+  if (self->count == 1) {
+    ETJump::EntityUtilsShared::teleportPlayer(
+        &other->client->ps, &other->s, &self->s, &other->client->pers.cmd,
+        self->s.origin2, self->s.angles2, self->r.mins, self->r.maxs);
+    return;
+  }
+
+  gentity_t *dest = G_PickTarget(self->target);
+  vec3_t destOrigin;
+  vec3_t destAngles;
 
   if (!dest) {
     G_Printf("Couldn't find teleporter destination\n");
     return;
   }
 
-  if (self->outSpeed > 0) {
-    // If we don't have any velocity when teleporting,
-    // there's nothing to scale from, so let's add some
-    if (VectorCompare(other->client->ps.velocity, vec3_origin)) {
-      VectorSet(other->client->ps.velocity, 0.01, 0.01, 0.0);
+  VectorCopy(dest->s.origin, destOrigin);
+  VectorCopy(dest->s.angles, destAngles);
+
+  ETJump::EntityUtilsShared::teleportPlayer(
+      &other->client->ps, &other->s, &self->s, &other->client->pers.cmd,
+      destOrigin, destAngles, self->r.mins, self->r.maxs);
+}
+
+void trigger_teleporter_think(gentity_t *self) {
+  // store destination origin/angles if we have a single target for prediction
+  // multi-target teleporters won't get predicted since we need to
+  // pick target on every activation randomly (handled in touch)
+  // this must be handled in think on runtime as the destination entity
+  // might not have spawned in yet when the trigger itself spawns
+  gentity_t *tmp = nullptr;
+  gentity_t *target = nullptr;
+  self->count = 0;
+
+  while (true) {
+    tmp = G_FindByTargetname(tmp, self->target);
+    if (!tmp) {
+      break;
     }
 
-    VectorNormalize(other->client->ps.velocity);
-    VectorScale(other->client->ps.velocity, self->outSpeed,
-                other->client->ps.velocity);
+    // store number of targets in self->count
+    self->count++;
+    target = tmp;
+    if (self->count > 1) {
+      break;
+    }
   }
 
-  if (self->noise_index) {
-    G_AddEvent(other, EV_GENERAL_SOUND, self->noise_index);
+  if (self->count == 1) {
+    VectorCopy(target->s.origin, self->s.origin2);
+    VectorCopy(target->s.angles, self->s.angles2);
   }
 
-  if (self->spawnflags & static_cast<int>(TeleporterSpawnflags::Knockback)) {
-    other->client->ps.pm_time = 160; // hold time
-    other->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
-  }
-
-  if (self->spawnflags & static_cast<int>(TeleporterSpawnflags::ResetSpeed)) {
-    // We need some speed to make TeleportPlayerKeepAngles work with
-    // this spawnflag, else it doesn't know which trigger side we enter
-    VectorSet(other->client->ps.velocity, 0.01, 0.01, 0.0);
-  }
-
-  if (self->spawnflags & static_cast<int>(TeleporterSpawnflags::ConvertSpeed)) {
-    TeleportPlayerExt(other, dest->s.origin, dest->s.angles);
-    return;
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(TeleporterSpawnflags::RelativePitch)) {
-    TeleportPlayerKeepAngles_Clank(other, self, dest->s.origin, dest->s.angles);
-    return;
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(TeleporterSpawnflags::RelativePitchYaw)) {
-    TeleportPlayerKeepAngles(other, self, dest->s.origin, dest->s.angles);
-    return;
-  }
-
-  TeleportPlayer(other, dest->s.origin, dest->s.angles);
+  // we have to keep running think every once in a while,
+  // otherwise origin2/angles2 get cleared, and we lose the destination data
+  // FIXME: this seems like it shouldn't happen? not sure where it gets cleared
+  self->nextthink = level.time + 1000;
 }
 
 /*QUAKED trigger_teleport (.5 .5 .5) ?
@@ -458,10 +464,23 @@ void SP_trigger_teleport(gentity_t *self) {
   G_SpawnString("noise", "", &s);
   self->noise_index = G_SoundIndex(s);
 
-  G_SpawnInt("outspeed", "0", &self->outSpeed);
+  G_SpawnFloat("outspeed", "0", &self->speed);
+  Numeric::clamp(self->speed, 0, UINT16_MAX);
+
+  // 16 bits for outspeed, should be more than enough
+  self->s.frame = static_cast<int>(self->speed);
+
+  // 8 bits for sound, 24 bits for spawnflags
+  // if we ever need more than 24 spawnflags, we can move the sound elsewhere,
+  // there's plenty of fields free to reuse for teleporters,
+  // but for now lets conserve the available resources
+  self->s.constantLight |= self->noise_index & 0xff;
+  self->s.constantLight |= (self->spawnflags << 8) & 0xffffff;
 
   self->s.eType = ET_TELEPORT_TRIGGER;
   self->touch = trigger_teleporter_touch;
+  self->think = trigger_teleporter_think;
+  self->nextthink = level.time + FRAMETIME;
 
   trap_LinkEntity(self);
 }
