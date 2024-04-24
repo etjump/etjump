@@ -41,7 +41,7 @@ public:
 
   static void teleportPlayer(playerState_t *ps, entityState_t *player,
                              entityState_t *teleporter, usercmd_t *cmd,
-                             vec3_t origin, vec3_t angles);
+                             const vec3_t origin, vec3_t angles);
 
   static void setViewAngles(playerState_t *ps, entityState_t *es,
                             usercmd_t *cmd, const vec3_t angle);

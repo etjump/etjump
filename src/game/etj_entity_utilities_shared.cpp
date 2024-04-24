@@ -91,7 +91,7 @@ void EntityUtilsShared::setPushVelocity(const playerState_t *ps,
 
 void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
                                        entityState_t *teleporter,
-                                       usercmd_t *cmd, vec3_t origin,
+                                       usercmd_t *cmd, const vec3_t origin,
                                        vec3_t angles) {
   // bits 8-31 contain the spawnflags
   const int spawnflags = (teleporter->constantLight >> 8) & 0xffffff;
