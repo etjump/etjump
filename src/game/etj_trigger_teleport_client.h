@@ -24,26 +24,12 @@
 
 #pragma once
 
-#ifdef CGAMEDLL
-  #include "../cgame/cg_local.h"
-#else
-  #include "g_local.h"
-#endif
-
 namespace ETJump {
-class EntityUtilsShared {
+class TriggerTeleportClient {
+  static void think(gentity_t *self);
+  static void touch(gentity_t *self, gentity_t *other);
+
 public:
-  static void touchPusher(playerState_t *ps, int time,
-                          const entityState_t *pusher);
-
-  static void setPushVelocity(const playerState_t *ps, const vec3_t origin2,
-                              const int &spawnflags, vec3_t pushVel);
-
-  static void teleportPlayer(playerState_t *ps, entityState_t *player,
-                             entityState_t *teleporter, usercmd_t *cmd,
-                             vec3_t origin, vec3_t angles);
-
-  static void setViewAngles(playerState_t *ps, entityState_t *es,
-                            usercmd_t *cmd, const vec3_t angle);
+  static void spawn(gentity_t *self);
 };
 } // namespace ETJump

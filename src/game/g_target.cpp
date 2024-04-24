@@ -567,7 +567,6 @@ void SP_target_laser(gentity_t *self) {
 target_teleporter
 =====================
 */
-// FIXME: use the teleporter stuff in EntityUtilsShared
 void target_teleporter_use(gentity_t *self, gentity_t *other,
                            gentity_t *activator) {
   gentity_t *dest;

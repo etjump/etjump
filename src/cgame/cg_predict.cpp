@@ -59,6 +59,7 @@ void CG_BuildSolidList(void) {
     if (ent->eType == ET_ITEM || ent->eType == ET_PUSH_TRIGGER ||
         ent->eType == ET_VELOCITY_PUSH_TRIGGER ||
         ent->eType == ET_TELEPORT_TRIGGER ||
+        ent->eType == ET_TELEPORT_TRIGGER_CLIENT ||
         ent->eType == ET_CONCUSSIVE_TRIGGER || ent->eType == ET_OID_TRIGGER
 #ifdef VISIBLE_TRIGGERS
         || ent->eType == ET_TRIGGER_MULTIPLE ||
@@ -519,7 +520,7 @@ static void CG_TouchTriggerPrediction() {
     if (ent->eType == ET_CONSTRUCTIBLE || ent->eType == ET_OID_TRIGGER ||
         ent->eType == ET_PUSH_TRIGGER ||
         ent->eType == ET_VELOCITY_PUSH_TRIGGER ||
-        ent->eType == ET_TELEPORT_TRIGGER
+        ent->eType == ET_TELEPORT_TRIGGER_CLIENT
 #ifdef VISIBLE_TRIGGERS
         || ent->eType == ET_TRIGGER_MULTIPLE ||
         ent->eType == ET_TRIGGER_FLAGONLY ||
@@ -546,7 +547,7 @@ static void CG_TouchTriggerPrediction() {
       {
         if (ent->eType != ET_PUSH_TRIGGER &&
             ent->eType != ET_VELOCITY_PUSH_TRIGGER &&
-            ent->eType != ET_TELEPORT_TRIGGER) {
+            ent->eType != ET_TELEPORT_TRIGGER_CLIENT) {
           // expand the bbox a bit
           VectorSet(mins, mins[0] - 48, mins[1] - 48, mins[2] - 48);
           VectorSet(maxs, maxs[0] + 48, maxs[1] + 48, maxs[2] + 48);
@@ -593,16 +594,12 @@ static void CG_TouchTriggerPrediction() {
         continue;
       }
 
-      if (ent->eType == ET_TELEPORT_TRIGGER) {
-        if (!ETJump::EntityUtilsShared::canPredictTeleport(
-                &cg.snap->ps, ent, (ent->constantLight >> 8) & 0xffffff)) {
-          continue;
-        }
-
-        entityState_t *es = &cg_entities[cg.snap->ps.clientNum].currentState;
-        ETJump::EntityUtilsShared::teleportPlayer(
-            &cg.predictedPlayerState, es, ent, &cg_pmove.cmd, ent->origin2,
-            ent->angles2, mins, maxs);
+      if (ent->eType == ET_TELEPORT_TRIGGER_CLIENT) {
+        entityState_t *playerEs =
+            &cg_entities[cg.snap->ps.clientNum].currentState;
+        ETJump::EntityUtilsShared::teleportPlayer(&cg.predictedPlayerState,
+                                                  playerEs, ent, &cg_pmove.cmd,
+                                                  ent->origin2, ent->angles2);
       } else {
         ETJump::EntityUtilsShared::touchPusher(&cg.predictedPlayerState,
                                                cg.physicsTime, ent);

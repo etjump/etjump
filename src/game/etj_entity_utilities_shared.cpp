@@ -92,8 +92,7 @@ void EntityUtilsShared::setPushVelocity(const playerState_t *ps,
 void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
                                        entityState_t *teleporter,
                                        usercmd_t *cmd, vec3_t origin,
-                                       vec3_t angles, vec3_t mins,
-                                       vec3_t maxs) {
+                                       vec3_t angles) {
   // bits 8-31 contain the spawnflags
   const int spawnflags = (teleporter->constantLight >> 8) & 0xffffff;
 
@@ -121,20 +120,12 @@ void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
   }
 
   if (spawnflags & static_cast<int>(TeleporterSpawnflags::ResetSpeed)) {
-    // pitch/yaw preservation requires a tiny amount of speed,
-    // else we can't determine which side we're entering from
-    VectorSet(ps->velocity, 0.01f, 0.01f, 0.0f);
-  }
-
-  if (spawnflags & static_cast<int>(TeleporterSpawnflags::ConvertSpeed)) {
+    VectorClear(ps->velocity);
+  } else if (spawnflags &
+             static_cast<int>(TeleporterSpawnflags::ConvertSpeed)) {
     float speed = VectorLength(ps->velocity);
     AngleVectors(angles, ps->velocity, nullptr, nullptr);
     VectorScale(ps->velocity, speed, ps->velocity);
-  } else if (spawnflags &
-                 static_cast<int>(TeleporterSpawnflags::RelativePitch) ||
-             spawnflags &
-                 static_cast<int>(TeleporterSpawnflags::RelativePitchYaw)) {
-    calcRelativeAngles(ps, mins, maxs, spawnflags, origin, angles);
   }
 
   VectorCopy(origin, ps->origin);
@@ -174,198 +165,4 @@ void EntityUtilsShared::setViewAngles(playerState_t *ps, entityState_t *es,
   VectorCopy(angle, es->angles);
   VectorCopy(es->angles, ps->viewangles);
 }
-
-void EntityUtilsShared::calcRelativeAngles(playerState_t *ps, const vec3_t mins,
-                                           const vec3_t maxs,
-                                           const int &spawnflags, vec3_t origin,
-                                           vec3_t angles) {
-  vec3_t newOrigin, newViewAngles{};
-  vec3_t newVelocity = {0, 0, 0}, offset = {0, 0, 0};
-  vec3_t triggerOrigin, tempActivator, tempOrigin;
-  vec3_t normalizedVelocity, veloAngles;
-  vec3_t sPlane[6];
-  vec_t minDistYZ, minDistXZ, minDistXY;
-  vec_t speed, length;
-  bool negDir = false;
-  const bool relativePitch =
-      spawnflags & static_cast<int>(TeleporterSpawnflags::RelativePitchYaw);
-
-  // normalized velocity is the direction vector
-  // for calculating the intersection points
-  VectorNormalize2(ps->velocity, normalizedVelocity);
-
-  // calculate the origin of the trigger brush
-  VectorSubtract(maxs, mins, tempOrigin);
-  VectorMA(mins, 0.5f, tempOrigin, triggerOrigin);
-
-  // calculate the intersection-points of player movement
-  // with the 6 planes of the trigger brush
-  // the shortest distance between player and intersection points
-  // selects the plane (where did we get into the trigger, from what side?)
-  if (normalizedVelocity[0] != 0.0f) {
-    VectorMA(ps->origin, (mins[0] - ps->origin[0]) / normalizedVelocity[0],
-             normalizedVelocity, sPlane[0]);
-    VectorMA(ps->origin, (maxs[0] - ps->origin[0]) / normalizedVelocity[0],
-             normalizedVelocity, sPlane[3]);
-    minDistYZ = std::min(VectorDistance(ps->origin, sPlane[0]),
-                         VectorDistance(ps->origin, sPlane[3]));
-  } else {
-    minDistYZ = 10000.0f;
-  }
-
-  if (normalizedVelocity[1] != 0.0f) {
-    VectorMA(ps->origin, (mins[1] - ps->origin[1]) / normalizedVelocity[1],
-             normalizedVelocity, sPlane[1]);
-    VectorMA(ps->origin, (maxs[1] - ps->origin[1]) / normalizedVelocity[1],
-             normalizedVelocity, sPlane[4]);
-    minDistXZ = std::min(VectorDistance(ps->origin, sPlane[1]),
-                         VectorDistance(ps->origin, sPlane[4]));
-  } else {
-    minDistXZ = 10000.0f;
-  }
-
-  if (normalizedVelocity[2] != 0.0f) {
-    VectorMA(ps->origin, (mins[2] - ps->origin[2]) / normalizedVelocity[2],
-             normalizedVelocity, sPlane[2]);
-    VectorMA(ps->origin, (maxs[2] - ps->origin[2]) / normalizedVelocity[2],
-             normalizedVelocity, sPlane[5]);
-    minDistXY = std::min(VectorDistance(ps->origin, sPlane[2]),
-                         VectorDistance(ps->origin, sPlane[5]));
-  } else {
-    minDistXY = 10000.0f;
-  }
-
-  // copy origins to tempvars
-  VectorCopy(triggerOrigin, tempOrigin);
-  VectorCopy(ps->origin, tempActivator);
-
-  // PLANE YZ (NORMAL X)
-  if (minDistYZ < minDistXZ && minDistYZ < minDistXY) {
-    // check +/- direction of trigger
-    if (triggerOrigin[0] < ps->origin[0]) {
-      negDir = true;
-    }
-
-    // calc viewangles
-    VectorCopy(angles, newViewAngles);
-    newViewAngles[YAW] += ps->viewangles[YAW];
-
-    if (relativePitch) {
-      newViewAngles[PITCH] += ps->viewangles[PITCH];
-    }
-
-    // calc velocity
-    speed = VectorLength(ps->velocity);
-    vectoangles(ps->velocity, veloAngles);
-    veloAngles[YAW] += angles[YAW];
-
-    if (negDir) {
-      veloAngles[YAW] += 180.0f;
-    }
-
-    AngleVectors(veloAngles, newVelocity, nullptr, nullptr);
-    VectorScale(newVelocity, speed, newVelocity);
-
-    // calc origin
-    tempOrigin[0] = tempActivator[0] = 0.0f;
-    VectorSubtract(tempActivator, tempOrigin, offset);
-
-    if (negDir) {
-      offset[1] *= -1.0f;
-    }
-
-    length = offset[1];
-    offset[0] = static_cast<float>(std::sin(-DEG2RAD(angles[1])) * length);
-    offset[1] = static_cast<float>(std::cos(-DEG2RAD(angles[1])) * length);
-  }
-  // PLANE XZ (NORMAL Y)
-  else if (minDistXZ < minDistYZ && minDistXZ < minDistXY) {
-    // check +/- direction of trigger
-    if (triggerOrigin[1] < ps->origin[1]) {
-      negDir = qtrue;
-    }
-
-    // calc viewangles
-    VectorCopy(angles, newViewAngles);
-    newViewAngles[YAW] += (ps->viewangles[YAW] - 90.0f);
-
-    if (relativePitch) {
-      newViewAngles[PITCH] += ps->viewangles[PITCH];
-    }
-
-    // calc velocity
-    speed = VectorLength(ps->velocity);
-    vectoangles(ps->velocity, veloAngles);
-    veloAngles[YAW] += angles[YAW] - 90.0f;
-
-    if (negDir) {
-      veloAngles[YAW] += 180.0f;
-    }
-
-    AngleVectors(veloAngles, newVelocity, nullptr, nullptr);
-    VectorScale(newVelocity, speed, newVelocity);
-
-    // calc origin offset
-    tempOrigin[1] = tempActivator[1] = 0.0f;
-    VectorSubtract(tempActivator, tempOrigin, offset);
-    if (triggerOrigin[1] < ps->origin[1]) {
-      offset[0] *= -1.0f;
-    }
-
-    length = offset[0];
-    offset[1] =
-        static_cast<float>(std::sin(DEG2RAD(angles[1] - 90.0f)) * length);
-    offset[0] =
-        static_cast<float>(std::cos(DEG2RAD(angles[1] - 90.0f)) * length);
-  }
-  // PLANE XY (NORMAL Z) // makes no sense, set dest values
-  else if (minDistXY < minDistXZ && minDistXY < minDistYZ) {
-    // viewangles
-    VectorCopy(angles, newViewAngles);
-    // velocity
-    VectorCopy(vec3_origin, newVelocity);
-    // origin
-    VectorCopy(vec3_origin, offset);
-  }
-
-  // add origin offset
-  VectorAdd(origin, offset, newOrigin);
-  // set velocity
-  VectorCopy(newVelocity, ps->velocity);
-  // correct Viewangles
-  if (negDir) {
-    newViewAngles[YAW] += 180.0f;
-  }
-
-  // setup new origin and angles
-  VectorCopy(newOrigin, origin);
-  VectorCopy(newViewAngles, angles);
-}
-
-#ifdef CGAMEDLL
-bool EntityUtilsShared::canPredictTeleport(const playerState_t *ps,
-                                           const entityState_t *teleporter,
-                                           const int &spawnflags) {
-  // FIXME: I'd like to make these work but they just completely break
-  //  since they run the angle calculations on same values multiple times
-  if (spawnflags & static_cast<int>(TeleporterSpawnflags::RelativePitch) ||
-      spawnflags & static_cast<int>(TeleporterSpawnflags::RelativePitchYaw)) {
-    return false;
-  }
-
-  // multi-target teleporter
-  if (VectorCompare(teleporter->origin2, vec3_origin) &&
-      VectorCompare(teleporter->angles2, vec3_origin)) {
-    return false;
-  }
-
-  // can't predict if target isn't in PVS
-  if (!trap_R_inPVS(teleporter->origin2, ps->origin)) {
-    return false;
-  }
-
-  return true;
-}
-#endif
-
 } // namespace ETJump
