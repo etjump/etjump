@@ -575,7 +575,7 @@ static void CG_TouchTriggerPrediction() {
         CG_ObjectivePrint(va("You are near %s\n", cs), SMALLCHAR_WIDTH);
       }
 
-      // sanity check trace for non-axial triggers
+      // trace for non-axial triggers
       // FIXME: maybe this setup could be used for everything instead of
       //  doing the BG_BBoxCollision above, as this is more accurate?
       cmodel = trap_CM_InlineModel(ent->modelindex);
@@ -586,19 +586,14 @@ static void CG_TouchTriggerPrediction() {
 
       trace_t trace;
       trap_CM_CapsuleTrace(&trace, cg.predictedPlayerState.origin,
-                           cg.predictedPlayerState.origin,
-                           cg.predictedPlayerState.mins,
-                           cg.predictedPlayerState.maxs, cmodel, -1);
+                           cg.predictedPlayerState.origin, cg_pmove.mins,
+                           cg_pmove.maxs, cmodel, -1);
 
       if (trace.fraction == 1.0f) {
         continue;
       }
 
-      if (ent->eType == ET_PUSH_TRIGGER ||
-          ent->eType == ET_VELOCITY_PUSH_TRIGGER) {
-        ETJump::EntityUtilsShared::touchPusher(&cg.predictedPlayerState,
-                                               cg.physicsTime, ent);
-      } else if (ent->eType == ET_TELEPORT_TRIGGER) {
+      if (ent->eType == ET_TELEPORT_TRIGGER) {
         if (!ETJump::EntityUtilsShared::canPredictTeleport(
                 &cg.snap->ps, ent, (ent->constantLight >> 8) & 0xffffff)) {
           continue;
@@ -608,6 +603,9 @@ static void CG_TouchTriggerPrediction() {
         ETJump::EntityUtilsShared::teleportPlayer(
             &cg.predictedPlayerState, es, ent, &cg_pmove.cmd, ent->origin2,
             ent->angles2, mins, maxs);
+      } else {
+        ETJump::EntityUtilsShared::touchPusher(&cg.predictedPlayerState,
+                                               cg.physicsTime, ent);
       }
 
       continue;
