@@ -6633,7 +6633,9 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         }
         // ydnar: better bullet marks
         VectorSubtract(vec3_origin, dir, dir);
-        if (trace.entityNum >= MAX_CLIENTS && cg_ghostPlayers.integer > 0) {
+
+        // FIXME: handle ft collision correctly here
+        if (trace.entityNum >= MAX_CLIENTS && cg_ghostPlayers.integer == 1) {
           CG_MissileHitWall(fromweap, 1, trace.endpos, dir, trace.surfaceFlags);
         }
       }

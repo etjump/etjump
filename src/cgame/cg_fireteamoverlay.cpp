@@ -89,7 +89,7 @@ void CG_ParseFireteams() {
   unsigned int tmp;
 
   for (i = 0; i < MAX_CLIENTS; i++) {
-    cgs.clientinfo[i].fireteamData = NULL;
+    cgs.clientinfo[i].fireteamData = nullptr;
   }
 
   for (i = 0; i < MAX_FIRETEAMS; i++) {
@@ -110,6 +110,9 @@ void CG_ParseFireteams() {
 
     s = Info_ValueForKey(p, "sl");
     cg.fireTeams[i].saveLimit = Q_atoi(s);
+
+    s = Info_ValueForKey(p, "ng");
+    cg.fireTeams[i].noGhost = Q_atoi(s);
 
     s = Info_ValueForKey(p, "c");
     Q_strncpyz(hexbuffer + 2, s, 9);
@@ -287,6 +290,8 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
   }
 
   const bool saveLimit = f->saveLimit != FT_SAVELIMIT_NOT_SET;
+  const bool noGhost = f->noGhost;
+
   h = FT_HEADER_HEIGHT + 2 + 2;
 
   for (i = 0; i < MAX_FIRETEAM_USERS; i++) {
@@ -311,28 +316,37 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
   CG_Text_Paint_Ext(x + 3, y + FT_BAR_HEIGHT, .19f, .19f, tclr, buffer, 0, 0, 0,
                     &cgs.media.limboFont1);
 
+  float iconX = rect->x + FT_WIDTH - 4 + fireteamOffsetX;
+  vec4_t friendShaderColor = {1.0f, 1.0f, 1.0f, fireteamAlpha};
+  float saveTextW = 0.0f;
+
   if (saveLimit) {
     if (f->saveLimit == 0) {
-      vec4_t friendShaderColor = {1.0f, 1.0f, 1.0f, fireteamAlpha};
-      ETJump::drawPic(rect->x + FT_WIDTH - 4 - 8 + fireteamOffsetX,
-                      y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.saveIcon, tclr);
-      ETJump::drawPic(rect->x + FT_WIDTH - 4 - 8 + fireteamOffsetX,
-                      y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.friendShader,
-                      friendShaderColor);
+      ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8,
+                      cgs.media.saveIcon, tclr);
+      ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8,
+                      cgs.media.friendShader, friendShaderColor);
 
     } else {
       buffer = ETJump::stringFormat("%i", f->saveLimit);
-      auto textW = static_cast<float>(
+      saveTextW = static_cast<float>(
           CG_Text_Width_Ext(buffer, 0.19f, 0, &cgs.media.limboFont1));
-      CG_Text_Paint_RightAligned_Ext(
-          rect->x + FT_WIDTH - 4 + fireteamOffsetX, y + FT_BAR_HEIGHT, .19f,
-          .19f, tclr, va("%i", f->saveLimit), 0, 0, 0, &cgs.media.limboFont1);
-      ETJump::drawPic(rect->x + FT_WIDTH - 4 - textW - 12 + fireteamOffsetX,
-                      y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.saveIcon, tclr);
+      CG_Text_Paint_RightAligned_Ext(iconX, y + FT_BAR_HEIGHT, .19f, .19f, tclr,
+                                     va("%i", f->saveLimit), 0, 0, 0,
+                                     &cgs.media.limboFont1);
+      ETJump::drawPic(iconX - saveTextW - 12, y + FT_BAR_HEIGHT - 8, 8, 8,
+                      cgs.media.saveIcon, tclr);
     }
+
+    iconX -= 8 + 4 + (saveTextW > 0 ? saveTextW + 4 : 0);
   }
 
-  x += 2;
+  if (noGhost) {
+    ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8,
+                    cgs.media.noclipIcon, tclr);
+    ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8,
+                    cgs.media.friendShader, friendShaderColor);
+  }
 
   for (i = 0; i < MAX_FIRETEAM_USERS; i++) {
     y += FT_BAR_HEIGHT + FT_BAR_YSPACING;

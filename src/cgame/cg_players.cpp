@@ -1533,18 +1533,18 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
   // send a trace down from the player to the ground
   VectorCopy(cent->lerpOrigin, end);
   end[2] -= SHADOW_DISTANCE;
+
   // Trickjump: Ghost
-  if (cg_ghostPlayers.integer == 1) {
-    trap_CM_BoxTrace(&trace, cent->lerpOrigin, end, NULL, NULL, 0,
-                     MASK_PLAYERSOLID & ~CONTENTS_BODY);
-  } else {
-    trap_CM_BoxTrace(&trace, cent->lerpOrigin, end, NULL, NULL, 0,
-                     MASK_PLAYERSOLID);
+  trap_CM_BoxTrace(&trace, cent->lerpOrigin, end, nullptr, nullptr, 0,
+                   MASK_PLAYERSOLID);
+
+  // re-trace if we hit a nonsolid player
+  if (trace.entityNum < MAX_CLIENTS) {
+    if (!ETJump::playerIsSolid(cg.snap->ps.clientNum, trace.entityNum)) {
+      trap_CM_BoxTrace(&trace, cent->lerpOrigin, end, nullptr, nullptr, 0,
+                       MASK_PLAYERSOLID & ~CONTENTS_BODY);
+    }
   }
-  // no shadow if too high
-  //%	if ( trace.fraction == 1.0 || trace.fraction == 0.0f ) {
-  //%		return qfalse;
-  //%	}
 
   *shadowPlane = trace.endpos[2] + 1;
 
@@ -1959,9 +1959,8 @@ void CG_Player(centity_t *cent) {
     return;
   }
 
-  // Only hide if ghostPlayers is on
-  if (cg_ghostPlayers.integer == 1) {
-
+  // Only hide if player is nonsolid
+  if (!ETJump::playerIsSolid(cg.snap->ps.clientNum, clientNum)) {
     vec_t playerDist = Distance(cgsnap->lerpOrigin, cent->lerpOrigin);
     int transZone = etj_hideDistance.integer + etj_hideFadeRange.integer;
 

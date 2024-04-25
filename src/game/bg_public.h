@@ -2436,6 +2436,8 @@ typedef struct {
   qboolean teamJumpMode;
   qboolean inuse;
   qboolean priv;
+
+  bool noGhost; // disable ghostplayers between fireteam members
 } fireteamData_t;
 
 long BG_StringHashValue(const char *fname);

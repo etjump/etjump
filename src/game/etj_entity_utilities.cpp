@@ -70,4 +70,30 @@ void EntityUtilities::drawRailBox(gentity_t *ent,
 
   temp->s.effect1Time = ent->s.number + 1;
 }
+
+bool EntityUtilities::playerIsSolid(const int self, const int other) {
+  fireteamData_t *ftSelf, *ftOther;
+
+  if (!G_IsOnFireteam(self, &ftSelf)) {
+    return false;
+  }
+
+  if (self == other) {
+    return false;
+  }
+
+  // we're on same fireteam, but noghost isn't enabled
+  if (G_IsOnFireteam(other, &ftOther) && ftSelf == ftOther) {
+    if (!ftSelf->noGhost) {
+      return false;
+    }
+  }
+
+  // we're not in the same fireteam
+  if (!G_IsOnFireteam(other, &ftOther) || ftSelf != ftOther) {
+    return false;
+  }
+
+  return true;
+}
 } // namespace ETJump

@@ -1238,6 +1238,7 @@ void SP_worldspawn(void) {
     trap_Cvar_Set("g_ghostPlayers", buf);
     trap_Cvar_Update(&g_ghostPlayers);
     G_Printf("Ghosting is disabled.\n");
+    level.noGhost = true;
   } else {
     char buf[128] = "\0";
     int currentValue = g_ghostPlayers.integer;
@@ -1248,6 +1249,7 @@ void SP_worldspawn(void) {
     trap_Cvar_Set("g_ghostPlayers", buf);
     trap_Cvar_Update(&g_ghostPlayers);
     G_Printf("Ghosting is enabled.\n");
+    level.noGhost = false;
   }
 
   G_SpawnString("limitedsaves", "0", &s);

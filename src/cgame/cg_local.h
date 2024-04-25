@@ -2182,6 +2182,12 @@ enum class FTMenuPos {
   FT_MENUPOS_RULES = 5
 };
 
+enum class FTMenuRulesPos {
+  FT_RULES_RESET = 0,
+  FT_RULES_SAVELIMIT = 1,
+  FT_RULES_NOGHOST = 2
+};
+
 //==============================================================================
 
 extern cgs_t cgs;

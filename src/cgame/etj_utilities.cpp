@@ -232,4 +232,17 @@ int ETJump::getSvFps() {
   return fps;
 }
 
+bool ETJump::playerIsSolid(const int self, const int other) {
+  if (cg_ghostPlayers.integer != 1) {
+    return true;
+  }
+
+  if (CG_IsOnSameFireteam(self, other) &&
+      cgs.clientinfo[self].fireteamData->noGhost) {
+    return true;
+  }
+
+  return false;
+}
+
 #endif

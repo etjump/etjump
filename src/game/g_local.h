@@ -1452,7 +1452,7 @@ typedef struct {
 
   ipMute_t ipMutes[MAX_IP_MUTES]; // I don't think we need more than 16
 
-  qboolean ghostPlayers;
+  bool noGhost;
   int limitedSaves;
   int portalTeam;
 

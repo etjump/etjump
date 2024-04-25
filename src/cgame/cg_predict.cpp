@@ -6,6 +6,7 @@
 // It also handles local physics interaction, like fragments bouncing off walls
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 
 /*static*/ pmove_t cg_pmove;
 
@@ -136,6 +137,11 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
 
     if (ent->number == skipNumber ||
         (!tracePlayers && ent->eType == ET_PLAYER)) {
+      continue;
+    }
+
+    if (ent->eType == ET_PLAYER &&
+        !ETJump::playerIsSolid(cg.snap->ps.clientNum, ent->number)) {
       continue;
     }
 
@@ -424,12 +430,7 @@ static void CG_InterpolatePlayerState(qboolean grabAngles) {
     trap_GetUserCmd(cmdNum, &cmd);
 
     // rain - added tracemask
-    if (cg_ghostPlayers.integer == 1) {
-      PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace,
-                          MASK_PLAYERSOLID & ~CONTENTS_BODY);
-    } else {
-      PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID);
-    }
+    PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID);
   }
 
   // if the next frame is a teleport, we can't lerp to it
@@ -921,26 +922,25 @@ void CG_PredictPlayerState() {
   }
 
   cg_pmove.skill = cgs.clientinfo[cg.snap->ps.clientNum].skill;
-
-  if (cg_ghostPlayers.integer == 1) {
-    cg_pmove.trace = CG_TraceCapsule_NoPlayers;
-  } else {
-    cg_pmove.trace = CG_TraceCapsule;
-  }
-  // cg_pmove.trace = CG_Trace;
+  cg_pmove.trace = CG_TraceCapsule;
   cg_pmove.pointcontents = CG_PointContents;
-  if (cg_pmove.ps->pm_type == PM_DEAD) {
-    cg_pmove.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
-    cg_pmove.ps->eFlags |= EF_DEAD; // DHM-Nerve added:: EF_DEAD is checked for
-                                    // in Pmove functions, but wasn't being set
-                                    // until after Pmove
-  } else if (cg_pmove.ps->pm_type == PM_SPECTATOR) {
-    // rain - fix the spectator can-move-partway-through-world
-    // weirdness bug by actually setting tracemask when spectating :x
-    cg_pmove.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
-    cg_pmove.trace = CG_TraceCapsule_World;
-  } else {
-    cg_pmove.tracemask = MASK_PLAYERSOLID;
+
+  switch (cg_pmove.ps->pm_type) {
+    case PM_DEAD:
+      cg_pmove.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+      cg_pmove.ps->eFlags |= EF_DEAD;
+      break;
+    case PM_SPECTATOR:
+      cg_pmove.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+      cg_pmove.trace = CG_TraceCapsule_World;
+      break;
+    case PM_NOCLIP:
+      cg_pmove.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+      cg_pmove.trace = CG_TraceCapsule_NoPlayers;
+      break;
+    default:
+      cg_pmove.tracemask = MASK_PLAYERSOLID;
+      break;
   }
 
   if ((cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR) ||
