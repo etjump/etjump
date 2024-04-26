@@ -788,7 +788,6 @@ void G_RunMissile(gentity_t *ent) {
   trap_LinkEntity(ent);
 
   if (tr.fraction != 1) {
-
     if (level.tracemapLoaded &&
         (ent->s.weapon == WP_MORTAR_SET || ent->s.weapon == WP_GPG40 ||
          ent->s.weapon == WP_M7 || ent->s.weapon == WP_GRENADE_LAUNCHER ||

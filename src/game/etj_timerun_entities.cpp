@@ -193,6 +193,17 @@ bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
                                    client->ps.viewangles[ROLL]));
       return false;
     }
+
+    fireteamData_t *ft;
+
+    if (!(self->spawnflags &
+          static_cast<int>(TimerunSpawnflags::AllowFTNoGhost)) &&
+        (G_IsOnFireteam(*clientNum, &ft) && ft->noGhost)) {
+      Printer::SendCenterMessage(
+          *clientNum, "^3WARNING: ^7Timerun was not started. ^3Fireteam "
+                      "noghost ^7is disabled for this run!\n");
+      return false;
+    }
   }
 
   return true;

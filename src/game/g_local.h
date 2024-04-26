@@ -2953,6 +2953,7 @@ enum class TimerunSpawnflags {
   NoExplosivesPickup = 32,
   NoPortalgunPickup = 64,
   NoSave = 128,
+  AllowFTNoGhost = 256,
 };
 
 bool checkCheatCvars(gclient_s *client, int flags);

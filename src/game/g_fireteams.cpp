@@ -720,7 +720,7 @@ void G_FireteamRace(int clientNum) {
 }
 
 namespace ETJump {
-void setSaveLimitForFTMembers(fireteamData_t *ft, int limit) {
+static void setSaveLimitForFTMembers(fireteamData_t *ft, int limit) {
   gentity_t *ent;
 
   for (int i = 0; i < level.numConnectedClients; i++) {
@@ -736,7 +736,7 @@ void setSaveLimitForFTMembers(fireteamData_t *ft, int limit) {
   }
 }
 
-void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
+static void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
   const std::string &msg =
       ETJump::stringFormat("^gFireteam rules: ^3noghost ^ghas been ^3%s.",
                            noGhost ? "enabled" : "disabled");
@@ -752,7 +752,25 @@ void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
   }
 }
 
-void setFireTeamRules(int clientNum) {
+static bool fireTeamMemberIsTimerunning(fireteamData_t *ft) {
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    if (ft->joinOrder[i] == -1) {
+      continue;
+    }
+
+    gentity_t *ent = g_entities + ft->joinOrder[i];
+
+    if (ent->client->sess.timerunActive &&
+        !(ent->client->sess.runSpawnflags &
+          static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+static void setFireTeamRules(int clientNum) {
   char arg1[MAX_TOKEN_CHARS];
   char val[MAX_TOKEN_CHARS];
   fireteamData_t *ft;
@@ -802,6 +820,14 @@ void setFireTeamRules(int clientNum) {
           stringFormat("fireteam: player ghosting is disabled by the %s.",
                        level.noGhost ? "map" : "server"));
       return;
+    }
+
+    // ghosting cannot be enabled if someone is already timerunning unless
+    // the run allows it, so we need to only check for enabling here
+    if (!g_cheats.integer && !ft->noGhost && fireTeamMemberIsTimerunning(ft)) {
+      G_ClientPrintAndReturn(clientNum,
+                             "fireteam: a member of your fireteam is "
+                             "timerunning, cannot enable noghost.")
     }
 
     trap_Argv(3, val, sizeof(val));
