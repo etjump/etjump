@@ -822,12 +822,20 @@ static void setFireTeamRules(int clientNum) {
       return;
     }
 
-    // ghosting cannot be enabled if someone is already timerunning unless
-    // the run allows it, so we need to only check for enabling here
-    if (!g_cheats.integer && !ft->noGhost && fireTeamMemberIsTimerunning(ft)) {
-      G_ClientPrintAndReturn(clientNum,
-                             "fireteam: a member of your fireteam is "
-                             "timerunning, cannot enable noghost.")
+    // disable some checks if cheats are enabled
+    if (!g_cheats.integer) {
+      if (level.noFTNoGhost) {
+        G_ClientPrintAndReturn(
+            clientNum, "fireteam: noghost cannot be enabled on this map.")
+      }
+
+      // ghosting cannot be enabled if someone is already timerunning unless
+      // the run allows it, so we need to only check for enabling here
+      if (!ft->noGhost && fireTeamMemberIsTimerunning(ft)) {
+        G_ClientPrintAndReturn(clientNum,
+                               "fireteam: a member of your fireteam is "
+                               "timerunning, cannot enable noghost.")
+      }
     }
 
     trap_Argv(3, val, sizeof(val));
