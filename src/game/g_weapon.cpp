@@ -4011,21 +4011,16 @@ gentity_t *weapon_mortar_fire(gentity_t *ent, int grenType) {
 
   VectorCopy(ent->client->ps.viewangles, angles);
   angles[PITCH] -= 60.f;
-  /*	if( angles[PITCH] < -89.f )
-          angles[PITCH] = -89.f;*/
-  AngleVectors(angles, forward, NULL, NULL);
+  AngleVectors(angles, forward, nullptr, nullptr);
 
   VectorCopy(muzzleEffect, launchPos);
 
-  // check for valid start spot (so you don't throw through or get stuck
-  // in a wall)
+  // check for valid start spot
+  // (so you don't throw through or get stuck in a wall)
   VectorMA(launchPos, 32, forward, testPos);
 
   // Gordon: hack so i can do inverse trajectory calcs easily :p
   if (G_IsSinglePlayerGame() && ent->r.svFlags & SVF_BOT) {
-    /*		forward[0] *= 3000;
-            forward[1] *= 3000;
-            forward[2] *= 3000;*/
     VectorCopy(ent->gDelta, forward);
   } else {
     forward[0] *= 3000 * 1.1f;
@@ -4034,10 +4029,10 @@ gentity_t *weapon_mortar_fire(gentity_t *ent, int grenType) {
   }
 
   trap_Trace(&tr, testPos, tv(-4.f, -4.f, 0.f), tv(4.f, 4.f, 6.f), launchPos,
-             ent->s.number, CONTENTS_SOLID | CONTENTS_MISSILECLIP);
+             ent->s.number, MASK_MISSILESHOT);
 
-  if (tr.fraction < 1) // oops, bad launch spot
-  {
+  // oops, bad launch spot
+  if (tr.fraction < 1) {
     VectorCopy(tr.endpos, launchPos);
     SnapVectorTowards(launchPos, testPos);
   }
