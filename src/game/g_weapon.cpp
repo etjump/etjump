@@ -10,6 +10,7 @@
 #include "g_local.h"
 #include "etj_printer.h"
 #include "etj_utilities.h"
+#include "etj_entity_utilities.h"
 
 vec3_t forward, right, up;
 vec3_t muzzleEffect;
@@ -3400,7 +3401,25 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
   }
 
   G_Trace(source, &tr, start, nullptr, nullptr, end, source->s.number,
-          MASK_SOLID);
+          MASK_SHOT);
+
+  bool playerIgnored = false;
+
+  if (tr.entityNum < MAX_CLIENTS && g_ghostPlayers.integer == 1) {
+    // keep tracing while we hit nonsolid players
+    while (tr.entityNum < MAX_CLIENTS &&
+           !ETJump::EntityUtilities::playerIsSolid(
+               attacker->client->ps.clientNum, tr.entityNum)) {
+      G_TempTraceIgnoreEntity(&g_entities[tr.entityNum]);
+      G_Trace(source, &tr, start, nullptr, nullptr, end, source->s.number,
+              MASK_SHOT);
+      playerIgnored = true;
+    }
+  }
+
+  if (playerIgnored) {
+    G_ResetTempTraceIgnoreEnts();
+  }
 
   // bani - prevent shooting ourselves in the head when prone,
   // firing through a breakable
@@ -3657,7 +3676,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
 
   // check that portals aren't overlapping..
   if ((ent->portalBlue) || (ent->portalRed)) {
-    gentity_t* otherPortal = nullptr;
+    gentity_t *otherPortal = nullptr;
 
     if (portalNumber == 1 && ent->portalRed) {
       otherPortal = ent->portalRed;
@@ -3666,7 +3685,8 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
     }
 
     if (otherPortal) {
-      const float otherScale = static_cast<float>(otherPortal->s.onFireStart) / 48.0f;
+      const float otherScale =
+          static_cast<float>(otherPortal->s.onFireStart) / 48.0f;
       const float min_dist =
           MIN_PORTALS_DIST * scale + MIN_PORTALS_DIST * otherScale;
 

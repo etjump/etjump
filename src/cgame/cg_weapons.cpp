@@ -7,6 +7,7 @@
 
 #include "cg_local.h"
 #include "../game/etj_string_utilities.h"
+#include "etj_utilities.h"
 
 vec3_t ejectBrassCasingOrigin;
 
@@ -6492,7 +6493,7 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
     VectorSubtract(tmpv, origin, tmpv2);
     headshot = (VectorLength(tmpv2) < 10);
 
-    if (headshot && cg_blood.integer) {
+    if (headshot && cg_showblood.integer) {
       for (i = 0; i < 5; i++) {
         rnd = random();
         VectorScale(smokedir, 25.0 + random() * 25, tmpv);
@@ -6544,7 +6545,7 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
 
     // if we haven't dropped a blood spat in a while, check if
     // this is a good scenario
-    if (cg_blood.integer &&
+    if (cg_showblood.integer &&
         (lastBloodSpat > cg.time || lastBloodSpat < cg.time - 500)) {
       vec4_t color;
 
@@ -6634,10 +6635,12 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         // ydnar: better bullet marks
         VectorSubtract(vec3_origin, dir, dir);
 
-        // FIXME: handle ft collision correctly here
-        if (trace.entityNum >= MAX_CLIENTS && cg_ghostPlayers.integer == 1) {
-          CG_MissileHitWall(fromweap, 1, trace.endpos, dir, trace.surfaceFlags);
+        if (trace.entityNum < MAX_CLIENTS &&
+            ETJump::playerIsSolid(cg.snap->ps.clientNum, trace.entityNum)) {
+          return;
         }
+
+        CG_MissileHitWall(fromweap, 1, trace.endpos, dir, trace.surfaceFlags);
       }
     }
   }

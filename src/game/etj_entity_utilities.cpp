@@ -74,11 +74,11 @@ void EntityUtilities::drawRailBox(gentity_t *ent,
 bool EntityUtilities::playerIsSolid(const int self, const int other) {
   fireteamData_t *ftSelf, *ftOther;
 
-  if (!G_IsOnFireteam(self, &ftSelf)) {
+  if (self == other) {
     return false;
   }
 
-  if (self == other) {
+  if (!G_IsOnFireteam(self, &ftSelf)) {
     return false;
   }
 
