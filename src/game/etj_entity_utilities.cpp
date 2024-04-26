@@ -73,8 +73,20 @@ void EntityUtilities::drawRailBox(gentity_t *ent,
 
 bool EntityUtilities::playerIsSolid(const int self, const int other) {
   fireteamData_t *ftSelf, *ftOther;
+  const gclient_t *selfClient = g_entities[self].client;
+  const gclient_t *otherClient = g_entities[other].client;
 
   if (self == other) {
+    return false;
+  }
+
+  if (selfClient->sess.sessionTeam == TEAM_SPECTATOR ||
+      otherClient->sess.sessionTeam == TEAM_SPECTATOR) {
+    return false;
+  }
+
+  if (selfClient->ps.pm_type == PM_NOCLIP ||
+      otherClient->ps.pm_type == PM_NOCLIP) {
     return false;
   }
 

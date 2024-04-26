@@ -226,18 +226,15 @@ ammotable_t ammoTableMP[WP_NUM_WEAPONS] = {
     {24, 1, 8, 24, 8, 1500, DELAY_PISTOL, 400, 0, 0,
      MOD_SILENCER}, // WP_SILENCER				// 14
     {1, 0, 10, 0, 0, 1000, DELAY_THROW, 1600, 0, 0,
-     MOD_DYNAMITE}, // WP_DYNAMITE				// 15
+     MOD_DYNAMITE},                         // WP_DYNAMITE				// 15
+    {999, 0, 999, 0, 0, 0, 50, 0, 0, 0, 0}, // WP_SMOKETRAIL // 16
     {999, 0, 999, 0, 0, 0, 50, 0, 0, 0,
-     0}, // WP_SMOKETRAIL			// 16
-    {999, 0, 999, 0, 0, 0, 50, 0, 0, 0,
-     0}, // WP_MAPMORTAR				// 17
-    {999, 0, 999, 0, 0, 0, 50, 0, 0, 0,
-     0}, // VERYBIGEXPLOSION			// 18
+     0},                                    // WP_MAPMORTAR				// 17
+    {999, 0, 999, 0, 0, 0, 50, 0, 0, 0, 0}, // VERYBIGEXPLOSION // 18
     {999, 0, 999, 1, 1, 0, 50, 0, 0, 0,
      0}, // WP_MEDKIT				// 19
 
-    {999, 0, 999, 0, 0, 0, 50, 0, 0, 0,
-     0}, // WP_BINOCULARS			// 20
+    {999, 0, 999, 0, 0, 0, 50, 0, 0, 0, 0}, // WP_BINOCULARS // 20
     {999, 0, 999, 0, 0, 0, 50, 0, 0, 0,
      0}, // WP_PLIERS				// 21
     {999, 0, 999, 0, 1, 0, 50, 0, 0, 0,
@@ -278,9 +275,8 @@ ammotable_t ammoTableMP[WP_NUM_WEAPONS] = {
      MOD_K43}, // WP_K43					// 32
                // K43
     {60, 1, 20, 40, 20, 2000, DELAY_LOW, 100, 0, 0,
-     MOD_FG42}, // WP_FG42					// 33
-    {0, 0, 0, 0, 0, 0, 0, 0, 1500, 300,
-     0}, // WP_DUMMY_MG42			// 34
+     MOD_FG42},                             // WP_FG42					// 33
+    {0, 0, 0, 0, 0, 0, 0, 0, 1500, 300, 0}, // WP_DUMMY_MG42 // 34
     {15, 1, 1, 0, 0, 0, 750, 1600, 0, 0,
      MOD_MORTAR}, // WP_MORTAR				// 35
     {999, 0, 1, 0, 0, 1000, 750, 1600, 0, 0,
@@ -4212,6 +4208,10 @@ void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s,
   s->nextWeapon = ps->nextWeapon; // Ridah, s->loopSound = ps->loopSound;
   s->teamNum = ps->teamNum;
   s->aiState = ps->aiState; // xkan, 1/10/2003
+
+  if (ps->pm_type == PM_NOCLIP) {
+    s->density |= PM_NOCLIP;
+  }
 }
 
 /*
@@ -4318,6 +4318,10 @@ void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
   s->nextWeapon = ps->nextWeapon; // Ridah
   s->teamNum = ps->teamNum;
   s->aiState = ps->aiState; // xkan, 1/10/2003
+
+  if (ps->pm_type == PM_NOCLIP) {
+    s->density |= PM_NOCLIP;
+  }
 }
 
 // Gordon: some weapons are duplicated for code puposes.... just want to treat

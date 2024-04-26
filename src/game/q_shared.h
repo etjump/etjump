@@ -1788,7 +1788,7 @@ typedef struct entityState_s {
                  // ANIM_TOGGLEBIT	//----(SA) removed (weap anims
                  // will be client-side only)
 
-  int density; // for particle effects
+  int density; // for particle effects, pm_type for players in entityState
 
   int dmgFlags; // to pass along additional information for damage
                 // effects for players/ Also used for cursorhints for

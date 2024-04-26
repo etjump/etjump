@@ -233,16 +233,28 @@ int ETJump::getSvFps() {
 }
 
 bool ETJump::playerIsSolid(const int self, const int other) {
-  if (cg_ghostPlayers.integer != 1) {
-    return true;
+  if (cg_ghostPlayers.integer == 1) {
+    if (self == other) {
+      return false;
+    }
+
+    if (cg_pmove.ps->pm_type == PM_NOCLIP ||
+        cg_entities[other].currentState.density & PM_NOCLIP) {
+      return false;
+    }
+
+    if (!isPlaying(self) || !isPlaying(other)) {
+      return false;
+    }
+
+    if (!CG_IsOnSameFireteam(self, other) ||
+        (CG_IsOnSameFireteam(self, other) &&
+         !cgs.clientinfo[self].fireteamData->noGhost)) {
+      return false;
+    }
   }
 
-  if (CG_IsOnSameFireteam(self, other) &&
-      cgs.clientinfo[self].fireteamData->noGhost) {
-    return true;
-  }
-
-  return false;
+  return true;
 }
 
 #endif
