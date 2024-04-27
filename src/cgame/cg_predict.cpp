@@ -141,7 +141,8 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
     }
 
     if (ent->eType == ET_PLAYER &&
-        !ETJump::playerIsSolid(cg.snap->ps.clientNum, ent->number)) {
+        (!ETJump::playerIsSolid(cg.snap->ps.clientNum, ent->number) ||
+         ETJump::playerIsNoclipping(ent->number))) {
       continue;
     }
 

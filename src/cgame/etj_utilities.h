@@ -72,5 +72,8 @@ int getSvFps();
 // checks if we should have collision with the target player
 bool playerIsSolid(int self, int other);
 
+// checks if target client is noclipping
+bool playerIsNoclipping(int clientNum);
+
 #endif
 } // namespace ETJump

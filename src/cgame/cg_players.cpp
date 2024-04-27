@@ -1911,7 +1911,8 @@ void CG_Player(centity_t *cent) {
   }
 
   // Only hide if player is nonsolid
-  if (!ETJump::playerIsSolid(cg.snap->ps.clientNum, clientNum)) {
+  if (!ETJump::playerIsSolid(cg.snap->ps.clientNum, clientNum) &&
+      !ETJump::playerIsNoclipping(clientNum)) {
     vec_t playerDist = Distance(cgsnap->lerpOrigin, cent->lerpOrigin);
     int transZone = etj_hideDistance.integer + etj_hideFadeRange.integer;
 

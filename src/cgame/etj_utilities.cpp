@@ -238,11 +238,6 @@ bool ETJump::playerIsSolid(const int self, const int other) {
       return false;
     }
 
-    if (cg_pmove.ps->pm_type == PM_NOCLIP ||
-        cg_entities[other].currentState.density & PM_NOCLIP) {
-      return false;
-    }
-
     if (!isPlaying(self) || !isPlaying(other)) {
       return false;
     }
@@ -255,6 +250,10 @@ bool ETJump::playerIsSolid(const int self, const int other) {
   }
 
   return true;
+}
+
+bool ETJump::playerIsNoclipping(const int clientNum) {
+  return cg_entities[clientNum].currentState.density & PM_NOCLIP;
 }
 
 #endif
