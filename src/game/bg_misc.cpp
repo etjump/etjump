@@ -4209,6 +4209,8 @@ void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s,
   s->teamNum = ps->teamNum;
   s->aiState = ps->aiState; // xkan, 1/10/2003
 
+  s->density = 0;
+
   if (ps->pm_type == PM_NOCLIP) {
     s->density |= PM_NOCLIP;
   }
@@ -4318,6 +4320,8 @@ void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
   s->nextWeapon = ps->nextWeapon; // Ridah
   s->teamNum = ps->teamNum;
   s->aiState = ps->aiState; // xkan, 1/10/2003
+
+  s->density = 0;
 
   if (ps->pm_type == PM_NOCLIP) {
     s->density |= PM_NOCLIP;
