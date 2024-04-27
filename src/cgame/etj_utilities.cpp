@@ -253,7 +253,8 @@ bool ETJump::playerIsSolid(const int self, const int other) {
 }
 
 bool ETJump::playerIsNoclipping(const int clientNum) {
-  return cg_entities[clientNum].currentState.density & PM_NOCLIP;
+  return cg_entities[clientNum].currentState.density &
+         static_cast<int>(PlayerDensityFlags::Noclip);
 }
 
 #endif

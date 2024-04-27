@@ -2811,7 +2811,16 @@ enum class CheatCvarFlags {
   LookYaw = 1,
   PmoveFPS = 2,
 };
-}
+
+// this can hold maximum on 10 bits and maps to currentState->density
+// used to transmit information otherwise inaccessible in cgame
+// from player to player, such as playerState_t fields that don't
+// normally get mapped to entityState in BG_PlayerStateToEntityState
+enum class PlayerDensityFlags {
+  None = 0 << 0,
+  Noclip = 1 << 0,
+};
+} // namespace ETJump
 
 const int JUMP_VELOCITY = 270;
 // FIXME: this is incorrect when ps.speed is modified

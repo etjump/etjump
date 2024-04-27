@@ -4103,6 +4103,16 @@ void BG_SetupMountedGunStatus(playerState_t *ps) {
   }
 }
 
+namespace ETJump {
+void setDensityBits(playerState_t *ps, entityState_t *s) {
+  s->density = 0;
+
+  if (ps->pm_type == PM_NOCLIP) {
+    s->density |= static_cast<int>(PlayerDensityFlags::Noclip);
+  }
+}
+} // namespace ETJump
+
 /*
 ========================
 BG_PlayerStateToEntityState
@@ -4209,11 +4219,7 @@ void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s,
   s->teamNum = ps->teamNum;
   s->aiState = ps->aiState; // xkan, 1/10/2003
 
-  s->density = 0;
-
-  if (ps->pm_type == PM_NOCLIP) {
-    s->density |= PM_NOCLIP;
-  }
+  ETJump::setDensityBits(ps, s);
 }
 
 /*
@@ -4321,11 +4327,7 @@ void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
   s->teamNum = ps->teamNum;
   s->aiState = ps->aiState; // xkan, 1/10/2003
 
-  s->density = 0;
-
-  if (ps->pm_type == PM_NOCLIP) {
-    s->density |= PM_NOCLIP;
-  }
+  ETJump::setDensityBits(ps, s);
 }
 
 // Gordon: some weapons are duplicated for code puposes.... just want to treat
