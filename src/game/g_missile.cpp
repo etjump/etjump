@@ -635,6 +635,8 @@ void missileTrace(trace_t *tr, gentity_t *ent, vec3_t end) {
     trap_Trace(tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, end,
                ent->r.ownerNum, ent->clipmask);
   }
+
+  G_ResetTempTraceIgnoreEnts();
 }
 } // namespace ETJump
 
@@ -740,7 +742,6 @@ void G_RunMissile(gentity_t *ent) {
   }
 
   ETJump::missileTrace(&tr, ent, origin);
-  G_ResetTempTraceIgnoreEnts();
 
   // fix for engine bug where trace sometimes starts in solid even if
   // the entity that it starts in is nonsolid

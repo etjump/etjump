@@ -3371,6 +3371,28 @@ void Bullet_Fire(gentity_t *ent, float spread, int damage,
   G_HistoricalTraceEnd(ent);
 }
 
+namespace ETJump {
+void bulletTrace(gentity_t *source, gentity_t *attacker, trace_t *tr,
+                 vec3_t start, vec3_t end) {
+  G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number,
+          MASK_SHOT);
+
+  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr->entityNum < MAX_CLIENTS &&
+         !ETJump::EntityUtilities::playerIsSolid(attacker->client->ps.clientNum,
+                                                 tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number,
+            MASK_SHOT);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
+
 /*
 ==============
 Bullet_Fire_Extended
@@ -3400,26 +3422,7 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
     waslinked = qtrue;
   }
 
-  G_Trace(source, &tr, start, nullptr, nullptr, end, source->s.number,
-          MASK_SHOT);
-
-  bool playerIgnored = false;
-
-  if (tr.entityNum < MAX_CLIENTS && g_ghostPlayers.integer == 1) {
-    // keep tracing while we hit nonsolid players
-    while (tr.entityNum < MAX_CLIENTS &&
-           !ETJump::EntityUtilities::playerIsSolid(
-               attacker->client->ps.clientNum, tr.entityNum)) {
-      G_TempTraceIgnoreEntity(&g_entities[tr.entityNum]);
-      G_Trace(source, &tr, start, nullptr, nullptr, end, source->s.number,
-              MASK_SHOT);
-      playerIgnored = true;
-    }
-  }
-
-  if (playerIgnored) {
-    G_ResetTempTraceIgnoreEnts();
-  }
+  ETJump::bulletTrace(source, attacker, &tr, start, end);
 
   // bani - prevent shooting ourselves in the head when prone,
   // firing through a breakable
