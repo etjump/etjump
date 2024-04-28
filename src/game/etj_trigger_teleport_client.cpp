@@ -79,7 +79,6 @@ void TriggerTeleportClient::think(gentity_t *self) {
     self->r.svFlags |= SVF_PORTAL;
   }
 
-  foundTargets.clear();
   self->nextthink = 0;
 }
 
