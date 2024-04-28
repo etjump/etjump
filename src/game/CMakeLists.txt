@@ -52,6 +52,7 @@ add_library(qagame MODULE
 	"q_shared.cpp"
 	"etj_async_operation.cpp"
 	"etj_banner_system.cpp"
+	"etj_chat_replay.cpp"
 	"etj_command_parser.cpp"
 	"etj_command_variables.cpp"
 	"etj_commands.cpp"

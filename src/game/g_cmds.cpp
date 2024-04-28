@@ -1,7 +1,6 @@
 #include "g_local.h"
 #include <vector>
 #include <regex>
-#include "etj_result_set_formatter.h"
 #include "utilities.hpp"
 #include "etj_printer.h"
 #include "etj_operation_result.h"
@@ -11,6 +10,7 @@
 #include "etj_numeric_utilities.h"
 #include "etj_rtv.h"
 #include "etj_utilities.h"
+#include "etj_chat_replay.h"
 
 namespace ETJump {
 enum class VotingTypes {
@@ -2107,6 +2107,11 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
 
   if (g_chatOptions.integer & CHAT_OPTIONS_INTERPOLATE_NAME_TAGS) {
     printText = interpolateNametags(text, color);
+  }
+
+  if (mode == SAY_ALL) {
+    game.chatReplay->storeChatmessage(clientNum, escapedName, printText,
+                                      localize, encoded);
   }
 
   if (target) {

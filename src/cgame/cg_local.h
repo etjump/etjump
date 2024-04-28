@@ -1264,6 +1264,7 @@ typedef struct {
   char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
 
   bool shadowCvarsSet;
+  bool chatReplayReceived;
 
   // portalgun auto-binding
   bool portalgunBindingsAdjusted;

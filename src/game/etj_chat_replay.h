@@ -24,32 +24,30 @@
 
 #pragma once
 
-#include <memory>
+#include <list>
 
 namespace ETJump {
-class TimerunV2;
-class RockTheVote;
-class ChatReplay;
-} // namespace ETJump
+class ChatReplay {
+  struct ChatMessage {
+    int clientNum;
+    std::string name;
+    std::string message;
+    std::string location;
+    bool localize;
+    bool encoded;
+  };
 
-class Levels;
-class Commands;
-class CustomMapVotes;
-class Motd;
-class Timerun;
-class MapStatistics;
-class Tokens;
+  static constexpr int MAX_CHAT_REPLAY_BUFFER = 10;
 
-struct Game {
-  Game() {}
+  std::list<ChatMessage> chatReplayBuffer;
 
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<CustomMapVotes> customMapVotes;
-  std::shared_ptr<Motd> motd;
-  std::shared_ptr<MapStatistics> mapStatistics;
-  std::shared_ptr<Tokens> tokens;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
-  std::shared_ptr<ETJump::ChatReplay> chatReplay;
+public:
+  ChatReplay();
+  ~ChatReplay() = default;
+
+  void storeChatmessage(int clientNum, const std::string &name,
+                        const std::string &message, bool localize,
+                        bool encoded);
+  void sendChatMessages(gentity_t *ent);
 };
+} // namespace ETJump

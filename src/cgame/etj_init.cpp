@@ -628,6 +628,11 @@ void runFrameEnd() {
     cg.shadowCvarsSet = true;
   }
 
+  if (cg.clientFrame >= 10 && !cg.chatReplayReceived) {
+    trap_SendConsoleCommand("getchatreplay");
+    cg.chatReplayReceived = true;
+  }
+
   if (etj_autoPortalBinds.integer) {
     if (cg.weaponSelect == WP_PORTAL_GUN && !cg.portalgunBindingsAdjusted) {
       cgDC.getKeysForBinding("weapalt", &cg.weapAltB1, &cg.weapAltB2);
