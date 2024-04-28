@@ -22,38 +22,41 @@
  * SOFTWARE.
  */
 
-#ifndef TOKENS_HH
-#define TOKENS_HH
+#pragma once
+
 #include <string>
 #include <array>
 #include "json/json-forwards.h"
 #include <memory>
 
-typedef struct gentity_s gentity_t;
 typedef struct TokenInformation_s TokenInformation;
 
+namespace ETJump {
 class Tokens {
 public:
   enum Difficulty { Easy, Medium, Hard };
 
-  static const int TOKENS_PER_DIFFICULTY = 6;
+  // the entity is drawn as 32x32, but this feels more natural with touching
+  static constexpr float TOKEN_RADIUS = 8.0f;
+
   struct Token {
-    Token();
+    Token()
+        : isActive(false), entity(nullptr), coordinates{0.0f, 0.0f, 0.0f},
+          data(std::make_unique<TokenInformation>()) {}
     std::array<float, 3> coordinates;
     std::string name;
     bool isActive;
     gentity_t *entity;
-    // Because we cannot capture values for the entity think
-    // lambda we must pass the data as a gentity pointer in
-    // gentity Because there is so much data stored storing same
-    // data for every entity would be pretty pointles Only
-    // tokens have the data
+
+    // Because we cannot capture values for the entity think lambda,
+    // we must pass the data as a gentity pointer in gentity.
+    // Because there is so much data stored, storing the same data for
+    // every entity would be pretty pointless.
+    // Only tokens have the data.
     std::unique_ptr<TokenInformation> data;
     Json::Value toJson() const;
     void fromJson(const Json::Value &json);
   };
-  Tokens();
-  ~Tokens();
 
   std::pair<bool, std::string> createToken(Difficulty difficulty,
                                            std::array<float, 3> coordinates);
@@ -63,7 +66,8 @@ public:
     float distance;
     Difficulty difficulty;
   };
-  NearestToken findNearestToken(std::array<float, 3> coordinates);
+
+  static NearestToken findNearestToken(std::array<float, 3> coordinates);
   std::pair<bool, std::string>
   moveNearestToken(std::array<float, 3> coordinates);
   std::pair<bool, std::string>
@@ -71,16 +75,16 @@ public:
   std::pair<bool, std::string> deleteToken(Difficulty difficulty, int index);
 
   bool loadTokens(const std::string &filepath);
-  bool saveTokens(const std::string &filepath);
-  void createEntity(Token &token, Difficulty difficulty);
-  void createEntities();
-  void reset();
-  std::array<int, 3> getTokenCounts() const;
+  static bool saveTokens(const std::string &filepath);
+  static void createEntity(Token &token, Difficulty difficulty);
+  static void tokenTouch(gentity_t *self, gentity_t *other, trace_t *trace);
+  static void createEntities();
+  static void reset();
+  static std::array<int, 3> getTokenCounts();
+
+  static bool allTokensCollected(gentity_t *ent);
 
 private:
   std::string _filepath;
-  std::array<Token, TOKENS_PER_DIFFICULTY> _easyTokens;
-  std::array<Token, TOKENS_PER_DIFFICULTY> _mediumTokens;
-  std::array<Token, TOKENS_PER_DIFFICULTY> _hardTokens;
 };
-#endif
+} // namespace ETJump

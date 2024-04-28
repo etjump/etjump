@@ -2247,11 +2247,13 @@ void ClientBegin(int clientNum) {
   } else {
     trap_SendServerCommand(clientNum, "hasTimerun 0");
   }
-  for (i = 0; i < MAX_TOKENS_PER_DIFFICULTY; ++i) {
-    ent->client->pers.collectedEasyTokens[i] = qfalse;
-    ent->client->pers.collectedMediumTokens[i] = qfalse;
-    ent->client->pers.collectedHardTokens[i] = qfalse;
+
+  for (i = 0; i < ETJump::MAX_TOKENS_PER_DIFFICULTY; ++i) {
+    ent->client->pers.collectedEasyTokens[i] = false;
+    ent->client->pers.collectedMediumTokens[i] = false;
+    ent->client->pers.collectedHardTokens[i] = false;
   }
+
   ent->client->pers.tokenCollectionStartTime = level.time;
 
   if (!ent->client->sess.receivedTimerunStates) {
