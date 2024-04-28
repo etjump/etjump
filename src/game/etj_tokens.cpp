@@ -305,7 +305,7 @@ bool Tokens::allTokensCollected(gentity_t *ent) {
 }
 
 void Tokens::tokenTouch(gentity_t *self, gentity_t *other, trace_t *trace) {
-  if (!other->client) {
+  if (!other->client || other->client->ps.pm_type == PM_NOCLIP) {
     return;
   }
 
