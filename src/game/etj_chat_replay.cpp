@@ -82,7 +82,7 @@ void ChatReplay::readChatsFromFile() {
   Json::Value root;
 
   if (!JsonUtils::readFile(chatReplayFile, root)) {
-    logger.error("Couldn't open chat replay file '%s' for reading.",
+    logger.error("Could not open chat replay file '%s' for reading.",
                  chatReplayFile);
     return;
   }
