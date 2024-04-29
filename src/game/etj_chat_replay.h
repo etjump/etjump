@@ -41,6 +41,10 @@ class ChatReplay {
 
   std::list<ChatMessage> chatReplayBuffer;
 
+  static std::string parseChatMessage(const ChatMessage &msg);
+  void readChatsFromFile();
+  void writeChatsToFile();
+
 public:
   ChatReplay();
   ~ChatReplay();
@@ -50,11 +54,5 @@ public:
                         bool encoded);
 
   void sendChatMessages(gentity_t *ent);
-
-  static std::string parseChatMessage(const ChatMessage &msg);
-
-  void readChatsFromFile();
-
-  void writeChatsToFile();
 };
 } // namespace ETJump
