@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "g_local.h"
+#include "etj_entity_utilities.h"
 
 extern void AimAtTarget(gentity_t *self);
 extern float AngleDifference(float ang1, float ang2);
@@ -1690,6 +1691,28 @@ void flakPuff(vec3_t origin) {
   tent->s.angles2[2] = 10;
 }
 
+namespace ETJump {
+void historicalBulletTrace(trace_t *tr, gentity_t *activator, vec3_t start,
+                           vec3_t end, int passEntityNum) {
+  G_HistoricalTrace(activator, tr, start, nullptr, nullptr, end, passEntityNum,
+                    MASK_SHOT);
+
+  if (tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr->entityNum < MAX_CLIENTS &&
+         !ETJump::EntityUtilities::playerIsSolid(ClientNum(activator),
+                                                 tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    G_HistoricalTrace(activator, tr, start, nullptr, nullptr, end,
+                      passEntityNum, MASK_SHOT);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
+
 /*
 ==============
 Fire_Lead
@@ -1718,8 +1741,7 @@ void Fire_Lead_Ext(gentity_t *ent, gentity_t *activator, float spread,
 
   // rain - use activator for historicaltrace, not ent which may be
   // the weapon itself (e.g. for mg42s)
-  G_HistoricalTrace(activator, &tr, muzzle, NULL, NULL, end, ent->s.number,
-                    MASK_SHOT);
+  ETJump::historicalBulletTrace(&tr, activator, muzzle, end, ent->s.number);
 
   // bullet debugging using Q3A's railtrail
   if (g_debugBullets.integer & 1) {

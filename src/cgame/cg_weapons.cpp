@@ -6355,6 +6355,24 @@ void SnapVectorTowards(vec3_t v, vec3_t to) {
   }
 }
 
+namespace ETJump {
+void bulletTrace(trace_t *trace, vec3_t start, vec3_t end, int mask) {
+  CG_Trace(trace, start, nullptr, nullptr, end, 0, mask);
+
+  if (trace->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (trace->entityNum < MAX_CLIENTS &&
+         !ETJump::playerIsSolid(cg.snap->ps.clientNum, trace->entityNum)) {
+    tempTraceIgnoreClient(trace->entityNum);
+    CG_Trace(trace, start, nullptr, nullptr, end, 0, mask);
+  }
+
+  resetTempTraceIgnoredClients();
+}
+} // namespace ETJump
+
 /*
 ======================
 CG_Bullet
@@ -6415,7 +6433,7 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
     VectorMA(end, r, right, end);
     VectorMA(end, u, up, end);
 
-    CG_Trace(&tr, muzzle, nullptr, nullptr, end, otherEntNum2, MASK_SHOT);
+    ETJump::bulletTrace(&tr, muzzle, end, MASK_SHOT);
 
     SnapVectorTowards(tr.endpos, muzzle);
     VectorCopy(tr.endpos, end);
@@ -6619,10 +6637,9 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         VectorNormalizeFast(dir);
         VectorMA(end, 4, dir, end);
 
-        CG_Trace(&trace, start, nullptr, nullptr, end, 0, MASK_SHOT);
-        // JPW NERVE -- water check
-        CG_Trace(&trace2, start, nullptr, nullptr, end, 0,
-                 MASK_WATER | MASK_SHOT);
+        ETJump::bulletTrace(&trace, start, end, MASK_SHOT);
+        ETJump::bulletTrace(&trace2, start, end, (MASK_SHOT | MASK_WATER));
+
         if (trace.fraction != trace2.fraction) {
           trap_S_StartSound(end, -1, CHAN_AUTO,
                             cgs.media.sfx_bullet_waterhit[rand() % 5]);
@@ -6634,12 +6651,6 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         }
         // ydnar: better bullet marks
         VectorSubtract(vec3_origin, dir, dir);
-
-        if (trace.entityNum < MAX_CLIENTS &&
-            ETJump::playerIsSolid(cg.snap->ps.clientNum, trace.entityNum)) {
-          return;
-        }
-
         CG_MissileHitWall(fromweap, 1, trace.endpos, dir, trace.surfaceFlags);
       }
     }
