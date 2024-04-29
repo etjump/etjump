@@ -2040,19 +2040,6 @@ void CG_CheckForCursorHints(void) {
     return;
   }
 
-  // we hit a player, check if we have collision enabled with that player
-  if (trace.entityNum < MAX_CLIENTS) {
-    if (!ETJump::playerIsSolid(cg.snap->ps.clientNum, trace.entityNum)) {
-      // the player isn't solid, re-trace and ignore players
-      CG_Trace(&trace, start, vec3_origin, vec3_origin, end,
-               cg.snap->ps.clientNum, MASK_PLAYERSOLID & ~CONTENTS_BODY);
-
-      if (trace.fraction == 1.0f) {
-        return;
-      }
-    }
-  }
-
   dist = trace.fraction * CH_DIST;
 
   tracent = &cg_entities[trace.entityNum];

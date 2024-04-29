@@ -27,6 +27,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include <array>
 
 #include "etj_utilities.h"
 #include "etj_event_loop.h"
@@ -255,6 +256,18 @@ bool ETJump::playerIsSolid(const int self, const int other) {
 bool ETJump::playerIsNoclipping(const int clientNum) {
   return cg_entities[clientNum].currentState.density &
          static_cast<int>(PlayerDensityFlags::Noclip);
+}
+
+void ETJump::tempTraceIgnoreClient(int clientNum) {
+  if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  tempTraceIgnoredClients[clientNum] = true;
+}
+
+void ETJump::resetTempTraceIgnoredClients() {
+  std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
 }
 
 #endif

@@ -75,5 +75,9 @@ bool playerIsSolid(int self, int other);
 // checks if target client is noclipping
 bool playerIsNoclipping(int clientNum);
 
+void tempTraceIgnoreClient(int clientNum);
+
+void resetTempTraceIgnoredClients();
+
 #endif
 } // namespace ETJump
