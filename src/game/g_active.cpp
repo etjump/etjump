@@ -1291,21 +1291,17 @@ void ClientThink_real(gentity_t *ent) {
   }
 
   // setup nonsolid players
-  if (g_ghostPlayers.integer == 1) {
-    for (int i = 0; i < level.numConnectedClients; i++) {
-      const int otherNum = level.sortedClients[i];
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    const int otherNum = level.sortedClients[i];
 
-      if (!ETJump::EntityUtilities::playerIsSolid(clientNum, otherNum)) {
-        G_TempTraceIgnoreEntity(g_entities + otherNum);
-      }
+    if (!ETJump::EntityUtilities::playerIsSolid(clientNum, otherNum)) {
+      G_TempTraceIgnoreEntity(g_entities + otherNum);
     }
   }
 
   Pmove(&pm);
 
-  if (g_ghostPlayers.integer == 1 || pm.ps->pm_type == PM_NOCLIP) {
-    G_ResetTempTraceIgnoreEnts();
-  }
+  G_ResetTempTraceIgnoreEnts();
 
   // Gordon: thx to bani for this
   // ikkyo - fix leaning players bug
@@ -1678,8 +1674,8 @@ qboolean StuckInClient(gentity_t *self) {
       continue;
     }
 
-    if (g_ghostPlayers.integer == 1 && !ETJump::EntityUtilities::playerIsSolid(
-                                           ClientNum(self), ClientNum(hit))) {
+    if (!ETJump::EntityUtilities::playerIsSolid(ClientNum(self),
+                                                ClientNum(hit))) {
       continue;
     }
 
@@ -1791,9 +1787,8 @@ void WolfReviveBbox(gentity_t *self) {
       continue;
     }
 
-    if (hit->client && g_ghostPlayers.integer == 1 &&
-        !ETJump::EntityUtilities::playerIsSolid(ClientNum(self),
-                                                ClientNum(hit))) {
+    if (hit->client && !ETJump::EntityUtilities::playerIsSolid(
+                           ClientNum(self), ClientNum(hit))) {
       continue;
     }
 

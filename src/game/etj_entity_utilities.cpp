@@ -90,20 +90,22 @@ bool EntityUtilities::playerIsSolid(const int self, const int other) {
     return false;
   }
 
-  if (!G_IsOnFireteam(self, &ftSelf)) {
-    return false;
-  }
-
-  // we're on same fireteam, but noghost isn't enabled
-  if (G_IsOnFireteam(other, &ftOther) && ftSelf == ftOther) {
-    if (!ftSelf->noGhost) {
+  if (g_ghostPlayers.integer == 1) {
+    if (!G_IsOnFireteam(self, &ftSelf)) {
       return false;
     }
-  }
 
-  // we're not in the same fireteam
-  if (!G_IsOnFireteam(other, &ftOther) || ftSelf != ftOther) {
-    return false;
+    // we're on same fireteam, but noghost isn't enabled
+    if (G_IsOnFireteam(other, &ftOther) && ftSelf == ftOther) {
+      if (!ftSelf->noGhost) {
+        return false;
+      }
+    }
+
+    // we're not in the same fireteam
+    if (!G_IsOnFireteam(other, &ftOther) || ftSelf != ftOther) {
+      return false;
+    }
   }
 
   return true;
