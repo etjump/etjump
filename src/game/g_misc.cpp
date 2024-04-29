@@ -1697,7 +1697,7 @@ void historicalBulletTrace(trace_t *tr, gentity_t *activator, vec3_t start,
   G_HistoricalTrace(activator, tr, start, nullptr, nullptr, end, passEntityNum,
                     MASK_SHOT);
 
-  if (tr->entityNum >= MAX_CLIENTS) {
+  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
     return;
   }
 
