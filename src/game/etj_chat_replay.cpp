@@ -29,7 +29,7 @@
 #include "etj_log.h"
 
 namespace ETJump {
-Log logger("chatreplay");
+Log ChatReplay::logger = Log("chat-replay");
 
 ChatReplay::ChatReplay() {
   chatReplayBuffer.clear();

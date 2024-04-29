@@ -27,6 +27,8 @@
 #include "utilities.hpp"
 
 namespace ETJump {
+Log JsonUtils::logger = Log("JSON-utils");
+
 bool JsonUtils::writeFile(const std::string &file, const Json::Value &root) {
   Json::StyledWriter writer;
   const std::string &output = writer.write(root);
@@ -51,7 +53,13 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root) {
   }
 
   Json::CharReaderBuilder readerBuilder;
-  Json::parseFromStream(readerBuilder, fIn, &root, nullptr);
+  std::string errors;
+
+  if (!Json::parseFromStream(readerBuilder, fIn, &root, &errors)) {
+    logger.error("Failed to parse JSON file '%s': %s", file, errors);
+    return false;
+  }
+
   fIn.close();
   return true;
 }

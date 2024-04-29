@@ -25,6 +25,7 @@
 #pragma once
 
 #include <list>
+#include "etj_log.h"
 
 namespace ETJump {
 class ChatReplay {
@@ -35,6 +36,8 @@ class ChatReplay {
     bool localize;
     bool encoded;
   };
+
+  static Log logger;
 
   static constexpr int MAX_CHAT_REPLAY_BUFFER = 10;
   const std::string chatReplayFile = "chatreplay.json";
