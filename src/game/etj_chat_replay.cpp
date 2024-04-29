@@ -112,7 +112,7 @@ void ChatReplay::writeChatsToFile() {
     root.append(chat);
   }
 
-  if (!ETJump::JsonUtils::writeFile(chatReplayFile, root)) {
+  if (!JsonUtils::writeFile(chatReplayFile, root)) {
     logger.error("Could not open chat replay file '%s' for writing.",
                  chatReplayFile);
   }
