@@ -23,12 +23,22 @@
  */
 
 #include "g_local.h"
+#include "etj_json_utilities.h"
 #include "etj_chat_replay.h"
+#include "etj_string_utilities.h"
+#include "etj_log.h"
 
 namespace ETJump {
-ChatReplay::ChatReplay() { chatReplayBuffer.clear(); }
+Log logger("chatreplay");
 
-void ChatReplay::storeChatmessage(int clientNum, const std::string &name,
+ChatReplay::ChatReplay() {
+  chatReplayBuffer.clear();
+  readChatsFromFile();
+}
+
+ChatReplay::~ChatReplay() { writeChatsToFile(); }
+
+void ChatReplay::storeChatMessage(int clientNum, const std::string &name,
                                   const std::string &message, bool localize,
                                   bool encoded) {
   ChatMessage msg{};
@@ -47,7 +57,7 @@ void ChatReplay::storeChatmessage(int clientNum, const std::string &name,
 }
 
 void ChatReplay::sendChatMessages(gentity_t *ent) {
-  if (chatReplayBuffer.empty()) {
+  if (!ent || !ent->client) {
     return;
   }
 
@@ -57,11 +67,54 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
       continue;
     }
 
-    const char *cmd = msg.encoded ? "enc_chat" : "chat";
-    trap_SendServerCommand(ClientNum(ent),
-                           va("%s \"%s%c%c%s\" %i %i", cmd, msg.name.c_str(),
-                              Q_COLOR_ESCAPE, COLOR_GREEN, msg.message.c_str(),
-                              msg.clientNum, msg.localize));
+    const std::string &message = parseChatMessage(msg);
+    trap_SendServerCommand(ClientNum(ent), message.c_str());
+  }
+}
+
+std::string ChatReplay::parseChatMessage(const ChatReplay::ChatMessage &msg) {
+  const char *cmd = msg.encoded ? "enc_chat" : "chat";
+  return stringFormat("%s \"%s%c%c%s\" %i %i", cmd, msg.name, Q_COLOR_ESCAPE,
+                      COLOR_GREEN, msg.message, msg.clientNum, msg.localize);
+}
+
+void ChatReplay::readChatsFromFile() {
+  Json::Value root;
+
+  if (!JsonUtils::readFile(chatReplayFile, root)) {
+    logger.error("Couldn't open chat replay file '%s' for reading.",
+                 chatReplayFile);
+    return;
+  }
+
+  for (const auto &msg : root) {
+    const int clientNum = msg["clientnum"].asInt();
+    const std::string &name = msg["name"].asString();
+    const std::string &message = msg["message"].asString();
+    const bool localize = msg["localize"].asBool();
+    const bool encoded = msg["encoded"].asBool();
+
+    storeChatMessage(clientNum, name, message, localize, encoded);
+  }
+}
+
+void ChatReplay::writeChatsToFile() {
+  Json::Value root;
+  Json::Value chat;
+
+  for (const auto &msg : chatReplayBuffer) {
+    chat["clientNum"] = msg.clientNum;
+    chat["name"] = msg.name;
+    chat["message"] = msg.message;
+    chat["localize"] = msg.localize;
+    chat["encoded"] = msg.encoded;
+
+    root.append(chat);
+  }
+
+  if (!ETJump::JsonUtils::writeFile(chatReplayFile, root)) {
+    logger.error("Could not open chat replay file '%s' for writing.",
+                 chatReplayFile);
   }
 }
 } // namespace ETJump

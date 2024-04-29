@@ -32,22 +32,29 @@ class ChatReplay {
     int clientNum;
     std::string name;
     std::string message;
-    std::string location;
     bool localize;
     bool encoded;
   };
 
   static constexpr int MAX_CHAT_REPLAY_BUFFER = 10;
+  const std::string chatReplayFile = "chatreplay.json";
 
   std::list<ChatMessage> chatReplayBuffer;
 
 public:
   ChatReplay();
-  ~ChatReplay() = default;
+  ~ChatReplay();
 
-  void storeChatmessage(int clientNum, const std::string &name,
+  void storeChatMessage(int clientNum, const std::string &name,
                         const std::string &message, bool localize,
                         bool encoded);
+
   void sendChatMessages(gentity_t *ent);
+
+  static std::string parseChatMessage(const ChatMessage &msg);
+
+  void readChatsFromFile();
+
+  void writeChatsToFile();
 };
 } // namespace ETJump

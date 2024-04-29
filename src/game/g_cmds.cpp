@@ -2110,7 +2110,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   }
 
   if (mode == SAY_ALL) {
-    game.chatReplay->storeChatmessage(clientNum, escapedName, printText,
+    game.chatReplay->storeChatMessage(clientNum, escapedName, printText,
                                       localize, encoded);
   }
 

@@ -236,6 +236,7 @@ void OnGameShutdown() {
   game.tokens = nullptr;
   game.timerunV2 = nullptr;
   game.rtv = nullptr;
+  game.chatReplay = nullptr;
   ETJump::Log::processMessages();
 }
 
