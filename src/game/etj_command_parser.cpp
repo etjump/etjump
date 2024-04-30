@@ -363,7 +363,7 @@ std::string ETJump::CommandParser::formatCommandHelpString(
   if (sanitize(combinedStr, false).length() > maxLineLen) {
     const size_t lastWhiteSpace = combinedStr.find_last_of(' ', maxLineLen);
 
-    if (lastWhiteSpace != std::string ::npos) {
+    if (lastWhiteSpace != std::string::npos) {
       combinedStr.replace(
           lastWhiteSpace, 1,
           '\n' + std::string(sanitize(flagStr, false).length(), ' '));
