@@ -65,6 +65,7 @@ public:
       return "";
     }
 
+    std::string shortName{};
     std::string name{};
     std::string description{};
     Type type{Type::Token};
@@ -72,11 +73,13 @@ public:
     opt<int> position;
 
     static OptionDefinition create(const std::string &name,
+                                   const std::string &shortName,
                                    const std::string &description, Type type,
                                    bool required) {
       auto def = OptionDefinition{};
 
       def.name = name;
+      def.shortName = shortName;
       def.description = description;
       def.type = type;
       def.required = required;
@@ -92,18 +95,10 @@ public:
 
     std::string help() const {
       auto optionsToStrings = Container::map(options, [](const auto &pair) {
-        const auto &optionName = pair.second.name;
-        auto optionType = OptionDefinition::typeToString(pair.second.type);
-        const auto &desc = pair.second.description;
-        auto requiredString = pair.second.required ? " [required] " : "";
-        auto positionString = stringFormat(
-            " (pos: %d) ",
-            pair.second.position.hasValue() ? pair.second.position.value() : 0);
-
-        return stringFormat(
-            "    --%s (%s) %s%s%s", optionName, optionType, desc,
-            requiredString,
-            pair.second.position.hasValue() ? std::move(positionString) : "");
+        return CommandParser::formatCommandHelpString(
+            pair.second.name, pair.second.shortName, pair.second.type,
+            pair.second.description, pair.second.required,
+            pair.second.position);
       });
 
       return stringFormat("Usage: %s\n\n    %s\n\nOptions:\n%s\n", name,
@@ -123,10 +118,13 @@ public:
     }
 
     CommandDefinition &addOption(const std::string &name,
+                                 const std::string &shortName,
                                  const std::string &description,
                                  OptionDefinition::Type type, bool required) {
       auto opt = OptionDefinition{};
+
       opt.name = name;
+      opt.shortName = shortName;
       opt.description = description;
       opt.type = type;
       opt.required = required;
@@ -137,6 +135,7 @@ public:
     }
 
     CommandDefinition &addOption(const std::string &name,
+                                 const std::string &shortName,
                                  const std::string &description,
                                  OptionDefinition::Type type, bool required,
                                  int position) {
@@ -157,7 +156,9 @@ public:
       }
 
       auto opt = OptionDefinition{};
+
       opt.name = name;
+      opt.shortName = shortName;
       opt.description = description;
       opt.type = type;
       opt.required = required;
@@ -232,5 +233,11 @@ private:
   void expectOptionOrExtraArgs();
   void processPositionalArguments();
   void validateCommand();
+
+  static std::string formatCommandHelpString(const std::string &name,
+                                             const std::string &shortname,
+                                             OptionDefinition::Type optionType,
+                                             const std::string &description,
+                                             bool required, opt<int> position);
 };
 } // namespace ETJump
