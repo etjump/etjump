@@ -43,7 +43,7 @@ TEST_F(CommandParserTests, CommandParser_Returns_CommandWithSingleTokenOption) {
 
   auto cmd =
       CreateCommandParser(
-          CreateCommandDefinition().addOption("t", "token", "desc",
+          CreateCommandDefinition().addOption("token", "t",  "desc",
                                               CommandParser::OptionDefinition::Type::Token,
                                               true)
           ,
@@ -58,7 +58,7 @@ TEST_F(CommandParserTests,
                     "stuff"});
   auto cmd =
       CreateCommandParser(
-          CreateCommandDefinition().addOption("t", "token", "desc",
+          CreateCommandDefinition().addOption("token", "t", "desc",
                                               CommandParser::OptionDefinition::Type::Token,
                                               true),
           args)
@@ -72,7 +72,7 @@ TEST_F(CommandParserTests,
                     "some", "additional", "stuff"});
   auto cmd =
       CreateCommandParser(
-          CreateCommandDefinition().addOption("t", "token", "desc",
+          CreateCommandDefinition().addOption("token", "t", "desc",
                                               CommandParser::OptionDefinition::Type::Token,
                                               true)
           ,
@@ -88,7 +88,7 @@ TEST_F(CommandParserTests, CommandParser_Returns_MultipleCorrectOptions) {
                     "--bar"});
   auto cmd =
       CreateCommandParser(
-          CreateCommandDefinition().addOption("t", "token", "desc",
+          CreateCommandDefinition().addOption("token", "t", "desc",
                                               CommandParser::OptionDefinition::Type::Token,
                                               true).addOption(
               "b", "boolean", "desc", CommandParser::OptionDefinition::Type::Boolean,
@@ -107,10 +107,10 @@ TEST_F(CommandParserTests,
                     "--bar"});
   auto cmd =
       CreateCommandParser(
-          CreateCommandDefinition().addOption("t", "token", "desc",
+          CreateCommandDefinition().addOption("token", "t", "desc",
                                               CommandParser::OptionDefinition::Type::Token,
                                               true)
-                                   .addOption("b", "boolean", "desc",
+                                   .addOption("boolean", "b", "desc",
                                               CommandParser::OptionDefinition::Type::Boolean,
                                               true),
           args)
@@ -126,11 +126,11 @@ TEST_F(CommandParserTests,
                     "--bar"});
   auto cmd =
       CreateCommandParser(
-          CreateCommandDefinition().addOption("t", "token", "desc",
+          CreateCommandDefinition().addOption("token", "t", "desc",
                                               CommandParser::OptionDefinition::Type::Token,
                                               true)
                                    .addOption(
-                                       "b", "boolean", "desc",
+                                       "boolean", "b", "desc",
                                        CommandParser::OptionDefinition::Type::Boolean,
                                        true),
           args)
@@ -144,10 +144,10 @@ TEST_F(CommandParserTests, CommandParser_Returns_CorrectArgs_WithMultiToken) {
                     "param6", "--token", "param7"});
   auto cmd =
       CreateCommandParser(
-          CreateCommandDefinition().addOption("m", "multi", "desc",
+          CreateCommandDefinition().addOption("multi", "m", "desc",
                                               CommandParser::OptionDefinition::Type::MultiToken,
                                               true)
-                                   .addOption("t", "token", "desc",
+                                   .addOption("token", "t", "desc",
                                               CommandParser::OptionDefinition::Type::Token,
                                               true),
           args)
@@ -161,10 +161,10 @@ TEST_F(CommandParserTests,
                     "param6", "--token", "param7", "param8"});
   auto cmd =
       CreateCommandParser(
-          CreateCommandDefinition().addOption("m", "multi", "desc",
+          CreateCommandDefinition().addOption("multi", "m", "desc",
                                               CommandParser::OptionDefinition::Type::MultiToken,
                                               true)
-                                   .addOption("t", "token", "desc",
+                                   .addOption("token", "t", "desc",
                                               CommandParser::OptionDefinition::Type::Token,
                                               true)
           ,
@@ -180,9 +180,9 @@ TEST_F(CommandParserTests,
   auto cmd =
       CreateCommandParser(
           CreateCommandDefinition()
-          .addOption("m", "multi", "desc",
+          .addOption("multi", "m", "desc",
                      CommandParser::OptionDefinition::Type::MultiToken, true)
-          .addOption("t", "token", "desc",
+          .addOption("token", "t", "desc",
                      CommandParser::OptionDefinition::Type::Token, true),
           args)
       .parse();
@@ -194,7 +194,7 @@ TEST_F(CommandParserTests,
 TEST_F(CommandParserTests, CommandParser_Returns_Error_WhenNoParamForToken) {
   auto args = Args({"--token1"});
   auto cmd = CreateCommandParser(
-          CreateCommandDefinition().addOption("t1", "token1", "desc",
+          CreateCommandDefinition().addOption("token1", "t1", "desc",
                                               CommandParser::OptionDefinition::Type::Token,
                                               true)
           ,
@@ -208,7 +208,7 @@ TEST_F(CommandParserTests,
        CommandParser_ReturnsAnError_IfRequiredOptionIsMissing) {
   auto args = CreateDefaultArgs();
   auto def = CreateCommandDefinition().addOption(
-      "o", "opt", "desc", CommandParser::OptionDefinition::Type::Boolean, true);
+      "opt", "o", "desc", CommandParser::OptionDefinition::Type::Boolean, true);
   auto parser = CreateCommandParser(def, args);
   ASSERT_EQ(parser.parse().errors.size(), 1);
 }
@@ -217,7 +217,7 @@ TEST_F(CommandParserTests,
        CommandParser_ConsidersOptionsWithoutDefinitionExtraArgs) {
   auto args = std::vector<std::string>{"--extra-arg"};
   auto def = CreateCommandDefinition().addOption(
-      "o", "opt", "desc", CommandParser::OptionDefinition::Type::Boolean, true);
+      "opt", "o", "desc", CommandParser::OptionDefinition::Type::Boolean, true);
   auto parser = CreateCommandParser(def, args);
 
   ASSERT_EQ(parser.parse().extraArgs[0], "--extra-arg");
@@ -226,7 +226,7 @@ TEST_F(CommandParserTests,
 TEST_F(CommandParserTests, CommandParser_ParsesIntegersCorrectly) {
   auto args = std::vector<std::string>{"--integer", "1"};
   auto def = CreateCommandDefinition().addOption(
-      "i", "integer", "desc", CommandParser::OptionDefinition::Type::Integer, true);
+      "integer", "i", "desc", CommandParser::OptionDefinition::Type::Integer, true);
   auto parser = CreateCommandParser(def, args);
 
   ASSERT_EQ(parser.parse().options["integer"].integer, 1);
@@ -235,7 +235,7 @@ TEST_F(CommandParserTests, CommandParser_ParsesIntegersCorrectly) {
 TEST_F(CommandParserTests, CommandParser_ReturnsError_IfIntegerIsTooLarge) {
   auto args = std::vector<std::string>{"--integer", "999999999999999999999999"};
   auto def = CreateCommandDefinition().addOption(
-      "i", "integer", "desc", CommandParser::OptionDefinition::Type::Integer, true);
+      "integer", "i", "desc", CommandParser::OptionDefinition::Type::Integer, true);
   auto parser = CreateCommandParser(def, args);
 
   ASSERT_TRUE(
@@ -246,7 +246,7 @@ TEST_F(CommandParserTests, CommandParser_ReturnsError_IfIntegerIsTooLarge) {
 TEST_F(CommandParserTests, CommandParser_ReturnsError_IfParamIsNotInteger) {
   auto args = std::vector<std::string>{"--integer", "foobar"};
   auto def = CreateCommandDefinition().addOption(
-      "i", "integer", "desc", CommandParser::OptionDefinition::Type::Integer, true);
+      "integer", "i", "desc", CommandParser::OptionDefinition::Type::Integer, true);
   auto parser = CreateCommandParser(def, args);
 
   ASSERT_TRUE(ETJump::StringUtil::contains(parser.parse().errors[0],
@@ -256,7 +256,7 @@ TEST_F(CommandParserTests, CommandParser_ReturnsError_IfParamIsNotInteger) {
 TEST_F(CommandParserTests, CommandParser_ParsesDecimalsCorrectly) {
   auto args = std::vector<std::string>{"--decimal", "1.23"};
   auto def = CreateCommandDefinition().addOption(
-      "d", "decimal", "desc", CommandParser::OptionDefinition::Type::Decimal, true);
+      "decimal", "d", "desc", CommandParser::OptionDefinition::Type::Decimal, true);
   auto parser = CreateCommandParser(def, args);
 
   ASSERT_DOUBLE_EQ(parser.parse().options["decimal"].decimal, 1.23);
@@ -265,7 +265,7 @@ TEST_F(CommandParserTests, CommandParser_ParsesDecimalsCorrectly) {
 TEST_F(CommandParserTests, CommandParser_ReturnsError_IfDecimalIsTooLarge) {
   auto args = std::vector<std::string>{"--decimal", "1.79769e+309"};
   auto def = CreateCommandDefinition().addOption(
-      "d", "decimal", "desc", CommandParser::OptionDefinition::Type::Decimal, true);
+      "decimal", "d", "desc", CommandParser::OptionDefinition::Type::Decimal, true);
   auto parser = CreateCommandParser(def, args);
 
   ASSERT_TRUE(ETJump::StringUtil::contains(parser.parse().errors[0],
@@ -275,7 +275,7 @@ TEST_F(CommandParserTests, CommandParser_ReturnsError_IfDecimalIsTooLarge) {
 TEST_F(CommandParserTests, CommandParser_ReturnsError_IfParamIsNotDecimal) {
   auto args = std::vector<std::string>{"--decimal", "foobar"};
   auto def = CreateCommandDefinition().addOption(
-      "d", "decimal", "desc", CommandParser::OptionDefinition::Type::Decimal, true);
+      "decimal", "d", "desc", CommandParser::OptionDefinition::Type::Decimal, true);
   auto parser = CreateCommandParser(def, args);
 
   ASSERT_TRUE(ETJump::StringUtil::contains(parser.parse().errors[0],
@@ -285,7 +285,7 @@ TEST_F(CommandParserTests, CommandParser_ReturnsError_IfParamIsNotDecimal) {
 TEST_F(CommandParserTests, CommandParser_ParsesDatesCorrectly) {
   auto args = std::vector<std::string>{"--date", "2023-01-05"};
   auto def = CreateCommandDefinition().addOption(
-      "d", "date", "desc", CommandParser::OptionDefinition::Type::Date, true);
+      "date", "d", "desc", CommandParser::OptionDefinition::Type::Date, true);
   auto parser = CreateCommandParser(def, args);
 
   auto expectedDate = Date{2023, 1, 5};
@@ -295,7 +295,7 @@ TEST_F(CommandParserTests, CommandParser_ParsesDatesCorrectly) {
 TEST_F(CommandParserTests, CommandParser_ReturnsError_IfDateIsNotValid) {
   auto args = std::vector<std::string>{"--date", "foobar"};
   auto def = CreateCommandDefinition().addOption(
-      "d", "date", "desc", CommandParser::OptionDefinition::Type::Date, true);
+      "date", "d", "desc", CommandParser::OptionDefinition::Type::Date, true);
   auto parser = CreateCommandParser(def, args);
 
   ASSERT_TRUE(
@@ -307,9 +307,9 @@ TEST_F(CommandParserTests, CommandParser_HandlesPositionalArgumentsCorrectly) {
   auto args = std::vector<std::string>{"a", "b"};
   auto def =
       CreateCommandDefinition()
-          .addOption("fa", "field-a", "desc",
+          .addOption("field-a", "fa", "desc",
                      CommandParser::OptionDefinition::Type::Token, true, 0)
-          .addOption("fb", "field-b", "desc",
+          .addOption("field-b", "fb", "desc",
                      CommandParser::OptionDefinition::Type::Token, true, 1);
 
   auto parser = CreateCommandParser(def, args);
@@ -322,9 +322,9 @@ TEST_F(CommandParserTests, CommandParser_HandlesPositionalArgumentsCorrectly_IfS
   auto args = std::vector<std::string>{"--field-b", "b", "a"};
   auto def =
       CreateCommandDefinition()
-          .addOption("fa", "field-a", "desc",
+          .addOption("field-a", "fa", "desc",
                      CommandParser::OptionDefinition::Type::Token, true, 0)
-          .addOption("fb", "field-b", "desc",
+          .addOption("field-b", "fb", "desc",
                      CommandParser::OptionDefinition::Type::Token, true, 1);
 
   auto parser = CreateCommandParser(def, args);
@@ -336,7 +336,7 @@ TEST_F(CommandParserTests, CommandParser_HandlesPositionalArgumentsCorrectly_IfS
 TEST_F(CommandParserTests, CommandParser_ShouldNotCrash_IfNoParametersArePassed) {
   auto args = std::vector<std::string>{};
   auto def = CreateCommandDefinition().addOption(
-      "fa", "field-a", "desc", CommandParser::OptionDefinition::Type::Token, false, 0);
+      "field-a", "fa", "desc", CommandParser::OptionDefinition::Type::Token, false, 0);
 
   auto parser = CreateCommandParser(def, args);
 
