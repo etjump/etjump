@@ -91,7 +91,7 @@ TEST_F(CommandParserTests, CommandParser_Returns_MultipleCorrectOptions) {
           CreateCommandDefinition().addOption("token", "t", "desc",
                                               CommandParser::OptionDefinition::Type::Token,
                                               true).addOption(
-              "b", "boolean", "desc", CommandParser::OptionDefinition::Type::Boolean,
+              "boolean", "b", "desc", CommandParser::OptionDefinition::Type::Boolean,
               true)
           ,
           args)
