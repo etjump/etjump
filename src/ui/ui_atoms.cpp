@@ -188,15 +188,6 @@ qboolean UI_ConsoleCommand(int realTime) {
   }
 
   if (Q_stricmp(cmd, "iamacheater") == 0) {
-    int i;
-
-    // unlock all available levels and campaigns for SP
-    for (i = 0; i < uiInfo.campaignCount; i++) {
-      if (uiInfo.campaignList[i].typeBits & (1 << GT_SINGLE_PLAYER)) {
-        uiInfo.campaignList[i].unlocked = qtrue;
-        uiInfo.campaignList[i].progress = uiInfo.campaignList[i].mapCount;
-      }
-    }
     return qtrue;
   }
 

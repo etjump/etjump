@@ -13,15 +13,10 @@
 #include "bg_local.h"
 
 #ifdef CGAMEDLL
-  #define PM_GameType cg_gameType.integer
   #define PM_Cheats cgs.cheats
 #elif GAMEDLL
-  #define PM_GameType g_gametype.integer
   #define PM_Cheats g_cheats.integer
 #endif
-
-#define PM_IsSinglePlayerGame()                                                \
-  (PM_GameType == GT_SINGLE_PLAYER || PM_GameType == GT_COOP)
 
 namespace ETJump {
 static const int JUMP_DELAY_TIME = 850;
@@ -618,14 +613,6 @@ static float PM_CmdScale(usercmd_t *cmd) {
   float total;
   float scale;
 
-#ifdef CGAMEDLL
-  int gametype = cg_gameType.integer;
-  int movespeed = cg_movespeed.integer;
-#elif GAMEDLL
-  int gametype = g_gametype.integer;
-  int movespeed = g_movespeed.integer;
-#endif
-
   max = abs(cmd->forwardmove);
   if (abs(cmd->rightmove) > max) {
     max = abs(cmd->rightmove);
@@ -658,12 +645,6 @@ static float PM_CmdScale(usercmd_t *cmd) {
       scale *= 0.7;
     }
   }
-
-  if (gametype == GT_SINGLE_PLAYER || gametype == GT_COOP) {
-    // Adjust the movespeed
-    scale *= (((float)movespeed) / (float)127);
-
-  } // if (gametype == GT_SINGLE_PLAYER)...
 
   return scale;
 }
@@ -3792,19 +3773,11 @@ static void PM_Weapon(void) {
       }
 
       if (pm->cmd.buttons & BUTTON_ATTACK) {
-        if (PM_IsSinglePlayerGame()) {
-          pm->pmext->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_SP;
-        } else {
-          pm->pmext->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_MP;
-        }
+        pm->pmext->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_MP;
 
         PM_AddEvent(EV_FIRE_WEAPON_MG42);
 
-        if (PM_IsSinglePlayerGame()) {
-          pm->ps->weaponTime += MG42_RATE_OF_FIRE_SP;
-        } else {
-          pm->ps->weaponTime += MG42_RATE_OF_FIRE_MP;
-        }
+        pm->ps->weaponTime += MG42_RATE_OF_FIRE_MP;
 
         BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo,
                            ANIM_ET_FIREWEAPON, qfalse, qtrue);

@@ -39,15 +39,7 @@
 #define MG42_MULTIPLAYER_HEALTH 350 // JPW NERVE
 #define NO_BOT_SUPPORT
 
-// How long do bodies last?
-// SP : Axis: 20 seconds
-//		Allies: 30 seconds
-// MP : Both 10 seconds
-#define BODY_TIME(t)                                                           \
-  ((g_gametype.integer != GT_SINGLE_PLAYER || g_gametype.integer == GT_COOP)   \
-       ? 10000                                                                 \
-   : (t) == TEAM_AXIS ? 20000                                                  \
-                      : 30000)
+static constexpr int BODY_TIME = 10000;
 
 #define MAX_MG42_HEAT 1500.f
 
@@ -1625,7 +1617,6 @@ qboolean infront(gentity_t *self, gentity_t *other);
 void G_ProcessTagConnect(gentity_t *ent, qboolean clearAngles);
 
 void G_SetEntState(gentity_t *ent, entState_t state);
-void G_ParseCampaigns(void);
 qboolean G_MapIsValidCampaignStartMap(void);
 
 team_t G_GetTeamFromEntity(gentity_t *ent);
@@ -1855,8 +1846,6 @@ void SendScoreboardMessageToAllClients(void);
 void QDECL G_Printf(const char *fmt, ...);
 void QDECL G_DPrintf(const char *fmt, ...);
 void QDECL G_Error(const char *fmt, ...);
-// Is this a single player type game - sp or coop?
-qboolean G_IsSinglePlayerGame();
 void resetVote();
 
 //

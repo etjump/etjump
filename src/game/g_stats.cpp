@@ -190,10 +190,6 @@ void G_LoseSkillPoints(gentity_t *ent, skillType_t skill, float points) {
     return;
   }
 
-  if (g_gametype.integer == GT_WOLF_LMS) {
-    return; // Gordon: no xp in LMS
-  }
-
   oldskillpoints = ent->client->sess.skillpoints[skill];
   ent->client->sess.skillpoints[skill] -= points;
 
@@ -238,10 +234,6 @@ void G_AddSkillPoints(gentity_t *ent, skillType_t skill, float points) {
   if (ent->client->sess.sessionTeam != TEAM_AXIS &&
       ent->client->sess.sessionTeam != TEAM_ALLIES) {
     return;
-  }
-
-  if (g_gametype.integer == GT_WOLF_LMS) {
-    return; // Gordon: no xp in LMS
   }
 
   level.teamXP[skill][ent->client->sess.sessionTeam - TEAM_AXIS] += points;

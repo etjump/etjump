@@ -49,7 +49,7 @@ static void UI_LoadArenasFromFile(char *filename) {
     if (*token.string == '}') {
 
       if (!uiInfo.mapList[uiInfo.mapCount].typeBits) {
-        uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 << GT_WOLF);
+        uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 << ETJUMP_GAMETYPE);
       }
 
       uiInfo.mapCount++;
@@ -147,17 +147,9 @@ static void UI_LoadArenasFromFile(char *filename) {
         trap_PC_FreeSource(handle);
         return;
       } else {
-        if (strstr(token.string, "wolfsp")) {
-          uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 << GT_SINGLE_PLAYER);
-        }
-        if (strstr(token.string, "wolflms")) {
-          uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 << GT_WOLF_LMS);
-        }
-        if (strstr(token.string, "wolfmp")) {
-          uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 << GT_WOLF);
-        }
-        if (strstr(token.string, "wolfsw")) {
-          uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 << GT_WOLF_STOPWATCH);
+        if (strstr(token.string, "wolfsp") || strstr(token.string, "wolflms") ||
+            strstr(token.string, "wolfmp") || strstr(token.string, "wolfsw")) {
+          uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 << ETJUMP_GAMETYPE);
         }
       }
     } else if (!Q_stricmp(token.string, "mapposition_x")) {
@@ -387,10 +379,12 @@ static void UI_LoadCampaignsFromFile(const char *filename) {
   while (trap_PC_ReadToken(handle, &token)) {
     if (*token.string == '}') {
       if (uiInfo.campaignList[uiInfo.campaignCount].initial) {
-        if (uiInfo.campaignList[uiInfo.campaignCount].typeBits &
-            (1 << GT_SINGLE_PLAYER)) {
-          uiInfo.campaignList[uiInfo.campaignCount].unlocked = qtrue;
-        }
+        // FIXME
+        uiInfo.campaignList[uiInfo.campaignCount].unlocked = qtrue;
+        //        if (uiInfo.campaignList[uiInfo.campaignCount].typeBits & (1 <<
+        //        GT_SINGLE_PLAYER)) {
+        //          uiInfo.campaignList[uiInfo.campaignCount].unlocked = qtrue;
+        //        }
         // Always unlock the initial SP campaign
       }
 
@@ -477,20 +471,10 @@ static void UI_LoadCampaignsFromFile(const char *filename) {
         return;
       }
 
-      if (strstr(token.string, "wolfsp")) {
+      if (strstr(token.string, "wolfsp") || strstr(token.string, "wolfmp") ||
+          strstr(token.string, "wolfsw") || strstr(token.string, "wolflms")) {
         uiInfo.campaignList[uiInfo.campaignCount].typeBits |=
-            (1 << GT_SINGLE_PLAYER);
-      }
-      if (strstr(token.string, "wolfmp")) {
-        uiInfo.campaignList[uiInfo.campaignCount].typeBits |= (1 << GT_WOLF);
-      }
-      if (strstr(token.string, "wolfsw")) {
-        uiInfo.campaignList[uiInfo.campaignCount].typeBits |=
-            (1 << GT_WOLF_STOPWATCH);
-      }
-      if (strstr(token.string, "wolflms")) {
-        uiInfo.campaignList[uiInfo.campaignCount].typeBits |=
-            (1 << GT_WOLF_LMS);
+            (1 << ETJUMP_GAMETYPE);
       }
     } else if (!Q_stricmp(token.string, "maps")) {
       char *ptr, mapname[128], *mapnameptr;
@@ -675,7 +659,7 @@ void UI_LoadCampaigns() {
 
   // first, find the initial campaign
   for (i = 0; i < uiInfo.campaignCount; i++) {
-    if (!(uiInfo.campaignList[i].typeBits & (1 << GT_SINGLE_PLAYER))) {
+    if ((uiInfo.campaignList[i].typeBits & (1 << ETJUMP_GAMETYPE))) {
       continue;
     }
 

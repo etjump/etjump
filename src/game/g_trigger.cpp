@@ -1111,51 +1111,6 @@ void SP_trigger_once(gentity_t *ent) {
 // put this back in and modifyed for single player bots
 
 void trigger_aidoor_stayopen(gentity_t *ent, gentity_t *other, trace_t *trace) {
-  gentity_t *door;
-
-  // only use this in single player. It was taken out of multiplayer,
-  // and I'm guessing there was a good reason.
-  if (g_gametype.integer != GT_SINGLE_PLAYER && g_gametype.integer != GT_COOP) {
-    return;
-  }
-
-  // FIXME: port this code over to moving doors (use MOVER_POSx instead
-  // of MOVER_POSxROTATE)
-  if (other->client && other->health > 0) {
-    if (!ent->target || !(strlen(ent->target))) {
-      // ent->target of "" will crash game in
-      // Q_stricmp()
-
-      // FIXME: commented out so it can be fixed
-
-      //			G_Printf(
-      //"trigger_aidoor at loc %s does not
-      // have a target door\n", vtos (ent->s.origin) );
-      return;
-    }
-
-    door = G_FindByTargetname(NULL, ent->target);
-
-    if (!door) {
-      // FIXME: commented out so it can be fixed
-      //			G_Printf(
-      //"trigger_aidoor at loc %s does not
-      // have a target door\n", vtos (ent->s.origin) );
-      return;
-    }
-
-    if ((door->moverState == MOVER_POS2ROTATE) ||
-        (door->moverState == MOVER_POS2)) { // door is in open state waiting to
-                                            // close keep it open
-      door->nextthink = level.time + door->wait + 3000;
-    }
-
-    // what about other move states?
-
-    // for now, don't worry about getting the bots out of the
-    // way. this is just for single player, and the bots should
-    // have orders to follow anyway
-  }
 }
 
 void SP_trigger_aidoor(gentity_t *ent) {

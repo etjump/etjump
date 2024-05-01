@@ -298,7 +298,7 @@ After sitting around for five seconds, fall into the ground and dissapear
 */
 void BodySink2(gentity_t *ent) {
   ent->physicsObject = qfalse;
-  ent->nextthink = level.time + BODY_TIME(BODY_TEAM(ent)) + 1500;
+  ent->nextthink = level.time + BODY_TIME + 1500;
   ent->think = BodyUnlink;
   ent->s.pos.trType = TR_LINEAR;
   ent->s.pos.trTime = level.time;
@@ -429,7 +429,7 @@ void CopyToBodyQue(gentity_t *ent) {
 
   body->activator = nullptr;
 
-  body->nextthink = level.time + BODY_TIME(ent->client->sess.sessionTeam);
+  body->nextthink = level.time + BODY_TIME;
 
   body->think = BodySink;
 
@@ -2120,12 +2120,9 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   ClientUserinfoChanged(clientNum);
   G_LogPrintf("%s connected with ip: %s\n", client->pers.netname, ip);
 
-  // don't do the "xxx connected" messages if they were caried over from
-  // previous level
-  //		TAT 12/10/2002 - Don't display connected messages in
-  // single
-  // player
-  if (firstTime && !G_IsSinglePlayerGame()) {
+  // don't do the "xxx connected" messages if they were
+  // carried over from previous level
+  if (firstTime) {
     trap_SendServerCommand(-1, va("cpm \"%s" S_COLOR_WHITE " connected\n\"",
                                   client->pers.netname));
   }

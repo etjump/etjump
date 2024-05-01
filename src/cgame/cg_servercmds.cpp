@@ -1866,16 +1866,9 @@ void CG_parseWeaponStatsGS_cmd(void) {
         str = va("%d", ci->skillpoints[i]);
       }
 
-      if (cgs.gametype == GT_WOLF_CAMPAIGN) {
-        Q_strncpyz(gs->strSkillz[gs->cSkills++],
-                   va("%-15s %3d %s %12d", skillNames[i], ci->skill[i], str,
-                      ci->medals[i]),
-                   sizeof(gs->strSkillz[0]));
-      } else {
-        Q_strncpyz(gs->strSkillz[gs->cSkills++],
-                   va("%-15s %3d %s", skillNames[i], ci->skill[i], str),
-                   sizeof(gs->strSkillz[0]));
-      }
+      Q_strncpyz(gs->strSkillz[gs->cSkills++],
+                 va("%-15s %3d %s", skillNames[i], ci->skill[i], str),
+                 sizeof(gs->strSkillz[0]));
     }
   }
 }
@@ -1987,11 +1980,9 @@ void CG_parseWeaponStats_cmd(void(txt_dump)(const char *)) {
   }
 
   // Medals only in campaign mode
-  txt_dump(va("Skills         Level/Points%s\n",
-              ((cgs.gametype == GT_WOLF_CAMPAIGN) ? "  Medals" : "")));
+  txt_dump("Skills         Level/Points\n");
   if (fFull) {
-    txt_dump(va("---------------------------%s\n",
-                ((cgs.gametype == GT_WOLF_CAMPAIGN) ? "--------" : "")));
+    txt_dump("---------------------------\n");
   } else {
     txt_dump("\n");
   }
@@ -2014,12 +2005,7 @@ void CG_parseWeaponStats_cmd(void(txt_dump)(const char *)) {
         str = va("%d (%d)", ci->skill[i], ci->skillpoints[i]);
       }
 
-      if (cgs.gametype == GT_WOLF_CAMPAIGN) {
-        txt_dump(
-            va("%-14s ^3%-12s  ^2%6d\n", skillNames[i], str, ci->medals[i]));
-      } else {
-        txt_dump(va("%-14s ^3%-12s\n", skillNames[i], str));
-      }
+      txt_dump(va("%-14s ^3%-12s\n", skillNames[i], str));
     }
   }
 }

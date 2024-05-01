@@ -1577,15 +1577,8 @@ void CG_printConsoleString(const char *str) {
 
 void CG_LoadObjectiveData(void) {
   pc_token_t token, token2;
-  int handle;
-
-  if (cg_gameType.integer == GT_WOLF_LMS) {
-    handle =
-        trap_PC_LoadSource(va("maps/%s_lms.objdata", Q_strlwr(cgs.rawmapname)));
-  } else {
-    handle =
-        trap_PC_LoadSource(va("maps/%s.objdata", Q_strlwr(cgs.rawmapname)));
-  }
+  const int handle =
+      trap_PC_LoadSource(va("maps/%s.objdata", Q_strlwr(cgs.rawmapname)));
 
   if (!handle) {
     return;
@@ -3890,10 +3883,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   CG_ParseWolfinfo(); // NERVE - SMF
 
   cgs.campaignInfoLoaded = qfalse;
-  if (cgs.gametype == GT_WOLF_CAMPAIGN) {
-    CG_LocateCampaign();
-  } else if (cgs.gametype == GT_WOLF_STOPWATCH || cgs.gametype == GT_WOLF_LMS ||
-             cgs.gametype == GT_WOLF) {
+  if (cgs.gametype == ETJUMP_GAMETYPE) {
     CG_LocateArena();
   }
 
@@ -4094,13 +4084,7 @@ void CG_Shutdown(void) {
 }
 
 // returns true if game is single player (or coop)
-qboolean CG_IsSinglePlayer(void) {
-  if (cg_gameType.integer == GT_SINGLE_PLAYER || cgs.gametype == GT_COOP) {
-    return qtrue;
-  }
-
-  return qfalse;
-}
+qboolean CG_IsSinglePlayer(void) { return qfalse; }
 
 qboolean CG_CheckExecKey(int key) {
   if (cg.showFireteamMenu) {

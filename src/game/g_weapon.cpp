@@ -611,12 +611,6 @@ void Weapon_Syringe(gentity_t *ent) {
           G_AddSkillPoints(ent, SK_FIRST_AID, 4.f);
           G_DebugAddSkillPoints(ent, SK_FIRST_AID, 4.f, "reviving a player");
         }
-
-        // Arnout: calculate ranks to update numFinalDead arrays.
-        // Have to do it manually as addscore has an early out
-        if (g_gametype.integer == GT_WOLF_LMS) {
-          CalculateRanks();
-        }
       }
     }
   }
@@ -3657,7 +3651,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
 
   // check that portals aren't overlapping..
   if ((ent->portalBlue) || (ent->portalRed)) {
-    gentity_t* otherPortal = nullptr;
+    gentity_t *otherPortal = nullptr;
 
     if (portalNumber == 1 && ent->portalRed) {
       otherPortal = ent->portalRed;
@@ -3666,7 +3660,8 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
     }
 
     if (otherPortal) {
-      const float otherScale = static_cast<float>(otherPortal->s.onFireStart) / 48.0f;
+      const float otherScale =
+          static_cast<float>(otherPortal->s.onFireStart) / 48.0f;
       const float min_dist =
           MIN_PORTALS_DIST * scale + MIN_PORTALS_DIST * otherScale;
 
@@ -4001,17 +3996,9 @@ gentity_t *weapon_mortar_fire(gentity_t *ent, int grenType) {
   // in a wall)
   VectorMA(launchPos, 32, forward, testPos);
 
-  // Gordon: hack so i can do inverse trajectory calcs easily :p
-  if (G_IsSinglePlayerGame() && ent->r.svFlags & SVF_BOT) {
-    /*		forward[0] *= 3000;
-            forward[1] *= 3000;
-            forward[2] *= 3000;*/
-    VectorCopy(ent->gDelta, forward);
-  } else {
-    forward[0] *= 3000 * 1.1f;
-    forward[1] *= 3000 * 1.1f;
-    forward[2] *= 1500 * 1.1f;
-  }
+  forward[0] *= 3000 * 1.1f;
+  forward[1] *= 3000 * 1.1f;
+  forward[2] *= 1500 * 1.1f;
 
   trap_Trace(&tr, testPos, tv(-4.f, -4.f, 0.f), tv(4.f, 4.f, 6.f), launchPos,
              ent->s.number, CONTENTS_SOLID | CONTENTS_MISSILECLIP);

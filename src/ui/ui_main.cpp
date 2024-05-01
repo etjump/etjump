@@ -1403,76 +1403,6 @@ static void UI_DrawEffects(rectDef_t *rect, float scale, vec4_t color) {
 void UI_DrawMapPreview(rectDef_t *rect, float scale, vec4_t color,
                        qboolean net) {
   int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
-  int game = net ? ui_netGameType.integer
-                 : uiInfo
-                       .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
-                                                 MAX_GAMETYPES - 1)]
-                       .gtEnum;
-
-  if (game == GT_WOLF_CAMPAIGN) {
-    if (map < 0 || map > uiInfo.campaignCount) {
-      if (net) {
-        ui_currentNetMap.integer = 0;
-        trap_Cvar_Set("ui_currentNetMap", "0");
-      } else {
-        ui_currentMap.integer = 0;
-        trap_Cvar_Set("ui_currentMap", "0");
-      }
-      map = 0;
-    }
-
-    if (uiInfo.campaignList[map].mapTC[0][0] &&
-        uiInfo.campaignList[map].mapTC[1][0]) {
-      float x, y, w, h;
-      int i;
-
-      x = rect->x;
-      y = rect->y;
-      w = rect->w;
-      h = rect->h;
-      UI_AdjustFrom640(&x, &y, &w, &h);
-      trap_R_DrawStretchPic(
-          x, y, w, h, uiInfo.campaignList[map].mapTC[0][0] / 1024.f,
-          uiInfo.campaignList[map].mapTC[0][1] / 1024.f,
-          uiInfo.campaignList[map].mapTC[1][0] / 1024.f,
-          uiInfo.campaignList[map].mapTC[1][1] / 1024.f, uiInfo.campaignMap);
-      for (i = 0; i < uiInfo.campaignList[map].mapCount; i++) {
-        vec4_t colourFadedBlack = {0.f, 0.f, 0.f, 0.4f};
-
-        x = rect->x + ((uiInfo.campaignList[map].mapInfos[i]->mappos[0] -
-                        uiInfo.campaignList[map].mapTC[0][0]) /
-                       650.f * rect->w);
-        y = rect->y + ((uiInfo.campaignList[map].mapInfos[i]->mappos[1] -
-                        uiInfo.campaignList[map].mapTC[0][1]) /
-                       650.f * rect->h);
-
-        w = Text_Width(uiInfo.campaignList[map].mapInfos[i]->mapName, scale, 0);
-
-        if (x + 10 + w > rect->x + rect->w) {
-          UI_FillRect(x - w - 12 + 1, y - 6 + 1, 12 + w, 12, colourFadedBlack);
-          UI_FillRect(x - w - 12, y - 6, 12 + w, 12, colorBlack);
-        } else {
-          UI_FillRect(x + 1, y - 6 + 1, 12 + w, 12, colourFadedBlack);
-          UI_FillRect(x, y - 6, 12 + w, 12, colorBlack);
-        }
-
-        UI_DrawHandlePic(x - 8, y - 8, 16, 16,
-                         trap_R_RegisterShaderNoMip("gfx/loading/pin_neutral"));
-
-        if (x + 10 + w > rect->x + rect->w) {
-          Text_Paint(x - w - 10, y + 3, scale, colorWhite,
-                     uiInfo.campaignList[map].mapInfos[i]->mapName, 0, 0, 0);
-        } else {
-          Text_Paint(x + 10, y + 3, scale, colorWhite,
-                     uiInfo.campaignList[map].mapInfos[i]->mapName, 0, 0, 0);
-        }
-      }
-    } else {
-      UI_DrawHandlePic(rect->x, rect->y, rect->w, rect->h,
-                       trap_R_RegisterShaderNoMip("levelshots/unknownmap"));
-    }
-    return;
-  }
 
   if (map < 0 || map > uiInfo.mapCount) {
     if (net) {
@@ -1591,45 +1521,6 @@ static void UI_DrawMapCinematic(rectDef_t *rect, float scale, vec4_t color,
                                 qboolean net) {
 
   int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
-  int game = net ? ui_netGameType.integer
-                 : uiInfo
-                       .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
-                                                 MAX_GAMETYPES - 1)]
-                       .gtEnum;
-
-  if (game == GT_WOLF_CAMPAIGN) {
-    if (map < 0 || map > uiInfo.campaignCount) {
-      if (net) {
-        ui_currentNetMap.integer = 0;
-        trap_Cvar_Set("ui_currentNetMap", "0");
-      } else {
-        ui_currentMap.integer = 0;
-        trap_Cvar_Set("ui_currentMap", "0");
-      }
-      map = 0;
-    }
-
-    /*		if( uiInfo.campaignList[map].campaignCinematic >= -1 )
-       { if( uiInfo.campaignList[map].campaignCinematic == -1 )
-       { uiInfo.campaignList[map].campaignCinematic =
-       trap_CIN_PlayCinematic(va("%s.roq",
-       uiInfo.campaignList[map].campaignShortName), 0, 0, 0, 0,
-       (CIN_loop | CIN_silent) );
-                }
-                if( uiInfo.campaignList[map].campaignCinematic
-       >= 0 ) { trap_CIN_RunCinematic(
-       uiInfo.campaignList[map].campaignCinematic );
-       trap_CIN_SetExtents(
-       uiInfo.campaignList[map].campaignCinematic, rect->x,
-       rect->y, rect->w, rect->h ); trap_CIN_DrawCinematic(
-       uiInfo.campaignList[map].campaignCinematic ); } else {
-                    uiInfo.campaignList[map].campaignCinematic =
-       -2;
-                }
-            } else*/
-    { UI_DrawMapPreview(rect, scale, color, net); }
-    return;
-  }
 
   if (map < 0 || map > uiInfo.mapCount) {
     if (net) {
@@ -1757,21 +1648,9 @@ void UI_DrawCampaignDescription(rectDef_t *rect, float scale, vec4_t color,
   int height, len, textWidth, newLine, newLineWidth;
   float y;
   rectDef_t textRect;
-  int game = (net) ? ui_netGameType.integer : ui_netGameType.integer;
+  int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
 
-  if (game == GT_WOLF_CAMPAIGN) {
-    int campaign = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
-
-    textPtr = uiInfo.campaignList[campaign].campaignDescription;
-  } else if (game == GT_WOLF_LMS) {
-    int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
-
-    textPtr = uiInfo.mapList[map].lmsbriefing;
-  } else {
-    int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
-
-    textPtr = uiInfo.mapList[map].briefing;
-  }
+  textPtr = uiInfo.mapList[map].briefing;
 
   if (!textPtr || !*textPtr) {
     textPtr = "^1No text supplied";
@@ -4046,18 +3925,10 @@ void UI_RunMenuScript(const char **args) {
       trap_Cvar_SetValue("dedicated", Com_Clamp(0, 2, ui_dedicated.integer));
       trap_Cvar_SetValue("g_gametype", Com_Clamp(0, 8, ui_netGameType.integer));
 
-      if (ui_netGameType.integer == GT_WOLF_CAMPAIGN) {
-        trap_Cmd_ExecuteText(EXEC_APPEND,
-                             va("wait ; wait ; map %s\n",
-                                uiInfo.campaignList[ui_currentNetMap.integer]
-                                    .mapInfos[0]
-                                    ->mapLoadName));
-      } else {
-        trap_Cmd_ExecuteText(
-            EXEC_APPEND,
-            va("wait ; wait ; map %s\n",
-               uiInfo.mapList[ui_currentNetMap.integer].mapLoadName));
-      }
+      trap_Cmd_ExecuteText(
+          EXEC_APPEND,
+          va("wait ; wait ; map %s\n",
+             uiInfo.mapList[ui_currentNetMap.integer].mapLoadName));
 
       // NERVE - SMF - set user cvars here
       // set timelimit
@@ -4547,22 +4418,12 @@ void UI_RunMenuScript(const char **args) {
       return;
     }
     if (Q_stricmp(name, "voteMap") == 0) {
-      if (ui_netGameType.integer == GT_WOLF_CAMPAIGN) {
-        if (ui_currentNetMap.integer >= 0 &&
-            ui_currentNetMap.integer < uiInfo.campaignCount) {
-          trap_Cmd_ExecuteText(EXEC_APPEND,
-                               va("callvote campaign %s\n",
-                                  uiInfo.campaignList[ui_currentNetMap.integer]
-                                      .campaignShortName));
-        }
-      } else {
-        if (ui_currentNetMap.integer >= 0 &&
-            ui_currentNetMap.integer < uiInfo.mapCount) {
-          trap_Cmd_ExecuteText(
-              EXEC_APPEND,
-              va("callvote %s %s\n", ui_voteCheats.integer ? "devmap" : "map",
-                 uiInfo.mapList[ui_currentNetMap.integer].mapLoadName));
-        }
+      if (ui_currentNetMap.integer >= 0 &&
+          ui_currentNetMap.integer < uiInfo.mapCount) {
+        trap_Cmd_ExecuteText(
+            EXEC_APPEND,
+            va("callvote %s %s\n", ui_voteCheats.integer ? "devmap" : "map",
+               uiInfo.mapList[ui_currentNetMap.integer].mapLoadName));
       }
       return;
     }
@@ -4895,22 +4756,12 @@ void UI_RunMenuScript(const char **args) {
       return;
     }
     if (Q_stricmp(name, "refMap") == 0) {
-      if (ui_netGameType.integer == GT_WOLF_CAMPAIGN) {
-        if (ui_currentNetMap.integer >= 0 &&
-            ui_currentNetMap.integer < uiInfo.campaignCount) {
-          trap_Cmd_ExecuteText(EXEC_APPEND,
-                               va("ref campaign %s\n",
-                                  uiInfo.campaignList[ui_currentNetMap.integer]
-                                      .campaignShortName));
-        }
-      } else {
-        if (ui_currentNetMap.integer >= 0 &&
-            ui_currentNetMap.integer < uiInfo.mapCount) {
-          trap_Cmd_ExecuteText(
-              EXEC_APPEND,
-              va("ref map %s\n",
-                 uiInfo.mapList[ui_currentNetMap.integer].mapLoadName));
-        }
+      if (ui_currentNetMap.integer >= 0 &&
+          ui_currentNetMap.integer < uiInfo.mapCount) {
+        trap_Cmd_ExecuteText(
+            EXEC_APPEND,
+            va("ref map %s\n",
+               uiInfo.mapList[ui_currentNetMap.integer].mapLoadName));
       }
       return;
     }
@@ -5654,22 +5505,14 @@ static int UI_MapCountByGameType(qboolean singlePlayer) {
                             .gtEnum
                       : ui_netGameType.integer;
 
-  if (game == GT_WOLF_CAMPAIGN) {
-    for (i = 0; i < uiInfo.campaignCount; i++) {
-      if (uiInfo.campaignList[i].typeBits & (1 << GT_WOLF)) {
-        c++;
+  for (i = 0; i < uiInfo.mapCount; i++) {
+    uiInfo.mapList[i].active = qfalse;
+    if (uiInfo.mapList[i].typeBits & (1 << game)) {
+      if (singlePlayer) {
+        continue;
       }
-    }
-  } else {
-    for (i = 0; i < uiInfo.mapCount; i++) {
-      uiInfo.mapList[i].active = qfalse;
-      if (uiInfo.mapList[i].typeBits & (1 << game)) {
-        if (singlePlayer) {
-          continue;
-        }
-        c++;
-        uiInfo.mapList[i].active = qtrue;
-      }
+      c++;
+      uiInfo.mapList[i].active = qtrue;
     }
   }
   return c;
@@ -5710,15 +5553,11 @@ UI_CampaignCount
 ==================
 */
 static int UI_CampaignCount(qboolean singlePlayer) {
-  int i, c /*, game*/;
+  int i, c;
   c = 0;
-  // game = singlePlayer ? uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer,
-  // 0, MAX_GAMETYPES-1)].gtEnum :
-  // uiInfo.gameTypes[ui_netGameType.integer].gtEnum;
 
   for (i = 0; i < uiInfo.campaignCount; i++) {
-    if (singlePlayer &&
-        !(uiInfo.campaignList[i].typeBits & (1 << GT_SINGLE_PLAYER))) {
+    if (singlePlayer) {
       continue;
     }
 
@@ -5726,9 +5565,8 @@ static int UI_CampaignCount(qboolean singlePlayer) {
       c++;
     }
   }
-  return c;
 
-  // return uiInfo.campaignCount;
+  return c;
 }
 
 /*
@@ -6514,38 +6352,21 @@ static int UI_FeederCount(float feederID) {
 
 static const char *UI_SelectedMap(qboolean singlePlayer, int index,
                                   int *actual) {
-  int i, c, game;
+  int i, c;
   c = 0;
-  game = singlePlayer ? uiInfo
-                            .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
-                                                      MAX_GAMETYPES - 1)]
-                            .gtEnum
-                      : ui_netGameType.integer;
   *actual = 0;
 
-  if (game == GT_WOLF_CAMPAIGN) {
-    for (i = 0; i < uiInfo.mapCount; i++) {
-      if (uiInfo.campaignList[i].typeBits & (1 << GT_WOLF)) {
-        if (c == index) {
-          *actual = i;
-          return uiInfo.campaignList[i].campaignName;
-        } else {
-          c++;
-        }
-      }
-    }
-  } else {
-    for (i = 0; i < uiInfo.mapCount; i++) {
-      if (uiInfo.mapList[i].active) {
-        if (c == index) {
-          *actual = i;
-          return uiInfo.mapList[i].mapName;
-        } else {
-          c++;
-        }
+  for (i = 0; i < uiInfo.mapCount; i++) {
+    if (uiInfo.mapList[i].active) {
+      if (c == index) {
+        *actual = i;
+        return uiInfo.mapList[i].mapName;
+      } else {
+        c++;
       }
     }
   }
+
   return "";
 }
 
@@ -6912,25 +6733,11 @@ static qhandle_t UI_FeederItemImage(float feederID, int index) {
     }
   } else if (feederID == FEEDER_ALLMAPS || feederID == FEEDER_MAPS) {
     int actual;
-    int game;
 
     UI_SelectedMap(feederID == FEEDER_MAPS ? qtrue : qfalse, index, &actual);
     index = actual;
-    game = feederID == FEEDER_MAPS
-               ? uiInfo
-                     .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
-                                               MAX_GAMETYPES - 1)]
-                     .gtEnum
-               : ui_netGameType.integer;
-    if (game == GT_WOLF_CAMPAIGN) {
-      if (index >= 0 && index < uiInfo.campaignCount) {
-        if (uiInfo.campaignList[index].campaignShot == -1) {
-          uiInfo.campaignList[index].campaignShot = trap_R_RegisterShaderNoMip(
-              uiInfo.campaignList[index].campaignShortName);
-        }
-        return uiInfo.campaignList[index].campaignShot;
-      }
-    } else if (index >= 0 && index < uiInfo.mapCount) {
+
+    if (index >= 0 && index < uiInfo.mapCount) {
       if (uiInfo.mapList[index].levelShot == -1) {
         uiInfo.mapList[index].levelShot =
             trap_R_RegisterShaderNoMip(uiInfo.mapList[index].imageName);
@@ -6977,46 +6784,16 @@ void UI_FeederSelection(float feederID, int index) {
       trap_Cvar_Set("headmodel", uiInfo.q3HeadNames[index]);
     }
   } else if (feederID == FEEDER_MAPS || feederID == FEEDER_ALLMAPS) {
-    int actual /*, map*/;
-    int game;
-
-    // map  = (feederID == FEEDER_ALLMAPS) ?
-    // ui_currentNetMap.integer : ui_currentMap.integer;
-    game = feederID == FEEDER_MAPS
-               ? uiInfo
-                     .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
-                                               MAX_GAMETYPES - 1)]
-                     .gtEnum
-               : ui_netGameType.integer;
-    /*if( game == GT_WOLF_CAMPAIGN ) {
-        if (uiInfo.campaignList[map].campaignCinematic >= 0) {
-            trap_CIN_StopCinematic(uiInfo.campaignList[map].campaignCinematic);
-            uiInfo.campaignList[map].campaignCinematic = -1;
-        }
-    } else
-        if (uiInfo.mapList[map].cinematic >= 0) {
-            trap_CIN_StopCinematic(uiInfo.mapList[map].cinematic);
-            uiInfo.mapList[map].cinematic = -1;
-        }*/
+    int actual;
 
     UI_SelectedMap(feederID == FEEDER_MAPS ? qtrue : qfalse, index, &actual);
     trap_Cvar_Set("ui_mapIndex", va("%d", index));
     ui_mapIndex.integer = index;
 
     // NERVE - SMF - setup advanced server vars
-    if (feederID == FEEDER_ALLMAPS && game != GT_WOLF_CAMPAIGN) {
+    if (feederID == FEEDER_ALLMAPS) {
       ui_currentMap.integer = actual;
       trap_Cvar_Set("ui_currentMap", va("%d", actual));
-      /*			trap_Cvar_Set(
-         "ui_userTimelimit", va( "%d",
-         uiInfo.mapList[ui_currentMap.integer].Timelimit
-         ) ); trap_Cvar_Set( "ui_userAxisRespawnTime",
-         va( "%d",
-         uiInfo.mapList[ui_currentMap.integer].AxisRespawnTime
-         ) ); trap_Cvar_Set( "ui_userAlliedRespawnTime",
-         va( "%d",
-         uiInfo.mapList[ui_currentMap.integer].AlliedRespawnTime
-         ) );*/
     }
     // -NERVE - SMF
 
@@ -8313,9 +8090,6 @@ void _UI_SetActiveMenu(uiMenuCommand_t menu) {
         return;
 
       case UIMENU_INGAME:
-        if (g_gameType.integer == GT_SINGLE_PLAYER) {
-          trap_Cvar_Set("cl_paused", "1");
-        }
         trap_Key_SetCatcher(KEYCATCH_UI);
         UI_BuildPlayerList();
         Menu_SetFeederSelection(NULL, FEEDER_PLAYER_LIST, 0, NULL);
@@ -9319,7 +9093,7 @@ void UI_Campaign_f(void) {
     }
   }
 
-  if (i == uiInfo.campaignCount || !(campaign->typeBits & (1 << GT_WOLF))) {
+  if (i == uiInfo.campaignCount) {
     Com_Printf("Can't find campaign '%s'\n", str);
     return;
   }
@@ -9333,15 +9107,7 @@ void UI_Campaign_f(void) {
   trap_Cvar_Set("g_currentCampaign", campaign->campaignShortName);
   trap_Cvar_Set("g_currentCampaignMap", "0");
 
-  // we got a campaign, start it
-  trap_Cvar_Set("g_gametype", va("%i", GT_WOLF_CAMPAIGN));
-#if 0
-	if (trap_Cvar_VariableValue("developer"))
-	{
-		trap_Cmd_ExecuteText(EXEC_APPEND, va("devmap %s\n", campaign->mapInfos[0]->mapLoadName));
-	}
-	else
-#endif
+  trap_Cvar_Set("g_gametype", va("%i", ETJUMP_GAMETYPE));
   trap_Cmd_ExecuteText(EXEC_APPEND,
                        va("map %s\n", campaign->mapInfos[0]->mapLoadName));
 }
@@ -9356,7 +9122,7 @@ void UI_ListCampaigns_f(void) {
   mpCampaigns = 0;
 
   for (i = 0; i < uiInfo.campaignCount; i++) {
-    if (uiInfo.campaignList[i].typeBits & (1 << GT_WOLF)) {
+    if (uiInfo.campaignList[i].typeBits & (1 << ETJUMP_GAMETYPE)) {
       mpCampaigns++;
     }
   }
@@ -9369,7 +9135,7 @@ void UI_ListCampaigns_f(void) {
   }
 
   for (i = 0; i < uiInfo.campaignCount; i++) {
-    if (uiInfo.campaignList[i].typeBits & (1 << GT_WOLF)) {
+    if (uiInfo.campaignList[i].typeBits & (1 << ETJUMP_GAMETYPE)) {
       Com_Printf(" %s\n", uiInfo.campaignList[i].campaignShortName);
     }
   }
