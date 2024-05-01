@@ -57,7 +57,7 @@ void EntityUtilsShared::touchPusher(playerState_t *ps, const int time,
   if (pusher->eType == ET_VELOCITY_PUSH_TRIGGER) {
     vec3_t pushVel{};
 
-    // bits 8-23 holds spawnflags
+    // bits 8-16 holds spawnflags
     const int spawnflags = (pusher->constantLight >> 8) & 0xff;
     setPushVelocity(ps, pusher->origin2, spawnflags, pushVel);
     VectorCopy(pushVel, ps->velocity);
