@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef GAME_HPP
-#define GAME_HPP
+#pragma once
 
 #include <memory>
 
@@ -31,6 +30,7 @@ namespace ETJump {
 class TimerunV2;
 class RockTheVote;
 class Tokens;
+class ChatReplay;
 } // namespace ETJump
 
 class Levels;
@@ -51,6 +51,5 @@ struct Game {
   std::shared_ptr<ETJump::Tokens> tokens;
   std::shared_ptr<ETJump::TimerunV2> timerunV2;
   std::shared_ptr<ETJump::RockTheVote> rtv;
+  std::shared_ptr<ETJump::ChatReplay> chatReplay;
 };
-
-#endif

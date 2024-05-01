@@ -38,6 +38,7 @@
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
 #include "etj_timerun_v2.h"
+#include "etj_chat_replay.h"
 
 typedef std::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<std::function<bool(gentity_t *ent, Arguments argv)>, char>
@@ -379,6 +380,11 @@ bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
   game.timerunV2->loadCheckpoints(ClientNum(ent), level.rawmapname, runName,
                                   rank);
 
+  return true;
+}
+
+bool GetChatReplay(gentity_t *ent, Arguments argv) {
+  game.chatReplay->sendChatMessages(ent);
   return true;
 }
 } // namespace ClientCommands
@@ -2487,6 +2493,7 @@ Commands::Commands() {
   commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
   commands_["rankings"] = ClientCommands::Rankings;
   commands_["seasons"] = ClientCommands::ListSeasons;
+  commands_["getchatreplay"] = ClientCommands::GetChatReplay;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {

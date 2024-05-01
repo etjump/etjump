@@ -25,9 +25,12 @@
 #pragma once
 
 #include "json/json.h"
+#include "etj_log.h"
 
 namespace ETJump {
 class JsonUtils {
+  static Log logger;
+
 public:
   // returns true on successful read
   static bool readFile(const std::string &file, Json::Value &root);

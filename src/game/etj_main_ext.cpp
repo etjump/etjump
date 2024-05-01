@@ -39,6 +39,7 @@
 #include "etj_timerun_repository.h"
 #include "etj_timerun_v2.h"
 #include "etj_rtv.h"
+#include "etj_chat_replay.h"
 
 Game game;
 
@@ -156,6 +157,7 @@ void OnGameInit() {
   game.motd = std::make_shared<Motd>();
   game.tokens = std::make_shared<ETJump::Tokens>();
   game.rtv = std::make_shared<ETJump::RockTheVote>();
+  game.chatReplay = std::make_shared<ETJump::ChatReplay>();
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
@@ -234,6 +236,7 @@ void OnGameShutdown() {
   game.tokens = nullptr;
   game.timerunV2 = nullptr;
   game.rtv = nullptr;
+  game.chatReplay = nullptr;
   ETJump::Log::processMessages();
 }
 
