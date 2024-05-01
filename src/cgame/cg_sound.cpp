@@ -496,9 +496,9 @@ static void CG_SoundLoadSoundFiles() {
       }
       continue;
     }
-    if (len > static_cast<int>(sizeof(bigTextBuffer))) {
+    if (len >= static_cast<int>(sizeof(bigTextBuffer))) {
       CG_Error("%s is too big, make it smaller (max = %i bytes)\n", filename,
-               static_cast<int>(sizeof(bigTextBuffer)));
+               static_cast<int>(sizeof(bigTextBuffer) - 1));
     }
     memset(bigTextBuffer, 0, sizeof(bigTextBuffer));
     trap_FS_Read(bigTextBuffer, len, f);
