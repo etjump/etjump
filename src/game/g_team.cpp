@@ -241,31 +241,6 @@ void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor,
       attacker->client->pers.teamState.basedefense++;
       return;
     }
-
-    /*		if (g_gametype.integer < GT_WOLF) { // JPW NERVE no
-       attacker protect in wolf MP if (carrier && carrier !=
-       attacker) { VectorSubtract(targ->s.origin,
-       carrier->s.origin, v1);
-                    VectorSubtract(attacker->s.origin,
-       carrier->s.origin, v1);
-
-                    if (VectorLengthSquared(v1) <
-       SQR(CTF_ATTACKER_PROTECT_RADIUS) ||
-       VectorLengthSquared(v2) <
-       SQR(CTF_ATTACKER_PROTECT_RADIUS) || CanDamage(carrier,
-       targ->s.origin) || CanDamage(carrier,
-       attacker->s.origin)) { AddScore(attacker,
-       CTF_CARRIER_PROTECT_BONUS);
-                        attacker->client->pers.teamState.carrierdefense++;
-                        PrintMsg(NULL, "%s" S_COLOR_WHITE "
-       defends the %s's flag carrier.\n",
-       attacker->client->pers.netname,
-                            TeamName(attacker->client->sess.sessionTeam));
-                        return;
-                    }
-                }
-            }*/
-
   } // JPW NERVE
 
   // JPW NERVE -- look for nearby checkpoints and spawnpoints

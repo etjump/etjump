@@ -67,10 +67,6 @@
 #endif // NOTE: Used _DEPRECATE instead of _WARNINGS for backward
        //		 compatibility with compilers.
 
-// #define SAVEGAME_SUPPORT	// uncomment to enable savegames
-//  enabling this requires you to run extractfuncs.bat as well before compiling
-//  qagame
-
 #define SPRINTTIME 20000.0f
 
 #define DEBUG_BOT_RETREATBEHAVIOR 1
@@ -251,6 +247,8 @@ typedef enum {
 #define MAX_OID_TRIGGERS 18
 // dhm
 
+// ETJump: need to keep this at default so that 'gameinfo.txt' parses correctly,
+// otherwise we cannot show the correct gametypes in the server browser
 #define MAX_GAMETYPES 16
 
 typedef struct {
@@ -281,72 +279,6 @@ typedef struct {
   const char *lmsbriefing;
   const char *objectives;
 } mapInfo;
-
-// Campaign saves
-// rain - 128 -> 512, campaigns are commonplace
-#define MAX_CAMPAIGNS 512
-
-// START Mad Doc - TDF
-// changed this from 6 to 10
-#define MAX_MAPS_PER_CAMPAIGN 10
-// END Mad Doc - TDF
-
-#define CPS_IDENT (('S' << 24) + ('P' << 16) + ('C' << 8) + 'I')
-#define CPS_VERSION 1
-
-typedef struct {
-  int mapnameHash;
-} cpsMap_t;
-
-typedef struct {
-  int shortnameHash;
-  int progress;
-
-  cpsMap_t maps[MAX_MAPS_PER_CAMPAIGN];
-} cpsCampaign_t;
-
-typedef struct {
-  int ident;
-  int version;
-
-  int numCampaigns;
-  int profileHash;
-} cpsHeader_t;
-
-typedef struct {
-  cpsHeader_t header;
-  cpsCampaign_t campaigns[MAX_CAMPAIGNS];
-} cpsFile_t;
-
-qboolean BG_LoadCampaignSave(const char *filename, cpsFile_t *file,
-                             const char *profile);
-qboolean BG_StoreCampaignSave(const char *filename, cpsFile_t *file,
-                              const char *profile);
-
-typedef struct {
-  const char *campaignShortName;
-  const char *campaignName;
-  const char *campaignDescription;
-  const char *nextCampaignShortName;
-  const char *maps;
-  int mapCount;
-  mapInfo *mapInfos[MAX_MAPS_PER_CAMPAIGN];
-  vec2_t mapTC[2];
-  cpsCampaign_t *cpsCampaign; // if this campaign was found in the campaignsave,
-                              // more detailed info can be found here
-
-  const char *campaignShotName;
-  int campaignCinematic;
-  qhandle_t campaignShot;
-
-  qboolean unlocked;
-  int progress;
-
-  qboolean initial;
-  int order;
-
-  int typeBits;
-} campaignInfo_t;
 
 // Random reinforcement seed settings
 #define MAX_REINFSEEDS 8
@@ -414,11 +346,16 @@ extern const char *bg_fireteamNames[MAX_FIRETEAMS];
   18 //----(SA) used for saving the current state/settings of the fog
 #define CS_SKYBOXORG 19 // this is where we should view the skybox from
 
-#define CS_TARGETEFFECT 20          //----(SA)
-#define CS_WOLFINFO 21              // NERVE - SMF
+#define CS_TARGETEFFECT 20 //----(SA)
+
+// ETJump: this whole CS is useless for us and can be reused for something
+// without messing up old demos, as it used to just hold
+// campaign/stopwatch/LMS/gamestate data, which we have never supported
+#define CS_WOLFINFO 21
+
 #define CS_FIRSTBLOOD 22            // Team that has first blood
-#define CS_ROUNDSCORES1 23          // Axis round wins
-#define CS_ROUNDSCORES2 24          // Allied round wins
+#define CS_ROUNDSCORES1 23          // ETJump: unused (Axis LMS round wins)
+#define CS_ROUNDSCORES2 24          // ETJump: unused (Allied LMS round wins)
 #define CS_MAIN_AXIS_OBJECTIVE 25   // Most important current objective
 #define CS_MAIN_ALLIES_OBJECTIVE 26 // Most important current objective
 #define CS_MUSIC_QUEUE 27
@@ -644,10 +581,6 @@ typedef struct {
   float xyspeed;
 
   int *skill; // player skills
-
-#ifdef SAVEGAME_SUPPORT
-  qboolean reloading;
-#endif // SAVEGAME_SUPPORT
 
 #ifdef GAMEDLL         // the whole stamina thing is only in qagame
   qboolean leadership; // within 512 units of a player with level 5
@@ -1738,8 +1671,6 @@ qboolean BG_IsAkimboSideArm(int weaponNum, playerState_t *ps);
 int BG_AkimboSidearm(int weaponNum);
 
 #define ITEM_INDEX(x) ((x)-bg_itemlist)
-
-qboolean BG_CanUseWeapon(int classNum, int teamNum, weapon_t weapon);
 
 qboolean BG_CanItemBeGrabbed(const entityState_t *ent, const playerState_t *ps,
                              int *skill, int teamNum);

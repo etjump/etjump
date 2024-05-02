@@ -80,7 +80,6 @@ extern vmCvar_t ui_netSource;
 extern vmCvar_t ui_menuFiles;
 extern vmCvar_t ui_gameType;
 extern vmCvar_t ui_netGameType;
-// extern vmCvar_t	ui_actualNetGameType;
 extern vmCvar_t ui_joinGameType;
 extern vmCvar_t ui_dedicated;
 extern vmCvar_t ui_notebookCurrentPage;
@@ -115,10 +114,6 @@ extern vmCvar_t g_gameType;
 extern vmCvar_t cl_profile;
 extern vmCvar_t cl_defaultProfile;
 extern vmCvar_t ui_profile;
-extern vmCvar_t ui_currentNetCampaign;
-extern vmCvar_t ui_currentCampaign;
-extern vmCvar_t ui_campaignIndex;
-extern vmCvar_t ui_currentCampaignCompleted;
 extern vmCvar_t ui_blackout;
 extern vmCvar_t cg_crosshairAlpha;
 extern vmCvar_t cg_crosshairAlphaAlt;
@@ -147,7 +142,7 @@ extern vmCvar_t etj_menuSensitivity;
 
 #define MAX_MENUDEPTH 8
 #define MAX_MENUITEMS 128 // JPW NERVE put this back for MP
-//#define MAX_MENUITEMS			256
+// #define MAX_MENUITEMS			256
 
 #define MTYPE_NULL 0
 #define MTYPE_SLIDER 1
@@ -373,16 +368,12 @@ int UI_AdjustTimeByGame(int time);
 void UI_ShowPostGame(qboolean newHigh);
 void UI_ClearScores();
 void UI_LoadArenas(void);
-void UI_LoadCampaigns(void);
 mapInfo *UI_FindMapInfoByMapname(const char *name);
 void UI_ReadableSize(char *buf, int bufsize, int value);
 void UI_PrintTime(char *buf, int bufsize, int time);
 void Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color,
                     const char *text, float adjust, int limit, int style,
                     fontInfo_t *font);
-
-void UI_Campaign_f(void);
-void UI_ListCampaigns_f(void);
 
 #define GLINFO_LINES 128
 
@@ -655,7 +646,7 @@ typedef struct {
 #define MAX_ALIASES 64
 #define MAX_HEADNAME 32
 #define MAX_TEAMS 64
-//#define MAX_GAMETYPES 16 // moved up
+// #define MAX_GAMETYPES 16 // moved up
 #define MAX_MAPS 500
 #define MAX_SPMAPS 16
 #define PLAYERS_PER_TEAM 5
@@ -676,8 +667,8 @@ typedef struct {
 #define GAMES_TEAMPLAY 2
 #define GAMES_TOURNEY 3
 #define GAMES_CTF 4
-//#define MAPS_PER_TIER 3
-//#define MAX_TIERS 16
+// #define MAPS_PER_TIER 3
+// #define MAX_TIERS 16
 #define MAX_MODS 64
 #define MAX_DEMOS 256
 #define MAX_MOVIES 256
@@ -845,14 +836,6 @@ typedef struct {
 
   int mapCount;
   mapInfo mapList[MAX_MAPS];
-
-  // int tierCount;
-  // tierInfo tierList[MAX_TIERS];
-
-  int campaignCount;
-  campaignInfo_t campaignList[MAX_CAMPAIGNS];
-
-  cpsFile_t campaignStatus;
 
   profileInfo_t profileList[MAX_PROFILES];
   int profileCount;
@@ -1138,95 +1121,6 @@ void trap_openURL(const char *url); // TTimo
 void trap_GetHunkData(int *hunkused, int *hunkexpected);
 
 char *trap_TranslateString(const char *string); // NERVE - SMF - localization
-//
-// ui_addbots.c
-//
-void UI_AddBots_Cache(void);
-void UI_AddBotsMenu(void);
-
-//
-// ui_removebots.c
-//
-void UI_RemoveBots_Cache(void);
-void UI_RemoveBotsMenu(void);
-
-//
-// ui_teamorders.c
-//
-extern void UI_TeamOrdersMenu(void);
-extern void UI_TeamOrdersMenu_f(void);
-extern void UI_TeamOrdersMenu_Cache(void);
-
-//
-// ui_loadconfig.c
-//
-void UI_LoadConfig_Cache(void);
-void UI_LoadConfigMenu(void);
-
-//
-// ui_saveconfig.c
-//
-void UI_SaveConfigMenu_Cache(void);
-void UI_SaveConfigMenu(void);
-
-//
-// ui_display.c
-//
-void UI_DisplayOptionsMenu_Cache(void);
-void UI_DisplayOptionsMenu(void);
-
-//
-// ui_sound.c
-//
-void UI_SoundOptionsMenu_Cache(void);
-void UI_SoundOptionsMenu(void);
-
-//
-// ui_network.c
-//
-void UI_NetworkOptionsMenu_Cache(void);
-void UI_NetworkOptionsMenu(void);
-
-//
-// ui_gameinfo.c
-//
-typedef enum {
-  AWARD_ACCURACY,
-  AWARD_IMPRESSIVE,
-  AWARD_EXCELLENT,
-  AWARD_GAUNTLET,
-  AWARD_FRAGS,
-  AWARD_PERFECT
-} awardType_t;
-
-const char *UI_GetArenaInfoByNumber(int num);
-const char *UI_GetArenaInfoByMap(const char *map);
-const char *UI_GetSpecialArenaInfo(const char *tag);
-int UI_GetNumArenas(void);
-int UI_GetNumSPArenas(void);
-int UI_GetNumSPTiers(void);
-
-char *UI_GetBotInfoByNumber(int num);
-char *UI_GetBotInfoByName(const char *name);
-int UI_GetNumBots(void);
-
-void UI_GetBestScore(int level, int *score, int *skill);
-void UI_SetBestScore(int level, int score);
-int UI_TierCompleted(int levelWon);
-qboolean UI_ShowTierVideo(int tier);
-qboolean UI_CanShowTierVideo(int tier);
-int UI_GetCurrentGame(void);
-void UI_NewGame(void);
-void UI_LogAwardData(int award, int data);
-int UI_GetAwardLevel(int award);
-
-void UI_SPUnlock_f(void);
-void UI_SPUnlockMedals_f(void);
-
-void UI_InitGameinfo(void);
-
-const char *UI_DescriptionForCampaign(void);
-const char *UI_NameForCampaign(void);
 
 void ETJump_DrawMapDetails();
 #endif

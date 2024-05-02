@@ -197,18 +197,6 @@ void UI_LoadPanel_RenderPercentageMeter(panel_button_t *button) {
 
   trap_R_Add2dPolys(verts, 4, button->hShaderNormal);
 }
-/*
-void UI_LoadPanel_RenderCampaignNameText( panel_button_t* button ) {
-    uiClientState_t	cstate;
-    char *s;
-
-    trap_GetClientState( &cstate );
-
-    s = Q_strupr( cstate.servername );
-
-    Text_Paint_Ext( button->rect.x, button->rect.y, button->font->scalex,
-button->font->scaley, button->font->colour, s, 0, 14, 0, button->font->font );
-}*/
 
 void MiniAngleToAxis(vec_t angle, vec2_t axes[2]) {
   axes[0][0] = (vec_t)sin(-angle);

@@ -266,10 +266,6 @@ vmCvar_t cg_atmosphericEffects;
 vmCvar_t cg_drawRoundTimer;
 // END Mad Doc - TDF
 
-#ifdef SAVEGAME_SUPPORT
-vmCvar_t cg_reloading;
-#endif // SAVEGAME_SUPPORT
-
 vmCvar_t cg_fastSolids;
 vmCvar_t cg_instanttapout;
 
@@ -3728,8 +3724,6 @@ void CG_LoadHudMenu() {
   cgDC.stopCinematic = &CG_StopCinematic;
   cgDC.drawCinematic = &CG_DrawCinematic;
   cgDC.runCinematicFrame = &CG_RunCinematicFrame;
-  cgDC.descriptionForCampaign = &CG_DescriptionForCampaign;
-  cgDC.nameForCampaign = &CG_NameForCampaign;
   cgDC.add2dPolys = &trap_R_Add2dPolys;
   cgDC.updateScreen = &trap_UpdateScreen;
   cgDC.getHunkData = &trap_GetHunkData;
@@ -3880,9 +3874,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_ParseServerinfo();
   CG_ParseSysteminfo();
-  CG_ParseWolfinfo(); // NERVE - SMF
 
-  cgs.campaignInfoLoaded = qfalse;
   if (cgs.gametype == ETJUMP_GAMETYPE) {
     CG_LocateArena();
   }
@@ -4017,9 +4009,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_SetupCabinets();
 
-  if (!CG_IsSinglePlayer()) {
-    trap_S_FadeAllSound(1.0f, 0, qfalse); // fade sound up
-  }
+  trap_S_FadeAllSound(1.0f, 0, qfalse); // fade sound up
 
   // OSP
   cgs.dumpStatsFile = 0;
@@ -4082,9 +4072,6 @@ void CG_Shutdown(void) {
 
   Shutdown_Display();
 }
-
-// returns true if game is single player (or coop)
-qboolean CG_IsSinglePlayer(void) { return qfalse; }
 
 qboolean CG_CheckExecKey(int key) {
   if (cg.showFireteamMenu) {

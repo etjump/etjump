@@ -282,44 +282,6 @@ void CG_ParseOIDInfos(void) {
 
 /*
 ==================
-CG_ParseWolfinfo
-
-NERVE - SMF
-==================
-*/
-void CG_ParseWolfinfo(void) {
-  int old_gs = cgs.gamestate;
-  const char *info;
-
-  info = CG_ConfigString(CS_WOLFINFO);
-
-  cgs.currentRound = Q_atoi(Info_ValueForKey(info, "g_currentRound"));
-  cgs.nextTimeLimit = Q_atof(Info_ValueForKey(info, "g_nextTimeLimit"));
-  cgs.gamestate = (gamestate_t)Q_atoi(Info_ValueForKey(info, "gamestate"));
-  cgs.currentCampaign = Info_ValueForKey(info, "g_currentCampaign");
-  cgs.currentCampaignMap =
-      Q_atoi(Info_ValueForKey(info, "g_currentCampaignMap"));
-
-  // OSP - Announce game in progress if we are really playing
-  if (old_gs != GS_PLAYING && cgs.gamestate == GS_PLAYING) {
-    //		if(cg_announcer.integer > 0)
-    // trap_S_StartLocalSound(cgs.media.countFight,
-    // CHAN_ANNOUNCER);
-    Pri("^1FIGHT!\n");
-    CPri("^1FIGHT!\n");
-  }
-
-  if (!cgs.localServer) {
-    trap_Cvar_Set("gamestate", va("%i", cgs.gamestate));
-  }
-
-  if (old_gs != GS_WARMUP_COUNTDOWN && cgs.gamestate == GS_WARMUP_COUNTDOWN) {
-    CG_ParseWarmup();
-  }
-}
-
-/*
-==================
 CG_ParseSpawns
 ==================
 */
@@ -649,9 +611,6 @@ static void CG_ConfigStringModified(void) {
     CG_ParseSysteminfo();
   } else if (num == CS_WARMUP) {
     CG_ParseWarmup();
-  } else if (num == CS_WOLFINFO) // NERVE - SMF
-  {
-    CG_ParseWolfinfo();
   } else if (num == CS_FIRSTBLOOD) {
     cg.teamFirstBlood = Q_atoi(str);
   } else if (num == CS_ROUNDSCORES1) {
@@ -986,8 +945,6 @@ static void CG_MapRestart(void) {
   cgs.fadeStartTime = 0;
   cgs.fadeAlpha = 0;
   trap_Cvar_Set("cg_letterbox", "0");
-
-  CG_ParseWolfinfo();
 
   CG_ParseEntitiesFromString();
 

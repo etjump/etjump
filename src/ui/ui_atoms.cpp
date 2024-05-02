@@ -155,18 +155,6 @@ qboolean UI_ConsoleCommand(int realTime) {
     return qtrue;
   }
 
-  // Arnout: we DEFINATELY do NOT want this here
-  /*if ( Q_stricmp (cmd, "remapShader") == 0 ) {
-      if (trap_Argc() == 4) {
-          char shader1[MAX_QPATH];
-          char shader2[MAX_QPATH];
-          Q_strncpyz(shader1, UI_Argv(1), sizeof(shader1));
-          Q_strncpyz(shader2, UI_Argv(2), sizeof(shader2));
-          trap_R_RemapShader(shader1, shader2, UI_Argv(3));
-          return qtrue;
-      }
-  }*/
-
   if (Q_stricmp(cmd, "postgame") == 0) {
     UI_CalcPostGameStats();
     return qtrue;
@@ -192,17 +180,6 @@ qboolean UI_ConsoleCommand(int realTime) {
   }
 
   trap_GetClientState(&cstate);
-  if (cstate.connState == CA_DISCONNECTED) {
-    if (Q_stricmp(cmd, "campaign") == 0) {
-      UI_Campaign_f();
-      return qtrue;
-    }
-
-    if (Q_stricmp(cmd, "listcampaigns") == 0) {
-      UI_ListCampaigns_f();
-      return qtrue;
-    }
-  }
 
   return qfalse;
 }

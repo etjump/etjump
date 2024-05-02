@@ -36,32 +36,6 @@ void AddScore(gentity_t *ent, int score) {
 }
 
 /*
-============
-AddKillScore
-
-Adds score to both the client and his team, only used for playerkills, for lms
-============
-*/
-void AddKillScore(gentity_t *ent, int score) {
-  if (!ent || !ent->client) {
-    return;
-  }
-  // no scoring during pre-match warmup
-  if (level.warmupTime) {
-    return;
-  }
-
-  // someone already won
-  if (level.lmsWinningTeam) {
-    return;
-  }
-
-  ent->client->sess.game_points += score;
-
-  CalculateRanks();
-}
-
-/*
 =================
 TossClientItems
 
@@ -957,13 +931,6 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if (!targ->takedamage) {
     return;
   }
-
-#ifdef SAVEGAME_SUPPORT
-  if (g_gametype.integer == GT_SINGLE_PLAYER &&
-      (g_reloading.integer || saveGamePending)) {
-    return;
-  }
-#endif // SAVEGAME_SUPPORT
 
   // the intermission has already been qualified for,
   // so don't allow any extra scoring

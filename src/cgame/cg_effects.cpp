@@ -278,14 +278,6 @@ void CG_Bleed(vec3_t origin, int entityNum) {
     return;
   }
 
-#ifdef SAVEGAME_SUPPORT
-  if (cg_reloading.integer) {
-    // to dangerous, since we call playerangles() in here, which
-    // calls the animation system, which might not be setup yet
-    return;
-  }
-#endif // SAVEGAME_SUPPORT
-
   // Ridah, blood spurts
   if (entityNum != cg.snap->ps.clientNum) {
     vec3_t vhead, vbody, bOrigin, dir, vec, pvec, ndir;

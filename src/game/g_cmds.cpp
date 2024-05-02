@@ -1143,12 +1143,6 @@ void Cmd_Kill_f(gentity_t *ent) {
     return;
   }
 
-#ifdef SAVEGAME_SUPPORT
-  if (g_gametype.integer == GT_SINGLE_PLAYER && g_reloading.integer) {
-    return;
-  }
-#endif // SAVEGAME_SUPPORT
-
   ent->flags &= ~FL_GODMODE;
   ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
   ent->client->ps.persistant[PERS_HWEAPON_USE] =

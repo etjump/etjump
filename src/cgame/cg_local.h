@@ -1100,7 +1100,6 @@ typedef struct {
   int numMiscGameModels;
   int numCoronas;
 
-  qboolean showCampaignBriefing;
   qboolean showGameView;
   qboolean showFireteamMenu;
 
@@ -1865,19 +1864,6 @@ typedef struct {
   vec2_t mappos;
 } arenaInfo_t;
 
-typedef struct {
-  char campaignDescription[2048];
-  char campaignName[128];
-  char mapnames[MAX_MAPS_PER_CAMPAIGN][MAX_QPATH];
-  vec2_t mappos[MAX_MAPS_PER_CAMPAIGN];
-  arenaInfo_t arenas[MAX_MAPS_PER_CAMPAIGN];
-  int mapCount;
-  int current;
-  vec2_t mapTC[2];
-} cg_campaignInfo_t;
-
-#define MAX_COMMAND_INFO MAX_CLIENTS
-
 #define MAX_STATIC_GAMEMODELS 1024
 constexpr int MAX_STATIC_CORONAS = 1024;
 
@@ -2047,12 +2033,9 @@ typedef struct {
   animScriptData_t animScriptData;
 
   int currentVoiceClient;
-  int currentRound;
   float nextTimeLimit;
   int minclients;
   gamestate_t gamestate;
-  const char *currentCampaign;
-  int currentCampaignMap;
 
   int complaintClient;  // DHM - Nerve
   int complaintEndTime; // DHM - Nerve
@@ -2062,9 +2045,6 @@ typedef struct {
   playerStats_t playerStats;
   int numOIDtriggers;
   int teamobjectiveStats[MAX_OID_TRIGGERS];
-
-  qboolean campaignInfoLoaded;
-  cg_campaignInfo_t campaignData;
 
   qboolean arenaInfoLoaded;
   arenaInfo_t arenaData;
@@ -2372,10 +2352,6 @@ extern vmCvar_t cg_drawRoundTimer;
 extern vmCvar_t cg_debugSkills;
 extern vmCvar_t cg_drawFireteamOverlay;
 extern vmCvar_t cg_drawSmallPopupIcons;
-
-#ifdef SAVEGAME_SUPPORT
-extern vmCvar_t cg_reloading;
-#endif // SAVEGAME_SUPPORT
 
 // Gordon: some optimization cvars
 extern vmCvar_t cg_fastSolids;
@@ -3474,7 +3450,6 @@ void CG_FreecamGetPos_f(void);
 void CG_ExecuteNewServerCommands(int latestSequence);
 void CG_ParseServerinfo(void);
 void CG_ParseSysteminfo(void);
-void CG_ParseWolfinfo(void); // NERVE - SMF
 void CG_ParseSpawns(void);
 void CG_ParseServerVersionInfo(const char *pszVersionInfo);
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
@@ -3845,12 +3820,8 @@ void CG_FitTextToWidth_Ext(char *instr, float scale, float w, int size,
                            fontInfo_t *font);
 int CG_TrimLeftPixels(char *instr, float scale, float w, int size);
 
-void CG_LocateCampaign(void);
 void CG_LocateArena(void);
-const char *CG_DescriptionForCampaign(void);
-const char *CG_NameForCampaign(void);
 void CG_CloseMenus();
-// void CG_CampaignBriefing_f( void );
 void CG_LimboMenu_f(void);
 
 void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
@@ -3923,8 +3894,6 @@ void CG_CampaignBriefingSetup(void);
 
 int CG_GetFirstSelectedBot();
 void CG_AddToJournal(char *text);
-// returns true if game is single player (or coop)
-qboolean CG_IsSinglePlayer(void);
 
 // END Mad Doc - TDF
 

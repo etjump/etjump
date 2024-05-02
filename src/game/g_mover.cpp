@@ -4503,16 +4503,6 @@ void G_Activate(gentity_t *ent, gentity_t *activator) {
       return;
     }
 
-    /*		// TAT 2/3/2003 - want keys for SP
-            if (G_IsSinglePlayerGame() && ent->key > 0)	// ent
-       requires key
-            {
-                gitem_t *item = BG_FindItemForKey(ent->key, 0);
-                if (!(activator->client->ps.stats[STAT_KEYS] &
-       (1<<item->giTag))) return;
-            }
-            */
-
     if (!Q_stricmp(ent->classname,
                    "script_mover")) // RF, dont activate script_mover's
     {
