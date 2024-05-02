@@ -61,6 +61,17 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
     return;
   }
 
+  // shouldn't ever happen but just in case,
+  // so we don't print out the info when there's no messages
+  if (chatReplayBuffer.empty()) {
+    return;
+  }
+
+  const int clientNum = ClientNum(ent);
+
+  Printer::SendChatMessage(clientNum,
+                           "^gServer: replaying latest chat messages:");
+
   for (const auto &msg : chatReplayBuffer) {
     // skip messages from ignored clients
     if (COM_BitCheck(ent->client->sess.ignoreClients, msg.clientNum)) {
@@ -68,7 +79,7 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
     }
 
     const std::string &message = parseChatMessage(msg);
-    trap_SendServerCommand(ClientNum(ent), message.c_str());
+    trap_SendServerCommand(clientNum, message.c_str());
   }
 }
 
