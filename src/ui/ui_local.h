@@ -646,7 +646,7 @@ typedef struct {
 #define MAX_ALIASES 64
 #define MAX_HEADNAME 32
 #define MAX_TEAMS 64
-//#define MAX_GAMETYPES 16 // moved up
+// #define MAX_GAMETYPES 16 // moved up
 #define MAX_MAPS 8192
 #define MAX_SPMAPS 16
 #define PLAYERS_PER_TEAM 5
@@ -673,7 +673,6 @@ typedef struct {
 #define MAX_DEMOS 256
 #define MAX_MOVIES 256
 #define MAX_PLAYERMODELS 256
-#define MAX_SAVEGAMES 256
 #define MAX_SPAWNPOINTS 128 // NERVE - SMF
 #define MAX_SPAWNDESC 128   // NERVE - SMF
 #define MAX_PBLINES 128     // DHM - Nerve
@@ -687,13 +686,6 @@ typedef struct {
   qhandle_t headImage;
   qboolean female;
 } characterInfo;
-
-//----(SA)	added
-typedef struct {
-  const char *name;
-  qhandle_t sshotImage;
-} savegameInfo;
-//----(SA)	end
 
 typedef struct {
   const char *name;
@@ -857,13 +849,6 @@ typedef struct {
   int movieCount;
   int movieIndex;
   int previewMovie;
-
-  //----(SA)	added
-  //	const char		*savegameList[MAX_SAVEGAMES];
-  savegameInfo savegameList[MAX_SAVEGAMES];
-  int savegameCount;
-  int savegameIndex;
-  //----(SA)	end
 
   serverStatus_t serverStatus;
 

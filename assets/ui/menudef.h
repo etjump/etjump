@@ -71,7 +71,6 @@
 #define FEEDER_SERVERSTATUS 		0x0d	// server status
 #define FEEDER_FINDPLAYER			0x0e	// find player
 #define FEEDER_CINEMATICS			0x0f	// cinematics
-#define FEEDER_SAVEGAMES			0x10	// savegames
 #define FEEDER_PROFILES				0x1c	// Arnout: profiles
 #define FEEDER_GLINFO				0x1d	// Arnout: glinfo
 
@@ -281,7 +280,6 @@
 
 //----(SA)	added
 #define UI_MENUMODEL				257
-#define	UI_SAVEGAME_SHOT			258
 //----(SA)	end
 
 // NERVE - SMF

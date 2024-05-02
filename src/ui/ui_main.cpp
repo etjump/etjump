@@ -1339,18 +1339,6 @@ static int UI_TeamIndexFromName(const char *name) {
   return 0;
 }
 
-/*
-==============
-UI_DrawSaveGameShot
-==============
-*/
-static void UI_DrawSaveGameShot(rectDef_t *rect, float scale, vec4_t color) {
-  trap_R_SetColor(color);
-  UI_DrawHandlePic(rect->x, rect->y, rect->w, rect->h,
-                   uiInfo.savegameList[uiInfo.savegameIndex].sshotImage);
-  trap_R_SetColor(NULL);
-}
-
 static void UI_DrawTeamName(rectDef_t *rect, float scale, vec4_t color,
                             qboolean blue, int textStyle) {
   int i;
@@ -2293,9 +2281,6 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x,
     case UI_EFFECTS:
       UI_DrawEffects(&rect, scale, color);
       break;
-    case UI_SAVEGAME_SHOT: // (SA)
-      UI_DrawSaveGameShot(&rect, scale, color);
-      break;
     case UI_GAMETYPE:
       UI_DrawGameType(&rect, scale, color, textStyle);
       break;
@@ -3083,98 +3068,6 @@ static void UI_LoadProfiles() {
 
 /*
 ===============
-UI_LoadTeams
-===============
-*/
-/*
-// TTimo: unused
-static void UI_LoadTeams() {
-    char	teamList[4096];
-    char	*teamName;
-    int		i, len, count;
-
-    count = trap_FS_GetFileList( "", "team", teamList, 4096 );
-
-    if (count) {
-        teamName = teamList;
-        for ( i = 0; i < count; i++ ) {
-            len = strlen( teamName );
-            UI_ParseTeamInfo(teamName);
-            teamName += len + 1;
-        }
-    }
-}
-*/
-
-/*
-==============
-UI_DelSavegame
-==============
-*/
-static void UI_DelSavegame() {
-
-  int ret;
-
-  ret = trap_FS_Delete(
-      va("save/%s.svg", uiInfo.savegameList[uiInfo.savegameIndex].name));
-  trap_FS_Delete(
-      va("save/images/%s.tga", uiInfo.savegameList[uiInfo.savegameIndex].name));
-
-  if (ret) {
-    Com_Printf("Deleted savegame: %s.svg\n",
-               uiInfo.savegameList[uiInfo.savegameIndex].name);
-  } else {
-    Com_Printf("Unable to delete savegame: %s.svg\n",
-               uiInfo.savegameList[uiInfo.savegameIndex].name);
-  }
-}
-
-/*
-==============
-UI_LoadSavegames
-==============
-*/
-static void UI_LoadSavegames() {
-  char sglist[4096];
-  char *sgname;
-  int i, len;
-
-  uiInfo.savegameCount = trap_FS_GetFileList("save", "svg", sglist, 4096);
-
-  if (uiInfo.savegameCount) {
-    if (uiInfo.savegameCount > MAX_SAVEGAMES) {
-      uiInfo.savegameCount = MAX_SAVEGAMES;
-    }
-    sgname = sglist;
-    for (i = 0; i < uiInfo.savegameCount; i++) {
-
-      len = strlen(sgname);
-
-      if (!Q_strncmp(sgname, "current",
-                     7)) // ignore current.svg since it
-                         // has special uses and
-                         // shouldn't be loaded directly
-      {
-        i--;
-        uiInfo.savegameCount -= 1;
-        sgname += len + 1;
-        continue;
-      }
-
-      if (!Q_stricmp(sgname + len - 4, ".svg")) {
-        sgname[len - 4] = '\0';
-      }
-      Q_strupr(sgname);
-      uiInfo.savegameList[i].name = String_Alloc(sgname);
-      uiInfo.savegameList[i].sshotImage = trap_R_RegisterShaderNoMip(
-          va("save/images/%s.tga", uiInfo.savegameList[i].name));
-      sgname += len + 1;
-    }
-  }
-}
-
-/*
-===============
 UI_LoadMovies
 ===============
 */
@@ -3643,28 +3536,6 @@ void UI_RunMenuScript(const char **args) {
       return;
 
       //----(SA)	added
-    }
-    if (Q_stricmp(name, "LoadSaveGames") == 0) // get the list
-    {
-      UI_LoadSavegames();
-      return;
-    }
-    if (Q_stricmp(name, "Loadgame") == 0) {
-      trap_Cmd_ExecuteText(
-          EXEC_APPEND,
-          va("loadgame %s\n", uiInfo.savegameList[uiInfo.savegameIndex].name));
-      return;
-    }
-    if (Q_stricmp(name, "Savegame") == 0) {
-      trap_Cmd_ExecuteText(
-          EXEC_APPEND,
-          va("savegame %s\n", UI_Cvar_VariableString("ui_savegame")));
-      return;
-    }
-    if (Q_stricmp(name, "DelSavegame") == 0) {
-      UI_DelSavegame();
-      //----(SA)	end
-      return;
     }
     if (Q_stricmp(name, "LoadMods") == 0) {
       UI_LoadMods();
@@ -5771,8 +5642,6 @@ static int UI_FeederCount(float feederID) {
     return uiInfo.q3HeadCount;
   } else if (feederID == FEEDER_CINEMATICS) {
     return uiInfo.movieCount;
-  } else if (feederID == FEEDER_SAVEGAMES) {
-    return uiInfo.savegameCount;
   } else if (feederID == FEEDER_MAPS || feederID == FEEDER_ALLMAPS) {
     return UI_MapCountByGameType();
   } else if (feederID == FEEDER_GLINFO) {
@@ -6091,10 +5960,6 @@ const char *UI_FeederItemText(float feederID, int index, int column,
     if (index >= 0 && index < uiInfo.movieCount) {
       return uiInfo.movieList[index];
     }
-  } else if (feederID == FEEDER_SAVEGAMES) {
-    if (index >= 0 && index < uiInfo.savegameCount) {
-      return uiInfo.savegameList[index].name;
-    }
   } else if (feederID == FEEDER_DEMOS) {
     if (index >= 0 && index < static_cast<int>(uiInfo.demoObjects.size())) {
       if (uiInfo.demoObjects[index].type == FileSystemObjectType::Folder) {
@@ -6161,14 +6026,6 @@ static qhandle_t UI_FeederItemImage(float feederID, int index) {
             trap_R_RegisterShaderNoMip(uiInfo.mapList[index].imageName);
       }
       return uiInfo.mapList[index].levelShot;
-    }
-  } else if (feederID == FEEDER_SAVEGAMES) {
-    if (index >= 0 && index < uiInfo.savegameCount) {
-      if (uiInfo.savegameList[index].sshotImage == -1) {
-        uiInfo.savegameList[index].sshotImage = trap_R_RegisterShaderNoMip(
-            va("save/images/%s.tga", uiInfo.savegameList[index].name));
-      }
-      return uiInfo.savegameList[index].sshotImage;
     }
   }
 
@@ -6253,8 +6110,6 @@ void UI_FeederSelection(float feederID, int index) {
       trap_CIN_StopCinematic(uiInfo.previewMovie);
     }
     uiInfo.previewMovie = -1;
-  } else if (feederID == FEEDER_SAVEGAMES) {
-    uiInfo.savegameIndex = index;
   } else if (feederID == FEEDER_DEMOS) {
     uiInfo.demoIndex = index;
   } else if (feederID == FEEDER_PROFILES) {

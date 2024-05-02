@@ -2147,28 +2147,6 @@ typedef struct bg_character_s {
   animModelInfo_t *animModelInfo;
 } bg_character_t;
 
-/*
-==============================================================
-
-SAVE
-
-    12 -
-    13 - (SA) added 'episode' tracking to savegame
-    14 - RF added 'skill'
-    15 - (SA) moved time info above the main game reading
-    16 - (SA) added fog
-    17 - (SA) rats, changed fog.
-    18 - TTimo targetdeath fix
-       https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=434
-    30 - Arnout: initial Enemy Territory implementation
-    31 - Arnout: added new global fog
-
-==============================================================
-*/
-
-#define SAVE_VERSION 31
-#define SAVE_INFOSTRING_LENGTH 256
-
 //------------------------------------------------------------------
 // Global Function Decs
 

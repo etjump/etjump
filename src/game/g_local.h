@@ -1277,14 +1277,6 @@ typedef struct {
   int bodyQueIndex; // dead bodies
   gentity_t *bodyQue[BODY_QUEUE_SIZE];
 
-  int portalSequence;
-  // Ridah
-  char *scriptAI;
-  int reloadPauseTime; // don't think AI/client's until this time has
-                       // elapsed
-  int reloadDelayTime; // don't start loading the savegame until this
-                       // has expired
-
   int capturetimes[4]; // red, blue, none, spectator for WOLF_MP_CPH
   int redReinforceTime,
       blueReinforceTime; // last time reinforcements arrived in ms
@@ -1899,7 +1891,6 @@ void Props_Chair_Skyboxtouch(gentity_t *ent);
 #include "g_team.h" // teamplay specific stuff
 extern level_locals_t level;
 extern gentity_t g_entities[]; // DAJ was explicit set to MAX_ENTITIES
-extern int saveGamePending;
 
 #define FOFS(x) (int(((intptr_t) & (((gentity_t *)0)->x))))
 

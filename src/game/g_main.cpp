@@ -68,8 +68,6 @@ static void shutdownETJump() {
 gentity_t g_entities[MAX_GENTITIES];
 gclient_t g_clients[MAX_CLIENTS];
 
-int saveGamePending; // 0 = no, 1 = check, 2 = loading
-
 mapEntityData_Team_t mapEntityData[2];
 
 vmCvar_t g_gametype;
@@ -1878,8 +1876,6 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
   // Reset the amount of timerun timers
   level.timerunNamesCount = 0;
-
-  saveGamePending = 0;
 
   // must be called before scripts
   ETJump::initRemappedShaders();

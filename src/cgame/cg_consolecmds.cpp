@@ -1453,9 +1453,6 @@ void CG_InitConsoleCommands() {
 
   trap_AddCommand("selectbuddy");
 
-  trap_AddCommand("loadgame");
-  trap_AddCommand("savegame");
-
   trap_AddCommand("save");
   trap_AddCommand("load");
   trap_AddCommand("backup");
