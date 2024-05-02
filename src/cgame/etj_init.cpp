@@ -628,7 +628,7 @@ void runFrameEnd() {
     cg.shadowCvarsSet = true;
   }
 
-  if (cg.clientFrame >= 10 && !cg.chatReplayReceived) {
+  if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.chatReplayReceived) {
     trap_SendConsoleCommand("getchatreplay");
     cg.chatReplayReceived = true;
   }
