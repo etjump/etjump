@@ -1799,15 +1799,6 @@ bool BG_DropItems(int contents, int shared);
 //----(SA)	removed PM_ammoNeeded 11/27/00
 void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce);
 
-// #define ARENAS_PER_TIER		4
-#define MAX_ARENAS 64
-#define MAX_ARENAS_TEXT 8192
-
-#define MAX_BOTS 64
-#define MAX_BOTS_TEXT 8192
-
-#define MAX_CAMPAIGNS_TEXT 8192
-
 typedef enum {
   FOOTSTEP_NORMAL,
   FOOTSTEP_METAL,

@@ -2203,14 +2203,6 @@ void ClientBegin(int clientNum) {
   // during the match
   if (client->sess.sessionTeam != TEAM_SPECTATOR &&
       (level.time - level.startTime > FRAMETIME * GAME_INIT_FRAMES)) {
-    /*	  if( (client->sess.sessionTeam != TEAM_SPECTATOR &&
-       (level.time - client->pers.connectTime) > 60000) || (
-       g_gamestate.integer == GS_PLAYING
-       && ( client->sess.sessionTeam == TEAM_AXIS ||
-       client->sess.sessionTeam == TEAM_ALLIES ) &&
-       g_gametype.integer == GT_WOLF_LMS && (
-       level.numTeamClients[0] > 0 || level.numTeamClients[1] >
-       0 ) ) ) {*/
     ent->health = 0;
     ent->r.contents = CONTENTS_CORPSE;
 

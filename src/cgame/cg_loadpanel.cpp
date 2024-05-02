@@ -39,11 +39,7 @@ panel_button_text_t missiondescriptionHeaderTxt = {
     &bg_loadscreenfont2,
 };
 
-panel_button_text_t campaignpheaderTxt = {
-    0.2f, 0.2f, {1.0f, 1.0f, 1.0f, 0.6f}, 0, 0, &bg_loadscreenfont2,
-};
-
-panel_button_text_t campaignpTxt = {
+panel_button_text_t mapTxt = {
     0.30f, 0.30f, {1.0f, 1.0f, 1.0f, 0.6f}, 0, 0, &bg_loadscreenfont2,
 };
 
@@ -89,7 +85,7 @@ panel_button_t loadScreenPins = {
     NULL, /* font		*/
     NULL, /* keyDown	*/
     NULL, /* keyUp	*/
-    CG_LoadPanel_RenderCampaignPins,
+    CG_LoadPanel_RenderMapPin,
     NULL,
 };
 
@@ -117,15 +113,15 @@ panel_button_t missiondescriptionPanelText = {
     NULL,
 };
 
-panel_button_t campaignPanelText = {
+panel_button_t mapPanelText = {
     NULL,
     "",
     {451, 11, 178, 35},
     {0, 0, 0, 0, 0, 0, 0, 0},
-    &campaignpTxt, /* font		*/
-    NULL,          /* keyDown	*/
-    NULL,          /* keyUp	*/
-    CG_LoadPanel_RenderCampaignNameText,
+    &mapTxt, /* font		*/
+    NULL,    /* keyDown	*/
+    NULL,    /* keyUp	*/
+    CG_LoadPanel_RenderMapNameText,
     NULL,
 };
 
@@ -172,7 +168,7 @@ panel_button_t *loadpanelButtons[] = {
     &missiondescriptionPanelText,
     &missiondescriptionPanelHeaderText,
 
-    &campaignPanelText,
+    &mapPanelText,
 
     &loadScreenMeterBack,
     &loadScreenMeterBack2,
@@ -349,7 +345,7 @@ void CG_LoadPanel_RenderLoadingBar(panel_button_t *button) {
                button->rect.h, 0, 0, frac, 1, button->hShaderNormal);
 }
 
-void CG_LoadPanel_RenderCampaignNameText(panel_button_t *button) {
+void CG_LoadPanel_RenderMapNameText(panel_button_t *button) {
   const int MAX_LEN = 18; // the box fits roughly 18 chars on default text scale
   float textScale = button->font->scalex;
   int len = Q_PrintStrlen(cgs.arenaData.longname);
@@ -411,21 +407,6 @@ void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button) {
   }
 }
 
-void CG_LoadPanel_KeyHandling(int key, qboolean down) {
-  if (BG_PanelButtonsKeyEvent(key, down, loadpanelButtonsLayout)) {
-    return;
-  }
-}
-
-qboolean CG_LoadPanel_ContinueButtonKeyDown(panel_button_t *button, int key) {
-  if (key == K_MOUSE1) {
-    CG_EventHandling(CGAME_EVENT_GAMEVIEW, qfalse);
-    return qtrue;
-  }
-
-  return qfalse;
-}
-
 void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx,
                           float sy, qhandle_t shader, float pinsize,
                           float backheight) {
@@ -457,7 +438,7 @@ void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx,
   }
 }
 
-void CG_LoadPanel_RenderCampaignPins(panel_button_t *button) {
+void CG_LoadPanel_RenderMapPin(panel_button_t *button) {
   float px, py;
 
   if (!cgs.arenaInfoLoaded) {

@@ -1936,7 +1936,6 @@ void CG_parseWeaponStats_cmd(void(txt_dump)(const char *)) {
     txt_dump("\n\n\n");
   }
 
-  // Medals only in campaign mode
   txt_dump("Skills         Level/Points\n");
   if (fFull) {
     txt_dump("---------------------------\n");

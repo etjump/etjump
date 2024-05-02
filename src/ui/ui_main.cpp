@@ -35,27 +35,6 @@ static const char *MonthAbbrev[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 
 static const serverFilter_t serverFilters[] = {{"All", ""}};
 
-// For server browser
-/*static const char *ETGameTypes[] = {
-    "Single Player",
-    "Cooperative",
-    "Objective",
-    "Stopwatch",
-    "Campaign",
-    "Last Man Standing"
-};
-
-static const char *shortETGameTypes[] = {
-    "SP",
-    "Coop",
-    "Obj",
-    "SW",
-    "Cmpgn",
-    "LMS"
-};
-
-static int const numETGameTypes = sizeof(ETGameTypes) / sizeof(const char*);*/
-
 static const int numServerFilters =
     sizeof(serverFilters) / sizeof(serverFilter_t);
 
@@ -2341,21 +2320,6 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x,
     case UI_GAMETYPEDESCRIPTION:
       UI_DrawGametypeDescription(&rect, scale, color, text_x, text_y, textStyle,
                                  align, qtrue);
-      break;
-    case UI_CAMPAIGNCINEMATIC:
-    case UI_CAMPAIGNNAME:
-    case UI_CAMPAIGNMAP1_SHOT:
-    case UI_CAMPAIGNMAP2_SHOT:
-    case UI_CAMPAIGNMAP3_SHOT:
-    case UI_CAMPAIGNMAP4_SHOT:
-    case UI_CAMPAIGNMAP5_SHOT:
-    case UI_CAMPAIGNMAP6_SHOT:
-    case UI_CAMPAIGNMAP1_TEXT:
-    case UI_CAMPAIGNMAP2_TEXT:
-    case UI_CAMPAIGNMAP3_TEXT:
-    case UI_CAMPAIGNMAP4_TEXT:
-    case UI_CAMPAIGNMAP5_TEXT:
-    case UI_CAMPAIGNMAP6_TEXT:
       break;
     case UI_MB_MAP:
       UI_DrawMissionBriefingMap(&rect);

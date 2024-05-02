@@ -3872,31 +3872,6 @@ extern rankicon_t rankicons[NUM_EXPERIENCE_LEVELS][2];
 
 fireteamData_t *CG_IsOnSameFireteam(int clientNum, int clientNum2);
 
-// START Mad Doc - TDF
-
-#define MAX_SQUAD_SIZE 6
-
-//
-// merged the common UI elements
-//
-#define UI_CAMPAIGN_BRIEFING 0
-#define UI_COMMAND_MAP 1
-#define UI_SQUAD_SELECT 2
-
-void CG_DrawUITabs();
-void CG_DrawUICurrentSquad();
-qboolean CG_UICommonClick();
-void CG_DrawUISelectedSoldier(void);
-void CG_UICurrentSquadSetup(void);
-void CG_CampaignBriefingSetup(void);
-
-#define ORDER_ICON_FADE_TIME 3500
-
-int CG_GetFirstSelectedBot();
-void CG_AddToJournal(char *text);
-
-// END Mad Doc - TDF
-
 // Gordon: Fireteam stuff
 
 // fireteamData_t* CG_IsOnFireteam(		int clientNum );
@@ -4139,14 +4114,10 @@ void CG_LoadPanel_Init();
 void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx,
                           float sy, qhandle_t shader, float pinsize,
                           float backheight);
-void CG_LoadPanel_RenderCampaignPins(panel_button_t *button);
+void CG_LoadPanel_RenderMapPin(panel_button_t *button);
 void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button);
-void CG_LoadPanel_RenderCampaignNameText(panel_button_t *button);
-void CG_LoadPanel_RenderPercentageMeter(panel_button_t *button);
-void CG_LoadPanel_RenderContinueButton(panel_button_t *button);
+void CG_LoadPanel_RenderMapNameText(panel_button_t *button);
 void CG_LoadPanel_RenderLoadingBar(panel_button_t *button);
-void CG_LoadPanel_KeyHandling(int key, qboolean down);
-qboolean CG_LoadPanel_ContinueButtonKeyDown(panel_button_t *button, int key);
 void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh);
 
 int CG_CalcViewValues(void);
