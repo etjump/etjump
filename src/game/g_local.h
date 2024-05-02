@@ -97,22 +97,6 @@ typedef enum {
   MOVER_2TO1ROTATE
 } moverState_t;
 
-#define MAX_PASSWORD_LEN 40
-#define MAX_ADMINS 16
-
-// door AI sound ranges
-#define HEAR_RANGE_DOOR_LOCKED 128 // really close since this is a cruel check
-#define HEAR_RANGE_DOOR_KICKLOCKED 512
-#define HEAR_RANGE_DOOR_OPEN 256
-#define HEAR_RANGE_DOOR_KICKOPEN 768
-
-// DHM - Nerve :: Worldspawn spawnflags to indicate if a gametype is not
-// supported
-#define NO_GT_WOLF 1
-#define NO_STOPWATCH 2
-#define NO_CHECKPOINT 4
-#define NO_LMS 8
-
 #define MAX_CONSTRUCT_STAGES 3
 
 #define ALLOW_AXIS_TEAM 1
