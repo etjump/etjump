@@ -191,7 +191,7 @@ UI_LoadArenas
 void UI_LoadArenas() {
   int numdirs;
   char filename[128];
-  char dirlist[16000];
+  char dirlist[16384];
   char *dirptr;
   int i;
   int dirlen;
@@ -200,13 +200,21 @@ void UI_LoadArenas() {
   uiInfo.mapCount = 0;
 
   // get all arenas from .arena files
-  numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, 12000);
+  numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, sizeof(dirlist));
   dirptr = dirlist;
   for (i = 0; i < numdirs; i++, dirptr += dirlen + 1) {
     dirlen = static_cast<int>(strlen(dirptr));
     Q_strncpyz(filename, "scripts/", sizeof(filename));
     Q_strcat(filename, sizeof(filename), dirptr);
     UI_LoadArenasFromFile(filename);
+  }
+
+  // cap here rather than in the parser, so we get proper map counts
+  if (uiInfo.mapCount >= MAX_MAPS) {
+    Com_Printf(S_COLOR_YELLOW "WARNING: reached maximum maps for UI display "
+                              "(%i > %i), not all maps are displayed.\n",
+               uiInfo.mapCount, MAX_MAPS - 1);
+    uiInfo.mapCount = MAX_MAPS - 1;
   }
 }
 
