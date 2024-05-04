@@ -580,33 +580,36 @@ static void CG_TouchTriggerPrediction() {
         CG_ObjectivePrint(va("You are near %s\n", cs), SMALLCHAR_WIDTH);
       }
 
-      // trace for non-axial triggers
-      // FIXME: maybe this setup could be used for everything instead of
-      //  doing the BG_BBoxCollision above, as this is more accurate?
-      cmodel = trap_CM_InlineModel(ent->modelindex);
+      // trace for non-axial triggers for teleporters/pushers
+      // for more accurate collision
+      if (ent->eType == ET_TELEPORT_TRIGGER_CLIENT ||
+          ent->eType == ET_PUSH_TRIGGER ||
+          ent->eType == ET_VELOCITY_PUSH_TRIGGER) {
+        cmodel = trap_CM_InlineModel(ent->modelindex);
 
-      if (!cmodel) {
-        continue;
-      }
+        if (!cmodel) {
+          continue;
+        }
 
-      trace_t trace;
-      trap_CM_CapsuleTrace(&trace, cg.predictedPlayerState.origin,
-                           cg.predictedPlayerState.origin, cg_pmove.mins,
-                           cg_pmove.maxs, cmodel, -1);
+        trace_t trace;
+        trap_CM_CapsuleTrace(&trace, cg.predictedPlayerState.origin,
+                             cg.predictedPlayerState.origin, cg_pmove.mins,
+                             cg_pmove.maxs, cmodel, -1);
 
-      if (trace.fraction == 1.0f) {
-        continue;
-      }
+        if (trace.fraction == 1.0f) {
+          continue;
+        }
 
-      if (ent->eType == ET_TELEPORT_TRIGGER_CLIENT) {
-        entityState_t *playerEs =
-            &cg_entities[cg.snap->ps.clientNum].currentState;
-        ETJump::EntityUtilsShared::teleportPlayer(&cg.predictedPlayerState,
-                                                  playerEs, ent, &cg_pmove.cmd,
-                                                  ent->origin2, ent->angles2);
-      } else {
-        ETJump::EntityUtilsShared::touchPusher(&cg.predictedPlayerState,
-                                               cg.physicsTime, ent);
+        if (ent->eType == ET_TELEPORT_TRIGGER_CLIENT) {
+          entityState_t *playerEs =
+              &cg_entities[cg.snap->ps.clientNum].currentState;
+          ETJump::EntityUtilsShared::teleportPlayer(
+              &cg.predictedPlayerState, playerEs, ent, &cg_pmove.cmd,
+              ent->origin2, ent->angles2);
+        } else {
+          ETJump::EntityUtilsShared::touchPusher(&cg.predictedPlayerState,
+                                                 cg.physicsTime, ent);
+        }
       }
 
       continue;
