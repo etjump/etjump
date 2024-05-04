@@ -69,8 +69,10 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
 
   const int clientNum = ClientNum(ent);
 
-  Printer::SendChatMessage(clientNum,
-                           "^gServer: replaying latest chat messages:");
+  // send this with raw trap_SendServerCommand instead of Printer,
+  // so we can omit team flags easily on client side
+  trap_SendServerCommand(
+      clientNum, "chat \"^gServer: replaying latest chat messages:\" -1 0 1");
 
   for (const auto &msg : chatReplayBuffer) {
     // skip messages from ignored clients
@@ -85,8 +87,9 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
 
 std::string ChatReplay::parseChatMessage(const ChatReplay::ChatMessage &msg) {
   const char *cmd = msg.encoded ? "enc_chat" : "chat";
-  return stringFormat("%s \"%s%c%c%s\" %i %i", cmd, msg.name, Q_COLOR_ESCAPE,
-                      COLOR_GREEN, msg.message, msg.clientNum, msg.localize);
+  return stringFormat("%s \"^g[REPLAY] %s%c%c%s\" %i %i 1", cmd, msg.name,
+                      Q_COLOR_ESCAPE, COLOR_LTGREY, msg.message, msg.clientNum,
+                      msg.localize);
 }
 
 void ChatReplay::readChatsFromFile() {
