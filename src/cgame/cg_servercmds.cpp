@@ -771,7 +771,7 @@ CG_AddToTeamChat
 
 =======================
 */
-static void CG_AddToTeamChat(const char *str, int clientnum) {
+static void CG_AddToTeamChat(const char *str, int clientnum, bool replayMsg) {
   int len;
   char *p, *ls;
   int lastcolor;
@@ -829,8 +829,10 @@ static void CG_AddToTeamChat(const char *str, int clientnum) {
   }
   *p = 0;
 
+  // chat replay should have no flag
   cgs.teamChatMsgTeams[cgs.teamChatPos % chatHeight] =
-      cgs.clientinfo[clientnum].team;
+      replayMsg ? TEAM_SPECTATOR : cgs.clientinfo[clientnum].team;
+
   cgs.teamChatMsgTimes[cgs.teamChatPos % chatHeight] = cg.time;
   cgs.teamChatPos++;
 
@@ -1414,7 +1416,7 @@ void CG_PlayVoiceChat(bufferedVoiceChat_t *vchat) {
     }
   }
   if (!vchat->voiceOnly && !cg_noVoiceText.integer) {
-    CG_AddToTeamChat(vchat->message, vchat->clientNum);
+    CG_AddToTeamChat(vchat->message, vchat->clientNum, false);
     CG_Printf(va("[skipnotify]%s\n", vchat->message)); // JPW NERVE
   }
   voiceChatBuffer[cg.voiceChatBufferOut].snd = 0;
@@ -2210,8 +2212,14 @@ void CG_ForceTapOut_f(void);
 /**
  * @param text The unmodified text (excl. encoding/decoding)
  * @param clientNum The user who sent the message
+ * @param replayMsg Is this a chat replay message?
  */
-const char *CG_AddChatModifications(char *text, int clientNum) {
+const char *CG_AddChatModifications(char *text, int clientNum, bool replayMsg) {
+  // don't perform chat modifications to chat replay messages
+  if (replayMsg) {
+    return text;
+  }
+
   static char message[MAX_SAY_TEXT + 32] = "\0";
   const char *msgColor = "^z";
   qtime_t t;
@@ -2407,6 +2415,7 @@ static void CG_ServerCommand(void) {
   enc = !Q_stricmp(cmd, "enc_chat") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "chat") || enc) {
     const char *s;
+    const bool chatReplay = Q_atoi(CG_Argv(4));
 
     if (cg_teamChatsOnly.integer) {
       return;
@@ -2426,8 +2435,8 @@ static void CG_ServerCommand(void) {
 
     CG_RemoveChatEscapeChar(text);
     CG_FixLinesEndingWithCaret(text, MAX_SAY_TEXT);
-    s = CG_AddChatModifications(text, Q_atoi(CG_Argv(2)));
-    CG_AddToTeamChat(s, Q_atoi(CG_Argv(2)));
+    s = CG_AddChatModifications(text, Q_atoi(CG_Argv(2)), chatReplay);
+    CG_AddToTeamChat(s, Q_atoi(CG_Argv(2)), chatReplay);
     CG_Printf("%s\n", s);
 
     return;
@@ -2450,11 +2459,11 @@ static void CG_ServerCommand(void) {
     }
     CG_RemoveChatEscapeChar(text);
 
-    s = CG_AddChatModifications(text, Q_atoi(CG_Argv(2)));
+    s = CG_AddChatModifications(text, Q_atoi(CG_Argv(2)), false);
     Q_strncpyz(text, s, MAX_SAY_TEXT);
 
     CG_FixLinesEndingWithCaret(text, MAX_SAY_TEXT);
-    CG_AddToTeamChat(text, Q_atoi(CG_Argv(2)));
+    CG_AddToTeamChat(text, Q_atoi(CG_Argv(2)), false);
     CG_Printf("%s\n", text); // JPW NERVE
 
     return;
