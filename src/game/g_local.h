@@ -587,8 +587,6 @@ struct gentity_s {
   int tjlLineNumber;
   char *tjlLineName;
 
-  int outSpeed;
-
   float scaleTime;
 
   int entityOwner; // Owner data for etj_touchPickupWeapons
@@ -697,15 +695,6 @@ enum class TriggerMultipleFlags {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-enum TeleporterSpawnflags {
-  None = 0,
-  ResetSpeed = 1 << 0,
-  ConvertSpeed = 1 << 1,
-  RelativePitch = 1 << 2,
-  RelativePitchYaw = 1 << 3,
-  Knockback = 1 << 4
-};
 
 #define MAX_IP_LEN 15
 

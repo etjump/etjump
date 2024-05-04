@@ -61,6 +61,7 @@ add_library(qagame MODULE
 	"etj_database_v2.cpp"
 	"etj_deathrun_system.cpp"
 	"etj_entity_utilities.cpp"
+	"etj_entity_utilities_shared.cpp"
 	"etj_file.cpp"
 	"etj_filesystem.cpp"
 	"etj_inactivity_timer.cpp"
@@ -88,6 +89,7 @@ add_library(qagame MODULE
 	"etj_timerun_entities.cpp"
 	"etj_timerun_shared.cpp"
 	"etj_tokens.cpp"
+	"etj_trigger_teleport_client.cpp"
 	"etj_user.cpp"
 	"etj_utilities.cpp"
 	${GAME_HEADERS}
