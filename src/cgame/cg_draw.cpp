@@ -2272,17 +2272,8 @@ static void CG_DrawVote() {
   }
 
   if (cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -1) {
-    // make sure we're still on the fireteam before displaying
-    // this prompt
-    if (CG_IsOnFireteam(cg.clientNum)) {
-      line_a = "Make Fireteam private?";
-      line_b = ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1,
-                                    str2);
-    }
-    // we have left, so reset the timer
-    else {
-      cgs.autoFireteamEndTime = cg.time;
-    }
+    // all fireteams are private in etjump
+    cgs.autoFireteamEndTime = cg.time;
   }
 
   if (cgs.voteTime) {
