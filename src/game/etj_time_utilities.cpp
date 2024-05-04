@@ -24,7 +24,6 @@
 
 #include "etj_time_utilities.h"
 #include <chrono>
-#include <time.h>
 #include <ctime>
 
 long long ETJump::getCurrentTimestamp() {

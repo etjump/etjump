@@ -38,6 +38,7 @@
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
 #include "etj_timerun_v2.h"
+#include "etj_chat_replay.h"
 
 typedef std::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<std::function<bool(gentity_t *ent, Arguments argv)>, char>
@@ -379,6 +380,11 @@ bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
   game.timerunV2->loadCheckpoints(ClientNum(ent), level.rawmapname, runName,
                                   rank);
 
+  return true;
+}
+
+bool GetChatReplay(gentity_t *ent, Arguments argv) {
+  game.chatReplay->sendChatMessages(ent);
   return true;
 }
 } // namespace ClientCommands
@@ -1770,9 +1776,12 @@ bool createToken(gentity_t *ent, Arguments argv) {
     }
   }
 
-  std::array<float, 3> coordinates;
+  std::array<float, 3> coordinates{};
   if (argv->size() < 6) {
     VectorCopy(ent->r.currentOrigin, coordinates);
+    // move closer to ground, but not quite to ground level
+    // to avoid clipping into slopes a bit
+    coordinates[2] += ent->client->ps.mins[2] + 2;
   } else {
     try {
       coordinates[0] = std::stof((*argv)[3]);
@@ -1801,13 +1810,13 @@ bool createToken(gentity_t *ent, Arguments argv) {
     }
   }
 
-  Tokens::Difficulty difficulty;
+  ETJump::Tokens::Difficulty difficulty;
   if ((*argv)[2] == "easy" || ((*argv)[2]) == "e") {
-    difficulty = Tokens::Easy;
+    difficulty = ETJump::Tokens::Easy;
   } else if ((*argv)[2] == "medium" || ((*argv)[2]) == "m") {
-    difficulty = Tokens::Medium;
+    difficulty = ETJump::Tokens::Medium;
   } else if ((*argv)[2] == "hard" || ((*argv)[2]) == "h") {
-    difficulty = Tokens::Hard;
+    difficulty = ETJump::Tokens::Hard;
   } else {
     ChatPrintTo(ent, "^3tokens: ^7difficulty must be either easy (e), medium "
                      "(m) or hard (h)");
@@ -1831,7 +1840,7 @@ bool moveToken(gentity_t *ent) {
     ChatPrintTo(ent, "^3usage: ^7!tokens move can only be used by players.");
     return false;
   }
-  std::array<float, 3> coordinates;
+  std::array<float, 3> coordinates{};
   VectorCopy(ent->r.currentOrigin, coordinates);
 
   auto result = game.tokens->moveNearestToken(coordinates);
@@ -1856,7 +1865,7 @@ bool deleteToken(gentity_t *ent, Arguments argv) {
   }
 
   if (argv->size() == 2) {
-    std::array<float, 3> coordinates;
+    std::array<float, 3> coordinates{};
     VectorCopy(ent->r.currentOrigin, coordinates);
     auto result = game.tokens->deleteNearestToken(coordinates);
     if (!result.first) {
@@ -1870,13 +1879,13 @@ bool deleteToken(gentity_t *ent, Arguments argv) {
   }
 
   if (argv->size() == 4) {
-    Tokens::Difficulty difficulty;
+    ETJump::Tokens::Difficulty difficulty;
     if ((*argv)[2] == "easy" || ((*argv)[2]) == "e") {
-      difficulty = Tokens::Easy;
+      difficulty = ETJump::Tokens::Easy;
     } else if ((*argv)[2] == "medium" || ((*argv)[2]) == "m") {
-      difficulty = Tokens::Medium;
+      difficulty = ETJump::Tokens::Medium;
     } else if ((*argv)[2] == "hard" || ((*argv)[2]) == "h") {
-      difficulty = Tokens::Hard;
+      difficulty = ETJump::Tokens::Hard;
     } else {
       ChatPrintTo(ent, "^3tokens: ^7difficulty must be either easy (e), medium "
                        "(m) or hard (h)");
@@ -2484,6 +2493,7 @@ Commands::Commands() {
   commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
   commands_["rankings"] = ClientCommands::Rankings;
   commands_["seasons"] = ClientCommands::ListSeasons;
+  commands_["getchatreplay"] = ClientCommands::GetChatReplay;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {

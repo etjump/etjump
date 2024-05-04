@@ -1859,12 +1859,6 @@ void BG_GetMarkDir(const vec3_t dir, const vec3_t normal, vec3_t out);
 void BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm,
                                          playerState_t *ps);
 
-void BG_TouchJumpPad(playerState_t *ps, int time, entityState_t *jumppad);
-void BG_TouchVelocityJumpPad(playerState_t *ps, int time,
-                             entityState_t *jumppad);
-void BG_GetPushVelocity(playerState_t *ps, vec3_t origin, int spawnflags,
-                        vec3_t outVelocity);
-
 void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s,
                                  qboolean snap);
 void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
@@ -2819,6 +2813,23 @@ enum class CheatCvarFlags {
 enum class PlayerDensityFlags {
   None = 0 << 0,
   Noclip = 1 << 0,
+};
+
+enum class TeleporterSpawnflags {
+  None = 0,
+  ResetSpeed = 1 << 0,
+  ConvertSpeed = 1 << 1,
+  RelativePitch = 1 << 2,
+  RelativePitchYaw = 1 << 3,
+  Knockback = 1 << 4
+};
+
+enum class PusherSpawnFlags {
+  None = 0,
+  // reserved by 'target_push' but unused as the sounds don't exist in ET
+  AltSound = 1 << 0,
+  AddXY = 1 << 1,
+  AddZ = 1 << 2
 };
 } // namespace ETJump
 

@@ -587,8 +587,6 @@ struct gentity_s {
   int tjlLineNumber;
   char *tjlLineName;
 
-  int outSpeed;
-
   float scaleTime;
 
   int entityOwner; // Owner data for etj_touchPickupWeapons
@@ -697,15 +695,6 @@ enum class TriggerMultipleFlags {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-enum TeleporterSpawnflags {
-  None = 0,
-  ResetSpeed = 1 << 0,
-  ConvertSpeed = 1 << 1,
-  RelativePitch = 1 << 2,
-  RelativePitchYaw = 1 << 3,
-  Knockback = 1 << 4
-};
 
 #define MAX_IP_LEN 15
 
@@ -879,6 +868,8 @@ struct votingInfo_t {
 
   int lastRtvMapVoted; // used for re-votes, the last map number we voted on
 };
+
+static constexpr int MAX_TOKENS_PER_DIFFICULTY = 32;
 } // namespace ETJump
 
 // client data that stays across multiple respawns, but is cleared
@@ -978,10 +969,9 @@ typedef struct {
 
   raceStruct_t race;
 
-#define MAX_TOKENS_PER_DIFFICULTY 6
-  qboolean collectedEasyTokens[MAX_TOKENS_PER_DIFFICULTY];
-  qboolean collectedMediumTokens[MAX_TOKENS_PER_DIFFICULTY];
-  qboolean collectedHardTokens[MAX_TOKENS_PER_DIFFICULTY];
+  bool collectedEasyTokens[ETJump::MAX_TOKENS_PER_DIFFICULTY];
+  bool collectedMediumTokens[ETJump::MAX_TOKENS_PER_DIFFICULTY];
+  bool collectedHardTokens[ETJump::MAX_TOKENS_PER_DIFFICULTY];
   int tokenCollectionStartTime;
 
   int previousSetHealthTime;

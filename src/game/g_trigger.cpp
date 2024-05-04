@@ -1,5 +1,6 @@
 #include "g_local.h"
 #include "etj_save_system.h"
+#include "etj_entity_utilities_shared.h"
 
 #include <algorithm>
 
@@ -227,16 +228,8 @@ void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace) {
     return;
   }
 
-  switch (self->s.eType) {
-    case ET_PUSH_TRIGGER:
-      BG_TouchJumpPad(&other->client->ps, level.time, &self->s);
-      break;
-    case ET_VELOCITY_PUSH_TRIGGER:
-      BG_TouchVelocityJumpPad(&other->client->ps, level.time, &self->s);
-      break;
-    default:
-      break;
-  }
+  ETJump::EntityUtilsShared::touchPusher(&other->client->ps, level.time,
+                                         &self->s);
 }
 
 /*
@@ -280,9 +273,6 @@ void AimAtTarget(gentity_t *self) {
   self->s.origin2[2] = time * gravity;
 }
 
-void trigger_push_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
-}
-
 /*QUAKED trigger_push (.5 .5 .5) ? TOGGLE REMOVEAFTERTOUCH PUSHPLAYERONLY
 Must point at a target_position, which will be the apex of the leap.
 This will be client side predicted, unlike target_push
@@ -291,9 +281,10 @@ void SP_trigger_push(gentity_t *self) {
   char *s;
   int speedInt;
 
-  if (!self->speed) {
+  if (self->speed == 0.0f) {
     self->speed = 1000;
   }
+
   G_SetMovedir(self->s.angles, self->s.origin2);
   VectorScale(self->s.origin2, self->speed, self->s.origin2);
 
@@ -314,7 +305,9 @@ void SP_trigger_push(gentity_t *self) {
     self->think = AimAtTarget;
     self->nextthink = level.time + FRAMETIME;
   }
-  if (self->spawnflags & 2 || self->spawnflags & 4) {
+
+  if (self->spawnflags & static_cast<int>(ETJump::PusherSpawnFlags::AddXY) ||
+      self->spawnflags & static_cast<int>(ETJump::PusherSpawnFlags::AddZ)) {
     self->s.eType = ET_VELOCITY_PUSH_TRIGGER;
   } else {
     self->s.eType = ET_PUSH_TRIGGER;
@@ -338,9 +331,10 @@ void Use_target_push(gentity_t *self, gentity_t *other, gentity_t *activator) {
     return;
   }
 
-  if (self->spawnflags & 2 || self->spawnflags & 4) {
-    BG_GetPushVelocity(&activator->client->ps, self->s.origin2,
-                       self->spawnflags, outVelocity);
+  if (self->spawnflags & static_cast<int>(ETJump::PusherSpawnFlags::AddXY) ||
+      self->spawnflags & static_cast<int>(ETJump::PusherSpawnFlags::AddZ)) {
+    ETJump::EntityUtilsShared::setPushVelocity(
+        &activator->client->ps, self->s.origin2, self->spawnflags, outVelocity);
     VectorCopy(outVelocity, activator->client->ps.velocity);
   } else {
     VectorCopy(self->s.origin2, activator->client->ps.velocity);
@@ -359,23 +353,26 @@ Pushes the activator in the direction.of angle, or towards a target apex.
 if "bouncepad", play bounce noise instead of windfly
 */
 void SP_target_push(gentity_t *self) {
-  if (!self->speed) {
+  if (self->speed == 0.0f) {
     self->speed = 1000;
   }
+
   G_SetMovedir(self->s.angles, self->s.origin2);
   VectorScale(self->s.origin2, self->speed, self->s.origin2);
 
-  if (self->spawnflags & 1) {
+  if (self->spawnflags & static_cast<int>(ETJump::PusherSpawnFlags::AltSound)) {
     self->noise_index = G_SoundIndex("sound/world/jumppad.wav");
   } else {
     self->noise_index = G_SoundIndex("sound/misc/windfly.wav");
   }
+
   if (self->target) {
     VectorCopy(self->s.origin, self->r.absmin);
     VectorCopy(self->s.origin, self->r.absmax);
     self->think = AimAtTarget;
     self->nextthink = level.time + FRAMETIME;
   }
+
   self->use = Use_target_push;
 }
 
@@ -398,7 +395,7 @@ void trigger_teleporter_touch(gentity_t *self, gentity_t *other,
     return;
   }
 
-  if (self->outSpeed > 0) {
+  if (self->speed > 0) {
     // If we don't have any velocity when teleporting,
     // there's nothing to scale from, so let's add some
     if (VectorCompare(other->client->ps.velocity, vec3_origin)) {
@@ -406,7 +403,7 @@ void trigger_teleporter_touch(gentity_t *self, gentity_t *other,
     }
 
     VectorNormalize(other->client->ps.velocity);
-    VectorScale(other->client->ps.velocity, self->outSpeed,
+    VectorScale(other->client->ps.velocity, self->speed,
                 other->client->ps.velocity);
   }
 
@@ -414,28 +411,33 @@ void trigger_teleporter_touch(gentity_t *self, gentity_t *other,
     G_AddEvent(other, EV_GENERAL_SOUND, self->noise_index);
   }
 
-  if (self->spawnflags & TeleporterSpawnflags::Knockback) {
+  if (self->spawnflags &
+      static_cast<int>(ETJump::TeleporterSpawnflags::Knockback)) {
     other->client->ps.pm_time = 160; // hold time
     other->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
   }
 
-  if (self->spawnflags & TeleporterSpawnflags::ResetSpeed) {
+  if (self->spawnflags &
+      static_cast<int>(ETJump::TeleporterSpawnflags::ResetSpeed)) {
     // We need some speed to make TeleportPlayerKeepAngles work with
     // this spawnflag, else it doesn't know which trigger side we enter
     VectorSet(other->client->ps.velocity, 0.01, 0.01, 0.0);
   }
 
-  if (self->spawnflags & TeleporterSpawnflags::ConvertSpeed) {
+  if (self->spawnflags &
+      static_cast<int>(ETJump::TeleporterSpawnflags::ConvertSpeed)) {
     TeleportPlayerExt(other, dest->s.origin, dest->s.angles);
     return;
   }
 
-  if (self->spawnflags & TeleporterSpawnflags::RelativePitch) {
+  if (self->spawnflags &
+      static_cast<int>(ETJump::TeleporterSpawnflags::RelativePitch)) {
     TeleportPlayerKeepAngles_Clank(other, self, dest->s.origin, dest->s.angles);
     return;
   }
 
-  if (self->spawnflags & TeleporterSpawnflags::RelativePitchYaw) {
+  if (self->spawnflags &
+      static_cast<int>(ETJump::TeleporterSpawnflags::RelativePitchYaw)) {
     TeleportPlayerKeepAngles(other, self, dest->s.origin, dest->s.angles);
     return;
   }
@@ -459,7 +461,8 @@ void SP_trigger_teleport(gentity_t *self) {
   G_SpawnString("noise", "", &s);
   self->noise_index = G_SoundIndex(s);
 
-  G_SpawnInt("outspeed", "0", &self->outSpeed);
+  G_SpawnFloat("outspeed", "0", &self->speed);
+  self->speed = std::floor(self->speed);
 
   self->s.eType = ET_TELEPORT_TRIGGER;
   self->touch = trigger_teleporter_touch;

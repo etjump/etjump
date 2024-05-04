@@ -14,6 +14,7 @@
 #include "etj_timerun_entities.h"
 #include "etj_missilepad.h"
 #include "etj_target_init.h"
+#include "etj_trigger_teleport_client.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -732,6 +733,7 @@ spawn_t spawns[] = {
     {"target_cleartjl", SP_target_tjlclear},
     {"target_init", ETJump::TargetInit::spawn},
     {"func_missilepad", ETJump::Missilepad::spawn},
+    {"trigger_teleport_client", ETJump::TriggerTeleportClient::spawn},
     {nullptr, nullptr},
 };
 

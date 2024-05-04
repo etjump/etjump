@@ -22,45 +22,14 @@
  * SOFTWARE.
  */
 
-#include <fstream>
-#include "etj_json_utilities.h"
-#include "utilities.hpp"
+#pragma once
 
 namespace ETJump {
-Log JsonUtils::logger = Log("JSON-utils");
+class TriggerTeleportClient {
+  static void think(gentity_t *self);
+  static void touch(gentity_t *self, gentity_t *other);
 
-bool JsonUtils::writeFile(const std::string &file, const Json::Value &root) {
-  Json::StyledWriter writer;
-  const std::string &output = writer.write(root);
-  std::ofstream fOut(GetPath(file));
-
-  if (!fOut) {
-    fOut.close();
-    return false;
-  }
-
-  fOut << output;
-  fOut.close();
-  return true;
-}
-
-bool JsonUtils::readFile(const std::string &file, Json::Value &root) {
-  std::ifstream fIn(GetPath(file));
-
-  if (!fIn) {
-    fIn.close();
-    return false;
-  }
-
-  Json::CharReaderBuilder readerBuilder;
-  std::string errors;
-
-  if (!Json::parseFromStream(readerBuilder, fIn, &root, &errors)) {
-    logger.error("Failed to parse JSON file '%s': %s", file, errors);
-    return false;
-  }
-
-  fIn.close();
-  return true;
-}
+public:
+  static void spawn(gentity_t *self);
+};
 } // namespace ETJump

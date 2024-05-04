@@ -8,6 +8,7 @@
 #include <array>
 #include "cg_local.h"
 #include "etj_utilities.h"
+#include "../game/etj_entity_utilities_shared.h"
 
 /*static*/ pmove_t cg_pmove;
 
@@ -60,6 +61,7 @@ void CG_BuildSolidList(void) {
     if (ent->eType == ET_ITEM || ent->eType == ET_PUSH_TRIGGER ||
         ent->eType == ET_VELOCITY_PUSH_TRIGGER ||
         ent->eType == ET_TELEPORT_TRIGGER ||
+        ent->eType == ET_TELEPORT_TRIGGER_CLIENT ||
         ent->eType == ET_CONCUSSIVE_TRIGGER || ent->eType == ET_OID_TRIGGER
 #ifdef VISIBLE_TRIGGERS
         || ent->eType == ET_TRIGGER_MULTIPLE ||
@@ -462,6 +464,8 @@ static void CG_InterpolatePlayerState(qboolean grabAngles) {
     out->velocity[i] = prev->ps.velocity[i] +
                        f * (next->ps.velocity[i] - prev->ps.velocity[i]);
   }
+
+  out->leanf = prev->ps.leanf + f * (next->ps.leanf - prev->ps.leanf);
 }
 
 void CG_AddDirtBulletParticles(vec3_t origin, vec3_t dir, int speed,
@@ -518,7 +522,9 @@ static void CG_TouchTriggerPrediction() {
     }
 
     if (ent->eType == ET_CONSTRUCTIBLE || ent->eType == ET_OID_TRIGGER ||
-        ent->eType == ET_PUSH_TRIGGER || ent->eType == ET_VELOCITY_PUSH_TRIGGER
+        ent->eType == ET_PUSH_TRIGGER ||
+        ent->eType == ET_VELOCITY_PUSH_TRIGGER ||
+        ent->eType == ET_TELEPORT_TRIGGER_CLIENT
 #ifdef VISIBLE_TRIGGERS
         || ent->eType == ET_TRIGGER_MULTIPLE ||
         ent->eType == ET_TRIGGER_FLAGONLY ||
@@ -544,7 +550,8 @@ static void CG_TouchTriggerPrediction() {
 #endif // VISIBLE_TRIGGERS
       {
         if (ent->eType != ET_PUSH_TRIGGER &&
-            ent->eType != ET_VELOCITY_PUSH_TRIGGER) {
+            ent->eType != ET_VELOCITY_PUSH_TRIGGER &&
+            ent->eType != ET_TELEPORT_TRIGGER_CLIENT) {
           // expand the bbox a bit
           VectorSet(mins, mins[0] - 48, mins[1] - 48, mins[2] - 48);
           VectorSet(maxs, maxs[0] + 48, maxs[1] + 48, maxs[2] + 48);
@@ -573,12 +580,33 @@ static void CG_TouchTriggerPrediction() {
         CG_ObjectivePrint(va("You are near %s\n", cs), SMALLCHAR_WIDTH);
       }
 
-      if (ent->eType == ET_PUSH_TRIGGER) {
-        BG_TouchJumpPad(&cg.predictedPlayerState, cg.physicsTime, ent);
+      // trace for non-axial triggers
+      // FIXME: maybe this setup could be used for everything instead of
+      //  doing the BG_BBoxCollision above, as this is more accurate?
+      cmodel = trap_CM_InlineModel(ent->modelindex);
+
+      if (!cmodel) {
+        continue;
       }
 
-      if (ent->eType == ET_VELOCITY_PUSH_TRIGGER) {
-        BG_TouchVelocityJumpPad(&cg.predictedPlayerState, cg.physicsTime, ent);
+      trace_t trace;
+      trap_CM_CapsuleTrace(&trace, cg.predictedPlayerState.origin,
+                           cg.predictedPlayerState.origin, cg_pmove.mins,
+                           cg_pmove.maxs, cmodel, -1);
+
+      if (trace.fraction == 1.0f) {
+        continue;
+      }
+
+      if (ent->eType == ET_TELEPORT_TRIGGER_CLIENT) {
+        entityState_t *playerEs =
+            &cg_entities[cg.snap->ps.clientNum].currentState;
+        ETJump::EntityUtilsShared::teleportPlayer(&cg.predictedPlayerState,
+                                                  playerEs, ent, &cg_pmove.cmd,
+                                                  ent->origin2, ent->angles2);
+      } else {
+        ETJump::EntityUtilsShared::touchPusher(&cg.predictedPlayerState,
+                                               cg.physicsTime, ent);
       }
 
       continue;

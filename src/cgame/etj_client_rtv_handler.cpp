@@ -83,6 +83,8 @@ bool ClientRtvHandler::rtvVoteActive() const {
 }
 
 void ClientRtvHandler::resetRtvEventHandler() {
-  CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+  if (cgs.eventHandling == CGAME_EVENT_RTV) {
+    CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+  }
 }
 } // namespace ETJump

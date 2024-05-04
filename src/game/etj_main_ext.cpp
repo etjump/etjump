@@ -39,6 +39,7 @@
 #include "etj_timerun_repository.h"
 #include "etj_timerun_v2.h"
 #include "etj_rtv.h"
+#include "etj_chat_replay.h"
 
 Game game;
 
@@ -154,8 +155,9 @@ void OnGameInit() {
   game.customMapVotes =
       std::make_shared<CustomMapVotes>(game.mapStatistics.get());
   game.motd = std::make_shared<Motd>();
-  game.tokens = std::make_shared<Tokens>();
+  game.tokens = std::make_shared<ETJump::Tokens>();
   game.rtv = std::make_shared<ETJump::RockTheVote>();
+  game.chatReplay = std::make_shared<ETJump::ChatReplay>();
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
@@ -234,6 +236,7 @@ void OnGameShutdown() {
   game.tokens = nullptr;
   game.timerunV2 = nullptr;
   game.rtv = nullptr;
+  game.chatReplay = nullptr;
   ETJump::Log::processMessages();
 }
 
@@ -445,30 +448,6 @@ void G_increaseCallvoteCount(const char *mapName) {
 
 void G_increasePassedCount(const char *mapName) {
   game.mapStatistics->increasePassedCount(mapName);
-}
-
-bool allTokensCollected(gentity_t *ent) {
-  auto tokenCounts = game.tokens->getTokenCounts();
-
-  auto easyCount = 0;
-  auto mediumCount = 0;
-  auto hardCount = 0;
-  for (auto i = 0; i < MAX_TOKENS_PER_DIFFICULTY; ++i) {
-    if (ent->client->pers.collectedEasyTokens[i]) {
-      ++easyCount;
-    }
-
-    if (ent->client->pers.collectedMediumTokens[i]) {
-      ++mediumCount;
-    }
-
-    if (ent->client->pers.collectedHardTokens[i]) {
-      ++hardCount;
-    }
-  }
-
-  return tokenCounts[0] == easyCount && tokenCounts[1] == mediumCount &&
-         tokenCounts[2] == hardCount;
 }
 
 namespace ETJump {

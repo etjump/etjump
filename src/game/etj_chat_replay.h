@@ -22,45 +22,40 @@
  * SOFTWARE.
  */
 
-#include <fstream>
-#include "etj_json_utilities.h"
-#include "utilities.hpp"
+#pragma once
+
+#include <list>
+#include "etj_log.h"
 
 namespace ETJump {
-Log JsonUtils::logger = Log("JSON-utils");
+class ChatReplay {
+  struct ChatMessage {
+    int clientNum;
+    std::string name;
+    std::string message;
+    bool localize;
+    bool encoded;
+  };
 
-bool JsonUtils::writeFile(const std::string &file, const Json::Value &root) {
-  Json::StyledWriter writer;
-  const std::string &output = writer.write(root);
-  std::ofstream fOut(GetPath(file));
+  static Log logger;
 
-  if (!fOut) {
-    fOut.close();
-    return false;
-  }
+  static constexpr int MAX_CHAT_REPLAY_BUFFER = 10;
+  const std::string chatReplayFile = "chatreplay.json";
 
-  fOut << output;
-  fOut.close();
-  return true;
-}
+  std::list<ChatMessage> chatReplayBuffer;
 
-bool JsonUtils::readFile(const std::string &file, Json::Value &root) {
-  std::ifstream fIn(GetPath(file));
+  static std::string parseChatMessage(const ChatMessage &msg);
+  void readChatsFromFile();
+  void writeChatsToFile();
 
-  if (!fIn) {
-    fIn.close();
-    return false;
-  }
+public:
+  ChatReplay();
+  ~ChatReplay();
 
-  Json::CharReaderBuilder readerBuilder;
-  std::string errors;
+  void storeChatMessage(int clientNum, const std::string &name,
+                        const std::string &message, bool localize,
+                        bool encoded);
 
-  if (!Json::parseFromStream(readerBuilder, fIn, &root, &errors)) {
-    logger.error("Failed to parse JSON file '%s': %s", file, errors);
-    return false;
-  }
-
-  fIn.close();
-  return true;
-}
+  void sendChatMessages(gentity_t *ent);
+};
 } // namespace ETJump

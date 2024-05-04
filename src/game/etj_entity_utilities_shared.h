@@ -22,45 +22,28 @@
  * SOFTWARE.
  */
 
-#include <fstream>
-#include "etj_json_utilities.h"
-#include "utilities.hpp"
+#pragma once
+
+#ifdef CGAMEDLL
+  #include "../cgame/cg_local.h"
+#else
+  #include "g_local.h"
+#endif
 
 namespace ETJump {
-Log JsonUtils::logger = Log("JSON-utils");
+class EntityUtilsShared {
+public:
+  static void touchPusher(playerState_t *ps, int time,
+                          const entityState_t *pusher);
 
-bool JsonUtils::writeFile(const std::string &file, const Json::Value &root) {
-  Json::StyledWriter writer;
-  const std::string &output = writer.write(root);
-  std::ofstream fOut(GetPath(file));
+  static void setPushVelocity(const playerState_t *ps, const vec3_t origin2,
+                              const int &spawnflags, vec3_t pushVel);
 
-  if (!fOut) {
-    fOut.close();
-    return false;
-  }
+  static void teleportPlayer(playerState_t *ps, entityState_t *player,
+                             entityState_t *teleporter, usercmd_t *cmd,
+                             const vec3_t origin, vec3_t angles);
 
-  fOut << output;
-  fOut.close();
-  return true;
-}
-
-bool JsonUtils::readFile(const std::string &file, Json::Value &root) {
-  std::ifstream fIn(GetPath(file));
-
-  if (!fIn) {
-    fIn.close();
-    return false;
-  }
-
-  Json::CharReaderBuilder readerBuilder;
-  std::string errors;
-
-  if (!Json::parseFromStream(readerBuilder, fIn, &root, &errors)) {
-    logger.error("Failed to parse JSON file '%s': %s", file, errors);
-    return false;
-  }
-
-  fIn.close();
-  return true;
-}
+  static void setViewAngles(playerState_t *ps, entityState_t *es,
+                            usercmd_t *cmd, const vec3_t angle);
+};
 } // namespace ETJump

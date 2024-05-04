@@ -373,6 +373,7 @@ static const char *entityTypeNames[] = {
     "ET_COMMANDMAP_MARKER",
     "ET_WOLF_OBJECTIVE",
     "ET_VELOCITY_PUSH_TRIGGER",
+    "ET_TELEPORT_TRIGGER_CLIENT",
     "ET_EVENTS",
 };
 
