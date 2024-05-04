@@ -2635,6 +2635,12 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     }
   }
 
+  fireteamData_t *ft;
+
+  if (G_IsOnFireteam(client->ps.clientNum, &ft) && ft->noGhost) {
+    client->ftNoGhostThisLife = true;
+  }
+
   // run a client frame to drop exactly to the floor,
   // initialize animations and other things
   client->ps.commandTime = level.time - 100;

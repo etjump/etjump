@@ -750,7 +750,10 @@ static void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
 
     gentity_t *ent = g_entities + ft->joinOrder[i];
 
-    ent->client->ftNoGhostThisLife = true;
+    if (noGhost) {
+      ent->client->ftNoGhostThisLife = true;
+    }
+
     Printer::SendPopupMessage(ClientNum(ent), msg);
   }
 }
