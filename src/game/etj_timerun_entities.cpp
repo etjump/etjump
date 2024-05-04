@@ -147,6 +147,9 @@ bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
 
   // disable some checks if we're on a debugging session
   if (!g_debugTimeruns.integer) {
+    const bool ftNoGhostAllowed =
+        self->spawnflags & static_cast<int>(TimerunSpawnflags::AllowFTNoGhost);
+
     if (client->noclip || activator->flags & FL_GODMODE) {
       Printer::SendCenterMessage(
           *clientNum,
@@ -165,6 +168,13 @@ bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
       Printer::SendCenterMessage(
           *clientNum, "^3WARNING: ^7Timerun was not started. ^3setoffset "
                       "^7activated this life, ^3/kill ^7required!");
+      return false;
+    }
+
+    if (client->ftNoGhostThisLife && !ftNoGhostAllowed) {
+      Printer::SendCenterMessage(
+          *clientNum, "^3WARNING: ^7Timerun was not started. ^3fireteam "
+                      "noghost ^7enabled this life, ^3/kill ^7required!");
       return false;
     }
 
@@ -196,9 +206,9 @@ bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
 
     fireteamData_t *ft;
 
-    if (!(self->spawnflags &
-          static_cast<int>(TimerunSpawnflags::AllowFTNoGhost)) &&
-        (G_IsOnFireteam(*clientNum, &ft) && ft->noGhost)) {
+    // this check is still hit when ft noghost gets enabled & players respawn,
+    // as ftNoGhostThisLife gets set upon enabling noghost and resets on respawn
+    if (!ftNoGhostAllowed && (G_IsOnFireteam(*clientNum, &ft) && ft->noGhost)) {
       Printer::SendCenterMessage(
           *clientNum, "^3WARNING: ^7Timerun was not started. ^3Fireteam "
                       "noghost ^7is disabled for this run!\n");
