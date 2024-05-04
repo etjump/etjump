@@ -33,5 +33,6 @@ class EntityUtilities {
 public:
   static bool isPlayer(gentity_t *ent);
   static void checkForRailBox(gentity_t *ent);
+  static bool playerIsSolid(int self, int other);
 };
 } // namespace ETJump

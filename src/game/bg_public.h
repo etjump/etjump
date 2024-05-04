@@ -2430,6 +2430,8 @@ typedef struct {
   qboolean teamJumpMode;
   qboolean inuse;
   qboolean priv;
+
+  bool noGhost; // disable ghostplayers between fireteam members
 } fireteamData_t;
 
 long BG_StringHashValue(const char *fname);
@@ -2802,6 +2804,15 @@ enum class CheatCvarFlags {
   None = 0,
   LookYaw = 1,
   PmoveFPS = 2,
+};
+
+// this can hold maximum of 10 bits and maps to currentState->density
+// used to transmit information otherwise inaccessible in cgame
+// from player to player, such as playerState_t fields that don't
+// normally get mapped to entityState in BG_PlayerStateToEntityState
+enum class PlayerDensityFlags {
+  None = 0 << 0,
+  Noclip = 1 << 0,
 };
 
 enum class TeleporterSpawnflags {

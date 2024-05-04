@@ -2183,6 +2183,12 @@ enum class FTMenuPos {
   FT_MENUPOS_RULES = 5
 };
 
+enum class FTMenuRulesPos {
+  FT_RULES_RESET = 0,
+  FT_RULES_SAVELIMIT = 1,
+  FT_RULES_NOGHOST = 2
+};
+
 //==============================================================================
 
 extern cgs_t cgs;
@@ -2266,7 +2272,7 @@ extern vmCvar_t cg_coronafardist;
 extern vmCvar_t cg_coronas;
 extern vmCvar_t cg_buildScript;
 extern vmCvar_t cg_paused;
-extern vmCvar_t cg_blood;
+extern vmCvar_t cg_showblood;
 extern vmCvar_t cg_deferPlayers;
 extern vmCvar_t cg_teamChatsOnly;
 extern vmCvar_t cg_noVoiceChats; // NERVE - SMF
@@ -4242,12 +4248,11 @@ extern std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
 extern std::vector<std::shared_ptr<IRenderable>> renderables;
 extern std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
 extern std::vector<std::shared_ptr<CvarShadow>> cvarShadows;
-extern std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 extern std::shared_ptr<EventLoop> eventLoop;
 extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 extern std::shared_ptr<ClientRtvHandler> rtvHandler;
 extern std::shared_ptr<DemoCompatibility> demoCompatibility;
-extern std::shared_ptr<AccelColor> accelColor;
+extern std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume, int soundTime);

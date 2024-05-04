@@ -2458,12 +2458,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     ent->classname = "player";
   }
   ent->r.contents = CONTENTS_BODY;
-
-  if (g_ghostPlayers.integer == 1) {
-    ent->clipmask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
-  } else {
-    ent->clipmask = MASK_PLAYERSOLID;
-  }
+  ent->clipmask = MASK_PLAYERSOLID;
 
   // DHM - Nerve :: Init to -1 on first spawn;
   if (!revived) {
@@ -2640,6 +2635,12 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     if (!revived) {
       G_UseTargets(spawnPoint, ent);
     }
+  }
+
+  fireteamData_t *ft;
+
+  if (G_IsOnFireteam(client->ps.clientNum, &ft) && ft->noGhost) {
+    client->ftNoGhostThisLife = true;
   }
 
   // run a client frame to drop exactly to the floor,

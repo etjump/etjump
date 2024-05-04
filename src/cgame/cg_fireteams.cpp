@@ -258,14 +258,16 @@ const char *ftOnMenuListAlphachars[] = {
 };
 
 const char *ftOnMenuRulesList[] = {
-    "Reset",
-    "Savelimit",
+    "Reset savelimit",
+    "Set savelimit",
+    "%s player collision",
     nullptr,
 };
 
 const char *ftOnMenuRulesListAlphaChars[] = {
     "R",
     "S",
+    "C",
     nullptr,
 };
 
@@ -556,6 +558,17 @@ void CG_DrawFireteamRules(panel_button_t *button) {
       str = va("%i. %s", (i + 1) % 10, ftOnMenuRulesList[i]);
     } else {
       str = va("%s. %s", ftOnMenuRulesListAlphaChars[i], ftOnMenuRulesList[i]);
+    }
+
+    if (i == static_cast<int>(FTMenuRulesPos::FT_RULES_NOGHOST)) {
+      if (cg_ghostPlayers.integer == 1) {
+        str = va(str, cgs.clientinfo[cg.clientNum].fireteamData->noGhost
+                          ? "Disable"
+                          : "Enable");
+      } else {
+        // this won't actually ever work, but for the sake of correct status
+        str = va(str, "Disable");
+      }
     }
 
     CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
@@ -1155,12 +1168,24 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           break;
         case FTMenuPos::FT_MENUPOS_RULES:
           if (doaction) {
-            if (i == 0) {
-              trap_SendConsoleCommand("fireteam rules savelimit reset\n");
-              CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-            } else if (i == 1) {
-              trap_UI_Popup(UIMENU_INGAME_FT_SAVELIMIT);
-              CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+            switch (static_cast<FTMenuRulesPos>(i)) {
+              case FTMenuRulesPos::FT_RULES_RESET:
+                trap_SendConsoleCommand("fireteam rules savelimit reset\n");
+                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                break;
+              case FTMenuRulesPos::FT_RULES_SAVELIMIT:
+                trap_UI_Popup(UIMENU_INGAME_FT_SAVELIMIT);
+                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                break;
+              case FTMenuRulesPos::FT_RULES_NOGHOST:
+                trap_SendConsoleCommand(
+                    va("fireteam rules noghost %i",
+                       cgs.clientinfo[cg.clientNum].fireteamData->noGhost ? 0
+                                                                          : 1));
+                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                break;
+              default:
+                break;
             }
           }
 

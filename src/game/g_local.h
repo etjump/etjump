@@ -1022,6 +1022,7 @@ struct gclient_s {
   bool noclipThisLife;
   bool setoffsetThisLife;
   bool pmoveOffThisLife;
+  bool ftNoGhostThisLife;
 
   int lastCmdTime; // level.time of last usercmd_t, for EF_CONNECTION
                    // we can't just use pers.lastCommand.time, because
@@ -1436,13 +1437,14 @@ typedef struct {
   bool noProne;
   bool noDrop;
   bool noWallbug;
+  bool noFTNoGhost;
 
   int portalEnabled; // Feen: PGM - Enabled/Disabled by map key
   qboolean portalSurfaces;
 
   ipMute_t ipMutes[MAX_IP_MUTES]; // I don't think we need more than 16
 
-  qboolean ghostPlayers;
+  bool noGhost;
   int limitedSaves;
   int portalTeam;
 
@@ -2943,6 +2945,7 @@ enum class TimerunSpawnflags {
   NoExplosivesPickup = 32,
   NoPortalgunPickup = 64,
   NoSave = 128,
+  AllowFTNoGhost = 256,
 };
 
 bool checkCheatCvars(gclient_s *client, int flags);

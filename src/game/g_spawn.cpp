@@ -1141,6 +1141,15 @@ static void initNoNoclip() {
   trap_Cvar_Set("shared", va("%d", shared.integer));
   G_Printf("Noclip is %s.\n", level.noNoclip ? "disabled" : "enabled");
 }
+
+static void initNoFTNoGhost() {
+  int value;
+  G_SpawnInt("noftnoghost", "0", &value);
+
+  level.noFTNoGhost = value;
+  G_Printf("Fireteam noghost is %s.\n",
+           level.noFTNoGhost ? "disabled" : "enabled");
+}
 } // namespace ETJump
 
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
@@ -1240,6 +1249,7 @@ void SP_worldspawn(void) {
     trap_Cvar_Set("g_ghostPlayers", buf);
     trap_Cvar_Update(&g_ghostPlayers);
     G_Printf("Ghosting is disabled.\n");
+    level.noGhost = true;
   } else {
     char buf[128] = "\0";
     int currentValue = g_ghostPlayers.integer;
@@ -1250,6 +1260,7 @@ void SP_worldspawn(void) {
     trap_Cvar_Set("g_ghostPlayers", buf);
     trap_Cvar_Update(&g_ghostPlayers);
     G_Printf("Ghosting is enabled.\n");
+    level.noGhost = false;
   }
 
   G_SpawnString("limitedsaves", "0", &s);
@@ -1283,6 +1294,7 @@ void SP_worldspawn(void) {
   ETJump::initNoDrop();
   ETJump::initNoWallbug();
   ETJump::initNoNoclip();
+  ETJump::initNoFTNoGhost();
 
   level.mapcoordsValid = qfalse;
   if (G_SpawnVector2D("mapcoordsmins", "-128 128",

@@ -10,6 +10,7 @@
 #include "g_local.h"
 #include "etj_printer.h"
 #include "etj_utilities.h"
+#include "etj_entity_utilities.h"
 
 vec3_t forward, right, up;
 vec3_t muzzleEffect;
@@ -3370,6 +3371,28 @@ void Bullet_Fire(gentity_t *ent, float spread, int damage,
   G_HistoricalTraceEnd(ent);
 }
 
+namespace ETJump {
+void bulletTrace(gentity_t *source, gentity_t *attacker, trace_t *tr,
+                 vec3_t start, vec3_t end) {
+  G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number,
+          MASK_SHOT);
+
+  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr->entityNum < MAX_CLIENTS &&
+         !ETJump::EntityUtilities::playerIsSolid(attacker->client->ps.clientNum,
+                                                 tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number,
+            MASK_SHOT);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
+
 /*
 ==============
 Bullet_Fire_Extended
@@ -3399,8 +3422,7 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
     waslinked = qtrue;
   }
 
-  G_Trace(source, &tr, start, nullptr, nullptr, end, source->s.number,
-          MASK_SOLID);
+  ETJump::bulletTrace(source, attacker, &tr, start, end);
 
   // bani - prevent shooting ourselves in the head when prone,
   // firing through a breakable
@@ -3657,7 +3679,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
 
   // check that portals aren't overlapping..
   if ((ent->portalBlue) || (ent->portalRed)) {
-    gentity_t* otherPortal = nullptr;
+    gentity_t *otherPortal = nullptr;
 
     if (portalNumber == 1 && ent->portalRed) {
       otherPortal = ent->portalRed;
@@ -3666,7 +3688,8 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
     }
 
     if (otherPortal) {
-      const float otherScale = static_cast<float>(otherPortal->s.onFireStart) / 48.0f;
+      const float otherScale =
+          static_cast<float>(otherPortal->s.onFireStart) / 48.0f;
       const float min_dist =
           MIN_PORTALS_DIST * scale + MIN_PORTALS_DIST * otherScale;
 
@@ -3991,21 +4014,16 @@ gentity_t *weapon_mortar_fire(gentity_t *ent, int grenType) {
 
   VectorCopy(ent->client->ps.viewangles, angles);
   angles[PITCH] -= 60.f;
-  /*	if( angles[PITCH] < -89.f )
-          angles[PITCH] = -89.f;*/
-  AngleVectors(angles, forward, NULL, NULL);
+  AngleVectors(angles, forward, nullptr, nullptr);
 
   VectorCopy(muzzleEffect, launchPos);
 
-  // check for valid start spot (so you don't throw through or get stuck
-  // in a wall)
+  // check for valid start spot
+  // (so you don't throw through or get stuck in a wall)
   VectorMA(launchPos, 32, forward, testPos);
 
   // Gordon: hack so i can do inverse trajectory calcs easily :p
   if (G_IsSinglePlayerGame() && ent->r.svFlags & SVF_BOT) {
-    /*		forward[0] *= 3000;
-            forward[1] *= 3000;
-            forward[2] *= 3000;*/
     VectorCopy(ent->gDelta, forward);
   } else {
     forward[0] *= 3000 * 1.1f;
@@ -4014,10 +4032,10 @@ gentity_t *weapon_mortar_fire(gentity_t *ent, int grenType) {
   }
 
   trap_Trace(&tr, testPos, tv(-4.f, -4.f, 0.f), tv(4.f, 4.f, 6.f), launchPos,
-             ent->s.number, CONTENTS_SOLID | CONTENTS_MISSILECLIP);
+             ent->s.number, MASK_MISSILESHOT);
 
-  if (tr.fraction < 1) // oops, bad launch spot
-  {
+  // oops, bad launch spot
+  if (tr.fraction < 1) {
     VectorCopy(tr.endpos, launchPos);
     SnapVectorTowards(launchPos, testPos);
   }

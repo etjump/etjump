@@ -2033,17 +2033,10 @@ void CG_CheckForCursorHints(void) {
   VectorCopy(cg.refdef_current->vieworg, start);
   VectorMA(start, CH_DIST, cg.refdef_current->viewaxis[0], end);
 
-  //	CG_Trace( &trace, start, vec3_origin, vec3_origin, end,
-  // cg.snap->ps.clientNum, MASK_ALL &~CONTENTS_MONSTERCLIP);
-  if (cg_ghostPlayers.integer == 1) {
-    CG_Trace(&trace, start, vec3_origin, vec3_origin, end,
-             cg.snap->ps.clientNum, MASK_PLAYERSOLID & ~CONTENTS_BODY);
-  } else {
-    CG_Trace(&trace, start, vec3_origin, vec3_origin, end,
-             cg.snap->ps.clientNum, MASK_PLAYERSOLID);
-  }
+  CG_Trace(&trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
+           MASK_PLAYERSOLID);
 
-  if (trace.fraction == 1) {
+  if (trace.fraction == 1.0f) {
     return;
   }
 

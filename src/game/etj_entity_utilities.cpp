@@ -70,4 +70,44 @@ void EntityUtilities::drawRailBox(gentity_t *ent,
 
   temp->s.effect1Time = ent->s.number + 1;
 }
+
+bool EntityUtilities::playerIsSolid(const int self, const int other) {
+  fireteamData_t *ftSelf, *ftOther;
+  const gclient_t *selfClient = g_entities[self].client;
+  const gclient_t *otherClient = g_entities[other].client;
+
+  if (self == other) {
+    return false;
+  }
+
+  if (selfClient->sess.sessionTeam == TEAM_SPECTATOR ||
+      otherClient->sess.sessionTeam == TEAM_SPECTATOR) {
+    return false;
+  }
+
+  if (selfClient->ps.pm_type == PM_NOCLIP ||
+      otherClient->ps.pm_type == PM_NOCLIP) {
+    return false;
+  }
+
+  if (g_ghostPlayers.integer == 1) {
+    if (!G_IsOnFireteam(self, &ftSelf)) {
+      return false;
+    }
+
+    // we're on same fireteam, but noghost isn't enabled
+    if (G_IsOnFireteam(other, &ftOther) && ftSelf == ftOther) {
+      if (!ftSelf->noGhost) {
+        return false;
+      }
+    }
+
+    // we're not in the same fireteam
+    if (!G_IsOnFireteam(other, &ftOther) || ftSelf != ftOther) {
+      return false;
+    }
+  }
+
+  return true;
+}
 } // namespace ETJump

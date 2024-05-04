@@ -84,6 +84,7 @@ std::shared_ptr<ClientRtvHandler> rtvHandler;
 std::shared_ptr<AreaIndicator> areaIndicator;
 std::shared_ptr<DemoCompatibility> demoCompatibility;
 std::shared_ptr<AccelColor> accelColor;
+std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 } // namespace ETJump
 
 static bool isInitialized{false};
@@ -315,6 +316,8 @@ void init() {
   initTimer();
   // restores timerun after vid_restart (if required)
   trap_SendClientCommand("timerun_status");
+
+  std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
 
   trickjumpLines = std::make_shared<TrickjumpLines>();
 

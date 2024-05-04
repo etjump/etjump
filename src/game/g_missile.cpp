@@ -1,5 +1,6 @@
 #include "g_local.h"
 #include "etj_printer.h"
+#include "etj_entity_utilities.h"
 
 #define MISSILE_PRESTEP_TIME 50
 
@@ -613,6 +614,32 @@ void Landmine_Check_Ground(gentity_t *self) {
   G_SetOrigin( self, oldorigin );*/
 }
 
+namespace ETJump {
+void missileTrace(trace_t *tr, gentity_t *ent, vec3_t end) {
+  // trace a line from the previous position to the current position,
+  // ignoring interactions with the missile owner
+  trap_Trace(tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, end,
+             ent->r.ownerNum, ent->clipmask);
+
+  if (g_ghostPlayers.integer != 1) {
+    return;
+  }
+
+  if (ent->r.ownerNum >= MAX_CLIENTS || tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr->entityNum < MAX_CLIENTS && !ETJump::EntityUtilities::playerIsSolid(
+                                            ent->r.ownerNum, tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    trap_Trace(tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, end,
+               ent->r.ownerNum, ent->clipmask);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
+
 /*
 ================
 G_RunMissile
@@ -714,10 +741,13 @@ void G_RunMissile(gentity_t *ent) {
     }
   }
 
-  // trace a line from the previous position to the current position,
-  // ignoring interactions with the missile owner
-  trap_Trace(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
-             ent->r.ownerNum, ent->clipmask);
+  ETJump::missileTrace(&tr, ent, origin);
+
+  // fix for engine bug where trace sometimes starts in solid even if
+  // the entity that it starts in is nonsolid
+  if (tr.startsolid && tr.entityNum == ENTITYNUM_NONE) {
+    tr.startsolid = qfalse;
+  }
 
   if (ent->s.weapon == WP_MORTAR_SET && ent->count2 == 1) {
     if (ent->r.currentOrigin[2] > origin[2] &&
@@ -2014,7 +2044,7 @@ gentity_t *fire_grenade(gentity_t *self, const vec3_t start, const vec3_t dir,
   bolt->splashRadius = G_GetWeaponDamage(grenadeWPID);
   // jpw
 
-  bolt->clipmask = CONTENTS_SOLID | CONTENTS_MISSILECLIP;
+  bolt->clipmask = MASK_MISSILESHOT;
 
   bolt->s.pos.trType = TR_GRAVITY;
   bolt->s.pos.trTime =
@@ -2071,15 +2101,7 @@ gentity_t *fire_rocket(gentity_t *self, vec3_t start, vec3_t dir) {
                             // // Arnout : hardcoded bleh hack
   bolt->methodOfDeath = MOD_PANZERFAUST;
   bolt->splashMethodOfDeath = MOD_PANZERFAUST;
-
-  // player shoots & never hits
-  if (self->client) {
-    bolt->clipmask = CONTENTS_SOLID | CONTENTS_MISSILECLIP;
-  }
-  // map shoots & hits
-  else {
-    bolt->clipmask = MASK_MISSILESHOT;
-  }
+  bolt->clipmask = MASK_MISSILESHOT;
 
   bolt->s.pos.trType = TR_LINEAR;
   bolt->s.pos.trTime =

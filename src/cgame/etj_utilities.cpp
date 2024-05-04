@@ -27,6 +27,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include <array>
 
 #include "etj_utilities.h"
 #include "etj_event_loop.h"
@@ -230,6 +231,43 @@ int ETJump::getSvFps() {
   }
 
   return fps;
+}
+
+bool ETJump::playerIsSolid(const int self, const int other) {
+  if (cg_ghostPlayers.integer == 1) {
+    if (self == other) {
+      return false;
+    }
+
+    if (!isPlaying(self) || !isPlaying(other)) {
+      return false;
+    }
+
+    if (!CG_IsOnSameFireteam(self, other) ||
+        (CG_IsOnSameFireteam(self, other) &&
+         !cgs.clientinfo[self].fireteamData->noGhost)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool ETJump::playerIsNoclipping(const int clientNum) {
+  return cg_entities[clientNum].currentState.density &
+         static_cast<int>(PlayerDensityFlags::Noclip);
+}
+
+void ETJump::tempTraceIgnoreClient(int clientNum) {
+  if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  tempTraceIgnoredClients[clientNum] = true;
+}
+
+void ETJump::resetTempTraceIgnoredClients() {
+  std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
 }
 
 #endif
