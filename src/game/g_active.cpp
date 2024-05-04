@@ -6,6 +6,7 @@
 #include "etj_numeric_utilities.h"
 #include "etj_string_utilities.h"
 #include "etj_utilities.h"
+#include "etj_entity_utilities.h"
 
 /*
 ===============
@@ -1133,22 +1134,21 @@ void ClientThink_real(gentity_t *ent) {
   // MrE: always use capsule for AI and player
   pm.trace = trap_TraceCapsule;
 
-  if (pm.ps->pm_type == PM_DEAD) {
-    pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
-    // DHM-Nerve added:: EF_DEAD is checked for in Pmove
-    // functions, but wasn't being set
-    //              until after Pmove
-    pm.ps->eFlags |= EF_DEAD;
-    // dhm-Nerve end
-  } else if (pm.ps->pm_type == PM_SPECTATOR) {
-    pm.trace = trap_TraceCapsuleNoEnts;
-  } else {
-    if (g_ghostPlayers.integer == 1) {
-      // Trickjump: Players can move through bodies.
+  switch (pm.ps->pm_type) {
+    case PM_DEAD:
       pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
-    } else {
+      pm.ps->eFlags |= EF_DEAD;
+      break;
+    case PM_SPECTATOR:
+      pm.trace = trap_TraceCapsuleNoEnts;
+      break;
+    case PM_NOCLIP:
+      pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+      G_TempTraceIgnorePlayersAndBodies();
+      break;
+    default:
       pm.tracemask = MASK_PLAYERSOLID;
-    }
+      break;
   }
 
   // DHM - Nerve :: We've gone back to using normal bbox traces
@@ -1240,7 +1240,18 @@ void ClientThink_real(gentity_t *ent) {
     pm.cmd.weapon = client->ps.weapon;
   }
 
+  // setup nonsolid players
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    const int otherNum = level.sortedClients[i];
+
+    if (!ETJump::EntityUtilities::playerIsSolid(clientNum, otherNum)) {
+      G_TempTraceIgnoreEntity(g_entities + otherNum);
+    }
+  }
+
   Pmove(&pm);
+
+  G_ResetTempTraceIgnoreEnts();
 
   // Gordon: thx to bani for this
   // ikkyo - fix leaning players bug
@@ -1608,6 +1619,16 @@ qboolean StuckInClient(gentity_t *self) {
       continue;
     }
 
+    if (hit->client->ps.pm_type == PM_NOCLIP ||
+        self->client->ps.pm_type == PM_NOCLIP) {
+      continue;
+    }
+
+    if (!ETJump::EntityUtilities::playerIsSolid(ClientNum(self),
+                                                ClientNum(hit))) {
+      continue;
+    }
+
     VectorAdd(hit->r.currentOrigin, hit->r.mins, hitmin);
     VectorAdd(hit->r.currentOrigin, hit->r.maxs, hitmax);
     VectorAdd(self->r.currentOrigin, self->r.mins, selfmin);
@@ -1642,48 +1663,45 @@ extern vec3_t playerMins, playerMaxs;
 static constexpr float WR_PUSHAMOUNT = 25.0f;
 
 void WolfRevivePushEnt(gentity_t *self, gentity_t *other) {
-  if (!g_ghostPlayers.integer || g_ghostPlayers.integer >= 2) {
-    vec3_t dir, push;
+  vec3_t dir, push;
 
-    // push only every 50ms to normalize push amount to 'sv_fps 20'
-    // we cannot simply scale the push amount to lower on higher sv_fps
-    // values because friction will have more impact on lower speeds,
-    // resulting in a smaller push overall
-    if ((self->client &&
-         self->client->lastRevivePushTime + DEFAULT_SV_FRAMETIME >
-             level.time) ||
-        other->client->lastRevivePushTime + DEFAULT_SV_FRAMETIME > level.time) {
-      return;
-    }
+  // push only every 50ms to normalize push amount to 'sv_fps 20'
+  // we cannot simply scale the push amount to lower on higher sv_fps
+  // values because friction will have more impact on lower speeds,
+  // resulting in a smaller push overall
+  if ((self->client &&
+       self->client->lastRevivePushTime + DEFAULT_SV_FRAMETIME > level.time) ||
+      other->client->lastRevivePushTime + DEFAULT_SV_FRAMETIME > level.time) {
+    return;
+  }
 
-    VectorSubtract(self->r.currentOrigin, other->r.currentOrigin, dir);
-    dir[2] = 0;
-    VectorNormalizeFast(dir);
+  VectorSubtract(self->r.currentOrigin, other->r.currentOrigin, dir);
+  dir[2] = 0;
+  VectorNormalizeFast(dir);
 
-    VectorScale(dir, WR_PUSHAMOUNT, push);
+  VectorScale(dir, WR_PUSHAMOUNT, push);
 
-    if (self->client) {
-      VectorAdd(self->s.pos.trDelta, push, self->s.pos.trDelta);
-      VectorAdd(self->client->ps.velocity, push, self->client->ps.velocity);
-      self->client->lastRevivePushTime =
-          level.time - (level.time % DEFAULT_SV_FRAMETIME);
-    }
-
-    VectorScale(dir, -WR_PUSHAMOUNT, push);
-    push[2] = WR_PUSHAMOUNT / 2;
-
-    VectorAdd(other->s.pos.trDelta, push, other->s.pos.trDelta);
-    VectorAdd(other->client->ps.velocity, push, other->client->ps.velocity);
-    other->client->lastRevivePushTime =
+  if (self->client) {
+    VectorAdd(self->s.pos.trDelta, push, self->s.pos.trDelta);
+    VectorAdd(self->client->ps.velocity, push, self->client->ps.velocity);
+    self->client->lastRevivePushTime =
         level.time - (level.time % DEFAULT_SV_FRAMETIME);
   }
+
+  VectorScale(dir, -WR_PUSHAMOUNT, push);
+  push[2] = WR_PUSHAMOUNT / 2;
+
+  VectorAdd(other->s.pos.trDelta, push, other->s.pos.trDelta);
+  VectorAdd(other->client->ps.velocity, push, other->client->ps.velocity);
+  other->client->lastRevivePushTime =
+      level.time - (level.time % DEFAULT_SV_FRAMETIME);
 }
 
 // Arnout: completely revived for capsules
 void WolfReviveBbox(gentity_t *self) {
   int touch[MAX_GENTITIES];
   int num, i, touchnum = 0;
-  gentity_t *hit = NULL; // TTimo: init
+  gentity_t *hit = nullptr; // TTimo: init
   vec3_t mins, maxs;
 
   hit = G_TestEntityPosition(self);
@@ -1695,8 +1713,6 @@ void WolfReviveBbox(gentity_t *self) {
               "using player\n");
     // Move corpse directly to the person who revived them
     if (self->props_frame_state >= 0) {
-      //			trap_UnlinkEntity( self
-      //);
       VectorCopy(g_entities[self->props_frame_state].client->ps.origin,
                  self->client->ps.origin);
       VectorCopy(self->client->ps.origin, self->r.currentOrigin);
@@ -1718,7 +1734,11 @@ void WolfReviveBbox(gentity_t *self) {
 
     // Always use capsule for player
     if (!trap_EntityContactCapsule(mins, maxs, hit)) {
-      // if ( !trap_EntityContact( mins, maxs, hit ) ) {
+      continue;
+    }
+
+    if (hit->client && !ETJump::EntityUtilities::playerIsSolid(
+                           ClientNum(self), ClientNum(hit))) {
       continue;
     }
 

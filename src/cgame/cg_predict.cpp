@@ -5,7 +5,10 @@
 // ahead the client's movement.
 // It also handles local physics interaction, like fragments bouncing off walls
 
+#include <array>
 #include "cg_local.h"
+#include "etj_utilities.h"
+#include "../game/etj_entity_utilities_shared.h"
 
 /*static*/ pmove_t cg_pmove;
 
@@ -58,6 +61,7 @@ void CG_BuildSolidList(void) {
     if (ent->eType == ET_ITEM || ent->eType == ET_PUSH_TRIGGER ||
         ent->eType == ET_VELOCITY_PUSH_TRIGGER ||
         ent->eType == ET_TELEPORT_TRIGGER ||
+        ent->eType == ET_TELEPORT_TRIGGER_CLIENT ||
         ent->eType == ET_CONCUSSIVE_TRIGGER || ent->eType == ET_OID_TRIGGER
 #ifdef VISIBLE_TRIGGERS
         || ent->eType == ET_TRIGGER_MULTIPLE ||
@@ -136,6 +140,11 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
 
     if (ent->number == skipNumber ||
         (!tracePlayers && ent->eType == ET_PLAYER)) {
+      continue;
+    }
+
+    if (ent->number < MAX_CLIENTS &&
+        ETJump::tempTraceIgnoredClients[ent->number]) {
       continue;
     }
 
@@ -424,12 +433,7 @@ static void CG_InterpolatePlayerState(qboolean grabAngles) {
     trap_GetUserCmd(cmdNum, &cmd);
 
     // rain - added tracemask
-    if (cg_ghostPlayers.integer == 1) {
-      PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace,
-                          MASK_PLAYERSOLID & ~CONTENTS_BODY);
-    } else {
-      PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID);
-    }
+    PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID);
   }
 
   // if the next frame is a teleport, we can't lerp to it
@@ -518,7 +522,9 @@ static void CG_TouchTriggerPrediction() {
     }
 
     if (ent->eType == ET_CONSTRUCTIBLE || ent->eType == ET_OID_TRIGGER ||
-        ent->eType == ET_PUSH_TRIGGER || ent->eType == ET_VELOCITY_PUSH_TRIGGER
+        ent->eType == ET_PUSH_TRIGGER ||
+        ent->eType == ET_VELOCITY_PUSH_TRIGGER ||
+        ent->eType == ET_TELEPORT_TRIGGER_CLIENT
 #ifdef VISIBLE_TRIGGERS
         || ent->eType == ET_TRIGGER_MULTIPLE ||
         ent->eType == ET_TRIGGER_FLAGONLY ||
@@ -544,7 +550,8 @@ static void CG_TouchTriggerPrediction() {
 #endif // VISIBLE_TRIGGERS
       {
         if (ent->eType != ET_PUSH_TRIGGER &&
-            ent->eType != ET_VELOCITY_PUSH_TRIGGER) {
+            ent->eType != ET_VELOCITY_PUSH_TRIGGER &&
+            ent->eType != ET_TELEPORT_TRIGGER_CLIENT) {
           // expand the bbox a bit
           VectorSet(mins, mins[0] - 48, mins[1] - 48, mins[2] - 48);
           VectorSet(maxs, maxs[0] + 48, maxs[1] + 48, maxs[2] + 48);
@@ -573,12 +580,33 @@ static void CG_TouchTriggerPrediction() {
         CG_ObjectivePrint(va("You are near %s\n", cs), SMALLCHAR_WIDTH);
       }
 
-      if (ent->eType == ET_PUSH_TRIGGER) {
-        BG_TouchJumpPad(&cg.predictedPlayerState, cg.physicsTime, ent);
+      // trace for non-axial triggers
+      // FIXME: maybe this setup could be used for everything instead of
+      //  doing the BG_BBoxCollision above, as this is more accurate?
+      cmodel = trap_CM_InlineModel(ent->modelindex);
+
+      if (!cmodel) {
+        continue;
       }
 
-      if (ent->eType == ET_VELOCITY_PUSH_TRIGGER) {
-        BG_TouchVelocityJumpPad(&cg.predictedPlayerState, cg.physicsTime, ent);
+      trace_t trace;
+      trap_CM_CapsuleTrace(&trace, cg.predictedPlayerState.origin,
+                           cg.predictedPlayerState.origin, cg_pmove.mins,
+                           cg_pmove.maxs, cmodel, -1);
+
+      if (trace.fraction == 1.0f) {
+        continue;
+      }
+
+      if (ent->eType == ET_TELEPORT_TRIGGER_CLIENT) {
+        entityState_t *playerEs =
+            &cg_entities[cg.snap->ps.clientNum].currentState;
+        ETJump::EntityUtilsShared::teleportPlayer(&cg.predictedPlayerState,
+                                                  playerEs, ent, &cg_pmove.cmd,
+                                                  ent->origin2, ent->angles2);
+      } else {
+        ETJump::EntityUtilsShared::touchPusher(&cg.predictedPlayerState,
+                                               cg.physicsTime, ent);
       }
 
       continue;
@@ -924,25 +952,38 @@ void CG_PredictPlayerState() {
 
   cg_pmove.skill = cgs.clientinfo[cg.snap->ps.clientNum].skill;
 
-  if (cg_ghostPlayers.integer == 1) {
-    cg_pmove.trace = CG_TraceCapsule_NoPlayers;
-  } else {
-    cg_pmove.trace = CG_TraceCapsule;
+  for (int i = 0; i < MAX_CLIENTS; i++) {
+    const int other = cg_entities[i].currentState.number;
+
+    if (cg.snap->ps.clientNum == other) {
+      continue;
+    }
+
+    if (!ETJump::playerIsSolid(cg.snap->ps.clientNum, other) ||
+        ETJump::playerIsNoclipping(other)) {
+      ETJump::tempTraceIgnoreClient(other);
+    }
   }
-  // cg_pmove.trace = CG_Trace;
+
+  cg_pmove.trace = CG_TraceCapsule;
   cg_pmove.pointcontents = CG_PointContents;
-  if (cg_pmove.ps->pm_type == PM_DEAD) {
-    cg_pmove.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
-    cg_pmove.ps->eFlags |= EF_DEAD; // DHM-Nerve added:: EF_DEAD is checked for
-                                    // in Pmove functions, but wasn't being set
-                                    // until after Pmove
-  } else if (cg_pmove.ps->pm_type == PM_SPECTATOR) {
-    // rain - fix the spectator can-move-partway-through-world
-    // weirdness bug by actually setting tracemask when spectating :x
-    cg_pmove.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
-    cg_pmove.trace = CG_TraceCapsule_World;
-  } else {
-    cg_pmove.tracemask = MASK_PLAYERSOLID;
+
+  switch (cg_pmove.ps->pm_type) {
+    case PM_DEAD:
+      cg_pmove.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+      cg_pmove.ps->eFlags |= EF_DEAD;
+      break;
+    case PM_SPECTATOR:
+      cg_pmove.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+      cg_pmove.trace = CG_TraceCapsule_World;
+      break;
+    case PM_NOCLIP:
+      cg_pmove.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+      cg_pmove.trace = CG_TraceCapsule_NoPlayers;
+      break;
+    default:
+      cg_pmove.tracemask = MASK_PLAYERSOLID;
+      break;
   }
 
   if ((cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR) ||
@@ -1294,6 +1335,8 @@ void CG_PredictPlayerState() {
     // add push trigger movement effects
     CG_TouchTriggerPrediction();
   }
+
+  ETJump::resetTempTraceIgnoredClients();
 
   // unlagged - optimized prediction
   //  do a /condump after a few seconds of this

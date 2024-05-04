@@ -69,5 +69,15 @@ bool isPlaying(int clientNum);
 // returns the server snapshot rate (sv_fps)
 int getSvFps();
 
+// checks if we should have collision with the target player
+bool playerIsSolid(int self, int other);
+
+// checks if target client is noclipping
+bool playerIsNoclipping(int clientNum);
+
+void tempTraceIgnoreClient(int clientNum);
+
+void resetTempTraceIgnoredClients();
+
 #endif
 } // namespace ETJump

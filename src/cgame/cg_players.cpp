@@ -1492,8 +1492,8 @@ Returns the Z component of the surface being shadowed
 */
 #define SHADOW_DISTANCE 64
 #define ZOFS 6.0
-#define SHADOW_MIN_DIST 250.0
-#define SHADOW_MAX_DIST 512.0
+#define SHADOW_MIN_DIST 250.0f
+#define SHADOW_MAX_DIST 512.0f
 
 typedef struct {
   const char *tagname;
@@ -1516,8 +1516,8 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
                                 {"tag_torso", 18.f, 96.f, 0.8f, 0},
                                 {nullptr, 0}};
 
-  shadowParts[0].shader =
-      cgs.media.shadowFootShader; // DAJ pulled out of initliization
+  // DAJ pulled out of initialisation
+  shadowParts[0].shader = cgs.media.shadowFootShader;
   shadowParts[1].shader = cgs.media.shadowFootShader;
   shadowParts[2].shader = cgs.media.shadowTorsoShader;
 
@@ -1530,23 +1530,14 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
   // send a trace down from the player to the ground
   VectorCopy(cent->lerpOrigin, end);
   end[2] -= SHADOW_DISTANCE;
-  // Trickjump: Ghost
-  if (cg_ghostPlayers.integer == 1) {
-    trap_CM_BoxTrace(&trace, cent->lerpOrigin, end, NULL, NULL, 0,
-                     MASK_PLAYERSOLID & ~CONTENTS_BODY);
-  } else {
-    trap_CM_BoxTrace(&trace, cent->lerpOrigin, end, NULL, NULL, 0,
-                     MASK_PLAYERSOLID);
-  }
-  // no shadow if too high
-  //%	if ( trace.fraction == 1.0 || trace.fraction == 0.0f ) {
-  //%		return qfalse;
-  //%	}
+
+  trap_CM_BoxTrace(&trace, cent->lerpOrigin, end, nullptr, nullptr, 0,
+                   MASK_PLAYERSOLID);
 
   *shadowPlane = trace.endpos[2] + 1;
 
-  if (cg_shadows.integer != 1) // no mark for stencil or projection shadows
-  {
+  // no mark for stencil or projection shadows
+  if (cg_shadows.integer != 1) {
     return qtrue;
   }
 
@@ -1555,14 +1546,9 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
     return qfalse;
   }
 
-  // fade the shadow out with height
-  //%	alpha = 1.0 - trace.fraction;
-
   // add the mark as a temporary, so it goes directly to the renderer
   // without taking a spot in the cg_marks array
-  dist =
-      VectorDistance(cent->lerpOrigin,
-                     cg.refdef_current->vieworg); //%	cg.snap->ps.origin );
+  dist = VectorDistance(cent->lerpOrigin, cg.refdef_current->vieworg);
   distFade = 1.0f - (1.0f - opacity);
   if (!(cent->currentState.eFlags & EF_ZOOMING) && (dist > SHADOW_MIN_DIST)) {
     if (dist > SHADOW_MAX_DIST) {
@@ -1592,21 +1578,16 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
     // into sloped geometry as much
     origin[2] += 18.0f;
 
-    //%	alpha *= distFade;
-
-    // ydnar: decal remix
-    //%	CG_ImpactMark( cgs.media.shadowTorsoShader,
-    // trace.endpos,
-    // trace.plane.normal, %		0, alpha,alpha,alpha,1, qfalse,
-    // 16, qtrue, -1 );
     CG_ImpactMark(cgs.media.shadowTorsoShader, origin, projection, 18.0f,
                   cent->lerpAngles[YAW], distFade, distFade, distFade, distFade,
                   -1);
+
     return qtrue;
   }
 
-  if (dist < SHADOW_MAX_DIST) // show more detail
-  {                           // now add shadows for the various body parts
+  // show more detail
+  if (dist < SHADOW_MAX_DIST) {
+    // now add shadows for the various body parts
     for (tagIndex = 0; shadowParts[tagIndex].tagname; tagIndex++) {
       // grab each tag with this name
       for (subIndex = 0;
@@ -1619,42 +1600,12 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
           origin[2] = *shadowPlane;
         }
 
-        // ydnar: add a bit of height so foot
-        // shadows don't clip into sloped
-        // geometry as much
+        // ydnar: add a bit of height so foot shadows don't clip
+        // into sloped geometry as much
         origin[2] += 5.0f;
-
-#if 0
-				alpha = 1.0 - ((origin[2] - (*shadowPlane + ZOFS)) / shadowParts[tagIndex].maxdist);
-				if (alpha < 0)
-				{
-					continue;
-				}
-				if (alpha > shadowParts[tagIndex].maxalpha)
-				{
-					alpha = shadowParts[tagIndex].maxalpha;
-				}
-				alpha    *= (1.0 - distFade);
-				origin[2] = *shadowPlane;
-#endif
 
         AxisToAngles(axis, angles);
 
-        // ydnar: decal remix
-        //%	CG_ImpactMark(
-        // shadowParts[tagIndex].shader, origin,
-        // trace.plane.normal, %
-        // angles[YAW]/*cent->pe.legs.yawAngle*/,
-        // alpha,alpha,alpha,1, qfalse,
-        // shadowParts[tagIndex].size, qtrue, -1
-        // );
-
-        //%	CG_ImpactMark( shadowParts[
-        // tagIndex ].shader, origin, up, %
-        // cent->lerpAngles[ YAW
-        //], 1.0f, 1.0f, 1.0f, 1.0f,
-        // qfalse, shadowParts[ tagIndex ].size,
-        // qtrue, -1 );
         CG_ImpactMark(shadowParts[tagIndex].shader, origin, projection,
                       shadowParts[tagIndex].size, angles[YAW], distFade,
                       distFade, distFade, distFade, -1);
@@ -1956,9 +1907,8 @@ void CG_Player(centity_t *cent) {
     return;
   }
 
-  // Only hide if ghostPlayers is on
-  if (cg_ghostPlayers.integer == 1) {
-
+  // Only hide if player is nonsolid
+  if (!ETJump::playerIsSolid(cg.snap->ps.clientNum, clientNum)) {
     vec_t playerDist = Distance(cgsnap->lerpOrigin, cent->lerpOrigin);
     int transZone = etj_hideDistance.integer + etj_hideFadeRange.integer;
 

@@ -133,7 +133,7 @@ void CG_BloodTrail(localEntity_t *le) {
   static vec3_t col = {1, 1, 1};
 #endif
 
-  if (!cg_blood.integer) {
+  if (!cg_showblood.integer) {
     return;
   }
 

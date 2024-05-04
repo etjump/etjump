@@ -24,15 +24,12 @@
 
 #pragma once
 
-#include "g_local.h"
-
 namespace ETJump {
-class EntityUtilities {
-  static void drawRailBox(gentity_t *ent, const std::vector<float> &color);
+class TriggerTeleportClient {
+  static void think(gentity_t *self);
+  static void touch(gentity_t *self, gentity_t *other);
 
 public:
-  static bool isPlayer(gentity_t *ent);
-  static void checkForRailBox(gentity_t *ent);
-  static bool playerIsSolid(int self, int other);
+  static void spawn(gentity_t *self);
 };
 } // namespace ETJump

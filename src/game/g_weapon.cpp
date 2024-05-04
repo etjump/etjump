@@ -10,6 +10,7 @@
 #include "g_local.h"
 #include "etj_printer.h"
 #include "etj_utilities.h"
+#include "etj_entity_utilities.h"
 
 vec3_t forward, right, up;
 vec3_t muzzleEffect;
@@ -3364,6 +3365,28 @@ void Bullet_Fire(gentity_t *ent, float spread, int damage,
   G_HistoricalTraceEnd(ent);
 }
 
+namespace ETJump {
+void bulletTrace(gentity_t *source, gentity_t *attacker, trace_t *tr,
+                 vec3_t start, vec3_t end) {
+  G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number,
+          MASK_SHOT);
+
+  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr->entityNum < MAX_CLIENTS &&
+         !ETJump::EntityUtilities::playerIsSolid(attacker->client->ps.clientNum,
+                                                 tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number,
+            MASK_SHOT);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
+
 /*
 ==============
 Bullet_Fire_Extended
@@ -3393,8 +3416,7 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
     waslinked = qtrue;
   }
 
-  G_Trace(source, &tr, start, nullptr, nullptr, end, source->s.number,
-          MASK_SOLID);
+  ETJump::bulletTrace(source, attacker, &tr, start, end);
 
   // bani - prevent shooting ourselves in the head when prone,
   // firing through a breakable
@@ -3986,14 +4008,12 @@ gentity_t *weapon_mortar_fire(gentity_t *ent, int grenType) {
 
   VectorCopy(ent->client->ps.viewangles, angles);
   angles[PITCH] -= 60.f;
-  /*	if( angles[PITCH] < -89.f )
-          angles[PITCH] = -89.f;*/
-  AngleVectors(angles, forward, NULL, NULL);
+  AngleVectors(angles, forward, nullptr, nullptr);
 
   VectorCopy(muzzleEffect, launchPos);
 
-  // check for valid start spot (so you don't throw through or get stuck
-  // in a wall)
+  // check for valid start spot
+  // (so you don't throw through or get stuck in a wall)
   VectorMA(launchPos, 32, forward, testPos);
 
   forward[0] *= 3000 * 1.1f;
@@ -4001,10 +4021,10 @@ gentity_t *weapon_mortar_fire(gentity_t *ent, int grenType) {
   forward[2] *= 1500 * 1.1f;
 
   trap_Trace(&tr, testPos, tv(-4.f, -4.f, 0.f), tv(4.f, 4.f, 6.f), launchPos,
-             ent->s.number, CONTENTS_SOLID | CONTENTS_MISSILECLIP);
+             ent->s.number, MASK_MISSILESHOT);
 
-  if (tr.fraction < 1) // oops, bad launch spot
-  {
+  // oops, bad launch spot
+  if (tr.fraction < 1) {
     VectorCopy(tr.endpos, launchPos);
     SnapVectorTowards(launchPos, testPos);
   }

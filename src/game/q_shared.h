@@ -1661,6 +1661,8 @@ typedef enum {
 
   ET_VELOCITY_PUSH_TRIGGER, // ETJump
 
+  ET_TELEPORT_TRIGGER_CLIENT, // client side predicted teleport
+
   ET_EVENTS, // any of the EV_* events can be added freestanding
              // by setting eType to ET_EVENTS + eventNum
              // this avoids having to set eFlags and eventNum
@@ -1774,7 +1776,8 @@ typedef struct entityState_s {
                  // ANIM_TOGGLEBIT	//----(SA) removed (weap anims
                  // will be client-side only)
 
-  int density; // for particle effects
+  // for particle effects, PlayerDensityFlags for players in entityState
+  int density;
 
   int dmgFlags; // to pass along additional information for damage
                 // effects for players/ Also used for cursorhints for

@@ -104,6 +104,7 @@ add_library(cgame MODULE
 	"../game/bg_tracemap.cpp"
 	"../game/q_math.cpp"
 	"../game/q_shared.cpp"
+	"../game/etj_entity_utilities_shared.cpp"
 	"../game/etj_file.cpp"
 	"../game/etj_filesystem.cpp"
 	"../game/etj_string_utilities.cpp"

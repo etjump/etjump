@@ -24,15 +24,26 @@
 
 #pragma once
 
-#include "g_local.h"
+#ifdef CGAMEDLL
+  #include "../cgame/cg_local.h"
+#else
+  #include "g_local.h"
+#endif
 
 namespace ETJump {
-class EntityUtilities {
-  static void drawRailBox(gentity_t *ent, const std::vector<float> &color);
-
+class EntityUtilsShared {
 public:
-  static bool isPlayer(gentity_t *ent);
-  static void checkForRailBox(gentity_t *ent);
-  static bool playerIsSolid(int self, int other);
+  static void touchPusher(playerState_t *ps, int time,
+                          const entityState_t *pusher);
+
+  static void setPushVelocity(const playerState_t *ps, const vec3_t origin2,
+                              const int &spawnflags, vec3_t pushVel);
+
+  static void teleportPlayer(playerState_t *ps, entityState_t *player,
+                             entityState_t *teleporter, usercmd_t *cmd,
+                             const vec3_t origin, vec3_t angles);
+
+  static void setViewAngles(playerState_t *ps, entityState_t *es,
+                            usercmd_t *cmd, const vec3_t angle);
 };
 } // namespace ETJump

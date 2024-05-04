@@ -164,7 +164,7 @@ vmCvar_t cg_buildScript;
 vmCvar_t cg_coronafardist;
 vmCvar_t cg_coronas;
 vmCvar_t cg_paused;
-vmCvar_t cg_blood;
+vmCvar_t cg_showblood;
 vmCvar_t cg_deferPlayers;
 vmCvar_t cg_drawTeamOverlay;
 vmCvar_t cg_enableBreath;
@@ -773,7 +773,7 @@ cvarTable_t cvarTable[] = {
     {&cg_buildScript, "com_buildScript", "0",
      0}, // force loading of all possible data amd error on failures
     {&cg_paused, "cl_paused", "0", CVAR_ROM},
-    {&cg_blood, "cg_showblood", "1", CVAR_ARCHIVE},
+    {&cg_showblood, "cg_showblood", "1", CVAR_ARCHIVE},
     {&cg_wolfparticles, "cg_wolfparticles", "1", CVAR_ARCHIVE},
     {&cg_gameType, "g_gametype", "0", 0}, // communicated by systeminfo
     {&cg_norender, "cg_norender", "0",

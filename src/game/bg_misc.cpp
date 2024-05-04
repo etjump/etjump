@@ -4007,6 +4007,16 @@ void BG_SetupMountedGunStatus(playerState_t *ps) {
   }
 }
 
+namespace ETJump {
+void setDensityBits(playerState_t *ps, entityState_t *s) {
+  s->density = 0;
+
+  if (ps->pm_type == PM_NOCLIP) {
+    s->density |= static_cast<int>(PlayerDensityFlags::Noclip);
+  }
+}
+} // namespace ETJump
+
 /*
 ========================
 BG_PlayerStateToEntityState
@@ -4112,6 +4122,8 @@ void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s,
   s->nextWeapon = ps->nextWeapon; // Ridah, s->loopSound = ps->loopSound;
   s->teamNum = ps->teamNum;
   s->aiState = ps->aiState; // xkan, 1/10/2003
+
+  ETJump::setDensityBits(ps, s);
 }
 
 /*
@@ -4218,6 +4230,8 @@ void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
   s->nextWeapon = ps->nextWeapon; // Ridah
   s->teamNum = ps->teamNum;
   s->aiState = ps->aiState; // xkan, 1/10/2003
+
+  ETJump::setDensityBits(ps, s);
 }
 
 // Gordon: some weapons are duplicated for code puposes.... just want to treat
@@ -5485,111 +5499,6 @@ void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB) {
   HSLtoRGB(temp_RGB, out_RGB);
 
   return;
-}
-
-/*
-================
-BG_TouchJumpPad
-================
-*/
-void BG_TouchJumpPad(playerState_t *ps, int time, entityState_t *jumppad) {
-  float s;
-  vec3_t dir;
-
-  // Disable for specs
-  if (ps->pm_type != PM_NORMAL) {
-    return;
-  }
-
-  if (ps->powerups[PW_PUSHERPREDICT] + jumppad->frame > time) {
-    return;
-  }
-
-  ps->powerups[PW_PUSHERPREDICT] = time;
-
-  if (jumppad->constantLight & 0xff) {
-    VectorNormalize2(jumppad->origin2, dir);
-    s = DotProduct(ps->velocity, dir);
-    if (s < 500) {
-      // don't play the event sound again if we are in a
-      // fat trigger
-      BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND,
-                                          jumppad->constantLight & 0xff, ps);
-    }
-  }
-
-  // Launch player
-  VectorCopy(jumppad->origin2, ps->velocity);
-}
-
-/*
-================
-BG_GetPushVelocity
-Calculate push velocity for additive pushers
-================
-*/
-void BG_GetPushVelocity(playerState_t *ps, vec3_t origin2, int spawnflags,
-                        vec3_t outVelocity) {
-  VectorCopy(ps->velocity, outVelocity);
-
-  // ADD_XY
-  if (spawnflags & 2) {
-    outVelocity[0] += origin2[0];
-    outVelocity[1] += origin2[1];
-    outVelocity[2] = origin2[2];
-  }
-
-  // ADD_Z
-  if (spawnflags & 4) {
-    outVelocity[0] = origin2[0];
-    outVelocity[1] = origin2[1];
-    outVelocity[2] += origin2[2];
-  }
-
-  if ((spawnflags & 2) && (spawnflags & 4)) {
-    VectorAdd(origin2, ps->velocity, outVelocity);
-  }
-}
-
-/*
-================
-BG_TouchVelocityJumpPad
-Additive pusher, adding horizontal and/or vertical speed
-to players current speed rather than setting it.
-================
-*/
-void BG_TouchVelocityJumpPad(playerState_t *ps, int time,
-                             entityState_t *jumppad) {
-  float s;
-  vec3_t dir;
-  vec3_t outVelocity;
-
-  // Disable for specs
-  if (ps->pm_type != PM_NORMAL) {
-    return;
-  }
-
-  if (ps->powerups[PW_PUSHERPREDICT] + jumppad->frame > time) {
-    return;
-  }
-
-  ps->powerups[PW_PUSHERPREDICT] = time;
-
-  if (jumppad->constantLight & 0xff) {
-    VectorNormalize2(jumppad->origin2, dir);
-    s = DotProduct(ps->velocity, dir);
-    if (s < 500) {
-      // don't play the event sound again if we are in a
-      // fat trigger
-      BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND,
-                                          jumppad->constantLight & 0xff, ps);
-    }
-  }
-
-  // Launch player
-  int spawnflags = (jumppad->constantLight >> 8) & 0xff;
-  BG_GetPushVelocity(ps, jumppad->origin2, spawnflags, outVelocity);
-  VectorCopy(outVelocity, ps->velocity);
 }
 
 /*

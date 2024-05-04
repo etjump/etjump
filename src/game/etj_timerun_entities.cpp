@@ -168,6 +168,16 @@ bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
       return false;
     }
 
+    if (client->ftNoGhostThisLife &&
+        !(self->spawnflags &
+          static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
+      Printer::SendCenterMessage(
+          *clientNum,
+          "^3WARNING: ^7Timerun was not started. ^3fireteam noghost ^7enabled "
+          "this life & run does not allow noghost, ^3/kill ^7required!");
+      return false;
+    }
+
     if (client->pmoveOffThisLife &&
         (!self->spawnflags ||
          self->spawnflags &

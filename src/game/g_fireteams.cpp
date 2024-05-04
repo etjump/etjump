@@ -1,6 +1,7 @@
 #include "g_local.h"
 #include "etj_numeric_utilities.h"
 #include "etj_printer.h"
+#include "etj_string_utilities.h"
 
 // Gordon
 // What we need....
@@ -103,9 +104,9 @@ void G_UpdateFireteamConfigString(fireteamData_t *ft) {
       }
     }
 
-    Com_sprintf(buffer, 128, "\\id\\%i\\l\\%i\\sl\\%i\\c\\%.8x%.8x",
-                ft->ident - 1, ft->joinOrder[0], ft->saveLimit, clnts[1],
-                clnts[0]);
+    Com_sprintf(buffer, 128, R"(\id\%i\l\%i\sl\%i\ng\%i\c\%.8x%.8x)",
+                ft->ident - 1, ft->joinOrder[0], ft->saveLimit, ft->noGhost,
+                clnts[1], clnts[0]);
     // G_Printf(va("%s\n", buffer));
   }
 
@@ -242,6 +243,7 @@ void G_RegisterFireteam(int entityNum) {
   ft->ident = ident;
   ft->saveLimit = FT_SAVELIMIT_NOT_SET;
   ft->teamJumpMode = qfalse;
+  ft->noGhost = false;
 
   if (g_autoFireteams.integer) {
     ft->priv = qfalse;
@@ -717,7 +719,8 @@ void G_FireteamRace(int clientNum) {
   //	}
 }
 
-void G_SetFireTeamSaveLimit(fireteamData_t *ft, int limit) {
+namespace ETJump {
+static void setSaveLimitForFTMembers(fireteamData_t *ft, int limit) {
   gentity_t *ent;
 
   for (int i = 0; i < level.numConnectedClients; i++) {
@@ -733,26 +736,63 @@ void G_SetFireTeamSaveLimit(fireteamData_t *ft, int limit) {
   }
 }
 
-void G_SetFireTeamRules(int clientNum) {
+static void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
+  const std::string &msg =
+      ETJump::stringFormat("^gFireteam rules: ^3noghost ^ghas been ^3%s.",
+                           noGhost ? "enabled" : "disabled");
+
+  ft->noGhost = noGhost;
+
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    if (ft->joinOrder[i] == -1) {
+      continue;
+    }
+
+    gentity_t *ent = g_entities + ft->joinOrder[i];
+
+    if (noGhost) {
+      ent->client->ftNoGhostThisLife = true;
+    }
+
+    Printer::SendPopupMessage(ClientNum(ent), msg);
+  }
+}
+
+static bool fireTeamMemberIsTimerunning(fireteamData_t *ft) {
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    if (ft->joinOrder[i] == -1) {
+      continue;
+    }
+
+    gentity_t *ent = g_entities + ft->joinOrder[i];
+
+    if (ent->client->sess.timerunActive &&
+        !(ent->client->sess.runSpawnflags &
+          static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+static void setFireTeamRules(int clientNum) {
   char arg1[MAX_TOKEN_CHARS];
   char val[MAX_TOKEN_CHARS];
   fireteamData_t *ft;
 
   if (!G_IsOnFireteam(clientNum, &ft)) {
-    G_ClientPrintAndReturn(clientNum, "You are not on a fireteam");
+    G_ClientPrintAndReturn(clientNum, "You are not on a fireteam")
   }
 
   if (!G_IsFireteamLeader(clientNum, &ft)) {
-    G_ClientPrintAndReturn(clientNum, "You are not the leader.");
+    G_ClientPrintAndReturn(clientNum, "You are not the leader.")
   }
 
-  if (trap_Argc() < 3) {
-    G_ClientPrintAndReturn(clientNum, "usage: fireteam rules <savelimit|reset> "
-                                      "<[optional] value>");
-  }
-
-  if (trap_Argc() == 3) {
-    G_ClientPrintAndReturn(clientNum, "rules: savelimit.");
+  if (trap_Argc() < 4) {
+    G_ClientPrintAndReturn(clientNum,
+                           "usage: fireteam rules <rule> <value>\n\nAvailable "
+                           "rules:\nsavelimit <value|reset>\nnoghost <on|off>")
   }
 
   trap_Argv(2, arg1, sizeof(arg1));
@@ -761,26 +801,78 @@ void G_SetFireTeamRules(int clientNum) {
     if (level.limitedSaves > 0) {
       G_ClientPrintAndReturn(clientNum,
                              "fireteam: unable to set savelimit - save is "
-                             "limited globally.");
+                             "limited globally.")
     }
 
     trap_Argv(3, val, sizeof(val));
 
     if (!Q_stricmp(val, "reset")) {
-      G_SetFireTeamSaveLimit(ft, ft->saveLimit);
+      setSaveLimitForFTMembers(ft, ft->saveLimit);
       return;
     }
 
-    int limit = Numeric::clamp(Q_atoi(val), -1, 100);
+    const int limit = Numeric::clamp(Q_atoi(val), -1, 100);
     ft->saveLimit = limit;
-    G_SetFireTeamSaveLimit(ft, limit);
+    setSaveLimitForFTMembers(ft, limit);
 
     G_UpdateFireteamConfigString(ft);
     return;
   }
 
-  G_ClientPrintAndReturn(clientNum, "fireteam: failed to set rules.");
+  if (!Q_stricmp(arg1, "noghost")) {
+    if (g_ghostPlayers.integer != 1) {
+      Printer::SendPopupMessage(
+          clientNum,
+          stringFormat("fireteam: player ghosting is disabled by the %s.",
+                       level.noGhost ? "map" : "server"));
+      return;
+    }
+
+    // disable some checks if cheats are enabled
+    if (!g_cheats.integer) {
+      if (level.noFTNoGhost) {
+        G_ClientPrintAndReturn(
+            clientNum, "fireteam: noghost cannot be enabled on this map.")
+      }
+
+      // ghosting cannot be enabled if someone is already timerunning unless
+      // the run allows it, so we need to only check for enabling here
+      if (!ft->noGhost && fireTeamMemberIsTimerunning(ft)) {
+        G_ClientPrintAndReturn(clientNum,
+                               "fireteam: a member of your fireteam is "
+                               "timerunning, cannot enable noghost.")
+      }
+    }
+
+    trap_Argv(3, val, sizeof(val));
+
+    if (!Q_stricmp(val, "on") || !Q_stricmp(val, "1")) {
+      if (ft->noGhost) {
+        G_ClientPrintAndReturn(clientNum,
+                               "fireteam: noghost is already enabled.")
+      }
+
+      setFireTeamGhosting(ft, true);
+    } else if (!Q_stricmp(val, "off") || !Q_stricmp(val, "0")) {
+      if (!ft->noGhost) {
+        G_ClientPrintAndReturn(clientNum,
+                               "fireteam: noghost is already disabled.")
+      }
+
+      setFireTeamGhosting(ft, false);
+    } else {
+      G_ClientPrintAndReturn(clientNum,
+                             "fireteam: invalid noghost value.\nValid values "
+                             "are: <on|1> and <off|0>")
+    }
+
+    G_UpdateFireteamConfigString(ft);
+    return;
+  }
+
+  G_ClientPrintAndReturn(clientNum, "fireteam: failed to set rules.")
 }
+} // namespace ETJump
 
 // Checks if given command buffer matches a valid client on the server
 // Returns true if given argument matches a valid client
@@ -902,7 +994,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
   // Challenge group.
   // Only leader
   else if (!Q_stricmp(command, "rules")) {
-    G_SetFireTeamRules(selfNum);
+    ETJump::setFireTeamRules(selfNum);
   } else if (!Q_stricmp(command, "tj")) {
     G_TeamJumpMode(selfNum);
   } else if (!Q_stricmp(command, "race")) {

@@ -274,7 +274,7 @@ void CG_Bleed(vec3_t origin, int entityNum) {
 #define BLOOD_SPURT_COUNT 4
   int i, j;
 
-  if (!cg_blood.integer) {
+  if (!cg_showblood.integer) {
     return;
   }
 
@@ -343,7 +343,7 @@ void CG_LaunchGib(centity_t *cent, vec3_t origin, vec3_t angles,
   refEntity_t *re;
   int i;
 
-  if (!cg_blood.integer) {
+  if (!cg_showblood.integer) {
     return;
   }
 
@@ -579,7 +579,7 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
       // tags in the torso
       "tag_chest", "tag_armright", "tag_armleft", "tag_head", nullptr};
 
-  if (cg_blood.integer) {
+  if (cg_showblood.integer) {
     // Rafael
     for (i = 0; i < MAXJUNCTIONS; i++) newjunction[i] = qfalse;
 
