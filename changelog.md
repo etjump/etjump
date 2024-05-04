@@ -1,3 +1,43 @@
+# ETJump 3.3.0
+
+* added `portalsize` key to `func_portaltarget` to allow scaling the size of the portal fired onto it (up to `512u`) [#1324](https://github.com/etjump/etjump/pull/1324)
+* fixed negative values for `give health` not killing players correctly and leaving them in a state where the player was not setup correctly to be dead [#1328](https://github.com/etjump/etjump/pull/1328)
+* lagometer improvements [#1325](https://github.com/etjump/etjump/pull/1325) [#1331](https://github.com/etjump/etjump/pull/1331)
+  * added `etj_lagometerAlpha` to control transparency of lagometer background
+  * added `etj_lagometerShader` to toggle displaying the background image or solid color
+  * demo playback will now display snapshot delta values as ping in demo playback (ETPro/legacy style)
+  * added client/server snapshot rate display to lagometer
+* fixes server side framerate dependencies, the mod should now be fully compatible with higher `sv_fps` values [#1327](https://github.com/etjump/etjump/pull/1327) [#1330](https://github.com/etjump/etjump/pull/1330)
+  * `wait` key in mapscripts simulates `sv_fps 20` timings
+  * disguise stealing speed is normalized to `sv_fps 20`
+  * flamethrower firing range is normalized to `sv_fps 20`
+  * player pushing when players are stuck in each other is normalized to `sv_fps 20`
+  * projectiles entering skyboxes no longer get stuck in skyboxes due to higher trace frequency
+* added support for `private` keyword to `playsound` script actions to allow playing sound only to activator [#1314](https://github.com/etjump/etjump/pull/1314)
+* fixed fireteam health only displaying correctly for fireteam members that are on the same team as you are [#1320](https://github.com/etjump/etjump/pull/1320)
+* improvements to token system [#1334](https://github.com/etjump/etjump/pull/1334)
+  * maximum tokens per difficulty increased to `32`
+  * creating a token will now place it on ground level as opposed to player origin
+  * slightly reduced the size of the token bbox to better match the visual size
+  * tokens can no longer be collected while noclipping
+* lean angles are now interpolated on spec/demo playback to smooth out viewangle transitions [#1337](https://github.com/etjump/etjump/pull/1337)
+* added chat replay system [#1335](https://github.com/etjump/etjump/pull/1335)
+  * server replays 10 latest global chat messages to clients after connecting/map change/`vid_restart`
+    * chats are stored on server in `chatreplay.json`
+    * timestamps or chat flags are not preserved from original messages
+* fixed potential crash on host game menu when over 500 maps were installed [#1343](https://github.com/etjump/etjump/pull/1343)
+* added `trigger_teleport_client` entity to enable client side predicted teleports [#1332](https://github.com/etjump/etjump/pull/1332)
+  * supports same keys/spawnflags as other teleport entities, except `spawnflags 4/8`
+  * no multi-target teleport support (multiple destinations with random target picking)
+* fixed vote start/end resetting event handler, which caused for example limbo menu to always close when a vote was called/ended [#1346](https://github.com/etjump/etjump/pull/1346)
+* added ability to toggle player collision between fireteam members [#1333](https://github.com/etjump/etjump/pull/1333)
+  * `fireteam rules noghost <1|on>/<0/off>` to enable/disable, also available in fireteam rule menu
+  * projectiles and bullets now collide with solid players
+  * added worldspawn key `noftnoghost` to disallow toggling fireteam collision in a map
+  * added `spawnflags 256` to `target/trigger_starttimer` to allow toggling fireteam collission during a timerun
+    * any timeruns lacking this spawnflag will not start if fireteam collision is enabled
+    * if a fireteam member is currently timerunning in a run that does not allow collision, fireteam collision cannot be turned on
+
 # ETJump 3.2.2
 
 * fixed CGaz 2 velocity direction lines flickering on spec/demo playback when playing at > 125FPS [#1307](https://github.com/etjump/etjump/pull/1307)
