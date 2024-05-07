@@ -4726,10 +4726,6 @@ void CG_DrawCoronas() {
     return;
   }
 
-  if (!cg_coronas.integer || !cg_coronafardist.integer) {
-    return;
-  }
-
   for (int i = 0; i < cg.numCoronas; i++) {
     centity_t *corona = &cgs.coronas[i];
 
