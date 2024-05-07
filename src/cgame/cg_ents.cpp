@@ -1446,6 +1446,12 @@ void CG_Corona(centity_t *cent) {
   float dot, dist;
   vec3_t dir;
 
+  // must be here instead of 'CG_DrawCoronas' so server side coronas
+  // can be turned off, as they are processed as packet entities
+  if (!cg_coronas.integer || cg_coronafardist.integer <= 0) {
+    return;
+  }
+
   dli = cent->currentState.dl_intensity;
   r = static_cast<float>(dli & 255);
   g = static_cast<float>((dli >> 8) & 255);
