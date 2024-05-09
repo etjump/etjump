@@ -45,6 +45,9 @@ add_subdirectory(deps/sqlite)
 add_subdirectory(deps/sqlite_modern_cpp)
 add_subdirectory(deps/gtest)
 add_subdirectory(deps/uuid4)
+
+# fmt 10.0.0 changed default of FMT_INSTALL from OFF to ON
+set(FMT_INSTALL OFF)
 add_subdirectory(deps/fmt EXCLUDE_FROM_ALL)
 
 target_link_libraries(libjson PRIVATE cxx_compiler_opts_w0)
