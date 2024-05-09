@@ -900,7 +900,7 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
               _repository->getSeasonsForName(params.season.value(), false);
 
           if (matchingSeasons.empty()) {
-            message = stringFormat("No matching season for name `%s`",
+            message = stringFormat("No matching season for name `%s`\n",
                                    params.season.value());
           } else {
             for (const auto &s : matchingSeasons) {

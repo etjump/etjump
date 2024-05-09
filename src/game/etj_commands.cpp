@@ -181,13 +181,13 @@ bool Rankings(gentity_t *ent, Arguments argv) {
           "overall as the default.\n\n    /rankings --season <season> --page "
           "<page> --page-size <page size>\n\n    Has a shorthand format of:\n  "
           "  /rankings <season>")
-          .addOption("season", "Name of the season to list rankings for",
+          .addOption("season", "s", "Name of the season to list rankings for",
                      ETJump::CommandParser::OptionDefinition::Type::MultiToken,
                      false)
-          .addOption("page", "Which page of rankings to show",
+          .addOption("page", "p", "Which page of rankings to show",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
                      false)
-          .addOption("page-size", "How many rankings to show per page",
+          .addOption("page-size", "ps", "How many rankings to show per page",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
                      false),
       &args);
@@ -252,25 +252,25 @@ bool Records(gentity_t *ent, Arguments argv) {
           "--map <map name> --run <run name>\n\n    Has a shorthand format "
           "of:\n    /records <run name>\n    /records <map name> <run name>\n  "
           "  /records <season name> <map name> <run name>")
-          .addOption("season",
+          .addOption("season", "s",
                      "Name of the season to print the records for. Default is "
                      "the overall season.",
                      ETJump::CommandParser::OptionDefinition::Type::MultiToken,
                      false)
-          .addOption("map",
+          .addOption("map", "m",
                      "Name of the map to print the records for. Default is the "
                      "current map.",
                      ETJump::CommandParser::OptionDefinition::Type::MultiToken,
                      false)
           .addOption(
-              "run",
+              "run", "r",
               "Name of the run to print the records for. Default will print "
               "top 3 records for all runs on specified map and your record.",
               ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
-          .addOption("page", "Which page to display starting at 1",
+          .addOption("page", "p", "Which page to display starting at 1",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
                      false)
-          .addOption("page-size",
+          .addOption("page-size", "ps",
                      "How many records to show on a single page. Max page size "
                      "is 100 if a run is specified, otherwise 10.",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
@@ -359,10 +359,10 @@ bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
           "    Has a shorthand format of:\n"
           "    /loadcheckpoints <run name> <rank>\n"
           "    /loadcheckpoints <run name>")
-          .addOption("run", "Name of the run to load the records from.",
+          .addOption("run", "r", "Name of the run to load the records from.",
                      ETJump::CommandParser::OptionDefinition::Type::Token, true,
                      0)
-          .addOption("rank",
+          .addOption("rank", "rk",
                      "Rank to load checkpoints from. Defaults to 1. Value -1 "
                      "clears loaded checkpoints.",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
@@ -2123,14 +2123,14 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
       ETJump::CommandParser::CommandDefinition::create(
           "add-season", "Adds a new timerun season\n    !add-season --name "
                         "<name> --start-date <2000-01-01>")
-          .addOption("name", "Name of the season to add",
+          .addOption("name", "n", "Name of the season to add",
                      ETJump::CommandParser::OptionDefinition::Type::MultiToken,
                      true)
-          .addOption("start-date",
+          .addOption("start-date", "sd",
                      "Start date for the timerun season in YYYY-MM-DD format "
                      "(e.g. 2000-01-01)",
                      ETJump::CommandParser::OptionDefinition::Type::Date, true)
-          .addOption("end-date-exclusive",
+          .addOption("end-date-exclusive", "ed",
                      "End date for the timerun season in YYYY-MM-DD format "
                      "(e.g. 2000-01-01)",
                      ETJump::CommandParser::OptionDefinition::Type::Date,
@@ -2178,14 +2178,14 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
   auto def = std::move(
       ETJump::CommandParser::CommandDefinition::create(
           "edit-season", "Edit an existing timerun season")
-          .addOption("name", "Name of the season to edit",
+          .addOption("name", "n", "Name of the season to edit",
                      ETJump::CommandParser::OptionDefinition::Type::MultiToken,
                      true)
-          .addOption("start-date",
+          .addOption("start-date", "sd",
                      "Start date for the timerun season in YYYY-MM-DD format "
                      "(e.g. 2000-01-01)",
                      ETJump::CommandParser::OptionDefinition::Type::Date, false)
-          .addOption("end-date",
+          .addOption("end-date", "ed",
                      "End date for the timerun season in YYYY-MM-DD format "
                      "(e.g. 2000-01-01)",
                      ETJump::CommandParser::OptionDefinition::Type::Date,
@@ -2224,7 +2224,7 @@ bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
       ETJump::CommandParser::CommandDefinition::create(
           "delete-season", "Delete a season. This will delete all the "
                            "records within the season.")
-          .addOption("name", "Exact name of the season to delete",
+          .addOption("name", "n", "Exact name of the season to delete",
                      ETJump::CommandParser::OptionDefinition::Type::MultiToken,
                      true));
 
@@ -2259,14 +2259,14 @@ bool addCustomVote(gentity_t *ent, Arguments argv) {
   const auto def = std::move(
       ETJump::CommandParser::CommandDefinition::create(
           "add-customvote", "Creates a new custom map vote list.")
-          .addOption("name", "Name of the custom vote list",
+          .addOption("name", "n", "Name of the custom vote list",
                      ETJump::CommandParser::OptionDefinition::Type::Token, true)
-          .addOption("full-name", "Full name, displayed in the callvote text.",
-                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
-                     true)
-          .addOption("maps", "Maps to include in the list, space delimited.",
-                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
-                     true));
+          .addOption(
+              "full-name", "fn", "Full name, displayed in the callvote text.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, true)
+          .addOption(
+              "maps", "m", "Maps to include in the list, space delimited.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, true));
 
   const auto optCommand =
       ETJump::getOptCommand("add-customvote", clientNum, def, argv);
@@ -2291,7 +2291,7 @@ bool deleteCustomVote(gentity_t *ent, Arguments argv) {
   auto def = std::move(
       ETJump::CommandParser::CommandDefinition::create(
           "delete-customvote", "Deletes a custom map vote list.")
-          .addOption("name", "Name of the list to delete.",
+          .addOption("name", "n", "Name of the list to delete.",
                      ETJump::CommandParser::OptionDefinition::Type::Token,
                      true));
 
@@ -2315,18 +2315,18 @@ bool editCustomVote(gentity_t *ent, Arguments argv) {
   auto def = std::move(
       ETJump::CommandParser::CommandDefinition::create(
           "edit-customvote", "Edits a custom map vote list.")
-          .addOption("list", "Name of the list to edit.",
+          .addOption("list", "l", "Name of the list to edit.",
                      ETJump::CommandParser::OptionDefinition::Type::Token, true)
-          .addOption("name", "Name of the custom vote list.",
+          .addOption("name", "n", "Name of the custom vote list.",
                      ETJump::CommandParser::OptionDefinition::Type::Token,
                      false)
-          .addOption("full-name", "Full name, displayed in the callvote text.",
-                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
-                     false)
-          .addOption("add-maps", "Maps to add to the list, space delimited.",
-                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
-                     false)
-          .addOption("remove-maps",
+          .addOption(
+              "full-name", "fn", "Full name, displayed in the callvote text.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption(
+              "add-maps", "am", "Maps to add to the list, space delimited.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("remove-maps", "rm",
                      "Maps to remove from the list, space delimited.",
                      ETJump::CommandParser::OptionDefinition::Type::MultiToken,
                      false));

@@ -35,6 +35,14 @@ ETJump::CommandParser::getOptionOrNull() {
     if (_def.options.count(optionName) > 0) {
       return &_def.options[optionName];
     }
+  } else if (StringUtil::startsWith(*_current, "-")) {
+    const auto optionShortName = (*_current).substr(1);
+
+    for (const auto &op : _def.options) {
+      if (op.second.shortName == optionShortName) {
+        return &_def.options[op.first];
+      }
+    }
   }
 
   return nullptr;
@@ -204,7 +212,7 @@ ETJump::CommandParser::Option ETJump::CommandParser::createDateOption(
 }
 
 void ETJump::CommandParser::expectOption() {
-  if (*_current == "--help") {
+  if (*_current == "--help" || *_current == "-h") {
     _cmd.helpRequested = true;
     return;
   }
@@ -326,4 +334,41 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse() {
         stringFormat("Unknown runtime error: `%s`", e.what()));
     return _cmd;
   }
+}
+std::string ETJump::CommandParser::formatCommandHelpString(
+    const std::string &name, const std::string &shortname,
+    OptionDefinition::Type optionType, const std::string &description,
+    bool required, opt<int> position) {
+  // console line width varies a bit depending on engine and resolution,
+  // but this should be fine for most scenarios
+  const size_t maxLineLen = 120;
+  const size_t flagPad = 23 - shortname.length();
+
+  const std::string &opTypeStr = OptionDefinition::typeToString(optionType);
+  const std::string &positionStr = stringFormat(
+      "%s",
+      position.hasValue() ? stringFormat(" (pos: %d) ", position.value()) : "");
+  const std::string &requiredStr =
+      stringFormat("%s", required ? " [required] " : "");
+
+  const std::string &flagStr =
+      stringFormat("    ^7-%s, --%-*s", shortname, flagPad, name);
+  const std::string &descStr = stringFormat(
+      "^z(%s) ^7%s%s%s", opTypeStr, description, requiredStr, positionStr);
+
+  std::string combinedStr = flagStr + descStr;
+
+  // split from the previous whitespace and indent the new line,
+  // if the description text is too long to fit to console max line width
+  if (sanitize(combinedStr, false).length() > maxLineLen) {
+    const size_t lastWhiteSpace = combinedStr.find_last_of(' ', maxLineLen);
+
+    if (lastWhiteSpace != std::string::npos) {
+      combinedStr.replace(
+          lastWhiteSpace, 1,
+          '\n' + std::string(sanitize(flagStr, false).length(), ' '));
+    }
+  }
+
+  return combinedStr;
 }
