@@ -1193,14 +1193,7 @@ void CG_PredictPlayerState() {
         CG_AdjustPositionForMover(cg.predictedPlayerState.origin,
                                   cg.predictedPlayerState.groundEntityNum,
                                   cg.physicsTime, cg.oldTime, adjusted,
-                                  deltaAngles);
-        // RF, add the deltaAngles (fixes jittery view while riding trains)
-        // ydnar: only do this if player is prone or using set mortar
-        if ((cg.predictedPlayerState.eFlags & EF_PRONE) ||
-            cg.weaponSelect == WP_MORTAR_SET) {
-          cg.predictedPlayerState.delta_angles[YAW] +=
-              ANGLE2SHORT(deltaAngles[YAW]);
-        }
+                                  nullptr);
 
         if (cg_showmiss.integer) {
           if (!VectorCompare(oldPlayerState.origin, adjusted)) {
@@ -1372,6 +1365,17 @@ void CG_PredictPlayerState() {
     CG_AdjustPositionForMover(
         cg.predictedPlayerState.origin, cg.predictedPlayerState.groundEntityNum,
         cg.physicsTime, cg.time, cg.predictedPlayerState.origin, deltaAngles);
+
+    // add deltaAngles (fixes jittery view while riding on movers)
+    // only do this if player is prone or using set mortar
+    if (deltaAngles[YAW] != 0.0f &&
+        ((cg.predictedPlayerState.eFlags & EF_PRONE) ||
+         cg.weaponSelect == WP_MORTAR_SET)) {
+      cg.predictedPlayerState.delta_angles[YAW] +=
+          ANGLE2SHORT(deltaAngles[YAW]);
+      PM_UpdateViewAngles(&cg.predictedPlayerState, &cg.pmext, &cg_pmove.cmd,
+                          cg_pmove.trace, cg_pmove.tracemask);
+    }
   }
 
   // fire events and other transition triggered things
