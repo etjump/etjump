@@ -6620,6 +6620,10 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
 
     if (CG_CalcMuzzlePoint(sourceEntityNum, start) ||
         cg.snap->ps.persistant[PERS_HWEAPON_USE]) {
+
+      ETJump::bulletTrace(&trace, start, end, MASK_SHOT);
+      ETJump::bulletTrace(&trace2, start, end, (MASK_SHOT | MASK_WATER));
+
       if (waterfraction != 0) {
         vec3_t dist;
         vec3_t end2;
@@ -6631,14 +6635,11 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
                           cgs.media.sfx_bullet_waterhit[rand() % 5]);
 
         CG_MissileHitWall(fromweap, 2, end2, tv(0, 0, 1), 0);
-        CG_MissileHitWall(fromweap, 1, end, trace.plane.normal, 0);
+        CG_MissileHitWall(fromweap, 1, end, trace2.plane.normal, 0);
       } else {
         VectorSubtract(end, start, dir);
         VectorNormalizeFast(dir);
         VectorMA(end, 4, dir, end);
-
-        ETJump::bulletTrace(&trace, start, end, MASK_SHOT);
-        ETJump::bulletTrace(&trace2, start, end, (MASK_SHOT | MASK_WATER));
 
         if (trace.fraction != trace2.fraction) {
           trap_S_StartSound(end, -1, CHAN_AUTO,
