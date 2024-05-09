@@ -3247,10 +3247,6 @@ qboolean G_ScriptAction_SetWinner(gentity_t *ent, char *params) {
     G_Error("G_ScriptAction_SetWinner: Invalid team number\n");
   }
 
-  if (g_gametype.integer == GT_WOLF_LMS) {
-    num = -1;
-  }
-
   trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
 
   Info_SetValueForKey(cs, "winner", token);
@@ -4366,12 +4362,9 @@ G_ScriptAction_AbortIfNotSinglePlayer
 ====================
 */
 qboolean G_ScriptAction_AbortIfNotSinglePlayer(gentity_t *ent, char *params) {
-  if (!G_IsSinglePlayerGame()) {
-    // abort the current script
-    ent->scriptStatus.scriptStackHead =
-        ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
-  }
-  //
+  ent->scriptStatus.scriptStackHead =
+      ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+
   return qtrue;
 }
 

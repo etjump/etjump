@@ -30,43 +30,6 @@ void AddScore(gentity_t *ent, int score) {
     return;
   }
 
-  if (g_gametype.integer == GT_WOLF_LMS) {
-    return;
-  }
-
-  // ent->client->ps.persistant[PERS_SCORE] += score;
-  ent->client->sess.game_points += score;
-
-  //	level.teamScores[ ent->client->ps.persistant[PERS_TEAM] ] +=
-  // score;
-  CalculateRanks();
-}
-
-/*
-============
-AddKillScore
-
-Adds score to both the client and his team, only used for playerkills, for lms
-============
-*/
-void AddKillScore(gentity_t *ent, int score) {
-  if (!ent || !ent->client) {
-    return;
-  }
-  // no scoring during pre-match warmup
-  if (level.warmupTime) {
-    return;
-  }
-
-  // someone already won
-  if (level.lmsWinningTeam) {
-    return;
-  }
-
-  if (g_gametype.integer == GT_WOLF_LMS) {
-    ent->client->ps.persistant[PERS_SCORE] += score;
-    level.teamScores[ent->client->ps.persistant[PERS_TEAM]] += score;
-  }
   ent->client->sess.game_points += score;
 
   CalculateRanks();
@@ -445,31 +408,15 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
   }
 
   if (attacker && attacker->client) {
-    if (attacker == self || OnSameTeam(self, attacker)) {
-      if (g_gametype.integer == GT_WOLF_LMS) {
-        AddKillScore(attacker, WOLF_FRIENDLY_PENALTY);
-      }
-    } else {
+    if (attacker != self && !OnSameTeam(self, attacker)) {
       // JPW NERVE -- mostly added as convenience,
       // so we can tweak from the #defines all in one place
       AddScore(attacker, WOLF_FRAG_BONUS);
-
-      if (g_gametype.integer == GT_WOLF_LMS) {
-        if (level.firstbloodTeam == -1) {
-          level.firstbloodTeam = attacker->client->sess.sessionTeam;
-        }
-
-        AddKillScore(attacker, WOLF_FRAG_BONUS);
-      }
 
       attacker->client->lastKillTime = level.time;
     }
   } else {
     AddScore(self, -1);
-
-    if (g_gametype.integer == GT_WOLF_LMS) {
-      AddKillScore(self, -1);
-    }
   }
 
   // Add team bonuses
@@ -623,10 +570,6 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
   } else if ((meansOfDeath == MOD_SUICIDE &&
               g_gamestate.integer == GS_PLAYING)) {
     limbo(self, qtrue);
-  } else if (g_gametype.integer == GT_WOLF_LMS) {
-    if (!G_CountTeamMedics(self->client->sess.sessionTeam, qtrue)) {
-      limbo(self, qtrue);
-    }
   }
 
   if (!self->client->sess.runSpawnflags ||
@@ -988,13 +931,6 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if (!targ->takedamage) {
     return;
   }
-
-#ifdef SAVEGAME_SUPPORT
-  if (g_gametype.integer == GT_SINGLE_PLAYER &&
-      (g_reloading.integer || saveGamePending)) {
-    return;
-  }
-#endif // SAVEGAME_SUPPORT
 
   // the intermission has already been qualified for,
   // so don't allow any extra scoring

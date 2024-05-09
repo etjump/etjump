@@ -506,12 +506,10 @@ void CG_GameStatsDraw() {
         1 +                    // Stats + extra
         tSpacing * ((gs->cWeapons > 0) ? gs->cWeapons : 1) +
         tSpacing * ((gs->fHasStats) ? 3 : 0) +
-        ((cgs.gametype == GT_WOLF_LMS)
-             ? 0
-             : (4 + 2 * tSpacing +                // Rank/XP
-                1 + tSpacing + 4 + 2 * tSpacing + // Skill columns
-                1 +                               // Skillz
-                tSpacing * ((gs->cSkills > 0) ? gs->cSkills : 1))) +
+        (4 + 2 * tSpacing +                // Rank/XP
+         1 + tSpacing + 4 + 2 * tSpacing + // Skill columns
+         1 +                               // Skillz
+         tSpacing * ((gs->cSkills > 0) ? gs->cSkills : 1)) +
         2;
 
     // Fade-in effects

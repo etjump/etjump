@@ -39,15 +39,7 @@
 #define MG42_MULTIPLAYER_HEALTH 350 // JPW NERVE
 #define NO_BOT_SUPPORT
 
-// How long do bodies last?
-// SP : Axis: 20 seconds
-//		Allies: 30 seconds
-// MP : Both 10 seconds
-#define BODY_TIME(t)                                                           \
-  ((g_gametype.integer != GT_SINGLE_PLAYER || g_gametype.integer == GT_COOP)   \
-       ? 10000                                                                 \
-   : (t) == TEAM_AXIS ? 20000                                                  \
-                      : 30000)
+static constexpr int BODY_TIME = 10000;
 
 #define MAX_MG42_HEAT 1500.f
 
@@ -104,22 +96,6 @@ typedef enum {
   MOVER_1TO2ROTATE,
   MOVER_2TO1ROTATE
 } moverState_t;
-
-#define MAX_PASSWORD_LEN 40
-#define MAX_ADMINS 16
-
-// door AI sound ranges
-#define HEAR_RANGE_DOOR_LOCKED 128 // really close since this is a cruel check
-#define HEAR_RANGE_DOOR_KICKLOCKED 512
-#define HEAR_RANGE_DOOR_OPEN 256
-#define HEAR_RANGE_DOOR_KICKOPEN 768
-
-// DHM - Nerve :: Worldspawn spawnflags to indicate if a gametype is not
-// supported
-#define NO_GT_WOLF 1
-#define NO_STOPWATCH 2
-#define NO_CHECKPOINT 4
-#define NO_LMS 8
 
 #define MAX_CONSTRUCT_STAGES 3
 
@@ -1291,14 +1267,6 @@ typedef struct {
   int bodyQueIndex; // dead bodies
   gentity_t *bodyQue[BODY_QUEUE_SIZE];
 
-  int portalSequence;
-  // Ridah
-  char *scriptAI;
-  int reloadPauseTime; // don't think AI/client's until this time has
-                       // elapsed
-  int reloadDelayTime; // don't start loading the savegame until this
-                       // has expired
-
   int capturetimes[4]; // red, blue, none, spectator for WOLF_MP_CPH
   int redReinforceTime,
       blueReinforceTime; // last time reinforcements arrived in ms
@@ -1354,12 +1322,6 @@ typedef struct {
   float covertopsChargeTimeModifier[2];
 
   int firstbloodTeam;
-  int teamEliminateTime;
-  int lmsWinningTeam;
-
-  int campaignCount;
-  int currentCampaign;
-  qboolean newCampaign;
 
   brushmodelInfo_t brushModelInfo[128];
   int numBrushModels;
@@ -1456,17 +1418,6 @@ typedef struct {
   int saveLoadRestrictions;
   int checkpointsCount[MAX_TIMERUNS];
 } level_locals_t;
-
-typedef struct {
-  char mapnames[MAX_MAPS_PER_CAMPAIGN][MAX_QPATH];
-  // arenaInfo_t	arenas[MAX_MAPS_PER_CAMPAIGN];
-  int mapCount;
-  int current;
-
-  char shortname[256];
-  char next[256];
-  int typeBits;
-} g_campaignInfo_t;
 
 //
 // g_spawn.c
@@ -1616,8 +1567,6 @@ qboolean infront(gentity_t *self, gentity_t *other);
 void G_ProcessTagConnect(gentity_t *ent, qboolean clearAngles);
 
 void G_SetEntState(gentity_t *ent, entState_t state);
-void G_ParseCampaigns(void);
-qboolean G_MapIsValidCampaignStartMap(void);
 
 team_t G_GetTeamFromEntity(gentity_t *ent);
 const char *ClientIPAddr(gentity_t *ent);
@@ -1769,7 +1718,6 @@ void ClientSpawn(gentity_t *ent, qboolean revived);
 void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
                 int damage, int mod);
 void AddScore(gentity_t *ent, int score);
-void AddKillScore(gentity_t *ent, int score);
 void CalculateRanks(void);
 qboolean SpotWouldTelefrag(gentity_t *spot);
 void G_StartPlayerAppropriateSound(gentity_t *ent, char *soundType);
@@ -1846,8 +1794,6 @@ void SendScoreboardMessageToAllClients(void);
 void QDECL G_Printf(const char *fmt, ...);
 void QDECL G_DPrintf(const char *fmt, ...);
 void QDECL G_Error(const char *fmt, ...);
-// Is this a single player type game - sp or coop?
-qboolean G_IsSinglePlayerGame();
 void resetVote();
 
 //
@@ -1936,8 +1882,6 @@ void Props_Chair_Skyboxtouch(gentity_t *ent);
 #include "g_team.h" // teamplay specific stuff
 extern level_locals_t level;
 extern gentity_t g_entities[]; // DAJ was explicit set to MAX_ENTITIES
-extern g_campaignInfo_t g_campaigns[];
-extern int saveGamePending;
 
 #define FOFS(x) (int(((intptr_t) & (((gentity_t *)0)->x))))
 
@@ -2012,25 +1956,10 @@ extern vmCvar_t g_scriptDebugLevel;
 // How fast do SP player and allied bots move?
 extern vmCvar_t g_movespeed;
 
-extern vmCvar_t g_oldCampaign;
-extern vmCvar_t g_currentCampaign;
-extern vmCvar_t g_currentCampaignMap;
-
-// Arnout: for LMS
-extern vmCvar_t g_axiswins;
-extern vmCvar_t g_alliedwins;
-
-#ifdef SAVEGAME_SUPPORT
-extern vmCvar_t g_reloading;
-#endif // SAVEGAME_SUPPORT
-
 // NERVE - SMF
-extern vmCvar_t g_nextTimeLimit;
 extern vmCvar_t g_userTimeLimit;
 extern vmCvar_t g_userAlliedRespawnTime;
 extern vmCvar_t g_userAxisRespawnTime;
-extern vmCvar_t g_currentRound;
-extern vmCvar_t g_altStopwatchMode;
 extern vmCvar_t g_gamestate;
 extern vmCvar_t g_swapteams;
 // -NERVE - SMF
@@ -2076,7 +2005,6 @@ extern vmCvar_t g_debugSkills;
 extern vmCvar_t g_autoFireteams;
 
 extern vmCvar_t g_nextmap;
-extern vmCvar_t g_nextcampaign;
 
 extern vmCvar_t g_dailyLogs;
 

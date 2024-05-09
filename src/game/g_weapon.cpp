@@ -612,12 +612,6 @@ void Weapon_Syringe(gentity_t *ent) {
           G_AddSkillPoints(ent, SK_FIRST_AID, 4.f);
           G_DebugAddSkillPoints(ent, SK_FIRST_AID, 4.f, "reviving a player");
         }
-
-        // Arnout: calculate ranks to update numFinalDead arrays.
-        // Have to do it manually as addscore has an early out
-        if (g_gametype.integer == GT_WOLF_LMS) {
-          CalculateRanks();
-        }
       }
     }
   }
@@ -4022,14 +4016,9 @@ gentity_t *weapon_mortar_fire(gentity_t *ent, int grenType) {
   // (so you don't throw through or get stuck in a wall)
   VectorMA(launchPos, 32, forward, testPos);
 
-  // Gordon: hack so i can do inverse trajectory calcs easily :p
-  if (G_IsSinglePlayerGame() && ent->r.svFlags & SVF_BOT) {
-    VectorCopy(ent->gDelta, forward);
-  } else {
-    forward[0] *= 3000 * 1.1f;
-    forward[1] *= 3000 * 1.1f;
-    forward[2] *= 1500 * 1.1f;
-  }
+  forward[0] *= 3000 * 1.1f;
+  forward[1] *= 3000 * 1.1f;
+  forward[2] *= 1500 * 1.1f;
 
   trap_Trace(&tr, testPos, tv(-4.f, -4.f, 0.f), tv(4.f, 4.f, 6.f), launchPos,
              ent->s.number, MASK_MISSILESHOT);

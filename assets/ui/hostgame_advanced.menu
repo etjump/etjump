@@ -61,16 +61,7 @@ menuDef {
 	NUMERICFIELD( 8, 274, (SUBWINDOW_WIDTH)-4, 10, "Axis Spawn Time:", .2, 8, "ui_userAxisRespawnTime", 2, "Override the default Axis spawn time" )
 	NUMERICFIELD( 8, 286, (SUBWINDOW_WIDTH)-4, 10, "Allied Max Lives:", .2, 8, "g_alliedmaxlives", 3, "Specify the number of Allied lives in a max lives game" )
 	NUMERICFIELD( 8, 298, (SUBWINDOW_WIDTH)-4, 10, "Axis Max Lives:", .2, 8, "g_axismaxlives", 3, "Specify the number of Axis lives in a max lives game" )
-	MULTI( 8, 310, (SUBWINDOW_WIDTH)-4, 10, "Stopwatch Round-Type:", .2, 8, "g_altStopwatchMode", cvarFloatList { "ABBA" 0 "ABAB" 1 }, "Determines the type of Stopwatch round (ABBA = swap sides, ABAB = retain sides)" )	
-	
-// LMS //
-
-	SUBWINDOW( 6, 328, (SUBWINDOW_WIDTH), 64, "LAST MAN STANDING" )
-	
-	NUMERICFIELD( 8, 344, (SUBWINDOW_WIDTH)-4, 10, "LMS Rounds Per Match:", .2, 8, "g_lms_roundlimit", 2, "Override the default LMS rounds per match" )	// fixme: range check
-	NUMERICFIELD( 8, 356, (SUBWINDOW_WIDTH)-4, 10, "LMS Matches Per Map:", .2, 8, "g_lms_matchlimit", 2, "Override the default LMS matches (comprising of rounds) per map" )	// fixme: range check
-	YESNO( 8, 368, (SUBWINDOW_WIDTH)-4, 10, "LMS Spectate Team Only:", .2, 8, "g_lms_followTeamOnly", "Stops players spectating the enemy team" )
-	YESNO( 8, 380, (SUBWINDOW_WIDTH)-4, 10, "LMS Locked Teams:", .2, 8, "g_lms_lockTeams", "Stops players being able to switch teams" )
+	MULTI( 8, 310, (SUBWINDOW_WIDTH)-4, 10, "Stopwatch Round-Type:", .2, 8, "g_altStopwatchMode", cvarFloatList { "ABBA" 0 "ABAB" 1 }, "Determines the type of Stopwatch round (ABBA = swap sides, ABAB = retain sides)" )
 
 // Admin //
 
@@ -102,7 +93,7 @@ menuDef {
 	itemDef {
 		name		"efleftbackLine 1:"
 		group		GROUP_NAME
-		rect		$evalfloat((6+(SUBWINDOW_WIDTH)+6+4)+44+6) $evalfloat(234) $evalfloat(((SUBWINDOW_WIDTH)-8)-44-6) $evalfloat(10)
+		rect		$evalfloat((6+(SUBWINDOW_WIDTH)+6+4)+44+6) $evalfloat(246) $evalfloat(((SUBWINDOW_WIDTH)-8)-44-6) $evalfloat(10)
 		style		WINDOW_STYLE_FILLED
 		backcolor	.5 .5 .5 .2
 		visible		1
@@ -113,7 +104,7 @@ menuDef {
 	itemDef {
 		name		"efleftbackLine 2:"
 		group		GROUP_NAME
-		rect		$evalfloat((6+(SUBWINDOW_WIDTH)+6+4)+44+6) $evalfloat(246) $evalfloat(((SUBWINDOW_WIDTH)-8)-44-6) $evalfloat(10)
+		rect		$evalfloat((6+(SUBWINDOW_WIDTH)+6+4)+44+6) $evalfloat(258) $evalfloat(((SUBWINDOW_WIDTH)-8)-44-6) $evalfloat(10)
 		style		WINDOW_STYLE_FILLED
 		backcolor	.5 .5 .5 .2
 		visible		1
@@ -124,7 +115,7 @@ menuDef {
 	itemDef {
 		name		"efleftbackLine 3:"
 		group		GROUP_NAME
-		rect		$evalfloat((6+(SUBWINDOW_WIDTH)+6+4)+44+6) $evalfloat(258) $evalfloat(((SUBWINDOW_WIDTH)-8)-44-6) $evalfloat(10)
+		rect		$evalfloat((6+(SUBWINDOW_WIDTH)+6+4)+44+6) $evalfloat(270) $evalfloat(((SUBWINDOW_WIDTH)-8)-44-6) $evalfloat(10)
 		style		WINDOW_STYLE_FILLED
 		backcolor	.5 .5 .5 .2
 		visible		1
@@ -135,7 +126,7 @@ menuDef {
 	itemDef {
 		name		"efleftbackLine 4:"
 		group		GROUP_NAME
-		rect		$evalfloat((6+(SUBWINDOW_WIDTH)+6+4)+44+6) $evalfloat(270) $evalfloat(((SUBWINDOW_WIDTH)-8)-44-6) $evalfloat(10)
+		rect		$evalfloat((6+(SUBWINDOW_WIDTH)+6+4)+44+6) $evalfloat(282) $evalfloat(((SUBWINDOW_WIDTH)-8)-44-6) $evalfloat(10)
 		style		WINDOW_STYLE_FILLED
 		backcolor	.5 .5 .5 .2
 		visible		1
@@ -146,7 +137,7 @@ menuDef {
 	itemDef {
 		name		"efleftbackLine 5:"
 		group		GROUP_NAME
-		rect		$evalfloat((6+(SUBWINDOW_WIDTH)+6+4)+44+6) $evalfloat(282) $evalfloat(((SUBWINDOW_WIDTH)-8)-44-6) $evalfloat(10)
+		rect		$evalfloat((6+(SUBWINDOW_WIDTH)+6+4)+44+6) $evalfloat(294) $evalfloat(((SUBWINDOW_WIDTH)-8)-44-6) $evalfloat(10)
 		style		WINDOW_STYLE_FILLED
 		backcolor	.5 .5 .5 .2
 		visible		1

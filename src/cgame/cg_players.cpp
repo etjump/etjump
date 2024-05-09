@@ -656,11 +656,8 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
   anim = lf->animation;
 
   // check for forcing last frame
-  if (cent->currentState.eFlags & EF_FORCE_END_FRAME
-      // xkan, 12/27/2002 - In SP, corpse also stays at the last frame
-      // (of the death animation) so that the death animation can end up
-      // in different positions and the body will stay in that position
-      || (/*CG_IsSinglePlayer() &&*/ cent->currentState.eType == ET_CORPSE)) {
+  if (cent->currentState.eFlags & EF_FORCE_END_FRAME ||
+      cent->currentState.eType == ET_CORPSE) {
     lf->oldFrame = lf->frame = anim->firstFrame + anim->numFrames - 1;
     lf->oldFrameModel = lf->frameModel = anim->mdxFile;
     lf->backlerp = 0;

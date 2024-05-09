@@ -495,9 +495,6 @@ typedef struct {
   void (*drawCinematic)(int handle, float x, float y, float w, float h);
   void (*runCinematicFrame)(int handle);
 
-  // Gordon: campaign stuffs
-  const char *(*descriptionForCampaign)(void);
-  const char *(*nameForCampaign)(void);
   void (*add2dPolys)(polyVert_t *verts, int numverts, qhandle_t hShader);
   void (*updateScreen)(void);
   void (*getHunkData)(int *hunkused, int *hunkexpected);

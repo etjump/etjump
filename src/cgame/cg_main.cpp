@@ -266,10 +266,6 @@ vmCvar_t cg_atmosphericEffects;
 vmCvar_t cg_drawRoundTimer;
 // END Mad Doc - TDF
 
-#ifdef SAVEGAME_SUPPORT
-vmCvar_t cg_reloading;
-#endif // SAVEGAME_SUPPORT
-
 vmCvar_t cg_fastSolids;
 vmCvar_t cg_instanttapout;
 
@@ -1577,15 +1573,8 @@ void CG_printConsoleString(const char *str) {
 
 void CG_LoadObjectiveData(void) {
   pc_token_t token, token2;
-  int handle;
-
-  if (cg_gameType.integer == GT_WOLF_LMS) {
-    handle =
-        trap_PC_LoadSource(va("maps/%s_lms.objdata", Q_strlwr(cgs.rawmapname)));
-  } else {
-    handle =
-        trap_PC_LoadSource(va("maps/%s.objdata", Q_strlwr(cgs.rawmapname)));
-  }
+  const int handle =
+      trap_PC_LoadSource(va("maps/%s.objdata", Q_strlwr(cgs.rawmapname)));
 
   if (!handle) {
     return;
@@ -3735,8 +3724,6 @@ void CG_LoadHudMenu() {
   cgDC.stopCinematic = &CG_StopCinematic;
   cgDC.drawCinematic = &CG_DrawCinematic;
   cgDC.runCinematicFrame = &CG_RunCinematicFrame;
-  cgDC.descriptionForCampaign = &CG_DescriptionForCampaign;
-  cgDC.nameForCampaign = &CG_NameForCampaign;
   cgDC.add2dPolys = &trap_R_Add2dPolys;
   cgDC.updateScreen = &trap_UpdateScreen;
   cgDC.getHunkData = &trap_GetHunkData;
@@ -3887,13 +3874,8 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_ParseServerinfo();
   CG_ParseSysteminfo();
-  CG_ParseWolfinfo(); // NERVE - SMF
 
-  cgs.campaignInfoLoaded = qfalse;
-  if (cgs.gametype == GT_WOLF_CAMPAIGN) {
-    CG_LocateCampaign();
-  } else if (cgs.gametype == GT_WOLF_STOPWATCH || cgs.gametype == GT_WOLF_LMS ||
-             cgs.gametype == GT_WOLF) {
+  if (cgs.gametype == ETJUMP_GAMETYPE) {
     CG_LocateArena();
   }
 
@@ -4027,9 +4009,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_SetupCabinets();
 
-  if (!CG_IsSinglePlayer()) {
-    trap_S_FadeAllSound(1.0f, 0, qfalse); // fade sound up
-  }
+  trap_S_FadeAllSound(1.0f, 0, qfalse); // fade sound up
 
   // OSP
   cgs.dumpStatsFile = 0;
@@ -4091,15 +4071,6 @@ void CG_Shutdown(void) {
   trap_R_LoadDynamicShader(nullptr, nullptr);
 
   Shutdown_Display();
-}
-
-// returns true if game is single player (or coop)
-qboolean CG_IsSinglePlayer(void) {
-  if (cg_gameType.integer == GT_SINGLE_PLAYER || cgs.gametype == GT_COOP) {
-    return qtrue;
-  }
-
-  return qfalse;
 }
 
 qboolean CG_CheckExecKey(int key) {

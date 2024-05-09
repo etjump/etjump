@@ -435,19 +435,12 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 
     G_increasePassedCount(level.voteInfo.vote_value);
 
-    if (g_gametype.integer == GT_WOLF_CAMPAIGN) {
-      trap_Cvar_VariableStringBuffer("nextcampaign", s, sizeof(s));
-      trap_SendConsoleCommand(
-          EXEC_APPEND, va("campaign %s%s\n", level.voteInfo.vote_value,
-                          ((*s) ? va("; set nextcampaign \"%s\"", s) : "")));
-    } else {
-      Svcmd_ResetMatch_f(qfalse);
-      trap_Cvar_VariableStringBuffer("nextmap", s, sizeof(s));
-      trap_SendConsoleCommand(EXEC_APPEND,
-                              va("%s %s%s\n", cheats ? "devmap" : "map",
-                                 level.voteInfo.vote_value,
-                                 ((*s) ? va("; set nextmap \"%s\"", s) : "")));
-    }
+    Svcmd_ResetMatch_f(qfalse);
+    trap_Cvar_VariableStringBuffer("nextmap", s, sizeof(s));
+    trap_SendConsoleCommand(EXEC_APPEND,
+                            va("%s %s%s\n", cheats ? "devmap" : "map",
+                               level.voteInfo.vote_value,
+                               ((*s) ? va("; set nextmap \"%s\"", s) : "")));
   }
 
   return (G_OK);

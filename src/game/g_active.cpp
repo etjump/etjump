@@ -481,12 +481,6 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd) {
     pm.noActivateLean = client->pers.noActivateLean;
     pm.noPanzerAutoswitch = client->pers.noPanzerAutoswitch;
 
-#ifdef SAVEGAME_SUPPORT
-    if (g_gametype.integer == GT_SINGLE_PLAYER && g_reloading.integer) {
-      pm.reloading = qtrue;
-    }
-#endif // SAVEGAME_SUPPORT
-
     Pmove(&pm); // JPW NERVE
 
     // Rafael - Activate
@@ -1059,13 +1053,8 @@ void ClientThink_real(gentity_t *ent) {
     return;
   }
 
-  if ((client->ps.eFlags & EF_VIEWING_CAMERA) || level.match_pause != PAUSE_NONE
-#ifdef SAVEGAME_SUPPORT
-      || (g_gametype.integer == GT_SINGLE_PLAYER && saveGamePending &&
-          g_reloading.integer && (g_reloading.integer != RELOAD_FAILED))) {
-#else
-  ) {
-#endif // SAVEGAME_SUPPORT
+  if ((client->ps.eFlags & EF_VIEWING_CAMERA) ||
+      level.match_pause != PAUSE_NONE) {
     ucmd->buttons = 0;
     ucmd->forwardmove = 0;
     ucmd->rightmove = 0;
@@ -1076,14 +1065,7 @@ void ClientThink_real(gentity_t *ent) {
     // freeze player (RELOAD_FAILED still allowed to move/look)
     if (level.match_pause != PAUSE_NONE) {
       client->ps.pm_type = PM_FREEZE;
-    } else if ((client->ps.eFlags & EF_VIEWING_CAMERA)
-#ifdef SAVEGAME_SUPPORT
-               || (g_gametype.integer == GT_SINGLE_PLAYER &&
-                   g_reloading.integer &
-                       (RELOAD_NEXTMAP_WAITING | RELOAD_ENDGAME))) {
-#else
-    ) {
-#endif // SAVEGAME_SUPPORT
+    } else if (client->ps.eFlags & EF_VIEWING_CAMERA) {
       VectorClear(client->ps.velocity);
       client->ps.pm_type = PM_FREEZE;
     }
@@ -1247,38 +1229,6 @@ void ClientThink_real(gentity_t *ent) {
   }
 
   pm.leadership = qfalse;
-  /*for ( i = 0 ; i < level.numConnectedClients; i++ ) {
-      gclient_t *cl = &level.clients[level.sortedClients[i]];
-      vec3_t dist;
-
-      if( cl->sess.sessionTeam != client->sess.sessionTeam ) {
-          continue;
-      }
-
-      if( cl->sess.skill[SK_SIGNALS] < 5 ) {
-          continue;
-      }
-
-      if( !trap_InPVS(
-  g_entities[level.sortedClients[i]].r.currentOrigin,
-  ent->r.currentOrigin ) ) { continue;
-      }
-
-      VectorSubtract(
-  g_entities[level.sortedClients[i]].r.currentOrigin,
-  ent->r.currentOrigin, dist ); if( VectorLengthSquared( dist ) >
-  SQR(512) ) continue;
-
-      pm.leadership = qtrue;
-
-      break;
-  }*/
-
-#ifdef SAVEGAME_SUPPORT
-  if (g_gametype.integer == GT_SINGLE_PLAYER && g_reloading.integer) {
-    pm.reloading = qtrue;
-  }
-#endif // SAVEGAME_SUPPORT
 
   // Gordon: bit hacky, stop the slight lag from client -> server even
   // on locahost, switching back to the weapon you were holding

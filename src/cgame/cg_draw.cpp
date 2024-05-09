@@ -2474,11 +2474,8 @@ static void CG_DrawIntermission(void) {
         CG_dumpStats_f();
       }
 
-      if ((cg_autoAction.integer & AA_DEMORECORD) &&
-          ((cgs.gametype == GT_WOLF_STOPWATCH && cgs.currentRound == 0) ||
-           cgs.gametype != GT_WOLF_STOPWATCH)) {
-        doDemostop = cg.time + 5000; // stats should show up within
-                                     // 5 seconds
+      if (cg_autoAction.integer & AA_DEMORECORD) {
+        doDemostop = cg.time + 5000; // stats should show up within 5 seconds
       }
     }
 
@@ -2792,35 +2789,6 @@ static void CG_DrawWarmup(void) {
         CG_DrawStringExt(SCREEN_CENTER_X - w * cw / 2, 208, s2, colorWhite,
                          qfalse, qtrue, cw, (int)(cw * 1.5), 0);
       }
-
-      /*	if ( !sec ) {
-              if ( cgs.gamestate ==
-         GS_WAITING_FOR_PLAYERS ) { cw = 10;
-
-                  s = CG_TranslateString( "Game Stopped
-         - Waiting for more players" );
-
-                  w = CG_DrawStrlen( s );
-                  CG_DrawStringExt( 320 - w * 6, 120, s,
-         colorWhite, qfalse, qtrue, 12, 18, 0 );
-
-                  if( cg_gameType.integer != GT_WOLF_LMS
-         ) { s1 = va( CG_TranslateString( "Waiting for
-         %i players" ), cgs.minclients ); s2 =
-         CG_TranslateString( "or call a vote to start
-         the match" );
-
-                  w = CG_DrawStrlen( s1 );
-                  CG_DrawStringExt( 320 - w * cw/2, 160,
-         s1, colorWhite, qfalse, qtrue, cw, (int)(cw
-         * 1.5), 0 );
-
-                  w = CG_DrawStrlen( s2 );
-                  CG_DrawStringExt( 320 - w * cw/2, 180,
-         s2, colorWhite, qfalse, qtrue, cw, (int)(cw
-         * 1.5), 0 );
-                  }
-      */
       return;
     }
 
@@ -2837,87 +2805,6 @@ static void CG_DrawWarmup(void) {
   w = CG_DrawStrlen(s);
   CG_DrawStringExt(SCREEN_CENTER_X - w * 6, 120, s, colorYellow, qfalse, qtrue,
                    12, 18, 0);
-
-  // NERVE - SMF - stopwatch stuff
-  s1 = "";
-  s2 = "";
-
-  if (cgs.gametype == GT_WOLF_STOPWATCH) {
-    const char *cs;
-    int defender;
-
-    s = va("%s %i", CG_TranslateString("Stopwatch Round"),
-           cgs.currentRound + 1);
-
-    cs = CG_ConfigString(CS_MULTI_INFO);
-    defender = Q_atoi(Info_ValueForKey(cs, "defender"));
-
-    if (!defender) {
-      if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_AXIS) {
-        if (cgs.currentRound == 1) {
-          s1 = "You have been switched "
-               "to the Axis team";
-          s2 = "Keep the Allies from "
-               "beating the clock!";
-        } else {
-          s1 = "You are on the Axis "
-               "team";
-        }
-      } else if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_ALLIES) {
-        if (cgs.currentRound == 1) {
-          s1 = "You have been switched "
-               "to the Allied team";
-          s2 = "Try to beat the clock!";
-        } else {
-          s1 = "You are on the Allied "
-               "team";
-        }
-      }
-    } else {
-      if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_AXIS) {
-        if (cgs.currentRound == 1) {
-          s1 = "You have been switched "
-               "to the Axis team";
-          s2 = "Try to beat the clock!";
-        } else {
-          s1 = "You are on the Axis "
-               "team";
-        }
-      } else if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_ALLIES) {
-        if (cgs.currentRound == 1) {
-          s1 = "You have been switched "
-               "to the Allied team";
-          s2 = "Keep the Axis from "
-               "beating the clock!";
-        } else {
-          s1 = "You are on the Allied "
-               "team";
-        }
-      }
-    }
-
-    if (strlen(s1)) {
-      s1 = CG_TranslateString(s1);
-    }
-
-    if (strlen(s2)) {
-      s2 = CG_TranslateString(s2);
-    }
-
-    cw = 10;
-
-    w = CG_DrawStrlen(s);
-    CG_DrawStringExt(SCREEN_CENTER_X - w * cw / 2, 140, s, colorWhite, qfalse,
-                     qtrue, cw, (int)(cw * 1.5), 0);
-
-    w = CG_DrawStrlen(s1);
-    CG_DrawStringExt(SCREEN_CENTER_X - w * cw / 2, 160, s1, colorWhite, qfalse,
-                     qtrue, cw, (int)(cw * 1.5), 0);
-
-    w = CG_DrawStrlen(s2);
-    CG_DrawStringExt(SCREEN_CENTER_X - w * cw / 2, 180, s2, colorWhite, qfalse,
-                     qtrue, cw, (int)(cw * 1.5), 0);
-  }
 }
 
 //==================================================================================
@@ -2931,8 +2818,7 @@ static void CG_DrawFlashFade(void) {
   static int lastTime;
   int elapsed, time;
   vec4_t col;
-  qboolean fBlackout =
-      (!CG_IsSinglePlayer() && int_ui_blackout.integer > 0) ? qtrue : qfalse;
+  qboolean fBlackout = (int_ui_blackout.integer > 0) ? qtrue : qfalse;
 
   if (cgs.fadeStartTime + cgs.fadeDuration < cg.time) {
     cgs.fadeAlphaCurrent = cgs.fadeAlpha;
@@ -3472,27 +3358,17 @@ void CG_DrawCompassIcon(float x, float y, float w, float h, vec3_t origin,
     return;
   }
 
-  //	if( cg_drawCompass.integer == 2 )
-  //		angles[YAW] = AngleSubtract( 90, angles[YAW] );
-  //	else
   angles[YAW] =
       AngleSubtract(cg.predictedPlayerState.viewangles[YAW], angles[YAW]);
 
   angle = ((angles[YAW] + 180.f) / 360.f - (0.50 / 2.f)) * pi2;
 
-  //	if (!CG_IsSinglePlayer()) {
   w /= 2;
   h /= 2;
 
   x += w;
   y += h;
 
-  //		if (CG_IsSinglePlayer())
-  /*		if (0)
-          {
-              w = 80; // hardcoded, because it has to fit the art
-          }
-          else*/
   { w = sqrt((w * w) + (h * h)) / 3.f * 2.f * 0.9f; }
 
   x = x + (cos(angle) * w);
@@ -4269,10 +4145,6 @@ static void CG_DrawPlayerStats(void) {
                       0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont1);
     CG_Text_Paint_Ext(SKILLS_X - 28 + 2, 480 - 4, 0.2f, 0.2f, colorWhite, "HP",
                       0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont1);
-  }
-
-  if (cgs.gametype == GT_WOLF_LMS) {
-    return;
   }
 
   ps = &cg.snap->ps;

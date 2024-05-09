@@ -15,7 +15,7 @@
 // Host Game Advanced Default Menu //
 
 #define DEFAULT_SETTINGS	setcvar sv_hostname "ETHost" ;			\
-							setcvar ui_netGameType 4 ;				\
+							setcvar ui_netGameType 2 ;				\
 							setcvar sv_maxclients 20 ;				\
 							setcvar server_autoconfig 0 ;			\
 							setcvar ui_dedicated 0 ;				\
@@ -24,7 +24,6 @@
 							setcvar g_maxlives 5 ;					\
 							setcvar g_heavyWeaponRestriction 100 ;	\
 							setcvar g_teamforcebalance 0 ;			\
-							setcvar g_lms_teamforcebalance 0 ;		\							
 							setcvar sv_minping 0 ;					\
 							setcvar sv_maxping 0 ;					\
 							setcvar sv_maxrate 0 ;					\
@@ -45,11 +44,6 @@
 							setcvar ui_userAxisRespawnTime 0 ;		\
 							setcvar g_alliedmaxlives 0 ;			\
 							setcvar g_axismaxlives 0 ;				\
-							setcvar g_altStopwatchMode 0 ;			\
-							setcvar g_lms_roundlimit 3 ;			\
-							setcvar g_lms_matchlimit 2 ;			\
-							setcvar g_lms_followTeamOnly 1 ;		\
-							setcvar g_lms_lockTeams 0 ;				\
 							setcvar sv_pure 1 ;						\
 							setcvar g_password "none" ;				\
 							setcvar refereePassword "none" ;		\

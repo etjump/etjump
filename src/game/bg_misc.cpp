@@ -23,10 +23,6 @@ extern vmCvar_t ui_gameType;
   #define gametypeCvar ui_gameType
 #endif
 
-#define BG_IsSinglePlayerGame()                                                \
-  (gametypeCvar.integer == GT_SINGLE_PLAYER) ||                                \
-      (gametypeCvar.integer == GT_COOP)
-
 const char *skillNames[SK_NUM_SKILLS] = {
     "Battle Sense",  "Engineering",   "First Aid", "Signals",
     "Light Weapons", "Heavy Weapons", "Covert Ops"};
@@ -3061,98 +3057,6 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
   }
 
   return ammoAdded ? qtrue : qfalse;
-}
-
-/*
-================
-BG_CanUseWeapon: can a player of the specified team and class use this weapon?
-extracted and adapted from Bot_GetWeaponForClassAndTeam.
-================
-- added by xkan, 01/02/03
-*/
-qboolean BG_CanUseWeapon(int classNum, int teamNum, weapon_t weapon) {
-  // TAT 1/11/2003 - is this SP game? - different weapons available in
-  // SP
-  qboolean isSinglePlayer = BG_IsSinglePlayerGame() ? qtrue : qfalse;
-
-  switch (classNum) {
-    case PC_ENGINEER:
-      if (weapon == WP_PLIERS || weapon == WP_DYNAMITE ||
-          weapon == WP_LANDMINE) {
-        return qtrue;
-      } else if (weapon == WP_MP40 || weapon == WP_KAR98) {
-        return (teamNum == TEAM_AXIS) ? qtrue : qfalse;
-      } else if (weapon == WP_THOMPSON || weapon == WP_CARBINE) {
-        return (teamNum == TEAM_ALLIES) ? qtrue : qfalse;
-      }
-      break;
-    case PC_FIELDOPS:
-      // TAT 1/11/2003 - in SP, field op can only use
-      // handgun, check after switch below
-      if (isSinglePlayer && teamNum == TEAM_ALLIES) {
-        break;
-      }
-
-      if (weapon == WP_STEN) {
-        return qtrue;
-      } else if (weapon == WP_MP40) {
-        return (teamNum == TEAM_AXIS) ? qtrue : qfalse;
-      } else if (weapon == WP_THOMPSON) {
-        return (teamNum == TEAM_ALLIES) ? qtrue : qfalse;
-      }
-      break;
-    case PC_SOLDIER:
-      if (weapon == WP_STEN || weapon == WP_PANZERFAUST ||
-          weapon == WP_FLAMETHROWER
-          // Gordon: shouldn't this only be for cvt ops?
-          || weapon == WP_FG42 || weapon == WP_MOBILE_MG42 ||
-          weapon == WP_MOBILE_MG42_SET || weapon == WP_MORTAR ||
-          weapon == WP_MORTAR_SET) {
-        return qtrue;
-      } else if (weapon == WP_MP40) {
-        return (teamNum == TEAM_AXIS) ? qtrue : qfalse;
-      } else if (weapon == WP_THOMPSON) {
-        return (teamNum == TEAM_ALLIES) ? qtrue : qfalse;
-      }
-      break;
-
-    case PC_MEDIC:
-      if (weapon == WP_MEDIC_SYRINGE || weapon == WP_MEDKIT) {
-        return qtrue;
-      }
-      // TAT 1/11/2003 - in SP, medic can only use
-      // handgun, check after switch below
-      else if (isSinglePlayer && teamNum == TEAM_ALLIES) {
-        break;
-      } else if (weapon == WP_MP40) {
-        return (teamNum == TEAM_AXIS) ? qtrue : qfalse;
-      } else if (weapon == WP_THOMPSON) {
-        return (teamNum == TEAM_ALLIES) ? qtrue : qfalse;
-      }
-      break;
-    case PC_COVERTOPS:
-      if (weapon == WP_STEN || weapon == WP_SMOKE_BOMB ||
-          weapon == WP_SATCHEL ||
-          weapon == WP_AMMO
-          // Gordon: this is a cvt ops weapon in single
-          // player too, right?
-          || weapon == WP_FG42) {
-        return qtrue;
-      } else if (weapon == WP_K43) {
-        return (teamNum == TEAM_AXIS) ? qtrue : qfalse;
-      } else if (weapon == WP_GARAND) {
-        return (teamNum == TEAM_ALLIES) ? qtrue : qfalse;
-      }
-      break;
-  }
-
-  if (weapon == WP_NONE || weapon == WP_KNIFE || weapon == WP_LUGER ||
-      weapon == WP_COLT) {
-    return qtrue;
-  }
-
-  // if not any of the above
-  return qfalse;
 }
 
 #define AMMOFORWEAP BG_FindAmmoForWeapon(item->giTag)

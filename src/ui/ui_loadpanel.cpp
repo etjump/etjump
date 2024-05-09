@@ -29,11 +29,7 @@ panel_button_text_t missiondescriptionHeaderTxt = {
     &bg_loadscreenfont2,
 };
 
-panel_button_text_t campaignpheaderTxt = {
-    0.2f, 0.2f, {1.0f, 1.0f, 1.0f, 0.6f}, 0, 0, &bg_loadscreenfont2,
-};
-
-panel_button_text_t campaignpTxt = {
+panel_button_text_t mapTxt = {
     0.35f, 0.35f, {1.0f, 1.0f, 1.0f, 0.6f}, 0, 0, &bg_loadscreenfont2,
 };
 
@@ -61,18 +57,6 @@ panel_button_t loadScreenBack = {
     NULL,
 };
 
-/*panel_button_t loadingPanelHeaderText = {
-    NULL,
-    "***TOP SECRET***",
-    { 440, 72, 200, 32 },
-    { 0, 0, 0, 0, 0, 0, 0, 0 },
-    &missiondescriptionHeaderTxt,
-    NULL,
-    NULL,
-    BG_PanelButtonsRender_Text,
-    NULL,
-};*/
-
 panel_button_t loadingPanelText = {
     NULL,
     "",
@@ -85,39 +69,20 @@ panel_button_t loadingPanelText = {
     NULL,
 };
 
-/*panel_button_t campaignheaderPanelText = {
-    NULL,
-    "Connecting to:",
-    { 456, 24, 152, 232 },
-    { 0, 0, 0, 0, 0, 0, 0, 0 },
-    &campaignpheaderTxt,
-    NULL,
-    NULL,
-    BG_PanelButtonsRender_Text,
-    NULL,
-};
-*/
-panel_button_t campaignPanelText = {
+panel_button_t mapPanelText = {
     NULL,
     "", //"CONNECTING...",
     {451, 11, 178, 35},
     {0, 0, 0, 0, 0, 0, 0, 0},
-    &campaignpTxt, /* font		*/
-    NULL,          /* keyDown	*/
-    NULL,          /* keyUp	*/
+    &mapTxt, /* font		*/
+    NULL,    /* keyDown	*/
+    NULL,    /* keyUp	*/
     UI_LoadPanel_RenderHeaderText,
     NULL,
 };
 
 panel_button_t *loadpanelButtons[] = {
-    &loadScreenMap,
-    &loadScreenBack,
-
-    &loadingPanelText, /*&loadingPanelHeaderText,*/
-
-    /*&campaignheaderPanelText,*/ &campaignPanelText,
-
-    NULL,
+    &loadScreenMap, &loadScreenBack, &loadingPanelText, &mapPanelText, nullptr,
 };
 
 std::vector<panel_button_t> loadpanelButtonsLayout;
@@ -197,18 +162,6 @@ void UI_LoadPanel_RenderPercentageMeter(panel_button_t *button) {
 
   trap_R_Add2dPolys(verts, 4, button->hShaderNormal);
 }
-/*
-void UI_LoadPanel_RenderCampaignNameText( panel_button_t* button ) {
-    uiClientState_t	cstate;
-    char *s;
-
-    trap_GetClientState( &cstate );
-
-    s = Q_strupr( cstate.servername );
-
-    Text_Paint_Ext( button->rect.x, button->rect.y, button->font->scalex,
-button->font->scaley, button->font->colour, s, 0, 14, 0, button->font->font );
-}*/
 
 void MiniAngleToAxis(vec_t angle, vec2_t axes[2]) {
   axes[0][0] = (vec_t)sin(-angle);

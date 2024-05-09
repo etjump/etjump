@@ -282,44 +282,6 @@ void CG_ParseOIDInfos(void) {
 
 /*
 ==================
-CG_ParseWolfinfo
-
-NERVE - SMF
-==================
-*/
-void CG_ParseWolfinfo(void) {
-  int old_gs = cgs.gamestate;
-  const char *info;
-
-  info = CG_ConfigString(CS_WOLFINFO);
-
-  cgs.currentRound = Q_atoi(Info_ValueForKey(info, "g_currentRound"));
-  cgs.nextTimeLimit = Q_atof(Info_ValueForKey(info, "g_nextTimeLimit"));
-  cgs.gamestate = (gamestate_t)Q_atoi(Info_ValueForKey(info, "gamestate"));
-  cgs.currentCampaign = Info_ValueForKey(info, "g_currentCampaign");
-  cgs.currentCampaignMap =
-      Q_atoi(Info_ValueForKey(info, "g_currentCampaignMap"));
-
-  // OSP - Announce game in progress if we are really playing
-  if (old_gs != GS_PLAYING && cgs.gamestate == GS_PLAYING) {
-    //		if(cg_announcer.integer > 0)
-    // trap_S_StartLocalSound(cgs.media.countFight,
-    // CHAN_ANNOUNCER);
-    Pri("^1FIGHT!\n");
-    CPri("^1FIGHT!\n");
-  }
-
-  if (!cgs.localServer) {
-    trap_Cvar_Set("gamestate", va("%i", cgs.gamestate));
-  }
-
-  if (old_gs != GS_WARMUP_COUNTDOWN && cgs.gamestate == GS_WARMUP_COUNTDOWN) {
-    CG_ParseWarmup();
-  }
-}
-
-/*
-==================
 CG_ParseSpawns
 ==================
 */
@@ -649,9 +611,6 @@ static void CG_ConfigStringModified(void) {
     CG_ParseSysteminfo();
   } else if (num == CS_WARMUP) {
     CG_ParseWarmup();
-  } else if (num == CS_WOLFINFO) // NERVE - SMF
-  {
-    CG_ParseWolfinfo();
   } else if (num == CS_FIRSTBLOOD) {
     cg.teamFirstBlood = Q_atoi(str);
   } else if (num == CS_ROUNDSCORES1) {
@@ -988,8 +947,6 @@ static void CG_MapRestart(void) {
   cgs.fadeStartTime = 0;
   cgs.fadeAlpha = 0;
   trap_Cvar_Set("cg_letterbox", "0");
-
-  CG_ParseWolfinfo();
 
   CG_ParseEntitiesFromString();
 
@@ -1868,16 +1825,9 @@ void CG_parseWeaponStatsGS_cmd(void) {
         str = va("%d", ci->skillpoints[i]);
       }
 
-      if (cgs.gametype == GT_WOLF_CAMPAIGN) {
-        Q_strncpyz(gs->strSkillz[gs->cSkills++],
-                   va("%-15s %3d %s %12d", skillNames[i], ci->skill[i], str,
-                      ci->medals[i]),
-                   sizeof(gs->strSkillz[0]));
-      } else {
-        Q_strncpyz(gs->strSkillz[gs->cSkills++],
-                   va("%-15s %3d %s", skillNames[i], ci->skill[i], str),
-                   sizeof(gs->strSkillz[0]));
-      }
+      Q_strncpyz(gs->strSkillz[gs->cSkills++],
+                 va("%-15s %3d %s", skillNames[i], ci->skill[i], str),
+                 sizeof(gs->strSkillz[0]));
     }
   }
 }
@@ -1988,12 +1938,9 @@ void CG_parseWeaponStats_cmd(void(txt_dump)(const char *)) {
     txt_dump("\n\n\n");
   }
 
-  // Medals only in campaign mode
-  txt_dump(va("Skills         Level/Points%s\n",
-              ((cgs.gametype == GT_WOLF_CAMPAIGN) ? "  Medals" : "")));
+  txt_dump("Skills         Level/Points\n");
   if (fFull) {
-    txt_dump(va("---------------------------%s\n",
-                ((cgs.gametype == GT_WOLF_CAMPAIGN) ? "--------" : "")));
+    txt_dump("---------------------------\n");
   } else {
     txt_dump("\n");
   }
@@ -2016,12 +1963,7 @@ void CG_parseWeaponStats_cmd(void(txt_dump)(const char *)) {
         str = va("%d (%d)", ci->skill[i], ci->skillpoints[i]);
       }
 
-      if (cgs.gametype == GT_WOLF_CAMPAIGN) {
-        txt_dump(
-            va("%-14s ^3%-12s  ^2%6d\n", skillNames[i], str, ci->medals[i]));
-      } else {
-        txt_dump(va("%-14s ^3%-12s\n", skillNames[i], str));
-      }
+      txt_dump(va("%-14s ^3%-12s\n", skillNames[i], str));
     }
   }
 }

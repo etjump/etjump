@@ -241,31 +241,6 @@ void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor,
       attacker->client->pers.teamState.basedefense++;
       return;
     }
-
-    /*		if (g_gametype.integer < GT_WOLF) { // JPW NERVE no
-       attacker protect in wolf MP if (carrier && carrier !=
-       attacker) { VectorSubtract(targ->s.origin,
-       carrier->s.origin, v1);
-                    VectorSubtract(attacker->s.origin,
-       carrier->s.origin, v1);
-
-                    if (VectorLengthSquared(v1) <
-       SQR(CTF_ATTACKER_PROTECT_RADIUS) ||
-       VectorLengthSquared(v2) <
-       SQR(CTF_ATTACKER_PROTECT_RADIUS) || CanDamage(carrier,
-       targ->s.origin) || CanDamage(carrier,
-       attacker->s.origin)) { AddScore(attacker,
-       CTF_CARRIER_PROTECT_BONUS);
-                        attacker->client->pers.teamState.carrierdefense++;
-                        PrintMsg(NULL, "%s" S_COLOR_WHITE "
-       defends the %s's flag carrier.\n",
-       attacker->client->pers.netname,
-                            TeamName(attacker->client->sess.sessionTeam));
-                        return;
-                    }
-                }
-            }*/
-
   } // JPW NERVE
 
   // JPW NERVE -- look for nearby checkpoints and spawnpoints
@@ -628,38 +603,25 @@ int Pickup_Team(gentity_t *ent, gentity_t *other) {
   int team;
   gclient_t *cl = other->client;
 
-  // START Mad Doc - TDF
-  if ((g_gametype.integer != GT_SINGLE_PLAYER) &&
-      (g_gametype.integer != GT_COOP)) {
-
-    // figure out what team this flag is
-    if (strcmp(ent->classname, "team_CTF_redflag") == 0) {
-      team = TEAM_AXIS;
-    } else if (strcmp(ent->classname, "team_CTF_blueflag") == 0) {
-      team = TEAM_ALLIES;
-    } else {
-      PrintMsg(other, "Don't know what team the flag is on.\n");
-      return 0;
-    }
-
-    // JPW NERVE -- set flag model in carrying entity if
-    // multiplayer and flagmodel is set
-    other->message = ent->message;
-    other->s.otherEntityNum2 = ent->s.modelindex2;
-    // jpw
-
-    return ((team == cl->sess.sessionTeam)
-                ? Team_TouchOurFlag
-                : Team_TouchEnemyFlag)(ent, other, team);
+  // figure out what team this flag is
+  if (strcmp(ent->classname, "team_CTF_redflag") == 0) {
+    team = TEAM_AXIS;
+  } else if (strcmp(ent->classname, "team_CTF_blueflag") == 0) {
+    team = TEAM_ALLIES;
   } else {
-    other->message = ent->message;
-    other->s.otherEntityNum2 = ent->s.modelindex2;
-
-    // for single player, we want the allies to be able to pick
-    // up both flags
-    return Team_TouchEnemyFlag(ent, other, TEAM_ALLIES);
+    PrintMsg(other, "Don't know what team the flag is on.\n");
+    return 0;
   }
-  // END Mad Doc - TDF
+
+  // JPW NERVE -- set flag model in carrying entity if
+  // multiplayer and flagmodel is set
+  other->message = ent->message;
+  other->s.otherEntityNum2 = ent->s.modelindex2;
+  // jpw
+
+  return ((team == cl->sess.sessionTeam)
+              ? Team_TouchOurFlag
+              : Team_TouchEnemyFlag)(ent, other, team);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -1839,10 +1801,6 @@ void G_verifyMatchState(int nTeam) {
     if (TeamCount(-1, nTeam) == 0) {
       if (g_doWarmup.integer > 0) {
         level.lastRestartTime = level.time;
-        if (g_gametype.integer == GT_WOLF_STOPWATCH) {
-          trap_Cvar_Set("g_currentRound", "0");
-          trap_Cvar_Set("g_nextTimeLimit", "0");
-        }
 
         trap_SendConsoleCommand(EXEC_APPEND,
                                 va("map_restart 0 %i\n", GS_WARMUP));
@@ -1875,23 +1833,16 @@ qboolean G_teamJoinCheck(int team_num, gentity_t *ent) {
       return (qtrue);
     }
 
-    if (g_gametype.integer != GT_WOLF_LMS) {
-      // Check for full teams
-      if (team_maxplayers.integer > 0 && team_maxplayers.integer <= cnt) {
-        G_printFull(va("The %s team is full!", aTeams[team_num]), ent);
-        return (qfalse);
+    // Check for full teams
+    if (team_maxplayers.integer > 0 && team_maxplayers.integer <= cnt) {
+      G_printFull(va("The %s team is full!", aTeams[team_num]), ent);
+      return (qfalse);
 
-        // Check for locked teams
-      } else if (teamInfo[team_num].team_lock &&
-                 (!(ent->client->pers.invite & team_num))) {
-        G_printFull(va("The %s team is LOCKED!", aTeams[team_num]), ent);
-        return (qfalse);
-      }
-    } else {
-      if (team_maxplayers.integer > 0 && team_maxplayers.integer <= cnt) {
-        G_printFull(va("The %s team is full!", aTeams[team_num]), ent);
-        return (qfalse);
-      }
+      // Check for locked teams
+    } else if (teamInfo[team_num].team_lock &&
+               (!(ent->client->pers.invite & team_num))) {
+      G_printFull(va("The %s team is LOCKED!", aTeams[team_num]), ent);
+      return (qfalse);
     }
   }
 

@@ -158,17 +158,12 @@ void G_spawnPrintf(int print_type, int print_time, gentity_t *owner) {
 void G_addStats(gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod) {
   int dmg, ref;
 
-  // Keep track of only active player-to-player interactions in a real
-  // game
+  // Keep track of only active player-to-player interactions in a real game
   if (!targ || !targ->client ||
 #ifndef DEBUG_STATS
       g_gamestate.integer != GS_PLAYING ||
 #endif
-      mod == MOD_SWITCHTEAM ||
-      (g_gametype.integer >= GT_WOLF &&
-       (targ->client->ps.pm_flags & PMF_LIMBO)) ||
-      (g_gametype.integer < GT_WOLF &&
-       (targ->s.eFlags == EF_DEAD || targ->client->ps.pm_type == PM_DEAD))) {
+      mod == MOD_SWITCHTEAM || targ->client->ps.pm_flags & PMF_LIMBO) {
     return;
   }
 
@@ -208,8 +203,7 @@ void G_addStats(gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod) {
   }
 
   // Player team stats
-  if (g_gametype.integer >= GT_WOLF &&
-      targ->client->sess.sessionTeam == attacker->client->sess.sessionTeam) {
+  if (targ->client->sess.sessionTeam == attacker->client->sess.sessionTeam) {
     attacker->client->sess.team_damage += dmg;
     if (targ->health <= 0) {
       attacker->client->sess.team_kills++;
@@ -571,16 +565,8 @@ void G_matchInfoDump(unsigned int dwDumpType) {
           G_statsall_cmd(ent, 0, qfalse);
         } else if (cl->sess.sessionTeam != TEAM_SPECTATOR) {
           if (cl->pers.autoaction & AA_STATSTEAM) {
-            G_statsall_cmd(ent, cl->sess.sessionTeam,
-                           qfalse); // Currently
-                                    // broken..
-                                    // need
-                                    // to
-                                    // support
-                                    // the
-                                    // overloading
-                                    // of
-                                    // dwCommandID
+            // Currently broken.. need to support the overloading of dwCommandID
+            G_statsall_cmd(ent, cl->sess.sessionTeam, qfalse);
           } else {
             CP(va("ws %s\n", G_createStats(ent)));
           }
@@ -589,16 +575,8 @@ void G_matchInfoDump(unsigned int dwDumpType) {
           int pid = cl->sess.spectatorClient;
 
           if ((cl->pers.autoaction & AA_STATSTEAM)) {
-            G_statsall_cmd(ent, level.clients[pid].sess.sessionTeam,
-                           qfalse); // Currently
-                                    // broken..
-                                    // need
-                                    // to
-                                    // support
-                                    // the
-                                    // overloading
-                                    // of
-                                    // dwCommandID
+            // Currently broken.. need to support the overloading of dwCommandID
+            G_statsall_cmd(ent, level.clients[pid].sess.sessionTeam, qfalse);
           } else {
             CP(va("ws %s\n", G_createStats(g_entities + pid)));
           }
@@ -613,44 +591,6 @@ void G_matchInfoDump(unsigned int dwDumpType) {
     } else if (dwDumpType == EOM_MATCHINFO) {
       if (!(cl->pers.clientFlags & CGF_STATSDUMP)) {
         G_printMatchInfo(ent);
-      }
-      if (g_gametype.integer == GT_WOLF_STOPWATCH) {
-        if (g_currentRound.integer == 1) // We've already missed the
-                                         // switch
-        {
-          CP(va("print \">>> ^3Clock set "
-                "to: %d:%02d\n\n\n\"",
-                g_nextTimeLimit.integer,
-                (int)(60.0 * (float)(g_nextTimeLimit.value -
-                                     g_nextTimeLimit.integer))));
-        } else {
-          float val =
-              (float)((level.timeCurrent - (level.startTime + level.time -
-                                            level.intermissiontime)) /
-                      60000.0);
-          if (val < g_timelimit.value) {
-            CP(va("print \">>> "
-                  "^3Objective "
-                  "reached at "
-                  "%d:%02d "
-                  "(original: "
-                  "%d:%02d)"
-                  "\n\n\n\"",
-                  (int)val, (int)(60.0 * (val - (int)val)), g_timelimit.integer,
-                  (int)(60.0 *
-                        (float)(g_timelimit.value - g_timelimit.integer))));
-          } else {
-            CP(va("print \">>> "
-                  "^3Objective "
-                  "NOT reached "
-                  "in time "
-                  "(%d:%02d)"
-                  "\n\n\n\"",
-                  g_timelimit.integer,
-                  (int)(60.0 *
-                        (float)(g_timelimit.value - g_timelimit.integer))));
-          }
-        }
       }
     }
   }
@@ -672,14 +612,7 @@ int G_checkServerToggle(vmCvar_t *cv) {
     } else {
       nFlag = CV_SVS_WARMUPDMG;
     }
-  } else if (cv == &g_nextmap && g_gametype.integer != GT_WOLF_CAMPAIGN) {
-    if (*cv->string) {
-      level.server_settings |= CV_SVS_NEXTMAP;
-    } else {
-      level.server_settings &= ~CV_SVS_NEXTMAP;
-    }
-    return (qtrue);
-  } else if (cv == &g_nextcampaign && g_gametype.integer == GT_WOLF_CAMPAIGN) {
+  } else if (cv == &g_nextmap) {
     if (*cv->string) {
       level.server_settings |= CV_SVS_NEXTMAP;
     } else {

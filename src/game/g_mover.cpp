@@ -2148,62 +2148,16 @@ void G_TryDoor(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   if ((ent->s.apos.trType == TR_STATIONARY &&
        ent->s.pos.trType == TR_STATIONARY)) {
     if (ent->active == qfalse) {
-      if (ent->key < 0 || !G_AllowTeamsAllowed(ent, activator) ||
-          (G_IsSinglePlayerGame() &&
-           ent->key == KEY_LOCKED_PICKABLE)) // door force
-                                             // locked
-      {
-        //				if(!walking &&
-        // activator)	// only
-        // send audible event if not trying to
-        // open slowly AICast_AudibleEvent(
-        // activator->s.clientNum,
-        // ent->s.origin, HEAR_RANGE_DOOR_LOCKED
-        // );
-        //// "someone tried locked door near
-        /// me!"
+      // door force locked
+      if (ent->key < 0 || !G_AllowTeamsAllowed(ent, activator)) {
         G_AddEvent(ent, EV_GENERAL_SOUND, ent->soundPos3);
         return;
       }
 
-      /*			// TAT 2/3/2003 - want
-      keys in SP if (G_IsSinglePlayerGame()
-                      && activator
-                      // door requires key
-                      && ent->key > 0)
-                  {
-                      gitem_t *item =
-      BG_FindItemForKey(ent->key, 0);
-                      if(!(activator->client->ps.stats[STAT_KEYS]
-      & (1<<item->giTag)))
-                      {
-      //					if(!walking)	// only send
-      audible event if not trying to open slowly
-      //
-      AICast_AudibleEvent( activator->s.clientNum,
-      ent->s.origin, HEAR_RANGE_DOOR_LOCKED );	//
-      "someone tried locked door near me!"
-                          // player does not have key
-                          G_AddEvent( ent,
-      EV_GENERAL_SOUND, ent->soundPos3); return;
-                      }
-                  }
-      */
-
       if (ent->teammaster && ent->team && ent != ent->teammaster) {
         ent->teammaster->active = qtrue;
         if (walking) {
-          ent->teammaster->flags |= FL_SOFTACTIVATE; // no
-                                                     // noise
-                                                     // generated
-        } else {
-          //					if(activator)
-          //						AICast_AudibleEvent(
-          // activator->s.clientNum,
-          // ent->s.origin,
-          // HEAR_RANGE_DOOR_OPEN );
-          // // "someone opened door
-          // near me!"
+          ent->teammaster->flags |= FL_SOFTACTIVATE; // no noise generated
         }
 
         Use_BinaryMover(ent->teammaster, activator, activator);
@@ -2211,16 +2165,7 @@ void G_TryDoor(gentity_t *ent, gentity_t *other, gentity_t *activator) {
       } else {
         ent->active = qtrue;
         if (walking) {
-          ent->flags |= FL_SOFTACTIVATE; // no
-                                         // noise
-        } else {
-          //					if(activator)
-          //						AICast_AudibleEvent(
-          // activator->s.clientNum,
-          // ent->s.origin,
-          // HEAR_RANGE_DOOR_OPEN );
-          // // "someone opened door
-          // near me!"
+          ent->flags |= FL_SOFTACTIVATE; // no noise
         }
 
         Use_BinaryMover(ent, activator, activator);
@@ -3031,17 +2976,9 @@ void info_limbo_camera_setup(gentity_t *self) {
 
 void SP_info_limbo_camera(gentity_t *self) {
   if (!(self->spawnflags & 2)) {
-    if (g_gametype.integer == GT_WOLF_LMS) {
-      if (!(self->spawnflags & 1)) {
-        G_FreeEntity(self);
-        return;
-      }
-    }
-    if (g_gametype.integer != GT_WOLF_LMS) {
-      if ((self->spawnflags & 1)) {
-        G_FreeEntity(self);
-        return;
-      }
+    if ((self->spawnflags & 1)) {
+      G_FreeEntity(self);
+      return;
     }
   }
 
@@ -3741,14 +3678,6 @@ void SP_func_door_rotating(gentity_t *ent) {
   } else {
     ent->key = -2; // otherwise, set the key when this ent
                    // finishes spawning
-  }
-  // special case for single player
-  if (G_IsSinglePlayerGame() && (ent->key == 99)) {
-    ent->key = KEY_LOCKED_PICKABLE;
-
-    // TAT 1/29/2003 - also load how long it takes to pick the
-    // lock - default to 30 seconds
-    G_SpawnInt("lockpickTime", "30", &ent->grenadeFired);
   }
 
   // if the key is invalid, set the key in the finishSpawning routine
@@ -4573,16 +4502,6 @@ void G_Activate(gentity_t *ent, gentity_t *activator) {
     {
       return;
     }
-
-    /*		// TAT 2/3/2003 - want keys for SP
-            if (G_IsSinglePlayerGame() && ent->key > 0)	// ent
-       requires key
-            {
-                gitem_t *item = BG_FindItemForKey(ent->key, 0);
-                if (!(activator->client->ps.stats[STAT_KEYS] &
-       (1<<item->giTag))) return;
-            }
-            */
 
     if (!Q_stricmp(ent->classname,
                    "script_mover")) // RF, dont activate script_mover's

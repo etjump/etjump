@@ -1,9 +1,8 @@
 file(GLOB GAME_HEADERS "*.h" "*.hpp")
 
-add_library(qagame MODULE 
+add_library(qagame MODULE
 	"bg_animation.cpp"
 	"bg_animgroup.cpp"
-	"bg_campaign.cpp"
 	"bg_character.cpp"
 	"bg_classes.cpp"
 	"bg_misc.cpp"
@@ -97,7 +96,7 @@ add_library(qagame MODULE
 target_compile_definitions(qagame PRIVATE GAMEDLL)
 target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt::fmt)
 target_link_libraries(qagame PRIVATE $<IF:$<CXX_COMPILER_ID:MSVC>,,pthread>)
-set_target_properties(qagame PROPERTIES 
+set_target_properties(qagame PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_DIR_PATH}")

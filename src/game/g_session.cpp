@@ -203,39 +203,7 @@ void G_ReadSessionData(gclient_t *client) {
   }
   // OSP
 
-  // Arnout: likely there are more cases in which we don't want this
-  if (g_gametype.integer != GT_SINGLE_PLAYER && g_gametype.integer != GT_COOP &&
-      g_gametype.integer != GT_WOLF &&
-      g_gametype.integer != GT_WOLF_STOPWATCH &&
-      !(g_gametype.integer == GT_WOLF_CAMPAIGN &&
-        (g_campaigns[level.currentCampaign].current == 0 ||
-         level.newCampaign)) &&
-      !(g_gametype.integer == GT_WOLF_LMS && g_currentRound.integer == 0)) {
-
-    trap_Cvar_VariableStringBuffer(va("sessionstats%i", clientNum), s,
-                                   sizeof(s));
-
-    // Arnout: read the clients stats (7) and medals (7)
-    sscanf(s, "%f %f %f %f %f %f %f %i %i %i %i %i %i %i",
-           &client->sess.skillpoints[0], &client->sess.skillpoints[1],
-           &client->sess.skillpoints[2], &client->sess.skillpoints[3],
-           &client->sess.skillpoints[4], &client->sess.skillpoints[5],
-           &client->sess.skillpoints[6], &client->sess.medals[0],
-           &client->sess.medals[1], &client->sess.medals[2],
-           &client->sess.medals[3], &client->sess.medals[4],
-           &client->sess.medals[5], &client->sess.medals[6]);
-  }
-
   G_CalcRank(client);
-
-  test = (g_altStopwatchMode.integer != 0 || g_currentRound.integer == 1)
-             ? qtrue
-             : qfalse;
-
-  if (g_gametype.integer == GT_WOLF_STOPWATCH &&
-      g_gamestate.integer != GS_PLAYING && test) {
-    G_ClientSwap(client);
-  }
 
   if (g_swapteams.integer) {
     trap_Cvar_Set("g_swapteams", "0");
@@ -338,14 +306,12 @@ void G_InitWorldSession() {
 
     // See if we need to clear player stats
     // FIXME: deal with the multi-map missions
-    if (g_gametype.integer != GT_WOLF_CAMPAIGN) {
-      if ((tmp = strchr(va("%s", tmp), ' ')) != nullptr) {
-        tmp++;
-        trap_GetServerinfo(s, sizeof(s));
-        if (Q_stricmp(tmp, Info_ValueForKey(s, "mapname"))) {
-          level.fResetStats = qtrue;
-          G_Printf("Map changed, clearing player stats.\n");
-        }
+    if ((tmp = strchr(va("%s", tmp), ' ')) != nullptr) {
+      tmp++;
+      trap_GetServerinfo(s, sizeof(s));
+      if (Q_stricmp(tmp, Info_ValueForKey(s, "mapname"))) {
+        level.fResetStats = qtrue;
+        G_Printf("Map changed, clearing player stats.\n");
       }
     }
   }
@@ -416,10 +382,7 @@ void G_WriteSessionData(qboolean restart) {
   // Keep stats for all players in sync
   for (i = 0; !level.fResetStats && i < level.numConnectedClients; i++) {
     if ((g_gamestate.integer == GS_WARMUP_COUNTDOWN &&
-         ((g_gametype.integer == GT_WOLF_STOPWATCH &&
-           level.clients[level.sortedClients[i]].sess.rounds >= 2) ||
-          (g_gametype.integer != GT_WOLF_STOPWATCH &&
-           level.clients[level.sortedClients[i]].sess.rounds >= 1)))) {
+         level.clients[level.sortedClients[i]].sess.rounds >= 1)) {
       level.fResetStats = qtrue;
     }
   }

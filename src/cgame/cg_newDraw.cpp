@@ -549,7 +549,6 @@ void CG_MouseEvent(int x, int y) {
     case CGAME_EVENT_DEMO:
     case CGAME_EVENT_SPEAKEREDITOR:
     case CGAME_EVENT_GAMEVIEW:
-    case CGAME_EVENT_CAMPAIGNBREIFING:
     case CGAME_EVENT_FIRETEAMMSG:
     case CGAME_EVENT_RTV:
       if (!cgs.demoCam.renderingFreeCam) {
@@ -673,7 +672,6 @@ void CG_EventHandling(int type, qboolean fForced) {
     case CGAME_EVENT_SPEAKEREDITOR:
     case CGAME_EVENT_GAMEVIEW:
     case CGAME_EVENT_NONE:
-    case CGAME_EVENT_CAMPAIGNBREIFING:
     case CGAME_EVENT_FIRETEAMMSG:
     case CGAME_EVENT_RTV:
     default:
@@ -699,8 +697,6 @@ void CG_EventHandling(int type, qboolean fForced) {
           trap_Key_SetCatcher(KEYCATCH_CGAME);
           return;
         }
-      } else if (cgs.eventHandling == CGAME_EVENT_CAMPAIGNBREIFING) {
-        type = CGAME_EVENT_GAMEVIEW;
       } else if (cgs.eventHandling == CGAME_EVENT_FIRETEAMMSG) {
         cg.showFireteamMenu = qfalse;
         trap_Cvar_Set("cl_bypassmouseinput", "0");
@@ -751,10 +747,6 @@ void CG_KeyEvent(int key, qboolean down) {
         CG_RunBinding(key, down);
       }
       return;
-
-    case CGAME_EVENT_CAMPAIGNBREIFING:
-      CG_LoadPanel_KeyHandling(key, down);
-      break;
 
     case CGAME_EVENT_FIRETEAMMSG:
       CG_Fireteams_KeyHandling(key, down);

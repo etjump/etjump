@@ -718,11 +718,9 @@ argv(0) god
 void Cmd_God_f(gentity_t *ent) {
   const char *msg;
   char *name;
-  qboolean godAll = qfalse;
 
   if (ent->client->sess.timerunActive && g_debugTimeruns.integer <= 0) {
-    CP("cp \"You cannot use cheats while timerun is "
-       "active.\n\"");
+    CP("cp \"You cannot use cheats while timerun is active.\n\"");
     return;
   }
 
@@ -737,56 +735,20 @@ void Cmd_God_f(gentity_t *ent) {
 
   name = ConcatArgs(1);
 
-  // are we supposed to make all our teammates gods too?
-  if (Q_stricmp(name, "all") == 0) {
-    godAll = qtrue;
-  }
-
-  // can only use this cheat in single player
-  if (godAll && g_gametype.integer == GT_SINGLE_PLAYER) {
-    int j;
-    qboolean settingFlag = qtrue;
-    gentity_t *other;
-
-    // are we turning it on or off?
-    if (ent->flags & FL_GODMODE) {
-      settingFlag = qfalse;
-    }
-
-    // loop through all players
-    for (j = 0; j < level.maxclients; j++) {
-      other = &g_entities[j];
-      // if they're on the same team
-      if (OnSameTeam(other, ent)) {
-        // set or clear the flag
-        if (settingFlag) {
-          other->flags |= FL_GODMODE;
-        } else {
-          other->flags &= ~FL_GODMODE;
-        }
-      }
-    }
-    if (settingFlag) {
-      msg = "godmode all ON\n";
-    } else {
-      msg = "godmode all OFF\n";
-    }
+  if (!Q_stricmp(name, "on") || Q_atoi(name)) {
+    ent->flags |= FL_GODMODE;
+  } else if (!Q_stricmp(name, "off") || !Q_stricmp(name, "0")) {
+    ent->flags &= ~FL_GODMODE;
   } else {
-    if (!Q_stricmp(name, "on") || Q_atoi(name)) {
-      ent->flags |= FL_GODMODE;
-    } else if (!Q_stricmp(name, "off") || !Q_stricmp(name, "0")) {
-      ent->flags &= ~FL_GODMODE;
-    } else {
-      ent->flags ^= FL_GODMODE;
-    }
-    if (!(ent->flags & FL_GODMODE)) {
-      msg = "godmode OFF\n";
-    } else {
-      msg = "godmode ON\n";
-    }
+    ent->flags ^= FL_GODMODE;
+  }
+  if (!(ent->flags & FL_GODMODE)) {
+    msg = "godmode OFF\n";
+  } else {
+    msg = "godmode ON\n";
   }
 
-  trap_SendServerCommand(ent - g_entities, va("print \"%s\"", msg));
+  trap_SendServerCommand(ClientNum(ent), va("print \"%s\"", msg));
 }
 
 /*
@@ -1181,12 +1143,6 @@ void Cmd_Kill_f(gentity_t *ent) {
     return;
   }
 
-#ifdef SAVEGAME_SUPPORT
-  if (g_gametype.integer == GT_SINGLE_PLAYER && g_reloading.integer) {
-    return;
-  }
-#endif // SAVEGAME_SUPPORT
-
   ent->flags &= ~FL_GODMODE;
   ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
   ent->client->ps.persistant[PERS_HWEAPON_USE] =
@@ -1395,23 +1351,15 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
   if (g_gamestate.integer == GS_PLAYING &&
       (client->sess.sessionTeam == TEAM_AXIS ||
        client->sess.sessionTeam == TEAM_ALLIES)) {
-    if (g_gametype.integer == GT_WOLF_LMS && level.numTeamClients[0] > 0 &&
-        level.numTeamClients[1] > 0) {
-      trap_SendServerCommand(clientNum, "cp \"Will spawn next "
-                                        "round, please wait.\n\"");
-      limbo(ent, qfalse);
-      return (qfalse);
-    } else {
-      int i;
-      int x = client->sess.sessionTeam - TEAM_AXIS;
+    int i;
+    int x = client->sess.sessionTeam - TEAM_AXIS;
 
-      for (i = 0; i < MAX_COMMANDER_TEAM_SOUNDS; i++) {
-        if (level.commanderSounds[x][i].index) {
-          gentity_t *tent =
-              G_TempEntity(client->ps.origin, EV_GLOBAL_CLIENT_SOUND);
-          tent->s.eventParm = level.commanderSounds[x][i].index - 1;
-          tent->s.teamNum = clientNum;
-        }
+    for (i = 0; i < MAX_COMMANDER_TEAM_SOUNDS; i++) {
+      if (level.commanderSounds[x][i].index) {
+        gentity_t *tent =
+            G_TempEntity(client->ps.origin, EV_GLOBAL_CLIENT_SOUND);
+        tent->s.eventParm = level.commanderSounds[x][i].index - 1;
+        tent->s.teamNum = clientNum;
       }
     }
   }
@@ -3237,14 +3185,8 @@ Cmd_StopCamera_f
 =================
 */
 void Cmd_StopCamera_f(gentity_t *ent) {
-  //	gentity_t *sp;
-
   if (ent->client->cameraPortal &&
       (ent->client->ps.eFlags & EF_VIEWING_CAMERA)) {
-    // send a script event
-    //		G_Script_ScriptEvent( ent->client->cameraPortal,
-    //"stopcam", ""
-    //);
 
     // go back into noclient mode
     G_FreeEntity(ent->client->cameraPortal);
@@ -3252,31 +3194,6 @@ void Cmd_StopCamera_f(gentity_t *ent) {
 
     ent->s.eFlags &= ~EF_VIEWING_CAMERA;
     ent->client->ps.eFlags &= ~EF_VIEWING_CAMERA;
-
-    // G_SetOrigin( ent, ent->client->cameraOrigin );	// restore
-    // our origin VectorCopy( ent->client->cameraOrigin,
-    // ent->client->ps.origin );
-
-    // (SA) trying this in client to avoid 1 frame of player
-    // drawing
-    //		ent->s.eFlags &= ~EF_NODRAW;
-    //		ent->client->ps.eFlags &= ~EF_NODRAW;
-
-    // RF, if we are near the spawn point, save the "current"
-    // game, for reloading after death
-    //		sp = NULL;
-    // gcc: suggests () around assignment used as truth value
-    //		while ((sp = G_Find( sp, FOFS(classname),
-    //"info_player_deathmatch"
-    //))) {	// info_player_start becomes info_player_deathmatch
-    // in it's
-    // spawn
-    // functon 			if (Distance( ent->s.pos.trBase,
-    // sp->s.origin ) < 256
-    // && trap_InPVS( ent->s.pos.trBase, sp->s.origin )) {
-    // G_SaveGame( NULL ); 				break;
-    //			}
-    //		}
   }
 }
 
@@ -3367,8 +3284,7 @@ qboolean Do_Activate2_f(gentity_t *ent, gentity_t *traceEnt) {
 
           if (BODY_VALUE(traceEnt) >= 250) {
 
-            traceEnt->nextthink =
-                traceEnt->timestamp + BODY_TIME(BODY_TEAM(traceEnt));
+            traceEnt->nextthink = traceEnt->timestamp + BODY_TIME;
 
             ent->client->ps.powerups[PW_OPS_DISGUISED] = 1;
             ent->client->ps.powerups[PW_OPS_CLASS_1] = BODY_CLASS(traceEnt) & 1;

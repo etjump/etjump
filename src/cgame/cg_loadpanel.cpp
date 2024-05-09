@@ -39,11 +39,7 @@ panel_button_text_t missiondescriptionHeaderTxt = {
     &bg_loadscreenfont2,
 };
 
-panel_button_text_t campaignpheaderTxt = {
-    0.2f, 0.2f, {1.0f, 1.0f, 1.0f, 0.6f}, 0, 0, &bg_loadscreenfont2,
-};
-
-panel_button_text_t campaignpTxt = {
+panel_button_text_t mapTxt = {
     0.30f, 0.30f, {1.0f, 1.0f, 1.0f, 0.6f}, 0, 0, &bg_loadscreenfont2,
 };
 
@@ -89,7 +85,7 @@ panel_button_t loadScreenPins = {
     NULL, /* font		*/
     NULL, /* keyDown	*/
     NULL, /* keyUp	*/
-    CG_LoadPanel_RenderCampaignPins,
+    CG_LoadPanel_RenderMapPin,
     NULL,
 };
 
@@ -117,15 +113,15 @@ panel_button_t missiondescriptionPanelText = {
     NULL,
 };
 
-panel_button_t campaignPanelText = {
+panel_button_t mapPanelText = {
     NULL,
     "",
     {451, 11, 178, 35},
     {0, 0, 0, 0, 0, 0, 0, 0},
-    &campaignpTxt, /* font		*/
-    NULL,          /* keyDown	*/
-    NULL,          /* keyUp	*/
-    CG_LoadPanel_RenderCampaignNameText,
+    &mapTxt, /* font		*/
+    NULL,    /* keyDown	*/
+    NULL,    /* keyUp	*/
+    CG_LoadPanel_RenderMapNameText,
     NULL,
 };
 
@@ -172,7 +168,7 @@ panel_button_t *loadpanelButtons[] = {
     &missiondescriptionPanelText,
     &missiondescriptionPanelHeaderText,
 
-    &campaignPanelText,
+    &mapPanelText,
 
     &loadScreenMeterBack,
     &loadScreenMeterBack2,
@@ -349,7 +345,7 @@ void CG_LoadPanel_RenderLoadingBar(panel_button_t *button) {
                button->rect.h, 0, 0, frac, 1, button->hShaderNormal);
 }
 
-void CG_LoadPanel_RenderCampaignNameText(panel_button_t *button) {
+void CG_LoadPanel_RenderMapNameText(panel_button_t *button) {
   const int MAX_LEN = 18; // the box fits roughly 18 chars on default text scale
   float textScale = button->font->scalex;
   int len = Q_PrintStrlen(cgs.arenaData.longname);
@@ -380,40 +376,11 @@ void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button) {
   char buffer[1024];
   float y;
 
-  // int gametype;
-
-  // DC->getConfigString( CS_SERVERINFO, buffer, sizeof( buffer ) );
-  // cs = Info_ValueForKey( buffer, "g_gametype" );
-  // gametype = Q_atoi(cs);
-
-  //	DC->fillRect( button->rect.x, button->rect.y, button->rect.w,
-  // button->rect.h, colorRed );
-
-  if (cgs.gametype == GT_WOLF_CAMPAIGN) {
-
-    cs = DC->descriptionForCampaign();
-    if (!cs) {
-      return;
-    }
-
-  } else if (cgs.gametype == GT_WOLF_LMS) {
-
-    // cs = CG_ConfigString( CS_MULTI_MAPDESC3 );
-
-    if (!cgs.arenaInfoLoaded) {
-      return;
-    }
-
-    cs = cgs.arenaData.lmsdescription;
-
-  } else {
-
-    if (!cgs.arenaInfoLoaded) {
-      return;
-    }
-
-    cs = cgs.arenaData.description;
+  if (!cgs.arenaInfoLoaded) {
+    return;
   }
+
+  cs = cgs.arenaData.description;
 
   Q_strncpyz(buffer, cs, sizeof(buffer));
   for (s = strchr(buffer, '*'); s; s = strchr(buffer, '*')) {
@@ -438,21 +405,6 @@ void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button) {
       p++;
     }
   }
-}
-
-void CG_LoadPanel_KeyHandling(int key, qboolean down) {
-  if (BG_PanelButtonsKeyEvent(key, down, loadpanelButtonsLayout)) {
-    return;
-  }
-}
-
-qboolean CG_LoadPanel_ContinueButtonKeyDown(panel_button_t *button, int key) {
-  if (key == K_MOUSE1) {
-    CG_EventHandling(CGAME_EVENT_GAMEVIEW, qfalse);
-    return qtrue;
-  }
-
-  return qfalse;
 }
 
 void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx,
@@ -486,54 +438,16 @@ void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx,
   }
 }
 
-void CG_LoadPanel_RenderCampaignPins(panel_button_t *button) {
-  int i;
-  qhandle_t shader;
-  /*char buffer[1024];
-  char *s;
-  int gametype;
+void CG_LoadPanel_RenderMapPin(panel_button_t *button) {
+  float px, py;
 
-  DC->getConfigString( CS_SERVERINFO, buffer, sizeof( buffer ) );
-  s = Info_ValueForKey( buffer, "g_gametype" );
-  gametype = Q_atoi(s);*/
-
-  if (cgs.gametype == GT_WOLF_STOPWATCH || cgs.gametype == GT_WOLF_LMS ||
-      cgs.gametype == GT_WOLF) {
-    float px, py;
-
-    if (!cgs.arenaInfoLoaded) {
-      return;
-    }
-
-    px = (cgs.arenaData.mappos[0] / 1024.f) * 440.f;
-    py = (cgs.arenaData.mappos[1] / 1024.f) * 480.f;
-
-    CG_LoadPanel_DrawPin(cgs.arenaData.longname, px, py, 0.22f, 0.25f,
-                         bg_neutralpin, 16.f, 16.f);
-  } else {
-    if (!cgs.campaignInfoLoaded) {
-      return;
-    }
-
-    for (i = 0; i < cgs.campaignData.mapCount; i++) {
-      float px, py;
-
-      cg.teamWonRounds[1] = Q_atoi(CG_ConfigString(CS_ROUNDSCORES1));
-      cg.teamWonRounds[0] = Q_atoi(CG_ConfigString(CS_ROUNDSCORES2));
-
-      if (cg.teamWonRounds[1] & (1 << i)) {
-        shader = bg_axispin;
-      } else if (cg.teamWonRounds[0] & (1 << i)) {
-        shader = bg_alliedpin;
-      } else {
-        shader = bg_neutralpin;
-      }
-
-      px = (cgs.campaignData.arenas[i].mappos[0] / 1024.f) * 440.f;
-      py = (cgs.campaignData.arenas[i].mappos[1] / 1024.f) * 480.f;
-
-      CG_LoadPanel_DrawPin(cgs.campaignData.arenas[i].longname, px, py, 0.22f,
-                           0.25f, shader, 16.f, 16.f);
-    }
+  if (!cgs.arenaInfoLoaded) {
+    return;
   }
+
+  px = (cgs.arenaData.mappos[0] / 1024.f) * 440.f;
+  py = (cgs.arenaData.mappos[1] / 1024.f) * 480.f;
+
+  CG_LoadPanel_DrawPin(cgs.arenaData.longname, px, py, 0.22f, 0.25f,
+                       bg_neutralpin, 16.f, 16.f);
 }
