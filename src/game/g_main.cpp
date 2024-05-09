@@ -90,7 +90,6 @@ vmCvar_t g_motd;
 vmCvar_t g_warmup;
 
 // NERVE - SMF
-vmCvar_t g_nextTimeLimit;
 vmCvar_t g_userTimeLimit;
 vmCvar_t g_userAlliedRespawnTime;
 vmCvar_t g_userAxisRespawnTime;
@@ -334,7 +333,6 @@ cvarTable_t gameCvarTable[] = {
     {&g_warmup, "g_warmup", "60", CVAR_ARCHIVE, 0, qtrue},
     {&g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue},
 
-    {&g_nextTimeLimit, "g_nextTimeLimit", "0", CVAR_WOLFINFO, 0, qfalse},
     {&g_gamestate, "gamestate", "-1", CVAR_WOLFINFO | CVAR_ROM, 0, qfalse},
 
     {&g_userTimeLimit, "g_userTimeLimit", "0", 0, 0, qfalse, qtrue},

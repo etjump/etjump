@@ -2033,7 +2033,6 @@ typedef struct {
   animScriptData_t animScriptData;
 
   int currentVoiceClient;
-  float nextTimeLimit;
   int minclients;
   gamestate_t gamestate;
 

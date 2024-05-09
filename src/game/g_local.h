@@ -1957,7 +1957,6 @@ extern vmCvar_t g_scriptDebugLevel;
 extern vmCvar_t g_movespeed;
 
 // NERVE - SMF
-extern vmCvar_t g_nextTimeLimit;
 extern vmCvar_t g_userTimeLimit;
 extern vmCvar_t g_userAlliedRespawnTime;
 extern vmCvar_t g_userAxisRespawnTime;
