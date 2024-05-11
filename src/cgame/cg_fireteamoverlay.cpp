@@ -113,7 +113,6 @@ void CG_ParseFireteams() {
 
     s = Info_ValueForKey(p, "ng");
     cg.fireTeams[i].noGhost = Q_atoi(s);
-    ;
 
     s = Info_ValueForKey(p, "s");
     cg.fireTeams[i].shove = Q_atoi(s);
