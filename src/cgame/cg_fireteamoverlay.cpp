@@ -353,7 +353,7 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
     iconX -= 8 + 4;
   }
 
-  if (shove) {
+  if (shove && (noGhost || cg_ghostPlayers.integer != 1)) {
     ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.shoveIcon,
                     tclr);
   }
