@@ -794,7 +794,7 @@ static void setFireteamShove(fireteamData_t *ft, bool shove) {
 
     Printer::SendPopupMessage(clientNum, msg);
 
-    if (ft->shove && !ft->noGhost) {
+    if (ft->shove && (!ft->noGhost && g_ghostPlayers.integer == 1)) {
       Printer::SendPopupMessage(
           clientNum,
           "^3noghost ^gmust be enabled before shoving is functional.");

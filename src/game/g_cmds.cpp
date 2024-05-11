@@ -3710,7 +3710,7 @@ void shoveTrace(trace_t *tr, vec3_t start, vec3_t end, gentity_t *ent) {
   const int passEntityNum = ClientNum(ent);
   trap_Trace(tr, start, nullptr, nullptr, end, passEntityNum, CONTENTS_BODY);
 
-  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+  if (tr->entityNum >= MAX_CLIENTS) {
     return;
   }
 
@@ -3753,7 +3753,7 @@ void Cmd_Activate2_f(gentity_t *ent) {
     fireteamData_t *ft;
 
     if (G_IsOnFireteam(ent->client->ps.clientNum, &ft) &&
-        (ft->shove && ft->noGhost)) {
+        (ft->shove && (ft->noGhost || g_ghostPlayers.integer != 1))) {
       ETJump::shoveTrace(&tr, offset, end, ent);
 
       if (tr.fraction != 1.0f) {
