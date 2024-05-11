@@ -1144,6 +1144,11 @@ struct gclient_s {
   bool forceRename;
 
   int lastRevivePushTime;
+
+  // client is holding down '+activate'
+  // used to disallow multiple shoves by holding down +activate
+  bool activateHeld;
+  int shoveTime;
 };
 
 typedef struct {

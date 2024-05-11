@@ -3652,16 +3652,86 @@ tryagain:
   }
 }
 
+namespace ETJump {
+static constexpr int SHOVE_DELAY = 500;
+static constexpr float SHOVE_VELOCITY = 60;
+
+void shovePlayer(gentity_t *ent, gentity_t *target) {
+  if (ent->health <= 0 || target->health <= 0) {
+    return;
+  }
+
+  // don't allow pushing lagged out players
+  if (target->client->ps.ping == 999 ||
+      target->client->pers.connected == CON_CONNECTING) {
+    return;
+  }
+
+  // don't allow pushing players locked in position from revive
+  if (target->client->ps.pm_flags & PMF_TIME_LOCKPLAYER) {
+    return;
+  }
+
+  // no push to players on nested mg42s/tanks
+  if (target->client->ps.persistant[PERS_HWEAPON_USE]) {
+    return;
+  }
+
+  if (level.time - ent->client->shoveTime < SHOVE_DELAY) {
+    return;
+  }
+
+  ent->client->shoveTime = level.time;
+
+  vec3_t dir{};
+  vec3_t push{};
+
+  AngleVectors(ent->client->ps.viewangles, dir, nullptr, nullptr);
+  VectorNormalizeFast(dir);
+
+  VectorScale(dir, SHOVE_VELOCITY * 5, push);
+
+  // don't try to shove players into the ground
+  if (push[2] > std::fabs(push[0]) && push[2] > std::fabs(push[1])) {
+    push[2] = dir[2] * SHOVE_VELOCITY * 5;
+  } else {
+    push[2] = 64.0f;
+  }
+
+  VectorAdd(target->s.pos.trDelta, push, target->s.pos.trDelta);
+  VectorAdd(target->client->ps.velocity, push, target->client->ps.velocity);
+
+  target->client->ps.pm_time = 100;
+  target->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
+  G_AddEvent(target, EV_SHOVE, 0);
+}
+
+void shoveTrace(trace_t *tr, vec3_t start, vec3_t end, gentity_t *ent) {
+  const int passEntityNum = ClientNum(ent);
+  trap_Trace(tr, start, nullptr, nullptr, end, passEntityNum, CONTENTS_BODY);
+
+  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr->entityNum < MAX_CLIENTS &&
+         !EntityUtilities::playerIsSolid(passEntityNum, tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    trap_Trace(tr, start, nullptr, nullptr, end, passEntityNum, CONTENTS_BODY);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
+
 void Cmd_Activate2_f(gentity_t *ent) {
   trace_t tr;
   vec3_t end;
   gentity_t *traceEnt;
   vec3_t forward, right, up, offset;
-  //	int			activatetime = level.time;
-  qboolean found = qfalse;
-  qboolean pass2 = qfalse;
+  bool pass2 = false;
 
-  if (ent->client->sess.playerType != PC_COVERTOPS) {
+  if (ent->client->ps.persistant[PERS_HWEAPON_USE]) {
     return;
   }
 
@@ -3669,32 +3739,41 @@ void Cmd_Activate2_f(gentity_t *ent) {
   CalcMuzzlePointForActivate(ent, forward, right, up, offset);
   VectorMA(offset, 96, forward, end);
 
-  trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number,
+  trap_Trace(&tr, offset, nullptr, nullptr, end, ent->s.number,
              (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE));
 
   if (tr.surfaceFlags & SURF_NOIMPACT || tr.entityNum == ENTITYNUM_WORLD) {
     trap_Trace(
-        &tr, offset, NULL, NULL, end, ent->s.number,
+        &tr, offset, nullptr, nullptr, end, ent->s.number,
         (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
-    pass2 = qtrue;
+    pass2 = true;
   }
 
-tryagain:
+  if (!ent->client->activateHeld) {
+    fireteamData_t *ft;
 
-  if (tr.surfaceFlags & SURF_NOIMPACT || tr.entityNum == ENTITYNUM_WORLD) {
-    return;
+    if (G_IsOnFireteam(ent->client->ps.clientNum, &ft) &&
+        (ft->shove && ft->noGhost)) {
+      ETJump::shoveTrace(&tr, offset, end, ent);
+
+      if (tr.fraction != 1.0f) {
+        ETJump::shovePlayer(ent, &g_entities[tr.entityNum]);
+      }
+    }
   }
 
-  traceEnt = &g_entities[tr.entityNum];
+  while (!(tr.surfaceFlags & SURF_NOIMPACT) &&
+         tr.entityNum != ENTITYNUM_WORLD) {
+    bool found = Do_Activate2_f(ent, &g_entities[tr.entityNum]);
 
-  found = Do_Activate2_f(ent, traceEnt);
+    if (found || pass2) {
+      break;
+    }
 
-  if (!found && !pass2) {
-    pass2 = qtrue;
+    pass2 = true;
     trap_Trace(
-        &tr, offset, NULL, NULL, end, ent->s.number,
+        &tr, offset, nullptr, nullptr, end, ent->s.number,
         (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
-    goto tryagain;
   }
 }
 

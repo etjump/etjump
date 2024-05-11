@@ -113,6 +113,10 @@ void CG_ParseFireteams() {
 
     s = Info_ValueForKey(p, "ng");
     cg.fireTeams[i].noGhost = Q_atoi(s);
+    ;
+
+    s = Info_ValueForKey(p, "s");
+    cg.fireTeams[i].shove = Q_atoi(s);
 
     s = Info_ValueForKey(p, "c");
     Q_strncpyz(hexbuffer + 2, s, 9);
@@ -291,6 +295,7 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
 
   const bool saveLimit = f->saveLimit != FT_SAVELIMIT_NOT_SET;
   const bool noGhost = f->noGhost;
+  const bool shove = f->shove;
 
   h = FT_HEADER_HEIGHT + 2 + 2;
 
@@ -346,6 +351,12 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
                     cgs.media.noclipIcon, tclr);
     ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8,
                     cgs.media.friendShader, friendShaderColor);
+    iconX -= 8 + 4;
+  }
+
+  if (shove) {
+    ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.shoveIcon,
+                    tclr);
   }
 
   for (i = 0; i < MAX_FIRETEAM_USERS; i++) {

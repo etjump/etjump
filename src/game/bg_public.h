@@ -1189,6 +1189,7 @@ typedef enum {
   EV_UPHILLSTEP,
   EV_PORTAL_TRAIL,
   EV_CUSHIONFALLSTEP,
+  EV_SHOVE,
   EV_MAX_EVENTS // just added as an 'endcap'
 } entity_event_t;
 
@@ -2309,6 +2310,7 @@ typedef struct {
   qboolean priv;
 
   bool noGhost; // disable ghostplayers between fireteam members
+  bool shove;
 } fireteamData_t;
 
 long BG_StringHashValue(const char *fname);

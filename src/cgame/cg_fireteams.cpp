@@ -258,17 +258,12 @@ const char *ftOnMenuListAlphachars[] = {
 };
 
 const char *ftOnMenuRulesList[] = {
-    "Reset savelimit",
-    "Set savelimit",
-    "%s player collision",
-    nullptr,
+    "Reset savelimit", "Set savelimit", "%s player collision",
+    "%s shoving",      nullptr,
 };
 
 const char *ftOnMenuRulesListAlphaChars[] = {
-    "R",
-    "S",
-    "C",
-    nullptr,
+    "R", "S", "C", "P", nullptr,
 };
 
 const char *ftLeaderMenuList[] = {
@@ -569,6 +564,10 @@ void CG_DrawFireteamRules(panel_button_t *button) {
         // this won't actually ever work, but for the sake of correct status
         str = va(str, "Disable");
       }
+    } else if (i == static_cast<int>(FTMenuRulesPos::FT_RULES_SHOVE)) {
+      str =
+          va(str, cgs.clientinfo[cg.clientNum].fireteamData->shove ? "Disable"
+                                                                   : "Enable");
     }
 
     CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
@@ -1182,6 +1181,12 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
                     va("fireteam rules noghost %i",
                        cgs.clientinfo[cg.clientNum].fireteamData->noGhost ? 0
                                                                           : 1));
+                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                break;
+              case FTMenuRulesPos::FT_RULES_SHOVE:
+                trap_SendConsoleCommand(va(
+                    "fireteam rules shove %i",
+                    cgs.clientinfo[cg.clientNum].fireteamData->shove ? 0 : 1));
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
               default:

@@ -104,9 +104,9 @@ void G_UpdateFireteamConfigString(fireteamData_t *ft) {
       }
     }
 
-    Com_sprintf(buffer, 128, R"(\id\%i\l\%i\sl\%i\ng\%i\c\%.8x%.8x)",
+    Com_sprintf(buffer, 128, R"(\id\%i\l\%i\sl\%i\ng\%i\s\%i\c\%.8x%.8x)",
                 ft->ident - 1, ft->joinOrder[0], ft->saveLimit, ft->noGhost,
-                clnts[1], clnts[0]);
+                ft->shove, clnts[1], clnts[0]);
     // G_Printf(va("%s\n", buffer));
   }
 
@@ -244,6 +244,7 @@ void G_RegisterFireteam(int entityNum) {
   ft->saveLimit = FT_SAVELIMIT_NOT_SET;
   ft->teamJumpMode = qfalse;
   ft->noGhost = false;
+  ft->shove = false;
 
   if (g_autoFireteams.integer) {
     ft->priv = qfalse;
@@ -738,7 +739,7 @@ static void setSaveLimitForFTMembers(fireteamData_t *ft, int limit) {
 
 static void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
   const std::string &msg =
-      ETJump::stringFormat("^gFireteam rules: ^3noghost ^ghas been ^3%s.",
+      ETJump::stringFormat("^gFireteam rules: ^3noghost ^ghas been ^3%s^g.",
                            noGhost ? "enabled" : "disabled");
 
   ft->noGhost = noGhost;
@@ -776,6 +777,31 @@ static bool fireTeamMemberIsTimerunning(fireteamData_t *ft) {
   return false;
 }
 
+static void setFireteamShove(fireteamData_t *ft, bool shove) {
+  const std::string &msg =
+      stringFormat("^gFireteam rules: ^3shoving ^ghas been ^3%s^g.",
+                   shove ? "enabled" : "disabled");
+
+  ft->shove = shove;
+
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    if (ft->joinOrder[i] == -1) {
+      continue;
+    }
+
+    gentity_t *ent = g_entities + ft->joinOrder[i];
+    const int clientNum = ClientNum(ent);
+
+    Printer::SendPopupMessage(clientNum, msg);
+
+    if (ft->shove && !ft->noGhost) {
+      Printer::SendPopupMessage(
+          clientNum,
+          "^3noghost ^gmust be enabled before shoving is functional.");
+    }
+  }
+}
+
 static void setFireTeamRules(int clientNum) {
   char arg1[MAX_TOKEN_CHARS];
   char val[MAX_TOKEN_CHARS];
@@ -790,9 +816,13 @@ static void setFireTeamRules(int clientNum) {
   }
 
   if (trap_Argc() < 4) {
-    G_ClientPrintAndReturn(clientNum,
-                           "usage: fireteam rules <rule> <value>\n\nAvailable "
-                           "rules:\nsavelimit <value|reset>\nnoghost <on|off>")
+    Printer::SendConsoleMessage(
+        clientNum,
+        stringFormat(
+            "^3usage: ^7fireteam rules <rule> <value>\n\nAvailable "
+            "rules:\n\n%-12s <value|reset>\n%-12s <on|off>\n%-12s <on|off>",
+            "savelimit", "noghost", "shove"));
+    return;
   }
 
   trap_Argv(2, arg1, sizeof(arg1));
@@ -864,6 +894,32 @@ static void setFireTeamRules(int clientNum) {
       G_ClientPrintAndReturn(clientNum,
                              "fireteam: invalid noghost value.\nValid values "
                              "are: <on|1> and <off|0>")
+    }
+
+    G_UpdateFireteamConfigString(ft);
+    return;
+  }
+
+  if (!Q_stricmp(arg1, "shove")) {
+    trap_Argv(3, val, sizeof(val));
+
+    if (!Q_stricmp(val, "on") || !Q_stricmp(val, "1")) {
+      if (ft->shove) {
+        G_ClientPrintAndReturn(clientNum,
+                               "fireteam: shoving is already enabled.")
+      }
+
+      setFireteamShove(ft, true);
+    } else if (!Q_stricmp(val, "off") || !Q_stricmp(val, "0")) {
+      if (!ft->shove) {
+        G_ClientPrintAndReturn(clientNum,
+                               "fireteam: shoving is already disabled.")
+      }
+
+      setFireteamShove(ft, false);
+    } else {
+      G_ClientPrintAndReturn(clientNum, "fireteam: invalid shove value.\nValid "
+                                        "values are: <on|1> and <off|0>")
     }
 
     G_UpdateFireteamConfigString(ft);

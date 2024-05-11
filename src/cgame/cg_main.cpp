@@ -2082,6 +2082,9 @@ static void CG_RegisterSounds(void) {
   trap_S_RegisterSound("sound/weapons/artillery/artillery_fly_3.wav", qfalse);
   trap_S_RegisterSound("sound/weapons/airstrike/airstrike_plane.wav", qfalse);
 
+  cgs.media.shoveSound =
+      trap_S_RegisterSound("sound/weapons/impact/flesh1.wav", qfalse);
+
   if (cg_buildScript.integer) {
     CG_PrecacheFXSounds();
   }
@@ -3125,6 +3128,7 @@ static void CG_RegisterGraphics(void) {
       trap_R_RegisterShader("gfx/2d/stopwatch_green");
   cgs.media.stopwatchIconRed = trap_R_RegisterShader("gfx/2d/stopwatch_red");
   cgs.media.idleIcon = trap_R_RegisterShader("gfx/2d/idle");
+  cgs.media.shoveIcon = trap_R_RegisterShader("gfx/2d/shoveicon");
 
   CG_LoadingString(" - game media done");
 }

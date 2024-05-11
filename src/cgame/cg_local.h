@@ -1697,6 +1697,8 @@ typedef struct {
 
   sfxHandle_t sndMedicCall[2];
 
+  sfxHandle_t shoveSound;
+
   qhandle_t ccStamps[2];
   qhandle_t ccFilterPics[10];
   qhandle_t ccFilterBackOn;
@@ -1852,6 +1854,7 @@ typedef struct {
   qhandle_t stopwatchIconGreen;
   qhandle_t stopwatchIconRed;
   qhandle_t idleIcon;
+  qhandle_t shoveIcon;
 
 } cgMedia_t;
 
@@ -2165,7 +2168,8 @@ enum class FTMenuPos {
 enum class FTMenuRulesPos {
   FT_RULES_RESET = 0,
   FT_RULES_SAVELIMIT = 1,
-  FT_RULES_NOGHOST = 2
+  FT_RULES_NOGHOST = 2,
+  FT_RULES_SHOVE = 3,
 };
 
 //==============================================================================
