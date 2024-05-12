@@ -61,6 +61,7 @@
 #include "etj_demo_compatibility.h"
 #include "etj_accelmeter_drawable.h"
 #include "etj_accel_color.h"
+#include "etj_utilities.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -637,27 +638,34 @@ void runFrameEnd() {
   }
 
   if (etj_autoPortalBinds.integer) {
-    if (cg.weaponSelect == WP_PORTAL_GUN && !cg.portalgunBindingsAdjusted) {
+    // confusingly cg.weaponSelect gets set to followed clients weapon,
+    // so we need to do this only if we're not in spec
+    if (isPlaying(cg.clientNum) && cg.weaponSelect == WP_PORTAL_GUN &&
+        !cg.portalgunBindingsAdjusted) {
       cgDC.getKeysForBinding("weapalt", &cg.weapAltB1, &cg.weapAltB2);
+
       if (cg.weapAltB1 != -1) {
         trap_Key_SetBinding(cg.weapAltB1, "+attack2");
         cg.portalgunBindingsAdjusted = true;
       }
+
       if (cg.weapAltB2 != -1) {
         trap_Key_SetBinding(cg.weapAltB2, "+attack2");
         cg.portalgunBindingsAdjusted = true;
       }
       // since you never spawn with a portalgun,
       // binds should reset at the very beginning of a level too
-    } else if ((cg.weaponSelect != WP_PORTAL_GUN &&
+    } else if (((cg.weaponSelect != WP_PORTAL_GUN ||
+                 !isPlaying(cg.clientNum)) &&
                 cg.portalgunBindingsAdjusted) ||
-               cg.clientFrame < 10 ||
-               cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
+               cg.clientFrame < 10) {
       cgDC.getKeysForBinding("+attack2", &cg.weapAltB1, &cg.weapAltB2);
+
       if (cg.weapAltB1 != -1) {
         trap_Key_SetBinding(cg.weapAltB1, "weapalt");
         cg.portalgunBindingsAdjusted = false;
       }
+
       if (cg.weapAltB2 != -1) {
         trap_Key_SetBinding(cg.weapAltB2, "weapalt");
         cg.portalgunBindingsAdjusted = false;
