@@ -4860,6 +4860,7 @@ void ClientCommand(int clientNum) {
   char cmd[MAX_TOKEN_CHARS];
   int i;
   qboolean enc = qfalse; // used for enc_say, enc_say_team, enc_say_buddy
+  fireteamData_t *ft;
 
   ent = g_entities + clientNum;
 
@@ -4925,6 +4926,10 @@ void ClientCommand(int clientNum) {
 
   enc = !Q_stricmp(cmd, "enc_say_buddy") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "say_buddy") || enc) {
+    if (!G_IsOnFireteam(clientNum, &ft)) {
+      return;
+    }
+
     if (ClientIsFlooding(ent)) {
       CP(va("print \"^1Spam Protection:^7 command %s^7 "
             "ignored\n\"",
@@ -4935,6 +4940,10 @@ void ClientCommand(int clientNum) {
     return;
   }
   if (!Q_stricmp(cmd, "vsay_buddy")) {
+    if (!G_IsOnFireteam(clientNum, &ft)) {
+      return;
+    }
+
     if (ClientIsFlooding(ent)) {
       CP(va("print \"^1Spam Protection:^7 command %s^7 "
             "ignored\n\"",
