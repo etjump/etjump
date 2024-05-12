@@ -2294,38 +2294,38 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
 
   } else {
     char buffer[16];
-    int index;
+    int skipArgs;
 
+    // if fireteam members are selected with 'selectbuddy', 2nd arg contains
+    // the number of clients that are selected, followed by the clientnums
+    // of the selected fireteam members = offset arg parsing by this amount
     trap_Argv(2, buffer, sizeof(buffer));
-    index = Q_atoi(buffer);
-    if (index < 0) {
-      index = 0;
+    skipArgs = Q_atoi(buffer);
+
+    if (skipArgs < 0) {
+      skipArgs = 0;
     }
 
-    if (trap_Argc() < 3 + index && !arg0) {
+    if (trap_Argc() < 3 + skipArgs && !arg0) {
       return;
     }
 
-    trap_Argv(3 + index, variant, sizeof(variant));
+    trap_Argv(3 + skipArgs, variant, sizeof(variant));
 
     if (Q_isnumeric(variant[0])) {
-      id = 4 + index;
-      cust = 5 + index;
+      id = 4 + skipArgs;
+      cust = 5 + skipArgs;
       vsay.variant = Q_atoi(variant);
     } else {
-      id = 3;
-      cust = 4;
+      id = 3 + skipArgs;
+      cust = 4 + skipArgs;
     }
 
     trap_Argv(id, vsay.id, sizeof(vsay.id));
     Q_strncpyz(vsay.custom, ConcatArgs(cust), sizeof(vsay.custom));
   }
 
-  if (g_customVoiceChat.integer) {
-    G_Voice(ent, nullptr, mode, &vsay, voiceonly);
-  } else {
-    G_Voice(ent, nullptr, mode, &vsay, voiceonly);
-  }
+  G_Voice(ent, nullptr, mode, &vsay, voiceonly);
 }
 
 // TTimo gcc: defined but not used
