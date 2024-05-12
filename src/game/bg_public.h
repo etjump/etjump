@@ -2696,9 +2696,10 @@ enum class TeleporterSpawnflags {
   None = 0,
   ResetSpeed = 1 << 0,
   ConvertSpeed = 1 << 1,
-  RelativePitch = 1 << 2,
+  RelativeYaw = 1 << 2,
   RelativePitchYaw = 1 << 3,
-  Knockback = 1 << 4
+  Knockback = 1 << 4,
+  NoZOffset = 1 << 5,
 };
 
 enum class PusherSpawnFlags {

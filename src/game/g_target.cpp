@@ -586,7 +586,7 @@ void target_teleporter_use(gentity_t *self, gentity_t *other,
     // If we don't have any velocity when teleporting,
     // there's nothing to scale from, so let's add some
     if (VectorCompare(activator->client->ps.velocity, vec3_origin)) {
-      VectorSet(activator->client->ps.velocity, 0.01, 0.01, 0.0);
+      VectorSet(activator->client->ps.velocity, 0.01f, 0.01f, 0.01f);
     }
 
     VectorNormalize(activator->client->ps.velocity);
@@ -598,39 +598,8 @@ void target_teleporter_use(gentity_t *self, gentity_t *other,
     G_AddEvent(activator, EV_GENERAL_SOUND, self->noise_index);
   }
 
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::Knockback)) {
-    activator->client->ps.pm_time = 160; // hold time
-    activator->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::ResetSpeed)) {
-    // We need some speed to make TeleportPlayerKeepAngles work with
-    // this spawnflag, else it doesn't know which trigger side we enter
-    VectorSet(activator->client->ps.velocity, 0.01, 0.01, 0.0);
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::ConvertSpeed)) {
-    TeleportPlayerExt(activator, dest->s.origin, dest->s.angles);
-    return;
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::RelativePitch)) {
-    TeleportPlayerKeepAngles_Clank(activator, other, dest->s.origin,
-                                   dest->s.angles);
-    return;
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::RelativePitchYaw)) {
-    TeleportPlayerKeepAngles(activator, other, dest->s.origin, dest->s.angles);
-    return;
-  }
-
-  TeleportPlayer(activator, dest->s.origin, dest->s.angles);
+  ETJump::teleportPlayer(activator, other, dest->s.origin, dest->s.angles,
+                         self->spawnflags);
 }
 
 /*QUAKED target_teleporter (1 0 0) (-8 -8 -8) (8 8 8)
