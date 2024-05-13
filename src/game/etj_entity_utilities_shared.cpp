@@ -116,7 +116,7 @@ void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
 
   if (spawnflags & static_cast<int>(TeleporterSpawnflags::Knockback)) {
     ps->pm_time = 160;
-    ps->pm_type |= PMF_TIME_KNOCKBACK;
+    ps->pm_flags |= PMF_TIME_KNOCKBACK;
   }
 
   if (spawnflags & static_cast<int>(TeleporterSpawnflags::ResetSpeed)) {
