@@ -2019,6 +2019,7 @@ extern vmCvar_t g_weapons;
 extern vmCvar_t g_noclip;
 extern vmCvar_t g_nameChangeLimit;
 extern vmCvar_t g_nameChangeInterval;
+extern vmCvar_t g_allowSpeclock;
 
 extern vmCvar_t g_mapScriptDir;
 extern vmCvar_t g_blockedMaps;

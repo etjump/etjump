@@ -201,6 +201,7 @@ vmCvar_t g_mapScriptDir;
 vmCvar_t g_blockedMaps;
 vmCvar_t g_nameChangeLimit;
 vmCvar_t g_nameChangeInterval;
+vmCvar_t g_allowSpeclock;
 
 // ETJump admin system
 
@@ -469,6 +470,7 @@ cvarTable_t gameCvarTable[] = {
     {&g_nameChangeInterval, "g_nameChangeInterval", "60", CVAR_ARCHIVE},
     {&g_mapScriptDir, "g_mapScriptDir", "mapscripts", CVAR_ARCHIVE},
     {&g_blockedMaps, "g_blockedMaps", "", CVAR_ARCHIVE},
+    {&g_allowSpeclock, "g_allowSpeclock", "1", CVAR_ARCHIVE, 0, qtrue},
 
     {&g_adminLog, "g_adminLog", "adminsystem.log", CVAR_ARCHIVE},
     {&g_userConfig, "g_userConfig", "users.db", CVAR_ARCHIVE},
@@ -1453,10 +1455,9 @@ void G_UpdateCvars(void) {
         cv->modificationCount = cv->vmCvar->modificationCount;
 
         if (cv->trackChange && !(cv->cvarFlags & CVAR_LATCH)) {
-          trap_SendServerCommand(-1, va("print \"Server:[lof] "
-                                        "%s [lon]changed "
-                                        "to[lof] %s\n\"",
-                                        cv->cvarName, cv->vmCvar->string));
+          trap_SendServerCommand(
+              -1, va("cpm \"Server:[lof] ^3%s [lon]^7changed to[lof] ^3%s\n\"",
+                     cv->cvarName, cv->vmCvar->string));
         }
 
         if (cv->teamShader) {
@@ -1531,6 +1532,20 @@ void G_UpdateCvars(void) {
                    cv->vmCvar == &vote_allow_autoRtv ||
                    cv->vmCvar == &g_enableVote) {
           fVoteFlags = qtrue;
+        } else if (cv->vmCvar == &g_allowSpeclock) {
+          if (!g_allowSpeclock.integer) {
+            for (int i = 0; i < level.numConnectedClients; i++) {
+              gentity_t *ent = g_entities + level.sortedClients[i];
+
+              if (ent->client->sess.specLocked) {
+                ent->client->sess.specLocked = qfalse;
+                Printer::SendPopupMessage(
+                    ClientNum(ent),
+                    "You are no longer locked from spectators.");
+                ETJump::UpdateClientConfigString(*ent);
+              }
+            }
+          }
         } else {
           fToggles =
               (G_checkServerToggle(cv->vmCvar) || fToggles) ? qtrue : qfalse;
