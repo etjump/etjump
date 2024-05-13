@@ -818,6 +818,8 @@ static void CG_Item(centity_t *cent) {
                                         // yawed
         }
       }
+
+      AnglesToAxis(cent->lerpAngles, ent.axis);
     }
 
   } else {
