@@ -661,7 +661,6 @@ static void CG_Item(centity_t *cent) {
   refEntity_t ent;
   entityState_t *es;
   gitem_t *item;
-  //	float				scale;
   qboolean hasStand, highlight;
   float highlightFadeScale = 1.0f;
 
@@ -671,7 +670,6 @@ static void CG_Item(centity_t *cent) {
   highlight = qfalse;
 
   // (item index is stored in es->modelindex for item)
-
   if (es->modelindex >= bg_numItems) {
     CG_Error("Bad item index %i on entity", es->modelindex);
   }
@@ -682,8 +680,6 @@ static void CG_Item(centity_t *cent) {
   }
 
   item = &bg_itemlist[es->modelindex];
-
-  //	scale = 0.005 + cent->currentState.number * 0.00001;
 
   memset(&ent, 0, sizeof(ent));
 
@@ -698,73 +694,50 @@ static void CG_Item(centity_t *cent) {
       hasStand = qtrue;
     }
 
-    if (hasStand) // first try to put the weapon on it's 'stand'
-    {
+    // first try to put the weapon on it's 'stand'
+    if (hasStand) {
       refEntity_t stand;
 
       memset(&stand, 0, sizeof(stand));
       stand.hModel = weaponInfo->standModel;
 
       if (es->eFlags & EF_SPINNING) {
-        if (es->groundEntityNum == -1 || !es->groundEntityNum) // (SA)
-                                                               // spinning
-                                                               // with a
-                                                               // stand will
-                                                               // spin the
-                                                               // stand and
-                                                               // the
-                                                               // attached
-                                                               // weap (only
-                                                               // when in the
-                                                               // air)
-        {
+        // (SA) spinning with a stand will spin the stand and the attached weap
+        // (only when in the air)
+        if (es->groundEntityNum == -1 || !es->groundEntityNum) {
           VectorCopy(cg.autoAnglesSlow, cent->lerpAngles);
           VectorCopy(cg.autoAnglesSlow, cent->lastLerpAngles);
         } else {
-          VectorCopy(cent->lastLerpAngles,
-                     cent->lerpAngles); // make
-                                        // a
-                                        // tossed
-                                        // weapon
-                                        // sit
-                                        // on
-                                        // the
-                                        // ground
-                                        // in a
-                                        // position
-                                        // that
-                                        // matches
-                                        // how
-                                        // it
-                                        // was
-                                        // yawed
+          // make a tossed weapon sit on the ground in a position
+          // that matches how it was yawed
+          VectorCopy(cent->lastLerpAngles, cent->lerpAngles);
         }
       }
 
       AnglesToAxis(cent->lerpAngles, stand.axis);
       VectorCopy(cent->lerpOrigin, stand.origin);
 
-      // scale the stand to match the weapon scale ( the
-      // weapon will also be scaled inside
-      // CG_PositionEntityOnTag() )
+      // scale the stand to match the weapon scale
+      // (the weapon will also be scaled inside CG_PositionEntityOnTag)
       VectorScale(stand.axis[0], 1.5, stand.axis[0]);
       VectorScale(stand.axis[1], 1.5, stand.axis[1]);
       VectorScale(stand.axis[2], 1.5, stand.axis[2]);
 
       //----(SA)	modified
       if (cent->currentState.frame) {
-        CG_PositionEntityOnTag(
-            &ent, &stand, va("tag_stand%d", cent->currentState.frame), 0, NULL);
+        CG_PositionEntityOnTag(&ent, &stand,
+                               va("tag_stand%d", cent->currentState.frame), 0,
+                               nullptr);
       } else {
-        CG_PositionEntityOnTag(&ent, &stand, "tag_stand", 0, NULL);
+        CG_PositionEntityOnTag(&ent, &stand, "tag_stand", 0, nullptr);
       }
       //----(SA)	end
 
       VectorCopy(ent.origin, ent.oldorigin);
       ent.nonNormalizedAxes = qtrue;
 
-    } else // then default to laying it on it's side
-    {
+    } else {
+      // then default to laying it on it's side
       if (weaponInfo->droppedAnglesHack) {
         cent->lerpAngles[2] += 90;
       }
@@ -781,41 +754,17 @@ static void CG_Item(centity_t *cent) {
       VectorCopy(cent->lerpOrigin, ent.origin);
       VectorCopy(cent->lerpOrigin, ent.oldorigin);
 
-      if (es->eFlags & EF_SPINNING) // spinning will override the
-                                    // angles set by a stand
-      {
-        if (es->groundEntityNum == -1 || !es->groundEntityNum) // (SA)
-                                                               // spinning
-                                                               // with a
-                                                               // stand will
-                                                               // spin the
-                                                               // stand and
-                                                               // the
-                                                               // attached
-                                                               // weap (only
-                                                               // when in the
-                                                               // air)
-        {
+      // spinning will override the angles set by a stand
+      if (es->eFlags & EF_SPINNING) {
+        // (SA) spinning with a stand will spin the stand and the attached weap
+        // (only when in the air)
+        if (es->groundEntityNum == -1 || !es->groundEntityNum) {
           VectorCopy(cg.autoAnglesSlow, cent->lerpAngles);
           VectorCopy(cg.autoAnglesSlow, cent->lastLerpAngles);
         } else {
-          VectorCopy(cent->lastLerpAngles,
-                     cent->lerpAngles); // make
-                                        // a
-                                        // tossed
-                                        // weapon
-                                        // sit
-                                        // on
-                                        // the
-                                        // ground
-                                        // in a
-                                        // position
-                                        // that
-                                        // matches
-                                        // how
-                                        // it
-                                        // was
-                                        // yawed
+          // make a tossed weapon sit on the ground in a position
+          // that matches how it was yawed
+          VectorCopy(cent->lastLerpAngles, cent->lerpAngles);
         }
       }
 
@@ -827,9 +776,8 @@ static void CG_Item(centity_t *cent) {
     VectorCopy(cent->lerpOrigin, ent.origin);
     VectorCopy(cent->lerpOrigin, ent.oldorigin);
 
-    if (es->eFlags & EF_SPINNING) // spinning will override the
-                                  // angles set by a stand
-    {
+    // spinning will override the angles set by a stand
+    if (es->eFlags & EF_SPINNING) {
       VectorCopy(cg.autoAnglesSlow, cent->lerpAngles);
       AxisCopy(cg.autoAxisSlow, ent.axis);
     }
@@ -837,21 +785,15 @@ static void CG_Item(centity_t *cent) {
 
   if (es->eFlags & EF_BOBBING) {
     ent.origin[2] +=
-        10 * (0.5 + 0.5 * sin(static_cast<float>(cg.time) / 150.0));
+        10 * (0.5f + 0.5f * std::sin(static_cast<float>(cg.time) / 150.0f));
   }
 
-  if (es->modelindex2) // modelindex2 was specified for the ent, meaning
-                       // it probably has an alternate model (as opposed
-                       // to the one in the itemlist)
-  { // try to load it first, and if it fails, default to the itemlist
-    // model
+  // modelindex2 was specified for the ent, meaning it probably has an
+  // alternate model (as opposed to the one in the itemlist)
+  // try to load it first, and if it fails, default to the itemlist model
+  if (es->modelindex2) {
     ent.hModel = cgs.gameModels[es->modelindex2];
   } else {
-    // if( item->giType == IT_WEAPON &&
-    // cg_items[es->modelindex].models[2])
-    // // check if there's a specific model for weapon pickup
-    // placement ent.hModel
-    //= cg_items[es->modelindex].models[2];
     if (item->giType == IT_WEAPON) {
       ent.hModel = cg_weapons[item->giTag].weaponModel[W_PU_MODEL].model;
 
@@ -866,24 +808,25 @@ static void CG_Item(centity_t *cent) {
   }
 
   //----(SA)	find midpoint for highlight corona.
-  //			Can't do it when item is registered since it
+  // Can't do it when item is registered since it
   // wouldn't know about replacement model
   if (!(cent->usehighlightOrigin)) {
     vec3_t mins, maxs, offset;
     int i;
 
-    trap_R_ModelBounds(ent.hModel, mins, maxs); // get bounds
+    // get bounds
+    trap_R_ModelBounds(ent.hModel, mins, maxs);
 
+    // find object-space center
     for (i = 0; i < 3; i++) {
-      offset[i] =
-          mins[i] + 0.5 * (maxs[i] - mins[i]); // find object-space center
+      offset[i] = mins[i] + 0.5f * (maxs[i] - mins[i]);
     }
 
-    VectorCopy(cent->lerpOrigin,
-               cent->highlightOrigin); // set 'midpoint' to origin
+    // set 'midpoint' to origin
+    VectorCopy(cent->lerpOrigin, cent->highlightOrigin);
 
-    for (i = 0; i < 3; i++) // adjust midpoint by offset and orientation
-    {
+    // adjust midpoint by offset and orientation
+    for (i = 0; i < 3; i++) {
       cent->highlightOrigin[i] += offset[0] * ent.axis[0][i] +
                                   offset[1] * ent.axis[1][i] +
                                   offset[2] * ent.axis[2][i];
@@ -892,18 +835,13 @@ static void CG_Item(centity_t *cent) {
     cent->usehighlightOrigin = qtrue;
   }
 
-  // items without glow textures need to keep a minimum light value so
-  // they are always visible
-  //	if ( ( item->giType == IT_WEAPON ) || ( item->giType == IT_ARMOR
-  //) ) {
+  // need to keep a minimum light value, so items are always visible
   ent.renderfx |= RF_MINLIGHT;
-  //	}
 
   // highlighting items the player looks at
   if (cg_drawCrosshairPickups.integer) {
-
-    if (cg_drawCrosshairPickups.integer == 2) // '2' is 'force highlights'
-    {
+    // '2' is 'force highlights'
+    if (cg_drawCrosshairPickups.integer == 2) {
       highlight = qtrue;
     }
 
@@ -912,17 +850,15 @@ static void CG_Item(centity_t *cent) {
       highlight = qtrue;
 
       if (item->giType == IT_TREASURE) {
+        //----(SA)	add corona to treasure
         trap_R_AddCoronaToScene(cent->highlightOrigin, 1, 0.85, 0.5, 2,
-                                cent->currentState.number,
-                                qtrue); //----(SA)	add corona to
-                                        // treasure
+                                cent->currentState.number, qtrue);
       }
     } else {
       if (item->giType == IT_TREASURE) {
+        //----(SA)	"empty corona" for proper fades
         trap_R_AddCoronaToScene(cent->highlightOrigin, 1, 0.85, 0.5, 2,
-                                cent->currentState.number,
-                                qfalse); //----(SA)	"empty corona"
-                                         // for proper fades
+                                cent->currentState.number, qfalse);
       }
     }
 
@@ -933,26 +869,25 @@ static void CG_Item(centity_t *cent) {
         cent->highlighted = qtrue;
         cent->highlightTime = cg.time;
       }
-      ent.hilightIntensity = ((cg.time - cent->highlightTime) / 250.0f) *
-                             highlightFadeScale; // .25 sec to brighten up
+
+      // .25 sec to brighten up
+      ent.hilightIntensity =
+          ((cg.time - cent->highlightTime) / 250.0f) * highlightFadeScale;
     } else {
       if (cent->highlighted) {
         cent->highlighted = qfalse;
         cent->highlightTime = cg.time;
       }
+
+      // 1 sec to dim down (diff in time causes problems if you quickly
+      // flip to/away from looking at the item)
       ent.hilightIntensity =
-          1.0f - ((cg.time - cent->highlightTime) / 1000.0f) *
-                     highlightFadeScale; // 1 sec to dim down
-                                         // (diff in time
-                                         // causes problems if
-                                         // you quickly flip
-                                         // to/away from
-                                         // looking at the
-                                         // item)
+          1.0f - (static_cast<float>(cg.time - cent->highlightTime) / 1000.0f) *
+                     highlightFadeScale;
     }
 
-    if (ent.hilightIntensity < 0.25f) // leave a minlight
-    {
+    // leave a minlight
+    if (ent.hilightIntensity < 0.25f) {
       ent.hilightIntensity = 0.25f;
     }
     if (ent.hilightIntensity > 1) {
