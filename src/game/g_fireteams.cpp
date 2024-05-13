@@ -901,6 +901,11 @@ static void setFireTeamRules(int clientNum) {
   }
 
   if (!Q_stricmp(arg1, "shove")) {
+    if (!g_cheats.integer && level.noFTShove) {
+      G_ClientPrintAndReturn(clientNum,
+                             "fireteam: shoving cannot be enabled on this map.")
+    }
+
     trap_Argv(3, val, sizeof(val));
 
     if (!Q_stricmp(val, "on") || !Q_stricmp(val, "1")) {
