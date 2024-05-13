@@ -640,7 +640,7 @@ models/players/temperate/allied/fieldops/acc/backpack
 }
 
 models/players/temperate/allied/soldier/acc/backpack 
-{	
+{
 	{
 		map models/players/temperate/allied/soldier/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -749,7 +749,7 @@ models/players/hud/allied_medic
 }
 
 models/players/hud/allied_cvops 
-{	
+{
 	{
 		map models/players/hud/allied_cvops.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
