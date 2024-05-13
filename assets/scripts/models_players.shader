@@ -296,7 +296,7 @@ models/players/temperate/axis/medic/acc/backpack
 }
 
 models/players/temperate/axis/medic/acc/backpack2 
-{	
+{
 	{
 		map models/players/temperate/axis/medic/acc/backpack2.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -307,7 +307,7 @@ models/players/temperate/axis/medic/acc/backpack2
 }
 
 models/players/temperate/axis/cvops/acc/backpack 
-{	
+{
 	{
 		map models/players/temperate/axis/cvops/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -318,7 +318,7 @@ models/players/temperate/axis/cvops/acc/backpack
 }
 
 models/players/temperate/axis/cvops/acc/fieldkit 
-{	
+{
 	{
 		map models/players/temperate/axis/cvops/acc/fieldkit.tga 
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -329,7 +329,7 @@ models/players/temperate/axis/cvops/acc/fieldkit
 }
 
 models/players/temperate/axis/engineer/acc/backpack 
-{	
+{
 	{
 		map models/players/temperate/axis/engineer/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -340,7 +340,7 @@ models/players/temperate/axis/engineer/acc/backpack
 }
 
 models/players/temperate/axis/engineer/acc/shovel 
-{	
+{
 	{
 		map models/players/temperate/axis/engineer/acc/shovel.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -351,7 +351,7 @@ models/players/temperate/axis/engineer/acc/shovel
 }
 
 models/players/temperate/axis/fieldops/acc/backpack 
-{	
+{
 	{
 		map models/players/temperate/axis/fieldops/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -362,7 +362,7 @@ models/players/temperate/axis/fieldops/acc/backpack
 }
 
 models/players/temperate/axis/soldier/acc/backpack 
-{	
+{
 	{
 		map models/players/temperate/axis/soldier/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -460,7 +460,7 @@ models/players/hud/axis_medic
 }
 
 models/players/hud/axis_cvops 
-{	
+{
 	{
 		map models/players/hud/axis_cvops.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -585,7 +585,7 @@ models/players/temperate/allied/leg01
 //
 //*****************************************
 models/players/temperate/allied/medic/acc/backpack 
-{	
+{
 	{
 		map models/players/temperate/allied/medic/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -596,7 +596,7 @@ models/players/temperate/allied/medic/acc/backpack
 }
 
 models/players/temperate/allied/medic/acc/backpack2 
-{	
+{
 	{
 		map models/players/temperate/allied/medic/acc/backpack2.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -607,7 +607,7 @@ models/players/temperate/allied/medic/acc/backpack2
 }
 
 models/players/temperate/allied/engineer/acc/backpack 
-{	
+{
 	{
 		map models/players/temperate/allied/engineer/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -618,7 +618,7 @@ models/players/temperate/allied/engineer/acc/backpack
 }
 
 models/players/temperate/allied/engineer/acc/shovel 
-{	
+{
 	{
 		map models/players/temperate/allied/engineer/acc/shovel.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -629,7 +629,7 @@ models/players/temperate/allied/engineer/acc/shovel
 }
 
 models/players/temperate/allied/fieldops/acc/backpack 
-{	
+{
 	{
 		map models/players/temperate/allied/fieldops/acc/backpack.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
@@ -795,10 +795,10 @@ models/players/hud/allied_soldier
 models/players/hud/teeth01 
 {
 	// lets hide teeth, so it won't look ugly with transparency
-    {
-    	map models/players/hud/teeth01.tga
-    	blendFunc GL_ZERO GL_ONE
-    }
+	{
+		map models/players/hud/teeth01.tga
+		blendFunc GL_ZERO GL_ONE
+	}
 }
 
 models/players/hud/eye01 
@@ -837,13 +837,13 @@ models/players/hud/eye03
 // alternative simple players representation through single shader
 etjump/simple_player
 {
-    cull none
-    {
-        map models/players/ghost.tga
+	cull none
+	{
+		map models/players/ghost.tga
 		tcmod scale 4 6
 		tcmod scroll 0 -0.1
-        blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-        rgbGen entity
-        alphaGen entity
-    }
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen entity
+		alphaGen entity
+	}
 }
