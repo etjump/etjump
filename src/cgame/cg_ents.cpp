@@ -742,22 +742,8 @@ static void CG_Item(centity_t *cent) {
         cent->lerpAngles[2] += 90;
       }
 
-      AnglesToAxis(cent->lerpAngles, ent.axis);
-
-      // increase the size of the weapons when they are
-      // presented as items
-      VectorScale(ent.axis[0], 1.5, ent.axis[0]);
-      VectorScale(ent.axis[1], 1.5, ent.axis[1]);
-      VectorScale(ent.axis[2], 1.5, ent.axis[2]);
-      ent.nonNormalizedAxes = qtrue;
-
-      VectorCopy(cent->lerpOrigin, ent.origin);
-      VectorCopy(cent->lerpOrigin, ent.oldorigin);
-
-      // spinning will override the angles set by a stand
       if (es->eFlags & EF_SPINNING) {
-        // (SA) spinning with a stand will spin the stand and the attached weap
-        // (only when in the air)
+        // spin only when in the air
         if (es->groundEntityNum == -1 || !es->groundEntityNum) {
           VectorCopy(cg.autoAnglesSlow, cent->lerpAngles);
           VectorCopy(cg.autoAnglesSlow, cent->lastLerpAngles);
@@ -769,6 +755,15 @@ static void CG_Item(centity_t *cent) {
       }
 
       AnglesToAxis(cent->lerpAngles, ent.axis);
+
+      // increase the size of the weapons when they are presented as items
+      VectorScale(ent.axis[0], 1.5, ent.axis[0]);
+      VectorScale(ent.axis[1], 1.5, ent.axis[1]);
+      VectorScale(ent.axis[2], 1.5, ent.axis[2]);
+      ent.nonNormalizedAxes = qtrue;
+
+      VectorCopy(cent->lerpOrigin, ent.origin);
+      VectorCopy(cent->lerpOrigin, ent.oldorigin);
     }
 
   } else {
