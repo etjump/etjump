@@ -1596,48 +1596,35 @@ void SP_target_portal_relay(gentity_t *self) {
 }
 
 void G_ActivateTarget(gentity_t *self, gentity_t *activator) {
-  gentity_t *ent = NULL;
-  ent = G_PickTarget(self->target);
+  gentity_t *ent = G_PickTarget(self->target);
   if (ent && ent->use) {
     G_UseEntity(ent, self, activator);
   }
 }
 
-qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 void target_ftrelay_use(gentity_t *self, gentity_t *other,
                         gentity_t *activator) {
-  fireteamData_t *activatorsFt = NULL;
-  fireteamData_t *otherFt = NULL;
-
   if (!activator || !activator->client) {
-    G_DPrintf("Error: trying to activate \"target_ftrelay\" "
-              "without an activator.\n");
+    G_Printf("target_ftrelay_use: cannot activate entity with no activator.\n");
     return;
   }
 
-  if (!G_IsOnFireteam(activator->client->ps.clientNum, &activatorsFt)) {
-    // Let's use it just for the activator
+  fireteamData_t *ft;
+  const int clientNum = ClientNum(activator);
+
+  // if activator is not in a fireteam or teamjump mode is off,
+  // just fire the target and exit
+  if (!G_IsOnFireteam(clientNum, &ft) || !ft->teamJumpMode) {
     G_ActivateTarget(self, activator);
     return;
-  } else {
-    int i = 0;
-    if (activatorsFt->teamJumpMode == qfalse) {
-      // Let's use it just for the activator
-      G_ActivateTarget(self, activator);
-      return;
+  }
+
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    if (ft->joinOrder[i] == -1) {
+      continue;
     }
 
-    for (; i < level.numConnectedClients; i++) {
-      int cnum = level.sortedClients[i];
-
-      if (!G_IsOnFireteam(cnum, &otherFt)) {
-        continue;
-      } else {
-        if (activatorsFt == otherFt) {
-          G_ActivateTarget(self, g_entities + cnum);
-        }
-      }
-    }
+    G_ActivateTarget(self, g_entities + ft->joinOrder[i]);
   }
 }
 

@@ -114,6 +114,9 @@ void CG_ParseFireteams() {
     s = Info_ValueForKey(p, "ng");
     cg.fireTeams[i].noGhost = Q_atoi(s);
 
+    s = Info_ValueForKey(p, "tj");
+    cg.fireTeams[i].teamJumpMode = Q_atoi(s);
+
     s = Info_ValueForKey(p, "c");
     Q_strncpyz(hexbuffer + 2, s, 9);
     sscanf(hexbuffer, "%x", &tmp);
@@ -312,7 +315,8 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
   CG_FillRect(x, y, FT_WIDTH - 4, FT_HEADER_HEIGHT, clr1);
 
   buffer = ETJump::StringUtil::toUpperCase(
-      ETJump::stringFormat("Fireteam: %s", bg_fireteamNames[f->ident]));
+      ETJump::stringFormat("FT: %s%s", bg_fireteamNames[f->ident],
+                           f->teamJumpMode ? " (TJ MODE)" : ""));
   CG_Text_Paint_Ext(x + 3, y + FT_BAR_HEIGHT, .19f, .19f, tclr, buffer, 0, 0, 0,
                     &cgs.media.limboFont1);
 

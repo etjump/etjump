@@ -104,9 +104,9 @@ void G_UpdateFireteamConfigString(fireteamData_t *ft) {
       }
     }
 
-    Com_sprintf(buffer, 128, R"(\id\%i\l\%i\sl\%i\ng\%i\c\%.8x%.8x)",
+    Com_sprintf(buffer, 128, R"(\id\%i\l\%i\sl\%i\ng\%i\tj\%i\c\%.8x%.8x)",
                 ft->ident - 1, ft->joinOrder[0], ft->saveLimit, ft->noGhost,
-                clnts[1], clnts[0]);
+                ft->teamJumpMode, clnts[1], clnts[0]);
     // G_Printf(va("%s\n", buffer));
   }
 
@@ -641,61 +641,6 @@ fireteamData_t *G_FindFreePublicFireteam(team_t team) {
   return NULL;
 }
 
-void G_TeamJumpMode(int clientNum) {
-  int i = 0;
-  char buf[MAX_TOKEN_CHARS] = "\0";
-  char arg[MAX_TOKEN_CHARS] = "\0";
-  fireteamData_t *ft = NULL;
-  qboolean printChanges = qtrue;
-
-  if (!G_IsOnFireteam(clientNum, &ft)) {
-    G_ClientPrintAndReturn(clientNum, "You are not on a fireteam");
-  }
-
-  if (!G_IsFireteamLeader(clientNum, &ft)) {
-    G_ClientPrintAndReturn(clientNum, "You are not the leader.");
-  }
-
-  if (trap_Argc() != 3) {
-    G_ClientPrintAndReturn(clientNum, "usage: fireteam tj on");
-  }
-
-  trap_Argv(2, arg, sizeof(arg));
-
-  if (!Q_stricmp(arg, "on")) {
-    if (ft->teamJumpMode == qtrue) {
-      printChanges = qfalse;
-    } else {
-      ft->teamJumpMode = qtrue;
-      Com_sprintf(buf, sizeof(buf), "chat \"Fireteam: team jump mode ^2ON\"");
-    }
-  } else if (!Q_stricmp(arg, "off")) {
-    if (ft->teamJumpMode == qfalse) {
-      printChanges = qfalse;
-    } else {
-      ft->teamJumpMode = qfalse;
-      Com_sprintf(buf, sizeof(buf), "chat \"Fireteam: team jump mode ^1OFF\"");
-    }
-  }
-
-  for (i = 0; i < level.numConnectedClients; i++) {
-    int cnum = level.sortedClients[i];
-    fireteamData_t *ft2 = NULL;
-
-    if (!G_IsOnFireteam(cnum, &ft2)) {
-      continue;
-    }
-
-    if (ft != ft2) {
-      continue;
-    } else {
-      if (printChanges) {
-        trap_SendServerCommand(cnum, buf);
-      }
-    }
-  }
-}
-
 void G_FireteamRace(int clientNum) {
   fireteamData_t *ft;
   if (!G_IsOnFireteam(clientNum, &ft)) {
@@ -872,6 +817,63 @@ static void setFireTeamRules(int clientNum) {
 
   G_ClientPrintAndReturn(clientNum, "fireteam: failed to set rules.")
 }
+
+void setupTeamJumpMode(const int &clientNum) {
+  fireteamData_t *ft;
+
+  if (!G_IsOnFireteam(clientNum, &ft)) {
+    G_ClientPrintAndReturn(clientNum, "You are not on a fireteam")
+  }
+
+  if (!G_IsFireteamLeader(clientNum, &ft)) {
+    G_ClientPrintAndReturn(clientNum, "You are not the leader.")
+  }
+
+  if (trap_Argc() != 3) {
+    G_ClientPrintAndReturn(clientNum, "usage: fireteam <tj|teamjump> <on|off>")
+  }
+
+  char arg[MAX_STRING_TOKENS] = "\0";
+  trap_Argv(2, arg, sizeof(arg));
+  std::string message;
+  bool announce = false;
+
+  if (!Q_stricmp(arg, "on") || !Q_stricmp(arg, "1")) {
+    if (ft->teamJumpMode) {
+      message = "fireteam: teamjump mode is already enabled";
+    } else {
+      message = "^gfireteam: ^3teamjump mode ^ghas been enabled";
+      announce = true;
+      ft->teamJumpMode = true;
+    }
+  } else if (!Q_stricmp(arg, "off") || !Q_stricmp(arg, "0")) {
+    if (!ft->teamJumpMode) {
+      message = "fireteam: teamjump mode is already disabled";
+    } else {
+      message = "^gfireteam: ^3teamjump mode ^ghas been disabled";
+      announce = true;
+      ft->teamJumpMode = false;
+    }
+  } else {
+    Printer::SendPopupMessage(clientNum, "fireteam: invalid teamjump value");
+    Printer::SendPopupMessage(clientNum, "Valid values are: <on|1> <off|0>");
+    return;
+  }
+
+  if (!announce) {
+    Printer::SendConsoleMessage(clientNum, std::move(message + "\n"));
+  } else {
+    for (int i = 0; i < level.numConnectedClients; i++) {
+      if (ft->joinOrder[i] == -1) {
+        continue;
+      }
+
+      Printer::SendPopupMessage(ft->joinOrder[i], message);
+    }
+
+    G_UpdateFireteamConfigString(ft);
+  }
+}
 } // namespace ETJump
 
 // Checks if given command buffer matches a valid client on the server
@@ -995,8 +997,8 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
   // Only leader
   else if (!Q_stricmp(command, "rules")) {
     ETJump::setFireTeamRules(selfNum);
-  } else if (!Q_stricmp(command, "tj")) {
-    G_TeamJumpMode(selfNum);
+  } else if (!Q_stricmp(command, "tj") || !Q_stricmp(command, "teamjump")) {
+    ETJump::setupTeamJumpMode(selfNum);
   } else if (!Q_stricmp(command, "race")) {
     G_FireteamRace(selfNum);
   }
