@@ -501,6 +501,10 @@ static void CG_MessageMode_f(void) {
   }
   // fireteam say
   else if (!Q_stricmp(cmd, "messagemode3")) {
+    if (!CG_IsOnFireteam(cg.clientNum)) {
+      return;
+    }
+
     trap_Cvar_Set("cg_messageType", "3");
   }
   // (normal) say
@@ -545,6 +549,10 @@ static void CG_MessageSend_f(void) {
   }
   // fireteam say
   else if (messageType == 3) {
+    if (!CG_IsOnFireteam(cg.clientNum)) {
+      return;
+    }
+
     trap_SendConsoleCommand(va("enc_say_buddy \"%s\"\n", messageTextEncoded));
   }
   // normal say
