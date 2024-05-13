@@ -1669,18 +1669,19 @@ void InitTrigger(gentity_t *self);
 //
 // g_misc.c
 //
-void TeleportPlayer(gentity_t *player, vec3_t origin, vec3_t angles);
-void TeleportPlayerExt(gentity_t *player, vec3_t origin, vec3_t angles);
-void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
-                                    const vec3_t origin, const vec3_t angles);
-void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
-                              const vec3_t origin, const vec3_t angles);
-void DirectTeleport(gentity_t *player, vec3_t origin, vec3_t angles);
+// this is only used by tank exiting and some weird spectator door teleport
+void TeleportPlayer(gentity_t *player, const vec3_t origin, vec3_t angles);
+void DirectTeleport(gentity_t *player, const vec3_t origin, vec3_t angles);
 void PortalTeleport(gentity_t *player, vec3_t origin,
                     vec3_t angles); // Feen: PGM
 void mg42_fire(gentity_t *other);
 void mg42_stopusing(gentity_t *self);
 void aagun_fire(gentity_t *other);
+
+namespace ETJump {
+void teleportPlayer(gentity_t *self, gentity_t *other, const vec3_t origin,
+                    const vec3_t angles, const int &spawnflags);
+}
 
 //
 // g_weapon.c

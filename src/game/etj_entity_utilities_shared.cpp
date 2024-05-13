@@ -129,7 +129,10 @@ void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
   }
 
   VectorCopy(origin, ps->origin);
-  ps->origin[2] += 1;
+
+  if (!(spawnflags & static_cast<int>(TeleporterSpawnflags::NoZOffset))) {
+    ps->origin[2] += 1;
+  }
 
   // toggle the teleport bit so the client knows to not lerp
   ps->eFlags ^= EF_TELEPORT_BIT;
