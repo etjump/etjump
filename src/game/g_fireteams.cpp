@@ -759,7 +759,7 @@ static void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
   }
 }
 
-static bool fireTeamMemberIsTimerunning(fireteamData_t *ft) {
+static bool fireTeamMemberIsTimerunning(fireteamData_t *ft, int checkFlag) {
   for (int i = 0; i < level.numConnectedClients; i++) {
     if (ft->joinOrder[i] == -1) {
       continue;
@@ -768,8 +768,7 @@ static bool fireTeamMemberIsTimerunning(fireteamData_t *ft) {
     gentity_t *ent = g_entities + ft->joinOrder[i];
 
     if (ent->client->sess.timerunActive &&
-        !(ent->client->sess.runSpawnflags &
-          static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
+        !(ent->client->sess.runSpawnflags & checkFlag)) {
       return true;
     }
   }
@@ -791,6 +790,10 @@ static void setFireteamShove(fireteamData_t *ft, bool shove) {
 
     gentity_t *ent = g_entities + ft->joinOrder[i];
     const int clientNum = ClientNum(ent);
+
+    if (shove) {
+      ent->client->ftShoveThisLife = true;
+    }
 
     Printer::SendPopupMessage(clientNum, msg);
 
@@ -867,7 +870,9 @@ static void setFireTeamRules(int clientNum) {
 
       // ghosting cannot be enabled if someone is already timerunning unless
       // the run allows it, so we need to only check for enabling here
-      if (!ft->noGhost && fireTeamMemberIsTimerunning(ft)) {
+      if (!ft->noGhost &&
+          fireTeamMemberIsTimerunning(
+              ft, static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
         G_ClientPrintAndReturn(clientNum,
                                "fireteam: a member of your fireteam is "
                                "timerunning, cannot enable noghost.")
@@ -904,6 +909,13 @@ static void setFireTeamRules(int clientNum) {
     if (!g_cheats.integer && level.noFTShove) {
       G_ClientPrintAndReturn(clientNum,
                              "fireteam: shoving cannot be enabled on this map.")
+    }
+
+    if (!ft->shove &&
+        fireTeamMemberIsTimerunning(
+            ft, static_cast<int>(TimerunSpawnflags::AllowFTShove))) {
+      G_ClientPrintAndReturn(clientNum, "fireteam: a member of your fireteam "
+                                        "is timerunning, cannot enable shove.")
     }
 
     trap_Argv(3, val, sizeof(val));

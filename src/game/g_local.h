@@ -999,6 +999,7 @@ struct gclient_s {
   bool setoffsetThisLife;
   bool pmoveOffThisLife;
   bool ftNoGhostThisLife;
+  bool ftShoveThisLife;
 
   int lastCmdTime; // level.time of last usercmd_t, for EF_CONNECTION
                    // we can't just use pers.lastCommand.time, because
@@ -2880,6 +2881,7 @@ enum class TimerunSpawnflags {
   NoPortalgunPickup = 64,
   NoSave = 128,
   AllowFTNoGhost = 256,
+  AllowFTShove = 512,
 };
 
 bool checkCheatCvars(gclient_s *client, int flags);

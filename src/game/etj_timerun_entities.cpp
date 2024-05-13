@@ -178,6 +178,16 @@ bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
       return false;
     }
 
+    if (client->ftShoveThisLife &&
+        !(self->spawnflags &
+          static_cast<int>(TimerunSpawnflags::AllowFTShove))) {
+      Printer::SendCenterMessage(
+          *clientNum,
+          "^3WARNING: ^7Timerun was not started. ^3fireteam shove ^7enabled "
+          "this life & run does not allow shove, ^3/kill ^7required!");
+      return false;
+    }
+
     if (client->pmoveOffThisLife &&
         (!self->spawnflags ||
          self->spawnflags &

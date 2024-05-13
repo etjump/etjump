@@ -2628,8 +2628,9 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 
   fireteamData_t *ft;
 
-  if (G_IsOnFireteam(client->ps.clientNum, &ft) && ft->noGhost) {
-    client->ftNoGhostThisLife = true;
+  if (G_IsOnFireteam(client->ps.clientNum, &ft)) {
+    client->ftNoGhostThisLife = ft->noGhost;
+    client->ftShoveThisLife = ft->shove;
   }
 
   // run a client frame to drop exactly to the floor,
