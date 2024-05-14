@@ -1604,6 +1604,7 @@ enum class FTRelaySpawnflags {
   AllTargets = 4,
   TimerunOnly = 8,
   NoTimerun = 16,
+  NoActivator = 32,
 };
 
 static bool canFireFTRelay(gentity_t *self, gentity_t *activator) {
@@ -1673,6 +1674,12 @@ void target_ftrelay_use(gentity_t *self, gentity_t *other,
     }
 
     gentity_t *ent = g_entities + ft->joinOrder[i];
+
+    if (activator == ent &&
+        self->spawnflags &
+            static_cast<int>(ETJump::FTRelaySpawnflags::NoActivator)) {
+      continue;
+    }
 
     if (!ETJump::canFireFTRelay(self, ent)) {
       continue;
