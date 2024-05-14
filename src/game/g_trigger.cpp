@@ -70,6 +70,11 @@ void Touch_Multi(gentity_t *self, gentity_t *other, trace_t *trace) {
     return;
   }
 
+  if (self->spawnflags & static_cast<int>(TriggerMultipleFlags::NoNoclip) &&
+      other->client->noclip) {
+    return;
+  }
+
   if ((self->spawnflags &
        static_cast<int>(TriggerMultipleFlags::DeathrunOnly)) != 0 &&
       (other->client->sess.deathrunFlags &

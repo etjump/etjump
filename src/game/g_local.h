@@ -668,6 +668,7 @@ enum class TriggerMultipleFlags {
   Constant = 1 << 9, // deprecated
   DeathrunOnly = 1 << 10,
   MultiActivator = 1 << 11, // deprecated (default behavior now)
+  NoNoclip = 1 << 12,
 };
 
 ///////////////////////////////////////////////////////////////////////////////
