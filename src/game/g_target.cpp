@@ -1602,8 +1602,39 @@ enum class FTRelaySpawnflags {
   // this matches 'target_relay' random spawnflag,
   // so it's sort of consistent with that (this uses random by default)
   AllTargets = 4,
+  TimerunOnly = 8,
+  NoTimerun = 16,
 };
+
+static bool canFireFTRelay(gentity_t *self, gentity_t *activator) {
+  if (activator->client->sess.sessionTeam == TEAM_SPECTATOR) {
+    return false;
+  }
+
+  if ((self->spawnflags &
+           static_cast<int>(ETJump::FTRelaySpawnflags::AxisOnly) &&
+       activator->client->sess.sessionTeam != TEAM_AXIS) ||
+      (self->spawnflags &
+           static_cast<int>(ETJump::FTRelaySpawnflags::AlliesOnly) &&
+       activator->client->sess.sessionTeam != TEAM_ALLIES)) {
+    return false;
+  }
+
+  if (self->spawnflags &
+          static_cast<int>(ETJump::FTRelaySpawnflags::TimerunOnly) &&
+      !activator->client->sess.timerunActive) {
+    return false;
+  }
+
+  if (self->spawnflags &
+          static_cast<int>(ETJump::FTRelaySpawnflags::NoTimerun) &&
+      activator->client->sess.timerunActive) {
+    return false;
+  }
+
+  return true;
 }
+} // namespace ETJump
 
 static void G_ActivateTarget(gentity_t *self, gentity_t *activator) {
   gentity_t *ent = G_PickTarget(self->target);
@@ -1621,11 +1652,6 @@ void target_ftrelay_use(gentity_t *self, gentity_t *other,
 
   fireteamData_t *ft;
   const int clientNum = ClientNum(activator);
-  const bool axisOnly =
-      self->spawnflags & static_cast<int>(ETJump::FTRelaySpawnflags::AxisOnly);
-  const bool alliesOnly =
-      self->spawnflags &
-      static_cast<int>(ETJump::FTRelaySpawnflags::AlliesOnly);
   const bool allTargets =
       self->spawnflags &
       static_cast<int>(ETJump::FTRelaySpawnflags::AllTargets);
@@ -1633,8 +1659,7 @@ void target_ftrelay_use(gentity_t *self, gentity_t *other,
   // if activator is not in a fireteam or teamjump mode is off,
   // just fire the target and exit
   if (!G_IsOnFireteam(clientNum, &ft) || !ft->teamJumpMode) {
-    if ((axisOnly && activator->client->sess.sessionTeam != TEAM_AXIS) ||
-        (alliesOnly && activator->client->sess.sessionTeam != TEAM_ALLIES)) {
+    if (!ETJump::canFireFTRelay(self, activator)) {
       return;
     }
 
@@ -1650,13 +1675,7 @@ void target_ftrelay_use(gentity_t *self, gentity_t *other,
 
     gentity_t *ent = g_entities + ft->joinOrder[i];
 
-    // do not fire targets to spectators
-    if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
-      continue;
-    }
-
-    if ((axisOnly && ent->client->sess.sessionTeam != TEAM_AXIS) ||
-        (allTargets && ent->client->sess.sessionTeam != TEAM_ALLIES)) {
+    if (!ETJump::canFireFTRelay(self, ent)) {
       continue;
     }
 
