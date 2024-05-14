@@ -1611,23 +1611,22 @@ static bool canFireFTRelay(gentity_t *self, gentity_t *activator) {
     return false;
   }
 
-  if ((self->spawnflags &
-           static_cast<int>(ETJump::FTRelaySpawnflags::AxisOnly) &&
-       activator->client->sess.sessionTeam != TEAM_AXIS) ||
-      (self->spawnflags &
-           static_cast<int>(ETJump::FTRelaySpawnflags::AlliesOnly) &&
-       activator->client->sess.sessionTeam != TEAM_ALLIES)) {
+  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::AxisOnly) &&
+      activator->client->sess.sessionTeam != TEAM_AXIS) {
     return false;
   }
 
-  if (self->spawnflags &
-          static_cast<int>(ETJump::FTRelaySpawnflags::TimerunOnly) &&
+  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::AlliesOnly) &&
+      activator->client->sess.sessionTeam != TEAM_ALLIES) {
+    return false;
+  }
+
+  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::TimerunOnly) &&
       !activator->client->sess.timerunActive) {
     return false;
   }
 
-  if (self->spawnflags &
-          static_cast<int>(ETJump::FTRelaySpawnflags::NoTimerun) &&
+  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::NoTimerun) &&
       activator->client->sess.timerunActive) {
     return false;
   }
