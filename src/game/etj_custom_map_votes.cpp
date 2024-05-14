@@ -83,8 +83,10 @@ bool CustomMapVotes::Load() {
       unsigned curr = customMapVotes_.size() - 1;
 
       Json::Value maps = list["maps"];
-      customMapVotes_[curr].type = list["name"].asString();
-      customMapVotes_[curr].callvoteText = list["callvote_text"].asString();
+      customMapVotes_[curr].type =
+          ETJump::sanitize(list["name"].asString(), true);
+      customMapVotes_[curr].callvoteText =
+          ETJump::sanitize(list["callvote_text"].asString());
 
       std::set<std::string> uniqueMapsOnServer{};
       std::set<std::string> uniqueMapsOther{};
@@ -92,7 +94,7 @@ bool CustomMapVotes::Load() {
       // clean up the list from potential duplicates
       // FIXME: we should rather erase the duplicates from the json file itself
       for (const auto &map : maps) {
-        const std::string &mapName = map.asString();
+        const std::string &mapName = ETJump::sanitize(map.asString(), true);
 
         if (std::binary_search(_currentMapsOnServer->begin(),
                                _currentMapsOnServer->end(), mapName)) {
@@ -191,13 +193,14 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
                                        const std::string &maps) {
   const std::string &customVotesFile = g_customMapVotesFile.string;
   Json::Value root;
+  const std::string sanitizedName = ETJump::sanitize(name, true);
 
   // read and append to existing file if present
   if (ETJump::JsonUtils::readFile(customVotesFile, root)) {
 
     // make sure we don't already have a list with this name
     for (const auto &lists : customMapVotes_) {
-      if (name == lists.type) {
+      if (sanitizedName == lists.type) {
         Printer::SendChatMessage(clientNum,
                                  "^3add-customvote: ^7operation failed, check "
                                  "console for more information.");
@@ -205,21 +208,21 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
             clientNum,
             ETJump::stringFormat("^3add-customvote: ^7a list with the name "
                                  "^3'%s' ^7already exists.\n",
-                                 name));
+                                 sanitizedName));
         return;
       }
     }
   }
 
   Json::Value vote;
-  vote["name"] = name;
-  vote["callvote_text"] = fullName;
+  vote["name"] = sanitizedName;
+  vote["callvote_text"] = ETJump::sanitize(fullName);
   vote["maps"] = Json::arrayValue;
 
   const auto mapList = ETJump::StringUtil::split(maps, " ");
 
   for (const auto &map : mapList) {
-    vote["maps"].append(map);
+    vote["maps"].append(ETJump::sanitize(map, true));
   }
 
   root.append(vote);
@@ -238,7 +241,7 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
   Printer::SendChatMessage(
       clientNum, ETJump::stringFormat("^3add-customvote: ^7successfully added "
                                       "a new custom vote list ^3'%s'",
-                                      name));
+                                      sanitizedName));
 }
 
 void CustomMapVotes::deleteCustomvoteList(int clientNum,
@@ -314,22 +317,26 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
     return;
   }
 
+  const std::string sanitizedList = ETJump::sanitize(list, true);
+  const std::string sanitizedName = ETJump::sanitize(name, true);
+  const std::string sanitizedFName = ETJump::sanitize(fullName);
+
   bool found = false;
 
   for (auto &object : root) {
-    if (object["name"].asString() == list) {
-      if (!name.empty()) {
+    if (ETJump::sanitize(object["name"].asString(), true) == sanitizedList) {
+      if (!sanitizedName.empty()) {
         for (const auto &key : object) {
           if (key == object["name"].asString()) {
-            object["name"] = name;
+            object["name"] = sanitizedName;
           }
         }
       }
 
-      if (!fullName.empty()) {
+      if (!sanitizedFName.empty()) {
         for (const auto &key : object) {
           if (key == object["callvote_text"].asString()) {
-            object["callvote_text"] = fullName;
+            object["callvote_text"] = sanitizedFName;
           }
         }
       }
@@ -338,7 +345,7 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
         const auto mapList = ETJump::StringUtil::split(addMaps, " ");
 
         for (const auto &map : mapList) {
-          object["maps"].append(map);
+          object["maps"].append(ETJump::sanitize(map, true));
         }
       }
 
@@ -347,7 +354,7 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
 
         for (const auto &map : mapList) {
           for (Json::ArrayIndex i = 0; i < object["maps"].size(); i++) {
-            if (object["maps"][i].asString() == map) {
+            if (ETJump::StringUtil::iEqual(object["maps"][i].asString(), map)) {
               Json::Value removed;
               object["maps"].removeIndex(i, &removed);
               break;
@@ -365,7 +372,7 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
     Printer::SendChatMessage(
         clientNum, ETJump::stringFormat("^3edit-customvote: ^7a list with the "
                                         "name ^3'%s' ^7was not found.\n",
-                                        list));
+                                        sanitizedList));
     return;
   }
 
@@ -385,7 +392,7 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
       clientNum,
       ETJump::stringFormat(
           "^3edit-customvote: ^7successfully edited custom vote list ^3'%s'",
-          list));
+          sanitizedList));
 }
 
 std::string CustomMapVotes::ListInfo(const std::string &type) {
