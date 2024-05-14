@@ -1954,9 +1954,6 @@ extern vmCvar_t g_landminetimeout;
 // What level of detail do we want script printing to go to.
 extern vmCvar_t g_scriptDebugLevel;
 
-// How fast do SP player and allied bots move?
-extern vmCvar_t g_movespeed;
-
 // NERVE - SMF
 extern vmCvar_t g_userTimeLimit;
 extern vmCvar_t g_userAlliedRespawnTime;
@@ -1977,7 +1974,6 @@ extern vmCvar_t match_readypercent;
 extern vmCvar_t match_timeoutcount;
 extern vmCvar_t match_timeoutlength;
 extern vmCvar_t match_warmupDamage;
-extern vmCvar_t server_autoconfig;
 extern vmCvar_t server_motd0;
 extern vmCvar_t server_motd1;
 extern vmCvar_t server_motd2;
@@ -1999,8 +1995,6 @@ extern vmCvar_t vote_allow_rtv;
 extern vmCvar_t vote_allow_autoRtv;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
-extern vmCvar_t g_letterbox;
-extern vmCvar_t bot_enable;
 
 extern vmCvar_t g_debugSkills;
 extern vmCvar_t g_autoFireteams;
@@ -2050,7 +2044,6 @@ extern vmCvar_t g_voteCooldown;
 extern vmCvar_t mod_version;
 
 extern vmCvar_t g_mapDatabase;
-extern vmCvar_t g_banDatabase;
 
 extern vmCvar_t g_disableVoteAfterMapChange;
 
@@ -2068,9 +2061,6 @@ extern vmCvar_t g_tokensPath;
 // end of tokens
 
 extern vmCvar_t g_chatOptions;
-
-// vchat customization
-extern vmCvar_t g_customVoiceChat;
 
 extern vmCvar_t shared;
 extern vmCvar_t g_moverScale;

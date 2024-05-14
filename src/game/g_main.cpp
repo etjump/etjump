@@ -100,8 +100,6 @@ vmCvar_t g_swapteams;
 vmCvar_t g_restarted;
 vmCvar_t g_logFile;
 vmCvar_t g_logSync;
-vmCvar_t g_podiumDist;
-vmCvar_t g_podiumDrop;
 vmCvar_t voteFlags;
 vmCvar_t g_filtercams;
 vmCvar_t g_voiceChatsAllowed; // DHM - Nerve
@@ -145,7 +143,6 @@ vmCvar_t match_readypercent;
 vmCvar_t match_timeoutcount;
 vmCvar_t match_timeoutlength;
 vmCvar_t match_warmupDamage;
-vmCvar_t server_autoconfig;
 vmCvar_t team_maxPanzers;
 vmCvar_t team_maxplayers;
 vmCvar_t team_nocontrols;
@@ -172,13 +169,9 @@ vmCvar_t g_landminetimeout;
 // enabled in bot scripts and regular scripts.
 // Added by Mad Doctor I, 8/23/2002
 vmCvar_t g_scriptDebugLevel;
-vmCvar_t g_movespeed;
 
 vmCvar_t mod_url;
 vmCvar_t url;
-
-vmCvar_t g_letterbox;
-vmCvar_t bot_enable;
 
 vmCvar_t g_debugSkills;
 vmCvar_t g_autoFireteams;
@@ -235,7 +228,6 @@ vmCvar_t g_voteCooldown;
 vmCvar_t mod_version;
 
 vmCvar_t g_mapDatabase;
-vmCvar_t g_banDatabase;
 
 vmCvar_t g_disableVoteAfterMapChange;
 
@@ -253,9 +245,6 @@ vmCvar_t g_chatOptions;
 vmCvar_t g_tokensMode;
 vmCvar_t g_tokensPath;
 // end of tokens
-
-// vchat customization
-vmCvar_t g_customVoiceChat;
 
 // ETJump client/server shared data
 // TODO: refactor ghostPlayers into this
@@ -368,9 +357,6 @@ cvarTable_t gameCvarTable[] = {
      qfalse}, //----(SA)	added
     {&g_motd, "g_motd", "", CVAR_ARCHIVE, 0, qfalse},
 
-    {&g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse},
-    {&g_podiumDrop, "g_podiumDrop", "70", 0, 0, qfalse},
-
     {&voteFlags, "voteFlags", "0", CVAR_TEMP | CVAR_ROM | CVAR_SERVERINFO, 0,
      qfalse},
 
@@ -406,7 +392,6 @@ cvarTable_t gameCvarTable[] = {
     {&match_timeoutcount, "match_timeoutcount", "3", 0, 0, qfalse, qtrue},
     {&match_timeoutlength, "match_timeoutlength", "180", 0, 0, qfalse, qtrue},
     {&match_warmupDamage, "match_warmupDamage", "1", 0, 0, qfalse},
-    {&server_autoconfig, "server_autoconfig", "0", 0, 0, qfalse, qfalse},
     {&server_motd0, "server_motd0", " ^NEnemy Territory ^7MOTD ", 0, 0, qfalse,
      qfalse},
     {&server_motd1, "server_motd1", "", 0, 0, qfalse, qfalse},
@@ -433,18 +418,11 @@ cvarTable_t gameCvarTable[] = {
     // What level of detail do we want script printing to go to.
     {&g_scriptDebugLevel, "g_scriptDebugLevel", "0", CVAR_CHEAT, 0, qfalse},
 
-    // How fast do we want Allied single player movement?
-    //	{ &g_movespeed, "g_movespeed", "127", CVAR_CHEAT, 0, qfalse },
-    {&g_movespeed, "g_movespeed", "76", CVAR_CHEAT, 0, qfalse},
-
     // points to the URL for mod information, should not be modified by server
     // admin
     {&mod_url, "mod_url", GAME_URL, CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
     // configured by the server admin, points to the web pages for the server
     {&url, "URL", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse},
-
-    {&g_letterbox, "cg_letterbox", "0", CVAR_TEMP},
-    {&bot_enable, "bot_enable", "0", 0},
 
     {&g_debugSkills, "g_debugSkills", "0", 0},
     {&g_autoFireteams, "g_autoFireteams", "1", CVAR_ARCHIVE},
@@ -501,7 +479,6 @@ cvarTable_t gameCvarTable[] = {
     {&mod_version, "mod_version", GAME_VERSION, CVAR_SERVERINFO},
 
     {&g_mapDatabase, "g_mapDatabase", "maps.dat", CVAR_ARCHIVE},
-    {&g_banDatabase, "g_banDatabase", "bans.dat", CVAR_ARCHIVE},
     {&g_disableVoteAfterMapChange, "g_disableVoteAfterMapChange", "30000",
      CVAR_ARCHIVE},
     {&g_motdFile, "g_motdFile", "motd.json", CVAR_ARCHIVE},
@@ -520,8 +497,6 @@ cvarTable_t gameCvarTable[] = {
     {&g_tokensMode, "g_tokensMode", "1", CVAR_ARCHIVE | CVAR_LATCH},
     {&g_tokensPath, "g_tokensPath", "tokens", CVAR_ARCHIVE | CVAR_LATCH},
     // end of tokens
-
-    {&g_customVoiceChat, "g_customVoiceChat", "1", CVAR_ARCHIVE},
 
     {&shared, "shared", "0", CVAR_SYSTEMINFO | CVAR_ROM},
     {&vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE},
@@ -1956,14 +1931,6 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   G_FindTeams();
 
   trap_PbStat(-1, "INIT", "GAME");
-
-#ifndef NO_BOT_SUPPORT
-  if (bot_enable.integer) {
-    BotAISetup(restart);
-    //		BotAILoadMap( restart );
-    G_InitBots(restart);
-  }
-#endif // NO_BOT_SUPPORT
 
   G_RemapTeamShaders();
 

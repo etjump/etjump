@@ -15,6 +15,7 @@
 #ifdef CGAMEDLL
   #define PM_Cheats cgs.cheats
 #elif GAMEDLL
+extern vmCvar_t g_cheats;
   #define PM_Cheats g_cheats.integer
 #endif
 
@@ -586,18 +587,6 @@ static void PM_Accelerate(vec3_t wishdir, float wishspeed, float accel) {
   VectorMA(pm->ps->velocity, canPush, pushDir, pm->ps->velocity);
 #endif
 }
-
-// JPW NERVE -- added because I need to check single/multiplayer instances and
-// branch accordingly
-#ifdef CGAMEDLL
-extern vmCvar_t cg_gameType;
-extern vmCvar_t cg_movespeed;
-#endif
-#ifdef GAMEDLL
-extern vmCvar_t g_gametype;
-extern vmCvar_t g_cheats;
-extern vmCvar_t g_movespeed;
-#endif
 
 /*
 ============

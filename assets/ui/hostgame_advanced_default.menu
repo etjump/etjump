@@ -17,7 +17,6 @@
 #define DEFAULT_SETTINGS	setcvar sv_hostname "ETHost" ;			\
 							setcvar ui_netGameType 2 ;				\
 							setcvar sv_maxclients 20 ;				\
-							setcvar server_autoconfig 0 ;			\
 							setcvar ui_dedicated 0 ;				\
 							setcvar g_friendlyFire 1 ;				\
 							setcvar g_antilag 1 ;					\
