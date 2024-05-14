@@ -1595,7 +1595,17 @@ void SP_target_portal_relay(gentity_t *self) {
   G_SpawnInt("maxportals", "-1", &self->count);
 }
 
-void G_ActivateTarget(gentity_t *self, gentity_t *activator) {
+namespace ETJump {
+enum class FTRelaySpawnflags {
+  AxisOnly = 1,
+  AlliesOnly = 2,
+  // this matches 'target_relay' random spawnflag,
+  // so it's sort of consistent with that (this uses random by default)
+  AllTargets = 4,
+};
+}
+
+static void G_ActivateTarget(gentity_t *self, gentity_t *activator) {
   gentity_t *ent = G_PickTarget(self->target);
   if (ent && ent->use) {
     G_UseEntity(ent, self, activator);
@@ -1611,11 +1621,25 @@ void target_ftrelay_use(gentity_t *self, gentity_t *other,
 
   fireteamData_t *ft;
   const int clientNum = ClientNum(activator);
+  const bool axisOnly =
+      self->spawnflags & static_cast<int>(ETJump::FTRelaySpawnflags::AxisOnly);
+  const bool alliesOnly =
+      self->spawnflags &
+      static_cast<int>(ETJump::FTRelaySpawnflags::AlliesOnly);
+  const bool allTargets =
+      self->spawnflags &
+      static_cast<int>(ETJump::FTRelaySpawnflags::AllTargets);
 
   // if activator is not in a fireteam or teamjump mode is off,
   // just fire the target and exit
   if (!G_IsOnFireteam(clientNum, &ft) || !ft->teamJumpMode) {
-    G_ActivateTarget(self, activator);
+    if ((axisOnly && activator->client->sess.sessionTeam != TEAM_AXIS) ||
+        (alliesOnly && activator->client->sess.sessionTeam != TEAM_ALLIES)) {
+      return;
+    }
+
+    allTargets ? G_UseTargets(self, activator)
+               : G_ActivateTarget(self, activator);
     return;
   }
 
@@ -1624,7 +1648,19 @@ void target_ftrelay_use(gentity_t *self, gentity_t *other,
       continue;
     }
 
-    G_ActivateTarget(self, g_entities + ft->joinOrder[i]);
+    gentity_t *ent = g_entities + ft->joinOrder[i];
+
+    // do not fire targets to spectators
+    if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+      continue;
+    }
+
+    if ((axisOnly && ent->client->sess.sessionTeam != TEAM_AXIS) ||
+        (allTargets && ent->client->sess.sessionTeam != TEAM_ALLIES)) {
+      continue;
+    }
+
+    allTargets ? G_UseTargets(self, ent) : G_ActivateTarget(self, ent);
   }
 }
 
