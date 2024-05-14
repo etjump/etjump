@@ -7977,7 +7977,6 @@ cvarTable_t cvarTable[] = {
     {&cg_crosshairColorAlt, "cg_crosshairColorAlt", "White", CVAR_ARCHIVE},
     {&cg_crosshairSize, "cg_crosshairSize", "48", CVAR_ARCHIVE},
     // game mappings (for create server option)
-    {NULL, "bot_enable", "1", CVAR_ARCHIVE},
     {NULL, "bot_minplayers", "0", CVAR_ARCHIVE},
     {NULL, "g_ipcomplaintlimit", "3", CVAR_ARCHIVE},
     {NULL, "g_complaintlimit", "6", CVAR_ARCHIVE},
@@ -7994,7 +7993,6 @@ cvarTable_t cvarTable[] = {
     {NULL, "match_timeoutcount", "3", CVAR_ARCHIVE},
     {NULL, "match_timeoutlength", "180", CVAR_ARCHIVE},
     {NULL, "match_warmupDamage", "1", CVAR_ARCHIVE},
-    {NULL, "server_autoconfig", "0", CVAR_ARCHIVE},
     {NULL, "server_motd0", " ^NEnemy Territory ^7MOTD ", CVAR_ARCHIVE},
     {NULL, "server_motd1", "", CVAR_ARCHIVE},
     {NULL, "server_motd2", "", CVAR_ARCHIVE},

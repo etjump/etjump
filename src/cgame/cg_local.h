@@ -2293,8 +2293,6 @@ extern vmCvar_t cg_redlimbotime;
 extern vmCvar_t cg_bluelimbotime;
 // jpw
 
-extern vmCvar_t cg_movespeed;
-
 extern vmCvar_t cg_animState;
 
 extern vmCvar_t cg_drawCompass;
