@@ -116,12 +116,33 @@ TEST_F(StringUtilitiesTests, countExtraPadding_ShouldWorkCorrectly) {
 }
 
 TEST_F(StringUtilitiesTests, iEqual_ShouldWorkCorrectly) {
+  // basic case-insensitive comparison
   EXPECT_EQ(StringUtil::iEqual("FOO", "foo"), true);
   EXPECT_EQ(StringUtil::iEqual("FOO", "bar"), false);
 
+  // case-insensitive comparison with sanitization
   EXPECT_EQ(StringUtil::iEqual("FOO", "^1foo", true), true);
   EXPECT_EQ(StringUtil::iEqual("^2FOO", "^1foo", true), true);
   EXPECT_EQ(StringUtil::iEqual("^2FOO", "^1bar", true), false);
 
+  // case-insensitive comparison without sanitization
   EXPECT_EQ(StringUtil::iEqual("FOO", "^1foo"), false);
+
+  // empty strings comparison
+  EXPECT_EQ(StringUtil::iEqual("", ""), true);
+  EXPECT_EQ(StringUtil::iEqual("", "foo"), false);
+  EXPECT_EQ(StringUtil::iEqual("foo", ""), false);
+
+  // different lengths
+  EXPECT_EQ(StringUtil::iEqual("FOO", "FOOBAR"), false);
+  EXPECT_EQ(StringUtil::iEqual("FOOBAR", "FOO"), false);
+
+  // mixed case with color codes
+  EXPECT_EQ(StringUtil::iEqual("^1FoO", "^2fOo", true), true);
+  EXPECT_EQ(StringUtil::iEqual("^1FoO", "^2BaR", true), false);
+
+  // no sanitization parameter specified
+  // (default behavior should be case-insensitive)
+  EXPECT_EQ(StringUtil::iEqual("FoO", "foO"), true);
+  EXPECT_EQ(StringUtil::iEqual("FoO", "BaR"), false);
 }
