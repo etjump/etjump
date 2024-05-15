@@ -507,18 +507,11 @@ std::vector<std::string> MapStatistics::blockedMaps() {
 }
 
 bool MapStatistics::isBlockedMap(const std::string &mapName) {
-  bool isBlocked = false;
-  const auto blockedMaps = MapStatistics::blockedMaps();
-  const auto numBlockedMaps = blockedMaps.size();
-
-  for (int i = 0; i < numBlockedMaps; i++) {
-    if (ETJump::StringUtil::matches(blockedMaps[i], mapName)) {
-      isBlocked = true;
-      break;
-    }
-  }
-
-  return isBlocked;
+  const auto &blockedMaps = MapStatistics::blockedMaps();
+  return std::any_of(blockedMaps.begin(), blockedMaps.end(),
+                     [&mapName](const std::string &map) {
+                       return ETJump::StringUtil::iEqual(map, mapName);
+                     });
 }
 
 bool MapStatistics::isValidMap(const MapInformation *mapInfo) const {

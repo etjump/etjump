@@ -303,9 +303,16 @@ bool ETJump::StringUtil::contains(const std::string &str,
   return str.find(text) != std::string::npos;
 }
 
-bool ETJump::StringUtil::matches(const std::string &str,
-                                 const std::string &text) {
-  return str == text;
+bool ETJump::StringUtil::iEqual(const std::string &str1,
+                                const std::string &str2, bool sanitized) {
+  if (sanitized) {
+    return sanitize(str1, true) == sanitize(str2, true);
+  }
+
+  return std::equal(str1.begin(), str1.end(), str2.begin(), str2.end(),
+                    [](unsigned char a, unsigned char b) {
+                      return std::tolower(a) == std::tolower(b);
+                    });
 }
 
 unsigned ETJump::StringUtil::countExtraPadding(const std::string &input) {
