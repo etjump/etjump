@@ -7,6 +7,7 @@
 
 #include "cg_local.h"
 #include "etj_utilities.h"
+#include "etj_player_bbox.h"
 
 #define SWING_RIGHT 1
 #define SWING_LEFT 2
@@ -2364,6 +2365,10 @@ void CG_Player(centity_t *cent) {
       CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team,
                                   &cent->currentState, cent->fireRiseDir);
     }
+  }
+
+  if (etj_drawPlayerBBox.integer) {
+    ETJump::playerBBox->drawBBox(ci, cent);
   }
 }
 

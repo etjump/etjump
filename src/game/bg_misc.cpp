@@ -50,6 +50,8 @@ const int skillLevels[NUM_SKILL_LEVELS] = {
         //	200		// reaching level 5
 };
 
+vec3_t playerMins = {-18, -18, -24};
+vec3_t playerMaxs = {18, 18, 48};
 vec3_t playerlegsProneMins = {-13.5f, -13.5f, -24.f};
 vec3_t playerlegsProneMaxs = {13.5f, 13.5f, -14.4f};
 

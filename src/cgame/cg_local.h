@@ -2744,6 +2744,15 @@ extern vmCvar_t etj_autoPortalBinds;
 
 extern vmCvar_t etj_muzzleFlash;
 
+extern vmCvar_t etj_drawPlayerBBox;
+extern vmCvar_t etj_playerBBoxColorSelf;
+extern vmCvar_t etj_playerBBoxColorOther;
+extern vmCvar_t etj_playerBBoxColorFireteam;
+extern vmCvar_t etj_playerBBoxBottomOnlySelf;
+extern vmCvar_t etj_playerBBoxBottomOnlyOther;
+extern vmCvar_t etj_playerBBoxBottomOnlyFireteam;
+extern vmCvar_t etj_playerBBoxShader;
+
 //
 // cg_main.c
 //
@@ -4177,6 +4186,7 @@ class CvarShadow;
 class ClientRtvHandler;
 class DemoCompatibility;
 class AccelColor;
+class PlayerBBox;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4190,6 +4200,7 @@ extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 extern std::shared_ptr<ClientRtvHandler> rtvHandler;
 extern std::shared_ptr<DemoCompatibility> demoCompatibility;
 extern std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
+extern std::shared_ptr<PlayerBBox> playerBBox;
 
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume, int soundTime);

@@ -127,6 +127,8 @@
 
 #define PRONE_VIEWHEIGHT -8
 
+extern vec3_t playerMins;
+extern vec3_t playerMaxs;
 extern vec3_t playerlegsProneMins;
 extern vec3_t playerlegsProneMaxs;
 
