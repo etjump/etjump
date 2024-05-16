@@ -96,18 +96,7 @@ void PlayerBBox::drawBBox(clientInfo_t *ci, centity_t *cent) {
     // we don't need to worry about hideme or dist < hideDistance here, the code
     // in CG_Player exits before we ever call this function in those scenarios
     if (etj_hide.integer) {
-      float alpha = 1.0f;
-      centity_t *self = &cg_entities[cg.snap->ps.clientNum];
-      const vec_t playerDist = Distance(self->lerpOrigin, cent->lerpOrigin);
-      const float fadeRange = etj_hideFadeRange.value;
-      const float transZone = etj_hideDistance.value + fadeRange;
-
-      if (playerDist < transZone) {
-        const float diff = (transZone - playerDist) / fadeRange;
-        alpha -= (alpha * diff);
-      }
-
-      box.color[3] *= alpha;
+      setBBoxAlpha(cent, box);
     }
   }
 
@@ -228,6 +217,21 @@ bool PlayerBBox::bottomOnly(const int &pType) {
     default: // shouldn't happen
       return false;
   }
+}
+
+void PlayerBBox::setBBoxAlpha(centity_t *cent, BBox &box) {
+  centity_t *self = &cg_entities[cg.snap->ps.clientNum];
+  const vec_t playerDist = Distance(self->lerpOrigin, cent->lerpOrigin);
+  const float fadeRange = etj_hideFadeRange.value;
+  const float transZone = etj_hideDistance.value + fadeRange;
+
+  if (playerDist > transZone) {
+    return;
+  }
+
+  const float diff = (transZone - playerDist) / fadeRange;
+  const float alpha = 1.0f - (1.0f * diff);
+  box.color[3] *= alpha;
 }
 
 bool PlayerBBox::canSkipDraw(centity_t *cent, clientInfo_t *ci) const {

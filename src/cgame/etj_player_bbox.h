@@ -61,6 +61,7 @@ class PlayerBBox {
 
   static void setupBBoxExtents(centity_t *cent, BBox &box);
   static bool bottomOnly(const int &pType);
+  static void setBBoxAlpha(centity_t *cent, BBox &box);
   bool canSkipDraw(centity_t *cent, clientInfo_t *ci) const;
 
 public:
