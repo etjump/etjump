@@ -220,26 +220,14 @@ void PlayerBBox::setupBBoxExtents(centity_t *cent, BBox &box) {
 bool PlayerBBox::bottomOnly(const int &pType) {
   switch (static_cast<PlayerType>(pType)) {
     case PlayerType::Self:
-      if (etj_playerBBoxBottomOnlySelf.integer) {
-        return true;
-      }
-
-      break;
+      return etj_playerBBoxBottomOnlySelf.integer;
     case PlayerType::Other:
-      if (etj_playerBBoxBottomOnlyOther.integer) {
-        return true;
-      }
-
-      break;
+      return etj_playerBBoxBottomOnlyOther.integer;
     case PlayerType::Fireteam:
-      if (etj_playerBBoxBottomOnlyFireteam.integer) {
-        return true;
-      }
-
-      break;
+      return etj_playerBBoxBottomOnlyFireteam.integer;
+    default: // shouldn't happen
+      return false;
   }
-
-  return false;
 }
 
 bool PlayerBBox::canSkipDraw(centity_t *cent, clientInfo_t *ci) const {
