@@ -56,8 +56,8 @@ class PlayerBBox {
   // in entitystate, it's simpler to just use hardcoded values
   // these are always correct anyway, there's no variation in any scenario
 
-  static constexpr int CROUCH_MAXS_Z = 24;
-  static constexpr int PRONE_MAXS_Z = 32;
+  static constexpr int CROUCH_MAXS_OFFSET_Z = 24;
+  static constexpr int PRONE_MAXS_OFFSET_Z = 32;
 
   static void setupBBoxExtents(centity_t *cent, BBox &box);
   static bool bottomOnly(const int &pType);

@@ -211,9 +211,9 @@ void PlayerBBox::setupBBoxExtents(centity_t *cent, BBox &box) {
   VectorCopy(playerMaxs, box.maxs);
 
   if (cent->currentState.eFlags & EF_CROUCHING) {
-    box.maxs[2] -= CROUCH_MAXS_Z;
+    box.maxs[2] -= CROUCH_MAXS_OFFSET_Z;
   } else if (cent->currentState.eFlags & (EF_PRONE | EF_PRONE_MOVING)) {
-    box.maxs[2] -= PRONE_MAXS_Z;
+    box.maxs[2] -= PRONE_MAXS_OFFSET_Z;
   }
 }
 
