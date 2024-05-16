@@ -1249,7 +1249,7 @@ cvarTable_t cvarTable[] = {
     {&etj_playerBBoxBottomOnlyFireteam, "etj_playerBBoxBottomOnlyFireteam", "0",
      CVAR_ARCHIVE},
     {&etj_playerBBoxShader, "etj_playerBBoxShader", "bbox_nocull",
-     CVAR_ARCHIVE},
+     CVAR_ARCHIVE | CVAR_LATCH},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
