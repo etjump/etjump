@@ -94,7 +94,7 @@ void PlayerBBox::drawBBox(clientInfo_t *ci, centity_t *cent) {
 
     // adjust alpha to match etj_hideDistance + etj_hideFadeRange
     // we don't need to worry about hideme or dist < hideDistance here, the code
-    // in CG_Player exists before we ever call this function in those scenarios
+    // in CG_Player exits before we ever call this function in those scenarios
     if (etj_hide.integer) {
       float alpha = 1.0f;
       centity_t *self = &cg_entities[cg.snap->ps.clientNum];
