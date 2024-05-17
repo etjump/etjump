@@ -480,7 +480,8 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
   const auto season =
       params.season.hasValue() ? params.season.value() : "Default";
   const std::string &map = params.map;
-  const bool runSpecified = params.run.hasValue();
+  const std::string &run = params.run.hasValue() ? params.run.value() : "";
+  const bool runSpecified = !run.empty();
 
   const auto seasons = getSeasonsForName(season, false);
 
@@ -489,30 +490,29 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
         stringFormat("No season matches name `%s`", season));
   }
 
-  const auto maps = getMapsForName(params.map, params.exactMap);
+  const auto maps = getMapsForName(map, params.exactMap);
   bool exactMapFound = false;
 
   if (maps.size() > 1) {
-    for (const auto &map : maps) {
-      if (map == params.map) {
+    for (const auto &m : maps) {
+      if (m == map) {
         exactMapFound = true;
         break;
       }
     }
 
     if (!exactMapFound) {
-      std::string error =
-          stringFormat("^3records: ^7found %d maps matching ^3%s^7\n",
-                       maps.size(), params.map);
+      std::string error = stringFormat(
+          "^3records: ^7found %d maps matching ^3%s^7\n", maps.size(), map);
 
       const int perRow = 3;
       int i = 0;
-      for (const auto &map : maps) {
+      for (const auto &m : maps) {
         if (i != 0 && i % perRow == 0) {
           error += "\n";
         }
 
-        error += stringFormat("%-22s", map);
+        error += stringFormat("%-22s", m);
         ++i;
       }
 
@@ -520,12 +520,23 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
     }
   }
 
+  // try to match a single run, so in scenarios where a map has runs
+  // 'foo' and 'foobar' and query has 'foo' as the run param,
+  // we get the exact match for the run 'foo' instead of exact and
+  // partial matches to both 'foo' and 'foobar'
+  std::vector<std::string> runs{};
+  std::string runPlaceholder;
+  std::string runBinder;
+
+  if (runSpecified) {
+    runPlaceholder = "and lsanitize(run) like ?";
+    runs = getRunsForName(!maps.empty() ? maps[0] : map, run, true, true);
+    runBinder = runs.size() == 1 ? runs[0] : "%" + run + "%";
+  }
+
   const std::string seasonPlaceholders = StringUtil::join(
       Container::map(seasons, [](const auto &s) { return "season_id=?"; }),
       " or ");
-
-  const std::string runPlaceholder =
-      runSpecified ? "and lsanitize(run) like ?" : "";
 
   const std::string query = stringFormat(R"(
     select
@@ -557,7 +568,7 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
   binder << StringUtil::toLowerCase(!maps.empty() ? maps[0] : map);
 
   if (runSpecified) {
-    binder << "%" + params.run.value() + "%";
+    binder << runBinder;
   }
 
   auto records = getRecordsFromQuery(binder);
