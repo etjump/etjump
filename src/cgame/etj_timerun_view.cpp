@@ -124,7 +124,7 @@ void ETJump::TimerunView::draw() {
   }
 
   // set green color for pb time, white for tied/new time
-  if (!running) {
+  if (!running && millis) {
     if (run->previousRecord == millis || run->previousRecord == -1) {
       color = &colorDefault;
     } else if (run->previousRecord > millis) {
