@@ -62,6 +62,7 @@
 #include "etj_accelmeter_drawable.h"
 #include "etj_accel_color.h"
 #include "etj_utilities.h"
+#include "etj_player_bbox.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -86,6 +87,7 @@ std::shared_ptr<AreaIndicator> areaIndicator;
 std::shared_ptr<DemoCompatibility> demoCompatibility;
 std::shared_ptr<AccelColor> accelColor;
 std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
+std::shared_ptr<PlayerBBox> playerBBox;
 } // namespace ETJump
 
 static bool isInitialized{false};
@@ -230,6 +232,8 @@ void init() {
 
   demoCompatibility = std::make_shared<DemoCompatibility>();
   accelColor = std::make_shared<AccelColor>();
+
+  playerBBox = std::make_shared<PlayerBBox>();
 
   // initialize renderables
   // Overbounce watcher

@@ -207,3 +207,26 @@ tcRenderShader3y
 		rgbGen const ( 0.5 0.5 0 )
 	}
 }
+
+bbox
+{
+	nopicmip
+
+	{
+		map gfx/misc/bbox.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+
+bbox_nocull
+{
+	nopicmip
+	cull none
+
+	{
+		map gfx/misc/bbox.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
