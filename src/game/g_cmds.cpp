@@ -1386,6 +1386,14 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
     }
   }
 
+  if (ent->client->sess.timerunActive) {
+    if (team == TEAM_SPECTATOR || !ent->client->sess.runSpawnflags ||
+        ent->client->sess.runSpawnflags &
+            static_cast<int>(ETJump::TimerunSpawnflags::ResetTeamChange)) {
+      InterruptRun(ent);
+    }
+  }
+
   return qtrue;
 }
 
@@ -1640,13 +1648,6 @@ void Cmd_Team_f(gentity_t *ent) {
 
   if (!SetTeam(ent, s, qfalse, w, w2, qtrue)) {
     G_SetClientWeapons(ent, w, w2, qtrue);
-  }
-
-  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR ||
-      !ent->client->sess.runSpawnflags ||
-      ent->client->sess.runSpawnflags &
-          static_cast<int>(ETJump::TimerunSpawnflags::ResetTeamChange)) {
-    InterruptRun(ent);
   }
 }
 
