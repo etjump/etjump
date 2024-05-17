@@ -747,11 +747,6 @@ static void CG_Item(centity_t *cent) {
         if (es->groundEntityNum == -1 || !es->groundEntityNum) {
           VectorCopy(cg.autoAnglesSlow, cent->lerpAngles);
           VectorCopy(cg.autoAnglesSlow, cent->lastLerpAngles);
-
-          // hack for spinning mortar because it has stupid angles...
-          if (item->giTag == WP_MORTAR) {
-            cent->lerpAngles[2] += 90;
-          }
         } else {
           // make a tossed weapon sit on the ground in a position
           // that matches how it was yawed
