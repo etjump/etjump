@@ -3624,9 +3624,12 @@ static bool PM_MountedFire() {
       PM_AddEvent(EV_FIRE_WEAPON_AAGUN);
       pm->ps->weaponTime += AAGUN_RATE_OF_FIRE;
     } else { // EF_MOUNTEDTANK | EF_MG42_ACTIVE
-      PM_AddEvent(pm->ps->eFlags & EF_MG42_ACTIVE ? EV_FIRE_WEAPON_MG42
-                                                  : EV_FIRE_WEAPON_MOUNTEDMG42);
-      pm->ps->viewlocked = static_cast<int>(ETJump::ViewlockState::Jitter);
+      if (pm->ps->eFlags & EF_MG42_ACTIVE) {
+        PM_AddEvent(EV_FIRE_WEAPON_MG42);
+        pm->ps->viewlocked = static_cast<int>(ETJump::ViewlockState::Jitter);
+      } else {
+        PM_AddEvent(EV_FIRE_WEAPON_MOUNTEDMG42);
+      }
 
       pm->ps->weaponTime += MG42_RATE_OF_FIRE_MP;
 
