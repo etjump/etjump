@@ -3632,27 +3632,7 @@ static bool PM_MountedFire() {
       }
 
       pm->ps->weaponTime += MG42_RATE_OF_FIRE_MP;
-
-      // The client is not aware of the current heat level of a mounted MG42
-      // when entering it (only server knows this, and it's not communicated),
-      // so when client exits and re-enters a mounted MG42,
-      // the client/server pmext->weapHeat values get desynced.
-
-      // Previously, when weapHeat was used in ps, due to a bug it was never
-      // actually correctly updated on client side, only server side
-      // (client side value remained constantly at MG42_RATE_OF_FIRE_MP).
-      // This bug however meant that Pmove called via CG_PredictPlayerState
-      // never fired the overheat event, and that was left entirely to the
-      // Pmove call made from Clientthink_real. With a fixed behavior,
-      // overheat events would get sent in excess to client as the weapHeat
-      // is now correctly set for client too, so let's recreate this
-      // buggy behavior and keep the client/server pmext desynced
-      // to avoid excess event firing
-#ifdef CGAMEDLL
-      pm->pmext->weapHeat[WP_DUMMY_MG42] = MG42_RATE_OF_FIRE_MP;
-#else
       pm->pmext->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_MP;
-#endif
 
       if (pm->pmext->weapHeat[WP_DUMMY_MG42] >= MAX_MG42_HEAT) {
         // cap heat to max
