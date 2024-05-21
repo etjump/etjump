@@ -912,7 +912,8 @@ void WolfFindMedic(gentity_t *self) {
 
   if (medic >= 0) {
     self->client->ps.viewlocked_entNum = medic;
-    self->client->ps.viewlocked = 7;
+    self->client->ps.viewlocked =
+        static_cast<int>(ETJump::ViewlockState::Medic);
   }
 }
 
