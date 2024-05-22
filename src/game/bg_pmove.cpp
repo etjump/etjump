@@ -3550,7 +3550,8 @@ void PM_AdjustAimSpreadScale(void) {
       (int)pm->ps->aimSpreadScaleFloat; // update the int for the client
 }
 
-static void PM_HandleRecoil() {
+namespace ETJump {
+static void handleRecoil() {
   vec3_t muzzlebounce;
   const int deltaTime = pm->cmd.serverTime - pm->pmext->weapRecoilTime;
 
@@ -3594,8 +3595,8 @@ static void PM_HandleRecoil() {
 }
 
 // handles mounted MG42 firing
-// returns true if we successfully fired a mounted gun
-static bool PM_MountedFire() {
+// returns false if we're not on a mounted gun
+static bool mountedFire() {
   if (!BG_PlayerMounted(pm->ps->eFlags)) {
     return false;
   }
@@ -3647,6 +3648,7 @@ static bool PM_MountedFire() {
 
   return true;
 }
+} // namespace ETJump
 
 #define weaponstateFiring                                                      \
   (pm->ps->weaponstate == WEAPON_FIRING ||                                     \
@@ -3768,7 +3770,7 @@ static void PM_Weapon(void) {
   // weapon cool down
   PM_CoolWeapons();
 
-  if (PM_MountedFire()) {
+  if (ETJump::mountedFire()) {
     return;
   }
 
@@ -3834,7 +3836,7 @@ static void PM_Weapon(void) {
   // do the recoil before setting the values, that way it will be shown
   // next frame and not this
   if (pm->pmext->weapRecoilTime) {
-    PM_HandleRecoil();
+    ETJump::handleRecoil();
   }
 
   delayedFire = qfalse;
