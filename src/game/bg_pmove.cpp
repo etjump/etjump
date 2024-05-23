@@ -3627,7 +3627,7 @@ static bool mountedFire() {
     } else { // EF_MOUNTEDTANK | EF_MG42_ACTIVE
       if (pm->ps->eFlags & EF_MG42_ACTIVE) {
         PM_AddEvent(EV_FIRE_WEAPON_MG42);
-        pm->ps->viewlocked = static_cast<int>(ETJump::ViewlockState::Jitter);
+        pm->ps->viewlocked = static_cast<int>(ViewlockState::Jitter);
       } else {
         PM_AddEvent(EV_FIRE_WEAPON_MOUNTEDMG42);
       }
