@@ -1014,6 +1014,12 @@ void CG_PredictPlayerState() {
     cg.pmext.noclipScale = etj_noclipScale.value;
   }
 
+  // let server handle mounted MG42 cooldown since client doesn't know
+  // the heat values of each individual mounted gun in the map
+  // otherwise we fire excess overheat events when client exits and re-enters
+  // the gun, as the correct heat value is never assigned client side
+  cg.pmext.weapHeat[WP_DUMMY_MG42] = 0.0f;
+
   memcpy(&oldpmext[current & CMD_MASK], &cg.pmext, sizeof(pmoveExt_t));
 
   // if we don't have the commands right after the snapshot, we

@@ -77,6 +77,7 @@ add_library(cgame MODULE
 	"etj_overbounce_detector.cpp"
 	"etj_overbounce_shared.cpp"
 	"etj_overbounce_watcher.cpp"
+	"etj_player_bbox.cpp"
 	"etj_player_events_handler.cpp"
 	"etj_pmove_utils.cpp"
 	"etj_quick_follow_drawable.cpp"

@@ -8,13 +8,6 @@
 
 // g_client.c -- client functions that don't happen every frame
 
-// Ridah, new bounding box
-// static vec3_t	playerMins = {-15, -15, -24};
-// static vec3_t	playerMaxs = {15, 15, 32};
-vec3_t playerMins = {-18, -18, -24};
-vec3_t playerMaxs = {18, 18, 48};
-// done.
-
 /*QUAKED info_player_deathmatch (1 0 1) (-18 -18 -24) (18 18 48)
 potential spawning position for deathmatch games.
 Targets will be fired when someone spawns in on them.

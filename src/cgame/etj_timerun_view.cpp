@@ -123,20 +123,16 @@ void ETJump::TimerunView::draw() {
     }
   }
 
-  // set green color for pb time
-  if (!running && millis &&
-      (run->previousRecord > millis || run->previousRecord == -1)) {
-    color = &colorSuccess;
+  // set green color for pb time, white for tied/new time
+  if (!running && millis) {
+    if (run->previousRecord == millis || run->previousRecord == -1) {
+      color = &colorDefault;
+    } else if (run->previousRecord > millis) {
+      color = &colorSuccess;
+    }
   }
 
-  const int ms = millis;
-  const int minutes = millis / 60000;
-  millis -= minutes * 60000;
-  const int seconds = millis / 1000;
-  millis -= seconds * 1000;
-
-  const std::string text =
-      ETJump::stringFormat("%02d:%02d.%03d", minutes, seconds, millis);
+  const std::string text = getTimerString(millis);
 
   auto x = etj_runTimerX.value;
   auto y = etj_runTimerY.value;
@@ -290,8 +286,8 @@ void ETJump::TimerunView::draw() {
     }
   }
 
-  if (running && run->previousRecord != -1 && ms > run->previousRecord) {
-    pastRecordAnimation(color, text.c_str(), ms, run->previousRecord);
+  if (running && run->previousRecord != -1 && millis > run->previousRecord) {
+    pastRecordAnimation(color, text.c_str(), millis, run->previousRecord);
   }
 }
 

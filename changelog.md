@@ -7,7 +7,7 @@
   * added `etj_lagometerShader` to toggle displaying the background image or solid color
   * demo playback will now display snapshot delta values as ping in demo playback (ETPro/legacy style)
   * added client/server snapshot rate display to lagometer
-* fixes server side framerate dependencies, the mod should now be fully compatible with higher `sv_fps` values [#1327](https://github.com/etjump/etjump/pull/1327) [#1330](https://github.com/etjump/etjump/pull/1330)
+* fixed server side framerate dependencies, the mod should now be fully compatible with higher `sv_fps` values [#1327](https://github.com/etjump/etjump/pull/1327) [#1330](https://github.com/etjump/etjump/pull/1330)
   * `wait` key in mapscripts simulates `sv_fps 20` timings
   * disguise stealing speed is normalized to `sv_fps 20`
   * flamethrower firing range is normalized to `sv_fps 20`
@@ -37,6 +37,24 @@
   * added `spawnflags 256` to `target/trigger_starttimer` to allow toggling fireteam collission during a timerun
     * any timeruns lacking this spawnflag will not start if fireteam collision is enabled
     * if a fireteam member is currently timerunning in a run that does not allow collision, fireteam collision cannot be turned on
+* fixed being unable to turn off server-side coronas [#1352](https://github.com/etjump/etjump/pull/1352)
+* added shortname system to the new command system [#1338](https://github.com/etjump/etjump/pull/1338)
+  * each command now has a full name as well as short name, e.g. `--name` & `-n`
+  * `--help` can also be substituted with `-h`
+* fixed viewangles stuttering when riding on movers while proning or using a mortar set [#1353](https://github.com/etjump/etjump/pull/1353)
+* removed all references to gametype related cvars/commands [#1341](https://github.com/etjump/etjump/pull/1341)
+* fixed water impact markers not working correctly [#1355](https://github.com/etjump/etjump/pull/1355)
+* fixed `etj_autoPortalBinds` triggering `weapalt -> +attack2` rebinds when spectating someone holding a portalgun [#1363](https://github.com/etjump/etjump/pull/1363)
+* fireteam chat fixes [#1362](https://github.com/etjump/etjump/pull/1362)
+  * fixed old etmain bug which allowed fireteam chatting while not in a fireteam
+  * fixed fireteam vsays not working when fireteam members were selected with `selectbuddy`
+* removed `sort 16` from player shaders, which caused them to draw over muzzleflashes [#1361](https://github.com/etjump/etjump/pull/1361)
+* added `g_allowSpeclock` to let servers disable speclocking [#1358](https://github.com/etjump/etjump/pull/1358)
+* added `spawnflags 32` to teleport entities which disables any z-offsetting done by the teleporter [#1360](https://github.com/etjump/etjump/pull/1360)
+  * when enabled, this disables the following:
+    * regular teleports no longer add +1u z offset to destination if this is set
+    * relative angle teleports no longer offset destination z origin by distance between player z origin and the trigger origin
+* fixed `SPIN` spawnflag not working on some weapon_ entities, spinning now works correctly in all of them [#1365](https://github.com/etjump/etjump/pull/1365)
 
 # ETJump 3.2.2
 

@@ -101,7 +101,9 @@ void stringSubstitute(std::string &input, char character,
 bool startsWith(const std::string &str, const std::string &prefix);
 bool endsWith(const std::string &str, const std::string &suffix);
 bool contains(const std::string &str, const std::string &text);
-bool matches(const std::string &str, const std::string &text);
+// case-insensitive string comparison, optionally with sanitized strings
+bool iEqual(const std::string &str1, const std::string &str2,
+            bool sanitized = false);
 // Counts the extra padding needed when using format specifiers like
 // %-20s with text that contains ET color codes
 unsigned countExtraPadding(const std::string &input);

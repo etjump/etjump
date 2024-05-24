@@ -586,7 +586,7 @@ void target_teleporter_use(gentity_t *self, gentity_t *other,
     // If we don't have any velocity when teleporting,
     // there's nothing to scale from, so let's add some
     if (VectorCompare(activator->client->ps.velocity, vec3_origin)) {
-      VectorSet(activator->client->ps.velocity, 0.01, 0.01, 0.0);
+      VectorSet(activator->client->ps.velocity, 0.01f, 0.01f, 0.01f);
     }
 
     VectorNormalize(activator->client->ps.velocity);
@@ -598,39 +598,8 @@ void target_teleporter_use(gentity_t *self, gentity_t *other,
     G_AddEvent(activator, EV_GENERAL_SOUND, self->noise_index);
   }
 
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::Knockback)) {
-    activator->client->ps.pm_time = 160; // hold time
-    activator->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::ResetSpeed)) {
-    // We need some speed to make TeleportPlayerKeepAngles work with
-    // this spawnflag, else it doesn't know which trigger side we enter
-    VectorSet(activator->client->ps.velocity, 0.01, 0.01, 0.0);
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::ConvertSpeed)) {
-    TeleportPlayerExt(activator, dest->s.origin, dest->s.angles);
-    return;
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::RelativePitch)) {
-    TeleportPlayerKeepAngles_Clank(activator, other, dest->s.origin,
-                                   dest->s.angles);
-    return;
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::RelativePitchYaw)) {
-    TeleportPlayerKeepAngles(activator, other, dest->s.origin, dest->s.angles);
-    return;
-  }
-
-  TeleportPlayer(activator, dest->s.origin, dest->s.angles);
+  ETJump::teleportPlayer(activator, other, dest->s.origin, dest->s.angles,
+                         self->spawnflags);
 }
 
 /*QUAKED target_teleporter (1 0 0) (-8 -8 -8) (8 8 8)
@@ -1626,49 +1595,99 @@ void SP_target_portal_relay(gentity_t *self) {
   G_SpawnInt("maxportals", "-1", &self->count);
 }
 
-void G_ActivateTarget(gentity_t *self, gentity_t *activator) {
-  gentity_t *ent = NULL;
-  ent = G_PickTarget(self->target);
+namespace ETJump {
+enum class FTRelaySpawnflags {
+  AxisOnly = 1,
+  AlliesOnly = 2,
+  // this matches 'target_relay' random spawnflag,
+  // so it's sort of consistent with that (this uses random by default)
+  AllTargets = 4,
+  TimerunOnly = 8,
+  NoTimerun = 16,
+  NoActivator = 32,
+};
+
+static bool canFireFTRelay(gentity_t *self, gentity_t *activator) {
+  if (activator->client->sess.sessionTeam == TEAM_SPECTATOR) {
+    return false;
+  }
+
+  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::AxisOnly) &&
+      activator->client->sess.sessionTeam != TEAM_AXIS) {
+    return false;
+  }
+
+  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::AlliesOnly) &&
+      activator->client->sess.sessionTeam != TEAM_ALLIES) {
+    return false;
+  }
+
+  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::TimerunOnly) &&
+      !activator->client->sess.timerunActive) {
+    return false;
+  }
+
+  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::NoTimerun) &&
+      activator->client->sess.timerunActive) {
+    return false;
+  }
+
+  return true;
+}
+} // namespace ETJump
+
+static void G_ActivateTarget(gentity_t *self, gentity_t *activator) {
+  gentity_t *ent = G_PickTarget(self->target);
   if (ent && ent->use) {
     G_UseEntity(ent, self, activator);
   }
 }
 
-qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 void target_ftrelay_use(gentity_t *self, gentity_t *other,
                         gentity_t *activator) {
-  fireteamData_t *activatorsFt = NULL;
-  fireteamData_t *otherFt = NULL;
-
   if (!activator || !activator->client) {
-    G_DPrintf("Error: trying to activate \"target_ftrelay\" "
-              "without an activator.\n");
+    G_Printf("target_ftrelay_use: cannot activate entity with no activator.\n");
     return;
   }
 
-  if (!G_IsOnFireteam(activator->client->ps.clientNum, &activatorsFt)) {
-    // Let's use it just for the activator
-    G_ActivateTarget(self, activator);
-    return;
-  } else {
-    int i = 0;
-    if (activatorsFt->teamJumpMode == qfalse) {
-      // Let's use it just for the activator
-      G_ActivateTarget(self, activator);
+  fireteamData_t *ft;
+  const int clientNum = ClientNum(activator);
+  const bool allTargets =
+      self->spawnflags &
+      static_cast<int>(ETJump::FTRelaySpawnflags::AllTargets);
+
+  // if activator is not in a fireteam or teamjump mode is off,
+  // just fire the target and exit
+  if (!G_IsOnFireteam(clientNum, &ft) || !ft->teamJumpMode) {
+    if (!ETJump::canFireFTRelay(self, activator)) {
       return;
     }
 
-    for (; i < level.numConnectedClients; i++) {
-      int cnum = level.sortedClients[i];
+    allTargets ? G_UseTargets(self, activator)
+               : G_ActivateTarget(self, activator);
+    return;
+  }
 
-      if (!G_IsOnFireteam(cnum, &otherFt)) {
-        continue;
-      } else {
-        if (activatorsFt == otherFt) {
-          G_ActivateTarget(self, g_entities + cnum);
-        }
-      }
+  const bool noActivator =
+      self->spawnflags &
+      static_cast<int>(ETJump::FTRelaySpawnflags::NoActivator);
+
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    if (ft->joinOrder[i] == -1) {
+      continue;
     }
+
+    gentity_t *ent = g_entities + ft->joinOrder[i];
+
+    if (noActivator && activator == ent) {
+      continue;
+    }
+
+    if (!ETJump::canFireFTRelay(self, ent)) {
+      continue;
+    }
+
+    allTargets ? G_UseTargets(self, ent) : G_ActivateTarget(self, ent);
   }
 }
 

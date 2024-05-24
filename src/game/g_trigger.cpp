@@ -70,6 +70,11 @@ void Touch_Multi(gentity_t *self, gentity_t *other, trace_t *trace) {
     return;
   }
 
+  if (self->spawnflags & static_cast<int>(TriggerMultipleFlags::NoNoclip) &&
+      other->client->noclip) {
+    return;
+  }
+
   if ((self->spawnflags &
        static_cast<int>(TriggerMultipleFlags::DeathrunOnly)) != 0 &&
       (other->client->sess.deathrunFlags &
@@ -399,7 +404,7 @@ void trigger_teleporter_touch(gentity_t *self, gentity_t *other,
     // If we don't have any velocity when teleporting,
     // there's nothing to scale from, so let's add some
     if (VectorCompare(other->client->ps.velocity, vec3_origin)) {
-      VectorSet(other->client->ps.velocity, 0.01, 0.01, 0.0);
+      VectorSet(other->client->ps.velocity, 0.01f, 0.01f, 0.01f);
     }
 
     VectorNormalize(other->client->ps.velocity);
@@ -411,38 +416,8 @@ void trigger_teleporter_touch(gentity_t *self, gentity_t *other,
     G_AddEvent(other, EV_GENERAL_SOUND, self->noise_index);
   }
 
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::Knockback)) {
-    other->client->ps.pm_time = 160; // hold time
-    other->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::ResetSpeed)) {
-    // We need some speed to make TeleportPlayerKeepAngles work with
-    // this spawnflag, else it doesn't know which trigger side we enter
-    VectorSet(other->client->ps.velocity, 0.01, 0.01, 0.0);
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::ConvertSpeed)) {
-    TeleportPlayerExt(other, dest->s.origin, dest->s.angles);
-    return;
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::RelativePitch)) {
-    TeleportPlayerKeepAngles_Clank(other, self, dest->s.origin, dest->s.angles);
-    return;
-  }
-
-  if (self->spawnflags &
-      static_cast<int>(ETJump::TeleporterSpawnflags::RelativePitchYaw)) {
-    TeleportPlayerKeepAngles(other, self, dest->s.origin, dest->s.angles);
-    return;
-  }
-
-  TeleportPlayer(other, dest->s.origin, dest->s.angles);
+  ETJump::teleportPlayer(other, self, dest->s.origin, dest->s.angles,
+                         self->spawnflags);
 }
 
 /*QUAKED trigger_teleport (.5 .5 .5) ?

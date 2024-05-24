@@ -2148,6 +2148,17 @@ struct range_t {
 };
 // End CGaz 5
 
+enum class FTMenuOptions {
+  FT_DISBAND_PROPOSE = 0,
+  FT_CREATE_LEAVE = 1,
+  FT_INVITE = 2,
+  FT_KICK = 3,
+  FT_WARN = 4,
+  FT_RULES = 5,
+  FT_TJMODE = 6,
+  FT_MAX_OPTIONS = 7,
+};
+
 enum class FTMenuMode {
   FT_VSAY = 0,
   FT_MANAGE = 1, // create, leave, disband
@@ -2162,7 +2173,7 @@ enum class FTMenuPos {
   FT_MENUPOS_INVITE = 2,
   FT_MENUPOS_KICK = 3,
   FT_MENUPOS_WARN = 4,
-  FT_MENUPOS_RULES = 5
+  FT_MENUPOS_RULES = 5,
 };
 
 enum class FTMenuRulesPos {
@@ -2296,8 +2307,6 @@ extern vmCvar_t cg_skybox;
 extern vmCvar_t cg_redlimbotime;
 extern vmCvar_t cg_bluelimbotime;
 // jpw
-
-extern vmCvar_t cg_movespeed;
 
 extern vmCvar_t cg_animState;
 
@@ -2749,6 +2758,15 @@ extern vmCvar_t etj_noPanzerAutoswitch;
 extern vmCvar_t etj_autoPortalBinds;
 
 extern vmCvar_t etj_muzzleFlash;
+
+extern vmCvar_t etj_drawPlayerBBox;
+extern vmCvar_t etj_playerBBoxColorSelf;
+extern vmCvar_t etj_playerBBoxColorOther;
+extern vmCvar_t etj_playerBBoxColorFireteam;
+extern vmCvar_t etj_playerBBoxBottomOnlySelf;
+extern vmCvar_t etj_playerBBoxBottomOnlyOther;
+extern vmCvar_t etj_playerBBoxBottomOnlyFireteam;
+extern vmCvar_t etj_playerBBoxShader;
 
 //
 // cg_main.c
@@ -4183,6 +4201,7 @@ class CvarShadow;
 class ClientRtvHandler;
 class DemoCompatibility;
 class AccelColor;
+class PlayerBBox;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4196,6 +4215,7 @@ extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 extern std::shared_ptr<ClientRtvHandler> rtvHandler;
 extern std::shared_ptr<DemoCompatibility> demoCompatibility;
 extern std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
+extern std::shared_ptr<PlayerBBox> playerBBox;
 
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume, int soundTime);

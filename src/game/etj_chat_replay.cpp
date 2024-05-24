@@ -47,7 +47,7 @@ void ChatReplay::storeChatMessage(int clientNum, const std::string &name,
   msg.name = name;
   msg.localize = localize;
   msg.encoded = encoded;
-  msg.message = message;
+  msg.message = sanitize(message);
 
   chatReplayBuffer.emplace_back(msg);
 

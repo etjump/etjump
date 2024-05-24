@@ -41,8 +41,6 @@
 
 static constexpr int BODY_TIME = 10000;
 
-#define MAX_MG42_HEAT 1500.f
-
 // gentity->flags
 #define FL_GODMODE 0x00000010
 #define FL_NOTARGET 0x00000020
@@ -668,6 +666,7 @@ enum class TriggerMultipleFlags {
   Constant = 1 << 9, // deprecated
   DeathrunOnly = 1 << 10,
   MultiActivator = 1 << 11, // deprecated (default behavior now)
+  NoNoclip = 1 << 12,
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1676,18 +1675,19 @@ void InitTrigger(gentity_t *self);
 //
 // g_misc.c
 //
-void TeleportPlayer(gentity_t *player, vec3_t origin, vec3_t angles);
-void TeleportPlayerExt(gentity_t *player, vec3_t origin, vec3_t angles);
-void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
-                                    const vec3_t origin, const vec3_t angles);
-void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
-                              const vec3_t origin, const vec3_t angles);
-void DirectTeleport(gentity_t *player, vec3_t origin, vec3_t angles);
+// this is only used by tank exiting and some weird spectator door teleport
+void TeleportPlayer(gentity_t *player, const vec3_t origin, vec3_t angles);
+void DirectTeleport(gentity_t *player, const vec3_t origin, vec3_t angles);
 void PortalTeleport(gentity_t *player, vec3_t origin,
                     vec3_t angles); // Feen: PGM
 void mg42_fire(gentity_t *other);
 void mg42_stopusing(gentity_t *self);
 void aagun_fire(gentity_t *other);
+
+namespace ETJump {
+void teleportPlayer(gentity_t *self, gentity_t *other, const vec3_t origin,
+                    const vec3_t angles, const int &spawnflags);
+}
 
 //
 // g_weapon.c
@@ -1960,9 +1960,6 @@ extern vmCvar_t g_landminetimeout;
 // What level of detail do we want script printing to go to.
 extern vmCvar_t g_scriptDebugLevel;
 
-// How fast do SP player and allied bots move?
-extern vmCvar_t g_movespeed;
-
 // NERVE - SMF
 extern vmCvar_t g_userTimeLimit;
 extern vmCvar_t g_userAlliedRespawnTime;
@@ -1983,7 +1980,6 @@ extern vmCvar_t match_readypercent;
 extern vmCvar_t match_timeoutcount;
 extern vmCvar_t match_timeoutlength;
 extern vmCvar_t match_warmupDamage;
-extern vmCvar_t server_autoconfig;
 extern vmCvar_t server_motd0;
 extern vmCvar_t server_motd1;
 extern vmCvar_t server_motd2;
@@ -2005,8 +2001,6 @@ extern vmCvar_t vote_allow_rtv;
 extern vmCvar_t vote_allow_autoRtv;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
-extern vmCvar_t g_letterbox;
-extern vmCvar_t bot_enable;
 
 extern vmCvar_t g_debugSkills;
 extern vmCvar_t g_autoFireteams;
@@ -2026,6 +2020,7 @@ extern vmCvar_t g_weapons;
 extern vmCvar_t g_noclip;
 extern vmCvar_t g_nameChangeLimit;
 extern vmCvar_t g_nameChangeInterval;
+extern vmCvar_t g_allowSpeclock;
 
 extern vmCvar_t g_mapScriptDir;
 extern vmCvar_t g_blockedMaps;
@@ -2055,7 +2050,6 @@ extern vmCvar_t g_voteCooldown;
 extern vmCvar_t mod_version;
 
 extern vmCvar_t g_mapDatabase;
-extern vmCvar_t g_banDatabase;
 
 extern vmCvar_t g_disableVoteAfterMapChange;
 
@@ -2073,9 +2067,6 @@ extern vmCvar_t g_tokensPath;
 // end of tokens
 
 extern vmCvar_t g_chatOptions;
-
-// vchat customization
-extern vmCvar_t g_customVoiceChat;
 
 extern vmCvar_t shared;
 extern vmCvar_t g_moverScale;

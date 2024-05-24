@@ -1386,6 +1386,14 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
     }
   }
 
+  if (ent->client->sess.timerunActive) {
+    if (team == TEAM_SPECTATOR || !ent->client->sess.runSpawnflags ||
+        ent->client->sess.runSpawnflags &
+            static_cast<int>(ETJump::TimerunSpawnflags::ResetTeamChange)) {
+      InterruptRun(ent);
+    }
+  }
+
   return qtrue;
 }
 
@@ -1640,13 +1648,6 @@ void Cmd_Team_f(gentity_t *ent) {
 
   if (!SetTeam(ent, s, qfalse, w, w2, qtrue)) {
     G_SetClientWeapons(ent, w, w2, qtrue);
-  }
-
-  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR ||
-      !ent->client->sess.runSpawnflags ||
-      ent->client->sess.runSpawnflags &
-          static_cast<int>(ETJump::TimerunSpawnflags::ResetTeamChange)) {
-    InterruptRun(ent);
   }
 }
 
@@ -2294,38 +2295,38 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
 
   } else {
     char buffer[16];
-    int index;
+    int skipArgs;
 
+    // if fireteam members are selected with 'selectbuddy', 2nd arg contains
+    // the number of clients that are selected, followed by the clientnums
+    // of the selected fireteam members = offset arg parsing by this amount
     trap_Argv(2, buffer, sizeof(buffer));
-    index = Q_atoi(buffer);
-    if (index < 0) {
-      index = 0;
+    skipArgs = Q_atoi(buffer);
+
+    if (skipArgs < 0) {
+      skipArgs = 0;
     }
 
-    if (trap_Argc() < 3 + index && !arg0) {
+    if (trap_Argc() < 3 + skipArgs && !arg0) {
       return;
     }
 
-    trap_Argv(3 + index, variant, sizeof(variant));
+    trap_Argv(3 + skipArgs, variant, sizeof(variant));
 
     if (Q_isnumeric(variant[0])) {
-      id = 4 + index;
-      cust = 5 + index;
+      id = 4 + skipArgs;
+      cust = 5 + skipArgs;
       vsay.variant = Q_atoi(variant);
     } else {
-      id = 3;
-      cust = 4;
+      id = 3 + skipArgs;
+      cust = 4 + skipArgs;
     }
 
     trap_Argv(id, vsay.id, sizeof(vsay.id));
     Q_strncpyz(vsay.custom, ConcatArgs(cust), sizeof(vsay.custom));
   }
 
-  if (g_customVoiceChat.integer) {
-    G_Voice(ent, nullptr, mode, &vsay, voiceonly);
-  } else {
-    G_Voice(ent, nullptr, mode, &vsay, voiceonly);
-  }
+  G_Voice(ent, nullptr, mode, &vsay, voiceonly);
 }
 
 // TTimo gcc: defined but not used
@@ -4939,6 +4940,7 @@ void ClientCommand(int clientNum) {
   char cmd[MAX_TOKEN_CHARS];
   int i;
   qboolean enc = qfalse; // used for enc_say, enc_say_team, enc_say_buddy
+  fireteamData_t *ft;
 
   ent = g_entities + clientNum;
 
@@ -5004,6 +5006,10 @@ void ClientCommand(int clientNum) {
 
   enc = !Q_stricmp(cmd, "enc_say_buddy") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "say_buddy") || enc) {
+    if (!G_IsOnFireteam(clientNum, &ft)) {
+      return;
+    }
+
     if (ClientIsFlooding(ent)) {
       CP(va("print \"^1Spam Protection:^7 command %s^7 "
             "ignored\n\"",
@@ -5014,6 +5020,10 @@ void ClientCommand(int clientNum) {
     return;
   }
   if (!Q_stricmp(cmd, "vsay_buddy")) {
+    if (!G_IsOnFireteam(clientNum, &ft)) {
+      return;
+    }
+
     if (ClientIsFlooding(ent)) {
       CP(va("print \"^1Spam Protection:^7 command %s^7 "
             "ignored\n\"",

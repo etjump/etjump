@@ -912,7 +912,8 @@ void WolfFindMedic(gentity_t *self) {
 
   if (medic >= 0) {
     self->client->ps.viewlocked_entNum = medic;
-    self->client->ps.viewlocked = 7;
+    self->client->ps.viewlocked =
+        static_cast<int>(ETJump::ViewlockState::Medic);
   }
 }
 
@@ -1466,14 +1467,6 @@ void ClientThink(int clientNum) {
   {
     ClientThink_real(ent);
   }
-
-  // if this is the locally playing client, do bot thinks
-#ifndef NO_BOT_SUPPORT
-  if (bot_enable.integer && !g_dedicated.integer && clientNum == 0) {
-    BotAIThinkFrame(ent->client->pers.cmd.serverTime);
-    level.lastClientBotThink = level.time;
-  }
-#endif // NO_BOT_SUPPORT
 }
 
 void G_RunClient(gentity_t *ent) {

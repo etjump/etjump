@@ -127,6 +127,8 @@
 
 #define PRONE_VIEWHEIGHT -8
 
+extern vec3_t playerMins;
+extern vec3_t playerMaxs;
 extern vec3_t playerlegsProneMins;
 extern vec3_t playerlegsProneMaxs;
 
@@ -151,10 +153,10 @@ extern vec3_t playerlegsProneMaxs;
 #define MG42_SPREAD_MP 100
 
 #define MG42_DAMAGE_MP 20
-#define MG42_RATE_OF_FIRE_MP 66
+static constexpr int MG42_RATE_OF_FIRE_MP = 66;
 
-#define MG42_DAMAGE_SP 40
-#define MG42_RATE_OF_FIRE_SP 100
+static constexpr float MAX_MG42_HEAT = 1500.0f;
+static constexpr int MG42_HEAT_RECOVERY = 2000;
 
 #define AAGUN_RATE_OF_FIRE 100
 #define MG42_YAWSPEED 300.f // degrees per second
@@ -2305,7 +2307,7 @@ typedef struct {
   int saveLimit;
   // Toggle whether target_relay_fireteam will activate for all ft
   // members or just one
-  qboolean teamJumpMode;
+  bool teamJumpMode;
   qboolean inuse;
   qboolean priv;
 
@@ -2698,9 +2700,10 @@ enum class TeleporterSpawnflags {
   None = 0,
   ResetSpeed = 1 << 0,
   ConvertSpeed = 1 << 1,
-  RelativePitch = 1 << 2,
+  RelativeYaw = 1 << 2,
   RelativePitchYaw = 1 << 3,
-  Knockback = 1 << 4
+  Knockback = 1 << 4,
+  NoZOffset = 1 << 5,
 };
 
 enum class PusherSpawnFlags {
@@ -2709,6 +2712,18 @@ enum class PusherSpawnFlags {
   AltSound = 1 << 0,
   AddXY = 1 << 1,
   AddZ = 1 << 2
+};
+
+// PERS_HWEAPON_USE
+enum class HeavyWeaponState {
+  MountedMG = 1,
+  AAGun = 2, // not sure if this is actually used/functional
+};
+
+enum class ViewlockState {
+  Jitter = 2,      // screen jitter (firing mounted MG42)
+  Mounted = 3,     // lock to direction of mounted gun
+  Medic = 7,       // look at nearest medic
 };
 } // namespace ETJump
 

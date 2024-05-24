@@ -276,7 +276,8 @@ void CG_OffsetThirdPersonView(void) {
   // rain - if dead, look at medic or allow freelook if none in range
   if (cg.predictedPlayerState.stats[STAT_HEALTH] <= 0) {
     // rain - #254 - force yaw to 0 if we're tracking a medic
-    if (cg.snap->ps.viewlocked != 7) {
+    if (cg.snap->ps.viewlocked !=
+        static_cast<int>(ETJump::ViewlockState::Medic)) {
       // rain - do short2angle AFTER the network part
       focusAngles[YAW] =
           SHORT2ANGLE(cg.predictedPlayerState.stats[STAT_DEAD_YAW]);
@@ -636,7 +637,8 @@ static void CG_OffsetFirstPersonView(void) {
     // rain - #254 - force yaw to 0 if we're tracking a medic
     // rain - medic tracking doesn't seem to happen in this
     // case?
-    if (cg.snap->ps.viewlocked == 7) {
+    if (cg.snap->ps.viewlocked ==
+        static_cast<int>(ETJump::ViewlockState::Medic)) {
       angles[YAW] = 0;
     } else {
       // rain - do short2angle AFTER the network part
@@ -1382,27 +1384,16 @@ int CG_CalcViewValues(void) {
 
     // Ridah, lock the viewangles if the game has told us to
     if (ps->viewlocked && !cgs.demoCam.renderingFreeCam) {
-
-      /*
-      if (ps->viewlocked == 4)
-      {
-          centity_t *tent;
-          tent = &cg_entities[ps->viewlocked_entNum];
-          VectorCopy (tent->currentState.apos.trBase,
-      cg.refdefViewAngles);
-      }
-      else
-      */
-      // DHM - Nerve :: don't bother evaluating if set
-      // to 7 (look at medic)
-      if (ps->viewlocked != 7 && ps->viewlocked != 3 && ps->viewlocked != 2) {
+      if (ps->viewlocked != static_cast<int>(ETJump::ViewlockState::Medic) &&
+          ps->viewlocked != static_cast<int>(ETJump::ViewlockState::Mounted) &&
+          ps->viewlocked != static_cast<int>(ETJump::ViewlockState::Jitter)) {
         BG_EvaluateTrajectory(
             &cg_entities[ps->viewlocked_entNum].currentState.apos, cg.time,
             cg.refdefViewAngles, qtrue,
             cg_entities[ps->viewlocked_entNum].currentState.effect2Time);
       }
 
-      if (ps->viewlocked == 2) {
+      if (ps->viewlocked == static_cast<int>(ETJump::ViewlockState::Jitter)) {
         cg.refdefViewAngles[0] += crandom();
         cg.refdefViewAngles[1] += crandom();
       }
@@ -1433,7 +1424,7 @@ int CG_CalcViewValues(void) {
       // do nothing
     }
     // Ridah, lock the viewangles if the game has told us to
-    else if (ps->viewlocked == 7) {
+    else if (ps->viewlocked == static_cast<int>(ETJump::ViewlockState::Medic)) {
       centity_t *tent;
       vec3_t vec;
 
@@ -1441,11 +1432,6 @@ int CG_CalcViewValues(void) {
       VectorCopy(tent->lerpOrigin, vec);
       VectorSubtract(vec, cg.refdef_current->vieworg, vec);
       vectoangles(vec, cg.refdefViewAngles);
-    } else if (ps->viewlocked == 4) {
-      vec3_t fwd;
-      AngleVectors(cg.refdefViewAngles, fwd, NULL, NULL);
-      VectorMA(cg_entities[ps->viewlocked_entNum].lerpOrigin, 16, fwd,
-               cg.refdef_current->vieworg);
     } else if (ps->viewlocked) {
       vec3_t fwd;
       float oldZ;

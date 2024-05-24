@@ -2254,6 +2254,23 @@ bool RockTheVote(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+// ensures custom vote command options are not just color codes
+bool validateCustomVoteCommand(const std::string &cmdName, const int &clientNum,
+                               const ETJump::CommandParser::Command &command) {
+  bool commandOk = true;
+
+  for (const auto &op : command.options) {
+    if (ETJump::sanitize(op.second.text).empty()) {
+      Printer::SendChatMessage(
+          clientNum, ETJump::stringFormat("^3%s: ^7'%s' cannot be empty.",
+                                          cmdName, op.first));
+      commandOk = false;
+    }
+  }
+
+  return commandOk;
+}
+
 bool addCustomVote(gentity_t *ent, Arguments argv) {
   const int clientNum = ClientNum(ent);
 
@@ -2281,6 +2298,10 @@ bool addCustomVote(gentity_t *ent, Arguments argv) {
   const std::string &name = command.options["name"].text;
   const std::string &fullName = command.options["full-name"].text;
   const std::string &maps = command.options["maps"].text;
+
+  if (!validateCustomVoteCommand(def.name, clientNum, command)) {
+    return false;
+  }
 
   game.customMapVotes->addCustomvoteList(clientNum, name, fullName, maps);
   return true;
@@ -2354,6 +2375,10 @@ bool editCustomVote(gentity_t *ent, Arguments argv) {
       optAddMaps.hasValue() ? optAddMaps.value().text : "";
   const std::string &removeMaps =
       optRemoveMaps.hasValue() ? optRemoveMaps.value().text : "";
+
+  if (!validateCustomVoteCommand(def.name, clientNum, command)) {
+    return false;
+  }
 
   game.customMapVotes->editCustomvoteList(clientNum, list, name, fullName,
                                           addMaps, removeMaps);

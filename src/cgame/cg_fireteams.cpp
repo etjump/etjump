@@ -267,11 +267,12 @@ const char *ftOnMenuRulesListAlphaChars[] = {
 };
 
 const char *ftLeaderMenuList[] = {
-    "Disband", "Leave", "Invite", "Kick", "Warn", "Rules", nullptr,
+    "Disband", "Leave", "Invite",           "Kick",
+    "Warn",    "Rules", "%s teamjump mode", nullptr,
 };
 
 const char *ftLeaderMenuListAlphachars[] = {
-    "D", "L", "I", "K", "W", "R", nullptr,
+    "D", "L", "I", "K", "W", "R", "T", nullptr,
 };
 
 int CG_CountFireteamsByTeam(team_t t) {
@@ -697,6 +698,13 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
                        ftLeaderMenuList[i]);
             }
 
+            if (i == static_cast<int>(FTMenuOptions::FT_TJMODE)) {
+              str = va(str,
+                       cgs.clientinfo[cg.clientNum].fireteamData->teamJumpMode
+                           ? "Disable"
+                           : "Enable");
+            }
+
             CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
                               button->font->scaley, button->font->colour, str,
                               0, 0, button->font->style, button->font->font);
@@ -977,24 +985,33 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
 
           return qtrue;
         } else {
-          if (i >= 6) {
+          if (i >= static_cast<int>(FTMenuOptions::FT_MAX_OPTIONS)) {
             break;
           }
 
-          if (i == 2 && !CG_CountPlayersNF()) {
+          if (i == static_cast<int>(FTMenuOptions::FT_INVITE) &&
+              !CG_CountPlayersNF()) {
             break;
           }
 
-          if ((i == 3 || i == 4) && !CG_CountPlayersSF()) {
+          if ((i == static_cast<int>(FTMenuOptions::FT_KICK) ||
+               i == static_cast<int>(FTMenuOptions::FT_WARN)) &&
+              !CG_CountPlayersSF()) {
             break;
           }
 
           if (doaction) {
-            if (i == 0) {
+            if (i == static_cast<int>(FTMenuOptions::FT_DISBAND_PROPOSE)) {
               trap_SendConsoleCommand("fireteam disband\n");
               CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-            } else if (i == 1) {
+            } else if (i == static_cast<int>(FTMenuOptions::FT_CREATE_LEAVE)) {
               trap_SendConsoleCommand("fireteam leave\n");
+              CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+            } else if (i == static_cast<int>(FTMenuOptions::FT_TJMODE)) {
+              trap_SendConsoleCommand(va(
+                  "fireteam teamjump %i",
+                  cgs.clientinfo[cg.clientNum].fireteamData->teamJumpMode ? 0
+                                                                          : 1));
               CG_EventHandling(CGAME_EVENT_NONE, qfalse);
             } else {
               cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_ADMIN);
@@ -1006,7 +1023,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           return qtrue;
         }
       }
-    } break;
+    }
     case FTMenuMode::FT_APPLY: {
       int i;
 

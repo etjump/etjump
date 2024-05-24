@@ -815,6 +815,14 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand,
   auto client = ClientNum(ent);
   std::string msg;
 
+  // turning off speclock clears speclock status, so we don't need to worry
+  // about clients trying to turn off speclock when g_allowSpeclock is 0
+  if (!g_allowSpeclock.integer) {
+    msg = "Speclock is disabled on this server.\n";
+    Printer::SendConsoleMessage(client, msg);
+    return;
+  }
+
   if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
     msg = ETJump::stringFormat(
         "^7You cannot use ^3spec%slock ^7while spectating!\n",

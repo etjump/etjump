@@ -61,6 +61,8 @@
 #include "etj_demo_compatibility.h"
 #include "etj_accelmeter_drawable.h"
 #include "etj_accel_color.h"
+#include "etj_utilities.h"
+#include "etj_player_bbox.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -85,6 +87,7 @@ std::shared_ptr<AreaIndicator> areaIndicator;
 std::shared_ptr<DemoCompatibility> demoCompatibility;
 std::shared_ptr<AccelColor> accelColor;
 std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
+std::shared_ptr<PlayerBBox> playerBBox;
 } // namespace ETJump
 
 static bool isInitialized{false};
@@ -229,6 +232,8 @@ void init() {
 
   demoCompatibility = std::make_shared<DemoCompatibility>();
   accelColor = std::make_shared<AccelColor>();
+
+  playerBBox = std::make_shared<PlayerBBox>();
 
   // initialize renderables
   // Overbounce watcher
@@ -637,27 +642,34 @@ void runFrameEnd() {
   }
 
   if (etj_autoPortalBinds.integer) {
-    if (cg.weaponSelect == WP_PORTAL_GUN && !cg.portalgunBindingsAdjusted) {
+    // confusingly cg.weaponSelect gets set to followed clients weapon,
+    // so we need to do this only if we're not in spec
+    if (isPlaying(cg.clientNum) && cg.weaponSelect == WP_PORTAL_GUN &&
+        !cg.portalgunBindingsAdjusted) {
       cgDC.getKeysForBinding("weapalt", &cg.weapAltB1, &cg.weapAltB2);
+
       if (cg.weapAltB1 != -1) {
         trap_Key_SetBinding(cg.weapAltB1, "+attack2");
         cg.portalgunBindingsAdjusted = true;
       }
+
       if (cg.weapAltB2 != -1) {
         trap_Key_SetBinding(cg.weapAltB2, "+attack2");
         cg.portalgunBindingsAdjusted = true;
       }
       // since you never spawn with a portalgun,
       // binds should reset at the very beginning of a level too
-    } else if ((cg.weaponSelect != WP_PORTAL_GUN &&
+    } else if (((cg.weaponSelect != WP_PORTAL_GUN ||
+                 !isPlaying(cg.clientNum)) &&
                 cg.portalgunBindingsAdjusted) ||
-               cg.clientFrame < 10 ||
-               cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
+               cg.clientFrame < 10) {
       cgDC.getKeysForBinding("+attack2", &cg.weapAltB1, &cg.weapAltB2);
+
       if (cg.weapAltB1 != -1) {
         trap_Key_SetBinding(cg.weapAltB1, "weapalt");
         cg.portalgunBindingsAdjusted = false;
       }
+
       if (cg.weapAltB2 != -1) {
         trap_Key_SetBinding(cg.weapAltB2, "weapalt");
         cg.portalgunBindingsAdjusted = false;

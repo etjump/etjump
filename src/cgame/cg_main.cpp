@@ -189,7 +189,6 @@ vmCvar_t cg_message;
 vmCvar_t cg_messageType;
 vmCvar_t cg_messagePlayer;
 vmCvar_t cg_messagePlayerName;
-vmCvar_t cg_movespeed;
 vmCvar_t cg_cameraMode;
 vmCvar_t cg_cameraOrbit;
 vmCvar_t cg_cameraOrbitDelay;
@@ -658,6 +657,15 @@ vmCvar_t etj_autoPortalBinds;
 
 vmCvar_t etj_muzzleFlash;
 
+vmCvar_t etj_drawPlayerBBox;
+vmCvar_t etj_playerBBoxColorSelf;
+vmCvar_t etj_playerBBoxColorOther;
+vmCvar_t etj_playerBBoxColorFireteam;
+vmCvar_t etj_playerBBoxBottomOnlySelf;
+vmCvar_t etj_playerBBoxBottomOnlyOther;
+vmCvar_t etj_playerBBoxBottomOnlyFireteam;
+vmCvar_t etj_playerBBoxShader;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -779,9 +787,8 @@ cvarTable_t cvarTable[] = {
     {&cg_norender, "cg_norender", "0",
      0}, // only used during single player, to suppress rendering until the
          // server is ready
-    {&cg_bluelimbotime, "", "30000", 0},     // communicated by systeminfo
-    {&cg_redlimbotime, "", "30000", 0},      // communicated by systeminfo
-    {&cg_movespeed, "g_movespeed", "76", 0}, // actual movespeed of player
+    {&cg_bluelimbotime, "", "30000", 0}, // communicated by systeminfo
+    {&cg_redlimbotime, "", "30000", 0},  // communicated by systeminfo
     {&cg_animState, "cg_animState", "0", CVAR_CHEAT},
     {&cg_drawCompass, "cg_drawCompass", "1", CVAR_ARCHIVE},
     {&cg_drawNotifyText, "cg_drawNotifyText", "1", CVAR_ARCHIVE},
@@ -1227,6 +1234,22 @@ cvarTable_t cvarTable[] = {
     {&etj_autoPortalBinds, "etj_autoPortalBinds", "1", CVAR_ARCHIVE},
 
     {&etj_muzzleFlash, "etj_muzzleFlash", "1", CVAR_ARCHIVE},
+
+    {&etj_drawPlayerBBox, "etj_drawPlayerBBox", "0", CVAR_ARCHIVE},
+    {&etj_playerBBoxColorSelf, "etj_playerBBoxColorSelf", "1.0 0.0 0.0 0.5",
+     CVAR_ARCHIVE},
+    {&etj_playerBBoxColorOther, "etj_playerBBoxColorOther", "0.0 1.0 0.0 0.5",
+     CVAR_ARCHIVE},
+    {&etj_playerBBoxColorFireteam, "etj_playerBBoxColorFireteam",
+     "0.0 0.0 1.0 0.5", CVAR_ARCHIVE},
+    {&etj_playerBBoxBottomOnlySelf, "etj_playerBBoxBottomOnlySelf", "0",
+     CVAR_ARCHIVE},
+    {&etj_playerBBoxBottomOnlyOther, "etj_playerBBoxBottomOnlyOther", "0",
+     CVAR_ARCHIVE},
+    {&etj_playerBBoxBottomOnlyFireteam, "etj_playerBBoxBottomOnlyFireteam", "0",
+     CVAR_ARCHIVE},
+    {&etj_playerBBoxShader, "etj_playerBBoxShader", "bbox_nocull",
+     CVAR_ARCHIVE | CVAR_LATCH},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

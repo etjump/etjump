@@ -50,6 +50,8 @@ const int skillLevels[NUM_SKILL_LEVELS] = {
         //	200		// reaching level 5
 };
 
+vec3_t playerMins = {-18, -18, -24};
+vec3_t playerMaxs = {18, 18, 48};
 vec3_t playerlegsProneMins = {-13.5f, -13.5f, -24.f};
 vec3_t playerlegsProneMaxs = {13.5f, 13.5f, -14.4f};
 
@@ -3990,13 +3992,14 @@ void BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm,
 }
 
 void BG_SetupMountedGunStatus(playerState_t *ps) {
-  switch (ps->persistant[PERS_HWEAPON_USE]) {
-    case 1:
+  switch (
+      static_cast<ETJump::HeavyWeaponState>(ps->persistant[PERS_HWEAPON_USE])) {
+    case ETJump::HeavyWeaponState::MountedMG:
       ps->eFlags |= EF_MG42_ACTIVE;
       ps->eFlags &= ~EF_AAGUN_ACTIVE;
       ps->powerups[PW_OPS_DISGUISED] = 0;
       break;
-    case 2:
+    case ETJump::HeavyWeaponState::AAGun:
       ps->eFlags |= EF_AAGUN_ACTIVE;
       ps->eFlags &= ~EF_MG42_ACTIVE;
       ps->powerups[PW_OPS_DISGUISED] = 0;
