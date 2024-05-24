@@ -768,7 +768,7 @@ static void setFireTeamRules(const int &clientNum) {
   fireteamData_t *ft;
   const std::string &usageStr = stringFormat(
       "^3usage: ^7fireteam rules <rule> <value>\n\nAvailable rules:\n\n%-12s "
-      "<value|reset>\n%-12s <on|off>\n%-12s <on|off>",
+      "<value|reset>\n%-12s <on|off>\n%-12s <on|off>\n",
       "savelimit", "noghost", "shove");
 
   if (!canSetFireteamRules(clientNum, &ft)) {
@@ -892,7 +892,7 @@ static void setFireTeamRules(const int &clientNum) {
 
       setFireteamShove(ft, false);
     } else {
-      Printer::SendPopupMessage(clientNum, "fireteam: invalid ^shove ^7value");
+      Printer::SendPopupMessage(clientNum, "fireteam: invalid ^3shove ^7value");
       Printer::SendPopupMessage(clientNum,
                                 "Valid values are: ^3<on|1> <off|0>");
     }
