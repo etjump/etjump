@@ -864,12 +864,6 @@ static void setFireTeamRules(const int &clientNum) {
   }
 
   if (!Q_stricmp(arg1, "shove")) {
-    if (!g_cheats.integer && level.noFTShove) {
-      Printer::SendPopupMessage(
-          clientNum, "fireteam: ^3shoving ^7cannot be enabled on this map");
-      return;
-    }
-
     if (!ft->shove &&
         fireTeamMemberIsTimerunning(
             ft, static_cast<int>(TimerunSpawnflags::AllowFTShove))) {

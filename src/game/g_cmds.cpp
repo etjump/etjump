@@ -3654,10 +3654,19 @@ tryagain:
 }
 
 namespace ETJump {
+static bool inNoShoveArea(gentity_t *ent) {
+  trace_t tr;
+  trap_TraceCapsule(&tr, ent->client->ps.origin, ent->r.mins, ent->r.maxs,
+                    ent->client->ps.origin, ent->client->ps.clientNum,
+                    CONTENTS_NOSHOVE);
+
+  return level.noFTShove == (tr.fraction == 1.0f);
+}
+
 static constexpr int SHOVE_DELAY = 500;
 static constexpr float SHOVE_VELOCITY = 60;
 
-void shovePlayer(gentity_t *ent, gentity_t *target) {
+static void shovePlayer(gentity_t *ent, gentity_t *target) {
   if (ent->health <= 0 || target->health <= 0) {
     return;
   }
@@ -3680,6 +3689,20 @@ void shovePlayer(gentity_t *ent, gentity_t *target) {
 
   if (level.time - ent->client->shoveTime < SHOVE_DELAY) {
     return;
+  }
+
+  if (!g_cheats.integer) {
+    if (inNoShoveArea(ent)) {
+      Printer::SendCenterMessage(ClientNum(ent),
+                                 "You cannot ^3shove ^7inside this area.");
+      return;
+    }
+
+    if (inNoShoveArea(target)) {
+      Printer::SendCenterMessage(ClientNum(ent),
+                                 "Cannot ^3shove ^7a player inside this area.");
+      return;
+    }
   }
 
   ent->client->shoveTime = level.time;
@@ -3707,7 +3730,7 @@ void shovePlayer(gentity_t *ent, gentity_t *target) {
   G_AddEvent(target, EV_SHOVE, 0);
 }
 
-void shoveTrace(trace_t *tr, vec3_t start, vec3_t end, gentity_t *ent) {
+static void shoveTrace(trace_t *tr, vec3_t start, vec3_t end, gentity_t *ent) {
   const int passEntityNum = ClientNum(ent);
   trap_Trace(tr, start, nullptr, nullptr, end, passEntityNum, CONTENTS_BODY);
 
