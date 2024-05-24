@@ -675,14 +675,15 @@ static void setSaveLimitForFTMembers(fireteamData_t *ft, int limit) {
       ent = g_entities + ft->joinOrder[i];
       ent->client->sess.saveLimitFt = limit;
       Printer::SendPopupMessage(
-          ClientNum(ent), va("fireteam: ^3savelimit ^7was set to ^3%i", limit));
+          ClientNum(ent),
+          stringFormat("fireteam: ^3savelimit ^7was set to ^3%i", limit));
     }
   }
 }
 
 static void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
-  const std::string &msg = ETJump::stringFormat(
-      "fireteam: ^3noghost ^7has been ^3%s", noGhost ? "enabled" : "disabled");
+  const std::string &msg = stringFormat("fireteam: ^3noghost ^7has been ^3%s",
+                                        noGhost ? "enabled" : "disabled");
 
   ft->noGhost = noGhost;
 
