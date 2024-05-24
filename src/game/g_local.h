@@ -41,8 +41,6 @@
 
 static constexpr int BODY_TIME = 10000;
 
-#define MAX_MG42_HEAT 1500.f
-
 // gentity->flags
 #define FL_GODMODE 0x00000010
 #define FL_NOTARGET 0x00000020

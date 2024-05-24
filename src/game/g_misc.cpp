@@ -1784,7 +1784,8 @@ void aagun_think(gentity_t *self) {
     if (VectorLengthSquared(vec) < SQR(96) && owner->active &&
         owner->health > 0) {
       self->active = qtrue;
-      owner->client->ps.persistant[PERS_HWEAPON_USE] = 2;
+      owner->client->ps.persistant[PERS_HWEAPON_USE] =
+          static_cast<int>(ETJump::HeavyWeaponState::AAGun);
       aagun_track(self, owner);
       self->nextthink = level.time + 50;
       self->timestamp = level.time + 1000;
@@ -1795,7 +1796,8 @@ void aagun_think(gentity_t *self) {
 
       // now tell the client to lock the view in the
       // direction of the gun
-      owner->client->ps.viewlocked = 3;
+      owner->client->ps.viewlocked =
+          static_cast<int>(ETJump::ViewlockState::Mounted);
       owner->client->ps.viewlocked_entNum = self->s.number;
 
       clamp_playerbehindgun(self, owner, dang);
@@ -1951,7 +1953,8 @@ void mg42_touch(gentity_t *self, gentity_t *other, trace_t *trace) {
 
     // now tell the client to lock the view in the direction of
     // the gun
-    other->client->ps.viewlocked = 3;
+    other->client->ps.viewlocked =
+        static_cast<int>(ETJump::ViewlockState::Mounted);
     other->client->ps.viewlocked_entNum = self->s.number;
 
     // if (self->s.frame)
@@ -2054,7 +2057,7 @@ void mg42_think(gentity_t *self) {
       if (owner->client) {
         self->flameQuotaTime = level.time + owner->client->ps.weaponTime;
       } else {
-        self->flameQuotaTime = level.time + 2000;
+        self->flameQuotaTime = level.time + MG42_HEAT_RECOVERY;
       }
     }
   } else if (self->flameQuotaTime < level.time &&
@@ -2074,7 +2077,8 @@ void mg42_think(gentity_t *self) {
       owner->client->ps.pm_flags &= ~PMF_DUCKED;
 
       self->active = qtrue;
-      owner->client->ps.persistant[PERS_HWEAPON_USE] = 1;
+      owner->client->ps.persistant[PERS_HWEAPON_USE] =
+          static_cast<int>(ETJump::HeavyWeaponState::MountedMG);
       mg42_track(self, owner);
       self->nextthink = level.time + 50;
       self->timestamp = level.time + 1000;

@@ -11,6 +11,7 @@
 #endif // CGAMEDLL
 
 #include "bg_local.h"
+#include "etj_numeric_utilities.h"
 
 #ifdef CGAMEDLL
   #define PM_Cheats cgs.cheats
@@ -3358,58 +3359,46 @@ int PM_WeaponClipEmpty(int inWp) {
 PM_CoolWeapons
 ==============
 */
-void PM_CoolWeapons(void) {
-  int wp, maxHeat;
+void PM_CoolWeapons() {
+  for (int wp = 0; wp < WP_NUM_WEAPONS; wp++) {
 
-  for (wp = 0; wp < WP_NUM_WEAPONS; wp++) {
-
-    // if you have the weapon
-    if (COM_BitCheck(pm->ps->weapons, wp)) {
+    // if you have the weapon, and it can overheat (or using mounted MG42)
+    if ((GetAmmoTableData(wp)->maxHeat && COM_BitCheck(pm->ps->weapons, wp)) ||
+        wp == WP_DUMMY_MG42) {
       // and it's hot
       if (pm->pmext->weapHeat[wp] != 0) {
         if (pm->skill[SK_HEAVY_WEAPONS] >= 2 &&
             pm->ps->stats[STAT_PLAYER_CLASS] == PC_SOLDIER) {
           pm->pmext->weapHeat[wp] -=
-              static_cast<float>(GetAmmoTableData(wp)->coolRate) * 2.f *
-              pml.frametime;
+              (static_cast<float>(GetAmmoTableData(wp)->coolRate) * 2.0f *
+               pml.frametime);
         } else {
           pm->pmext->weapHeat[wp] -=
-              static_cast<float>(GetAmmoTableData(wp)->coolRate) *
-              pml.frametime;
+              (static_cast<float>(GetAmmoTableData(wp)->coolRate) *
+               pml.frametime);
         }
 
-        if (pm->pmext->weapHeat[wp] < 0) {
-          pm->pmext->weapHeat[wp] = 0;
-        }
+        pm->pmext->weapHeat[wp] = std::max(pm->pmext->weapHeat[wp], 0.0f);
       }
     }
   }
 
-  // a weapon is currently selected, convert current heat value to 0-255
-  // range for client transmission
-  if (pm->ps->weapon) {
-    if (pm->ps->persistant[PERS_HWEAPON_USE] ||
-        pm->ps->eFlags & EF_MOUNTEDTANK) {
-      // rain - floor to prevent 8-bit wrap
-      pm->ps->curWeapHeat =
-          std::floor(((static_cast<float>(pm->pmext->weapHeat[WP_DUMMY_MG42]) /
-                       MAX_MG42_HEAT)) *
-                     255.0f);
-    } else {
-      // rain - #172 - don't divide by 0
-      maxHeat = GetAmmoTableData(pm->ps->weapon)->maxHeat;
+  if (BG_PlayerMounted(pm->ps->eFlags)) {
+    pm->ps->curWeapHeat = std::floor(
+        ((pm->pmext->weapHeat[WP_DUMMY_MG42] / MAX_MG42_HEAT)) * 255.0f);
+  } else {
+    const float maxHeat = GetAmmoTableData(pm->ps->weapon)->maxHeat;
 
-      // rain - floor to prevent 8-bit wrap
-      if (maxHeat != 0) {
-        pm->ps->curWeapHeat = std::floor(
-            ((static_cast<float>(pm->pmext->weapHeat[pm->ps->weapon]) /
-              static_cast<float>(maxHeat))) *
-            255.0f);
-      } else {
-        pm->ps->curWeapHeat = 0;
-      }
+    if (maxHeat != 0) {
+      pm->ps->curWeapHeat = std::floor(
+          ((pm->pmext->weapHeat[pm->ps->weapon] / maxHeat)) * 255.0f);
+    } else { // weapon can't overheat
+      pm->ps->curWeapHeat = 0;
     }
   }
+
+  // sanity check, cap weapon heat for 8-bit transmission to prevent wrap
+  Numeric::clamp(pm->ps->curWeapHeat, 0, 255);
 }
 
 /*
@@ -3561,7 +3550,8 @@ void PM_AdjustAimSpreadScale(void) {
       (int)pm->ps->aimSpreadScaleFloat; // update the int for the client
 }
 
-static void PM_HandleRecoil() {
+namespace ETJump {
+static void handleRecoil() {
   vec3_t muzzlebounce;
   const int deltaTime = pm->cmd.serverTime - pm->pmext->weapRecoilTime;
 
@@ -3604,11 +3594,65 @@ static void PM_HandleRecoil() {
   pm->pmext->lastRecoilDeltaTime = deltaTime;
 }
 
+// handles mounted MG42 firing
+// returns false if we're not on a mounted gun
+static bool mountedFire() {
+  if (!BG_PlayerMounted(pm->ps->eFlags)) {
+    return false;
+  }
+
+  // cooldown active
+  if (pm->ps->weaponTime > 0) {
+    pm->ps->weaponTime -= pml.msec;
+
+    if (pm->ps->weaponTime <= 0) {
+      if (!(pm->cmd.buttons & BUTTON_ATTACK) &&
+          !(pm->cmd.wbuttons & WBUTTON_ATTACK2)) {
+        pm->ps->weaponTime = 0;
+        return true;
+      }
+    } else {
+      return true;
+    }
+  }
+
+  if (pm->cmd.buttons & BUTTON_ATTACK || pm->cmd.wbuttons & WBUTTON_ATTACK2) {
+    BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo, ANIM_ET_FIREWEAPON,
+                       qfalse, qtrue);
+
+    // does this even work?
+    if (pm->ps->eFlags & EF_AAGUN_ACTIVE) {
+      PM_AddEvent(EV_FIRE_WEAPON_AAGUN);
+      pm->ps->weaponTime += AAGUN_RATE_OF_FIRE;
+    } else { // EF_MOUNTEDTANK | EF_MG42_ACTIVE
+      if (pm->ps->eFlags & EF_MG42_ACTIVE) {
+        PM_AddEvent(EV_FIRE_WEAPON_MG42);
+        pm->ps->viewlocked = static_cast<int>(ViewlockState::Jitter);
+      } else {
+        PM_AddEvent(EV_FIRE_WEAPON_MOUNTEDMG42);
+      }
+
+      pm->ps->weaponTime += MG42_RATE_OF_FIRE_MP;
+      pm->pmext->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_MP;
+
+      if (pm->pmext->weapHeat[WP_DUMMY_MG42] >= MAX_MG42_HEAT) {
+        // cap heat to max
+        pm->pmext->weapHeat[WP_DUMMY_MG42] = MAX_MG42_HEAT;
+        PM_AddEvent(EV_WEAP_OVERHEAT);
+
+        // force "heat recovery minimum" to 2 sec right now
+        pm->ps->weaponTime = MG42_HEAT_RECOVERY;
+      }
+    }
+  }
+
+  return true;
+}
+} // namespace ETJump
+
 #define weaponstateFiring                                                      \
   (pm->ps->weaponstate == WEAPON_FIRING ||                                     \
    pm->ps->weaponstate == WEAPON_FIRINGALT)
-
-#define GRENADE_DELAY 250
 
 /*
 ==============
@@ -3720,147 +3764,13 @@ static void PM_Weapon(void) {
       PM_CoolWeapons();
     }
 
-    // pm->ps->weapon = WP_NONE;
     return;
   }
 
-  //%	if( pm->ps->eFlags & EF_PRONE_MOVING )
-  //%		return;
+  // weapon cool down
+  PM_CoolWeapons();
 
-  // special mounted mg42 handling
-  switch (pm->ps->persistant[PERS_HWEAPON_USE]) {
-    case 1:
-      //			PM_CoolWeapons(); //
-      // Gordon: Arnout says this is
-      // how it's wanted ( bleugh ) no cooldown on weaps
-      // while using mg42, but need to update heat on
-      // mg42 itself
-      if (pm->pmext->weapHeat[WP_DUMMY_MG42] != 9) {
-        pm->pmext->weapHeat[WP_DUMMY_MG42] -= (300.f * pml.frametime);
-
-        if (pm->pmext->weapHeat[WP_DUMMY_MG42] < 0) {
-          pm->pmext->weapHeat[WP_DUMMY_MG42] = 0;
-        }
-
-        // rain - floor() to prevent 8-bit wrap
-        pm->ps->curWeapHeat = std::floor(
-            ((static_cast<float>(pm->pmext->weapHeat[WP_DUMMY_MG42]) /
-              MAX_MG42_HEAT)) *
-            255.0f);
-      }
-
-      if (pm->ps->weaponTime > 0) {
-        pm->ps->weaponTime -= pml.msec;
-        if (pm->ps->weaponTime <= 0) {
-          if (!(pm->cmd.buttons & BUTTON_ATTACK)) {
-            pm->ps->weaponTime = 0;
-            return;
-          }
-        } else {
-          return;
-        }
-      }
-
-      if (pm->cmd.buttons & BUTTON_ATTACK) {
-        pm->pmext->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_MP;
-
-        PM_AddEvent(EV_FIRE_WEAPON_MG42);
-
-        pm->ps->weaponTime += MG42_RATE_OF_FIRE_MP;
-
-        BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo,
-                           ANIM_ET_FIREWEAPON, qfalse, qtrue);
-        pm->ps->viewlocked = 2; // this enable screen jitter when
-                                // firing
-
-        if (pm->pmext->weapHeat[WP_DUMMY_MG42] >= MAX_MG42_HEAT) {
-          pm->ps->weaponTime = MAX_MG42_HEAT; // cap heat
-                                              // to max
-          PM_AddEvent(EV_WEAP_OVERHEAT);
-          pm->ps->weaponTime = 2000; // force "heat
-                                     // recovery minimum"
-                                     // to 2 sec right
-                                     // now
-        }
-      }
-      return;
-    case 2:
-      if (pm->ps->weaponTime > 0) {
-        pm->ps->weaponTime -= pml.msec;
-        if (pm->ps->weaponTime <= 0) {
-          if (!(pm->cmd.buttons & BUTTON_ATTACK)) {
-            pm->ps->weaponTime = 0;
-            return;
-          }
-        } else {
-          return;
-        }
-      }
-
-      if (pm->cmd.buttons & BUTTON_ATTACK) {
-        PM_AddEvent(EV_FIRE_WEAPON_AAGUN);
-
-        pm->ps->weaponTime += AAGUN_RATE_OF_FIRE;
-
-        BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo,
-                           ANIM_ET_FIREWEAPON, qfalse, qtrue);
-        //				pm->ps->viewlocked
-        //= 2;		// this
-        // enable screen jitter when firing
-      }
-      return;
-  }
-
-  if (pm->ps->eFlags & EF_MOUNTEDTANK) {
-    //		PM_CoolWeapons(); // Gordon: Arnout says this is how
-    // it's wanted ( bleugh ) no cooldown on weaps while using
-    // mg42, but need to update heat
-    // on mg42 itself
-    if (pm->pmext->weapHeat[WP_DUMMY_MG42] != 0) {
-      pm->pmext->weapHeat[WP_DUMMY_MG42] -= (300.f * pml.frametime);
-
-      if (pm->pmext->weapHeat[WP_DUMMY_MG42] < 0) {
-        pm->pmext->weapHeat[WP_DUMMY_MG42] = 0;
-      }
-
-      // rain - floor() to prevent 8-bit wrap
-      pm->ps->curWeapHeat =
-          std::floor(((static_cast<float>(pm->pmext->weapHeat[WP_DUMMY_MG42]) /
-                       MAX_MG42_HEAT)) *
-                     255.0f);
-    }
-
-    if (pm->ps->weaponTime > 0) {
-      pm->ps->weaponTime -= pml.msec;
-      if (pm->ps->weaponTime <= 0) {
-        if (!(pm->cmd.buttons & BUTTON_ATTACK)) {
-          pm->ps->weaponTime = 0;
-          return;
-        }
-      } else {
-        return;
-      }
-    }
-
-    if (pm->cmd.buttons & BUTTON_ATTACK) {
-      pm->pmext->weapHeat[WP_DUMMY_MG42] += MG42_RATE_OF_FIRE_MP;
-
-      PM_AddEvent(EV_FIRE_WEAPON_MOUNTEDMG42);
-
-      pm->ps->weaponTime += MG42_RATE_OF_FIRE_MP;
-
-      BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo,
-                         ANIM_ET_FIREWEAPON, qfalse, qtrue);
-      // pm->ps->viewlocked = 2;		// this
-      // enable screen jitter when firing
-
-      if (pm->pmext->weapHeat[WP_DUMMY_MG42] >= MAX_MG42_HEAT) {
-        pm->ps->weaponTime = MAX_MG42_HEAT; // cap heat to max
-        PM_AddEvent(EV_WEAP_OVERHEAT);
-        pm->ps->weaponTime = 2000; // force "heat recovery
-                                   // minimum" to 2 sec right now
-      }
-    }
+  if (ETJump::mountedFire()) {
     return;
   }
 
@@ -3922,14 +3832,11 @@ static void PM_Weapon(void) {
   }
 #endif
 
-  // weapon cool down
-  PM_CoolWeapons();
-
   // check for weapon recoil
   // do the recoil before setting the values, that way it will be shown
   // next frame and not this
   if (pm->pmext->weapRecoilTime) {
-    PM_HandleRecoil();
+    ETJump::handleRecoil();
   }
 
   delayedFire = qfalse;
@@ -6461,13 +6368,4 @@ void Pmove(pmove_t *pmove) {
       pmove->cmd.upmove = 20;
     }
   }
-
-  // rain - sanity check weapon heat
-  if (pmove->ps->curWeapHeat > 255) {
-    pmove->ps->curWeapHeat = 255;
-  } else if (pmove->ps->curWeapHeat < 0) {
-    pmove->ps->curWeapHeat = 0;
-  }
-
-  // PM_CheckStuck();
 }
