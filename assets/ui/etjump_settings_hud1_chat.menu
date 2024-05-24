@@ -72,6 +72,7 @@ menuDef {
         YESNO               (SETTINGS_ITEM_POS(10), "Chat mentions:", 0.2, SETTINGS_ITEM_H, "etj_highlight", "Highlight chat messages if you are mentioned\netj_highlight")
         EDITFIELD_EXT       (SETTINGS_EF_POS(11), "Highlight text:", 0.2, SETTINGS_ITEM_H, "etj_highlightText", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Prefix of chat message where you are highlighted\netj_highlightText")
         EDITFIELD_EXT       (SETTINGS_EF_POS(12), "Highlight sound:", 0.2, SETTINGS_ITEM_H, "etj_highlightSound", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Sound to play when you are highlighted in chat\netj_highlightSound")
+        YESNO               (SETTINGS_ITEM_POS(13), "Chat replay:", 0.2, SETTINGS_ITEM_H, "etj_chatReplay", "Replay latest chat messages from server when connecting to server or after vid_restart\netj_chatReplay")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

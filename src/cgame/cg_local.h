@@ -2476,6 +2476,7 @@ extern vmCvar_t etj_chatBackgroundAlpha;
 extern vmCvar_t etj_chatFlags;
 extern vmCvar_t etj_chatShadow;
 extern vmCvar_t etj_chatAlpha;
+extern vmCvar_t etj_chatReplay;
 
 // crosshair stats
 extern vmCvar_t etj_drawCHS1;
