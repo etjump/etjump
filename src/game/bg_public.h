@@ -2306,7 +2306,7 @@ typedef struct {
   int saveLimit;
   // Toggle whether target_relay_fireteam will activate for all ft
   // members or just one
-  qboolean teamJumpMode;
+  bool teamJumpMode;
   qboolean inuse;
   qboolean priv;
 

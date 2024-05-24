@@ -2145,6 +2145,17 @@ struct range_t {
 };
 // End CGaz 5
 
+enum class FTMenuOptions {
+  FT_DISBAND_PROPOSE = 0,
+  FT_CREATE_LEAVE = 1,
+  FT_INVITE = 2,
+  FT_KICK = 3,
+  FT_WARN = 4,
+  FT_RULES = 5,
+  FT_TJMODE = 6,
+  FT_MAX_OPTIONS = 7,
+};
+
 enum class FTMenuMode {
   FT_VSAY = 0,
   FT_MANAGE = 1, // create, leave, disband
@@ -2159,7 +2170,7 @@ enum class FTMenuPos {
   FT_MENUPOS_INVITE = 2,
   FT_MENUPOS_KICK = 3,
   FT_MENUPOS_WARN = 4,
-  FT_MENUPOS_RULES = 5
+  FT_MENUPOS_RULES = 5,
 };
 
 enum class FTMenuRulesPos {
