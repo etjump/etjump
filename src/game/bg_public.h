@@ -2662,23 +2662,25 @@ typedef struct {
 } vsayCmd_t;
 
 // Overbounce is disabled on current map
-const int BG_LEVEL_NO_OVERBOUNCE = 1 << 0;
+static constexpr int BG_LEVEL_NO_OVERBOUNCE = 1 << 0;
 // jump delay is disabled
-const int BG_LEVEL_NO_JUMPDELAY = 1 << 1;
+static constexpr int BG_LEVEL_NO_JUMPDELAY = 1 << 1;
 // Save is disabled
-const int BG_LEVEL_NO_SAVE = 1 << 2;
+static constexpr int BG_LEVEL_NO_SAVE = 1 << 2;
 // Fall damage is disabled
-const int BG_LEVEL_NO_FALLDAMAGE = 1 << 3;
+static constexpr int BG_LEVEL_NO_FALLDAMAGE = 1 << 3;
 // Fall damage is disabled (force)
-const int BG_LEVEL_NO_FALLDAMAGE_FORCE = 1 << 4;
+static constexpr int BG_LEVEL_NO_FALLDAMAGE_FORCE = 1 << 4;
 // Prone is disabled
-const int BG_LEVEL_NO_PRONE = 1 << 5;
+static constexpr int BG_LEVEL_NO_PRONE = 1 << 5;
 // Nodrop is enabled
-const int BG_LEVEL_NO_DROP = 1 << 6;
+static constexpr int BG_LEVEL_NO_DROP = 1 << 6;
 // Wallbugging is disabled
-const int BG_LEVEL_NO_WALLBUG = 1 << 7;
+static constexpr int BG_LEVEL_NO_WALLBUG = 1 << 7;
 // Noclip is disabled
-const int BG_LEVEL_NO_NOCLIP = 1 << 8;
+static constexpr int BG_LEVEL_NO_NOCLIP = 1 << 8;
+// FT Shove is disabled
+static constexpr int BG_LEVEL_NO_FTSHOVE = 1 << 9;
 
 namespace ETJump {
 enum class CheatCvarFlags {
@@ -2721,9 +2723,9 @@ enum class HeavyWeaponState {
 };
 
 enum class ViewlockState {
-  Jitter = 2,      // screen jitter (firing mounted MG42)
-  Mounted = 3,     // lock to direction of mounted gun
-  Medic = 7,       // look at nearest medic
+  Jitter = 2,  // screen jitter (firing mounted MG42)
+  Mounted = 3, // lock to direction of mounted gun
+  Medic = 7,   // look at nearest medic
 };
 } // namespace ETJump
 

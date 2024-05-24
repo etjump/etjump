@@ -2632,6 +2632,10 @@ extern vmCvar_t etj_drawNoclipIndicator;
 extern vmCvar_t etj_noclipIndicatorX;
 extern vmCvar_t etj_noclipIndicatorY;
 
+extern vmCvar_t etj_drawShoveIndicator;
+extern vmCvar_t etj_shoveIndicatorX;
+extern vmCvar_t etj_shoveIndicatorY;
+
 // Cvar unlocks
 extern vmCvar_t etj_viewlog;
 extern vmCvar_t etj_drawFoliage;

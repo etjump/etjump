@@ -1149,6 +1149,9 @@ static void initNoFTShove() {
   G_SpawnInt("noftshove", "0", &value);
 
   level.noFTShove = value;
+  level.noFTShove ? shared.integer |= BG_LEVEL_NO_FTSHOVE
+                  : shared.integer &= ~BG_LEVEL_NO_FTSHOVE;
+
   G_Printf("Fireteam shoving is %s.\n",
            level.noFTShove ? "disabled" : "enabled");
 }

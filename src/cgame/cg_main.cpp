@@ -527,6 +527,9 @@ vmCvar_t etj_proneIndicatorY;
 vmCvar_t etj_drawNoclipIndicator;
 vmCvar_t etj_noclipIndicatorX;
 vmCvar_t etj_noclipIndicatorY;
+vmCvar_t etj_drawShoveIndicator;
+vmCvar_t etj_shoveIndicatorX;
+vmCvar_t etj_shoveIndicatorY;
 
 // Cvar unlocks
 vmCvar_t etj_viewlog;
@@ -1112,8 +1115,12 @@ cvarTable_t cvarTable[] = {
     {&etj_proneIndicatorY, "etj_proneIndicatorY", "338", CVAR_ARCHIVE},
 
     {&etj_drawNoclipIndicator, "etj_drawNoclipIndicator", "3", CVAR_ARCHIVE},
-    {&etj_noclipIndicatorX, "etj_noclipIndicatorX", "615", CVAR_ARCHIVE},
-    {&etj_noclipIndicatorY, "etj_noclipIndicatorY", "313", CVAR_ARCHIVE},
+    {&etj_noclipIndicatorX, "etj_noclipIndicatorX", "595", CVAR_ARCHIVE},
+    {&etj_noclipIndicatorY, "etj_noclipIndicatorY", "363", CVAR_ARCHIVE},
+
+    {&etj_drawShoveIndicator, "etj_drawShoveIndicator", "3", CVAR_ARCHIVE},
+    {&etj_shoveIndicatorX, "etj_shoveIndicatorX", "595", CVAR_ARCHIVE},
+    {&etj_shoveIndicatorY, "etj_shoveIndicatorY", "338", CVAR_ARCHIVE},
 
     {&etj_uphillSteps, "etj_uphillSteps", "1", CVAR_ARCHIVE},
     {&etj_fixedCushionSteps, "etj_fixedCushionSteps", "0", CVAR_ARCHIVE},

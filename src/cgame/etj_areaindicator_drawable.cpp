@@ -38,6 +38,9 @@ AreaIndicator::AreaIndicator() {
   indicators.emplace_back(&etj_drawNoclipIndicator, &etj_noclipIndicatorX,
                           &etj_noclipIndicatorY, CONTENTS_NONOCLIP,
                           BG_LEVEL_NO_NOCLIP, cgs.media.noclipIcon);
+  indicators.emplace_back(&etj_drawShoveIndicator, &etj_shoveIndicatorX,
+                          &etj_shoveIndicatorY, CONTENTS_NOSHOVE,
+                          BG_LEVEL_NO_FTSHOVE, cgs.media.shoveIcon);
 
   ci = nullptr;
   ps = nullptr;
