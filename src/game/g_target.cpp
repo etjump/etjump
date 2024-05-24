@@ -1668,6 +1668,10 @@ void target_ftrelay_use(gentity_t *self, gentity_t *other,
     return;
   }
 
+  const bool noActivator =
+      self->spawnflags &
+      static_cast<int>(ETJump::FTRelaySpawnflags::NoActivator);
+
   for (int i = 0; i < level.numConnectedClients; i++) {
     if (ft->joinOrder[i] == -1) {
       continue;
@@ -1675,9 +1679,7 @@ void target_ftrelay_use(gentity_t *self, gentity_t *other,
 
     gentity_t *ent = g_entities + ft->joinOrder[i];
 
-    if (activator == ent &&
-        self->spawnflags &
-            static_cast<int>(ETJump::FTRelaySpawnflags::NoActivator)) {
+    if (noActivator && activator == ent) {
       continue;
     }
 
