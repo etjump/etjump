@@ -905,7 +905,7 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
           } else {
             for (const auto &s : matchingSeasons) {
               if (_rankingsPerSeason.count(s.id) == 0) {
-                message = stringFormat("No records for season `%s`", s.name);
+                message = stringFormat("No records for season `%s`\n", s.name);
               } else {
                 // clang-format off
                 message =
@@ -923,7 +923,7 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
 
         } else {
           if (_rankingsPerSeason.count(defaultSeasonId) == 0) {
-            message += "No overall records";
+            message += "No overall records\n";
           } else {
             // clang-format off
             message =
