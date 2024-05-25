@@ -378,6 +378,7 @@ vmCvar_t etj_chatBackgroundAlpha;
 vmCvar_t etj_chatFlags;
 vmCvar_t etj_chatShadow;
 vmCvar_t etj_chatAlpha;
+vmCvar_t etj_chatReplay;
 
 // crosshair stats
 vmCvar_t etj_drawCHS1;
@@ -945,6 +946,7 @@ cvarTable_t cvarTable[] = {
     {&etj_chatFlags, "etj_chatFlags", "1", CVAR_ARCHIVE},
     {&etj_chatShadow, "etj_chatShadow", "0", CVAR_ARCHIVE},
     {&etj_chatAlpha, "etj_chatAlpha", "1.0", CVAR_ARCHIVE},
+    {&etj_chatReplay, "etj_chatReplay", "1", CVAR_ARCHIVE},
 
     // crosshair stats
     {&etj_drawCHS1, "etj_drawCHS1", "0", CVAR_ARCHIVE},

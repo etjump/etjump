@@ -637,7 +637,13 @@ void runFrameEnd() {
   }
 
   if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.chatReplayReceived) {
-    trap_SendConsoleCommand("getchatreplay");
+    if (etj_chatReplay.integer) {
+      trap_SendConsoleCommand("getchatreplay");
+    }
+
+    // keep this separate from the cvar check, so client doesn't immediately
+    // receive chat replay in the middle of a map when toggling this,
+    // as the replay would just be whatever is currently in chat
     cg.chatReplayReceived = true;
   }
 
