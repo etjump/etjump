@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <stdexcept>
 #include "cg_local.h"
 #include "etj_event_loop.h"
 
@@ -73,10 +74,14 @@ bool ETJump::EventLoop::unschedule(int taskId) {
 }
 
 void ETJump::EventLoop::shutdown() {
-  removeEventsIf([&](Task const &task) {
+  // autodemo might have a pending ordinary task (saveTimerunDemo) at
+  // shutdown, which adds another ordinary task (saveDemo) upon execution
+  // causing iterator invalidation within removeEventsIf
+  // --> do not use removeEventsIf at shutdown
+
+  removeEvents([&](Task const &task) {
     if (!task.deprecated)
       task.fn();
-    return true;
   });
 }
 
@@ -137,9 +142,21 @@ void ETJump::EventLoop::cleanUpEvents() {
 
 void ETJump::EventLoop::removeEventsIf(function<bool(Task &task)> fn) {
   for (auto *storage : {&importantTasks, &ordinaryTasks}) {
+    const auto sz = storage->size();
     auto removeIter = remove_if(storage->begin(), storage->end(),
                                 [&](Task &task) { return fn(task); });
+    if (sz != storage->size())
+      throw std::runtime_error("Iterator invalidation: A task has added "
+                               "another task during its removal");
+
     storage->erase(removeIter, storage->end());
+  }
+}
+
+void ETJump::EventLoop::removeEvents(function<void(Task &task)> fn) {
+  for (auto *storage : {&importantTasks, &ordinaryTasks}) {
+    for_each(storage->begin(), storage->end(), [&](Task &task) { fn(task); });
+    storage->clear();
   }
 }
 
