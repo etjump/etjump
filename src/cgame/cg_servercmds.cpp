@@ -730,13 +730,17 @@ CG_AddToTeamChat
 
 =======================
 */
-static void CG_AddToTeamChat(const char *str, int clientnum, bool replayMsg) {
+static void CG_AddToTeamChat(const char *str, int clientnum, bool replayMsg,
+                             bool serverSay) {
   int len;
   char *p, *ls;
   int lastcolor;
   int chatHeight =
       Numeric::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
   int chatWidth = Numeric::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
+  const team_t team =
+      ((replayMsg || serverSay) ? TEAM_SPECTATOR
+                                : cgs.clientinfo[clientnum].team);
 
   if (chatHeight <= 0 || cg_teamChatTime.integer <= 0) {
     // team chat disabled, dump into normal chat
@@ -762,8 +766,7 @@ static void CG_AddToTeamChat(const char *str, int clientnum, bool replayMsg) {
       *p = 0;
 
       cgs.teamChatMsgTimes[cgs.teamChatPos % chatHeight] = cg.time;
-      cgs.teamChatMsgTeams[cgs.teamChatPos % chatHeight] =
-          cgs.clientinfo[clientnum].team;
+      cgs.teamChatMsgTeams[cgs.teamChatPos % chatHeight] = team;
 
       cgs.teamChatPos++;
       p = cgs.teamChatMsgs[cgs.teamChatPos % chatHeight];
@@ -788,9 +791,7 @@ static void CG_AddToTeamChat(const char *str, int clientnum, bool replayMsg) {
   }
   *p = 0;
 
-  // chat replay should have no flag
-  cgs.teamChatMsgTeams[cgs.teamChatPos % chatHeight] =
-      replayMsg ? TEAM_SPECTATOR : cgs.clientinfo[clientnum].team;
+  cgs.teamChatMsgTeams[cgs.teamChatPos % chatHeight] = team;
 
   cgs.teamChatMsgTimes[cgs.teamChatPos % chatHeight] = cg.time;
   cgs.teamChatPos++;
@@ -1373,7 +1374,7 @@ void CG_PlayVoiceChat(bufferedVoiceChat_t *vchat) {
     }
   }
   if (!vchat->voiceOnly && !cg_noVoiceText.integer) {
-    CG_AddToTeamChat(vchat->message, vchat->clientNum, false);
+    CG_AddToTeamChat(vchat->message, vchat->clientNum, false, false);
     CG_Printf(va("[skipnotify]%s\n", vchat->message)); // JPW NERVE
   }
   voiceChatBuffer[cg.voiceChatBufferOut].snd = 0;
@@ -2156,7 +2157,8 @@ void CG_ForceTapOut_f(void);
  * @param clientNum The user who sent the message
  * @param replayMsg Is this a chat replay message?
  */
-const char *CG_AddChatModifications(char *text, int clientNum, bool replayMsg) {
+static const char *CG_AddChatModifications(char *text, int clientNum,
+                                           bool replayMsg, bool serverSay) {
   // don't perform chat modifications to chat replay messages
   if (replayMsg) {
     return text;
@@ -2168,19 +2170,18 @@ const char *CG_AddChatModifications(char *text, int clientNum, bool replayMsg) {
 
   memset(message, 0, sizeof(message));
   trap_RealTime(&t);
-  if (etj_highlight.integer && cg.clientNum != clientNum) {
-    if (strstr(text + strlen(cgs.clientinfo[clientNum].name),
-               cgs.clientinfo[cg.clientNum].name) != NULL) {
-      Q_strcat(message, sizeof(message), etj_highlightText.string);
-      Q_strcat(message, sizeof(message), "^7");
+  if (etj_highlight.integer && (serverSay || cg.clientNum != clientNum) &&
+      strstr(text + strlen(cgs.clientinfo[clientNum].name),
+             cgs.clientinfo[cg.clientNum].name) != NULL) {
+    Q_strcat(message, sizeof(message), etj_highlightText.string);
+    Q_strcat(message, sizeof(message), "^7");
 
-      trap_S_StartLocalSound(
-          trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
-    }
+    trap_S_StartLocalSound(
+        trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
   }
 
   if (etj_drawMessageTime.integer) {
-    if (cg.clientNum == clientNum) {
+    if (!serverSay && cg.clientNum == clientNum) {
       msgColor = "^g";
     }
     if (etj_drawMessageTime.integer == 2) {
@@ -2356,8 +2357,10 @@ static void CG_ServerCommand(void) {
 
   enc = !Q_stricmp(cmd, "enc_chat") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "chat") || enc) {
-    const char *s;
     const bool chatReplay = Q_atoi(CG_Argv(4));
+    const char *s = CG_Argv(2);
+    const bool serverSay = (s[0] == '\0'); // server sends empty clientNum
+    const int clientNum = Q_atoi(s);
 
     if (cg_teamChatsOnly.integer) {
       return;
@@ -2377,8 +2380,8 @@ static void CG_ServerCommand(void) {
 
     CG_RemoveChatEscapeChar(text);
     CG_FixLinesEndingWithCaret(text, MAX_SAY_TEXT);
-    s = CG_AddChatModifications(text, Q_atoi(CG_Argv(2)), chatReplay);
-    CG_AddToTeamChat(s, Q_atoi(CG_Argv(2)), chatReplay);
+    s = CG_AddChatModifications(text, clientNum, chatReplay, serverSay);
+    CG_AddToTeamChat(s, clientNum, chatReplay, serverSay);
     CG_Printf("%s\n", s);
 
     return;
@@ -2401,11 +2404,11 @@ static void CG_ServerCommand(void) {
     }
     CG_RemoveChatEscapeChar(text);
 
-    s = CG_AddChatModifications(text, Q_atoi(CG_Argv(2)), false);
+    s = CG_AddChatModifications(text, Q_atoi(CG_Argv(2)), false, false);
     Q_strncpyz(text, s, MAX_SAY_TEXT);
 
     CG_FixLinesEndingWithCaret(text, MAX_SAY_TEXT);
-    CG_AddToTeamChat(text, Q_atoi(CG_Argv(2)), false);
+    CG_AddToTeamChat(text, Q_atoi(CG_Argv(2)), false, false);
     CG_Printf("%s\n", text); // JPW NERVE
 
     return;
