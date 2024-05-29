@@ -63,6 +63,7 @@
 #include "etj_accel_color.h"
 #include "etj_utilities.h"
 #include "etj_player_bbox.h"
+#include "etj_pmove_utils.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -681,6 +682,39 @@ void runFrameEnd() {
         cg.portalgunBindingsAdjusted = false;
       }
     }
+  }
+
+  // handle autospec feature
+  if (!cg.demoPlayback && etj_autoSpec.integer) {
+    constexpr int minAutoSpecDelay = 1000; // 1s
+    static int oldTeam = -1;
+    static int lastActivity = -minAutoSpecDelay;
+
+    const auto ps = getValidPlayerState();
+    const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, CMDSCALE_DEFAULT);
+    const auto team = cgs.clientinfo[cg.clientNum].team;
+
+    if (ps->pm_flags & PMF_FOLLOW &&
+        (cmd.forwardmove || cmd.rightmove || cmd.upmove)) {
+      // followed client has moved
+      lastActivity = cg.time;
+
+    } else if (cg.time - lastActivity >=
+               std::max(etj_autoSpecDelay.integer, minAutoSpecDelay)) {
+      // it's time to follow the next player
+      if (team != TEAM_SPECTATOR) {
+        trap_SendClientCommand("team s");
+      }
+      trap_SendClientCommand("follownext");
+      lastActivity = cg.time;
+
+    } else if (oldTeam != team && team != TEAM_SPECTATOR) {
+      // team has changed and we are not in spec
+      trap_Cvar_Set("etj_autoSpec", "0");
+      lastActivity = -minAutoSpecDelay;
+    }
+
+    oldTeam = team;
   }
 }
 
