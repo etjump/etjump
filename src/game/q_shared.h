@@ -343,8 +343,8 @@ typedef enum {
 #define PROP_HEIGHT 27
 #define PROP_SMALL_SIZE_SCALE 0.75
 
-#define BLINK_DIVISOR 200
-#define PULSE_DIVISOR 75
+#define BLINK_DIVISOR 200  // only used in bitwise checks and should stay int
+#define PULSE_DIVISOR 75.0 // floating point for higher pulse accuracy
 
 #define UI_LEFT 0x00000000 // default
 #define UI_CENTER 0x00000001
