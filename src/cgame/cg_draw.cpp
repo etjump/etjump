@@ -2244,9 +2244,7 @@ static void CG_DrawVote() {
                              cgs.clientinfo[cgs.applicationClient].name);
     line_b =
         ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
-  }
-
-  if (cgs.propositionEndTime > cg.time && cgs.propositionClient >= 0) {
+  } else if (cgs.propositionEndTime > cg.time && cgs.propositionClient >= 0) {
     line_a = ETJump::stringFormat(
         "Accept %s's proposition to invite %s to join your "
         "fireteam?",
@@ -2254,17 +2252,13 @@ static void CG_DrawVote() {
         cgs.clientinfo[cgs.propositionClient].name);
     line_b =
         ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
-  }
-
-  if (cgs.invitationEndTime > cg.time && cgs.invitationClient >= 0) {
+  } else if (cgs.invitationEndTime > cg.time && cgs.invitationClient >= 0) {
     line_a =
         ETJump::stringFormat("Accept %s's invitation to join their fireteam?",
                              cgs.clientinfo[cgs.invitationClient].name);
     line_b =
         ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
-  }
-
-  if (cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -1) {
+  } else if (cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -1) {
     // make sure we're still on the fireteam before displaying
     // this prompt
     if (CG_IsOnFireteam(cg.clientNum)) {
@@ -2276,9 +2270,7 @@ static void CG_DrawVote() {
     else {
       cgs.autoFireteamEndTime = cg.time;
     }
-  }
-
-  if (cgs.voteTime) {
+  } else if (cgs.voteTime) {
     // play a talk beep whenever it is modified
     if (cgs.voteModified) {
       cgs.voteModified = qfalse;
@@ -2374,9 +2366,7 @@ static void CG_DrawVote() {
         }
       }
     }
-  }
-
-  if (cgs.applicationEndTime > cg.time && cgs.applicationClient < 0) {
+  } else if (cgs.applicationEndTime > cg.time && cgs.applicationClient < 0) {
     switch (cgs.applicationClient) {
       case -1:
         line_a = "Your application has been "
@@ -2394,9 +2384,7 @@ static void CG_DrawVote() {
                  "been sent";
         break;
     }
-  }
-
-  if (cgs.propositionEndTime > cg.time && cgs.propositionClient < 0) {
+  } else if (cgs.propositionEndTime > cg.time && cgs.propositionClient < 0) {
     switch (cgs.propositionClient) {
       case -1:
         line_a = "Your proposition has been "
@@ -2413,9 +2401,7 @@ static void CG_DrawVote() {
                  "been sent";
         break;
     }
-  }
-
-  if (cgs.invitationEndTime > cg.time && cgs.invitationClient < 0) {
+  } else if (cgs.invitationEndTime > cg.time && cgs.invitationClient < 0) {
     switch (cgs.invitationClient) {
       case -1:
         line_a = "Your invitation has been "
@@ -2432,13 +2418,11 @@ static void CG_DrawVote() {
                  "been sent";
         break;
     }
-  }
-
-  if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) ||
-      (cgs.autoFireteamCreateEndTime > cg.time &&
-       cgs.autoFireteamCreateNum == -2) ||
-      (cgs.autoFireteamJoinEndTime > cg.time &&
-       cgs.autoFireteamJoinNum == -2)) {
+  } else if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) ||
+             (cgs.autoFireteamCreateEndTime > cg.time &&
+              cgs.autoFireteamCreateNum == -2) ||
+             (cgs.autoFireteamJoinEndTime > cg.time &&
+              cgs.autoFireteamJoinNum == -2)) {
     line_a = "Response Sent";
   }
 
