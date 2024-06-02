@@ -790,10 +790,7 @@ qboolean ConsoleCommand(void) {
   // -fretn
 
   if (g_dedicated.integer) {
-    if (!Q_stricmp(cmd, "say")) {
-      trap_SendServerCommand(-1, va("cpm \"server: %s\n\"", ConcatArgs(1)));
-      return qtrue;
-    } else if (!Q_stricmp(cmd, "qsay")) {
+    if (!Q_stricmp(cmd, "qsay")) {
       trap_SendServerCommand(-1, va("chat \"%s\"", ConcatArgs(1)));
       return qtrue;
     } else if (!Q_stricmp(cmd, "enc_qsay")) {
