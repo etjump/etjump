@@ -875,7 +875,7 @@ std::string ETJump::TimerunV2::getRankingsStringFor(
     if (isOwnRanking && !isOnVisiblePage) {
       auto rankString = rankToString(i + 1);
       auto rankStringWidth = 5 + StringUtil::countExtraPadding(rankString);
-      auto name = isOwnRanking ? (r->name + " ^g(You)") : r->name;
+      auto name = r->name + " ^g(You)";
       auto nameStringWidth =
           MAX_NAME_LENGTH + 1 + 5 + StringUtil::countExtraPadding(name);
 
