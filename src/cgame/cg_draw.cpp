@@ -3113,10 +3113,6 @@ static void CG_DrawObjectiveInfo(void) {
   int x1, y1, x2, y2;
   float *color;
   vec4_t backColor;
-  backColor[0] = 0.2f;
-  backColor[1] = 0.2f;
-  backColor[2] = 0.2f;
-  backColor[2] = 1.f;
 
   if (!cg.oidPrintTime) {
     return;
