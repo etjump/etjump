@@ -208,7 +208,6 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage) {
   // impact damage
   if (other->takedamage || other->dmgparent) {
     if (ent->damage) {
-      AccuracyHit(other, &g_entities[ent->r.ownerNum]);
       BG_EvaluateTrajectoryDelta(&ent->s.pos, level.time, velocity, qfalse,
                                  ent->s.effect2Time);
       if (VectorLengthSquared(velocity) == 0) {
