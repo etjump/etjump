@@ -51,6 +51,7 @@ void PmoveUtilsV2::initCvars() {
   hudCvars.emplace_back(&etj_drawStrafeQuality);
   hudCvars.emplace_back(&etj_drawUpmoveMeter);
   hudCvars.emplace_back(&etj_drawJumpSpeeds);
+  hudCvars.emplace_back(&etj_drawYaw);
 
   chsCvars.emplace_back(&etj_drawCHS1);
 

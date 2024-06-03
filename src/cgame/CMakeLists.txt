@@ -67,6 +67,7 @@ add_library(cgame MODULE
 	"etj_cvar_update_handler.cpp"
 	"etj_demo_compatibility.cpp"
 	"etj_demo_recorder.cpp"
+	"etj_draw_yaw.cpp"
 	"etj_drawable.cpp"
 	"etj_drawspeed2_v2.cpp"
 	"etj_entity_events_handler.cpp"

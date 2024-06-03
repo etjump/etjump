@@ -2810,6 +2810,14 @@ extern vmCvar_t etj_ccMenu_width;
 extern vmCvar_t etj_ccMenu_browseWithOpen;
 extern vmCvar_t etj_ccMenu_showEmptyPages;
 
+extern vmCvar_t etj_drawYaw;
+extern vmCvar_t etj_yawX;
+extern vmCvar_t etj_yawY;
+extern vmCvar_t etj_yawColor;
+extern vmCvar_t etj_yawShadow;
+extern vmCvar_t etj_yawSize;
+extern vmCvar_t etj_yawWidth;
+
 //
 // cg_main.c
 //

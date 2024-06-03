@@ -750,6 +750,14 @@ vmCvar_t etj_ccMenu_width;
 vmCvar_t etj_ccMenu_browseWithOpen;
 vmCvar_t etj_ccMenu_showEmptyPages;
 
+vmCvar_t etj_drawYaw;
+vmCvar_t etj_yawX;
+vmCvar_t etj_yawY;
+vmCvar_t etj_yawColor;
+vmCvar_t etj_yawShadow;
+vmCvar_t etj_yawSize;
+vmCvar_t etj_yawWidth;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1416,6 +1424,14 @@ cvarTable_t cvarTable[] = {
      CVAR_ARCHIVE},
     {&etj_ccMenu_showEmptyPages, "etj_ccMenu_showEmptyPages", "0",
      CVAR_ARCHIVE},
+
+    {&etj_drawYaw, "etj_drawYaw", "0", CVAR_ARCHIVE},
+    {&etj_yawX, "etj_yawX", "320", CVAR_ARCHIVE},
+    {&etj_yawY, "etj_yawY", "300", CVAR_ARCHIVE},
+    {&etj_yawColor, "etj_yawColor", "White", CVAR_ARCHIVE},
+    {&etj_yawShadow, "etj_yawShadow", "1", CVAR_ARCHIVE},
+    {&etj_yawSize, "etj_yawSize", "3", CVAR_ARCHIVE},
+    {&etj_yawWidth, "etj_yawWidth", "10", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

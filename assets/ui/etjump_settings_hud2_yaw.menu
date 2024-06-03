@@ -3,7 +3,7 @@
 #include "ui/menumacros.h"
 #include "ui/menumacros_ext.h"
 
-#define MENU_NAME "etjump_settings_hud2_chs"
+#define MENU_NAME "etjump_settings_hud2_yaw"
 #define GROUP_NAME "group_etjump_settings_hud2"
 
 #define NUM_SUBMENUS 11
@@ -41,7 +41,7 @@ menuDef {
 
     SIDEBUTTON          (1, "CGAZ", close MENU_NAME; open etjump_settings_hud2_cgaz)
     SIDEBUTTON          (2, "SNAPHUD", close MENU_NAME; open etjump_settings_hud2_snaphud)
-    SIDEBUTTON_ACTIVE   (3, "CHS", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (3, "CHS", close MENU_NAME; open etjump_settings_hud2_chs)
     SIDEBUTTON          (4, "CHS 1", close MENU_NAME; open etjump_settings_hud2_chs1)
     SIDEBUTTON          (5, "CHS 2", close MENU_NAME; open etjump_settings_hud2_chs2)
     SIDEBUTTON          (6, "CHS 3", close MENU_NAME; open etjump_settings_hud2_chs3)
@@ -49,15 +49,20 @@ menuDef {
     SIDEBUTTON          (8, "JUMP SPEEDS", close MENU_NAME; open etjump_settings_hud2_jumpspeeds)
     SIDEBUTTON          (9, "STRAFE QUALITY", close MENU_NAME; open etjump_settings_hud2_strafequality)
     SIDEBUTTON          (10, "UPMOVE METER", close MENU_NAME; open etjump_settings_hud2_upmove)
-    SIDEBUTTON          (11, "YAW", close MENU_NAME; open etjump_settings_hud2_yaw)
+    SIDEBUTTON_ACTIVE   (11, "YAW", close MENU_NAME; open MENU_NAME)
 
-    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CROSSHAIR STATS")
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "YAW")
 
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS(1), "etj_CHSAlpha", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(1), "CHS alpha:", 0.2, SETTINGS_ITEM_H, etj_CHSAlpha 1 0 1 0.05, "Sets transparency of CHS\netj_CHSAlpha")
-        COMBO               (SETTINGS_COMBO_POS(2), "CHS color:", 0.2, SETTINGS_ITEM_H, "etj_CHSColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of CHS\netj_CHSColor")
-        YESNO               (SETTINGS_ITEM_POS(3), "CHS shadow:", 0.2, SETTINGS_ITEM_H, "etj_CHSShadow", "Draw shadow on CHS\netj_CHSShadow")
-        YESNO               (SETTINGS_ITEM_POS(4), "Offset Z origin:", 0.2, SETTINGS_ITEM_H, "etj_CHSUseFeet", "Offset Z origin to feet level in positional calculations\netj_CHSUseFeet")
+        YESNO               (SETTINGS_ITEM_POS(1), "Draw yaw:", 0.2, SETTINGS_ITEM_H, "etj_drawYaw", "Draw yaw HUD\netj_drawYaw")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_yawX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(2), "Yaw X:", 0.2, SETTINGS_ITEM_H, etj_yawX 320 0 640 5, "Sets X position of yaw\netj_yawX")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_yawY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(3), "Yaw Y:", 0.2, SETTINGS_ITEM_H, etj_yawY 300 0 480 5, "Sets Y position of yaw\netj_yawY")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_yawWidth", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(4), "Yaw width:", 0.2, SETTINGS_ITEM_H, etj_yawWidth 10 0 100 5, "Sets distance between the yaw arrows\netj_yawWidth")
+        COMBO               (SETTINGS_COMBO_POS(5), "Yaw color:", 0.2, SETTINGS_ITEM_H, "etj_yawColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of yaw\netj_yawColor")
+        YESNO               (SETTINGS_ITEM_POS(6), "Yaw shadow:", 0.2, SETTINGS_ITEM_H, "etj_yawShadow", "Draw shadow on yaw\netj_yawShadow")
+        MULTI               (SETTINGS_ITEM_POS(7), "Yaw size:", 0.2, SETTINGS_ITEM_H, "etj_yawSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of yaw\netj_yawSize")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

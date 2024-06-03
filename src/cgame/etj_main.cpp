@@ -44,6 +44,7 @@
 #include "etj_custom_command_menu_drawable.h"
 #include "etj_cvar_unlocker.h"
 #include "etj_demo_compatibility.h"
+#include "etj_draw_yaw.h"
 #include "etj_drawspeed2_v2.h"
 #include "etj_entity_events_handler.h"
 #include "etj_event_loop.h"
@@ -318,6 +319,8 @@ static void initHUD() {
 
   cgame.hud.renderables.emplace_back(
       std::make_unique<KeySetSystem>(&etj_drawKeys, cgame.core.cvarUpdate));
+  cgame.hud.renderables.emplace_back(
+      std::make_unique<DrawYaw>(cgame.core.cvarUpdate));
 
   // FIXME: move to renderables
   ETJump_ClearDrawables();
