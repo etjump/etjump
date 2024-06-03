@@ -1143,6 +1143,18 @@ static void initNoFTNoGhost() {
   G_Printf("Fireteam noghost is %s.\n",
            level.noFTNoGhost ? "disabled" : "enabled");
 }
+
+static void initNoFTShove() {
+  int value;
+  G_SpawnInt("noftshove", "0", &value);
+
+  level.noFTShove = value;
+  level.noFTShove ? shared.integer |= BG_LEVEL_NO_FTSHOVE
+                  : shared.integer &= ~BG_LEVEL_NO_FTSHOVE;
+
+  G_Printf("Fireteam shoving is %s.\n",
+           level.noFTShove ? "disabled" : "enabled");
+}
 } // namespace ETJump
 
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
@@ -1288,6 +1300,7 @@ void SP_worldspawn(void) {
   ETJump::initNoWallbug();
   ETJump::initNoNoclip();
   ETJump::initNoFTNoGhost();
+  ETJump::initNoFTShove();
 
   level.mapcoordsValid = qfalse;
   if (G_SpawnVector2D("mapcoordsmins", "-128 128",

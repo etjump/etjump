@@ -2826,6 +2826,10 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
                    es->pos.trBase, es->dmgFlags,
                    tv(es->angles[0], es->angles[1], es->angles[2]));
       break;
+    case EV_SHOVE:
+      DEBUGNAME("EV_SHOVE");
+      trap_S_StartSound(nullptr, es->number, CHAN_AUTO, cgs.media.shoveSound);
+      break;
     default:
       DEBUGNAME("UNKNOWN");
       break;
