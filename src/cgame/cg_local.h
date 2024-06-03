@@ -2765,6 +2765,13 @@ extern vmCvar_t etj_playerBBoxBottomOnlyOther;
 extern vmCvar_t etj_playerBBoxBottomOnlyFireteam;
 extern vmCvar_t etj_playerBBoxShader;
 
+extern vmCvar_t etj_drawYaw;
+extern vmCvar_t etj_drawYawX;
+extern vmCvar_t etj_drawYawY;
+extern vmCvar_t etj_drawYawColor;
+extern vmCvar_t etj_drawYawShadow;
+extern vmCvar_t etj_drawYawSize;
+
 //
 // cg_main.c
 //

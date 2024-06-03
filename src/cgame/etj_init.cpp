@@ -63,6 +63,7 @@
 #include "etj_accel_color.h"
 #include "etj_utilities.h"
 #include "etj_player_bbox.h"
+#include "etj_draw_yaw.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -271,6 +272,7 @@ void init() {
   ETJump::renderables.push_back(
       std::shared_ptr<ETJump::IRenderable>(keySetSystem));
   ETJump::initDrawKeys(keySetSystem);
+  ETJump::renderables.push_back(std::make_shared<DrawYaw>());
   ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
 
   ETJump::renderables.push_back(std::make_shared<Crosshair>());

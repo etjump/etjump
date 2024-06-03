@@ -6,7 +6,7 @@
 #define MENU_NAME "etjump_settings_hud2_strafequality"
 #define GROUP_NAME "group_etjump_settings_hud2"
 
-#define NUM_SUBMENUS 9
+#define NUM_SUBMENUS 10
 #define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
 
 menuDef {
@@ -47,6 +47,7 @@ menuDef {
     SIDEBUTTON          (7, "JUMP SPEEDS", close MENU_NAME; open etjump_settings_hud2_jumpspeeds)
     SIDEBUTTON_ACTIVE   (8, "STRAFE QUALITY", close MENU_NAME; open MENU_NAME)
     SIDEBUTTON          (9, "UPMOVE METER", close MENU_NAME; open etjump_settings_hud2_upmove)
+    SIDEBUTTON          (10, "YAW", close MENU_NAME; open etjump_settings_hud2_yaw)
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "STRAFE QUALITY")
 
