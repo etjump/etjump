@@ -149,7 +149,7 @@ jobs:
         path: ${{ github.workspace }}/build/*.zip
 
     - name: Create latest build
-      uses: marvinpinto/action-automatic-releases@latest
+      uses: czietz/action-automatic-releases@latest
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         automatic_release_tag: "latest"
