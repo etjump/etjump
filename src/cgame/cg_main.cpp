@@ -667,6 +667,13 @@ vmCvar_t etj_playerBBoxBottomOnlyOther;
 vmCvar_t etj_playerBBoxBottomOnlyFireteam;
 vmCvar_t etj_playerBBoxShader;
 
+vmCvar_t etj_drawYaw;
+vmCvar_t etj_drawYawX;
+vmCvar_t etj_drawYawY;
+vmCvar_t etj_drawYawColor;
+vmCvar_t etj_drawYawShadow;
+vmCvar_t etj_drawYawSize;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1252,6 +1259,13 @@ cvarTable_t cvarTable[] = {
      CVAR_ARCHIVE},
     {&etj_playerBBoxShader, "etj_playerBBoxShader", "bbox_nocull",
      CVAR_ARCHIVE | CVAR_LATCH},
+
+    {&etj_drawYaw, "etj_drawYaw", "0", CVAR_ARCHIVE},
+    {&etj_drawYawX, "etj_drawYawX", "320", CVAR_ARCHIVE},
+    {&etj_drawYawY, "etj_drawYawY", "300", CVAR_ARCHIVE},
+    {&etj_drawYawColor, "etj_drawYawColor", "White", CVAR_ARCHIVE},
+    {&etj_drawYawShadow, "etj_drawYawShadow", "1", CVAR_ARCHIVE},
+    {&etj_drawYawSize, "etj_drawYawSize", "3", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
