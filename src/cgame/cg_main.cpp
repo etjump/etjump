@@ -667,6 +667,9 @@ vmCvar_t etj_playerBBoxBottomOnlyOther;
 vmCvar_t etj_playerBBoxBottomOnlyFireteam;
 vmCvar_t etj_playerBBoxShader;
 
+vmCvar_t etj_autoSpec;
+vmCvar_t etj_autoSpecDelay;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1252,6 +1255,9 @@ cvarTable_t cvarTable[] = {
      CVAR_ARCHIVE},
     {&etj_playerBBoxShader, "etj_playerBBoxShader", "bbox_nocull",
      CVAR_ARCHIVE | CVAR_LATCH},
+
+    {&etj_autoSpec, "etj_autoSpec", "0", CVAR_ARCHIVE},
+    {&etj_autoSpecDelay, "etj_autoSpecDelay", "10000", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
