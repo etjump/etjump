@@ -156,7 +156,7 @@ Desktop.ini
 *.egg
 *.egg-info
 dist
-build
+build*
 eggs
 parts
 bin
@@ -192,4 +192,3 @@ scons.signatures.dblite
 out
 cmake-build*/
 checks.json
-build-linux-x64/
