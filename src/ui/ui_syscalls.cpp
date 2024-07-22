@@ -23,6 +23,13 @@ extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
   #endif
 #endif
 
+template <typename T, typename... Types>
+static intptr_t ExpandSyscall(T syscallArg, Types... args) {
+  // we have to do C-style casting here to support all types
+  // of arguments passed onto syscalls
+  return syscall((intptr_t)syscallArg, (intptr_t)args...);
+}
+
 inline int PASSFLOAT(const float &f) noexcept {
   floatint_t fi;
   fi.f = f;

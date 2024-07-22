@@ -24,8 +24,6 @@
 
 #pragma once
 
-#include "q_shared.h"
-
 #if defined(__linux__) || defined(__APPLE__)
   #define FN_PUBLIC __attribute__((visibility("default")))
 #elif defined(_WIN32)
@@ -37,10 +35,3 @@
 
 static constexpr intptr_t VM_CALL_END = -1337;
 #define SystemCall(...) ExpandSyscall(__VA_ARGS__, VM_CALL_END)
-
-template <typename T, typename... Types>
-static intptr_t ExpandSyscall(T syscallArg, Types... args) {
-  // we have to do C-style casting here to support all types
-  // of arguments passed onto syscalls
-  return syscall((intptr_t)syscallArg, (intptr_t)args...);
-}
