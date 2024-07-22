@@ -10,10 +10,12 @@ static intptr_t(QDECL *syscall)(intptr_t arg,
     #pragma export on
   #endif
 #endif
+
 extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
                                                                ...)) {
   syscall = syscallptr;
 }
+
 #if defined(__MACOS__)
   #ifndef __GNUC__
     #pragma export off

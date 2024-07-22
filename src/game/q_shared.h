@@ -106,10 +106,11 @@
   #include <float.h>
   #include <cstdlib>
   #include <string>
+  #include <cstdint>
 
 #endif
 
-#include "etj_public.h"
+#include "etj_syscalls.h"
 
 #ifdef _WIN32
 
@@ -1915,14 +1916,5 @@ typedef enum {
 
 constexpr int MAX_TIMERUN_CHECKPOINTS = 16;
 constexpr int TIMERUN_CHECKPOINT_NOT_SET = -1;
-
-/**
- * @def VM_CALL_END
- *
- * @brief This should be something like INT_MAX but that would need limits.h
- * everywhere so meh and negative values should be somewhat safe
- */
-#define VM_CALL_END -1337
-#define SystemCall(...) syscall(__VA_ARGS__, VM_CALL_END)
 
 #endif // __Q_SHARED_H
