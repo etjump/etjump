@@ -1535,7 +1535,7 @@ void G_UseEntity(gentity_t *ent, gentity_t *other, gentity_t *activator);
 qboolean G_IsWeaponDisabled(gentity_t *ent, weapon_t weapon);
 void G_TeamCommand(team_t team, char *cmd);
 void G_KillBox(gentity_t *ent);
-gentity_t *G_Find(gentity_t *from, int fieldofs, const char *match);
+gentity_t *G_Find(gentity_t *from, size_t fieldofs, const char *match);
 gentity_t *G_FindByTargetname(gentity_t *from, const char *match);
 gentity_t *G_FindByTargetnameFast(gentity_t *from, const char *match, int hash);
 gentity_t *G_PickTarget(char *targetname);
@@ -1883,7 +1883,7 @@ void Props_Chair_Skyboxtouch(gentity_t *ent);
 extern level_locals_t level;
 extern gentity_t g_entities[]; // DAJ was explicit set to MAX_ENTITIES
 
-#define FOFS(x) (int(((intptr_t) & (((gentity_t *)0)->x))))
+#define FOFS(x) (offsetof(gentity_t, x))
 
 extern vmCvar_t g_gametype;
 
