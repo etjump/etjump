@@ -32,3 +32,6 @@
 #else
   #error "Unsupported compiler"
 #endif
+
+static constexpr intptr_t VM_CALL_END = -1337;
+#define SystemCall(...) ExpandSyscall(__VA_ARGS__, VM_CALL_END)

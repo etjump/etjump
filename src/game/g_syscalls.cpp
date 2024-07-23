@@ -13,15 +13,24 @@ static intptr_t(QDECL *syscall)(intptr_t arg,
     #pragma export on
   #endif
 #endif
+
 extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
                                                                ...)) {
   syscall = syscallptr;
 }
+
 #if defined(__MACOS__)
   #ifndef __GNUC__
     #pragma export off
   #endif
 #endif
+
+template <typename T, typename... Types>
+static intptr_t ExpandSyscall(T syscallArg, Types... args) {
+  // we have to do C-style casting here to support all types
+  // of arguments passed onto syscalls
+  return syscall((intptr_t)syscallArg, (intptr_t)args...);
+}
 
 inline int PASSFLOAT(const float &f) noexcept {
   floatint_t fi;
