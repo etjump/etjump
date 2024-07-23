@@ -62,11 +62,9 @@ function(create_compiler_opts target)
 			-ggdb3>)			# generate gdb friendly debug info
 
 	# MSVC flags
-	# link time optimizations disabled for now, possibly due to MSVC 2019-specific bug
-	
-	# set(MSVC_LINK_FLAGS 
-	# 	$<$<CONFIG:Release>:
-	# 		/LTCG>) # perform link time optimizations
+	set(MSVC_LINK_FLAGS 
+		$<$<CONFIG:Release>:
+			/LTCG>) # perform link time optimizations
 
 	set(MSVC_CXX_FLAGS
 		/wd4068                # ignore GCC pragmas
@@ -78,7 +76,7 @@ function(create_compiler_opts target)
 		$<$<CONFIG:Release>:
 			/MT                # use static runtime
 			/O2                # max optimizations
-			# /GL                # full exe/dll optimization
+			/GL                # full exe/dll optimization
 			/Gy                # generate useful information for optimizer
 			/Ob2               # let compiler inline freely
 			/fp:fast>          # fast floating point math
