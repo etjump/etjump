@@ -163,6 +163,9 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
       if (ent->eFlags & EF_FAKEBMODEL && ent->eType != ET_PLAYER) {
         VectorCopy(ent->origin2, bmins);
         VectorCopy(ent->angles2, bmaxs);
+      } else if (ent->eType == ET_BEAM_2) {
+        VectorCopy(ent->origin2, bmins);
+        VectorCopy(ent->angles, bmaxs);
       } else {
         // encoded bbox
         x = (ent->solid & 255);
@@ -175,8 +178,6 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
         bmaxs[2] = zu;
       }
 
-      // cmodel = trap_CM_TempCapsuleModel( bmins, bmaxs
-      // );
       cmodel = trap_CM_TempBoxModel(bmins, bmaxs);
 
       VectorCopy(vec3_origin, angles);
