@@ -3073,9 +3073,8 @@ void SP_func_fakebrush(gentity_t *ent) {
   // prediction
   VectorCopy(ent->r.mins, ent->s.origin2);
   VectorCopy(ent->r.maxs, ent->s.angles2);
-  ent->s.eFlags |= EF_FAKEBMODEL;
 
-  ent->s.eType = ET_GENERAL;
+  ent->s.eType = ET_FAKEBRUSH;
 
   trap_LinkEntity(ent);
 }

@@ -731,7 +731,7 @@ constexpr int EF_VOTED = 0x00004000;                           // already cast a
 constexpr int EF_TAGCONNECT = 0x00008000;                      // connected to another entity via tag;
 constexpr int EF_MOUNTEDTANK = EF_TAGCONNECT;                  // Gordon: duplicated for clarity
 
-constexpr int EF_FAKEBMODEL = 0x00010000;  // Gordon: freed
+constexpr int EF_SPARE5 = 0x00010000;      // Gordon: freed
 constexpr int EF_PATH_LINK = 0x00020000;   // Gordon: linking trains together
 constexpr int EF_ZOOMING = 0x00040000;     // client is zooming;
 constexpr int EF_PRONE = 0x00080000;       // player is prone
@@ -759,9 +759,8 @@ constexpr int EF_SPARE4 = 0x80000000;        // unused
 constexpr int EF_PLAYER_UNUSED1 = EF_NONSOLID_BMODEL; // used only on entities
 constexpr int EF_PLAYER_UNUSED2 = EF_SMOKING;         // player never gets this flag, only ent/weapon
 constexpr int EF_PLAYER_UNUSED3 = EF_SMOKINGBLACK;    // player never gets this flag, only ent/weapon
-constexpr int EF_PLAYER_UNUSED4 = EF_FAKEBMODEL;      // used only on entities
-constexpr int EF_PLAYER_UNUSED5 = EF_PATH_LINK;       // used only on entities
-constexpr int EF_PLAYER_UNUSED6 = EF_SPARE0;          // used only on entities
+constexpr int EF_PLAYER_UNUSED4 = EF_PATH_LINK;       // used only on entities
+constexpr int EF_PLAYER_UNUSED5 = EF_SPARE0;          // used only on entities
 // clang-format on
 
 #define BG_PlayerMounted(eFlags)                                               \
@@ -1672,7 +1671,7 @@ qboolean BG_IsAkimboWeapon(int weaponNum);
 qboolean BG_IsAkimboSideArm(int weaponNum, playerState_t *ps);
 int BG_AkimboSidearm(int weaponNum);
 
-#define ITEM_INDEX(x) ((x)-bg_itemlist)
+#define ITEM_INDEX(x) ((x) - bg_itemlist)
 
 qboolean BG_CanItemBeGrabbed(const entityState_t *ent, const playerState_t *ps,
                              int *skill, int teamNum);
@@ -2719,9 +2718,9 @@ enum class HeavyWeaponState {
 };
 
 enum class ViewlockState {
-  Jitter = 2,      // screen jitter (firing mounted MG42)
-  Mounted = 3,     // lock to direction of mounted gun
-  Medic = 7,       // look at nearest medic
+  Jitter = 2,  // screen jitter (firing mounted MG42)
+  Mounted = 3, // lock to direction of mounted gun
+  Medic = 7,   // look at nearest medic
 };
 } // namespace ETJump
 

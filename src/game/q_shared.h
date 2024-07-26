@@ -1664,6 +1664,8 @@ typedef enum {
 
   ET_TELEPORT_TRIGGER_CLIENT, // client side predicted teleport
 
+  ET_FAKEBRUSH, // func_fakebrush
+
   ET_EVENTS, // any of the EV_* events can be added freestanding
              // by setting eType to ET_EVENTS + eventNum
              // this avoids having to set eFlags and eventNum
