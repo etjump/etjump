@@ -33,7 +33,7 @@ function(create_compiler_opts target)
 			-O3					# max optimization
 			-ffast-math>		# fast floating point math
 		$<$<CONFIG:Debug>:
-			-Og					# supress optimizations
+			-O0					# suppress optimizations
 			-g3					# generate debug info
 			-ggdb3>)			# generate gdb friendly debug info
 
@@ -57,7 +57,7 @@ function(create_compiler_opts target)
 			-flto				# link time optimizations
 			-ffast-math>		# fast floating point math
 		$<$<CONFIG:Debug>:
-			-Og					# supress optimizations
+			-O0					# suppress optimizations
 			-g3					# generate debug info
 			-ggdb3>)			# generate gdb friendly debug info
 
