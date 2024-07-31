@@ -771,7 +771,7 @@ void ClientEvents(gentity_t *ent, int oldEventSequence) {
       default:
         break;
     } // switch case
-  }   // event loop
+  } // event loop
 
   // Feen: CrashLand fix
 
@@ -1113,7 +1113,7 @@ void ClientThink_real(gentity_t *ent) {
           clientNum, "^3WARNING: ^7Timerun stopped due to high ping!");
       InterruptRun(ent);
     }
-    if (client->pers.maxFPS < 25) {
+    if (client->pers.maxFPS > 0 && client->pers.maxFPS < 25) {
       Printer::SendCenterMessage(
           clientNum, "^3WARNING: ^7Timerun stopped due to low FPS!");
       InterruptRun(ent);
