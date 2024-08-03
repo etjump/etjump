@@ -777,6 +777,21 @@ gfx/2d/noclip_on
 }
 
 ////////////////
+// Shove Icon
+////////////////
+
+gfx/2d/shoveicon
+{
+	noPicMip
+	noMipMaps
+	{
+		map gfx/2d/shoveicon.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+
+////////////////
 // Stopwatch Icon
 ////////////////
 

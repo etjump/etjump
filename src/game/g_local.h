@@ -998,6 +998,7 @@ struct gclient_s {
   bool setoffsetThisLife;
   bool pmoveOffThisLife;
   bool ftNoGhostThisLife;
+  bool ftShoveThisLife;
 
   int lastCmdTime; // level.time of last usercmd_t, for EF_CONNECTION
                    // we can't just use pers.lastCommand.time, because
@@ -1143,6 +1144,11 @@ struct gclient_s {
   bool forceRename;
 
   int lastRevivePushTime;
+
+  // client is holding down '+activate'
+  // used to disallow multiple shoves by holding down +activate
+  bool activateHeld;
+  int shoveTime;
 };
 
 typedef struct {
@@ -1399,6 +1405,7 @@ typedef struct {
   bool noDrop;
   bool noWallbug;
   bool noFTNoGhost;
+  bool noFTShove;
 
   int portalEnabled; // Feen: PGM - Enabled/Disabled by map key
   qboolean portalSurfaces;
@@ -2865,6 +2872,7 @@ enum class TimerunSpawnflags {
   NoPortalgunPickup = 64,
   NoSave = 128,
   AllowFTNoGhost = 256,
+  AllowFTShove = 512,
 };
 
 bool checkCheatCvars(gclient_s *client, int flags);
