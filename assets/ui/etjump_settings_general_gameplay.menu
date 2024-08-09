@@ -57,7 +57,7 @@ menuDef {
         YESNO               (SETTINGS_ITEM_POS(10), "Optimized prediction:", 0.2, SETTINGS_ITEM_H, "etj_optimizePrediction", "Enable optimized playerstate prediction to improve client side prediction performance\netj_optimizePrediction")
         YESNO               (SETTINGS_ITEM_POS(11), "No panzer autoswitch:", 0.2, SETTINGS_ITEM_H, "etj_noPanzerAutoswitch", "Disable automatic weapon switching after firing a panzerfaust\netj_noPanzerAutoswitch")
         YESNO               (SETTINGS_ITEM_POS(12), "Portalgun auto binds:", 0.2, SETTINGS_ITEM_H, "etj_autoPortalBinds", "Automatically set 'weapalt' bindings to '+attack2' and back when switching to/from portalgun\netj_autoPortalBinds")
-        NUMERICFIELD_EXT    (SETTINGS_EF_POS(13), "Auto switch weapons:", 0.2, SETTINGS_ITEM_H, "cg_autoswitch", 1, "Automatically switch weapon when picking up a new one (bitflag)\n0 = disabled\n1 = enabled\n2 = don't autoswitch unless replacing current weapon\n4 = don't autoswitch to portal gun\ncg_autoswitch")
+        COMBO_BIT           (SETTINGS_COMBO_POS(13), "Auto switch weapons:", 0.2, SETTINGS_ITEM_H, "cg_autoswitch", cvarFloatList { "Enabled" 1 "If replacing current" 2 "No portalgun autoswitch" 4 }, none, "Automatically switch weapon when picking up a new one\ncg_autoswitch")
 
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
