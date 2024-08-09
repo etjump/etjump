@@ -56,7 +56,7 @@ menuDef {
         CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_accelY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(3), "Accel meter Y:", 0.2, SETTINGS_ITEM_H, etj_accelY 340 0 480 10, "Sets Y position of acceleration meter\netj_accelY")
         MULTI               (SETTINGS_ITEM_POS(4), "Accel meter size:", 0.2, SETTINGS_ITEM_H, "etj_accelSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of acceleration meter\netj_accelSize")
-        MULTI               (SETTINGS_ITEM_POS(5), "Accel meter color:", 0.2, SETTINGS_ITEM_H, "etj_accelColor", COLOR_LIST, "Sets color of acceleration meter\netj_accelColor")
+        COMBO               (SETTINGS_COMBO_POS(5), "Accel meter color:", 0.2, SETTINGS_ITEM_H, "etj_accelColor", COLOR_LIST, none, "Sets color of acceleration meter\netj_accelColor")
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(6), "etj_accelAlpha", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(6), "Accel meter alpha:", 0.2, SETTINGS_ITEM_H, etj_accelAlpha 1.0 0 1 0.05, "Sets transparency of acceleration meter\netj_speedAlpha")
         MULTI               (SETTINGS_ITEM_POS(7), "Accel based color:", 0.2, SETTINGS_ITEM_H, "etj_accelColorUsesAccel", cvarFloatList { "Off" 0 "Simple" 1 "Advanced" 2 }, "Color acceleration meter based on accel/decel\nNote: advanced coloring is disabled on spec/demo playback\netj_accelColorUsesAccel")

@@ -100,7 +100,8 @@
 #define ASSET_CHECKBOX_CHECK_NOT "ui/assets/check_not.tga"
 #define ASSET_CHECKBOX_CHECK_NO "ui/assets/check_no.tga"
 
-#define SCROLLBAR_SIZE 16.0
+constexpr float SCROLLBAR_SIZE = 16.0f;
+constexpr float SCROLLBAR_SIZE_COMBO = 10.0f;
 #define SLIDER_WIDTH 96.0
 #define SLIDER_HEIGHT 10.0 // 16.0
 #define SLIDER_THUMB_WIDTH 12.0
@@ -234,6 +235,18 @@ typedef struct modelDef_s {
   int frameTime;
 } modelDef_t;
 
+struct comboDef_t {
+  rectDef_t rect;
+  int maxItems;
+  // this is an int just to ease parsing (is this a bitflag selection dropdown?)
+  int bitflag;
+  // also int for parsing reasons (should we draw this bottom to top?)
+  int reversed;
+  int startPos;
+  bool scrollbar;
+  float height; // height of the dropdown part of the menu
+};
+
 #define CVAR_ENABLE 0x00000001
 #define CVAR_DISABLE 0x00000002
 #define CVAR_SHOW 0x00000004
@@ -320,6 +333,7 @@ typedef struct itemDef_s {
   const char *hOffset;
   const char *yOffset;
 
+  comboDef_t comboData;
 } itemDef_t;
 
 typedef struct {
