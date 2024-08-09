@@ -3002,7 +3002,7 @@ static float getComboThumbPosition(itemDef_t *item, const rectDef_t *rect) {
 }
 
 static void comboHandleScroll(itemDef_t *item, const int8_t direction,
-                              const u_int8_t amount) {
+                              const uint8_t amount) {
   if (direction == DIRECTION_UP) {
     item->comboData.startPos -= amount;
 
