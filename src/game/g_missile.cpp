@@ -975,26 +975,23 @@ int G_PredictMissile(gentity_t *ent, int duration, vec3_t endPos,
 //=============================================================================
 
 // copied from cg_flamethrower.c
-#define FLAME_START_SIZE 1.0
-#define FLAME_START_MAX_SIZE                                                   \
-  100.0 // when the flame is spawned, it should endevour to reach this
-        // size
-#define FLAME_START_SPEED 1200.0 // speed of flame as it leaves the nozzle
-#define FLAME_MIN_SPEED 60.0
+static constexpr float FLAME_START_SIZE = 1.0f;
+// when the flame is spawned, it should endeavour to reach this
+static constexpr float FLAME_START_MAX_SIZE = 100.0f;
+// speed of flame as it leaves the nozzle
+static constexpr float FLAME_START_SPEED = 1200.0f;
+static constexpr float FLAME_MIN_SPEED = 60.0f;
 
 // these are calculated (don't change)
-#define FLAME_LENGTH                                                           \
-  (FLAMETHROWER_RANGE + 50.0) // NOTE: only modify the range, since this
-                              // should always reflect that range
+// NOTE: only modify the range, since this should always reflect that range
+static constexpr int FLAME_LENGTH = FLAMETHROWER_RANGE * 50;
 
-#define FLAME_LIFETIME                                                         \
-  (int)((FLAME_LENGTH / FLAME_START_SPEED) *                                   \
-        1000) // life duration in milliseconds
-#define FLAME_FRICTION_PER_SEC (2.0f * FLAME_START_SPEED)
-#define GET_FLAME_SIZE_SPEED(x)                                                \
-  (((float)x / FLAME_LIFETIME) / 0.3) // x is the current sizeMax
-
-#define FLAME_THRESHOLD 50
+// life duration in milliseconds
+static constexpr int FLAME_LIFETIME =
+    static_cast<int>((FLAME_LENGTH / FLAME_START_SPEED) * 1000);
+static constexpr float FLAME_FRICTION_PER_SEC = 2.0f * FLAME_START_SPEED;
+// x is the current sizeMax
+#define GET_FLAME_SIZE_SPEED(x) ((static_cast<float>(x) / FLAME_LIFETIME) / 0.3)
 
 void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
   int i;
@@ -1063,17 +1060,19 @@ void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
 
   // Non-clients that take damage get damaged here
   if (!body->client) {
-    if (body->health > 0) {
+    if (body->health > 0 &&
+        level.time + FRAMETIME >= body->lastBurnedFrametime) {
       G_Damage(body, self->parent, self->parent, vec3_origin,
                self->r.currentOrigin, 2, 0, MOD_FLAMETHROWER);
+      body->lastBurnedFrametime = level.time;
     }
     return;
   }
 
   // JPW NERVE -- do a trace to see if there's a wall btwn. body & flame
   // centroid -- prevents damage through walls
-  trap_Trace(&tr, self->r.currentOrigin, NULL, NULL, point, body->s.number,
-             MASK_SHOT);
+  trap_Trace(&tr, self->r.currentOrigin, nullptr, nullptr, point,
+             body->s.number, MASK_SHOT);
   if (tr.fraction < 1.0) {
     return;
   }
@@ -1082,14 +1081,14 @@ void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
   // now check the damageQuota to see if we should play a pain animation
   // first reduce the current damageQuota with time
   if (body->flameQuotaTime && body->flameQuota > 0) {
-    body->flameQuota -=
-        (int)(((float)(level.time - body->flameQuotaTime) / 1000) * 2.5f);
+    body->flameQuota -= static_cast<int>(
+        (static_cast<float>(level.time - body->flameQuotaTime) / 1000) * 2.5f);
     if (body->flameQuota < 0) {
       body->flameQuota = 0;
     }
   }
 
-  G_BurnMeGood(self, body);
+  G_BurnMeGood(self, body, directhit);
 }
 
 void G_FlameDamage(gentity_t *self, gentity_t *ignoreent) {
@@ -1100,8 +1099,8 @@ void G_FlameDamage(gentity_t *self, gentity_t *ignoreent) {
   vec3_t mins, maxs;
 
   radius = self->speed;
-  boxradius =
-      1.41421356 * radius; // radius * sqrt(2) for bounding box enlargement
+  // radius * sqrt(2) for bounding box enlargement
+  boxradius = 1.41421356f * radius;
 
   for (i = 0; i < 3; i++) {
     mins[i] = self->r.currentOrigin[i] - boxradius;
@@ -1144,8 +1143,8 @@ void G_RunFlamechunk(gentity_t *ent) {
   if (level.time - ent->timestamp <= MISSILE_PRESTEP_TIME) {
     speed = FLAME_START_SPEED;
   } else if (level.time - ent->timestamp <= ent->s.pos.trDuration) {
-    speed -= deltaTime * static_cast<float>(FLAME_FRICTION_PER_SEC);
-    speed = std::max(speed, static_cast<float>(FLAME_MIN_SPEED));
+    speed -= deltaTime * FLAME_FRICTION_PER_SEC;
+    speed = std::max(speed, FLAME_MIN_SPEED);
 
     VectorScale(vel, speed, ent->s.pos.trDelta);
   }
@@ -1169,7 +1168,7 @@ void G_RunFlamechunk(gentity_t *ent) {
     VectorMA(vel, -2 * dot, tr.plane.normal, vel);
     VectorNormalize(vel);
     speed *= 0.5f * (0.25f + 0.75f * ((dot + 1.0f) * 0.5f));
-    speed = std::max(speed, static_cast<float>(FLAME_MIN_SPEED));
+    speed = std::max(speed, FLAME_MIN_SPEED);
 
     VectorScale(vel, speed, ent->s.pos.trDelta);
 
@@ -1184,8 +1183,10 @@ void G_RunFlamechunk(gentity_t *ent) {
   }
 
   // Do damage to nearby entities, every 100ms
+  // gate the calls here too instead of only at G_BurnMeGood to avoid
+  // tracing entities in box every frame
   if (ent->flameQuotaTime <= level.time) {
-    ent->flameQuotaTime = level.time + 100;
+    ent->flameQuotaTime = level.time + FRAMETIME;
     G_FlameDamage(ent, ignoreent);
   }
 
@@ -1208,7 +1209,8 @@ void G_RunFlamechunk(gentity_t *ent) {
 
   // Adjust the size
   if (ent->speed < FLAME_START_MAX_SIZE) {
-    ent->speed += 10.f;
+    ent->speed +=
+        10.f * (static_cast<float>(level.frameTime) / DEFAULT_SV_FRAMETIME);
 
     if (ent->speed > FLAME_START_MAX_SIZE) {
       ent->speed = FLAME_START_MAX_SIZE;
@@ -1216,10 +1218,8 @@ void G_RunFlamechunk(gentity_t *ent) {
   }
 
   // Remove after 2 seconds
-  if (level.time - ent->timestamp >
-      (FLAME_LIFETIME - 150)) // JPW NERVE increased to 350 from 250 to
-                              // match visuals better
-  {
+  // JPW NERVE increased to 350 from 250 to match visuals better
+  if (level.time - ent->timestamp > (FLAME_LIFETIME - 150)) {
     G_FreeEntity(ent);
     return;
   }
@@ -1247,8 +1247,11 @@ gentity_t *fire_flamechunk(gentity_t *self, const vec3_t start, vec3_t dir) {
   bolt = G_Spawn();
   bolt->classname = "flamechunk";
 
+  // always generate chunks at 100ms intervals to prevent tap-firing causing
+  // potentially massive dps increase due to different chunks burning
+  // at non-100ms intervals
+  bolt->flameQuotaTime = (level.time + FRAMETIME) - (level.time % FRAMETIME);
   bolt->timestamp = level.time;
-  bolt->flameQuotaTime = level.time + 50;
   bolt->s.eType = ET_FLAMETHROWER_CHUNK;
   bolt->r.svFlags = SVF_NOCLIENT;
   bolt->s.weapon = self->s.weapon;
