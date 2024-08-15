@@ -613,7 +613,6 @@ float AngleNormalize180(float angle) {
   return angle;
 }
 
-
 /*
 =================
 AngleNormalize90
@@ -625,8 +624,7 @@ float AngleNormalize90(float angle) {
   angle = AngleNormalize180(angle);
   if (angle >= 90.0) {
     angle -= 180.0;
-  }
-  else if (angle < 0) {
+  } else if (angle < 0) {
     angle = 90 + angle;
   }
   return angle;
@@ -1549,14 +1547,14 @@ void AxisToAngles(vec3_t axis[3], vec3_t angles) {
   angles[ROLL] = -roll_angles[PITCH];
 }
 
-float VectorDistance(vec3_t v1, vec3_t v2) {
+float VectorDistance(const vec3_t v1, const vec3_t v2) {
   vec3_t dir;
 
   VectorSubtract(v2, v1, dir);
   return VectorLength(dir);
 }
 
-float VectorDistanceSquared(vec3_t v1, vec3_t v2) {
+float VectorDistanceSquared(const vec3_t v1, const vec3_t v2) {
   vec3_t dir;
 
   VectorSubtract(v2, v1, dir);
