@@ -1242,8 +1242,8 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
     trap_PC_AddGlobalDefine("FUI");
   }
 
-  if (uiInfo.legacyClient) {
-    trap_PC_AddGlobalDefine("LEGACY");
+  if (uiInfo.etLegacyClient) {
+    trap_PC_AddGlobalDefine("ETLEGACY");
   }
 
   handle = trap_PC_LoadSource(menuFile);
@@ -6781,7 +6781,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
     uiInfo.uiDC.bias = 0;
   }
 
-  MOD_CHECK_LEGACY(legacyClient, clientVersion, uiInfo.legacyClient);
+  MOD_CHECK_ETLEGACY(legacyClient, clientVersion, uiInfo.etLegacyClient);
 
   // UI_Load();
   uiInfo.uiDC.registerShaderNoMip = &trap_R_RegisterShaderNoMip;
