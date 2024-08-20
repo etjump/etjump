@@ -209,11 +209,14 @@ void PlayerBBox::setupBBoxExtents(centity_t *cent, BBox &box) {
 bool PlayerBBox::bottomOnly(const int &pType) {
   switch (static_cast<PlayerType>(pType)) {
     case PlayerType::Self:
-      return etj_playerBBoxBottomOnlySelf.integer;
+      return etj_playerBBoxBottomOnly.integer &
+             static_cast<int>(DrawFlags::Self);
     case PlayerType::Other:
-      return etj_playerBBoxBottomOnlyOther.integer;
+      return etj_playerBBoxBottomOnly.integer &
+             static_cast<int>(DrawFlags::Others);
     case PlayerType::Fireteam:
-      return etj_playerBBoxBottomOnlyFireteam.integer;
+      return etj_playerBBoxBottomOnly.integer &
+             static_cast<int>(DrawFlags::Fireteam);
     default: // shouldn't happen
       return false;
   }
