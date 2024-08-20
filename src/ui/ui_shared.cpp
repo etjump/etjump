@@ -2900,7 +2900,7 @@ const char *Item_Multi_Setting(itemDef_t *item) {
 
   if (multiPtr) {
     if (item->comboData.bitflag) {
-      return va("%.0f", DC->getCVarValue(item->cvar));
+      return va("%i", static_cast<int>(DC->getCVarValue(item->cvar)));
     } else if (multiPtr->strDef) {
       DC->getCVarString(item->cvar, buff, sizeof(buff));
     } else {
