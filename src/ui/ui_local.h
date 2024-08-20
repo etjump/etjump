@@ -782,7 +782,7 @@ typedef struct {
 enum class FileSystemObjectType { Item, Folder };
 
 struct FileSystemObjectInfo {
-  FileSystemObjectInfo() : type(FileSystemObjectType::Item), name(""){};
+  FileSystemObjectInfo() : type(FileSystemObjectType::Item), name("") {};
   FileSystemObjectType type;
   std::string name;
   std::string displayName;
@@ -899,7 +899,7 @@ typedef struct {
   fontInfo_t loadscreenfont1;
   fontInfo_t loadscreenfont2;
 
-  int legacyClient;
+  int etLegacyClient;
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;
