@@ -58,6 +58,9 @@ menuDef {
         YESNO               (SETTINGS_ITEM_POS(11), "No panzer autoswitch:", 0.2, SETTINGS_ITEM_H, "etj_noPanzerAutoswitch", "Disable automatic weapon switching after firing a panzerfaust\netj_noPanzerAutoswitch")
         YESNO               (SETTINGS_ITEM_POS(12), "Portalgun auto binds:", 0.2, SETTINGS_ITEM_H, "etj_autoPortalBinds", "Automatically set 'weapalt' bindings to '+attack2' and back when switching to/from portalgun\netj_autoPortalBinds")
         COMBO_BIT           (SETTINGS_COMBO_POS(13), "Auto switch weapons:", 0.2, SETTINGS_ITEM_H, "cg_autoswitch", cvarFloatList { "Enabled" 1 "If replacing current" 2 "No portalgun autoswitch" 4 }, none, "Automatically switch weapon when picking up a new one\ncg_autoswitch")
+        YESNO               (SETTINGS_ITEM_POS(14), "Auto spectate:", 0.2, SETTINGS_ITEM_H, "etj_autoSpec", "Automatically spectate next player when idling in free spec\netj_autoSpec")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(15), "etj_autoSpecDelay", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(15), "Auto spectate delay:", 0.2, SETTINGS_ITEM_H, etj_autoSpecDelay 10000 1000 30000 1000, "How long to stay idle for before automatically following next player\netj_autoSpecDelay")
 
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
