@@ -106,6 +106,7 @@
 	loadMenu { "ui/etjump_settings_hud2_jumpspeeds.menu" }
 	loadMenu { "ui/etjump_settings_hud2_strafequality.menu" }
 	loadMenu { "ui/etjump_settings_hud2_upmove.menu" }
+	loadMenu { "ui/etjump_settings_hud2_yaw.menu" }
 
 	loadMenu { "ui/etjump_settings_audio.menu" }
 
