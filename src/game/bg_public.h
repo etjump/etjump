@@ -1756,8 +1756,7 @@ gitem_t *BG_ValidStatWeapon(weapon_t weap);
 weapon_t BG_WeaponForMOD(int MOD);
 
 qboolean BG_WeaponInWolfMP(int weapon);
-qboolean BG_PlayerTouchesItem(playerState_t *ps, entityState_t *item,
-                              int atTime);
+bool BG_PlayerTouchesItem(playerState_t *ps, entityState_t *item, int atTime);
 int BG_GrenadesForClass(int cls, int *skills);
 weapon_t BG_GrenadeTypeForTeam(team_t team);
 
