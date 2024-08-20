@@ -2760,9 +2760,7 @@ extern vmCvar_t etj_drawPlayerBBox;
 extern vmCvar_t etj_playerBBoxColorSelf;
 extern vmCvar_t etj_playerBBoxColorOther;
 extern vmCvar_t etj_playerBBoxColorFireteam;
-extern vmCvar_t etj_playerBBoxBottomOnlySelf;
-extern vmCvar_t etj_playerBBoxBottomOnlyOther;
-extern vmCvar_t etj_playerBBoxBottomOnlyFireteam;
+extern vmCvar_t etj_playerBBoxBottomOnly;
 extern vmCvar_t etj_playerBBoxShader;
 
 //
