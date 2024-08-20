@@ -140,10 +140,11 @@ static constexpr int MG42_HEAT_RECOVERY = 2000;
 #define AAGUN_RATE_OF_FIRE 100
 #define MG42_YAWSPEED 300.f // degrees per second
 
-#define SAY_ALL 0
-#define SAY_TEAM 1
-#define SAY_BUDDY 2
-#define SAY_TEAMNL 3
+static constexpr int SAY_ALL = 0;
+static constexpr int SAY_TEAM = 1;
+static constexpr int SAY_BUDDY = 2;
+static constexpr int SAY_TEAMNL = 3;
+static constexpr int SAY_ADMIN = 4;
 
 // RF, client damage identifiers
 

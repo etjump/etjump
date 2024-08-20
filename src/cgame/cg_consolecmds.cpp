@@ -484,6 +484,11 @@ static void CG_BuddyVoiceChat_f(void) {
                              CG_BuildSelectedFirteamString(), chatCmd));
 }
 
+static constexpr int MSGTYPE_ALL = 1;
+static constexpr int MSGTYPE_TEAM = 2;
+static constexpr int MSGTYPE_BUDDY = 3;
+static constexpr int MSGTYPE_ADMIN = 4;
+
 // ydnar: say, team say, etc
 static void CG_MessageMode_f(void) {
   char cmd[64];
@@ -497,7 +502,7 @@ static void CG_MessageMode_f(void) {
 
   // team say
   if (!Q_stricmp(cmd, "messagemode2")) {
-    trap_Cvar_Set("cg_messageType", "2");
+    trap_Cvar_Set("cg_messageType", std::to_string(MSGTYPE_TEAM).c_str());
   }
   // fireteam say
   else if (!Q_stricmp(cmd, "messagemode3")) {
@@ -505,11 +510,15 @@ static void CG_MessageMode_f(void) {
       return;
     }
 
-    trap_Cvar_Set("cg_messageType", "3");
+    trap_Cvar_Set("cg_messageType", std::to_string(MSGTYPE_BUDDY).c_str());
+  }
+  // admin say
+  else if (!Q_stricmp(cmd, "adminChat")) {
+    trap_Cvar_Set("cg_messageType", std::to_string(MSGTYPE_ADMIN).c_str());
   }
   // (normal) say
   else {
-    trap_Cvar_Set("cg_messageType", "1");
+    trap_Cvar_Set("cg_messageType", std::to_string(MSGTYPE_ALL).c_str());
   }
 
   // clear the chat text
@@ -543,21 +552,23 @@ static void CG_MessageSend_f(void) {
 
   CG_EncodeQP(messageText, messageTextEncoded, sizeof(messageTextEncoded));
 
-  // team say
-  if (messageType == 2) {
-    trap_SendConsoleCommand(va("enc_say_team \"%s\"\n", messageTextEncoded));
-  }
-  // fireteam say
-  else if (messageType == 3) {
-    if (!CG_IsOnFireteam(cg.clientNum)) {
-      return;
-    }
+  switch (messageType) {
+    case MSGTYPE_TEAM:
+      trap_SendConsoleCommand(va("enc_say_team \"%s\"\n", messageTextEncoded));
+      break;
+    case MSGTYPE_BUDDY:
+      if (!CG_IsOnFireteam(cg.clientNum)) {
+        return;
+      }
 
-    trap_SendConsoleCommand(va("enc_say_buddy \"%s\"\n", messageTextEncoded));
-  }
-  // normal say
-  else {
-    trap_SendConsoleCommand(va("enc_say \"%s\"\n", messageTextEncoded));
+      trap_SendConsoleCommand(va("enc_say_buddy \"%s\"\n", messageTextEncoded));
+      break;
+    case MSGTYPE_ADMIN:
+      trap_SendConsoleCommand(va("enc_say_admin \"%s\"\n", messageTextEncoded));
+      break;
+    default:
+      trap_SendConsoleCommand(va("enc_say \"%s\"\n", messageTextEncoded));
+      break;
   }
 }
 
@@ -1226,6 +1237,7 @@ static const consoleCommand_t noDemoCommands[] = {
     {"messageMode", CG_MessageMode_f},
     {"messageMode2", CG_MessageMode_f},
     {"messageMode3", CG_MessageMode_f},
+    {"adminChat", CG_MessageMode_f},
     {"messageSend", CG_MessageSend_f},
 
     {"openlimbomenu", CG_LimboMenu_f},
@@ -1440,6 +1452,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("say_teamnl");
   trap_AddCommand("say_team");
   trap_AddCommand("say_buddy");
+  trap_AddCommand("say_admin");
   trap_AddCommand("scores");
   trap_AddCommand("specinvite");
   trap_AddCommand("specuninvite");
@@ -1534,6 +1547,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("enc_say");
   trap_AddCommand("enc_say_team");
   trap_AddCommand("enc_say_buddy");
+  trap_AddCommand("enc_say_admin");
 
   trap_AddCommand("generateCustomvotes");
   trap_AddCommand("readCustomvotes");
