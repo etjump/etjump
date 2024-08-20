@@ -236,6 +236,8 @@ typedef struct modelDef_s {
 } modelDef_t;
 
 struct comboDef_t {
+  // note: rect height is NOT the dropdown height, it's merely the height of
+  // the actual dropdown entry, comboData.height contains the dropdown height
   rectDef_t rect;
   int maxItems;
   // this is an int just to ease parsing (is this a bitflag selection dropdown?)
