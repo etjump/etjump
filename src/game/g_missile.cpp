@@ -984,7 +984,7 @@ static constexpr float FLAME_MIN_SPEED = 60.0f;
 
 // these are calculated (don't change)
 // NOTE: only modify the range, since this should always reflect that range
-static constexpr int FLAME_LENGTH = FLAMETHROWER_RANGE * 50;
+static constexpr int FLAME_LENGTH = FLAMETHROWER_RANGE + 50;
 
 // life duration in milliseconds
 static constexpr int FLAME_LIFETIME =
