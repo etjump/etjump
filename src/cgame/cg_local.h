@@ -2765,6 +2765,9 @@ extern vmCvar_t etj_playerBBoxBottomOnlyOther;
 extern vmCvar_t etj_playerBBoxBottomOnlyFireteam;
 extern vmCvar_t etj_playerBBoxShader;
 
+extern vmCvar_t etj_autoSpec;
+extern vmCvar_t etj_autoSpecDelay;
+
 //
 // cg_main.c
 //
