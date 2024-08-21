@@ -616,7 +616,9 @@ bool Ban(gentity_t *ent, Arguments argv) {
       return false;
     }
 
-    expires = static_cast<unsigned>(t) + expires;
+    if (expires != 0) {
+      expires = static_cast<unsigned>(t) + expires;
+    }
   }
 
   if (argv->size() >= 4) {
