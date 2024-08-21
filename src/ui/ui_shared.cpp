@@ -10,6 +10,7 @@
 #include "ui_local.h" // For CS settings/retrieval
 
 #include "../game/etj_numeric_utilities.h"
+#include "../game/etj_string_utilities.h"
 
 #define SCROLL_TIME_START 500
 #define SCROLL_TIME_ADJUST 150
@@ -2918,11 +2919,27 @@ const char *Item_Multi_Setting(itemDef_t *item) {
         }
       }
     }
+
     if (multiPtr->undefinedStr) {
       return multiPtr->undefinedStr;
     }
+
     if (multiPtr->count == 0) {
       return "None Defined";
+    }
+
+    if (multiPtr->strDef) {
+      return va("Custom (%s)", buff);
+    } else {
+      std::string val = std::to_string(DC->getCVarValue(item->cvar));
+      ETJump::StringUtil::removeTrailingChars(val, '0');
+
+      // also strip trailing . if the value is just an integer
+      if (val.back() == '.') {
+        val.pop_back();
+      }
+
+      return va("Custom (%s)", val.c_str());
     }
   }
 

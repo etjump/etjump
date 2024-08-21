@@ -318,3 +318,13 @@ bool ETJump::StringUtil::iEqual(const std::string &str1,
 unsigned ETJump::StringUtil::countExtraPadding(const std::string &input) {
   return input.length() - sanitize(input).length();
 }
+
+void ETJump::StringUtil::removeTrailingChars(std::string &str,
+                                             const char charToRemove) {
+  str.erase(str.find_last_not_of(charToRemove) + 1, std::string::npos);
+}
+
+void ETJump::StringUtil::removeLeadingChars(std::string &str,
+                                            const char charToRemove) {
+  str.erase(0, std::min(str.find_first_not_of(charToRemove), str.size() - 1));
+}
