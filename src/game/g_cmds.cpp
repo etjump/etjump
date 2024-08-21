@@ -2043,7 +2043,8 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
       break;
     case SAY_ADMIN:
       G_LogPrintf("sayadmin: %s: %s\n", ent->client->pers.netname, chatText);
-      Com_sprintf(name, sizeof(name), "[%s^7]: ", ent->client->pers.netname);
+      Com_sprintf(name, sizeof(name),
+                  "^A> ^7%s^7: ", ent->client->pers.netname);
       color = COLOR_LTORANGE;
   }
 
