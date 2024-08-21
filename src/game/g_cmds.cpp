@@ -4974,7 +4974,7 @@ void ClientCommand(int clientNum) {
   }
 
   enc = !Q_stricmp(cmd, "enc_say_admin") ? qtrue : qfalse;
-  if (!Q_stricmp(cmd, "say_admin") || enc) {
+  if (!Q_stricmp(cmd, "say_admin") || !Q_stricmp(cmd, "ma") || enc) {
     if (!g_adminChat.integer) {
       Printer::SendChatMessage(clientNum,
                                "Adminchat is disabled on this server.");

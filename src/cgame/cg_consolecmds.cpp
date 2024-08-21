@@ -1453,6 +1453,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("say_team");
   trap_AddCommand("say_buddy");
   trap_AddCommand("say_admin");
+  trap_AddCommand("ma"); // message-admin
   trap_AddCommand("scores");
   trap_AddCommand("specinvite");
   trap_AddCommand("specuninvite");
