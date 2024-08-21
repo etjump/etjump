@@ -349,7 +349,7 @@ bool Database::ListBans(gentity_t *ent, int page) {
     if (printed == BANS_PER_PAGE) {
       break;
     }
-    BufferPrint(ent, va("%d %s ^7%s %s %s %s\n", bans_[i]->id,
+    BufferPrint(ent, va("%d %s ^7%s %s ^7%s %s\n", bans_[i]->id,
                         bans_[i]->name.c_str(), bans_[i]->banDate.c_str(),
                         bans_[i]->bannedBy.c_str(),
                         bans_[i]->expires != 0
