@@ -900,6 +900,7 @@ typedef struct {
   fontInfo_t loadscreenfont2;
 
   int etLegacyClient;
+  bool eteClient;
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;
