@@ -107,5 +107,9 @@ bool iEqual(const std::string &str1, const std::string &str2,
 // Counts the extra padding needed when using format specifiers like
 // %-20s with text that contains ET color codes
 unsigned countExtraPadding(const std::string &input);
+
+void removeTrailingChars(std::string &str, char charToRemove);
+void removeLeadingChars(std::string &str, char charToRemove);
+
 } // namespace StringUtil
 } // namespace ETJump
