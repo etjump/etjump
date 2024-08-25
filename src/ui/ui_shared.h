@@ -357,8 +357,9 @@ typedef struct {
   int openTime;          // ydnar: time menu opened
   const char *onTimeout; // ydnar: run when menu times out
 
-  const char *onKey[255]; // NERVE - SMF - execs commands when a key is pressed
-  const char *soundName;  // background loop sound for menu
+  // NERVE - SMF - execs commands when a key is pressed
+  const char *onKey[K_MAX_KEYS];
+  const char *soundName; // background loop sound for menu
 
   vec4_t focusColor;               // focus color for items
   vec4_t disableColor;             // focus color for items

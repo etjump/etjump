@@ -4067,7 +4067,7 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
   if (!menu->itemHotkeyMode) {
     // END - TAT 9/16/2002
 
-    if (key > 0 && key <= 255 && menu->onKey[key]) {
+    if (key > 0 && key < K_MAX_KEYS && menu->onKey[key]) {
       itemDef_t it;
       it.parent = menu;
       Item_RunScript(&it, nullptr, menu->onKey[key]);
@@ -4075,7 +4075,7 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
     }
 
     // START - TAT 9/16/2002
-  } else if (key > 0 && key <= 255) {
+  } else if (key > 0 && key < K_MAX_KEYS) {
     itemDef_t *it;
 
     // we're using the item hotkey mode, so we want to loop
