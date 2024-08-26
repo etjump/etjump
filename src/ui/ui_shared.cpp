@@ -2929,15 +2929,32 @@ const char *Item_Multi_Setting(itemDef_t *item) {
     }
 
     if (multiPtr->strDef) {
-      return va("Custom (%s)", buff);
+      // if a string is empty or a hex color, return as-is
+      if (buff[0] == '\0' || ETJump::StringUtil::startsWith(buff, "#") ||
+          ETJump::StringUtil::startsWith(buff, "0x")) {
+        return va("Custom (%s)", buff);
+      }
+
+      std::vector<std::string> splits = ETJump::StringUtil::split(buff, " ");
+
+      // at this point, we might still have nonsense strings such as
+      // 'aaa.00.0000aaa.555' or some other stupid stuff, so ensure the
+      // all the strings are actually proper ints or floats
+      for (const auto &split : splits) {
+        if (split.find_first_not_of(".0123456789") != std::string::npos) {
+          return va("Custom (%s)", buff);
+        }
+      }
+
+      for (auto &split : splits) {
+        split = ETJump::StringUtil::normalizeNumberString(split);
+      }
+
+      const std::string &val = ETJump::StringUtil::join(splits, " ");
+      return va("Custom (%s)", val.c_str());
     } else {
       std::string val = std::to_string(DC->getCVarValue(item->cvar));
-      ETJump::StringUtil::removeTrailingChars(val, '0');
-
-      // also strip trailing . if the value is just an integer
-      if (val.back() == '.') {
-        val.pop_back();
-      }
+      val = ETJump::StringUtil::normalizeNumberString(val);
 
       return va("Custom (%s)", val.c_str());
     }
