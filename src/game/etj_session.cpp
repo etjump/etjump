@@ -368,6 +368,22 @@ int Session::GetId(int clientNum) const {
   return clients_[clientNum].user->id;
 }
 
+gentity_t *Session::gentityFromId(unsigned id) {
+  if (!UserExists(id)) {
+    return nullptr;
+  }
+
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    const int clientNum = level.sortedClients[i];
+
+    if (GetId(clientNum) == id) {
+      return g_entities + clientNum;
+    }
+  }
+
+  return nullptr;
+}
+
 int Session::GetLevel(gentity_t *ent) const {
   int num = ClientNum(ent);
   if (ent && clients_[num].user) {

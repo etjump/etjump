@@ -62,6 +62,7 @@ public:
   int GetLevel(gentity_t *ent) const;
   int GetId(gentity_t *ent) const;
   int GetId(int clientNum) const;
+  gentity_t *gentityFromId(unsigned id);
   bool SetLevel(gentity_t *target, int level);
   bool SetLevel(int id, int level);
   int GetLevelById(unsigned id) const;
