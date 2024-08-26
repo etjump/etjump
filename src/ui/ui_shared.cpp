@@ -2940,7 +2940,7 @@ const char *Item_Multi_Setting(itemDef_t *item) {
       // at this point, we might still have nonsense strings such as
       // 'aaa.00.0000aaa.555' or some other stupid stuff, so ensure the
       // all the strings are actually proper ints or floats
-      for (auto &split : splits) {
+      for (const auto &split : splits) {
         if (split.find_first_not_of(".0123456789") != std::string::npos) {
           return va("Custom (%s)", buff);
         }
