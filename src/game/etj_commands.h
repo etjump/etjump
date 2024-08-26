@@ -50,4 +50,34 @@ private:
                 char>>::const_iterator AdminCommandsIterator;
 };
 
+namespace CommandFlags {
+// Silent command execution via '/' flag
+// Not listed here because it's not a command in itself
+
+const char BAN = 'b';
+// For everyone
+const char BASIC = 'a';
+const char CANCELVOTE = 'C';
+// const char EBALL       = '8';
+const char EDIT = 'A';
+const char FINGER = 'f';
+// const char HELP        = 'h';
+const char KICK = 'k';
+const char LISTBANS = 'L';
+const char LISTPLAYERS = 'l';
+const char MAP = 'M';
+const char MUTE = 'm';
+const char NOCLIP = 'N';
+const char PASSVOTE = 'P';
+// const char READCONFIG  = 'G';
+const char RENAME = 'R';
+const char RESTART = 'r';
+const char TOKENS = 'V';
+const char SETLEVEL = 's';
+const char MOVERSCALE = 'v';
+const char TIMERUN_MANAGEMENT = 'T';
+const char CUSTOMVOTES = 'c';
+const char ADMINCHAT = 'S';
+} // namespace CommandFlags
+
 #endif

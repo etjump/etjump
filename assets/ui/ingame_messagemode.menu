@@ -126,9 +126,9 @@ menuDef
 		textaligny		8								
 		forecolor		.6 .6 .6 1										
 		cvar			"cg_messageType"										
-		cvarFloatList   { "All" 1 "Team" 2 "Fireteam" 3 }													
+		cvarFloatList   { "All" 1 "Team" 2 "Fireteam" 3 "Admin" 4 }
 		visible			1												
-		tooltip			"Select the desitnation for your text (all, team or fire-team)"
+		tooltip			"Select the desitnation for your text (all, team, fireteam or admin)"
 		yOffset         "ui_mtOffset"					
 																		
 		mouseEnter {													

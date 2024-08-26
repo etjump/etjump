@@ -262,6 +262,8 @@ vmCvar_t g_autoRtv;
 vmCvar_t g_rtvMapCount;
 vmCvar_t vote_minRtvDuration;
 
+vmCvar_t g_adminChat;
+
 // ETLegacy server browser integration
 // os support - this SERVERINFO cvar specifies supported client operating
 // systems on server
@@ -510,6 +512,8 @@ cvarTable_t gameCvarTable[] = {
     {&g_autoRtv, "g_autoRtv", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
     {&vote_minRtvDuration, "vote_minRtvDuration", "15000", CVAR_ARCHIVE},
     {&g_rtvMapCount, "g_rtvMapCount", "5", CVAR_ARCHIVE},
+
+    {&g_adminChat, "g_adminChat", "1", CVAR_ARCHIVE},
 };
 
 // bk001129 - made static to avoid aliasing
