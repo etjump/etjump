@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
 
 #include "etj_string_utilities.h"
 
@@ -317,6 +318,26 @@ bool ETJump::StringUtil::iEqual(const std::string &str1,
 
 unsigned ETJump::StringUtil::countExtraPadding(const std::string &input) {
   return input.length() - sanitize(input).length();
+}
+
+std::string
+ETJump::StringUtil::normalizeNumberString(const std::string &input) {
+  double number = std::stod(input);
+
+  std::ostringstream oss;
+  oss << std::setprecision(10) << std::fixed << number;
+  std::string result = oss.str();
+
+  if (result.find('.') != std::string::npos) {
+    removeTrailingChars(result, '0');
+
+    // remove trailing dot if the result is just an integer
+    if (result.back() == '.') {
+      result.pop_back();
+    }
+  }
+
+  return result;
 }
 
 void ETJump::StringUtil::removeTrailingChars(std::string &str,
