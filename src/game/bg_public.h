@@ -2324,7 +2324,7 @@ qboolean PC_Float_Parse(int handle, float *f);
 // for boolean parsing where the value must be explicitly set via int
 // can be used for both bool and qboolean values
 template <typename T>
-qboolean PC_Bool_Parse(int handle, T *value) {
+qboolean PC_Boolean_Parse(int handle, T *value) {
   int temp;
 
   if (!PC_Int_Parse(handle, &temp)) {
