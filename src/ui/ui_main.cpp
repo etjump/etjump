@@ -28,32 +28,31 @@ namespace ETJump {
 std::unique_ptr<ColorPicker> colorPicker;
 
 static void initColorPicker() {
-  ETJump::colorPicker = std::make_unique<ETJump::ColorPicker>();
+  colorPicker = std::make_unique<ColorPicker>();
 
-  uiInfo.uiDC.updateSliderState =
-      [p = ETJump::colorPicker.get()](itemDef_t *item) {
-        p->updateSliderState(item);
-      };
+  uiInfo.uiDC.updateSliderState = [p = colorPicker.get()](itemDef_t *item) {
+    p->updateSliderState(item);
+  };
 
   uiInfo.uiDC.cvarToColorPickerState =
-      [p = ETJump::colorPicker.get()](const std::string &cvar) {
+      [p = colorPicker.get()](const std::string &cvar) {
         p->cvarToColorPickerState(cvar);
       };
 
-  uiInfo.uiDC.resetColorPickerState = [p = ETJump::colorPicker.get()] {
+  uiInfo.uiDC.resetColorPickerState = [p = colorPicker.get()] {
     p->resetColorPickerState();
   };
 
   uiInfo.uiDC.colorPickerDragFunc =
-      [p = ETJump::colorPicker.get()](itemDef_t *item, const float cursorX,
-                                      const float cursorY, const int key) {
+      [p = colorPicker.get()](itemDef_t *item, const float cursorX,
+                              const float cursorY, const int key) {
         p->colorPickerDragFunc(item, cursorX, cursorY, key);
       };
 
-  uiInfo.uiDC.getColorSliderString = &ETJump::ColorPicker::getColorSliderString;
-  uiInfo.uiDC.setColorSliderType = &ETJump::ColorPicker::setColorSliderType;
-  uiInfo.uiDC.getColorSliderValue = &ETJump::ColorPicker::getColorSliderValue;
-  uiInfo.uiDC.setColorSliderValue = &ETJump::ColorPicker::setColorSliderValue;
+  uiInfo.uiDC.getColorSliderString = &ColorPicker::getColorSliderString;
+  uiInfo.uiDC.setColorSliderType = &ColorPicker::setColorSliderType;
+  uiInfo.uiDC.getColorSliderValue = &ColorPicker::getColorSliderValue;
+  uiInfo.uiDC.setColorSliderValue = &ColorPicker::setColorSliderValue;
 }
 
 } // namespace ETJump
