@@ -9211,7 +9211,7 @@ void BG_HSVtoRGB(const vec4_t hsv, vec4_t rgb, bool normalize) {
 
   // intermediate variables
   float C = V * S; // chroma
-  float X = C * (1 - std::fabsf(std::fmodf(H / 60.0f, 2) - 1));
+  float X = C * (1 - std::fabs(std::fmod(H / 60.0f, 2.0f) - 1));
   float m = V - C;
 
   float r_temp, g_temp, b_temp;
@@ -9275,7 +9275,7 @@ void BG_RGBtoHSV(const vec4_t rgb, vec4_t hsv) {
   if (delta == 0) {
     H = 0; // Hue is undefined for grayscale colors
   } else if (max == R) {
-    H = 60.0f * std::fmodf(((G - B) / delta), 6);
+    H = 60.0f * std::fmod(((G - B) / delta), 6.0f);
   } else if (max == G) {
     H = 60.0f * (((B - R) / delta) + 2);
   } else { // max == B
