@@ -240,10 +240,8 @@ struct comboDef_t {
   // the actual dropdown entry, comboData.height contains the dropdown height
   rectDef_t rect;
   int maxItems;
-  // this is an int just to ease parsing (is this a bitflag selection dropdown?)
-  int bitflag;
-  // also int for parsing reasons (should we draw this bottom to top?)
-  int reversed;
+  bool bitflag;  // is this a bitflag selection dropdown?
+  bool reversed; // should we draw this bottom to top?
   int startPos;
   bool scrollbar;
   float height; // height of the dropdown part of the menu
