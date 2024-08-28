@@ -255,7 +255,7 @@
     bordercolor       .1 .1 .1 .5                                              \
     tooltip           COMBO_TOOLTIP                                            \
     combomaxitems     $evalfloat(COMBO_MAX_ITEMS)                              \
-    combobitflag      1                                                        \
+    combobitflag                                                               \
     comboreversed     COMBO_REVERSED                                           \
                                                                                \
     mouseEnter {                                                               \

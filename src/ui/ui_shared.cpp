@@ -7594,11 +7594,12 @@ qboolean ItemParse_combo_maxItems(itemDef_t *item, int handle) {
 }
 
 qboolean ItemParse_combo_bitflag(itemDef_t *item, int handle) {
-  return PC_Int_Parse(handle, &item->comboData.bitflag);
+  item->comboData.bitflag = true;
+  return qtrue;
 }
 
 qboolean ItemParse_combo_reversed(itemDef_t *item, int handle) {
-  return PC_Int_Parse(handle, &item->comboData.reversed);
+  return PC_Boolean_Parse(handle, &item->comboData.reversed);
 }
 
 keywordHash_t itemParseKeywords[] = {

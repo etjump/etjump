@@ -2321,6 +2321,20 @@ qboolean PC_Color_Parse(int handle, vec4_t *c);
 qboolean PC_Vec_Parse(int handle, vec3_t *c);
 qboolean PC_Float_Parse(int handle, float *f);
 
+// for boolean parsing where the value must be explicitly set via int
+// can be used for both bool and qboolean values
+template <typename T>
+qboolean PC_Boolean_Parse(int handle, T *value) {
+  int temp;
+
+  if (!PC_Int_Parse(handle, &temp)) {
+    return qfalse;
+  }
+
+  *value = static_cast<T>(temp);
+  return qtrue;
+}
+
 typedef enum {
   UIMENU_NONE,
   UIMENU_MAIN,
