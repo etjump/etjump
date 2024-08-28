@@ -3669,7 +3669,8 @@ void Item_StartCapture(itemDef_t *item, int key) {
       break;
     }
     case ITEM_TYPE_OWNERDRAW:
-      if (item->window.ownerDraw == UI_COLOR_PICKER) {
+      if (item->window.ownerDraw == UI_COLOR_PICKER &&
+          item->window.flags & WINDOW_MOUSEOVER) {
         ETJump::colorPickerStartCapture(item, key);
       }
 
