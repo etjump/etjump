@@ -23,13 +23,14 @@ menuDef {
     fadeAmount  0.075
 
     onOpen {
+        setEditFocus "efleftConfig name:";
         setitemcolor emptyNameLabel forecolor 0.6 0 0 0 ;
         setitemcolor background backcolor 0 0 0 0 ;
         fadein background
 
         conditionalscript ui_writeconfig_name 1
             ( "clearcvar ui_writeconfig_name ; abort" )
-            ( "clearfocus" )
+            ( "none" )
     }
 
     onESC {
