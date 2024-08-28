@@ -2322,6 +2322,7 @@ qboolean PC_Vec_Parse(int handle, vec3_t *c);
 qboolean PC_Float_Parse(int handle, float *f);
 
 // for boolean parsing where the value must be explicitly set via int
+// can be used for both bool and qboolean values
 template <typename T>
 qboolean PC_Bool_Parse(int handle, T *value) {
   int temp;
@@ -2330,7 +2331,7 @@ qboolean PC_Bool_Parse(int handle, T *value) {
     return qfalse;
   }
 
-  *value = static_cast<qboolean>(temp);
+  *value = static_cast<T>(temp);
   return qtrue;
 }
 
