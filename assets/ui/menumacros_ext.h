@@ -402,7 +402,7 @@
     rect          $evalfloat(OCOLORPICKER_PREVIEW_X)                           \
                   $evalfloat(COLORPICKER_PREVIEW_Y)                            \
                   $evalfloat(COLORPICKER_PREVIEW_W)                            \
-                        $evalfloat(COLORPICKER_PREVIEW_H)                      \
+                  $evalfloat(COLORPICKER_PREVIEW_H)                            \
     type          ITEM_TYPE_OWNERDRAW                                          \
     ownerdraw     COLORPICKER_PREVIEW_OWNERNUM                                 \
     textfont      UI_FONT_COURBD_21                                            \
