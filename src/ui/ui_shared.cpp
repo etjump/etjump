@@ -6422,8 +6422,9 @@ void Menu_Paint(menuDef_t *menu, qboolean forcePaint) {
     if (menu->items[i]->window.flags & WINDOW_MOUSEOVER) {
       item = menu->items[i];
 
+      // skip expanded dropdowns here
       if (!((menu->items[i]->window.flags & WINDOW_HASFOCUS) &&
-            g_editingField)) {
+            g_editingField && menu->items[i]->type == ITEM_TYPE_COMBO)) {
         Item_Paint(menu->items[i]);
       }
     } else {
@@ -6431,7 +6432,11 @@ void Menu_Paint(menuDef_t *menu, qboolean forcePaint) {
     }
   }
 
-  if (item && (item->window.flags & WINDOW_HASFOCUS) && g_editingField) {
+  // now draw expanded dropdown so it draws over other items
+  // make sure g_editingField is true too, so we draw tooltip for non-expanded
+  // dropdown menus (we don't want to draw it if the menu is expanded)
+  if (item && (item->window.flags & WINDOW_HASFOCUS) && g_editingField &&
+      item->type == ITEM_TYPE_COMBO) {
     Item_Paint(item);
   } else if (DC->getCVarValue("ui_showtooltips") != 0 && item != nullptr &&
              item->toolTipData != nullptr &&
