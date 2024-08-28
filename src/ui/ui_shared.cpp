@@ -6312,23 +6312,7 @@ void Menu_HandleMouseMove(menuDef_t *menu, float x, float y) {
     return;
   }
 
-  if (itemCapture) {
-    if (itemCapture->type == ITEM_TYPE_LISTBOX) {
-      // NERVE - SMF - lose capture if out of client
-      // rect
-      if (!Rect_ContainsPoint(&itemCapture->window.rect, x, y)) {
-        Item_StopCapture(itemCapture);
-        itemCapture = NULL;
-        captureFunc = NULL;
-        captureData = NULL;
-      }
-    }
-    // Item_MouseMove(itemCapture, x, y);
-
-    return;
-  }
-
-  if (g_waitingForKey || g_editingField) {
+  if (itemCapture || g_waitingForKey || g_editingField) {
     return;
   }
 
