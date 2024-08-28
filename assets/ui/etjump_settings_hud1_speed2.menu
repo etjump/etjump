@@ -62,7 +62,7 @@ menuDef {
         CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_speedY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(4), "Speed meter Y:", 0.2, SETTINGS_ITEM_H, etj_speedY 320 0 480 10, "Sets Y position of ETJump speed meter\netj_speedY")
         MULTI               (SETTINGS_ITEM_POS(5), "Speed meter size:", 0.2, SETTINGS_ITEM_H, "etj_speedSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of ETJump speed meter\netj_speedSize")
-        COMBO               (SETTINGS_COMBO_POS(6), "Speed meter color:", 0.2, SETTINGS_ITEM_H, "etj_speedColor", COLOR_LIST, none, "Sets color of ETJump speed meter\netj_speedColor")
+        COMBO               (SETTINGS_COMBO_POS(6), "Speed meter color:", 0.2, SETTINGS_ITEM_H, "etj_speedColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of ETJump speed meter\netj_speedColor")
         MULTI               (SETTINGS_ITEM_POS(7), "Accel-based color:", 0.2, SETTINGS_ITEM_H, "etj_speedColorUsesAccel", cvarFloatList { "Off" 0 "Simple" 1 "Advanced" 2 }, "Color ETJump speed meter based on accel/decel\nNote: advanced coloring is disabled on spec/demo playback\netj_speedColorUsesAccel")
         YESNO               (SETTINGS_ITEM_POS(8), "Speed meter shadow:", 0.2, SETTINGS_ITEM_H, "etj_speedShadow", "Draw shadow on ETJump speed meter\netj_speedShadow")
         MULTI               (SETTINGS_ITEM_POS(9), "Speed meter align:", 0.2, SETTINGS_ITEM_H, "etj_speedAlign", cvarFloatList { "Center" 0 "Left" 1 "Right" 2 }, "Sets alignment of ETJump speed meter\netj_speedAlign")

@@ -48,7 +48,7 @@ menuDef {
         SLIDER              (SETTINGS_ITEM_POS(2), "Run timer X:", 0.2, SETTINGS_ITEM_H, etj_runTimerX 320 0 640 10, "Sets X position of timerun timer\netj_runTimerX")
         CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_runTimerY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(3), "Run timer Y:", 0.2, SETTINGS_ITEM_H, etj_runTimerY 360 0 480 10, "Sets Y position of timerun timer\netj_runTimerY")
-        COMBO               (SETTINGS_COMBO_POS(4), "Run timer inactive color:", 0.2, SETTINGS_ITEM_H, "etj_runTimerInactiveColor", COLOR_LIST, none, "Sets color of timerun timer when not running\netj_runTimerInactiveColor")
+        COMBO               (SETTINGS_COMBO_POS(4), "Run timer inactive color:", 0.2, SETTINGS_ITEM_H, "etj_runTimerInactiveColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of timerun timer when not running\netj_runTimerInactiveColor")
         YESNO               (SETTINGS_ITEM_POS(5), "Run timer shadow:", 0.2, SETTINGS_ITEM_H, "etj_runTimerShadow", "Draw shadow on timerun timer\netj_runTimerShadow")
         YESNO               (SETTINGS_ITEM_POS(6), "Auto hide:", 0.2, SETTINGS_ITEM_H, "etj_runTimerAutoHide", "Automatically hide timerun timer if not running\netj_runTimerAutoHide")
 

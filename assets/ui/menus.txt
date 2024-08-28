@@ -116,4 +116,5 @@
 	loadMenu { "ui/etjump_settings_demos_playback.menu" }
 
 	loadMenu { "ui/etjump_settings_popup_writeconfig.menu" }
+	loadMenu { "ui/etjump_settings_popup_colorpicker.menu" }
 }

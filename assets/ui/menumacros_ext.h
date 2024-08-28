@@ -277,3 +277,139 @@
       play "sound/menu/filter.wav" ;                                           \
     }                                                                          \
   }
+
+// a slider that adjusts HSV/RGB/A values, used in color picker
+#define SLIDER_COLOR( SLIDER_X, SLIDER_Y, SLIDER_W, SLIDER_H, SLIDER_TEXT,     \
+                      SLIDER_TEXT_SCALE, SLIDER_TEXT_ALIGN_Y,                  \
+                      SLIDER_COLORVAR, SLIDER_TOOLTIP )                        \
+                                                                               \
+  itemDef {                                                                    \
+    name          "sliderColor"##SLIDER_TEXT                                   \
+    group         GROUP_NAME                                                   \
+    rect          $evalfloat(SLIDER_X) $evalfloat(SLIDER_Y)                    \
+                  $evalfloat(SLIDER_W) $evalfloat(SLIDER_H)                    \
+    type          ITEM_TYPE_SLIDER                                             \
+    text          SLIDER_TEXT                                                  \
+    textfont      UI_FONT_COURBD_21                                            \
+    textstyle     ITEM_TEXTSTYLE_SHADOWED                                      \
+    textscale     SLIDER_TEXT_SCALE                                            \
+    textalign     ITEM_ALIGN_RIGHT                                             \
+    textalignx    $evalfloat(0.5*(SLIDER_W))                                   \
+    textaligny    SLIDER_TEXT_ALIGN_Y                                          \
+    forecolor     .6 .6 .6 1                                                   \
+    colorVar      SLIDER_COLORVAR                                              \
+    visible       1                                                            \
+    tooltip       SLIDER_TOOLTIP                                               \
+                                                                               \
+    mouseEnter {                                                               \
+      setitemcolor "sliderColor"##SLIDER_TEXT forecolor .9 .9 .9 1 ;           \
+    }                                                                          \
+                                                                               \
+    mouseExit {                                                                \
+      setitemcolor "sliderColor"##SLIDER_TEXT forecolor .6 .6 .6 1 ;           \
+    }                                                                          \
+  }
+
+// displays the color value set by SLIDER_COLOR as int
+#define SLIDERCOLORINTLABEL( LABEL_X, LABEL_Y, LABEL_W, LABEL_H,               \
+                             LABEL_COLORVAR, LABEL_TEXT_SCALE,                 \
+                             LABEL_TEXT_ALIGN, LABEL_TEXT_ALIGN_X,             \
+                             LABEL_TEXT_ALIGN_Y )                              \
+                                                                               \
+  itemDef {                                                                    \
+    name            "sliderLabel"##LABEL_COLORVAR                              \
+    group           GROUP_NAME                                                 \
+    rect            $evalfloat(LABEL_X) $evalfloat(LABEL_Y)                    \
+                    $evalfloat(LABEL_W) $evalfloat(LABEL_H)                    \
+    type            ITEM_TYPE_TEXT                                             \
+    textfont        UI_FONT_COURBD_21                                          \
+    textstyle       ITEM_TEXTSTYLE_SHADOWED                                    \
+    textscale       LABEL_TEXT_SCALE                                           \
+    textalign       LABEL_TEXT_ALIGN                                           \
+    textalignx      LABEL_TEXT_ALIGN_X                                         \
+    textaligny      LABEL_TEXT_ALIGN_Y                                         \
+    forecolor       .6 .6 .6 1                                                 \
+    colorValue      LABEL_COLORVAR                                             \
+    visible         1                                                          \
+    decoration                                                                 \
+    textasint                                                                  \
+  }
+
+// displays the color value set by SLIDER_COLOR as float
+#define SLIDERCOLORFLOATLABEL( LABEL_X, LABEL_Y, LABEL_W, LABEL_H,             \
+                               LABEL_COLORVAR, LABEL_TEXT_SCALE,               \
+                               LABEL_TEXT_ALIGN, LABEL_TEXT_ALIGN_X,           \
+                               LABEL_TEXT_ALIGN_Y )                            \
+                                                                               \
+  itemDef {                                                                    \
+    name            "sliderLabel"##LABEL_COLORVAR                              \
+    group           GROUP_NAME                                                 \
+    rect            $evalfloat(LABEL_X) $evalfloat(LABEL_Y)                    \
+                    $evalfloat(LABEL_W) $evalfloat(LABEL_H)                    \
+    type            ITEM_TYPE_TEXT                                             \
+    textfont        UI_FONT_COURBD_21                                          \
+    textstyle       ITEM_TEXTSTYLE_SHADOWED                                    \
+    textscale       LABEL_TEXT_SCALE                                           \
+    textalign       LABEL_TEXT_ALIGN                                           \
+    textalignx      LABEL_TEXT_ALIGN_X                                         \
+    textaligny      LABEL_TEXT_ALIGN_Y                                         \
+    forecolor       .6 .6 .6 1                                                 \
+    colorValue      LABEL_COLORVAR                                             \
+    visible         1                                                          \
+    decoration                                                                 \
+    textasfloat                                                                \
+  }
+
+// note: this is NOT a decoration so we can grab focus!
+#define COLORPICKER( COLORPICKER_X, COLORPICKER_Y, COLORPICKER_W,              \
+                     COLORPICKER_H, COLORPICKER_NAME, COLORPICKER_OWNERNUM,    \
+                     COLORPICKER_TOOLTIP )                                     \
+                                                                               \
+  itemDef {                                                                    \
+    name          COLORPICKER_NAME                                             \
+    group         GROUP_NAME                                                   \
+    rect          $evalfloat(COLORPICKER_X) $evalfloat(COLORPICKER_Y)          \
+                  $evalfloat(COLORPICKER_W) $evalfloat(COLORPICKER_H)          \
+    type          ITEM_TYPE_OWNERDRAW                                          \
+    ownerdraw     COLORPICKER_OWNERNUM                                         \
+    textfont      UI_FONT_COURBD_21                                            \
+    textscale     .2                                                           \
+    border        WINDOW_BORDER_FULL                                           \
+    bordercolor   .5 .5 .5 .5                                                  \
+    tooltip       COLORPICKER_TOOLTIP                                          \
+    tooltipAbove                                                               \
+    visible       1                                                            \
+                                                                               \
+    mouseEnter {                                                               \
+      setitemcolor COLORPICKER_NAME bordercolor .75 .75 .75 .5                 \
+    }                                                                          \
+                                                                               \
+    mouseExit {                                                                \
+      setitemcolor COLORPICKER_NAME bordercolor .5 .5 .5 .5                    \
+    }                                                                          \
+  }
+
+
+#define COLORPICKER_PREVIEW( OCOLORPICKER_PREVIEW_X, COLORPICKER_PREVIEW_Y,    \
+                             COLORPICKER_PREVIEW_W, COLORPICKER_PREVIEW_H,     \
+                             COLORPICKER_PREVIEW_NAME,                         \
+                             COLORPICKER_PREVIEW_OWNERNUM,                     \
+                             COLORPICKER_PREVIEW_TOOLTIP )                     \
+                                                                               \
+  itemDef {                                                                    \
+    name          COLORPICKER_PREVIEW_NAME                                     \
+    group         GROUP_NAME                                                   \
+    rect          $evalfloat(OCOLORPICKER_PREVIEW_X)                           \
+                  $evalfloat(COLORPICKER_PREVIEW_Y)                            \
+                  $evalfloat(COLORPICKER_PREVIEW_W)                            \
+                        $evalfloat(COLORPICKER_PREVIEW_H)                      \
+    type          ITEM_TYPE_OWNERDRAW                                          \
+    ownerdraw     COLORPICKER_PREVIEW_OWNERNUM                                 \
+    textfont      UI_FONT_COURBD_21                                            \
+    textscale     .2                                                           \
+    border        WINDOW_BORDER_FULL                                           \
+    bordercolor   .5 .5 .5 .5                                                  \
+    tooltip       COLORPICKER_PREVIEW_TOOLTIP                                  \
+    visible       1                                                            \
+    decoration                                                                 \
+  }

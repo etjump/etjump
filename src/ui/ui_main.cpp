@@ -9,8 +9,11 @@ USER INTERFACE MAIN
 */
 
 #include <cmath>
-#include "ui_local.h"
 #include <memory>
+
+#include "ui_local.h"
+#include "etj_colorpicker.h"
+
 #include "../game/etj_string_utilities.h"
 #include "../cgame/etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
@@ -20,6 +23,40 @@ USER INTERFACE MAIN
 #define ALLIES_TEAM 1
 #define SPECT_TEAM 2
 // -NERVE - SMF
+
+namespace ETJump {
+std::unique_ptr<ColorPicker> colorPicker;
+
+static void initColorPicker() {
+  ETJump::colorPicker = std::make_unique<ETJump::ColorPicker>();
+
+  uiInfo.uiDC.updateSliderState =
+      [p = ETJump::colorPicker.get()](itemDef_t *item) {
+        p->updateSliderState(item);
+      };
+
+  uiInfo.uiDC.cvarToColorPickerState =
+      [p = ETJump::colorPicker.get()](const std::string &cvar) {
+        p->cvarToColorPickerState(cvar);
+      };
+
+  uiInfo.uiDC.resetColorPickerState = [p = ETJump::colorPicker.get()] {
+    p->resetColorPickerState();
+  };
+
+  uiInfo.uiDC.colorPickerDragFunc =
+      [p = ETJump::colorPicker.get()](itemDef_t *item, const float cursorX,
+                                      const float cursorY, const int key) {
+        p->colorPickerDragFunc(item, cursorX, cursorY, key);
+      };
+
+  uiInfo.uiDC.getColorSliderString = &ETJump::ColorPicker::getColorSliderString;
+  uiInfo.uiDC.setColorSliderType = &ETJump::ColorPicker::setColorSliderType;
+  uiInfo.uiDC.getColorSliderValue = &ETJump::ColorPicker::getColorSliderValue;
+  uiInfo.uiDC.setColorSliderValue = &ETJump::ColorPicker::setColorSliderValue;
+}
+
+} // namespace ETJump
 
 extern qboolean g_waitingForKey;
 extern qboolean g_editingField;
@@ -350,6 +387,9 @@ void AssetCache() {
       trap_R_RegisterShaderNoMip(ASSET_REPLAY_DIRECTORY);
   uiInfo.uiDC.Assets.replayHome = trap_R_RegisterShaderNoMip(ASSET_REPLAY_HOME);
   uiInfo.uiDC.Assets.replayUp = trap_R_RegisterShaderNoMip(ASSET_REPLAY_UP);
+
+  uiInfo.uiDC.Assets.colorPickerMask =
+      trap_R_RegisterShaderNoMip(ASSET_COLORPICKER_MASK);
 }
 
 void _UI_DrawSides(float x, float y, float w, float h, float size) {
@@ -853,6 +893,7 @@ void UI_ShowPostGame(qboolean newHigh) {
   uiInfo.soundHighScore = newHigh;
   _UI_SetActiveMenu(UIMENU_POSTGAME);
 }
+
 /*
 =================
 _UI_Refresh
@@ -944,6 +985,9 @@ _UI_Shutdown
 */
 void _UI_Shutdown(void) {
   trap_LAN_SaveCachedServers();
+
+  ETJump::colorPicker = nullptr;
+
   Shutdown_Display();
 }
 
@@ -2395,6 +2439,18 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x,
       break;
     case UI_LOADPANEL:
       UI_DrawLoadPanel(qfalse, qtrue, qfalse);
+      break;
+    case UI_COLOR_PICKER:
+      ETJump::ColorPicker::shrinkRectForColorPicker(rect);
+      ETJump::colorPicker->drawColorPicker(&rect);
+      break;
+    case UI_COLOR_PICKER_PREVIEW_OLD:
+      ETJump::ColorPicker::shrinkRectForColorPicker(rect);
+      ETJump::colorPicker->drawPreviewOld(&rect);
+      break;
+    case UI_COLOR_PICKER_PREVIEW_NEW:
+      ETJump::ColorPicker::shrinkRectForColorPicker(rect);
+      ETJump::colorPicker->drawPreviewNew(&rect);
       break;
     default:
       break;
@@ -4858,9 +4914,9 @@ void UI_RunMenuScript(const char **args) {
         }
       } else {
         uiPreviousMenu[0] = '\0';
-        Com_Printf(
-            S_COLOR_YELLOW
-            "WARNING: uiScript 'uiPreviousMenu' called with no arguments\n");
+        Com_Printf(S_COLOR_YELLOW
+                   "WARNING: uiScript '%s' called with no arguments\n",
+                   name);
       }
 
       return;
@@ -4872,6 +4928,11 @@ void UI_RunMenuScript(const char **args) {
       trap_Cvar_VariableStringBuffer("ui_writeconfig_name", buf, sizeof(buf));
       trap_Cmd_ExecuteText(EXEC_NOW, va("writeconfig %s", buf));
 
+      return;
+    }
+
+    if (!Q_stricmp(name, "resetColorPickerState")) {
+      DC->resetColorPickerState();
       return;
     }
 
@@ -6871,6 +6932,8 @@ void _UI_Init(int legacyClient, int clientVersion) {
   uiInfo.uiDC.getHunkData = &trap_GetHunkData;
   uiInfo.uiDC.getConfigString = &trap_GetConfigString;
   uiInfo.uiDC.getActiveFont = &GetActiveFont;
+
+  ETJump::initColorPicker();
 
   Init_Display(&uiInfo.uiDC);
 

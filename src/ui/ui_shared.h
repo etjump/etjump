@@ -3,12 +3,15 @@
 
 #include <vector>
 #include <string>
+#include <functional>
+#include <memory>
 
 #include "../game/q_shared.h"
 #include "../cgame/tr_types.h"
 #include "keycodes.h"
 
 #include "../../assets/ui/menudef.h"
+#include "../../assets/ui/menudef_ext.h"
 
 #define MAX_MENUNAME 32
 #define MAX_ITEMTEXT 64
@@ -100,17 +103,20 @@
 #define ASSET_CHECKBOX_CHECK_NOT "ui/assets/check_not.tga"
 #define ASSET_CHECKBOX_CHECK_NO "ui/assets/check_no.tga"
 
-constexpr float SCROLLBAR_SIZE = 16.0f;
-constexpr float SCROLLBAR_SIZE_COMBO = 10.0f;
-#define SLIDER_WIDTH 96.0
-#define SLIDER_HEIGHT 10.0 // 16.0
-#define SLIDER_THUMB_WIDTH 12.0
-#define SLIDER_THUMB_HEIGHT 12.0 // 20.0
-#define NUM_CROSSHAIRS 17
-
 #define ASSET_REPLAY_DIRECTORY "gfx/2d/directory"
 #define ASSET_REPLAY_HOME "gfx/2d/home"
 #define ASSET_REPLAY_UP "gfx/2d/up"
+
+#define ASSET_COLORPICKER_MASK "gfx/2d/colorpicker_mask"
+
+static constexpr float SCROLLBAR_SIZE = 16.0f;
+static constexpr float SCROLLBAR_SIZE_COMBO = 10.0f;
+static constexpr float SLIDER_WIDTH = 96.0f;
+static constexpr float SLIDER_HEIGHT = 10.0f;
+static constexpr float SLIDER_THUMB_WIDTH = 12.0f;
+static constexpr float SLIDER_THUMB_HEIGHT = 12.0f;
+
+static constexpr int NUM_CROSSHAIRS = 17;
 
 typedef struct scriptDef_s {
   const char *command;
@@ -249,6 +255,11 @@ struct comboDef_t {
   float height; // height of the dropdown part of the menu
 };
 
+struct colorSliderDef_t {
+  const char *colorVar;
+  int colorType; // HSV, RGB, Alpha
+};
+
 #define CVAR_ENABLE 0x00000001
 #define CVAR_DISABLE 0x00000002
 #define CVAR_SHOW 0x00000004
@@ -336,6 +347,9 @@ typedef struct itemDef_s {
   const char *yOffset;
 
   comboDef_t comboData;
+
+  colorSliderDef_t colorSliderData;
+  bool tooltipAbove;
 } itemDef_t;
 
 typedef struct {
@@ -417,6 +431,7 @@ typedef struct {
   qhandle_t replayHome;
   qhandle_t replayUp;
 
+  qhandle_t colorPickerMask;
 } cachedAssets_t;
 
 typedef struct {
@@ -537,6 +552,16 @@ typedef struct {
   qhandle_t gradientImage;
   qhandle_t cursor;
   float FPS;
+
+  std::function<const char *(int)> getColorSliderString;
+  std::function<void(itemDef_t *)> setColorSliderType;
+  std::function<float(const std::string &)> getColorSliderValue;
+  std::function<void(const std::string &, float)> setColorSliderValue;
+  std::function<void(itemDef_t *)> updateSliderState;
+  std::function<void(const std::string &)> cvarToColorPickerState;
+  std::function<void()> resetColorPickerState;
+  std::function<void(itemDef_t *, const float, const float, const int)>
+      colorPickerDragFunc;
 } displayContextDef_t;
 
 const char *String_Alloc(const char *p);
@@ -694,6 +719,9 @@ void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size,
 void AdjustFrom640(float *x, float *y, float *w, float *h);
 void SetupRotatedThing(polyVert_t *verts, vec2_t org, float w, float h,
                        vec_t angle);
+
+void BG_HSVtoRGB(const vec4_t hsv, vec4_t rgb, bool normalize);
+void BG_RGBtoHSV(const vec4_t rgb, vec4_t hsv);
 
 #define SCREEN_WIDTH DC->screenWidth
 #define SCREEN_HEIGHT DC->screenHeight
