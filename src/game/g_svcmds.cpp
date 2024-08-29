@@ -374,6 +374,7 @@ static const char *entityTypeNames[] = {
     "ET_WOLF_OBJECTIVE",
     "ET_VELOCITY_PUSH_TRIGGER",
     "ET_TELEPORT_TRIGGER_CLIENT",
+    "ET_FAKEBRUSH",
     "ET_EVENTS",
 };
 

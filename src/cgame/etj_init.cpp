@@ -63,6 +63,7 @@
 #include "etj_accel_color.h"
 #include "etj_utilities.h"
 #include "etj_player_bbox.h"
+#include "etj_pmove_utils.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -680,6 +681,28 @@ void runFrameEnd() {
         trap_Key_SetBinding(cg.weapAltB2, "weapalt");
         cg.portalgunBindingsAdjusted = false;
       }
+    }
+  }
+
+  // handle autospec feature
+  if (!cg.demoPlayback && etj_autoSpec.integer) {
+    constexpr int minAutoSpecDelay = 1000; // 1s
+    static int lastActivity = -minAutoSpecDelay;
+
+    const auto ps = getValidPlayerState();
+    const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, CMDSCALE_DEFAULT);
+    const auto team = cgs.clientinfo[cg.clientNum].team;
+    const bool moving = (cmd.forwardmove || cmd.rightmove || cmd.forwardmove);
+    const bool following = ps->pm_flags & PMF_FOLLOW;
+
+    if (team != TEAM_SPECTATOR || (!following && moving) ||
+        (following && moving)) {
+      lastActivity = cg.time;
+    } else if (cg.time - lastActivity >=
+               std::max(etj_autoSpecDelay.integer, minAutoSpecDelay)) {
+      // it's time to follow the next player
+      trap_SendClientCommand("follownext");
+      lastActivity = cg.time;
     }
   }
 }

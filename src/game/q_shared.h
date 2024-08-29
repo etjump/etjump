@@ -28,14 +28,10 @@
 
 // #define LOCALIZATION_SUPPORT
 
-#define NEW_ANIMS
-#define MAX_TEAMNAME 32
-
-#define MOD_VERSION_DATA_CHECK(x) (x && x >= 272 && x < 3000)
-#define MOD_CHECK_LEGACY(islegacy, versionNum, outputValue)                    \
-  outputValue = (islegacy == qtrue ? qtrue : qfalse);                          \
-  if (outputValue && MOD_VERSION_DATA_CHECK(versionNum)) {                     \
-    outputValue = versionNum;                                                  \
+#define MOD_CHECK_ETLEGACY(isETLegacy, versionNum, outputValue)                \
+  outputValue = ((isETLegacy) ? true : false);                                 \
+  if (outputValue) {                                                           \
+    (outputValue) = versionNum;                                                \
   }
 
 #if defined _WIN32 && !defined __GNUC__
@@ -678,8 +674,8 @@ void AnglesToAxis(const vec3_t angles, vec3_t axis[3]);
 // TTimo: const vec_t ** would require explicit casts for ANSI C conformance
 // see unix/const-arg.c
 void AxisToAngles(/*const*/ vec3_t axis[3], vec3_t angles);
-float VectorDistance(vec3_t v1, vec3_t v2);
-float VectorDistanceSquared(vec3_t v1, vec3_t v2);
+float VectorDistance(const vec3_t v1, const vec3_t v2);
+float VectorDistanceSquared(const vec3_t v1, const vec3_t v2);
 
 void AxisClear(vec3_t axis[3]);
 void AxisCopy(vec3_t in[3], vec3_t out[3]);
@@ -1663,6 +1659,8 @@ typedef enum {
   ET_VELOCITY_PUSH_TRIGGER, // ETJump
 
   ET_TELEPORT_TRIGGER_CLIENT, // client side predicted teleport
+
+  ET_FAKEBRUSH, // func_fakebrush
 
   ET_EVENTS, // any of the EV_* events can be added freestanding
              // by setting eType to ET_EVENTS + eventNum

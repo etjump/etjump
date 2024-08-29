@@ -11,6 +11,8 @@
 #include "etj_rtv.h"
 #include "etj_utilities.h"
 #include "etj_chat_replay.h"
+#include "etj_session.h"
+#include "etj_commands.h"
 
 namespace ETJump {
 enum class VotingTypes {
@@ -1969,9 +1971,7 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
     return;
   }
 
-  if (mode == SAY_BUDDY) // send only to people who have the sender on
-                         // their buddy list
-  {
+  if (mode == SAY_BUDDY) {
     if (ent->s.clientNum != other->s.clientNum) {
       fireteamData_t *ft1, *ft2;
       if (!G_IsOnFireteam(otherClientNum, &ft1)) {
@@ -1987,9 +1987,12 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
   }
 
   if (encoded) {
-    cmd = mode == SAY_TEAM || mode == SAY_BUDDY ? "enc_tchat" : "enc_chat";
+    cmd = (mode == SAY_TEAM || mode == SAY_BUDDY || mode == SAY_ADMIN)
+              ? "enc_tchat"
+              : "enc_chat";
   } else {
-    cmd = mode == SAY_TEAM || mode == SAY_BUDDY ? "tchat" : "chat";
+    cmd = (mode == SAY_TEAM || mode == SAY_BUDDY || mode == SAY_ADMIN) ? "tchat"
+                                                                       : "chat";
   }
 
   trap_SendServerCommand(otherClientNum,
@@ -2038,6 +2041,11 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
       Com_sprintf(name, sizeof(name), "(%s^7): ", ent->client->pers.netname);
       color = COLOR_CYAN;
       break;
+    case SAY_ADMIN:
+      G_LogPrintf("sayadmin: %s: %s\n", ent->client->pers.netname, chatText);
+      Com_sprintf(name, sizeof(name),
+                  "^A> ^7%s^7: ", ent->client->pers.netname);
+      color = COLOR_LTORANGE;
   }
 
   len = sizeof(text);
@@ -2074,6 +2082,12 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   // send it to all the appropriate clients
   for (j = 0; j < level.numConnectedClients; j++) {
     other = &g_entities[level.sortedClients[j]];
+
+    if (mode == SAY_ADMIN &&
+        !ETJump::session->HasPermission(other, CommandFlags::ADMINCHAT)) {
+      continue;
+    }
+
     if (!COM_BitCheck(other->client->sess.ignoreClients, clientNum)) {
       G_SayTo(ent, other, mode, color, escapedName, printText, localize,
               encoded);
@@ -2092,7 +2106,7 @@ void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded) {
   if (trap_Argc() < 2 && !arg0) {
     return;
   }
-  G_Say(ent, NULL, mode, encoded, ConcatArgs(((arg0) ? 0 : 1)));
+  G_Say(ent, nullptr, mode, encoded, ConcatArgs(((arg0) ? 0 : 1)));
 }
 
 // NERVE - SMF
@@ -4860,7 +4874,7 @@ void ClientCommand(int clientNum) {
   gentity_t *ent;
   char cmd[MAX_TOKEN_CHARS];
   int i;
-  qboolean enc = qfalse; // used for enc_say, enc_say_team, enc_say_buddy
+  qboolean enc = qfalse; // QP-encoded chat commands
   fireteamData_t *ft;
 
   ent = g_entities + clientNum;
@@ -4893,6 +4907,7 @@ void ClientCommand(int clientNum) {
     }
     return;
   }
+
   enc = !Q_stricmp(cmd, "enc_say_team") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "say_team") || enc) {
     if (ClientIsFlooding(ent)) {
@@ -4904,6 +4919,7 @@ void ClientCommand(int clientNum) {
     }
     return;
   }
+
   if (!Q_stricmp(cmd, "vsay")) {
     if (ClientIsFlooding(ent)) {
       CP(va("print \"^1Spam Protection:^7 command %s^7 "
@@ -4914,6 +4930,7 @@ void ClientCommand(int clientNum) {
     }
     return;
   }
+
   if (!Q_stricmp(cmd, "vsay_team")) {
     if (ClientIsFlooding(ent)) {
       CP(va("print \"^1Spam Protection:^7 command %s^7 "
@@ -4940,6 +4957,7 @@ void ClientCommand(int clientNum) {
     }
     return;
   }
+
   if (!Q_stricmp(cmd, "vsay_buddy")) {
     if (!G_IsOnFireteam(clientNum, &ft)) {
       return;
@@ -4951,6 +4969,25 @@ void ClientCommand(int clientNum) {
             cmd));
     } else if (!ent->client->sess.muted) {
       Cmd_Voice_f(ent, SAY_BUDDY, qfalse, qfalse);
+    }
+    return;
+  }
+
+  enc = !Q_stricmp(cmd, "enc_say_admin") ? qtrue : qfalse;
+  if (!Q_stricmp(cmd, "say_admin") || !Q_stricmp(cmd, "ma") || enc) {
+    if (!g_adminChat.integer) {
+      Printer::SendChatMessage(clientNum,
+                               "Adminchat is disabled on this server.");
+    } else if (!ETJump::session->HasPermission(ent, CommandFlags::ADMINCHAT)) {
+      Printer::SendChatMessage(
+          clientNum,
+          "You don't have permission to use adminchat on this server.");
+    } else if (ClientIsFlooding(ent)) {
+      Printer::SendConsoleMessage(
+          clientNum, ETJump::stringFormat(
+                         "^1Spam Protection: ^7command %s ^7ignored\n", cmd));
+    } else if (!ent->client->sess.muted) {
+      Cmd_Say_f(ent, SAY_ADMIN, qfalse, enc);
     }
     return;
   }

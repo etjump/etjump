@@ -160,7 +160,7 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
                             qfalse, cent->currentState.effect2Time);
     } else {
       // see g_misc.c SP_func_fakebrush...
-      if (ent->eFlags & EF_FAKEBMODEL && ent->eType != ET_PLAYER) {
+      if (ent->eType == ET_FAKEBRUSH) {
         VectorCopy(ent->origin2, bmins);
         VectorCopy(ent->angles2, bmaxs);
       } else if (ent->eType == ET_BEAM_2) {

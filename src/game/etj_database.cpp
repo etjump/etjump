@@ -25,6 +25,8 @@
 #include "etj_database.h"
 #include "utilities.hpp"
 #include "etj_string_utilities.h"
+#include "etj_printer.h"
+#include "etj_session.h"
 #include <iostream>
 
 Database::Database() {}
@@ -205,37 +207,41 @@ bool Database::UserExists(std::string const &guid) {
 
 bool Database::UserInfo(gentity_t *ent, int id) {
   auto user = GetUserConst(id);
+  const int clientNum = ClientNum(ent);
 
   if (user == users_.end()) {
-    ChatPrintTo(ent,
-                "^3userinfo: ^7no user found with id " + std::to_string(id));
+    Printer::SendChatMessage(clientNum, "^3userinfo: ^7no user found with id " +
+                                            std::to_string(id));
     return false;
   }
 
-  ChatPrintTo(ent, "^3userinfo: ^7check console for more information.");
-  BeginBufferPrint();
-  // unsigned id;
-  // std::string guid;
+  Printer::SendChatMessage(clientNum,
+                           "^3userinfo: ^7check console for more information.");
 
-  //// non indexed properties
-  // int level;
-  // unsigned lastSeen;
-  // std::string name;
-  // std::string title;
-  // std::string commands;
-  // std::string greeting;
-  // std::vector<std::string> hwids;
-  // unsigned updated;
-  BufferPrint(
-      ent, va("^5ID: ^7%d\n^5GUID: ^7%s\n^5Level: ^7%d\n^5Last seen:^7 "
-              "%s\n^5Name: "
-              "^7%s\n^5Title: ^7%s\n^5Commands: ^7%s\n^5Greeting: ^7%s\n",
-              user->second->id, user->second->guid.c_str(), user->second->level,
-              TimeStampToString(user->second->lastSeen).c_str(),
-              user->second->name.c_str(), user->second->title.c_str(),
-              user->second->commands.c_str(), user->second->greeting.c_str()));
+  std::string ip = "N/A";
+  gentity_t *other = ETJump::session->gentityFromId(id);
 
-  FinishBufferPrint(ent, false);
+  if (other) {
+    std::string ipport = ValueForKey(other, "ip");
+    std::string::size_type pos = ipport.find(':');
+    ip = ipport.substr(0, pos);
+  }
+
+  std::string msg = ETJump::stringFormat(
+      "^5ID: ^7%d\n"
+      "^5GUID: ^7%s\n"
+      "^5IP: ^7%s\n"
+      "^5Level: ^7%d\n"
+      "^5Last seen:^7 %s\n"
+      "^5Name: ^7%s\n"
+      "^5Title: ^7%s\n"
+      "^5Commands: ^7%s\n"
+      "^5Greeting: ^7%s\n",
+      user->second->id, user->second->guid, ip, user->second->level,
+      TimeStampToString(user->second->lastSeen), user->second->name,
+      user->second->title, user->second->commands, user->second->greeting);
+
+  Printer::SendConsoleMessage(clientNum, msg);
   return true;
 }
 
@@ -349,7 +355,7 @@ bool Database::ListBans(gentity_t *ent, int page) {
     if (printed == BANS_PER_PAGE) {
       break;
     }
-    BufferPrint(ent, va("%d %s ^7%s %s %s %s\n", bans_[i]->id,
+    BufferPrint(ent, va("%d %s ^7%s %s ^7%s %s\n", bans_[i]->id,
                         bans_[i]->name.c_str(), bans_[i]->banDate.c_str(),
                         bans_[i]->bannedBy.c_str(),
                         bans_[i]->expires != 0

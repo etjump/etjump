@@ -461,8 +461,7 @@ struct gentity_s {
   int lastHintCheckTime;     // DHM - Nerve
   int voiceChatSquelch;      // DHM - Nerve
   int voiceChatPreviousTime; // DHM - Nerve
-  int lastBurnedFrameNumber; // JPW - Nerve   : to fix FT instant-kill
-                             // exploit
+  int lastBurnedFrametime;   // last server timestamp where burn damage occurred
 
   entState_t entstate;
   char *constages;
@@ -1751,7 +1750,7 @@ void AddIPBan(const char *str);
 // g_weapon.c
 //
 void FireWeapon(gentity_t *ent);
-void G_BurnMeGood(gentity_t *self, gentity_t *body);
+void G_BurnMeGood(gentity_t *self, gentity_t *body, bool directhit);
 
 //
 // IsSilencedWeapon
@@ -2071,6 +2070,8 @@ extern vmCvar_t g_enableVote;
 extern vmCvar_t g_autoRtv;
 extern vmCvar_t g_rtvMapCount;
 extern vmCvar_t vote_minRtvDuration;
+
+extern vmCvar_t g_adminChat;
 
 void trap_Printf(const char *fmt);
 void trap_Error(const char *fmt);

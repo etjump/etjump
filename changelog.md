@@ -7,10 +7,11 @@
   * added `etj_lagometerShader` to toggle displaying the background image or solid color
   * demo playback will now display snapshot delta values as ping in demo playback (ETPro/legacy style)
   * added client/server snapshot rate display to lagometer
-* fixed server side framerate dependencies, the mod should now be fully compatible with higher `sv_fps` values [#1327](https://github.com/etjump/etjump/pull/1327) [#1330](https://github.com/etjump/etjump/pull/1330)
+* fixed server side framerate dependencies, the mod should now be fully compatible with higher `sv_fps` values [#1327](https://github.com/etjump/etjump/pull/1327) [#1330](https://github.com/etjump/etjump/pull/1330) [#1407](https://github.com/etjump/etjump/pull/1407)
   * `wait` key in mapscripts simulates `sv_fps 20` timings
   * disguise stealing speed is normalized to `sv_fps 20`
   * flamethrower firing range is normalized to `sv_fps 20`
+  * flamethrower damage normalized to `sv_fps 20`
   * player pushing when players are stuck in each other is normalized to `sv_fps 20`
   * projectiles entering skyboxes no longer get stuck in skyboxes due to higher trace frequency
 * added support for `private` keyword to `playsound` script actions to allow playing sound only to activator [#1314](https://github.com/etjump/etjump/pull/1314)
@@ -25,6 +26,7 @@
   * server replays 10 latest global chat messages to clients after connecting/map change/`vid_restart`
     * chats are stored on server in `chatreplay.json`
     * timestamps or chat flags are not preserved from original messages
+    * `etj_chatReplay` cvar toggles the replay on client side, any chat messages you send are still included for other players chat replays
 * fixed potential crash on host game menu when over 500 maps were installed [#1343](https://github.com/etjump/etjump/pull/1343)
 * added `trigger_teleport_client` entity to enable client side predicted teleports [#1332](https://github.com/etjump/etjump/pull/1332)
   * supports same keys/spawnflags as other teleport entities, except `spawnflags 4/8`
@@ -55,6 +57,43 @@
     * regular teleports no longer add +1u z offset to destination if this is set
     * relative angle teleports no longer offset destination z origin by distance between player z origin and the trigger origin
 * fixed `SPIN` spawnflag not working on some weapon_ entities, spinning now works correctly in all of them [#1365](https://github.com/etjump/etjump/pull/1365)
+* timerun timer now displays white for tied records and first records (no previous record) [#1367](https://github.com/etjump/etjump/pull/1367)
+* added `spawnflags 4096` to `trigger_multiple` to disable activation while noclipping [#1368](https://github.com/etjump/etjump/pull/1368)
+* custom vote list names can no longer be just color codes, and mapnames are forced to lowercase [#1369](https://github.com/etjump/etjump/pull/1369)
+* `records <runname>` no longer returns additional partial matches if the queried run is an exact match for a run [#1371](https://github.com/etjump/etjump/pull/1371)
+* added `etj_drawPlayerBBox` to draw bounding boxes of players [#1372](https://github.com/etjump/etjump/pull/1372)
+  * `etj_drawPlayerBBox` - bitflag value to draw bboxes
+    * `1` = draw self
+    * `1` = draw others
+    * `1` = draw fireteam mambers
+  * `etj_playerBBoxBottomOnly` - bitflag to draw only bottom of bbox instead of full box
+    * same flags as `etj_drawPlayerBBox`
+  * `etj_playerBBoxColorSelf/Other/Fireteam` - sets the color of the bbox
+    * might not work correctly if using a custom shader
+  * `etj_playerBBoxShader` - shader to use for drawing
+* fixed `!spectate` not triggering timerun interrupt when a timerun was set to interrupt on team change [#1375](https://github.com/etjump/etjump/pull/1375)
+* improvements to fireteam teamjump mode & `target_ftrelay` [#1364](https://github.com/etjump/etjump/pull/1364)
+  * `target_ftrelay` no longer fires for spectators
+  * added `spawnflags 1/2/4/8/16/32`
+    * `4` - fire all targets intead of one random target
+    * `32` - only fire for other fireteam members
+    * rest match regular `target_relay`
+  * improved fireteam prints related to teamjump mode
+  * added menu option to toggle fireteam teamjump mode
+  * added indicator to fireteam overlay to show if teamjump mode is active
+* fixed excess overheat events triggering for mounted MG42s [#1376](https://github.com/etjump/etjump/pull/1376)
+  * `+attack2` now works on mounted MG42s
+* fixed missing newlines on some `records` prints [#1378](https://github.com/etjump/etjump/pull/1378)
+* fixed chat highlighting not working for server chat messages [#1381](https://github.com/etjump/etjump/pull/1381)
+* fixed unrelated fireteam/vote messages being visible simultaneously [#1383](https://github.com/etjump/etjump/pull/1383)
+* fixed portalgun portals drawing mirrored on 2.60b clients [#1388](https://github.com/etjump/etjump/pull/1388)
+* fixed systemcalls working unreliably on 64-bit clients [#1396](https://github.com/etjump/etjump/pull/1396)
+* tiemruns no longer interrupt due to too low fps with `com_maxfps 0` [#1405](https://github.com/etjump/etjump/pull/1405)
+* added dropdown menus to UI for more convenient multi-selection menu entries [#1406](https://github.com/etjump/etjump/pull/1406)
+* fixed picking up med/ammopacks instantly on some non-axial angles [#1408](https://github.com/etjump/etjump/pull/1408)
+* added autospec feature to automatically follow next client when idling in free spec [#1382](https://github.com/etjump/etjump/pull/1382)
+  * `etj_autoSpec` - toggle on/off
+  * `etj_autoSpecDelay` - time in milliseconds to wait before automatically following next client
 
 # ETJump 3.2.2
 

@@ -1242,8 +1242,12 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
     trap_PC_AddGlobalDefine("FUI");
   }
 
-  if (uiInfo.legacyClient) {
-    trap_PC_AddGlobalDefine("LEGACY");
+  if (uiInfo.eteClient) {
+    trap_PC_AddGlobalDefine("ETE");
+  }
+
+  if (uiInfo.etLegacyClient) {
+    trap_PC_AddGlobalDefine("ETLEGACY");
   }
 
   handle = trap_PC_LoadSource(menuFile);
@@ -6781,7 +6785,17 @@ void _UI_Init(int legacyClient, int clientVersion) {
     uiInfo.uiDC.bias = 0;
   }
 
-  MOD_CHECK_LEGACY(legacyClient, clientVersion, uiInfo.legacyClient);
+  // try to detect engine version, check for ETe specifically first because
+  // it sends a faked ETL client version, so it will always match that
+  char versionStr[MAX_CVAR_VALUE_STRING];
+  trap_Cvar_VariableStringBuffer("version", versionStr, sizeof(versionStr));
+
+  if (versionStr[0] && !Q_stricmpn(versionStr, "ET 2.60e",
+                                   static_cast<int>(strlen("ET 2.60e")))) {
+    uiInfo.eteClient = true;
+  } else {
+    MOD_CHECK_ETLEGACY(legacyClient, clientVersion, uiInfo.etLegacyClient);
+  }
 
   // UI_Load();
   uiInfo.uiDC.registerShaderNoMip = &trap_R_RegisterShaderNoMip;

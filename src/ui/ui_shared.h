@@ -100,7 +100,8 @@
 #define ASSET_CHECKBOX_CHECK_NOT "ui/assets/check_not.tga"
 #define ASSET_CHECKBOX_CHECK_NO "ui/assets/check_no.tga"
 
-#define SCROLLBAR_SIZE 16.0
+constexpr float SCROLLBAR_SIZE = 16.0f;
+constexpr float SCROLLBAR_SIZE_COMBO = 10.0f;
 #define SLIDER_WIDTH 96.0
 #define SLIDER_HEIGHT 10.0 // 16.0
 #define SLIDER_THUMB_WIDTH 12.0
@@ -234,6 +235,18 @@ typedef struct modelDef_s {
   int frameTime;
 } modelDef_t;
 
+struct comboDef_t {
+  // note: rect height is NOT the dropdown height, it's merely the height of
+  // the actual dropdown entry, comboData.height contains the dropdown height
+  rectDef_t rect;
+  int maxItems;
+  bool bitflag;  // is this a bitflag selection dropdown?
+  bool reversed; // should we draw this bottom to top?
+  int startPos;
+  bool scrollbar;
+  float height; // height of the dropdown part of the menu
+};
+
 #define CVAR_ENABLE 0x00000001
 #define CVAR_DISABLE 0x00000002
 #define CVAR_SHOW 0x00000004
@@ -320,6 +333,7 @@ typedef struct itemDef_s {
   const char *hOffset;
   const char *yOffset;
 
+  comboDef_t comboData;
 } itemDef_t;
 
 typedef struct {
@@ -341,8 +355,9 @@ typedef struct {
   int openTime;          // ydnar: time menu opened
   const char *onTimeout; // ydnar: run when menu times out
 
-  const char *onKey[255]; // NERVE - SMF - execs commands when a key is pressed
-  const char *soundName;  // background loop sound for menu
+  // NERVE - SMF - execs commands when a key is pressed
+  const char *onKey[K_MAX_KEYS];
+  const char *soundName; // background loop sound for menu
 
   vec4_t focusColor;               // focus color for items
   vec4_t disableColor;             // focus color for items

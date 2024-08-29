@@ -4,9 +4,13 @@
 #include <vector>
 #include <algorithm>
 #include <array>
+#include <cstdint>
 
 #include "ui_shared.h"
 #include "ui_local.h" // For CS settings/retrieval
+
+#include "../game/etj_numeric_utilities.h"
+#include "../game/etj_string_utilities.h"
 
 #define SCROLL_TIME_START 500
 #define SCROLL_TIME_ADJUST 150
@@ -834,7 +838,7 @@ qboolean IsVisible(int flags) {
 
 qboolean Rect_ContainsPoint(rectDef_t *rect, float x, float y) {
   if (rect) {
-    if (x > rect->x && x < rect->x + rect->w && y > rect->y &&
+    if (x >= rect->x && x < rect->x + rect->w && y >= rect->y &&
         y < rect->y + rect->h) {
       return qtrue;
     }
@@ -1985,6 +1989,9 @@ void Script_Abort(itemDef_t *item, qboolean *bAbort, const char **args) {
   *bAbort = qtrue;
 }
 
+// do nothing
+void Script_None(itemDef_t *item, qboolean *bAbort, const char **args) {}
+
 commandDef_t commandList[] = {
     {"fadein", &Script_FadeIn},           // group/name
     {"fadeout", &Script_FadeOut},         // group/name
@@ -2038,6 +2045,7 @@ commandDef_t commandList[] = {
     {"execwolfconfig", &Script_ExecWolfConfig},   // executes etconfig.cfg
     {"setEditFocus", &Script_SetEditFocus},
     {"abort", &Script_Abort},
+    {"none", &Script_None},
 };
 
 int scriptCommandCount = sizeof(commandList) / sizeof(commandDef_t);
@@ -2889,15 +2897,18 @@ int Item_Multi_FindCvarByValue(itemDef_t *item) {
 const char *Item_Multi_Setting(itemDef_t *item) {
   char buff[1024];
   float value = 0;
-  int i;
-  multiDef_t *multiPtr = (multiDef_t *)item->typeData;
+  auto multiPtr = static_cast<const multiDef_t *>(item->typeData);
+
   if (multiPtr) {
-    if (multiPtr->strDef) {
+    if (item->comboData.bitflag) {
+      return va("%i", static_cast<int>(DC->getCVarValue(item->cvar)));
+    } else if (multiPtr->strDef) {
       DC->getCVarString(item->cvar, buff, sizeof(buff));
     } else {
       value = DC->getCVarValue(item->cvar);
     }
-    for (i = 0; i < multiPtr->count; i++) {
+
+    for (int i = 0; i < multiPtr->count; i++) {
       if (multiPtr->strDef) {
         if (Q_stricmp(buff, multiPtr->cvarStr[i]) == 0) {
           return multiPtr->cvarList[i];
@@ -2908,11 +2919,44 @@ const char *Item_Multi_Setting(itemDef_t *item) {
         }
       }
     }
+
     if (multiPtr->undefinedStr) {
       return multiPtr->undefinedStr;
     }
+
     if (multiPtr->count == 0) {
       return "None Defined";
+    }
+
+    if (multiPtr->strDef) {
+      // if a string is empty or a hex color, return as-is
+      if (buff[0] == '\0' || ETJump::StringUtil::startsWith(buff, "#") ||
+          ETJump::StringUtil::startsWith(buff, "0x")) {
+        return va("Custom (%s)", buff);
+      }
+
+      std::vector<std::string> splits = ETJump::StringUtil::split(buff, " ");
+
+      // at this point, we might still have nonsense strings such as
+      // 'aaa.00.0000aaa.555' or some other stupid stuff, so ensure the
+      // all the strings are actually proper ints or floats
+      for (const auto &split : splits) {
+        if (split.find_first_not_of(".0123456789") != std::string::npos) {
+          return va("Custom (%s)", buff);
+        }
+      }
+
+      for (auto &split : splits) {
+        split = ETJump::StringUtil::normalizeNumberString(split);
+      }
+
+      const std::string &val = ETJump::StringUtil::join(splits, " ");
+      return va("Custom (%s)", val.c_str());
+    } else {
+      std::string val = std::to_string(DC->getCVarValue(item->cvar));
+      val = ETJump::StringUtil::normalizeNumberString(val);
+
+      return va("Custom (%s)", val.c_str());
     }
   }
 
@@ -2956,6 +3000,272 @@ qboolean Item_Multi_HandleKey(itemDef_t *item, int key) {
   }
   return qfalse;
 }
+
+namespace ETJump {
+static constexpr int8_t DIRECTION_UP = 1;
+static constexpr int8_t DIRECTION_DOWN = -1;
+static constexpr uint8_t SCROLL_SMALL = 1;
+static constexpr uint8_t SCROLL_BIG = 3;
+
+static float getComboThumbPosition(itemDef_t *item, const rectDef_t *rect) {
+  float pos;
+  const float size = item->comboData.height - (SCROLLBAR_SIZE_COMBO * 2) - 2;
+  const float posMin = rect->y + SCROLLBAR_SIZE_COMBO;
+  const float posMax = rect->y + size;
+
+  // we're dragging the thumb, use cursor position for smooth dragging
+  if (itemCapture == item && item->window.flags & WINDOW_LB_THUMB) {
+    pos = Numeric::clamp(static_cast<float>(DC->cursory), posMin, posMax);
+  } else if (item->comboData.startPos == 0) {
+    pos = posMin;
+  } else {
+    const auto multi = static_cast<const multiDef_t *>(item->typeData);
+    const auto scrollRange =
+        static_cast<float>(multi->count - item->comboData.maxItems);
+    const auto frac =
+        static_cast<float>(item->comboData.startPos) / scrollRange;
+    pos = posMin + (frac * size);
+
+    // cap to the bottom of the scrollable area
+    if (pos > posMax) {
+      pos = posMax;
+    }
+  }
+
+  return pos;
+}
+
+static void comboHandleScroll(itemDef_t *item, const int8_t direction,
+                              const uint8_t amount) {
+  if (direction == DIRECTION_UP) {
+    item->comboData.startPos -= amount;
+
+    // cap scrolling to the start of the list
+    if (item->comboData.startPos < 0) {
+      item->comboData.startPos = 0;
+    }
+  } else if (direction == DIRECTION_DOWN) {
+    const auto multi = static_cast<multiDef_t *>(item->typeData);
+    item->comboData.startPos += amount;
+
+    // cap scrolling to the end of the list
+    if (multi->count - item->comboData.startPos < item->comboData.maxItems) {
+      item->comboData.startPos = multi->count - item->comboData.maxItems;
+    }
+  }
+}
+
+static void comboScrollFunc(scrollInfo_t *si, const int8_t scrollDir) {
+  if (DC->realTime > si->nextScrollTime) {
+    // simulate a click on the arrows to scroll the list
+    comboHandleScroll(si->item, scrollDir, SCROLL_SMALL);
+    si->nextScrollTime = DC->realTime + si->adjustValue;
+  }
+
+  if (DC->realTime > si->nextAdjustTime) {
+    si->nextAdjustTime = DC->realTime + SCROLL_TIME_ADJUST;
+    if (si->adjustValue > SCROLL_TIME_FLOOR) {
+      si->adjustValue -= SCROLL_TIME_ADJUSTOFFSET;
+    }
+  }
+}
+
+static void comboAutoScroll(void *funcPtr) {
+  const auto si = static_cast<scrollInfo_t *>(funcPtr);
+  comboScrollFunc(si, si->item->window.flags & WINDOW_LB_LEFTARROW
+                          ? DIRECTION_UP
+                          : DIRECTION_DOWN);
+}
+
+static void comboDragThumb(void *funcPtr) {
+  const auto si = static_cast<scrollInfo_t *>(funcPtr);
+  const auto cursorY = static_cast<float>(DC->cursory);
+
+  if (cursorY == si->yStart) {
+    return;
+  }
+
+  const int8_t scrollDir = cursorY > si->yStart ? DIRECTION_DOWN : DIRECTION_UP;
+  const float scrollHeight =
+      si->item->comboData.height - ((SCROLLBAR_SIZE_COMBO + 1) * 2);
+
+  const rectDef_t rect = {si->item->comboData.rect.x +
+                              si->item->comboData.rect.w -
+                              SCROLLBAR_SIZE_COMBO - 1,
+                          si->item->comboData.rect.y + SCROLLBAR_SIZE_COMBO + 1,
+                          SCROLLBAR_SIZE_COMBO, scrollHeight};
+
+  const auto md = static_cast<multiDef_t *>(si->item->typeData);
+
+  si->item->comboData.startPos = static_cast<int>(Numeric::clamp(
+      (cursorY - rect.y) *
+          static_cast<float>(md->count - si->item->comboData.maxItems) /
+          scrollHeight,
+      0, md->count - si->item->comboData.maxItems));
+  si->yStart = cursorY;
+
+  // don't scroll if mouse is above or below scrollbar, otherwise when we
+  // over-drag the scrollbar above/below max position, we start scrolling
+  // as soon as the mouse is moved to other direction
+  if (si->yStart > rect.y && si->yStart < rect.y) {
+    comboScrollFunc(si, scrollDir);
+  }
+}
+
+static void comboStartCapture(itemDef_t *item, int key, bool autoScroll) {
+  if (autoScroll) {
+    scrollInfo.nextScrollTime = DC->realTime + SCROLL_TIME_START;
+    scrollInfo.nextAdjustTime = DC->realTime + SCROLL_TIME_ADJUST;
+    scrollInfo.adjustValue = SCROLL_TIME_START;
+    captureFunc = &comboAutoScroll;
+  } else {
+    scrollInfo.xStart = static_cast<float>(DC->cursorx);
+    scrollInfo.yStart = static_cast<float>(DC->cursory);
+    captureFunc = &comboDragThumb;
+  }
+
+  scrollInfo.item = item;
+  scrollInfo.scrollKey = key;
+  itemCapture = item;
+  captureData = &scrollInfo;
+}
+
+int comboMouseOverScrollbar(itemDef_t *item, float x, float y) {
+  rectDef_t r;
+
+  // FIXME: - 6 only applies to etjump settings menu
+  r.x = item->comboData.rect.x + item->comboData.rect.w - SCROLLBAR_SIZE_COMBO -
+        6;
+  r.y = item->comboData.rect.y;
+  r.h = r.w = SCROLLBAR_SIZE_COMBO;
+
+  if (Rect_ContainsPoint(&r, x, y)) {
+    return WINDOW_LB_LEFTARROW;
+  }
+
+  r.y = item->comboData.rect.y + item->comboData.height - SCROLLBAR_SIZE_COMBO;
+  if (Rect_ContainsPoint(&r, x, y)) {
+    return WINDOW_LB_RIGHTARROW;
+  }
+
+  r.y = item->comboData.rect.y;
+  // temporarily set this so we get the correct thumb position
+  r.h = item->comboData.height;
+
+  const float thumbstart = getComboThumbPosition(item, &r);
+
+  r.h = SCROLLBAR_SIZE_COMBO;
+
+  r.y = thumbstart;
+  if (Rect_ContainsPoint(&r, x, y)) {
+    return WINDOW_LB_THUMB;
+  }
+
+  r.y = item->comboData.rect.y + SCROLLBAR_SIZE_COMBO;
+  r.h = thumbstart - r.y;
+  if (Rect_ContainsPoint(&r, x, y)) {
+    return WINDOW_LB_PGUP;
+  }
+
+  r.y = thumbstart + SCROLLBAR_SIZE_COMBO;
+  r.h = item->comboData.rect.y + item->comboData.height - SCROLLBAR_SIZE_COMBO;
+  if (Rect_ContainsPoint(&r, x, y)) {
+    return WINDOW_LB_PGDN;
+  }
+
+  // hack hack
+  // TODO: what even is this? the default listbox does this too,
+  //  but does nothing with the value...
+  r.y = item->comboData.rect.y;
+  r.h = item->comboData.rect.h;
+  if (Rect_ContainsPoint(&r, x, y)) {
+    return WINDOW_LB_SOMEWHERE;
+  }
+
+  return 0;
+}
+
+// returns true if the dropdown should close on a keypress
+static bool comboHandleKey(itemDef_t *item, int key) {
+  // cursor is outside of dropdown, or on top of the scrollbar
+  if (item->cursorPos < 0 && (key == K_MOUSE1 || key == K_MOUSE2)) {
+    item->window.flags &=
+        ~(WINDOW_LB_LEFTARROW | WINDOW_LB_RIGHTARROW | WINDOW_LB_THUMB |
+          WINDOW_LB_PGUP | WINDOW_LB_PGDN | WINDOW_LB_SOMEWHERE);
+
+    item->window.flags |= comboMouseOverScrollbar(
+        item, static_cast<float>(DC->cursorx), static_cast<float>(DC->cursory));
+
+    int8_t dir = 0;
+    uint8_t amount = SCROLL_SMALL;
+
+    if (item->window.flags & WINDOW_LB_LEFTARROW) {
+      dir = DIRECTION_UP;
+    } else if (item->window.flags & WINDOW_LB_RIGHTARROW) {
+      dir = DIRECTION_DOWN;
+    } else if (item->window.flags & WINDOW_LB_PGUP) {
+      dir = DIRECTION_UP;
+      amount = SCROLL_BIG;
+    } else if (item->window.flags & WINDOW_LB_PGDN) {
+      dir = DIRECTION_DOWN;
+      amount = SCROLL_BIG;
+    } else if (item->window.flags & WINDOW_LB_THUMB) {
+      return false; // return false here so menu doesn't close
+    }
+
+    if (dir) {
+      comboHandleScroll(item, dir, amount);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  const auto multi = static_cast<multiDef_t *>(item->typeData);
+
+  if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_ENTER ||
+      key == K_KP_ENTER) {
+    if (multi->strDef) {
+      DC->setCVar(item->cvar, multi->cvarStr[item->cursorPos]);
+    } else if (item->comboData.bitflag) {
+      auto currentValue = static_cast<int>(DC->getCVarValue(item->cvar));
+      const auto selectedValue =
+          static_cast<int>(multi->cvarValue[item->cursorPos]);
+
+      if (currentValue & selectedValue) {
+        currentValue &= ~selectedValue;
+      } else {
+        currentValue |= selectedValue;
+      }
+
+      DC->setCVar(item->cvar, va("%i", currentValue));
+    } else {
+      DC->setCVar(item->cvar, va("%.0f", multi->cvarValue[item->cursorPos]));
+    }
+
+    Item_RunScript(item, nullptr, item->onAccept);
+
+    return item->comboData.bitflag ? false : true;
+  } else if (key == K_MWHEELUP || key == K_UPARROW || key == K_KP_UPARROW) {
+    if (item->comboData.scrollbar) {
+      comboHandleScroll(item, DIRECTION_UP,
+                        key == K_MWHEELUP ? SCROLL_BIG : SCROLL_SMALL);
+    }
+
+    return false;
+  } else if (key == K_MWHEELDOWN || key == K_DOWNARROW ||
+             key == K_KP_DOWNARROW) {
+    if (item->comboData.scrollbar) {
+      comboHandleScroll(item, DIRECTION_DOWN,
+                        key == K_MWHEELDOWN ? SCROLL_BIG : SCROLL_SMALL);
+    }
+
+    return false;
+  }
+
+  return true;
+}
+} // namespace ETJump
 
 qboolean Item_TextField_HandleKey(itemDef_t *item, int key) {
   char buff[1024];
@@ -3267,12 +3577,14 @@ static void Scroll_Slider_ThumbFunc(void *p) {
 
 void Item_StartCapture(itemDef_t *item, int key) {
   int flags;
+  const auto cursorX = static_cast<float>(DC->cursorx);
+  const auto cursorY = static_cast<float>(DC->cursory);
+
   switch (item->type) {
     case ITEM_TYPE_EDITFIELD:
     case ITEM_TYPE_NUMERICFIELD:
-
-    case ITEM_TYPE_LISTBOX: {
-      flags = Item_ListBox_OverLB(item, DC->cursorx, DC->cursory);
+    case ITEM_TYPE_LISTBOX:
+      flags = Item_ListBox_OverLB(item, cursorX, cursorY);
       if (flags & (WINDOW_LB_LEFTARROW | WINDOW_LB_RIGHTARROW)) {
         scrollInfo.nextScrollTime = DC->realTime + SCROLL_TIME_START;
         scrollInfo.nextAdjustTime = DC->realTime + SCROLL_TIME_ADJUST;
@@ -3286,27 +3598,38 @@ void Item_StartCapture(itemDef_t *item, int key) {
       } else if (flags & WINDOW_LB_THUMB) {
         scrollInfo.scrollKey = key;
         scrollInfo.item = item;
-        scrollInfo.xStart = DC->cursorx;
-        scrollInfo.yStart = DC->cursory;
+        scrollInfo.xStart = cursorX;
+        scrollInfo.yStart = cursorY;
         captureData = &scrollInfo;
         captureFunc = &Scroll_ListBox_ThumbFunc;
         itemCapture = item;
       }
+
       break;
-    }
-    case ITEM_TYPE_SLIDER: {
-      flags = Item_Slider_OverSlider(item, DC->cursorx, DC->cursory);
+    case ITEM_TYPE_SLIDER:
+      flags = Item_Slider_OverSlider(item, cursorX, cursorY);
       if (flags & WINDOW_LB_THUMB) {
         scrollInfo.scrollKey = key;
         scrollInfo.item = item;
-        scrollInfo.xStart = DC->cursorx;
-        scrollInfo.yStart = DC->cursory;
+        scrollInfo.xStart = cursorX;
+        scrollInfo.yStart = cursorY;
         captureData = &scrollInfo;
         captureFunc = &Scroll_Slider_ThumbFunc;
         itemCapture = item;
       }
+
       break;
-    }
+    case ITEM_TYPE_COMBO:
+      // window flags are already set in comboHandleKey
+      const bool autoScroll =
+          item->window.flags & (WINDOW_LB_LEFTARROW | WINDOW_LB_RIGHTARROW);
+
+      if (item->window.flags &
+          (WINDOW_LB_LEFTARROW | WINDOW_LB_RIGHTARROW | WINDOW_LB_THUMB)) {
+        ETJump::comboStartCapture(item, key, autoScroll);
+      }
+
+      break;
   }
 }
 
@@ -3408,9 +3731,6 @@ qboolean Item_HandleKey(itemDef_t *item, int key, qboolean down) {
       break;
     case ITEM_TYPE_EDITFIELD:
     case ITEM_TYPE_NUMERICFIELD:
-      // return Item_TextField_HandleKey(item, key);
-      return qfalse;
-      break;
     case ITEM_TYPE_COMBO:
       return qfalse;
       break;
@@ -3676,9 +3996,11 @@ static rectDef_t *Item_CorrectedTextRect(itemDef_t *item) {
 void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
   int i;
   itemDef_t *item = nullptr;
+  const auto cursorX = static_cast<float>(DC->cursorx);
+  const auto cursorY = static_cast<float>(DC->cursory);
 
   // NERVE - SMF - fix for focus not resetting on unhidden buttons
-  Menu_HandleMouseMove(menu, DC->cursorx, DC->cursory);
+  Menu_HandleMouseMove(menu, cursorX, cursorY);
 
   // ydnar: enter key handling for the window supersedes item enter handling
   if (down && ((key == K_ENTER || key == K_KP_ENTER) && menu->onEnter)) {
@@ -3694,16 +4016,28 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
   }
 
   if (g_editingField && down) {
-    if (!Item_TextField_HandleKey(g_editItem, key)) {
-      g_editingField = qfalse;
-      g_editItem = nullptr;
-      return;
-    } else if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3) {
-      g_editingField = qfalse;
-      g_editItem = nullptr;
-      Display_MouseMove(nullptr, DC->cursorx, DC->cursory);
-    } else if (key == K_TAB || key == K_UPARROW || key == K_DOWNARROW) {
-      return;
+    if (g_editItem->type == ITEM_TYPE_COMBO) {
+      if (ETJump::comboHandleKey(g_editItem, key)) {
+        g_editingField = qfalse;
+        g_editItem->comboData.startPos = 0; // reset back to top position
+        g_editItem = nullptr;
+
+        if (!itemCapture) {
+          return;
+        }
+      }
+    } else {
+      if (!Item_TextField_HandleKey(g_editItem, key)) {
+        g_editingField = qfalse;
+        g_editItem = nullptr;
+        return;
+      } else if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3) {
+        g_editingField = qfalse;
+        g_editItem = nullptr;
+        Display_MouseMove(nullptr, DC->cursorx, DC->cursory);
+      } else if (key == K_TAB || key == K_UPARROW || key == K_DOWNARROW) {
+        return;
+      }
     }
   }
 
@@ -3714,7 +4048,7 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
   // see if the mouse is within the window bounds and if so is this a
   // mouse click
   if (down && !(menu->window.flags & WINDOW_POPUP) &&
-      !Rect_ContainsPoint(&menu->window.rect, DC->cursorx, DC->cursory)) {
+      !Rect_ContainsPoint(&menu->window.rect, cursorX, cursorY)) {
     static qboolean inHandleKey = qfalse;
     // bk001206 - parentheses
     if (!inHandleKey &&
@@ -3750,7 +4084,7 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
   if (!menu->itemHotkeyMode) {
     // END - TAT 9/16/2002
 
-    if (key > 0 && key <= 255 && menu->onKey[key]) {
+    if (key > 0 && key < K_MAX_KEYS && menu->onKey[key]) {
       itemDef_t it;
       it.parent = menu;
       Item_RunScript(&it, nullptr, menu->onKey[key]);
@@ -3758,7 +4092,7 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
     }
 
     // START - TAT 9/16/2002
-  } else if (key > 0 && key <= 255) {
+  } else if (key > 0 && key < K_MAX_KEYS) {
     itemDef_t *it;
 
     // we're using the item hotkey mode, so we want to loop
@@ -3836,26 +4170,19 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
     case K_MOUSE2:
       if (item) {
         if (item->type == ITEM_TYPE_TEXT) {
-          if (Rect_ContainsPoint(Item_CorrectedTextRect(item), DC->cursorx,
-                                 DC->cursory)) {
+          if (Rect_ContainsPoint(Item_CorrectedTextRect(item), cursorX,
+                                 cursorY)) {
             Item_Action(item);
           }
         } else if (item->type == ITEM_TYPE_EDITFIELD ||
                    item->type == ITEM_TYPE_NUMERICFIELD) {
-          if (Rect_ContainsPoint(&item->window.rect, DC->cursorx,
-                                 DC->cursory)) {
-            editFieldDef_t *editPtr = (editFieldDef_t *)item->typeData;
+          if (Rect_ContainsPoint(&item->window.rect, cursorX, cursorY)) {
+            auto editPtr = static_cast<editFieldDef_t *>(item->typeData);
 
-            // ydnar: fixme,
-            // make it set the
-            // insertion point
-            // correctly
+            // ydnar: fixme,  make it set the insertion point correctly
 
-            // NERVE - SMF -
-            // reset scroll
-            // offset so we can
-            // see what we're
-            // editing
+            // NERVE - SMF
+            // reset scroll offset, so we can see what we're editing
             if (editPtr) {
               editPtr->paintOffset = 0;
             }
@@ -3863,19 +4190,15 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
             item->cursorPos = 0;
             g_editingField = qtrue;
             g_editItem = item;
-
-            // see elsewhere for
-            // venomous comment
-            // about this
-            // particular piece
-            // of
-            // "functionality"
-            //%
-            // DC->setOverstrikeMode(qtrue);
+          }
+        } else if (item->type == ITEM_TYPE_COMBO) {
+          if (Rect_ContainsPoint(&item->window.rect, cursorX, cursorY)) {
+            Item_Action(item);
+            g_editingField = qtrue;
+            g_editItem = item;
           }
         } else {
-          if (Rect_ContainsPoint(&item->window.rect, DC->cursorx,
-                                 DC->cursory)) {
+          if (Rect_ContainsPoint(&item->window.rect, cursorX, cursorY)) {
             Item_Action(item);
           }
         }
@@ -5111,21 +5434,267 @@ void Item_Image_Paint(itemDef_t *item) {
                     item->asset);
 }
 
+namespace ETJump {
+static void comboDrawScrollbar(itemDef_t *item, const rectDef_t *rect) {
+  const float x = rect->x + rect->w - SCROLLBAR_SIZE_COMBO - 1 - 6;
+  float y = rect->y;
+
+  DC->drawHandlePic(x, y, SCROLLBAR_SIZE_COMBO, SCROLLBAR_SIZE_COMBO,
+                    DC->Assets.scrollBarArrowUp);
+  y += SCROLLBAR_SIZE_COMBO - 1;
+
+  const float size = item->comboData.height - (SCROLLBAR_SIZE_COMBO * 2);
+  DC->drawHandlePic(x, y, SCROLLBAR_SIZE_COMBO, size + 1, DC->Assets.scrollBar);
+  y += size - 1;
+  DC->drawHandlePic(x, y, SCROLLBAR_SIZE_COMBO, SCROLLBAR_SIZE_COMBO,
+                    DC->Assets.scrollBarArrowDown);
+
+  float thumb = getComboThumbPosition(item, rect);
+  DC->drawHandlePic(x, thumb, SCROLLBAR_SIZE_COMBO, SCROLLBAR_SIZE_COMBO,
+                    DC->Assets.scrollBarThumb);
+}
+
+static void comboPaint(itemDef_t *item) {
+  rectDef_t rect = item->window.rect;
+  rectDef_t selector{};
+
+  if (item->text) {
+    Item_Text_Paint(item);
+  }
+
+  auto multiPtr = static_cast<const multiDef_t *>(item->typeData);
+
+  // somebody forgot to define cvar list
+  if (!multiPtr) {
+    return;
+  }
+
+  char valueStr[MAX_CVAR_VALUE_STRING];
+  float value = 0.0f;
+  const bool isStringValue = multiPtr->strDef;
+
+  // cvarStrList
+  if (isStringValue) {
+    DC->getCVarString(item->cvar, valueStr, sizeof(valueStr));
+  } else { // cvarFloatList
+    value = DC->getCVarValue(item->cvar);
+  }
+
+  // main rect
+  // FIXME: + 6 is only correct in etjump settings menu
+  rect.x = rect.x + (rect.w * 0.5f) + 6;
+  rect.w = (rect.w * 0.5f) - 6;
+
+  DC->drawRect(rect.x, rect.y, rect.w - rect.h, rect.h, item->window.borderSize,
+               item->window.borderColor);
+
+  // selector
+  // FIXME: - 6 is only correct in etjump settings menu
+  selector.x = (rect.x + rect.w) - rect.h - 6;
+  selector.y = rect.y;
+  selector.h = rect.h;
+  selector.w = selector.h;
+
+  DC->drawRect(selector.x, selector.y, selector.w, selector.h,
+               item->window.borderSize, item->window.borderColor);
+
+  // dropdown text
+  const char *text = Item_Multi_Setting(item);
+  const float borderOfs = item->window.borderSize * 2;
+
+  DC->drawText(rect.x + borderOfs, item->textRect.y, item->textscale,
+               item->window.foreColor, text, 0, 0, item->textStyle);
+
+  // selector text
+  const char *selectorText = "V";
+  const float selectorTextOfs =
+      static_cast<float>(DC->textWidth(selectorText, item->textscale, 0)) *
+      0.5f;
+  DC->drawText(selector.x + (selector.w * 0.5f) - selectorTextOfs,
+               item->textRect.y, item->textscale, item->window.foreColor,
+               selectorText, 0, 0, item->textStyle);
+
+  // if the dropdown isn't expanded, we can exit here
+  if (!((item->window.flags & WINDOW_HASFOCUS) && g_editingField)) {
+    return;
+  }
+
+  item->comboData.rect = rect;
+  item->comboData.rect.y += item->comboData.rect.h;
+  item->comboData.scrollbar = multiPtr->count > item->comboData.maxItems;
+  const uint8_t maxItems =
+      item->comboData.scrollbar ? item->comboData.maxItems : multiPtr->count;
+
+  item->comboData.height =
+      item->comboData.rect.h * static_cast<float>(maxItems);
+  const bool reversed = item->comboData.reversed;
+
+  if (reversed) {
+    item->comboData.rect.y -= item->comboData.rect.h + item->comboData.height;
+  }
+
+  // we can't use forecolor here because if mouse is over an item,
+  // the forecolor will be changed to highlight the item
+  vec4_t defaultColor = {0.6f, 0.6f, 0.6f, 1.0f};
+  vec4_t backColor = {0.1f, 0.1f, 0.1f, 0.9f};
+
+  // FIXME: - 6 is only correct in etjump settings menu
+  DC->fillRect(item->comboData.rect.x, item->comboData.rect.y,
+               item->comboData.rect.w - 6, item->comboData.height, backColor);
+  DC->drawRect(item->comboData.rect.x, item->comboData.rect.y,
+               item->comboData.rect.w - 6, item->comboData.height,
+               item->window.borderSize, item->window.borderColor);
+
+  if (item->comboData.scrollbar) {
+    comboDrawScrollbar(item, &item->comboData.rect);
+  }
+
+  // current selection rect
+  // FIXME: - 6 is only correct in etjump settings menu
+  rectDef_t textRect = {item->comboData.rect.x, 0.0f,
+                        item->comboData.rect.w - 6 - SCROLLBAR_SIZE_COMBO - 2,
+                        item->comboData.rect.h};
+  vec4_t color;
+  item->cursorPos = -1;
+  const int startPos = item->comboData.startPos;
+  const bool isBitflag = item->comboData.bitflag;
+
+  for (int i = 0; i < maxItems; i++) {
+    if (reversed) {
+      // + 1 to offset from rect bottom edge to top edge
+      textRect.y =
+          item->textRect.y -
+          (static_cast<float>(maxItems - i + 1) * item->comboData.rect.h) +
+          borderOfs;
+    } else {
+      textRect.y = item->textRect.y +
+                   (static_cast<float>(i) * item->comboData.rect.h) + borderOfs;
+    }
+
+    if (Rect_ContainsPoint(&textRect, static_cast<float>(DC->cursorx),
+                           static_cast<float>(DC->cursory))) {
+      Vector4Copy(item->window.foreColor, color);
+      item->cursorPos = i + startPos;
+    } else if (!isBitflag &&
+               ((!isStringValue &&
+                 multiPtr->cvarValue[i + startPos] == value) ||
+                (isStringValue &&
+                 !Q_stricmp(multiPtr->cvarStr[i + startPos], valueStr)))) {
+      Vector4Copy(item->window.foreColor, color);
+    } else {
+      Vector4Copy(defaultColor, color);
+    }
+
+    float iconOfs = 0;
+    float posY = 0;
+
+    if (reversed) {
+      posY = item->textRect.y -
+             (static_cast<float>(maxItems - i) * item->comboData.rect.h);
+    } else {
+      posY = item->textRect.y +
+             (static_cast<float>(i + 1) * item->comboData.rect.h);
+    }
+
+    if (isBitflag) {
+      if (static_cast<int>(multiPtr->cvarValue[i + startPos]) &
+          static_cast<int>(value)) {
+        DC->drawHandlePic(item->comboData.rect.x + borderOfs,
+                          posY - item->comboData.rect.h +
+                              (item->window.borderSize * 2),
+                          item->comboData.rect.h - 1,
+                          item->comboData.rect.h - 1, DC->Assets.checkboxCheck);
+      } else {
+        DC->drawHandlePic(
+            item->comboData.rect.x + borderOfs,
+            posY - item->comboData.rect.h + (item->window.borderSize * 2),
+            item->comboData.rect.h - 1, item->comboData.rect.h - 1,
+            DC->Assets.checkboxCheckNot);
+      }
+      iconOfs = item->comboData.rect.h;
+    }
+
+    std::string cvarText;
+
+    if (isStringValue) {
+      cvarText = multiPtr->cvarList[i + startPos];
+    } else {
+      cvarText = va("%.0f - %s", multiPtr->cvarValue[i + startPos],
+                    multiPtr->cvarList[i + startPos]);
+    }
+
+    DC->drawText(item->comboData.rect.x + borderOfs + iconOfs, posY,
+                 item->textscale, color, cvarText.c_str(), 0, 0,
+                 item->textStyle);
+  }
+}
+} // namespace ETJump
+
+static void Item_DrawScrollbar(itemDef_t *item, listBoxDef_t *listPtr,
+                               const bool horizontal) {
+  rectDef_t fillRect = item->window.rect;
+  float x, y, size, thumb;
+
+  if (horizontal) {
+    x = fillRect.x + 1;
+    y = fillRect.y + fillRect.h - SCROLLBAR_SIZE - 1;
+
+    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
+                      DC->Assets.scrollBarArrowLeft);
+    x += SCROLLBAR_SIZE - 1;
+
+    size = fillRect.w - (SCROLLBAR_SIZE * 2);
+    DC->drawHandlePic(x, y, size + 1, SCROLLBAR_SIZE, DC->Assets.scrollBar);
+    x += size - 1;
+    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
+                      DC->Assets.scrollBarArrowRight);
+
+    // thumb
+    thumb = static_cast<float>(Item_ListBox_ThumbDrawPosition(item));
+
+    if (thumb > x - SCROLLBAR_SIZE - 1) {
+      thumb = x - SCROLLBAR_SIZE - 1;
+    }
+
+    DC->drawHandlePic(thumb, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
+                      DC->Assets.scrollBarThumb);
+  } else {
+    x = fillRect.x + fillRect.w - SCROLLBAR_SIZE - 1;
+    y = fillRect.y + 1;
+
+    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
+                      DC->Assets.scrollBarArrowUp);
+    y += SCROLLBAR_SIZE - 1;
+
+    listPtr->endPos = listPtr->startPos;
+
+    size = fillRect.h - (SCROLLBAR_SIZE * 2);
+    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, size + 1, DC->Assets.scrollBar);
+    y += size - 1;
+    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
+                      DC->Assets.scrollBarArrowDown);
+
+    // thumb
+    thumb = static_cast<float>(Item_ListBox_ThumbDrawPosition(item));
+
+    if (thumb > y - SCROLLBAR_SIZE - 1) {
+      thumb = y - SCROLLBAR_SIZE - 1;
+    }
+
+    DC->drawHandlePic(x, thumb, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
+                      DC->Assets.scrollBarThumb);
+  }
+}
+
 void Item_ListBox_Paint(itemDef_t *item) {
-  float x, y, size, count, i, thumb;
+  float x, y, size, count, i;
   qhandle_t image;
   qhandle_t optionalImages[8];
   int numOptionalImages;
-  listBoxDef_t *listPtr = (listBoxDef_t *)item->typeData;
+  auto listPtr = static_cast<listBoxDef_t *>(item->typeData);
   rectDef_t fillRect = item->window.rect;
   item->textStyle = ITEM_TEXTSTYLE_SHADOWED;
-
-  /*if( item->window.borderSize ) {
-      fillRect.x += item->window.borderSize;
-      fillRect.y += item->window.borderSize;
-      fillRect.w -= 2 * item->window.borderSize;
-      fillRect.h -= 2 * item->window.borderSize;
-  }*/
+  const bool isHorizontal = item->window.flags & WINDOW_HORIZONTAL;
 
   // the listbox is horizontal or vertical and has a fixed size scroll
   // bar going either direction elements are enumerated from the DC and
@@ -5136,27 +5705,8 @@ void Item_ListBox_Paint(itemDef_t *item) {
   count = DC->feederCount(item->special);
   // default is vertical if horizontal flag is not here
   if (item->window.flags & WINDOW_HORIZONTAL) {
-    // draw scrollbar in bottom of the window
-    // bar
-    x = fillRect.x + 1;
-    y = fillRect.y + fillRect.h - SCROLLBAR_SIZE - 1;
-    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarArrowLeft);
-    x += SCROLLBAR_SIZE - 1;
-    size = fillRect.w - (SCROLLBAR_SIZE * 2);
-    DC->drawHandlePic(x, y, size + 1, SCROLLBAR_SIZE, DC->Assets.scrollBar);
-    x += size - 1;
-    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarArrowRight);
-    // thumb
-    thumb = Item_ListBox_ThumbDrawPosition(
-        item); // Item_ListBox_ThumbPosition(item);
-    if (thumb > x - SCROLLBAR_SIZE - 1) {
-      thumb = x - SCROLLBAR_SIZE - 1;
-    }
-    DC->drawHandlePic(thumb, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarThumb);
-    //
+    // draw scrollbar in bottom of the window bar
+    Item_DrawScrollbar(item, listPtr, isHorizontal);
     listPtr->endPos = listPtr->startPos;
     size = fillRect.w - 2;
     // items
@@ -5196,26 +5746,7 @@ void Item_ListBox_Paint(itemDef_t *item) {
     }
   } else {
     // draw scrollbar to right side of the window
-    x = fillRect.x + fillRect.w - SCROLLBAR_SIZE - 1;
-    y = fillRect.y + 1;
-    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarArrowUp);
-    y += SCROLLBAR_SIZE - 1;
-
-    listPtr->endPos = listPtr->startPos;
-    size = fillRect.h - (SCROLLBAR_SIZE * 2);
-    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, size + 1, DC->Assets.scrollBar);
-    y += size - 1;
-    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarArrowDown);
-    // thumb
-    thumb = Item_ListBox_ThumbDrawPosition(
-        item); // Item_ListBox_ThumbPosition(item);
-    if (thumb > y - SCROLLBAR_SIZE - 1) {
-      thumb = y - SCROLLBAR_SIZE - 1;
-    }
-    DC->drawHandlePic(x, thumb, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarThumb);
+    Item_DrawScrollbar(item, listPtr, isHorizontal);
 
     // adjust size for item painting
     size = fillRect.h /* - 2*/;
@@ -5615,6 +6146,7 @@ void Item_Paint(itemDef_t *item) {
       }
       break;
     case ITEM_TYPE_COMBO:
+      ETJump::comboPaint(item);
       break;
     case ITEM_TYPE_LISTBOX:
       Item_ListBox_Paint(item);
@@ -5780,23 +6312,7 @@ void Menu_HandleMouseMove(menuDef_t *menu, float x, float y) {
     return;
   }
 
-  if (itemCapture) {
-    if (itemCapture->type == ITEM_TYPE_LISTBOX) {
-      // NERVE - SMF - lose capture if out of client
-      // rect
-      if (!Rect_ContainsPoint(&itemCapture->window.rect, x, y)) {
-        Item_StopCapture(itemCapture);
-        itemCapture = NULL;
-        captureFunc = NULL;
-        captureData = NULL;
-      }
-    }
-    // Item_MouseMove(itemCapture, x, y);
-
-    return;
-  }
-
-  if (g_waitingForKey || g_editingField) {
+  if (itemCapture || g_waitingForKey || g_editingField) {
     return;
   }
 
@@ -5903,16 +6419,28 @@ void Menu_Paint(menuDef_t *menu, qboolean forcePaint) {
                menu->fadeCycle);
 
   for (i = 0; i < menu->itemCount; i++) {
-    Item_Paint(menu->items[i]);
     if (menu->items[i]->window.flags & WINDOW_MOUSEOVER) {
       item = menu->items[i];
+
+      // skip expanded dropdowns here
+      if (!((menu->items[i]->window.flags & WINDOW_HASFOCUS) &&
+            g_editingField && menu->items[i]->type == ITEM_TYPE_COMBO)) {
+        Item_Paint(menu->items[i]);
+      }
+    } else {
+      Item_Paint(menu->items[i]);
     }
   }
 
-  // OSP draw tooltip data if we have it
-  if (DC->getCVarValue("ui_showtooltips") && item != NULL &&
-      item->toolTipData != NULL && item->toolTipData->text != NULL &&
-      *item->toolTipData->text) {
+  // now draw expanded dropdown so it draws over other items
+  // make sure g_editingField is true too, so we draw tooltip for non-expanded
+  // dropdown menus (we don't want to draw it if the menu is expanded)
+  if (item && (item->window.flags & WINDOW_HASFOCUS) && g_editingField &&
+      item->type == ITEM_TYPE_COMBO) {
+    Item_Paint(item);
+  } else if (DC->getCVarValue("ui_showtooltips") != 0 && item != nullptr &&
+             item->toolTipData != nullptr &&
+             item->toolTipData->text != nullptr && *item->toolTipData->text) {
     Item_Paint(item->toolTipData);
   }
 
@@ -5946,32 +6474,45 @@ void Item_ValidateTypeData(itemDef_t *item) {
     return;
   }
 
-  if (item->type == ITEM_TYPE_LISTBOX) {
-    item->typeData = UI_Alloc(sizeof(listBoxDef_t));
-    memset(item->typeData, 0, sizeof(listBoxDef_t));
-  } else if (item->type == ITEM_TYPE_EDITFIELD ||
-             item->type == ITEM_TYPE_NUMERICFIELD ||
-             item->type == ITEM_TYPE_YESNO || item->type == ITEM_TYPE_BIND ||
-             item->type == ITEM_TYPE_SLIDER || item->type == ITEM_TYPE_TEXT) {
-    item->typeData = UI_Alloc(sizeof(editFieldDef_t));
-    memset(item->typeData, 0, sizeof(editFieldDef_t));
-    if (item->type == ITEM_TYPE_EDITFIELD ||
-        item->type == ITEM_TYPE_NUMERICFIELD) {
-      if (!((editFieldDef_t *)item->typeData)->maxPaintChars) {
-        ((editFieldDef_t *)item->typeData)->maxPaintChars = MAX_EDITFIELD;
+  switch (item->type) {
+    case ITEM_TYPE_LISTBOX:
+      item->typeData = UI_Alloc(sizeof(listBoxDef_t));
+      memset(item->typeData, 0, sizeof(listBoxDef_t));
+      break;
+    case ITEM_TYPE_EDITFIELD:
+    case ITEM_TYPE_NUMERICFIELD:
+    case ITEM_TYPE_YESNO:
+    case ITEM_TYPE_BIND:
+    case ITEM_TYPE_SLIDER:
+    case ITEM_TYPE_TEXT:
+      item->typeData = UI_Alloc(sizeof(editFieldDef_t));
+      memset(item->typeData, 0, sizeof(editFieldDef_t));
+
+      // ensure edit/numericfields always have maxPaintChars set
+      if (item->type == ITEM_TYPE_EDITFIELD ||
+          item->type == ITEM_TYPE_NUMERICFIELD) {
+        auto typeData = static_cast<editFieldDef_t *>(item->typeData);
+
+        if (!typeData->maxPaintChars) {
+          typeData->maxPaintChars = MAX_EDITFIELD;
+        }
       }
-    }
-  } else if (item->type == ITEM_TYPE_MULTI ||
-             item->type == ITEM_TYPE_CHECKBOX ||
-             item->type == ITEM_TYPE_TRICHECKBOX) {
-    item->typeData = UI_Alloc(sizeof(multiDef_t));
-    memset(item->typeData, 0, sizeof(multiDef_t));
-  } else if (item->type == ITEM_TYPE_MODEL) {
-    item->typeData = UI_Alloc(sizeof(modelDef_t));
-    memset(item->typeData, 0, sizeof(modelDef_t));
-  } else if (item->type == ITEM_TYPE_MENUMODEL) {
-    item->typeData = UI_Alloc(sizeof(modelDef_t));
-    memset(item->typeData, 0, sizeof(modelDef_t));
+
+      break;
+    case ITEM_TYPE_MULTI:
+    case ITEM_TYPE_CHECKBOX:
+    case ITEM_TYPE_TRICHECKBOX:
+    case ITEM_TYPE_COMBO:
+      item->typeData = UI_Alloc(sizeof(multiDef_t));
+      memset(item->typeData, 0, sizeof(multiDef_t));
+      break;
+    case ITEM_TYPE_MODEL:
+    case ITEM_TYPE_MENUMODEL:
+      item->typeData = UI_Alloc(sizeof(modelDef_t));
+      memset(item->typeData, 0, sizeof(modelDef_t));
+      break;
+    default:
+      break;
   }
 }
 
@@ -7053,100 +7594,117 @@ qboolean ItemParse_voteFlag(itemDef_t *item, int handle) {
   return (PC_Int_Parse(handle, &item->voteFlag));
 }
 
-keywordHash_t itemParseKeywords[] = {
-    {"accept", ItemParse_accept, NULL}, // NERVE - SMF
-    {"action", ItemParse_action, NULL},
-    {"addColorRange", ItemParse_addColorRange, NULL},
-    {"addColorRangeRel", ItemParse_addColorRangeRel, NULL},
-    {"align", ItemParse_align, NULL},
-    {"asset_model", ItemParse_asset_model, NULL},
-    {"asset_shader", ItemParse_asset_shader, NULL},
-    {"autowrapped", ItemParse_autowrapped, NULL},
-    {"backcolor", ItemParse_backcolor, NULL},
-    {"background", ItemParse_background, NULL},
-    {"border", ItemParse_border, NULL},
-    {"bordercolor", ItemParse_bordercolor, NULL},
-    {"bordersize", ItemParse_bordersize, NULL},
-    {"borderfixed", ItemParse_borderfixed, NULL},
-    {"cinematic", ItemParse_cinematic, NULL},
-    {"columns", ItemParse_columns, NULL},
-    {"contextmenu", ItemParse_contextMenu, NULL},
-    {"cursorColor", ItemParse_cursorColor, NULL},
-    {"cvar", ItemParse_cvar, NULL},
-    {"cvarFloat", ItemParse_cvarFloat, NULL},
-    {"cvarFloatList", ItemParse_cvarFloatList, NULL},
-    {"cvarStrList", ItemParse_cvarStrList, NULL},
-    {"cvarListUndefined", ItemParse_cvarListUndefined, NULL},
-    {"cvarTest", ItemParse_cvarTest, NULL},
-    {"decoration", ItemParse_decoration, NULL},
-    {"textasint", ItemParse_textasint, NULL},
-    {"textasfloat", ItemParse_textasfloat, NULL},
-    {"disableCvar", ItemParse_disableCvar, NULL},
-    {"doubleclick", ItemParse_doubleClick, NULL},
-    {"onEsc", ItemParse_onEsc, NULL},
-    {"onEnter", ItemParse_onEnter, NULL},
-    {"elementheight", ItemParse_elementheight, NULL},
-    {"elementtype", ItemParse_elementtype, NULL},
-    {"elementwidth", ItemParse_elementwidth, NULL},
-    {"enableCvar", ItemParse_enableCvar, NULL},
-    {"execKey", ItemParse_execKey, NULL},
-    {"feeder", ItemParse_feeder, NULL},
-    {"focusSound", ItemParse_focusSound, NULL},
-    {"forecolor", ItemParse_forecolor, NULL},
-    {"group", ItemParse_group, NULL},
-    {"hOffset", ItemParse_hOffset, NULL},
-    {"hideCvar", ItemParse_hideCvar, NULL},
-    {"horizontalscroll", ItemParse_horizontalscroll, NULL},
-    {"leaveFocus", ItemParse_leaveFocus, NULL},
-    {"maxChars", ItemParse_maxChars, NULL},
-    {"maxPaintChars", ItemParse_maxPaintChars, NULL},
-    {"cvarLength", ItemParse_cvarLength, NULL},
-    {"model_angle", ItemParse_model_angle, NULL},
-    {"model_animplay", ItemParse_model_animplay, NULL},
-    {"model_fovx", ItemParse_model_fovx, NULL},
-    {"model_fovy", ItemParse_model_fovy, NULL},
-    {"model_origin", ItemParse_model_origin, NULL},
-    {"model_rotation", ItemParse_model_rotation, NULL},
-    {"mouseEnter", ItemParse_mouseEnter, NULL},
-    {"mouseEnterText", ItemParse_mouseEnterText, NULL},
-    {"mouseExit", ItemParse_mouseExit, NULL},
-    {"mouseExitText", ItemParse_mouseExitText, NULL},
-    {"multiline", ItemParse_multiline, NULL},
-    {"name", ItemParse_name, NULL},
-    {"noToggle", ItemParse_noToggle,
-     NULL}, // TTimo: use with ITEM_TYPE_YESNO and an action script (see
-            // sv_punkbuster)
-    {"notselectable", ItemParse_notselectable, NULL},
-    {"onFocus", ItemParse_onFocus, NULL},
-    {"origin", ItemParse_origin, NULL}, // NERVE - SMF
-    {"outlinecolor", ItemParse_outlinecolor, NULL},
-    {"ownerdraw", ItemParse_ownerdraw, NULL},
-    {"ownerdrawFlag", ItemParse_ownerdrawFlag, NULL},
-    {"rect", ItemParse_rect, NULL},
-    {"settingDisabled", ItemParse_settingDisabled, NULL}, // OSP
-    {"settingEnabled", ItemParse_settingEnabled, NULL},   // OSP
-    {"showCvar", ItemParse_showCvar, NULL},
-    {"special", ItemParse_special, NULL},
-    {"style", ItemParse_style, NULL},
-    {"text", ItemParse_text, NULL},
-    {"textalign", ItemParse_textalign, NULL},
-    {"textalignx", ItemParse_textalignx, NULL},
-    {"textaligny", ItemParse_textaligny, NULL},
-    {"textfile", ItemParse_textfile, NULL}, //----(SA)	added
-    {"textfont", ItemParse_textfont, NULL}, // (SA)
-    {"textscale", ItemParse_textscale, NULL},
-    {"textstyle", ItemParse_textstyle, NULL},
-    {"lineheight", ItemParse_lineHeight, NULL},
-    {"tooltip", ItemParse_tooltip, NULL},
-    {"tooltipalignx", ItemParse_tooltipalignx, NULL},
-    {"tooltipaligny", ItemParse_tooltipaligny, NULL},
-    {"type", ItemParse_type, NULL},
-    {"visible", ItemParse_visible, NULL},
-    {"voteFlag", ItemParse_voteFlag, NULL}, // OSP - vote check
-    {"wrapped", ItemParse_wrapped, NULL},
-    {"yOffset", ItemParse_yOffset, NULL},
+qboolean ItemParse_combo_maxItems(itemDef_t *item, int handle) {
+  return PC_Int_Parse(handle, &item->comboData.maxItems);
+}
 
-    {NULL, NULL, NULL}};
+qboolean ItemParse_combo_bitflag(itemDef_t *item, int handle) {
+  item->comboData.bitflag = true;
+  return qtrue;
+}
+
+qboolean ItemParse_combo_reversed(itemDef_t *item, int handle) {
+  return PC_Boolean_Parse(handle, &item->comboData.reversed);
+}
+
+keywordHash_t itemParseKeywords[] = {
+    {"accept", ItemParse_accept, nullptr}, // NERVE - SMF
+    {"action", ItemParse_action, nullptr},
+    {"addColorRange", ItemParse_addColorRange, nullptr},
+    {"addColorRangeRel", ItemParse_addColorRangeRel, nullptr},
+    {"align", ItemParse_align, nullptr},
+    {"asset_model", ItemParse_asset_model, nullptr},
+    {"asset_shader", ItemParse_asset_shader, nullptr},
+    {"autowrapped", ItemParse_autowrapped, nullptr},
+    {"backcolor", ItemParse_backcolor, nullptr},
+    {"background", ItemParse_background, nullptr},
+    {"border", ItemParse_border, nullptr},
+    {"bordercolor", ItemParse_bordercolor, nullptr},
+    {"bordersize", ItemParse_bordersize, nullptr},
+    {"borderfixed", ItemParse_borderfixed, nullptr},
+    {"cinematic", ItemParse_cinematic, nullptr},
+    {"columns", ItemParse_columns, nullptr},
+    {"contextmenu", ItemParse_contextMenu, nullptr},
+    {"cursorColor", ItemParse_cursorColor, nullptr},
+    {"cvar", ItemParse_cvar, nullptr},
+    {"cvarFloat", ItemParse_cvarFloat, nullptr},
+    {"cvarFloatList", ItemParse_cvarFloatList, nullptr},
+    {"cvarStrList", ItemParse_cvarStrList, nullptr},
+    {"cvarListUndefined", ItemParse_cvarListUndefined, nullptr},
+    {"cvarTest", ItemParse_cvarTest, nullptr},
+    {"decoration", ItemParse_decoration, nullptr},
+    {"textasint", ItemParse_textasint, nullptr},
+    {"textasfloat", ItemParse_textasfloat, nullptr},
+    {"disableCvar", ItemParse_disableCvar, nullptr},
+    {"doubleclick", ItemParse_doubleClick, nullptr},
+    {"onEsc", ItemParse_onEsc, nullptr},
+    {"onEnter", ItemParse_onEnter, nullptr},
+    {"elementheight", ItemParse_elementheight, nullptr},
+    {"elementtype", ItemParse_elementtype, nullptr},
+    {"elementwidth", ItemParse_elementwidth, nullptr},
+    {"enableCvar", ItemParse_enableCvar, nullptr},
+    {"execKey", ItemParse_execKey, nullptr},
+    {"feeder", ItemParse_feeder, nullptr},
+    {"focusSound", ItemParse_focusSound, nullptr},
+    {"forecolor", ItemParse_forecolor, nullptr},
+    {"group", ItemParse_group, nullptr},
+    {"hOffset", ItemParse_hOffset, nullptr},
+    {"hideCvar", ItemParse_hideCvar, nullptr},
+    {"horizontalscroll", ItemParse_horizontalscroll, nullptr},
+    {"leaveFocus", ItemParse_leaveFocus, nullptr},
+    {"maxChars", ItemParse_maxChars, nullptr},
+    {"maxPaintChars", ItemParse_maxPaintChars, nullptr},
+    {"cvarLength", ItemParse_cvarLength, nullptr},
+    {"model_angle", ItemParse_model_angle, nullptr},
+    {"model_animplay", ItemParse_model_animplay, nullptr},
+    {"model_fovx", ItemParse_model_fovx, nullptr},
+    {"model_fovy", ItemParse_model_fovy, nullptr},
+    {"model_origin", ItemParse_model_origin, nullptr},
+    {"model_rotation", ItemParse_model_rotation, nullptr},
+    {"mouseEnter", ItemParse_mouseEnter, nullptr},
+    {"mouseEnterText", ItemParse_mouseEnterText, nullptr},
+    {"mouseExit", ItemParse_mouseExit, nullptr},
+    {"mouseExitText", ItemParse_mouseExitText, nullptr},
+    {"multiline", ItemParse_multiline, nullptr},
+    {"name", ItemParse_name, nullptr},
+
+    // TTimo: use with ITEM_TYPE_YESNO and an action script (see sv_punkbuster)
+    {"noToggle", ItemParse_noToggle, nullptr},
+    {"notselectable", ItemParse_notselectable, nullptr},
+    {"onFocus", ItemParse_onFocus, nullptr},
+    {"origin", ItemParse_origin, nullptr}, // NERVE - SMF
+    {"outlinecolor", ItemParse_outlinecolor, nullptr},
+    {"ownerdraw", ItemParse_ownerdraw, nullptr},
+    {"ownerdrawFlag", ItemParse_ownerdrawFlag, nullptr},
+    {"rect", ItemParse_rect, nullptr},
+    {"settingDisabled", ItemParse_settingDisabled, nullptr}, // OSP
+    {"settingEnabled", ItemParse_settingEnabled, nullptr},   // OSP
+    {"showCvar", ItemParse_showCvar, nullptr},
+    {"special", ItemParse_special, nullptr},
+    {"style", ItemParse_style, nullptr},
+    {"text", ItemParse_text, nullptr},
+    {"textalign", ItemParse_textalign, nullptr},
+    {"textalignx", ItemParse_textalignx, nullptr},
+    {"textaligny", ItemParse_textaligny, nullptr},
+    {"textfile", ItemParse_textfile, nullptr}, //----(SA)	added
+    {"textfont", ItemParse_textfont, nullptr}, // (SA)
+    {"textscale", ItemParse_textscale, nullptr},
+    {"textstyle", ItemParse_textstyle, nullptr},
+    {"lineheight", ItemParse_lineHeight, nullptr},
+    {"tooltip", ItemParse_tooltip, nullptr},
+    {"tooltipalignx", ItemParse_tooltipalignx, nullptr},
+    {"tooltipaligny", ItemParse_tooltipaligny, nullptr},
+    {"type", ItemParse_type, nullptr},
+    {"visible", ItemParse_visible, nullptr},
+    {"voteFlag", ItemParse_voteFlag, nullptr}, // OSP - vote check
+    {"wrapped", ItemParse_wrapped, nullptr},
+    {"yOffset", ItemParse_yOffset, nullptr},
+
+    {"comboMaxItems", ItemParse_combo_maxItems, nullptr},
+    {"comboBitflag", ItemParse_combo_bitflag, nullptr},
+    {"comboReversed", ItemParse_combo_reversed, nullptr},
+
+    {nullptr, nullptr, nullptr}};
 
 keywordHash_t *itemParseKeywordHash[KEYWORDHASH_SIZE];
 
@@ -7969,7 +8527,7 @@ panel_button_t *bg_focusButton;
 
 qboolean BG_RectContainsPoint(float x, float y, float w, float h, float px,
                               float py) {
-  if (px > x && px < x + w && py > y && py < y + h) {
+  if (px >= x && px < x + w && py >= y && py < y + h) {
     return qtrue;
   }
   return qfalse;

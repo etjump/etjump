@@ -662,10 +662,11 @@ vmCvar_t etj_drawPlayerBBox;
 vmCvar_t etj_playerBBoxColorSelf;
 vmCvar_t etj_playerBBoxColorOther;
 vmCvar_t etj_playerBBoxColorFireteam;
-vmCvar_t etj_playerBBoxBottomOnlySelf;
-vmCvar_t etj_playerBBoxBottomOnlyOther;
-vmCvar_t etj_playerBBoxBottomOnlyFireteam;
+vmCvar_t etj_playerBBoxBottomOnly;
 vmCvar_t etj_playerBBoxShader;
+
+vmCvar_t etj_autoSpec;
+vmCvar_t etj_autoSpecDelay;
 
 typedef struct {
   vmCvar_t *vmCvar;
@@ -1244,14 +1245,12 @@ cvarTable_t cvarTable[] = {
      CVAR_ARCHIVE},
     {&etj_playerBBoxColorFireteam, "etj_playerBBoxColorFireteam",
      "0.0 0.0 1.0 0.5", CVAR_ARCHIVE},
-    {&etj_playerBBoxBottomOnlySelf, "etj_playerBBoxBottomOnlySelf", "0",
-     CVAR_ARCHIVE},
-    {&etj_playerBBoxBottomOnlyOther, "etj_playerBBoxBottomOnlyOther", "0",
-     CVAR_ARCHIVE},
-    {&etj_playerBBoxBottomOnlyFireteam, "etj_playerBBoxBottomOnlyFireteam", "0",
-     CVAR_ARCHIVE},
+    {&etj_playerBBoxBottomOnly, "etj_playerBBoxBottomOnly", "0", CVAR_ARCHIVE},
     {&etj_playerBBoxShader, "etj_playerBBoxShader", "bbox_nocull",
      CVAR_ARCHIVE | CVAR_LATCH},
+
+    {&etj_autoSpec, "etj_autoSpec", "0", CVAR_ARCHIVE},
+    {&etj_autoSpecDelay, "etj_autoSpecDelay", "10000", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

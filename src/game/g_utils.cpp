@@ -468,12 +468,13 @@ void G_SetMovedir(vec3_t angles, vec3_t movedir) {
 void G_InitGentity(gentity_t *e) {
   e->inuse = qtrue;
   e->classname = "noclass";
-  e->s.number = e - g_entities;
+  e->s.number = ClientNum(e);
   e->r.ownerNum = ENTITYNUM_NONE;
   e->aiInactive = 0xffffffff;
   e->nextthink = 0;
   memset(e->goalPriority, 0, sizeof(e->goalPriority));
-  e->free = NULL;
+  e->free = nullptr;
+  e->s.solid = 0;
 
   // RF, init scripting
   e->scriptStatus.scriptEventIndex = -1;

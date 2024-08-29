@@ -107,5 +107,14 @@ bool iEqual(const std::string &str1, const std::string &str2,
 // Counts the extra padding needed when using format specifiers like
 // %-20s with text that contains ET color codes
 unsigned countExtraPadding(const std::string &input);
+
+// removes any leading and trailing zeroes from a number
+// always returns at least 0 even if there are no significant numbers
+// e.g. 0000.0000 -> 0
+std::string normalizeNumberString(const std::string &input);
+
+void removeTrailingChars(std::string &str, char charToRemove);
+void removeLeadingChars(std::string &str, char charToRemove);
+
 } // namespace StringUtil
 } // namespace ETJump

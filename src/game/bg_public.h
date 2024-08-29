@@ -80,34 +80,13 @@
 
 #define MAX_ITEMS 256
 
-#define RANK_TIED_FLAG 0x4000
-
-// #define DEFAULT_SHOTGUN_SPREAD	700
-// #define DEFAULT_SHOTGUN_COUNT	11
-
 // #define	ITEM_RADIUS			15		// item sizes
 //  are needed for client side pickup detection
 #define ITEM_RADIUS                                                            \
   10 // Rafael changed the radius so that the items would fit in the 3
      // new containers
 
-// RF, zombie getup
-// #define	TIMER_RESPAWN	(38*(1000/15)+100)
-
-// #define	LIGHTNING_RANGE		600
-// #define	TESLA_RANGE			800
-
-#define FLAMETHROWER_RANGE                                                     \
-  2500 // DHM - Nerve :: multiplayer range, was 850 in SP
-
-// #define ZOMBIE_FLAME_RADIUS 300
-
-// RF, AI effects
-// #define	PORTAL_ZOMBIE_SPAWNTIME		3000
-// #define	PORTAL_FEMZOMBIE_SPAWNTIME	3000
-
-#define SCORE_NOT_PRESENT                                                      \
-  -9999 // for the CS_SCORES[12] when only one player is present
+static constexpr int FLAMETHROWER_RANGE = 2500;
 
 #define VOTE_TIME 30000 // 30 seconds before vote times out
 
@@ -161,10 +140,11 @@ static constexpr int MG42_HEAT_RECOVERY = 2000;
 #define AAGUN_RATE_OF_FIRE 100
 #define MG42_YAWSPEED 300.f // degrees per second
 
-#define SAY_ALL 0
-#define SAY_TEAM 1
-#define SAY_BUDDY 2
-#define SAY_TEAMNL 3
+static constexpr int SAY_ALL = 0;
+static constexpr int SAY_TEAM = 1;
+static constexpr int SAY_BUDDY = 2;
+static constexpr int SAY_TEAMNL = 3;
+static constexpr int SAY_ADMIN = 4;
 
 // RF, client damage identifiers
 
@@ -731,7 +711,7 @@ constexpr int EF_VOTED = 0x00004000;                           // already cast a
 constexpr int EF_TAGCONNECT = 0x00008000;                      // connected to another entity via tag;
 constexpr int EF_MOUNTEDTANK = EF_TAGCONNECT;                  // Gordon: duplicated for clarity
 
-constexpr int EF_FAKEBMODEL = 0x00010000;  // Gordon: freed
+constexpr int EF_SPARE5 = 0x00010000;      // Gordon: freed
 constexpr int EF_PATH_LINK = 0x00020000;   // Gordon: linking trains together
 constexpr int EF_ZOOMING = 0x00040000;     // client is zooming;
 constexpr int EF_PRONE = 0x00080000;       // player is prone
@@ -759,9 +739,8 @@ constexpr int EF_SPARE4 = 0x80000000;        // unused
 constexpr int EF_PLAYER_UNUSED1 = EF_NONSOLID_BMODEL; // used only on entities
 constexpr int EF_PLAYER_UNUSED2 = EF_SMOKING;         // player never gets this flag, only ent/weapon
 constexpr int EF_PLAYER_UNUSED3 = EF_SMOKINGBLACK;    // player never gets this flag, only ent/weapon
-constexpr int EF_PLAYER_UNUSED4 = EF_FAKEBMODEL;      // used only on entities
-constexpr int EF_PLAYER_UNUSED5 = EF_PATH_LINK;       // used only on entities
-constexpr int EF_PLAYER_UNUSED6 = EF_SPARE0;          // used only on entities
+constexpr int EF_PLAYER_UNUSED4 = EF_PATH_LINK;       // used only on entities
+constexpr int EF_PLAYER_UNUSED5 = EF_SPARE0;          // used only on entities
 // clang-format on
 
 #define BG_PlayerMounted(eFlags)                                               \
@@ -1672,7 +1651,7 @@ qboolean BG_IsAkimboWeapon(int weaponNum);
 qboolean BG_IsAkimboSideArm(int weaponNum, playerState_t *ps);
 int BG_AkimboSidearm(int weaponNum);
 
-#define ITEM_INDEX(x) ((x)-bg_itemlist)
+#define ITEM_INDEX(x) ((x) - bg_itemlist)
 
 qboolean BG_CanItemBeGrabbed(const entityState_t *ent, const playerState_t *ps,
                              int *skill, int teamNum);
@@ -1778,8 +1757,7 @@ gitem_t *BG_ValidStatWeapon(weapon_t weap);
 weapon_t BG_WeaponForMOD(int MOD);
 
 qboolean BG_WeaponInWolfMP(int weapon);
-qboolean BG_PlayerTouchesItem(playerState_t *ps, entityState_t *item,
-                              int atTime);
+bool BG_PlayerTouchesItem(playerState_t *ps, entityState_t *item, int atTime);
 int BG_GrenadesForClass(int cls, int *skills);
 weapon_t BG_GrenadeTypeForTeam(team_t team);
 
@@ -2343,6 +2321,20 @@ qboolean PC_Color_Parse(int handle, vec4_t *c);
 qboolean PC_Vec_Parse(int handle, vec3_t *c);
 qboolean PC_Float_Parse(int handle, float *f);
 
+// for boolean parsing where the value must be explicitly set via int
+// can be used for both bool and qboolean values
+template <typename T>
+qboolean PC_Boolean_Parse(int handle, T *value) {
+  int temp;
+
+  if (!PC_Int_Parse(handle, &temp)) {
+    return qfalse;
+  }
+
+  *value = static_cast<T>(temp);
+  return qtrue;
+}
+
 typedef enum {
   UIMENU_NONE,
   UIMENU_MAIN,
@@ -2719,9 +2711,9 @@ enum class HeavyWeaponState {
 };
 
 enum class ViewlockState {
-  Jitter = 2,      // screen jitter (firing mounted MG42)
-  Mounted = 3,     // lock to direction of mounted gun
-  Medic = 7,       // look at nearest medic
+  Jitter = 2,  // screen jitter (firing mounted MG42)
+  Mounted = 3, // lock to direction of mounted gun
+  Medic = 7,   // look at nearest medic
 };
 } // namespace ETJump
 
