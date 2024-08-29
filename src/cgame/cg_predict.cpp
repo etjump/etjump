@@ -159,8 +159,12 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
       BG_EvaluateTrajectory(&cent->currentState.pos, cg.physicsTime, origin,
                             qfalse, cent->currentState.effect2Time);
     } else {
-      // see g_misc.c SP_func_fakebrush...
-      if (ent->eType == ET_FAKEBRUSH) {
+      // dmgFlags are set to r.contents if the fakebrush is playerclip,
+      // so only grab mins/maxs if we're doing a player trace (capsule),
+      // or if dmgFlags are not set (regular CONTENTS_SOLID), otherwise stuff
+      // like bullets and flame particles collide with playerclip fakebrushes
+      // on client side, visually
+      if (ent->eType == ET_FAKEBRUSH && (capsule || !ent->dmgFlags)) {
         VectorCopy(ent->origin2, bmins);
         VectorCopy(ent->angles2, bmaxs);
       } else {

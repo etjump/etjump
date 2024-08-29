@@ -3084,5 +3084,9 @@ void SP_func_fakebrush(gentity_t *ent) {
   // it won't have solid flag set and prediction is broken
   if (ent->r.contents & CONTENTS_PLAYERCLIP && !ent->s.solid) {
     ent->s.solid = 1;
+
+    // also pass along contents so we can filter this out for stuff
+    // such as bullet traces, to avoid bullet marks on playerclip fakebrushes
+    ent->s.dmgFlags = ent->r.contents;
   }
 }
