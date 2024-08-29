@@ -3077,4 +3077,12 @@ void SP_func_fakebrush(gentity_t *ent) {
   ent->s.eType = ET_FAKEBRUSH;
 
   trap_LinkEntity(ent);
+
+  // SV_LinkEntity only sets the entity to solid if entity has a bmodel
+  // or r.contents is either CONTENTS_SOLID or CONTENTS_BODY,
+  // so if we try to make a playerclip fakebrush,
+  // it won't have solid flag set and prediction is broken
+  if (ent->r.contents & CONTENTS_PLAYERCLIP && !ent->s.solid) {
+    ent->s.solid = 1;
+  }
 }
