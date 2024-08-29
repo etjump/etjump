@@ -1242,6 +1242,10 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
     trap_PC_AddGlobalDefine("FUI");
   }
 
+  if (uiInfo.vetClient) {
+    trap_PC_AddGlobalDefine("VET");
+  }
+
   if (uiInfo.eteClient) {
     trap_PC_AddGlobalDefine("ETE");
   }
@@ -6672,70 +6676,78 @@ static void UI_DrawCinematic(int handle, float x, float y, float w, float h) {
 
 static void UI_RunCinematicFrame(int handle) { trap_CIN_RunCinematic(handle); }
 
+namespace ETJump {
 /*
-=================
-PlayerModel_BuildList
-=================
-*/
-/*
-// TTimo: unused
-static void UI_BuildQ3Model_List( void )
-{
-    int		numdirs;
-    int		numfiles;
-    char	dirlist[2048];
-    char	filelist[2048];
-    char	skinname[64];
-    char*	dirptr;
-    char*	fileptr;
-    int		i;
-    int		j;
-    int		dirlen;
-    int		filelen;
+ * TL;DR - every client is shit and pretends to be something it's not.
+ *
+ * ET: Legacy sends 3 args to UI_INIT, but 2.60b only sends 1.
+ * The idea is that ET: Legacy wants to nag 2.60b users to download ET: Legacy
+ * client if legacy mod is loaded with the vanilla client.
+ * arg1 is a boolean (is this ET: Legacy client?) and arg2 is an integer
+ * representation of current version (for various compatibility checks).
+ *
+ * ETe also sends 3 args, and fakes being an ET: Legacy client (though for UI,
+ * I'm not sure what good this does as it doesn't get around the nagging).
+ * What this means for us is that we can't rely on checking the arg1/2
+ * to detect if a client is ET: Legacy or not, because ETe pretends
+ * that it's ET: Legacy too.
+ *
+ * Solution? Check the 'version' string that each client sends, right?
+ * Right...? Yeah lol, no.
+ *
+ * We CAN differentiate ETe from 2.60b using the version string, vanilla client
+ * is either 'ET 2.60b' or 'ET 2.60d', and ETe is 'ET 2.60e'.
+ * So this means we can just check for the version string first,
+ * try to match that to ETe, and then fallback to arg1/arg2 for ET: Legacy,
+ * and if neither match = vanilla client, right? Nope.
+ *
+ * The VM_Call argument parsing function in vanilla is not ideal.
+ * For every VM_Call, it reads memory as if you're sending the max amount of
+ * supported varags. This means that it will *very* likely read and send
+ * garbage memory as arg1 and arg2 to UI_Init, which means it can accidentally
+ * identify as an ET: Legacy client, because arg1 is treated as boolean.
+ *
+ * Okay, so just read the version string then and forget arg1/2 completely?
+ * Yeah nope, ET: Legacy needs to be special.
+ *
+ * For some reason it sends a faked 'version' string, pretending
+ * to be 2.60b client, presumably to maintain compatibility with some mods.
+ * Which is a bit odd as ETPro doesn't run anyway, and no other mod has a
+ * client version check that prevents you from playing them on custom clients.
+ *
+ * There is a saving grace though: ET: Legacy also sends a special 'etVersion'
+ * string, along with the regular 'version' string. So this means, we can
+ * identify the client by doing the following:
+ *
+ * 1. read both 'version' and 'etVersion' strings
+ * 2. if 'etVersion string is empty, we can parse the 'version' string safely
+ * to differentiate between vanilla client and ETe
+ * 3. if 'etVersion' string is not empty, we can parse arg1/2 to grab
+ * ET: Legacy client version.
+ */
 
-    uiInfo.q3HeadCount = 0;
+static void detectClientEngine(int legacyClient, int clientVersion) {
+  char versionStr[MAX_CVAR_VALUE_STRING];
+  char etVersionStr[MAX_CVAR_VALUE_STRING]; // ET: Legacy exclusive
+  trap_Cvar_VariableStringBuffer("version", versionStr, sizeof(versionStr));
+  trap_Cvar_VariableStringBuffer("etVersion", etVersionStr,
+                                 sizeof(etVersionStr));
 
-    // iterate directory of all player models
-    numdirs = trap_FS_GetFileList("models/players", "/", dirlist, 2048 );
-    dirptr  = dirlist;
-    for (i=0; i<numdirs && uiInfo.q3HeadCount < MAX_PLAYERMODELS;
-i++,dirptr+=dirlen+1)
-    {
-        dirlen = strlen(dirptr);
+  if (versionStr[0] && etVersionStr[0] == '\0') {
+    // we can use this length for every detection
+    const auto len = static_cast<int>(strlen("ET 2.60b"));
 
-        if (dirlen && dirptr[dirlen-1]=='/') dirptr[dirlen-1]='\0';
-
-        if (!strcmp(dirptr,".") || !strcmp(dirptr,".."))
-            continue;
-
-        // iterate all skin files in directory
-        numfiles = trap_FS_GetFileList( va("models/players/%s",dirptr), "tga",
-filelist, 2048 ); fileptr  = filelist; for (j=0; j<numfiles &&
-uiInfo.q3HeadCount < MAX_PLAYERMODELS;j++,fileptr+=filelen+1)
-        {
-            filelen = strlen(fileptr);
-
-            COM_StripExtension(fileptr,skinname);
-
-            // look for icon_????
-            if (Q_stricmpn(skinname, "icon_", 5) == 0 &&
-!(Q_stricmp(skinname,"icon_blue") == 0 || Q_stricmp(skinname,"icon_red") == 0))
-            {
-                if (Q_stricmp(skinname, "icon_default") == 0) {
-                    Com_sprintf( uiInfo.q3HeadNames[uiInfo.q3HeadCount],
-sizeof(uiInfo.q3HeadNames[uiInfo.q3HeadCount]), dirptr); } else { Com_sprintf(
-uiInfo.q3HeadNames[uiInfo.q3HeadCount],
-sizeof(uiInfo.q3HeadNames[uiInfo.q3HeadCount]), "%s/%s",dirptr, skinname + 5);
-                }
-                uiInfo.q3HeadIcons[uiInfo.q3HeadCount++] =
-trap_R_RegisterShaderNoMip(va("models/players/%s/%s",dirptr,skinname));
-            }
-
-        }
+    if (!Q_stricmpn(versionStr, "ET 2.60b", len) ||
+        !Q_stricmpn(versionStr, "ET 2.60d", len)) {
+      uiInfo.vetClient = true;
+    } else if (!Q_stricmpn(versionStr, "ET 2.60e", len)) {
+      uiInfo.eteClient = true;
     }
-
+  } else {
+    MOD_CHECK_ETLEGACY(legacyClient, clientVersion, uiInfo.etLegacyClient);
+  }
 }
-*/
+} // namespace ETJump
 
 /*
 =================
@@ -6785,17 +6797,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
     uiInfo.uiDC.bias = 0;
   }
 
-  // try to detect engine version, check for ETe specifically first because
-  // it sends a faked ETL client version, so it will always match that
-  char versionStr[MAX_CVAR_VALUE_STRING];
-  trap_Cvar_VariableStringBuffer("version", versionStr, sizeof(versionStr));
-
-  if (versionStr[0] && !Q_stricmpn(versionStr, "ET 2.60e",
-                                   static_cast<int>(strlen("ET 2.60e")))) {
-    uiInfo.eteClient = true;
-  } else {
-    MOD_CHECK_ETLEGACY(legacyClient, clientVersion, uiInfo.etLegacyClient);
-  }
+  ETJump::detectClientEngine(legacyClient, clientVersion);
 
   // UI_Load();
   uiInfo.uiDC.registerShaderNoMip = &trap_R_RegisterShaderNoMip;
