@@ -6719,7 +6719,7 @@ namespace ETJump {
  * string, along with the regular 'version' string. So this means, we can
  * identify the client by doing the following:
  *
- * 1. read both 'version' and 'etVersion' strings
+ * 1. parse 'etVersion' string
  * 2. if 'etVersion string is empty, we can parse the 'version' string safely
  * to differentiate between vanilla client and ETe
  * 3. if 'etVersion' string is not empty, we can parse arg1/2 to grab
@@ -6727,13 +6727,14 @@ namespace ETJump {
  */
 
 static void detectClientEngine(int legacyClient, int clientVersion) {
-  char versionStr[MAX_CVAR_VALUE_STRING];
   char etVersionStr[MAX_CVAR_VALUE_STRING]; // ET: Legacy exclusive
-  trap_Cvar_VariableStringBuffer("version", versionStr, sizeof(versionStr));
   trap_Cvar_VariableStringBuffer("etVersion", etVersionStr,
                                  sizeof(etVersionStr));
 
-  if (versionStr[0] && etVersionStr[0] == '\0') {
+  if (etVersionStr[0] == '\0') {
+    char versionStr[MAX_CVAR_VALUE_STRING];
+    trap_Cvar_VariableStringBuffer("version", versionStr, sizeof(versionStr));
+
     // we can use this length for every detection
     const auto len = static_cast<int>(strlen("ET 2.60b"));
 
