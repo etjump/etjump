@@ -45,6 +45,7 @@ class ColorPicker {
 
   // the cvar that the color picker is currently modifying
   std::string currentCvar{};
+  std::string currentCvarOldValue{};
 
   static inline void setHSV(vec4_t hsv, float h, float s, float v, float a);
   static inline void setRGB(vec4_t rgb, float r, float g, float b, float a);
@@ -68,7 +69,9 @@ public:
   static void shrinkRectForColorPicker(rectDef_t &rect);
 
   void cvarToColorPickerState(const std::string &cvar);
-  void colorPickerStateToCvar();
+
+  // if reset is true, value is taken from currentCvarOldValue
+  void colorPickerStateToCvar(bool reset);
 
   // reset sliders to state at which they were in when the menu was opened
   void resetColorPickerState();

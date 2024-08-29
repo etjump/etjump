@@ -87,10 +87,11 @@ void ColorPicker::cvarToColorPickerState(const std::string &cvar) {
   currentCvar = cvar;
   char buf[MAX_CVAR_VALUE_STRING];
   DC->getCVarString(cvar.c_str(), buf, sizeof(buf));
+  currentCvarOldValue = buf;
 
   // this can potentially be a bit wasteful if the color is already
   // in 0-255 range, but I'd rather not complicate the logic around that
-  parseColorString(buf, normalizedRGB);
+  parseColorString(currentCvarOldValue, normalizedRGB);
 
   Vector4Copy(normalizedRGB, oldRGB);
   Vector4Copy(normalizedRGB, pickerRGB);
@@ -103,17 +104,21 @@ void ColorPicker::cvarToColorPickerState(const std::string &cvar) {
   colorPickerValues[COLOR_PICKER_A] = normalizedRGB[3];
 }
 
-void ColorPicker::colorPickerStateToCvar() {
+void ColorPicker::colorPickerStateToCvar(bool reset) {
   if (currentCvar.empty()) {
     Com_Printf(S_COLOR_YELLOW "%s: cannot set slider state to empty cvar\n",
                __func__);
     return;
   }
 
-  const std::string &value =
-      stringFormat("%f %f %f %f", normalizedRGB[0], normalizedRGB[1],
-                   normalizedRGB[2], normalizedRGB[3]);
-  DC->setCVar(currentCvar.c_str(), value.c_str());
+  if (reset) {
+    DC->setCVar(currentCvar.c_str(), currentCvarOldValue.c_str());
+  } else {
+    const std::string &value =
+        stringFormat("%f %f %f %f", normalizedRGB[0], normalizedRGB[1],
+                     normalizedRGB[2], normalizedRGB[3]);
+    DC->setCVar(currentCvar.c_str(), value.c_str());
+  }
 }
 
 void ColorPicker::resetColorPickerState() {
@@ -125,7 +130,7 @@ void ColorPicker::resetColorPickerState() {
   updateRGBSliderState(fullRGB);
   colorPickerValues[COLOR_PICKER_A] = normalizedRGB[3];
 
-  colorPickerStateToCvar();
+  colorPickerStateToCvar(true);
 }
 
 inline void ColorPicker::setHSV(vec4_t hsv, const float h, const float s,
@@ -186,7 +191,7 @@ void ColorPicker::updateSliderState(itemDef_t *item) {
       break;
   }
 
-  colorPickerStateToCvar();
+  colorPickerStateToCvar(false);
 }
 
 const char *ColorPicker::getColorSliderString(int handle) {
@@ -266,7 +271,7 @@ void ColorPicker::colorPickerDragFunc(itemDef_t *item, const float cursorX,
   Vector4Scale(normalizedRGB, 255, fullRGB);
   updateRGBSliderState(fullRGB);
 
-  colorPickerStateToCvar();
+  colorPickerStateToCvar(false);
 }
 
 void ColorPicker::shrinkRectForColorPicker(rectDef_t &rect) {
