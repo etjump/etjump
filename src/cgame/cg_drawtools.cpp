@@ -78,7 +78,7 @@ CG_FillAngleYaw
 ==============
 */
 void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
-                     float fov, vec4_t const color) {
+                     float fov, vec4_t const color, bool borderOnly) {
   // don't try to draw lines with no width
   if (start == end) {
     return;
@@ -87,10 +87,20 @@ void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
   const range_t range = AnglesToRange(start, end, yaw, fov);
 
   if (!range.split) {
-    CG_FillRect(range.x1, y, range.x2 - range.x1, h, color);
+    if (borderOnly) {
+      CG_DrawRect_FixedBorder(range.x1, y, range.x2 - range.x1, h, 1, color);
+    } else {
+      CG_FillRect(range.x1, y, range.x2 - range.x1, h, color);
+    }
   } else {
-    CG_FillRect(0, y, range.x1, h, color);
-    CG_FillRect(range.x2, y, SCREEN_WIDTH - range.x2, h, color);
+    if (borderOnly) {
+      CG_DrawRect_FixedBorder(0, y, range.x1, h, 1, color);
+      CG_DrawRect_FixedBorder(range.x2, y, SCREEN_WIDTH - range.x2, h, 1,
+                              color);
+    } else {
+      CG_FillRect(0, y, range.x1, h, color);
+      CG_FillRect(range.x2, y, SCREEN_WIDTH - range.x2, h, color);
+    }
   }
 }
 

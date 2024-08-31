@@ -50,7 +50,7 @@ menuDef {
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "SNAPHUD")
     
-        MULTI               (SETTINGS_ITEM_POS(1), "Draw snaphud:", 0.2, SETTINGS_ITEM_H, "etj_drawSnapHUD", cvarFloatList { "No" 0 "Full zones" 1 "Edges only" 2 }, "Draw velocity snapping HUD\netj_drawSnapHUD")
+        MULTI               (SETTINGS_ITEM_POS(1), "Draw snaphud:", 0.2, SETTINGS_ITEM_H, "etj_drawSnapHUD", cvarFloatList { "No" 0 "Full zones" 1 "Edges only" 2 "Borders only" 3 }, "Draw velocity snapping HUD\netj_drawSnapHUD")
         CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_snapHUDOffsetY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "Snaphud offset Y:", 0.2, SETTINGS_ITEM_H, etj_snapHUDOffsetY 0 -240 240 5, "Sets Y offset of snaphud\netj_snapHUDOffsetY")
         CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_snapHUDHeight", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
