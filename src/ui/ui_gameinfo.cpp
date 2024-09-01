@@ -175,7 +175,7 @@ void UI_LoadArenas() {
       handle = trap_PC_LoadSource(filename);
 
       if (!handle) {
-        trap_Print(va(S_COLOR_RED "file not found: %s\n", filename));
+        Com_LocalPrintf(va(S_COLOR_RED "file not found: %s\n", filename));
       } else {
         UI_LoadArenasFromFile(handle, filename);
       }
@@ -189,7 +189,7 @@ void UI_LoadArenas() {
 
       handle = trap_PC_LoadSource(filename);
       if (!handle) {
-        trap_Print(va(S_COLOR_RED "file not found: %s\n", filename));
+        Com_LocalPrintf(va(S_COLOR_RED "file not found: %s\n", filename));
 
         // FIXME: remove up this typeBits field entirely, it's not necessary
         //  as we only have one valid gametype
