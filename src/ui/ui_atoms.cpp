@@ -179,6 +179,11 @@ qboolean UI_ConsoleCommand(int realTime) {
     return qtrue;
   }
 
+  if (!Q_stricmp(cmd, "uiParseMaplist")) {
+    ETJump::parseMaplist();
+    return qtrue;
+  }
+
   trap_GetClientState(&cstate);
 
   return qfalse;

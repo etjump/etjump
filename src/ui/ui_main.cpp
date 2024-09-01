@@ -6947,6 +6947,10 @@ void _UI_Init(int legacyClient, int clientVersion) {
   trap_Cvar_Set("ui_netGameType", "2");
   trap_Cvar_Update(&ui_netGameType);
 
+  // FIXME: this breaks if a client does 'ui_restart', but it's not that big
+  //  of a deal as vid/cgame_restart will fix up the list
+  uiInfo.serverMaplist.clear();
+
   // init Yes/No once for cl_language -> server browser (punkbuster)
   Q_strncpyz(translated_yes, DC->translateString("Yes"),
              sizeof(translated_yes));
@@ -7085,6 +7089,16 @@ void handleIllegalRedirect() {
   markAllServersVisible();
   keepServerListUpdating();
   openPlayOnlineMenu();
+}
+
+void parseMaplist() {
+  char arg[MAX_QPATH];
+
+  // start iterating from 1 to skip the command string
+  for (int i = 1, len = trap_Argc(); i < len; i++) {
+    trap_Argv(i, arg, sizeof(arg));
+    uiInfo.serverMaplist.emplace_back(arg);
+  }
 }
 } // namespace ETJump
 

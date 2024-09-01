@@ -901,6 +901,8 @@ typedef struct {
 
   int etLegacyClient;
   bool eteClient;
+
+  std::vector<std::string> serverMaplist;
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;
@@ -1109,4 +1111,8 @@ void trap_GetHunkData(int *hunkused, int *hunkexpected);
 char *trap_TranslateString(const char *string); // NERVE - SMF - localization
 
 void ETJump_DrawMapDetails();
+
+namespace ETJump {
+void parseMaplist();
+}
 #endif
