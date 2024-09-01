@@ -49,6 +49,14 @@ static void initColorPicker() {
         p->colorPickerDragFunc(item, cursorX, cursorY, key);
       };
 
+  uiInfo.uiDC.toggleRGBSliderValues = [p = colorPicker.get()] {
+    p->toggleRGBSliderValues();
+  };
+
+  uiInfo.uiDC.RGBSlidersAreNormalized = [p = colorPicker.get()] {
+    return p->RGBSlidersAreNormalized();
+  };
+
   uiInfo.uiDC.getColorSliderString = &ColorPicker::getColorSliderString;
   uiInfo.uiDC.setColorSliderType = &ColorPicker::setColorSliderType;
   uiInfo.uiDC.getColorSliderValue = &ColorPicker::getColorSliderValue;
@@ -4932,6 +4940,11 @@ void UI_RunMenuScript(const char **args) {
 
     if (!Q_stricmp(name, "resetColorPickerState")) {
       DC->resetColorPickerState();
+      return;
+    }
+
+    if (!Q_stricmp(name, "toggleColorPickerRGBSliders")) {
+      DC->toggleRGBSliderValues();
       return;
     }
 

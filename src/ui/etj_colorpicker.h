@@ -47,12 +47,14 @@ class ColorPicker {
   std::string currentCvar{};
   std::string currentCvarOldValue{};
 
+  bool normalizedRGBSliders;
+
   static inline void setHSV(vec4_t hsv, float h, float s, float v, float a);
   static inline void setRGB(vec4_t rgb, float r, float g, float b, float a);
   static inline void setRGBNormalized(vec4_t RGB, float r, float g, float b,
                                       float a);
 
-  static void updateRGBSliderState(const vec4_t rgb);
+  void updateRGBSliderState(const vec4_t rgb) const;
   static void updateHSVSliderState(const vec4_t hsv);
 
 public:
@@ -84,5 +86,9 @@ public:
 
   void colorPickerDragFunc(itemDef_t *item, float cursorX, float cursorY,
                            int key);
+
+  // toggle RGB sliders between normalized and full RGB
+  void toggleRGBSliderValues();
+  bool RGBSlidersAreNormalized() const;
 };
 } // namespace ETJump

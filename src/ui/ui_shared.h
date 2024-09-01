@@ -562,6 +562,8 @@ typedef struct {
   std::function<void()> resetColorPickerState;
   std::function<void(itemDef_t *, const float, const float, const int)>
       colorPickerDragFunc;
+  std::function<void()> toggleRGBSliderValues;
+  std::function<bool()> RGBSlidersAreNormalized;
 } displayContextDef_t;
 
 const char *String_Alloc(const char *p);

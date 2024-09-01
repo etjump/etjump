@@ -43,6 +43,7 @@ static std::unordered_map<std::string, float> colorPickerValues{
 
 ColorPicker::ColorPicker() {
   Vector4Set(pickerColor, 0.75f, 0.75f, 0.75f, 0.75f);
+  normalizedRGBSliders = false;
 }
 
 void ColorPicker::drawPreviewOld(rectDef_t *rect) const {
@@ -50,11 +51,14 @@ void ColorPicker::drawPreviewOld(rectDef_t *rect) const {
 }
 
 void ColorPicker::drawPreviewNew(const rectDef_t *rect) {
-  Vector4Copy(fullRGB, normalizedRGB);
-  setRGBNormalized(normalizedRGB, colorPickerValues[COLOR_PICKER_R],
-                   colorPickerValues[COLOR_PICKER_G],
-                   colorPickerValues[COLOR_PICKER_B],
-                   colorPickerValues[COLOR_PICKER_A]);
+  if (!normalizedRGBSliders) {
+    Vector4Copy(fullRGB, normalizedRGB);
+    setRGBNormalized(normalizedRGB, colorPickerValues[COLOR_PICKER_R],
+                     colorPickerValues[COLOR_PICKER_G],
+                     colorPickerValues[COLOR_PICKER_B],
+                     colorPickerValues[COLOR_PICKER_A]);
+  }
+
   DC->fillRect(rect->x, rect->y, rect->w, rect->h, normalizedRGB);
 }
 
@@ -156,10 +160,16 @@ inline void ColorPicker::setRGBNormalized(vec4_t rgb, const float r,
              Numeric::clamp(a, 0.0f, 1.0f));
 }
 
-void ColorPicker::updateRGBSliderState(const vec4_t rgb) {
-  colorPickerValues[COLOR_PICKER_R] = rgb[0];
-  colorPickerValues[COLOR_PICKER_G] = rgb[1];
-  colorPickerValues[COLOR_PICKER_B] = rgb[2];
+void ColorPicker::updateRGBSliderState(const vec4_t rgb) const {
+  if (normalizedRGBSliders) {
+    colorPickerValues[COLOR_PICKER_R] = rgb[0] / 255;
+    colorPickerValues[COLOR_PICKER_G] = rgb[1] / 255;
+    colorPickerValues[COLOR_PICKER_B] = rgb[2] / 255;
+  } else {
+    colorPickerValues[COLOR_PICKER_R] = rgb[0];
+    colorPickerValues[COLOR_PICKER_G] = rgb[1];
+    colorPickerValues[COLOR_PICKER_B] = rgb[2];
+  }
 }
 
 void ColorPicker::updateHSVSliderState(const vec4_t hsv) {
@@ -179,10 +189,19 @@ void ColorPicker::updateSliderState(itemDef_t *item) {
       updateRGBSliderState(fullRGB);
       break;
     case COLOR_RGB:
-      setRGB(fullRGB, colorPickerValues[COLOR_PICKER_R],
-             colorPickerValues[COLOR_PICKER_G],
-             colorPickerValues[COLOR_PICKER_B],
-             colorPickerValues[COLOR_PICKER_A]);
+      if (normalizedRGBSliders) {
+        setRGB(normalizedRGB, colorPickerValues[COLOR_PICKER_R],
+               colorPickerValues[COLOR_PICKER_G],
+               colorPickerValues[COLOR_PICKER_B],
+               colorPickerValues[COLOR_PICKER_A]);
+        Vector4Scale(normalizedRGB, 255, fullRGB);
+      } else {
+        setRGB(fullRGB, colorPickerValues[COLOR_PICKER_R],
+               colorPickerValues[COLOR_PICKER_G],
+               colorPickerValues[COLOR_PICKER_B],
+               colorPickerValues[COLOR_PICKER_A]);
+      }
+
       BG_RGBtoHSV(fullRGB, HSV);
       updateHSVSliderState(HSV);
       break;
@@ -247,6 +266,75 @@ void ColorPicker::setColorSliderValue(const std::string &colorVar,
   colorPickerValues[colorVar] = value;
 }
 
+void ColorPicker::toggleRGBSliderValues() {
+  menuDef_t *menu = Menus_FindByName(COLOR_PICKER_MENU);
+  bool redFound = false;
+  bool greenFound = false;
+  bool blueFound = false;
+
+  // flip flop
+  normalizedRGBSliders = !normalizedRGBSliders;
+
+  const auto swapLabelType = [&](itemDef_t *item) {
+    if (normalizedRGBSliders) {
+      item->window.flags &= ~WINDOW_TEXTASINT;
+      item->window.flags |= WINDOW_TEXTASFLOAT;
+    } else {
+      item->window.flags &= ~WINDOW_TEXTASFLOAT;
+      item->window.flags |= WINDOW_TEXTASINT;
+    }
+  };
+
+  for (int i = 0; i < menu->itemCount; i++) {
+    itemDef_t *item = menu->items[i];
+
+    if (!item->colorSliderData.colorVar) {
+      continue;
+    }
+
+    const auto editDef = static_cast<editFieldDef_t *>(item->typeData);
+    const std::string &colorVar = item->colorSliderData.colorVar;
+
+    if (colorVar == COLOR_PICKER_R) {
+      if (item->type == ITEM_TYPE_TEXT) {
+        swapLabelType(item);
+      } else {
+        editDef->defVal = normalizedRGBSliders ? 1.0f : 255.0f;
+        editDef->maxVal = normalizedRGBSliders ? 1.0f : 255.0f;
+        editDef->step = normalizedRGBSliders ? 0.01f : 1.0f;
+        redFound = true;
+      }
+    } else if (colorVar == COLOR_PICKER_G) {
+      if (item->type == ITEM_TYPE_TEXT) {
+        swapLabelType(item);
+      } else {
+        editDef->defVal = 0.0f;
+        editDef->maxVal = normalizedRGBSliders ? 1.0f : 255.0f;
+        editDef->step = normalizedRGBSliders ? 0.01f : 1.0f;
+        greenFound = true;
+      }
+    } else if (colorVar == COLOR_PICKER_B) {
+      if (item->type == ITEM_TYPE_TEXT) {
+        swapLabelType(item);
+      } else {
+        editDef->defVal = 0.0f;
+        editDef->maxVal = normalizedRGBSliders ? 1.0f : 255.0f;
+        editDef->step = normalizedRGBSliders ? 0.01f : 1.0f;
+        blueFound = true;
+      }
+    }
+  }
+
+  // we should always find these but just in case
+  if (redFound && greenFound && blueFound) {
+    updateRGBSliderState(fullRGB);
+  } else {
+    Com_Printf(S_COLOR_YELLOW
+               "%s: unable to find color sliders for conversion\n",
+               __func__);
+  }
+}
+
 void ColorPicker::colorPickerDragFunc(itemDef_t *item, const float cursorX,
                                       const float cursorY, const int key) {
   rectDef_t rect = item->window.rect;
@@ -279,5 +367,9 @@ void ColorPicker::shrinkRectForColorPicker(rectDef_t &rect) {
   rect.y += 2;
   rect.w -= 4;
   rect.h -= 4;
+}
+
+bool ColorPicker::RGBSlidersAreNormalized() const {
+  return normalizedRGBSliders;
 }
 } // namespace ETJump

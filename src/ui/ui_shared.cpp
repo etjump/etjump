@@ -1585,6 +1585,10 @@ void Script_ConditionalScript(itemDef_t *item, qboolean *bAbort,
         } else if (!Q_stricmp(cvar, "uiCheckBackground")) {
           const char *script = uiShowBackground ? script1 : script2;
           Item_RunScript(item, bAbort, script);
+        } else if (!Q_stricmp(cvar, "colorPickerCheckSliderState")) {
+          const char *script =
+              DC->RGBSlidersAreNormalized() ? script1 : script2;
+          Item_RunScript(item, bAbort, script);
         }
 
         break;
