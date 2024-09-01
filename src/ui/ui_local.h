@@ -901,7 +901,8 @@ typedef struct {
 
   int etLegacyClient;
   bool eteClient;
-
+  bool vetClient; // original 2.60b, steam 2.60b or 2.60d
+  
   std::vector<std::string> serverMaplist;
 } uiInfo_t;
 

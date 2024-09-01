@@ -241,7 +241,7 @@ bool Database::UserInfo(gentity_t *ent, int id) {
       TimeStampToString(user->second->lastSeen), user->second->name,
       user->second->title, user->second->commands, user->second->greeting);
 
-  Printer::SendConsoleMessage(clientNum, msg);
+  Printer::SendConsoleMessage(clientNum, std::move(msg));
   return true;
 }
 
