@@ -732,9 +732,9 @@ void runFrameEnd() {
   }
 
   // populate map vote menu
-  if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.maplistReceived) {
+  if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.maplistRequested) {
     trap_SendClientCommand("requestMaplist");
-    cg.maplistReceived = true;
+    cg.maplistRequested = true;
   }
 }
 

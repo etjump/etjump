@@ -1264,7 +1264,7 @@ typedef struct {
 
   bool shadowCvarsSet;
   bool chatReplayReceived;
-  bool maplistReceived;
+  bool maplistRequested;
 
   // portalgun auto-binding
   bool portalgunBindingsAdjusted;
