@@ -420,10 +420,10 @@ qboolean CG_ServerCommandExt(const char *cmd) {
     return CG_displaybynumber();
   }
 
-  // TODO: The client will always request after cgame is initialized, thus
-  //  making '!listmaps' command sort of redundant. The command itself should
-  //  probably stay (the output formatting is nice and all), but now that
-  //  we're always receiving a full map list from server,
+  // TODO: The client will always request map list after cgame is initialized,
+  //  thus making '!listmaps' command sort of redundant. The command itself
+  //  should probably stay (the output formatting is nice and all),
+  //  but now that we're always receiving a full map list from server,
   //  we could use a local cache for map list instead of requesting it again.
   if (command == "maplist") {
     char arg[MAX_QPATH];
