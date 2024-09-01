@@ -181,7 +181,7 @@ void UI_LoadArenas() {
       }
     }
   } else {
-    for (auto &map : uiInfo.serverMaplist) {
+    for (const auto &map : uiInfo.serverMaplist) {
       std::string arenaFile = map;
       arenaFile.insert(0, "scripts/");
       arenaFile.append(".arena");
