@@ -35,13 +35,13 @@ static const char *LocationText[] = {"Center", "Top", "Chat", "Left"};
 ETJump::BannerSystem::BannerSystem(Options options) : _bannerIdx(0) {
   _options = std::move(options);
   subscribeToRunFrame([=](int levelTime) { check(levelTime); });
-  Printer::LogPrintln(stringFormat("Initialized banner system\n"
-                                   "- %d banners\n"
-                                   "- %ds interval\n"
-                                   "- %s location",
-                                   _options.messages.size(),
-                                   (_options.interval / 1000),
-                                   LocationText[_options.location]));
+  Printer::logLn(stringFormat("Initialized banner system\n"
+                              "- %d banners\n"
+                              "- %ds interval\n"
+                              "- %s location",
+                              _options.messages.size(),
+                              (_options.interval / 1000),
+                              LocationText[_options.location]));
 }
 
 void ETJump::BannerSystem::check(int levelTime) {
@@ -57,19 +57,17 @@ void ETJump::BannerSystem::check(int levelTime) {
 
   switch (_options.location) {
     case Center:
-      Printer::BroadcastCenterMessage(message);
-      break;
-    case Top:
-      Printer::BroadcastTopBannerMessage(message);
+      Printer::centerAll(message);
       break;
     case Chat:
-      Printer::BroadcastChatMessage(message);
+      Printer::chatAll(message);
       break;
     case Left:
-      Printer::BroadcastLeftBannerMessage(message);
+      Printer::popupAll(message);
       break;
+    case Top:
     default:
-      Printer::BroadcastTopBannerMessage(message);
+      Printer::bannerAll(message);
       break;
   }
 

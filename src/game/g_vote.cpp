@@ -112,8 +112,7 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote) {
   auto clientNum = ClientNum(ent);
 
   if (fShowVote) {
-    Printer::SendConsoleMessage(clientNum,
-                                "\nValid ^3callvote^7 commands are:\n"
+    Printer::console(clientNum, "\nValid ^3callvote^7 commands are:\n"
                                 "^3----------------------------\n");
   }
 
@@ -132,28 +131,27 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote) {
 
   for (i = 0; i < rows; i++) {
     if (i + rows * 3 + 1 <= num_cmds) {
-      Printer::SendConsoleMessage(
-          clientNum, va("^5%-17s%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-                        aVoteInfo[vi[i + rows]].pszVoteName,
-                        aVoteInfo[vi[i + rows * 2]].pszVoteName,
-                        aVoteInfo[vi[i + rows * 3]].pszVoteName));
+      Printer::console(clientNum, va("^5%-17s%-17s%-17s%-17s",
+                                     aVoteInfo[vi[i]].pszVoteName,
+                                     aVoteInfo[vi[i + rows]].pszVoteName,
+                                     aVoteInfo[vi[i + rows * 2]].pszVoteName,
+                                     aVoteInfo[vi[i + rows * 3]].pszVoteName));
     } else if (i + rows * 2 + 1 <= num_cmds) {
-      Printer::SendConsoleMessage(
-          clientNum, va("^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-                        aVoteInfo[vi[i + rows]].pszVoteName,
-                        aVoteInfo[vi[i + rows * 2]].pszVoteName));
+      Printer::console(clientNum,
+                       va("^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+                          aVoteInfo[vi[i + rows]].pszVoteName,
+                          aVoteInfo[vi[i + rows * 2]].pszVoteName));
     } else if (i + rows + 1 <= num_cmds) {
-      Printer::SendConsoleMessage(
-          clientNum, va("^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-                        aVoteInfo[vi[i + rows]].pszVoteName));
+      Printer::console(clientNum,
+                       va("^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+                          aVoteInfo[vi[i + rows]].pszVoteName));
     } else {
-      Printer::SendConsoleMessage(clientNum,
-                                  va("^5%-17s", aVoteInfo[vi[i]].pszVoteName));
+      Printer::console(clientNum, va("^5%-17s", aVoteInfo[vi[i]].pszVoteName));
     }
   }
 
   if (fShowVote) {
-    Printer::SendConsoleMessage(
+    Printer::console(
         clientNum,
         "\n\nUsage: ^3callvote <command> <params>\n"
         "^7For current settings/help, use: ^3callvote <command> ?\n");
@@ -379,7 +377,7 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
 
     std::string map;
     if (!ETJump::matchRandomMap(arg2, map)) {
-      Printer::SendConsoleMessage(ClientNum(ent), map);
+      Printer::console(ClientNum(ent), map);
       return G_INVALID;
     }
 
@@ -420,7 +418,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 
     std::string map;
     if (!ETJump::matchMap(arg2, map, cheats)) {
-      Printer::SendConsoleMessage(clientNum, map);
+      Printer::console(clientNum, map);
       return G_INVALID;
     }
 
@@ -491,7 +489,7 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 
     if (arg2[0]) {
       if (!CustomMapTypeExists(arg2)) {
-        Printer::SendPopupMessage(
+        Printer::popup(
             clientNum,
             stringFormat(
                 "Specified custom vote type ^3'%s' ^7does not exist.\n", arg2));
@@ -503,7 +501,7 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 
       // in case someone made an empty map list, or none are available
       if (numMaps == 0) {
-        Printer::SendPopupMessage(
+        Printer::popup(
             clientNum,
             stringFormat("Specified custom vote type ^3'%s' ^7is empty or none "
                          "of the maps are available.\n",
@@ -532,8 +530,8 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                     "use this feature.\n",
                     arg);
       } else {
-        Printer::SendPopupMessage(
-            clientNum, stringFormat("Sorry, calling [lof]^3%s^7[lon] with less "
+        Printer::popup(clientNum,
+                       stringFormat("Sorry, calling [lof]^3%s^7[lon] with less "
                                     "than 3 valid maps on %s is not possible.",
                                     arg, arg2[0] ? "a list" : "the server"));
       }
@@ -609,8 +607,8 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
 
     // if auto rtv is already off, no point turning it off again
     if (Q_atoi(arg2) == 0 && !g_autoRtv.integer) {
-      Printer::SendPopupMessage(
-          ClientNum(ent), "^gAutomatic Rock The Vote is already turned off.");
+      Printer::popup(ClientNum(ent),
+                     "^gAutomatic Rock The Vote is already turned off.");
       return G_INVALID;
     }
 
@@ -620,8 +618,7 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
                             va("g_autoRtv %s", level.voteInfo.vote_value));
 
     if (!Q_stricmp(level.voteInfo.vote_value, "0")) {
-      Printer::BroadcastPopupMessage(
-          "^gAutomatic Rock The Vote has been turned off.");
+      Printer::popupAll("^gAutomatic Rock The Vote has been turned off.");
     } else {
       std::string voteMsg;
 
@@ -636,9 +633,9 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
           interval - ((level.time - game.rtv->autoRtvStartTime) / (1000 * 60));
       const char *minutesStr = nextVoteTime == 1 ? "minute" : "minutes";
 
-      Printer::BroadcastPopupMessage(voteMsg);
+      Printer::popupAll(voteMsg);
       if (nextVoteTime > 0) {
-        Printer::BroadcastPopupMessage(
+        Printer::popupAll(
             stringFormat("^gNext vote will be called in ^3%i ^g%s.",
                          nextVoteTime, minutesStr));
       }

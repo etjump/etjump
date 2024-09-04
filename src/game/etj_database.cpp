@@ -210,13 +210,12 @@ bool Database::UserInfo(gentity_t *ent, int id) {
   const int clientNum = ClientNum(ent);
 
   if (user == users_.end()) {
-    Printer::SendChatMessage(clientNum, "^3userinfo: ^7no user found with id " +
-                                            std::to_string(id));
+    Printer::chat(clientNum,
+                  "^3userinfo: ^7no user found with id " + std::to_string(id));
     return false;
   }
 
-  Printer::SendChatMessage(clientNum,
-                           "^3userinfo: ^7check console for more information.");
+  Printer::chat(clientNum, "^3userinfo: ^7check console for more information.");
 
   std::string ip = "N/A";
   gentity_t *other = ETJump::session->gentityFromId(id);
@@ -241,7 +240,7 @@ bool Database::UserInfo(gentity_t *ent, int id) {
       TimeStampToString(user->second->lastSeen), user->second->name,
       user->second->title, user->second->commands, user->second->greeting);
 
-  Printer::SendConsoleMessage(clientNum, std::move(msg));
+  Printer::console(clientNum, std::move(msg));
   return true;
 }
 

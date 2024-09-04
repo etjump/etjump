@@ -1005,8 +1005,7 @@ void ClientThink_real(gentity_t *ent) {
   if (!g_cheats.integer) {
     if (ent->client->noclip && Utilities::inNoNoclipArea(ent)) {
       ent->client->noclip = qfalse;
-      Printer::SendCenterMessage(clientNum,
-                                 "^7You cannot ^3noclip ^7inside this area.\n");
+      Printer::center(clientNum, "^7You cannot ^3noclip ^7inside this area.\n");
     }
   }
 
@@ -1109,13 +1108,13 @@ void ClientThink_real(gentity_t *ent) {
   // Stop lagging through triggers in timeruns
   if (client->sess.timerunActive) {
     if (client->ps.ping > 400) {
-      Printer::SendCenterMessage(
-          clientNum, "^3WARNING: ^7Timerun stopped due to high ping!");
+      Printer::center(clientNum,
+                      "^3WARNING: ^7Timerun stopped due to high ping!");
       InterruptRun(ent);
     }
     if (client->pers.maxFPS > 0 && client->pers.maxFPS < 25) {
-      Printer::SendCenterMessage(
-          clientNum, "^3WARNING: ^7Timerun stopped due to low FPS!");
+      Printer::center(clientNum,
+                      "^3WARNING: ^7Timerun stopped due to low FPS!");
       InterruptRun(ent);
     }
   }

@@ -26,7 +26,6 @@
 #include "etj_game.h"
 #include "etj_session.h"
 #include "etj_commands.h"
-#include "etj_save_system.h"
 #include "etj_levels.h"
 #include "etj_database.h"
 #include "etj_custom_map_votes.h"
@@ -118,10 +117,9 @@ bool checkCheatCvars(gclient_s *client, int flags) {
 
   if (cheatCvarsEnabled) {
     trap_SendServerCommand(clientNum, va("cheatCvarsOff %i", flags));
-    Printer::SendChatMessage(clientNum,
-                             "^gCheat cvars are not allowed on this server, "
+    Printer::chat(clientNum, "^gCheat cvars are not allowed on this server, "
                              "check console for more information.\n");
-    Printer::SendConsoleMessage(clientNum, std::move(message));
+    Printer::console(clientNum, std::move(message));
   }
 
   return cheatCvarsEnabled;

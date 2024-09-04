@@ -1518,9 +1518,8 @@ void G_UpdateCvars(void) {
 
               if (ent->client->sess.specLocked) {
                 ent->client->sess.specLocked = qfalse;
-                Printer::SendPopupMessage(
-                    ClientNum(ent),
-                    "You are no longer locked from spectators.");
+                Printer::popup(ClientNum(ent),
+                               "You are no longer locked from spectators.");
                 ETJump::UpdateClientConfigString(*ent);
               }
             }
@@ -2869,14 +2868,14 @@ void CheckVote() {
 
   if (!isAutoRtvVote &&
       level.voteInfo.voter_team != voter->client->sess.sessionTeam) {
-    Printer::BroadcastPopupMessage("^7Vote canceled: caller switched team.");
+    Printer::popupAll("^7Vote canceled: caller switched team.");
     G_LogPrintf("Vote canceled: %s (caller %s switched teams)\n",
                 level.voteInfo.voteString, voter->client->pers.netname);
 
     level.voteInfo.voteYes = 0;
     level.voteInfo.voteNo = level.numConnectedClients;
   } else if (level.voteInfo.voteYes > requiredClients) {
-    Printer::BroadcastPopupMessage("^5Vote passed!");
+    Printer::popupAll("^5Vote passed!");
     G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
 
     level.voteInfo.voteTime = 0;
@@ -2887,7 +2886,7 @@ void CheckVote() {
              level.time - level.voteInfo.voteTime >= VOTE_TIME) {
     std::string voteFailedMsg = ETJump::stringFormat("^3Vote FAILED! ^3(%s)",
                                                      level.voteInfo.voteString);
-    Printer::BroadcastPopupMessage(voteFailedMsg);
+    Printer::popupAll(voteFailedMsg);
     G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
 
     level.voteInfo.voteTime = 0;

@@ -1553,8 +1553,8 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
     }
 
     if (!(self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)) {
-      Printer::SendCenterMessage(ClientNum(activator),
-                                 "^7Your portal gun portals have been reset.");
+      Printer::center(ClientNum(activator),
+                      "^7Your portal gun portals have been reset.");
     }
   }
 

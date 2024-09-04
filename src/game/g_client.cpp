@@ -1,6 +1,5 @@
 #include "g_local.h"
 #include "etj_save_system.h"
-#include "etj_inactivity_timer.h"
 #include "etj_string_utilities.h"
 #include "etj_numeric_utilities.h"
 #include "etj_printer.h"
@@ -2835,7 +2834,7 @@ void ClientDisconnect(int clientNum) {
   // note: after CalculateRanks so level.numConnectedClients is up-to-date
   if (level.voteInfo.voteTime) {
     if (level.voteInfo.voter_cn == clientNum) {
-      Printer::BroadcastPopupMessage("^7Vote canceled: caller disconnected.");
+      Printer::popupAll("^7Vote canceled: caller disconnected.");
       G_LogPrintf("Vote canceled: %s (caller %s disconnected)\n",
                   level.voteInfo.voteString, ent->client->pers.netname);
       resetVote();

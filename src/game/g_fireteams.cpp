@@ -674,9 +674,8 @@ static void setSaveLimitForFTMembers(fireteamData_t *ft, int limit) {
     } else {
       ent = g_entities + ft->joinOrder[i];
       ent->client->sess.saveLimitFt = limit;
-      Printer::SendPopupMessage(
-          ClientNum(ent),
-          stringFormat("fireteam: ^3savelimit ^7was set to ^3%i", limit));
+      Printer::popup(
+          ent, stringFormat("fireteam: ^3savelimit ^7was set to ^3%i", limit));
     }
   }
 }
@@ -698,7 +697,7 @@ static void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
       ent->client->ftNoGhostThisLife = true;
     }
 
-    Printer::SendPopupMessage(ClientNum(ent), msg);
+    Printer::popup(ent, msg);
   }
 }
 
@@ -722,12 +721,12 @@ static bool fireTeamMemberIsTimerunning(fireteamData_t *ft) {
 
 static bool canSetFireteamRules(const int &clientNum, fireteamData_t **ft) {
   if (!G_IsOnFireteam(clientNum, ft)) {
-    Printer::SendPopupMessage(clientNum, "You are not in a fireteam");
+    Printer::popup(clientNum, "You are not in a fireteam");
     return false;
   }
 
   if (!G_IsFireteamLeader(clientNum, ft)) {
-    Printer::SendPopupMessage(clientNum, "You are not the fireteam leader");
+    Printer::popup(clientNum, "You are not the fireteam leader");
     return false;
   }
 
@@ -747,7 +746,7 @@ static void setFireTeamRules(const int &clientNum) {
   }
 
   if (trap_Argc() < 4) {
-    Printer::SendConsoleMessage(clientNum, usageStr);
+    Printer::console(clientNum, usageStr);
     return;
   }
 
@@ -755,8 +754,7 @@ static void setFireTeamRules(const int &clientNum) {
 
   if (!Q_stricmp(arg1, "savelimit")) {
     if (level.limitedSaves > 0) {
-      Printer::SendPopupMessage(clientNum,
-                                "fireteam: ^7unable to set ^3savelimit ^7- "
+      Printer::popup(clientNum, "fireteam: ^7unable to set ^3savelimit ^7- "
                                 "save is limited by the map");
       return;
     }
@@ -778,8 +776,8 @@ static void setFireTeamRules(const int &clientNum) {
 
   if (!Q_stricmp(arg1, "noghost")) {
     if (g_ghostPlayers.integer != 1) {
-      Printer::SendPopupMessage(
-          clientNum, stringFormat("fireteam: ^3noghost ^7is disabled by the %s",
+      Printer::popup(clientNum,
+                     stringFormat("fireteam: ^3noghost ^7is disabled by the %s",
                                   level.noGhost ? "map" : "server"));
       return;
     }
@@ -787,16 +785,15 @@ static void setFireTeamRules(const int &clientNum) {
     // disable some checks if cheats are enabled
     if (!g_cheats.integer) {
       if (level.noFTNoGhost) {
-        Printer::SendPopupMessage(
-            clientNum, "fireteam: ^3noghost ^7cannot be enabled on this map");
+        Printer::popup(clientNum,
+                       "fireteam: ^3noghost ^7cannot be enabled on this map");
         return;
       }
 
       // ghosting cannot be enabled if someone is already timerunning unless
       // the run allows it, so we need to only check for enabling here
       if (!ft->noGhost && fireTeamMemberIsTimerunning(ft)) {
-        Printer::SendPopupMessage(clientNum,
-                                  "fireteam: a member of your fireteam is "
+        Printer::popup(clientNum, "fireteam: a member of your fireteam is "
                                   "timerunning, cannot enable ^3noghost");
         return;
       }
@@ -806,25 +803,21 @@ static void setFireTeamRules(const int &clientNum) {
 
     if (!Q_stricmp(val, "on") || !Q_stricmp(val, "1")) {
       if (ft->noGhost) {
-        Printer::SendPopupMessage(clientNum,
-                                  "fireteam: ^3noghost ^7is already enabled");
+        Printer::popup(clientNum, "fireteam: ^3noghost ^7is already enabled");
         return;
       }
 
       setFireTeamGhosting(ft, true);
     } else if (!Q_stricmp(val, "off") || !Q_stricmp(val, "0")) {
       if (!ft->noGhost) {
-        Printer::SendPopupMessage(clientNum,
-                                  "fireteam: ^3noghost ^7is already disabled");
+        Printer::popup(clientNum, "fireteam: ^3noghost ^7is already disabled");
         return;
       }
 
       setFireTeamGhosting(ft, false);
     } else {
-      Printer::SendPopupMessage(clientNum,
-                                "fireteam: invalid ^3noghost ^7value");
-      Printer::SendPopupMessage(clientNum,
-                                "Valid values are: ^3<on|1> <off|0>");
+      Printer::popup(clientNum, "fireteam: invalid ^3noghost ^7value");
+      Printer::popup(clientNum, "Valid values are: ^3<on|1> <off|0>");
       return;
     }
 
@@ -832,9 +825,9 @@ static void setFireTeamRules(const int &clientNum) {
     return;
   }
 
-  Printer::SendPopupMessage(
-      clientNum, "Failed to set fireteam rules, see console for usage");
-  Printer::SendConsoleMessage(clientNum, usageStr);
+  Printer::popup(clientNum,
+                 "Failed to set fireteam rules, see console for usage");
+  Printer::console(clientNum, usageStr);
 }
 
 void setupTeamJumpMode(const int &clientNum) {
@@ -845,8 +838,7 @@ void setupTeamJumpMode(const int &clientNum) {
   }
 
   if (trap_Argc() != 3) {
-    Printer::SendPopupMessage(clientNum,
-                              "^3usage: ^7fireteam <tj|teamjump> <on|off>");
+    Printer::popup(clientNum, "^3usage: ^7fireteam <tj|teamjump> <on|off>");
     return;
   }
 
@@ -872,21 +864,20 @@ void setupTeamJumpMode(const int &clientNum) {
       ft->teamJumpMode = false;
     }
   } else {
-    Printer::SendPopupMessage(clientNum,
-                              "fireteam: invalid ^3teamjump ^7value");
-    Printer::SendPopupMessage(clientNum, "Valid values are: ^3<on|1> <off|0>");
+    Printer::popup(clientNum, "fireteam: invalid ^3teamjump ^7value");
+    Printer::popup(clientNum, "Valid values are: ^3<on|1> <off|0>");
     return;
   }
 
   if (!announce) {
-    Printer::SendPopupMessage(clientNum, message);
+    Printer::popup(clientNum, message);
   } else {
     for (int i = 0; i < level.numConnectedClients; i++) {
       if (ft->joinOrder[i] == -1) {
         continue;
       }
 
-      Printer::SendPopupMessage(ft->joinOrder[i], message);
+      Printer::popup(ft->joinOrder[i], message);
     }
 
     G_UpdateFireteamConfigString(ft);

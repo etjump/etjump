@@ -57,7 +57,7 @@ void InitBannerSystem() {
 }
 
 void ShutdownBannerSystem() {
-  Printer::LogPrintln("Banner system shut down");
+  Printer::logLn("Banner system shut down");
   if (bannerSystem) {
     bannerSystem = nullptr;
   }
@@ -77,11 +77,11 @@ void unsubscribeToRunFrame(int id) {
 
 // Initializes the ETJump subsystems
 void ETJump_InitGame(int levelTime, int randomSeed, int restart) {
-  Printer::LogPrint("----------------------------------------------------------"
-                    "----------------------\n"
-                    "Initializing ETJump subsystems\n"
-                    "----------------------------------------------------------"
-                    "----------------------\n");
+  Printer::log("---------------------------------------------------------------"
+               "-----------------\n"
+               "Initializing ETJump subsystems\n"
+               "---------------------------------------------------------------"
+               "-----------------\n");
   runFrameCallbacks.clear();
 
   // each subsystem will subscribe to necessary events
@@ -89,28 +89,28 @@ void ETJump_InitGame(int levelTime, int randomSeed, int restart) {
     InitBannerSystem();
   }
 
-  Printer::LogPrint("----------------------------------------------------------"
-                    "----------------------\n"
-                    "ETJump subsystems initialized\n"
-                    "----------------------------------------------------------"
-                    "----------------------\n");
+  Printer::log("---------------------------------------------------------------"
+               "-----------------\n"
+               "ETJump subsystems initialized\n"
+               "---------------------------------------------------------------"
+               "-----------------\n");
 }
 
 // Shuts down the ETJump subsystems
 void ETJump_ShutdownGame(int restart) {
-  Printer::LogPrint("----------------------------------------------------------"
-                    "----------------------\n"
-                    "Shutting down the ETJump subsystems\n"
-                    "----------------------------------------------------------"
-                    "----------------------\n");
+  Printer::log("---------------------------------------------------------------"
+               "-----------------\n"
+               "Shutting down the ETJump subsystems\n"
+               "---------------------------------------------------------------"
+               "-----------------\n");
 
   ShutdownBannerSystem();
 
-  Printer::LogPrint("----------------------------------------------------------"
-                    "----------------------\n"
-                    "ETJump subsystems shut down\n"
-                    "----------------------------------------------------------"
-                    "----------------------\n");
+  Printer::log("---------------------------------------------------------------"
+               "-----------------\n"
+               "ETJump subsystems shut down\n"
+               "---------------------------------------------------------------"
+               "-----------------\n");
 }
 
 void ETJump_RunFrame(int levelTime) {

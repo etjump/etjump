@@ -63,21 +63,20 @@ getOptCommand(const std::string &commandPrefix, int clientNum,
   auto command = ETJump::CommandParser(def, *args).parse();
 
   if (command.helpRequested) {
-    Printer::SendChatMessage(
+    Printer::chat(
         clientNum,
         ETJump::stringFormat("^3%s: ^7check console for help.", commandPrefix));
-    Printer::SendConsoleMessage(clientNum, def.help());
+    Printer::console(clientNum, def.help());
     return {};
   }
 
   if (!command.errors.empty()) {
-    Printer::SendChatMessage(
+    Printer::chat(
         clientNum,
         stringFormat(
             "^3%s: ^7operation failed. Check console for more information.",
             commandPrefix));
-
-    Printer::SendConsoleMessage(clientNum, command.getErrorMessage() + "\n");
+    Printer::console(clientNum, command.getErrorMessage() + "\n");
 
     return {};
   }
@@ -114,7 +113,7 @@ bool listCustomVotes(gentity_t *ent, Arguments argv) {
 
   if (argv->size() != 2) {
     std::string types = game.customMapVotes->ListTypes();
-    Printer::SendConsoleMessage(
+    Printer::console(
         clientNum,
         ETJump::stringFormat(
             "^gAvailable custom map vote lists:\n^z %s\n\n^gUse ^3%s "
@@ -126,12 +125,12 @@ bool listCustomVotes(gentity_t *ent, Arguments argv) {
   const auto &type = argv->at(1);
   const std::string maplist = game.customMapVotes->ListInfo(type);
   if (maplist.empty()) {
-    Printer::SendConsoleMessage(
+    Printer::console(
         clientNum, ETJump::stringFormat("^3%s: ^gcould not find list ^3'%s'\n",
                                         cmd, type));
     return false;
   }
-  Printer::SendConsoleMessage(clientNum, maplist);
+  Printer::console(clientNum, maplist);
   return true;
 }
 
@@ -977,7 +976,7 @@ bool FindMap(gentity_t *ent, Arguments argv) {
 
   buffer += "\n";
 
-  Printer::SendConsoleMessage(ClientNum(ent), std::move(buffer));
+  Printer::console(ClientNum(ent), std::move(buffer));
   return true;
 }
 
@@ -1145,8 +1144,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv) {
     ++listedMaps;
   }
 
-  Printer::SendConsoleMessage(ClientNum(ent), std::move(buffer));
-
+  Printer::console(ClientNum(ent), std::move(buffer));
   return true;
 }
 
@@ -1234,8 +1232,7 @@ bool ListMaps(gentity_t *ent, Arguments argv) {
   buffer += "\n^zFound ^3" + ETJump::getPluralizedString(maps.size(), "^zmap") +
             " on the server.\n";
 
-  Printer::SendConsoleMessage(ClientNum(ent), std::move(buffer));
-
+  Printer::chat(ClientNum(ent), buffer);
   return true;
 }
 
@@ -1403,7 +1400,7 @@ bool MostPlayed(gentity_t *ent, Arguments argv) {
     ++listedMaps;
   }
 
-  Printer::SendConsoleMessage(ClientNum(ent), std::move(buffer));
+  Printer::console(ClientNum(ent), std::move(buffer));
 
   return true;
 }
@@ -1521,10 +1518,9 @@ bool Noclip(gentity_t *ent, Arguments argv) {
 bool Passvote(gentity_t *ent, Arguments argv) {
   if (level.voteInfo.voteTime) {
     if (level.voteInfo.vote_fn == ETJump::G_RockTheVote_v) {
-      Printer::SendChatMessage(
-          ClientNum(ent),
-          ETJump::stringFormat("^3passvote:^7 %s cannot be force passed.",
-                               level.voteInfo.voteString));
+      Printer::chat(
+          ent, ETJump::stringFormat("^3passvote:^7 %s cannot be force passed.",
+                                    level.voteInfo.voteString));
     } else {
       level.voteInfo.forcePass = qtrue;
       ChatPrintAll("^3passvote:^7 vote has been passed.");
@@ -1556,8 +1552,7 @@ bool Rename(gentity_t *ent, Arguments argv) {
   if (ent) {
     if (IsTargetHigherLevel(ent, target, true)) {
       if (ent != target) {
-        Printer::SendChatMessage(
-            ClientNum(ent), "^3rename: ^7you cannot rename a fellow admin.");
+        Printer::chat(ent, "^3rename: ^7you cannot rename a fellow admin.");
         return false;
       }
     }
@@ -1910,7 +1905,7 @@ bool Tokens(gentity_t *ent, Arguments argv) {
     if (argv->size() < 2) {
       ChatPrintTo(ent, "^3usage: ^7check console for "
                        "more information");
-      Printer::SendConsoleMessage(
+      Printer::console(
           ClientNum(ent),
           "^7!tokens create <easy (e)|medium (m)|hard (h)> ^9| Creates a new "
           "token\n"
@@ -1922,10 +1917,10 @@ bool Tokens(gentity_t *ent, Arguments argv) {
     }
   } else {
     if (argv->size() < 4) {
-      Printer::SendConsoleMessage(
-          ClientNum(ent),
-          "^3usage: \n^7!tokens <easy (e)|medium (m)|hard (h)> <difficulty> "
-          "<x> <y> <z>\n"
+      Printer::console(
+          ent,
+          "^3usage: \n"
+          "^7!tokens <easy (e)|medium (m)|hard (h)> <difficulty> <x> <y> <z>\n"
           "!tokens <delete> <easy (e)|medium (m)|hard (h)> <1-6>\n");
       return false;
     }
@@ -2045,18 +2040,17 @@ bool NewMaps(gentity_t *ent, Arguments argv) {
     try {
       numMaps = std::stoi(argv->at(1), nullptr, 10);
     } catch (const std::invalid_argument &) {
-      Printer::SendChatMessage(
-          ClientNum(ent),
-          ETJump::stringFormat("^3newmaps: ^7%s^7 is not a number",
-                               argv->at(1)));
+      Printer::chat(ClientNum(ent),
+                    ETJump::stringFormat("^3newmaps: ^7%s^7 is not a number",
+                                         argv->at(1)));
       return false;
     } catch (const std::out_of_range &) {
       numMaps = 5;
     }
 
     if (numMaps <= 0) {
-      Printer::SendChatMessage(ClientNum(ent),
-                               "^3newmaps: ^7second argument must be over 0");
+      Printer::chat(ClientNum(ent),
+                    "^3newmaps: ^7second argument must be over 0");
       return false;
     }
 
@@ -2083,8 +2077,7 @@ bool NewMaps(gentity_t *ent, Arguments argv) {
     lines++;
   }
 
-  Printer::SendConsoleMessage(ClientNum(ent), std::move(buffer));
-
+  Printer::console(ClientNum(ent), std::move(buffer));
   return true;
 }
 
@@ -2126,11 +2119,10 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
 
   if (end.hasValue()) {
     if ((*end).date < start) {
-      Printer::SendChatMessage(
-          clientNum,
-          ETJump::stringFormat(
-              "^3addseason: ^7Start time `%s` is after end time `%s`",
-              start.toDateString(), end.value().date.toDateString()));
+      Printer::chat(clientNum,
+                    ETJump::stringFormat(
+                        "^3addseason: ^7Start time `%s` is after end time `%s`",
+                        start.toDateString(), end.value().date.toDateString()));
       return true;
     }
   }
@@ -2234,9 +2226,9 @@ bool validateCustomVoteCommand(const std::string &cmdName, const int &clientNum,
 
   for (const auto &op : command.options) {
     if (ETJump::sanitize(op.second.text).empty()) {
-      Printer::SendChatMessage(
-          clientNum, ETJump::stringFormat("^3%s: ^7'%s' cannot be empty.",
-                                          cmdName, op.first));
+      Printer::chat(clientNum,
+                    ETJump::stringFormat("^3%s: ^7'%s' cannot be empty.",
+                                         cmdName, op.first));
       commandOk = false;
     }
   }
@@ -2514,8 +2506,7 @@ bool Commands::List(gentity_t *ent) {
   const int clienNum = ClientNum(ent);
   std::string helpMsg;
 
-  Printer::SendChatMessage(clienNum,
-                           "^3help: ^gcheck console for more information.");
+  Printer::chat(clienNum, "^3help: ^gcheck console for more information.");
 
   int i = 1;
   std::bitset<256> perm = ETJump::session->Permissions(ent);
@@ -2542,7 +2533,7 @@ bool Commands::List(gentity_t *ent) {
     helpMsg += "\n^gUse admin commands silently with ^3/!command\n";
   }
 
-  Printer::SendConsoleMessage(clienNum, std::move(helpMsg));
+  Printer::console(clienNum, std::move(helpMsg));
   return true;
 }
 
