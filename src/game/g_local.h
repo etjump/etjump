@@ -2798,17 +2798,6 @@ void Use_target_remove_powerups(gentity_t *ent, gentity_t *other,
                                 gentity_t *activator);
 
 // g_utilities.cpp
-// C versions of printing functions
-void C_BPAll(const char *msg);
-void C_BPTo(gentity_t *target, const char *msg);
-void C_CPAll(const char *msg);
-void C_CPMAll(const char *msg);
-void C_CPMTo(gentity_t *target, const char *msg);
-void C_CPTo(gentity_t *target, const char *msg);
-void C_ChatPrintAll(const char *msg);
-void C_ChatPrintTo(gentity_t *target, const char *msg);
-void C_ConsolePrintAll(const char *msg);
-void C_ConsolePrintTo(gentity_t *target, const char *msg);
 const char *EscapeString(const char *in);
 const char *interpolateNametags(const char *text, const int color);
 const char *findAndReplaceNametags(const char *text, const char *name);

@@ -24,6 +24,7 @@
 
 #include "etj_session.h"
 #include "utilities.hpp"
+#include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_levels.h"
 #include <iostream>
@@ -158,7 +159,7 @@ bool Session::GuidReceived(gentity_t *ent) {
                 (g_entities + clientNum)->client->pers.netname,
                 clients_[clientNum].guid.c_str(),
                 clients_[clientNum].hwid.c_str());
-    CPMAll(
+    Printer::popupAll(
         va("Banned player %s ^7tried to connect.", ent->client->pers.netname));
     trap_DropClient(clientNum, "You are banned.", 0);
     return false;
@@ -217,8 +218,9 @@ void Session::GetUserAndLevelData(int clientNum) {
 
   if (ent->client->sess.firstTime) {
     PrintGreeting(ent);
-    CPMTo(ent, std::string("^5Your last visit was on ") +
-                   clients_[clientNum].user->GetLastSeenString() + ".");
+    Printer::popup(ent, "^5Your last visit was on " +
+                            clients_[clientNum].user->GetLastSeenString() +
+                            ".");
   }
 
   if (!clients_[clientNum].user) {
@@ -292,7 +294,7 @@ void Session::PrintGreeting(gentity_t *ent) {
     ETJump::StringUtil::replaceAll(greeting, "[d]",
                                    cl->user->GetLastVisitString());
     G_DPrintf("Printing greeting %s\n", greeting.c_str());
-    ChatPrintAll(greeting);
+    Printer::chatAll(greeting);
   } else {
     if (!cl->level) {
       return;
@@ -307,7 +309,7 @@ void Session::PrintGreeting(gentity_t *ent) {
       ETJump::StringUtil::replaceAll(greeting, "[d]",
                                      cl->user->GetLastVisitString());
       G_DPrintf("Printing greeting %s\n", greeting.c_str());
-      ChatPrintAll(greeting);
+      Printer::chatAll(greeting);
     }
   }
 }
@@ -338,9 +340,8 @@ bool Session::SetLevel(int id, int level) {
   for (int i = 0; i < MAX_CLIENTS; i++) {
     if (clients_[i].user && clients_[i].user->id == id) {
       ParsePermissions(i);
-      ChatPrintTo(g_entities + i, va("^3setlevel: ^7you are now a "
-                                     "level %d user.",
-                                     level));
+      Printer::chat(g_entities + i,
+                    va("^3setlevel: ^7you are now a level %d user.", level));
     }
   }
   return true;
@@ -428,24 +429,25 @@ void Session::PrintFinger(gentity_t *ent, gentity_t *target) {
     return;
   }
 
-  ChatPrintTo(ent, "^3finger: ^7check console for more information.");
-  BeginBufferPrint();
-  BufferPrint(ent, va("^7Name: %s\n", target->client->pers.netname));
-  BufferPrint(ent,
-              va("^7Original name: %s\n", clients_[num].user->name.c_str()));
-  BufferPrint(ent, va("^7ID: %d\n", clients_[num].user->id));
-  BufferPrint(ent, va("^7Level: %d\n", clients_[num].user->level));
-  BufferPrint(ent,
-              va("^7Title: %s\n", clients_[num].user->title.length() > 0
-                                      ? clients_[num].user->title.c_str()
-                                      : clients_[num].level->name.c_str()));
-  FinishBufferPrint(ent, false);
+  Printer::chat(ent, "^3finger: ^7check console for more information.");
+
+  const auto user = clients_[num].user;
+  Printer::console(
+      ent, ETJump::stringFormat(
+               "^7Name: %s\n"
+               "^7Original name: %s\n"
+               "^7ID: %d\n"
+               "^7Level: %d\n"
+               "^7Title: %s\n",
+               target->client->pers.netname, user->name, user->id, user->level,
+               user->title.empty() ? clients_[num].level->name : user->title));
 }
 
 void Session::PrintAdmintest(gentity_t *ent) {
   int clientNum = ClientNum(ent);
 
   if (!clients_[ClientNum(ent)].user) {
+    // TODO: what is this for?
     message_ = "you must wait until user has connected.";
     return;
   }
@@ -458,7 +460,7 @@ void Session::PrintAdmintest(gentity_t *ent) {
                ? clients_[clientNum].user->title.c_str()
                : clients_[clientNum].level->name.c_str());
 
-    ChatPrintAll(message);
+    Printer::chatAll(message);
   }
 }
 

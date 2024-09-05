@@ -26,6 +26,7 @@
 #include "json/json.h"
 #include "etj_local.h"
 #include "utilities.hpp"
+#include "etj_printer.h"
 #include <fstream>
 
 Motd::Motd() : initialized_(false) {}
@@ -76,8 +77,8 @@ void Motd::Initialize() {
 
 void Motd::PrintMotd(gentity_t *ent) {
   if (initialized_) {
-    ChatPrintTo(ent, chatMessage_);
-    ConsolePrintTo(ent, motd_);
+    Printer::chat(ent, chatMessage_);
+    Printer::console(ent, motd_);
   }
 }
 

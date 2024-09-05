@@ -5047,7 +5047,7 @@ void ClientCommand(int clientNum) {
   }
 
   if (!Q_stricmp(cmd, "mod_information")) {
-    C_ConsolePrintTo(ent,
+    Printer::console(ent,
                      va("%s %s %s", GAME_NAME, GAME_VERSION_DATED, __TIME__));
     return;
   }

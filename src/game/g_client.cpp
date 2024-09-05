@@ -1697,16 +1697,16 @@ void G_NameChanged(gentity_t *ent) {
   }
 
   if (g_nameChangeLimit.integer - client->sess.nameChangeCount == 0) {
-    C_CPMTo(ent,
-            va("^3WARNING: ^7You must wait at least %s "
-               "before renaming.",
-               ETJump::getSecondsString(g_nameChangeInterval.integer).c_str()));
+    Printer::popup(
+        ent,
+        va("^3WARNING: ^7You must wait at least %s before renaming.",
+           ETJump::getSecondsString(g_nameChangeInterval.integer).c_str()));
   } else if (client->sess.nameChangeCount > g_nameChangeLimit.integer) {
     trap_DropClient(ClientNum(ent), "You were kicked for spamming rename.", 0);
   } else {
-    C_CPMTo(ent,
-            va("^3WARNING: ^7You have %d name changes left",
-               (g_nameChangeLimit.integer - client->sess.nameChangeCount)));
+    Printer::popup(
+        ent, va("^3WARNING: ^7You have %d name changes left",
+                (g_nameChangeLimit.integer - client->sess.nameChangeCount)));
   }
 
   client->sess.nameChangeCount++;

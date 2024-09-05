@@ -126,15 +126,6 @@ bool checkCheatCvars(gclient_s *client, int flags) {
 }
 } // namespace ETJump
 
-/*
-Changes map to a random map
-*/
-void ChangeMap() {
-  std::string map = game.mapStatistics->randomMap();
-  CPAll(ETJump::stringFormat("Changing map to %s.", map));
-  trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", map.c_str()));
-}
-
 void RunFrame(int levelTime) {
   game.mapStatistics->runFrame(levelTime);
   game.timerunV2->runFrame();
@@ -425,7 +416,7 @@ void LogServerState() {
     state += "No players on the server.\n";
   }
 
-  LogPrint(std::move(state));
+  Printer::log(std::move(state));
 }
 
 void TimerunConnectNotify(gentity_t *ent) {
