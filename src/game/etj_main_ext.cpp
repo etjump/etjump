@@ -39,6 +39,7 @@
 #include "etj_timerun_v2.h"
 #include "etj_rtv.h"
 #include "etj_chat_replay.h"
+#include "etj_filesystem.h"
 
 Game game;
 
@@ -174,9 +175,11 @@ void OnGameInit() {
       level.rawmapname,
       std::make_unique<ETJump::TimerunRepository>(
           std::make_unique<ETJump::DatabaseV2>(
-              "timerunv2", GetPath(g_timeruns2Database.string)),
+              "timerunv2",
+              ETJump::FileSystem::Path::getPath(g_timeruns2Database.string)),
           std::make_unique<ETJump::DatabaseV2>(
-              "timerunv1", GetPath(g_timerunsDatabase.string))),
+              "timerunv1",
+              ETJump::FileSystem::Path::getPath(g_timerunsDatabase.string))),
       std::make_unique<ETJump::Log>("timerunv2"),
       std::make_unique<ETJump::SynchronizationContext>());
 

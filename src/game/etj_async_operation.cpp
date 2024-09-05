@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
-#include "etj_async_operation.h"
 #include <thread>
-#include "utilities.hpp"
+
+#include "etj_async_operation.h"
+#include "etj_filesystem.h"
 
 void *AsyncOperation::StartThread(void *data) {
   AsyncOperation *object = static_cast<AsyncOperation *>(data);
@@ -34,7 +35,8 @@ void *AsyncOperation::StartThread(void *data) {
 }
 
 bool AsyncOperation::OpenDatabase(std::string const &database) {
-  int rc = sqlite3_open(GetPath(database.c_str()).c_str(), &db_);
+  int rc =
+      sqlite3_open(ETJump::FileSystem::Path::getPath(database).c_str(), &db_);
   if (rc != SQLITE_OK) {
     errorMessage_ = sqlite3_errmsg(db_);
     return false;

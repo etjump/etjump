@@ -32,6 +32,7 @@
 #include "utilities.hpp"
 #include "etj_printer.h"
 #include "etj_json_utilities.h"
+#include "etj_filesystem.h"
 
 CustomMapVotes::CustomMapVotes(MapStatistics *mapStats) : _mapStats(mapStats) {}
 
@@ -54,7 +55,8 @@ bool CustomMapVotes::Load() {
   _currentMapsOnServer = _mapStats->getCurrentMaps();
 
   customMapVotes_.clear();
-  std::string path = GetPath(g_customMapVotesFile.string);
+  std::string path =
+      ETJump::FileSystem::Path::getPath(g_customMapVotesFile.string);
   std::ifstream f(path.c_str());
 
   if (!f) {
@@ -136,7 +138,8 @@ std::string CustomMapVotes::ListTypes() const {
 
 void CustomMapVotes::GenerateVotesFile() {
   Arguments argv = GetArgs();
-  std::ifstream in(GetPath(g_customMapVotesFile.string).c_str());
+  std::ifstream in(
+      ETJump::FileSystem::Path::getPath(g_customMapVotesFile.string));
   if (in.good()) {
     if (argv->size() == 1) {
       G_Printf("A custom map votes file exists. Are you "
@@ -174,7 +177,8 @@ void CustomMapVotes::GenerateVotesFile() {
 
   Json::StyledWriter writer;
   std::string output = writer.write(root);
-  std::ofstream fOut(GetPath(g_customMapVotesFile.string).c_str());
+  std::ofstream fOut(
+      ETJump::FileSystem::Path::getPath(g_customMapVotesFile.string));
   if (!fOut) {
     G_Printf("Couldn't open file \"%s\" defined in "
              "g_customMapVotesFile.\n",

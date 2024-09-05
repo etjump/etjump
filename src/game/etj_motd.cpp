@@ -26,6 +26,7 @@
 #include "json/json.h"
 #include "etj_local.h"
 #include "utilities.hpp"
+#include "etj_filesystem.h"
 #include "etj_printer.h"
 #include <fstream>
 
@@ -38,7 +39,7 @@ void Motd::Initialize() {
     return;
   }
 
-  std::string filePath = GetPath(g_motdFile.string);
+  std::string filePath = ETJump::FileSystem::Path::getPath(g_motdFile.string);
   std::ifstream f(filePath.c_str());
 
   if (!f) {
@@ -84,7 +85,7 @@ void Motd::PrintMotd(gentity_t *ent) {
 
 void Motd::GenerateMotdFile() {
   Arguments argv = GetArgs();
-  std::ifstream in(GetPath(g_motdFile.string).c_str());
+  std::ifstream in(ETJump::FileSystem::Path::getPath(g_motdFile.string));
   if (in.good()) {
     if (argv->size() == 1) {
       G_Printf("A motd file exists. Are you sure you want "
@@ -106,7 +107,7 @@ void Motd::GenerateMotdFile() {
   root["console_message"] = "This is the console message.";
   Json::StyledWriter writer;
   std::string output = writer.write(root);
-  std::ofstream fOut(GetPath(g_motdFile.string).c_str());
+  std::ofstream fOut(ETJump::FileSystem::Path::getPath(g_motdFile.string));
   if (!fOut) {
     G_Printf("Couldn't open file \"%s\" defined in g_motdFile.\n",
              g_motdFile.string);

@@ -24,13 +24,6 @@
 
 #pragma once
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
-
 #include <string>
 #include <vector>
 
@@ -46,10 +39,15 @@ public:
   static std::vector<std::string> getFileList(const std::string &path,
                                               const std::string &ext);
   class Path {
+    static std::string buildOSPath(const std::string &file);
+
   public:
     static std::string sanitize(std::string path);
     static std::string sanitizeFile(std::string path);
     static std::string sanitizeFolder(std::string path);
+
+    // returns the full filesystem path to a file
+    static std::string getPath(const std::string &file);
   };
 };
 } // namespace ETJump
