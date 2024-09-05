@@ -2816,7 +2816,6 @@ qboolean OnClientCommand(gentity_t *ent);
 qboolean OnConsoleCommand();
 void OnGameInit();
 void OnGameShutdown();
-qboolean G_MapExists(const char *map);
 const char *GetRandomMap();
 const char *GetRandomMapByType(const char *customType);
 std::vector<std::string> getMapsOnList(const std::string &name);

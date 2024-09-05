@@ -33,8 +33,6 @@ gentity_t *PlayerGentityFromString(char *name, char *err, int size,
 gentity_t *PlayerGentityFromString(const std::string &name, std::string &err,
                                    team_t filter = TEAM_FREE);
 
-bool MapExists(const std::string &map);
-
 std::string ValueForKey(gentity_t *ent, const std::string &key);
 std::string ValueForKey(int clientNum, const std::string &key);
 std::string TimeStampToString(int timeStamp);

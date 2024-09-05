@@ -39,6 +39,7 @@
 #include "etj_printer.h"
 #include "etj_timerun_v2.h"
 #include "etj_chat_replay.h"
+#include "etj_filesystem.h"
 
 typedef std::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<std::function<bool(gentity_t *ent, Arguments argv)>, char>
@@ -1300,7 +1301,7 @@ bool Map(gentity_t *ent, Arguments argv) {
 
   std::string requestedMap = ETJump::StringUtil::toLowerCase(argv->at(1));
 
-  if (!MapExists(requestedMap)) {
+  if (!ETJump::FileSystem::exists("maps/" + requestedMap + ".bsp")) {
     Printer::chat(ent, "^3map: ^7'" + requestedMap + "' is not on the server.");
     return false;
   }

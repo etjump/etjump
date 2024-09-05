@@ -60,8 +60,7 @@ bool FileSystem::remove(const std::string &path) {
 }
 
 bool FileSystem::exists(const std::string &path) {
-  int handle;
-  int length = trap_FS_FOpenFile(path.c_str(), &handle, FS_READ);
+  int length = trap_FS_FOpenFile(path.c_str(), nullptr, FS_READ);
   return length != File::FILE_NOT_FOUND;
 }
 

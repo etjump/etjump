@@ -129,27 +129,6 @@ std::string SayArgv(int n) {
   }
 }
 
-bool MapExists(const std::string &map) {
-  string mapName = "maps/" + map + ".bsp";
-
-  fileHandle_t f = 0;
-  trap_FS_FOpenFile(mapName.c_str(), &f, FS_READ);
-  trap_FS_FCloseFile(f);
-
-  if (!f) {
-    return false;
-  }
-  return true;
-}
-
-qboolean G_MapExists(const char *map) {
-  if (!map) {
-    G_Error("map is NULL.");
-  }
-
-  return MapExists(map) ? qtrue : qfalse;
-}
-
 string ValueForKey(gentity_t *ent, const std::string &key) {
   char userinfo[MAX_INFO_STRING] = "\0";
   char *value = NULL;

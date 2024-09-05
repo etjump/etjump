@@ -480,6 +480,5 @@ std::string const CustomMapVotes::RandomMap(std::string const &type) {
 //  MapStatistics::isValidMap but that takes MapInfo as argument
 //  and isn't simple to refactor so bleh
 bool CustomMapVotes::isValidMap(const std::string &mapName) {
-  return G_MapExists(mapName.c_str()) && mapName != level.rawmapname &&
-         !MapStatistics::isBlockedMap(mapName);
+  return game.mapStatistics->mapExists(mapName) && mapName != level.rawmapname;
 }
