@@ -31,7 +31,7 @@
 void Printer::log(std::string message) {
   const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
 
-  for (auto &split : splits) {
+  for (const auto &split : splits) {
     G_LogPrintf(split.c_str());
   }
 }
@@ -41,7 +41,7 @@ void Printer::logLn(const std::string &message) { log(message + "\n"); }
 void Printer::console(int clientNum, std::string message) {
   const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
 
-  for (auto &split : splits) {
+  for (const auto &split : splits) {
     if (clientNum == CONSOLE_CLIENT_NUMBER) {
       G_Printf("%s", split.c_str());
     } else {
@@ -63,7 +63,7 @@ void Printer::console(gclient_t *client, std::string message) {
 void Printer::consoleAll(std::string message) {
   const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
 
-  for (auto &split : splits) {
+  for (const auto &split : splits) {
     trap_SendServerCommand(-1, va("print \"%s\"", split.c_str()));
     G_Printf("%s", split.c_str());
   }

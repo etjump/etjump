@@ -180,9 +180,6 @@ Levels::Level const *Levels::GetLevel(int level) {
 }
 
 void Levels::PrintLevelInfo(gentity_t *ent) {
-  auto it = levels_.begin();
-  auto end = levels_.end();
-
   Printer::chat(ent, "^3levelinfo: ^7check console for more information.");
   std::string msg = "Levels:";
 
