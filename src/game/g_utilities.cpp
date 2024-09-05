@@ -118,14 +118,6 @@ gentity_t *PlayerGentityFromString(const std::string &name, std::string &err,
   return player;
 }
 
-void CharPtrToString(const char *p, std::string &s) {
-  if (p) {
-    s = p;
-  } else {
-    s = "";
-  }
-}
-
 std::string SayArgv(int n) {
   if (n >= Q_SayArgc()) {
     return "";

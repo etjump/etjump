@@ -110,8 +110,8 @@ void Session::ReadSessionData(int clientNum) {
 
   sscanf(sessionData, "%s %s", guidBuf, hwidBuf);
 
-  CharPtrToString(guidBuf, clients_[clientNum].guid);
-  CharPtrToString(hwidBuf, clients_[clientNum].hwid);
+  clients_[clientNum].guid = guidBuf;
+  clients_[clientNum].hwid = hwidBuf;
 
   GetUserAndLevelData(clientNum);
 

@@ -32,7 +32,6 @@ gentity_t *PlayerGentityFromString(char *name, char *err, int size,
                                    team_t filter = TEAM_FREE);
 gentity_t *PlayerGentityFromString(const std::string &name, std::string &err,
                                    team_t filter = TEAM_FREE);
-void CharPtrToString(const char *p, std::string &s);
 
 std::string GetPath(const std::string &file);
 bool MapExists(const std::string &map);
