@@ -68,6 +68,8 @@ void ETJump::BannerSystem::check(int levelTime) {
     case Left:
       Printer::popupAll(message);
       break;
+    default:
+      break;
   }
 
   _bannerIdx = static_cast<int>((_bannerIdx + 1) % _options.messages.size());
