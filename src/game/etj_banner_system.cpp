@@ -59,15 +59,14 @@ void ETJump::BannerSystem::check(int levelTime) {
     case Center:
       Printer::centerAll(message);
       break;
+    case Top:
+      Printer::bannerAll(message);
+      break;
     case Chat:
       Printer::chatAll(message);
       break;
     case Left:
       Printer::popupAll(message);
-      break;
-    case Top:
-    default:
-      Printer::bannerAll(message);
       break;
   }
 
