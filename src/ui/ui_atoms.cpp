@@ -60,7 +60,9 @@ void QDECL Com_LocalPrintf(const char *msg, ...) {
   uiClientState_t cstate;
   trap_GetClientState(&cstate);
 
-  if (Q_stricmp(cstate.servername, "localhost")) {
+  // this isn't 100% reliable, but it's the best that we can do
+  if (Q_strncmp(cstate.servername, "localhost",
+                static_cast<int>(strlen("localhost")))) {
     return;
   }
 
