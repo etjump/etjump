@@ -1240,7 +1240,7 @@ bool ListMaps(gentity_t *ent, Arguments argv) {
   buffer += "\n^zFound ^3" + ETJump::getPluralizedString(maps.size(), "^zmap") +
             " on the server.\n";
 
-  Printer::chat(ClientNum(ent), buffer);
+  Printer::console(ent, std::move(buffer));
   return true;
 }
 
