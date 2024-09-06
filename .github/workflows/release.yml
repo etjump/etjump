@@ -31,6 +31,7 @@ jobs:
       run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
 
     - name: Test
+      working-directory: ${{github.workspace}}/build
       run: ctest -C ${{ matrix.config }}
 
     - name: Upload artifacts
