@@ -7102,6 +7102,8 @@ void parseMaplist() {
     trap_Argv(i, arg, sizeof(arg));
     uiInfo.serverMaplist.emplace_back(arg);
   }
+
+  std::sort(uiInfo.serverMaplist.begin(), uiInfo.serverMaplist.end());
 }
 } // namespace ETJump
 

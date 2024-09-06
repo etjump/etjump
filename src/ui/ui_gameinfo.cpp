@@ -4,6 +4,9 @@
 // gameinfo.c
 //
 
+#include <memory>
+#include <algorithm>
+
 #include "ui_local.h"
 
 //
@@ -150,12 +153,7 @@ UI_LoadArenas
 ===============
 */
 void UI_LoadArenas() {
-  int numdirs;
   char filename[128];
-  char dirlist[16384];
-  char *dirptr;
-  int i;
-  int dirlen;
   int handle;
 
   uiInfo.mapCount = 0;
@@ -164,13 +162,26 @@ void UI_LoadArenas() {
 
   // we're in the menus, parse local files
   if (cstate.connState == CA_DISCONNECTED) {
-    numdirs =
-        trap_FS_GetFileList("scripts", ".arena", dirlist, sizeof(dirlist));
-    dirptr = dirlist;
-    for (i = 0; i < numdirs; i++, dirptr += dirlen + 1) {
-      dirlen = static_cast<int>(strlen(dirptr));
+    constexpr int BUF_SIZE = 200000;
+    const auto fileList = std::make_unique<char[]>(BUF_SIZE);
+    const int numFiles =
+        trap_FS_GetFileList("scripts", ".arena", fileList.get(), BUF_SIZE);
+    std::vector<std::string> files;
+    files.reserve(numFiles);
+
+    auto namePtr = fileList.get();
+
+    // parse files to a vector so we can sort them easily
+    for (int i = 0; i < numFiles; i++) {
+      files.emplace_back(namePtr);
+      namePtr += strlen(namePtr) + 1;
+    }
+
+    std::sort(files.begin(), files.end());
+
+    for (const auto &file : files) {
       Q_strncpyz(filename, "scripts/", sizeof(filename));
-      Q_strcat(filename, sizeof(filename), dirptr);
+      Q_strcat(filename, sizeof(filename), file.c_str());
 
       handle = trap_PC_LoadSource(filename);
 
