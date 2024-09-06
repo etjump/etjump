@@ -69,6 +69,7 @@ void ETJump::BannerSystem::check(int levelTime) {
       Printer::popupAll(message);
       break;
     default:
+      Printer::bannerAll(message);
       break;
   }
 
