@@ -491,8 +491,8 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       if (!CustomMapTypeExists(arg2)) {
         Printer::popup(
             clientNum,
-            stringFormat(
-                "Specified custom vote type ^3'%s' ^7does not exist.\n", arg2));
+            stringFormat("Specified custom vote type ^3'%s' ^7does not exist.",
+                         arg2));
         return G_INVALID;
       }
 
@@ -501,11 +501,10 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 
       // in case someone made an empty map list, or none are available
       if (numMaps == 0) {
-        Printer::popup(
-            clientNum,
-            stringFormat("Specified custom vote type ^3'%s' ^7is empty or none "
-                         "of the maps are available.\n",
-                         arg2));
+        Printer::popup(clientNum,
+                       stringFormat("Specified custom vote type ^3'%s' ^7is "
+                                    "empty or none of the maps are available.",
+                                    arg2));
         return G_INVALID;
       }
 
