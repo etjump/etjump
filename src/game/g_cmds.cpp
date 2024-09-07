@@ -2502,13 +2502,13 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
 
   // Setting g_enableVote 0 sets this flag as well
   if (voteFlags.integer == VOTING_DISABLED) {
-    Printer::popup(clientNum, "Voting is not enabled on this server.\n");
+    Printer::popup(clientNum, "Voting is not enabled on this server.");
     return false;
   }
 
   if (ent->client->sess.muted && g_mute.integer & 2) {
     Printer::popup(clientNum,
-                   "^3callvote: ^7not allowed to call a vote while muted.\n");
+                   "^3callvote: ^7not allowed to call a vote while muted.");
     return false;
   }
 
@@ -2516,24 +2516,24 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
       g_spectatorVote.integer < 2) {
     Printer::popup(
         clientNum,
-        "^3callvote: ^7you are not allowed to call a vote as a spectator.\n");
+        "^3callvote: ^7you are not allowed to call a vote as a spectator.");
     return false;
   }
 
   if (level.voteInfo.voteTime) {
-    Printer::popup(clientNum, "A vote is already in progress.\n");
+    Printer::popup(clientNum, "A vote is already in progress.");
     return false;
   }
 
   if (level.intermissiontime) {
-    Printer::popup(clientNum, "Cannot callvote during intermission.\n");
+    Printer::popup(clientNum, "Cannot callvote during intermission.");
     return false;
   }
 
   if (vote_limit.integer > 0 &&
       ent->client->pers.voteCount >= vote_limit.integer) {
     voteError = ETJump::stringFormat(
-        "You have already called the maximum number of votes (%d).\n",
+        "You have already called the maximum number of votes (%d).",
         vote_limit.integer);
     Printer::popup(clientNum, voteError);
     return false;
@@ -2544,7 +2544,7 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
         (g_disableVoteAfterMapChange.integer - (level.time - level.startTime)) /
         1000.0);
     voteError = "You must wait " + ETJump::getSecondsString(remainingTime) +
-                " before voting after a map change.\n";
+                " before voting after a map change.";
     Printer::popup(clientNum, voteError);
     return false;
   }
@@ -2556,7 +2556,7 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
                   1000.0);
     voteError = "^3callvote:^7 you must wait " +
                 ETJump::getSecondsString(voteCooldown) +
-                " before voting again.\n";
+                " before voting again.";
     Printer::chat(clientNum, voteError);
     return false;
   }
@@ -2614,7 +2614,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   trap_Argv(2, arg2, sizeof(arg2));
 
   if (strchr(arg1, ';') || strchr(arg2, ';')) {
-    Printer::popup(clientNum, "Invalid vote string.\n");
+    Printer::popup(clientNum, "Invalid vote string.");
     return;
   }
 
@@ -2998,8 +2998,7 @@ void Cmd_Vote_f(gentity_t *ent) {
         // stops excessive spam from server if user keeps voting in timeouts
         if (!client->pers.votingInfo.isWarned) {
           client->pers.votingInfo.isWarned = true;
-          Printer::popup(clientNum,
-                         "You can't re-vote on this vote anymore.\n");
+          Printer::popup(clientNum, "You can't re-vote on this vote anymore.");
         }
         return;
       }
@@ -3019,7 +3018,7 @@ void Cmd_Vote_f(gentity_t *ent) {
         Printer::popup(
             clientNum,
             ETJump::stringFormat(
-                "^7You must wait for ^3%s ^7before re-voting.\n",
+                "^7You must wait for ^3%s ^7before re-voting.",
                 ETJump::getSecondsString(ETJump::VOTING_TIMEOUT / 1000)));
       }
       return;
@@ -3060,7 +3059,7 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     Printer::popup(clientNum, ETJump::stringFormat(
-                                  "Vote cast, you can change your vote %s.\n",
+                                  "Vote cast, you can change your vote %s.",
                                   ETJump::getPluralizedString(
                                       ETJump::VOTING_ATTEMPTS + 1 -
                                           client->pers.votingInfo.attempts,
@@ -3070,7 +3069,7 @@ void Cmd_Vote_f(gentity_t *ent) {
 
   if (ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
       !g_spectatorVote.integer) {
-    Printer::popup(clientNum, "You are not allowed to vote as a spectator.\n");
+    Printer::popup(clientNum, "You are not allowed to vote as a spectator.");
     return;
   }
 
