@@ -39,8 +39,8 @@ void Log::println(const std::string &level, const std::string &message) const {
 void Log::processMessages() {
   std::lock_guard<std::mutex> lock(Log::_messagesLock);
   for (const auto &msg : _messages) {
-    Printer::LogPrintln(msg);
+    Printer::logLn(msg);
   }
   _messages.clear();
 }
-}
+} // namespace ETJump

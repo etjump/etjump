@@ -1553,8 +1553,8 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
     }
 
     if (!(self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)) {
-      Printer::SendCenterMessage(ClientNum(activator),
-                                 "^7Your portal gun portals have been reset.");
+      Printer::center(ClientNum(activator),
+                      "^7Your portal gun portals have been reset.");
     }
   }
 
@@ -1707,41 +1707,47 @@ void SP_target_savelimit_inc(gentity_t *self) {
   self->use = target_savelimit_inc_use;
 }
 
-#define NO_DECAY_IDENT -1
-#define NO_DECAY_VALUE -1
-#define NO_DECAY_TIME -1
+static constexpr int NO_DECAY_IDENT = -1;
+static constexpr int NO_DECAY_VALUE = -1;
+static constexpr int NO_DECAY_TIME = -1;
 
 void target_decay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (self->decayTime == NO_DECAY_TIME) {
-    C_ConsolePrintAll("target_decay: no \"decay_time\" specified.");
-
-  } else if (self->decayValue == NO_DECAY_VALUE) {
-    C_ConsolePrintAll("target_decay: no \"decay_value\" specified.");
-  } else if (self->decayTime < 0) {
-    C_ConsolePrintAll("target_decay: \"decay_time\" is below 0.");
-  } else {
-    if (!activator || !activator->client) {
-      return;
-    }
-    if (self->ident != NO_DECAY_IDENT) {
-      activator->client->sess.upcomingClientMapProgression =
-          activator->client->sess.clientMapProgression;
-    } else {
-      activator->client->sess.upcomingClientMapProgression = self->decayValue;
-    }
-
-    activator->client->sess.previousClientMapProgression =
-        activator->client->sess.clientMapProgression;
-    activator->client->sess.clientMapProgression = self->ident;
-
-    activator->client->sess.nextProgressionDecayEvent =
-        level.time + self->decayTime;
-    activator->client->sess.decayProgression = qtrue;
+    G_Printf(S_COLOR_YELLOW "%s: no 'decay_time' specified.", __func__);
+    return;
   }
+
+  if (self->decayValue == NO_DECAY_VALUE) {
+    G_Printf(S_COLOR_YELLOW "%s: no 'decay_value' specified.", __func__);
+    return;
+  }
+
+  if (self->decayTime < 0) {
+    G_Printf(S_COLOR_YELLOW "%s: 'decay_time' cannot be negative.", __func__);
+    return;
+  }
+
+  if (!activator || !activator->client) {
+    return;
+  }
+
+  if (self->ident != NO_DECAY_IDENT) {
+    activator->client->sess.upcomingClientMapProgression =
+        activator->client->sess.clientMapProgression;
+  } else {
+    activator->client->sess.upcomingClientMapProgression = self->decayValue;
+  }
+
+  activator->client->sess.previousClientMapProgression =
+      activator->client->sess.clientMapProgression;
+  activator->client->sess.clientMapProgression = self->ident;
+
+  activator->client->sess.nextProgressionDecayEvent =
+      level.time + self->decayTime;
+  activator->client->sess.decayProgression = qtrue;
 }
 
 void SP_target_decay(gentity_t *self) {
-  // FIXME: -1 instead of "-1"
   G_SpawnInt("ident", "-1", &self->ident);
   G_SpawnInt("decay_time", "-1", &self->decayTime);
   G_SpawnInt("decay_value", "-1", &self->decayValue);

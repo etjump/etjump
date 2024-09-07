@@ -42,7 +42,7 @@ protected:
   static bool canActivate(gentity_t *activator);
   static int getOrSetTimerunIndex(const std::string &runName);
   static bool canStartTimerun(gentity_t *self, gentity_t *activator,
-                              const int *clientNum, const float *speed);
+                              int clientNum, float speed);
 
 public:
   static void validateTimerunEntities();

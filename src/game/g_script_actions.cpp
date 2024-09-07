@@ -3500,7 +3500,7 @@ qboolean G_ScriptAction_Announce(gentity_t *ent, char *params) {
     ETJump::StringUtil::replaceAll(str, "%s", name);
   }
 
-  Printer::BroadcastPopupMessage(str);
+  Printer::popupAll(str);
 
   return qtrue;
 }
@@ -4668,7 +4668,7 @@ qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params) {
       ETJump::stringFormat("%s^7", activator->client->pers.netname);
   ETJump::StringUtil::replaceAll(str, "%s", name);
 
-  Printer::SendPopupMessage(ClientNum(activator), str);
+  Printer::popup(ClientNum(activator), str);
 
   return qtrue;
 }

@@ -1,6 +1,5 @@
 #include "g_local.h"
 #include "etj_save_system.h"
-#include "etj_inactivity_timer.h"
 #include "etj_string_utilities.h"
 #include "etj_numeric_utilities.h"
 #include "etj_printer.h"
@@ -1698,16 +1697,16 @@ void G_NameChanged(gentity_t *ent) {
   }
 
   if (g_nameChangeLimit.integer - client->sess.nameChangeCount == 0) {
-    C_CPMTo(ent,
-            va("^3WARNING: ^7You must wait at least %s "
-               "before renaming.",
-               ETJump::getSecondsString(g_nameChangeInterval.integer).c_str()));
+    Printer::popup(
+        ent,
+        va("^3WARNING: ^7You must wait at least %s before renaming.",
+           ETJump::getSecondsString(g_nameChangeInterval.integer).c_str()));
   } else if (client->sess.nameChangeCount > g_nameChangeLimit.integer) {
     trap_DropClient(ClientNum(ent), "You were kicked for spamming rename.", 0);
   } else {
-    C_CPMTo(ent,
-            va("^3WARNING: ^7You have %d name changes left",
-               (g_nameChangeLimit.integer - client->sess.nameChangeCount)));
+    Printer::popup(
+        ent, va("^3WARNING: ^7You have %d name changes left",
+                (g_nameChangeLimit.integer - client->sess.nameChangeCount)));
   }
 
   client->sess.nameChangeCount++;
@@ -2835,7 +2834,7 @@ void ClientDisconnect(int clientNum) {
   // note: after CalculateRanks so level.numConnectedClients is up-to-date
   if (level.voteInfo.voteTime) {
     if (level.voteInfo.voter_cn == clientNum) {
-      Printer::BroadcastPopupMessage("^7Vote canceled: caller disconnected.");
+      Printer::popupAll("^7Vote canceled: caller disconnected.");
       G_LogPrintf("Vote canceled: %s (caller %s disconnected)\n",
                   level.voteInfo.voteString, ent->client->pers.netname);
       resetVote();

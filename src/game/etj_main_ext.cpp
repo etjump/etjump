@@ -26,7 +26,6 @@
 #include "etj_game.h"
 #include "etj_session.h"
 #include "etj_commands.h"
-#include "etj_save_system.h"
 #include "etj_levels.h"
 #include "etj_database.h"
 #include "etj_custom_map_votes.h"
@@ -40,6 +39,7 @@
 #include "etj_timerun_v2.h"
 #include "etj_rtv.h"
 #include "etj_chat_replay.h"
+#include "etj_filesystem.h"
 
 Game game;
 
@@ -118,24 +118,14 @@ bool checkCheatCvars(gclient_s *client, int flags) {
 
   if (cheatCvarsEnabled) {
     trap_SendServerCommand(clientNum, va("cheatCvarsOff %i", flags));
-    Printer::SendChatMessage(clientNum,
-                             "^gCheat cvars are not allowed on this server, "
+    Printer::chat(clientNum, "^gCheat cvars are not allowed on this server, "
                              "check console for more information.\n");
-    Printer::SendConsoleMessage(clientNum, std::move(message));
+    Printer::console(clientNum, message);
   }
 
   return cheatCvarsEnabled;
 }
 } // namespace ETJump
-
-/*
-Changes map to a random map
-*/
-void ChangeMap() {
-  std::string map = game.mapStatistics->randomMap();
-  CPAll(ETJump::stringFormat("Changing map to %s.", map));
-  trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", map.c_str()));
-}
 
 void RunFrame(int levelTime) {
   game.mapStatistics->runFrame(levelTime);
@@ -185,9 +175,11 @@ void OnGameInit() {
       level.rawmapname,
       std::make_unique<ETJump::TimerunRepository>(
           std::make_unique<ETJump::DatabaseV2>(
-              "timerunv2", GetPath(g_timeruns2Database.string)),
+              "timerunv2",
+              ETJump::FileSystem::Path::getPath(g_timeruns2Database.string)),
           std::make_unique<ETJump::DatabaseV2>(
-              "timerunv1", GetPath(g_timerunsDatabase.string))),
+              "timerunv1",
+              ETJump::FileSystem::Path::getPath(g_timerunsDatabase.string))),
       std::make_unique<ETJump::Log>("timerunv2"),
       std::make_unique<ETJump::SynchronizationContext>());
 
@@ -427,7 +419,7 @@ void LogServerState() {
     state += "No players on the server.\n";
   }
 
-  LogPrint(std::move(state));
+  Printer::log(state);
 }
 
 void TimerunConnectNotify(gentity_t *ent) {

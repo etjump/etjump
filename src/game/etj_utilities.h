@@ -90,11 +90,6 @@ std::string ReadFile(const std::string &filepath);
 bool anyonePlaying();
 
 /**
- * Returns the q3 engine path for a file
- */
-std::string getPath(const std::string &name);
-
-/**
  * Converts timestamp to date
  */
 std::string timestampToString(int timestamp,

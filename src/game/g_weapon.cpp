@@ -1696,7 +1696,7 @@ void Weapon_Engineer(gentity_t *ent) {
       traceEnt->takedamage = qtrue;
       traceEnt->s.eFlags &= ~EF_SMOKING;
 
-      Printer::SendCenterMessage(clientNum, "You have repaired the MG!");
+      Printer::center(clientNum, "You have repaired the MG!");
       G_AddEvent(ent, EV_MG42_FIXED, 0);
     } else {
       traceEnt->health += 3;

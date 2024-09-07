@@ -24,6 +24,7 @@
 
 #include "etj_database.h"
 #include "utilities.hpp"
+#include "etj_filesystem.h"
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
 #include "etj_session.h"
@@ -210,13 +211,12 @@ bool Database::UserInfo(gentity_t *ent, int id) {
   const int clientNum = ClientNum(ent);
 
   if (user == users_.end()) {
-    Printer::SendChatMessage(clientNum, "^3userinfo: ^7no user found with id " +
-                                            std::to_string(id));
+    Printer::chat(clientNum,
+                  "^3userinfo: ^7no user found with id " + std::to_string(id));
     return false;
   }
 
-  Printer::SendChatMessage(clientNum,
-                           "^3userinfo: ^7check console for more information.");
+  Printer::chat(clientNum, "^3userinfo: ^7check console for more information.");
 
   std::string ip = "N/A";
   gentity_t *other = ETJump::session->gentityFromId(id);
@@ -241,7 +241,7 @@ bool Database::UserInfo(gentity_t *ent, int id) {
       TimeStampToString(user->second->lastSeen), user->second->name,
       user->second->title, user->second->commands, user->second->greeting);
 
-  Printer::SendConsoleMessage(clientNum, std::move(msg));
+  Printer::console(clientNum, msg);
   return true;
 }
 
@@ -252,39 +252,34 @@ bool Database::ListUsers(gentity_t *ent, int page) {
   int i = (page - 1) * USERS_PER_PAGE;
 
   if (page > pages) {
-    ChatPrintTo(ent, "^3listusers: ^7no page #" + std::to_string(page));
+    Printer::chat(ent, "^3listusers: ^7no page #" + std::to_string(page));
     return false;
   }
 
-  auto it = users_.begin();
-  auto end = users_.end();
+  Printer::chat(ent, "^3listusers: ^7check console for more information.");
 
-  ChatPrintTo(ent, "^3listusers: ^7check console for more information.");
-  BeginBufferPrint();
-
-  BufferPrint(ent, va("Listing page %d/%d\n", page, pages));
   int curr = 0;
   time_t t;
   time(&t);
-  BufferPrint(ent, va("^7%-5s %-10s %-15s %-36s\n", "ID", "Level", "Last seen",
-                      "Name"));
-  while (it != end) {
+
+  std::string msg = ETJump::stringFormat("Listing page %d/%d\n", page, pages);
+  msg += ETJump::stringFormat("^7%-5s %-10s %-15s %-36s\n", "ID", "Level",
+                              "Last seen", "Name");
+
+  for (const auto &user : users_) {
     if (curr >= i && curr < i + USERS_PER_PAGE) {
-      BufferPrint(ent,
-                  va("^7%-5d %-10d %-15s %-36s\n", it->second->id,
-                     it->second->level,
-                     (TimeStampDifferenceToString(static_cast<unsigned>(t) -
-                                                  it->second->lastSeen) +
-                      " ago")
-                         .c_str(),
-                     it->second->name.c_str()));
+      msg += ETJump::stringFormat(
+          "^7%-5d %-10d %-15s %-36s\n", user.second->id, user.second->level,
+          TimeStampDifferenceToString(static_cast<int>(t) -
+                                      user.second->lastSeen) +
+              " ago",
+          user.second->name);
     }
 
     curr++;
-    it++;
   }
-  FinishBufferPrint(ent, false);
 
+  Printer::console(ent, msg);
   return true;
 }
 
@@ -345,25 +340,27 @@ bool Database::ListBans(gentity_t *ent, int page) {
   int pages = (size / BANS_PER_PAGE) + 1;
 
   if (page > pages) {
-    ChatPrintTo(ent, "^3listbans: ^7no page #" + std::to_string(page));
+    Printer::chat(ent, "^3listbans: ^7no page #" + std::to_string(page));
+    return false;
   }
 
-  ChatPrintTo(ent, "^3listbans: ^7check console for more information.");
-  BeginBufferPrint();
-  BufferPrint(ent, va("^7Showing page %d/%d\n", page, pages));
+  Printer::chat(ent, "^3listbans: ^7check console for more information.");
+  std::string msg = ETJump::stringFormat("^7Showing page %d/%d\n", page, pages);
+
   for (; i < size; i++, printed++) {
     if (printed == BANS_PER_PAGE) {
       break;
     }
-    BufferPrint(ent, va("%d %s ^7%s %s ^7%s %s\n", bans_[i]->id,
-                        bans_[i]->name.c_str(), bans_[i]->banDate.c_str(),
-                        bans_[i]->bannedBy.c_str(),
-                        bans_[i]->expires != 0
-                            ? TimeStampToString(bans_[i]->expires).c_str()
-                            : "PERMANENTLY",
-                        bans_[i]->reason.c_str()));
+
+    msg += ETJump::stringFormat(
+        "%d %s ^7%s %s ^7%s %s\n", bans_[i]->id, bans_[i]->name,
+        bans_[i]->banDate, bans_[i]->bannedBy,
+        bans_[i]->expires != 0 ? TimeStampToString(bans_[i]->expires)
+                               : "PERMANENTLY",
+        bans_[i]->reason);
   }
-  FinishBufferPrint(ent, false);
+
+  Printer::console(ent, msg);
   return true;
 }
 
@@ -940,7 +937,8 @@ User_s const *Database::GetUserData(std::string const &guid) const {
 }
 
 bool Database::InitDatabase(char const *config) {
-  int rc = sqlite3_open(GetPath(config).c_str(), &db_);
+  int rc =
+      sqlite3_open(ETJump::FileSystem::Path::getPath(config).c_str(), &db_);
 
   users_.clear();
   bans_.clear();
@@ -1296,20 +1294,19 @@ void Database::FindUserOperation::Execute() {
     users.push_back(user);
   }
 
-  if (users.size() == 0) {
-    ChatPrintTo(ent_, "^3finduser: ^7no users found.");
+  if (users.empty()) {
+    Printer::chat(ent_, "^3finduser: ^7no users found.");
     return;
   }
 
-  ChatPrintTo(ent_, "^3finduser: ^7check console for more information.");
-  BufferPrinter printer(ent_);
-  printer.Begin();
-  printer.Print("ID       Name\n");
-  for (unsigned i = 0; i < users.size(); i++) {
-    printer.Print(ETJump::stringFormat("%-8d %-36s^7\n", users[i].first,
-                                       users[i].second));
+  Printer::chat(ent_, "^3finduser: ^7check console for more information.");
+  std::string msg = "ID       Name\n";
+
+  for (const auto &user : users) {
+    msg += ETJump::stringFormat("%-8d %-36s^7\n", user.first, user.second);
   }
-  printer.Finish(false);
+
+  Printer::console(ent_, msg);
 }
 
 Database::SaveNameOperation::SaveNameOperation(std::string const &name, int id)
@@ -1374,20 +1371,20 @@ void Database::ListUserNamesOperation::Execute() {
     names.push_back(name ? name : "");
   }
 
-  if (names.size() == 0) {
-    ChatPrintTo(ent_, "^3listusernames: ^7couldn't find any names with id " +
-                          std::to_string(id_));
+  if (names.empty()) {
+    Printer::chat(ent_, "^3listusernames: ^7couldn't find any names with id " +
+                            std::to_string(id_));
   } else {
-    ConsolePrintTo(ent_, "^3listusernames: ^7check console for "
-                         "more information.");
-    BufferPrinter printer(ent_);
-    printer.Begin();
-    printer.Print(ETJump::stringFormat("Found %d names with id: %d\n",
-                                       names.size(), id_));
-    for (unsigned i = 0; i < names.size(); i++) {
-      printer.Print(names[i] + "\n");
+    Printer::chat(ent_,
+                  "^3listusernames: ^7check console for more information.");
+    std::string msg =
+        ETJump::stringFormat("Found %d names with id: %d\n", names.size(), id_);
+
+    for (const auto &name : names) {
+      msg += name + '\n';
     }
-    printer.Finish(false);
+
+    Printer::console(ent_, msg);
   }
 }
 
