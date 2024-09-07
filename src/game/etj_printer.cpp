@@ -70,8 +70,6 @@ void Printer::consoleAll(const std::string &message) {
 }
 
 void Printer::chat(int clientNum, const std::string &message) {
-  assert(!message.empty() && message.back() != '\n');
-
   if (clientNum == CONSOLE_CLIENT_NUMBER) {
     G_Printf("%s\n", message.c_str());
   } else {
@@ -95,8 +93,6 @@ void Printer::chatAll(const std::string &message) {
 }
 
 void Printer::popup(int clientNum, const std::string &message) {
-  assert(!message.empty() && message.back() != '\n');
-
   if (clientNum == CONSOLE_CLIENT_NUMBER) {
     G_Printf("%s\n", message.c_str());
   } else {
@@ -120,8 +116,6 @@ void Printer::popupAll(const std::string &message) {
 }
 
 void Printer::center(int clientNum, const std::string &message) {
-  assert(!message.empty() && message.back() != '\n');
-
   trap_SendServerCommand(clientNum,
                          ETJump::stringFormat("cp \"%s\n\"", message).c_str());
 }
@@ -142,8 +136,6 @@ void Printer::centerAll(const std::string &message) {
 }
 
 void Printer::banner(int clientNum, const std::string &message) {
-  assert(!message.empty() && message.back() != '\n');
-
   if (clientNum == CONSOLE_CLIENT_NUMBER) {
     G_Printf("%s\n", message.c_str());
   } else {
