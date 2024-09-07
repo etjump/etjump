@@ -32,21 +32,17 @@
 
 Motd::Motd() : initialized_(false) {}
 
-Motd::~Motd() {}
-
 void Motd::Initialize() {
   if (strlen(g_motdFile.string) == 0) {
     return;
   }
 
-  std::string filePath = ETJump::FileSystem::Path::getPath(g_motdFile.string);
-  std::ifstream f(filePath.c_str());
+  std::ifstream f(ETJump::FileSystem::Path::getPath(g_motdFile.string));
 
   if (!f) {
-    G_LogPrintf("MOTD: g_motdFile was defined but couldn't "
-                "find the motd file. To "
-                "generate an example file do /rcon "
-                "generateMotd <file name>.\n");
+    G_LogPrintf("MOTD: g_motdFile '%s' was defined but could not be found. To "
+                "generate a sample file, use '/generateMotd'.\n",
+                g_motdFile.string);
     return;
   }
 
@@ -66,9 +62,8 @@ void Motd::Initialize() {
     chatMessage_ = root["chat_message"].asString();
     motd_ = root["console_message"].asString();
   } catch (...) {
-    G_LogPrintf("MOTD: missing information from motd file. Are you "
-                "sure both "
-                "chat_message and console_message are defined?\n");
+    G_LogPrintf("MOTD: missing information from motd file. Are you sure both "
+                "'chat_message' and 'console_message' are defined?\n");
   }
 
   G_LogPrintf("MOTD: initialized.\n");
@@ -86,18 +81,19 @@ void Motd::PrintMotd(gentity_t *ent) {
 void Motd::GenerateMotdFile() {
   Arguments argv = GetArgs();
   std::ifstream in(ETJump::FileSystem::Path::getPath(g_motdFile.string));
+
   if (in.good()) {
     if (argv->size() == 1) {
-      G_Printf("A motd file exists. Are you sure you want "
-               "to overwrite the "
-               "file? If so, do /rcon generatemotd -f.\n");
+      G_Printf("A motd file '%s' already exists. Use 'generateMotd -f' to "
+               "overwrite the existing file.\n",
+               g_motdFile.string);
       return;
     }
     if (argv->size() == 2 && argv->at(1) == "-f") {
-      G_LogPrintf("Overwriting motd file with a "
-                  "default one.\n");
+      G_LogPrintf("Overwriting motd file '%s' with a default one.\n",
+                  g_motdFile.string);
     } else {
-      G_Printf("Unknown argument \"%s\".\n", argv->at(1).c_str());
+      G_Printf("Unknown argument '%s'.\n", argv->at(1).c_str());
       return;
     }
   }
@@ -108,13 +104,16 @@ void Motd::GenerateMotdFile() {
   Json::StyledWriter writer;
   std::string output = writer.write(root);
   std::ofstream fOut(ETJump::FileSystem::Path::getPath(g_motdFile.string));
+
   if (!fOut) {
-    G_Printf("Couldn't open file \"%s\" defined in g_motdFile.\n",
+    G_Printf("Couldn't open file '%s' defined in 'g_motdFile'.\n",
              g_motdFile.string);
     return;
   }
+
   fOut << output;
   fOut.close();
-  G_Printf("Generated new motd file \"%s\"\n", g_motdFile.string);
+
+  G_Printf("Generated new motd file '%s'\n", g_motdFile.string);
   Initialize();
 }
