@@ -110,10 +110,15 @@ unsigned countExtraPadding(const std::string &input);
 
 // removes any leading and trailing zeroes from a number
 // always returns at least 0 even if there are no significant numbers
-// e.g. 0000.0000 -> 0
+// e.g. 0000.0000 returns 0
+// this expects a valid integer/floating point string as an input
+// if input is invalid, returns an empty string
 std::string normalizeNumberString(const std::string &input);
 
+// if input contains only chars to remove, result is empty string
 void removeTrailingChars(std::string &str, char charToRemove);
+
+// if input contains only chars to remove, result is empty string
 void removeLeadingChars(std::string &str, char charToRemove);
 
 } // namespace StringUtil
