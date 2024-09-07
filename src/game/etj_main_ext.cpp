@@ -120,7 +120,7 @@ bool checkCheatCvars(gclient_s *client, int flags) {
     trap_SendServerCommand(clientNum, va("cheatCvarsOff %i", flags));
     Printer::chat(clientNum, "^gCheat cvars are not allowed on this server, "
                              "check console for more information.\n");
-    Printer::console(clientNum, std::move(message));
+    Printer::console(clientNum, message);
   }
 
   return cheatCvarsEnabled;
@@ -419,7 +419,7 @@ void LogServerState() {
     state += "No players on the server.\n";
   }
 
-  Printer::log(std::move(state));
+  Printer::log(state);
 }
 
 void TimerunConnectNotify(gentity_t *ent) {

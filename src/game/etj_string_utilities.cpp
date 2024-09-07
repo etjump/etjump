@@ -146,8 +146,8 @@ std::string ETJump::trim(const std::string &input) {
 }
 
 // word-wrapper
-std::vector<std::string> ETJump::wrapWords(std::string &input, char separator,
-                                           size_t maxLength) {
+std::vector<std::string> ETJump::wrapWords(const std::string &input,
+                                           char separator, size_t maxLength) {
   std::vector<std::string> output;
   size_t lastPos = 0;
 

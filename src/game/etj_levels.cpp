@@ -191,7 +191,7 @@ void Levels::PrintLevelInfo(gentity_t *ent) {
     msg.replace(msg.length() - 1, 1, "\n");
   }
 
-  Printer::console(ent, std::move(msg));
+  Printer::console(ent, msg);
 }
 
 void Levels::PrintLevelInfo(gentity_t *ent, int level) {

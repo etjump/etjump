@@ -702,7 +702,7 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
           }
         }
 
-        Printer::console(params.clientNum, std::move(message));
+        Printer::console(params.clientNum, message);
       },
       [this, params](const std::runtime_error &e) {
         Printer::console(params.clientNum, e.what() + std::string("\n"));

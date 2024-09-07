@@ -28,7 +28,7 @@
 #include "etj_string_utilities.h"
 #include "g_local.h"
 
-void Printer::log(std::string message) {
+void Printer::log(const std::string &message) {
   const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
 
   for (const auto &split : splits) {
@@ -38,7 +38,7 @@ void Printer::log(std::string message) {
 
 void Printer::logLn(const std::string &message) { log(message + "\n"); }
 
-void Printer::console(int clientNum, std::string message) {
+void Printer::console(int clientNum, const std::string &message) {
   const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
 
   for (const auto &split : splits) {
@@ -50,17 +50,17 @@ void Printer::console(int clientNum, std::string message) {
   }
 }
 
-void Printer::console(gentity_t *ent, std::string message) {
+void Printer::console(gentity_t *ent, const std::string &message) {
   const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
-  console(clientNum, std::move(message));
+  console(clientNum, message);
 }
 
-void Printer::console(gclient_t *client, std::string message) {
+void Printer::console(gclient_t *client, const std::string &message) {
   const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
-  console(clientNum, std::move(message));
+  console(clientNum, message);
 }
 
-void Printer::consoleAll(std::string message) {
+void Printer::consoleAll(const std::string &message) {
   const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
 
   for (const auto &split : splits) {

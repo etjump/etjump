@@ -890,7 +890,7 @@ void setPlayerOffset(gentity_t *ent) {
   if (!result.success) {
     std::string str = ETJump::stringFormat(result.message, "setoffset");
     capitalizeWithColor(str);
-    Printer::console(clientNum, std::move(str));
+    Printer::console(clientNum, str);
     return;
   }
 
@@ -1043,7 +1043,7 @@ void setTracker(gentity_t *ent) {
       setTrackerMsg = stringFormat("^7Set tracker value on all "
                                    "indices to ^2%i^7.\n",
                                    value);
-      Printer::console(clientNum, std::move(setTrackerMsg));
+      Printer::console(clientNum, setTrackerMsg);
     }
   }
 
@@ -2726,7 +2726,7 @@ void Cmd_Vote_f(gentity_t *ent) {
       voteMsgs += std::string(nm) + " ";
     }
     voteMsgs += "\n";
-    Printer::console(clientNum, std::move(voteMsgs));
+    Printer::console(clientNum, voteMsgs);
   };
 
   static const auto printRtvVoteMsgs = [&]() {
@@ -2745,7 +2745,7 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     voteMsgs += "\n";
-    Printer::console(clientNum, std::move(voteMsgs));
+    Printer::console(clientNum, voteMsgs);
   };
 
   static const auto cancelVote = [&]() {
@@ -4636,7 +4636,7 @@ void Cmd_Class_f(gentity_t *ent) {
           ETJump::getPlayerClassSymbol(loadout.classId), loadout.weaponSlot);
     }
 
-    Printer::console(clientNum, std::move(usageText));
+    Printer::console(clientNum, usageText);
     return;
   }
 

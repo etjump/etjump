@@ -241,7 +241,7 @@ bool Database::UserInfo(gentity_t *ent, int id) {
       TimeStampToString(user->second->lastSeen), user->second->name,
       user->second->title, user->second->commands, user->second->greeting);
 
-  Printer::console(clientNum, std::move(msg));
+  Printer::console(clientNum, msg);
   return true;
 }
 
@@ -279,7 +279,7 @@ bool Database::ListUsers(gentity_t *ent, int page) {
     curr++;
   }
 
-  Printer::console(ent, std::move(msg));
+  Printer::console(ent, msg);
   return true;
 }
 
@@ -360,7 +360,7 @@ bool Database::ListBans(gentity_t *ent, int page) {
         bans_[i]->reason);
   }
 
-  Printer::console(ent, std::move(msg));
+  Printer::console(ent, msg);
   return true;
 }
 
@@ -1306,7 +1306,7 @@ void Database::FindUserOperation::Execute() {
     msg += ETJump::stringFormat("%-8d %-36s^7\n", user.first, user.second);
   }
 
-  Printer::console(ent_, std::move(msg));
+  Printer::console(ent_, msg);
 }
 
 Database::SaveNameOperation::SaveNameOperation(std::string const &name, int id)
@@ -1384,7 +1384,7 @@ void Database::ListUserNamesOperation::Execute() {
       msg += name + '\n';
     }
 
-    Printer::console(ent_, std::move(msg));
+    Printer::console(ent_, msg);
   }
 }
 

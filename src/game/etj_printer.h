@@ -41,7 +41,7 @@ public:
    * send multiple messages if the message is longer than 1000 bytes
    * @param message The message to be sent
    */
-  static void log(std::string message);
+  static void log(const std::string &message);
 
   /**
    * Same functionality as log but adds a new line in the end
@@ -57,9 +57,9 @@ public:
    * @param clientNum The client to send the message to
    * @param message The message to be sent
    */
-  static void console(int clientNum, std::string message);
-  static void console(gentity_t *ent, std::string message);
-  static void console(gclient_t *client, std::string message);
+  static void console(int clientNum, const std::string &message);
+  static void console(gentity_t *ent, const std::string &message);
+  static void console(gclient_t *client, const std::string &message);
 
   /**
    * Sends a console message to everyone in the server and to server
@@ -67,7 +67,7 @@ public:
    * 998 bytes.
    * @param message The message to be sent
    */
-  static void consoleAll(std::string message);
+  static void consoleAll(const std::string &message);
 
   /**
    * Prints to client chat. If client num is -1 sends to console.

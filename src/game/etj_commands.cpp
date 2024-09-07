@@ -983,7 +983,7 @@ bool FindMap(gentity_t *ent, Arguments argv) {
 
   buffer += "\n";
 
-  Printer::console(ClientNum(ent), std::move(buffer));
+  Printer::console(ClientNum(ent), buffer);
   return true;
 }
 
@@ -1151,7 +1151,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv) {
     ++listedMaps;
   }
 
-  Printer::console(ClientNum(ent), std::move(buffer));
+  Printer::console(ClientNum(ent), buffer);
   return true;
 }
 
@@ -1240,7 +1240,7 @@ bool ListMaps(gentity_t *ent, Arguments argv) {
   buffer += "\n^zFound ^3" + ETJump::getPluralizedString(maps.size(), "^zmap") +
             " on the server.\n";
 
-  Printer::console(ent, std::move(buffer));
+  Printer::console(ent, buffer);
   return true;
 }
 
@@ -1289,7 +1289,7 @@ bool ListPlayers(gentity_t *ent, Arguments argv) {
                                 player->client->pers.netname);
   }
 
-  Printer::console(ent, std::move(msg));
+  Printer::console(ent, msg);
   return true;
 }
 
@@ -1406,7 +1406,7 @@ bool MostPlayed(gentity_t *ent, Arguments argv) {
     ++listedMaps;
   }
 
-  Printer::console(ClientNum(ent), std::move(buffer));
+  Printer::console(ClientNum(ent), buffer);
 
   return true;
 }
@@ -2082,7 +2082,7 @@ bool NewMaps(gentity_t *ent, Arguments argv) {
     lines++;
   }
 
-  Printer::console(ClientNum(ent), std::move(buffer));
+  Printer::console(ClientNum(ent), buffer);
   return true;
 }
 
@@ -2538,7 +2538,7 @@ bool Commands::List(gentity_t *ent) {
     helpMsg += "\n^gUse admin commands silently with ^3/!command\n";
   }
 
-  Printer::console(clienNum, std::move(helpMsg));
+  Printer::console(clienNum, helpMsg);
   return true;
 }
 
@@ -2611,7 +2611,7 @@ bool Commands::AdminCommand(gentity_t *ent) {
       msg += ETJump::stringFormat("* %s\n", cmd->first);
     }
 
-    Printer::console(ent, std::move(msg));
+    Printer::console(ent, msg);
   }
 
   return false;
@@ -2633,7 +2633,7 @@ void Commands::ListCommandFlags(gentity_t *ent) {
   // manually add this since it's not an actual command
   msg += "/ [silent commands]\n";
 
-  Printer::console(ent, std::move(msg));
+  Printer::console(ent, msg);
 }
 
 char Commands::FindCommandFlag(const std::string &command) {
