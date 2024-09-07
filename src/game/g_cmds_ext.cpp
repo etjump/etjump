@@ -774,7 +774,7 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
         ETJump::stringFormat("%s^7 has been sent a spectator invitation.\n",
                              other->client->pers.netname);
     Printer::console(selfClient, selfMsg);
-    otherMsg = ETJump::stringFormat("You have been invited to spectate %s^7.\n",
+    otherMsg = ETJump::stringFormat("You have been invited to spectate %s^7.",
                                     ent->client->pers.netname);
     Printer::popup(targetClient, otherMsg);
   } else {
@@ -797,7 +797,7 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
                              other->client->pers.netname);
     Printer::console(selfClient, selfMsg);
     otherMsg =
-        ETJump::stringFormat("^7You are no longer invited to spectate %s^7.\n",
+        ETJump::stringFormat("^7You are no longer invited to spectate %s^7.",
                              ent->client->pers.netname);
     Printer::popup(targetClient, otherMsg);
   }
@@ -841,13 +841,13 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand,
 
   // unlocked
   if (!ent->client->sess.specLocked) {
-    Printer::popup(client, "You are now unlocked from spectators!\n");
+    Printer::popup(client, "You are now unlocked from spectators!");
     return;
   }
 
   // locked
-  Printer::popup(client, "You are now locked from spectators!\n");
-  Printer::popup(client, "Use ^3specinvite ^7to invite people to spectate.\n");
+  Printer::popup(client, "You are now locked from spectators!");
+  Printer::popup(client, "Use ^3specinvite ^7to invite people to spectate.");
 
   // update following players
   for (i = 0; i < level.numConnectedClients; i++) {
