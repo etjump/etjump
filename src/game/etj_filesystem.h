@@ -29,6 +29,9 @@
 
 namespace ETJump {
 class FileSystem {
+  // this can hold ~8192 filenames
+  static constexpr int BIG_DIR_BUFFER = 2 << 18;
+
 public:
   static void copy(const std::string &src, const std::string &dst);
   static void move(const std::string &src, const std::string &dst);
@@ -36,8 +39,8 @@ public:
   static bool exists(const std::string &path);
   static bool safeCopy(const std::string &src, const std::string &dst);
   static bool safeMove(const std::string &src, const std::string &dst);
-  static std::vector<std::string> getFileList(const std::string &path,
-                                              const std::string &ext);
+  static std::vector<std::string>
+  getFileList(const std::string &path, const std::string &ext, bool sort);
   class Path {
     static std::string buildOSPath(const std::string &file);
 
