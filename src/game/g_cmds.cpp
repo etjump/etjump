@@ -4358,10 +4358,10 @@ void Cmd_Goto_f(gentity_t *ent) {
   VectorClear(ent->client->ps.velocity);
 
   Printer::popup(ClientNum(ent),
-                 ETJump::stringFormat("%s ^7-> %s\n", ent->client->pers.netname,
+                 ETJump::stringFormat("%s ^7-> %s", ent->client->pers.netname,
                                       other->client->pers.netname));
   Printer::popup(ClientNum(other),
-                 ETJump::stringFormat("%s ^7-> %s\n", ent->client->pers.netname,
+                 ETJump::stringFormat("%s ^7-> %s", ent->client->pers.netname,
                                       other->client->pers.netname));
 }
 
@@ -4443,12 +4443,10 @@ void Cmd_Call_f(gentity_t *ent) {
   VectorCopy(ent->client->ps.origin, other->client->ps.origin);
 
   Printer::popup(ClientNum(ent),
-                 ETJump::stringFormat("%s ^7-> %s\n",
-                                      other->client->pers.netname,
+                 ETJump::stringFormat("%s ^7-> %s", other->client->pers.netname,
                                       ent->client->pers.netname));
   Printer::popup(ClientNum(other),
-                 ETJump::stringFormat("%s ^7-> %s\n",
-                                      other->client->pers.netname,
+                 ETJump::stringFormat("%s ^7-> %s", other->client->pers.netname,
                                       ent->client->pers.netname));
 }
 
@@ -4479,7 +4477,7 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
   if (!ent) {
     msg = ConcatArgs(2);
     Printer::chat(ClientNum(other),
-                  va("^7Private message from server console: ^3%s\n", msg));
+                  va("^7Private message from server console: ^3%s", msg));
     G_Printf("Private message to %s^7: ^3%s\n", other->client->pers.netname,
              msg);
     return;
@@ -4487,10 +4485,10 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
 
   if (!COM_BitCheck(other->client->sess.ignoreClients, ClientNum(ent))) {
     msg = ConcatArgs(2);
-    Printer::chat(ClientNum(other), va("^7Private message from %s^7: ^3%s\n",
+    Printer::chat(ClientNum(other), va("^7Private message from %s^7: ^3%s",
                                        ent->client->pers.netname, msg));
     if (ent) {
-      Printer::chat(selfNum, va("^7Private message to %s^7: ^3%s\n",
+      Printer::chat(selfNum, va("^7Private message to %s^7: ^3%s",
                                 other->client->pers.netname, msg));
     }
   } else {
