@@ -165,7 +165,7 @@ void UI_LoadArenas() {
 
   // we're in the menus, parse local files
   if (cstate.connState == CA_DISCONNECTED) {
-    std::vector<std::string> files =
+    const std::vector<std::string> files =
         ETJump::FileSystem::getFileList("scripts", ".arena", true);
 
     for (const auto &file : files) {
