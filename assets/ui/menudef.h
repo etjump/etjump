@@ -295,6 +295,11 @@
 #define UI_MB_TITLE					301
 #define UI_MB_OBJECTIVES			302
 
+// ETJump: color picker
+#define UI_COLOR_PICKER 303
+#define UI_COLOR_PICKER_PREVIEW_OLD 304
+#define UI_COLOR_PICKER_PREVIEW_NEW 305
+
 #define VOICECHAT_GETFLAG			"getflag"				// command someone to get the flag
 #define VOICECHAT_OFFENSE			"offense"				// command someone to go on offense
 #define VOICECHAT_DEFEND			"defend"				// command someone to go on defense

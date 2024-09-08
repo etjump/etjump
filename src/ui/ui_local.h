@@ -8,13 +8,6 @@
 #include "../game/bg_public.h"
 #include "ui_shared.h"
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
-
 #include <vector>
 #include <stack>
 #include <string>

@@ -90,7 +90,7 @@ menuDef {
         CVARINTLABEL        (SETTINGS_ITEM_POS(21), "etj_obWatcherY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(21), "OB watcher Y:", 0.2, SETTINGS_ITEM_H, etj_obWatcherY 100 0 480 10, "Sets Y position of overbounce watcher\netj_obWatcherY")
         MULTI               (SETTINGS_ITEM_POS(22), "OB watcher size:", 0.2, SETTINGS_ITEM_H, "etj_obWatcherSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of overbounce watcher\netj_obWatcherSize")
-        COMBO               (SETTINGS_COMBO_POS(23), "OB watcher color:", 0.2, SETTINGS_ITEM_H, "etj_obWatcherColor", COLOR_LIST, none, "Sets color of overbounce watcher\netj_obWatcherColor")
+        COMBO               (SETTINGS_COMBO_POS(23), "OB watcher color:", 0.2, SETTINGS_ITEM_H, "etj_obWatcherColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of overbounce watcher\netj_obWatcherColor")
         COMBO_BIT           (SETTINGS_COMBO_POS(24), "Extra trace:", 0.2, SETTINGS_ITEM_H, "etj_extraTrace", EXTRATRACE_LIST, none, "Enable playerclip tracing for various indicators\netj_extraTrace")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)

@@ -111,16 +111,19 @@ void Tooltip_ComputePosition(itemDef_t *item) {
 
   // Set positioning based on item location
   tipRect->x = itemRect->x + (itemRect->w / 3);
-  tipRect->y = itemRect->y + itemRect->h + 8;
-  // tipRect->h = 14.0f;
-  // tipRect->w = DC->textWidth( item->toolTipData->text,
-  // item->toolTipData->textscale, 0 ) + 6.0f;
-  tipRect->h = DC->multiLineTextHeight(item->toolTipData->text,
-                                       item->toolTipData->textscale, 0) +
-               9.f;
-  tipRect->w = DC->multiLineTextWidth(item->toolTipData->text,
-                                      item->toolTipData->textscale, 0) +
-               6.f;
+  tipRect->h = static_cast<float>(DC->multiLineTextHeight(
+                   item->toolTipData->text, item->toolTipData->textscale, 0)) +
+               9.0f;
+  tipRect->w = static_cast<float>(DC->multiLineTextWidth(
+                   item->toolTipData->text, item->toolTipData->textscale, 0)) +
+               6.0f;
+
+  if (item->toolTipData->tooltipAbove) {
+    tipRect->y = itemRect->y - tipRect->h - 8;
+  } else {
+    tipRect->y = itemRect->y + itemRect->h + 8;
+  }
+
   if ((tipRect->w + tipRect->x) > 635.0f) {
     tipRect->x -= (tipRect->w + tipRect->x) - 635.0f;
   }
@@ -1582,6 +1585,10 @@ void Script_ConditionalScript(itemDef_t *item, qboolean *bAbort,
         } else if (!Q_stricmp(cvar, "uiCheckBackground")) {
           const char *script = uiShowBackground ? script1 : script2;
           Item_RunScript(item, bAbort, script);
+        } else if (!Q_stricmp(cvar, "colorPickerCheckSliderState")) {
+          const char *script =
+              DC->RGBSlidersAreNormalized() ? script1 : script2;
+          Item_RunScript(item, bAbort, script);
         }
 
         break;
@@ -2331,7 +2338,11 @@ float Item_Slider_ThumbPosition(itemDef_t *item) {
     Com_Error(ERR_FATAL, "Item_Slider_ThumbPosition: NULL editDef\n");
   }
 
-  value = DC->getCVarValue(item->cvar);
+  if (item->cvar) {
+    value = DC->getCVarValue(item->cvar);
+  } else {
+    value = DC->getColorSliderValue(item->colorSliderData.colorVar);
+  }
 
   if (value < editDef->minVal) {
     value = editDef->minVal;
@@ -3226,7 +3237,13 @@ static bool comboHandleKey(itemDef_t *item, int key) {
   if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_ENTER ||
       key == K_KP_ENTER) {
     if (multi->strDef) {
-      DC->setCVar(item->cvar, multi->cvarStr[item->cursorPos]);
+      if (!Q_stricmp(multi->cvarStr[item->cursorPos], OPEN_COLOR_PICKER)) {
+        Menu_ClearFocus(static_cast<menuDef_t *>(item->parent));
+        Menus_OpenByName(COLOR_PICKER_MENU);
+        DC->cvarToColorPickerState(item->cvar);
+      } else {
+        DC->setCVar(item->cvar, multi->cvarStr[item->cursorPos]);
+      }
     } else if (item->comboData.bitflag) {
       auto currentValue = static_cast<int>(DC->getCVarValue(item->cvar));
       const auto selectedValue =
@@ -3264,6 +3281,25 @@ static bool comboHandleKey(itemDef_t *item, int key) {
   }
 
   return true;
+}
+
+static void colorPickerDragWrapper(void *p) {
+  const auto si = static_cast<scrollInfo_t *>(p);
+  DC->colorPickerDragFunc(itemCapture, static_cast<float>(DC->cursorx),
+                          static_cast<float>(DC->cursory), si->scrollKey);
+}
+
+// this is mostly useless setup, but we need to do this here to
+// correctly set itemCapture, captureData and captureFunc
+// since this is purely a drag func, we don't bother with most scrollInfo values
+// and just send raw cursor position to do continuous updates
+static void colorPickerStartCapture(itemDef_t *item, int key) {
+  scrollInfo.scrollKey = key;
+  itemCapture = item;
+  captureData = &scrollInfo;
+  // we have to call a wrapper func here because we can't assign
+  // std::function with captures to a C-style function pointer
+  captureFunc = &colorPickerDragWrapper;
 }
 } // namespace ETJump
 
@@ -3546,8 +3582,8 @@ static void Scroll_ListBox_ThumbFunc(void *p) {
 
 static void Scroll_Slider_ThumbFunc(void *p) {
   float x, value, cursorx;
-  scrollInfo_t *si = (scrollInfo_t *)p;
-  editFieldDef_t *editDef = (editFieldDef_t *)si->item->typeData;
+  const auto si = static_cast<scrollInfo_t *>(p);
+  const auto editDef = static_cast<editFieldDef_t *>(si->item->typeData);
 
   if (si->item->text) {
     x = si->item->textRect.x + si->item->textRect.w + 8;
@@ -3555,7 +3591,7 @@ static void Scroll_Slider_ThumbFunc(void *p) {
     x = si->item->window.rect.x;
   }
 
-  cursorx = DC->cursorx;
+  cursorx = static_cast<float>(DC->cursorx);
 
   if (cursorx < x) {
     cursorx = x;
@@ -3569,10 +3605,15 @@ static void Scroll_Slider_ThumbFunc(void *p) {
 
   if (editDef->step > 0) {
     // snap to nearest value
-    value = round(value / editDef->step) * editDef->step;
+    value = std::roundf(value / editDef->step) * editDef->step;
   }
 
-  DC->setCVar(si->item->cvar, va("%f", value));
+  if (si->item->cvar) {
+    DC->setCVar(si->item->cvar, va("%f", value));
+  } else {
+    DC->setColorSliderValue(si->item->colorSliderData.colorVar, value);
+    DC->updateSliderState(si->item);
+  }
 }
 
 void Item_StartCapture(itemDef_t *item, int key) {
@@ -3619,7 +3660,7 @@ void Item_StartCapture(itemDef_t *item, int key) {
       }
 
       break;
-    case ITEM_TYPE_COMBO:
+    case ITEM_TYPE_COMBO: {
       // window flags are already set in comboHandleKey
       const bool autoScroll =
           item->window.flags & (WINDOW_LB_LEFTARROW | WINDOW_LB_RIGHTARROW);
@@ -3630,23 +3671,35 @@ void Item_StartCapture(itemDef_t *item, int key) {
       }
 
       break;
+    }
+    case ITEM_TYPE_OWNERDRAW:
+      if (item->window.ownerDraw == UI_COLOR_PICKER &&
+          item->window.flags & WINDOW_MOUSEOVER) {
+        ETJump::colorPickerStartCapture(item, key);
+      }
+
+      break;
+    default:
+      break;
   }
 }
 
 void Item_StopCapture(itemDef_t *item) {}
 
 qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
-  float x, value, width, work;
+  float x, value, work;
+  const auto cursorX = static_cast<float>(DC->cursorx);
+  const auto cursorY = static_cast<float>(DC->cursory);
 
-  // DC->Print("slider handle key\n");
-  if (item->window.flags & WINDOW_HASFOCUS && item->cvar &&
-      Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory)) {
+  if (item->window.flags & WINDOW_HASFOCUS &&
+      (item->cvar || item->colorSliderData.colorVar) &&
+      Rect_ContainsPoint(&item->window.rect, cursorX, cursorY)) {
     if (key == K_MOUSE1 || key == K_ENTER || key == K_MOUSE2 ||
         key == K_MOUSE3) {
-      editFieldDef_t *editDef = (editFieldDef_t *)item->typeData;
+      const auto editDef = static_cast<editFieldDef_t *>(item->typeData);
       if (editDef) {
         rectDef_t testRect;
-        width = SLIDER_WIDTH;
+
         if (item->text) {
           x = item->textRect.x + item->textRect.w + 8;
         } else {
@@ -3657,29 +3710,27 @@ qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
         testRect.x = x;
         value = (float)SLIDER_THUMB_WIDTH / 2;
         testRect.x -= value;
-        // DC->Print("slider x: %f\n",
-        // testRect.x);
         testRect.w = (SLIDER_WIDTH + (float)SLIDER_THUMB_WIDTH / 2);
-        // DC->Print("slider w: %f\n",
-        // testRect.w);
-        if (Rect_ContainsPoint(&testRect, DC->cursorx, DC->cursory)) {
-          work = DC->cursorx - x;
-          value = work / width;
+
+        if (Rect_ContainsPoint(&testRect, cursorX, cursorY)) {
+          work = cursorX - x;
+          value = work / SLIDER_WIDTH;
           value *= (editDef->maxVal - editDef->minVal);
-          // vm fuckage
-          // value =
-          // (((float)(DC->cursorx - x)/
-          // SLIDER_WIDTH) *
-          // (editDef->maxVal -
-          // editDef->minVal));
           value += editDef->minVal;
-          DC->setCVar(item->cvar, va("%f", value));
+
+          if (item->cvar) {
+            DC->setCVar(item->cvar, va("%f", value));
+          } else {
+            DC->setColorSliderValue(item->colorSliderData.colorVar, value);
+            DC->updateSliderState(item);
+          }
+
           return qtrue;
         }
       }
     }
   }
-  //	DC->Print("slider handle key exit\n");
+
   return qfalse;
 }
 
@@ -4605,7 +4656,7 @@ void Item_Text_Paint(itemDef_t *item) {
   }
 
   if (item->cvarLength || item->text == nullptr) {
-    if (item->cvar == nullptr) {
+    if (!item->cvar && !item->colorSliderData.colorVar) {
       return;
     } else {
       if (item->cvarLength) {
@@ -4613,8 +4664,16 @@ void Item_Text_Paint(itemDef_t *item) {
         size = etj_chatlen((unsigned char *)text);
 
         textPtr = va("%s%i", item->text, MAX_CHAT_TEXT - 1 - size);
-      } else {
-        DC->getCVarString(item->cvar, text, sizeof(text));
+      } else if (item->cvar || item->colorSliderData.colorVar) {
+        if (item->cvar) {
+          DC->getCVarString(item->cvar, text, sizeof(text));
+        } else {
+          Q_strncpyz(text,
+                     std::to_string(DC->getColorSliderValue(
+                                        item->colorSliderData.colorVar))
+                         .c_str(),
+                     sizeof(text));
+        }
 
         if (item->window.flags & WINDOW_TEXTASINT) {
           COM_StripExtension(text, text);
@@ -7607,6 +7666,44 @@ qboolean ItemParse_combo_reversed(itemDef_t *item, int handle) {
   return PC_Boolean_Parse(handle, &item->comboData.reversed);
 }
 
+qboolean ItemParse_colorSliderVar(itemDef_t *item, int handle) {
+  Item_ValidateTypeData(item);
+
+  if (!item->typeData) {
+    return qfalse;
+  }
+
+  const auto editPtr = static_cast<editFieldDef_t *>(item->typeData);
+
+  item->colorSliderData.colorVar = DC->getColorSliderString(handle);
+  if (!item->colorSliderData.colorVar) {
+    return qfalse;
+  }
+
+  DC->setColorSliderType(item);
+
+  if (PC_Float_Parse(handle, &editPtr->defVal) &&
+      PC_Float_Parse(handle, &editPtr->minVal) &&
+      PC_Float_Parse(handle, &editPtr->maxVal)) {
+    if (ETJump::PC_hasFloat(handle)) {
+      PC_Float_Parse(handle, &editPtr->step);
+    }
+    return qtrue;
+  }
+
+  return qfalse;
+}
+
+qboolean ItemParse_colorSliderValue(itemDef_t *item, int handle) {
+  item->colorSliderData.colorVar = DC->getColorSliderString(handle);
+  return item->colorSliderData.colorVar != nullptr ? qtrue : qfalse;
+}
+
+qboolean ItemParse_tooltipAbove(itemDef_t *item, int handle) {
+  item->toolTipData->tooltipAbove = true;
+  return qtrue;
+}
+
 keywordHash_t itemParseKeywords[] = {
     {"accept", ItemParse_accept, nullptr}, // NERVE - SMF
     {"action", ItemParse_action, nullptr},
@@ -7703,6 +7800,11 @@ keywordHash_t itemParseKeywords[] = {
     {"comboMaxItems", ItemParse_combo_maxItems, nullptr},
     {"comboBitflag", ItemParse_combo_bitflag, nullptr},
     {"comboReversed", ItemParse_combo_reversed, nullptr},
+
+    {"colorVar", ItemParse_colorSliderVar, nullptr},
+    {"colorValue", ItemParse_colorSliderValue, nullptr},
+
+    {"tooltipAbove", ItemParse_tooltipAbove, nullptr},
 
     {nullptr, nullptr, nullptr}};
 
@@ -9079,3 +9181,106 @@ void ETJump_DrawMapDetails() {
 }
 
 #endif
+
+/*
+================
+ BG_HSVtoRGB
+
+ HSV values must be in range:
+
+ Hue:         0 - 360
+ Saturation:  0 - 100
+ Value:       0 - 100
+
+ Alpha isn't modified here, what goes in, comes out
+================
+*/
+void BG_HSVtoRGB(const vec4_t hsv, vec4_t rgb, bool normalize) {
+  float H = hsv[0];
+  float S = hsv[1];
+  float V = hsv[2];
+
+  H = std::fmod(H, 360.0f);
+  S /= 100.0f;
+  V /= 100.0f;
+
+  // intermediate variables
+  float C = V * S; // chroma
+  float X = C * (1 - std::fabs(std::fmod(H / 60.0f, 2.0f) - 1));
+  float m = V - C;
+
+  float r_temp, g_temp, b_temp;
+
+  if (H >= 0 && H < 60) {
+    r_temp = C;
+    g_temp = X;
+    b_temp = 0;
+  } else if (H >= 60 && H < 120) {
+    r_temp = X;
+    g_temp = C;
+    b_temp = 0;
+  } else if (H >= 120 && H < 180) {
+    r_temp = 0;
+    g_temp = C;
+    b_temp = X;
+  } else if (H >= 180 && H < 240) {
+    r_temp = 0;
+    g_temp = X;
+    b_temp = C;
+  } else if (H >= 240 && H < 300) {
+    r_temp = X;
+    g_temp = 0;
+    b_temp = C;
+  } else { // H >= 300 && H < 360
+    r_temp = C;
+    g_temp = 0;
+    b_temp = X;
+  }
+
+  Vector4Set(rgb, r_temp + m, g_temp + m, b_temp + m, hsv[3]);
+
+  if (!normalize) {
+    VectorScale(rgb, 255, rgb);
+  }
+}
+
+/*
+================
+ BG_RGBtoHSV
+
+ RGB values are expected to be in 0 - 255 range
+ Alpha isn't modified here, what goes in, comes out
+================
+*/
+void BG_RGBtoHSV(const vec4_t rgb, vec4_t hsv) {
+  const float R = rgb[0] / 255.0f;
+  const float G = rgb[1] / 255.0f;
+  const float B = rgb[2] / 255.0f;
+
+  const float max = std::max({R, G, B});
+  const float min = std::min({R, G, B});
+  const float delta = max - min;
+
+  // scale saturation and value to 0-100 range
+  const float S = (max == 0) ? 0 : (delta / max) * 100.0f;
+  const float V = max * 100.0f;
+
+  float H;
+
+  if (delta == 0) {
+    H = 0; // Hue is undefined for grayscale colors
+  } else if (max == R) {
+    H = 60.0f * std::fmod(((G - B) / delta), 6.0f);
+  } else if (max == G) {
+    H = 60.0f * (((B - R) / delta) + 2);
+  } else { // max == B
+    H = 60.0f * (((R - G) / delta) + 4);
+  }
+
+  // ensure the hue is positive
+  if (H < 0) {
+    H += 360.0f;
+  }
+
+  Vector4Set(hsv, H, S, V, rgb[3]);
+}
