@@ -44,7 +44,7 @@ typedef struct gentity_s gentity_t;
 class Motd {
 public:
   Motd();
-  ~Motd();
+  ~Motd() = default;
   void Initialize();
   void GenerateMotdFile();
   void PrintMotd(gentity_t *ent);

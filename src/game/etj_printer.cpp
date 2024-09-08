@@ -22,42 +22,26 @@
  * SOFTWARE.
  */
 
+#include <utility>
+
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
-
 #include "g_local.h"
 
-void Printer::PrintLn(std::string message) {
-  std::string partialMessage ;
-  while (message.length() > 1000) {
-    partialMessage = message.substr(0, 1000);
-    message = message.substr(1000);
-    G_Printf("%s\n", partialMessage.c_str());
-  }
-  if (message.length() > 0) {
-    G_Printf(message.c_str());
+void Printer::log(const std::string &message) {
+  const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
+
+  for (const auto &split : splits) {
+    G_LogPrintf(split.c_str());
   }
 }
 
-void Printer::LogPrint(std::string message) {
-  std::string partialMessage;
-  while (message.length() > 1000) {
-    partialMessage = message.substr(0, 1000);
-    message = message.substr(1000);
-    G_LogPrintf("%s", partialMessage.c_str());
-  }
-  if (message.length() > 0) {
-    G_LogPrintf(message.c_str());
-  }
-}
+void Printer::logLn(const std::string &message) { log(message + "\n"); }
 
-void Printer::LogPrintln(const std::string &message) {
-  LogPrint(message + "\n");
-}
+void Printer::console(int clientNum, const std::string &message) {
+  const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
 
-void Printer::SendConsoleMessage(int clientNum, std::string message) {
-  auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
-  for (auto &split : splits) {
+  for (const auto &split : splits) {
     if (clientNum == CONSOLE_CLIENT_NUMBER) {
       G_Printf("%s", split.c_str());
     } else {
@@ -66,51 +50,92 @@ void Printer::SendConsoleMessage(int clientNum, std::string message) {
   }
 }
 
-void Printer::SendChatMessage(int clientNum, const std::string &message) {
-  if (clientNum == CONSOLE_CLIENT_NUMBER) {
-    G_Printf("%s", message.c_str());
-  } else {
-    trap_SendServerCommand(clientNum, va("chat \"%s\"", message.c_str()));
-  }
+void Printer::console(gentity_t *ent, const std::string &message) {
+  const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
+  console(clientNum, message);
 }
 
-void Printer::SendPopupMessage(int clientNum, const std::string &message) {
-  if (clientNum == CONSOLE_CLIENT_NUMBER) {
-    G_Printf("%s", message.c_str());
-  } else {
-    trap_SendServerCommand(clientNum, va("cpm \"%s\"", message.c_str()));
-  }
+void Printer::console(gclient_t *client, const std::string &message) {
+  const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
+  console(clientNum, message);
 }
 
-void Printer::BroadcastConsoleMessage(std::string message) {
-  auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
-  for (auto &split : splits) {
+void Printer::consoleAll(const std::string &message) {
+  const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
+
+  for (const auto &split : splits) {
     trap_SendServerCommand(-1, va("print \"%s\"", split.c_str()));
     G_Printf("%s", split.c_str());
   }
 }
 
-void Printer::BroadcastChatMessage(const std::string &message) {
+void Printer::chat(int clientNum, const std::string &message) {
+  if (clientNum == CONSOLE_CLIENT_NUMBER) {
+    G_Printf("%s\n", message.c_str());
+  } else {
+    trap_SendServerCommand(clientNum, va("chat \"%s\"", message.c_str()));
+  }
+}
+
+void Printer::chat(gentity_t *ent, const std::string &message) {
+  const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
+  chat(clientNum, message);
+}
+
+void Printer::chat(gclient_t *client, const std::string &message) {
+  const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
+  chat(clientNum, message);
+}
+
+void Printer::chatAll(const std::string &message) {
   trap_SendServerCommand(-1, va("chat \"%s\"", message.c_str()));
   G_Printf("%s\n", message.c_str());
 }
 
-void Printer::BroadcastPopupMessage(const std::string &message) {
+void Printer::popup(int clientNum, const std::string &message) {
+  if (clientNum == CONSOLE_CLIENT_NUMBER) {
+    G_Printf("%s\n", message.c_str());
+  } else {
+    trap_SendServerCommand(clientNum, va("cpm \"%s\"", message.c_str()));
+  }
+}
+
+void Printer::popup(gentity_t *ent, const std::string &message) {
+  const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
+  popup(clientNum, message);
+}
+
+void Printer::popup(gclient_t *client, const std::string &message) {
+  const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
+  popup(clientNum, message);
+}
+
+void Printer::popupAll(const std::string &message) {
   trap_SendServerCommand(-1, va("cpm \"%s\n\"", message.c_str()));
   G_Printf("%s\n", message.c_str());
 }
 
-void Printer::BroadcastLeftBannerMessage(const std::string &message) {
-  trap_SendServerCommand(-1, va("cpm \"%s\n\"", message.c_str()));
+void Printer::center(int clientNum, const std::string &message) {
+  trap_SendServerCommand(clientNum,
+                         ETJump::stringFormat("cp \"%s\n\"", message).c_str());
+}
+
+void Printer::center(gentity_t *ent, const std::string &message) {
+  const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
+  center(clientNum, message);
+}
+
+void Printer::center(gclient_t *client, const std::string &message) {
+  const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
+  center(clientNum, message);
+}
+
+void Printer::centerAll(const std::string &message) {
+  trap_SendServerCommand(-1, va("cp \"%s\n\"", message.c_str()));
   G_Printf("%s\n", message.c_str());
 }
 
-void Printer::BroadCastBannerMessage(const std::string &message) {
-  trap_SendServerCommand(-1, va("bp \"%s\n\"", message.c_str()));
-  G_Printf("%s\n", message.c_str());
-}
-
-void Printer::SendBannerMessage(int clientNum, const std::string &message) {
+void Printer::banner(int clientNum, const std::string &message) {
   if (clientNum == CONSOLE_CLIENT_NUMBER) {
     G_Printf("%s\n", message.c_str());
   } else {
@@ -118,32 +143,32 @@ void Printer::SendBannerMessage(int clientNum, const std::string &message) {
   }
 }
 
-void Printer::SendCommand(int clientNum, const std::string &command) {
-  trap_SendServerCommand(clientNum, command.c_str());
+void Printer::banner(gentity_t *ent, const std::string &message) {
+  const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
+  banner(clientNum, message);
 }
 
-void Printer::BroadcastTopBannerMessage(const std::string &message) {
+void Printer::banner(gclient_t *client, const std::string &message) {
+  const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
+  banner(clientNum, message);
+}
+
+void Printer::bannerAll(const std::string &message) {
   trap_SendServerCommand(-1, va("bp \"%s\n\"", message.c_str()));
   G_Printf("%s\n", message.c_str());
 }
 
-void Printer::BroadcastCenterMessage(const std::string &message) {
-  trap_SendServerCommand(-1, va("cp \"%s\n\"", message.c_str()));
-  G_Printf("%s\n", message.c_str());
+void Printer::command(int clientNum, const std::string &command) {
+  trap_SendServerCommand(clientNum, command.c_str());
 }
 
-void Printer::SendCenterMessage(int clientNum, const std::string &message) {
-  trap_SendServerCommand(clientNum,
-                         ETJump::stringFormat("cp \"%s\n\"", message).c_str());
-}
-
-void Printer::SendCommandToAll(const std::string &command) {
-  trap_SendServerCommand(-1, command.c_str());
-}
-
-void Printer::SendCommand(std::vector<int> clientNums,
-                          const std::string &command) {
-  for (auto &clientNum : clientNums) {
+void Printer::command(const std::vector<int> &clientNums,
+                      const std::string &command) {
+  for (const auto &clientNum : clientNums) {
     trap_SendServerCommand(clientNum, command.c_str());
   }
+}
+
+void Printer::commandAll(const std::string &command) {
+  trap_SendServerCommand(-1, command.c_str());
 }

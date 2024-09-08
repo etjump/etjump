@@ -13,6 +13,8 @@ add_library(ui MODULE
 	"../game/q_math.cpp"
 	"../game/q_shared.cpp"
 	"../cgame/etj_utilities.cpp"
+	"../game/etj_file.cpp"
+	"../game/etj_filesystem.cpp"
 	"../game/etj_string_utilities.cpp"
 	${UI_HEADERS}
 )

@@ -2013,8 +2013,7 @@ gentity_t *fire_grenade(gentity_t *self, const vec3_t start, const vec3_t dir,
       // JPW NERVE sets to score below if dynamite is in
       // trigger_objective_info & it's an objective
       bolt->accuracy = 0;
-      Printer::SendCenterMessage(ClientNum(self),
-                                 "Dynamite is set, but NOT armed!");
+      Printer::center(ClientNum(self), "Dynamite is set, but NOT armed!");
       // differentiate non-armed dynamite with non-pulsing dlight
       bolt->s.teamNum =
           self->client ? self->client->sess.sessionTeam + 4 : self->s.teamNum;

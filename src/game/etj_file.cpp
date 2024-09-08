@@ -23,15 +23,18 @@
  */
 
 #include "etj_file.h"
+
 #ifdef GAMEDLL
   #include "g_local.h"
+  #include "etj_string_utilities.h"
 #elif CGAMEDLL
   #include "../cgame/cg_local.h"
+#elif UIDLL
+  #include "../ui/ui_local.h"
 #endif
-#include "etj_string_utilities.h"
 
-ETJump::File::File(const std::string &path, Mode mode)
-    : _path(path), _handle(INVALID_FILE_HANDLE), _mode(mode) {
+ETJump::File::File(std::string path, Mode mode)
+    : _path(std::move(path)), _handle(INVALID_FILE_HANDLE), _mode(mode) {
   fsMode_t fsMode;
   switch (_mode) {
     case Mode::Read:
@@ -77,11 +80,11 @@ std::vector<char> ETJump::File::read(int bytes) {
 }
 
 void ETJump::File::write(const std::string &data) const {
-  write(data.c_str(), data.length());
+  write(data.c_str(), static_cast<int>(data.length()));
 }
 
 void ETJump::File::write(const std::vector<char> &data) const {
-  write(data.data(), data.size());
+  write(data.data(), static_cast<int>(data.size()));
 }
 
 void ETJump::File::write(const char *data, int len) const {
@@ -99,41 +102,4 @@ void ETJump::File::write(const char *data, int len) const {
 #else
   trap_FS_Write(data, len, _handle);
 #endif
-}
-
-std::vector<std::string> ETJump::File::fileList(const std::string &path,
-                                                const std::string &extension) {
-  std::vector<std::string> files;
-  auto buffer = std::unique_ptr<char[]>(new char[1 << 16]);
-  auto numDirs = trap_FS_GetFileList(path.c_str(), extension.c_str(),
-                                     buffer.get(), sizeof(buffer));
-  auto dirPtr = buffer.get();
-  auto dirLen = 0;
-
-  for (auto i = 0; i < numDirs; i++, dirPtr += dirLen + 1) {
-    dirLen = strlen(dirPtr);
-    if (strlen(dirPtr) > 4) {
-      dirPtr[strlen(dirPtr) - 4] = 0;
-    }
-
-    char file[MAX_QPATH] = "";
-    Q_strncpyz(file, dirPtr, sizeof(file));
-    files.push_back(file);
-  }
-  return files;
-}
-
-std::string ETJump::File::getPath(const std::string file) {
-  char game[MAX_CVAR_VALUE_STRING] = "";
-  char base[MAX_CVAR_VALUE_STRING] = "";
-  trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
-  trap_Cvar_VariableStringBuffer("fs_homepath", base, sizeof(base));
-
-  auto path = ETJump::stringFormat("%s/%s/%s", base, game, file);
-  for (auto &c : path) {
-    if (c == '/' || c == '\\') {
-      c = PATH_SEP;
-    }
-  }
-  return path;
 }

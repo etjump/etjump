@@ -32,6 +32,7 @@
 #include "utilities.hpp"
 #include "etj_printer.h"
 #include "etj_json_utilities.h"
+#include "etj_filesystem.h"
 
 CustomMapVotes::CustomMapVotes(MapStatistics *mapStats) : _mapStats(mapStats) {}
 
@@ -54,7 +55,8 @@ bool CustomMapVotes::Load() {
   _currentMapsOnServer = _mapStats->getCurrentMaps();
 
   customMapVotes_.clear();
-  std::string path = GetPath(g_customMapVotesFile.string);
+  std::string path =
+      ETJump::FileSystem::Path::getPath(g_customMapVotesFile.string);
   std::ifstream f(path.c_str());
 
   if (!f) {
@@ -136,7 +138,8 @@ std::string CustomMapVotes::ListTypes() const {
 
 void CustomMapVotes::GenerateVotesFile() {
   Arguments argv = GetArgs();
-  std::ifstream in(GetPath(g_customMapVotesFile.string).c_str());
+  std::ifstream in(
+      ETJump::FileSystem::Path::getPath(g_customMapVotesFile.string));
   if (in.good()) {
     if (argv->size() == 1) {
       G_Printf("A custom map votes file exists. Are you "
@@ -174,7 +177,8 @@ void CustomMapVotes::GenerateVotesFile() {
 
   Json::StyledWriter writer;
   std::string output = writer.write(root);
-  std::ofstream fOut(GetPath(g_customMapVotesFile.string).c_str());
+  std::ofstream fOut(
+      ETJump::FileSystem::Path::getPath(g_customMapVotesFile.string));
   if (!fOut) {
     G_Printf("Couldn't open file \"%s\" defined in "
              "g_customMapVotesFile.\n",
@@ -201,14 +205,12 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
     // make sure we don't already have a list with this name
     for (const auto &lists : customMapVotes_) {
       if (sanitizedName == lists.type) {
-        Printer::SendChatMessage(clientNum,
-                                 "^3add-customvote: ^7operation failed, check "
+        Printer::chat(clientNum, "^3add-customvote: ^7operation failed, check "
                                  "console for more information.");
-        Printer::SendConsoleMessage(
-            clientNum,
-            ETJump::stringFormat("^3add-customvote: ^7a list with the name "
-                                 "^3'%s' ^7already exists.\n",
-                                 sanitizedName));
+        Printer::console(clientNum, ETJump::stringFormat(
+                                        "^3add-customvote: ^7a list with the "
+                                        "name ^3'%s' ^7already exists.\n",
+                                        sanitizedName));
         return;
       }
     }
@@ -228,20 +230,20 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
   root.append(vote);
 
   if (!ETJump::JsonUtils::writeFile(customVotesFile, root)) {
-    Printer::SendChatMessage(clientNum, "^3add-customvote: ^7operation failed, "
-                                        "check console for more information.");
-    Printer::SendConsoleMessage(
-        clientNum, ETJump::stringFormat("^3add-customvote: ^7couldn't open the "
-                                        "file ^3'%s' ^7for writing.\n",
-                                        customVotesFile));
+    Printer::chat(clientNum, "^3add-customvote: ^7operation failed, check "
+                             "console for more information.");
+    Printer::console(clientNum,
+                     ETJump::stringFormat("^3add-customvote: ^7couldn't open "
+                                          "the file ^3'%s' ^7for writing.\n",
+                                          customVotesFile));
     return;
   }
 
   Load();
-  Printer::SendChatMessage(
-      clientNum, ETJump::stringFormat("^3add-customvote: ^7successfully added "
-                                      "a new custom vote list ^3'%s'",
-                                      sanitizedName));
+  Printer::chat(clientNum,
+                ETJump::stringFormat("^3add-customvote: ^7successfully added a "
+                                     "new custom vote list ^3'%s'",
+                                     sanitizedName));
 }
 
 void CustomMapVotes::deleteCustomvoteList(int clientNum,
@@ -250,10 +252,9 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
   Json::Value root;
 
   if (!ETJump::JsonUtils::readFile(customVotesFile, root)) {
-    Printer::SendChatMessage(clientNum,
-                             "^3delete-customvote: ^7operation failed, check "
+    Printer::chat(clientNum, "^3delete-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::SendConsoleMessage(
+    Printer::console(
         clientNum, ETJump::stringFormat("^3delete-customvote: ^7couldn't open "
                                         "the file ^3'%s' ^7for reading.\n",
                                         customVotesFile));
@@ -272,18 +273,17 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
   }
 
   if (!found) {
-    Printer::SendChatMessage(
-        clientNum, ETJump::stringFormat("^3delete-customvote: ^7a list with "
-                                        "the name ^3'%s' ^7was not found.\n",
-                                        name));
+    Printer::chat(clientNum,
+                  ETJump::stringFormat("^3delete-customvote: ^7a list with the "
+                                       "name ^3'%s' ^7was not found.\n",
+                                       name));
     return;
   }
 
   if (!ETJump::JsonUtils::writeFile(customVotesFile, root)) {
-    Printer::SendChatMessage(clientNum,
-                             "^3delete-customvote: ^7operation failed, check "
+    Printer::chat(clientNum, "^3delete-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::SendConsoleMessage(
+    Printer::console(
         clientNum, ETJump::stringFormat("^3delete-customvote: ^7couldn't open "
                                         "the file ^3'%s' ^7for writing.\n",
                                         customVotesFile));
@@ -291,7 +291,7 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
   }
 
   Load();
-  Printer::SendChatMessage(
+  Printer::chat(
       clientNum,
       ETJump::stringFormat(
           "^3delete-customvote: ^7successfully deleted custom vote list ^3'%s'",
@@ -307,13 +307,12 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
   Json::Value root;
 
   if (!ETJump::JsonUtils::readFile(customVotesFile, root)) {
-    Printer::SendChatMessage(clientNum,
-                             "^3edit-customvote: ^7operation failed, check "
+    Printer::chat(clientNum, "^3edit-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::SendConsoleMessage(
-        clientNum, ETJump::stringFormat("^3edit-customvote: ^7couldn't open "
-                                        "the file ^3'%s' ^7for reading.\n",
-                                        customVotesFile));
+    Printer::console(clientNum,
+                     ETJump::stringFormat("^3edit-customvote: ^7couldn't open "
+                                          "the file ^3'%s' ^7for reading.\n",
+                                          customVotesFile));
     return;
   }
 
@@ -369,26 +368,25 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
   }
 
   if (!found) {
-    Printer::SendChatMessage(
-        clientNum, ETJump::stringFormat("^3edit-customvote: ^7a list with the "
-                                        "name ^3'%s' ^7was not found.\n",
-                                        sanitizedList));
+    Printer::chat(clientNum,
+                  ETJump::stringFormat("^3edit-customvote: ^7a list with the "
+                                       "name ^3'%s' ^7was not found.\n",
+                                       sanitizedList));
     return;
   }
 
   if (!ETJump::JsonUtils::writeFile(customVotesFile, root)) {
-    Printer::SendChatMessage(clientNum,
-                             "^3edit-customvote: ^7operation failed, check "
+    Printer::chat(clientNum, "^3edit-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::SendConsoleMessage(
-        clientNum, ETJump::stringFormat("^3edit-customvote: ^7couldn't open "
-                                        "the file ^3'%s' ^7for writing.\n",
-                                        customVotesFile));
+    Printer::console(clientNum,
+                     ETJump::stringFormat("^3edit-customvote: ^7couldn't open "
+                                          "the file ^3'%s' ^7for writing.\n",
+                                          customVotesFile));
     return;
   }
 
   Load();
-  Printer::SendChatMessage(
+  Printer::chat(
       clientNum,
       ETJump::stringFormat(
           "^3edit-customvote: ^7successfully edited custom vote list ^3'%s'",
@@ -482,6 +480,5 @@ std::string const CustomMapVotes::RandomMap(std::string const &type) {
 //  MapStatistics::isValidMap but that takes MapInfo as argument
 //  and isn't simple to refactor so bleh
 bool CustomMapVotes::isValidMap(const std::string &mapName) {
-  return G_MapExists(mapName.c_str()) && mapName != level.rawmapname &&
-         !MapStatistics::isBlockedMap(mapName);
+  return game.mapStatistics->mapExists(mapName) && mapName != level.rawmapname;
 }

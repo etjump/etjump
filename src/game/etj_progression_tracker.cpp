@@ -206,7 +206,7 @@ void ETJump::ProgressionTrackers::printTrackerChanges(gentity_t *activator,
       const std::string &trackerChangeMsg = stringFormat(
           "^7Tracker change - index: ^3%i ^7value: ^2%i ^7from: ^9%i^7\n",
           i + 1, activator->client->sess.progression[i], oldValues[i]);
-      Printer::SendPopupMessage(clientNum, trackerChangeMsg);
+      Printer::popup(clientNum, trackerChangeMsg);
     }
   }
 }

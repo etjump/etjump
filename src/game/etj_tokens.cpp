@@ -29,6 +29,7 @@
 #include "json/json.h"
 #include "etj_utilities.h"
 #include "etj_time_utilities.h"
+#include "etj_printer.h"
 
 namespace ETJump {
 static std::array<Tokens::Token, MAX_TOKENS_PER_DIFFICULTY> easyTokens;
@@ -337,14 +338,14 @@ void Tokens::tokenTouch(gentity_t *self, gentity_t *other, trace_t *trace) {
   }
 
   *collected = qtrue;
-  C_CPMTo(other, va("^7You collected %s ^7token ^5#%d", difficulty,
-                    self->tokenInformation->idx + 1));
+  Printer::popup(other, va("^7You collected %s ^7token ^5#%d", difficulty,
+                           self->tokenInformation->idx + 1));
 
   if (allTokensCollected(other)) {
     const std::string &time = millisToString(
         level.time - other->client->pers.tokenCollectionStartTime);
-    C_CPMAll(va("%s ^7collected all tokens in %s", other->client->pers.netname,
-                time.c_str()));
+    Printer::popupAll(va("%s ^7collected all tokens in %s",
+                         other->client->pers.netname, time.c_str()));
   }
 }
 

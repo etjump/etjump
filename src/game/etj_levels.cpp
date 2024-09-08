@@ -24,7 +24,7 @@
 
 #include "etj_levels.h"
 #include "etj_local.h"
-#include "utilities.hpp"
+#include "etj_printer.h"
 #include "etj_string_utilities.h"
 
 Levels::Level::Level(int level, std::string const &name,
@@ -180,39 +180,36 @@ Levels::Level const *Levels::GetLevel(int level) {
 }
 
 void Levels::PrintLevelInfo(gentity_t *ent) {
-  auto it = levels_.begin();
-  auto end = levels_.end();
+  Printer::chat(ent, "^3levelinfo: ^7check console for more information.");
+  std::string msg = "Levels:";
 
-  ChatPrintTo(ent, "^3levelinfo: ^7check console for more information.");
-  BeginBufferPrint();
-  BufferPrint(ent, "Levels: ");
-  for (; it != end; ++it) {
-    if (it + 1 == end) {
-      BufferPrint(ent, va("%d", (*it)->level));
-      FinishBufferPrint(ent, true);
-      return;
-    }
-    BufferPrint(ent, va("%d, ", it->get()->level));
+  for (const auto &lvl : levels_) {
+    msg += ETJump::stringFormat(" %i,", lvl->level);
   }
+
+  if (!msg.empty() && msg.back() == ',') {
+    msg.replace(msg.length() - 1, 1, "\n");
+  }
+
+  Printer::console(ent, msg);
 }
 
 void Levels::PrintLevelInfo(gentity_t *ent, int level) {
-  auto it = levels_.begin();
-  auto end = levels_.end();
-
-  for (; it != end; ++it) {
-    if (it->get()->level == level) {
-      ChatPrintTo(ent, "^3levelinfo: ^7check console "
-                       "for more information.");
-      ConsolePrintTo(ent, va("^5Level: ^7%d\n^5Name: ^7%s\n^5Commands: "
-                             "^7%s\n^5Greeting: ^7%s",
-                             level, it->get()->name.c_str(),
-                             it->get()->commands.c_str(),
-                             it->get()->greeting.c_str()));
+  for (const auto &lvl : levels_) {
+    if (lvl->level == level) {
+      Printer::chat(ent, "^3levelinfo: ^7check console for more information.");
+      Printer::console(ent, ETJump::stringFormat("^5Level: ^7%d\n"
+                                                 "^5Name: ^7%s\n"
+                                                 "^5Commands: ^7%s\n"
+                                                 "^5Greeting: ^7%s",
+                                                 level, lvl->name,
+                                                 lvl->commands, lvl->greeting));
       return;
     }
   }
-  ChatPrintTo(ent, "^3levelinfo: ^7undefined level: " + std::to_string(level));
+
+  Printer::chat(ent,
+                "^3levelinfo: ^7undefined level: " + std::to_string(level));
 }
 
 bool Levels::LevelExists(int level) const {

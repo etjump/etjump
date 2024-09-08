@@ -146,3 +146,106 @@ TEST_F(StringUtilitiesTests, iEqual_ShouldWorkCorrectly) {
   EXPECT_EQ(StringUtil::iEqual("FoO", "foO"), true);
   EXPECT_EQ(StringUtil::iEqual("FoO", "BaR"), false);
 }
+
+TEST_F(StringUtilitiesTests, normalizeNumberString_ValidInput) {
+  EXPECT_EQ(StringUtil::normalizeNumberString("123"), "123");
+  EXPECT_EQ(StringUtil::normalizeNumberString("123.456"), "123.456");
+  EXPECT_EQ(StringUtil::normalizeNumberString("-123"), "-123");
+  EXPECT_EQ(StringUtil::normalizeNumberString("-123.456"), "-123.456");
+  EXPECT_EQ(StringUtil::normalizeNumberString("1e10"), "10000000000");
+  EXPECT_EQ(StringUtil::normalizeNumberString("1e-10"), "0.0000000001");
+  EXPECT_EQ(StringUtil::normalizeNumberString("123.4560000"), "123.456");
+}
+
+TEST_F(StringUtilitiesTests, normalizeNumberString_EdgeCases) {
+  EXPECT_EQ(StringUtil::normalizeNumberString(""), "");
+  EXPECT_EQ(StringUtil::normalizeNumberString("0"), "0");
+  EXPECT_EQ(StringUtil::normalizeNumberString("0.0"), "0");
+  EXPECT_EQ(StringUtil::normalizeNumberString("-0"), "-0");
+  EXPECT_EQ(StringUtil::normalizeNumberString("0.0000000001"), "0.0000000001");
+  EXPECT_EQ(StringUtil::normalizeNumberString("-0.0000000001"),
+            "-0.0000000001");
+}
+
+TEST_F(StringUtilitiesTests, normalizeNumberString_InvalidInput) {
+  EXPECT_EQ(StringUtil::normalizeNumberString("abc"), "");
+  EXPECT_EQ(StringUtil::normalizeNumberString("123abc"), "123");
+  EXPECT_EQ(StringUtil::normalizeNumberString("123.456.789"), "123.456");
+  EXPECT_EQ(StringUtil::normalizeNumberString("."), "");
+}
+
+TEST_F(StringUtilitiesTests, normalizeNumberString_PrecisionAndRounding) {
+  EXPECT_EQ(StringUtil::normalizeNumberString("123.4567890123456789"),
+            "123.4567890123");
+  // rounds up
+  EXPECT_EQ(StringUtil::normalizeNumberString("123.45678901235"),
+            "123.4567890124");
+}
+
+TEST_F(StringUtilitiesTests,
+       normalizeNumberString_LeadingZerosAndDecimalPoint) {
+  EXPECT_EQ(StringUtil::normalizeNumberString("0123.4500"), "123.45");
+  EXPECT_EQ(StringUtil::normalizeNumberString("0123.0"), "123");
+}
+
+TEST_F(StringUtilitiesTests,
+       normalizeNumberString_TrailingZerosAndDecimalPoint) {
+  EXPECT_EQ(StringUtil::normalizeNumberString("123.4500"), "123.45");
+  EXPECT_EQ(StringUtil::normalizeNumberString("123.0"), "123");
+}
+
+TEST_F(StringUtilitiesTests, removeTrailingChars_NoTrailingChars) {
+  std::string input = "aaa";
+  ETJump::StringUtil::removeTrailingChars(input, ' ');
+  EXPECT_EQ(input, "aaa");
+
+  input = "aaa aaa";
+  ETJump::StringUtil::removeTrailingChars(input, ' ');
+  EXPECT_EQ(input, "aaa aaa");
+}
+
+TEST_F(StringUtilitiesTests, removeTrailingChars_WithTrailingChars) {
+  std::string input = "aaa   ";
+  ETJump::StringUtil::removeTrailingChars(input, ' ');
+  EXPECT_EQ(input, "aaa");
+}
+
+TEST_F(StringUtilitiesTests, removeTrailingChars_AllCharsToRemove) {
+  std::string input = "   ";
+  ETJump::StringUtil::removeTrailingChars(input, ' ');
+  EXPECT_TRUE(input.empty());
+}
+
+TEST_F(StringUtilitiesTests, removeTrailingChars_EmptyString) {
+  std::string input;
+  ETJump::StringUtil::removeTrailingChars(input, ' ');
+  EXPECT_TRUE(input.empty());
+}
+
+TEST_F(StringUtilitiesTests, removeLeadingChars_NoLeadingChars) {
+  std::string input = "aaa";
+  ETJump::StringUtil::removeLeadingChars(input, ' ');
+  EXPECT_EQ(input, "aaa");
+
+  input = "aaa aaa";
+  ETJump::StringUtil::removeLeadingChars(input, ' ');
+  EXPECT_EQ(input, "aaa aaa");
+}
+
+TEST_F(StringUtilitiesTests, removeLeadingChars_WithLeadingChars) {
+  std::string input = "   aaa";
+  ETJump::StringUtil::removeLeadingChars(input, ' ');
+  EXPECT_EQ(input, "aaa");
+}
+
+TEST_F(StringUtilitiesTests, removeLeadingChars_AllCharsToRemove) {
+  std::string input = "   ";
+  ETJump::StringUtil::removeLeadingChars(input, ' ');
+  EXPECT_TRUE(input.empty());
+}
+
+TEST_F(StringUtilitiesTests, removeLeadingChars_EmptyString) {
+  std::string input{};
+  ETJump::StringUtil::removeLeadingChars(input, ' ');
+  EXPECT_TRUE(input.empty());
+}

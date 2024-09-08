@@ -11,25 +11,6 @@ typedef vec_t vec3_t[3];
 typedef vec_t vec4_t[4];
 typedef vec_t vec5_t[5];
 
-const std::string NEWLINE = "\n";
-
-void LogPrint(std::string message);
-
-// C++ versions of the printing functions
-void ConsolePrintTo(gentity_t *target, const std::string& msg);
-void BPAll(const std::string& msg, bool toConsole = true);
-void BPTo(gentity_t *target, const std::string& msg);
-void BeginBufferPrint();
-void BufferPrint(gentity_t *ent, const std::string& msg);
-void FinishBufferPrint(gentity_t *ent, bool insertNewLine = false);
-void CPAll(const std::string& msg, bool toConsole = true);
-void CPMAll(const std::string& msg, bool toConsole = true);
-void CPMTo(gentity_t* target, const std::string& msg);
-void CPTo(gentity_t *target, const std::string& msg);
-void ChatPrintAll(const std::string& msg, bool toConsole = true);
-void ChatPrintTo(gentity_t *target, const std::string& msg);
-void ConsolePrintTo(gentity_t *target, const std::string& msg);
-
 // Argument handling
 typedef const std::vector<std::string> *Arguments;
 typedef std::vector<std::string>::const_iterator ConstArgIter;
@@ -40,38 +21,22 @@ Arguments GetSayArgs(int start = 0);
 std::string SayArgv(int arg);
 
 // Conversions
-bool ToInt(const std::string& toConvert, int& value);
-bool ToUnsigned(const std::string& toConvert, unsigned& value);
-bool ToFloat(const std::string& toConvert, float& value);
+bool ToInt(const std::string &toConvert, int &value);
+bool ToUnsigned(const std::string &toConvert, unsigned &value);
+bool ToFloat(const std::string &toConvert, float &value);
 
 std::string ToString(vec3_t toConvert);
 std::string ToString(vec_t x, vec_t y, vec_t z);
 
-gentity_t *PlayerGentityFromString(char *name, char *err, int size, team_t filter = TEAM_FREE);
-gentity_t *PlayerGentityFromString(const std::string& name,
-                                   std::string& err, team_t filter = TEAM_FREE);
-void CharPtrToString(const char *p, std::string& s);
+gentity_t *PlayerGentityFromString(char *name, char *err, int size,
+                                   team_t filter = TEAM_FREE);
+gentity_t *PlayerGentityFromString(const std::string &name, std::string &err,
+                                   team_t filter = TEAM_FREE);
 
-std::string GetPath(const std::string& file);
-bool MapExists(const std::string& map);
-
-std::string ValueForKey(gentity_t *ent, const std::string& key);
-std::string ValueForKey(int clientNum, const std::string& key);
+std::string ValueForKey(gentity_t *ent, const std::string &key);
+std::string ValueForKey(int clientNum, const std::string &key);
 std::string TimeStampToString(int timeStamp);
 std::string TimeStampDifferenceToString(int diff);
 
 bool ValidGuid(std::string guid);
-
-class BufferPrinter
-{
-public:
-	BufferPrinter(gentity_t *ent);
-
-	void Begin();
-	void Print(const std::string& data);
-	void Finish(bool insertNewLine);
-private:
-	gentity_t   *ent_;
-	std::string buffer_;
-};
 #endif // g_utilities_h__

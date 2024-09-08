@@ -146,8 +146,8 @@ std::string ETJump::trim(const std::string &input) {
 }
 
 // word-wrapper
-std::vector<std::string> ETJump::wrapWords(std::string &input, char separator,
-                                           size_t maxLength) {
+std::vector<std::string> ETJump::wrapWords(const std::string &input,
+                                           char separator, size_t maxLength) {
   std::vector<std::string> output;
   size_t lastPos = 0;
 
@@ -322,7 +322,17 @@ unsigned ETJump::StringUtil::countExtraPadding(const std::string &input) {
 
 std::string
 ETJump::StringUtil::normalizeNumberString(const std::string &input) {
-  double number = std::stod(input);
+  if (input.empty()) {
+    return "";
+  }
+
+  double number;
+
+  try {
+    number = std::stod(input);
+  } catch (...) {
+    return "";
+  }
 
   std::ostringstream oss;
   oss << std::setprecision(10) << std::fixed << number;
@@ -342,10 +352,30 @@ ETJump::StringUtil::normalizeNumberString(const std::string &input) {
 
 void ETJump::StringUtil::removeTrailingChars(std::string &str,
                                              const char charToRemove) {
-  str.erase(str.find_last_not_of(charToRemove) + 1, std::string::npos);
+  if (str.empty()) {
+    return;
+  }
+
+  const size_t pos = str.find_last_not_of(charToRemove);
+
+  if (pos == std::string::npos) {
+    str.clear();
+  } else {
+    str.erase(pos + 1);
+  }
 }
 
 void ETJump::StringUtil::removeLeadingChars(std::string &str,
                                             const char charToRemove) {
-  str.erase(0, std::min(str.find_first_not_of(charToRemove), str.size() - 1));
+  if (str.empty()) {
+    return;
+  }
+
+  const size_t pos = str.find_first_not_of(charToRemove);
+
+  if (pos == std::string::npos) {
+    str.clear();
+  } else {
+    str.erase(0, pos);
+  }
 }
