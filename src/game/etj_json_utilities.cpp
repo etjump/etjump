@@ -25,6 +25,7 @@
 #include <fstream>
 #include "etj_json_utilities.h"
 #include "etj_filesystem.h"
+#include "etj_file.h"
 
 namespace ETJump {
 Log JsonUtils::logger = Log("JSON-utils");
@@ -32,15 +33,21 @@ Log JsonUtils::logger = Log("JSON-utils");
 bool JsonUtils::writeFile(const std::string &file, const Json::Value &root) {
   Json::StyledWriter writer;
   const std::string &output = writer.write(root);
-  std::ofstream fOut(FileSystem::Path::getPath(file));
 
-  if (!fOut) {
-    fOut.close();
+  if (file.empty()) {
+    logger.error("Failed to write JSON file: empty filename\n");
     return false;
   }
 
-  fOut << output;
-  fOut.close();
+  File fOut(file, File::Mode::Write);
+
+  try {
+    fOut.write(output);
+  } catch (const File::WriteFailedException &e) {
+    logger.error("Failed to write JSON file: %s\n", e.what());
+    return false;
+  }
+
   return true;
 }
 
