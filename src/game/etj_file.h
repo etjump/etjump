@@ -24,17 +24,11 @@
 
 #pragma once
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
-
 #include <string>
 #include <vector>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 namespace ETJump {
 class File {
@@ -61,7 +55,7 @@ public:
   // throws FileNotFoundException if the mode is read and there's no
   // such file.
   // Write will create the file in that case
-  explicit File(const std::string &path, Mode mode = Mode::Read);
+  explicit File(std::string path, Mode mode = Mode::Read);
   ~File();
 
   // reads `bytes` bytes from the file.
@@ -75,13 +69,6 @@ public:
   void write(const std::string &data) const;
   void write(const std::vector<char> &data) const;
   void write(const char *data, int len) const;
-
-  // lists files in a dir with extension
-  static std::vector<std::string> fileList(const std::string &path,
-                                           const std::string &extension);
-
-  // builds the quake file system path from the file name
-  static std::string getPath(const std::string file);
 
 private:
   std::string _path;
