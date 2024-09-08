@@ -7097,7 +7097,7 @@ void parseMaplist() {
     uiInfo.serverMaplist.emplace_back(arg);
   }
 
-  std::sort(uiInfo.serverMaplist.begin(), uiInfo.serverMaplist.end());
+  ETJump::StringUtil::sortStrings(uiInfo.serverMaplist, true);
 }
 } // namespace ETJump
 

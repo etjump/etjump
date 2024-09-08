@@ -40,7 +40,10 @@ public:
   static bool safeCopy(const std::string &src, const std::string &dst);
   static bool safeMove(const std::string &src, const std::string &dst);
   static std::vector<std::string>
+
+  // if sort is true, the returned list is sorted case-insensitively
   getFileList(const std::string &path, const std::string &ext, bool sort);
+
   class Path {
     static std::string buildOSPath(const std::string &file);
 

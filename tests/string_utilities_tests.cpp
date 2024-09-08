@@ -249,3 +249,35 @@ TEST_F(StringUtilitiesTests, removeLeadingChars_EmptyString) {
   ETJump::StringUtil::removeLeadingChars(input, ' ');
   EXPECT_TRUE(input.empty());
 }
+
+TEST_F(StringUtilitiesTests, sortStrings_SortNoCase) {
+  std::vector<std::string> vec = {"A", "c", "d", "B"};
+  ETJump::StringUtil::sortStrings(vec, true);
+
+  ASSERT_EQ(vec[0], "A");
+  ASSERT_EQ(vec[1], "B");
+  ASSERT_EQ(vec[2], "c");
+  ASSERT_EQ(vec[3], "d");
+}
+
+TEST_F(StringUtilitiesTests, sortStrings_SortNoCase_DuplicatesKeepOrder) {
+  std::vector<std::string> vec = {"a", "B", "A", "b"};
+  ETJump::StringUtil::sortStrings(vec, true);
+
+  ASSERT_EQ(vec[0], "a");
+  ASSERT_EQ(vec[1], "A");
+  ASSERT_EQ(vec[2], "B");
+  ASSERT_EQ(vec[3], "b");
+}
+
+TEST_F(StringUtilitiesTests, sortStrings_SortWithCase) {
+  std::vector<std::string> vec = {"AB", "Ab", "aA", "aC", "AA", "Ba"};
+  ETJump::StringUtil::sortStrings(vec, false);
+
+  ASSERT_EQ(vec[0], "AA");
+  ASSERT_EQ(vec[1], "AB");
+  ASSERT_EQ(vec[2], "Ab");
+  ASSERT_EQ(vec[3], "Ba");
+  ASSERT_EQ(vec[4], "aA");
+  ASSERT_EQ(vec[5], "aC");
+}

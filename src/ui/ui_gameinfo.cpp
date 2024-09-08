@@ -7,6 +7,9 @@
 #include <memory>
 #include <algorithm>
 
+#include "../game/etj_filesystem.h"
+#include "../game/etj_string_utilities.h"
+
 #include "ui_local.h"
 
 //
@@ -162,22 +165,8 @@ void UI_LoadArenas() {
 
   // we're in the menus, parse local files
   if (cstate.connState == CA_DISCONNECTED) {
-    constexpr int BUF_SIZE = 200000;
-    const auto fileList = std::make_unique<char[]>(BUF_SIZE);
-    const int numFiles =
-        trap_FS_GetFileList("scripts", ".arena", fileList.get(), BUF_SIZE);
-    std::vector<std::string> files;
-    files.reserve(numFiles);
-
-    auto namePtr = fileList.get();
-
-    // parse files to a vector so we can sort them easily
-    for (int i = 0; i < numFiles; i++) {
-      files.emplace_back(namePtr);
-      namePtr += strlen(namePtr) + 1;
-    }
-
-    std::sort(files.begin(), files.end());
+    std::vector<std::string> files =
+        ETJump::FileSystem::getFileList("scripts", ".arena", true);
 
     for (const auto &file : files) {
       Q_strncpyz(filename, "scripts/", sizeof(filename));

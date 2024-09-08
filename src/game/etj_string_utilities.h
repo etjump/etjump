@@ -121,5 +121,19 @@ void removeTrailingChars(std::string &str, char charToRemove);
 // if input contains only chars to remove, result is empty string
 void removeLeadingChars(std::string &str, char charToRemove);
 
+// sorts strings either with case sensitivity or insensitivity
+// identical strings are kept in order
+template <typename T>
+void sortStrings(T &v, const bool noCase) {
+  std::sort(
+      v.begin(), v.end(), [&](const std::string &lhs, const std::string &rhs) {
+        if (noCase) {
+          return StringUtil::toUpperCase(lhs) < StringUtil::toUpperCase(rhs);
+        } else {
+          return lhs < rhs;
+        }
+      });
+}
+
 } // namespace StringUtil
 } // namespace ETJump

@@ -103,11 +103,7 @@ std::vector<std::string> FileSystem::getFileList(const std::string &path,
   }
 
   if (sort) {
-    std::sort(files.begin(), files.end(),
-              [](const std::string &lhs, const std::string &rhs) {
-                return StringUtil::toUpperCase(lhs) <
-                       StringUtil::toUpperCase(rhs);
-              });
+    ETJump::StringUtil::sortStrings(files, true);
   }
 
   return files;
