@@ -55,6 +55,27 @@ void QDECL Com_Printf(const char *msg, ...) {
   trap_Print(va("%s", text));
 }
 
+// prints only in localhost
+void QDECL Com_LocalPrintf(const char *msg, ...) {
+  uiClientState_t cstate;
+  trap_GetClientState(&cstate);
+
+  // this isn't 100% reliable, but it's the best that we can do
+  if (Q_strncmp(cstate.servername, "localhost",
+                static_cast<int>(strlen("localhost")))) {
+    return;
+  }
+
+  va_list argptr;
+  char text[1024];
+
+  va_start(argptr, msg);
+  Q_vsnprintf(text, sizeof(text), msg, argptr);
+  va_end(argptr);
+
+  trap_Print(va("%s", text));
+}
+
 #endif
 
 /*
@@ -176,6 +197,11 @@ qboolean UI_ConsoleCommand(int realTime) {
   }
 
   if (Q_stricmp(cmd, "iamacheater") == 0) {
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "uiParseMaplist")) {
+    ETJump::parseMaplist();
     return qtrue;
   }
 

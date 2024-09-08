@@ -1345,6 +1345,14 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
     }
   }
 
+  uiInfo.serverMaplist.clear();
+
+  // if we're already in-game, re-request the map list from server
+  // this only ever executes if a client does 'ui_restart' while connected
+  if (cstate.connState == CA_ACTIVE) {
+    trap_Cmd_ExecuteText(EXEC_APPEND, "requestMapList");
+  }
+
   Com_DPrintf("UI menu load time = %d milli seconds\n",
               trap_Milliseconds() - start);
 
@@ -3183,7 +3191,7 @@ static void UI_LoadDemos() {
       "dm_" +
       std::to_string(static_cast<int>(trap_Cvar_VariableValue("protocol")));
 
-  std::vector<std::string> demoDirs =
+  const std::vector<std::string> demoDirs =
       ETJump::FileSystem::getFileList(path, PATH_SEP_STRING, true);
   std::vector<FileSystemObjectInfo> directories;
 
@@ -3200,7 +3208,7 @@ static void UI_LoadDemos() {
     directories.emplace_back(objectInfo);
   }
 
-  std::vector<std::string> demoFiles =
+  const std::vector<std::string> demoFiles =
       ETJump::FileSystem::getFileList(path, ext, true);
   std::vector<FileSystemObjectInfo> files;
 
@@ -7157,6 +7165,18 @@ void handleIllegalRedirect() {
   markAllServersVisible();
   keepServerListUpdating();
   openPlayOnlineMenu();
+}
+
+void parseMaplist() {
+  char arg[MAX_QPATH];
+
+  // start iterating from 1 to skip the command string
+  for (int i = 1, len = trap_Argc(); i < len; i++) {
+    trap_Argv(i, arg, sizeof(arg));
+    uiInfo.serverMaplist.emplace_back(arg);
+  }
+
+  ETJump::StringUtil::sortStrings(uiInfo.serverMaplist, true);
 }
 } // namespace ETJump
 

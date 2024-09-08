@@ -895,6 +895,8 @@ typedef struct {
   int etLegacyClient;
   bool eteClient;
   bool vetClient; // original 2.60b, steam 2.60b or 2.60d
+  
+  std::vector<std::string> serverMaplist;
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;
@@ -1103,4 +1105,8 @@ void trap_GetHunkData(int *hunkused, int *hunkexpected);
 char *trap_TranslateString(const char *string); // NERVE - SMF - localization
 
 void ETJump_DrawMapDetails();
+
+namespace ETJump {
+void parseMaplist();
+}
 #endif

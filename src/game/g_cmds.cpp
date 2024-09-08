@@ -12,6 +12,7 @@
 #include "etj_chat_replay.h"
 #include "etj_session.h"
 #include "etj_commands.h"
+#include "etj_map_statistics.h"
 
 namespace ETJump {
 enum class VotingTypes {
@@ -1090,6 +1091,21 @@ void clearSaves(gentity_t *ent) {
   auto clientNum = ClientNum(ent);
   saveSystem->resetSavedPositions(ent);
   Printer::center(clientNum, "^7Your saves were removed.\n");
+}
+
+static void sendMaplist(gentity_t *ent) {
+  std::string mapList = StringUtil::join(game.mapStatistics->getMaps(), " ");
+  const std::string prefix = "maplist ";
+  const size_t msgLen = BYTES_PER_PACKET - prefix.length();
+
+  // split to multiple commands to ensure client gets the full list
+  // each command is prefixed with 'maplist' so client recognizes
+  // this command is part of the map list, and parses it correctly
+  auto splits = wrapWords(mapList, ' ', msgLen);
+  for (auto &split : splits) {
+    split.insert(0, prefix);
+    trap_SendServerCommand(ClientNum(ent), split.c_str());
+  }
 }
 } // namespace ETJump
 
@@ -4833,6 +4849,7 @@ static const command_t noIntermissionCommands[] = {
     {"tracker_print", qtrue, ETJump::printTracker},
     {"tracker_set", qtrue, ETJump::setTracker},
     {"clearsaves", qtrue, ETJump::clearSaves},
+    {"requestMaplist", qtrue, ETJump::sendMaplist},
 };
 
 qboolean ClientIsFlooding(gentity_t *ent) {

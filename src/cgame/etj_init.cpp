@@ -420,6 +420,31 @@ qboolean CG_ServerCommandExt(const char *cmd) {
     return CG_displaybynumber();
   }
 
+  // TODO: The client will always request map list after cgame is initialized,
+  //  thus making '!listmaps' command sort of redundant. The command itself
+  //  should probably stay (the output formatting is nice and all),
+  //  but now that we're always receiving a full map list from server,
+  //  we could use a local cache for map list instead of requesting it again.
+  if (command == "maplist") {
+    char arg[MAX_QPATH];
+    std::string uiCommand = "uiParseMaplist ";
+
+    // start iterating from 1 to skip the command string
+    for (int i = 1, len = trap_Argc(); i < len; i++) {
+      trap_Argv(i, arg, sizeof(arg));
+      uiCommand += std::string(arg) + " ";
+    }
+
+    if (uiCommand.back() == ' ') {
+      uiCommand.pop_back();
+    }
+
+    // we need to forward this command to UI to parse the list there,
+    // so we can populate the map vote list
+    trap_SendConsoleCommand(uiCommand.c_str());
+    return qtrue;
+  }
+
   return qfalse;
 }
 
@@ -704,6 +729,12 @@ void runFrameEnd() {
       trap_SendClientCommand("follownext");
       lastActivity = cg.time;
     }
+  }
+
+  // populate map vote menu
+  if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.maplistRequested) {
+    trap_SendClientCommand("requestMaplist");
+    cg.maplistRequested = true;
   }
 }
 

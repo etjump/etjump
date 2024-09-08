@@ -877,6 +877,7 @@ void SortString(char *src);
 // this is only here so the functions in q_shared.c and bg_*.c can link
 void QDECL Com_Error(int level, const char *error, ...);
 void QDECL Com_Printf(const char *msg, ...);
+void QDECL Com_LocalPrintf(const char *msg, ...);
 
 /*
 ==========================================================
