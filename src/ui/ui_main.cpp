@@ -14,6 +14,7 @@ USER INTERFACE MAIN
 #include "../game/etj_string_utilities.h"
 #include "../cgame/etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
+#include "../game/etj_filesystem.h"
 
 // NERVE - SMF
 #define AXIS_TEAM 0
@@ -3112,51 +3113,44 @@ static void UI_LoadDemos() {
   if (uiInfo.currentDemoPath.empty()) {
     uiInfo.currentDemoPath.emplace_back("demos");
   }
-  std::string path =
+
+  const std::string path =
       ETJump::StringUtil::join(uiInfo.currentDemoPath, PATH_SEP_STRING);
-  const auto bufferSize = 200000;
-  auto dirList = std::unique_ptr<char[]>(new char[bufferSize]);
-  auto demoList = std::unique_ptr<char[]>(new char[bufferSize]);
+  const std::string ext =
+      "dm_" +
+      std::to_string(static_cast<int>(trap_Cvar_VariableValue("protocol")));
 
-  auto demoExt =
-      ETJump::stringFormat("dm_%d", (int)trap_Cvar_VariableValue("protocol"));
-
-  auto numDirectories =
-      trap_FS_GetFileList(path.c_str(), "/", dirList.get(), bufferSize);
-  auto numFiles = trap_FS_GetFileList(path.c_str(), demoExt.c_str(),
-                                      demoList.get(), bufferSize);
-
+  std::vector<std::string> demoDirs =
+      ETJump::FileSystem::getFileList(path, PATH_SEP_STRING, true);
   std::vector<FileSystemObjectInfo> directories;
-  char *dirPtr = dirList.get();
-  for (auto i = 0; i < numDirectories; ++i) {
+
+  for (const auto &dir : demoDirs) {
     FileSystemObjectInfo objectInfo;
     objectInfo.type = FileSystemObjectType::Folder;
-    objectInfo.name = std::string(dirPtr);
+    objectInfo.name = dir;
     objectInfo.displayName = "^7" + ETJump::sanitize(objectInfo.name, false);
-    if (objectInfo.name != "." && objectInfo.name != "..") {
-      directories.push_back(objectInfo);
+
+    if (dir == "." || dir == "..") {
+      continue;
     }
-    dirPtr += objectInfo.name.length() + 1;
+
+    directories.emplace_back(objectInfo);
   }
 
+  std::vector<std::string> demoFiles =
+      ETJump::FileSystem::getFileList(path, ext, true);
   std::vector<FileSystemObjectInfo> files;
-  auto namePtr = demoList.get();
-  for (auto i = 0; i < numFiles; ++i) {
+
+  for (const auto &demo : demoFiles) {
     FileSystemObjectInfo objectInfo;
     objectInfo.type = FileSystemObjectType::Item;
-    objectInfo.name = std::string(namePtr);
+    objectInfo.name = demo;
     objectInfo.displayName = ETJump::sanitize(objectInfo.name, false);
-    files.push_back(objectInfo);
-    namePtr += objectInfo.name.length() + 1;
+    files.emplace_back(objectInfo);
   }
 
   uiInfo.demoObjects = std::vector<FileSystemObjectInfo>();
-  const auto comparer = [](const FileSystemObjectInfo &lhs,
-                           const FileSystemObjectInfo &rhs) {
-    return lhs.name < rhs.name;
-  };
-  std::sort(std::begin(directories), std::end(directories), comparer);
-  std::sort(std::begin(files), std::end(files), comparer);
+
   if (uiInfo.currentDemoPath.size() > 1) {
     FileSystemObjectInfo back;
     back.type = FileSystemObjectType::Folder;

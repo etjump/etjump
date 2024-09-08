@@ -28,10 +28,13 @@
 #include "../game/etj_file.h"
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_filesystem.h"
+
 #ifdef GAMEDLL
   #include "g_local.h"
 #elif CGAMEDLL
   #include "../cgame/cg_local.h"
+#elif UIDLL
+  #include "../ui/ui_local.h"
 #endif
 
 namespace ETJump {
@@ -49,13 +52,13 @@ void FileSystem::move(const std::string &src, const std::string &dst) {
 }
 
 bool FileSystem::remove(const std::string &path) {
-#ifdef CGAMEDLL
-  int success = trap_FS_Delete(path.c_str());
-  return success == 1;
-#elif GAMEDLL
-  // hacky fallback
+#ifdef GAMEDLL
+  // hacky fallback because qagame doesn't have trap_FS_Delete
   trap_FS_Rename(path.c_str(), "");
   return true;
+#else
+  int success = trap_FS_Delete(path.c_str());
+  return success == 1;
 #endif
 }
 
@@ -83,17 +86,30 @@ bool FileSystem::safeMove(const std::string &src, const std::string &dst) {
 }
 
 std::vector<std::string> FileSystem::getFileList(const std::string &path,
-                                                 const std::string &ext) {
-  const int BUFF_SIZE = 200000;
-  auto demoList = std::unique_ptr<char[]>(new char[BUFF_SIZE]);
-  auto numFiles =
-      trap_FS_GetFileList(path.c_str(), ext.c_str(), demoList.get(), BUFF_SIZE);
+                                                 const std::string &ext,
+                                                 const bool sort) {
+  const auto fileList = std::make_unique<char[]>(BIG_DIR_BUFFER);
+  const int numFiles = trap_FS_GetFileList(path.c_str(), ext.c_str(),
+                                           fileList.get(), BIG_DIR_BUFFER);
+
   std::vector<std::string> files;
-  auto namePtr = demoList.get();
+  files.reserve(numFiles);
+
+  char *namePtr = fileList.get();
+
   for (auto i = 0; i < numFiles; ++i) {
-    files.push_back(std::string(namePtr));
+    files.emplace_back(namePtr);
     namePtr += strlen(namePtr) + 1;
   }
+
+  if (sort) {
+    std::sort(files.begin(), files.end(),
+              [](const std::string &lhs, const std::string &rhs) {
+                return StringUtil::toUpperCase(lhs) <
+                       StringUtil::toUpperCase(rhs);
+              });
+  }
+
   return files;
 }
 

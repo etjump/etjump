@@ -29,6 +29,8 @@
   #include "etj_string_utilities.h"
 #elif CGAMEDLL
   #include "../cgame/cg_local.h"
+#elif UIDLL
+  #include "../ui/ui_local.h"
 #endif
 
 ETJump::File::File(std::string path, Mode mode)
