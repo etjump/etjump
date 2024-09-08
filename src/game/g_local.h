@@ -2857,7 +2857,6 @@ enum class TimerunSpawnflags {
 };
 
 bool checkCheatCvars(gclient_s *client, int flags);
-void sendMaplist(int clientNum);
 } // namespace ETJump
 
 void TimerunConnectNotify(gentity_t *ent);

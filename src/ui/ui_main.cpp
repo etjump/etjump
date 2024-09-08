@@ -1294,6 +1294,14 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
     }
   }
 
+  uiInfo.serverMaplist.clear();
+
+  // if we're already in-game, re-request the map list from server
+  // this only ever executes if a client does 'ui_restart' while connected
+  if (cstate.connState == CA_ACTIVE) {
+    trap_Cmd_ExecuteText(EXEC_APPEND, "requestMapList");
+  }
+
   Com_DPrintf("UI menu load time = %d milli seconds\n",
               trap_Milliseconds() - start);
 
@@ -3120,7 +3128,7 @@ static void UI_LoadDemos() {
       "dm_" +
       std::to_string(static_cast<int>(trap_Cvar_VariableValue("protocol")));
 
-  std::vector<std::string> demoDirs =
+  const std::vector<std::string> demoDirs =
       ETJump::FileSystem::getFileList(path, PATH_SEP_STRING, true);
   std::vector<FileSystemObjectInfo> directories;
 
@@ -3137,7 +3145,7 @@ static void UI_LoadDemos() {
     directories.emplace_back(objectInfo);
   }
 
-  std::vector<std::string> demoFiles =
+  const std::vector<std::string> demoFiles =
       ETJump::FileSystem::getFileList(path, ext, true);
   std::vector<FileSystemObjectInfo> files;
 
@@ -6943,10 +6951,6 @@ void _UI_Init(int legacyClient, int clientVersion) {
   // ETJump: default to objective
   trap_Cvar_Set("ui_netGameType", "2");
   trap_Cvar_Update(&ui_netGameType);
-
-  // FIXME: this breaks if a client does 'ui_restart', but it's not that big
-  //  of a deal as vid/cgame_restart will fix up the list
-  uiInfo.serverMaplist.clear();
 
   // init Yes/No once for cl_language -> server browser (punkbuster)
   Q_strncpyz(translated_yes, DC->translateString("Yes"),
