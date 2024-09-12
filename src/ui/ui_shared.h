@@ -118,6 +118,9 @@ static constexpr float SLIDER_THUMB_HEIGHT = 12.0f;
 
 static constexpr int NUM_CROSSHAIRS = 17;
 
+// y offset applied to each line of autowrapped text, along with text height
+static constexpr int AUTOWRAP_OFFSET = 5;
+
 typedef struct scriptDef_s {
   const char *command;
   const char *args[MAX_SCRIPT_ARGS];

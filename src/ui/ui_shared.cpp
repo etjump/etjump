@@ -4631,7 +4631,7 @@ void Item_Text_Wrapped_Paint(itemDef_t *item) {
     strncpy(buff, start, p - start + 1);
     buff[p - start] = '\0';
     DC->drawText(x, y, item->textscale, color, buff, 0, 0, item->textStyle);
-    y += height + 5;
+    y += height + AUTOWRAP_OFFSET;
     start += p - start + 1;
     p = strchr(p + 1, '\r');
   }
