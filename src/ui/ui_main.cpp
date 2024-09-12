@@ -498,56 +498,26 @@ fontInfo_t *GetActiveFont() {
 }
 
 int Multiline_Text_Width(const char *text, float scale, int limit) {
-  int count, len;
-  float out = 0;
-  float width, widest = 0;
-  const char *s = text;
-  fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
+  const auto lines = ETJump::StringUtil::split(text, "\n");
 
-  if (text) {
-    len = strlen(text);
-    if (limit > 0 && len > limit) {
-      len = limit;
-    }
-    count = 0;
-    while (s && *s && count < len) {
-      if (Q_IsColorString(s)) {
-        s += 2;
-        continue;
-      } else {
-        if (*s == '\n') {
-          width = out * scale * font->glyphScale;
-          if (width > widest) {
-            widest = width;
-          }
-          out = 0;
-        } else {
-          // this will ensure a bit more
-          // flexible x spacing in
-          // tooltips since xSkip varies
-          // per glyph, but the
-          // positioning of glyphs isn't
-          // all that precise, sometimes
-          // resulting in badly spaced
-          // tooltips
-          out += glyphxSkipMax;
-        }
-        s++;
-        count++;
-      }
+  // if no linebreaks, just return the text width
+  if (lines.size() == 1) {
+    return Text_Width(text, scale, limit);
+  }
+
+  const auto linecount = static_cast<int>(lines.size());
+  auto maxWidth = 0;
+
+  for (int i = 0; i < linecount; i++) {
+    const int width = Text_Width(lines[i].c_str(), scale, limit);
+
+    if (width > maxWidth) {
+      maxWidth = width;
     }
   }
 
-  if (widest > 0) {
-    width = out * scale * font->glyphScale;
-    if (width > widest) {
-      widest = width;
-    }
-
-    return widest;
-  } else {
-    return out * scale * font->glyphScale;
-  }
+  // add a bit of padding to account for uneven glyph spacing
+  return maxWidth + Text_Width(" ", scale, limit);
 }
 
 int Text_Height_Ext(const char *text, float scale, int limit,
@@ -594,64 +564,40 @@ int Text_Height(const char *text, float scale, int limit) {
 
 // despite the name, this is also used for single line tooltips
 int Multiline_Text_Height(const char *text, float scale, int limit) {
-  size_t len, count;
-  int topMin, heightMax;
-  int lineHeight = 0;
-  glyphInfo_t *glyph;
-  const char *s = text;
-  fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
-  bool multiline = false;
+  const auto lines = ETJump::StringUtil::split(text, "\n");
 
-  // default item->textaligny for tooltips
-  // FIXME: this is bad, make this be aware of the actual textaligny value
-  constexpr int LINE_SPACING = 10.0f;
-
-  topMin = 0;
-  heightMax = 0;
-
-  if (text) {
-    len = std::strlen(text);
-
-    if (limit > 0 && len > static_cast<size_t>(limit)) {
-      len = limit;
-    }
-
-    count = 0;
-
-    while (s && *s && count < len) {
-      if (Q_IsColorString(s)) {
-        s += 2;
-        continue;
-      } else {
-        if (*s == '\n') {
-          lineHeight += std::abs(topMin) + heightMax;
-          lineHeight += LINE_SPACING;
-          topMin = 0;
-          heightMax = 0;
-          multiline = true;
-        } else {
-          // NERVE - SMF - this needs to be an unsigned cast for localization
-          glyph = &font->glyphs[static_cast<unsigned char>(*s)];
-
-          if (heightMax < glyph->height) {
-            heightMax = glyph->height;
-          }
-
-          if (glyph->top < topMin) {
-            topMin = glyph->top;
-          }
-        }
-
-        s++;
-        count++;
-      }
-    }
+  // single line, just return the text height
+  if (lines.size() == 1) {
+    return Text_Height(text, scale, limit);
   }
 
-  lineHeight += multiline ? std::abs(topMin) + heightMax : heightMax;
+  glyphInfo_t *glyph;
+  fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
+  const auto linecount = static_cast<int>(lines.size());
+  int height = 0;
 
-  return static_cast<int>(
-      std::ceil(static_cast<float>(lineHeight) * scale * font->glyphScale));
+  // some glyphs (notably '_') have their top position on a negative offset,
+  // we keep track of this so that on the last line, we can add this offset
+  // to the total height, because Text_Height only looks for max glyph height
+  // this is only done on last line, to keep line heights consistent
+  int minTop = 0;
+
+  for (int i = 0; i < linecount; i++) {
+    if (i == linecount - 1) {
+      for (const auto &c : lines[i]) {
+        glyph = &font->glyphs[static_cast<unsigned char>(c)];
+
+        if (glyph->top < minTop) {
+          minTop = glyph->top;
+        }
+      }
+    }
+
+    height += Text_Height(lines[i].c_str(), scale, limit) + std::abs(minTop);
+    minTop = 0;
+  }
+
+  return height + (AUTOWRAP_OFFSET * (linecount - 1));
 }
 
 void Text_PaintCharExt(float x, float y, float w, float h, float scalex,
@@ -1635,7 +1581,7 @@ void UI_DrawGametypeDescription(rectDef_t *rect, float scale, vec4_t color,
         break;
       }
       //
-      y += height + 5;
+      y += height + AUTOWRAP_OFFSET;
       p = newLinePtr;
       len = 0;
       newLine = 0;
@@ -1713,7 +1659,7 @@ void UI_DrawMapDescription(rectDef_t *rect, float scale, vec4_t color,
         break;
       }
       //
-      y += height + 5;
+      y += height + AUTOWRAP_OFFSET;
       p = newLinePtr;
       len = 0;
       newLine = 0;
@@ -1829,7 +1775,7 @@ static void UI_DrawMissionBriefingObjectives(rectDef_t *rect, float scale,
         break;
       }
       //
-      y += height + 5;
+      y += height + AUTOWRAP_OFFSET;
       p = newLinePtr;
       len = 0;
       newLine = 0;
