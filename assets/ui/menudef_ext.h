@@ -90,7 +90,7 @@
 #define COLOR_PICKER_A "colorPickerA"
 
 // Helper macros
-#define SLIDER_LABEL_X $evalfloat(SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN)
+#define SLIDER_LABEL_X (SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN)
 #define COLOR_LIST cvarStrList { "Color picker..."; OPEN_COLOR_PICKER; "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }
 #define CHS_LIST cvarFloatList { "Off" 0 "Speed" 1 "Health" 2 "Ammo" 4 "Distance XY" 10 "Distance Z" 11 "Distance XYZ" 12 "Distance ViewXYZ" 13 "Distance XY Z XYZ" 14 "Distance XY Z ViewXYZ" 15 "Look XYZ" 16 "Speed X" 20 "Speed Y" 21 "Speed Z" 22 "Speed XY" 23 "Speed XYZ" 24 "Speed forward" 25 "Speed sideways" 26 "Speed forward sideways" 27 "Speed XY forward sideways" 28 "Pitch" 30 "Yaw" 31 "Roll" 32 "Position X" 33 "Position Y" 34 "Position Z" 35 "View position X" 36 "View position Y" 37 "View position Z" 38 "Pitch yaw" 40 "Player XYZ" 41 "Player XYZ pitch yaw" 42 "View position XYZ pitch yaw" 43 "Position XYZ" 44 "View position XYZ" 45 "Angles XYZ" 46 "Velocity XYZ" 47 "Jump XYZ" 50 "Plane Angle Z" 53 "Last Jump Speed" 55 }
 #define EXTRATRACE_LIST cvarFloatList { "OB Detector" 1 "Slick Detector" 2 "NJD Detector" 4 "CHS 10-11" 8 "CHS 12" 16 "CHS 13-15" 32 "CHS 16" 64 "CHS 53" 128 }

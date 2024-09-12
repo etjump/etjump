@@ -49,10 +49,10 @@ menuDef {
 
 #ifdef VET
         MULTI               (SETTINGS_ITEM_POS(3), "Rendering primitives:", 0.2, SETTINGS_ITEM_H, "r_primitives", cvarFloatList { "Auto" 0 "Multiple glArrayElement" 1 "Single glDrawElements" 2 }, "Sets rendering primitives mode (ET 2.60b only)\nSetting this to 'Single glDrawElements' is recommended on modern systems for best performance\nr_primitives")
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS(4), "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(4), "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(4), "Menu sensitivity:", 0.2, SETTINGS_ITEM_H, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
 #else
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS(3), "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(3), "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(3), "Menu sensitivity:", 0.2, SETTINGS_ITEM_H, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
 #endif
 

@@ -51,9 +51,9 @@ menuDef {
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "JUMP SPEEDS")
 
         YESNO               (SETTINGS_ITEM_POS(1), "Draw jump speeds:", 0.2, SETTINGS_ITEM_H, "etj_drawJumpSpeeds", "Draw jump speed list\netj_drawJumpSpeeds")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_jumpSpeedsX", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_jumpSpeedsX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "Jump speeds X:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsX 0 -6 634 10, "Sets X offset of jump speed list\netj_jumpSpeedsX")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_jumpSpeedsY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_jumpSpeedsY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(3), "Jump speeds Y:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsY 0 -240 240 10, "Sets Y offset of jump speed list\netj_jumpSpeedsY")
         COMBO               (SETTINGS_COMBO_POS(4), "Jump speeds color:", 0.2, SETTINGS_ITEM_H, "etj_jumpSpeedsColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of jump speed list\netj_jumpSpeedsColor")
         YESNO               (SETTINGS_ITEM_POS(5), "Jump speeds shadow:", 0.2, SETTINGS_ITEM_H, "etj_jumpSpeedsShadow", "Draw shadow on jump speed list\netj_jumpSpeedsShadow")
@@ -61,7 +61,7 @@ menuDef {
         YESNO               (SETTINGS_ITEM_POS(7), "Show difference:", 0.2, SETTINGS_ITEM_H, "etj_jumpSpeedsShowDiff", "Colorize speed if it's faster/slower than previous\netj_jumpSpeedsShowDiff")
         COMBO               (SETTINGS_COMBO_POS(8), "Faster color:", 0.2, SETTINGS_ITEM_H, "etj_jumpSpeedsFasterColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of faster jumps\netj_jumpSpeedsFasterColor")
         COMBO               (SETTINGS_COMBO_POS(9), "Slower color:", 0.2, SETTINGS_ITEM_H, "etj_jumpSpeedsSlowerColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of slower jumps\netj_jumpSpeedsSlowerColor")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(10), "etj_jumpSpeedsMinSpeed", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(10), "etj_jumpSpeedsMinSpeed", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(10), "Minimum speed:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsMinSpeed 0 0 500 1, "Color jumps below this value with the slower color value\netj_jumpSpeedsMinSpeed")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
