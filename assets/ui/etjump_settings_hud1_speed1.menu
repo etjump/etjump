@@ -55,7 +55,7 @@ menuDef {
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "SPEED 1")
 
         MULTI               (SETTINGS_ITEM_POS(1), "Draw speed meter 1:", 0.2, SETTINGS_ITEM_H, "etj_drawspeed", cvarFloatList { "No" 0 "Yes" 1 "Yes + show max" 2 }, "Draw original speed meter on right side of screen\netj_drawspeed")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_speedinterval", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_speedinterval", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "Speed meter refresh rate:", 0.2, SETTINGS_ITEM_H, etj_speedinterval 100 0 2000 50, "How often in milliseconds to update original speed meter\netj_speedInterval")
         MULTI               (SETTINGS_ITEM_POS(3), "Speed meter unit:", 0.2, SETTINGS_ITEM_H, "etj_speedunit", cvarFloatList { "UPS" 0 "MPH" 1 "KPH" 2 }, "Speed measurement unit of original speed meter\netj_speedunit")
         YESNO               (SETTINGS_ITEM_POS(4), "Ignore vertical speed:", 0.2, SETTINGS_ITEM_H, "etj_speedXYonly", "Ignore vertical speed on original speed meter\netj_speedXYonly")

@@ -76,22 +76,22 @@ menuDef {
             }
         }
 
-        CVARINTLABEL        (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 1), "cg_crosshairSize", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 1), "cg_crosshairSize", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 1), "Crosshair size:", 0.2, SETTINGS_ITEM_H, cg_crosshairSize 48 0 96 1, "Sets the size of the crosshair\ncg_crosshairSize")
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 2), "etj_crosshairScaleX", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 2), "etj_crosshairScaleX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 2), "Crosshair scale X:", 0.2, SETTINGS_ITEM_H, etj_crosshairScaleX 1.0 -5.0 5.0 0.1, "Horizontal scale of crosshair, negative values will flip the crosshair\netj_crosshairScaleX")
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 3), "etj_crosshairScaleY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 3), "etj_crosshairScaleY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 3), "Crosshair scale Y:", 0.2, SETTINGS_ITEM_H, etj_crosshairScaleY 1.0 -5.0 5.0 0.1, "Vertical scale of crosshair, negative values will flip the crosshair\netj_crosshairScaleY")
         YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 4), "Crosshair pulsing:", 0.2, SETTINGS_ITEM_H, "cg_crosshairPulse", "Toggles crosshair spread sizing while moving/firing\ncg_crosshairPulse")
         YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 5), "Crosshair health info:", 0.2, SETTINGS_ITEM_H, "cg_crosshairHealth", "Colors the crosshair based on current health (overrides crosshair color settings)\ncg_crosshairHealth")
         YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 6), "Crosshair name drawing:", 0.2, SETTINGS_ITEM_H, "cg_drawCrosshairNames", "Displays player info when the crosshair is over a teammate\ncg_drawCrosshairNames")
         COMBO               (SETTINGS_COMBO_POS_REVERSE(NUM_SETTINGS - 7), "Primary color:", 0.2, SETTINGS_ITEM_H, "cg_crosshairColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Set the color for the primary crosshair element\ncg_crosshairColor")
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 8), "cg_crosshairAlpha", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 8), "cg_crosshairAlpha", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 8), "Primary alpha:", 0.2, SETTINGS_ITEM_H, "cg_crosshairAlpha" 1 0 1, "Set the transparency level for the primary crosshair\ncg_crosshairAlpha")
         COMBO               (SETTINGS_COMBO_POS_REVERSE(NUM_SETTINGS - 9), "Secondary color:", 0.2, SETTINGS_ITEM_H, "cg_crosshairColorAlt", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Set the color for the secondary crosshair\ncg_crosshairColorAlt")
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 10), "cg_crosshairAlphaAlt", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 10), "cg_crosshairAlphaAlt", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 10), "Secondary alpha:", 0.2, SETTINGS_ITEM_H, "cg_crosshairAlphaAlt" 1 0 1, "Set the transparency level for the secondary crosshair\ncg_crosshairAlphaAlt")
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 11), "etj_crosshairThickness", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 11), "etj_crosshairThickness", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 11), "Line thickness:", 0.2, SETTINGS_ITEM_H, etj_crosshairThickness 1.0 0.0 5.0 0.1, "Line thickness of ETJump crosshairs\netj_crosshairThickness")
         YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 12), "Crosshair outline:", 0.2, SETTINGS_ITEM_H, "etj_crosshairOutline", "Draw outline on ETJump crosshairs\netj_crosshairOutline")
 
