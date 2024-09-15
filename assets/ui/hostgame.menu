@@ -210,7 +210,7 @@ menuDef {
       	group			GROUP_NAME
 		rect			$evalfloat(6+4) $evalfloat(320+16) $evalfloat(WINDOW_WIDTH-12-8-8) $evalfloat(96-16-4)
 		type			ITEM_TYPE_OWNERDRAW
-		ownerdraw		UI_CAMPAIGNDESCRIPTION
+		ownerdraw		UI_MAPDESCRIPTION
 		textfont		UI_FONT_COURBD_21
 		textstyle		ITEM_TEXTSTYLE_SHADOWED
 		textscale		.2

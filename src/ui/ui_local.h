@@ -895,7 +895,7 @@ typedef struct {
   int etLegacyClient;
   bool eteClient;
   bool vetClient; // original 2.60b, steam 2.60b or 2.60d
-  
+
   std::vector<std::string> serverMaplist;
 } uiInfo_t;
 
@@ -1108,5 +1108,20 @@ void ETJump_DrawMapDetails();
 
 namespace ETJump {
 void parseMaplist();
-}
+
+struct TextScroll {
+  // the item which we're currently bound to, used to reset the state when
+  // switching selection (e.g. selecting a new map to read briefing from)
+  int scrollItem;
+
+  int scrollStartTime;
+  int scrollEndTime;
+  float scrollDeltaTime; // for framerate independent scroll speed
+
+  float x;
+  float y;
+
+  bool scrolling;
+};
+} // namespace ETJump
 #endif

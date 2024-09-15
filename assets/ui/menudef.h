@@ -287,7 +287,7 @@
 // -NERVE - SMF
 
 // Arnout: Enemy Territory
-#define UI_CAMPAIGNDESCRIPTION		262
+#define UI_MAPDESCRIPTION		262
 #define UI_GAMETYPEDESCRIPTION		280
 
 // Gordon: Mission briefing
@@ -299,6 +299,9 @@
 #define UI_COLOR_PICKER 303
 #define UI_COLOR_PICKER_PREVIEW_OLD 304
 #define UI_COLOR_PICKER_PREVIEW_NEW 305
+
+#define UI_MAPNAME 306
+#define UI_LEVELSHOT_PREVIEW 307
 
 #define VOICECHAT_GETFLAG			"getflag"				// command someone to get the flag
 #define VOICECHAT_OFFENSE			"offense"				// command someone to go on offense
