@@ -200,19 +200,28 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
   const std::string sanitizedName = ETJump::sanitize(name, true);
 
   // read and append to existing file if present
-  if (ETJump::JsonUtils::readFile(customVotesFile, root)) {
-
-    // make sure we don't already have a list with this name
-    for (const auto &lists : customMapVotes_) {
-      if (sanitizedName == lists.type) {
-        Printer::chat(clientNum, "^3add-customvote: ^7operation failed, check "
-                                 "console for more information.");
-        Printer::console(clientNum, ETJump::stringFormat(
-                                        "^3add-customvote: ^7a list with the "
-                                        "name ^3'%s' ^7already exists.\n",
-                                        sanitizedName));
-        return;
+  if (ETJump::FileSystem::exists(customVotesFile)) {
+    if (ETJump::JsonUtils::readFile(customVotesFile, root)) {
+      // make sure we don't already have a list with this name
+      for (const auto &lists : customMapVotes_) {
+        if (sanitizedName == lists.type) {
+          Printer::chat(clientNum, "^3add-customvote: ^7operation failed, "
+                                   "check console for more information.");
+          Printer::console(clientNum, ETJump::stringFormat(
+                                          "^3add-customvote: ^7a list with the "
+                                          "name ^3'%s' ^7already exists.\n",
+                                          sanitizedName));
+          return;
+        }
       }
+    } else {
+      Printer::chat(clientNum, "^3add-customvote: ^7operation failed, check "
+                               "console for more information.");
+      Printer::console(clientNum,
+                       ETJump::stringFormat("^3add-customvote: ^7couldn't open "
+                                            "the file ^3'%s' ^7for reading.\n",
+                                            customVotesFile));
+      return;
     }
   }
 
