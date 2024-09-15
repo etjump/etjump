@@ -1689,7 +1689,7 @@ void UI_DrawMapDescription(rectDef_t *rect, float scale, vec4_t color,
     ts.scrollItem = ui_currentNetMap.integer;
   }
 
-  constexpr int lineHeight = 10;
+  static constexpr int lineHeight = 10;
   const float totalHeight = static_cast<float>(lines.size()) * lineHeight;
   float y = 0.0f + ts.y;
 
@@ -1697,7 +1697,7 @@ void UI_DrawMapDescription(rectDef_t *rect, float scale, vec4_t color,
 
   if (totalHeight > rect->h && ts.scrolling &&
       DC->realTime > ts.scrollStartTime) {
-    float scrollSpeed = 25.0f; // pixels per second
+    static constexpr float scrollSpeed = 15.0f; // pixels per second
     ts.y -= scrollSpeed * ts.scrollDeltaTime;
   }
 
