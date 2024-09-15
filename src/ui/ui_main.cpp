@@ -1701,6 +1701,8 @@ void UI_DrawMapDescription(rectDef_t *rect, float scale, vec4_t color,
     ts.y -= scrollSpeed * ts.scrollDeltaTime;
   }
 
+  vec4_t textColor;
+
   for (const auto &line : lines) {
     const auto width = static_cast<float>(Text_Width(line.c_str(), scale, 0));
 
@@ -1722,12 +1724,28 @@ void UI_DrawMapDescription(rectDef_t *rect, float scale, vec4_t color,
     textRect.x += rect->x;
     textRect.y += rect->y;
 
-    // only draw the line if it's within rect boundaries
-    if (textRect.y >= rect->y && textRect.y + lineHeight <= rect->y + rect->h) {
-      Text_Paint(textRect.x, textRect.y, scale, color, line.c_str(), 0, 0,
-                 textStyle);
+    // fade out if the line is going out of rect bounds
+    if (textRect.y < rect->y || textRect.y + lineHeight > rect->y + rect->h) {
+      float fadeFactor = 1.0f;
+
+      if (textRect.y < rect->y) {
+        // text is above the rect
+        float oobDist = rect->y - textRect.y;
+        fadeFactor = 1.0f - (oobDist / (lineHeight * 0.5f));
+      } else if (textRect.y + lineHeight > rect->y + rect->h) {
+        // text is below the rect
+        float oobDist = (textRect.y + lineHeight) - (rect->y + rect->h);
+        fadeFactor = 1.0f - (oobDist / (lineHeight * 0.5f));
+      }
+
+      Vector4Copy(color, textColor);
+      textColor[3] *= Numeric::clamp(fadeFactor, 0.0f, 1.0f);
+    } else {
+      Vector4Copy(color, textColor);
     }
 
+    Text_Paint(textRect.x, textRect.y, scale, textColor, line.c_str(), 0, 0,
+               textStyle);
     y += lineHeight;
   }
 
