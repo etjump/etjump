@@ -25,55 +25,11 @@ USER INTERFACE MAIN
 #define SPECT_TEAM 2
 // -NERVE - SMF
 
-namespace ETJump {
-std::unique_ptr<ColorPicker> colorPicker;
-
-static void initColorPicker() {
-  colorPicker = std::make_unique<ColorPicker>();
-
-  uiInfo.uiDC.updateSliderState = [p = colorPicker.get()](itemDef_t *item) {
-    p->updateSliderState(item);
-  };
-
-  uiInfo.uiDC.cvarToColorPickerState =
-      [p = colorPicker.get()](const std::string &cvar) {
-        p->cvarToColorPickerState(cvar);
-      };
-
-  uiInfo.uiDC.resetColorPickerState = [p = colorPicker.get()] {
-    p->resetColorPickerState();
-  };
-
-  uiInfo.uiDC.colorPickerDragFunc =
-      [p = colorPicker.get()](itemDef_t *item, const float cursorX,
-                              const float cursorY, const int key) {
-        p->colorPickerDragFunc(item, cursorX, cursorY, key);
-      };
-
-  uiInfo.uiDC.toggleRGBSliderValues = [p = colorPicker.get()] {
-    p->toggleRGBSliderValues();
-  };
-
-  uiInfo.uiDC.RGBSlidersAreNormalized = [p = colorPicker.get()] {
-    return p->RGBSlidersAreNormalized();
-  };
-
-  uiInfo.uiDC.getColorSliderString = &ColorPicker::getColorSliderString;
-  uiInfo.uiDC.setColorSliderType = &ColorPicker::setColorSliderType;
-  uiInfo.uiDC.getColorSliderValue = &ColorPicker::getColorSliderValue;
-  uiInfo.uiDC.setColorSliderValue = &ColorPicker::setColorSliderValue;
-}
-
-} // namespace ETJump
-
 extern qboolean g_waitingForKey;
 extern qboolean g_editingField;
 extern itemDef_t *g_editItem;
 
 uiInfo_t uiInfo;
-
-static const int glyphxSkipMax =
-    14; // the biggest xSkip value used in glyph mapping
 
 static const char *MonthAbbrev[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -848,6 +804,97 @@ void UI_ShowPostGame(qboolean newHigh) {
   _UI_SetActiveMenu(UIMENU_POSTGAME);
 }
 
+namespace ETJump {
+std::unique_ptr<ColorPicker> colorPicker;
+
+static void initColorPicker() {
+  colorPicker = std::make_unique<ColorPicker>();
+
+  uiInfo.uiDC.updateSliderState = [p = colorPicker.get()](itemDef_t *item) {
+    p->updateSliderState(item);
+  };
+
+  uiInfo.uiDC.cvarToColorPickerState =
+      [p = colorPicker.get()](const std::string &cvar) {
+        p->cvarToColorPickerState(cvar);
+      };
+
+  uiInfo.uiDC.resetColorPickerState = [p = colorPicker.get()] {
+    p->resetColorPickerState();
+  };
+
+  uiInfo.uiDC.colorPickerDragFunc =
+      [p = colorPicker.get()](itemDef_t *item, const float cursorX,
+                              const float cursorY, const int key) {
+        p->colorPickerDragFunc(item, cursorX, cursorY, key);
+      };
+
+  uiInfo.uiDC.toggleRGBSliderValues = [p = colorPicker.get()] {
+    p->toggleRGBSliderValues();
+  };
+
+  uiInfo.uiDC.RGBSlidersAreNormalized = [p = colorPicker.get()] {
+    return p->RGBSlidersAreNormalized();
+  };
+
+  uiInfo.uiDC.getColorSliderString = &ColorPicker::getColorSliderString;
+  uiInfo.uiDC.setColorSliderType = &ColorPicker::setColorSliderType;
+  uiInfo.uiDC.getColorSliderValue = &ColorPicker::getColorSliderValue;
+  uiInfo.uiDC.setColorSliderValue = &ColorPicker::setColorSliderValue;
+}
+
+static void drawLevelshotPreview(rectDef_t &rect) {
+  // unregistered levelshot is -1, not 0
+  if (uiInfo.mapList[ui_mapIndex.integer].levelShot == -1) {
+    uiInfo.mapList[ui_mapIndex.integer].levelShot = trap_R_RegisterShaderNoMip(
+        va("levelshots/%s", uiInfo.mapList[ui_mapIndex.integer].mapLoadName));
+
+    if (!uiInfo.mapList[ui_mapIndex.integer].levelShot) {
+      uiInfo.mapList[ui_mapIndex.integer].levelShot =
+          trap_R_RegisterShaderNoMip("levelshots/unknownmap");
+    }
+  }
+
+  uiInfo.uiDC.drawHandlePic(rect.x, rect.y, rect.w, rect.h,
+                            uiInfo.mapList[ui_mapIndex.integer].levelShot);
+}
+
+void drawMapname(rectDef_t &rect, float scale, vec4_t color, float text_x,
+                 int textStyle, int align) {
+  rectDef_t textRect = {0, 0, rect.w, rect.h};
+
+  const int map = ui_currentNetMap.integer;
+  std::string mapname;
+
+  if (uiInfo.mapList[map].mapLoadName != nullptr) {
+    mapname = uiInfo.mapList[map].mapLoadName;
+  } else {
+    mapname = "unknownmap";
+  }
+
+  const auto width = static_cast<float>(Text_Width(mapname.c_str(), scale, 0));
+
+  switch (align) {
+    case ITEM_ALIGN_LEFT:
+      textRect.x = text_x;
+      break;
+    case ITEM_ALIGN_RIGHT:
+      textRect.x = text_x - width;
+      break;
+    case ITEM_ALIGN_CENTER:
+      textRect.x = text_x - (width * 0.5f);
+      break;
+    default:
+      break;
+  }
+
+  textRect.x += rect.x;
+  textRect.y += rect.y;
+  Text_Paint(textRect.x, textRect.y, scale, color, mapname.c_str(), 0, 0,
+             textStyle);
+}
+} // namespace ETJump
+
 /*
 =================
 _UI_Refresh
@@ -916,8 +963,6 @@ void _UI_Refresh(int realtime) {
     UI_BuildServerStatus(qfalse);
     // refresh find player list
     UI_BuildFindPlayerList(qfalse);
-
-    ETJump_DrawMapDetails();
   }
 
   // draw cursor
@@ -1599,80 +1644,114 @@ void UI_DrawGametypeDescription(rectDef_t *rect, float scale, vec4_t color,
 }
 
 void UI_DrawMapDescription(rectDef_t *rect, float scale, vec4_t color,
-                           float text_x, float text_y, int textStyle, int align,
-                           qboolean net) {
-  const char *p, *textPtr, *newLinePtr = nullptr;
-  char buff[1024];
-  int height, len, textWidth, newLine, newLineWidth;
-  float y;
-  rectDef_t textRect;
-  int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
+                           float text_x, int textStyle, int align) {
+  fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
+  rectDef_t textRect = {0, 0, rect->w, rect->h};
 
-  textPtr = uiInfo.mapList[map].briefing;
+  const int map = ui_currentNetMap.integer;
+  std::string briefing;
 
-  if (!textPtr || !*textPtr) {
-    textPtr = "^1No text supplied";
+  if (uiInfo.mapList[map].briefing != nullptr) {
+    briefing = uiInfo.mapList[map].briefing;
+
+    if (!briefing.empty()) {
+      // replace any carriage returns with whitespace
+      ETJump::StringUtil::replaceAll(briefing, "\r", " ");
+
+      // replace special '*' char with a regular linebreak char
+      ETJump::StringUtil::replaceAll(briefing, "*", "\n");
+    }
+  } else {
+    briefing = "^1No text supplied";
   }
 
-  height = Text_Height(textPtr, scale, 0);
+  BG_FitTextToWidth_Ext(briefing, scale, textRect.w, font);
+  std::vector<std::string> lines = ETJump::StringUtil::split(briefing, "\n");
 
-  textRect.x = 0;
-  textRect.y = 0;
-  textRect.w = rect->w;
-  textRect.h = rect->h;
+  // remove any potential empty strings from the back of the vector
+  while (!lines.empty() && lines.back().empty()) {
+    lines.pop_back();
+  }
 
-  // y = text_y;
-  y = 0;
-  len = 0;
-  buff[0] = '\0';
-  newLine = 0;
-  newLineWidth = 0;
-  p = textPtr;
+  // nothing left to draw, exit
+  if (lines.empty()) {
+    return;
+  }
 
-  while (p) {
-    textWidth = DC->textWidth(buff, scale, 0);
-    if (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\0' || *p == '*') {
-      newLine = len;
-      newLinePtr = p + 1;
-      newLineWidth = textWidth;
-    }
-    if ((newLine && textWidth > rect->w) || *p == '\n' || *p == '\0' ||
-        *p == '*' /*( *p == '*' && *(p+1) == '*' )*/) {
-      if (len) {
-        if (align == ITEM_ALIGN_LEFT) {
-          textRect.x = text_x;
-        } else if (align == ITEM_ALIGN_RIGHT) {
-          textRect.x = text_x - newLineWidth;
-        } else if (align == ITEM_ALIGN_CENTER) {
-          textRect.x = text_x - newLineWidth / 2;
-        }
-        textRect.y = y;
+  static ETJump::TextScroll ts;
 
-        textRect.x += rect->x;
-        textRect.y += rect->y;
-        //
-        buff[newLine] = '\0';
-        DC->drawText(textRect.x, textRect.y, scale, color, buff, 0, 0,
-                     textStyle);
-      }
-      if (*p == '\0') {
+  if (ts.scrollStartTime == 0 ||
+      (!ts.scrolling && DC->realTime > ts.scrollEndTime) ||
+      ts.scrollItem != ui_currentNetMap.integer) {
+    ts.scrollStartTime = DC->realTime + 2000;
+    ts.scrolling = true;
+    ts.y = 0;
+    ts.scrollItem = ui_currentNetMap.integer;
+  }
+
+  static constexpr int lineHeight = 10;
+  const float totalHeight = static_cast<float>(lines.size()) * lineHeight;
+  float y = 0.0f + ts.y;
+
+  ts.scrollDeltaTime = static_cast<float>(DC->frameTime) * 0.001f;
+
+  if (totalHeight > rect->h && ts.scrolling &&
+      DC->realTime > ts.scrollStartTime) {
+    static constexpr float scrollSpeed = 15.0f; // pixels per second
+    ts.y -= scrollSpeed * ts.scrollDeltaTime;
+  }
+
+  vec4_t textColor;
+
+  for (const auto &line : lines) {
+    const auto width = static_cast<float>(Text_Width(line.c_str(), scale, 0));
+
+    switch (align) {
+      case ITEM_ALIGN_LEFT:
+        textRect.x = text_x;
         break;
+      case ITEM_ALIGN_RIGHT:
+        textRect.x = text_x - width;
+        break;
+      case ITEM_ALIGN_CENTER:
+        textRect.x = text_x - (width * 0.5f);
+        break;
+      default:
+        break;
+    }
+
+    textRect.y = y;
+    textRect.x += rect->x;
+    textRect.y += rect->y;
+
+    // fade out if the line is going out of rect bounds
+    if (textRect.y < rect->y || textRect.y + lineHeight > rect->y + rect->h) {
+      float fadeFactor = 1.0f;
+
+      if (textRect.y < rect->y) {
+        // text is above the rect
+        float oobDist = rect->y - textRect.y;
+        fadeFactor = 1.0f - (oobDist / (lineHeight * 0.5f));
+      } else if (textRect.y + lineHeight > rect->y + rect->h) {
+        // text is below the rect
+        float oobDist = (textRect.y + lineHeight) - (rect->y + rect->h);
+        fadeFactor = 1.0f - (oobDist / (lineHeight * 0.5f));
       }
-      //
-      y += height + AUTOWRAP_OFFSET;
-      p = newLinePtr;
-      len = 0;
-      newLine = 0;
-      newLineWidth = 0;
-      continue;
-    }
-    buff[len++] = *p++;
 
-    if (buff[len - 1] == 13) {
-      buff[len - 1] = ' ';
+      Vector4Copy(color, textColor);
+      textColor[3] *= Numeric::clamp(fadeFactor, 0.0f, 1.0f);
+    } else {
+      Vector4Copy(color, textColor);
     }
 
-    buff[len] = '\0';
+    Text_Paint(textRect.x, textRect.y, scale, textColor, line.c_str(), 0, 0,
+               textStyle);
+    y += lineHeight;
+  }
+
+  if (ts.scrolling && ts.y + totalHeight < textRect.h) {
+    ts.scrollEndTime = DC->realTime + 2000;
+    ts.scrolling = false;
   }
 }
 
@@ -2310,11 +2389,8 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x,
     case UI_STARTMAPCINEMATIC:
       UI_DrawMapCinematic(&rect, scale, color, qtrue);
       break;
-    // confusingly this draws the arena file contents
-    // when selecting a map in the map selection list
-    case UI_CAMPAIGNDESCRIPTION:
-      UI_DrawMapDescription(&rect, scale, color, text_x, text_y, textStyle,
-                            align, qtrue);
+    case UI_MAPDESCRIPTION:
+      UI_DrawMapDescription(&rect, scale, color, text_x, textStyle, align);
       break;
     case UI_GAMETYPEDESCRIPTION:
       UI_DrawGametypeDescription(&rect, scale, color, text_x, text_y, textStyle,
@@ -2417,6 +2493,12 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x,
     case UI_COLOR_PICKER_PREVIEW_NEW:
       ETJump::ColorPicker::shrinkRectForColorPicker(rect);
       ETJump::colorPicker->drawPreviewNew(&rect);
+      break;
+    case UI_MAPNAME:
+      ETJump::drawMapname(rect, scale, color, text_x, textStyle, align);
+      break;
+    case UI_LEVELSHOT_PREVIEW:
+      ETJump::drawLevelshotPreview(rect);
       break;
     default:
       break;
@@ -3845,7 +3927,6 @@ void UI_RunMenuScript(const char **args) {
       trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_UI);
       trap_Key_ClearStates();
       trap_Cvar_Set("cl_paused", "0");
-      trap_Cvar_Set("ui_map_details", "0");
       Menus_CloseAll();
       return;
     }
@@ -4842,18 +4923,6 @@ void UI_RunMenuScript(const char **args) {
         trap_Cmd_ExecuteText(EXEC_APPEND, "exec default_left.cfg\n");
         Controls_SetDefaults(qtrue);
       }
-      return;
-    }
-    if (!Q_stricmp(name, "ui_openMapDetails")) {
-      trap_Cvar_Set("ui_map_details", "1");
-      trap_Cvar_Set("ui_details_map_name",
-                    uiInfo.mapList[ui_currentNetMap.integer].mapLoadName);
-      trap_Cvar_Set("ui_details_briefing",
-                    uiInfo.mapList[ui_currentNetMap.integer].briefing);
-      return;
-    }
-    if (!Q_stricmp(name, "ui_closeMapDetails")) {
-      trap_Cvar_Set("ui_map_details", "0");
       return;
     }
     if (!Q_stricmp(name, "voteAutoRtv")) {

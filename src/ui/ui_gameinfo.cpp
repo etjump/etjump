@@ -197,6 +197,9 @@ void UI_LoadArenas() {
           uiInfo.mapList[uiInfo.mapCount].typeBits = (1 << ETJUMP_GAMETYPE);
         }
 
+        uiInfo.mapList[uiInfo.mapCount].cinematic = -1;
+        uiInfo.mapList[uiInfo.mapCount].levelShot = -1;
+
         uiInfo.mapList[uiInfo.mapCount].mapLoadName = String_Alloc(map.c_str());
         uiInfo.mapList[uiInfo.mapCount].mapName = String_Alloc(map.c_str());
 

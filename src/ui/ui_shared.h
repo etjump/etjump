@@ -718,6 +718,8 @@ qboolean BG_CursorInRectWide(rectDef_t *rect);
 
 void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size,
                            fontInfo_t *font);
+void BG_FitTextToWidth_Ext(std::string &instr, float scale, float w,
+                           fontInfo_t *font);
 
 void AdjustFrom640(float *x, float *y, float *w, float *h);
 void SetupRotatedThing(polyVert_t *verts, vec2_t org, float w, float h,
