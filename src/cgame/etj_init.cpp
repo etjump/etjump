@@ -427,17 +427,15 @@ qboolean CG_ServerCommandExt(const char *cmd) {
   //  we could use a local cache for map list instead of requesting it again.
   if (command == "maplist") {
     char arg[MAX_QPATH];
-    std::string uiCommand = "uiParseMaplist ";
+    std::string uiCommand = "uiParseMaplist";
 
     // start iterating from 1 to skip the command string
     for (int i = 1, len = trap_Argc(); i < len; i++) {
       trap_Argv(i, arg, sizeof(arg));
-      uiCommand += std::string(arg) + " ";
+      uiCommand += " " + std::string(arg);
     }
 
-    if (uiCommand.back() == ' ') {
-      uiCommand.pop_back();
-    }
+    uiCommand += '\n';
 
     // we need to forward this command to UI to parse the list there,
     // so we can populate the map vote list
@@ -733,7 +731,7 @@ void runFrameEnd() {
 
   // populate map vote menu
   if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.maplistRequested) {
-    trap_SendClientCommand("requestMaplist");
+    trap_SendClientCommand("requestmaplist\n");
     cg.maplistRequested = true;
   }
 }
