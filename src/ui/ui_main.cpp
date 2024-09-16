@@ -1341,7 +1341,7 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
   // if we're already in-game, re-request the map list from server
   // this only ever executes if a client does 'ui_restart' while connected
   if (cstate.connState == CA_ACTIVE) {
-    trap_Cmd_ExecuteText(EXEC_APPEND, "requestMapList");
+    trap_Cmd_ExecuteText(EXEC_APPEND, "requestmaplist\n");
   }
 
   Com_DPrintf("UI menu load time = %d milli seconds\n",

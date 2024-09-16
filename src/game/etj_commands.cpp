@@ -358,6 +358,25 @@ bool GetChatReplay(gentity_t *ent, Arguments argv) {
   game.chatReplay->sendChatMessages(ent);
   return true;
 }
+
+static bool sendMaplist(gentity_t *ent, Arguments argv) {
+  std::string mapList =
+      ETJump::StringUtil::join(game.mapStatistics->getMaps(), " ");
+  const std::string prefix = "maplist ";
+  const size_t msgLen = BYTES_PER_PACKET - prefix.length();
+
+  // split to multiple commands to ensure client gets the full list
+  // each command is prefixed with 'maplist' so client recognizes
+  // this command is part of the map list, and parses it correctly
+  auto splits = ETJump::wrapWords(mapList, ' ', msgLen);
+  for (auto &split : splits) {
+    split.insert(0, prefix);
+    trap_SendServerCommand(ClientNum(ent), std::string(split + '\n').c_str());
+  }
+
+  return true;
+}
+
 } // namespace ClientCommands
 
 void PrintManual(gentity_t *ent, const std::string &command) {
@@ -2490,6 +2509,7 @@ Commands::Commands() {
   commands_["rankings"] = ClientCommands::Rankings;
   commands_["seasons"] = ClientCommands::ListSeasons;
   commands_["getchatreplay"] = ClientCommands::GetChatReplay;
+  commands_["requestmaplist"] = ClientCommands::sendMaplist;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {
