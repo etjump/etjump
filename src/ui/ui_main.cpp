@@ -1363,7 +1363,7 @@ void UI_Load() {
     Q_strncpyz(lastName, menu->window.name, sizeof(lastName));
   }
   if (menuSet == nullptr || menuSet[0] == '\0') {
-    menuSet = "ui/menus.txt";
+    menuSet = DEFAULT_MENU_FILE;
   } else {
     lastName[0] = '\0';
   }
@@ -6864,8 +6864,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
   UI_InitMemory();
   trap_PC_RemoveAllGlobalDefines();
 
-  trap_Cvar_Set("ui_menuFiles",
-                "ui/menus.txt"); // NERVE - SMF - we need to hardwire for wolfMP
+  trap_Cvar_Set("ui_menuFiles", DEFAULT_MENU_FILE);
 
   // cache redundant calulations
   trap_GetGlconfig(&uiInfo.uiDC.glconfig);
@@ -7008,7 +7007,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
 
   UI_ParseGameInfo("gameinfo.txt");
 
-  UI_LoadMenus("ui/menus.txt", qfalse);
+  UI_LoadMenus(DEFAULT_MENU_FILE, qfalse);
 
   Menus_CloseAll();
 
@@ -7136,16 +7135,6 @@ void _UI_MouseEvent(int dx, int dy) {
   if (Menu_Count() > 0) {
     Display_MouseMove(nullptr, uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory);
   }
-}
-
-void UI_LoadNonIngame() {
-  const char *menuSet = UI_Cvar_VariableString("ui_menuFiles");
-
-  if (menuSet == NULL || menuSet[0] == '\0') {
-    menuSet = "ui/menus.txt";
-  }
-  UI_LoadMenus(menuSet, qfalse);
-  uiInfo.inGameLoad = qfalse;
 }
 
 //----(SA)	added
@@ -7998,7 +7987,7 @@ cvarTable_t cvarTable[] = {
     {&ui_selectedPlayer, "cg_selectedPlayer", "0", CVAR_ARCHIVE},
     {&ui_selectedPlayerName, "cg_selectedPlayerName", "", CVAR_ARCHIVE},
     {&ui_netSource, "ui_netSource", "1", CVAR_ARCHIVE},
-    {&ui_menuFiles, "ui_menuFiles", "ui/menus.txt", CVAR_ARCHIVE},
+    {&ui_menuFiles, "ui_menuFiles", DEFAULT_MENU_FILE, CVAR_ARCHIVE},
     {&ui_gameType, "ui_gametype", "2", CVAR_ARCHIVE},
     {&ui_joinGameType, "ui_joinGametype", "-1", CVAR_ARCHIVE},
     {&ui_netGameType, "ui_netGametype", "2", CVAR_ARCHIVE},
