@@ -48,6 +48,8 @@ static int ui_serverFilterType = 0;
 
 static char uiPreviousMenu[256]{};
 
+static constexpr char DEFAULT_MENU_FILE[] = "ui/menus.txt";
+
 // NERVE - SMF - enabled for multiplayer
 static void UI_StartServerRefresh(qboolean full);
 static void UI_StopServerRefresh(void);
@@ -1298,14 +1300,17 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
   }
 
   handle = trap_PC_LoadSource(menuFile);
+
   if (!handle) {
-    trap_Error(va(S_COLOR_YELLOW "menu file not found: %s, using default\n",
-                  menuFile));
-    handle = trap_PC_LoadSource("ui/menus.txt");
+    Com_Printf(va(S_COLOR_YELLOW "%s: menu file '%s', using default\n",
+                  __func__, menuFile));
+    handle = trap_PC_LoadSource(DEFAULT_MENU_FILE);
+
     if (!handle) {
-      trap_Error(S_COLOR_RED "default menu file not "
-                             "found: ui_mp/menus.txt, "
-                             "unable to continue!\n");
+      trap_Error(
+          va(S_COLOR_RED
+             "%s: default menu file '%s' not found, unable to continue!\n",
+             __func__, DEFAULT_MENU_FILE));
     }
   }
 
