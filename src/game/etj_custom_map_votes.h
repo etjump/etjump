@@ -56,6 +56,9 @@ public:
   std::string ListInfo(const std::string &name);
   std::vector<std::string> getMapsOnList(const std::string &name);
   void GenerateVotesFile();
+  size_t getNumVotelists() const;
+  // returns nullptr on invalid index
+  CustomMapVotes::MapType *getVotelistByIndex(int index);
 
   void addCustomvoteList(int clientNum, const std::string &name,
                          const std::string &fullName, const std::string &maps);
