@@ -261,6 +261,26 @@ struct colorSliderDef_t {
   int colorType; // HSV, RGB, Alpha
 };
 
+struct textScroll_t {
+  // the item which we're currently bound to, used to reset the state when
+  // switching selection (e.g. selecting a new map to read briefing from)
+  int scrollItem;
+  // the text currently being scrolled, used to reset the state if
+  // text updates mid-scroll
+  char scrollText[MAX_TOKEN_CHARS];
+
+  int scrollStartTime;
+  int scrollEndTime;
+  float scrollDeltaTime; // for framerate independent scroll speed
+
+  float x;
+  float y;
+
+  int textOffset; // text index when scrolling horizontally off-screen
+
+  bool scrolling;
+};
+
 #define CVAR_ENABLE 0x00000001
 #define CVAR_DISABLE 0x00000002
 #define CVAR_SHOW 0x00000004
@@ -351,6 +371,8 @@ typedef struct itemDef_s {
 
   colorSliderDef_t colorSliderData;
   bool tooltipAbove;
+
+  textScroll_t textScroll;
 } itemDef_t;
 
 typedef struct {
