@@ -1266,6 +1266,15 @@ typedef struct {
   bool chatReplayReceived;
   bool maplistRequested;
 
+  // have we requested the amount of custom votes yet?
+  bool numCustomvotesRequested;
+  // have we requested the customvote infos to be sent?
+  bool customvoteInfoRequested;
+  // -1 if we haven't gotten the amount yet
+  int numCustomvotes;
+  // how many lists we've requested info for so far
+  int numCustomvoteInfosRequested;
+
   // portalgun auto-binding
   bool portalgunBindingsAdjusted;
   int weapAltB1;

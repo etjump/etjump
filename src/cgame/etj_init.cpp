@@ -426,19 +426,41 @@ qboolean CG_ServerCommandExt(const char *cmd) {
   //  but now that we're always receiving a full map list from server,
   //  we could use a local cache for map list instead of requesting it again.
   if (command == "maplist") {
-    char arg[MAX_QPATH];
     std::string uiCommand = "uiParseMaplist";
 
     // start iterating from 1 to skip the command string
     for (int i = 1, len = trap_Argc(); i < len; i++) {
-      trap_Argv(i, arg, sizeof(arg));
-      uiCommand += " " + std::string(arg);
+      uiCommand += " " + std::string(CG_Argv(i));
     }
 
     uiCommand += '\n';
 
     // we need to forward this command to UI to parse the list there,
     // so we can populate the map vote list
+    trap_SendConsoleCommand(uiCommand.c_str());
+    return qtrue;
+  }
+
+  if (command == "numcustomvotes") {
+    if (trap_Argc() < 2) {
+      return qtrue;
+    }
+
+    cg.numCustomvotes = Q_atoi(CG_Argv(1));
+    // forward count to UI
+    trap_SendConsoleCommand(va("uiNumCustomvotes %i\n", cg.numCustomvotes));
+    return qtrue;
+  }
+
+  if (command == "customvotelist") {
+    std::string uiCommand = "uiParseCustomvote";
+
+    for (int i = 1, len = trap_Argc(); i < len; i++) {
+      uiCommand += " " + std::string(CG_Argv(i));
+    }
+
+    uiCommand += '\n';
+
     trap_SendConsoleCommand(uiCommand.c_str());
     return qtrue;
   }
@@ -599,6 +621,20 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
     trap_SendConsoleCommand(va("fireteam rules savelimit %i\n", limit));
     return qtrue;
   }
+
+  if (command == "forceCustomvoteRefresh") {
+    cg.numCustomvotesRequested = false;
+    cg.customvoteInfoRequested = false;
+    cg.numCustomvotes = -1;
+    cg.numCustomvoteInfosRequested = 0;
+    return qtrue;
+  }
+
+  if (command == "uiRequestCustomvotes") {
+    cg.customvoteInfoRequested = true;
+    return qtrue;
+  }
+
   return qfalse;
 }
 
@@ -731,8 +767,26 @@ void runFrameEnd() {
 
   // populate map vote menu
   if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.maplistRequested) {
-    trap_SendClientCommand("requestmaplist\n");
+    trap_SendClientCommand("requestmaplist");
     cg.maplistRequested = true;
+  }
+
+  if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.numCustomvotesRequested) {
+    cg.numCustomvotes = -1;
+    cg.numCustomvoteInfosRequested = 0;
+
+    trap_SendClientCommand("requestnumcustomvotes");
+    cg.numCustomvotesRequested = true;
+  }
+
+  // space out customvote info requests a bit, otherwise we get a
+  // big lag spike if the server has lots of data to send
+  if (!cg.demoPlayback && cg.customvoteInfoRequested && cg.numCustomvotes > 0 &&
+      cg.clientFrame >= 10 + (cg.numCustomvoteInfosRequested * 25) &&
+      cg.numCustomvoteInfosRequested < cg.numCustomvotes) {
+    trap_SendClientCommand(
+        va("requestcustomvoteinfo %i", cg.numCustomvoteInfosRequested));
+    cg.numCustomvoteInfosRequested++;
   }
 }
 

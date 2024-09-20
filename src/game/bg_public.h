@@ -2671,6 +2671,11 @@ const int BG_LEVEL_NO_WALLBUG = 1 << 7;
 const int BG_LEVEL_NO_NOCLIP = 1 << 8;
 
 namespace ETJump {
+static constexpr char CUSTOMVOTE_TYPE[] = "type";
+static constexpr char CUSTOMVOTE_CVTEXT[] = "cvtext";
+static constexpr char CUSTOMVOTE_SERVERMAPS[] = "servermaps";
+static constexpr char CUSTOMVOTE_OTHERMAPS[] = "othermaps";
+
 enum class CheatCvarFlags {
   None = 0,
   LookYaw = 1,

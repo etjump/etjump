@@ -268,6 +268,14 @@ void ColorPicker::setColorSliderValue(const std::string &colorVar,
 
 void ColorPicker::toggleRGBSliderValues() {
   menuDef_t *menu = Menus_FindByName(COLOR_PICKER_MENU);
+
+  // this should never happen, we already have the menu open...
+  if (menu == nullptr) {
+    Com_Printf(S_COLOR_YELLOW "%s: unable to find color picker menu '%s'\n",
+               __func__, COLOR_PICKER_MENU);
+    return;
+  }
+
   bool redFound = false;
   bool greenFound = false;
   bool blueFound = false;

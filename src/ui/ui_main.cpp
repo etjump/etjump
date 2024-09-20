@@ -48,6 +48,8 @@ static int ui_serverFilterType = 0;
 
 static char uiPreviousMenu[256]{};
 
+static constexpr char DEFAULT_MENU_FILE[] = "ui/menus.txt";
+
 // NERVE - SMF - enabled for multiplayer
 static void UI_StartServerRefresh(qboolean full);
 static void UI_StopServerRefresh(void);
@@ -859,8 +861,8 @@ static void drawLevelshotPreview(rectDef_t &rect) {
                             uiInfo.mapList[ui_mapIndex.integer].levelShot);
 }
 
-void drawMapname(rectDef_t &rect, float scale, vec4_t color, float text_x,
-                 int textStyle, int align) {
+static void drawMapname(rectDef_t &rect, float scale, vec4_t color,
+                        float text_x, int textStyle, int align) {
   rectDef_t textRect = {0, 0, rect.w, rect.h};
 
   const int map = ui_currentNetMap.integer;
@@ -1298,14 +1300,17 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
   }
 
   handle = trap_PC_LoadSource(menuFile);
+
   if (!handle) {
-    trap_Error(va(S_COLOR_YELLOW "menu file not found: %s, using default\n",
-                  menuFile));
-    handle = trap_PC_LoadSource("ui/menus.txt");
+    Com_Printf(va(S_COLOR_YELLOW "%s: menu file '%s', using default\n",
+                  __func__, menuFile));
+    handle = trap_PC_LoadSource(DEFAULT_MENU_FILE);
+
     if (!handle) {
-      trap_Error(S_COLOR_RED "default menu file not "
-                             "found: ui_mp/menus.txt, "
-                             "unable to continue!\n");
+      trap_Error(
+          va(S_COLOR_RED
+             "%s: default menu file '%s' not found, unable to continue!\n",
+             __func__, DEFAULT_MENU_FILE));
     }
   }
 
@@ -1337,11 +1342,14 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
   }
 
   uiInfo.serverMaplist.clear();
+  uiInfo.customVotes.clear();
 
-  // if we're already in-game, re-request the map list from server
-  // this only ever executes if a client does 'ui_restart' while connected
+  // if we're already in-game, force a re-request for map list and customvotes
+  // this only ever executes if we do 'ui_restart' while in-game
   if (cstate.connState == CA_ACTIVE) {
-    trap_Cmd_ExecuteText(EXEC_APPEND, "requestmaplist\n");
+    // FIXME: this does nothing
+    // trap_Cmd_ExecuteText(EXEC_APPEND, "requestmaplist\n");
+    trap_Cmd_ExecuteText(EXEC_APPEND, "forceCustomvoteRefresh\n");
   }
 
   Com_DPrintf("UI menu load time = %d milli seconds\n",
@@ -1358,7 +1366,7 @@ void UI_Load() {
     Q_strncpyz(lastName, menu->window.name, sizeof(lastName));
   }
   if (menuSet == nullptr || menuSet[0] == '\0') {
-    menuSet = "ui/menus.txt";
+    menuSet = DEFAULT_MENU_FILE;
   } else {
     lastName[0] = '\0';
   }
@@ -4969,6 +4977,41 @@ void UI_RunMenuScript(const char **args) {
       return;
     }
 
+    if (!Q_stricmp(name, "loadCustomvotes")) {
+      // don't re-request custom votes if we already have everything processed
+      if (static_cast<int>(uiInfo.customVotes.size()) !=
+          uiInfo.numCustomvotes) {
+        uiInfo.customVotes.clear();
+        // cgame handles this as a console command and sends request to qagame
+        trap_Cmd_ExecuteText(EXEC_APPEND, "uiRequestCustomvotes");
+      }
+
+      Menu_SetFeederSelection(nullptr, FEEDER_CUSTOMVOTES, 0, nullptr);
+      return;
+    }
+
+    if (!Q_stricmp(name, "voteCustomvote")) {
+      if (uiInfo.customvoteIndex < 0 ||
+          uiInfo.customvoteIndex > uiInfo.numCustomvotes) {
+        return;
+      }
+
+      const std::string list = uiInfo.customVotes[uiInfo.customvoteIndex].type;
+      trap_Cmd_ExecuteText(EXEC_APPEND,
+                           va("callvote %s %s\n",
+                              ui_voteCustomRTV.integer ? "rtv" : "randommap",
+                              list.c_str()));
+      return;
+    }
+
+    if (!Q_stricmp(name, "resetCustomvoteDetailsIndex")) {
+      Menu_SetFeederSelection(nullptr, FEEDER_CUSTOMVOTES_MAPS_ONSERVER, 0,
+                              nullptr);
+      Menu_SetFeederSelection(nullptr, FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE, 0,
+                              nullptr);
+      return;
+    }
+
     Com_Printf("^3WARNING: unknown UI script %s\n", name);
   }
 }
@@ -5767,7 +5810,19 @@ static int UI_FeederCount(float feederID) {
   } else if (feederID == FEEDER_MODS) {
     return uiInfo.modCount;
   } else if (feederID == FEEDER_DEMOS) {
-    return uiInfo.demoObjects.size();
+    return static_cast<int>(uiInfo.demoObjects.size());
+  } else if (feederID == FEEDER_CUSTOMVOTES) {
+    if (static_cast<int>(uiInfo.customVotes.size()) != uiInfo.numCustomvotes) {
+      return 1;
+    } else {
+      return uiInfo.numCustomvotes;
+    }
+  } else if (feederID == FEEDER_CUSTOMVOTES_MAPS_ONSERVER) {
+    return static_cast<int>(
+        uiInfo.customVotes[uiInfo.customvoteIndex].mapsOnServer.size());
+  } else if (feederID == FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE) {
+    return static_cast<int>(
+        uiInfo.customVotes[uiInfo.customvoteIndex].otherMaps.size());
   }
   return 0;
 }
@@ -6094,6 +6149,28 @@ const char *UI_FeederItemText(float feederID, int index, int column,
         return uiInfo.profileList[index].name;
       }
     }
+  } else if (feederID == FEEDER_CUSTOMVOTES) {
+    if (static_cast<int>(uiInfo.customVotes.size()) != uiInfo.numCustomvotes) {
+      return "Loading...";
+    } else {
+      return uiInfo.customVotes[index].callvoteText.c_str();
+    }
+  } else if (feederID == FEEDER_CUSTOMVOTES_MAPS_ONSERVER) {
+    if (static_cast<int>(uiInfo.customVotes.size()) != uiInfo.numCustomvotes) {
+      return "Loading...";
+    } else {
+      return uiInfo.customVotes[uiInfo.customvoteIndex]
+          .mapsOnServer[index]
+          .c_str();
+    }
+  } else if (feederID == FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE) {
+    if (static_cast<int>(uiInfo.customVotes.size()) != uiInfo.numCustomvotes) {
+      return "Loading...";
+    } else {
+      return uiInfo.customVotes[uiInfo.customvoteIndex]
+          .otherMaps[index]
+          .c_str();
+    }
   }
   // -NERVE - SMF
   return "";
@@ -6213,6 +6290,12 @@ void UI_FeederSelection(float feederID, int index) {
   } else if (feederID == FEEDER_PROFILES) {
     uiInfo.profileIndex = index;
     trap_Cvar_Set("ui_profile", uiInfo.profileList[index].name);
+  } else if (feederID == FEEDER_CUSTOMVOTES) {
+    uiInfo.customvoteIndex = index;
+  } else if (feederID == FEEDER_CUSTOMVOTES_MAPS_ONSERVER) {
+    uiInfo.customvoteMapsOnServerIndex = index;
+  } else if (feederID == FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE) {
+    uiInfo.customvoteOtherMapsIndex = index;
   }
 }
 
@@ -6859,8 +6942,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
   UI_InitMemory();
   trap_PC_RemoveAllGlobalDefines();
 
-  trap_Cvar_Set("ui_menuFiles",
-                "ui/menus.txt"); // NERVE - SMF - we need to hardwire for wolfMP
+  trap_Cvar_Set("ui_menuFiles", DEFAULT_MENU_FILE);
 
   // cache redundant calulations
   trap_GetGlconfig(&uiInfo.uiDC.glconfig);
@@ -6999,11 +7081,13 @@ void _UI_Init(int legacyClient, int clientVersion) {
   uiInfo.characterCount = 0;
   uiInfo.aliasCount = 0;
 
+  uiInfo.numCustomvotes = -1;
+
   UI_LoadPanel_Init();
 
   UI_ParseGameInfo("gameinfo.txt");
 
-  UI_LoadMenus("ui/menus.txt", qfalse);
+  UI_LoadMenus(DEFAULT_MENU_FILE, qfalse);
 
   Menus_CloseAll();
 
@@ -7133,16 +7217,6 @@ void _UI_MouseEvent(int dx, int dy) {
   }
 }
 
-void UI_LoadNonIngame() {
-  const char *menuSet = UI_Cvar_VariableString("ui_menuFiles");
-
-  if (menuSet == NULL || menuSet[0] == '\0') {
-    menuSet = "ui/menus.txt";
-  }
-  UI_LoadMenus(menuSet, qfalse);
-  uiInfo.inGameLoad = qfalse;
-}
-
 //----(SA)	added
 static uiMenuCommand_t menutype = UIMENU_NONE;
 
@@ -7192,6 +7266,81 @@ void parseMaplist() {
   }
 
   ETJump::StringUtil::sortStrings(uiInfo.serverMaplist, true);
+}
+
+void parseNumCustomvotes() {
+  if (trap_Argc() < 2) {
+    Com_Printf(va(S_COLOR_YELLOW
+                  "%s: unable to parse customvote count: no arguments given.\n",
+                  __func__));
+    return;
+  }
+
+  char arg[MAX_TOKEN_CHARS];
+  trap_Argv(1, arg, sizeof(arg));
+  uiInfo.numCustomvotes = Q_atoi(arg);
+}
+
+void parseCustomvote() {
+  // if a mapsOnServer or otherMaps is empty, we only have 3 args
+  static constexpr int minArgs = 3;
+  const int numArgs = trap_Argc();
+
+  if (numArgs < minArgs) {
+    Com_Printf(va(S_COLOR_YELLOW "%s: unable to parse customvote: malformed "
+                                 "command - too few arguments (%i < %i).\n",
+                  __func__, numArgs, minArgs));
+    return;
+  }
+
+  char arg[MAX_TOKEN_CHARS];
+  CustomMapVotes::MapType *mapType = nullptr;
+
+  trap_Argv(1, arg, sizeof(arg));
+
+  // grab an existing list if we've already parsed this list before
+  for (auto &customVote : uiInfo.customVotes) {
+    if (customVote.type == arg) {
+      mapType = &customVote;
+      break;
+    }
+  }
+
+  // create a new entry if we didn't find an existing list
+  if (mapType == nullptr) {
+    uiInfo.customVotes.emplace_back();
+    mapType = &uiInfo.customVotes.back();
+    mapType->type = arg;
+  }
+
+  trap_Argv(2, arg, sizeof(arg));
+  const std::string field = arg;
+
+  if (field == CUSTOMVOTE_TYPE) {
+    trap_Argv(3, arg, sizeof(arg));
+    mapType->type = arg;
+  } else if (field == CUSTOMVOTE_CVTEXT) {
+    // this can potentially be multiple args
+    std::string cvtext;
+
+    for (int i = 3; i < numArgs; i++) {
+      trap_Argv(i, arg, sizeof(arg));
+      cvtext += std::string(arg) + " ";
+    }
+
+    cvtext.pop_back();
+    mapType->callvoteText = cvtext;
+  } else if (field == CUSTOMVOTE_SERVERMAPS) {
+    for (int i = 3; i < numArgs; i++) {
+      trap_Argv(i, arg, sizeof(arg));
+      mapType->mapsOnServer.emplace_back(arg);
+    }
+  } else if (field == CUSTOMVOTE_OTHERMAPS) {
+    for (int i = 3; i < numArgs; i++) {
+      trap_Argv(i, arg, sizeof(arg));
+      mapType->otherMaps.emplace_back(arg);
+    }
+  }
 }
 } // namespace ETJump
 
@@ -7916,6 +8065,7 @@ vmCvar_t cl_bypassMouseInput;
 vmCvar_t ui_autoredirect;
 
 vmCvar_t ui_voteCheats;
+vmCvar_t ui_voteCustomRTV;
 
 vmCvar_t etj_menuSensitivity;
 
@@ -7993,7 +8143,7 @@ cvarTable_t cvarTable[] = {
     {&ui_selectedPlayer, "cg_selectedPlayer", "0", CVAR_ARCHIVE},
     {&ui_selectedPlayerName, "cg_selectedPlayerName", "", CVAR_ARCHIVE},
     {&ui_netSource, "ui_netSource", "1", CVAR_ARCHIVE},
-    {&ui_menuFiles, "ui_menuFiles", "ui/menus.txt", CVAR_ARCHIVE},
+    {&ui_menuFiles, "ui_menuFiles", DEFAULT_MENU_FILE, CVAR_ARCHIVE},
     {&ui_gameType, "ui_gametype", "2", CVAR_ARCHIVE},
     {&ui_joinGameType, "ui_joinGametype", "-1", CVAR_ARCHIVE},
     {&ui_netGameType, "ui_netGametype", "2", CVAR_ARCHIVE},
@@ -8148,6 +8298,7 @@ cvarTable_t cvarTable[] = {
     {&ui_autoredirect, "ui_autoredirect", "0", CVAR_ARCHIVE},
 
     {&ui_voteCheats, "ui_voteCheats", "0", CVAR_ARCHIVE},
+    {&ui_voteCustomRTV, "ui_voteCustomRTV", "0", CVAR_ARCHIVE},
 
     {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
 };

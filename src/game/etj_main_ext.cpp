@@ -295,6 +295,8 @@ qboolean OnConsoleCommand() {
 
   if (command == "readcustomvotes") {
     game.customMapVotes->Load();
+    // force voteflag re-check so UI can turn on/off custom vote button
+    G_voteFlags();
     return qtrue;
   }
 

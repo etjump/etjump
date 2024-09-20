@@ -2857,8 +2857,19 @@ bool BG_PlayerTouchesItem(playerState_t *ps, entityState_t *item, int atTime) {
   vec3_t origin;
 
   BG_EvaluateTrajectory(&item->pos, atTime, origin, qfalse, item->effect2Time);
+  static constexpr int boxSide = 36;
 
-  return (VectorDistance(ps->origin, origin) < (playerMaxs[0] - playerMins[0]));
+  // we are ignoring ducked differences here
+  if (ps->origin[0] - origin[0] > boxSide ||
+      ps->origin[0] - origin[0] < -boxSide ||
+      ps->origin[1] - origin[1] > boxSide ||
+      ps->origin[1] - origin[1] < -boxSide ||
+      ps->origin[2] - origin[2] > boxSide ||
+      ps->origin[2] - origin[2] < -boxSide) {
+    return false;
+  }
+
+  return true;
 }
 
 /*
