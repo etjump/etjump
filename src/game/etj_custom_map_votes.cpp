@@ -453,6 +453,18 @@ CustomMapVotes::getMapsOnList(const std::string &name) {
   return mapList;
 }
 
+size_t CustomMapVotes::getNumVotelists() const {
+  return customMapVotes_.size();
+}
+
+CustomMapVotes::MapType *CustomMapVotes::getVotelistByIndex(const int index) {
+  if (index < 0 || index >= customMapVotes_.size()) {
+    return nullptr;
+  }
+
+  return &customMapVotes_[index];
+}
+
 std::string const CustomMapVotes::RandomMap(std::string const &type) {
   for (unsigned i = 0; i < customMapVotes_.size(); i++) {
     auto &customMapVote = customMapVotes_[i];

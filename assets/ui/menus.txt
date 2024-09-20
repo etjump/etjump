@@ -56,11 +56,17 @@
 	loadMenu { "ui/wm_ftquickmessage.menu" }
 	loadMenu { "ui/wm_ftquickmessageAlt.menu" }
 
+
+	// these need to be registered before the vote menus, so the tooltips in them draw over these
+	loadMenu { "ui/ingame_map_details.menu" }
+	loadMenu { "ui/ingame_customvote_details.menu" }
+
 	// ingame
 	loadMenu { "ui/ingame_main.menu" }
 	loadMenu { "ui/ingame_vote.menu" }
 	loadMenu { "ui/ingame_vote_disabled.menu" }
 	loadMenu { "ui/ingame_vote_map.menu" }
+	loadMenu { "ui/ingame_vote_customvote.menu" }
 	loadMenu { "ui/ingame_serverinfo.menu" }
 	loadMenu { "ui/ingame_disconnect.menu" }
 	loadMenu { "ui/ingame_messagemode.menu" }
@@ -71,8 +77,6 @@
 	loadMenu { "ui/etjump.menu" }
 	loadMenu { "ui/etjump_controls.menu" }
 	loadMenu { "ui/etjump_credits.menu" }
-
-	loadMenu { "ui/ingame_map_details.menu" }
 	loadMenu { "ui/ingame_ft_savelimit.menu" }
 
 	loadMenu { "ui/etjump_settings_general_gameplay.menu" }

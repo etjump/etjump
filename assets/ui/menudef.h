@@ -71,6 +71,9 @@
 #define FEEDER_SERVERSTATUS 		0x0d	// server status
 #define FEEDER_FINDPLAYER			0x0e	// find player
 #define FEEDER_CINEMATICS			0x0f	// cinematics
+#define FEEDER_CUSTOMVOTES			0x10	// ETJump: custom vote lists
+#define FEEDER_CUSTOMVOTES_MAPS_ONSERVER	0x11	// ETJump: maps available on server from customvote list
+#define FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE	0x12	// ETJump: maps not available on server from customvote list
 #define FEEDER_PROFILES				0x1c	// Arnout: profiles
 #define FEEDER_GLINFO				0x1d	// Arnout: glinfo
 
@@ -402,6 +405,9 @@
 #define CV_SVF_RANDOMMAP		4
 #define CV_SVF_RTV			8
 #define CV_SVF_AUTORTV			16
+// there's no actual cvar associated with this flag, but we turn this off
+// if there are no custom votes defined on the server
+#define CV_SVF_CUSTOMVOTE		32
 
 // referee level
 #define RL_NONE					0

@@ -26,9 +26,6 @@ void G_loadMatchGame() {
   trap_SetConfigstring(CS_CUSTMOTD + 4, server_motd4.string);
   trap_SetConfigstring(CS_CUSTMOTD + 5, server_motd5.string);
 
-  // Voting flags
-  G_voteFlags();
-
   // Set up the random reinforcement seeds for both teams and send to clients
   dwBlueOffset = rand() % MAX_REINFSEEDS;
   dwRedOffset = rand() % MAX_REINFSEEDS;

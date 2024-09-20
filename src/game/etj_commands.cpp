@@ -363,7 +363,7 @@ static bool sendMaplist(gentity_t *ent, Arguments argv) {
   std::string mapList =
       ETJump::StringUtil::join(game.mapStatistics->getMaps(), " ");
   const std::string prefix = "maplist ";
-  const size_t msgLen = BYTES_PER_PACKET - prefix.length();
+  const size_t msgLen = BYTES_PER_PACKET - prefix.length() - 1;
 
   // split to multiple commands to ensure client gets the full list
   // each command is prefixed with 'maplist' so client recognizes
@@ -372,6 +372,93 @@ static bool sendMaplist(gentity_t *ent, Arguments argv) {
   for (auto &split : splits) {
     split.insert(0, prefix);
     trap_SendServerCommand(ClientNum(ent), std::string(split + '\n').c_str());
+  }
+
+  return true;
+}
+
+static bool sendNumCustomvotes(gentity_t *ent, Arguments argv) {
+  const size_t numlists = game.customMapVotes->getNumVotelists();
+  trap_SendServerCommand(ClientNum(ent), va("numcustomvotes %i\n", numlists));
+  return true;
+}
+
+static bool sendCustomvoteInfo(gentity_t *ent, Arguments argv) {
+  if (argv->size() < 2) {
+    Printer::console(
+        ent, ETJump::stringFormat("^3%s: ^7no list given as an argument.\n",
+                                  __func__));
+    return false;
+  }
+
+  const int index = Q_atoi(argv->at(1).c_str());
+  const auto list = game.customMapVotes->getVotelistByIndex(index);
+
+  if (list == nullptr) {
+    Printer::console(ent, ETJump::stringFormat(
+                              "^3%s: ^7no list with a given index ^3'%i'^7.\n",
+                              __func__, index));
+    return false;
+  }
+
+  const std::string prefix = "customvotelist";
+  const int clientNum = ClientNum(ent);
+
+  /* The commands sent to client consist of following fields:
+   *
+   * cmd <type> <field> <data>
+   *
+   * Each command includes the list type as the first argument, so client knows
+   * which list the data in this command belongs to. This way we can ensure
+   * the client can construct the complete struct for any given list, regardless
+   * of the order in which the packets arrive in. They *should* arrive
+   * sequentially in the order we send them, this is just extra guarantee.
+   */
+
+  const std::string cmd = ETJump::stringFormat("%s \"%s\"", prefix, list->type);
+
+  // we could omit the type from the end here, but this simplifies parsing
+  const std::string typeCmd = ETJump::stringFormat(
+      "%s %s \"%s\"\n", cmd, ETJump::CUSTOMVOTE_TYPE, list->type);
+  const std::string cvTextCmd = ETJump::stringFormat(
+      "%s %s \"%s\"\n", cmd, ETJump::CUSTOMVOTE_CVTEXT, list->callvoteText);
+
+  trap_SendServerCommand(clientNum, typeCmd.c_str());
+  trap_SendServerCommand(clientNum, cvTextCmd.c_str());
+
+  const std::string serverMapsCmd =
+      ETJump::stringFormat("%s %s ", cmd, ETJump::CUSTOMVOTE_SERVERMAPS);
+  const std::string otherMapsCmd =
+      ETJump::stringFormat("%s %s ", cmd, ETJump::CUSTOMVOTE_OTHERMAPS);
+
+  const std::string serverMaps =
+      ETJump::StringUtil::join(list->mapsOnServer, " ");
+  const std::string otherMaps = ETJump::StringUtil::join(list->otherMaps, " ");
+
+  // we have to check if the combined string would be over max message length,
+  // because we need to always attach the command prefix in front
+  if (serverMapsCmd.length() + serverMaps.length() > BYTES_PER_PACKET - 1) {
+    const auto splits = ETJump::wrapWords(
+        serverMaps, ' ', BYTES_PER_PACKET - serverMapsCmd.length() - 1);
+
+    for (const auto &split : splits) {
+      trap_SendServerCommand(clientNum, (serverMapsCmd + split + '\n').c_str());
+    }
+  } else {
+    trap_SendServerCommand(clientNum,
+                           (serverMapsCmd + serverMaps + '\n').c_str());
+  }
+
+  if (otherMapsCmd.length() + otherMaps.length() > BYTES_PER_PACKET) {
+    const auto splits = ETJump::wrapWords(
+        otherMaps, ' ', BYTES_PER_PACKET - otherMapsCmd.length() - 1);
+
+    for (const auto &split : splits) {
+      trap_SendServerCommand(clientNum, (otherMapsCmd + split + '\n').c_str());
+    }
+  } else {
+    trap_SendServerCommand(clientNum,
+                           (otherMapsCmd + otherMaps + '\n').c_str());
   }
 
   return true;
@@ -2510,6 +2597,8 @@ Commands::Commands() {
   commands_["seasons"] = ClientCommands::ListSeasons;
   commands_["getchatreplay"] = ClientCommands::GetChatReplay;
   commands_["requestmaplist"] = ClientCommands::sendMaplist;
+  commands_["requestnumcustomvotes"] = ClientCommands::sendNumCustomvotes;
+  commands_["requestcustomvoteinfo"] = ClientCommands::sendCustomvoteInfo;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {

@@ -7,6 +7,7 @@
 #include "keycodes.h"
 #include "../game/bg_public.h"
 #include "ui_shared.h"
+#include "../game/etj_custom_map_votes.h"
 
 #include <vector>
 #include <stack>
@@ -120,6 +121,7 @@ extern vmCvar_t cl_bypassMouseInput;
 extern vmCvar_t ui_autoredirect;
 
 extern vmCvar_t ui_voteCheats;
+extern vmCvar_t ui_voteCustomRTV;
 
 extern vmCvar_t etj_menuSensitivity;
 
@@ -897,6 +899,12 @@ typedef struct {
   bool vetClient; // original 2.60b, steam 2.60b or 2.60d
 
   std::vector<std::string> serverMaplist;
+
+  std::vector<CustomMapVotes::MapType> customVotes;
+  int numCustomvotes; // -1 if we haven't gotten the count yet
+  int customvoteIndex;
+  int customvoteMapsOnServerIndex;
+  int customvoteOtherMapsIndex;
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;
@@ -1108,6 +1116,9 @@ void ETJump_DrawMapDetails();
 
 namespace ETJump {
 void parseMaplist();
+
+void parseNumCustomvotes();
+void parseCustomvote();
 
 struct TextScroll {
   // the item which we're currently bound to, used to reset the state when

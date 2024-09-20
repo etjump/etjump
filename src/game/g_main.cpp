@@ -1957,6 +1957,10 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   OnGameInit();
   ETJump_InitGame(levelTime, randomSeed, restart);
 
+  // setup voteflags, must be called after ETJump init because we need
+  // to check the amount of custom votes on server in here
+  G_voteFlags();
+
   if (G_PatchFixEnabled()) {
     G_Printf("\n^7--------- ^1!!! WARNING !!! ^7---------\n\n^7Server started "
              "with ^3cm_optimizePatchPlanes 0\n^7Patch collision is different "

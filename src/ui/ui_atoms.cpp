@@ -205,6 +205,16 @@ qboolean UI_ConsoleCommand(int realTime) {
     return qtrue;
   }
 
+  if (!Q_stricmp(cmd, "uiNumCustomvotes")) {
+    ETJump::parseNumCustomvotes();
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "uiParseCustomvote")) {
+    ETJump::parseCustomvote();
+    return qtrue;
+  }
+
   trap_GetClientState(&cstate);
 
   return qfalse;

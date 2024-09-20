@@ -8,6 +8,7 @@
 #include "etj_map_statistics.h"
 #include "etj_numeric_utilities.h"
 #include "etj_rtv.h"
+#include "etj_custom_map_votes.h"
 #include <set>
 
 #define T_FFA 0x01
@@ -24,6 +25,9 @@ static const char *ACTIVATED = "ACTIVATED";
 static const char *DEACTIVATED = "DEACTIVATED";
 static const char *ENABLED = "ENABLED";
 static const char *DISABLED = "DISABLED";
+
+// note: this is also defined in ui/menudef.h for usage in .menu files
+static constexpr int CV_SVF_CUSTOMVOTE = 32;
 
 //
 // Update info:
@@ -169,6 +173,10 @@ void G_voteFlags(void) {
       if (trap_Cvar_VariableIntegerValue(voteToggles[i].pszCvar) == 0) {
         flags |= voteToggles[i].flag;
       }
+    }
+
+    if (game.customMapVotes->getNumVotelists() == 0) {
+      flags |= CV_SVF_CUSTOMVOTE;
     }
   }
   if (flags != voteFlags.integer) {
