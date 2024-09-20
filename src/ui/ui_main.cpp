@@ -1302,7 +1302,8 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
   handle = trap_PC_LoadSource(menuFile);
 
   if (!handle) {
-    Com_Printf(va(S_COLOR_YELLOW "%s: menu file '%s', using default\n",
+    Com_Printf(va(S_COLOR_YELLOW
+                  "%s: menu file '%s' not found, using default\n",
                   __func__, menuFile));
     handle = trap_PC_LoadSource(DEFAULT_MENU_FILE);
 
