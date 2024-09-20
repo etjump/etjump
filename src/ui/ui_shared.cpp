@@ -5558,11 +5558,89 @@ static void comboPaint(itemDef_t *item) {
                item->window.borderSize, item->window.borderColor);
 
   // dropdown text
-  const char *text = Item_Multi_Setting(item);
+  const std::string textFull = Item_Multi_Setting(item);
   const float borderOfs = item->window.borderSize * 2;
+  const auto textWidth =
+      static_cast<float>(DC->textWidth(textFull.c_str(), item->textscale, 0));
+  const float maxWidth = rect.w - 6 - selector.w - (borderOfs * 2);
 
-  DC->drawText(rect.x + borderOfs, item->textRect.y, item->textscale,
-               item->window.foreColor, text, 0, 0, item->textStyle);
+  if (textWidth > maxWidth) {
+    textScroll_t *ts = &item->textScroll;
+
+    if (ts->scrollStartTime == 0 ||
+        (!ts->scrolling && DC->realTime > ts->scrollEndTime) ||
+        Q_stricmp(ts->scrollText, textFull.c_str())) {
+      ts->scrollStartTime = DC->realTime + 1000;
+      ts->scrolling = true;
+      ts->x = 0;
+      ts->textOffset = 0;
+      Q_strncpyz(ts->scrollText, textFull.c_str(), sizeof(ts->scrollText));
+    }
+
+    float textX = rect.x + borderOfs + ts->x;
+    float textXOffset = 0;
+
+    fontInfo_t *font = DC->getActiveFont();
+
+    // determine how many characters from the start are off-screen
+    if (ts->x < 0) {
+      for (size_t i = 0; i < textFull.length(); i++) {
+        const auto width = static_cast<float>(
+            DC->textWidth(textFull.substr(0, i).c_str(), item->textscale, 0));
+
+        if (width > std::abs(ts->x)) {
+          textXOffset = width;
+          ts->textOffset = static_cast<int>(i);
+          break;
+        }
+      }
+    }
+
+    ts->scrollDeltaTime = static_cast<float>(DC->frameTime) * 0.001f;
+
+    if (ts->scrolling && DC->realTime > ts->scrollStartTime) {
+      static constexpr float scrollSpeed = 30.0f; // pixels per second
+      ts->x -= scrollSpeed * ts->scrollDeltaTime;
+    }
+
+    int limit = 0;
+    float tempW = 0;
+
+    // determine how many characters we can fit
+    for (size_t i = 0; i < textFull.substr(ts->textOffset).length(); i++) {
+      tempW +=
+          GetCharWidth(&textFull[ts->textOffset + i], item->textscale, font);
+
+      if (tempW > maxWidth) {
+        break;
+      }
+
+      limit++;
+    }
+
+    // note: we don't limit the text length here so that we can check the
+    // remaining width after drawing, instead we use 'limit' in the draw func
+    const std::string textPart = textFull.substr(ts->textOffset);
+    DC->drawText(textX + textXOffset, item->textRect.y, item->textscale,
+                 item->window.foreColor, textPart.c_str(), 0, limit,
+                 item->textStyle);
+
+    const auto textPartW =
+        static_cast<float>(DC->textWidth(textPart.c_str(), item->textscale, 0));
+
+    // FIXME: this + 1 is a big hack, the math never quite aligns correctly,
+    //  but this ensures the scroll continues to roughly
+    //  to the start of the text field
+    if (ts->scrolling && textPartW < maxWidth &&
+        textX + textXOffset <= rect.x + borderOfs + 1) {
+      ts->scrollEndTime = DC->realTime + 1000;
+      ts->scrolling = false;
+    }
+  } else {
+    DC->drawText(rect.x + borderOfs, item->textRect.y, item->textscale,
+                 item->window.foreColor, textFull.c_str(), 0, 0,
+                 item->textStyle);
+  }
 
   // selector text
   const char *selectorText = "V";

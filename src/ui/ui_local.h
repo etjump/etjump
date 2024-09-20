@@ -1116,23 +1116,7 @@ void ETJump_DrawMapDetails();
 
 namespace ETJump {
 void parseMaplist();
-
 void parseNumCustomvotes();
 void parseCustomvote();
-
-struct TextScroll {
-  // the item which we're currently bound to, used to reset the state when
-  // switching selection (e.g. selecting a new map to read briefing from)
-  int scrollItem;
-
-  int scrollStartTime;
-  int scrollEndTime;
-  float scrollDeltaTime; // for framerate independent scroll speed
-
-  float x;
-  float y;
-
-  bool scrolling;
-};
 } // namespace ETJump
 #endif

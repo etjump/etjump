@@ -1651,7 +1651,7 @@ void UI_DrawGametypeDescription(rectDef_t *rect, float scale, vec4_t color,
   }
 }
 
-void UI_DrawMapDescription(rectDef_t *rect, float scale, vec4_t color,
+void UI_DrawMapDescription(rectDef_t *rect, float scale, const vec4_t color,
                            float text_x, int textStyle, int align) {
   fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
   rectDef_t textRect = {0, 0, rect->w, rect->h};
@@ -1686,7 +1686,7 @@ void UI_DrawMapDescription(rectDef_t *rect, float scale, vec4_t color,
     return;
   }
 
-  static ETJump::TextScroll ts;
+  static textScroll_t ts;
 
   if (ts.scrollStartTime == 0 ||
       (!ts.scrolling && DC->realTime > ts.scrollEndTime) ||
