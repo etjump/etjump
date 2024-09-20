@@ -90,10 +90,43 @@
 * fixed systemcalls working unreliably on 64-bit clients [#1396](https://github.com/etjump/etjump/pull/1396)
 * tiemruns no longer interrupt due to too low fps with `com_maxfps 0` [#1405](https://github.com/etjump/etjump/pull/1405)
 * added dropdown menus to UI for more convenient multi-selection menu entries [#1406](https://github.com/etjump/etjump/pull/1406)
-* fixed picking up med/ammopacks instantly on some non-axial angles [#1408](https://github.com/etjump/etjump/pull/1408)
 * added autospec feature to automatically follow next client when idling in free spec [#1382](https://github.com/etjump/etjump/pull/1382)
   * `etj_autoSpec` - toggle on/off
   * `etj_autoSpecDelay` - time in milliseconds to wait before automatically following next client
+* fixed `!listbans` output being affected by the color of "banned by" entry [#1419](https://github.com/etjump/etjump/pull/1419)
+* fixed `!ban` failing if time was 0, making it impossible to ban someone permantently while also giving a reason for the ban [#1418](https://github.com/etjump/etjump/pull/1418)
+* menu entries with `Custom` value now display the actual cvar value [#1416](https://github.com/etjump/etjump/pull/1416)
+* menu options that are incompatible with players client are now hidden [#1413](https://github.com/etjump/etjump/pull/1413)
+* added adminchat functionality [#1415](https://github.com/etjump/etjump/pull/1415)
+  * can be toggled on server with `g_adminChat`
+  * available to players with adminflag `S`
+  * `say_admin`, `ma` and `enc_say_admin` will send a message to adminchat
+  * also available as a target in regular chat window (`adminChat` command opens the message window with adminchat selected
+* IP address is now visible in `!userinfo` output if a player is connected [#1417](https://github.com/etjump/etjump/pull/1417)
+* dragging a scrollbar in listbox menu no longer stops the scroll if cursor moves outside the window [#1424](https://github.com/etjump/etjump/pull/1424)
+* fixed `Write Config` button in settings menu not focusing on the text field upon opening [#1425](https://github.com/etjump/etjump/pull/1425)
+* added `etj_drawSnapHUD 3` to draw snaphud with borders only instead of solid colored blocks [#1430](https://github.com/etjump/etjump/pull/1430)
+* fixed collision on `func_fakebrush` with `CONTENTS_PLAYECLIP` not working correctly [#1429](https://github.com/etjump/etjump/pull/1429)
+* re-fixed demo list sorting to be case-insensitive - this was already the case on earlier versions but broke at some point [#1437](https://github.com/etjump/etjump/pull/1437)
+* added color picker to UI [#1422](https://github.com/etjump/etjump/pull/1422)
+  * avaialble via `Color picker...` menu option in dropdown menus
+  * sliders for RGB, HSV and Alpha, preview boxes for old/new color
+    * RGB sliders can be set to either `0-1` or `0-255` range
+  * interactive HSV color picker, usable with mouse
+    * `MOUSE2` only adjusts saturation
+    * `MOUSE3` only adjusts value
+* `Vote -> Map` menu now lists all maps on the server, regardless of the amount of pk3 files on the server [#1431](https://github.com/etjump/etjump/pull/1431)
+  * the list is also now sorted alphabetically
+* fixes to `Vote -> Map -> Details` menu [#1442](https://github.com/etjump/etjump/pull/1442)
+  * details now update automatically as you select new map on the vote list
+  * levelshot is now displayed in correct aspect ratio
+  * added text scrolling to the briefing drawing if it didn't fit on screen fully
+  * unfortunately you'll likely never see this panel properly because the files won't be loaded with `sv_pure 1` if server has a lot of maps
+* fixed `!add-customvote` deleting existing customvote file if the file contained a syntax error [#1443](https://github.com/etjump/etjump/pull/1443)
+* fixed menu loading fallback not working if custom menufile was not found [#1446](https://github.com/etjump/etjump/pull/1446)
+* added custom votes to vote UI [#1447](https://github.com/etjump/etjump/pull/1447)
+  * details panel contains the list of maps on the server and any unavailable maps
+  * menu contains a toggle for voting a random map or RTV from given list
 
 # ETJump 3.2.2
 
