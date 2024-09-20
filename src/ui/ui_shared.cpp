@@ -7386,7 +7386,7 @@ qboolean ItemParse_cvarFloat(itemDef_t *item, int handle) {
       PC_Float_Parse(handle, &editPtr->minVal) &&
       PC_Float_Parse(handle, &editPtr->maxVal)) {
     if (ETJump::PC_hasFloat(handle)) {
-      PC_Float_Parse(handle, &editPtr->step);
+      return PC_Float_Parse(handle, &editPtr->step);
     }
     return qtrue;
   }
@@ -7686,7 +7686,7 @@ qboolean ItemParse_colorSliderVar(itemDef_t *item, int handle) {
       PC_Float_Parse(handle, &editPtr->minVal) &&
       PC_Float_Parse(handle, &editPtr->maxVal)) {
     if (ETJump::PC_hasFloat(handle)) {
-      PC_Float_Parse(handle, &editPtr->step);
+      return PC_Float_Parse(handle, &editPtr->step);
     }
     return qtrue;
   }
