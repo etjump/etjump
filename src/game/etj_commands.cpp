@@ -385,6 +385,9 @@ static bool sendNumCustomvotes(gentity_t *ent, Arguments argv) {
 
 static bool sendCustomvoteInfo(gentity_t *ent, Arguments argv) {
   if (argv->size() < 2) {
+    Printer::console(
+        ent, ETJump::stringFormat("^3%s: ^7no list given as an argument.\n",
+                                  __func__));
     return false;
   }
 
@@ -392,6 +395,9 @@ static bool sendCustomvoteInfo(gentity_t *ent, Arguments argv) {
   const auto list = game.customMapVotes->getVotelistByIndex(index);
 
   if (list == nullptr) {
+    Printer::console(ent, ETJump::stringFormat(
+                              "^3%s: ^7no list with a given index ^3'%i'^7.\n",
+                              __func__, index));
     return false;
   }
 
