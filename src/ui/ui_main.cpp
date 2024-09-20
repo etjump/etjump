@@ -1347,8 +1347,7 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
   // if we're already in-game, force a re-request for map list and customvotes
   // this only ever executes if we do 'ui_restart' while in-game
   if (cstate.connState == CA_ACTIVE) {
-    // FIXME: this does nothing
-    // trap_Cmd_ExecuteText(EXEC_APPEND, "requestmaplist\n");
+    trap_Cmd_ExecuteText(EXEC_APPEND, "forceMaplistRefresh\n");
     trap_Cmd_ExecuteText(EXEC_APPEND, "forceCustomvoteRefresh\n");
   }
 

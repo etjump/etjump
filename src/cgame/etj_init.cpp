@@ -622,6 +622,11 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
     return qtrue;
   }
 
+  if (command == "forceMaplistRefresh") {
+    cg.maplistRequested = false;
+    return qtrue;
+  }
+
   if (command == "forceCustomvoteRefresh") {
     cg.numCustomvotesRequested = false;
     cg.customvoteInfoRequested = false;
