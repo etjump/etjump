@@ -3608,6 +3608,17 @@ static void Scroll_Slider_ThumbFunc(void *p) {
     value = std::roundf(value / editDef->step) * editDef->step;
   }
 
+  const float oldValue =
+      si->item->cvar
+          ? DC->getCVarValue(si->item->cvar)
+          : DC->getColorSliderValue(si->item->colorSliderData.colorVar);
+
+  // if we haven't moved the mouse enough to update the cvar value,
+  // don't spam cvar updates for no reason
+  if (oldValue == value) {
+    return;
+  }
+
   if (si->item->cvar) {
     DC->setCVar(si->item->cvar, va("%f", value));
   } else {
