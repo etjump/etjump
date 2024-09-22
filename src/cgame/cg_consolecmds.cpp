@@ -1615,6 +1615,4 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("generateCustomvotes");
   trap_AddCommand("readCustomvotes");
   trap_AddCommand("generateMotd");
-
-  trap_AddCommand("savepos");
 }
