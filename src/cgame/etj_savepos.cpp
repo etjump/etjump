@@ -34,9 +34,10 @@
 namespace ETJump {
 
 SavePos::SavePos(const std::shared_ptr<Timerun> &p) {
-  const bool timerunCompatible = demoCompatibility->isCompatible({3, 0, 0});
+  const bool timerunCompatible =
+      cg.demoPlayback ? demoCompatibility->isCompatible({3, 0, 0}) : true;
 
-  if (!p || (cg.demoPlayback && !timerunCompatible)) {
+  if (!p || !timerunCompatible) {
     CG_Printf("^3WARNING: ^7unable to initialize timerun information for "
               "^3'savepos'^7. Timerun state will not be saved in positions!\n");
 
