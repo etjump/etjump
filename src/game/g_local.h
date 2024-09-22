@@ -1708,7 +1708,7 @@ void CalcMuzzlePointForActivate(gentity_t *ent, vec3_t forward, vec3_t right,
 team_t TeamCount(int ignoreClientNum,
                  int team); // NERVE - SMF - merge from team arena
 team_t PickTeam(int ignoreClientNum);
-void SetClientViewAngle(gentity_t *ent, vec3_t angle);
+void SetClientViewAngle(gentity_t *ent, const vec3_t angle);
 gentity_t *SelectSpawnPoint(vec3_t avoidPoint, vec3_t origin, vec3_t angles);
 void respawn(gentity_t *ent);
 void BeginIntermission(void);

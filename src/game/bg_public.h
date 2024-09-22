@@ -2642,6 +2642,20 @@ static const struct Manual commandManuals[] = {
      "Lists latest ^3[count] ^7maps added to server, sorted from oldest to "
      "newest."},
     {"rtv", "!rtv", "Calls Rock The Vote."},
+
+    {"savepos", "/savepos [(optional) name] [(optional) flags]",
+     "Saves your current position to a savepos file.\n\n"
+     "Flags:\n"
+     "1 - don't save velocity\n"
+     "2 - don't save pitch angle\n\n"
+     "If no arguments are given, saves to 'savepos/default.dat'.\n"
+     "If only one argument is given, the argument is treated as a 'flag' if "
+     "it's numeric, otherwise as 'name'."},
+
+    {"loadpos", "/loadpos [(optional) name]",
+     "Loads position from a given savepos file. If 'name' isn't specified, "
+     "loads 'savepos/default.dat'.\n"
+     "Cheats must be enabled to use this command."},
 };
 
 typedef struct {
@@ -2719,6 +2733,13 @@ enum class ViewlockState {
   Jitter = 2,  // screen jitter (firing mounted MG42)
   Mounted = 3, // lock to direction of mounted gun
   Medic = 7,   // look at nearest medic
+};
+
+// TODO: use this in save system/goto/call
+enum class PlayerStance {
+  Stand = 0,
+  Crouch = 1,
+  Prone = 2,
 };
 } // namespace ETJump
 

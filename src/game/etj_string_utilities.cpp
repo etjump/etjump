@@ -379,3 +379,11 @@ void ETJump::StringUtil::removeLeadingChars(std::string &str,
     str.erase(0, pos);
   }
 }
+
+void ETJump::StringUtil::stripExtension(std::string &str) {
+  const size_t pos = str.find_last_of('.');
+
+  if (pos != std::string::npos) {
+    str.erase(pos);
+  }
+}

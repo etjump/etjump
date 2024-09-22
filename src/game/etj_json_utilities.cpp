@@ -28,14 +28,18 @@
 #include "etj_file.h"
 
 namespace ETJump {
+#ifdef GAMEDLL
 Log JsonUtils::logger = Log("JSON-utils");
+#endif
 
 bool JsonUtils::writeFile(const std::string &file, const Json::Value &root) {
   Json::StyledWriter writer;
   const std::string &output = writer.write(root);
 
   if (file.empty()) {
+#ifdef GAMEDLL
     logger.error("Failed to write JSON file: empty filename\n");
+#endif
     return false;
   }
 
@@ -44,7 +48,9 @@ bool JsonUtils::writeFile(const std::string &file, const Json::Value &root) {
   try {
     fOut.write(output);
   } catch (const File::WriteFailedException &e) {
+#ifdef GAMEDLL
     logger.error("Failed to write JSON file: %s\n", e.what());
+#endif
     return false;
   }
 
@@ -63,7 +69,9 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root) {
   std::string errors;
 
   if (!Json::parseFromStream(readerBuilder, fIn, &root, &errors)) {
+#ifdef GAMEDLL
     logger.error("Failed to parse JSON file '%s': %s", file, errors);
+#endif
     return false;
   }
 

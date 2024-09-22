@@ -135,5 +135,7 @@ void sortStrings(T &v, const bool noCase) {
       });
 }
 
+void stripExtension(std::string &str);
+
 } // namespace StringUtil
 } // namespace ETJump

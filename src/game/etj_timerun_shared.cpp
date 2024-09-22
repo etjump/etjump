@@ -44,11 +44,6 @@ int TimerunCommands::parseClientNum(const std::string &arg) {
 opt<int> TimerunCommands::parseTime(const std::string &arg) {
   try {
     const auto time = std::stoi(arg);
-
-    if (time < 0) {
-      return opt<int>();
-    }
-
     return time;
   } catch (const std::runtime_error &) {
     return opt<int>();
