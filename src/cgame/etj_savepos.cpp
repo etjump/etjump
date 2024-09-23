@@ -246,10 +246,10 @@ std::vector<std::string> SavePos::getSaveposNames() {
 }
 
 PlayerStance SavePos::getStance(const playerState_t *ps) {
-  if (ps->pm_flags & PMF_DUCKED) {
-    return PlayerStance::Crouch;
-  } else if (ps->eFlags & (EF_PRONE | EF_PRONE_MOVING)) {
+  if (ps->eFlags & (EF_PRONE | EF_PRONE_MOVING)) {
     return PlayerStance::Prone;
+  } else if (ps->pm_flags & PMF_DUCKED) {
+    return PlayerStance::Crouch;
   } else {
     return PlayerStance::Stand;
   }
