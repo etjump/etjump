@@ -2325,43 +2325,46 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
   gun.renderfx = parent->renderfx;
   ETJump_SetEntityRGBA(&gun, 1.0, 1.0, 1.0, 1.0);
 
-  if (ps) {
-    team_t team = (team_t)ps->persistant[PERS_TEAM];
+  team_t team = ps ? static_cast<team_t>(ps->persistant[PERS_TEAM])
+                   : cgs.clientinfo[cent->currentState.clientNum].team;
+  const modelViewType_t modelViewType = ps ? W_FP_MODEL : W_TP_MODEL;
 
-    if ((weaponNum != WP_SATCHEL) &&
+  if (ps) {
+    if (weaponNum != WP_SATCHEL &&
         (cent->currentState.powerups & (1 << PW_OPS_DISGUISED))) {
       team = team == TEAM_AXIS ? TEAM_ALLIES : TEAM_AXIS;
     }
 
-    gun.hModel = weapon->weaponModel[W_FP_MODEL].model;
-    if ((team == TEAM_AXIS) &&
-        weapon->weaponModel[W_FP_MODEL].skin[TEAM_AXIS]) {
-      gun.customSkin = weapon->weaponModel[W_FP_MODEL].skin[TEAM_AXIS];
-    } else if ((team == TEAM_ALLIES) &&
-               weapon->weaponModel[W_FP_MODEL].skin[TEAM_ALLIES]) {
-      gun.customSkin = weapon->weaponModel[W_FP_MODEL].skin[TEAM_ALLIES];
+    gun.hModel = weapon->weaponModel[modelViewType].model;
+
+    if (team == TEAM_AXIS &&
+        weapon->weaponModel[modelViewType].skin[TEAM_AXIS]) {
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[TEAM_AXIS];
+    } else if (team == TEAM_ALLIES &&
+               weapon->weaponModel[modelViewType].skin[TEAM_ALLIES]) {
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[TEAM_ALLIES];
     } else {
       // if not loaded it's 0 so doesn't do any harm
-      gun.customSkin = weapon->weaponModel[W_FP_MODEL].skin[0];
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[0];
     }
   } else {
-    team_t team = cgs.clientinfo[cent->currentState.clientNum].team;
 
-    if ((weaponNum != WP_SATCHEL) &&
-        cent->currentState.powerups & (1 << PW_OPS_DISGUISED)) {
+    if (weaponNum != WP_SATCHEL &&
+        (cent->currentState.powerups & (1 << PW_OPS_DISGUISED))) {
       team = team == TEAM_AXIS ? TEAM_ALLIES : TEAM_AXIS;
     }
 
-    gun.hModel = weapon->weaponModel[W_TP_MODEL].model;
-    if ((team == TEAM_AXIS) &&
-        weapon->weaponModel[W_TP_MODEL].skin[TEAM_AXIS]) {
-      gun.customSkin = weapon->weaponModel[W_FP_MODEL].skin[TEAM_AXIS];
-    } else if ((team == TEAM_ALLIES) &&
-               weapon->weaponModel[W_TP_MODEL].skin[TEAM_ALLIES]) {
-      gun.customSkin = weapon->weaponModel[W_TP_MODEL].skin[TEAM_ALLIES];
+    gun.hModel = weapon->weaponModel[modelViewType].model;
+
+    if (team == TEAM_AXIS &&
+        weapon->weaponModel[modelViewType].skin[TEAM_AXIS]) {
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[TEAM_AXIS];
+    } else if (team == TEAM_ALLIES &&
+               weapon->weaponModel[modelViewType].skin[TEAM_ALLIES]) {
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[TEAM_ALLIES];
     } else {
       // if not loaded it's 0 so doesn't do any harm
-      gun.customSkin = weapon->weaponModel[W_TP_MODEL].skin[0];
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[0];
     }
 
     ETJump_SetEntityAutoTransparency(&gun);
