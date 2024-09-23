@@ -1212,16 +1212,6 @@ static void storeSavepos() {
   savePos->createSaveposData(filename, flags);
 }
 
-static void listSavepos() {
-  const std::vector<std::string> saveposNames = savePos->getSaveposNames();
-
-  CG_Printf("Available ^3savepos ^7positions:\n");
-
-  for (const auto &name : saveposNames) {
-    CG_Printf("- %s\n", name.c_str());
-  }
-}
-
 static void loadSavepos() {
   const int argc = trap_Argc();
   std::string filename = savePos->getDefaultSaveposName();
@@ -1248,6 +1238,24 @@ static void loadSavepos() {
 
   trap_SendClientCommand(va("%s", SavePos::serialize(data).c_str()));
 }
+
+static void listSavepos() {
+  const std::vector<std::string> saveposNames = savePos->getSaveposNames();
+
+  if (saveposNames.empty()) {
+    CG_Printf("No positions found. Make sure savepos files are located in "
+              "^3'etjump/savepos/' ^7directory.\n");
+    return;
+  }
+
+  CG_Printf("Available ^3savepos ^7positions:\n");
+
+  for (const auto &name : saveposNames) {
+    CG_Printf("- %s\n", name.c_str());
+  }
+}
+
+static void readSavepos() { savePos->parseExistingPositions(true); }
 } // namespace ETJump
 
 typedef struct {
@@ -1384,6 +1392,7 @@ static const consoleCommand_t anyTimeCommands[] = {
     {"listspawnpt", ETJump::listSpawnPoints},
     {"savepos", ETJump::storeSavepos},
     {"listsavepos", ETJump::listSavepos},
+    {"readsavepos", ETJump::readSavepos},
 };
 
 /*

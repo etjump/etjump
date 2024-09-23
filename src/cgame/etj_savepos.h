@@ -45,10 +45,6 @@ class SavePos {
   // adds new savepos to savePositions map, or overwrites an existing one
   void storePosition(SavePosData &data);
 
-  // parses all existing savepos files and adds them to the map
-  // this is called on constructor to store existing positions to memory
-  void parseExistingPositions();
-
   std::shared_ptr<Timerun> timerun = nullptr;
 
   static PlayerStance getStance(const playerState_t *ps);
@@ -56,6 +52,13 @@ class SavePos {
 public:
   explicit SavePos(const std::shared_ptr<Timerun> &p);
   ~SavePos() = default;
+
+  // parses all existing savepos files and adds them to the savePositions map
+  // this is called on constructor to store existing positions to memory,
+  // and can be called manually to reload positions using 'readsavepos' command
+  // if manual is true, prints out number of positions even if no positions
+  // are loaded, to give some output to 'readsavepos' command
+  void parseExistingPositions(bool manual);
 
   // processes the players current state and fills out Position struct
   void createSaveposData(const std::string &file, int flags);

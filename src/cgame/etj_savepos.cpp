@@ -52,18 +52,25 @@ SavePos::SavePos(const std::shared_ptr<Timerun> &p) {
     timerun = p;
   }
 
-  parseExistingPositions();
+  parseExistingPositions(false);
 }
 
-void SavePos::parseExistingPositions() {
+void SavePos::parseExistingPositions(const bool manual) {
   const std::vector<std::string> files =
       FileSystem::getFileList("savepos", ".dat", false);
+
+  savePositions.clear();
 
   for (const auto &file : files) {
     parseSavepos(file);
   }
 
-  if (!savePositions.empty()) {
+  if (savePositions.empty()) {
+    if (manual) {
+      CG_Printf("No positions found. Make sure savepos files are located in "
+                "^3'etjump/savepos/' ^7directory.\n");
+    }
+  } else {
     CG_Printf("Parsed data for ^3%i ^7savepos files.\n", savePositions.size());
   }
 }
