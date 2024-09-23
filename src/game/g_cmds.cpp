@@ -5074,6 +5074,13 @@ void ClientCommand(int clientNum) {
     return;
   }
 
+  // if we execute a `vid_restart`, UI will send these while cgame isn't loaded,
+  // and they end up here as unrecognized console commands
+  if (!Q_stricmp(cmd, "forceMaplistRefresh") ||
+      !Q_stricmp(cmd, "forceCustomvoteRefresh")) {
+    return;
+  }
+
   CP(va("print \"Unknown command %s^7.\n\"", cmd));
 }
 
