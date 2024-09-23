@@ -59,6 +59,9 @@ public:
   Position pos{};
   TimerunInfo timerunInfo{};
 
+  // contains the error message thrown is parsing fails
+  std::string error{};
+
   // returns a serialized string of savepos data to send over network
   static std::string serialize(const SavePosData &data);
 

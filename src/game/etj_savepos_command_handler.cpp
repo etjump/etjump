@@ -34,6 +34,11 @@ void SavePosHandler::execSaveposCommand(gentity_t *ent,
                                         const std::vector<std::string> &args) {
   const SavePosData data = SavePosData::deserialize(args);
 
+  if (!data.error.empty()) {
+    Printer::console(ent, "Failed to deserialize savepos data: " + data.error);
+    return;
+  }
+
   saveposTeleport(ent, data);
 
   if (!data.timerunInfo.runName.empty()) {

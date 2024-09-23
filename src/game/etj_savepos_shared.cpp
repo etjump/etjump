@@ -54,35 +54,42 @@ SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
   static constexpr int expectedMinArgs = 10;
   SavePosData data{};
 
-  for (int i = 0; i < 3; i++) {
-    data.pos.origin[i] = Q_atof(args[0 + i].c_str());
-    data.pos.angles[i] = Q_atof(args[3 + i].c_str());
-    data.pos.velocity[i] = Q_atof(args[6 + i].c_str());
-  }
+  try {
+    for (int i = 0; i < 3; i++) {
+      data.pos.origin[i] = std::stof(args[0 + i]);
+      data.pos.angles[i] = std::stof(args[3 + i]);
+      data.pos.velocity[i] = std::stof(args[6 + i]);
+    }
 
-  data.pos.stance = static_cast<PlayerStance>(Q_atoi(args[9].c_str()));
+    data.pos.stance = static_cast<PlayerStance>(std::stoi(args[9]));
 
-  if (args.size() == expectedMinArgs || args[10].empty()) {
+    if (args.size() == expectedMinArgs || args[10].empty()) {
+      return data;
+    }
+
+    data.timerunInfo.runName = args[10];
+    data.timerunInfo.currentRunTimer = std::stoi(args[11]);
+    data.timerunInfo.previousRecord = std::stoi(args[12]);
+
+    const auto checkpoints = StringUtil::split(args[13], ",");
+    const auto previousRecordCheckpoints = StringUtil::split(args[14], ",");
+
+    // sanity check
+    if (checkpoints.size() != MAX_TIMERUN_CHECKPOINTS ||
+        previousRecordCheckpoints.size() != MAX_TIMERUN_CHECKPOINTS) {
+      return data;
+    }
+
+    for (int i = 0; i < MAX_TIMERUN_CHECKPOINTS; i++) {
+      data.timerunInfo.checkpoints[i] = std::stoi(checkpoints[i]);
+      data.timerunInfo.previousRecordCheckpoints[i] =
+          std::stoi(previousRecordCheckpoints[i]);
+    }
+  } catch (const std::invalid_argument &e) {
+    data.error = stringFormat("invalid argument for %s\n", e.what());
     return data;
-  }
-
-  data.timerunInfo.runName = args[10];
-  data.timerunInfo.currentRunTimer = Q_atoi(args[11].c_str());
-  data.timerunInfo.previousRecord = Q_atoi(args[12].c_str());
-
-  const auto checkpoints = StringUtil::split(args[13], ",");
-  const auto previousRecordCheckpoints = StringUtil::split(args[14], ",");
-
-  // sanity check
-  if (checkpoints.size() != MAX_TIMERUN_CHECKPOINTS ||
-      previousRecordCheckpoints.size() != MAX_TIMERUN_CHECKPOINTS) {
-    return data;
-  }
-
-  for (int i = 0; i < MAX_TIMERUN_CHECKPOINTS; i++) {
-    data.timerunInfo.checkpoints[i] = Q_atoi(checkpoints[i].c_str());
-    data.timerunInfo.previousRecordCheckpoints[i] =
-        Q_atoi(previousRecordCheckpoints[i].c_str());
+  } catch (const std::out_of_range &e) {
+    data.error = stringFormat("argument out of range for %s\n", e.what());
   }
 
   return data;
