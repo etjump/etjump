@@ -2102,44 +2102,45 @@ void Item_RunScript(itemDef_t *item, qboolean *bAbort, const char *s) {
   }
 }
 
-qboolean Item_EnableShowViaCvar(itemDef_t *item, int flag) {
+qboolean Item_EnableShowViaCvar(const itemDef_t *item, int flag) {
+  if (!item || !item->enableCvar || !*item->enableCvar || !item->cvarTest ||
+      !*item->cvarTest) {
+    return qtrue;
+  }
+
   char script[1024];
+  char buff[1024];
   const char *p;
   memset(script, 0, sizeof(script));
-  if (item && item->enableCvar && *item->enableCvar && item->cvarTest &&
-      *item->cvarTest) {
-    char buff[1024];
-    DC->getCVarString(item->cvarTest, buff, sizeof(buff));
 
-    Q_strcat(script, 1024, item->enableCvar);
-    p = script;
-    while (1) {
-      const char *val = NULL;
-      // expect value then ; or NULL, NULL ends list
-      if (!String_Parse(&p, &val)) {
-        return (item->cvarFlags & flag) ? qfalse : qtrue;
+  DC->getCVarString(item->cvarTest, buff, sizeof(buff));
+
+  Q_strcat(script, sizeof(script), item->enableCvar);
+  p = script;
+
+  while (true) {
+    const char *val = nullptr;
+    // expect value then ; or NULL, NULL ends list
+    if (!String_Parse(&p, &val)) {
+      return (item->cvarFlags & flag) ? qfalse : qtrue;
+    }
+
+    if (val[0] == ';' && val[1] == '\0') {
+      continue;
+    }
+
+    // enable it if any of the values are true
+    if (item->cvarFlags & flag) {
+      if (Q_stricmp(buff, val) == 0) {
+        return qtrue;
       }
-
-      if (val[0] == ';' && val[1] == '\0') {
-        continue;
-      }
-
-      // enable it if any of the values are true
-      if (item->cvarFlags & flag) {
-        if (Q_stricmp(buff, val) == 0) {
-          return qtrue;
-        }
-      } else {
-        // disable it if any of the values are
-        // true
-        if (Q_stricmp(buff, val) == 0) {
-          return qfalse;
-        }
+    } else {
+      // disable it if any of the values are true
+      if (Q_stricmp(buff, val) == 0) {
+        return qfalse;
       }
     }
-    return (item->cvarFlags & flag) ? qfalse : qtrue;
   }
-  return qtrue;
 }
 
 // OSP - display if we poll on a server toggle setting
