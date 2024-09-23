@@ -90,6 +90,7 @@ SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
     return data;
   } catch (const std::out_of_range &e) {
     data.error = stringFormat("argument out of range for %s\n", e.what());
+    return data;
   }
 
   return data;
