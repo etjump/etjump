@@ -32,7 +32,7 @@
 namespace ETJump {
 void SavePosHandler::execSaveposCommand(gentity_t *ent,
                                         const std::vector<std::string> &args) {
-  const SavePosData data = deserialize(args);
+  const SavePosData data = SavePosData::deserialize(args);
 
   saveposTeleport(ent, data);
 
@@ -97,44 +97,5 @@ void SavePosHandler::restoreSaveposTimerunState(gentity_t *ent,
     game.timerunV2->checkpoint(data.timerunInfo.runName, clientNum, i,
                                startTime + data.timerunInfo.checkpoints[i]);
   }
-}
-
-SavePosData SavePosHandler::deserialize(const std::vector<std::string> &args) {
-  // minimum valid argument count, position with timerun data contains more
-  static constexpr int expectedMinArgs = 10;
-  SavePosData data{};
-
-  for (int i = 0; i < 3; i++) {
-    data.pos.origin[i] = Q_atof(args[0 + i].c_str());
-    data.pos.angles[i] = Q_atof(args[3 + i].c_str());
-    data.pos.velocity[i] = Q_atof(args[6 + i].c_str());
-  }
-
-  data.pos.stance = static_cast<PlayerStance>(Q_atoi(args[9].c_str()));
-
-  if (args.size() == expectedMinArgs || args[10].empty()) {
-    return data;
-  }
-
-  data.timerunInfo.runName = args[10];
-  data.timerunInfo.currentRunTimer = Q_atoi(args[11].c_str());
-  data.timerunInfo.previousRecord = Q_atoi(args[12].c_str());
-
-  const auto checkpoints = StringUtil::split(args[13], ",");
-  const auto previousRecordCheckpoints = StringUtil::split(args[14], ",");
-
-  // sanity check
-  if (checkpoints.size() != MAX_TIMERUN_CHECKPOINTS ||
-      previousRecordCheckpoints.size() != MAX_TIMERUN_CHECKPOINTS) {
-    return data;
-  }
-
-  for (int i = 0; i < MAX_TIMERUN_CHECKPOINTS; i++) {
-    data.timerunInfo.checkpoints[i] = Q_atoi(checkpoints[i].c_str());
-    data.timerunInfo.previousRecordCheckpoints[i] =
-        Q_atoi(previousRecordCheckpoints[i].c_str());
-  }
-
-  return data;
 }
 } // namespace ETJump

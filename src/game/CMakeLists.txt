@@ -79,6 +79,7 @@ add_library(qagame MODULE
 	"etj_rtv.cpp"
 	"etj_save_system.cpp"
 	"etj_savepos_command_handler.cpp"
+	"etj_savepos_shared.cpp"
 	"etj_session.cpp"
 	"etj_synchronization_context.cpp"
 	"etj_string_utilities.cpp"

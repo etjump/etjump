@@ -77,8 +77,5 @@ public:
 
   // check if a given savepos exists (used with loadpos)
   bool saveposExists(const std::string &name);
-
-  // returns a serialized string of savepos data to send over network
-  static std::string serialize(const SavePosData &data);
 };
 } // namespace ETJump

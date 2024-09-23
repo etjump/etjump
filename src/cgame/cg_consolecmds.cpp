@@ -1236,7 +1236,7 @@ static void loadSavepos() {
     return;
   }
 
-  trap_SendClientCommand(va("%s", SavePos::serialize(data).c_str()));
+  trap_SendClientCommand(va("%s", SavePosData::serialize(data).c_str()));
 }
 
 static void listSavepos() {

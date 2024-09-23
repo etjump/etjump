@@ -110,6 +110,7 @@ add_library(cgame MODULE
 	"../game/etj_file.cpp"
 	"../game/etj_filesystem.cpp"
 	"../game/etj_json_utilities.cpp"
+	"../game/etj_savepos_shared.cpp"
 	"../game/etj_string_utilities.cpp"
 	"../game/etj_time_utilities.cpp"
 	"../game/etj_timerun_shared.cpp"

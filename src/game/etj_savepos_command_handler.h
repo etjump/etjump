@@ -28,19 +28,6 @@
 
 namespace ETJump {
 class SavePosHandler {
-  /*
-   * [0-2] - origin
-   * [3-5] - angles
-   * [6-8] - velocity
-   * [9]   - stance
-   * [10]  - runName
-   * [11]  - currentRunTimer
-   * [12]  - previousRecord
-   * [13]  - checkpoints
-   * [14]  - previousRecordCheckpoints
-   */
-  static SavePosData deserialize(const std::vector<std::string> &args);
-
 public:
   static void execSaveposCommand(gentity_t *ent,
                                  const std::vector<std::string> &args);

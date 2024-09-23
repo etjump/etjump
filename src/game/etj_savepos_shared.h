@@ -24,7 +24,10 @@
 
 #pragma once
 
-#include "../game/etj_timerun_shared.h"
+#include <array>
+
+#include "q_shared.h"
+#include "bg_public.h"
 
 namespace ETJump {
 class SavePosData {
@@ -55,5 +58,21 @@ public:
 
   Position pos{};
   TimerunInfo timerunInfo{};
+
+  // returns a serialized string of savepos data to send over network
+  static std::string serialize(const SavePosData &data);
+
+  /*
+   * [0-2] - origin
+   * [3-5] - angles
+   * [6-8] - velocity
+   * [9]   - stance
+   * [10]  - runName
+   * [11]  - currentRunTimer
+   * [12]  - previousRecord
+   * [13]  - checkpoints
+   * [14]  - previousRecordCheckpoints
+   */
+  static SavePosData deserialize(const std::vector<std::string> &args);
 };
 } // namespace ETJump

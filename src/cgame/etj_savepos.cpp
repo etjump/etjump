@@ -254,27 +254,4 @@ PlayerStance SavePos::getStance(const playerState_t *ps) {
     return PlayerStance::Stand;
   }
 }
-
-std::string SavePos::serialize(const SavePosData &data) {
-  const std::string &origin = StringUtil::join(data.pos.origin, " ");
-  const std::string &angles = StringUtil::join(data.pos.angles, " ");
-  const std::string &velocity = StringUtil::join(data.pos.velocity, " ");
-
-  // omit timerun data if this position wasn't saved during a timerun
-  if (data.timerunInfo.runName.empty()) {
-    return stringFormat("loadpos %s %s %s %i", origin, angles, velocity,
-                        static_cast<int>(data.pos.stance));
-  }
-
-  const std::string &checkpoints =
-      StringUtil::join(data.timerunInfo.checkpoints, ",");
-  const std::string &previousRecordCheckpoints =
-      StringUtil::join(data.timerunInfo.previousRecordCheckpoints, ",");
-
-  return stringFormat(
-      "loadpos %s %s %s %i \"%s\" %i %i %s %s", origin, angles, velocity,
-      static_cast<int>(data.pos.stance), data.timerunInfo.runName,
-      data.timerunInfo.currentRunTimer, data.timerunInfo.previousRecord,
-      checkpoints, previousRecordCheckpoints);
-}
 } // namespace ETJump
