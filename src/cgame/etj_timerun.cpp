@@ -127,7 +127,7 @@ void Timerun::parseServerCommand(const std::vector<std::string> &args) {
     return;
   }
 
-  if (args[1] == "start") {
+  if (args[1] == "start" || args[1] == "saveposstart") {
     auto startOpt = TimerunCommands::Start::deserialize(args);
     if (!startOpt.hasValue()) {
       return;

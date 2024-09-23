@@ -370,7 +370,7 @@ void ETJump::TimerunV2::startSaveposTimer(int clientNum,
   }
 
   Printer::commandAll(
-      TimerunCommands::Start(
+      TimerunCommands::SavePosStart(
           player->clientNum, player->startTime.value(), player->activeRunName,
           data.timerunInfo.previousRecord, player->runHasCheckpoints,
           data.timerunInfo.previousRecordCheckpoints,

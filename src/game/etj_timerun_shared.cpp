@@ -44,9 +44,14 @@ int TimerunCommands::parseClientNum(const std::string &arg) {
 opt<int> TimerunCommands::parseTime(const std::string &arg) {
   try {
     const auto time = std::stoi(arg);
+
+    if (time < 0) {
+      return {};
+    }
+
     return time;
   } catch (const std::runtime_error &) {
-    return opt<int>();
+    return {};
   }
 }
 
@@ -54,11 +59,9 @@ opt<int> TimerunCommands::parseInteger(const std::string &arg) {
   try {
     return std::stoi(arg);
   } catch (const std::runtime_error &) {
-    return opt<int>();
+    return {};
   }
 }
-
-TimerunCommands::Start::Start() = default;
 
 TimerunCommands::Start::Start(
     int clientNum, int startTime, const std::string &runName,
@@ -82,27 +85,36 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
   const int numExpectedFields = 9;
 
   if (args.size() < numExpectedFields) {
-    return opt<Start>();
+    return {};
   }
 
   if (args[0] != "timerun") {
-    return opt<Start>();
+    return {};
   }
 
-  if (args[1] != "start") {
-    return opt<Start>();
+  if (args[1] != "start" && args[1] != "saveposstart") {
+    return {};
   }
 
   Start start;
 
   start.clientNum = parseClientNum(args[2]);
   if (start.clientNum == INVALID_CLIENT_NUM) {
-    return opt<Start>();
+    return {};
   }
 
-  auto startTime = parseTime(args[3]);
+  opt<int> startTime;
+
+  // savepos parses startTime as an int instead of time,
+  // because it needs to support negative startTime
+  if (args[1] == "saveposstart") {
+    startTime = parseInteger(args[3]);
+  } else {
+    startTime = parseTime((args[3]));
+  }
+
   if (!startTime.hasValue()) {
-    return opt<Start>();
+    return {};
   }
 
   start.startTime = startTime.value();
@@ -138,6 +150,23 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
   }
 
   return start;
+}
+
+TimerunCommands::SavePosStart::SavePosStart(
+    int clientNum, int startTime, std::string runName,
+    const opt<int> &previousRecord, bool runHasCheckpoints,
+    std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
+    std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints)
+    : clientNum(clientNum), startTime(startTime), runName(std::move(runName)),
+      previousRecord(previousRecord), runHasCheckpoints(runHasCheckpoints),
+      checkpoints(checkpoints), currentRunCheckpoints(currentRunCheckpoints) {}
+
+std::string TimerunCommands::SavePosStart::serialize() {
+  return stringFormat("timerun saveposstart %d %d \"%s\" %d %d \"%s\" \"%s\"",
+                      clientNum, startTime, runName,
+                      previousRecord.hasValue() ? previousRecord.value() : -1,
+                      runHasCheckpoints, StringUtil::join(checkpoints, ","),
+                      StringUtil::join(currentRunCheckpoints, ","));
 }
 
 std::string TimerunCommands::Checkpoint::serialize() {
