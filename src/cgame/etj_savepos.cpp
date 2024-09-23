@@ -168,7 +168,6 @@ void SavePos::writeSaveposFile(SavePosData &data) {
   const std::string filename = "savepos/" + data.name + ".dat";
 
   if (!JsonUtils::writeFile(filename, root)) {
-    CG_Printf("Unable to write savepos file ^3'%s'\n", filename.c_str());
     return;
   }
 
@@ -183,7 +182,6 @@ void SavePos::parseSavepos(const std::string &file) {
       "savepos/" + (file.empty() ? defaultName + ".dat" : file);
 
   if (!JsonUtils::readFile(filename, root)) {
-    CG_Printf("Couldn't parse savepos file ^3'%s'\n", filename.c_str());
     return;
   }
 

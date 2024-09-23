@@ -30,6 +30,10 @@
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 
+#ifdef CGAMEDLL
+  #include "../cgame/cg_local.h"
+#endif
+
 namespace ETJump {
 /**
  * Thread safe implementation of a logger
@@ -41,15 +45,26 @@ public:
 
   template <typename... Targs>
   void info(const std::string &format, const Targs &...fargs) const {
+#ifdef CGAMEDLL
+    const std::string &msg = stringFormat(format, fargs...);
+    CG_Printf("%s [^2%s^7]: %s", _name.c_str(), "info", msg.c_str());
+#else
     println("info", stringFormat(format, fargs...));
+#endif
   }
 
   template <typename... Targs>
   void error(const std::string &format, const Targs &...fargs) const {
+#ifdef CGAMEDLL
+    const std::string &msg = stringFormat(format, fargs...);
+    CG_Printf("%s [^1%s^7]: %s", _name.c_str(), "error", msg.c_str());
+#else
     println("error", stringFormat(format, fargs...));
+#endif
   }
 
   static void processMessages();
+
 private:
   std::string _name;
 
@@ -57,4 +72,4 @@ private:
   static std::mutex _messagesLock;
   static std::vector<std::string> _messages;
 };
-}
+} // namespace ETJump
