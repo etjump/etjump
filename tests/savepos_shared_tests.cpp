@@ -9,7 +9,7 @@ public:
 
   static std::array<int, MAX_TIMERUN_CHECKPOINTS> createNullCheckpoints() {
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
-    checkpoints.fill(-1);
+    checkpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
     return checkpoints;
   }
 
@@ -175,7 +175,7 @@ TEST_F(SavePosSharedTests, deserialize_ShouldDeserializeWithoutTimerunData) {
 }
 
 TEST_F(SavePosSharedTests,
-       deserialize_ReturnsNullCheckpointsIfTooFewCheckpointArgs) {
+       deserialize_ReturnsNullCheckpointsIfIncorrectCheckpointCount) {
   auto args = createSampleArgs();
   args[13] = "1,2,3,4,5";
   SavePosData data = SavePosData::deserialize(args);
@@ -183,7 +183,7 @@ TEST_F(SavePosSharedTests,
   ASSERT_EQ(data.timerunInfo.checkpoints, createNullCheckpoints());
 
   args = createSampleArgs();
-  args[14] = "1,2,3,4,5";
+  args[14] = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18";
   data = SavePosData::deserialize(args);
 
   ASSERT_EQ(data.timerunInfo.previousRecordCheckpoints,
