@@ -571,7 +571,10 @@ qboolean ReviveEntity(gentity_t *ent, gentity_t *traceEnt) {
 void Weapon_Syringe(gentity_t *ent) {
   vec3_t end;
   trace_t tr;
-  gentity_t *traceEnt;
+
+  if (!ent || !ent->client) {
+    return;
+  }
 
   AngleVectors(ent->client->ps.viewangles, forward, right, up);
   CalcMuzzlePointForActivate(ent, forward, right, up, muzzleTrace);
@@ -585,35 +588,36 @@ void Weapon_Syringe(gentity_t *ent) {
                MASK_SHOT);
   }
 
-  if (tr.fraction < 1.0) {
-    traceEnt = &g_entities[tr.entityNum];
-    if (traceEnt->client != nullptr) {
+  if (tr.fraction == 1.0f) {
+    return;
+  }
 
-      if ((traceEnt->client->ps.pm_type == PM_DEAD) &&
-          (traceEnt->client->sess.sessionTeam ==
-           ent->client->sess.sessionTeam)) {
-        // Mad Doc - TDF moved all the revive stuff into its own function
-        ReviveEntity(ent, traceEnt);
+  gentity_t *traceEnt = &g_entities[tr.entityNum];
 
-        // OSP - syringe "hit"
-        if (g_gamestate.integer == GS_PLAYING) {
-          ent->client->sess.aWeaponStats[WS_SYRINGE].hits++;
-        }
-        if (ent->client) {
-          G_LogPrintf("Medic_Revive: %d %d\n", ClientNum(ent),
-                      ClientNum(traceEnt)); // OSP
-        }
-        // Gordon: flag for if they were teamkilled or not
-        if (!traceEnt->isProp) {
-          // JPW NERVE
-          // props to the medic for the swift and dexterous bit o healitude
-          AddScore(ent, WOLF_MEDIC_BONUS);
+  if (!traceEnt->client || traceEnt->client->ps.pm_type != PM_DEAD ||
+      traceEnt->client->sess.sessionTeam != ent->client->sess.sessionTeam) {
+    return;
+  }
 
-          G_AddSkillPoints(ent, SK_FIRST_AID, 4.f);
-          G_DebugAddSkillPoints(ent, SK_FIRST_AID, 4.f, "reviving a player");
-        }
-      }
-    }
+  // Mad Doc - TDF moved all the revive stuff into its own function
+  ReviveEntity(ent, traceEnt);
+
+  // OSP - syringe "hit"
+  if (g_gamestate.integer == GS_PLAYING) {
+    ent->client->sess.aWeaponStats[WS_SYRINGE].hits++;
+  }
+
+  G_LogPrintf("Medic_Revive: %d %d\n", ClientNum(ent),
+              ClientNum(traceEnt)); // OSP
+
+  // Gordon: flag for if they were teamkilled or not
+  if (!traceEnt->isProp) {
+    // JPW NERVE
+    // props to the medic for the swift and dexterous bit o healitude
+    AddScore(ent, WOLF_MEDIC_BONUS);
+
+    G_AddSkillPoints(ent, SK_FIRST_AID, 4.f);
+    G_DebugAddSkillPoints(ent, SK_FIRST_AID, 4.f, "reviving a player");
   }
 }
 // jpw
