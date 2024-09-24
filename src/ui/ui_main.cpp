@@ -1346,7 +1346,7 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
   uiInfo.customVotes.clear();
 
   // if we're already in-game, force a re-request for map list and customvotes
-  // this only ever executes if we do 'ui_restart' while in-game
+  // this only ever executes if we do 'ui/vid_restart' while in-game
   if (cstate.connState == CA_ACTIVE) {
     trap_Cmd_ExecuteText(EXEC_APPEND, "forceMaplistRefresh\n");
     trap_Cmd_ExecuteText(EXEC_APPEND, "forceCustomvoteRefresh\n");
@@ -7329,7 +7329,7 @@ void parseCustomvote() {
     }
 
     cvtext.pop_back();
-    mapType->callvoteText = cvtext;
+    mapType->callvoteText = std::move(cvtext);
   } else if (field == CUSTOMVOTE_SERVERMAPS) {
     for (int i = 3; i < numArgs; i++) {
       trap_Argv(i, arg, sizeof(arg));

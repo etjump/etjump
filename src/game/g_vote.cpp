@@ -296,8 +296,8 @@ static bool matchMap(const char *voteArg, std::string &resultedMap,
 
   if (matchedMaps.size() > 1 && resultedMap.empty()) {
     resultedMap =
-        stringFormat("^3callvote: ^7found ^3%zu ^7maps matching ^3%s^7.\n",
-                     matchedMaps.size(), voteArg);
+        stringFormat("^3callvote: ^7found ^3%i ^7maps matching ^3%s^7.\n",
+                     static_cast<int>(matchedMaps.size()), voteArg);
     auto perRow = 3;
     auto mapsOnCurrentRow = 0;
     for (auto &map : matchedMaps) {

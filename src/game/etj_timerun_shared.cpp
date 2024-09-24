@@ -36,7 +36,7 @@ int TimerunCommands::parseClientNum(const std::string &arg) {
     }
 
     return clientNum;
-  } catch (const std::runtime_error &) {
+  } catch (const std::logic_error &) {
     return INVALID_CLIENT_NUM;
   }
 }
@@ -50,7 +50,7 @@ opt<int> TimerunCommands::parseTime(const std::string &arg) {
     }
 
     return time;
-  } catch (const std::runtime_error &) {
+  } catch (const std::logic_error &) {
     return {};
   }
 }
@@ -58,7 +58,7 @@ opt<int> TimerunCommands::parseTime(const std::string &arg) {
 opt<int> TimerunCommands::parseInteger(const std::string &arg) {
   try {
     return std::stoi(arg);
-  } catch (const std::runtime_error &) {
+  } catch (const std::logic_error &) {
     return {};
   }
 }

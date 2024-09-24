@@ -46,7 +46,7 @@ class ChatReplay {
 
   static std::string parseChatMessage(const ChatMessage &msg);
   void readChatsFromFile();
-  void writeChatsToFile();
+  void writeChatsToFile() const;
 
 public:
   ChatReplay();
@@ -56,6 +56,6 @@ public:
                         const std::string &message, bool localize,
                         bool encoded);
 
-  void sendChatMessages(gentity_t *ent);
+  void sendChatMessages(gentity_t *ent) const;
 };
 } // namespace ETJump
