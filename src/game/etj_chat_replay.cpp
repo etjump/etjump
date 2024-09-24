@@ -36,8 +36,6 @@ ChatReplay::ChatReplay() {
   readChatsFromFile();
 }
 
-ChatReplay::~ChatReplay() { writeChatsToFile(); }
-
 void ChatReplay::storeChatMessage(int clientNum, const std::string &name,
                                   const std::string &message, bool localize,
                                   bool encoded) {
