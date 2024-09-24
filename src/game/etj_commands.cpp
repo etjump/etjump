@@ -378,8 +378,9 @@ static bool sendMaplist(gentity_t *ent, Arguments argv) {
 }
 
 static bool sendNumCustomvotes(gentity_t *ent, Arguments argv) {
-  const size_t numlists = game.customMapVotes->getNumVotelists();
-  trap_SendServerCommand(ClientNum(ent), va("numcustomvotes %zu\n", numlists));
+  const auto numlists =
+      static_cast<int>(game.customMapVotes->getNumVotelists());
+  trap_SendServerCommand(ClientNum(ent), va("numcustomvotes %i\n", numlists));
   return true;
 }
 
