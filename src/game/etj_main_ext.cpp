@@ -147,7 +147,7 @@ void OnGameInit() {
   game.motd = std::make_shared<Motd>();
   game.tokens = std::make_shared<ETJump::Tokens>();
   game.rtv = std::make_shared<ETJump::RockTheVote>();
-  game.chatReplay = std::make_shared<ETJump::ChatReplay>();
+  game.chatReplay = std::make_unique<ETJump::ChatReplay>();
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {

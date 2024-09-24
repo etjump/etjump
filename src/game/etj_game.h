@@ -41,7 +41,7 @@ class Timerun;
 class MapStatistics;
 
 struct Game {
-  Game() {}
+  Game() = default;
 
   std::shared_ptr<Levels> levels;
   std::shared_ptr<Commands> commands;
@@ -51,5 +51,5 @@ struct Game {
   std::shared_ptr<ETJump::Tokens> tokens;
   std::shared_ptr<ETJump::TimerunV2> timerunV2;
   std::shared_ptr<ETJump::RockTheVote> rtv;
-  std::shared_ptr<ETJump::ChatReplay> chatReplay;
+  std::unique_ptr<ETJump::ChatReplay> chatReplay;
 };

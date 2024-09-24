@@ -56,7 +56,7 @@ void ChatReplay::storeChatMessage(int clientNum, const std::string &name,
   }
 }
 
-void ChatReplay::sendChatMessages(gentity_t *ent) {
+void ChatReplay::sendChatMessages(gentity_t *ent) const {
   if (!ent || !ent->client) {
     return;
   }
@@ -112,11 +112,12 @@ void ChatReplay::readChatsFromFile() {
   }
 }
 
-void ChatReplay::writeChatsToFile() {
+void ChatReplay::writeChatsToFile() const {
   Json::Value root;
-  Json::Value chat;
 
   for (const auto &msg : chatReplayBuffer) {
+    Json::Value chat;
+
     chat["clientNum"] = msg.clientNum;
     chat["name"] = msg.name;
     chat["message"] = msg.message;
