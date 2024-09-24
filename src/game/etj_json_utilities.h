@@ -25,18 +25,18 @@
 #pragma once
 
 #include "json/json.h"
-#include "etj_log.h"
+#include "etj_string_utilities.h"
 
 namespace ETJump {
 class JsonUtils {
-  static Log logger;
-
 public:
   // returns true on successful read
-  static bool readFile(const std::string &file, Json::Value &root);
+  static bool readFile(const std::string &file, Json::Value &root,
+                       std::string *errors = nullptr);
 
   // returns true on successful write
-  static bool writeFile(const std::string &file, const Json::Value &root);
+  static bool writeFile(const std::string &file, const Json::Value &root,
+                        std::string *errors = nullptr);
 
   // tries to parse a JSON value
   // returns true if parse was successful, otherwise false
