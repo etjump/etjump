@@ -69,7 +69,7 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
 void OnClientBegin(gentity_t *ent) {
   G_DPrintf("OnClientBegin called by %d\n", ClientNum(ent));
   if (!ent->client->sess.motdPrinted) {
-    game.motd->PrintMotd(ent);
+    game.motd->printMotd(ent);
     ent->client->sess.motdPrinted = qtrue;
   }
   ETJump::Log::processMessages();
@@ -144,7 +144,8 @@ void OnGameInit() {
   game.mapStatistics = std::make_shared<MapStatistics>();
   game.customMapVotes =
       std::make_shared<CustomMapVotes>(game.mapStatistics.get());
-  game.motd = std::make_shared<Motd>();
+  game.motd =
+      std::make_unique<ETJump::Motd>(std::make_unique<ETJump::Log>("MOTD"));
   game.tokens = std::make_shared<ETJump::Tokens>();
   game.rtv = std::make_shared<ETJump::RockTheVote>();
 
@@ -188,7 +189,7 @@ void OnGameInit() {
   game.mapStatistics->initialize(std::string(g_mapDatabase.string),
                                  level.rawmapname);
   game.customMapVotes->Load();
-  game.motd->Initialize();
+  game.motd->initialize();
   game.timerunV2->initialize();
 
   if (g_tokensMode.integer) {
@@ -294,7 +295,7 @@ qboolean OnConsoleCommand() {
   auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
 
   if (command == "generatemotd") {
-    game.motd->GenerateMotdFile();
+    game.motd->generateMotdFile();
     return qtrue;
   }
 

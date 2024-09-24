@@ -35,22 +35,27 @@
  * }
  */
 
+#pragma once
+
 #include <string>
-#include <ostream>
+#include "g_local.h"
+#include "etj_log.h"
 
-struct gentity_s;
-typedef struct gentity_s gentity_t;
-
+namespace ETJump {
 class Motd {
-public:
-  Motd();
-  ~Motd() = default;
-  void Initialize();
-  void GenerateMotdFile();
-  void PrintMotd(gentity_t *ent);
+  bool initialized;
+  std::string chatMotd;
+  std::string consoleMotd;
 
-private:
-  bool initialized_;
-  std::string chatMessage_;
-  std::string motd_;
+  std::unique_ptr<Log> logger;
+  std::string errors;
+
+public:
+  explicit Motd(std::unique_ptr<Log> log);
+  ~Motd() = default;
+
+  void initialize();
+  void generateMotdFile();
+  void printMotd(gentity_t *ent) const;
 };
+} // namespace ETJump

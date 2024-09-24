@@ -29,91 +29,88 @@
 #include "etj_filesystem.h"
 #include "etj_printer.h"
 #include <fstream>
+#include "etj_json_utilities.h"
 
-Motd::Motd() : initialized_(false) {}
+namespace ETJump {
+Motd::Motd(std::unique_ptr<Log> log)
+    : initialized(false), logger(std::move(log)) {}
 
-void Motd::Initialize() {
+void Motd::initialize() {
   if (strlen(g_motdFile.string) == 0) {
     return;
   }
 
-  std::ifstream f(ETJump::FileSystem::Path::getPath(g_motdFile.string));
-
-  if (!f) {
-    G_LogPrintf("MOTD: g_motdFile '%s' was defined but could not be found. To "
-                "generate a sample file, use '/generateMotd'.\n",
-                g_motdFile.string);
+  if (!FileSystem::exists(g_motdFile.string)) {
+    logger->info("MOTD file '%s' was defined but could not be found. To "
+                 "generate a sample file, use '/generateMotd'.",
+                 g_motdFile.string);
     return;
   }
-
-  std::string content((std::istreambuf_iterator<char>(f)),
-                      std::istreambuf_iterator<char>());
 
   Json::Value root;
-  Json::Reader reader;
 
-  if (!reader.parse(content, root)) {
-    G_LogPrintf("MOTD: failed to parse motd file: %s\n",
-                reader.getFormattedErrorMessages().c_str());
+  if (!JsonUtils::readFile(g_motdFile.string, root, &errors)) {
+    logger->error(errors);
     return;
   }
 
-  try {
-    chatMessage_ = root["chat_message"].asString();
-    motd_ = root["console_message"].asString();
-  } catch (...) {
-    G_LogPrintf("MOTD: missing information from motd file. Are you sure both "
-                "'chat_message' and 'console_message' are defined?\n");
+  if (!JsonUtils::parseValue(chatMotd, root["chat_message"], &errors,
+                             "chat_message")) {
+    logger->error(errors);
   }
 
-  G_LogPrintf("MOTD: initialized.\n");
+  if (!JsonUtils::parseValue(consoleMotd, root["console_message"], &errors,
+                             "console_message")) {
+    logger->error(errors);
+  }
 
-  initialized_ = true;
-}
-
-void Motd::PrintMotd(gentity_t *ent) {
-  if (initialized_) {
-    Printer::chat(ent, chatMessage_);
-    Printer::console(ent, motd_);
+  if (errors.empty()) {
+    logger->info("Successfully initialized MOTD system.");
+    initialized = true;
+  } else {
+    logger->error("Missing information from MOTD file '%s'. Make sure both "
+                  "'chat_message' and 'console_message' fields are defined.",
+                  g_motdFile.string);
   }
 }
 
-void Motd::GenerateMotdFile() {
-  Arguments argv = GetArgs();
-  std::ifstream in(ETJump::FileSystem::Path::getPath(g_motdFile.string));
+void Motd::printMotd(gentity_t *ent) const {
+  if (!initialized) {
+    return;
+  }
 
-  if (in.good()) {
-    if (argv->size() == 1) {
-      G_Printf("A motd file '%s' already exists. Use 'generateMotd -f' to "
+  Printer::chat(ent, chatMotd);
+  Printer::console(ent, consoleMotd + "\n");
+}
+
+void Motd::generateMotdFile() {
+  const Arguments argv = GetArgs();
+
+  const bool overwrite = argv->size() > 1 && argv->at(1) == "-f";
+
+  if (argv->size() == 1 || !overwrite) {
+    if (FileSystem::exists(g_motdFile.string)) {
+      G_Printf("A MOTD file '%s' already exists. Use '/generateMotd -f' to "
                "overwrite the existing file.\n",
                g_motdFile.string);
       return;
     }
-    if (argv->size() == 2 && argv->at(1) == "-f") {
-      G_LogPrintf("Overwriting motd file '%s' with a default one.\n",
-                  g_motdFile.string);
-    } else {
-      G_Printf("Unknown argument '%s'.\n", argv->at(1).c_str());
-      return;
-    }
+  }
+
+  if (overwrite) {
+    G_Printf("Overwriting MOTD file '%s' with a default one.\n",
+             g_motdFile.string);
   }
 
   Json::Value root;
   root["chat_message"] = "This is the chat message.";
   root["console_message"] = "This is the console message.";
-  Json::StyledWriter writer;
-  std::string output = writer.write(root);
-  std::ofstream fOut(ETJump::FileSystem::Path::getPath(g_motdFile.string));
 
-  if (!fOut) {
-    G_Printf("Couldn't open file '%s' defined in 'g_motdFile'.\n",
-             g_motdFile.string);
-    return;
+  if (JsonUtils::writeFile(g_motdFile.string, root, &errors)) {
+    G_Printf("Generated new motd file '%s'\n", g_motdFile.string);
+    initialize();
+  } else {
+    G_Printf("%s", errors.c_str());
   }
-
-  fOut << output;
-  fOut.close();
-
-  G_Printf("Generated new motd file '%s'\n", g_motdFile.string);
-  Initialize();
 }
+} // namespace ETJump
