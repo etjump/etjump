@@ -7329,7 +7329,7 @@ void parseCustomvote() {
     }
 
     cvtext.pop_back();
-    mapType->callvoteText = cvtext;
+    mapType->callvoteText = std::move(cvtext);
   } else if (field == CUSTOMVOTE_SERVERMAPS) {
     for (int i = 3; i < numArgs; i++) {
       trap_Argv(i, arg, sizeof(arg));
