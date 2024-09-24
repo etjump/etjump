@@ -24,13 +24,6 @@
 
 #pragma once
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
-
 #include <string>
 #include <sstream>
 #include <vector>
@@ -48,7 +41,16 @@ std::string getValue(const std::string &value,
 
 template <typename... Targs>
 std::string stringFormat(const std::string &format, const Targs &...Fargs) {
-  return fmt::sprintf(format, Fargs...);
+  try {
+    return fmt::sprintf(format, Fargs...);
+  } catch (const fmt::v10::format_error &e) {
+#ifdef _DEBUG
+    return "^3" + std::string(__func__) + ": ^7" + e.what() + "\n";
+#else
+    return "^3" + std::string(__func__) + ": ^7" + e.what() +
+           ", please report this error to the developers.\n";
+#endif
+  }
 }
 
 std::string trimStart(const std::string &input);
