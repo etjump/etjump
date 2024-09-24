@@ -28,15 +28,15 @@
 
 namespace ETJump {
 class SavePosHandler {
-public:
-  static void execSaveposCommand(gentity_t *ent,
-                                 const std::vector<std::string> &args);
-
   // teleports the player to the savepos
   static void saveposTeleport(gentity_t *ent, const SavePosData &data);
 
   // restores players timerun state from savepos
   static void restoreSaveposTimerunState(gentity_t *ent,
                                          const SavePosData &data);
+
+public:
+  static void execSaveposCommand(gentity_t *ent,
+                                 const std::vector<std::string> &args);
 };
 } // namespace ETJump
