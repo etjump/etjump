@@ -210,14 +210,21 @@ void OnGameShutdown() {
   if (ETJump::database != nullptr) {
     ETJump::database->CloseDatabase();
   }
+
   if (game.mapStatistics != nullptr) {
     game.mapStatistics->saveChanges();
   }
+
   if (game.tokens != nullptr) {
-    game.tokens->reset();
+    ETJump::Tokens::reset();
   }
+
   if (game.timerunV2) {
     game.timerunV2->shutdown();
+  }
+
+  if (game.chatReplay) {
+    game.chatReplay->writeChatsToFile();
   }
 
   game.levels = nullptr;
@@ -229,6 +236,7 @@ void OnGameShutdown() {
   game.timerunV2 = nullptr;
   game.rtv = nullptr;
   game.chatReplay = nullptr;
+
   ETJump::Log::processMessages();
 }
 
