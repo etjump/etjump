@@ -1925,8 +1925,11 @@ bool moveToken(gentity_t *ent) {
   }
   std::array<float, 3> coordinates{};
   VectorCopy(ent->r.currentOrigin, coordinates);
+  // move closer to ground, but not quite to ground level
+  // to avoid clipping into slopes a bit
+  coordinates[2] += ent->client->ps.mins[2] + 2;
 
-  auto result = game.tokens->moveNearestToken(coordinates);
+  const auto result = game.tokens->moveNearestToken(coordinates);
   if (!result.first) {
     Printer::chat(ent, "^3error: ^7" + result.second);
     return false;
@@ -1950,7 +1953,7 @@ bool deleteToken(gentity_t *ent, Arguments argv) {
   if (argv->size() == 2) {
     std::array<float, 3> coordinates{};
     VectorCopy(ent->r.currentOrigin, coordinates);
-    auto result = game.tokens->deleteNearestToken(coordinates);
+    const auto result = game.tokens->deleteNearestToken(coordinates);
     if (!result.first) {
       Printer::chat(ent, "^3error: ^7" + result.second);
       return false;

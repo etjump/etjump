@@ -146,7 +146,7 @@ void OnGameInit() {
       std::make_shared<CustomMapVotes>(game.mapStatistics.get());
   game.motd =
       std::make_unique<ETJump::Motd>(std::make_unique<ETJump::Log>("MOTD"));
-  game.tokens = std::make_shared<ETJump::Tokens>();
+  game.tokens = std::make_unique<ETJump::Tokens>();
   game.rtv = std::make_shared<ETJump::RockTheVote>();
 
   game.chatReplay = std::make_unique<ETJump::ChatReplay>(

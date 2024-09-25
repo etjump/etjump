@@ -28,6 +28,7 @@
 #include <array>
 #include "json/json-forwards.h"
 #include <memory>
+#include "etj_log.h"
 
 typedef struct TokenInformation_s TokenInformation;
 
@@ -47,6 +48,7 @@ public:
     std::string name;
     bool isActive;
     gentity_t *entity;
+    std::string errors;
 
     // Because we cannot capture values for the entity think lambda,
     // we must pass the data as a gentity pointer in gentity.
@@ -55,14 +57,14 @@ public:
     // Only tokens have the data.
     std::unique_ptr<TokenInformation> data;
     Json::Value toJson() const;
-    void fromJson(const Json::Value &json);
+    bool fromJson(const Json::Value &json);
   };
 
   std::pair<bool, std::string> createToken(Difficulty difficulty,
                                            std::array<float, 3> coordinates);
   struct NearestToken {
     int number;
-    Tokens::Token *token;
+    Token *token;
     float distance;
     Difficulty difficulty;
   };
@@ -74,11 +76,11 @@ public:
   deleteNearestToken(std::array<float, 3> coordinates);
   std::pair<bool, std::string> deleteToken(Difficulty difficulty, int index);
 
-  bool loadTokens(const std::string &filepath);
-  static bool saveTokens(const std::string &filepath);
-  static void createEntity(Token &token, Difficulty difficulty);
+  void loadTokens(const std::string &filepath);
+  bool saveTokens(const std::string &filepath);
+  void createEntity(Token &token, Difficulty difficulty) const;
   static void tokenTouch(gentity_t *self, gentity_t *other, trace_t *trace);
-  static void createEntities();
+  void createEntities();
   static void reset();
   static std::array<int, 3> getTokenCounts();
 
@@ -86,5 +88,7 @@ public:
 
 private:
   std::string _filepath;
+  std::unique_ptr<Log> logger;
+  std::string errors;
 };
 } // namespace ETJump
