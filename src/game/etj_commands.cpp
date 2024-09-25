@@ -113,7 +113,13 @@ bool listCustomVotes(gentity_t *ent, Arguments argv) {
   const std::string &cmd = argv->at(0);
 
   if (argv->size() != 2) {
-    std::string types = game.customMapVotes->ListTypes();
+    std::string types = game.customMapVotes->listTypes();
+
+    if (types.empty()) {
+      Printer::console(clientNum, "No custom map votes found on the server.\n");
+      return true;
+    }
+
     Printer::console(
         clientNum,
         ETJump::stringFormat(
@@ -124,7 +130,7 @@ bool listCustomVotes(gentity_t *ent, Arguments argv) {
   }
 
   const auto &type = argv->at(1);
-  const std::string maplist = game.customMapVotes->ListInfo(type);
+  const std::string maplist = game.customMapVotes->listInfo(type);
   if (maplist.empty()) {
     Printer::console(
         clientNum, ETJump::stringFormat("^3%s: ^gcould not find list ^3'%s'\n",
@@ -1413,7 +1419,7 @@ bool Map(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  if (MapStatistics::isBlockedMap(requestedMap)) {
+  if (ETJump::MapStatistics::isBlockedMap(requestedMap)) {
     Printer::chat(ent, "^3map: ^7'" + requestedMap +
                            "' cannot be played on this server.");
     return false;

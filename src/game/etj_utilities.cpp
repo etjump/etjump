@@ -204,7 +204,7 @@ void Utilities::Error(const std::string &error) { G_Error(error.c_str()); }
 
 std::vector<std::string> Utilities::getMaps() {
   std::vector<std::string> maps;
-  MapStatistics mapStats;
+  ETJump::MapStatistics mapStats;
 
   int i = 0;
   int numDirs = 0;
@@ -224,7 +224,7 @@ std::vector<std::string> Utilities::getMaps() {
     Q_strncpyz(buf, dirPtr, sizeof(buf));
     Q_strlwr(buf);
 
-    if (MapStatistics::isBlockedMap(buf)) {
+    if (ETJump::MapStatistics::isBlockedMap(buf)) {
       continue;
     }
 
