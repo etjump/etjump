@@ -50,9 +50,17 @@ std::string SavePosData::serialize(const SavePosData &data) {
 }
 
 SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
-  // minimum valid argument count, position with timerun data contains more
-  static constexpr int expectedMinArgs = 10;
+  const auto argc = static_cast<int>(args.size());
   SavePosData data{};
+
+  static constexpr int MIN_SAVEPOS_ARGS = 10;
+  static constexpr int MIN_SAVEPOS_TIMERUN_ARGS = 15;
+
+  if (args.size() < MIN_SAVEPOS_ARGS) {
+    data.error = stringFormat("Too few arguments to parse position (%i < %i)\n",
+                              argc, MIN_SAVEPOS_ARGS);
+    return data;
+  }
 
   try {
     for (int i = 0; i < 3; i++) {
@@ -63,7 +71,14 @@ SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
 
     data.pos.stance = static_cast<PlayerStance>(std::stoi(args[9]));
 
-    if (args.size() == expectedMinArgs || args[10].empty()) {
+    if (argc == MIN_SAVEPOS_ARGS || args[10].empty()) {
+      return data;
+    }
+
+    if (argc < MIN_SAVEPOS_TIMERUN_ARGS) {
+      data.error = stringFormat(
+          "Too few arguments to parse timerun information (%i < %i)", argc,
+          MIN_SAVEPOS_TIMERUN_ARGS);
       return data;
     }
 
