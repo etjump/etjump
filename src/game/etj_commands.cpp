@@ -113,7 +113,13 @@ bool listCustomVotes(gentity_t *ent, Arguments argv) {
   const std::string &cmd = argv->at(0);
 
   if (argv->size() != 2) {
-    std::string types = game.customMapVotes->ListTypes();
+    std::string types = game.customMapVotes->listTypes();
+
+    if (types.empty()) {
+      Printer::console(clientNum, "No custom map votes found on the server.\n");
+      return true;
+    }
+
     Printer::console(
         clientNum,
         ETJump::stringFormat(
@@ -124,7 +130,7 @@ bool listCustomVotes(gentity_t *ent, Arguments argv) {
   }
 
   const auto &type = argv->at(1);
-  const std::string maplist = game.customMapVotes->ListInfo(type);
+  const std::string maplist = game.customMapVotes->listInfo(type);
   if (maplist.empty()) {
     Printer::console(
         clientNum, ETJump::stringFormat("^3%s: ^gcould not find list ^3'%s'\n",
@@ -1413,7 +1419,7 @@ bool Map(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  if (MapStatistics::isBlockedMap(requestedMap)) {
+  if (ETJump::MapStatistics::isBlockedMap(requestedMap)) {
     Printer::chat(ent, "^3map: ^7'" + requestedMap +
                            "' cannot be played on this server.");
     return false;
@@ -1906,9 +1912,9 @@ bool createToken(gentity_t *ent, Arguments argv) {
   }
 
   Printer::chat(ent, ETJump::stringFormat(
-                         "Creating a token at (%f, %f, %f) for difficulty (%d)",
+                         "Creating a token at (%f, %f, %f) for difficulty '%s'",
                          coordinates[0], coordinates[1], coordinates[2],
-                         static_cast<int>(difficulty)));
+                         ETJump::Tokens::tokenDifficultyToString(difficulty)));
 
   auto result = game.tokens->createToken(difficulty, coordinates);
   if (!result.first) {
@@ -1925,8 +1931,11 @@ bool moveToken(gentity_t *ent) {
   }
   std::array<float, 3> coordinates{};
   VectorCopy(ent->r.currentOrigin, coordinates);
+  // move closer to ground, but not quite to ground level
+  // to avoid clipping into slopes a bit
+  coordinates[2] += ent->client->ps.mins[2] + 2;
 
-  auto result = game.tokens->moveNearestToken(coordinates);
+  const auto result = game.tokens->moveNearestToken(coordinates);
   if (!result.first) {
     Printer::chat(ent, "^3error: ^7" + result.second);
     return false;
@@ -1950,7 +1959,7 @@ bool deleteToken(gentity_t *ent, Arguments argv) {
   if (argv->size() == 2) {
     std::array<float, 3> coordinates{};
     VectorCopy(ent->r.currentOrigin, coordinates);
-    auto result = game.tokens->deleteNearestToken(coordinates);
+    const auto result = game.tokens->deleteNearestToken(coordinates);
     if (!result.first) {
       Printer::chat(ent, "^3error: ^7" + result.second);
       return false;

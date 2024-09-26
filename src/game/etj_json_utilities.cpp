@@ -28,30 +28,35 @@
 #include "etj_file.h"
 
 namespace ETJump {
-Log JsonUtils::logger = Log("JSON-utils");
-
-bool JsonUtils::writeFile(const std::string &file, const Json::Value &root) {
+bool JsonUtils::writeFile(const std::string &file, const Json::Value &root,
+                          std::string *errors) {
   Json::StyledWriter writer;
   const std::string &output = writer.write(root);
 
   if (file.empty()) {
-    logger.error("Failed to write JSON file: empty filename\n");
+    if (errors) {
+      *errors = "Failed to write JSON file: empty filename\n";
+    }
+
     return false;
   }
 
-  File fOut(file, File::Mode::Write);
+  const File fOut(file, File::Mode::Write);
 
   try {
     fOut.write(output);
+    return true;
   } catch (const File::WriteFailedException &e) {
-    logger.error("Failed to write JSON file: %s\n", e.what());
+    if (errors) {
+      *errors = stringFormat("Failed to write JSON file: %s\n", e.what());
+    }
+
     return false;
   }
-
-  return true;
 }
 
-bool JsonUtils::readFile(const std::string &file, Json::Value &root) {
+bool JsonUtils::readFile(const std::string &file, Json::Value &root,
+                         std::string *errors) {
   std::ifstream fIn(FileSystem::Path::getPath(file));
 
   if (!fIn) {
@@ -60,10 +65,13 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root) {
   }
 
   Json::CharReaderBuilder readerBuilder;
-  std::string errors;
+  std::string err;
 
-  if (!Json::parseFromStream(readerBuilder, fIn, &root, &errors)) {
-    logger.error("Failed to parse JSON file '%s': %s", file, errors);
+  if (!Json::parseFromStream(readerBuilder, fIn, &root, &err)) {
+    if (errors) {
+      *errors = stringFormat("Failed to parse JSON file '%s':\n%s", file, err);
+    }
+
     return false;
   }
 

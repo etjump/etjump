@@ -70,21 +70,6 @@ void Console(const std::string &message);
 void Log(const std::string &message);
 
 /**
- * Log a message & appends a newline
- */
-void Logln(const std::string &message);
-
-/**
- * Writes string to specified file
- */
-void WriteFile(const std::string &filepath, const std::string &content);
-
-/**
- * Reads contents of specified file and returns std moved string
- */
-std::string ReadFile(const std::string &filepath);
-
-/**
  * Returns true if there is atleast one player on team
  */
 bool anyonePlaying();

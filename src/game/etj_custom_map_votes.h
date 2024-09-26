@@ -26,7 +26,9 @@
 
 #include <vector>
 #include <string>
+#include "etj_log.h"
 
+namespace ETJump {
 class MapStatistics;
 
 class CustomMapVotes {
@@ -46,16 +48,17 @@ public:
     std::string callvoteText;
   };
 
-  CustomMapVotes(MapStatistics *mapStats);
-  ~CustomMapVotes();
-  bool Load();
-  TypeInfo GetTypeInfo(const std::string &type) const;
-  const std::string RandomMap(const std::string &type);
+  CustomMapVotes(const std::shared_ptr<MapStatistics> &mapStats,
+                 std::unique_ptr<Log> log);
+  ~CustomMapVotes() = default;
+  void loadCustomvotes();
+  TypeInfo getTypeInfo(const std::string &type) const;
+  std::string randomMap(const std::string &type);
   static bool isValidMap(const std::string &mapName);
-  std::string ListTypes() const;
-  std::string ListInfo(const std::string &name);
+  std::string listTypes() const;
+  std::string listInfo(const std::string &name);
   std::vector<std::string> getMapsOnList(const std::string &name);
-  void GenerateVotesFile();
+  void generateVotesFile();
   size_t getNumVotelists() const;
   // returns nullptr on invalid index
   CustomMapVotes::MapType *getVotelistByIndex(int index);
@@ -71,6 +74,9 @@ public:
 
 private:
   std::vector<MapType> customMapVotes_;
-  const std::vector<std::string> *_currentMapsOnServer;
-  MapStatistics *_mapStats;
+  const std::vector<std::string> *_currentMapsOnServer{};
+  const std::shared_ptr<MapStatistics> &_mapStats;
+  std::unique_ptr<Log> logger;
+  std::string errors;
 };
+} // namespace ETJump

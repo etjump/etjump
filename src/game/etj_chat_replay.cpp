@@ -29,16 +29,15 @@
 #include "etj_log.h"
 
 namespace ETJump {
-Log ChatReplay::logger = Log("chat-replay");
 
-ChatReplay::ChatReplay() {
+ChatReplay::ChatReplay(std::unique_ptr<Log> log) : logger(std::move(log)) {
   chatReplayBuffer.clear();
   readChatsFromFile();
 }
 
-void ChatReplay::storeChatMessage(int clientNum, const std::string &name,
-                                  const std::string &message, bool localize,
-                                  bool encoded) {
+void ChatReplay::createChatMessage(const int clientNum, const std::string &name,
+                                   const std::string &message,
+                                   const bool localize, const bool encoded) {
   ChatMessage msg{};
 
   msg.clientNum = clientNum;
@@ -47,6 +46,10 @@ void ChatReplay::storeChatMessage(int clientNum, const std::string &name,
   msg.encoded = encoded;
   msg.message = sanitize(message);
 
+  storeChatMessage(msg);
+}
+
+void ChatReplay::storeChatMessage(const ChatMessage &msg) {
   chatReplayBuffer.emplace_back(msg);
 
   if (chatReplayBuffer.size() > MAX_CHAT_REPLAY_BUFFER) {
@@ -93,24 +96,31 @@ std::string ChatReplay::parseChatMessage(const ChatReplay::ChatMessage &msg) {
 void ChatReplay::readChatsFromFile() {
   Json::Value root;
 
-  if (!JsonUtils::readFile(chatReplayFile, root)) {
-    logger.error("Could not open chat replay file '%s' for reading.",
-                 chatReplayFile);
+  if (!JsonUtils::readFile(chatReplayFile, root, &errors)) {
+    logger->error(errors);
     return;
   }
 
-  for (const auto &msg : root) {
-    const int clientNum = msg["clientnum"].asInt();
-    const std::string &name = msg["name"].asString();
-    const std::string &message = msg["message"].asString();
-    const bool localize = msg["localize"].asBool();
-    const bool encoded = msg["encoded"].asBool();
+  for (const auto &message : root) {
+    ChatMessage msg{};
 
-    storeChatMessage(clientNum, name, message, localize, encoded);
+    if (JsonUtils::parseValue(msg.clientNum, message["clientNum"], &errors,
+                              "clientNum") &&
+        JsonUtils::parseValue(msg.name, message["name"], &errors, "name") &&
+        JsonUtils::parseValue(msg.message, message["message"], &errors,
+                              "message") &&
+        JsonUtils::parseValue(msg.localize, message["localize"], &errors,
+                              "localize") &&
+        JsonUtils::parseValue(msg.encoded, message["encoded"], &errors,
+                              "encoded")) {
+      storeChatMessage(msg);
+    } else {
+      logger->error(errors);
+    }
   }
 }
 
-void ChatReplay::writeChatsToFile() const {
+void ChatReplay::writeChatsToFile() {
   Json::Value root;
 
   for (const auto &msg : chatReplayBuffer) {
@@ -125,9 +135,8 @@ void ChatReplay::writeChatsToFile() const {
     root.append(chat);
   }
 
-  if (!JsonUtils::writeFile(chatReplayFile, root)) {
-    logger.error("Could not open chat replay file '%s' for writing.",
-                 chatReplayFile);
+  if (!JsonUtils::writeFile(chatReplayFile, root, &errors)) {
+    logger->error(errors);
   }
 }
 } // namespace ETJump
