@@ -387,6 +387,16 @@ void shutdown() {
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
                                      " shutdown... " S_COLOR_GREEN "DONE\n");
 }
+
+// FIXME: this should probably be somewhere else
+void resetCustomvoteInfo() {
+  cg.numCustomvotesRequested = false;
+  cg.customvoteInfoRequested = false;
+  cg.numCustomvotes = -1;
+  cg.numCustomvoteInfosRequested = 0;
+
+  trap_SendConsoleCommand("uiResetCustomvotes\n");
+}
 } // namespace ETJump
 
 /**
@@ -438,6 +448,11 @@ qboolean CG_ServerCommandExt(const char *cmd) {
     // we need to forward this command to UI to parse the list there,
     // so we can populate the map vote list
     trap_SendConsoleCommand(uiCommand.c_str());
+    return qtrue;
+  }
+
+  if (command == "forceCustomvoteRefresh") {
+    ETJump::resetCustomvoteInfo();
     return qtrue;
   }
 
@@ -628,10 +643,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
   }
 
   if (command == "forceCustomvoteRefresh") {
-    cg.numCustomvotesRequested = false;
-    cg.customvoteInfoRequested = false;
-    cg.numCustomvotes = -1;
-    cg.numCustomvoteInfosRequested = 0;
+    ETJump::resetCustomvoteInfo();
     return qtrue;
   }
 

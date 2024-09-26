@@ -51,6 +51,10 @@ public:
   CustomMapVotes(const std::shared_ptr<MapStatistics> &mapStats,
                  std::unique_ptr<Log> log);
   ~CustomMapVotes() = default;
+
+  // this simply calls 'loadCustomvotes', we use this on game init to avoid
+  // invalidating cache for custom map votes on clients
+  void initialize();
   void loadCustomvotes();
   TypeInfo getTypeInfo(const std::string &type) const;
   std::string randomMap(const std::string &type);

@@ -49,6 +49,8 @@ CustomMapVotes::getTypeInfo(std::string const &type) const {
   return {false, ""};
 }
 
+void CustomMapVotes::initialize() { loadCustomvotes(); }
+
 void CustomMapVotes::loadCustomvotes() {
   const std::string filename = g_customMapVotesFile.string;
 
@@ -62,6 +64,7 @@ void CustomMapVotes::loadCustomvotes() {
   const auto parsingFailed = [&](const std::string &errMsg) {
     logger->error(errMsg);
     customMapVotes_.clear();
+    Printer::commandAll("forceCustomvoteRefresh");
   };
 
   if (!FileSystem::exists(filename)) {
@@ -130,6 +133,9 @@ void CustomMapVotes::loadCustomvotes() {
       customMapVotes_[curr].otherMaps.emplace_back(map);
     }
   }
+
+  // invalidate cached customvote lists for all clients
+  Printer::commandAll("forceCustomvoteRefresh");
 
   logger->info("Succesfully loaded %i custom votes from '%s'",
                static_cast<int>(customMapVotes_.size()), filename);

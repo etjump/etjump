@@ -215,6 +215,11 @@ qboolean UI_ConsoleCommand(int realTime) {
     return qtrue;
   }
 
+  if (!Q_stricmp(cmd, "uiResetCustomvotes")) {
+    ETJump::resetCustomvotes();
+    return qtrue;
+  }
+
   trap_GetClientState(&cstate);
 
   return qfalse;

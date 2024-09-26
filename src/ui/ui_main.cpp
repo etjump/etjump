@@ -7344,6 +7344,14 @@ void parseCustomvote() {
     }
   }
 }
+
+void resetCustomvotes() {
+  uiInfo.customVotes.clear();
+  uiInfo.numCustomvotes = -1;
+  uiInfo.customvoteIndex = 0;
+  uiInfo.customvoteMapsOnServerIndex = 0;
+  uiInfo.customvoteOtherMapsIndex = 0;
+}
 } // namespace ETJump
 
 void _UI_SetActiveMenu(uiMenuCommand_t menu) {

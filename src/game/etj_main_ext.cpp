@@ -189,7 +189,7 @@ void OnGameInit() {
 
   game.mapStatistics->initialize(std::string(g_mapDatabase.string),
                                  level.rawmapname);
-  game.customMapVotes->loadCustomvotes();
+  game.customMapVotes->initialize();
   game.motd->initialize();
   game.timerunV2->initialize();
 
