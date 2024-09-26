@@ -40,7 +40,9 @@ static std::array<Tokens::Token, MAX_TOKENS_PER_DIFFICULTY> easyTokens;
 static std::array<Tokens::Token, MAX_TOKENS_PER_DIFFICULTY> mediumTokens;
 static std::array<Tokens::Token, MAX_TOKENS_PER_DIFFICULTY> hardTokens;
 
-std::string toString(const Tokens::Difficulty difficulty) {
+Tokens::Tokens(std::unique_ptr<Log> log) : logger(std::move(log)) {}
+
+std::string Tokens::tokenDifficultyToString(const Difficulty difficulty) {
   switch (difficulty) {
     case Tokens::Easy:
       return "easy";
@@ -112,11 +114,13 @@ std::pair<bool, std::string> Tokens::deleteToken(const Difficulty difficulty,
     G_FreeEntity(token->entity);
     token->entity = nullptr;
     saveTokens(_filepath);
-    return std::make_pair(true, va("Successfully deleted %s token #%d",
-                                   toString(difficulty).c_str(), index + 1));
+    return std::make_pair(
+        true, stringFormat("Successfully deleted %s token #%d",
+                           tokenDifficultyToString(difficulty), index + 1));
   }
-  return std::make_pair(false, va("%s token with number #%d does not exist.",
-                                  toString(difficulty).c_str(), index + 1));
+  return std::make_pair(
+      false, stringFormat("%s token with number #%d does not exist.",
+                          tokenDifficultyToString(difficulty), index + 1));
 }
 
 std::pair<bool, std::string>
@@ -131,9 +135,10 @@ Tokens::deleteNearestToken(const std::array<float, 3> coordinates) {
   saveTokens(_filepath);
   G_FreeEntity(nearestToken.token->entity);
   nearestToken.token->entity = nullptr;
-  return std::make_pair(true, va("Deleted %s token #%d.",
-                                 toString(nearestToken.difficulty).c_str(),
-                                 nearestToken.number));
+  return std::make_pair(
+      true, stringFormat("Deleted %s token #%d.",
+                         tokenDifficultyToString(nearestToken.difficulty),
+                         nearestToken.number));
 }
 
 std::pair<bool, std::string>
@@ -149,9 +154,10 @@ Tokens::moveNearestToken(std::array<float, 3> coordinates) {
 
   saveTokens(_filepath);
 
-  return std::make_pair(true, va("Moved %s #%d to new location.",
-                                 toString(nearestToken.difficulty).c_str(),
-                                 nearestToken.number));
+  return std::make_pair(
+      true, stringFormat("Moved %s #%d to new location.",
+                         tokenDifficultyToString(nearestToken.difficulty),
+                         nearestToken.number));
 }
 
 std::pair<bool, std::string>
@@ -187,7 +193,7 @@ Tokens::createToken(const Difficulty difficulty,
   if (nextFreeToken == nullptr) {
     return std::make_pair(
         false, stringFormat("No free tokens left for '%s' difficulty.",
-                            toString(difficulty)));
+                            tokenDifficultyToString(difficulty)));
   }
 
   nextFreeToken->isActive = true;
@@ -207,10 +213,6 @@ Tokens::createToken(const Difficulty difficulty,
 }
 
 void Tokens::loadTokens(const std::string &filepath) {
-  if (!logger) {
-    logger = std::make_unique<Log>("tokens");
-  }
-
   _filepath = filepath;
 
   if (!FileSystem::exists(_filepath)) {

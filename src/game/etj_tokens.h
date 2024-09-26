@@ -35,6 +35,9 @@ typedef struct TokenInformation_s TokenInformation;
 namespace ETJump {
 class Tokens {
 public:
+  explicit Tokens(std::unique_ptr<Log> log);
+  ~Tokens() = default;
+
   enum Difficulty { Easy, Medium, Hard };
 
   // the entity is drawn as 32x32, but this feels more natural with touching
@@ -42,7 +45,7 @@ public:
 
   struct Token {
     Token()
-        : isActive(false), entity(nullptr), coordinates{0.0f, 0.0f, 0.0f},
+        : coordinates{0.0f, 0.0f, 0.0f}, isActive(false), entity(nullptr),
           data(std::make_unique<TokenInformation>()) {}
     std::array<float, 3> coordinates;
     std::string name;
@@ -83,6 +86,7 @@ public:
   void createEntities();
   static void reset();
   static std::array<int, 3> getTokenCounts();
+  static std::string tokenDifficultyToString(Tokens::Difficulty difficulty);
 
   static bool allTokensCollected(gentity_t *ent);
 

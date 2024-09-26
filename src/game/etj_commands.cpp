@@ -1912,9 +1912,9 @@ bool createToken(gentity_t *ent, Arguments argv) {
   }
 
   Printer::chat(ent, ETJump::stringFormat(
-                         "Creating a token at (%f, %f, %f) for difficulty (%d)",
+                         "Creating a token at (%f, %f, %f) for difficulty '%s'",
                          coordinates[0], coordinates[1], coordinates[2],
-                         static_cast<int>(difficulty)));
+                         ETJump::Tokens::tokenDifficultyToString(difficulty)));
 
   auto result = game.tokens->createToken(difficulty, coordinates);
   if (!result.first) {
