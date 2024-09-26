@@ -7131,6 +7131,8 @@ void _UI_Init(int legacyClient, int clientVersion) {
              sizeof(translated_yes));
   Q_strncpyz(translated_no, DC->translateString("NO"), sizeof(translated_no));
 
+  trap_AddCommand("ui_report");
+
   Com_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                       " " S_COLOR_LTGREY GAME_BINARY_NAME
                                       " init... " S_COLOR_GREEN "DONE\n");
