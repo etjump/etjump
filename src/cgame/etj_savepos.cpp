@@ -167,7 +167,8 @@ void SavePos::writeSaveposFile(SavePosData &data) {
 
   const std::string filename = "savepos/" + data.name + ".dat";
 
-  if (!JsonUtils::writeFile(filename, root)) {
+  if (!JsonUtils::writeFile(filename, root, &errors)) {
+    CG_Printf("%s\n", errors.c_str());
     return;
   }
 
@@ -181,12 +182,26 @@ void SavePos::parseSavepos(const std::string &file) {
   const std::string filename =
       "savepos/" + (file.empty() ? defaultName + ".dat" : file);
 
-  if (!JsonUtils::readFile(filename, root)) {
+  if (!JsonUtils::readFile(filename, root, &errors)) {
+    CG_Printf("%s", errors.c_str());
     return;
   }
 
-  data.name = root["name"].asString();
-  data.mapname = root["mapname"].asString();
+  const auto parsingFailed = [&](const std::string &error) {
+    CG_Printf("Failure while parsing savepos file ^3'%s':\n", filename.c_str());
+    CG_Printf("%s\n", error.c_str());
+  };
+
+  if (!JsonUtils::parseValue(data.name, root["name"], &errors, "name")) {
+    parsingFailed(errors);
+    return;
+  }
+
+  if (!JsonUtils::parseValue(data.mapname, root["mapname"], &errors,
+                             "mapname")) {
+    parsingFailed(errors);
+    return;
+  }
 
   const Json::Value position = root["position"];
   const Json::Value timerunInfo = root["timerunInfo"];
@@ -196,25 +211,60 @@ void SavePos::parseSavepos(const std::string &file) {
   const Json::Value &velocity = position["velocity"];
 
   for (int i = 0; i < 3; i++) {
-    data.pos.origin[i] = origin[i].asFloat();
-    data.pos.angles[i] = angles[i].asFloat();
-    data.pos.velocity[i] = velocity[i].asFloat();
+    if (!JsonUtils::parseValue(data.pos.origin[i], origin[i], &errors,
+                               "origin") ||
+        !JsonUtils::parseValue(data.pos.angles[i], angles[i], &errors,
+                               "angles") ||
+        !JsonUtils::parseValue(data.pos.velocity[i], velocity[i], &errors,
+                               "velocity")) {
+      parsingFailed(errors);
+      return;
+    }
   }
 
-  data.pos.stance = static_cast<PlayerStance>(position["stance"].asInt());
+  int stance;
 
-  data.timerunInfo.runName = timerunInfo["runName"].asString();
-  data.timerunInfo.currentRunTimer = timerunInfo["currentRunTimer"].asInt();
-  data.timerunInfo.previousRecord = timerunInfo["previousRecord"].asInt();
+  // can't parse this directly since it's an enum class
+  if (!JsonUtils::parseValue(stance, position["stance"], &errors, "stance")) {
+    parsingFailed(errors);
+    return;
+  }
+
+  data.pos.stance = static_cast<PlayerStance>(stance);
+
+  if (!JsonUtils::parseValue(data.timerunInfo.runName, timerunInfo["runName"],
+                             &errors, "runName")) {
+    parsingFailed(errors);
+    return;
+  }
+
+  if (!JsonUtils::parseValue(data.timerunInfo.currentRunTimer,
+                             timerunInfo["currentRunTimer"], &errors,
+                             "currentRunTimer")) {
+    parsingFailed(errors);
+    return;
+  }
+
+  if (!JsonUtils::parseValue(data.timerunInfo.previousRecord,
+                             timerunInfo["previousRecord"], &errors,
+                             "previousRecord")) {
+    parsingFailed(errors);
+    return;
+  }
 
   const Json::Value &checkpoints = timerunInfo["checkpoints"];
   const Json::Value &previousRecordCheckpoints =
       timerunInfo["previousRecordCheckpoints"];
 
   for (int i = 0; i < MAX_TIMERUN_CHECKPOINTS; i++) {
-    data.timerunInfo.checkpoints[i] = checkpoints[i].asInt();
-    data.timerunInfo.previousRecordCheckpoints[i] =
-        previousRecordCheckpoints[i].asInt();
+    if (!JsonUtils::parseValue(data.timerunInfo.checkpoints[i], checkpoints[i],
+                               &errors, "checkpoints") ||
+        !JsonUtils::parseValue(data.timerunInfo.previousRecordCheckpoints[i],
+                               previousRecordCheckpoints[i], &errors,
+                               "previousRecordCheckpoints")) {
+      parsingFailed(errors);
+      return;
+    }
   }
 
   storePosition(data);

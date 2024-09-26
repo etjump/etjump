@@ -71,7 +71,7 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root,
     if (errors) {
       *errors = stringFormat("Failed to parse JSON file '%s':\n%s", file, err);
     }
-    
+
     return false;
   }
 

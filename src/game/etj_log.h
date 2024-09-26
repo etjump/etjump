@@ -27,11 +27,10 @@
 #include <vector>
 #include <string>
 
-#include "etj_printer.h"
 #include "etj_string_utilities.h"
 
 #ifdef CGAMEDLL
-  #include "../cgame/cg_local.h"
+void QDECL CG_Printf(const char *msg, ...);
 #endif
 
 namespace ETJump {

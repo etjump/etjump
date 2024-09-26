@@ -49,6 +49,8 @@ class SavePos {
 
   static PlayerStance getStance(const playerState_t *ps);
 
+  std::string errors;
+
 public:
   explicit SavePos(const std::shared_ptr<Timerun> &p);
   ~SavePos() = default;
