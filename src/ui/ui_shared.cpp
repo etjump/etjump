@@ -2339,7 +2339,9 @@ float Item_Slider_ThumbPosition(itemDef_t *item) {
     Com_Error(ERR_FATAL, "Item_Slider_ThumbPosition: NULL editDef\n");
   }
 
-  if (item->cvar) {
+  if (itemCapture && itemCapture == item && item->cacheCvarValue) {
+    value = Q_atof(item->cacheCvarValue);
+  } else if (item->cvar) {
     value = DC->getCVarValue(item->cvar);
   } else {
     value = DC->getColorSliderValue(item->colorSliderData.colorVar);
@@ -3582,7 +3584,7 @@ static void Scroll_ListBox_ThumbFunc(void *p) {
 }
 
 static void Scroll_Slider_ThumbFunc(void *p) {
-  float x, value, cursorx;
+  float x;
   const auto si = static_cast<scrollInfo_t *>(p);
   const auto editDef = static_cast<editFieldDef_t *>(si->item->typeData);
 
@@ -3592,14 +3594,15 @@ static void Scroll_Slider_ThumbFunc(void *p) {
     x = si->item->window.rect.x;
   }
 
-  cursorx = static_cast<float>(DC->cursorx);
+  auto cursorx = static_cast<float>(DC->cursorx);
 
   if (cursorx < x) {
     cursorx = x;
   } else if (cursorx > x + SLIDER_WIDTH) {
     cursorx = x + SLIDER_WIDTH;
   }
-  value = cursorx - x;
+
+  float value = cursorx - x;
   value /= SLIDER_WIDTH;
   value *= (editDef->maxVal - editDef->minVal);
   value += editDef->minVal;
@@ -3607,6 +3610,11 @@ static void Scroll_Slider_ThumbFunc(void *p) {
   if (editDef->step > 0) {
     // snap to nearest value
     value = std::roundf(value / editDef->step) * editDef->step;
+  }
+
+  if (scrollInfo.item->cacheCvar) {
+    scrollInfo.item->cacheCvarValue = va("%f", value);
+    return;
   }
 
   const float oldValue =
@@ -3696,69 +3704,82 @@ void Item_StartCapture(itemDef_t *item, int key) {
   }
 }
 
-void Item_StopCapture(itemDef_t *item) {}
-
 qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
-  float x, value, work;
   const auto cursorX = static_cast<float>(DC->cursorx);
   const auto cursorY = static_cast<float>(DC->cursory);
 
-  if (item->window.flags & WINDOW_HASFOCUS &&
-      (item->cvar || item->colorSliderData.colorVar) &&
-      Rect_ContainsPoint(&item->window.rect, cursorX, cursorY)) {
-    if (key == K_MOUSE1 || key == K_ENTER || key == K_MOUSE2 ||
-        key == K_MOUSE3) {
-      const auto editDef = static_cast<editFieldDef_t *>(item->typeData);
-      if (editDef) {
-        rectDef_t testRect;
-
-        if (item->text) {
-          x = item->textRect.x + item->textRect.w + 8;
-        } else {
-          x = item->window.rect.x;
-        }
-
-        testRect = item->window.rect;
-        testRect.x = x;
-        value = (float)SLIDER_THUMB_WIDTH / 2;
-        testRect.x -= value;
-        testRect.w = (SLIDER_WIDTH + (float)SLIDER_THUMB_WIDTH / 2);
-
-        if (Rect_ContainsPoint(&testRect, cursorX, cursorY)) {
-          work = cursorX - x;
-          value = work / SLIDER_WIDTH;
-          value *= (editDef->maxVal - editDef->minVal);
-          value += editDef->minVal;
-
-          if (item->cvar) {
-            DC->setCVar(item->cvar, va("%f", value));
-          } else {
-            DC->setColorSliderValue(item->colorSliderData.colorVar, value);
-            DC->updateSliderState(item);
-          }
-
-          return qtrue;
-        }
-      }
-    }
+  if (!(item->window.flags & WINDOW_HASFOCUS) &&
+      (!item->cvar && !item->colorSliderData.colorVar) &&
+      !Rect_ContainsPoint(&item->window.rect, cursorX, cursorY)) {
+    return qfalse;
   }
 
-  return qfalse;
+  if (key != K_MOUSE1 && key != K_ENTER && key != K_MOUSE2 && key != K_MOUSE3) {
+    return qfalse;
+  }
+
+  const auto editDef = static_cast<editFieldDef_t *>(item->typeData);
+
+  if (!editDef) {
+    return qfalse;
+  }
+
+  float x;
+  rectDef_t testRect;
+
+  if (item->text) {
+    x = item->textRect.x + item->textRect.w + 8;
+  } else {
+    x = item->window.rect.x;
+  }
+
+  testRect = item->window.rect;
+  testRect.x = x;
+  float value = SLIDER_THUMB_WIDTH / 2;
+  testRect.x -= value;
+  testRect.w = SLIDER_WIDTH + SLIDER_THUMB_WIDTH / 2;
+
+  if (!Rect_ContainsPoint(&testRect, cursorX, cursorY)) {
+    return qfalse;
+  }
+
+  const float work = cursorX - x;
+  value = work / SLIDER_WIDTH;
+  value *= editDef->maxVal - editDef->minVal;
+  value += editDef->minVal;
+
+  // always update cache cvar value on click if it exists
+  if (item->cacheCvar) {
+    item->cacheCvarValue = va("%f", value);
+  }
+
+  if (item->cvar) {
+    DC->setCVar(item->cvar, va("%f", value));
+  } else {
+    DC->setColorSliderValue(item->colorSliderData.colorVar, value);
+    DC->updateSliderState(item);
+  }
+
+  return qtrue;
 }
 
 qboolean Item_HandleKey(itemDef_t *item, int key, qboolean down) {
-  int realKey;
+  int realKey = key;
 
-  realKey = key;
   if (realKey & K_CHAR_FLAG) {
     realKey &= ~K_CHAR_FLAG;
   }
 
   if (itemCapture) {
-    Item_StopCapture(itemCapture);
-    itemCapture = NULL;
-    captureFunc = NULL;
-    captureData = NULL;
+    if (itemCapture->cvar && itemCapture->cacheCvar &&
+        itemCapture->cacheCvarValue) {
+      DC->setCVar(scrollInfo.item->cvar, scrollInfo.item->cacheCvarValue);
+      scrollInfo.item->cacheCvarValue = nullptr;
+    }
+
+    itemCapture = nullptr;
+    captureFunc = nullptr;
+    captureData = nullptr;
   } else {
     // bk001206 - parentheses
     if (down &&
@@ -4676,8 +4697,13 @@ void Item_Text_Paint(itemDef_t *item) {
         size = etj_chatlen((unsigned char *)text);
 
         textPtr = va("%s%i", item->text, MAX_CHAT_TEXT - 1 - size);
-      } else if (item->cvar || item->colorSliderData.colorVar) {
-        if (item->cvar) {
+      } else if (item->cvar || (itemCapture && itemCapture->cacheCvar) ||
+                 item->colorSliderData.colorVar) {
+        if (itemCapture && itemCapture->cacheCvar &&
+            itemCapture->cacheCvarValue &&
+            !Q_stricmp(itemCapture->cvar, item->cvar)) {
+          Q_strncpyz(text, scrollInfo.item->cacheCvarValue, sizeof(text));
+        } else if (item->cvar) {
           DC->getCVarString(item->cvar, text, sizeof(text));
         } else {
           Q_strncpyz(text,
@@ -7794,6 +7820,11 @@ qboolean ItemParse_tooltipAbove(itemDef_t *item, int handle) {
   return qtrue;
 }
 
+qboolean ItemParse_cacheCvar(itemDef_t *item, int handle) {
+  item->cacheCvar = true;
+  return qtrue;
+}
+
 keywordHash_t itemParseKeywords[] = {
     {"accept", ItemParse_accept, nullptr}, // NERVE - SMF
     {"action", ItemParse_action, nullptr},
@@ -7895,6 +7926,8 @@ keywordHash_t itemParseKeywords[] = {
     {"colorValue", ItemParse_colorSliderValue, nullptr},
 
     {"tooltipAbove", ItemParse_tooltipAbove, nullptr},
+
+    {"cacheCvar", ItemParse_cacheCvar, nullptr},
 
     {nullptr, nullptr, nullptr}};
 
