@@ -37,25 +37,28 @@ class ChatReplay {
     bool encoded;
   };
 
-  static Log logger;
-
   static constexpr int MAX_CHAT_REPLAY_BUFFER = 10;
   const std::string chatReplayFile = "chatreplay.json";
+
+  std::unique_ptr<Log> logger;
+  std::string errors{};
 
   std::list<ChatMessage> chatReplayBuffer;
 
   static std::string parseChatMessage(const ChatMessage &msg);
   void readChatsFromFile();
-  void writeChatsToFile() const;
+  void storeChatMessage(const ChatMessage &msg);
 
 public:
-  ChatReplay();
-  ~ChatReplay();
+  explicit ChatReplay(std::unique_ptr<Log> log);
+  ~ChatReplay() = default;
 
-  void storeChatMessage(int clientNum, const std::string &name,
-                        const std::string &message, bool localize,
-                        bool encoded);
+  void createChatMessage(int clientNum, const std::string &name,
+                         const std::string &message, bool localize,
+                         bool encoded);
 
   void sendChatMessages(gentity_t *ent) const;
+
+  void writeChatsToFile();
 };
 } // namespace ETJump

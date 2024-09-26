@@ -32,6 +32,7 @@
 #include "g_local.h"
 #include "etj_filesystem.h"
 
+namespace ETJump {
 MapStatistics::MapStatistics()
     : _previousLevelTime(0), _currentMillisecondsPlayed(0),
       _currentMillisecondsOnServer(0), _currentMap(nullptr) {}
@@ -546,5 +547,4 @@ void MapStatistics::writeMapsToDisk(const std::string &fileName) {
   trap_FS_Write(str.c_str(), str.length(), f);
   trap_FS_FCloseFile(f);
 }
-
-MapStatistics::~MapStatistics() {}
+} // namespace ETJump

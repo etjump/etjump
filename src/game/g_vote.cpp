@@ -323,7 +323,7 @@ static bool matchMap(const char *voteArg, std::string &resultedMap,
     return false;
   }
 
-  if (MapStatistics::isBlockedMap(resultedMap)) {
+  if (ETJump::MapStatistics::isBlockedMap(resultedMap)) {
     resultedMap = stringFormat("^3callvote: ^7Voting for %s is not allowed.\n",
                                resultedMap);
     return false;

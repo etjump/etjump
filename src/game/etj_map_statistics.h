@@ -22,16 +22,17 @@
  * SOFTWARE.
  */
 
-#ifndef MAP_STATISTICS_H
-#define MAP_STATISTICS_H
+#pragma once
+
 #include <string>
 #include <vector>
 #include <random>
 
+namespace ETJump {
 class MapStatistics {
 public:
   MapStatistics();
-  ~MapStatistics();
+  ~MapStatistics() = default;
 
   struct MapInformation {
     MapInformation()
@@ -87,5 +88,4 @@ private:
   std::string _databaseName;
   int _originalSecondsPlayed;
 };
-
-#endif
+} // namespace ETJump

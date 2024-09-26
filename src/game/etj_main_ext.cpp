@@ -69,7 +69,7 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
 void OnClientBegin(gentity_t *ent) {
   G_DPrintf("OnClientBegin called by %d\n", ClientNum(ent));
   if (!ent->client->sess.motdPrinted) {
-    game.motd->PrintMotd(ent);
+    game.motd->printMotd(ent);
     ent->client->sess.motdPrinted = qtrue;
   }
   ETJump::Log::processMessages();
@@ -141,13 +141,17 @@ void RunFrame(int levelTime) {
 void OnGameInit() {
   game.levels = std::make_shared<Levels>();
   game.commands = std::make_shared<Commands>();
-  game.mapStatistics = std::make_shared<MapStatistics>();
-  game.customMapVotes =
-      std::make_shared<CustomMapVotes>(game.mapStatistics.get());
-  game.motd = std::make_shared<Motd>();
-  game.tokens = std::make_shared<ETJump::Tokens>();
+  game.mapStatistics = std::make_shared<ETJump::MapStatistics>();
+  game.customMapVotes = std::make_unique<ETJump::CustomMapVotes>(
+      game.mapStatistics, std::make_unique<ETJump::Log>("customvotes"));
+  game.motd =
+      std::make_unique<ETJump::Motd>(std::make_unique<ETJump::Log>("MOTD"));
+  game.tokens =
+      std::make_unique<ETJump::Tokens>(std::make_unique<ETJump::Log>("tokens"));
   game.rtv = std::make_shared<ETJump::RockTheVote>();
-  game.chatReplay = std::make_unique<ETJump::ChatReplay>();
+
+  game.chatReplay = std::make_unique<ETJump::ChatReplay>(
+      std::make_unique<ETJump::Log>("chat-replay"));
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
@@ -185,8 +189,8 @@ void OnGameInit() {
 
   game.mapStatistics->initialize(std::string(g_mapDatabase.string),
                                  level.rawmapname);
-  game.customMapVotes->Load();
-  game.motd->Initialize();
+  game.customMapVotes->loadCustomvotes();
+  game.motd->initialize();
   game.timerunV2->initialize();
 
   if (g_tokensMode.integer) {
@@ -210,14 +214,21 @@ void OnGameShutdown() {
   if (ETJump::database != nullptr) {
     ETJump::database->CloseDatabase();
   }
+
   if (game.mapStatistics != nullptr) {
     game.mapStatistics->saveChanges();
   }
+
   if (game.tokens != nullptr) {
-    game.tokens->reset();
+    ETJump::Tokens::reset();
   }
+
   if (game.timerunV2) {
     game.timerunV2->shutdown();
+  }
+
+  if (game.chatReplay) {
+    game.chatReplay->writeChatsToFile();
   }
 
   game.levels = nullptr;
@@ -229,6 +240,7 @@ void OnGameShutdown() {
   game.timerunV2 = nullptr;
   game.rtv = nullptr;
   game.chatReplay = nullptr;
+
   ETJump::Log::processMessages();
 }
 
@@ -284,17 +296,17 @@ qboolean OnConsoleCommand() {
   auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
 
   if (command == "generatemotd") {
-    game.motd->GenerateMotdFile();
+    game.motd->generateMotdFile();
     return qtrue;
   }
 
   if (command == "generatecustomvotes") {
-    game.customMapVotes->GenerateVotesFile();
+    game.customMapVotes->generateVotesFile();
     return qtrue;
   }
 
   if (command == "readcustomvotes") {
-    game.customMapVotes->Load();
+    game.customMapVotes->loadCustomvotes();
     // force voteflag re-check so UI can turn on/off custom vote button
     G_voteFlags();
     return qtrue;
@@ -367,7 +379,7 @@ const char *GetRandomMapByType(const char *customType) {
     G_Error("customType is NULL.");
   }
 
-  Q_strncpyz(buf, game.customMapVotes->RandomMap(customType).c_str(),
+  Q_strncpyz(buf, game.customMapVotes->randomMap(customType).c_str(),
              sizeof(buf));
   return buf;
 }
@@ -379,7 +391,8 @@ const char *CustomMapTypeExists(const char *mapType) {
     G_Error("mapType is NULL.");
   }
 
-  CustomMapVotes::TypeInfo info = game.customMapVotes->GetTypeInfo(mapType);
+  ETJump::CustomMapVotes::TypeInfo info =
+      game.customMapVotes->getTypeInfo(mapType);
 
   if (info.typeExists) {
     Q_strncpyz(buf, info.callvoteText.c_str(), sizeof(buf));

@@ -28,12 +28,16 @@
 #include <array>
 #include "json/json-forwards.h"
 #include <memory>
+#include "etj_log.h"
 
 typedef struct TokenInformation_s TokenInformation;
 
 namespace ETJump {
 class Tokens {
 public:
+  explicit Tokens(std::unique_ptr<Log> log);
+  ~Tokens() = default;
+
   enum Difficulty { Easy, Medium, Hard };
 
   // the entity is drawn as 32x32, but this feels more natural with touching
@@ -41,12 +45,13 @@ public:
 
   struct Token {
     Token()
-        : isActive(false), entity(nullptr), coordinates{0.0f, 0.0f, 0.0f},
+        : coordinates{0.0f, 0.0f, 0.0f}, isActive(false), entity(nullptr),
           data(std::make_unique<TokenInformation>()) {}
     std::array<float, 3> coordinates;
     std::string name;
     bool isActive;
     gentity_t *entity;
+    std::string errors;
 
     // Because we cannot capture values for the entity think lambda,
     // we must pass the data as a gentity pointer in gentity.
@@ -55,14 +60,14 @@ public:
     // Only tokens have the data.
     std::unique_ptr<TokenInformation> data;
     Json::Value toJson() const;
-    void fromJson(const Json::Value &json);
+    bool fromJson(const Json::Value &json);
   };
 
   std::pair<bool, std::string> createToken(Difficulty difficulty,
                                            std::array<float, 3> coordinates);
   struct NearestToken {
     int number;
-    Tokens::Token *token;
+    Token *token;
     float distance;
     Difficulty difficulty;
   };
@@ -74,17 +79,20 @@ public:
   deleteNearestToken(std::array<float, 3> coordinates);
   std::pair<bool, std::string> deleteToken(Difficulty difficulty, int index);
 
-  bool loadTokens(const std::string &filepath);
-  static bool saveTokens(const std::string &filepath);
-  static void createEntity(Token &token, Difficulty difficulty);
+  void loadTokens(const std::string &filepath);
+  bool saveTokens(const std::string &filepath);
+  void createEntity(Token &token, Difficulty difficulty) const;
   static void tokenTouch(gentity_t *self, gentity_t *other, trace_t *trace);
-  static void createEntities();
+  void createEntities();
   static void reset();
   static std::array<int, 3> getTokenCounts();
+  static std::string tokenDifficultyToString(Tokens::Difficulty difficulty);
 
   static bool allTokensCollected(gentity_t *ent);
 
 private:
   std::string _filepath;
+  std::unique_ptr<Log> logger;
+  std::string errors;
 };
 } // namespace ETJump

@@ -900,7 +900,7 @@ typedef struct {
 
   std::vector<std::string> serverMaplist;
 
-  std::vector<CustomMapVotes::MapType> customVotes;
+  std::vector<ETJump::CustomMapVotes::MapType> customVotes;
   int numCustomvotes; // -1 if we haven't gotten the count yet
   int customvoteIndex;
   int customvoteMapsOnServerIndex;

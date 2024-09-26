@@ -196,40 +196,6 @@ void Utilities::Log(const std::string &message) {
   G_LogPrintf(message.c_str());
 }
 
-std::string Utilities::ReadFile(const std::string &filepath) {
-  fileHandle_t f;
-  auto len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_READ);
-  if (len == -1) {
-    throw std::runtime_error("Could not open file for reading: " + filepath);
-  }
-
-  std::unique_ptr<char[]> buf(new char[len + 1]);
-  trap_FS_Read(buf.get(), len, f);
-  trap_FS_FCloseFile(f);
-  buf[len] = 0;
-  return std::string(buf.get());
-}
-
-void Utilities::WriteFile(const std::string &filepath,
-                          const std::string &content) {
-  fileHandle_t f;
-  auto len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_WRITE);
-  if (len == -1) {
-    throw std::runtime_error("Could not open file for writing: " + filepath);
-  }
-
-  auto bytesWritten = trap_FS_Write(content.c_str(), content.length(), f);
-  if (bytesWritten == 0) {
-    trap_FS_FCloseFile(f);
-    throw std::runtime_error("Wrote 0 bytes to " + filepath);
-  }
-  trap_FS_FCloseFile(f);
-}
-
-void Utilities::Logln(const std::string &message) {
-  G_LogPrintf("%s\n", message.c_str());
-}
-
 void Utilities::Console(const std::string &message) {
   G_Printf(message.c_str());
 }
@@ -238,7 +204,7 @@ void Utilities::Error(const std::string &error) { G_Error(error.c_str()); }
 
 std::vector<std::string> Utilities::getMaps() {
   std::vector<std::string> maps;
-  MapStatistics mapStats;
+  ETJump::MapStatistics mapStats;
 
   int i = 0;
   int numDirs = 0;
@@ -258,7 +224,7 @@ std::vector<std::string> Utilities::getMaps() {
     Q_strncpyz(buf, dirPtr, sizeof(buf));
     Q_strlwr(buf);
 
-    if (MapStatistics::isBlockedMap(buf)) {
+    if (ETJump::MapStatistics::isBlockedMap(buf)) {
       continue;
     }
 
