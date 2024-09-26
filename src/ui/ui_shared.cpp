@@ -3772,7 +3772,8 @@ qboolean Item_HandleKey(itemDef_t *item, int key, qboolean down) {
 
   if (itemCapture) {
     if (itemCapture->cvar && itemCapture->cacheCvar &&
-        itemCapture->cacheCvarValue) {
+        itemCapture->cacheCvarValue && scrollInfo.item &&
+        scrollInfo.item->cacheCvarValue) {
       DC->setCVar(scrollInfo.item->cvar, scrollInfo.item->cacheCvarValue);
       scrollInfo.item->cacheCvarValue = nullptr;
     }
