@@ -34,5 +34,8 @@ public:
   static bool isPlayer(gentity_t *ent);
   static void checkForRailBox(gentity_t *ent);
   static bool playerIsSolid(int self, int other);
+
+  // 'threshold' indicates the number of entities that must be free
+  static bool entitiesFree(int threshold);
 };
 } // namespace ETJump
