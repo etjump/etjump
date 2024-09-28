@@ -1199,7 +1199,8 @@ static void storeSavepos() {
   if (argc == 2) {
     const char *arg = CG_Argv(1);
 
-    if (Q_isnumeric(*arg)) {
+    // if 1st arg is one character long and numeric, treat it as a flag
+    if (strlen(arg) == 1 && Q_isnumeric(*arg)) {
       flags = Q_atoi(arg);
     } else {
       filename = arg;
