@@ -65,6 +65,8 @@ private:
 
   static const int popupFadeTime = 100;
 
+  int demoSvFps;
+
   static bool canSkipDraw();
 };
 } // namespace ETJump

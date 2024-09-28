@@ -40,6 +40,10 @@ ETJump::TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
       &etj_runTimerInactiveColor, [&](const vmCvar_t *cvar) {
         parseColorString(cvar->string, inactiveTimerColor);
       });
+
+  if (cg.demoPlayback) {
+    demoSvFps = getSvFps();
+  }
 }
 
 ETJump::TimerunView::~TimerunView() = default;
@@ -83,13 +87,16 @@ void ETJump::TimerunView::draw() {
   const bool autoHide = etj_runTimerAutoHide.integer;
   vec4_t *color = &colorDefault;
 
-  // ensure correct 8ms interval timer when playing
-  // specs/demo playback get approximation from cg.time, so timer stays smooth
-  // one day this can maybe be real commandTime for all scenarios
-  // if we get to sv_fps 125 servers...
-  const int timeVar = (isPlaying(cg.clientNum) && !cg.demoPlayback)
-                          ? cg.predictedPlayerState.commandTime
-                          : cg.time;
+  // figure out the timing variable we can use for the run timer
+  int timeVar;
+
+  if (cg.demoPlayback) {
+    timeVar = demoSvFps == 125 ? cg.snap->ps.commandTime : cg.time;
+  } else if (isPlaying(cg.clientNum)) {
+    timeVar = cg.predictedPlayerState.commandTime;
+  } else {
+    timeVar = cgs.sv_fps == 125 ? cg.snap->ps.commandTime : cg.time;
+  }
 
   int millis;
 
