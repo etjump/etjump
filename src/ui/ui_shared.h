@@ -373,6 +373,9 @@ typedef struct itemDef_s {
   bool tooltipAbove;
 
   textScroll_t textScroll;
+
+  bool cacheCvar; // update cvar value only when itemCapture ends
+  const char *cacheCvarValue;
 } itemDef_t;
 
 typedef struct {

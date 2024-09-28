@@ -52,7 +52,7 @@ menuDef {
         MULTI               (SETTINGS_ITEM_POS(6), "Enable +activate lean:", 0.2, SETTINGS_ITEM_H, "etj_noActivateLean", cvarFloatList { "Yes" 0 "No" 1 }, "Enable leaning by pressing left/right movement keys when '+activate' is held\netj_noActivateLean")
         MULTI               (SETTINGS_ITEM_POS(7), "Quick follow:", 0.2, SETTINGS_ITEM_H, "etj_quickFollow", cvarFloatList { "No" 0 "Yes" 1 "Yes + draw hint" 2 }, "Spectate other players by aiming and pressing '+activate'\netj_quickFollow")
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(8), "etj_noclipScale", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(8), "Noclip scale:", 0.2, SETTINGS_ITEM_H, etj_noclipScale 1 0 10 0.2, "Scales the speed of noclip\netj_noclipScale")
+        CACHEDSLIDER        (SETTINGS_ITEM_POS(8), "Noclip scale:", 0.2, SETTINGS_ITEM_H, etj_noclipScale 1 0 10 0.2, "Scales the speed of noclip\netj_noclipScale")
         MULTI               (SETTINGS_ITEM_POS(9), "Auto weapon pickup:", 0.2, SETTINGS_ITEM_H, "etj_touchPickupWeapons", cvarFloatList { "No" 0 "Own + Spawned" 1 "All" 2 }, "Automatically pickup weapons when touching them\netj_touchPickupWeapons")
         YESNO               (SETTINGS_ITEM_POS(10), "Optimized prediction:", 0.2, SETTINGS_ITEM_H, "etj_optimizePrediction", "Enable optimized playerstate prediction to improve client side prediction performance\netj_optimizePrediction")
         YESNO               (SETTINGS_ITEM_POS(11), "No panzer autoswitch:", 0.2, SETTINGS_ITEM_H, "etj_noPanzerAutoswitch", "Disable automatic weapon switching after firing a panzerfaust\netj_noPanzerAutoswitch")
