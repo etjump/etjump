@@ -39,6 +39,10 @@ void SavePosHandler::execSaveposCommand(gentity_t *ent,
     return;
   }
 
+  if (ent->client->ps.stats[STAT_HEALTH] <= GIB_HEALTH) {
+    respawn(ent);
+  }
+
   saveposTeleport(ent, data);
 
   if (!data.timerunInfo.runName.empty()) {
