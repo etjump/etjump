@@ -43,6 +43,8 @@ void SavePosHandler::execSaveposCommand(gentity_t *ent,
     respawn(ent);
   }
 
+  game.timerunV2->interrupt(ClientNum(ent));
+
   saveposTeleport(ent, data);
 
   if (!data.timerunInfo.runName.empty()) {
@@ -82,8 +84,6 @@ void SavePosHandler::saveposTeleport(gentity_t *ent, const SavePosData &data) {
 void SavePosHandler::restoreSaveposTimerunState(gentity_t *ent,
                                                 const SavePosData &data) {
   const int clientNum = ClientNum(ent);
-
-  game.timerunV2->interrupt(clientNum);
 
   // we can't use the real startTime from the timerun info, as that is set to
   // whatever the server timestamp was at the time the position was saved,
