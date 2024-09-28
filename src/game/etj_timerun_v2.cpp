@@ -1117,29 +1117,25 @@ void ETJump::TimerunV2::startNotify(Player *player) const {
           .serialize());
 }
 
-bool ETJump::TimerunV2::isDebugging(int clientNum) {
+bool ETJump::TimerunV2::isDebugging(const int clientNum) {
   std::vector<std::string> debuggers;
 
-  if (g_debugTimeruns.integer > 0) {
-    debuggers.emplace_back("Timerun");
-  }
-
-  if (g_debugTrackers.integer > 0) {
+  if (g_debugTrackers.integer) {
     debuggers.emplace_back("Tracker");
   }
 
-  if (!debuggers.empty()) {
-    Printer::popup(clientNum, "Record not saved:\n");
-
-    for (auto &debugger : debuggers) {
-      std::string fmt = stringFormat("- ^3%s ^7debugging enabled.\n", debugger);
-      Printer::popup(clientNum, fmt);
-    }
-
-    return true;
+  if (debuggers.empty()) {
+    return false;
   }
 
-  return false;
+  Printer::popup(clientNum, "Record not saved:\n");
+
+  for (auto &debugger : debuggers) {
+    std::string fmt = stringFormat("- ^3%s ^7debugging enabled.\n", debugger);
+    Printer::popup(clientNum, fmt);
+  }
+
+  return true;
 }
 
 int ETJump::TimerunV2::indexForRunname(const std::string &runName) {
