@@ -71,7 +71,9 @@ void SavePos::parseExistingPositions(const bool manual) {
                 "^3'etjump/savepos/' ^7directory.\n");
     }
   } else {
-    CG_Printf("Parsed data for ^3%i ^7savepos files.\n", savePositions.size());
+    CG_Printf("Parsed data for ^3%i ^7savepos %s.\n",
+              static_cast<int>(savePositions.size()),
+              savePositions.size() == 1 ? "file" : "files");
   }
 }
 
