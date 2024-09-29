@@ -214,12 +214,10 @@ int ETJump::getSvFps() {
   int fps;
 
   if (cg.demoPlayback) {
-    static bool svFpsAvailable = demoCompatibility->isCompatible({3, 3, 0});
-    static bool csAvailable = demoCompatibility->isCompatible({3, 2, 0});
 
-    if (svFpsAvailable) {
+    if (demoCompatibility->flags.svFpsInCgs) {
       fps = cgs.sv_fps;
-    } else if (csAvailable) {
+    } else if (demoCompatibility->flags.svFpsInSysteminfo) {
       const char *cs = CG_ConfigString(CS_SYSTEMINFO);
       fps = Q_atoi(Info_ValueForKey(cs, "sv_fps"));
     } else {

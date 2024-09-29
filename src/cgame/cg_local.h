@@ -1258,8 +1258,6 @@ typedef struct {
   // ETJump: hold last jump position for chs
   vec3_t etjLastJumpPos;
 
-  bool requiresEntityTypeAdjustment; // ETJump 2.3.0 specific hack
-
   char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
 
   bool shadowCvarsSet;
@@ -4221,7 +4219,7 @@ extern std::vector<std::shared_ptr<CvarShadow>> cvarShadows;
 extern std::shared_ptr<EventLoop> eventLoop;
 extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 extern std::shared_ptr<ClientRtvHandler> rtvHandler;
-extern std::shared_ptr<DemoCompatibility> demoCompatibility;
+extern std::unique_ptr<DemoCompatibility> demoCompatibility;
 extern std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 extern std::shared_ptr<PlayerBBox> playerBBox;
 

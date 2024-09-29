@@ -12,6 +12,7 @@
 #include "etj_init.h"
 #include "etj_cvar_shadow.h"
 #include "etj_cvar_update_handler.h"
+#include "etj_demo_compatibility.h"
 #include "etj_utilities.h"
 #include "etj_rtv_drawable.h"
 
@@ -4047,19 +4048,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   cgs.demoCam.startLean = qfalse;
   cgs.demoCam.noclip = qfalse;
 
-  if (cg.demoPlayback) {
-    // Marks the right 2.3.0 version to perform the entity type
-    // adjustement hack
-    char *pakBaseName = strchr(Info_ValueForKey(CG_ConfigString(CS_SYSTEMINFO),
-                                                "sv_referencedPakNames"),
-                               '/') +
-                        1;
-    if (!Q_strncmp(pakBaseName, "etjump-2_3_0-RC4 ", 17) ||
-        !Q_strncmp(pakBaseName, "etjump-2_3_0 ", 13)) {
-      cg.requiresEntityTypeAdjustment = true;
-    }
-  }
-
   CG_InitLocations();
 
   ETJump::init();
@@ -4073,6 +4061,10 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   }
 
   Com_Printf("CG_Init... DONE\n");
+
+  if (cg.demoPlayback) {
+    ETJump::demoCompatibility->printDemoInformation();
+  }
 }
 
 /*
