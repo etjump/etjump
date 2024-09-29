@@ -137,72 +137,73 @@ void TimerunEntity::validateTimerunEntities() {
   }
 }
 
-bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
+bool TimerunEntity::canStartTimerun(const gentity_t *self,
+                                    const gentity_t *activator,
                                     const int clientNum, const float speed) {
-  auto client = activator->client;
+  const auto client = activator->client;
 
   if (!client->pers.enableTimeruns || client->sess.timerunActive) {
     return false;
   }
 
-  // disable some checks if we're on a debugging session
-  if (!g_debugTimeruns.integer) {
-    if (client->noclip || activator->flags & FL_GODMODE) {
-      Printer::center(
-          clientNum,
-          "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
-      return false;
-    }
+  // disable checks if cheats are enabled
+  if (g_cheats.integer) {
+    return true;
+  }
 
-    if (client->noclipThisLife) {
-      Printer::center(clientNum,
-                      "^3WARNING: ^7Timerun was not started. ^3noclip "
-                      "^7activated this life, ^3/kill ^7required!");
-      return false;
-    }
+  if (client->noclip || activator->flags & FL_GODMODE) {
+    Printer::center(
+        clientNum,
+        "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
+    return false;
+  }
 
-    if (client->setoffsetThisLife) {
-      Printer::center(clientNum,
-                      "^3WARNING: ^7Timerun was not started. ^3setoffset "
-                      "^7activated this life, ^3/kill ^7required!");
-      return false;
-    }
+  if (client->noclipThisLife) {
+    Printer::center(clientNum, "^3WARNING: ^7Timerun was not started. ^3noclip "
+                               "^7activated this life, ^3/kill ^7required!");
+    return false;
+  }
 
-    if (client->ftNoGhostThisLife &&
-        !(self->spawnflags &
-          static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
-      Printer::center(
-          clientNum,
-          "^3WARNING: ^7Timerun was not started. ^3fireteam noghost ^7enabled "
-          "this life & run does not allow noghost, ^3/kill ^7required!");
-      return false;
-    }
+  if (client->setoffsetThisLife) {
+    Printer::center(clientNum,
+                    "^3WARNING: ^7Timerun was not started. ^3setoffset "
+                    "^7activated this life, ^3/kill ^7required!");
+    return false;
+  }
 
-    if (client->pmoveOffThisLife &&
-        (!self->spawnflags ||
-         self->spawnflags &
-             static_cast<int>(TimerunSpawnflags::ResetNoPmove))) {
-      Printer::center(clientNum,
-                      "^3WARNING: ^7Timerun was not started. ^3pmove_fixed 0 "
-                      "^7set this life, ^3/kill ^7required!");
-      return false;
-    }
+  if (client->ftNoGhostThisLife &&
+      !(self->spawnflags &
+        static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
+    Printer::center(
+        clientNum,
+        "^3WARNING: ^7Timerun was not started. ^3fireteam noghost ^7enabled "
+        "this life & run does not allow noghost, ^3/kill ^7required!");
+    return false;
+  }
 
-    if (speed > self->velocityUpperLimit) {
-      Printer::center(clientNum,
-                      stringFormat("^3WARNING: ^7Timerun was not started. Too "
-                                   "high starting speed (%.2f > %.2f)\n",
-                                   speed, self->velocityUpperLimit));
-      return false;
-    }
+  if (client->pmoveOffThisLife &&
+      (!self->spawnflags ||
+       self->spawnflags & static_cast<int>(TimerunSpawnflags::ResetNoPmove))) {
+    Printer::center(clientNum,
+                    "^3WARNING: ^7Timerun was not started. ^3pmove_fixed 0 "
+                    "^7set this life, ^3/kill ^7required!");
+    return false;
+  }
 
-    if (client->ps.viewangles[ROLL] != 0) {
-      Printer::center(clientNum,
-                      stringFormat("^3WARNING: ^7Timerun was not started. "
-                                   "Illegal roll angles (%.2f != 0)",
-                                   client->ps.viewangles[ROLL]));
-      return false;
-    }
+  if (speed > self->velocityUpperLimit) {
+    Printer::center(clientNum,
+                    stringFormat("^3WARNING: ^7Timerun was not started. Too "
+                                 "high starting speed (%.2f > %.2f)\n",
+                                 speed, self->velocityUpperLimit));
+    return false;
+  }
+
+  if (client->ps.viewangles[ROLL] != 0) {
+    Printer::center(clientNum,
+                    stringFormat("^3WARNING: ^7Timerun was not started. "
+                                 "Illegal roll angles (%.2f != 0)",
+                                 client->ps.viewangles[ROLL]));
+    return false;
   }
 
   return true;

@@ -718,28 +718,28 @@ argv(0) god
 ==================
 */
 void Cmd_God_f(gentity_t *ent) {
-  const char *msg;
-  char *name;
+  if (!g_cheats.integer) {
+    if (ent->client->sess.timerunActive) {
+      Printer::center(ent, "You cannot use cheats while timerun is active.");
+      return;
+    }
 
-  if (ent->client->sess.timerunActive && g_debugTimeruns.integer <= 0) {
-    CP("cp \"You cannot use cheats while timerun is active.\n\"");
-    return;
+    if (level.noGod) {
+      Printer::center(ent, "^3god ^7has been disabled on this map.");
+      return;
+    }
   }
 
   if (!CheatsOk(ent)) {
     return;
   }
 
-  if (!g_cheats.integer && level.noGod) {
-    CP("cp \"God has been disabled on this map.\n\"");
-    return;
-  }
+  const char *msg;
+  const char *arg = ConcatArgs(1);
 
-  name = ConcatArgs(1);
-
-  if (!Q_stricmp(name, "on") || Q_atoi(name)) {
+  if (!Q_stricmp(arg, "on") || Q_atoi(arg)) {
     ent->flags |= FL_GODMODE;
-  } else if (!Q_stricmp(name, "off") || !Q_stricmp(name, "0")) {
+  } else if (!Q_stricmp(arg, "off") || !Q_stricmp(arg, "0")) {
     ent->flags &= ~FL_GODMODE;
   } else {
     ent->flags ^= FL_GODMODE;
@@ -828,31 +828,29 @@ OperationResult canNoclip(gentity_t *ent) {
     return {false, "^7Non-player entities cannot use ^3%s^7.\n"};
   }
 
-  if (!g_cheats.integer && ent->client->sess.timerunActive &&
-      g_debugTimeruns.integer <= 0) {
-    return {false, "^7Cannot use ^3%s ^7while timer is running.\n"};
-  }
-
-  if (!g_cheats.integer && ent->client->sess.deathrunFlags &
-                               static_cast<int>(DeathrunFlags::Active)) {
-    return {false, "^7Cannot use ^3%s ^7while death run is active.\n"};
-  }
-
-  if (ent->client->ps.eFlags & EF_DEAD) {
-    return {false, "^7Cannot use ^3%s ^7in this state.\n"};
-  }
-
   if (!g_cheats.integer) {
+    if (ent->client->sess.timerunActive) {
+      return {false, "^7Cannot use ^3%s ^7while timer is running.\n"};
+    }
+
+    if (ent->client->sess.deathrunFlags &
+        static_cast<int>(DeathrunFlags::Active)) {
+      return {false, "^7Cannot use ^3%s ^7while death run is active.\n"};
+    }
+
     if (Utilities::inNoNoclipArea(ent)) {
       return {false, "^7You cannot ^3%s ^7inside this area.\n"};
     }
 
     if (ent->client->pers.noclipCount == 0 && !ent->client->noclip) {
       if (!g_noclip.integer && !CheatsOk(ent)) {
-        return {false, "^7You can no longer "
-                       "use ^3%s^7.\n"};
+        return {false, "^7You can no longer use ^3%s^7.\n"};
       }
     }
+  }
+
+  if (ent->client->ps.eFlags & EF_DEAD) {
+    return {false, "^7Cannot use ^3%s ^7in this state.\n"};
   }
 
   return {true, ""};
