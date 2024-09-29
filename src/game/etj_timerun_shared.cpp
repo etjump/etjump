@@ -169,15 +169,16 @@ std::string TimerunCommands::SavePosStart::serialize() {
                       StringUtil::join(currentRunCheckpoints, ","));
 }
 
-std::string TimerunCommands::Checkpoint::serialize() {
-  return stringFormat("timerun checkpoint %d %d %d \"%s\"", clientNum,
-                      checkpointIndex, checkpointTime, runName);
+std::string TimerunCommands::Checkpoint::serialize() const {
+  return stringFormat("timerun checkpoint %d %d %d \"%s\" %d", clientNum,
+                      checkpointNum, checkpointTime, runName, checkpointIndex);
 }
 
 opt<TimerunCommands::Checkpoint>
 TimerunCommands::Checkpoint::deserialize(const std::vector<std::string> &args) {
   auto empty = opt<Checkpoint>();
-  const int expectedFields = 6;
+  constexpr int expectedFields = 6;
+
   if (args.size() < expectedFields) {
     return empty;
   }
@@ -197,11 +198,11 @@ TimerunCommands::Checkpoint::deserialize(const std::vector<std::string> &args) {
     return empty;
   }
 
-  auto cpi = parseInteger(args[3]);
-  if (!cpi.hasValue()) {
+  auto cpn = parseInteger(args[3]);
+  if (!cpn.hasValue()) {
     return empty;
   }
-  cp.checkpointIndex = cpi.value();
+  cp.checkpointNum = cpn.value();
 
   auto time = parseTime(args[4]);
   if (!time.hasValue()) {
@@ -209,6 +210,19 @@ TimerunCommands::Checkpoint::deserialize(const std::vector<std::string> &args) {
   }
   cp.checkpointTime = time.value();
   cp.runName = args[5];
+
+  if (args.size() == 6) {
+    return cp;
+  }
+
+  // ETJump 3.3.0 onwards, the checkpoint index we've hit is part of the command
+  auto cpi = parseInteger(args[6]);
+
+  if (!cpi.hasValue()) {
+    return empty;
+  }
+
+  cp.checkpointIndex = cpi.value();
 
   return cp;
 }

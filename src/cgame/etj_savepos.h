@@ -43,7 +43,7 @@ class SavePos {
   void writeSaveposFile(SavePosData &data);
 
   // adds new savepos to savePositions map, or overwrites an existing one
-  void storePosition(SavePosData &data);
+  void storePosition(const SavePosData &data);
 
   std::shared_ptr<Timerun> timerun = nullptr;
 

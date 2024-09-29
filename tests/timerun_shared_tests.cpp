@@ -79,12 +79,20 @@ TEST_F(TimerunSharedTests, Start_ShouldDeserialize_IfNoPreviousRecord) {
 }
 
 TEST_F(TimerunSharedTests, Checkpoint_ShouldSerialize) {
-  auto checkpoint = TimerunCommands::Checkpoint(1, 2, 3, "4");
+  auto checkpoint = TimerunCommands::Checkpoint(1, 2, 3, "4", 5);
 
-  ASSERT_EQ(checkpoint.serialize(), "timerun checkpoint 1 2 3 \"4\"");
+  ASSERT_EQ(checkpoint.serialize(), "timerun checkpoint 1 2 3 \"4\" 5");
 }
 
 TEST_F(TimerunSharedTests, Checkpoint_ShouldDeserialize) {
+  auto args = std::vector<std::string>{"timerun", "checkpoint", "1", "2",
+                                       "3",       "4",          "5"};
+  auto checkpoint = TimerunCommands::Checkpoint::deserialize(args);
+
+  ASSERT_EQ(checkpoint.value().checkpointIndex, 5);
+}
+
+TEST_F(TimerunSharedTests, Checkpoint_ShouldDeserializeWithoutCheckpointIndex) {
   auto args =
       std::vector<std::string>{"timerun", "checkpoint", "1", "2", "3", "4"};
   auto checkpoint = TimerunCommands::Checkpoint::deserialize(args);

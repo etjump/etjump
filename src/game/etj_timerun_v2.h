@@ -66,7 +66,7 @@ public:
     bool runHasCheckpoints;
     int nextCheckpointIdx;
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointTimes{};
-    std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointIndexesHit{};
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
     // /loadcheckpoints stores checkpoints here
     std::map<std::string, std::array<int, MAX_TIMERUN_CHECKPOINTS>>
         overriddenCheckpoints{};
@@ -102,7 +102,7 @@ public:
                          int currentTimeMs, const SavePosData &data);
 
   void checkpoint(const std::string &runName, int clientNum,
-                  int checkpointIndex, int currentTimeMs);
+                  int checkpointIndex, int currentTimeMs) const;
   void stopTimer(const std::string &runName, int clientNum, int currentTimeMs);
   void addSeason(Timerun::AddSeasonParams season);
   void editSeason(Timerun::EditSeasonParams params);
@@ -125,7 +125,8 @@ private:
    * or if the player is already running
    */
   Player *setupPlayerData(int clientNum, const std::string &runName,
-                          const std::string &playerName, int currentTimeMs);
+                          const std::string &playerName,
+                          int currentTimeMs) const;
 
   static std::array<int, MAX_TIMERUN_CHECKPOINTS>
   toCheckpointsArray(const std::vector<int> *vector);

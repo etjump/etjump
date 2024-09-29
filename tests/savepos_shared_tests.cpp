@@ -13,6 +13,13 @@ public:
     return checkpoints;
   }
 
+  static std::array<bool, MAX_TIMERUN_CHECKPOINTS>
+  createNullCheckpointIndicesHit() {
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
+    checkpointIndicesHit.fill(false);
+    return checkpointIndicesHit;
+  }
+
   static std::array<int, MAX_TIMERUN_CHECKPOINTS> createDefaultCheckpoints() {
     return {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, -1, -1};
   }
@@ -20,6 +27,12 @@ public:
   static std::array<int, MAX_TIMERUN_CHECKPOINTS>
   createDefaultPreviousCheckpoints() {
     return {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -1, -1, -1, -1, -1, -1};
+  }
+
+  static std::array<bool, MAX_TIMERUN_CHECKPOINTS>
+  createDefaultCheckpointIndicesHit() {
+    return {true,  false, false, true,  false, false, false, false,
+            false, false, false, false, false, true,  false, false};
   }
 
   static std::vector<std::string> createSampleArgs() {
@@ -37,7 +50,8 @@ public:
             "100",
             "-1",
             "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1",
-            "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1"};
+            "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1",
+            "1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0"};
   }
 
   static SavePosData createSampleData() {
@@ -60,6 +74,7 @@ public:
     data.timerunInfo.checkpoints = createDefaultCheckpoints();
     data.timerunInfo.previousRecordCheckpoints =
         createDefaultPreviousCheckpoints();
+    data.timerunInfo.checkpointIndicesHit = createDefaultCheckpointIndicesHit();
 
     return data;
   }
@@ -68,20 +83,22 @@ public:
 TEST_F(SavePosSharedTests, serialize_ShouldSerialize) {
   const SavePosData data = createSampleData();
 
-  ASSERT_EQ(SavePosData::serialize(data),
-            "loadpos 1 1 1 2 2 2 3 3 3 0 \"samplerun\" 100 -1 "
-            "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1 "
-            "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1");
+  ASSERT_EQ(
+      SavePosData::serialize(data),
+      "loadpos 1 1 1 2 2 2 3 3 3 0 \"samplerun\" 100 -1 "
+      "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1 "
+      "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1 1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0");
 }
 
 TEST_F(SavePosSharedTests, serialize_ShouldSerializeWithMultipartRunName) {
   SavePosData data = createSampleData();
   data.timerunInfo.runName = "foo bar";
 
-  ASSERT_EQ(SavePosData::serialize(data),
-            "loadpos 1 1 1 2 2 2 3 3 3 0 \"foo bar\" 100 -1 "
-            "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1 "
-            "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1");
+  ASSERT_EQ(
+      SavePosData::serialize(data),
+      "loadpos 1 1 1 2 2 2 3 3 3 0 \"foo bar\" 100 -1 "
+      "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1 "
+      "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1 1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0");
 }
 
 TEST_F(SavePosSharedTests, serialize_ShouldSerializeWithoutTimerunData) {
@@ -116,6 +133,8 @@ TEST_F(SavePosSharedTests, deserialize_ShouldDeserialize) {
   ASSERT_EQ(data.timerunInfo.checkpoints, createDefaultCheckpoints());
   ASSERT_EQ(data.timerunInfo.previousRecordCheckpoints,
             createDefaultPreviousCheckpoints());
+  ASSERT_EQ(data.timerunInfo.checkpointIndicesHit,
+            createDefaultCheckpointIndicesHit());
 }
 
 TEST_F(SavePosSharedTests, deserialize_ShouldDeserializeWithMultipartRunName) {
@@ -144,6 +163,8 @@ TEST_F(SavePosSharedTests, deserialize_ShouldDeserializeWithMultipartRunName) {
   ASSERT_EQ(data.timerunInfo.checkpoints, createDefaultCheckpoints());
   ASSERT_EQ(data.timerunInfo.previousRecordCheckpoints,
             createDefaultPreviousCheckpoints());
+  ASSERT_EQ(data.timerunInfo.checkpointIndicesHit,
+            createDefaultCheckpointIndicesHit());
 }
 
 TEST_F(SavePosSharedTests, deserialize_ShouldDeserializeWithoutTimerunData) {
@@ -172,6 +193,8 @@ TEST_F(SavePosSharedTests, deserialize_ShouldDeserializeWithoutTimerunData) {
   ASSERT_EQ(data.timerunInfo.checkpoints, createNullCheckpoints());
   ASSERT_EQ(data.timerunInfo.previousRecordCheckpoints,
             createNullCheckpoints());
+  ASSERT_EQ(data.timerunInfo.checkpointIndicesHit,
+            createNullCheckpointIndicesHit());
 }
 
 TEST_F(SavePosSharedTests,
@@ -188,6 +211,13 @@ TEST_F(SavePosSharedTests,
 
   ASSERT_EQ(data.timerunInfo.previousRecordCheckpoints,
             createNullCheckpoints());
+
+  args = createSampleArgs();
+  args[15] = "1,0,0,0,1,0";
+  data = SavePosData::deserialize(args);
+
+  ASSERT_EQ(data.timerunInfo.checkpointIndicesHit,
+            createNullCheckpointIndicesHit());
 }
 
 TEST_F(SavePosSharedTests, deserialize_ShouldThrowError) {

@@ -120,6 +120,9 @@ void SavePos::createSaveposData(const std::string &file, const int flags) {
     std::copy(currentRun->previousRecordCheckpoints.cbegin(),
               currentRun->previousRecordCheckpoints.cend(),
               data.timerunInfo.previousRecordCheckpoints.begin());
+    std::copy(currentRun->checkpointIndicesHit.cbegin(),
+              currentRun->checkpointIndicesHit.cend(),
+              data.timerunInfo.checkpointIndicesHit.begin());
   }
 
   writeSaveposFile(data);
@@ -159,6 +162,7 @@ void SavePos::writeSaveposFile(SavePosData &data) {
 
   timerunInfo["checkpoints"] = Json::arrayValue;
   timerunInfo["previousRecordCheckpoints"] = Json::arrayValue;
+  timerunInfo["checkpointIndicesHit"] = Json::arrayValue;
 
   for (const auto &checkpoint : data.timerunInfo.checkpoints) {
     timerunInfo["checkpoints"].append(checkpoint).asInt();
@@ -166,6 +170,11 @@ void SavePos::writeSaveposFile(SavePosData &data) {
 
   for (const auto &checkpoint : data.timerunInfo.previousRecordCheckpoints) {
     timerunInfo["previousRecordCheckpoints"].append(checkpoint).asInt();
+  }
+
+  for (const auto &checkpoint : data.timerunInfo.checkpointIndicesHit) {
+    // read/write this as an int instead of boolean to make parsing easier
+    timerunInfo["checkpointIndicesHit"].append(checkpoint).asInt();
   }
 
   root["timerunInfo"] = timerunInfo;
@@ -260,13 +269,17 @@ void SavePos::parseSavepos(const std::string &file) {
   const Json::Value &checkpoints = timerunInfo["checkpoints"];
   const Json::Value &previousRecordCheckpoints =
       timerunInfo["previousRecordCheckpoints"];
+  const Json::Value &checkpointIndicesHit = timerunInfo["checkpointIndicesHit"];
 
   for (int i = 0; i < MAX_TIMERUN_CHECKPOINTS; i++) {
     if (!JsonUtils::parseValue(data.timerunInfo.checkpoints[i], checkpoints[i],
                                &errors, "checkpoints") ||
         !JsonUtils::parseValue(data.timerunInfo.previousRecordCheckpoints[i],
                                previousRecordCheckpoints[i], &errors,
-                               "previousRecordCheckpoints")) {
+                               "previousRecordCheckpoints") ||
+        !JsonUtils::parseValue(data.timerunInfo.checkpointIndicesHit[i],
+                               checkpointIndicesHit[i], &errors,
+                               "checkpointIndicesHit")) {
       parsingFailed(errors);
       return;
     }
@@ -275,7 +288,7 @@ void SavePos::parseSavepos(const std::string &file) {
   storePosition(data);
 }
 
-void SavePos::storePosition(ETJump::SavePosData &data) {
+void SavePos::storePosition(const SavePosData &data) {
   savePositions[data.name] = data;
 }
 

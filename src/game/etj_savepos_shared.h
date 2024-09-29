@@ -42,6 +42,7 @@ class SavePosData {
     TimerunInfo() {
       checkpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
       previousRecordCheckpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
+      checkpointIndicesHit.fill(false);
       previousRecord = -1;
     };
 
@@ -50,6 +51,7 @@ class SavePosData {
     int previousRecord{};
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
     std::array<int, MAX_TIMERUN_CHECKPOINTS> previousRecordCheckpoints{};
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
   };
 
 public:

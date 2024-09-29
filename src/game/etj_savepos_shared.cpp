@@ -41,12 +41,14 @@ std::string SavePosData::serialize(const SavePosData &data) {
       StringUtil::join(data.timerunInfo.checkpoints, ",");
   const std::string &previousRecordCheckpoints =
       StringUtil::join(data.timerunInfo.previousRecordCheckpoints, ",");
+  const std::string &checkpointIndicesHit =
+      StringUtil::join(data.timerunInfo.checkpointIndicesHit, ",");
 
   return stringFormat(
-      "loadpos %s %s %s %i \"%s\" %i %i %s %s", origin, angles, velocity,
+      "loadpos %s %s %s %i \"%s\" %i %i %s %s %s", origin, angles, velocity,
       static_cast<int>(data.pos.stance), data.timerunInfo.runName,
       data.timerunInfo.currentRunTimer, data.timerunInfo.previousRecord,
-      checkpoints, previousRecordCheckpoints);
+      checkpoints, previousRecordCheckpoints, checkpointIndicesHit);
 }
 
 SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
@@ -54,7 +56,7 @@ SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
   SavePosData data{};
 
   static constexpr int MIN_SAVEPOS_ARGS = 10;
-  static constexpr int MIN_SAVEPOS_TIMERUN_ARGS = 15;
+  static constexpr int MIN_SAVEPOS_TIMERUN_ARGS = 16;
 
   if (args.size() < MIN_SAVEPOS_ARGS) {
     data.error = stringFormat("Too few arguments to parse position (%i < %i)\n",
@@ -88,10 +90,12 @@ SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
 
     const auto checkpoints = StringUtil::split(args[13], ",");
     const auto previousRecordCheckpoints = StringUtil::split(args[14], ",");
+    const auto checkpointIndicesHit = StringUtil::split(args[15], ",");
 
     // sanity check
     if (checkpoints.size() != MAX_TIMERUN_CHECKPOINTS ||
-        previousRecordCheckpoints.size() != MAX_TIMERUN_CHECKPOINTS) {
+        previousRecordCheckpoints.size() != MAX_TIMERUN_CHECKPOINTS ||
+        checkpointIndicesHit.size() != MAX_TIMERUN_CHECKPOINTS) {
       return data;
     }
 
@@ -99,6 +103,8 @@ SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
       data.timerunInfo.checkpoints[i] = std::stoi(checkpoints[i]);
       data.timerunInfo.previousRecordCheckpoints[i] =
           std::stoi(previousRecordCheckpoints[i]);
+      data.timerunInfo.checkpointIndicesHit[i] =
+          static_cast<bool>(std::stoi(checkpointIndicesHit[i]));
     }
   } catch (const std::invalid_argument &e) {
     data.error = stringFormat("invalid argument for %s\n", e.what());

@@ -85,17 +85,20 @@ class Checkpoint {
 public:
   Checkpoint() = default;
 
-  Checkpoint(int clientNum, int checkpointIndex, int checkpointTime,
-             const std::string &runName)
-      : clientNum(clientNum), checkpointIndex(checkpointIndex),
-        checkpointTime(checkpointTime), runName(runName) {}
+  Checkpoint(const int clientNum, const int checkpointNum,
+             const int checkpointTime, const std::string &runName,
+             const int checkpointIndex)
+      : clientNum(clientNum), checkpointNum(checkpointNum),
+        checkpointTime(checkpointTime), runName(runName),
+        checkpointIndex(checkpointIndex) {}
 
   int clientNum{};
-  int checkpointIndex{};
+  int checkpointNum{}; // sequential counter, how many checkpoints we've hit
   int checkpointTime{};
   std::string runName{};
+  int checkpointIndex{}; // index for Player.checkpointIndexesHit
 
-  std::string serialize();
+  std::string serialize() const;
 
   static opt<Checkpoint> deserialize(const std::vector<std::string> &args);
 };

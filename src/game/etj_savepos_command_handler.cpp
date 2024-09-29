@@ -94,17 +94,19 @@ void SavePosHandler::restoreSaveposTimerunState(gentity_t *ent,
   game.timerunV2->startSaveposTimer(clientNum, ent->client->pers.netname,
                                     startTime, data);
 
+  int checkpointNum = 0;
+
   for (int i = 0; i < MAX_TIMERUN_CHECKPOINTS; i++) {
-    // checkpoint times are added sequentially so as soon as
-    // we find one without a time set, we can stop sending the commands
-    if (data.timerunInfo.checkpoints[i] == TIMERUN_CHECKPOINT_NOT_SET) {
-      break;
+    // skip any checkpoint indices we haven't hit
+    if (!data.timerunInfo.checkpointIndicesHit[i]) {
+      continue;
     }
 
     // these are relative times from the beginning of the run,
     // so we just add them to the adjusted startTime
-    game.timerunV2->checkpoint(data.timerunInfo.runName, clientNum, i,
-                               startTime + data.timerunInfo.checkpoints[i]);
+    game.timerunV2->checkpoint(
+        data.timerunInfo.runName, clientNum, i,
+        startTime + data.timerunInfo.checkpoints[checkpointNum++]);
   }
 }
 } // namespace ETJump

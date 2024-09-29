@@ -313,8 +313,8 @@ void ETJump::TimerunV2::clientDisconnect(int clientNum) {
 
 ETJump::TimerunV2::Player *ETJump::TimerunV2::setupPlayerData(
     const int clientNum, const std::string &runName,
-    const std::string &playerName, const int currentTimeMs) {
-  auto player = _players[clientNum].get();
+    const std::string &playerName, const int currentTimeMs) const {
+  const auto player = _players[clientNum].get();
 
   if (!player) {
     _logger->error("Trying to start run `%s` for client `%d` but no player "
@@ -338,7 +338,7 @@ ETJump::TimerunV2::Player *ETJump::TimerunV2::setupPlayerData(
   player->runHasCheckpoints =
       level.checkpointsCount[indexForRunname(runName)] != 0;
   player->checkpointTimes.fill(TIMERUN_CHECKPOINT_NOT_SET);
-  player->checkpointIndexesHit.fill(false);
+  player->checkpointIndicesHit.fill(false);
   player->nextCheckpointIdx = 0;
 
   return player;
@@ -380,8 +380,10 @@ void ETJump::TimerunV2::startSaveposTimer(int clientNum,
   Utilities::startRun(clientNum);
 }
 
-void ETJump::TimerunV2::checkpoint(const std::string &runName, int clientNum,
-                                   int checkpointIndex, int currentTimeMs) {
+void ETJump::TimerunV2::checkpoint(const std::string &runName,
+                                   const int clientNum,
+                                   const int checkpointIndex,
+                                   const int currentTimeMs) const {
   Player *player = _players[clientNum].get();
 
   if (player == nullptr) {
@@ -396,11 +398,11 @@ void ETJump::TimerunV2::checkpoint(const std::string &runName, int clientNum,
     return;
   }
 
-  if (player->checkpointIndexesHit[checkpointIndex]) {
+  if (player->checkpointIndicesHit[checkpointIndex]) {
     return;
   }
 
-  player->checkpointIndexesHit[checkpointIndex] = true;
+  player->checkpointIndicesHit[checkpointIndex] = true;
 
   player->checkpointTimes[player->nextCheckpointIdx++] =
       currentTimeMs - player->startTime.value();
@@ -409,7 +411,7 @@ void ETJump::TimerunV2::checkpoint(const std::string &runName, int clientNum,
       TimerunCommands::Checkpoint(
           clientNum, player->nextCheckpointIdx - 1,
           player->checkpointTimes[player->nextCheckpointIdx - 1],
-          player->activeRunName)
+          player->activeRunName, checkpointIndex)
           .serialize());
 }
 

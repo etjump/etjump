@@ -52,7 +52,9 @@ public:
     PlayerTimerunInformation() {
       previousRecordCheckpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
       checkpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
-    };
+      checkpointIndicesHit.fill(false);
+    }
+
     int startTime{};
     int completionTime{};
     std::string runName;
@@ -64,8 +66,8 @@ public:
     bool runHasCheckpoints = false;
     int numCheckpointsHit{};
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
-    int nextFreeCheckpointIdx{};
     int lastCheckpointTimestamp{};
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
   };
 
   explicit Timerun(int clientNum,
