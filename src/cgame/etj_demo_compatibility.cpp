@@ -125,6 +125,12 @@ void DemoCompatibility::setupCompatibilityFlags() {
     compatibilityStrings.emplace_back(
         "- sv_fps can be read from client game static struct");
   }
+
+  if (isCompatible({3, 3, 0})) {
+    flags.saveposTimerunInfo = true;
+    compatibilityStrings.emplace_back(
+        "- Timerun state can be saved to 'savepos'");
+  }
 }
 
 void DemoCompatibility::printDemoInformation() const {

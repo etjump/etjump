@@ -34,8 +34,11 @@
 namespace ETJump {
 
 SavePos::SavePos(const std::shared_ptr<Timerun> &p) {
+  // FIXME: remove developer check
   const bool timerunCompatible =
-      cg.demoPlayback ? demoCompatibility->isCompatible({3, 0, 0}) : true;
+      cg.demoPlayback
+          ? demoCompatibility->flags.saveposTimerunInfo || developer.integer
+          : true;
 
   if (!p || !timerunCompatible) {
     CG_Printf("^3WARNING: ^7unable to initialize timerun information for "
@@ -43,7 +46,7 @@ SavePos::SavePos(const std::shared_ptr<Timerun> &p) {
 
     if (!timerunCompatible) {
       CG_Printf("Timerun state cannot be saved from demos recorded prior to "
-                "^3ETJump 3.0.0\n");
+                "^3ETJump 3.3.0\n");
     } else {
       CG_Printf("Try reconnecting or performing a 'vid_restart' to resolve the "
                 "issue.\n");
