@@ -37,7 +37,7 @@ SavePos::SavePos(const std::shared_ptr<Timerun> &p) {
   // FIXME: remove developer check
   const bool timerunCompatible =
       cg.demoPlayback
-          ? demoCompatibility->flags.saveposTimerunInfo || developer.integer
+          ? !demoCompatibility->flags.noSavePosTimerunInfo || developer.integer
           : true;
 
   if (!p || !timerunCompatible) {

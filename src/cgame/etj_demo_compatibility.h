@@ -54,7 +54,7 @@ public:
     bool svFpsInSysteminfo = false;
     bool svFpsInCgs = false;
     bool adjustEntityTypes = false;
-    bool saveposTimerunInfo = false;
+    bool noSavePosTimerunInfo = false;
   };
 
   // everything in here will be set to false unless we're on demo playback
