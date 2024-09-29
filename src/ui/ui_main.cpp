@@ -7344,6 +7344,29 @@ void parseCustomvote() {
     }
   }
 }
+
+void resetCustomvotes() {
+  uiInfo.customVotes.clear();
+  uiInfo.numCustomvotes = -1;
+  uiInfo.customvoteIndex = 0;
+  uiInfo.customvoteMapsOnServerIndex = 0;
+  uiInfo.customvoteOtherMapsIndex = 0;
+
+  static constexpr char DETAILS_MENU[] = "ingame_customvote_details";
+  static constexpr char VOTE_MENU[] = "ingame_vote_customvote";
+
+  const menuDef_t *detailsMenu = Menus_FindByName(DETAILS_MENU);
+  const menuDef_t *voteMenu = Menus_FindByName(VOTE_MENU);
+
+  if (detailsMenu && detailsMenu->window.flags & WINDOW_VISIBLE) {
+    Menus_CloseByName(DETAILS_MENU);
+  }
+
+  if (voteMenu && voteMenu->window.flags & WINDOW_VISIBLE) {
+    Menus_CloseByName(VOTE_MENU);
+    Menus_OpenByName("ingame_vote");
+  }
+}
 } // namespace ETJump
 
 void _UI_SetActiveMenu(uiMenuCommand_t menu) {

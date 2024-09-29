@@ -254,7 +254,6 @@ vmCvar_t shared;
 vmCvar_t vote_minVoteDuration;
 vmCvar_t g_moverScale;
 vmCvar_t g_debugTrackers;
-vmCvar_t g_debugTimeruns;
 vmCvar_t g_spectatorVote;
 vmCvar_t g_enableVote;
 
@@ -504,7 +503,6 @@ cvarTable_t gameCvarTable[] = {
     {&vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE},
     {&g_moverScale, "g_moverScale", "1.0", 0},
     {&g_debugTrackers, "g_debugTrackers", "0", CVAR_ARCHIVE | CVAR_LATCH},
-    {&g_debugTimeruns, "g_debugTimeruns", "0", CVAR_ARCHIVE | CVAR_LATCH},
     {&g_spectatorVote, "g_spectatorVote", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
     {&g_enableVote, "g_enableVote", "1", CVAR_ARCHIVE},
     {&g_oss, "g_oss", "399", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse, qfalse},

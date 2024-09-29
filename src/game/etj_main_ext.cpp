@@ -190,7 +190,7 @@ void OnGameInit() {
 
   game.mapStatistics->initialize(std::string(g_mapDatabase.string),
                                  level.rawmapname);
-  game.customMapVotes->loadCustomvotes();
+  game.customMapVotes->loadCustomvotes(true);
   game.motd->initialize();
   game.timerunV2->initialize();
 
@@ -307,7 +307,7 @@ qboolean OnConsoleCommand() {
   }
 
   if (command == "readcustomvotes") {
-    game.customMapVotes->loadCustomvotes();
+    game.customMapVotes->loadCustomvotes(false);
     // force voteflag re-check so UI can turn on/off custom vote button
     G_voteFlags();
     return qtrue;

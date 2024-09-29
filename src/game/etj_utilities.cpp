@@ -101,8 +101,8 @@ void Utilities::startRun(int clientNum) {
     ETJump::saveSystem->clearTimerunSaves(player);
   }
 
-  // If we are debugging, just exit here
-  if (g_debugTimeruns.integer > 0) {
+  // if cheats are enabled, just exit here
+  if (g_cheats.integer) {
     return;
   }
 

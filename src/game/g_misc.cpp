@@ -1132,8 +1132,12 @@ void SP_misc_portal_camera(gentity_t *ent) {
 
 void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   vec3_t dir;
-  float deg;
   vec3_t up, right;
+
+  // don't let players crash servers by spamming shooter entities
+  if (!ETJump::EntityUtilities::entitiesFree(16)) {
+    return;
+  }
 
   // see if we have a target
   if (ent->enemy) {
@@ -1144,8 +1148,9 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   }
 
   if (ent->s.weapon == WP_MAPMORTAR) {
-    AimAtTarget(ent); // store in ent->s.origin2 the direction/force
-                      // needed to pass through the target
+    // store in ent->s.origin2 the direction/force
+    // needed to pass through the target
+    AimAtTarget(ent);
     VectorCopy(ent->s.origin2, dir);
   }
 
@@ -1153,7 +1158,7 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   PerpendicularVector(up, dir);
   CrossProduct(up, dir, right);
 
-  deg = crandom() * ent->random;
+  float deg = crandom() * ent->random;
   VectorMA(dir, deg, up, dir);
 
   deg = crandom() * ent->random;
@@ -1163,11 +1168,9 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
   switch (ent->s.weapon) {
     case WP_GRENADE_LAUNCHER:
-      VectorScale(dir, 700,
-                  dir); //----(SA)	had to add this
-                        // as fire_grenade now
-                        // expects a non-normalized
-                        // direction vector
+      //----(SA)	had to add this as fire_grenade
+      // now expects a non-normalized direction vector
+      VectorScale(dir, 700, dir);
       fire_grenade(ent, ent->s.origin, dir, WP_GRENADE_LAUNCHER);
       break;
     case WP_PANZERFAUST:
@@ -1175,19 +1178,15 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
       VectorScale(ent->s.pos.trDelta, 2, ent->s.pos.trDelta);
       SnapVector(ent->s.pos.trDelta); // save net bandwidth
       break;
-
-      /*	case WP_SPEARGUN:
-          case WP_SPEARGUN_CO2:
-              fire_speargun(ent, ent->s.origin, dir);
-              break;*/
-
     case WP_MAPMORTAR:
-      AimAtTarget(ent); // store in ent->s.origin2 the
-                        // direction/force needed to
-                        // pass through the target
+      // store in ent->s.origin2 the direction/force
+      // needed to pass through the target
+      AimAtTarget(ent);
       VectorScale(dir, VectorLength(ent->s.origin2), dir);
       fire_mortar(ent, ent->s.origin, dir);
       break;
+    default:
+      return;
   }
 
   G_AddEvent(ent, EV_FIRE_WEAPON, 0);
@@ -1195,21 +1194,21 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
 static void InitShooter_Finish(gentity_t *ent) {
   ent->enemy = G_PickTarget(ent->target);
-  ent->think = 0;
+  ent->think = nullptr;
   ent->nextthink = 0;
 }
 
-void InitShooter(gentity_t *ent, int weapon) {
+void InitShooter(gentity_t *ent, const int weapon) {
   ent->use = Use_Shooter;
   ent->s.weapon = weapon;
 
   G_SetMovedir(ent->s.angles, ent->movedir);
 
-  if (!ent->random) {
+  if (ent->random != 0.0f) {
     ent->random = 1.0;
   }
 
-  ent->random = sin(M_PI * ent->random / 180);
+  ent->random = std::sin(static_cast<float>(M_PI) * ent->random / 180);
 
   // target might be a moving object, so we can't set movedir for it
   if (ent->target) {

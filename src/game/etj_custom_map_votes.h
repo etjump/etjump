@@ -51,7 +51,10 @@ public:
   CustomMapVotes(const std::shared_ptr<MapStatistics> &mapStats,
                  std::unique_ptr<Log> log);
   ~CustomMapVotes() = default;
-  void loadCustomvotes();
+
+  // if 'init' is true, clients aren't forced to invalidate cached customvotes
+  // any calls made outside of game init should call this with 'false'
+  void loadCustomvotes(bool init);
   TypeInfo getTypeInfo(const std::string &type) const;
   std::string randomMap(const std::string &type);
   static bool isValidMap(const std::string &mapName);

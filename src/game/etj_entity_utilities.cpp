@@ -110,4 +110,18 @@ bool EntityUtilities::playerIsSolid(const int self, const int other) {
 
   return true;
 }
+
+bool EntityUtilities::entitiesFree(const int threshold) {
+  int free = 0;
+
+  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < ENTITYNUM_MAX_NORMAL; i++) {
+    const gentity_t *ent = &g_entities[i];
+
+    if (!ent->inuse) {
+      free++;
+    }
+  }
+
+  return free > threshold;
+}
 } // namespace ETJump

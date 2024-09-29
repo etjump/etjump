@@ -453,3 +453,36 @@
     visible       1                                                            \
     decoration                                                                 \
   }
+
+// slider that only updates the cvar when mouse button is released
+#define CACHEDSLIDER( CACHEDSLIDER_X, CACHEDSLIDER_Y, CACHEDSLIDER_W,          \
+                      CACHEDSLIDER_H, CACHEDSLIDER_TEXT,                       \
+                      CACHEDSLIDER_TEXT_SCALE, CACHEDSLIDER_TEXT_ALIGN_Y,      \
+                      CACHEDSLIDER_CVARFLOAT, CACHEDSLIDER_TOOLTIP )           \
+  itemDef {                                                                    \
+    name        "cachedslider"##CACHEDSLIDER_TEXT                              \
+    group       GROUP_NAME                                                     \
+    rect        $evalfloat(CACHEDSLIDER_X) $evalfloat(CACHEDSLIDER_Y)          \
+                $evalfloat(CACHEDSLIDER_W) $evalfloat(CACHEDSLIDER_H)          \
+    type        ITEM_TYPE_SLIDER                                               \
+    text        CACHEDSLIDER_TEXT                                              \
+    textfont    UI_FONT_COURBD_21                                              \
+    textstyle   ITEM_TEXTSTYLE_SHADOWED                                        \
+    textscale   CACHEDSLIDER_TEXT_SCALE                                        \
+    textalign   ITEM_ALIGN_RIGHT                                               \
+    textalignx  $evalfloat(0.5*(CACHEDSLIDER_W))                               \
+    textaligny  CACHEDSLIDER_TEXT_ALIGN_Y                                      \
+    forecolor   .6 .6 .6 1                                                     \
+    cvarFloat   CACHEDSLIDER_CVARFLOAT                                         \
+    visible     1                                                              \
+    tooltip     CACHEDSLIDER_TOOLTIP                                           \
+    cacheCvar                                                                  \
+                                                                               \
+    mouseEnter {                                                               \
+      setitemcolor "cachedslider"##CACHEDSLIDER_TEXT forecolor .9 .9 .9 1 ;    \
+    }                                                                          \
+                                                                               \
+    mouseExit {                                                                \
+      setitemcolor "cachedslider"##CACHEDSLIDER_TEXT forecolor .6 .6 .6 1 ;    \
+    }                                                                          \
+  }

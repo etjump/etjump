@@ -49,7 +49,7 @@ CustomMapVotes::getTypeInfo(std::string const &type) const {
   return {false, ""};
 }
 
-void CustomMapVotes::loadCustomvotes() {
+void CustomMapVotes::loadCustomvotes(const bool init) {
   const std::string filename = g_customMapVotesFile.string;
 
   if (filename.empty()) {
@@ -62,6 +62,10 @@ void CustomMapVotes::loadCustomvotes() {
   const auto parsingFailed = [&](const std::string &errMsg) {
     logger->error(errMsg);
     customMapVotes_.clear();
+
+    if (!init) {
+      Printer::commandAll("forceCustomvoteRefresh");
+    }
   };
 
   if (!FileSystem::exists(filename)) {
@@ -131,6 +135,11 @@ void CustomMapVotes::loadCustomvotes() {
     }
   }
 
+  if (!init) {
+    // invalidate cached customvote lists for all clients
+    Printer::commandAll("forceCustomvoteRefresh");
+  }
+
   logger->info("Succesfully loaded %i custom votes from '%s'",
                static_cast<int>(customMapVotes_.size()), filename);
 }
@@ -195,7 +204,7 @@ void CustomMapVotes::generateVotesFile() {
   }
 
   G_Printf("Generated new custom map votes file '%s'\n", filename.c_str());
-  loadCustomvotes();
+  loadCustomvotes(false);
 }
 
 void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
@@ -256,7 +265,7 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
     return;
   }
 
-  loadCustomvotes();
+  loadCustomvotes(false);
   Printer::chat(clientNum, stringFormat("^3add-customvote: ^7successfully "
                                         "added a new custom vote list ^3'%s'",
                                         sanitizedName));
@@ -307,7 +316,7 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
     return;
   }
 
-  loadCustomvotes();
+  loadCustomvotes(false);
   Printer::chat(
       clientNum,
       stringFormat(
@@ -433,7 +442,7 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
     return;
   }
 
-  loadCustomvotes();
+  loadCustomvotes(false);
   Printer::chat(
       clientNum,
       stringFormat(

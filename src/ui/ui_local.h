@@ -1118,5 +1118,6 @@ namespace ETJump {
 void parseMaplist();
 void parseNumCustomvotes();
 void parseCustomvote();
+void resetCustomvotes();
 } // namespace ETJump
 #endif

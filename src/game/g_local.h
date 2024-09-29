@@ -1549,7 +1549,6 @@ gentity_t *G_PopupMessage(popupMessageType_t type);
 void G_Sound(gentity_t *ent, int soundIndex);
 void G_AnimScriptSound(int soundIndex, vec3_t org, int client);
 void G_FreeEntity(gentity_t *e);
-// qboolean	G_EntitiesFree( void );
 
 void G_TouchTriggers(gentity_t *ent);
 
@@ -2063,7 +2062,6 @@ extern vmCvar_t g_chatOptions;
 extern vmCvar_t shared;
 extern vmCvar_t g_moverScale;
 extern vmCvar_t g_debugTrackers;
-extern vmCvar_t g_debugTimeruns;
 extern vmCvar_t g_spectatorVote;
 extern vmCvar_t g_enableVote;
 
