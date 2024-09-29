@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <vector>
+
 namespace ETJump {
 class DemoCompatibility {
   struct Version {
@@ -33,16 +35,36 @@ class DemoCompatibility {
   };
 
   void parseDemoVersion();
-  static void fillVersionInfo(Version *version, const std::string &versionStr,
-                              const std::string &delimiter);
+  void fillVersionInfo(Version &version, const std::string &versionStr,
+                       const std::string &delimiter);
+
+  void setupCompatibilityFlags();
+
+  // returns true if the demo version is newer or same as 'minimum'
+  bool isCompatible(const Version &minimum) const;
+
+  // returns true if 'version' is the exact same as demo version
+  bool isExactVersion(const Version &version) const;
 
   Version demoVersion{};
 
 public:
+  struct CompatibilityFlags {
+    bool serverSideCoronas = false;
+    bool svFpsInSysteminfo = false;
+    bool svFpsInCgs = false;
+    bool adjustEntityTypes = false;
+  };
+
+  // everything in here will be set to false unless we're on demo playback
+  CompatibilityFlags flags{};
+
+  // stores the strings to print for compatibility info
+  std::vector<std::string> compatibilityStrings{};
+
+  void printDemoInformation() const;
+
   DemoCompatibility();
   ~DemoCompatibility() = default;
-
-  // returns true if the demo version is newer or same as minimumVersion
-  bool isCompatible(Version minimum) const;
 };
 } // namespace ETJump

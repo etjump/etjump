@@ -85,7 +85,7 @@ std::shared_ptr<TimerunView> timerunView;
 std::shared_ptr<TrickjumpLines> trickjumpLines;
 std::shared_ptr<ClientRtvHandler> rtvHandler;
 std::shared_ptr<AreaIndicator> areaIndicator;
-std::shared_ptr<DemoCompatibility> demoCompatibility;
+std::unique_ptr<DemoCompatibility> demoCompatibility;
 std::shared_ptr<AccelColor> accelColor;
 std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 std::shared_ptr<PlayerBBox> playerBBox;
@@ -231,7 +231,7 @@ void init() {
   rtvHandler = std::make_shared<ClientRtvHandler>();
   rtvHandler->initialize();
 
-  demoCompatibility = std::make_shared<DemoCompatibility>();
+  demoCompatibility = std::make_unique<DemoCompatibility>();
   accelColor = std::make_shared<AccelColor>();
 
   playerBBox = std::make_shared<PlayerBBox>();
