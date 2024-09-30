@@ -38,13 +38,14 @@ function(create_compiler_opts target)
 			-ggdb3>)			# generate gdb friendly debug info
 
 	# Clang flags
-	set (CLANG_LINK_FLAGS
+	set(CLANG_LINK_FLAGS
 		$<IF:$<PLATFORM_ID:Darwin>,-Wl$<COMMA>-undefined$<COMMA>error,-Wl$<COMMA>--no-undefined>
-		-flto								# link time optimizations
-		-O3									# max optimization
-		$<IF:$<PLATFORM_ID:Darwin>,,-s>)	# strip symbols (if not on macOS)
+		$<$<CONFIG:Release>:
+			-flto								# link time optimizations
+			-O3									# max optimization
+			$<IF:$<PLATFORM_ID:Darwin>,,-s>>)	# strip symbols
 
-	set (CLANG_CXX_FLAGS
+	set(CLANG_CXX_FLAGS
 		-pipe
 		-fPIC
 		-fvisibility=hidden
