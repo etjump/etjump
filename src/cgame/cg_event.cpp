@@ -1,6 +1,7 @@
 // cg_event.c -- handle entity events at snapshot or playerstate transitions
 
 #include "cg_local.h"
+#include "etj_demo_compatibility.h"
 #include "etj_entity_events_handler.h"
 #include <algorithm>
 #include "etj_player_events_handler.h"
@@ -1508,12 +1509,12 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
   es = &cent->currentState;
   event = es->event & ~EV_EVENT_BITS;
 
-  if (cg_debugEvents.integer) {
-    CG_Printf("time:%i ent:%3i  event:%3i ", cg.time, es->number, event);
-  }
-
   if (!event) {
-    DEBUGNAME("ZEROEVENT");
+    if (cg_debugEvents.integer) {
+      CG_Printf("time:%i ent:%3i  event:%3i ZEROEVENT\n", cg.time, es->number,
+                event);
+    }
+
     return;
   }
 
@@ -1522,10 +1523,34 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
     clientNum = 0;
   }
 
+  // shift event numbers for 'EV_GENERAL_CLIENT_SOUND_VOLUME' due to it
+  // getting placed in the middle of entity_events_t enum in 2.3.0
+  if (ETJump::demoCompatibility->flags.adjustEvGeneralClientSoundVolume) {
+    if (event == EV_GENERAL_CLIENT_SOUND_VOLUME) {
+      event = EV_GLOBAL_SOUND;
+    } else if (event > EV_GENERAL_CLIENT_SOUND_VOLUME) {
+      event++;
+    }
+  }
+
+  // adjust freestanding events to account for ET_TOKEN_EASY/MEDIUM/HARD,
+  // ET_VELOCITY_PUSH_TRIGGER, ET_FAKEBRUSH and ET_TELEPORT_TRIGGER_CLIENT
+  // freestanding events always have an eType > ET_EVENTS
+  if ((ETJump::demoCompatibility->flags.adjustEvVelocityPushTrigger ||
+       ETJump::demoCompatibility->flags.adjustEvFakebrushAndClientTeleporter ||
+       ETJump::demoCompatibility->flags.adjustEvTokens) &&
+      es->eType > ET_EVENTS) {
+    event = ETJump::demoCompatibility->adjustedEventNum(event);
+  }
+
   if (event == EV_CUSHIONFALLSTEP) {
     if (!etj_fixedCushionSteps.integer) {
       event = EV_FOOTSTEP;
     }
+  }
+
+  if (cg_debugEvents.integer) {
+    CG_Printf("time:%i ent:%3i  event:%3i ", cg.time, es->number, event);
   }
 
   switch (event) {

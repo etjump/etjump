@@ -55,6 +55,10 @@ public:
     bool svFpsInCgs = false;
     bool adjustEntityTypes = false;
     bool noSavePosTimerunInfo = false;
+    bool adjustEvTokens = false;
+    bool adjustEvGeneralClientSoundVolume = false;
+    bool adjustEvVelocityPushTrigger = false;
+    bool adjustEvFakebrushAndClientTeleporter = false;
   };
 
   // everything in here will be set to false unless we're on demo playback
@@ -62,6 +66,10 @@ public:
 
   // stores the strings to print for compatibility info
   std::vector<std::string> compatibilityStrings{};
+
+  // performs event number adjustments for events that are added freestanding
+  // by setting event num to ET_EVENTS + event due to additional entity types
+  int adjustedEventNum(int event) const;
 
   void printDemoInformation() const;
 
