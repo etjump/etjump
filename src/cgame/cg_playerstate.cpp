@@ -283,8 +283,6 @@ void CG_Respawn(qboolean revived) {
   // dhm - end
 }
 
-extern char *eventnames[];
-
 /*
 ==============
 CG_CheckPlayerstateEvents
