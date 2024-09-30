@@ -109,6 +109,22 @@ void DemoCompatibility::fillVersionInfo(Version &version,
 }
 
 void DemoCompatibility::setupCompatibilityFlags() {
+  if (!isCompatible({2, 0, 6})) {
+    flags.adjustEvTokens = true;
+    compatibilityStrings.emplace_back(
+        "- Adjusted event indices for ET_TOKEN_ entities");
+  }
+
+  if (!isCompatible({2, 3, 0})) {
+    flags.adjustEvGeneralClientSoundVolume = true;
+    compatibilityStrings.emplace_back(
+        "- Adjusted event indices for EV_GENERAL_CLIENT_SOUND_VOLUME");
+
+    flags.adjustEvVelocityPushTrigger = true;
+    compatibilityStrings.emplace_back(
+        "- Adjusted event indices for ET_VELOCITY_PUSH_TRIGGER");
+  }
+
   if (!isCompatible({3, 2, 0})) {
     flags.serverSideCoronas = true;
     compatibilityStrings.emplace_back("- Using fully server-side coronas");
@@ -124,6 +140,72 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.svFpsInCgs = true;
     compatibilityStrings.emplace_back(
         "- sv_fps can be read from client game static struct");
+  }
+
+  if (!isCompatible({3, 3, 0})) {
+    flags.adjustEvFakebrushAndClientTeleporter = true;
+    compatibilityStrings.emplace_back(
+        "- Adjusted event indices for ET_FAKEBRUSH and "
+        "ET_TELEPORT_TRIGGER_CLIENT");
+  }
+}
+
+int DemoCompatibility::adjustedEventNum(const int event) const {
+  int adjust = 0;
+
+  if (flags.adjustEvTokens) {
+    adjust += 3;
+  }
+
+  if (flags.adjustEvVelocityPushTrigger) {
+    adjust += 1;
+  }
+
+  if (flags.adjustEvFakebrushAndClientTeleporter) {
+    adjust += 2;
+  }
+
+  switch (event + adjust) {
+    case EV_RAILTRAIL:
+    case EV_GLOBAL_CLIENT_SOUND:
+    case EV_OBITUARY:
+    case EV_GLOBAL_ITEM_PICKUP:
+    case EV_GLOBAL_SOUND:
+    case EV_SMOKE:
+    case EV_MG42BULLET_HIT_WALL:
+    case EV_MG42BULLET_HIT_FLESH:
+    case EV_MISSILE_HIT:
+    case EV_MISSILE_MISS:
+    case EV_SHAKE:
+    case EV_MORTAR_MISS:
+    case EV_MORTAR_IMPACT:
+    case EV_BULLET_HIT_FLESH:
+    case EV_BULLET_HIT_WALL:
+    case EV_MORTAREFX:
+    case EV_ITEM_POP:
+    case EV_EFFECT:
+    case EV_RUBBLE:
+    case EV_BUILDDECAYED_SOUND:
+    case EV_GUNSPARKS:
+    case EV_DUST:
+    case EV_OILSLICK:
+    case EV_OILSLICKREMOVE:
+    case EV_SNOWFLURRY:
+    case EV_DEBRIS:
+    case EV_ALERT_SPEAKER:
+    case EV_GLOBAL_TEAM_SOUND:
+    case EV_RUMBLE_EFX:
+    case EV_GENERAL_SOUND_VOLUME:
+    case EV_GENERAL_CLIENT_SOUND_VOLUME:
+    case EV_GENERAL_SOUND:
+    case EV_AIRSTRIKEMESSAGE:
+    case EV_ARTYMESSAGE:
+    case EV_EMITTER:
+    case EV_PORTAL_TRAIL:
+    case EV_POPUPMESSAGE:
+      return event + adjust;
+    default:
+      return event;
   }
 }
 
