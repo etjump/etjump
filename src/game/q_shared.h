@@ -103,6 +103,7 @@
   #include <cstdlib>
   #include <string>
   #include <cstdint>
+  #include <array>
 
 #endif
 
@@ -1667,6 +1668,83 @@ typedef enum {
              // by setting eType to ET_EVENTS + eventNum
              // this avoids having to set eFlags and eventNum
 } entityType_t;
+
+static constexpr std::array<const char *, ET_EVENTS + 1> entityTypeNames = {
+    "ET_GENERAL",
+    "ET_PLAYER",
+    "ET_ITEM",
+    "ET_MISSILE",
+    "ET_MOVER",
+    "ET_BEAM",
+    "ET_PORTAL",
+    "ET_SPEAKER",
+    "ET_PUSH_TRIGGER",
+    "ET_TELEPORT_TRIGGER",
+    "ET_INVISIBLE",
+    "ET_CONCUSSIVE_TRIGGER",
+    "ET_OID_TRIGGER",
+    "ET_EXPLOSIVE_INDICATOR",
+    "ET_EXPLOSIVE",
+    "ET_EF_SPOTLIGHT",
+    "ET_ALARMBOX",
+    "ET_CORONA",
+    "ET_TRAP",
+    "ET_GAMEMODEL",
+    "ET_FOOTLOCKER",
+    "ET_FLAMEBARREL",
+    "ET_FP_PARTS",
+    "ET_FIRE_COLUMN",
+    "ET_FIRE_COLUMN_SMOKE",
+    "ET_RAMJET",
+    "ET_FLAMETHROWER_CHUNK",
+    "ET_EXPLO_PART",
+    "ET_PROP",
+    "ET_AI_EFFECT",
+    "ET_CAMERA",
+    "ET_MOVERSCALED",
+    "ET_CONSTRUCTIBLE_INDICATOR",
+    "ET_CONSTRUCTIBLE",
+    "ET_CONSTRUCTIBLE_MARKER",
+    "ET_BOMB",
+    "ET_WAYPOINT",
+    "ET_BEAM_2",
+    "ET_TANK_INDICATOR",
+    "ET_TANK_INDICATOR_DEAD",
+    "ET_BOTGOAL_INDICATOR",
+    "ET_CORPSE",
+    "ET_SMOKER",
+    "ET_TEMPHEAD",
+    "ET_MG42_BARREL",
+    "ET_TEMPLEGS",
+    "ET_TRIGGER_MULTIPLE",
+    "ET_TRIGGER_FLAGONLY",
+    "ET_TRIGGER_FLAGONLY_MULTIPLE",
+    "ET_GAMEMANAGER",
+    "ET_AAGUN",
+    "ET_CABINET_H",
+    "ET_CABINET_A",
+    "ET_HEALER",
+    "ET_SUPPLIER",
+    "ET_PORTAL_BLUE",
+    "ET_PORTAL_RED",
+    "ET_TOKEN_EASY",
+    "ET_TOKEN_MEDIUM",
+    "ET_TOKEN_HARD",
+    "ET_LANDMINE_HINT",
+    "ET_ATTRACTOR_HINT",
+    "ET_SNIPER_HINT",
+    "ET_LANDMINESPOT_HINT",
+    "ET_COMMANDMAP_MARKER",
+    "ET_WOLF_OBJECTIVE",
+    "ET_VELOCITY_PUSH_TRIGGER",
+    "ET_TELEPORT_TRIGGER_CLIENT",
+    "ET_FAKEBRUSH",
+    "ET_EVENTS",
+};
+
+static_assert(sizeof(entityTypeNames) / sizeof(entityTypeNames[0]) ==
+                  ET_EVENTS + 1,
+              "Entity types array size does not match enum list");
 
 // actual communicated field sizes (msg.c)
 
