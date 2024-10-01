@@ -51,7 +51,7 @@ class ColorPicker {
 
   static inline void setHSV(vec4_t hsv, float h, float s, float v, float a);
   static inline void setRGB(vec4_t rgb, float r, float g, float b, float a);
-  static inline void setRGBNormalized(vec4_t RGB, float r, float g, float b,
+  static inline void setRGBNormalized(vec4_t rgb, float r, float g, float b,
                                       float a);
 
   void updateRGBSliderState(const vec4_t rgb) const;
@@ -62,7 +62,7 @@ public:
   ~ColorPicker() = default;
 
   void drawColorPicker(const rectDef_t *rect);
-  void drawPreviewOld(rectDef_t *rect) const;
+  void drawPreviewOld(const rectDef_t *rect) const;
   void drawPreviewNew(const rectDef_t *rect);
 
   // shrinks a rectDef to match the color area
@@ -73,7 +73,7 @@ public:
   void cvarToColorPickerState(const std::string &cvar);
 
   // if reset is true, value is taken from currentCvarOldValue
-  void colorPickerStateToCvar(bool reset);
+  void colorPickerStateToCvar(bool reset) const;
 
   // reset sliders to state at which they were in when the menu was opened
   void resetColorPickerState();
@@ -82,9 +82,9 @@ public:
   static void setColorSliderType(itemDef_t *item);
   static float getColorSliderValue(const std::string &colorVar);
   static void setColorSliderValue(const std::string &colorVar, float value);
-  void updateSliderState(itemDef_t *item);
+  void updateSliderState(const itemDef_t *item);
 
-  void colorPickerDragFunc(itemDef_t *item, float cursorX, float cursorY,
+  void colorPickerDragFunc(const itemDef_t *item, float cursorX, float cursorY,
                            int key);
 
   // toggle RGB sliders between normalized and full RGB
