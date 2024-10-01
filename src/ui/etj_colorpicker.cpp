@@ -46,7 +46,7 @@ ColorPicker::ColorPicker() {
   normalizedRGBSliders = false;
 }
 
-void ColorPicker::drawPreviewOld(rectDef_t *rect) const {
+void ColorPicker::drawPreviewOld(const rectDef_t *rect) const {
   DC->fillRect(rect->x, rect->y, rect->w, rect->h, oldRGB);
 }
 
@@ -108,7 +108,7 @@ void ColorPicker::cvarToColorPickerState(const std::string &cvar) {
   colorPickerValues[COLOR_PICKER_A] = normalizedRGB[3];
 }
 
-void ColorPicker::colorPickerStateToCvar(bool reset) {
+void ColorPicker::colorPickerStateToCvar(const bool reset) const {
   if (currentCvar.empty()) {
     Com_Printf(S_COLOR_YELLOW "%s: cannot set slider state to empty cvar\n",
                __func__);
@@ -178,7 +178,7 @@ void ColorPicker::updateHSVSliderState(const vec4_t hsv) {
   colorPickerValues[COLOR_PICKER_V] = hsv[2];
 }
 
-void ColorPicker::updateSliderState(itemDef_t *item) {
+void ColorPicker::updateSliderState(const itemDef_t *item) {
   // note: regardless of which slider is being updated, 'normalizedRGB' must be
   // updated as that's what 'colorPickerStateToCvar' uses to set the cvar value
   switch (item->colorSliderData.colorType) {
@@ -276,7 +276,7 @@ void ColorPicker::setColorSliderValue(const std::string &colorVar,
 }
 
 void ColorPicker::toggleRGBSliderValues() {
-  menuDef_t *menu = Menus_FindByName(COLOR_PICKER_MENU);
+  const menuDef_t *menu = Menus_FindByName(COLOR_PICKER_MENU);
 
   // this should never happen, we already have the menu open...
   if (menu == nullptr) {
@@ -352,8 +352,9 @@ void ColorPicker::toggleRGBSliderValues() {
   }
 }
 
-void ColorPicker::colorPickerDragFunc(itemDef_t *item, const float cursorX,
-                                      const float cursorY, const int key) {
+void ColorPicker::colorPickerDragFunc(const itemDef_t *item,
+                                      const float cursorX, const float cursorY,
+                                      const int key) {
   rectDef_t rect = item->window.rect;
   shrinkRectForColorPicker(rect);
 
