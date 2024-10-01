@@ -65,7 +65,7 @@ private:
 
   static const int popupFadeTime = 100;
 
-  int demoSvFps;
+  int demoSvFps{};
 
   static bool canSkipDraw();
 };
