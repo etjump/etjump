@@ -281,7 +281,6 @@ vmCvar_t cl_demooffset;
 vmCvar_t cl_waverecording;
 vmCvar_t cl_wavefilename;
 vmCvar_t cl_waveoffset;
-vmCvar_t cg_recording_statusline;
 vmCvar_t cg_ghostPlayers;
 vmCvar_t etj_hide;
 vmCvar_t etj_hideDistance;
@@ -669,6 +668,10 @@ vmCvar_t etj_playerBBoxShader;
 vmCvar_t etj_autoSpec;
 vmCvar_t etj_autoSpecDelay;
 
+vmCvar_t etj_drawRecordingStatus;
+vmCvar_t etj_recordingStatusX;
+vmCvar_t etj_recordingStatusY;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -854,7 +857,6 @@ cvarTable_t cvarTable[] = {
     {&cl_waverecording, "cl_waverecording", "0", CVAR_ROM},
     {&cl_wavefilename, "cl_wavefilename", "", CVAR_ROM},
     {&cl_waveoffset, "cl_waveoffset", "0", CVAR_ROM},
-    {&cg_recording_statusline, "cg_recording_statusline", "9", CVAR_ARCHIVE},
 
     {&cg_ghostPlayers, "", "0", 0},
     {&etj_hide, "etj_hide", "1", CVAR_ARCHIVE},
@@ -1252,6 +1254,10 @@ cvarTable_t cvarTable[] = {
 
     {&etj_autoSpec, "etj_autoSpec", "0", CVAR_ARCHIVE},
     {&etj_autoSpecDelay, "etj_autoSpecDelay", "10000", CVAR_ARCHIVE},
+
+    {&etj_drawRecordingStatus, "etj_drawRecordingStatus", "1", CVAR_ARCHIVE},
+    {&etj_recordingStatusX, "etj_recordingStatusX", "2", CVAR_ARCHIVE},
+    {&etj_recordingStatusY, "etj_recordingStatusY", "9", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

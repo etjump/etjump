@@ -4257,37 +4257,36 @@ static void CG_DrawStatsDebug(void) {
 }
 
 // bani
-void CG_DrawDemoRecording(void) {
-  char status[1024];
-  char demostatus[128];
-  char wavestatus[128];
-
+void CG_DrawDemoRecording() {
   if (!cl_demorecording.integer && !cl_waverecording.integer) {
     return;
   }
 
-  if (!cg_recording_statusline.integer) {
+  if (!etj_drawRecordingStatus.integer) {
     return;
   }
 
+  std::string demoStatus;
+  std::string waveStatus;
+
   if (cl_demorecording.integer) {
-    Com_sprintf(demostatus, sizeof(demostatus), " demo %s: %ik ",
-                cl_demofilename.string, cl_demooffset.integer / 1024);
-  } else {
-    strncpy(demostatus, "", sizeof(demostatus));
+    demoStatus = ETJump::stringFormat(" demo %s: %ik ", cl_demofilename.string,
+                                      cl_demooffset.integer / 1024);
   }
 
   if (cl_waverecording.integer) {
-    Com_sprintf(wavestatus, sizeof(demostatus), " audio %s: %ik ",
-                cl_wavefilename.string, cl_waveoffset.integer / 1024);
-  } else {
-    strncpy(wavestatus, "", sizeof(wavestatus));
+    waveStatus = ETJump::stringFormat(" audio: %s %ik ", cl_wavefilename.string,
+                                      cl_waveoffset.integer / 1024);
   }
 
-  Com_sprintf(status, sizeof(status), "RECORDING%s%s", demostatus, wavestatus);
+  const std::string status =
+      ETJump::stringFormat("RECORDING%s%s", demoStatus, waveStatus);
 
-  CG_Text_Paint_Ext(5, cg_recording_statusline.integer, 0.2f, 0.2f, colorWhite,
-                    status, 0, 0, 0, &cgs.media.limboFont2);
+  const float x = ETJump_AdjustPosition(etj_recordingStatusX.value);
+  const float y = etj_recordingStatusY.value;
+
+  CG_Text_Paint_Ext(x, y, 0.2f, 0.2f, colorWhite, status, 0, 0,
+                    ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
 }
 
 /*

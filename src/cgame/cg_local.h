@@ -2386,7 +2386,6 @@ extern vmCvar_t cl_demooffset;
 extern vmCvar_t cl_waverecording;
 extern vmCvar_t cl_wavefilename;
 extern vmCvar_t cl_waveoffset;
-extern vmCvar_t cg_recording_statusline;
 
 extern vmCvar_t cg_ghostPlayers;
 extern vmCvar_t etj_hide;
@@ -2773,6 +2772,10 @@ extern vmCvar_t etj_playerBBoxShader;
 
 extern vmCvar_t etj_autoSpec;
 extern vmCvar_t etj_autoSpecDelay;
+
+extern vmCvar_t etj_drawRecordingStatus;
+extern vmCvar_t etj_recordingStatusX;
+extern vmCvar_t etj_recordingStatusY;
 
 //
 // cg_main.c
