@@ -179,6 +179,8 @@ void ColorPicker::updateHSVSliderState(const vec4_t hsv) {
 }
 
 void ColorPicker::updateSliderState(itemDef_t *item) {
+  // note: regardless of which slider is being updated, 'normalizedRGB' must be
+  // updated as that's what 'colorPickerStateToCvar' uses to set the cvar value
   switch (item->colorSliderData.colorType) {
     case COLOR_HSV:
       setHSV(HSV, colorPickerValues[COLOR_PICKER_H],
@@ -186,9 +188,12 @@ void ColorPicker::updateSliderState(itemDef_t *item) {
              colorPickerValues[COLOR_PICKER_V],
              colorPickerValues[COLOR_PICKER_A]);
       BG_HSVtoRGB(HSV, fullRGB, false);
+      setRGBNormalized(normalizedRGB, fullRGB[0], fullRGB[1], fullRGB[2],
+                       fullRGB[3]);
       updateRGBSliderState(fullRGB);
       break;
     case COLOR_RGB:
+    case COLOR_ALPHA:
       if (normalizedRGBSliders) {
         setRGB(normalizedRGB, colorPickerValues[COLOR_PICKER_R],
                colorPickerValues[COLOR_PICKER_G],
@@ -200,20 +205,24 @@ void ColorPicker::updateSliderState(itemDef_t *item) {
                colorPickerValues[COLOR_PICKER_G],
                colorPickerValues[COLOR_PICKER_B],
                colorPickerValues[COLOR_PICKER_A]);
+        setRGBNormalized(normalizedRGB, colorPickerValues[COLOR_PICKER_R],
+                         colorPickerValues[COLOR_PICKER_G],
+                         colorPickerValues[COLOR_PICKER_B],
+                         colorPickerValues[COLOR_PICKER_A]);
       }
 
       BG_RGBtoHSV(fullRGB, HSV);
       updateHSVSliderState(HSV);
       break;
-    case COLOR_ALPHA:
     case COLOR_UNKNOWN:
+    default:
       break;
   }
 
   colorPickerStateToCvar(false);
 }
 
-const char *ColorPicker::getColorSliderString(int handle) {
+const char *ColorPicker::getColorSliderString(const int handle) {
   const char *colorVar = nullptr;
 
   if (!PC_String_Parse(handle, &colorVar)) {

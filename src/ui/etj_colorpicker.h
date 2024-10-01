@@ -51,7 +51,7 @@ class ColorPicker {
 
   static inline void setHSV(vec4_t hsv, float h, float s, float v, float a);
   static inline void setRGB(vec4_t rgb, float r, float g, float b, float a);
-  static inline void setRGBNormalized(vec4_t RGB, float r, float g, float b,
+  static inline void setRGBNormalized(vec4_t rgb, float r, float g, float b,
                                       float a);
 
   void updateRGBSliderState(const vec4_t rgb) const;
