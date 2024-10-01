@@ -2318,9 +2318,9 @@ int Item_ListBox_ThumbDrawPosition(itemDef_t *item) {
   }
 }
 
-float Item_Slider_ThumbPosition(itemDef_t *item) {
-  float value, range, x;
-  auto *editDef = static_cast<editFieldDef_t *>(item->typeData);
+float Item_Slider_ThumbPosition(const itemDef_t *item) {
+  float x;
+  const auto *editDef = static_cast<editFieldDef_t *>(item->typeData);
 
   if (item->text) {
     x = item->textRect.x + item->textRect.w + 8;
@@ -2339,11 +2339,13 @@ float Item_Slider_ThumbPosition(itemDef_t *item) {
     Com_Error(ERR_FATAL, "Item_Slider_ThumbPosition: NULL editDef\n");
   }
 
+  float value = 0.0f;
+
   if (itemCapture && itemCapture == item && item->cacheCvarValue) {
     value = Q_atof(item->cacheCvarValue);
   } else if (item->cvar) {
     value = DC->getCVarValue(item->cvar);
-  } else {
+  } else if (item->colorSliderData.colorVar) {
     value = DC->getColorSliderValue(item->colorSliderData.colorVar);
   }
 
@@ -2353,7 +2355,7 @@ float Item_Slider_ThumbPosition(itemDef_t *item) {
     value = editDef->maxVal;
   }
 
-  range = editDef->maxVal - editDef->minVal;
+  const float range = editDef->maxVal - editDef->minVal;
   value -= editDef->minVal;
   value /= range;
   value *= SLIDER_WIDTH;
@@ -3617,10 +3619,13 @@ static void Scroll_Slider_ThumbFunc(void *p) {
     return;
   }
 
-  const float oldValue =
-      si->item->cvar
-          ? DC->getCVarValue(si->item->cvar)
-          : DC->getColorSliderValue(si->item->colorSliderData.colorVar);
+  float oldValue = value;
+
+  if (si->item->cvar) {
+    oldValue = DC->getCVarValue(si->item->cvar);
+  } else if (si->item->colorSliderData.colorVar) {
+    oldValue = DC->getColorSliderValue(si->item->colorSliderData.colorVar);
+  }
 
   // if we haven't moved the mouse enough to update the cvar value,
   // don't spam cvar updates for no reason
@@ -3755,7 +3760,7 @@ qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
 
   if (item->cvar) {
     DC->setCVar(item->cvar, va("%f", value));
-  } else {
+  } else if (item->colorSliderData.colorVar) {
     DC->setColorSliderValue(item->colorSliderData.colorVar, value);
     DC->updateSliderState(item);
   }
@@ -4706,12 +4711,11 @@ void Item_Text_Paint(itemDef_t *item) {
           Q_strncpyz(text, scrollInfo.item->cacheCvarValue, sizeof(text));
         } else if (item->cvar) {
           DC->getCVarString(item->cvar, text, sizeof(text));
-        } else {
-          Q_strncpyz(text,
-                     std::to_string(DC->getColorSliderValue(
-                                        item->colorSliderData.colorVar))
-                         .c_str(),
-                     sizeof(text));
+        } else if (item->colorSliderData.colorVar) {
+          Q_strncpyz(
+              text,
+              va("%f", DC->getColorSliderValue(item->colorSliderData.colorVar)),
+              sizeof(text));
         }
 
         if (item->window.flags & WINDOW_TEXTASINT) {
