@@ -12,6 +12,7 @@
 
 #include "bg_local.h"
 #include "etj_numeric_utilities.h"
+#include "etj_string_utilities.h"
 
 #ifdef CGAMEDLL
   #define PM_Cheats cgs.cheats
@@ -27,13 +28,18 @@ static const int PRONE_DELAY_TIME = 750;
 static bool hasJustStoodUp() {
   return pm->pmext->proneTime - pm->pmext->jumpTime == PRONE_JUMP_DELAY_TIME;
 }
-} // namespace ETJump
 
-// JPW NERVE -- stuck this here so it can be seen client & server side
-float Com_GetFlamethrowerRange(void) {
-  return 2500; // multiplayer range is longer for balance
+template <typename... Targs>
+static void bgPrint(const std::string &msg, const Targs &...fargs) {
+  const std::string fmt = stringFormat(msg, fargs...);
+
+#ifdef CGAMEDLL
+  Com_Printf("cl: %s\n", fmt.c_str());
+#else
+  Com_Printf("sv: %s\n", fmt.c_str());
+#endif
 }
-// jpw
+} // namespace ETJump
 
 pmove_t *pm;
 pml_t pml;
