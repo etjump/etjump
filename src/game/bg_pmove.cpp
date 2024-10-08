@@ -34,9 +34,9 @@ static void bgPrint(const std::string &msg, const Targs &...fargs) {
   const std::string fmt = stringFormat(msg, fargs...);
 
 #ifdef CGAMEDLL
-  Com_Printf("cl: %s\n", fmt.c_str());
+  Com_Printf("^g[cl] ^7%s\n", fmt.c_str());
 #else
-  Com_Printf("sv: %s\n", fmt.c_str());
+  Com_Printf("^z[sv] ^7%s\n", fmt.c_str());
 #endif
 }
 } // namespace ETJump
