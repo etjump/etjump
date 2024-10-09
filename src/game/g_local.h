@@ -243,6 +243,29 @@ typedef struct commanderTeamChat_s {
   int index;
 } commanderTeamChat_t;
 
+//
+// fields are needed for spawning from the entity string
+//
+typedef enum {
+  F_INT,
+  F_FLOAT,
+  F_LSTRING, // string on disk, pointer in memory, TAG_LEVEL
+  F_GSTRING, // string on disk, pointer in memory, TAG_GAME
+  F_VECTOR,
+  F_ANGLEHACK,
+  F_ENTITY, // index on disk, pointer in memory
+  F_ITEM,   // index on disk, pointer in memory
+  F_CLIENT, // index on disk, pointer in memory
+  F_IGNORE
+} fieldtype_t;
+
+typedef struct {
+  const char *name;
+  size_t ofs;
+  fieldtype_t type;
+  int flags;
+} field_t;
+
 struct gentity_s {
   entityState_t s;  // communicated by server to clients
   entityShared_t r; // shared by both the server system and game
@@ -1535,6 +1558,9 @@ qboolean G_IsWeaponDisabled(gentity_t *ent, weapon_t weapon);
 void G_TeamCommand(team_t team, char *cmd);
 void G_KillBox(gentity_t *ent);
 gentity_t *G_Find(gentity_t *from, size_t fieldofs, const char *match);
+gentity_t *G_FindInt(gentity_t *from, size_t fieldofs, int match);
+gentity_t *G_FindFloat(gentity_t *from, size_t fieldofs, float match);
+gentity_t *G_FindVec(gentity_t *from, size_t fieldofs, const vec3_t match);
 gentity_t *G_FindByTargetname(gentity_t *from, const char *match);
 gentity_t *G_FindByTargetnameFast(gentity_t *from, const char *match, int hash);
 gentity_t *G_PickTarget(char *targetname);

@@ -121,6 +121,7 @@ qboolean G_ScriptAction_ConstructibleDuration(gentity_t *ent, char *params);
 // bani
 qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params);
 qboolean G_ScriptAction_Create(gentity_t *ent, char *params);
+qboolean G_ScriptAction_Delete(gentity_t *ent, char *params);
 
 qboolean G_ScriptAction_UseTarget(gentity_t *ent, char *params);
 qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params);
@@ -208,6 +209,7 @@ g_script_stack_action_t gScriptActions[] = {
     {"killplayer", G_ScriptAction_KillPlayer},
 
     {"create", G_ScriptAction_Create},
+    {"delete", G_ScriptAction_Delete},
 
     // Gordon: going for longest silly script command ever here :) (sets a model
     // for a brush to one stolen from a func_brushmodel
@@ -665,11 +667,10 @@ void G_Script_ScriptParse(gentity_t *ent) {
 
         memset(params, 0, sizeof(params));
 
-        // Ikkyo - Parse for {}'s if this is a
-        // set command parse for {}'s if this is
-        // a set or create command
+        // parse for {} if this is a 'set', 'create' or 'delete' command
         if (!Q_stricmp(action->actionString, "set") ||
-            !Q_stricmp(action->actionString, "create")) {
+            !Q_stricmp(action->actionString, "create") ||
+            !Q_stricmp(action->actionString, "delete")) {
           token = COM_Parse(&pScript);
           if (token[0] != '{') {
             COM_ParseError("'{' expected, "

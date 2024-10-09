@@ -167,9 +167,8 @@ NULL will be returned if the end of the list is reached.
 
 =============
 */
-gentity_t *G_Find(gentity_t *from, size_t fieldofs, const char *match) {
-  char *s;
-  gentity_t *max = &g_entities[level.num_entities];
+gentity_t *G_Find(gentity_t *from, const size_t fieldofs, const char *match) {
+  const gentity_t *max = &g_entities[level.num_entities];
 
   if (!from) {
     from = g_entities;
@@ -181,16 +180,105 @@ gentity_t *G_Find(gentity_t *from, size_t fieldofs, const char *match) {
     if (!from->inuse) {
       continue;
     }
-    s = *(char **)((byte *)from + fieldofs);
+
+    const char *s =
+        *reinterpret_cast<char **>(reinterpret_cast<byte *>(from) + fieldofs);
+
     if (!s) {
       continue;
     }
+
     if (!Q_stricmp(s, match)) {
       return from;
     }
   }
 
-  return NULL;
+  return nullptr;
+}
+
+// like G_Find, but searches for an int
+gentity_t *G_FindInt(gentity_t *from, const size_t fieldofs, const int match) {
+  const gentity_t *max = &g_entities[level.num_entities];
+
+  if (!from) {
+    from = g_entities;
+  } else {
+    from++;
+  }
+
+  for (; from < max; from++) {
+    if (!from->inuse) {
+      continue;
+    }
+
+    const int i =
+        *reinterpret_cast<int *>(reinterpret_cast<byte *>(from) + fieldofs);
+
+    if (i == match) {
+      return from;
+    }
+  }
+
+  return nullptr;
+}
+
+// like G_Find, but searches for a float
+gentity_t *G_FindFloat(gentity_t *from, const size_t fieldofs,
+                       const float match) {
+  const gentity_t *max = &g_entities[level.num_entities];
+
+  if (!from) {
+    from = g_entities;
+  } else {
+    from++;
+  }
+
+  for (; from < max; from++) {
+    if (!from->inuse) {
+      continue;
+    }
+
+    const float f =
+        *reinterpret_cast<float *>(reinterpret_cast<byte *>(from) + fieldofs);
+
+    if (f == match) {
+      return from;
+    }
+  }
+
+  return nullptr;
+}
+
+// like G_Find, but searches for a vec3_t
+gentity_t *G_FindVec(gentity_t *from, const size_t fieldofs,
+                     const vec3_t match) {
+  const gentity_t *max = &g_entities[level.num_entities];
+
+  if (!from) {
+    from = g_entities;
+  } else {
+    from++;
+  }
+
+  for (; from < max; from++) {
+    if (!from->inuse) {
+      continue;
+    }
+
+    vec3_t v;
+    v[0] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) +
+                                      fieldofs + 0);
+    v[1] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) +
+                                      fieldofs + 4);
+    v[2] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) +
+                                      fieldofs + 8);
+
+    if (VectorCompare(v, match)) {
+      return from;
+    }
+  }
+
+  return nullptr;
 }
 
 /*
