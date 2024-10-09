@@ -77,6 +77,7 @@ public:
    * [12]  - previousRecord
    * [13]  - checkpoints
    * [14]  - previousRecordCheckpoints
+   * [15]  - checkpointIndicesHit
    */
   static SavePosData deserialize(const std::vector<std::string> &args);
 };
