@@ -4546,7 +4546,7 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
       // tries to do this while spawning is disabled
       if (!level.spawning) {
         G_Error(
-            "%s: 'classname' must be changed inside a 'spawn' script event.",
+            "%s: 'classname' must be changed inside a 'spawn' script event.\n",
             __func__);
       }
 
