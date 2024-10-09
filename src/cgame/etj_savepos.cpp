@@ -34,11 +34,8 @@
 namespace ETJump {
 
 SavePos::SavePos(const std::shared_ptr<Timerun> &p) {
-  // FIXME: remove developer check
   const bool timerunCompatible =
-      cg.demoPlayback
-          ? !demoCompatibility->flags.noSavePosTimerunInfo || developer.integer
-          : true;
+      cg.demoPlayback ? !demoCompatibility->flags.noSavePosTimerunInfo : true;
 
   if (!p || !timerunCompatible) {
     CG_Printf("^3WARNING: ^7unable to initialize timerun information for "
