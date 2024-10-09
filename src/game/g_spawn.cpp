@@ -79,29 +79,8 @@ qboolean G_SpawnVector2DExt(const char *key, const char *defaultString,
   return present;
 }
 
-//
-// fields are needed for spawning from the entity string
-//
-typedef enum {
-  F_INT,
-  F_FLOAT,
-  F_LSTRING, // string on disk, pointer in memory, TAG_LEVEL
-  F_GSTRING, // string on disk, pointer in memory, TAG_GAME
-  F_VECTOR,
-  F_ANGLEHACK,
-  F_ENTITY, // index on disk, pointer in memory
-  F_ITEM,   // index on disk, pointer in memory
-  F_CLIENT, // index on disk, pointer in memory
-  F_IGNORE
-} fieldtype_t;
-
-typedef struct {
-  const char *name;
-  size_t ofs;
-  fieldtype_t type;
-  int flags;
-} field_t;
-
+// FIXME: this is woefully out of date, it doesn't contain *ANY* custom keys
+//  we've added for ETJump, and is also lacking a lot of stock entity keys
 field_t fields[] = {
     {"classname", FOFS(classname), F_LSTRING},
     {"origin", FOFS(s.origin), F_VECTOR},
@@ -193,7 +172,7 @@ field_t fields[] = {
     {"targetShaderName", FOFS(targetShaderName), F_LSTRING},
     {"targetShaderNewName", FOFS(targetShaderNewName), F_LSTRING},
 
-    {NULL}};
+    {nullptr}};
 
 typedef struct {
   const char *name;

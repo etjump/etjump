@@ -4605,6 +4605,136 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params) {
   return qtrue;
 }
 
+extern field_t fields[];
+
+qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
+  char key[MAX_TOKEN_CHARS]{};
+  char value[MAX_TOKEN_CHARS]{};
+  const char *p = params;
+
+  // params may contain multiple k/v pairs for more precise targeting,
+  // each of these values must match the entity before we delete it
+  std::array<uint8_t, MAX_GENTITIES> pass{};
+  pass.fill(0);
+  int count = 0; // number of valid k/v pairs in params
+
+  bool parse = true;
+
+  while (parse) {
+    const char *token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0]) {
+      break;
+    }
+
+    Q_strncpyz(key, token, sizeof(key));
+
+    token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0]) {
+      G_Error("%s: key '%s' has no value.\n", __func__, key);
+    }
+
+    Q_strncpyz(value, token, sizeof(value));
+
+    // validate the key
+    int i;
+
+    for (i = 0; fields[i].name; ++i) {
+      if (!Q_stricmp(fields[i].name, key)) {
+        break;
+      }
+    }
+
+    if (!fields[i].name) {
+      G_Error("%s: non-existing key '%s'\n", __func__, key);
+    }
+
+    // valid k/v pair found
+    count++;
+    gentity_t *found = nullptr;
+
+    int valueInt{};
+    float valueFloat{};
+    vec3_t valueVec{};
+
+    switch (fields[i].type) {
+      case F_INT:
+        valueInt = Q_atoi(value);
+
+        while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != nullptr) {
+          pass[found->s.number]++;
+        }
+
+        break;
+      case F_FLOAT:
+        valueFloat = Q_atof(value);
+
+        while ((found = G_FindFloat(found, fields[i].ofs, valueFloat)) !=
+               nullptr) {
+          pass[found->s.number]++;
+        }
+
+        break;
+      case F_LSTRING:
+      case F_GSTRING:
+        while ((found = G_Find(found, fields[i].ofs, value)) != nullptr) {
+          pass[found->s.number]++;
+        }
+        break;
+
+      case F_VECTOR:
+        std::sscanf(value, "%f %f %f", &valueVec[0], &valueVec[1],
+                    &valueVec[2]);
+
+        while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
+          pass[found->s.number]++;
+        }
+
+        break;
+      case F_ANGLEHACK:
+        VectorClear(valueVec);
+        valueVec[2] = Q_atof(value);
+
+        while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
+          pass[found->s.number]++;
+        }
+
+        break;
+      default:
+        G_Printf(S_COLOR_YELLOW "%s: invalid key '%s'\n", __func__, key);
+        parse = false;
+        break;
+    }
+  }
+
+  // no k/v pairs found?
+  if (!count) {
+    return qtrue;
+  }
+
+  int numDeleted = 0;
+
+  // delete all entities that passed the tests
+  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < MAX_GENTITIES; i++) {
+    if (pass[i] == count) {
+      numDeleted++;
+      G_Printf("%s: entity %i [^z%s^7] removed, matched params ^3'%s'\n",
+               __func__, i, g_entities[i].classname, params);
+      G_FreeEntity(&g_entities[i]);
+    }
+  }
+
+  // did we actually delete anything?
+  if (!numDeleted) {
+    G_Printf("%s: no entities found matching params ^3'%s'\n", __func__,
+             params);
+    return qtrue;
+  }
+
+  return qtrue;
+}
+
 // alertentity -equivalent that passes activator
 qboolean G_ScriptAction_UseTarget(gentity_t *ent, char *params) {
   if (!ent->activator) {
