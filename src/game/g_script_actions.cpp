@@ -4542,9 +4542,15 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
   // rain - if the classname was changed, call the spawn func again
   if (classchanged) {
     if (!nospawn) {
-      level.spawning = qtrue;
+      // provide a bit more meaningful error message if someone
+      // tries to do this while spawning is disabled
+      if (!level.spawning) {
+        G_Error(
+            "%s: 'classname' must be changed inside a 'spawn' script event.\n",
+            __func__);
+      }
+
       G_CallSpawn(ent);
-      level.spawning = qfalse;
     }
 
     trap_LinkEntity(ent);
