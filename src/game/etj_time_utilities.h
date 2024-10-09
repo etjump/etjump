@@ -30,6 +30,7 @@
 #include <array>
 
 #include "etj_string_utilities.h"
+#include "etj_printer.h"
 
 namespace ETJump {
 struct Clock {
@@ -180,11 +181,23 @@ struct Time {
   }
 
   // https://en.cppreference.com/w/cpp/io/manip/get_time
+  // if parsing fails, returns timestamp from '1900-01-01 00:00:00'
   static Time fromString(const std::string &input,
                          const std::string &format = "%Y-%m-%d %H:%M:%S") {
     std::istringstream ss(input);
     std::tm t = {};
     ss >> std::get_time(&t, format.c_str());
+
+    if (ss.fail()) {
+      Printer::logLn(
+          stringFormat("%s: Failed to parse timestamp string '%s' in given "
+                       "format '%s', using default timestamp.",
+                       __func__, input, format));
+
+      t = {};
+      std::istringstream defaultTime("1900-01-01 00:00:00");
+      defaultTime >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
+    }
 
     Time time;
     time.date.year = t.tm_year + 1900;
