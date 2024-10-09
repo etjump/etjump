@@ -4729,7 +4729,6 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
   if (!numDeleted) {
     G_Printf("%s: no entities found matching params ^3'%s'\n", __func__,
              params);
-    return qtrue;
   }
 
   return qtrue;
