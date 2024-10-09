@@ -4716,7 +4716,7 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
   int numDeleted = 0;
 
   // delete all entities that passed the tests
-  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < MAX_GENTITIES; i++) {
+  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < ENTITYNUM_MAX_NORMAL; i++) {
     if (pass[i] == count) {
       numDeleted++;
       G_Printf("%s: entity %i [^z%s^7] removed, matched params ^3'%s'\n",
