@@ -40,6 +40,7 @@
 #include "etj_rtv.h"
 #include "etj_chat_replay.h"
 #include "etj_filesystem.h"
+#include "etj_printer.h"
 
 Game game;
 

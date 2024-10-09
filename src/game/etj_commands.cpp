@@ -40,6 +40,7 @@
 #include "etj_timerun_v2.h"
 #include "etj_chat_replay.h"
 #include "etj_filesystem.h"
+#include "etj_savepos_command_handler.h"
 
 typedef std::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<std::function<bool(gentity_t *ent, Arguments argv)>, char>
@@ -471,6 +472,26 @@ static bool sendCustomvoteInfo(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+static bool loadPos(gentity_t *ent, Arguments argv) {
+  if (argv->size() < 2) {
+    Printer::center(ent, "Invalid ^3loadpos ^7command");
+    return false;
+  }
+
+  if (!g_cheats.integer) {
+    Printer::center(ent, "^3loadpos ^7cannot be used without cheats");
+    return false;
+  }
+
+  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+    Printer::center(ent, "^3loadpos ^7cannot be used while spectating");
+    return false;
+  }
+
+  ETJump::SavePosHandler::execSaveposCommand(
+      ent, ETJump::Container::skipFirstN(*argv, 1));
+  return true;
+}
 } // namespace ClientCommands
 
 void PrintManual(gentity_t *ent, const std::string &command) {
@@ -2609,6 +2630,7 @@ Commands::Commands() {
   commands_["requestmaplist"] = ClientCommands::sendMaplist;
   commands_["requestnumcustomvotes"] = ClientCommands::sendNumCustomvotes;
   commands_["requestcustomvoteinfo"] = ClientCommands::sendCustomvoteInfo;
+  commands_["loadpos"] = ClientCommands::loadPos;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {

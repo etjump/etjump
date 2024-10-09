@@ -23,38 +23,20 @@
  */
 
 #pragma once
-#include <mutex>
-#include <vector>
-#include <string>
 
-#include "etj_string_utilities.h"
+#include "etj_savepos_shared.h"
 
 namespace ETJump {
-/**
- * Thread safe implementation of a logger
- * All messages are queued and main thread will process them on next frame
- */
-class Log {
+class SavePosHandler {
+  // teleports the player to the savepos
+  static void saveposTeleport(gentity_t *ent, const SavePosData &data);
+
+  // restores players timerun state from savepos
+  static void restoreSaveposTimerunState(gentity_t *ent,
+                                         const SavePosData &data);
+
 public:
-  explicit Log(std::string name) : _name(std::move(name)) {}
-
-  template <typename... Targs>
-  void info(const std::string &format, const Targs &...fargs) const {
-    println("info", stringFormat(format, fargs...));
-  }
-
-  template <typename... Targs>
-  void error(const std::string &format, const Targs &...fargs) const {
-    println("error", stringFormat(format, fargs...));
-  }
-
-  static void processMessages();
-
-private:
-  std::string _name;
-
-  void println(const std::string &level, const std::string &message) const;
-  static std::mutex _messagesLock;
-  static std::vector<std::string> _messages;
+  static void execSaveposCommand(gentity_t *ent,
+                                 const std::vector<std::string> &args);
 };
 } // namespace ETJump

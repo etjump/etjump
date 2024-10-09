@@ -136,6 +136,5 @@ void sortStrings(T &v, const bool noCase) {
         }
       });
 }
-
 } // namespace StringUtil
 } // namespace ETJump

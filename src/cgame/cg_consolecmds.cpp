@@ -11,8 +11,9 @@
 #include <string>
 #include <vector>
 #include "etj_client_commands_handler.h"
-#include "etj_inline_command_parser.h"
 #include "../game/etj_string_utilities.h"
+#include "../game/etj_json_utilities.h"
+#include "etj_savepos.h"
 
 /*
 =============
@@ -1189,6 +1190,73 @@ void openRtvMenu() {
     CG_EventHandling(CGAME_EVENT_RTV, qfalse);
   }
 }
+
+static void storeSavepos() {
+  const int argc = trap_Argc();
+  std::string filename{};
+  int flags = 0;
+
+  if (argc == 2) {
+    const char *arg = CG_Argv(1);
+
+    // if 1st arg is one character long and numeric, treat it as a flag
+    if (strlen(arg) == 1 && Q_isnumeric(*arg)) {
+      flags = Q_atoi(arg);
+    } else {
+      filename = arg;
+    }
+  } else if (argc > 2) {
+    filename = CG_Argv(1);
+    flags = Q_atoi(CG_Argv(2));
+  }
+
+  savePos->createSaveposData(filename, flags);
+}
+
+static void loadSavepos() {
+  const int argc = trap_Argc();
+  std::string filename = savePos->getDefaultSaveposName();
+
+  if (argc > 1) {
+    filename = CG_Argv(1);
+  }
+
+  if (!savePos->saveposExists(filename)) {
+    CG_Printf("No savepos found with name ^3'%s'\n", filename.c_str());
+    return;
+  }
+
+  const SavePosData &data = savePos->getSaveposData(filename);
+
+  // this is obviously trivial to bypass by just editing the mapname field
+  // in the savepos file, but it's a good idea to check this anyway
+  if (!StringUtil::iEqual(data.mapname, cgs.rawmapname, true)) {
+    CG_Printf("Savepos ^3'%s' ^7was not saved in the current map, change map "
+              "to ^3'%s' ^7to load this position.\n",
+              filename.c_str(), ETJump::sanitize(data.mapname).c_str());
+    return;
+  }
+
+  trap_SendClientCommand(va("%s", SavePosData::serialize(data).c_str()));
+}
+
+static void listSavepos() {
+  const std::vector<std::string> saveposNames = savePos->getSaveposNames();
+
+  if (saveposNames.empty()) {
+    CG_Printf("No positions found. Make sure savepos files are located in "
+              "^3'etjump/savepos/' ^7directory.\n");
+    return;
+  }
+
+  CG_Printf("Available ^3savepos ^7positions:\n");
+
+  for (const auto &name : saveposNames) {
+    CG_Printf("- %s\n", name.c_str());
+  }
+}
+
+static void readSavepos() { savePos->parseExistingPositions(true); }
 } // namespace ETJump
 
 typedef struct {
@@ -1278,6 +1346,7 @@ static const consoleCommand_t noDemoCommands[] = {
     {"stopTimer", CG_StopTimer},
 
     {"openRtvMenu", ETJump::openRtvMenu},
+    {"loadpos", ETJump::loadSavepos},
 };
 
 static const consoleCommand_t anyTimeCommands[] = {
@@ -1322,6 +1391,9 @@ static const consoleCommand_t anyTimeCommands[] = {
     {"incrementVar", CG_IncrementVar_f},
     {"extraTrace", CG_ExtraTrace_f},
     {"listspawnpt", ETJump::listSpawnPoints},
+    {"savepos", ETJump::storeSavepos},
+    {"listsavepos", ETJump::listSavepos},
+    {"readsavepos", ETJump::readSavepos},
 };
 
 /*

@@ -54,6 +54,7 @@ public:
     bool svFpsInSysteminfo = false;
     bool svFpsInCgs = false;
     bool adjustEntityTypes = false;
+    bool noSavePosTimerunInfo = false;
     bool adjustEvTokens = false;
     bool adjustEvGeneralClientSoundVolume = false;
     bool adjustEvVelocityPushTrigger = false;

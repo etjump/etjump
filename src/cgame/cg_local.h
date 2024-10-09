@@ -4211,6 +4211,7 @@ class ClientRtvHandler;
 class DemoCompatibility;
 class AccelColor;
 class PlayerBBox;
+class SavePos;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4225,6 +4226,7 @@ extern std::shared_ptr<ClientRtvHandler> rtvHandler;
 extern std::unique_ptr<DemoCompatibility> demoCompatibility;
 extern std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 extern std::shared_ptr<PlayerBBox> playerBBox;
+extern std::unique_ptr<SavePos> savePos;
 
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume, int soundTime);

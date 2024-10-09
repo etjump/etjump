@@ -311,10 +311,11 @@ void ETJump::TimerunV2::clientDisconnect(int clientNum) {
   _players[clientNum] = nullptr;
 }
 
-void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
-                                   const std::string &playerName,
-                                   int currentTimeMs) {
-  auto player = _players[clientNum].get();
+ETJump::TimerunV2::Player *ETJump::TimerunV2::setupPlayerData(
+    const int clientNum, const std::string &runName,
+    const std::string &playerName, const int currentTimeMs) const {
+  const auto player = _players[clientNum].get();
+
   if (!player) {
     _logger->error("Trying to start run `%s` for client `%d` but no player "
                    "object available.",
@@ -322,11 +323,11 @@ void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
     Printer::chat(clientNum,
                   "Unable to start timerun. Reconnect and if this persists, "
                   "report the bug at github.com/etjump/etjump");
-    return;
+    return nullptr;
   }
 
   if (player->running) {
-    return;
+    return nullptr;
   }
 
   player->running = true;
@@ -337,16 +338,52 @@ void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
   player->runHasCheckpoints =
       level.checkpointsCount[indexForRunname(runName)] != 0;
   player->checkpointTimes.fill(TIMERUN_CHECKPOINT_NOT_SET);
-  player->checkpointIndexesHit.fill(false);
+  player->checkpointIndicesHit.fill(false);
   player->nextCheckpointIdx = 0;
 
+  return player;
+}
+
+void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
+                                   const std::string &playerName,
+                                   int currentTimeMs) {
+  const auto player =
+      setupPlayerData(clientNum, runName, playerName, currentTimeMs);
+
+  if (!player) {
+    return;
+  }
+
   startNotify(player);
+  Utilities::startRun(clientNum);
+}
+
+void ETJump::TimerunV2::startSaveposTimer(int clientNum,
+                                          const std::string &playerName,
+                                          const int currentTimeMs,
+                                          const ETJump::SavePosData &data) {
+  const auto player = setupPlayerData(clientNum, data.timerunInfo.runName,
+                                      playerName, currentTimeMs);
+
+  if (!player) {
+    return;
+  }
+
+  Printer::commandAll(
+      TimerunCommands::SavePosStart(
+          player->clientNum, player->startTime.value(), player->activeRunName,
+          data.timerunInfo.previousRecord, player->runHasCheckpoints,
+          data.timerunInfo.previousRecordCheckpoints,
+          data.timerunInfo.checkpoints)
+          .serialize());
 
   Utilities::startRun(clientNum);
 }
 
-void ETJump::TimerunV2::checkpoint(const std::string &runName, int clientNum,
-                                   int checkpointIndex, int currentTimeMs) {
+void ETJump::TimerunV2::checkpoint(const std::string &runName,
+                                   const int clientNum,
+                                   const int checkpointIndex,
+                                   const int currentTimeMs) const {
   Player *player = _players[clientNum].get();
 
   if (player == nullptr) {
@@ -361,11 +398,11 @@ void ETJump::TimerunV2::checkpoint(const std::string &runName, int clientNum,
     return;
   }
 
-  if (player->checkpointIndexesHit[checkpointIndex]) {
+  if (player->checkpointIndicesHit[checkpointIndex]) {
     return;
   }
 
-  player->checkpointIndexesHit[checkpointIndex] = true;
+  player->checkpointIndicesHit[checkpointIndex] = true;
 
   player->checkpointTimes[player->nextCheckpointIdx++] =
       currentTimeMs - player->startTime.value();
@@ -374,7 +411,7 @@ void ETJump::TimerunV2::checkpoint(const std::string &runName, int clientNum,
       TimerunCommands::Checkpoint(
           clientNum, player->nextCheckpointIdx - 1,
           player->checkpointTimes[player->nextCheckpointIdx - 1],
-          player->activeRunName)
+          player->activeRunName, checkpointIndex)
           .serialize());
 }
 
@@ -1089,7 +1126,6 @@ void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
 }
 
 void ETJump::TimerunV2::startNotify(Player *player) const {
-  auto spectators = Utilities::getSpectators(player->clientNum);
   auto previousRecord =
       player->getRecord(defaultSeasonId, player->activeRunName);
 

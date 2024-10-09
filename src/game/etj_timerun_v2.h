@@ -35,6 +35,7 @@
 #include "etj_timerun_models.h"
 #include "etj_utilities.h"
 #include "g_local.h"
+#include "etj_savepos_shared.h"
 
 namespace ETJump {
 class TimerunRepository;
@@ -65,7 +66,7 @@ public:
     bool runHasCheckpoints;
     int nextCheckpointIdx;
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointTimes{};
-    std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointIndexesHit{};
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
     // /loadcheckpoints stores checkpoints here
     std::map<std::string, std::array<int, MAX_TIMERUN_CHECKPOINTS>>
         overriddenCheckpoints{};
@@ -92,8 +93,16 @@ public:
   void clientDisconnect(int clientNum);
   void startTimer(const std::string &runName, int clientNum,
                   const std::string &playerName, int currentTimeMs);
+
+  /*
+   * Starts a timerun for player, except grabs previous record and previous
+   * record checkpoints from savepos data instead of records database
+   */
+  void startSaveposTimer(int clientNum, const std::string &playerName,
+                         int currentTimeMs, const SavePosData &data);
+
   void checkpoint(const std::string &runName, int clientNum,
-                  int checkpointIndex, int currentTimeMs);
+                  int checkpointIndex, int currentTimeMs) const;
   void stopTimer(const std::string &runName, int clientNum, int currentTimeMs);
   void addSeason(Timerun::AddSeasonParams season);
   void editSeason(Timerun::EditSeasonParams params);
@@ -110,6 +119,15 @@ private:
   void startNotify(Player *player) const;
   static bool isDebugging(int clientNum);
   void checkRecord(Player *player);
+
+  /*
+   * returns nullptr if player object is unavailable,
+   * or if the player is already running
+   */
+  Player *setupPlayerData(int clientNum, const std::string &runName,
+                          const std::string &playerName,
+                          int currentTimeMs) const;
+
   static std::array<int, MAX_TIMERUN_CHECKPOINTS>
   toCheckpointsArray(const std::vector<int> *vector);
   static int indexForRunname(const std::string &runName);

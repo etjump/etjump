@@ -143,6 +143,10 @@ void DemoCompatibility::setupCompatibilityFlags() {
   }
 
   if (!isCompatible({3, 3, 0})) {
+    flags.noSavePosTimerunInfo = true;
+    compatibilityStrings.emplace_back(
+        "- Timerun state unavailable for 'savepos'");
+
     flags.adjustEvFakebrushAndClientTeleporter = true;
     compatibilityStrings.emplace_back(
         "- Adjusted event indices for ET_FAKEBRUSH and "

@@ -64,6 +64,7 @@
 #include "etj_utilities.h"
 #include "etj_player_bbox.h"
 #include "etj_pmove_utils.h"
+#include "etj_savepos.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -89,6 +90,7 @@ std::unique_ptr<DemoCompatibility> demoCompatibility;
 std::shared_ptr<AccelColor> accelColor;
 std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 std::shared_ptr<PlayerBBox> playerBBox;
+std::unique_ptr<SavePos> savePos;
 } // namespace ETJump
 
 static bool isInitialized{false};
@@ -323,6 +325,9 @@ void init() {
   // restores timerun after vid_restart (if required)
   trap_SendClientCommand("timerun_status");
 
+  // must be called after 'initTimer' so the pointer is valid!
+  savePos = std::make_unique<SavePos>(timerun);
+
   std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
 
   trickjumpLines = std::make_shared<TrickjumpLines>();
@@ -380,6 +385,8 @@ void shutdown() {
   ETJump::serverCommandsHandler = nullptr;
   ETJump::playerEventsHandler = nullptr;
   ETJump::entityEventsHandler = nullptr;
+
+  ETJump::savePos = nullptr;
 
   isInitialized = false;
 

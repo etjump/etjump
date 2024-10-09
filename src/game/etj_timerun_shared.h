@@ -42,7 +42,7 @@ opt<int> parseInteger(const std::string &arg);
 
 class Start {
 public:
-  Start();
+  Start() = default;
   Start(int clientNum, int startTime, const std::string &runName,
         const opt<int> &previousRecord, bool runHasCheckpoints,
         std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
@@ -61,21 +61,44 @@ public:
   static opt<Start> deserialize(const std::vector<std::string> &args);
 };
 
+// this uses deserialize() from Start class for simplicity
+class SavePosStart {
+public:
+  SavePosStart() = default;
+  SavePosStart(int clientNum, int startTime, std::string runName,
+               const opt<int> &previousRecord, bool runHasCheckpoints,
+               std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
+               std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
+
+  int clientNum{};
+  int startTime{};
+  std::string runName{};
+  opt<int> previousRecord{};
+  bool runHasCheckpoints = false;
+  std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
+  std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints{};
+
+  std::string serialize();
+};
+
 class Checkpoint {
 public:
   Checkpoint() = default;
 
-  Checkpoint(int clientNum, int checkpointIndex, int checkpointTime,
-             const std::string &runName)
-      : clientNum(clientNum), checkpointIndex(checkpointIndex),
-        checkpointTime(checkpointTime), runName(runName) {}
+  Checkpoint(const int clientNum, const int checkpointNum,
+             const int checkpointTime, const std::string &runName,
+             const int checkpointIndex)
+      : clientNum(clientNum), checkpointNum(checkpointNum),
+        checkpointTime(checkpointTime), runName(runName),
+        checkpointIndex(checkpointIndex) {}
 
   int clientNum{};
-  int checkpointIndex{};
+  int checkpointNum{}; // sequential counter, how many checkpoints we've hit
   int checkpointTime{};
   std::string runName{};
+  int checkpointIndex{}; // index for Player.checkpointIndexesHit
 
-  std::string serialize();
+  std::string serialize() const;
 
   static opt<Checkpoint> deserialize(const std::vector<std::string> &args);
 };
