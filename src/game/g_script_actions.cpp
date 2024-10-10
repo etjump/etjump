@@ -4620,8 +4620,8 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
 
   // params may contain multiple k/v pairs for more precise targeting,
   // each of these values must match the entity before we delete it
-  std::array<uint8_t, MAX_GENTITIES> pass{};
-  pass.fill(0);
+  std::array<std::pair<uint8_t, std::vector<std::string>>, MAX_GENTITIES>
+      pass{};
   int count = 0; // number of valid k/v pairs in params
 
   bool parse = true;
@@ -4656,54 +4656,128 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
       G_Error("%s: non-existing key '%s'\n", __func__, key);
     }
 
-    // valid k/v pair found
+    // k/v pair parsed successfully, add it to count
     count++;
     gentity_t *found = nullptr;
 
     int valueInt{};
     float valueFloat{};
     vec3_t valueVec{};
+    std::vector<std::string> args = ETJump::StringUtil::split(value, " ");
+
+    // can't capture __func__ for the lambda directly
+    constexpr auto func = __func__;
+
+    const auto invalidArgCount = [&](const int expectedArgs,
+                                     const size_t numArgs) {
+      G_Printf("%s: Invalid number of arguments for ^3'%s'^7, expected ^3%i^7, "
+               "got ^3%i\n",
+               func, key, expectedArgs, static_cast<int>(numArgs));
+      count--;
+    };
+
+    const auto invalidArgType = [&](const std::string &expectedType,
+                                    const std::string &type) {
+      G_Printf(
+          "%s: Invalid argument for ^3'%s'^7, expected ^3%s^7, got ^3'%s'\n",
+          func, key, expectedType.c_str(), type.c_str());
+      count--;
+    };
 
     switch (fields[i].type) {
       case F_INT:
-        valueInt = Q_atoi(value);
+        if (args.size() != 1) {
+          invalidArgCount(1, args.size());
+          break;
+        }
+
+        try {
+          valueInt = std::stoi(value);
+        } catch (const std::logic_error &) {
+          invalidArgType("number", args[0]);
+          break;
+        }
 
         while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != nullptr) {
-          pass[found->s.number]++;
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
         }
 
         break;
       case F_FLOAT:
-        valueFloat = Q_atof(value);
+        if (args.size() != 1) {
+          invalidArgCount(1, args.size());
+          break;
+        }
+
+        try {
+          valueFloat = std::stof(value);
+        } catch (const std::logic_error &) {
+          invalidArgType("number", args[0]);
+          break;
+        }
 
         while ((found = G_FindFloat(found, fields[i].ofs, valueFloat)) !=
                nullptr) {
-          pass[found->s.number]++;
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
         }
 
         break;
       case F_LSTRING:
       case F_GSTRING:
         while ((found = G_Find(found, fields[i].ofs, value)) != nullptr) {
-          pass[found->s.number]++;
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
         }
         break;
 
       case F_VECTOR:
-        std::sscanf(value, "%f %f %f", &valueVec[0], &valueVec[1],
-                    &valueVec[2]);
+        if (args.size() != 3) {
+          invalidArgCount(3, args.size());
+          break;
+        }
+
+        int j;
+
+        try {
+          for (j = 0; j < 3; j++) {
+            valueVec[j] = std::stof(args[j]);
+          }
+        } catch (const std::logic_error &) {
+          invalidArgType("number", args[j]);
+          break;
+        }
 
         while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
-          pass[found->s.number]++;
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
         }
 
         break;
       case F_ANGLEHACK:
+        if (args.size() != 1) {
+          invalidArgCount(1, args.size());
+          break;
+        }
+
         VectorClear(valueVec);
-        valueVec[2] = Q_atof(value);
+
+        try {
+          valueVec[2] = std::stof(args[0]);
+        } catch (const std::logic_error &) {
+          invalidArgType("number", args[0]);
+          break;
+        }
 
         while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
-          pass[found->s.number]++;
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
         }
 
         break;
@@ -4723,10 +4797,12 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
 
   // delete all entities that passed the tests
   for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < ENTITYNUM_MAX_NORMAL; i++) {
-    if (pass[i] == count) {
+    if (pass[i].first == count) {
       numDeleted++;
-      G_Printf("%s: entity %i [^z%s^7] removed, matched params ^3'%s'\n",
-               __func__, i, g_entities[i].classname, params);
+      const std::string paramsMatched =
+          ETJump::StringUtil::join(pass[i].second, ", ");
+      G_Printf("%s: deleted entity %i [^z%s^7], matched params: ^3'%s'\n",
+               __func__, i, g_entities[i].classname, paramsMatched.c_str());
       G_FreeEntity(&g_entities[i]);
     }
   }
