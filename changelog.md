@@ -127,6 +127,49 @@
 * added custom votes to vote UI [#1447](https://github.com/etjump/etjump/pull/1447)
   * details panel contains the list of maps on the server and any unavailable maps
   * menu contains a toggle for voting a random map or RTV from given list
+* improvements to menu sliders [#1455](https://github.com/etjump/etjump/pull/1455) [#1466](https://github.com/etjump/etjump/pull/1466)
+  * sliders no longer send cvar updates every frame mouse is not moved
+  * added "cached" menu sliders, which update the real cvar value only when mouse click state changes
+    * used for `etj_noclipScale` to prevent spamming userinfo updates, and `etj_menuSensitivity` to make the slider easier to use
+* improved logging for tokens, motd and custom votes [#1463](https://github.com/etjump/etjump/pull/1463)
+  * fixed several crashes related to JSON parsing
+  * various errors from `!tokens` no longer crash the server, but are gracefully handled with an error message
+* fixed `!tokens move` not shifting token to ground level like `!tokens add` [#1463](https://github.com/etjump/etjump/pull/1463)
+* fixed `listinfo/customvotes` output if server has no custom votes set [#1463](https://github.com/etjump/etjump/pull/1463)
+* `shooter_rocket/grenade/mortar` no longer spawn entities if entity limit is close to full, to prevent them working as an effective DoS in some maps [#1467](https://github.com/etjump/etjump/pull/1467)
+* runtimer now uses correct timestamps for spectators/demo playback if server runs/was running at `sv_fps 125` [#1468](https://github.com/etjump/etjump/pull/1468)
+* added info print to the start of demo playback [#1470](https://github.com/etjump/etjump/pull/1470)
+  * displays mod version for demo, player name, map, server and any compatibility flags used during demo playback
+* deprecated `g_debugTimeruns` as it serves no real purpose anymore [#1469](https://github.com/etjump/etjump/pull/1469)
+* fixed various backwards compatibility issues with old demos [1472](https://github.com/etjump/etjump/pull/1472)
+  * events are now correctly adjusted to account for new events/entity types added in ETJump 2.0.6, 2.3.0 and 3.3.0 (for this release)
+* added cvars to control demo recording status line [#1475](https://github.com/etjump/etjump/pull/1475)
+  * `etj_drawRecordingStatus` - toggle demo recording status on/off
+  * `etj_recordingStatusX/Y` - X/Y position
+  * etmain's `cg_recording_statusline` is removed in favor of these
+  * the default position is very slightly shifted to left
+* added `savepos/loadpos` system [#1456](https://github.com/etjump/etjump/pull/1456)
+  * allows saving players position, angles, velocity, stance and timerun state into a file
+    * files are saved into `etjump/savepos/<name>.dat` (if no name is given, `default.dat`)
+    * can also be used in demo playback
+    * timerun state can only be saved from demos recorded in ETJump 3.3.0 and newer
+  * `loadpos` restores the state from a given file
+  * `savepos` can be used any time, whereas `loadpos` requires cheats to be enabled
+  * usage:
+    * `savepos <optional name> <optional flags>` - saves a position
+      * `1` - don't save velocity (will be cleared)
+      * `2` - don't save pitch angle (will reset to 0)
+      * if only one parameter is given, it's treated as a flag if it's numeric and one character only
+    * `loadpos <optional name>` - loads a position
+    * `listsavepos` - list all saved savepos files
+    * `readsavepos` - reload savepos files
+* `set` script action can no longer change entitys `classname` outside of `spawn` script events [#1480](https://github.com/etjump/etjump/pull/1480)
+  * `classname_nospawn` can still be used as it doesn't re-spawn the entity
+* added `delete` script action for deleting entities by their entity key/value pairs [#1481](https://github.com/etjump/etjump/pull/1481)
+  * `delete { origin "16 16 16" }`, `delete { origin "16 16 16" targetname "foo" ... }`
+  * if multiple key/value pairs are provided, an entity must match all of them to be deleted
+  * not all entity keys are supported with this script action - this will be improved in future releases
+    * for the currently supported keys, see [here](https://github.com/etjump/etjump/blob/d75422cb0d81be51575dffa5121079547a68a867/src/game/g_spawn.cpp#L84-L175)
 
 # ETJump 3.2.2
 
