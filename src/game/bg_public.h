@@ -2701,7 +2701,7 @@ struct Manual {
   const char *description;
 };
 
-static const struct Manual commandManuals[] = {
+static constexpr Manual commandManuals[] = {
     {"8ball", "!8ball [question]",
      "Magical 8 Ball of pure awesomeness gives an answer to any question you "
      "might have!"},
@@ -2710,7 +2710,7 @@ static const struct Manual commandManuals[] = {
      "Adds a new level. Provide optional -switches to set level attributes."},
     {"admintest", "!admintest", "Displays your admin level."},
     {"ban", "!ban [player] [(optional) seconds] [(optional) reason]",
-     "Bans target player from server."},
+     "Bans target player from server. If seconds is 0, ban is permanent."},
     {"cancelvote", "!cancelvote", "Cancels current vote in progress."},
     {"deletelevel", "!deletelevel [level]", "Deletes a level."},
     //    {"deleteuser", "!deleteuser -id [user id]", "Deletes a user based on
