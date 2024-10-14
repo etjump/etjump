@@ -170,6 +170,8 @@
   * if multiple key/value pairs are provided, an entity must match all of them to be deleted
   * not all entity keys are supported with this script action - this will be improved in future releases
     * for the currently supported keys, see [here](https://github.com/etjump/etjump/blob/d75422cb0d81be51575dffa5121079547a68a867/src/game/g_spawn.cpp#L84-L175)
+* fixed `!rename` ignoring spaces for the new name [#1485](https://github.com/etjump/etjump/pull/1485)
+  * the command also won't execute if the resulting name would be too long, while previously the new name was truncated to stay within limits
 
 # ETJump 3.2.2
 
