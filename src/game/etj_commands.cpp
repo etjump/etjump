@@ -1678,7 +1678,7 @@ bool ReadConfig(gentity_t *ent, Arguments argv) {
 }
 
 bool Rename(gentity_t *ent, Arguments argv) {
-  if (argv->size() != 3) {
+  if (argv->size() < 3) {
     PrintManual(ent, "rename");
     return false;
   }
@@ -1703,17 +1703,27 @@ bool Rename(gentity_t *ent, Arguments argv) {
     }
   }
 
+  const std::string newName =
+      ETJump::StringUtil::join(ETJump::Container::skipFirstN(*argv, 2), " ");
+
+  if (newName.length() > MAX_NETNAME) {
+    Printer::chat(
+        ent, ETJump::stringFormat("^3rename: ^7new name is too long (%i > %i)",
+                                  newName.length(), MAX_NETNAME));
+    return false;
+  }
+
   char userinfo[MAX_INFO_STRING] = "\0";
-  int cn = ClientNum(target);
+  const int cn = ClientNum(target);
   trap_GetUserinfo(cn, userinfo, sizeof(userinfo));
 
   const char *oldName = Info_ValueForKey(userinfo, "name");
-  Printer::chatAll(va("^3rename: ^7%s^7 has been renamed to %s", oldName,
-                      argv->at(2).c_str()));
-  Info_SetValueForKey(userinfo, "name", argv->at(2).c_str());
+  Printer::chatAll(
+      va("^3rename: ^7%s^7 has been renamed to %s", oldName, newName.c_str()));
+  Info_SetValueForKey(userinfo, "name", newName.c_str());
   trap_SetUserinfo(cn, userinfo);
   ClientUserinfoChanged(cn);
-  trap_SendServerCommand(cn, va("set_name %s", argv->at(2).c_str()));
+  trap_SendServerCommand(cn, va("set_name %s", newName.c_str()));
   return true;
 }
 
