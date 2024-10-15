@@ -26,7 +26,7 @@
 #include "etj_json_utilities.h"
 #include "etj_chat_replay.h"
 #include "etj_string_utilities.h"
-#include "etj_log.h"
+#include "etj_time_utilities.h"
 
 namespace ETJump {
 
@@ -45,6 +45,13 @@ void ChatReplay::createChatMessage(const int clientNum, const std::string &name,
   msg.localize = localize;
   msg.encoded = encoded;
   msg.message = sanitize(message);
+  msg.expired = false;
+
+  time_t t;
+  t = std::time(&t);
+
+  // FIXME: 32-bit time
+  msg.timestamp = static_cast<int>(t);
 
   storeChatMessage(msg);
 }
@@ -57,7 +64,7 @@ void ChatReplay::storeChatMessage(const ChatMessage &msg) {
   }
 }
 
-void ChatReplay::sendChatMessages(gentity_t *ent) const {
+void ChatReplay::sendChatMessages(gentity_t *ent) {
   if (!ent || !ent->client) {
     return;
   }
@@ -70,6 +77,31 @@ void ChatReplay::sendChatMessages(gentity_t *ent) const {
 
   const int clientNum = ClientNum(ent);
 
+  // if messages are set to expire, mark any chats that are too old
+  if (g_chatReplayMaxMessageAge.integer > 0) {
+    time_t t;
+    t = std::time(&t);
+
+    // FIXME: 32-bit time
+    t -= g_chatReplayMaxMessageAge.integer * 60;
+    const Time maxAge = Time::fromInt(static_cast<int>(t));
+
+    bool allExpired = true;
+
+    for (auto &msg : chatReplayBuffer) {
+      if (maxAge > Time::fromInt(msg.timestamp)) {
+        msg.expired = true;
+      } else {
+        allExpired = false;
+      }
+    }
+
+    // no valid messages to send
+    if (allExpired) {
+      return;
+    }
+  }
+
   // send this with raw trap_SendServerCommand instead of Printer,
   // so we can omit team flags easily on client side
   trap_SendServerCommand(
@@ -78,6 +110,10 @@ void ChatReplay::sendChatMessages(gentity_t *ent) const {
   for (const auto &msg : chatReplayBuffer) {
     // skip messages from ignored clients
     if (COM_BitCheck(ent->client->sess.ignoreClients, msg.clientNum)) {
+      continue;
+    }
+
+    if (msg.expired) {
       continue;
     }
 
@@ -112,7 +148,9 @@ void ChatReplay::readChatsFromFile() {
         JsonUtils::parseValue(msg.localize, message["localize"], &errors,
                               "localize") &&
         JsonUtils::parseValue(msg.encoded, message["encoded"], &errors,
-                              "encoded")) {
+                              "encoded") &&
+        JsonUtils::parseValue(msg.timestamp, message["timestamp"], &errors,
+                              "timestamp")) {
       storeChatMessage(msg);
     } else {
       logger->error(errors);
@@ -131,6 +169,7 @@ void ChatReplay::writeChatsToFile() {
     chat["message"] = msg.message;
     chat["localize"] = msg.localize;
     chat["encoded"] = msg.encoded;
+    chat["timestamp"] = msg.timestamp;
 
     root.append(chat);
   }

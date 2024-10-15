@@ -35,6 +35,10 @@ class ChatReplay {
     std::string message;
     bool localize;
     bool encoded;
+
+    // true if timestamp is older than current time - g_chatReplayMaxMessageAge
+    bool expired;
+    int timestamp;
   };
 
   static constexpr int MAX_CHAT_REPLAY_BUFFER = 10;
@@ -57,7 +61,7 @@ public:
                          const std::string &message, bool localize,
                          bool encoded);
 
-  void sendChatMessages(gentity_t *ent) const;
+  void sendChatMessages(gentity_t *ent);
 
   void writeChatsToFile();
 };
