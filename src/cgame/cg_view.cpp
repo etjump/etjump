@@ -988,7 +988,7 @@ static int CG_CalcFov(void) {
     fov_x = 90;
   } else {
     fov_x = cg_fov.value;
-    if (!developer.integer) {
+    if (!developer.integer && !cg.demoPlayback) {
       if (fov_x < 90) {
         fov_x = 90;
       } else if (fov_x > 160) {
