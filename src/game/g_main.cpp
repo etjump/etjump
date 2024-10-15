@@ -263,6 +263,8 @@ vmCvar_t vote_minRtvDuration;
 
 vmCvar_t g_adminChat;
 
+vmCvar_t g_chatReplayMaxMessageAge;
+
 // ETLegacy server browser integration
 // os support - this SERVERINFO cvar specifies supported client operating
 // systems on server
@@ -512,6 +514,9 @@ cvarTable_t gameCvarTable[] = {
     {&g_rtvMapCount, "g_rtvMapCount", "5", CVAR_ARCHIVE},
 
     {&g_adminChat, "g_adminChat", "1", CVAR_ARCHIVE},
+
+    {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "0",
+     CVAR_ARCHIVE | CVAR_LATCH},
 };
 
 // bk001129 - made static to avoid aliasing
