@@ -516,7 +516,7 @@ cvarTable_t gameCvarTable[] = {
     {&g_adminChat, "g_adminChat", "1", CVAR_ARCHIVE},
 
     {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "0",
-     CVAR_ARCHIVE},
+     CVAR_ARCHIVE | CVAR_LATCH},
 };
 
 // bk001129 - made static to avoid aliasing
