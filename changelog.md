@@ -65,7 +65,7 @@
   * `etj_drawPlayerBBox` - bitflag value to draw bboxes
     * `1` = draw self
     * `1` = draw others
-    * `1` = draw fireteam mambers
+    * `1` = draw fireteam members
   * `etj_playerBBoxBottomOnly` - bitflag to draw only bottom of bbox instead of full box
     * same flags as `etj_drawPlayerBBox`
   * `etj_playerBBoxColorSelf/Other/Fireteam` - sets the color of the bbox
@@ -88,7 +88,7 @@
 * fixed unrelated fireteam/vote messages being visible simultaneously [#1383](https://github.com/etjump/etjump/pull/1383)
 * fixed portalgun portals drawing mirrored on 2.60b clients [#1388](https://github.com/etjump/etjump/pull/1388)
 * fixed systemcalls working unreliably on 64-bit clients [#1396](https://github.com/etjump/etjump/pull/1396)
-* tiemruns no longer interrupt due to too low fps with `com_maxfps 0` [#1405](https://github.com/etjump/etjump/pull/1405)
+* timeruns no longer interrupt due to too low fps with `com_maxfps 0` [#1405](https://github.com/etjump/etjump/pull/1405)
 * added dropdown menus to UI for more convenient multi-selection menu entries [#1406](https://github.com/etjump/etjump/pull/1406)
 * added autospec feature to automatically follow next client when idling in free spec [#1382](https://github.com/etjump/etjump/pull/1382)
   * `etj_autoSpec` - toggle on/off
@@ -262,7 +262,7 @@
 * added `wait` key to `trigger_push` and fixed multiple activations on client side, causing prediction errors when traveling through large triggers [#1217](https://github.com/etjump/etjump/pull/1217)
   * default **100ms**, valid range is **0 - 65535**
 * loading to a prone position while using mortar set is no longer possible [#1221](https://github.com/etjump/etjump/pull/1221)
-* `goto/call/iwant` now teleport you to the same stance as the target/caller`[#1223](https://github.com/etjump/etjump/pull/1223)
+* `goto/call/iwant` now teleport you to the same stance as the target/caller [#1223](https://github.com/etjump/etjump/pull/1223)
 * fixed issues with `!rename` command
   * `!rename` no longer works on admins that are same/higher level than you
   * `!rename` no longer reduced name change limit (unless using it on yourself)
