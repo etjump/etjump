@@ -22,11 +22,13 @@
   * slightly reduced the size of the token bbox to better match the visual size
   * tokens can no longer be collected while noclipping
 * lean angles are now interpolated on spec/demo playback to smooth out viewangle transitions [#1337](https://github.com/etjump/etjump/pull/1337)
-* added chat replay system [#1335](https://github.com/etjump/etjump/pull/1335)
+* added chat replay system [#1335](https://github.com/etjump/etjump/pull/1335) [#1488](https://github.com/etjump/etjump/pull/1488)
   * server replays 10 latest global chat messages to clients after connecting/map change/`vid_restart`
     * chats are stored on server in `chatreplay.json`
     * timestamps or chat flags are not preserved from original messages
     * `etj_chatReplay` cvar toggles the replay on client side, any chat messages you send are still included for other players chat replays
+  * server cvar `g_chatReplayMaxMessageAge <minutes>` can be set to make chats expire, any message older than specified won't be included in a chat replay
+    * default value `0` means chats never expire
 * fixed potential crash on host game menu when over 500 maps were installed [#1343](https://github.com/etjump/etjump/pull/1343)
 * added `trigger_teleport_client` entity to enable client side predicted teleports [#1332](https://github.com/etjump/etjump/pull/1332)
   * supports same keys/spawnflags as other teleport entities, except `spawnflags 4/8`
@@ -172,6 +174,7 @@
     * for the currently supported keys, see [here](https://github.com/etjump/etjump/blob/d75422cb0d81be51575dffa5121079547a68a867/src/game/g_spawn.cpp#L84-L175)
 * fixed `!rename` ignoring spaces for the new name [#1485](https://github.com/etjump/etjump/pull/1485)
   * the command also won't execute if the resulting name would be too long, while previously the new name was truncated to stay within limits
+* `cg_fov` can now be set outside of 90-160 range in demo playback without setting `developer 1` [#1489](https://github.com/etjump/etjump/pull/1489)
 
 # ETJump 3.2.2
 
