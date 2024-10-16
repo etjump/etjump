@@ -116,7 +116,6 @@ jobs:
         path: ${{ github.workspace }}/build/etjump
 
   package:
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-20.04
     needs: [Windows, Linux, macOS]
 
