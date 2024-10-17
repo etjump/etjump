@@ -51,7 +51,7 @@ PlayerBBox::PlayerBBox() {
   shader = trap_R_RegisterShader(etj_playerBBoxShader.string);
 }
 
-void PlayerBBox::drawBBox(clientInfo_t *ci, centity_t *cent) {
+void PlayerBBox::drawBBox(const clientInfo_t *ci, const centity_t *cent) const {
   if (canSkipDraw(cent, ci)) {
     return;
   }
@@ -95,7 +95,8 @@ void PlayerBBox::drawBBox(clientInfo_t *ci, centity_t *cent) {
     // adjust alpha to match etj_hideDistance + etj_hideFadeRange
     // we don't need to worry about hideme or dist < hideDistance here, the code
     // in CG_Player exits before we ever call this function in those scenarios
-    if (etj_hide.integer) {
+    if (etj_hide.integer &&
+        !playerIsSolid(cg.snap->ps.clientNum, ci->clientNum)) {
       setBBoxAlpha(cent, box);
     }
   }
@@ -195,7 +196,7 @@ void PlayerBBox::drawBBox(clientInfo_t *ci, centity_t *cent) {
   trap_R_AddPolyToScene(shader, 4, box.verts);
 }
 
-void PlayerBBox::setupBBoxExtents(centity_t *cent, BBox &box) {
+void PlayerBBox::setupBBoxExtents(const centity_t *cent, BBox &box) {
   VectorCopy(playerMins, box.mins);
   VectorCopy(playerMaxs, box.maxs);
 
@@ -222,8 +223,8 @@ bool PlayerBBox::bottomOnly(const int &pType) {
   }
 }
 
-void PlayerBBox::setBBoxAlpha(centity_t *cent, BBox &box) {
-  centity_t *self = &cg_entities[cg.snap->ps.clientNum];
+void PlayerBBox::setBBoxAlpha(const centity_t *cent, BBox &box) {
+  const centity_t *self = &cg_entities[cg.snap->ps.clientNum];
   const vec_t playerDist = Distance(self->lerpOrigin, cent->lerpOrigin);
   const float fadeRange = etj_hideFadeRange.value;
   const float transZone = etj_hideDistance.value + fadeRange;
@@ -237,7 +238,12 @@ void PlayerBBox::setBBoxAlpha(centity_t *cent, BBox &box) {
   box.color[3] *= alpha;
 }
 
-bool PlayerBBox::canSkipDraw(centity_t *cent, clientInfo_t *ci) const {
+bool PlayerBBox::canSkipDraw(const centity_t *cent,
+                             const clientInfo_t *ci) const {
+  if (!ci) {
+    return true;
+  }
+
   if (ci->team == TEAM_SPECTATOR || cent->currentState.eFlags & EF_DEAD) {
     return true;
   }

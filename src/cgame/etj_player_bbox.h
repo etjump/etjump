@@ -59,13 +59,13 @@ class PlayerBBox {
   static constexpr int CROUCH_MAXS_OFFSET_Z = 24;
   static constexpr int PRONE_MAXS_OFFSET_Z = 32;
 
-  static void setupBBoxExtents(centity_t *cent, BBox &box);
+  static void setupBBoxExtents(const centity_t *cent, BBox &box);
   static bool bottomOnly(const int &pType);
-  static void setBBoxAlpha(centity_t *cent, BBox &box);
-  bool canSkipDraw(centity_t *cent, clientInfo_t *ci) const;
+  static void setBBoxAlpha(const centity_t *cent, BBox &box);
+  bool canSkipDraw(const centity_t *cent, const clientInfo_t *ci) const;
 
 public:
-  void drawBBox(clientInfo_t *ci, centity_t *cent);
+  void drawBBox(const clientInfo_t *ci, const centity_t *cent) const;
 
   PlayerBBox();
   ~PlayerBBox() = default;
