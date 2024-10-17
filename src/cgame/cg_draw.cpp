@@ -1989,13 +1989,29 @@ static float CG_ScanForCrosshairEntity(float *zChange, qboolean *hitClient) {
   return dist;
 }
 
-#define CH_KNIFE_DIST 48 // from g_weapon.c
-#define CH_LADDER_DIST 100
-#define CH_WATER_DIST 100
-#define CH_BREAKABLE_DIST 64
-#define CH_DOOR_DIST 96
+namespace ETJump {
+void cursorhintTrace(trace_t *trace, vec3_t start, vec3_t end) {
+  CG_Trace(trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
+           MASK_PLAYERSOLID);
 
-#define CH_DIST 100 // 128		// use the largest value from above
+  if (trace->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (trace->entityNum < MAX_CLIENTS &&
+         !playerIsSolid(cg.snap->ps.clientNum, trace->entityNum)) {
+    tempTraceIgnoreClient(trace->entityNum);
+    CG_Trace(trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
+             MASK_PLAYERSOLID);
+  }
+
+  resetTempTraceIgnoredClients();
+}
+} // namespace ETJump
+
+static constexpr float CH_KNIFE_DIST = 48.0f; // from g_weapon.c
+static constexpr float CH_LADDER_DIST = 100.0f;
+static constexpr float CH_DIST = 100.0f;
 
 /*
 ==============
@@ -2003,20 +2019,16 @@ CG_CheckForCursorHints
     concept in progress...
 ==============
 */
-void CG_CheckForCursorHints(void) {
+void CG_CheckForCursorHints() {
   trace_t trace;
   vec3_t start, end;
-  centity_t *tracent;
-  vec3_t pforward, eforward;
-  float dist;
 
   if (cg.renderingThirdPerson) {
     return;
   }
 
-  if (cg.snap->ps.serverCursorHint) // server is dictating a cursor
-                                    // hint, use it.
-  {
+  // server is dictating a cursor hint, use it.
+  if (cg.snap->ps.serverCursorHint) {
     cg.cursorHintTime = cg.time;
     cg.cursorHintFade = 500; // fade out time
     cg.cursorHintIcon = cg.snap->ps.serverCursorHint;
@@ -2033,16 +2045,14 @@ void CG_CheckForCursorHints(void) {
   VectorCopy(cg.refdef_current->vieworg, start);
   VectorMA(start, CH_DIST, cg.refdef_current->viewaxis[0], end);
 
-  CG_Trace(&trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
-           MASK_PLAYERSOLID);
+  ETJump::cursorhintTrace(&trace, start, end);
 
   if (trace.fraction == 1.0f) {
     return;
   }
 
-  dist = trace.fraction * CH_DIST;
-
-  tracent = &cg_entities[trace.entityNum];
+  const float dist = trace.fraction * CH_DIST;
+  const centity_t *tracent = &cg_entities[trace.entityNum];
 
   // Arnout: invisible entities don't show hints
   if (trace.entityNum >= MAX_CLIENTS &&
@@ -2051,11 +2061,9 @@ void CG_CheckForCursorHints(void) {
     return;
   }
 
-  //
   // world
-  //
   if (trace.entityNum == ENTITYNUM_WORLD) {
-    if ((trace.surfaceFlags & SURF_LADDER) &&
+    if (trace.surfaceFlags & SURF_LADDER &&
         !(cg.snap->ps.pm_flags & PMF_LADDER)) {
       if (dist <= CH_LADDER_DIST) {
         cg.cursorHintIcon = HINT_LADDER;
@@ -2064,24 +2072,30 @@ void CG_CheckForCursorHints(void) {
         cg.cursorHintValue = 0;
       }
     }
+  }
 
-  } else if (trace.entityNum < MAX_CLIENTS) // people
-  {                                         // knife
-    if (trace.entityNum < MAX_CLIENTS && (cg.snap->ps.weapon == WP_KNIFE)) {
-      if (dist <= CH_KNIFE_DIST) {
+  // for players, we only care about knife for backstab hint
+  if (trace.entityNum >= MAX_CLIENTS || cg.snap->ps.weapon != WP_KNIFE) {
+    return;
+  }
 
-        AngleVectors(cg.snap->ps.viewangles, pforward, NULL, NULL);
-        AngleVectors(tracent->lerpAngles, eforward, NULL, NULL);
+  // too far
+  if (dist > CH_KNIFE_DIST) {
+    return;
+  }
 
-        if (DotProduct(eforward, pforward) > 0.6f) // from behind(-ish)
-        {
-          cg.cursorHintIcon = HINT_KNIFE;
-          cg.cursorHintTime = cg.time;
-          cg.cursorHintFade = 100;
-          cg.cursorHintValue = 0;
-        }
-      }
-    }
+  vec3_t eforward;
+  vec3_t pforward;
+
+  AngleVectors(cg.snap->ps.viewangles, pforward, nullptr, nullptr);
+  AngleVectors(tracent->lerpAngles, eforward, nullptr, nullptr);
+
+  // from behind(-ish)
+  if (DotProduct(eforward, pforward) > 0.6f) {
+    cg.cursorHintIcon = HINT_KNIFE;
+    cg.cursorHintTime = cg.time;
+    cg.cursorHintFade = 100;
+    cg.cursorHintValue = 0;
   }
 }
 
