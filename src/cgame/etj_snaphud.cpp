@@ -297,7 +297,8 @@ bool Snaphud::beforeRender() {
     case HudType::SNAP_BORDER:
       borderOnly = true;
       borderThickness =
-          Numeric::clamp(etj_snapHUDBorderThickness.value, 0.1f, 10.0f);
+          Numeric::clamp(etj_snapHUDBorderThickness.value, 0.1f,
+                         std::min(etj_snapHUDHeight.value * 2, 10.0f));
       break;
     default:
       borderOnly = false;
