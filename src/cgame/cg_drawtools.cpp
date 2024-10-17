@@ -74,11 +74,12 @@ void CG_FillRectGradient(float x, float y, float width, float height,
 
 /*
 ==============
-CG_FillAngleYaw
+CG_FillAngleYawExt
 ==============
 */
-void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
-                     float fov, vec4_t const color, bool borderOnly) {
+void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
+                        float fov, vec4_t const color, bool borderOnly,
+                        float borderThickness) {
   // don't try to draw lines with no width
   if (start == end) {
     return;
@@ -88,20 +89,31 @@ void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
 
   if (!range.split) {
     if (borderOnly) {
-      CG_DrawRect_FixedBorder(range.x1, y, range.x2 - range.x1, h, 1, color);
+      CG_DrawRect_FixedBorder(range.x1, y, range.x2 - range.x1, h,
+                              borderThickness, color);
     } else {
       CG_FillRect(range.x1, y, range.x2 - range.x1, h, color);
     }
   } else {
     if (borderOnly) {
-      CG_DrawRect_FixedBorder(0, y, range.x1, h, 1, color);
-      CG_DrawRect_FixedBorder(range.x2, y, SCREEN_WIDTH - range.x2, h, 1,
-                              color);
+      CG_DrawRect_FixedBorder(0, y, range.x1, h, borderThickness, color);
+      CG_DrawRect_FixedBorder(range.x2, y, SCREEN_WIDTH - range.x2, h,
+                              borderThickness, color);
     } else {
       CG_FillRect(0, y, range.x1, h, color);
       CG_FillRect(range.x2, y, SCREEN_WIDTH - range.x2, h, color);
     }
   }
+}
+
+/*
+==============
+CG_FillAngleYaw
+==============
+*/
+void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
+                     float fov, const vec4_t color) {
+  CG_FillAngleYawExt(start, end, yaw, y, h, fov, color, false, 1);
 }
 
 /*
@@ -513,7 +525,7 @@ void CG_DrawRect(float x, float y, float width, float height, float size,
 }
 
 void CG_DrawRect_FixedBorder(float x, float y, float width, float height,
-                             int border, const vec4_t color) {
+                             float border, const vec4_t color) {
   trap_R_SetColor(color);
 
   CG_DrawTopBottom_NoScale(x, y, width, height, border);

@@ -65,7 +65,9 @@ menuDef {
         COMBO               (SETTINGS_COMBO_POS(10), "Highlight color 2:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDHLColor2", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of active secondary snapzone\netj_snapHUDHLColor2")
         CVARINTLABEL        (SETTINGS_ITEM_POS(11), "etj_snapHUDEdgeThickness", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(11), "Edge thickness:", 0.2, SETTINGS_ITEM_H, etj_snapHUDEdgeThickness 10 1 128 1, "Thickness of snapzone edges when using edge-only snaphud\netj_snapHUDEdgeThickness")
-        YESNO               (SETTINGS_ITEM_POS(12), "Color 1 is active zone:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDActiveIsPrimary", "Always use primary color for currently active snapzone and flip colors when switching zones\netj_snapHUDActiveIsPrimary")
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(12), "etj_snapHUDBorderThickness", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(12), "Border thickness:", 0.2, SETTINGS_ITEM_H, etj_snapHUDBorderThickness 1 0.1 10 0.1, "Thickness of snapzone borders when using border-only snaphud\netj_snapHUDBorderThickness")
+        YESNO               (SETTINGS_ITEM_POS(13), "Color 1 is active zone:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDActiveIsPrimary", "Always use primary color for currently active snapzone and flip colors when switching zones\netj_snapHUDActiveIsPrimary")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

@@ -490,7 +490,7 @@ typedef struct {
   void (*fillRect)(float x, float y, float w, float h, const vec4_t color);
   void (*drawRect)(float x, float y, float w, float h, float size,
                    const vec4_t color);
-  void (*drawRectFixed)(float x, float y, float w, float h, int size,
+  void (*drawRectFixed)(float x, float y, float w, float h, float border,
                         const vec4_t color);
   void (*drawSides)(float x, float y, float w, float h, float size);
   void (*drawTopBottom)(float x, float y, float w, float h, float size);
