@@ -290,10 +290,18 @@ bool Snaphud::beforeRender() {
 
   hudType = static_cast<HudType>(etj_drawSnapHUD.integer);
 
-  if (hudType == HudType::SNAP_EDGE) {
-    edgeThickness = Numeric::clamp(etj_snapHUDEdgeThickness.integer, 1, 128);
-  } else {
-    borderOnly = (hudType == HudType::SNAP_BORDER);
+  switch (hudType) {
+    case HudType::SNAP_EDGE:
+      edgeThickness = Numeric::clamp(etj_snapHUDEdgeThickness.integer, 0, 128);
+      break;
+    case HudType::SNAP_BORDER:
+      borderOnly = true;
+      borderThickness =
+          Numeric::clamp(etj_snapHUDBorderThickness.value, 0.1f, 10.0f);
+      break;
+    default:
+      borderOnly = false;
+      break;
   }
 
   PrepareDrawables();
@@ -347,8 +355,9 @@ void Snaphud::render() const {
       CG_FillAngleYaw(SHORT2RAD(ds.eSnap), SHORT2RAD(ds.eSnap - edgeThickness),
                       SHORT2RAD(yaw), y, h, fov, snaphudColors[color]);
     } else {
-      CG_FillAngleYaw(SHORT2RAD(ds.bSnap), SHORT2RAD(ds.eSnap), SHORT2RAD(yaw),
-                      y, h, fov, snaphudColors[color], borderOnly);
+      CG_FillAngleYawExt(SHORT2RAD(ds.bSnap), SHORT2RAD(ds.eSnap),
+                         SHORT2RAD(yaw), y, h, fov, snaphudColors[color],
+                         borderOnly, borderThickness);
     }
   }
 }

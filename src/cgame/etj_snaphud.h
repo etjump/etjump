@@ -81,6 +81,7 @@ private:
   int yaw{};
   vec4_t snaphudColors[4]{};
   int edgeThickness{};
+  float borderThickness{};
   HudType hudType{};
   bool borderOnly{};
   int lastUpdateTime{};

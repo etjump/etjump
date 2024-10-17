@@ -2693,6 +2693,7 @@ extern vmCvar_t etj_snapHUDFov;
 extern vmCvar_t etj_snapHUDHLActive;
 extern vmCvar_t etj_snapHUDTrueness;
 extern vmCvar_t etj_snapHUDEdgeThickness;
+extern vmCvar_t etj_snapHUDBorderThickness;
 extern vmCvar_t etj_snapHUDActiveIsPrimary;
 
 extern vmCvar_t etj_gunSway;
@@ -2847,7 +2848,10 @@ void CG_AdjustFrom640(float *x, float *y, float *w, float *h);
 void CG_FillRect(float x, float y, float width, float height,
                  const float *color);
 void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
-                     float fov, vec4_t const color, bool borderOnly = false);
+                     float fov, vec4_t const color);
+void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
+                        float fov, vec4_t const color, bool borderOnly,
+                        float borderThickness);
 void DrawLine(float x1, float y1, float x2, float y2, const vec4_t color);
 void DrawLine(float x1, float y1, float x2, float y2, float w, float h,
               const vec4_t color);
@@ -2929,7 +2933,7 @@ void UI_DrawProportionalString(int x, int y, const char *str, int style,
 void CG_DrawRect(float x, float y, float width, float height, float size,
                  const float *color);
 void CG_DrawRect_FixedBorder(float x, float y, float width, float height,
-                             int border, const vec4_t color);
+                             float border, const vec4_t color);
 void CG_DrawSides(float x, float y, float w, float h, float size);
 void CG_DrawSides_NoScale(float x, float y, float w, float h, float size);
 void CG_DrawTopBottom(float x, float y, float w, float h, float size);

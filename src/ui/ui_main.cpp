@@ -406,12 +406,12 @@ void _UI_DrawRect(float x, float y, float width, float height, float size,
 }
 
 void _UI_DrawRect_DrawRect_FixedBorder(float x, float y, float width,
-                                       float height, int size,
+                                       float height, float border,
                                        const float *color) {
   trap_R_SetColor(color);
 
-  _UI_DrawSides_NoScale(x, y, width, height, size);
-  _UI_DrawTopBottom_NoScale(x, y, width, height, size);
+  _UI_DrawSides_NoScale(x, y, width, height, border);
+  _UI_DrawTopBottom_NoScale(x, y, width, height, border);
 
   trap_R_SetColor(NULL);
 }
