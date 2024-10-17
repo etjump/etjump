@@ -88,10 +88,29 @@ KNIFE/GAUNTLET (NOTE: gauntlet is now the Zombie melee)
 ======================================================================
 */
 
-#define KNIFE_DIST 48
-
 // Let's use the same angle between function we've used before
 extern float sAngleBetweenVectors(vec3_t a, vec3_t b);
+
+namespace ETJump {
+void historicalKnifeTrace(gentity_t *ent, trace_t *tr, vec3_t start, vec3_t end,
+                          int passEntityNum) {
+  G_HistoricalTrace(ent, tr, start, nullptr, nullptr, end, passEntityNum,
+                    MASK_SHOT);
+
+  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr->entityNum < MAX_CLIENTS &&
+         !EntityUtilities::playerIsSolid(ClientNum(ent), tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    G_HistoricalTrace(ent, tr, start, nullptr, nullptr, end, passEntityNum,
+                      MASK_SHOT);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
 
 /*
 ==============
@@ -100,19 +119,17 @@ Weapon_Knife
 */
 void Weapon_Knife(gentity_t *ent) {
   trace_t tr;
-  gentity_t *traceEnt, *tent;
-  int damage, mod;
-  vec3_t pforward, eforward;
-
+  gentity_t *tent;
   vec3_t end;
 
-  mod = MOD_KNIFE;
+  static constexpr float KNIFE_DIST = 48.0f;
+  static constexpr int mod = MOD_KNIFE;
 
   AngleVectors(ent->client->ps.viewangles, forward, right, up);
   CalcMuzzlePoint(ent, ent->s.weapon, forward, right, up, muzzleTrace);
   VectorMA(muzzleTrace, KNIFE_DIST, forward, end);
-  G_HistoricalTrace(ent, &tr, muzzleTrace, NULL, NULL, end, ent->s.number,
-                    MASK_SHOT);
+
+  ETJump::historicalKnifeTrace(ent, &tr, muzzleTrace, end, ent->s.number);
 
   if (tr.surfaceFlags & SURF_NOIMPACT) {
     return;
@@ -142,31 +159,31 @@ void Weapon_Knife(gentity_t *ent) {
     return;
   }
 
-  traceEnt = &g_entities[tr.entityNum];
+  gentity_t *traceEnt = &g_entities[tr.entityNum];
 
   if (!(traceEnt->takedamage)) {
     return;
   }
 
-  damage = G_GetWeaponDamage(ent->s.weapon); // JPW		// default knife
-                                             // damage for frontal attacks
+  // default knife damage for frontal attacks
+  int damage = G_GetWeaponDamage(ent->s.weapon);
 
   /* CHECK WITH PAUL */
   if (ent->client->sess.playerType == PC_COVERTOPS) {
     damage *= 2; // Watch it - you could hurt someone with that thing!
   }
   if (traceEnt->client) {
+    vec3_t eforward;
+    vec3_t pforward;
     AngleVectors(ent->client->ps.viewangles, pforward, NULL, NULL);
     AngleVectors(traceEnt->client->ps.viewangles, eforward, NULL, NULL);
 
     if (DotProduct(eforward, pforward) > 0.6f) // from behind(-ish)
     {
-      damage = 100; // enough to drop a 'normal' (100
-                    // health) human with one jab
-      mod = MOD_KNIFE;
+      // enough to drop a 'normal' (100 health) human with one jab
+      damage = 100;
 
-      // rain - only do this if they have a positive
-      // health
+      // rain - only do this if they have a positive health
       if (traceEnt->health > 0 &&
           ent->client->sess
                   .skill[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS] >= 4) {
