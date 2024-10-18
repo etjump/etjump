@@ -1212,6 +1212,7 @@ void updateRefdefAngles(const playerState_t *ps) {
   // - prone
   // - mounted
   // - using a set weapon (mortar, mobile mg42)
+  // - wounded and waiting for medic
   //
   // this is because we need pmext values to accurately calculate viewangles
   // in these scenarios, but the values might be out of date since we're not
@@ -1227,10 +1228,14 @@ void updateRefdefAngles(const playerState_t *ps) {
 
   // DHM - Nerve :: Added support for PMF_TIME_LOCKPLAYER
   if (ps->pm_type == PM_INTERMISSION || ps->pm_flags & PMF_TIME_LOCKPLAYER) {
+    VectorCopy(ps->viewangles, cg.refdefViewAngles);
+    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
     return;
   }
 
   if (ps->pm_type != PM_SPECTATOR && ps->stats[STAT_HEALTH] <= 0) {
+    VectorCopy(ps->viewangles, cg.refdefViewAngles);
+    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
     return;
   }
 
