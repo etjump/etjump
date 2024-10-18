@@ -858,6 +858,9 @@ typedef struct {
   refdef_t refdef;
   vec3_t refdefViewAngles; // will be converted to refdef.viewaxis
 
+  // for etj_smoothAngles, used in place of ps.delta_angles
+  int refdefDeltaAngles[3];
+
   // zoom key
   qboolean zoomed;
   qboolean zoomedBinoc;
@@ -2777,6 +2780,8 @@ extern vmCvar_t etj_autoSpecDelay;
 extern vmCvar_t etj_drawRecordingStatus;
 extern vmCvar_t etj_recordingStatusX;
 extern vmCvar_t etj_recordingStatusY;
+
+extern vmCvar_t etj_smoothAngles;
 
 //
 // cg_main.c
