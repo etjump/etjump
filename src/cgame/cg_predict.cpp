@@ -1199,7 +1199,7 @@ void CG_PredictPlayerState() {
           CG_Printf("PredictionTeleport\n");
         }
 
-        // sync up refdef angles is etj_smoothAngles is enabled
+        // sync up refdef angles if etj_smoothAngles is enabled
         if (etj_smoothAngles.integer && cg_pmove.pmove_fixed) {
           VectorCopy(cg_pmove.ps->viewangles, cg.refdefViewAngles);
           VectorCopy(cg_pmove.ps->delta_angles, cg.refdefDeltaAngles);
