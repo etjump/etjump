@@ -1194,9 +1194,17 @@ void CG_PredictPlayerState() {
       } else if (cg.thisFrameTeleport) {
         // a teleport will not cause an error decay
         VectorClear(cg.predictedError);
+
         if (cg_showmiss.integer) {
           CG_Printf("PredictionTeleport\n");
         }
+
+        // sync up refdef angles if etj_smoothAngles is enabled
+        if (etj_smoothAngles.integer && cg_pmove.pmove_fixed) {
+          VectorCopy(cg_pmove.ps->viewangles, cg.refdefViewAngles);
+          VectorCopy(cg_pmove.ps->delta_angles, cg.refdefDeltaAngles);
+        }
+
         cg.thisFrameTeleport = qfalse;
       } else if (!cg.showGameView) {
         vec3_t adjusted;

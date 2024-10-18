@@ -673,6 +673,8 @@ vmCvar_t etj_drawRecordingStatus;
 vmCvar_t etj_recordingStatusX;
 vmCvar_t etj_recordingStatusY;
 
+vmCvar_t etj_smoothAngles;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1261,6 +1263,8 @@ cvarTable_t cvarTable[] = {
     {&etj_drawRecordingStatus, "etj_drawRecordingStatus", "1", CVAR_ARCHIVE},
     {&etj_recordingStatusX, "etj_recordingStatusX", "2", CVAR_ARCHIVE},
     {&etj_recordingStatusY, "etj_recordingStatusY", "9", CVAR_ARCHIVE},
+
+    {&etj_smoothAngles, "etj_smoothAngles", "0", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
