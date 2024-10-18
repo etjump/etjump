@@ -1238,9 +1238,6 @@ void updateRefdefAngles(const playerState_t *ps) {
   const int cmdNum = trap_GetCurrentCmdNumber();
   trap_GetUserCmd(cmdNum, &cmd);
 
-  vec3_t oldViewAngles;
-  VectorCopy(cg.refdefViewAngles, oldViewAngles);
-
   // circularly clamp the angles with deltas
   for (int i = 0; i < 2; i++) {
     auto temp = static_cast<int16_t>(cmd.angles[i] + cg.refdefDeltaAngles[i]);
