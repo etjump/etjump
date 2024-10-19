@@ -263,6 +263,7 @@ vmCvar_t vote_minRtvDuration;
 
 vmCvar_t g_adminChat;
 
+vmCvar_t g_chatReplay;
 vmCvar_t g_chatReplayMaxMessageAge;
 
 // ETLegacy server browser integration
@@ -515,6 +516,7 @@ cvarTable_t gameCvarTable[] = {
 
     {&g_adminChat, "g_adminChat", "1", CVAR_ARCHIVE},
 
+    {&g_chatReplay, "g_chatReplay", "1", CVAR_ARCHIVE},
     {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "0",
      CVAR_ARCHIVE | CVAR_LATCH},
 };

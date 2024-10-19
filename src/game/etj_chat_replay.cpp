@@ -69,6 +69,10 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
     return;
   }
 
+  if (!g_chatReplay.integer) {
+    return;
+  }
+
   // shouldn't ever happen but just in case,
   // so we don't print out the info when there's no messages
   if (chatReplayBuffer.empty()) {
