@@ -1335,7 +1335,7 @@ int CG_CalcViewValues() {
   cg.bobcycle = (ps->bobCycle & 128) >> 7;
   cg.bobfracsin = std::fabs(std::sin(static_cast<float>(ps->bobCycle & 127) /
                                      127.0f * static_cast<float>(M_PI)));
-  cg.xyspeed = VectorLengthSquared2(ps->velocity);
+  cg.xyspeed = VectorLength2(ps->velocity);
 
   if (cg.showGameView) {
     VectorCopy(cgs.ccPortalPos, cg.refdef_current->vieworg);
