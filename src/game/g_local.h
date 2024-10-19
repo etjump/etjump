@@ -2097,6 +2097,7 @@ extern vmCvar_t vote_minRtvDuration;
 
 extern vmCvar_t g_adminChat;
 
+extern vmCvar_t g_chatReplay;
 extern vmCvar_t g_chatReplayMaxMessageAge;
 
 void trap_Printf(const char *fmt);
