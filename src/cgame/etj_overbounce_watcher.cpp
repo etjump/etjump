@@ -121,7 +121,11 @@ bool OverbounceWatcher::beforeRender() {
   gravity = ps->gravity;
   zVel = ps->velocity[2];
   startHeight = ps->origin[2] + ps->mins[2];
-  x = etj_obWatcherX.value;
+
+  // impossible OB - negative z velocity & below saved coordinate
+  if (zVel < 0 && startHeight < endHeight) {
+    return false;
+  }
 
   overbounce = false;
 
@@ -135,6 +139,7 @@ bool OverbounceWatcher::beforeRender() {
   sizeX *= etj_obWatcherSize.value;
   sizeY *= etj_obWatcherSize.value;
 
+  x = etj_obWatcherX.value;
   ETJump_AdjustPosition(&x);
 
   // setup & do trace, so we can determine if surface allows OB
@@ -196,11 +201,6 @@ bool OverbounceWatcher::canSkipDraw() const {
   }
 
   if (ps->groundEntityNum != ENTITYNUM_NONE) {
-    return true;
-  }
-
-  // impossible OB - negative z velocity & below saved coordinate
-  if (zVel < 0 && startHeight < endHeight) {
     return true;
   }
 
