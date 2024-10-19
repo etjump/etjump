@@ -1199,12 +1199,6 @@ void CG_PredictPlayerState() {
           CG_Printf("PredictionTeleport\n");
         }
 
-        // sync up refdef angles if etj_smoothAngles is enabled
-        if (etj_smoothAngles.integer && cg_pmove.pmove_fixed) {
-          VectorCopy(cg_pmove.ps->viewangles, cg.refdefViewAngles);
-          VectorCopy(cg_pmove.ps->delta_angles, cg.refdefDeltaAngles);
-        }
-
         cg.thisFrameTeleport = qfalse;
       } else if (!cg.showGameView) {
         vec3_t adjusted;
@@ -1345,6 +1339,13 @@ void CG_PredictPlayerState() {
     // END unlagged - optimized prediction
 
     moved = true;
+
+    // after Pmove is run, sync playerstate viewangles with refdef angles
+    // if etj_smoothAngles is enabled, to apply any changes done in Pmove
+    if (etj_smoothAngles.integer && cg_pmove.pmove_fixed) {
+      VectorCopy(cg_pmove.ps->viewangles, cg.refdefViewAngles);
+      VectorCopy(cg_pmove.ps->delta_angles, cg.refdefDeltaAngles);
+    }
 
     // add push trigger movement effects
     CG_TouchTriggerPrediction();
