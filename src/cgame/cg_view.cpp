@@ -1213,6 +1213,7 @@ void updateRefdefAngles(const playerState_t *ps) {
   // - mounted
   // - using a set weapon (mortar, mobile mg42)
   // - wounded and waiting for medic
+  // - scoped with a sniper
   //
   // this is because we need pmext values to accurately calculate viewangles
   // in these scenarios, but the values might be out of date since we're not
@@ -1234,6 +1235,14 @@ void updateRefdefAngles(const playerState_t *ps) {
   }
 
   if (ps->pm_type != PM_SPECTATOR && ps->stats[STAT_HEALTH] <= 0) {
+    VectorCopy(ps->viewangles, cg.refdefViewAngles);
+    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
+    return;
+  }
+
+  // sniper recoil is handled entirely in pmove,
+  // so we must use playerstate viewangles for that
+  if (cg.zoomedScope) {
     VectorCopy(ps->viewangles, cg.refdefViewAngles);
     VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
     return;
