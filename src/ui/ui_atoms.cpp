@@ -150,17 +150,10 @@ static void UI_CalcPostGameStats() {}
 UI_ConsoleCommand
 =================
 */
-qboolean UI_ConsoleCommand(int realTime) {
-  char *cmd;
-  uiClientState_t cstate;
-
+qboolean UI_ConsoleCommand(const int realTime) {
+  const char *cmd = UI_Argv(0);
   uiInfo.uiDC.frameTime = realTime - uiInfo.uiDC.realTime;
   uiInfo.uiDC.realTime = realTime;
-
-  cmd = UI_Argv(0);
-
-  // ensure minimum menu data is available
-  // Menu_Cache();
 
   if (Q_stricmp(cmd, "ui_test") == 0) {
     UI_ShowPostGame(qtrue);
@@ -219,8 +212,6 @@ qboolean UI_ConsoleCommand(int realTime) {
     ETJump::resetCustomvotes();
     return qtrue;
   }
-
-  trap_GetClientState(&cstate);
 
   return qfalse;
 }
