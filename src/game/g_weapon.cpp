@@ -3546,7 +3546,7 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
     tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_WALL);
 
     G_Trace(source, &tr2, start, nullptr, nullptr, end, source->s.number,
-            MASK_WATER | MASK_SOLID);
+            MASK_WATER | MASK_SHOT);
 
     if ((tr.entityNum != tr2.entityNum && tr2.fraction != 1)) {
       vec3_t v;
