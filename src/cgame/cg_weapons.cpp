@@ -6560,8 +6560,8 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
     } else {
       // JPW NERVE changed from,origin, to this
       trap_S_StartSound(
-          cg_entities[fleshEntityNum].currentState.origin, ENTITYNUM_WORLD,
-          CHAN_BODY, cgs.media.sfx_bullet_stonehit[rand() % MAX_IMPACT_SOUNDS]);
+          cg_entities[fleshEntityNum].lerpOrigin, ENTITYNUM_WORLD, CHAN_BODY,
+          cgs.media.sfx_bullet_stonehit[rand() % MAX_IMPACT_SOUNDS]);
     }
 
     // if we haven't dropped a blood spat in a while, check if
