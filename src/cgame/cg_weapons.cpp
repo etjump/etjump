@@ -6623,10 +6623,6 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
 
     if (CG_CalcMuzzlePoint(sourceEntityNum, start) ||
         cg.snap->ps.persistant[PERS_HWEAPON_USE]) {
-
-      ETJump::bulletTrace(&trace, start, end, MASK_SHOT);
-      ETJump::bulletTrace(&trace2, start, end, (MASK_SHOT | MASK_WATER));
-
       if (waterfraction != 0) {
         vec3_t dist;
         vec3_t end2;
@@ -6634,15 +6630,26 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         VectorSubtract(end, start, dist);
         VectorMA(start, waterfraction, dist, end2);
 
+        ETJump::bulletTrace(&trace2, start, end, MASK_SHOT | MASK_WATER);
+
         trap_S_StartSound(end, -1, CHAN_AUTO,
                           cgs.media.sfx_bullet_waterhit[rand() % 5]);
 
         CG_MissileHitWall(fromweap, 2, end2, tv(0, 0, 1), 0);
-        CG_MissileHitWall(fromweap, 1, end, trace2.plane.normal, 0);
+
+        // for reasons beyond my understanding this trace sometimes fails
+        // and does not actually hit anything, if this happens,
+        // don't try to create a particle if the trace results aren't valid
+        if (trace2.fraction != 1.0f) {
+          CG_MissileHitWall(fromweap, 1, end, trace2.plane.normal, 0);
+        }
       } else {
         VectorSubtract(end, start, dir);
         VectorNormalizeFast(dir);
         VectorMA(end, 4, dir, end);
+
+        ETJump::bulletTrace(&trace, start, end, MASK_SHOT);
+        ETJump::bulletTrace(&trace2, start, end, MASK_SHOT | MASK_WATER);
 
         if (trace.fraction != trace2.fraction) {
           trap_S_StartSound(end, -1, CHAN_AUTO,
