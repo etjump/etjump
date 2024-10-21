@@ -17,6 +17,15 @@ on:
       - release.sh
   pull_request:
     branches: [ master ]
+    paths-ignore:
+      - docs/*
+      - .gitignore
+      - .gitattributes
+      - .clang-format
+      - changelog.md
+      - README.md
+      - VERSION.txt
+      - release.sh
   merge_group:
 
 jobs:
