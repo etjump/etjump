@@ -1,3 +1,23 @@
+# ETJump 3.x.x
+
+* fixed backstab hint showing for nonsolid players when holding a knife [#1492](https://github.com/etjump/etjump/pull/1492)
+  * also fixes a long standing issue where knife would "hit" nonsolid players
+* fixed `etj_drawPlayerBBox` + `etj_hideFadeRange` interaction with solid players - bbox alpha now ignores this correctly for solid players [#1493](https://github.com/etjump/etjump/pull/1493)
+* added `etj_snapHUDBorderThickness` to control `etj_drawSnapHUD 3` border thickness [#1494](https://github.com/etjump/etjump/pull/1494)
+  * valid range is `0.1 - 10.0 or etj_snapHUDHeight * 2`
+* added `g_chatReplay` cvar to turn off chat replay on server [#1497](https://github.com/etjump/etjump/pull/1497)
+  * chats are still logged when the feature is turned off, the messages are just not sent to clients
+* fixed overbounce watcher breaking until cgame was reloaded if an impossible OB was detected (negative z-velocity & start height > current height) [#1496](https://github.com/etjump/etjump/pull/1496)
+* added experimental `etj_smoothAngles` cvar to decouple client view updates from Pmove update rate [#1495](https://github.com/etjump/etjump/pull/1495)
+  * when enabled, clients viewangles used to render the scene are updated every frame with new values, as opposed to using viewangle results from Pmove, which would limit the updates to 125Hz with `pmove_fixed 1`
+  * every time client runs Pmove via prediction code, the client viewangles are synced back to match with the viewangle results from Pmove
+  * does not affect physics calculations - the updates ran outside of Pmove calls are purely visual
+    * this means that e.g. at 250FPS, every other viewangle update is not actually what is being sent to Pmove to calculate physics
+  * no effect while spectating or if `pmove_fixed` is `0`
+* fixed old etmain bug which caused bullet flesh impact sounds to play at wrong location [#1500](https://github.com/etjump/etjump/pull/1500)
+* fixed corpses producing water impact particles when shot [#1501](https://github.com/etjump/etjump/pull/1501)
+* fixed bullet impacts producing particle effects unreliably [#1503](https://github.com/etjump/etjump/pull/1503)
+
 # ETJump 3.3.0
 
 * added `portalsize` key to `func_portaltarget` to allow scaling the size of the portal fired onto it (up to `512u`) [#1324](https://github.com/etjump/etjump/pull/1324)
