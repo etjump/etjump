@@ -1,5 +1,17 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
-project(etjump VERSION 3.3.0 HOMEPAGE_URL "etjump.com" LANGUAGES C CXX)
+
+# read version from VERSION.txt
+file(READ "${CMAKE_SOURCE_DIR}/VERSION.txt" version_content)
+
+string(REGEX MATCH "VERSION_MAJOR ([0-9]+)" _major_match "${version_content}")
+string(REGEX MATCH "VERSION_MINOR ([0-9]+)" _minor_match "${version_content}")
+string(REGEX MATCH "VERSION_PATCH ([0-9]+)" _patch_match "${version_content}")
+
+set(VERSION_MAJOR "${CMAKE_MATCH_1}")
+set(VERSION_MINOR "${CMAKE_MATCH_1}")
+set(VERSION_PATCH "${CMAKE_MATCH_1}")
+
+project(etjump VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" HOMEPAGE_URL "etjump.com" LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 14)
 
 option(BUILD_TESTS "Enable tests building (ON by default)" ON)

@@ -1,7 +1,10 @@
-name: etjump-release
+name: ETJump Release
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - '*'
 
 jobs:
   Windows:
@@ -22,7 +25,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
+        ref: master
 
     - name: Configure CMake
       run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -G "Visual Studio 16 2019" -A ${{ matrix.platform }}
@@ -58,7 +62,8 @@ jobs:
 
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
+        ref: master
 
     - name: Configure CMake
       run: |
@@ -97,7 +102,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
+        ref: master
 
     - name: Configure CMake
       run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_OSX_ARCHITECTURES=${{ matrix.platforms }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.osx-target }}
@@ -122,7 +128,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
+        ref: master
 
     - name: Download artifacts
       uses: actions/download-artifact@v4
@@ -138,7 +145,9 @@ jobs:
         make mod_release
 
     - name: Upload release 
-      uses: actions/upload-artifact@v4
+      uses: softprops/action-gh-release@v2
       with:
-        name: etjump-stable-release
-        path: ${{ github.workspace }}/build/*.zip
+        token: ${{ secrets.GITHUB_TOKEN }}
+        name: ETJump ${{ github.ref_name }}
+        files: ${{ github.workspace }}/build/*.zip
+        draft: true
