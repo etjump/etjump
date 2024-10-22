@@ -2,13 +2,15 @@
 // these are processed at snapshot transition time, so there will definately
 // be a valid snapshot this frame
 
+#include <vector>
+#include <ctime>
+
 #include "cg_local.h"
 #include "etj_init.h"
-#include <vector>
 #include "etj_client_commands_handler.h"
-#include "../game/etj_numeric_utilities.h"
-#include "etj_cvar_shadow.h"
 #include "etj_client_rtv_handler.h"
+
+#include "../game/etj_numeric_utilities.h"
 
 #define SCOREPARSE_COUNT 9
 
@@ -2161,44 +2163,58 @@ void CG_ForceTapOut_f(void);
  */
 static const char *CG_AddChatModifications(char *text, int clientNum,
                                            int msgType) {
-  // don't perform chat modifications to chat replay messages
-  if (msgType & REPLAY_MSG) {
-    return text;
-  }
-
   static char message[MAX_SAY_TEXT + 32] = "\0";
-  const char *msgColor = "^z";
-  qtime_t t;
-
   memset(message, 0, sizeof(message));
-  trap_RealTime(&t);
-  if (etj_highlight.integer &&
-      (msgType & SERVER_MSG || cg.clientNum != clientNum) &&
-      strstr(text + strlen(cgs.clientinfo[clientNum].name),
-             cgs.clientinfo[cg.clientNum].name) != NULL) {
-    Q_strcat(message, sizeof(message), etj_highlightText.string);
-    Q_strcat(message, sizeof(message), "^7");
 
-    trap_S_StartLocalSound(
-        trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
+  // disable highlights for chat replays
+  if (!(msgType & REPLAY_MSG)) {
+    if (etj_highlight.integer &&
+        (msgType & SERVER_MSG || cg.clientNum != clientNum) &&
+        strstr(text + strlen(cgs.clientinfo[clientNum].name),
+               cgs.clientinfo[cg.clientNum].name) != nullptr) {
+      Q_strcat(message, sizeof(message), etj_highlightText.string);
+      Q_strcat(message, sizeof(message), "^7");
+
+      trap_S_StartLocalSound(
+          trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
+    }
   }
 
-  if (etj_drawMessageTime.integer) {
-    if (!(msgType & SERVER_MSG) && cg.clientNum == clientNum) {
-      msgColor = "^g";
+  // don't add prefix to the replay notify message
+  if (msgType & REPLAY_MSG && trap_Argc() > 5) {
+    Q_strcat(message, sizeof(message), "^g[REPLAY] ");
+  }
+
+  // don't add timestamps to chat replays without a timestamp (e.g. notify msg)
+  if (etj_drawMessageTime.integer &&
+      (!(msgType & REPLAY_MSG) || (msgType & REPLAY_MSG && trap_Argc() == 6))) {
+    const char *msgColor = "^z";
+    tm *lt;
+
+    if (msgType & REPLAY_MSG) {
+      // chat replay sends original message timestamp as 6th arg
+      const time_t mt = Q_atoi(CG_Argv(5));
+      lt = std::localtime(&mt);
+    } else {
+      time_t t = std::time(&t);
+      lt = std::localtime(&t);
+
+      if (!(msgType & SERVER_MSG) && cg.clientNum == clientNum) {
+        msgColor = "^g";
+      }
     }
+
     if (etj_drawMessageTime.integer == 2) {
-      Q_strcat(
-          message, sizeof(message),
-          va("%s[%02d:%02d:%02d]^7 ", msgColor, t.tm_hour, t.tm_min, t.tm_sec));
+      Q_strcat(message, sizeof(message),
+               va("%s[%02d:%02d:%02d]^7 ", msgColor, lt->tm_hour, lt->tm_min,
+                  lt->tm_sec));
     } else {
       Q_strcat(message, sizeof(message),
-               va("%s[%02d:%02d]^7 ", msgColor, t.tm_hour, t.tm_min));
+               va("%s[%02d:%02d]^7 ", msgColor, lt->tm_hour, lt->tm_min));
     }
   }
 
   Q_strcat(message, sizeof(message), text);
-
   return message;
 }
 
