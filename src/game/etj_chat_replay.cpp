@@ -128,9 +128,9 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
 
 std::string ChatReplay::parseChatMessage(const ChatMessage &msg) {
   const char *cmd = msg.encoded ? "enc_chat" : "chat";
-  return stringFormat("%s \"^g[REPLAY] ^7%s%c%c%s\" %i %i 1", cmd, msg.name,
+  return stringFormat("%s \"^7%s%c%c%s\" %i %i 1 %i", cmd, msg.name,
                       Q_COLOR_ESCAPE, COLOR_LTGREY, msg.message, msg.clientNum,
-                      msg.localize);
+                      msg.localize, msg.timestamp);
 }
 
 void ChatReplay::readChatsFromFile() {
