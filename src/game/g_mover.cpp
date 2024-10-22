@@ -9,7 +9,7 @@
 #include "g_local.h"
 #include "etj_utilities.h";
 
-const char *hintStrings[HINT_NUM_HINTS] = {
+static constexpr std::array<const char *, HINT_NUM_HINTS + 1> hintStrings = {
     "",          // HINT_NONE
     "HINT_NONE", // actually HINT_FORCENONE, but since this is being specified
                  // in the ent, the designer actually means HINT_FORCENONE
@@ -2654,6 +2654,24 @@ void SP_func_button(gentity_t *ent) {
     ent->wait = 1;
   }
   ent->wait *= 1000;
+
+  // allow custom cursorhint, but default to HINT_BUTTON
+  // FIXME: does this need to be networked??? No, I don't think so???
+  //  func_invisible_user uses dmgFlags too to store the cursorhint value,
+  //  but it's never actually read on client, it's just stored into
+  //  ps->serverCursorHint, and CG_CheckForCursorHints on client side only
+  //  checks for ladders and backstab hints if server doesn't set cursorhint
+  //  also this is a 32-bit (!!!) field, while atm HINT_NUM_HINTS is 49
+  char *cursorhint;
+  ent->s.dmgFlags = HINT_BUTTON;
+
+  if (G_SpawnString("cursorhint", "0", &cursorhint)) {
+    for (int i = 0; i < HINT_NUM_HINTS; i++) {
+      if (!Q_stricmp(cursorhint, hintStrings[i])) {
+        ent->s.dmgFlags = i;
+      }
+    }
+  }
 
   // first position
   VectorCopy(ent->s.origin, ent->pos1);
