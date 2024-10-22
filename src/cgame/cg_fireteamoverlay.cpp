@@ -130,8 +130,7 @@ void CG_ParseFireteams() {
         cg.fireTeams[i].joinOrder[j] = qtrue;
         cgs.clientinfo[j].fireteamData = &cg.fireTeams[i];
 
-        if (CG_IsOnFireteam(cg.clientNum) &&
-            cgs.clientinfo[j].fireteamData->noGhost && etj_hideMe.integer) {
+        if (cgs.clientinfo[j].fireteamData->noGhost && etj_hideMe.integer) {
           trap_Cvar_Set("etj_hideMe", "0");
         }
       } else {
