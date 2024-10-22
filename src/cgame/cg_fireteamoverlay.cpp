@@ -129,6 +129,11 @@ void CG_ParseFireteams() {
       if (COM_BitCheck(clnts, j)) {
         cg.fireTeams[i].joinOrder[j] = qtrue;
         cgs.clientinfo[j].fireteamData = &cg.fireTeams[i];
+
+        if (cgs.clientinfo[j].fireteamData->noGhost &&
+            cgs.clientinfo[j].hideMe) {
+          trap_Cvar_Set("etj_hideMe", "0");
+        }
       } else {
         cg.fireTeams[i].joinOrder[j] = qfalse;
       }

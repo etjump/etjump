@@ -296,6 +296,13 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
 
       otherEnt->client->sess.saveLimitFt = ft->saveLimit;
 
+      if (otherEnt->client->pers.hideMe) {
+        otherEnt->client->pers.hideMe = false;
+        Printer::popup(
+            otherEnt,
+            "Fireteam ^3noghost ^7is enabled, disabling ^3etj_hideMe\n");
+      }
+
       G_UpdateFireteamConfigString(ft);
 
       return;
@@ -695,6 +702,12 @@ static void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
 
     if (noGhost) {
       ent->client->ftNoGhostThisLife = true;
+
+      if (ent->client->pers.hideMe) {
+        ent->client->pers.hideMe = false;
+        Printer::popup(ent,
+                       "fireteam: disabling ^3etj_hideMe ^7due to ^3noghost\n");
+      }
     }
 
     Printer::popup(ent, msg);

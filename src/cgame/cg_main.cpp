@@ -1379,9 +1379,18 @@ void CG_UpdateCvars(void) {
   }
 }
 
-void CG_setClientFlags(void) {
+void CG_setClientFlags() {
   if (cg.demoPlayback) {
     return;
+  }
+
+  const fireteamData_t *ft = CG_IsOnFireteam(cg.clientNum);
+
+  if (ft && ft->noGhost && etj_hideMe.integer) {
+    CG_AddPMItem(PM_MESSAGE,
+                 "Fireteam ^3noghost ^7is enabled, cannot set ^3etj_hideMe\n",
+                 cgs.media.voiceChatShader);
+    trap_Cvar_Set("etj_hideMe", "0");
   }
 
   cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
