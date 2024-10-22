@@ -1189,7 +1189,7 @@ void G_CheckForCursorHints(gentity_t *ent) {
             }
           } else if (!Q_stricmp(checkEnt->classname, "func_button")) {
             hintDist = CH_ACTIVATE_DIST;
-            hintType = HINT_BUTTON;
+            hintType = checkEnt->s.dmgFlags;
           } else if (!Q_stricmp(checkEnt->classname, "props_"
                                                      "flamebarrel")) {
             hintDist = CH_BREAKABLE_DIST * 2;
