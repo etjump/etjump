@@ -1,11 +1,31 @@
-name: etjump-CI
+name: ETJump CI/CD
 
 on:
   workflow_dispatch:
   push:
     branches: [ master ]
+    tags-ignore:
+      - '*'
+    paths-ignore:
+      - docs/*
+      - .gitignore
+      - .gitattributes
+      - .clang-format
+      - changelog.md
+      - README.md
+      - VERSION.txt
+      - release.sh
   pull_request:
     branches: [ master ]
+    paths-ignore:
+      - docs/*
+      - .gitignore
+      - .gitattributes
+      - .clang-format
+      - changelog.md
+      - README.md
+      - VERSION.txt
+      - release.sh
   merge_group:
 
 jobs:
@@ -27,7 +47,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
 
     - name: Configure CMake
       run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -G "Visual Studio 16 2019" -A ${{ matrix.platform }}
@@ -63,7 +83,7 @@ jobs:
 
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
 
     - name: Configure CMake
       run: |
@@ -102,7 +122,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
 
     - name: Configure CMake
       run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_OSX_ARCHITECTURES=${{ matrix.platforms }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.osx-target }}
@@ -128,7 +148,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
 
     - name: Download artifacts
       uses: actions/download-artifact@v4
