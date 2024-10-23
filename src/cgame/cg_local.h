@@ -2681,6 +2681,7 @@ extern vmCvar_t etj_autoDemo;
 extern vmCvar_t etj_ad_savePBOnly;
 extern vmCvar_t etj_ad_stopDelay;
 extern vmCvar_t etj_ad_targetPath;
+extern vmCvar_t etj_ad_stopInSpec;
 
 extern vmCvar_t etj_chatScale;
 

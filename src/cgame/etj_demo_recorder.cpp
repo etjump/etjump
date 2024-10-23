@@ -54,6 +54,12 @@ void ETJump::DemoRecorder::stop() {
 
 void ETJump::DemoRecorder::restart(const std::string &name) {
   stop();
+
+  if (etj_ad_stopInSpec.integer &&
+      cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
+    return;
+  }
+
   start(name);
 }
 

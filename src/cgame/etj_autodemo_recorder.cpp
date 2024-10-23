@@ -34,11 +34,11 @@
 #include "cg_local.h"
 
 // constants
-static const int DEMO_SAVE_DELAY = 500;
-static const int DEMO_MAX_SAVE_DELAY = 10000;
-static const int DEMO_START_TIMEOUT = 500;
-static const int MAX_TEMP = 20;
-static const char *TEMP_PATH = "temp";
+static constexpr int DEMO_SAVE_DELAY = 500;
+static constexpr int DEMO_MAX_SAVE_DELAY = 10000;
+static constexpr int DEMO_START_TIMEOUT = 500;
+static constexpr int MAX_TEMP = 20;
+static constexpr char TEMP_PATH[] = "temp";
 
 std::string ETJump::AutoDemoRecorder::TempNameGenerator::pop() {
   if (!names.size())
@@ -68,21 +68,30 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
   if (cg.demoPlayback)
     return;
 
-  playerEventsHandler->subscribe(
-      "load",
-      [&](const std::vector<std::string> &args) {
-        if (etj_autoDemo.integer > 0)
-          tryRestart();
-      });
+  playerEventsHandler->subscribe("load",
+                                 [&](const std::vector<std::string> &args) {
+                                   if (etj_autoDemo.integer > 0)
+                                     tryRestart();
+                                 });
 
   playerEventsHandler->subscribe(
-      "respawn",
-      [&](const std::vector<std::string> &args) {
-        auto revive = Q_atoi(args[0].c_str());
-        if (revive)
+      "respawn", [&](const std::vector<std::string> &args) {
+        if (etj_ad_stopInSpec.integer && _demo.isRecording() &&
+            cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR &&
+            !_delayedTimerId) {
+          _demo.stop();
           return;
-        if (etj_autoDemo.integer > 0)
+        }
+
+        const int revive = Q_atoi(args[0].c_str());
+
+        if (revive) {
+          return;
+        }
+
+        if (etj_autoDemo.integer) {
           tryRestart();
+        }
       });
 
   playerEventsHandler->subscribe(
@@ -98,8 +107,7 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
       });
 
   playerEventsHandler->subscribe(
-      "timerun:record",
-      [&](const std::vector<std::string> &args) {
+      "timerun:record", [&](const std::vector<std::string> &args) {
         auto clientNum = std::stoi(args[0]);
         if (clientNum != cg.clientNum) {
           return;
@@ -124,26 +132,35 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
       });
 }
 
-ETJump::AutoDemoRecorder::~AutoDemoRecorder() {
-}
+ETJump::AutoDemoRecorder::~AutoDemoRecorder() {}
 
 void ETJump::AutoDemoRecorder::tryRestart() {
   // no autodemo for specs
-  if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR)
+  if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
     return;
+  }
+
   // start autodemo for timerun maps only
-  if (etj_autoDemo.integer == 1 && !cg.hasTimerun)
+  if (etj_autoDemo.integer == 1 && !cg.hasTimerun) {
     return;
+  }
+
   // don't start autodemo if timeruns are disabled unless autodemo is
   // enabled for all maps
-  if (etj_autoDemo.integer < 2 && !etj_enableTimeruns.integer)
+  if (etj_autoDemo.integer < 2 && !etj_enableTimeruns.integer) {
     return;
+  }
+
   // timeout
-  if (_demo.getStartTime() + DEMO_START_TIMEOUT >= cg.time)
+  if (_demo.getStartTime() + DEMO_START_TIMEOUT >= cg.time) {
     return;
+  }
+
   // dont attempt to restart if in timerun mode
-  if (cgs.clientinfo[cg.clientNum].timerunActive || _delayedTimerId)
+  if (cgs.clientinfo[cg.clientNum].timerunActive || _delayedTimerId) {
     return;
+  }
+
   restart();
 }
 
