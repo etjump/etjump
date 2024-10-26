@@ -93,11 +93,6 @@ void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
                                        entityState_t *teleporter,
                                        usercmd_t *cmd, const vec3_t origin,
                                        vec3_t angles) {
-  // do not trigger while noclipping or spectating, prediction doesn't work
-  if (ps->pm_type != PM_NORMAL) {
-    return;
-  }
-
   // bits 8-31 contain the spawnflags
   const int spawnflags = (teleporter->constantLight >> 8) & 0xffffff;
 
