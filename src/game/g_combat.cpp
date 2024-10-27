@@ -11,6 +11,7 @@
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
 #include "etj_missilepad.h"
+#include "etj_save_system.h"
 
 extern vec3_t muzzleTrace;
 
@@ -570,6 +571,11 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
   } else if ((meansOfDeath == MOD_SUICIDE &&
               g_gamestate.integer == GS_PLAYING)) {
     limbo(self, qtrue);
+  }
+
+  if (meansOfDeath != MOD_SWITCHTEAM) {
+    ETJump::saveSystem->invalidateTeamQuickDeployPosition(
+        self, self->client->sess.sessionTeam);
   }
 
   if (!self->client->sess.runSpawnflags ||

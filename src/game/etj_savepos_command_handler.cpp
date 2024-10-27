@@ -40,7 +40,9 @@ void SavePosHandler::execSaveposCommand(gentity_t *ent,
   }
 
   if (ent->client->ps.stats[STAT_HEALTH] <= GIB_HEALTH) {
+    ent->client->respawnFromLoad = true;
     respawn(ent);
+    ent->client->respawnFromLoad = false;
   }
 
   game.timerunV2->interrupt(ClientNum(ent));

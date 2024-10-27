@@ -292,7 +292,12 @@ void SaveSystem::load(gentity_t *ent) {
 
     // allow fast respawn + load if we got gibbed to skip death sequence
     if (ent->client->ps.stats[STAT_HEALTH] <= GIB_HEALTH) {
+      ent->client->respawnFromLoad = true;
+      // set origin to the save slot origin here before calling respawm,
+      // so we can grab the spawn position from player origin
+      G_SetOrigin(ent, pos->origin);
       respawn(ent);
+      ent->client->respawnFromLoad = false;
     }
 
     teleportPlayer(ent, pos);
@@ -740,6 +745,15 @@ void SaveSystem::loadPositionsFromDatabase(gentity_t *ent) {
   }
 }
 
+void SaveSystem::invalidateTeamQuickDeployPosition(gentity_t *ent,
+                                                   team_t team) {
+  const auto pos = getValidTeamQuickDeploySave(ent, team);
+
+  if (pos) {
+    pos->isValid = false;
+  }
+}
+
 void SaveSystem::storeTeamQuickDeployPosition(gentity_t *ent, team_t team) {
   const auto lastValidSave = getValidTeamSaveForSlot(ent, team, 0);
 
@@ -750,14 +764,16 @@ void SaveSystem::storeTeamQuickDeployPosition(gentity_t *ent, team_t team) {
   }
 }
 
-void SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent, team_t team) {
+bool SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent, team_t team) {
   const auto validSave = getValidTeamQuickDeploySave(ent, team);
 
   if (validSave) {
     restoreStanceFromSave(ent, validSave);
     teleportPlayer(ent, validSave);
-    validSave->isValid = false;
+    return true;
   }
+
+  return false;
 }
 
 SaveSystem::SavePosition *
@@ -965,5 +981,7 @@ void SaveSystem::teleportPlayer(gentity_t *ent, SavePosition *pos) {
   }
 
   client->ps.pm_time = 1; // Crashland + instant load bug fix.
+  BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
+  trap_LinkEntity(ent);
 }
 } // namespace ETJump
