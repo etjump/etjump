@@ -2339,7 +2339,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
         client->sess.sessionTeam != TEAM_ALLIES) {
       spawnPoint = SelectSpectatorSpawnPoint(spawn_origin, spawn_angles);
     } else {
-      // try to spawn in last load position if autoload is enabled
+      // try to spawn in last load position if autoload is enabled,
+      // or if we're forcing a respawn during death sequence with load/loadpos
       if ((ent->client->pers.autoLoad &&
            ETJump::saveSystem->loadOnceTeamQuickDeployPosition(
                ent, ent->client->sess.sessionTeam)) ||
