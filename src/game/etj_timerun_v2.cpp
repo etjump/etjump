@@ -1550,3 +1550,50 @@ const ETJump::Timerun::Season *ETJump::TimerunV2::getMostRelevantSeason() {
   }
   return mostRelevant;
 }
+
+void ETJump::TimerunV2::removeDisallowedWeapons(gentity_t *ent) {
+  for (int i = 0; i < WP_NUM_WEAPONS; i++) {
+    if (BG_WeaponDisallowedInTimeruns(i)) {
+      COM_BitClear(ent->client->ps.weapons, i);
+      ent->client->ps.ammo[i] = 0;
+      ent->client->ps.ammoclip[i] = 0;
+    }
+  }
+
+  // expire grenades
+  ent->client->ps.grenadeTimeLeft = 0;
+}
+
+void ETJump::TimerunV2::removePlayerProjectiles(gentity_t *ent) {
+  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; i++) {
+    if (ent->s.eType == ET_MISSILE) {
+      if (ent->parent && ent->parent->s.number == ClientNum(ent)) {
+        G_FreeEntity(ent);
+      }
+    }
+  }
+}
+
+bool ETJump::TimerunV2::weaponIsExplosivePickup(const int weapon) {
+  // FIXME: we should allow K43/Garand, but remove rifle nades on pickup
+  switch (weapon) {
+    case WP_GRENADE_LAUNCHER:
+    case WP_PANZERFAUST:
+    case WP_FLAMETHROWER:
+    case WP_GRENADE_PINEAPPLE:
+    case WP_DYNAMITE:
+    case WP_PLIERS:
+    case WP_KAR98:
+    case WP_CARBINE:
+    case WP_LANDMINE:
+    case WP_SATCHEL:
+    case WP_SATCHEL_DET:
+    case WP_MORTAR:
+    case WP_GPG40:
+    case WP_M7:
+    case WP_MORTAR_SET:
+      return true;
+    default:
+      return false;
+  }
+}

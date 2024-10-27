@@ -1709,6 +1709,10 @@ void teleportPlayer(gentity_t *self, gentity_t *other, const vec3_t origin,
 //
 // g_weapon.c
 //
+namespace ETJump {
+bool weaponAllowedWithNoExplosives(int weapon);
+}
+
 qboolean AccuracyHit(gentity_t *target, gentity_t *attacker);
 void CalcMuzzlePoint(gentity_t *ent, int weapon, vec3_t forward, vec3_t right,
                      vec3_t up, vec3_t muzzlePoint);

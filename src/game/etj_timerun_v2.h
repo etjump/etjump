@@ -115,6 +115,13 @@ public:
   void printSeasons(int clientNum);
   void deleteSeason(int clientNum, const std::string &name);
 
+  static void removeDisallowedWeapons(gentity_t *ent);
+  static void removePlayerProjectiles(gentity_t *ent);
+
+  // returns true if weapon is considered an explosive by the
+  // "No explosives" timerun spawnflag
+  static bool weaponIsExplosivePickup(int weapon);
+
 private:
   void startNotify(Player *player) const;
   static bool isDebugging(int clientNum);

@@ -10,6 +10,7 @@
  */
 
 #include "g_local.h"
+#include "etj_timerun_v2.h"
 
 #define RESPAWN_SP -1
 #define RESPAWN_KEY 4
@@ -544,7 +545,8 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
   // ent->delay carries secondary weapon ammo
   const int quantityAlt = static_cast<int>(ent->delay);
 
-  const weapon_t grenadeType = BG_GrenadeTypeForTeam(other->client->sess.sessionTeam);
+  const weapon_t grenadeType =
+      BG_GrenadeTypeForTeam(other->client->sess.sessionTeam);
 
   if (grenadeType != WP_NONE && ent->item->giTag == grenadeType) {
     if (quantity > 0) {
@@ -553,8 +555,8 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
       other->client->ps.ammoclip[grenadeType] += quantity;
 
       const int maxGrenades =
-        BG_GrenadesForClass(other->client->ps.stats[STAT_PLAYER_CLASS],
-                            other->client->sess.skill);
+          BG_GrenadesForClass(other->client->ps.stats[STAT_PLAYER_CLASS],
+                              other->client->sess.skill);
 
       if (other->client->ps.ammoclip[grenadeType] > maxGrenades) {
         other->client->ps.ammoclip[grenadeType] = maxGrenades;
@@ -562,7 +564,6 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
       return -1;
     }
   }
-
 
   // JPW NERVE -- magic ammo for any two-handed weapon
   if (ent->item->giTag == WP_AMMO) {
@@ -746,13 +747,12 @@ void RespawnItem(gentity_t *ent) {
     }
     master = ent->teammaster;
 
-    for (count = 0, ent = master; ent; ent = ent->teamchain, count++)
-      ;
+    for (count = 0, ent = master; ent; ent = ent->teamchain, count++);
 
     choice = rand() % count;
 
-    for (count = 0, ent = master; count < choice; ent = ent->teamchain, count++)
-      ;
+    for (count = 0, ent = master; count < choice;
+         ent = ent->teamchain, count++);
   }
 
   ent->r.contents = CONTENTS_TRIGGER;
@@ -855,10 +855,10 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace) {
   }
 
   // ETJump: disable explosives pickup
-  if (BG_WeaponIsExplosive(ent->item->giTag) &&
+  if (ETJump::TimerunV2::weaponIsExplosivePickup(ent->item->giTag) &&
       other->client->sess.timerunActive &&
-      (other->client->sess.runSpawnflags &
-       static_cast<int>(ETJump::TimerunSpawnflags::NoExplosivesPickup))) {
+      other->client->sess.runSpawnflags &
+          static_cast<int>(ETJump::TimerunSpawnflags::NoExplosivesPickup)) {
     return;
   }
 
@@ -1268,7 +1268,7 @@ void G_SpawnItem(gentity_t *ent, gitem_t *item) {
   } else if (item->giTag == WP_GRENADE_PINEAPPLE ||
              item->giTag == WP_GRENADE_LAUNCHER) {
     G_SpawnInt("count", "1", &ent->count);
-    
+
     if (ent->count < 0) {
       ent->count = 0;
     }

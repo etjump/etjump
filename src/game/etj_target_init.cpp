@@ -27,14 +27,15 @@
 
 #include "g_local.h"
 #include "etj_target_init.h"
+#include "etj_utilities.h"
 
 namespace ETJump {
-std::vector<weapon_t> allowedWeapons = {
+static constexpr std::array<weapon_t, 7> allowedWeapons = {
     WP_NONE,   WP_KNIFE,      WP_MEDKIT, WP_MEDIC_SYRINGE, WP_MEDIC_ADRENALINE,
     WP_PLIERS, WP_BINOCULARS,
 };
 
-void TargetInit::spawn(gentity_t *self) { self->use = TargetInit::use; }
+void TargetInit::spawn(gentity_t *self) { self->use = use; }
 
 void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (!activator || !activator->client) {
@@ -65,7 +66,7 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
     }
 
     // restore the ammo we spawned with in case we don't have our weapon anymore
-    if (!(COM_BitCheck(activator->client->ps.weapons, weapon))) {
+    if (!COM_BitCheck(activator->client->ps.weapons, weapon)) {
       activator->client->ps.ammo[weapon] =
           activator->client->sess.ammoOnSpawn[weapon];
       activator->client->ps.ammoclip[weapon] =
@@ -89,26 +90,18 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
         }
       }
     }
-    // swap to the restored weapon if our current weapon was removed
-    if (!(COM_BitCheck(activator->client->ps.weapons,
-                       activator->client->ps.weapon))) {
-      activator->client->ps.weapon = weapon;
+
+    // swap to a valid weapon if our current weapon was removed
+    if (!COM_BitCheck(activator->client->ps.weapons,
+                      activator->client->ps.weapon)) {
+      Utilities::selectValidWeapon(activator);
     }
   }
 
   if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepPortalgun))) {
     // swap weapons in case portalgun was equipped
-    // if we have ammo: primary > secondary > knife
     if (activator->client->ps.weapon == WP_PORTAL_GUN) {
-      if (BG_WeaponHasAmmo(&activator->client->ps,
-                           activator->client->sess.playerWeapon)) {
-        activator->client->ps.weapon = activator->client->sess.playerWeapon;
-      } else if (BG_WeaponHasAmmo(&activator->client->ps,
-                                  activator->client->sess.playerWeapon2)) {
-        activator->client->ps.weapon = activator->client->sess.playerWeapon2;
-      } else {
-        activator->client->ps.weapon = WP_KNIFE;
-      }
+      Utilities::selectValidWeapon(activator);
     }
 
     COM_BitClear(activator->client->ps.weapons, WP_PORTAL_GUN);
@@ -131,9 +124,9 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
 
   if (self->spawnflags & static_cast<int>(SpawnFlags::RemoveStartingWeapons) &&
       !(self->spawnflags & static_cast<int>(SpawnFlags::KeepWeapons))) {
-    for (int i = 0; i < WP_NUM_WEAPONS; i++) {
-      if (std::find(allowedWeapons.begin(), allowedWeapons.end(), i) !=
-          allowedWeapons.end()) {
+    for (int i = WP_NONE; i < WP_NUM_WEAPONS; i++) {
+      if (std::find(allowedWeapons.cbegin(), allowedWeapons.cend(), i) !=
+          allowedWeapons.cend()) {
         continue;
       }
 
