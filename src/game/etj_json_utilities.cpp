@@ -65,9 +65,10 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root,
   }
 
   Json::CharReaderBuilder readerBuilder;
+  readerBuilder["strictRoot"] = true;
   std::string err;
 
-  if (!Json::parseFromStream(readerBuilder, fIn, &root, &err)) {
+  if (!parseFromStream(readerBuilder, fIn, &root, &err)) {
     if (errors) {
       *errors = stringFormat("Failed to parse JSON file '%s':\n%s", file, err);
     }
