@@ -378,7 +378,8 @@ void G_TouchTriggers(gentity_t *ent) {
 
     // ignore most entities if a spectator
     if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
-      if (hit->s.eType != ET_TELEPORT_TRIGGER) {
+      if (hit->s.eType != ET_TELEPORT_TRIGGER &&
+          hit->s.eType != ET_TELEPORT_TRIGGER_CLIENT) {
         continue;
       }
     }
