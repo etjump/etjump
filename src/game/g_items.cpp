@@ -544,7 +544,8 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
   // ent->delay carries secondary weapon ammo
   const int quantityAlt = static_cast<int>(ent->delay);
 
-  const weapon_t grenadeType = BG_GrenadeTypeForTeam(other->client->sess.sessionTeam);
+  const weapon_t grenadeType =
+      BG_GrenadeTypeForTeam(other->client->sess.sessionTeam);
 
   if (grenadeType != WP_NONE && ent->item->giTag == grenadeType) {
     if (quantity > 0) {
@@ -553,8 +554,8 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
       other->client->ps.ammoclip[grenadeType] += quantity;
 
       const int maxGrenades =
-        BG_GrenadesForClass(other->client->ps.stats[STAT_PLAYER_CLASS],
-                            other->client->sess.skill);
+          BG_GrenadesForClass(other->client->ps.stats[STAT_PLAYER_CLASS],
+                              other->client->sess.skill);
 
       if (other->client->ps.ammoclip[grenadeType] > maxGrenades) {
         other->client->ps.ammoclip[grenadeType] = maxGrenades;
@@ -562,7 +563,6 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
       return -1;
     }
   }
-
 
   // JPW NERVE -- magic ammo for any two-handed weapon
   if (ent->item->giTag == WP_AMMO) {
@@ -597,8 +597,13 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
   }
 
   // check if player already had the weapon
+  // hack: fops doesn't spawn with an ammo pack, but we need to treat them as
+  // if they have the ammo pack already, otherwise we return a wrong value here
+  // and ammo packs picked up by field ops don't disappear once picked up
   const bool alreadyHave =
-      COM_BitCheck(other->client->ps.weapons, ent->item->giTag);
+      COM_BitCheck(other->client->ps.weapons, ent->item->giTag) ||
+      other->client->ps.stats[STAT_PLAYER_CLASS] == PC_FIELDOPS &&
+          ent->item->giTag == WP_AMMO;
 
   // JPW NERVE  prevents drop/pickup weapon "quick reload" exploit
   if (alreadyHave) {
@@ -746,13 +751,12 @@ void RespawnItem(gentity_t *ent) {
     }
     master = ent->teammaster;
 
-    for (count = 0, ent = master; ent; ent = ent->teamchain, count++)
-      ;
+    for (count = 0, ent = master; ent; ent = ent->teamchain, count++);
 
     choice = rand() % count;
 
-    for (count = 0, ent = master; count < choice; ent = ent->teamchain, count++)
-      ;
+    for (count = 0, ent = master; count < choice;
+         ent = ent->teamchain, count++);
   }
 
   ent->r.contents = CONTENTS_TRIGGER;
@@ -1268,7 +1272,7 @@ void G_SpawnItem(gentity_t *ent, gitem_t *item) {
   } else if (item->giTag == WP_GRENADE_PINEAPPLE ||
              item->giTag == WP_GRENADE_LAUNCHER) {
     G_SpawnInt("count", "1", &ent->count);
-    
+
     if (ent->count < 0) {
       ent->count = 0;
     }
