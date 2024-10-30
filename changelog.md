@@ -1,4 +1,4 @@
-# ETJump 3.x.x
+# ETJump 3.3.1
 
 * fixed backstab hint showing for nonsolid players when holding a knife [#1492](https://github.com/etjump/etjump/pull/1492)
   * also fixes a long standing issue where knife would "hit" nonsolid players
@@ -17,6 +17,14 @@
 * fixed old etmain bug which caused bullet flesh impact sounds to play at wrong location [#1500](https://github.com/etjump/etjump/pull/1500)
 * fixed corpses producing water impact particles when shot [#1501](https://github.com/etjump/etjump/pull/1501)
 * fixed bullet impacts producing particle effects unreliably [#1503](https://github.com/etjump/etjump/pull/1503)
+* added `cursorhint` key to `func_button` for specifying the cursorhint, similar to `func_invisible_user` [#1507](https://github.com/etjump/etjump/pull/1507)
+* `etj_hideMe` can no longer be set if fireteam player collision is enabled, and will automatically be disabled if turned on [#1506](https://github.com/etjump/etjump/pull/1506)
+* added `etj_ad_stopInSpec` to automatically stop autodemo recording when switching to spectators [#1510](https://github.com/etjump/etjump/pull/1510)
+* fixed `trigger_teleport_client` not working correctly for spectators [#1511](https://github.com/etjump/etjump/pull/1511)
+* fixed JSON files without a JSON object unexpectedly crashing the game [#1514](https://github.com/etjump/etjump/pull/1514)
+* fixed ammo packs not functioning correctly when picked up by a field ops [#1517](https://github.com/etjump/etjump/pull/1517)
+* fixed `etj_autoLoad` and `load` executed during a death sequence initially spawning you in original spawn location, which could cause entities to trigger unexpectedly on original spawn location [#1516](https://github.com/etjump/etjump/pull/1516)
+* fixed `target_init` and timerun start not clearing the ammo for removed weapons, which would cause the weapons to have incorrect ammo when picked up again [#1515](https://github.com/etjump/etjump/pull/1515)
 
 # ETJump 3.3.0
 
