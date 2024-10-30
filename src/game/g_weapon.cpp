@@ -23,7 +23,32 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
                               vec3_t start, vec3_t end, float spread,
                               int damage, qboolean distance_falloff);
 
-int G_GetWeaponDamage(int weapon); // JPW
+namespace ETJump {
+bool weaponAllowedWithNoExplosives(const int weapon) {
+  switch (weapon) {
+    case WP_GRENADE_LAUNCHER:
+    case WP_PANZERFAUST:
+    case WP_GRENADE_PINEAPPLE:
+    case WP_LANDMINE:
+    case WP_SATCHEL:
+    case WP_SATCHEL_DET:
+    case WP_MORTAR:
+    case WP_GPG40:
+    case WP_M7:
+    case WP_MORTAR_SET:
+      return false;
+    case WP_DYNAMITE:
+    case WP_PLIERS:
+      if (level.noExplosives == 2) {
+        return false;
+      }
+
+      return true;
+    default:
+      return true;
+  }
+}
+} // namespace ETJump
 
 qboolean G_WeaponIsExplosive(meansOfDeath_t mod) {
   switch (mod) {

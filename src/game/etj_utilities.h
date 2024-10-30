@@ -24,9 +24,8 @@
 
 #pragma once
 
-#include <algorithm>
-#include <iterator>
 #include <vector>
+
 #include "etj_levels.h"
 
 namespace Utilities {
@@ -81,7 +80,10 @@ std::string timestampToString(int timestamp,
                               const char *format = "%d/%m/%y %H:%M:%S",
                               const char *start = "never");
 
-void RemovePlayerWeapons(int clientNum);
+/**
+ * Sets a valid weapon as currently held weapon
+ */
+void selectValidWeapon(const gentity_t *ent);
 
 /**
  * Returns true if the player is inside a no-noclip area

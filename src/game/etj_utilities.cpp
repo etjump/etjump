@@ -27,6 +27,7 @@
 #include "etj_utilities.h"
 #include "etj_save_system.h"
 #include "etj_map_statistics.h"
+#include "etj_timerun_v2.h"
 
 std::vector<int> Utilities::getSpectators(int clientNum) {
   std::vector<int> spectators;
@@ -54,42 +55,6 @@ std::vector<int> Utilities::getSpectators(int clientNum) {
   return spectators;
 }
 
-static void SelectCorrectWeapon(gclient_t *cl) {
-  auto primary = cl->sess.playerWeapon;
-  auto secondary = cl->sess.playerWeapon2;
-
-  // early out if our currently held weapon is allowed
-  // even though disallowed weapons are already removed, we'll still get to
-  // keep any if it's currently equipped, so we force a weapon swap later
-  if (!BG_WeaponDisallowedInTimeruns(cl->ps.weapon)) {
-    return;
-  }
-
-  // our currently held weapon was removed, so swap to a valid one
-  if (COM_BitCheck(cl->ps.weapons, primary) &&
-      BG_WeaponHasAmmo(&cl->ps, primary)) {
-    cl->ps.weapon = primary;
-  } else if (COM_BitCheck(cl->ps.weapons, secondary) &&
-             BG_WeaponHasAmmo(&cl->ps, secondary)) {
-    cl->ps.weapon = secondary;
-  } else {
-    cl->ps.weapon = WP_KNIFE;
-  }
-}
-
-static void RemovePlayerProjectiles(int clientNum) {
-  // Iterate entitylist and remove all projectiles
-  // that belong to the activator
-  for (int i = MAX_CLIENTS; i < level.num_entities; i++) {
-    auto ent = g_entities + i;
-    if (ent->s.eType == ET_MISSILE) {
-      if (ent->parent && ent->parent->s.number == clientNum) {
-        G_FreeEntity(ent);
-      }
-    }
-  }
-}
-
 void Utilities::startRun(int clientNum) {
   gentity_t *player = g_entities + clientNum;
 
@@ -106,9 +71,14 @@ void Utilities::startRun(int clientNum) {
     return;
   }
 
-  RemovePlayerWeapons(clientNum);
-  RemovePlayerProjectiles(clientNum);
-  SelectCorrectWeapon(player->client);
+  ETJump::TimerunV2::removeDisallowedWeapons(player);
+  ETJump::TimerunV2::removePlayerProjectiles(player);
+
+  // force swap if the current weapon isn't allowed in timeruns
+  if (BG_WeaponDisallowedInTimeruns(player->client->ps.weapon)) {
+    selectValidWeapon(player);
+  }
+
   ClearPortals(player);
 }
 
@@ -119,16 +89,16 @@ void Utilities::stopRun(int clientNum) {
   ETJump::UpdateClientConfigString(*player);
 }
 
-void Utilities::RemovePlayerWeapons(int clientNum) {
-  auto *cl = (g_entities + clientNum)->client;
-
-  for (int i = 0; i < WP_NUM_WEAPONS; i++) {
-    if (BG_WeaponDisallowedInTimeruns(i)) {
-      COM_BitClear(cl->ps.weapons, i);
-    }
+void Utilities::selectValidWeapon(const gentity_t *ent) {
+  // primary > secondary > knife
+  if (BG_WeaponHasAmmo(&ent->client->ps, ent->client->sess.playerWeapon)) {
+    ent->client->ps.weapon = ent->client->sess.playerWeapon;
+  } else if (BG_WeaponHasAmmo(&ent->client->ps,
+                              ent->client->sess.playerWeapon2)) {
+    ent->client->ps.weapon = ent->client->sess.playerWeapon2;
+  } else {
+    ent->client->ps.weapon = WP_KNIFE;
   }
-
-  cl->ps.grenadeTimeLeft = 0;
 }
 
 bool Utilities::inNoNoclipArea(gentity_t *ent) {

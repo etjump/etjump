@@ -10,6 +10,7 @@
  */
 
 #include "g_local.h"
+#include "etj_timerun_v2.h"
 
 #define RESPAWN_SP -1
 #define RESPAWN_KEY 4
@@ -859,10 +860,10 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace) {
   }
 
   // ETJump: disable explosives pickup
-  if (BG_WeaponIsExplosive(ent->item->giTag) &&
+  if (ETJump::TimerunV2::weaponIsExplosivePickup(ent->item->giTag) &&
       other->client->sess.timerunActive &&
-      (other->client->sess.runSpawnflags &
-       static_cast<int>(ETJump::TimerunSpawnflags::NoExplosivesPickup))) {
+      other->client->sess.runSpawnflags &
+          static_cast<int>(ETJump::TimerunSpawnflags::NoExplosivesPickup)) {
     return;
   }
 
