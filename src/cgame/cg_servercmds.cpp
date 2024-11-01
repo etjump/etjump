@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <ctime>
+#include <chrono>
 
 #include "cg_local.h"
 #include "etj_init.h"
@@ -11,6 +12,7 @@
 #include "etj_client_rtv_handler.h"
 
 #include "../game/etj_numeric_utilities.h"
+#include "../game/etj_string_utilities.h"
 
 #define SCOREPARSE_COUNT 9
 
@@ -2145,64 +2147,71 @@ void CG_dumpStats(void) {
 }
 // -OSP
 
-/*
-=================
-CG_ServerCommand
+namespace ETJump {
+static const char *addChatReplayModifications(const char *text) {
+  static char msg[MAX_SAY_TEXT + 32];
+  memset(msg, 0, sizeof(msg));
 
-The string has been tokenized and can be retrieved with
-Cmd_Argc() / Cmd_Argv()
-=================
-*/
+  const int timestamp = Q_atoi(CG_Argv(5));
 
-void CG_ForceTapOut_f(void);
+  // don't prefix the replay notification message
+  if (timestamp != -1) {
+    Q_strcat(msg, sizeof(msg), "^g[REPLAY] ");
+  }
 
-/**
- * @param text The unmodified text (excl. encoding/decoding)
- * @param clientNum The user who sent the message
- * @param msgType The message type
- */
-static const char *CG_AddChatModifications(char *text, int clientNum,
-                                           int msgType) {
-  static char message[MAX_SAY_TEXT + 32] = "\0";
+  // no further modifications if timestamps are disabled,
+  // or if this is the notify message
+  if (!etj_drawMessageTime.integer || timestamp == -1) {
+    Q_strcat(msg, sizeof(msg), text);
+    return msg;
+  }
+
+  const auto mt = static_cast<time_t>(timestamp);
+  const time_t now =
+      std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  const double diffSec = std::difftime(now, mt);
+
+  if (diffSec < 60) {
+    Q_strcat(msg, sizeof(msg),
+             stringFormat("^z[%is ago] ", static_cast<int>(diffSec)).c_str());
+  } else if (diffSec < 60 * 60) {
+    const int min = static_cast<int>(diffSec / 60);
+    Q_strcat(msg, sizeof(msg), stringFormat("^z[%im ago] ", min).c_str());
+  } else {
+    // up to 12h
+    if (diffSec >= 60 * 60 * 12) {
+      Q_strcat(msg, sizeof(msg), "^z[12h+ ago] ");
+    } else {
+      const int hours = static_cast<int>(diffSec / 3600);
+      Q_strcat(msg, sizeof(msg), stringFormat("^z[%ih ago] ", hours).c_str());
+    }
+  }
+
+  Q_strcat(msg, sizeof(msg), text);
+  return msg;
+}
+
+static const char *addChatModifications(char *text, const int clientNum,
+                                        const bool serverSay) {
+  static char message[MAX_SAY_TEXT + 32];
   memset(message, 0, sizeof(message));
 
-  // disable highlights for chat replays
-  if (!(msgType & REPLAY_MSG)) {
-    if (etj_highlight.integer &&
-        (msgType & SERVER_MSG || cg.clientNum != clientNum) &&
-        strstr(text + strlen(cgs.clientinfo[clientNum].name),
-               cgs.clientinfo[cg.clientNum].name) != nullptr) {
-      Q_strcat(message, sizeof(message), etj_highlightText.string);
-      Q_strcat(message, sizeof(message), "^7");
+  if (etj_highlight.integer && (serverSay || cg.clientNum != clientNum) &&
+      strstr(text + strlen(cgs.clientinfo[clientNum].name),
+             cgs.clientinfo[cg.clientNum].name) != nullptr) {
+    Q_strcat(message, sizeof(message), etj_highlightText.string);
+    Q_strcat(message, sizeof(message), "^7");
 
-      trap_S_StartLocalSound(
-          trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
-    }
+    trap_S_StartLocalSound(
+        trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
   }
 
-  // don't add prefix to the replay notify message
-  if (msgType & REPLAY_MSG && trap_Argc() > 5) {
-    Q_strcat(message, sizeof(message), "^g[REPLAY] ");
-  }
+  if (etj_drawMessageTime.integer) {
+    const char *msgColor =
+        cg.clientNum == clientNum && !serverSay ? "^g" : "^z";
 
-  // don't add timestamps to chat replays without a timestamp (e.g. notify msg)
-  if (etj_drawMessageTime.integer &&
-      (!(msgType & REPLAY_MSG) || (msgType & REPLAY_MSG && trap_Argc() == 6))) {
-    const char *msgColor = "^z";
-    tm *lt;
-
-    if (msgType & REPLAY_MSG) {
-      // chat replay sends original message timestamp as 6th arg
-      const time_t mt = Q_atoi(CG_Argv(5));
-      lt = std::localtime(&mt);
-    } else {
-      time_t t = std::time(&t);
-      lt = std::localtime(&t);
-
-      if (!(msgType & SERVER_MSG) && cg.clientNum == clientNum) {
-        msgColor = "^g";
-      }
-    }
+    time_t t = std::time(&t);
+    const tm *lt = std::localtime(&t);
 
     if (etj_drawMessageTime.integer == 2) {
       Q_strcat(message, sizeof(message),
@@ -2218,8 +2227,9 @@ static const char *CG_AddChatModifications(char *text, int clientNum,
   return message;
 }
 
-void CG_FixLinesEndingWithCaret(char *text, int size) {
-  int len = strlen(text);
+static void fixLinesEndingWithCaret(char *text, int size) {
+  const size_t len = strlen(text);
+
   if (text[len - 1] != '^') {
     return;
   }
@@ -2229,6 +2239,16 @@ void CG_FixLinesEndingWithCaret(char *text, int size) {
   text[size - 2] = '2';
   text[size - 1] = 0;
 }
+} // namespace ETJump
+
+/*
+=================
+CG_ServerCommand
+
+The string has been tokenized and can be retrieved with
+Cmd_Argc() / Cmd_Argv()
+=================
+*/
 
 static void CG_ServerCommand(void) {
   const char *cmd;
@@ -2377,13 +2397,17 @@ static void CG_ServerCommand(void) {
   enc = !Q_stricmp(cmd, "enc_chat") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "chat") || enc) {
     int msgType = 0;
+
     if (Q_atoi(CG_Argv(4))) {
       msgType |= REPLAY_MSG;
     }
+
     const char *s = CG_Argv(2);
+
     if (s[0] == '\0') { // server sends empty clientNum
       msgType |= SERVER_MSG;
     }
+
     const int clientNum = Q_atoi(s);
 
     if (cg_teamChatsOnly.integer) {
@@ -2403,8 +2427,14 @@ static void CG_ServerCommand(void) {
     }
 
     CG_RemoveChatEscapeChar(text);
-    CG_FixLinesEndingWithCaret(text, MAX_SAY_TEXT);
-    s = CG_AddChatModifications(text, clientNum, msgType);
+    ETJump::fixLinesEndingWithCaret(text, MAX_SAY_TEXT);
+
+    if (msgType & REPLAY_MSG) {
+      s = ETJump::addChatReplayModifications(text);
+    } else {
+      s = ETJump::addChatModifications(text, clientNum, msgType);
+    }
+
     CG_AddToTeamChat(s, clientNum, msgType);
     CG_Printf("%s\n", s);
 
@@ -2413,7 +2443,6 @@ static void CG_ServerCommand(void) {
 
   enc = !Q_stricmp(cmd, "enc_tchat") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "tchat") || enc) {
-
     const char *s;
 
     if (Q_atoi(CG_Argv(3))) {
@@ -2426,12 +2455,13 @@ static void CG_ServerCommand(void) {
     if (enc) {
       CG_DecodeQP(text);
     }
+
     CG_RemoveChatEscapeChar(text);
 
-    s = CG_AddChatModifications(text, Q_atoi(CG_Argv(2)), 0);
+    s = ETJump::addChatModifications(text, Q_atoi(CG_Argv(2)), false);
     Q_strncpyz(text, s, MAX_SAY_TEXT);
 
-    CG_FixLinesEndingWithCaret(text, MAX_SAY_TEXT);
+    ETJump::fixLinesEndingWithCaret(text, MAX_SAY_TEXT);
     CG_AddToTeamChat(text, Q_atoi(CG_Argv(2)), 0);
     CG_Printf("%s\n", text); // JPW NERVE
 

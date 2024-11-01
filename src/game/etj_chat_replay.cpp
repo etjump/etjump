@@ -108,8 +108,10 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
 
   // send this with raw trap_SendServerCommand instead of Printer,
   // so we can omit team flags easily on client side
+  // timestamp is set to -1 to identify this from other chat replays
   trap_SendServerCommand(
-      clientNum, "chat \"^gServer: replaying latest chat messages:\" -1 0 1");
+      clientNum,
+      "chat \"^gServer: replaying latest chat messages:\" -1 0 1 -1");
 
   for (const auto &msg : chatReplayBuffer) {
     // skip messages from ignored clients
