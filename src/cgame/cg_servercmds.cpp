@@ -942,6 +942,7 @@ static void CG_MapRestart(void) {
   memset(&cg.pmext, 0, sizeof(cg.pmext));
 
   cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
+  cg.pmext.autoSprint = etj_autoSprint.integer;
 
   numSplinePaths = 0;
   numPathCorners = 0;

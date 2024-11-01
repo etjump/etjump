@@ -252,6 +252,7 @@ void CG_Respawn(qboolean revived) {
 
   cg.pmext.noclipScale = etj_noclipScale.value;
   cg.pmext.bAutoReload = cg_autoReload.integer ? qtrue : qfalse;
+  cg.pmext.autoSprint = etj_autoSprint.integer;
 
   cg.pmext.sprintTime = SPRINTTIME;
 
