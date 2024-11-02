@@ -975,7 +975,7 @@ typedef struct {
 
   ETJump::votingInfo_t votingInfo;
 
-  // auxilary storage for pmext.autoSprint
+  // auxiliary storage for pmext.autoSprint
   bool autoSprintAux;
 } clientPersistant_t;
 
