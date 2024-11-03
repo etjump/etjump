@@ -675,6 +675,7 @@ vmCvar_t etj_recordingStatusX;
 vmCvar_t etj_recordingStatusY;
 
 vmCvar_t etj_smoothAngles;
+vmCvar_t etj_autoSprint;
 
 typedef struct {
   vmCvar_t *vmCvar;
@@ -1268,6 +1269,7 @@ cvarTable_t cvarTable[] = {
     {&etj_recordingStatusY, "etj_recordingStatusY", "9", CVAR_ARCHIVE},
 
     {&etj_smoothAngles, "etj_smoothAngles", "0", CVAR_ARCHIVE},
+    {&etj_autoSprint, "etj_autoSprint", "0", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -1346,7 +1348,8 @@ void CG_UpdateCvars(void) {
             cv->vmCvar == &etj_touchPickupWeapons ||
             cv->vmCvar == &etj_autoLoad || cv->vmCvar == &etj_quickFollow ||
             cv->vmCvar == &etj_drawSnapHUD ||
-            cv->vmCvar == &etj_noPanzerAutoswitch) {
+            cv->vmCvar == &etj_noPanzerAutoswitch ||
+            cv->vmCvar == &etj_autoSprint) {
           fSetFlags = qtrue;
         } else if (cv->vmCvar == &cg_rconPassword && *cg_rconPassword.string) {
           trap_SendConsoleCommand(va("rconAuth %s\n", cg_rconPassword.string));
@@ -1397,6 +1400,8 @@ void CG_setClientFlags() {
   }
 
   cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
+  cg.pmext.autoSprint = etj_autoSprint.integer;
+
   trap_Cvar_Set(
       "cg_uinfo",
       va("%d %d %d %d %f %d",
@@ -1417,7 +1422,8 @@ void CG_setClientFlags() {
           ((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0) |
           ((etj_quickFollow.integer > 0) ? CGF_QUICK_FOLLOW : 0) |
           ((etj_drawSnapHUD.integer > 0) ? CGF_SNAPHUD : 0) |
-          ((etj_noPanzerAutoswitch.integer > 0) ? CGF_NOPANZERSWITCH : 0)
+          ((etj_noPanzerAutoswitch.integer > 0) ? CGF_NOPANZERSWITCH : 0) |
+          (etj_autoSprint.integer ? CGF_AUTOSPRINT : 0)
           // Add more in here, as needed
           ),
 

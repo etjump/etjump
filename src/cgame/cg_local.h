@@ -2783,6 +2783,7 @@ extern vmCvar_t etj_recordingStatusX;
 extern vmCvar_t etj_recordingStatusY;
 
 extern vmCvar_t etj_smoothAngles;
+extern vmCvar_t etj_autoSprint;
 
 //
 // cg_main.c

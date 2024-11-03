@@ -1892,6 +1892,14 @@ void ClientUserinfoChanged(int clientNum) {
   client->pers.noPanzerAutoswitch =
       (client->pers.clientFlags & CGF_NOPANZERSWITCH) != 0;
 
+  if (client->pers.clientFlags & CGF_AUTOSPRINT) {
+    client->pers.autoSprintAux = true;
+    client->pmext.autoSprint = true;
+  } else {
+    client->pers.autoSprintAux = false;
+    client->pmext.autoSprint = false;
+  }
+
   // set name
   Q_strncpyz(oldname, client->pers.netname, sizeof(oldname));
   s = Info_ValueForKey(userinfo, "name");
@@ -2481,6 +2489,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   // beause we need it in bg_*)
   client->pmext.bAutoReload = client->pers.bAutoReloadAux;
   // done
+
+  client->pmext.autoSprint = client->pers.autoSprintAux;
 
   client->ps.clientNum = index;
 

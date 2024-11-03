@@ -974,6 +974,9 @@ typedef struct {
   int previousSetHealthTime;
 
   ETJump::votingInfo_t votingInfo;
+
+  // auxiliary storage for pmext.autoSprint
+  bool autoSprintAux;
 } clientPersistant_t;
 
 typedef struct {
