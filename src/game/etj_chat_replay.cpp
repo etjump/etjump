@@ -27,6 +27,7 @@
 #include "etj_chat_replay.h"
 #include "etj_string_utilities.h"
 #include "etj_time_utilities.h"
+#include "etj_session.h"
 
 namespace ETJump {
 
@@ -83,12 +84,11 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
 
   // if messages are set to expire, mark any chats that are too old
   if (g_chatReplayMaxMessageAge.integer > 0) {
-    time_t t;
-    t = std::time(&t);
+    int sessStartTime = session->getSessionStartTime(ClientNum(ent));
 
     // FIXME: 32-bit time
-    t -= g_chatReplayMaxMessageAge.integer * 60;
-    const Time maxAge = Time::fromInt(static_cast<int>(t));
+    sessStartTime -= g_chatReplayMaxMessageAge.integer * 60;
+    const Time maxAge = Time::fromInt(sessStartTime);
 
     bool allExpired = true;
 
@@ -96,6 +96,7 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
       if (maxAge > Time::fromInt(msg.timestamp)) {
         msg.expired = true;
       } else {
+        msg.expired = false;
         allExpired = false;
       }
     }

@@ -517,7 +517,7 @@ cvarTable_t gameCvarTable[] = {
     {&g_adminChat, "g_adminChat", "1", CVAR_ARCHIVE},
 
     {&g_chatReplay, "g_chatReplay", "1", CVAR_ARCHIVE},
-    {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "0",
+    {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "5",
      CVAR_ARCHIVE | CVAR_LATCH},
 };
 
