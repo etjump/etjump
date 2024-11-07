@@ -269,7 +269,7 @@ qboolean G_ScriptAction_ChangeModel(gentity_t *ent, char *params) {
   Q_strcat(tagname, MAX_QPATH, ".tag");
   ent->tagNumber = trap_LoadTag(tagname);
 
-  ent->s.modelindex2 = G_ModelIndex(token);
+  ent->s.modelindex = G_ModelIndex(token);
 
   return qtrue;
 }
