@@ -296,11 +296,23 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
 
       otherEnt->client->sess.saveLimitFt = ft->saveLimit;
 
-      if (otherEnt->client->pers.hideMe) {
-        otherEnt->client->pers.hideMe = false;
-        Printer::popup(
-            otherEnt,
-            "Fireteam ^3noghost ^7is enabled, disabling ^3etj_hideMe\n");
+      if (ft->noGhost) {
+        if (otherEnt->client->pers.hideMe) {
+          otherEnt->client->pers.hideMe = false;
+          Printer::popup(
+              otherEnt,
+              "Fireteam ^3noghost ^7is enabled, disabling ^3etj_hideMe\n");
+        }
+
+        otherEnt->client->ftNoGhostThisLife = true;
+
+        if (otherEnt->client->sess.timerunActive &&
+            !(otherEnt->client->sess.runSpawnflags &
+              static_cast<int>(ETJump::TimerunSpawnflags::AllowFTNoGhost))) {
+          Printer::popup(otherEnt, "Fireteam ^3noghost ^7is not allowed in "
+                                   "this timerun, interrupting!\n");
+          InterruptRun(otherEnt);
+        }
       }
 
       G_UpdateFireteamConfigString(ft);
