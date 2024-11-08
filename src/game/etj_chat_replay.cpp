@@ -84,7 +84,7 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
 
   // if messages are set to expire, mark any chats that are too old
   if (g_chatReplayMaxMessageAge.integer > 0) {
-    int sessStartTime = session->getSessionStartTime(ClientNum(ent));
+    int sessStartTime = session->getSessionStartTime(clientNum);
 
     // FIXME: 32-bit time
     sessStartTime -= g_chatReplayMaxMessageAge.integer * 60;
