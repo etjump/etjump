@@ -1,3 +1,8 @@
+// ETJump mapscript for GreenJumps_f.bsp
+// Modifications:
+// - fixed mapscript entrypoint (game_manager -> etjump_manager, map has no script_multiplayer entity)
+// - tweaked func_door speed at the end of customs section to work on sv_fps 125 servers
+
 etjump_manager
 {
    spawn
