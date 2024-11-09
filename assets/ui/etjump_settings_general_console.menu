@@ -45,15 +45,10 @@ menuDef {
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CONSOLE")
 
 #ifdef ETLEGACY
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS(1), "etj_consoleAlpha", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(1), "Console alpha:", 0.2, SETTINGS_ITEM_H, etj_consoleAlpha 1 0 1 0.05, "Sets transparency of console (vid_restart required)\netj_consoleAlpha")
-        YESNO               (SETTINGS_ITEM_POS(2), "Console shader:", 0.2, SETTINGS_ITEM_H, "etj_consoleShader", "Draw console background shader (vid_restart required)\netj_consoleShader")
-        COMBO               (SETTINGS_COMBO_POS(3), "Console color:", 0.2, SETTINGS_ITEM_H, "etj_consoleColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets console color when console shader is disabled (vid_restart required)\netj_consoleColor")
-        YESNO               (SETTINGS_ITEM_POS(4), "Log banners:", 0.2, SETTINGS_ITEM_H, "etj_logBanner", "Log banners into console\netj_logBanner")
-        YESNO               (SETTINGS_ITEM_POS(5), "Notify messages:", 0.2, SETTINGS_ITEM_H, "etj_drawNotify", "Draw console output at top left\netj_drawNotify (con_drawnotify)")
-        COMBO               (SETTINGS_COMBO_POS(6), "Renderer speeds:", 0.2, SETTINGS_ITEM_H, "etj_speeds", cvarFloatList { "Off" 0 "Surfaces" 1 "Culling" 2 "Viewcluster" 3 "Dlights" 4 "Render distance" 5 "Flares" 6 "Decals" 7 }, none, "Output various render statistics to console\netj_speeds (r_speeds)")
+        YESNO               (SETTINGS_ITEM_POS(1), "External console:", 0.2, SETTINGS_ITEM_H, "etj_viewlog", "Enable external console window (Windows only)\nRequires ET: Legacy 2.83.0 or newer\nOlder versions must enable the console with '+set viewlog 1' launch option\netj_viewlog (viewlog)")
 #else
         YESNO               (SETTINGS_ITEM_POS(1), "External console:", 0.2, SETTINGS_ITEM_H, "etj_viewlog", "Enable external console window (Windows only)\netj_viewlog (viewlog)")
+#endif
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(2), "etj_consoleAlpha", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "Console alpha:", 0.2, SETTINGS_ITEM_H, etj_consoleAlpha 1 0 1 0.05, "Sets transparency of console (vid_restart required)\netj_consoleAlpha")
         YESNO               (SETTINGS_ITEM_POS(3), "Console shader:", 0.2, SETTINGS_ITEM_H, "etj_consoleShader", "Draw console background shader (vid_restart required)\netj_consoleShader")
@@ -61,7 +56,7 @@ menuDef {
         YESNO               (SETTINGS_ITEM_POS(5), "Log banners:", 0.2, SETTINGS_ITEM_H, "etj_logBanner", "Log banners into console\netj_logBanner")
         YESNO               (SETTINGS_ITEM_POS(6), "Notify messages:", 0.2, SETTINGS_ITEM_H, "etj_drawNotify", "Draw console output at top left\netj_drawNotify (con_drawnotify)")
         COMBO               (SETTINGS_COMBO_POS(7), "Renderer speeds:", 0.2, SETTINGS_ITEM_H, "etj_speeds", cvarFloatList { "Off" 0 "Surfaces" 1 "Culling" 2 "Viewcluster" 3 "Dlights" 4 "Render distance" 5 "Flares" 6 "Decals" 7 }, none, "Output various render statistics to console\netj_speeds (r_speeds)")
-#endif
+
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
