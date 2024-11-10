@@ -1873,6 +1873,7 @@ typedef struct {
   char alliedwintext[1024];
   char longname[128];
   vec2_t mappos;
+  char author[128];
 } arenaInfo_t;
 
 #define MAX_STATIC_GAMEMODELS 1024

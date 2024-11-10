@@ -165,6 +165,15 @@ qboolean CG_FindArenaInfo(char *filename, char *mapname, arenaInfo_t *info) {
       y = token.floatvalue;
 
       info->mappos[1] = y;
+    } else if (!Q_stricmp(token.string, "author")) {
+      if (!PC_String_Parse(handle, &dummy)) {
+        trap_Print(
+            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+        trap_PC_FreeSource(handle);
+        return qfalse;
+      }
+
+      Q_strncpyz(info->author, dummy, sizeof(info->author));
     }
   }
 
