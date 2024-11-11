@@ -1,6 +1,7 @@
 // cg_syscalls.c -- this file is only included when building a dll
 // cg_syscalls.asm is included instead when building a qvm
 #include "cg_local.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 static intptr_t(QDECL *syscall)(intptr_t arg,
                                 ...) = (intptr_t(QDECL *)(intptr_t, ...)) - 1;
@@ -932,3 +933,19 @@ int trap_R_GetTextureId(const char *name) {
 
 // bani - sync rendering
 void trap_R_Finish(void) { SystemCall(CG_R_FINISH); }
+
+// ETJump: syscall extensions
+namespace ETJump {
+// entry point for additional system calls for other engines (ETe, ET: Legacy)
+bool SyscallExt::trap_GetValue(char *value, const int size, const char *key) {
+  return SystemCall(syscallExt->dll_com_trapGetValue, value, size, key);
+}
+
+// ET: Legacy - flash client window
+void SyscallExt::trap_SysFlashWindowETLegacy(const FlashWindowState state) {
+  if (syscallExt->cgameExtensions[syscallExt->flashWindowETLegacy]) {
+    SystemCall(syscallExt->cgameExtensions[syscallExt->flashWindowETLegacy],
+               static_cast<int>(state));
+  }
+}
+} // namespace ETJump

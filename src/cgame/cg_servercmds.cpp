@@ -13,6 +13,7 @@
 
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 #define SCOREPARSE_COUNT 9
 
@@ -2205,6 +2206,9 @@ static const char *addChatModifications(char *text, const int clientNum,
 
     trap_S_StartLocalSound(
         trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
+
+    SyscallExt::trap_SysFlashWindowETLegacy(
+        SyscallExt::FlashWindowState::FLASH_UNTIL_FOCUS);
   }
 
   if (etj_drawMessageTime.integer) {

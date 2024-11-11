@@ -1,4 +1,5 @@
 #include "ui_local.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 // this file is only included when building a dll
 // syscalls.asm is included instead when building a qvm
@@ -499,3 +500,11 @@ void trap_openURL(const char *s) { SystemCall(UI_OPENURL, s); }
 void trap_GetHunkData(int *hunkused, int *hunkexpected) {
   SystemCall(UI_GETHUNKDATA, hunkused, hunkexpected);
 }
+
+// ETJump: syscall extensions
+namespace ETJump {
+// entry point for additional system calls for other engines (ETe, ET: Legacy)
+bool SyscallExt::trap_GetValue(char *value, const int size, const char *key) {
+  return SystemCall(syscallExt->dll_com_trapGetValue, value, size, key);
+}
+} // namespace ETJump

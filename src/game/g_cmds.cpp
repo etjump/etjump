@@ -4472,11 +4472,14 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
   }
 
   other = g_entities + clientNum;
+  const int otherNum = ClientNum(other);
 
   if (!ent) {
     msg = ConcatArgs(2);
     Printer::chat(ClientNum(other),
                   va("^7Private message from server console: ^3%s", msg));
+    trap_SendServerCommand(otherNum, "pmFlashWindow");
+
     G_Printf("Private message to %s^7: ^3%s\n", other->client->pers.netname,
              msg);
     return;
@@ -4484,8 +4487,10 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
 
   if (!COM_BitCheck(other->client->sess.ignoreClients, ClientNum(ent))) {
     msg = ConcatArgs(2);
-    Printer::chat(ClientNum(other), va("^7Private message from %s^7: ^3%s",
-                                       ent->client->pers.netname, msg));
+    Printer::chat(otherNum, va("^7Private message from %s^7: ^3%s",
+                               ent->client->pers.netname, msg));
+    trap_SendServerCommand(otherNum, "pmFlashWindow");
+
     if (ent) {
       Printer::chat(selfNum, va("^7Private message to %s^7: ^3%s",
                                 other->client->pers.netname, msg));

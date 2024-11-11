@@ -81,6 +81,7 @@ add_library(qagame MODULE
 	"etj_savepos_command_handler.cpp"
 	"etj_savepos_shared.cpp"
 	"etj_session.cpp"
+	"etj_syscall_ext_shared.cpp"
 	"etj_synchronization_context.cpp"
 	"etj_string_utilities.cpp"
 	"etj_target_init.cpp"

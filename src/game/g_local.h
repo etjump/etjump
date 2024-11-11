@@ -2919,6 +2919,9 @@ extern std::shared_ptr<Database> database;
 class ProgressionTrackers;
 extern std::shared_ptr<ProgressionTrackers> progressionTrackers;
 
+class SyscallExt;
+extern std::unique_ptr<SyscallExt> syscallExt;
+
 struct GameLogicException : public std::exception {
 private:
   std::string message;

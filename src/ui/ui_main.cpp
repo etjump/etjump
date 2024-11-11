@@ -18,6 +18,7 @@ USER INTERFACE MAIN
 #include "../cgame/etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_filesystem.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 // NERVE - SMF
 #define AXIS_TEAM 0
@@ -808,6 +809,7 @@ void UI_ShowPostGame(qboolean newHigh) {
 
 namespace ETJump {
 std::unique_ptr<ColorPicker> colorPicker;
+std::unique_ptr<SyscallExt> syscallExt;
 
 static void initColorPicker() {
   colorPicker = std::make_unique<ColorPicker>();
@@ -843,6 +845,11 @@ static void initColorPicker() {
   uiInfo.uiDC.setColorSliderType = &ColorPicker::setColorSliderType;
   uiInfo.uiDC.getColorSliderValue = &ColorPicker::getColorSliderValue;
   uiInfo.uiDC.setColorSliderValue = &ColorPicker::setColorSliderValue;
+}
+
+static void initExtensionSystem() {
+  syscallExt = std::make_unique<SyscallExt>();
+  syscallExt->setupExtensions();
 }
 
 static void drawLevelshotPreview(rectDef_t &rect) {
@@ -7048,6 +7055,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
   uiInfo.uiDC.getActiveFont = &GetActiveFont;
 
   ETJump::initColorPicker();
+  ETJump::initExtensionSystem();
 
   Init_Display(&uiInfo.uiDC);
 

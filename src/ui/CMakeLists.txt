@@ -17,6 +17,7 @@ add_library(ui MODULE
 	"../game/etj_file.cpp"
 	"../game/etj_filesystem.cpp"
 	"../game/etj_string_utilities.cpp"
+	"../game/etj_syscall_ext_shared.cpp"
 	${UI_HEADERS}
 )
 target_compile_definitions(ui PRIVATE UIDLL)
