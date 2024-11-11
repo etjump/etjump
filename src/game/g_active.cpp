@@ -1109,10 +1109,19 @@ void ClientThink_real(gentity_t *ent) {
   // Stop lagging through triggers in timeruns
   if (client->sess.timerunActive) {
     if (client->ps.ping > 400) {
-      Printer::center(clientNum,
-                      "^3WARNING: ^7Timerun stopped due to high ping!");
-      InterruptRun(ent);
+      client->numLagFrames++;
+
+      // allow 100ms of sustained lag
+      if (client->numLagFrames * level.frameTime >= FRAMETIME) {
+        Printer::center(clientNum,
+                        "^3WARNING: ^7Timerun stopped due to high ping!");
+        InterruptRun(ent);
+        client->numLagFrames = 0;
+      }
+    } else {
+      client->numLagFrames = 0;
     }
+
     if (client->pers.maxFPS > 0 && client->pers.maxFPS < 25) {
       Printer::center(clientNum,
                       "^3WARNING: ^7Timerun stopped due to low FPS!");
