@@ -262,6 +262,7 @@ typedef struct {
   const char *briefing;
   const char *lmsbriefing;
   const char *objectives;
+  const char *author;
 } mapInfo;
 
 // Random reinforcement seed settings
