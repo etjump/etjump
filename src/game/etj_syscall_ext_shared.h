@@ -46,9 +46,9 @@ public:
 
   // defined by SDL2
   enum class FlashWindowState {
-    FLASH_OFF = 0,
-    FLASH_BRIEF = 1,
-    FLASH_UNTIL_FOCUS = 2,
+    SDL_FLASH_CANCEL = 0,
+    SDL_FLASH_BRIEFLY = 1,
+    SDL_FLASH_UNTIL_FOCUSED = 2,
   };
 
   static void trap_SysFlashWindowETLegacy(FlashWindowState state);

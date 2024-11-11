@@ -2208,7 +2208,7 @@ static const char *addChatModifications(char *text, const int clientNum,
         trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
 
     SyscallExt::trap_SysFlashWindowETLegacy(
-        SyscallExt::FlashWindowState::FLASH_UNTIL_FOCUS);
+        SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
   }
 
   if (etj_drawMessageTime.integer) {

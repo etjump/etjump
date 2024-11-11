@@ -496,7 +496,7 @@ qboolean CG_ServerCommandExt(const char *cmd) {
 
   if (command == "pmFlashWindow") {
     ETJump::SyscallExt::trap_SysFlashWindowETLegacy(
-        ETJump::SyscallExt::FlashWindowState::FLASH_UNTIL_FOCUS);
+        ETJump::SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
     return qtrue;
   }
 
