@@ -7,7 +7,8 @@
  */
 
 #include "g_local.h"
-#include "etj_utilities.h";
+#include "etj_utilities.h"
+#include "etj_entity_utilities.h"
 
 static constexpr std::array<const char *, HINT_NUM_HINTS + 1> hintStrings = {
     "",          // HINT_NONE
@@ -97,8 +98,19 @@ gentity_t *G_TestEntityPosition(gentity_t *ent) {
   }
 
   if (ent->client) {
+    // setup nonsolid players
+    for (int i = 0; i < level.numConnectedClients; i++) {
+      const int otherNum = level.sortedClients[i];
+
+      if (!ETJump::EntityUtilities::playerIsSolid(ClientNum(ent), otherNum)) {
+        G_TempTraceIgnoreEntity(g_entities + otherNum);
+      }
+    }
+
     trap_TraceCapsule(&tr, ent->client->ps.origin, ent->r.mins, ent->r.maxs,
                       ent->client->ps.origin, ent->s.number, mask);
+
+    G_ResetTempTraceIgnoreEnts();
 
     if (!tr.startsolid && ent->client->ps.eFlags & EF_PRONE) {
       vec3_t org, flatforward, point;
