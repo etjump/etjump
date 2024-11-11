@@ -2637,7 +2637,7 @@ qboolean BG_LoadSpeakerScript(const char *filename);
 extern ammotable_t ammoTableMP[WP_NUM_WEAPONS];
 #define GetAmmoTableData(ammoIndex) ((ammotable_t *)(&ammoTableMP[ammoIndex]))
 
-#define MAX_MAP_SIZE 65536
+static constexpr int MAX_MAP_SIZE = 65536;
 
 qboolean BG_BBoxCollision(vec3_t min1, vec3_t max1, vec3_t min2, vec3_t max2);
 
