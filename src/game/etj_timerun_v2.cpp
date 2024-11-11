@@ -732,8 +732,13 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
                 rank++;
               }
 
-              if (ownRecordString.length() > 0) {
+              if (!ownRecordString.empty()) {
                 message += "\n" + ownRecordString;
+              }
+
+              if (processedRecords.size() > 1 &&
+                  skvp.first != std::prev(processedRecords.end())->first) {
+                message += "\n";
               }
             }
           }

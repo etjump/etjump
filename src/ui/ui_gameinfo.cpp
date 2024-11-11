@@ -124,11 +124,11 @@ static void UI_LoadArenasFromFile(const int handle, char *filename) {
             va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
-      } else {
-        if (strstr(token.string, "wolfsp") || strstr(token.string, "wolflms") ||
-            strstr(token.string, "wolfmp") || strstr(token.string, "wolfsw")) {
-          uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 << ETJUMP_GAMETYPE);
-        }
+      }
+
+      if (strstr(token.string, "wolfsp") || strstr(token.string, "wolflms") ||
+          strstr(token.string, "wolfmp") || strstr(token.string, "wolfsw")) {
+        uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 << ETJUMP_GAMETYPE);
       }
     } else if (!Q_stricmp(token.string, "mapposition_x")) {
       if (!PC_Float_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].mappos[0])) {
@@ -139,6 +139,13 @@ static void UI_LoadArenasFromFile(const int handle, char *filename) {
       }
     } else if (!Q_stricmp(token.string, "mapposition_y")) {
       if (!PC_Float_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].mappos[1])) {
+        trap_Print(
+            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+        trap_PC_FreeSource(handle);
+        return;
+      }
+    } else if (!Q_stricmp(token.string, "author")) {
+      if (!PC_String_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].author)) {
         trap_Print(
             va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);

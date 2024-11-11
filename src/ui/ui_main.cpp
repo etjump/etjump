@@ -5032,13 +5032,11 @@ UI_MapCountByGameType
 ==================
 */
 static int UI_MapCountByGameType() {
-  int i, c, game;
-  c = 0;
-  game = ui_netGameType.integer;
+  int c = 0;
 
-  for (i = 0; i < uiInfo.mapCount; i++) {
+  for (int i = 0; i < uiInfo.mapCount; i++) {
     uiInfo.mapList[i].active = qfalse;
-    if (uiInfo.mapList[i].typeBits & (1 << game)) {
+    if (uiInfo.mapList[i].typeBits & 1 << ETJUMP_GAMETYPE) {
       c++;
       uiInfo.mapList[i].active = qtrue;
     }

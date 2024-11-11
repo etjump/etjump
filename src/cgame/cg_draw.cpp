@@ -2673,7 +2673,7 @@ static void CG_DrawSlick(void) {
   ETJump_AdjustPosition(&x);
 
   VectorCopy(cg.refdef.vieworg, start);
-  VectorMA(start, 8192, cg.refdef.viewaxis[0], end);
+  VectorMA(start, MAX_MAP_SIZE * 2, cg.refdef.viewaxis[0], end);
 
   CG_Trace(&trace, start, NULL, NULL, end, ps->clientNum, traceContents);
 
@@ -2701,7 +2701,7 @@ static void CG_DrawJumpDelay(void) {
 
   ETJump_AdjustPosition(&x);
   VectorCopy(cg.refdef.vieworg, start);
-  VectorMA(start, 8192, cg.refdef.viewaxis[0], end);
+  VectorMA(start, MAX_MAP_SIZE * 2, cg.refdef.viewaxis[0], end);
 
   CG_Trace(&trace, start, nullptr, nullptr, end, ps->clientNum, traceContents);
 

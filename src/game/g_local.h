@@ -1170,6 +1170,8 @@ struct gclient_s {
   int lastRevivePushTime;
 
   bool respawnFromLoad;
+
+  int numLagFrames; // for tracking high ping on timeruns to counter lag abuse
 };
 
 typedef struct {
