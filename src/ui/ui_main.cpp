@@ -995,6 +995,7 @@ void _UI_Shutdown(void) {
   trap_LAN_SaveCachedServers();
 
   ETJump::colorPicker = nullptr;
+  ETJump::syscallExt = nullptr;
 
   Shutdown_Display();
 }
