@@ -35,7 +35,6 @@
 #include <unordered_map>
 
 namespace ETJump {
-
 class SyscallExt {
 public:
 #ifdef CGAMEDLL

@@ -36,7 +36,6 @@ void SyscallExt::setupExtensions() {
   dll_com_trapGetValue = Q_atoi(value);
 
 #ifdef CGAMEDLL
-  Com_Printf("cgame extensions...\n");
   for (auto &ext : cgameExtensions) {
     setupExtensionTrap(value, ext.first, ext.second);
   }
