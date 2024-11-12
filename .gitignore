@@ -10,6 +10,7 @@
 *.opendb
 *.VC.db
 assets/ui/git_version.h
+assets/ui/changelog/*
 
 #################
 ## Eclipse
