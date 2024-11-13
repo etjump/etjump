@@ -5126,7 +5126,7 @@ void UI_RunMenuScript(const char **args) {
       uiInfo.formattedChangelog = ETJump::StringUtil::split(contents, "\n");
       uiInfo.formattedChangelog = ETJump::fitChangelogLinesToWidth(
           uiInfo.formattedChangelog,
-          static_cast<int>(item->window.rect.w - SCROLLBAR_SIZE - 6),
+          static_cast<int>(item->window.rect.w - SCROLLBAR_SIZE - 10),
           item->textscale, font);
 
       Menu_SetFeederSelection(nullptr, FEEDER_CHANGELOG, 0, nullptr);
