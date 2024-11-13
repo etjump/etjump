@@ -40,6 +40,9 @@ macro (parse_changelog CHANGELOG_CVARS CHANGELOG_CVAR_STR)
             string(REPLACE "__" "'" CLEANED_LINE ${CLEANED_LINE})
             string(REPLACE "`" "'" CLEANED_LINE ${CLEANED_LINE})
 
+            # replace carets with an escaped color string
+            string(REPLACE "^" "^^*" CLEANED_LINE ${CLEANED_LINE})
+
             # replace line starts from '*' to '-'
             string(REGEX REPLACE "^([ \t]*)\\*" "\\1-" CLEANED_LINE ${CLEANED_LINE})
 
