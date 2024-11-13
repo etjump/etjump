@@ -52,7 +52,7 @@ set(GAME_URL "${CMAKE_PROJECT_HOMEPAGE_URL}")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/git_version.h.in"
 		"${CMAKE_CURRENT_SOURCE_DIR}/assets/ui/git_version.h" @ONLY)
 
-parse_changelog(CHANGELOG_HEADERS CHANGELOG_CVARS CHANGELOG_CVAR_STR)
+parse_changelog(CHANGELOG_CVARS CHANGELOG_CVAR_STR)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/version_headers.h.in"
 		"${CMAKE_CURRENT_SOURCE_DIR}/assets/ui/changelog/version_headers.h" @ONLY)

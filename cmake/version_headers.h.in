@@ -1,5 +1,5 @@
-// string containing all the version headers in changelog, delimited by |
-#define CHANGELOG_HEADERS "@CHANGELOG_HEADERS@"
+// this is included in .cpp files so include a header guard
+#pragma once
 
 // string containing all the version "cvars" used by the dropdown menu, delimited by |
 // this also matches all the individual changelog files, excluding .txt extension

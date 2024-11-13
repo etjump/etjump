@@ -1,4 +1,4 @@
-macro (parse_changelog CHANGELOG_HEADERS CHANGELOG_CVARS CHANGELOG_CVAR_STR)
+macro (parse_changelog CHANGELOG_CVARS CHANGELOG_CVAR_STR)
     file(READ "${CMAKE_SOURCE_DIR}/changelog.md" CONTENTS)
 
     # split the contents into lines
@@ -20,7 +20,6 @@ macro (parse_changelog CHANGELOG_HEADERS CHANGELOG_CVARS CHANGELOG_CVAR_STR)
 
                 file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/assets/ui/changelog/${FILENAME}.txt" ${SECTION_NAME} "\n" ${SECTION_CONTENT})
 
-                string(APPEND "${CHANGELOG_HEADERS}" ${SECTION_NAME} "|")
                 string(APPEND "${CHANGELOG_CVARS}" ${FILENAME} "|")
                 string(APPEND "${CHANGELOG_CVAR_STR}" \"${SECTION_NAME}\" ";" \"${FILENAME}\" ";")
 
@@ -59,7 +58,6 @@ macro (parse_changelog CHANGELOG_HEADERS CHANGELOG_CVARS CHANGELOG_CVAR_STR)
 
         file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/assets/ui/changelog/${FILENAME}.txt" ${SECTION_NAME} "\n" ${SECTION_CONTENT})
 
-        string(APPEND "${CHANGELOG_HEADERS}" ${SECTION_NAME})
         string(APPEND "${CHANGELOG_CVARS}" ${FILENAME})
         string(APPEND "${CHANGELOG_CVAR_STR}" \"${SECTION_NAME}\" ";" \"${FILENAME}\")
 
