@@ -21,6 +21,7 @@ macro (parse_changelog CHANGELOG_CVARS CHANGELOG_CVAR_STR)
                 file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/assets/ui/changelog/${FILENAME}.txt" ${SECTION_NAME} "\n" ${SECTION_CONTENT})
 
                 string(APPEND "${CHANGELOG_CVARS}" ${FILENAME} "|")
+                string(REPLACE "ETJump " "" SECTION_NAME ${SECTION_NAME})
                 string(APPEND "${CHANGELOG_CVAR_STR}" \"${SECTION_NAME}\" ";" \"${FILENAME}\" ";")
 
                 # debug
@@ -62,6 +63,7 @@ macro (parse_changelog CHANGELOG_CVARS CHANGELOG_CVAR_STR)
         file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/assets/ui/changelog/${FILENAME}.txt" ${SECTION_NAME} "\n" ${SECTION_CONTENT})
 
         string(APPEND "${CHANGELOG_CVARS}" ${FILENAME})
+        string(REPLACE "ETJump " "" SECTION_NAME ${SECTION_NAME})
         string(APPEND "${CHANGELOG_CVAR_STR}" \"${SECTION_NAME}\" ";" \"${FILENAME}\")
 
         # debug
