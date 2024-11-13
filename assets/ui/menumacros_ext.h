@@ -323,66 +323,6 @@
     }                                                                          \
   }
 
-// dropdown menu with left alignment
-#define COMBOLEFT( COMBOLEFT_X, COMBOLEFT_Y, COMBOLEFT_W, COMBOLEFT_H,         \
-                   COMBOLEFT_RECT_W, COMBOLEFT_MAX_ITEMS, COMBOLEFT_REVERSED,  \
-                   COMBOLEFT_TEXT, COMBOLEFT_TEXT_SCALE,                       \
-                   COMBOLEFT_TEXT_ALIGN_Y, COMBOLEFT_CVAR, COMBOLEFT_CVARLIST, \
-                   COMBOLEFT_ACTION, COMBOLEFT_TOOLTIP )                       \
-                                                                               \
-  itemDef {                                                                    \
-    name                "comboback"##COMBOLEFT_TEXT                            \
-    group               GROUP_NAME                                             \
-    rect                $evalfloat(COMBOLEFT_X) $evalfloat(COMBOLEFT_Y)        \
-                        $evalfloat(COMBOLEFT_W) $evalfloat(COMBOLEFT_H)        \
-    style               WINDOW_STYLE_FILLED                                    \
-    backcolor           .3 .3 .3 .4                                            \
-    visible             1                                                      \
-    decoration                                                                 \
-  }                                                                            \
-                                                                               \
-  itemDef {                                                                    \
-    name                "combo"##COMBOLEFT_TEXT                                \
-    group               GROUP_NAME                                             \
-    rect                $evalfloat(COMBOLEFT_X) $evalfloat(COMBOLEFT_Y)        \
-                        $evalfloat(COMBOLEFT_W) $evalfloat(COMBOLEFT_H)        \
-    type                ITEM_TYPE_COMBO                                        \
-    text                COMBOLEFT_TEXT                                         \
-    textfont            UI_FONT_COURBD_21                                      \
-    textstyle           ITEM_TEXTSTYLE_SHADOWED                                \
-    textscale           COMBOLEFT_TEXT_SCALE                                   \
-    textalign           ITEM_ALIGN_RIGHT                                       \
-    textaligny          COMBOLEFT_TEXT_ALIGN_Y                                 \
-    backcolor           .3 .3 .3 .4                                            \
-    forecolor           .6 .6 .6 1                                             \
-    cvar                COMBOLEFT_CVAR                                         \
-    COMBOLEFT_CVARLIST                                                         \
-    visible             1                                                      \
-    bordercolor         .1 .1 .1 .5                                            \
-    tooltip             COMBOLEFT_TOOLTIP                                      \
-    combomaxitems       $evalfloat(COMBOLEFT_MAX_ITEMS)                        \
-    comboreversed       COMBOLEFT_REVERSED                                     \
-                                                                               \
-    mouseEnter {                                                               \
-      setitemcolor "combo"##COMBOLEFT_TEXT forecolor .9 .9 .9 1 ;              \
-      setitemcolor "combo"##COMBOLEFT_TEXT backcolor .5 .5 .5 .4 ;             \
-    }                                                                          \
-                                                                               \
-    mouseExit {                                                                \
-      setitemcolor "combo"##COMBOLEFT_TEXT forecolor .6 .6 .6 1 ;              \
-      setitemcolor "combo"##COMBOLEFT_TEXT backcolor .3 .3 .3 .4 ;             \
-    }                                                                          \
-                                                                               \
-    accept {                                                                   \
-      play "sound/menu/filter.wav" ;                                           \
-      COMBOLEFT_ACTION                                                         \
-    }                                                                          \
-                                                                               \
-    action {                                                                   \
-      play "sound/menu/filter.wav" ;                                           \
-    }                                                                          \
-  }
-
 // a slider that adjusts HSV/RGB/A values, used in color picker
 #define SLIDER_COLOR( SLIDER_X, SLIDER_Y, SLIDER_W, SLIDER_H, SLIDER_TEXT,     \
                       SLIDER_TEXT_SCALE, SLIDER_TEXT_ALIGN_Y,                  \
