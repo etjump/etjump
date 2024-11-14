@@ -93,6 +93,12 @@ void CustomMapVotes::loadCustomvotes(const bool init) {
 
     customMapVotes_[curr].type = sanitize(customMapVotes_[curr].type, true);
 
+    if (customMapVotes_[curr].type.empty()) {
+      customMapVotes_.pop_back();
+      logger->error("Failed to parse custom vote - 'name' is empty");
+      continue;
+    }
+
     if (!JsonUtils::parseValue(customMapVotes_[curr].callvoteText,
                                list["callvote_text"], &errors,
                                "callvote_text")) {
@@ -102,6 +108,12 @@ void CustomMapVotes::loadCustomvotes(const bool init) {
 
     customMapVotes_[curr].callvoteText =
         sanitize(customMapVotes_[curr].callvoteText);
+
+    if (customMapVotes_[curr].callvoteText.empty()) {
+      customMapVotes_.pop_back();
+      logger->error("Failed to parse custom vote - 'callvote_text' is empty");
+      continue;
+    }
 
     std::set<std::string> uniqueMapsOnServer{};
     std::set<std::string> uniqueMapsOther{};
