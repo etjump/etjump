@@ -498,7 +498,7 @@ qboolean CG_ServerCommandExt(const char *cmd) {
     if (etj_highlight.integer &
         static_cast<int>(ETJump::ChatHighlightFlags::HIGHLIGHT_FLASH)) {
       ETJump::SyscallExt::trap_SysFlashWindowETLegacy(
-          ETJump::SyscallExt::FlashWindowState::FLASH_UNTIL_FOCUS);
+          ETJump::SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
     }
 
     return qtrue;

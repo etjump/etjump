@@ -2213,7 +2213,7 @@ static const char *addChatModifications(char *text, const int clientNum,
     if (etj_highlight.integer &
         static_cast<int>(ChatHighlightFlags::HIGHLIGHT_FLASH)) {
       SyscallExt::trap_SysFlashWindowETLegacy(
-          SyscallExt::FlashWindowState::FLASH_UNTIL_FOCUS);
+          SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
     }
   }
 
