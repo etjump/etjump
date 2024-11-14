@@ -18,7 +18,10 @@ USER INTERFACE MAIN
 #include "../cgame/etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_filesystem.h"
+#include "../game/etj_file.h"
 #include "../game/etj_syscall_ext_shared.h"
+
+#include "../../assets/ui/changelog/version_headers.h"
 
 // NERVE - SMF
 #define AXIS_TEAM 0
@@ -901,6 +904,90 @@ static void drawMapname(rectDef_t &rect, float scale, vec4_t color,
   textRect.y += rect.y;
   Text_Paint(textRect.x, textRect.y, scale, color, mapname.c_str(), 0, 0,
              textStyle);
+}
+
+static void parseChangelogs() {
+  // the "cvar" names are the filenames, excluding .txt extension
+  const std::vector<std::string> files =
+      StringUtil::split(CHANGELOG_CVARS, "|");
+  const std::string path = "ui/changelog/";
+
+  for (const auto &file : files) {
+    try {
+      File fIn(path + file + ".txt");
+      const auto contents = fIn.read();
+      uiInfo.changelogs[file] = std::string(contents.begin(), contents.end());
+    } catch (const File::FileNotFoundException &) {
+      Com_Printf(S_COLOR_RED
+                 "%s: failed to open changelog '%s.txt' for reading.\n",
+                 __func__, file.c_str());
+    }
+  }
+}
+
+// formats the current changelog to a give window width, preserving indentation
+// this does not handle color codes, there's no reason we ever
+// should have color codes in the changelog
+std::vector<std::string>
+fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
+                         const float scale, fontInfo_t *font) {
+  std::vector<std::string> fmtLines;
+
+  for (auto &line : lines) {
+    int width = 0;
+    size_t indent = 0;
+    size_t lastWhitespace = 0;
+
+    // do we have to split this line at all?
+    if (Text_Width_Ext(line.c_str(), scale, 0, font) <= maxW) {
+      fmtLines.emplace_back(line);
+      continue;
+    }
+
+    // find first non-dash, non-whitespace character to get indentation
+    auto textStart = std::find_if(line.begin(), line.end(), [](const char c) {
+      return c != '-' && !std::isspace(c);
+    });
+
+    if (textStart != line.end()) {
+      indent = std::distance(line.begin(), textStart);
+    }
+
+    std::string tmp;
+    tmp.reserve(line.length());
+
+    for (size_t i = 0; i < line.length(); i++) {
+      tmp += line[i];
+
+      if (std::isspace(line[i])) {
+        lastWhitespace = i;
+      }
+
+      width = Text_Width_Ext(tmp.c_str(), scale, 0, font);
+
+      if (width > maxW) {
+        if (lastWhitespace != 0) {
+          fmtLines.emplace_back(tmp.substr(0, lastWhitespace));
+          line.erase(0, lastWhitespace + 1); // consume the whitespace too
+          lastWhitespace = 0;
+        } else {
+          // this should never happen, but it protects against an infinite loop
+          fmtLines.emplace_back(tmp);
+          line.erase(0, i);
+        }
+
+        width = 0;
+        i = -1; // so we start from 0 again after i++
+
+        tmp.clear();
+        line.insert(0, indent, ' ');
+      }
+    }
+
+    fmtLines.emplace_back(line);
+  }
+
+  return fmtLines;
 }
 } // namespace ETJump
 
@@ -5027,6 +5114,41 @@ void UI_RunMenuScript(const char **args) {
       return;
     }
 
+    if (!Q_stricmp(name, "setActiveChangelog")) {
+      if (ui_currentChangelog.string[0] == '\0') {
+        trap_Cvar_Set("ui_currentChangelog",
+                      va(std::prev(uiInfo.changelogs.end())->first.c_str()));
+      }
+
+      trap_Cvar_Update(&ui_currentChangelog);
+
+      // invalidate cached formatting
+      uiInfo.formattedChangelog.clear();
+
+      const char *itemName;
+      String_Parse(args, &itemName);
+      const itemDef_t *item = Menu_FindItemByName(Menu_GetFocused(), itemName);
+
+      if (!item) {
+        Com_Printf(S_COLOR_RED "%s: failed to find changelog item to parse!\n",
+                   __func__);
+        return;
+      }
+
+      fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[item->font];
+      std::string contents = uiInfo.changelogs[ui_currentChangelog.string];
+
+      uiInfo.formattedChangelog = ETJump::StringUtil::split(contents, "\n");
+      uiInfo.formattedChangelog = ETJump::fitChangelogLinesToWidth(
+          uiInfo.formattedChangelog,
+          static_cast<int>(item->window.rect.w - SCROLLBAR_SIZE - 10),
+          item->textscale, font);
+
+      Menu_SetFeederSelection(nullptr, FEEDER_CHANGELOG, 0, nullptr);
+
+      return;
+    }
+
     Com_Printf("^3WARNING: unknown UI script %s\n", name);
   }
 }
@@ -5789,55 +5911,65 @@ static void UI_BuildServerStatus(qboolean force) {
 UI_FeederCount
 ==================
 */
-static int UI_FeederCount(float feederID) {
-  if (feederID == FEEDER_HEADS) {
-    return uiInfo.characterCount;
-  } else if (feederID == FEEDER_Q3HEADS) {
-    return uiInfo.q3HeadCount;
-  } else if (feederID == FEEDER_CINEMATICS) {
-    return uiInfo.movieCount;
-  } else if (feederID == FEEDER_MAPS || feederID == FEEDER_ALLMAPS) {
-    return UI_MapCountByGameType();
-  } else if (feederID == FEEDER_GLINFO) {
-    return uiInfo.numGlInfoLines;
-  } else if (feederID == FEEDER_PROFILES) {
-    return uiInfo.profileCount;
-  } else if (feederID == FEEDER_SERVERS) {
-    return uiInfo.serverStatus.numDisplayServers;
-  } else if (feederID == FEEDER_SERVERSTATUS) {
-    return uiInfo.serverStatusInfo.numLines;
-  } else if (feederID == FEEDER_FINDPLAYER) {
-    return uiInfo.numFoundPlayerServers;
-  } else if (feederID == FEEDER_PLAYER_LIST) {
-    if (uiInfo.uiDC.realTime > uiInfo.playerRefresh) {
-      uiInfo.playerRefresh = uiInfo.uiDC.realTime + 3000;
-      UI_BuildPlayerList();
-    }
-    return uiInfo.playerCount;
-  } else if (feederID == FEEDER_TEAM_LIST) {
-    if (uiInfo.uiDC.realTime > uiInfo.playerRefresh) {
-      uiInfo.playerRefresh = uiInfo.uiDC.realTime + 3000;
-      UI_BuildPlayerList();
-    }
-    return uiInfo.myTeamCount;
-  } else if (feederID == FEEDER_MODS) {
-    return uiInfo.modCount;
-  } else if (feederID == FEEDER_DEMOS) {
-    return static_cast<int>(uiInfo.demoObjects.size());
-  } else if (feederID == FEEDER_CUSTOMVOTES) {
-    if (static_cast<int>(uiInfo.customVotes.size()) != uiInfo.numCustomvotes) {
-      return 1;
-    } else {
+static int UI_FeederCount(const float feederID) {
+  // why tf is this a float...
+  switch (static_cast<int>(feederID)) {
+    case FEEDER_HEADS:
+      return uiInfo.characterCount;
+    case FEEDER_Q3HEADS:
+      return uiInfo.q3HeadCount;
+    case FEEDER_CINEMATICS:
+      return uiInfo.movieCount;
+    case FEEDER_MAPS:
+    case FEEDER_ALLMAPS:
+      return UI_MapCountByGameType();
+    case FEEDER_GLINFO:
+      return uiInfo.numGlInfoLines;
+    case FEEDER_PROFILES:
+      return uiInfo.profileCount;
+    case FEEDER_SERVERS:
+      return uiInfo.serverStatus.numDisplayServers;
+    case FEEDER_SERVERSTATUS:
+      return uiInfo.serverStatusInfo.numLines;
+    case FEEDER_FINDPLAYER:
+      return uiInfo.numFoundPlayerServers;
+    case FEEDER_PLAYER_LIST:
+      if (uiInfo.uiDC.realTime > uiInfo.playerRefresh) {
+        uiInfo.playerRefresh = uiInfo.uiDC.realTime + 3000;
+        UI_BuildPlayerList();
+      }
+
+      return uiInfo.playerCount;
+    case FEEDER_TEAM_LIST:
+      if (uiInfo.uiDC.realTime > uiInfo.playerRefresh) {
+        uiInfo.playerRefresh = uiInfo.uiDC.realTime + 3000;
+        UI_BuildPlayerList();
+      }
+
+      return uiInfo.myTeamCount;
+    case FEEDER_MODS:
+      return uiInfo.modCount;
+    case FEEDER_DEMOS:
+      return static_cast<int>(uiInfo.demoObjects.size());
+    case FEEDER_CUSTOMVOTES:
+      // for displaying "Loading..." while we're still receiving custom votes
+      if (static_cast<int>(uiInfo.customVotes.size()) !=
+          uiInfo.numCustomvotes) {
+        return 1;
+      }
+
       return uiInfo.numCustomvotes;
-    }
-  } else if (feederID == FEEDER_CUSTOMVOTES_MAPS_ONSERVER) {
-    return static_cast<int>(
-        uiInfo.customVotes[uiInfo.customvoteIndex].mapsOnServer.size());
-  } else if (feederID == FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE) {
-    return static_cast<int>(
-        uiInfo.customVotes[uiInfo.customvoteIndex].otherMaps.size());
+    case FEEDER_CUSTOMVOTES_MAPS_ONSERVER:
+      return static_cast<int>(
+          uiInfo.customVotes[uiInfo.customvoteIndex].mapsOnServer.size());
+    case FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE:
+      return static_cast<int>(
+          uiInfo.customVotes[uiInfo.customvoteIndex].otherMaps.size());
+    case FEEDER_CHANGELOG:
+      return static_cast<int>(uiInfo.formattedChangelog.size());
+    default:
+      return 0;
   }
-  return 0;
 }
 
 static const char *UI_SelectedMap(int index, int *actual) {
@@ -6184,6 +6316,8 @@ const char *UI_FeederItemText(float feederID, int index, int column,
           .otherMaps[index]
           .c_str();
     }
+  } else if (feederID == FEEDER_CHANGELOG) {
+    return uiInfo.formattedChangelog[index].c_str();
   }
   // -NERVE - SMF
   return "";
@@ -6309,6 +6443,8 @@ void UI_FeederSelection(float feederID, int index) {
     uiInfo.customvoteMapsOnServerIndex = index;
   } else if (feederID == FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE) {
     uiInfo.customvoteOtherMapsIndex = index;
+  } else if (feederID == FEEDER_CHANGELOG) {
+    uiInfo.changelogLineIndex = index;
   }
 }
 
@@ -7062,6 +7198,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
 
   ETJump::initColorPicker();
   ETJump::initExtensionSystem();
+  ETJump::parseChangelogs();
 
   Init_Display(&uiInfo.uiDC);
 
@@ -8108,6 +8245,8 @@ vmCvar_t ui_voteCustomRTV;
 
 vmCvar_t etj_menuSensitivity;
 
+vmCvar_t ui_currentChangelog;
+
 cvarTable_t cvarTable[] = {
 
     {&ui_glCustom, "ui_glCustom", "4",
@@ -8340,6 +8479,8 @@ cvarTable_t cvarTable[] = {
     {&ui_voteCustomRTV, "ui_voteCustomRTV", "0", CVAR_ARCHIVE},
 
     {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
+
+    {&ui_currentChangelog, "ui_currentChangelog", "", CVAR_TEMP | CVAR_ROM},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

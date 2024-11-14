@@ -672,6 +672,11 @@ void Item_SetScreenCoords(itemDef_t *item, float x, float y) {
   item->window.rect.w = item->window.rectClient.w;
   item->window.rect.h = item->window.rectClient.h;
 
+  if (item->type == ITEM_TYPE_COMBO) {
+    item->comboData.rect.x += x;
+    item->comboData.rect.y += y;
+  }
+
   // FIXME: do the proper thing for the right borders here?
   /*if( item->window.border != 0 ) {
       item->window.rect.x += item->window.borderSize;
@@ -3023,11 +3028,12 @@ static constexpr int8_t DIRECTION_DOWN = -1;
 static constexpr uint8_t SCROLL_SMALL = 1;
 static constexpr uint8_t SCROLL_BIG = 3;
 
-static float getComboThumbPosition(itemDef_t *item, const rectDef_t *rect) {
+static float getComboThumbPosition(const itemDef_t *item,
+                                   const rectDef_t *rect) {
   float pos;
-  const float size = item->comboData.height - (SCROLLBAR_SIZE_COMBO * 2) - 2;
-  const float posMin = rect->y + SCROLLBAR_SIZE_COMBO;
-  const float posMax = rect->y + size;
+  const float size = item->comboData.height - SCROLLBAR_SIZE_COMBO * 2 - 2;
+  const float posMin = rect->y + item->comboData.rect.h + SCROLLBAR_SIZE_COMBO;
+  const float posMax = rect->y + rect->h + size;
 
   // we're dragging the thumb, use cursor position for smooth dragging
   if (itemCapture == item && item->window.flags & WINDOW_LB_THUMB) {
@@ -3149,17 +3155,16 @@ static void comboStartCapture(itemDef_t *item, int key, bool autoScroll) {
 int comboMouseOverScrollbar(itemDef_t *item, float x, float y) {
   rectDef_t r;
 
-  // FIXME: - 6 only applies to etjump settings menu
-  r.x = item->comboData.rect.x + item->comboData.rect.w - SCROLLBAR_SIZE_COMBO -
-        6;
-  r.y = item->comboData.rect.y;
+  r.x = item->comboData.rect.x + item->comboData.rect.w - SCROLLBAR_SIZE_COMBO;
+  r.y = item->comboData.rect.y + item->comboData.rect.h;
   r.h = r.w = SCROLLBAR_SIZE_COMBO;
 
   if (Rect_ContainsPoint(&r, x, y)) {
     return WINDOW_LB_LEFTARROW;
   }
 
-  r.y = item->comboData.rect.y + item->comboData.height - SCROLLBAR_SIZE_COMBO;
+  r.y = item->comboData.rect.y + item->comboData.rect.h +
+        item->comboData.height - SCROLLBAR_SIZE_COMBO;
   if (Rect_ContainsPoint(&r, x, y)) {
     return WINDOW_LB_RIGHTARROW;
   }
@@ -3177,14 +3182,15 @@ int comboMouseOverScrollbar(itemDef_t *item, float x, float y) {
     return WINDOW_LB_THUMB;
   }
 
-  r.y = item->comboData.rect.y + SCROLLBAR_SIZE_COMBO;
+  r.y = item->comboData.rect.y + item->comboData.rect.h + SCROLLBAR_SIZE_COMBO;
   r.h = thumbstart - r.y;
   if (Rect_ContainsPoint(&r, x, y)) {
     return WINDOW_LB_PGUP;
   }
 
   r.y = thumbstart + SCROLLBAR_SIZE_COMBO;
-  r.h = item->comboData.rect.y + item->comboData.height - SCROLLBAR_SIZE_COMBO;
+  r.h = item->comboData.rect.y + item->comboData.rect.h +
+        item->comboData.height - SCROLLBAR_SIZE_COMBO;
   if (Rect_ContainsPoint(&r, x, y)) {
     return WINDOW_LB_PGDN;
   }
@@ -3192,7 +3198,7 @@ int comboMouseOverScrollbar(itemDef_t *item, float x, float y) {
   // hack hack
   // TODO: what even is this? the default listbox does this too,
   //  but does nothing with the value...
-  r.y = item->comboData.rect.y;
+  r.y = item->comboData.rect.y + item->comboData.rect.h;
   r.h = item->comboData.rect.h;
   if (Rect_ContainsPoint(&r, x, y)) {
     return WINDOW_LB_SOMEWHERE;
@@ -5551,8 +5557,8 @@ void Item_Image_Paint(itemDef_t *item) {
 
 namespace ETJump {
 static void comboDrawScrollbar(itemDef_t *item, const rectDef_t *rect) {
-  const float x = rect->x + rect->w - SCROLLBAR_SIZE_COMBO - 1 - 6;
-  float y = rect->y;
+  const float x = rect->x + rect->w - SCROLLBAR_SIZE_COMBO - 1;
+  float y = rect->y + rect->h;
 
   DC->drawHandlePic(x, y, SCROLLBAR_SIZE_COMBO, SCROLLBAR_SIZE_COMBO,
                     DC->Assets.scrollBarArrowUp);
@@ -5564,20 +5570,20 @@ static void comboDrawScrollbar(itemDef_t *item, const rectDef_t *rect) {
   DC->drawHandlePic(x, y, SCROLLBAR_SIZE_COMBO, SCROLLBAR_SIZE_COMBO,
                     DC->Assets.scrollBarArrowDown);
 
-  float thumb = getComboThumbPosition(item, rect);
+  const float thumb = getComboThumbPosition(item, rect);
   DC->drawHandlePic(x, thumb, SCROLLBAR_SIZE_COMBO, SCROLLBAR_SIZE_COMBO,
                     DC->Assets.scrollBarThumb);
 }
 
 static void comboPaint(itemDef_t *item) {
-  rectDef_t rect = item->window.rect;
+  rectDef_t comboRect = item->comboData.rect;
   rectDef_t selector{};
 
   if (item->text) {
     Item_Text_Paint(item);
   }
 
-  auto multiPtr = static_cast<const multiDef_t *>(item->typeData);
+  const auto multiPtr = static_cast<const multiDef_t *>(item->typeData);
 
   // somebody forgot to define cvar list
   if (!multiPtr) {
@@ -5596,18 +5602,15 @@ static void comboPaint(itemDef_t *item) {
   }
 
   // main rect
-  // FIXME: + 6 is only correct in etjump settings menu
-  rect.x = rect.x + (rect.w * 0.5f) + 6;
-  rect.w = (rect.w * 0.5f) - 6;
-
-  DC->drawRect(rect.x, rect.y, rect.w - rect.h, rect.h, item->window.borderSize,
-               item->window.borderColor);
+  comboRect.x += comboRect.w * 0.5f + 8;
+  comboRect.w = comboRect.w * 0.5f - 8;
+  DC->drawRect(comboRect.x, comboRect.y, comboRect.w - SCROLLBAR_SIZE_COMBO,
+               comboRect.h, item->window.borderSize, item->window.borderColor);
 
   // selector
-  // FIXME: - 6 is only correct in etjump settings menu
-  selector.x = (rect.x + rect.w) - rect.h - 6;
-  selector.y = rect.y;
-  selector.h = rect.h;
+  selector.x = comboRect.x + comboRect.w - SCROLLBAR_SIZE_COMBO;
+  selector.y = comboRect.y;
+  selector.h = comboRect.h;
   selector.w = selector.h;
 
   DC->drawRect(selector.x, selector.y, selector.w, selector.h,
@@ -5618,7 +5621,7 @@ static void comboPaint(itemDef_t *item) {
   const float borderOfs = item->window.borderSize * 2;
   const auto textWidth =
       static_cast<float>(DC->textWidth(textFull.c_str(), item->textscale, 0));
-  const float maxWidth = rect.w - 6 - selector.w - (borderOfs * 2);
+  const float maxWidth = comboRect.w - selector.w - borderOfs * 2;
 
   if (textWidth > maxWidth) {
     textScroll_t *ts = &item->textScroll;
@@ -5633,7 +5636,7 @@ static void comboPaint(itemDef_t *item) {
       Q_strncpyz(ts->scrollText, textFull.c_str(), sizeof(ts->scrollText));
     }
 
-    float textX = rect.x + borderOfs + ts->x;
+    float textX = comboRect.x + borderOfs + ts->x;
     float textXOffset = 0;
 
     fontInfo_t *font = DC->getActiveFont();
@@ -5688,12 +5691,12 @@ static void comboPaint(itemDef_t *item) {
     //  but this ensures the scroll continues to roughly
     //  to the start of the text field
     if (ts->scrolling && textPartW < maxWidth &&
-        textX + textXOffset <= rect.x + borderOfs + 1) {
+        textX + textXOffset <= comboRect.x + borderOfs + 1) {
       ts->scrollEndTime = DC->realTime + 1000;
       ts->scrolling = false;
     }
   } else {
-    DC->drawText(rect.x + borderOfs, item->textRect.y, item->textscale,
+    DC->drawText(comboRect.x + borderOfs, item->textRect.y, item->textscale,
                  item->window.foreColor, textFull.c_str(), 0, 0,
                  item->textStyle);
   }
@@ -5712,8 +5715,6 @@ static void comboPaint(itemDef_t *item) {
     return;
   }
 
-  item->comboData.rect = rect;
-  item->comboData.rect.y += item->comboData.rect.h;
   item->comboData.scrollbar = multiPtr->count > item->comboData.maxItems;
   const uint8_t maxItems =
       item->comboData.scrollbar ? item->comboData.maxItems : multiPtr->count;
@@ -5728,40 +5729,37 @@ static void comboPaint(itemDef_t *item) {
 
   // we can't use forecolor here because if mouse is over an item,
   // the forecolor will be changed to highlight the item
-  vec4_t defaultColor = {0.6f, 0.6f, 0.6f, 1.0f};
-  vec4_t backColor = {0.1f, 0.1f, 0.1f, 0.9f};
+  constexpr vec4_t defaultColor = {0.6f, 0.6f, 0.6f, 1.0f};
+  constexpr vec4_t backColor = {0.1f, 0.1f, 0.1f, 0.9f};
 
-  // FIXME: - 6 is only correct in etjump settings menu
-  DC->fillRect(item->comboData.rect.x, item->comboData.rect.y,
-               item->comboData.rect.w - 6, item->comboData.height, backColor);
-  DC->drawRect(item->comboData.rect.x, item->comboData.rect.y,
-               item->comboData.rect.w - 6, item->comboData.height,
-               item->window.borderSize, item->window.borderColor);
+  DC->fillRect(comboRect.x, comboRect.y + comboRect.h, comboRect.w,
+               item->comboData.height, backColor);
+  DC->drawRect(comboRect.x, comboRect.y + comboRect.h, comboRect.w,
+               item->comboData.height, item->window.borderSize,
+               item->window.borderColor);
 
   if (item->comboData.scrollbar) {
-    comboDrawScrollbar(item, &item->comboData.rect);
+    comboDrawScrollbar(item, &comboRect);
   }
 
   // current selection rect
-  // FIXME: - 6 is only correct in etjump settings menu
-  rectDef_t textRect = {item->comboData.rect.x, 0.0f,
-                        item->comboData.rect.w - 6 - SCROLLBAR_SIZE_COMBO - 2,
-                        item->comboData.rect.h};
-  vec4_t color;
+  rectDef_t textRect = {comboRect.x, 0.0f,
+                        comboRect.w - SCROLLBAR_SIZE_COMBO - 2, comboRect.h};
   item->cursorPos = -1;
   const int startPos = item->comboData.startPos;
   const bool isBitflag = item->comboData.bitflag;
 
   for (int i = 0; i < maxItems; i++) {
+    vec4_t color;
+
     if (reversed) {
       // + 1 to offset from rect bottom edge to top edge
-      textRect.y =
-          item->textRect.y -
-          (static_cast<float>(maxItems - i + 1) * item->comboData.rect.h) +
-          borderOfs;
+      textRect.y = item->textRect.y -
+                   static_cast<float>(maxItems - i + 1) * comboRect.h +
+                   borderOfs;
     } else {
-      textRect.y = item->textRect.y +
-                   (static_cast<float>(i) * item->comboData.rect.h) + borderOfs;
+      textRect.y =
+          item->textRect.y + static_cast<float>(i) * comboRect.h + borderOfs;
     }
 
     if (Rect_ContainsPoint(&textRect, static_cast<float>(DC->cursorx),
@@ -5792,19 +5790,17 @@ static void comboPaint(itemDef_t *item) {
     if (isBitflag) {
       if (static_cast<int>(multiPtr->cvarValue[i + startPos]) &
           static_cast<int>(value)) {
-        DC->drawHandlePic(item->comboData.rect.x + borderOfs,
-                          posY - item->comboData.rect.h +
-                              (item->window.borderSize * 2),
-                          item->comboData.rect.h - 1,
-                          item->comboData.rect.h - 1, DC->Assets.checkboxCheck);
+        DC->drawHandlePic(comboRect.x + borderOfs,
+                          posY - comboRect.h + (item->window.borderSize * 2),
+                          comboRect.h - 1, comboRect.h - 1,
+                          DC->Assets.checkboxCheck);
       } else {
-        DC->drawHandlePic(
-            item->comboData.rect.x + borderOfs,
-            posY - item->comboData.rect.h + (item->window.borderSize * 2),
-            item->comboData.rect.h - 1, item->comboData.rect.h - 1,
-            DC->Assets.checkboxCheckNot);
+        DC->drawHandlePic(comboRect.x + borderOfs,
+                          posY - comboRect.h + (item->window.borderSize * 2),
+                          comboRect.h - 1, comboRect.h - 1,
+                          DC->Assets.checkboxCheckNot);
       }
-      iconOfs = item->comboData.rect.h;
+      iconOfs = comboRect.h;
     }
 
     std::string cvarText;
@@ -5816,9 +5812,8 @@ static void comboPaint(itemDef_t *item) {
                     multiPtr->cvarList[i + startPos]);
     }
 
-    DC->drawText(item->comboData.rect.x + borderOfs + iconOfs, posY,
-                 item->textscale, color, cvarText.c_str(), 0, 0,
-                 item->textStyle);
+    DC->drawText(comboRect.x + borderOfs + iconOfs, posY, item->textscale,
+                 color, cvarText.c_str(), 0, 0, item->textStyle);
   }
 }
 } // namespace ETJump
@@ -6344,12 +6339,7 @@ void Item_Paint(itemDef_t *item) {
     case ITEM_TYPE_LISTBOX:
       Item_ListBox_Paint(item);
       break;
-      //		case ITEM_TYPE_IMAGE:
-      //			Item_Image_Paint(item);
-      //			break;
     case ITEM_TYPE_MENUMODEL:
-      Item_Model_Paint(item);
-      break;
     case ITEM_TYPE_MODEL:
       Item_Model_Paint(item);
       break;
@@ -7787,6 +7777,10 @@ qboolean ItemParse_voteFlag(itemDef_t *item, int handle) {
   return (PC_Int_Parse(handle, &item->voteFlag));
 }
 
+qboolean ItemParse_combo_rect(itemDef_t *item, int handle) {
+  return (PC_Rect_Parse(handle, &item->comboData.rect));
+}
+
 qboolean ItemParse_combo_maxItems(itemDef_t *item, int handle) {
   return PC_Int_Parse(handle, &item->comboData.maxItems);
 }
@@ -7936,6 +7930,7 @@ keywordHash_t itemParseKeywords[] = {
     {"wrapped", ItemParse_wrapped, nullptr},
     {"yOffset", ItemParse_yOffset, nullptr},
 
+    {"comboRect", ItemParse_combo_rect, nullptr},
     {"comboMaxItems", ItemParse_combo_maxItems, nullptr},
     {"comboBitflag", ItemParse_combo_bitflag, nullptr},
     {"comboReversed", ItemParse_combo_reversed, nullptr},

@@ -94,8 +94,8 @@
 * added `etj_drawPlayerBBox` to draw bounding boxes of players [#1372](https://github.com/etjump/etjump/pull/1372)
   * `etj_drawPlayerBBox` - bitflag value to draw bboxes
     * `1` = draw self
-    * `1` = draw others
-    * `1` = draw fireteam members
+    * `2` = draw others
+    * `4` = draw fireteam members
   * `etj_playerBBoxBottomOnly` - bitflag to draw only bottom of bbox instead of full box
     * same flags as `etj_drawPlayerBBox`
   * `etj_playerBBoxColorSelf/Other/Fireteam` - sets the color of the bbox
@@ -901,8 +901,8 @@
   * voting can now be correctly disabled by setting all `vote_allow_` cvars to 0
   * added `g_spectatorVote` to control spectator voting
     * __1__ spectators can cast votes
-	* __2__ spectators can also call votes
-	* only spectators who cast votes are count towards `vote_percent` to prevent votes never passing on servers with multiple afk spectators
+    * __2__ spectators can also call votes
+    * only spectators who cast votes are count towards `vote_percent` to prevent votes never passing on servers with multiple afk spectators
   * removed in-game vote -> misc menu and replaced it with map restart & random map buttons
   * various string formatting and spelling fixes
   * `callvote map` now lists matched maps if more than one match was found
@@ -918,14 +918,14 @@
 * added CHS 53 to display Z angle of a plane
 * added `etj_extraTrace` cvar to toggle tracing of playerclips on various detectors
   * takes bitmask value
-  * __1__ = OB detector
-  * __2__ = slick detector
-  * __4__ = no jump delay detector
-  * __8__ = CHS 10-11
-  * __16__ = CHS 12
-  * __32__ = CHS 13-15
-  * __64__ = CHS 16
-  * __128__ = CHS 53
+    * __1__ = OB detector
+    * __2__ = slick detector
+    * __4__ = no jump delay detector
+    * __8__ = CHS 10-11
+    * __16__ = CHS 12
+    * __32__ = CHS 13-15
+    * __64__ = CHS 16
+    * __128__ = CHS 53
   * the list above can be checked in game with `extraTrace` console command
 * character strings now always draw at least 1px high/wide characters even if scaled to very low size
 * added spawnflag __1__ `SILENT` to `target/trigger_savereset` to omit the print it makes
@@ -1013,8 +1013,8 @@
   * `damageplayer N`, inflicts __N__ hp damage to the activator
   * `killplayer`
 * added new keys for `func_invisible_user` entity:
-  - `noise <sound file>` sets sound file to play when activated
-  - `volume <0-255>` controls sound volume
+  * `noise <sound file>` sets sound file to play when activated
+  * `volume <0-255>` controls sound volume
 * fixed `func_static` spawnflag __2__ (PAIN), direct activation of entities don't crash the game anymore 
 * fixed `target_speaker` spawnflag **8** (ACTIVATOR) didn't play sound to the activator
 * added `etj_OBX/Y` to move OB detector
@@ -1213,13 +1213,13 @@
 * Added spawnflag 8 to `target_startTimer` to reset the runtimer if pmove is not fixed
 * Added spawnflag 16 to `target_startTimer` to disable use of save slots and backups
 * Portal gun changes:
-  - Both portal gun fire rates are now equal.
-  - Lowered the minimum allowed distance between the portal gun portals.
-  - Changed other players' portal color 1 to green to make it more distinct on light surfaces.
+  * Both portal gun fire rates are now equal.
+  * Lowered the minimum allowed distance between the portal gun portals.
+  * Changed other players' portal color 1 to green to make it more distinct on light surfaces.
 * Enhanced vote UX
-  - Spectators can now see the y/n count.
-  - Selected y/n is highlighted.
-  - Revoting is now possible. Players can change their vote 3 times 10 seconds after the vote.
+  * Spectators can now see the y/n count.
+  * Selected y/n is highlighted.
+  * Revoting is now possible. Players can change their vote 3 times 10 seconds after the vote.
 * Removed unused cvars.
 * Vsay now plays the same voice for every player.
 * Fixed a click event issue in the widescreen UI.
@@ -1233,19 +1233,19 @@
 * CHS 50 displays the last jump coordinates.
 * !spec now correctly only tries to match players that are not spectating.
 * Added two new spawnflags for `target_startTimer`
-  - __32__ disable explosive weapons pickup
-  - __64__ disable portal gun pickup
+  * __32__ disable explosive weapons pickup
+  * __64__ disable portal gun pickup
 * Drowned players are now correctly put to spec after a period of inactivity.
 * Added worldspawn key `nooverbounce`.  Disables overbounce if set to anything but __0__.
-  - Surfaceparm monsterslicksouth enables overbounce on maps with no overbounce enabled.
+  * Surfaceparm monsterslicksouth enables overbounce on maps with no overbounce enabled.
 * Added spawnflag __8__ to `target_teleporter`. Works like __4__ (preserves yaw) except keeps the pitch value as well.
 * `trigger_teleporter` now supports same spawnflags as `target_teleporter`.
 * Added overbounce watcher. You can save a position and the watcher will display whenever you are pointing at an OB location.
-  - `etj_drawObWatcher` to toggle the OB watcher.
-  - `etj_obWatcherX/Y` to change the location of the watcher.
-  - `ob_save <optional name>` to save the current position. Saved position will be displayed.
-  - `ob_load <optional name>` to load the saved position to be displayed. 
-  - `ob_reset` to remove the displayed position. (Nothing will be displayed)
+  * `etj_drawObWatcher` to toggle the OB watcher.
+  * `etj_obWatcherX/Y` to change the location of the watcher.
+  * `ob_save <optional name>` to save the current position. Saved position will be displayed.
+  * `ob_load <optional name>` to load the saved position to be displayed. 
+  * `ob_reset` to remove the displayed position. (Nothing will be displayed)
 * HUD/UI clean up (replaced some drawchars on proper text drawing method)
 * Value __9__ for `etj_drawSpeed2` now displays only tens in speedometer (ignores hundreds & thousands)
 * Added 'etj_drawMaxSpeed' variable and etj_maxSpeedX/Y/Duration to display max speed from previous load session
@@ -1258,25 +1258,25 @@
   * spawnflags __8__: only fires targets if the activating player is currently timerunning  
   * spawnflags __16__: only fires targets if the activating player is currently __NOT__ timerunning
 * Added `speed_limit` key to `target_starttimer`.  
-Timer will not be started if player's speed is higher than the value. Default value is __700__.
+  * Timer will not be started if player's speed is higher than the value. Default value is __700__.
 * Added `etj_drawTokens`.
 * Added `etj_enableTimeruns`.
 * Fixed issues with timerun timer.
 * Added `trigger_tracker` and `target_tracker`.  
-A replacement for `target_activate` that's easier to use and allows more complex designs.
+  * A replacement for `target_activate` that's easier to use and allows more complex designs.
 * Fixed lines ending with a ^ breaking newlines.
 * `g_banners` to enable/disable banners altogether.
 * Client side autoexec for map specific configs. (autoexec_mapname.cfg)
 * Added spawnflags 1 to `target_remove_portals` to disable the text print.
 * Added `target_interrupt_timerun` to stop any timerun without setting a record.
 * Added `target_set_health`.  
-Set's activator's health to the value specified by the health key.  
-Spawnflags __1__ to set once per life.
+  * Set's activator's health to the value specified by the health key.  
+  * Spawnflags __1__ to set once per life.
 * Fixed a likely crash on linux client.
 * Added cvars to control ghost player's transparency:  
-`etj_ghostPlayersOpacity` controls ghostplayer's transparency.  
-`etj_ghostPlayersFadeRange`  controls distance when ghostplayer starts to fade.
-* Custom vsays: /vsay &lt;variation&gt;  &lt;id&gt;  &lt;custom text&gt; e.g. `/vsay 4 hi Good evening!`.
+  * `etj_ghostPlayersOpacity` controls ghostplayer's transparency.  
+  * `etj_ghostPlayersFadeRange`  controls distance when ghostplayer starts to fade.
+* Custom vsays: `/vsay <variation> <id> <custom text>` e.g. `/vsay 4 hi Good evening!`.
 * UI enhancements:
   * optional shadows for runtimer and speed
   * runtimer user experience improved 
@@ -1284,13 +1284,13 @@ Spawnflags __1__ to set once per life.
   * popup message grouping (avoid duplicates) `etj_popupGrouped`
   * teamchat height increased up to 14 lines (from 8)
 * Added cvar to control explosives shake `etj_explosivesShake`  
-  __0__ disables shaking, __1__ disables shaking from own explosives, __2__ disables shaking from other player's explosives, __3__ default behaviour
+  * __0__ disables shaking, __1__ disables shaking from own explosives, __2__ disables shaking from other player's explosives, __3__ default behaviour
 * Widescreen support
 * `etj_chatFlags` toggles team flags next to chat messages.
 * Improved callvote:  
-Specs can no longer vote.  
-Votes will stay for full 30 seconds unless the percentage needed out of number of connected clients has exceeded for either yes or no votes.  
-For example: 51% => 2 players are in team, 2 in spec => 3 votes are needed. If both players in team vote yes it will wait for 30 seconds and pass. If one of the specs join team vote yes, it will pass instantly. If one of the specs join team and vote no, it will wait for the vote to expire and pass.
+  * Specs can no longer vote.  
+  * Votes will stay for full 30 seconds unless the percentage needed out of number of connected clients has exceeded for either yes or no votes.  
+  * For example: 51% => 2 players are in team, 2 in spec => 3 votes are needed. If both players in team vote yes it will wait for 30 seconds and pass. If one of the specs join team vote yes, it will pass instantly. If one of the specs join team and vote no, it will wait for the vote to expire and pass.
 * Fixed a bug in listbans.
 * Fixed weird coordinates in the chat causing undesired mouse movements.
 * Bullets and explosives go through ghost players.

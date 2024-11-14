@@ -1,0 +1,13 @@
+// this is included in .cpp files so include a header guard
+#ifndef __VERSION_HEADERS_H__
+#define __VERSION_HEADERS_H__
+
+// string containing all the version "cvars" used by the dropdown menu, delimited by |
+// this also matches all the individual changelog files, excluding .txt extension
+#define CHANGELOG_CVARS "@CHANGELOG_CVARS@"
+
+// cvarStrList definition for changelog dropdown menu
+// IMPORTANT! this must be defined WITHOUT surrounding quotes!
+#define CHANGELOG_CVAR_STR @CHANGELOG_CVAR_STR@
+
+#endif

@@ -77,6 +77,8 @@
 	loadMenu { "ui/etjump.menu" }
 	loadMenu { "ui/etjump_controls.menu" }
 	loadMenu { "ui/etjump_credits.menu" }
+	loadMenu { "ui/etjump_changelog.menu" }
+
 	loadMenu { "ui/ingame_ft_savelimit.menu" }
 
 	loadMenu { "ui/etjump_settings_general_gameplay.menu" }

@@ -1,17 +1,17 @@
 #ifndef __UI_LOCAL_H__
 #define __UI_LOCAL_H__
 
-#include "../game/q_shared.h"
-#include "../cgame/tr_types.h"
-#include "ui_public.h"
-#include "keycodes.h"
-#include "../game/bg_public.h"
-#include "ui_shared.h"
-#include "../game/etj_custom_map_votes.h"
-
 #include <vector>
 #include <stack>
 #include <string>
+#include <map>
+
+#include "../game/q_shared.h"
+#include "../cgame/tr_types.h"
+#include "ui_public.h"
+#include "../game/bg_public.h"
+#include "ui_shared.h"
+#include "../game/etj_custom_map_votes.h"
 
 extern vmCvar_t ui_ffa_fraglimit;
 extern vmCvar_t ui_ffa_timelimit;
@@ -124,6 +124,8 @@ extern vmCvar_t ui_voteCheats;
 extern vmCvar_t ui_voteCustomRTV;
 
 extern vmCvar_t etj_menuSensitivity;
+
+extern vmCvar_t ui_currentChangelog;
 
 //
 // ui_qmenu.c
@@ -905,6 +907,10 @@ typedef struct {
   int customvoteIndex;
   int customvoteMapsOnServerIndex;
   int customvoteOtherMapsIndex;
+
+  std::map<std::string, std::string> changelogs;
+  std::vector<std::string> formattedChangelog;
+  int changelogLineIndex;
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;

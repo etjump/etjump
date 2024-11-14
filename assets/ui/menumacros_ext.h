@@ -217,6 +217,8 @@
     group             GROUP_NAME                                               \
     rect              $evalfloat(COMBO_X) $evalfloat(COMBO_Y)                  \
                       $evalfloat(COMBO_W) $evalfloat(COMBO_H)                  \
+    comboRect         $evalfloat(COMBO_X) $evalfloat(COMBO_Y)                  \
+                      $evalfloat(COMBO_RECT_W) $evalfloat(COMBO_H)             \
     type              ITEM_TYPE_COMBO                                          \
     text              COMBO_TEXT                                               \
     textfont          UI_FONT_COURBD_21                                        \
@@ -256,18 +258,19 @@
   }
 
 // dropdown menu with bitflag selection
-#define COMBO_BIT( COMBO_X, COMBO_Y, COMBO_W, COMBO_H, COMBO_RECT_W,           \
-                   COMBO_MAX_ITEMS, COMBO_REVERSED, COMBO_TEXT,                \
-                   COMBO_TEXT_SCALE, COMBO_TEXT_ALIGN_Y, COMBO_CVAR,           \
-                   COMBO_CVARLIST, COMBO_ACTION, COMBO_TOOLTIP )               \
+#define COMBO_BIT( COMBO_BIT_X, COMBO_BIT_Y, COMBO_BIT_W, COMBO_BIT_H,         \
+                   COMBO_BIT_RECT_W, COMBO_BIT_MAX_ITEMS, COMBO_BIT_REVERSED,  \
+                   COMBO_BIT_TEXT, COMBO_BIT_TEXT_SCALE,                       \
+                   COMBO_BIT_TEXT_ALIGN_Y, COMBO_BIT_CVAR, COMBO_BIT_CVARLIST, \
+                   COMBO_BIT_ACTION, COMBO_BIT_TOOLTIP )                       \
                                                                                \
   itemDef {                                                                    \
-    name            "comboback"##COMBO_TEXT                                    \
+    name            "comboback"##COMBO_BIT_TEXT                                \
     group           GROUP_NAME                                                 \
-    rect            $evalfloat(COMBO_X + 0.5 * COMBO_W + 6)                    \
-                    $evalfloat(COMBO_Y)                                        \
-                    $evalfloat(0.5 * COMBO_RECT_W - 6)                         \
-                    $evalfloat(COMBO_H)                                        \
+    rect            $evalfloat(COMBO_BIT_X + (0.5 * COMBO_BIT_W) + 6)          \
+                    $evalfloat(COMBO_BIT_Y)                                    \
+                    $evalfloat(0.5 * COMBO_BIT_RECT_W - 6)                     \
+                    $evalfloat(COMBO_BIT_H)                                    \
     style           WINDOW_STYLE_FILLED                                        \
     backcolor       .3 .3 .3 .4                                                \
     visible         1                                                          \
@@ -275,42 +278,44 @@
   }                                                                            \
                                                                                \
   itemDef {                                                                    \
-    name              "combo"##COMBO_TEXT                                      \
+    name              "combo"##COMBO_BIT_TEXT                                  \
     group             GROUP_NAME                                               \
-    rect              $evalfloat(COMBO_X) $evalfloat(COMBO_Y)                  \
-                      $evalfloat(COMBO_W) $evalfloat(COMBO_H)                  \
+    rect              $evalfloat(COMBO_BIT_X) $evalfloat(COMBO_BIT_Y)          \
+                      $evalfloat(COMBO_BIT_W) $evalfloat(COMBO_BIT_H)          \
+    comboRect         $evalfloat(COMBO_BIT_X) $evalfloat(COMBO_BIT_Y)          \
+                      $evalfloat(COMBO_BIT_RECT_W) $evalfloat(COMBO_BIT_H)     \
     type              ITEM_TYPE_COMBO                                          \
-    text              COMBO_TEXT                                               \
+    text              COMBO_BIT_TEXT                                           \
     textfont          UI_FONT_COURBD_21                                        \
     textstyle         ITEM_TEXTSTYLE_SHADOWED                                  \
-    textscale         COMBO_TEXT_SCALE                                         \
+    textscale         COMBO_BIT_TEXT_SCALE                                     \
     textalign         ITEM_ALIGN_RIGHT                                         \
-    textalignx        $evalfloat(0.5 * (COMBO_W))                              \
-    textaligny        COMBO_TEXT_ALIGN_Y                                       \
+    textalignx        $evalfloat(0.5 * (COMBO_BIT_W))                          \
+    textaligny        COMBO_BIT_TEXT_ALIGN_Y                                   \
     backcolor         .3 .3 .3 .4                                              \
     forecolor         .6 .6 .6 1                                               \
-    cvar              COMBO_CVAR                                               \
-    COMBO_CVARLIST                                                             \
+    cvar              COMBO_BIT_CVAR                                           \
+    COMBO_BIT_CVARLIST                                                         \
     visible           1                                                        \
     bordercolor       .1 .1 .1 .5                                              \
-    tooltip           COMBO_TOOLTIP                                            \
-    combomaxitems     $evalfloat(COMBO_MAX_ITEMS)                              \
+    tooltip           COMBO_BIT_TOOLTIP                                        \
+    combomaxitems     $evalfloat(COMBO_BIT_MAX_ITEMS)                          \
     combobitflag                                                               \
-    comboreversed     COMBO_REVERSED                                           \
+    comboreversed     COMBO_BIT_REVERSED                                       \
                                                                                \
     mouseEnter {                                                               \
-      setitemcolor "combo"##COMBO_TEXT forecolor .9 .9 .9 1 ;                  \
-      setitemcolor "combo"##COMBO_TEXT backcolor .5 .5 .5 .4 ;                 \
+      setitemcolor "combo"##COMBO_BIT_TEXT forecolor .9 .9 .9 1 ;              \
+      setitemcolor "combo"##COMBO_BIT_TEXT backcolor .5 .5 .5 .4 ;             \
     }                                                                          \
                                                                                \
     mouseExit {                                                                \
-      setitemcolor "combo"##COMBO_TEXT forecolor .6 .6 .6 1 ;                  \
-      setitemcolor "combo"##COMBO_TEXT backcolor .3 .3 .3 .4 ;                 \
+      setitemcolor "combo"##COMBO_BIT_TEXT forecolor .6 .6 .6 1 ;              \
+      setitemcolor "combo"##COMBO_BIT_TEXT backcolor .3 .3 .3 .4 ;             \
     }                                                                          \
                                                                                \
     accept {                                                                   \
       play "sound/menu/filter.wav" ;                                           \
-      COMBO_ACTION                                                             \
+      COMBO_BIT_ACTION                                                         \
     }                                                                          \
                                                                                \
     action {                                                                   \

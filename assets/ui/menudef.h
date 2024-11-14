@@ -74,6 +74,7 @@
 #define FEEDER_CUSTOMVOTES			0x10	// ETJump: custom vote lists
 #define FEEDER_CUSTOMVOTES_MAPS_ONSERVER	0x11	// ETJump: maps available on server from customvote list
 #define FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE	0x12	// ETJump: maps not available on server from customvote list
+#define FEEDER_CHANGELOG			0x13	// ETJump: changelog
 #define FEEDER_PROFILES				0x1c	// Arnout: profiles
 #define FEEDER_GLINFO				0x1d	// Arnout: glinfo
 
