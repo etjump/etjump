@@ -334,6 +334,7 @@ void init() {
 
   syscallExt = std::make_unique<SyscallExt>();
   syscallExt->setupExtensions();
+  SyscallExt::trap_CmdBackup_Ext();
 
   trickjumpLines = std::make_shared<TrickjumpLines>();
 

@@ -948,4 +948,16 @@ void SyscallExt::trap_SysFlashWindowETLegacy(const FlashWindowState state) {
                static_cast<int>(state));
   }
 }
+
+void SyscallExt::trap_CmdBackup_Ext() {
+  if (syscallExt->cgameExtensions[syscallExt->cmdBackupExt]) {
+    cg.cmdBackup = CMD_BACKUP_EXT;
+    cg.cmdMask = CMD_MASK_EXT;
+    SystemCall(syscallExt->cgameExtensions[syscallExt->cmdBackupExt]);
+  } else {
+    cg.cmdBackup = CMD_BACKUP;
+    cg.cmdMask = CMD_MASK;
+  }
+}
+
 } // namespace ETJump

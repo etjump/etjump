@@ -1,10 +1,13 @@
+#pragma once
 
-
-#define CMD_BACKUP 64
-#define CMD_MASK (CMD_BACKUP - 1)
 // allow a lot of command backups for very fast systems
 // multiple commands may be combined into a single packet, so this
 // needs to be larger than PACKET_BACKUP
+static constexpr int CMD_BACKUP = 64;
+static constexpr int CMD_MASK = CMD_BACKUP - 1;
+
+static constexpr int CMD_BACKUP_EXT = 128;
+static constexpr int CMD_MASK_EXT = CMD_BACKUP_EXT - 1;
 
 #define MAX_ENTITIES_IN_SNAPSHOT 512
 
