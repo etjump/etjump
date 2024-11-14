@@ -25,6 +25,16 @@ git clang-format -i <file1> <file2> ... <fileN>
 * Braces should always be put on separate lines when working with shaders.
 * *Never run `clang-format` on assets!*
 
+## Changelog formatting
+
+We include changelog in the in-game menus. The [changelog.md](../changelog.md) file is parsed as a CMake configuration step into version-specific plaintext files, which are included in the mods assets. To ensure this parsing works as excepted, there are few rules you should follow when adding content to the changelog.
+
+* Only use `H1` headers (single `#`) and annotate each versions changelog separately with these - the parser uses `H1` headers to distinguish the versions.
+* Start each line with a `*`, the changelog should consist of only bulletpoint list entires.
+  * Multi-level lists like this are fine.
+  * When indenting multi-level lists, use __2__ spaces instead of tabs.
+* Markdown links are fine - the parser strips these out completely.
+
 ## Coding conventions
 
 In general, it's preferred to write more "C++ style" code rather than "C-style" code. This means for example using the C++ standard template library where applicable (e.g. use `std::array` over C-style array), C++ style casts instead of C-style casts and `nullptr` instead of `NULL`. It's perfectly fine to incorporate these types of changes to your commits when working on something: if you're fixing/modifying a function, feel free to replace any old usage of `NULL` within the function with `nullptr` for example.
