@@ -5013,10 +5013,17 @@ void UI_RunMenuScript(const char **args) {
     }
 
     if (!Q_stricmp(name, "resetCustomvoteDetailsIndex")) {
+      uiInfo.customvoteMapsOnServerIndex = 0;
+      uiInfo.customvoteOtherMapsIndex = 0;
+
+      const char *menuName = nullptr;
+      String_Parse(args, &menuName);
+
+      // if menuName is nullptr (called without args), active menu name is used
       Menu_SetFeederSelection(nullptr, FEEDER_CUSTOMVOTES_MAPS_ONSERVER, 0,
-                              nullptr);
+                              menuName);
       Menu_SetFeederSelection(nullptr, FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE, 0,
-                              nullptr);
+                              menuName);
       return;
     }
 
