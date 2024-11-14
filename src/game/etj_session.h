@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef SESSION_HPP
-#define SESSION_HPP
+#pragma once
 
 #include <string>
 #include <vector>
@@ -46,6 +45,7 @@ public:
     std::string hwid;
     std::bitset<MAX_COMMANDS> permissions;
     std::string ip;
+    int sessionStartTime; // FIXME: 32-bit time
     const User_s *user;
     const Levels::Level *level;
   };
@@ -79,6 +79,7 @@ public:
   // Returns the amount of users with that level
   int LevelDeleted(int level);
   std::vector<Session::Client *> FindUsersByLevel(int level);
+  int getSessionStartTime(int clientNum) const;
 
 private:
   std::shared_ptr<IAuthentication> database_;
@@ -87,5 +88,3 @@ private:
   Client clients_[MAX_CLIENTS];
   std::string message_;
 };
-
-#endif
