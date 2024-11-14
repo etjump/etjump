@@ -2201,14 +2201,20 @@ static const char *addChatModifications(char *text, const int clientNum,
   if (etj_highlight.integer && (serverSay || cg.clientNum != clientNum) &&
       strstr(text + strlen(cgs.clientinfo[clientNum].name),
              cgs.clientinfo[cg.clientNum].name) != nullptr) {
-    Q_strcat(message, sizeof(message), etj_highlightText.string);
-    Q_strcat(message, sizeof(message), "^7");
+    if (etj_highlight.integer &
+        static_cast<int>(ChatHighlightFlags::HIGHLIGHT_BEEPER)) {
+      Q_strcat(message, sizeof(message), etj_highlightText.string);
+      Q_strcat(message, sizeof(message), "^7");
 
-    trap_S_StartLocalSound(
-        trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
+      trap_S_StartLocalSound(
+          trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
+    }
 
-    SyscallExt::trap_SysFlashWindowETLegacy(
-        SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
+    if (etj_highlight.integer &
+        static_cast<int>(ChatHighlightFlags::HIGHLIGHT_FLASH)) {
+      SyscallExt::trap_SysFlashWindowETLegacy(
+          SyscallExt::FlashWindowState::FLASH_UNTIL_FOCUS);
+    }
   }
 
   if (etj_drawMessageTime.integer) {

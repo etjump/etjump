@@ -4264,6 +4264,11 @@ enum extraTraceOptions {
   CHS_16,
   CHS_53,
 };
+
+enum class ChatHighlightFlags {
+  HIGHLIGHT_BEEPER = 1,
+  HIGHLIGHT_FLASH = 2,
+};
 } // namespace ETJump
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
