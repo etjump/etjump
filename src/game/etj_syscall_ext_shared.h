@@ -39,9 +39,11 @@ class SyscallExt {
 public:
 #ifdef CGAMEDLL
   const char *flashWindowETLegacy = "trap_SysFlashWindow_Legacy";
+  const char *cmdBackupExt = "trap_CmdBackup_Ext_Legacy";
 
   std::unordered_map<const char *, int> cgameExtensions = {
       {flashWindowETLegacy, 0},
+      {cmdBackupExt, 0},
   };
 
   // defined by SDL2
@@ -52,6 +54,7 @@ public:
   };
 
   static void trap_SysFlashWindowETLegacy(FlashWindowState state);
+  static void trap_CmdBackup_Ext();
 #endif
 
   // entry point for extensions

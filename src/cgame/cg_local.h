@@ -777,7 +777,9 @@ typedef enum { SHOW_OFF, SHOW_SHUTDOWN, SHOW_ON } showView_t;
 
 void CG_ParseMapEntityInfo(int axis_number, int allied_number);
 
-#define MAX_BACKUP_STATES (CMD_BACKUP + 2)
+// we need to reserve the extended value for this, it doesn't matter
+// if the client doesn't actually support CMD_BACKUP_EXT
+static constexpr int MAX_BACKUP_STATES = CMD_BACKUP_EXT + 2;
 
 typedef struct {
   int clientFrame; // incremented each frame
@@ -1192,6 +1194,8 @@ typedef struct {
   int backupStateTail;
   int lastPredictedCommand;
   int lastPhysicsTime;
+  int cmdBackup;
+  int cmdMask;
 
   qboolean skyboxEnabled;
   vec3_t skyboxViewOrg;
