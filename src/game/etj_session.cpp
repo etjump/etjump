@@ -108,14 +108,14 @@ std::string Session::Guid(gentity_t *ent) const {
 void Session::ReadSessionData(int clientNum) {
   G_DPrintf("Session::ReadSessionData called for %d\n", clientNum);
 
-  char sessionData[MAX_STRING_CHARS] = "\0";
+  char sessionData[MAX_CVAR_VALUE_STRING] = "\0";
 
   trap_Cvar_VariableStringBuffer(va("etjumpsession%i", clientNum), sessionData,
                                  sizeof(sessionData));
 
-  char guidBuf[MAX_TOKEN_CHARS] = "\0";
-  char hwidBuf[MAX_TOKEN_CHARS] = "\0";
-  char sessStartTimeBuf[MAX_TOKEN_CHARS] = "\0";
+  char guidBuf[MAX_CVAR_VALUE_STRING] = "\0";
+  char hwidBuf[MAX_CVAR_VALUE_STRING] = "\0";
+  char sessStartTimeBuf[MAX_CVAR_VALUE_STRING] = "\0";
 
   sscanf(sessionData, "%s %s %s", guidBuf, hwidBuf, sessStartTimeBuf);
 
@@ -135,8 +135,8 @@ void Session::ReadSessionData(int clientNum) {
 bool Session::GuidReceived(gentity_t *ent) {
   int argc = trap_Argc();
   int clientNum = ClientNum(ent);
-  char guidBuf[MAX_TOKEN_CHARS];
-  char hwidBuf[MAX_TOKEN_CHARS];
+  char guidBuf[MAX_CVAR_VALUE_STRING];
+  char hwidBuf[MAX_CVAR_VALUE_STRING];
 
   // Client sends 'AUTHENTICATE guid hwid'
   constexpr int ARGC = 3;
