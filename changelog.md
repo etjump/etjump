@@ -25,6 +25,39 @@
 * fixed ammo packs not functioning correctly when picked up by a field ops [#1517](https://github.com/etjump/etjump/pull/1517)
 * fixed `etj_autoLoad` and `load` executed during a death sequence initially spawning you in original spawn location, which could cause entities to trigger unexpectedly on original spawn location [#1516](https://github.com/etjump/etjump/pull/1516)
 * fixed `target_init` and timerun start not clearing the ammo for removed weapons, which would cause the weapons to have incorrect ammo when picked up again [#1515](https://github.com/etjump/etjump/pull/1515)
+* changes to chat replay [#1508](https://github.com/etjump/etjump/pull/1508) [#1521](https://github.com/etjump/etjump/pull/1521)
+  * messages are now timestamped with relative timestamps (10s ago, 1min ago, 1h ago etc.)
+  * `g_chatReplayMaxMessageAge` now only applies to messages that were sent prior to your session starting
+    * any message send after you have connected to the server will always be replayed, regardless of the message age
+    * default is now `5`
+* bundled `sv_fps 125` compatible mapscript for `GreenJumps_f.bsp` with the mod [#1518](https://github.com/etjump/etjump/pull/1518)
+* added `etj_autoSprint` to flip `+sprint` button behavior [#1519](https://github.com/etjump/etjump/pull/1519)
+  * when enabled, player automatically sprints, and holding `+sprint` runs instead
+* fixed exploits with `noghost` fireteam rule upon joining [#1520](https://github.com/etjump/etjump/pull/1520)
+  * clients are now flagged to have enabled `noghost` upon joining, if `noghost` is enabled
+  * timeruns are now interrupted when joining to fireteam with `noghost` enabled, if ongoing timerun doesn't allow `noghost`
+* `changemodel` script action now works (was broken in etmain) [#1522](https://github.com/etjump/etjump/pull/1522)
+  * `changemodel <path/to/model.md3>` changes entitys model to the given model
+* increased slick and NJD detector ranges to maximum possible map size [#1530](https://github.com/etjump/etjump/pull/1530)
+* adjusted timerun high ping interrupt to require sustained 100ms of lag before triggering [#1529](https://github.com/etjump/etjump/pull/1529)
+  * this should help filter out small lag spikes that are caused by unstable connections, which would trigger timerun interrupts overly aggressively on `sv_fps + snaps 125`
+* added initial support for `author` key to `.arena` files [#1528](https://github.com/etjump/etjump/pull/1528)
+  * currently not used for anything
+* fixed in-game `Vote -> Map` list breaking if `ui_netGameType` was not set to `2` [#1527](https://github.com/etjump/etjump/pull/1527)
+* fixed nonsolid player pushing each other while riding on movers [#1526](https://github.com/etjump/etjump/pull/1526)
+* added missing newline to print output when viewing run records for multiple seasons [#1525](https://github.com/etjump/etjump/pull/1525)
+* reintroduced `etj_viewlog` setting to the menus for ET: Legacy clients [#1524](https://github.com/etjump/etjump/pull/1524)
+  * ET: Legacy version 2.83.0 and newer can now toggle the external console while the game is running
+* added support for engine extensions [#1531](https://github.com/etjump/etjump/pull/1531) [#1535](https://github.com/etjump/etjump/pull/1535)
+  * currently supports two extensions
+    * extended `CMD_BACKUP/MASK` on ET: Legacy clients to allow for higher ping + FPS combinations
+    * window flash on ET: Legacy on chat mentions and incoming private messages (requires `etj_highlight & 2`)
+* fixed buggy behavior with `TAB` and `UP/DOWNARROW` keys with expanded dropdown menus
+* improved custom vote UI [#1534](https://github.com/etjump/etjump/pull/1534)
+  * map list scrolling is now more responsive
+  * map list scrolls back to first entry when selecting a new list
+* added changelog to the menus [#1532](https://github.com/etjump/etjump/pull/1532)
+* fixed a client crash if server had a custom vote list with an empty `name` or `callvote_text` field [#1536](https://github.com/etjump/etjump/pull/1536)
 
 # ETJump 3.3.0
 
