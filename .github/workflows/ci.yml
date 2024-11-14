@@ -20,7 +20,7 @@ on:
       - docs/*
       - .gitignore
       - .gitattributes
-      - changelog.md
+      - .clang-format
       - README.md
       - VERSION.txt
       - release.sh
