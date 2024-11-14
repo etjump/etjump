@@ -64,6 +64,7 @@ menuDef {
         elementheight   12
         columns         1 0 200 33
         visible         0
+        notselectable
     }
 
     itemDef {
@@ -84,5 +85,6 @@ menuDef {
         elementheight   12
         columns         1 0 200 33
         visible         0
+        notselectable
     }
 }

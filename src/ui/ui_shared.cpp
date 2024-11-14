@@ -3238,9 +3238,9 @@ static bool comboHandleKey(itemDef_t *item, int key) {
     if (dir) {
       comboHandleScroll(item, dir, amount);
       return false;
-    } else {
-      return true;
     }
+
+    return true;
   }
 
   const auto multi = static_cast<multiDef_t *>(item->typeData);
@@ -3273,21 +3273,30 @@ static bool comboHandleKey(itemDef_t *item, int key) {
 
     Item_RunScript(item, nullptr, item->onAccept);
 
-    return item->comboData.bitflag ? false : true;
-  } else if (key == K_MWHEELUP || key == K_UPARROW || key == K_KP_UPARROW) {
+    // don't close the menu if this is a bitflag dropdown
+    return !item->comboData.bitflag;
+  }
+
+  if (key == K_MWHEELUP || key == K_UPARROW || key == K_KP_UPARROW) {
     if (item->comboData.scrollbar) {
       comboHandleScroll(item, DIRECTION_UP,
                         key == K_MWHEELUP ? SCROLL_BIG : SCROLL_SMALL);
     }
 
     return false;
-  } else if (key == K_MWHEELDOWN || key == K_DOWNARROW ||
-             key == K_KP_DOWNARROW) {
+  }
+
+  if (key == K_MWHEELDOWN || key == K_DOWNARROW || key == K_KP_DOWNARROW) {
     if (item->comboData.scrollbar) {
       comboHandleScroll(item, DIRECTION_DOWN,
                         key == K_MWHEELDOWN ? SCROLL_BIG : SCROLL_SMALL);
     }
 
+    return false;
+  }
+
+  // eat K_TAB so we don't switch item focus and close the menu unexpectedly
+  if (key == K_TAB) {
     return false;
   }
 
@@ -4121,13 +4130,17 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
         if (!itemCapture) {
           return;
         }
+      } else if (key == K_TAB || key == K_UPARROW || key == K_DOWNARROW) {
+        return;
       }
-    } else {
+    } else { // ITEM_TYPE_EDITFIELD || ITEM_TYPE_NUMERICFIELD
       if (!Item_TextField_HandleKey(g_editItem, key)) {
         g_editingField = qfalse;
         g_editItem = nullptr;
         return;
-      } else if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3) {
+      }
+
+      if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3) {
         g_editingField = qfalse;
         g_editItem = nullptr;
         Display_MouseMove(nullptr, DC->cursorx, DC->cursory);

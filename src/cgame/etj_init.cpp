@@ -65,6 +65,7 @@
 #include "etj_player_bbox.h"
 #include "etj_pmove_utils.h"
 #include "etj_savepos.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -91,6 +92,7 @@ std::shared_ptr<AccelColor> accelColor;
 std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 std::shared_ptr<PlayerBBox> playerBBox;
 std::unique_ptr<SavePos> savePos;
+std::unique_ptr<SyscallExt> syscallExt;
 } // namespace ETJump
 
 static bool isInitialized{false};
@@ -330,6 +332,9 @@ void init() {
 
   std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
 
+  syscallExt = std::make_unique<SyscallExt>();
+  syscallExt->setupExtensions();
+
   trickjumpLines = std::make_shared<TrickjumpLines>();
 
   // Check if load TJL on connection is enable
@@ -387,6 +392,8 @@ void shutdown() {
   ETJump::entityEventsHandler = nullptr;
 
   ETJump::savePos = nullptr;
+
+  syscallExt = nullptr;
 
   isInitialized = false;
 
@@ -484,6 +491,16 @@ qboolean CG_ServerCommandExt(const char *cmd) {
     uiCommand += '\n';
 
     trap_SendConsoleCommand(uiCommand.c_str());
+    return qtrue;
+  }
+
+  if (command == "pmFlashWindow") {
+    if (etj_highlight.integer &
+        static_cast<int>(ETJump::ChatHighlightFlags::HIGHLIGHT_FLASH)) {
+      ETJump::SyscallExt::trap_SysFlashWindowETLegacy(
+          ETJump::SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
+    }
+
     return qtrue;
   }
 

@@ -12,6 +12,7 @@
 #include "etj_entity_utilities.h"
 #include "etj_numeric_utilities.h"
 #include "etj_rtv.h"
+#include "etj_syscall_ext_shared.h"
 
 level_locals_t level;
 
@@ -37,6 +38,7 @@ std::shared_ptr<SaveSystem> saveSystem;
 std::shared_ptr<Database> database;
 std::shared_ptr<Session> session;
 std::shared_ptr<ProgressionTrackers> progressionTrackers;
+std::unique_ptr<SyscallExt> syscallExt;
 } // namespace ETJump
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,6 +51,9 @@ static void initializeETJump() {
   ETJump::session = std::make_shared<Session>(ETJump::database);
   ETJump::saveSystem = std::make_shared<ETJump::SaveSystem>(ETJump::session);
   ETJump::progressionTrackers = std::make_shared<ETJump::ProgressionTrackers>();
+
+  ETJump::syscallExt = std::make_unique<ETJump::SyscallExt>();
+  ETJump::syscallExt->setupExtensions();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,6 +66,7 @@ static void shutdownETJump() {
   ETJump::session = nullptr;
   ETJump::saveSystem = nullptr;
   ETJump::progressionTrackers = nullptr;
+  ETJump::syscallExt = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -517,7 +523,7 @@ cvarTable_t gameCvarTable[] = {
     {&g_adminChat, "g_adminChat", "1", CVAR_ARCHIVE},
 
     {&g_chatReplay, "g_chatReplay", "1", CVAR_ARCHIVE},
-    {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "0",
+    {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "5",
      CVAR_ARCHIVE | CVAR_LATCH},
 };
 

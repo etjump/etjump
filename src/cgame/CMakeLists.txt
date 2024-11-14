@@ -114,6 +114,7 @@ add_library(cgame MODULE
 	"../game/etj_string_utilities.cpp"
 	"../game/etj_time_utilities.cpp"
 	"../game/etj_timerun_shared.cpp"
+	"../game/etj_syscall_ext_shared.cpp"
 	"../ui/ui_shared.cpp"
 	${CGAME_HEADERS}
 )

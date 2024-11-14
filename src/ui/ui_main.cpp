@@ -19,6 +19,7 @@ USER INTERFACE MAIN
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_filesystem.h"
 #include "../game/etj_file.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 #include "../../assets/ui/changelog/version_headers.h"
 
@@ -811,6 +812,7 @@ void UI_ShowPostGame(qboolean newHigh) {
 
 namespace ETJump {
 std::unique_ptr<ColorPicker> colorPicker;
+std::unique_ptr<SyscallExt> syscallExt;
 
 static void initColorPicker() {
   colorPicker = std::make_unique<ColorPicker>();
@@ -846,6 +848,11 @@ static void initColorPicker() {
   uiInfo.uiDC.setColorSliderType = &ColorPicker::setColorSliderType;
   uiInfo.uiDC.getColorSliderValue = &ColorPicker::getColorSliderValue;
   uiInfo.uiDC.setColorSliderValue = &ColorPicker::setColorSliderValue;
+}
+
+static void initExtensionSystem() {
+  syscallExt = std::make_unique<SyscallExt>();
+  syscallExt->setupExtensions();
 }
 
 static void drawLevelshotPreview(rectDef_t &rect) {
@@ -1075,6 +1082,7 @@ void _UI_Shutdown(void) {
   trap_LAN_SaveCachedServers();
 
   ETJump::colorPicker = nullptr;
+  ETJump::syscallExt = nullptr;
 
   Shutdown_Display();
 }
@@ -5092,10 +5100,17 @@ void UI_RunMenuScript(const char **args) {
     }
 
     if (!Q_stricmp(name, "resetCustomvoteDetailsIndex")) {
+      uiInfo.customvoteMapsOnServerIndex = 0;
+      uiInfo.customvoteOtherMapsIndex = 0;
+
+      const char *menuName = nullptr;
+      String_Parse(args, &menuName);
+
+      // if menuName is nullptr (called without args), active menu name is used
       Menu_SetFeederSelection(nullptr, FEEDER_CUSTOMVOTES_MAPS_ONSERVER, 0,
-                              nullptr);
+                              menuName);
       Menu_SetFeederSelection(nullptr, FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE, 0,
-                              nullptr);
+                              menuName);
       return;
     }
 
@@ -7182,6 +7197,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
   uiInfo.uiDC.getActiveFont = &GetActiveFont;
 
   ETJump::initColorPicker();
+  ETJump::initExtensionSystem();
   ETJump::parseChangelogs();
 
   Init_Display(&uiInfo.uiDC);

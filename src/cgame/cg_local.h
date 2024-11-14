@@ -4224,6 +4224,7 @@ class DemoCompatibility;
 class AccelColor;
 class PlayerBBox;
 class SavePos;
+class SyscallExt;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4239,6 +4240,7 @@ extern std::unique_ptr<DemoCompatibility> demoCompatibility;
 extern std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 extern std::shared_ptr<PlayerBBox> playerBBox;
 extern std::unique_ptr<SavePos> savePos;
+extern std::unique_ptr<SyscallExt> syscallExt;
 
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume, int soundTime);
@@ -4261,6 +4263,11 @@ enum extraTraceOptions {
   CHS_13_15,
   CHS_16,
   CHS_53,
+};
+
+enum class ChatHighlightFlags {
+  HIGHLIGHT_BEEPER = 1,
+  HIGHLIGHT_FLASH = 2,
 };
 } // namespace ETJump
 

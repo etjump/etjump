@@ -69,7 +69,11 @@ menuDef {
         SLIDER              (SETTINGS_ITEM_POS(8), "Chat scale:", 0.2, SETTINGS_ITEM_H, etj_chatScale 1 0.1 5 0.1, "Sets chat size scale\netj_chatScale")
         CVARINTLABEL        (SETTINGS_ITEM_POS(9), "etj_chatLineWidth", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(9), "Chat line width:", 0.2, SETTINGS_ITEM_H, etj_chatLineWidth 62 15 100 1, "Maximum number of characters on one line before chat wraps to a new line\netj_chatLineWidth")
+#ifdef ETLEGACY
+        COMBO_BIT           (SETTINGS_COMBO_POS(10), "Chat mentions:", 0.2, SETTINGS_ITEM_H, "etj_highlight", cvarFloatList { "Beeper" 1 "Flash window" 2 }, none, "Highlight chat messages if you are mentioned\netj_highlight")
+#else
         YESNO               (SETTINGS_ITEM_POS(10), "Chat mentions:", 0.2, SETTINGS_ITEM_H, "etj_highlight", "Highlight chat messages if you are mentioned\netj_highlight")
+#endif
         EDITFIELD_EXT       (SETTINGS_EF_POS(11), "Highlight text:", 0.2, SETTINGS_ITEM_H, "etj_highlightText", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Prefix of chat message where you are highlighted\netj_highlightText")
         EDITFIELD_EXT       (SETTINGS_EF_POS(12), "Highlight sound:", 0.2, SETTINGS_ITEM_H, "etj_highlightSound", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Sound to play when you are highlighted in chat\netj_highlightSound")
         YESNO               (SETTINGS_ITEM_POS(13), "Chat replay:", 0.2, SETTINGS_ITEM_H, "etj_chatReplay", "Replay latest chat messages from server when connecting to server or after vid_restart\netj_chatReplay")

@@ -1,6 +1,7 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
 #include "g_local.h"
+#include "etj_syscall_ext_shared.h"
 
 // this file is only included when building a dll
 // g_syscalls.asm is included instead when building a qvm
@@ -1010,3 +1011,11 @@ void trap_SendMessage(int clientNum, char *buf, int buflen) {
 messageStatus_t trap_MessageStatus(int clientNum) {
   return static_cast<messageStatus_t>(SystemCall(G_MESSAGESTATUS, clientNum));
 }
+
+// ETJump: syscall extensions
+namespace ETJump {
+// entry point for additional system calls for other engines (ETe, ET: Legacy)
+bool SyscallExt::trap_GetValue(char *value, const int size, const char *key) {
+  return SystemCall(syscallExt->dll_com_trapGetValue, value, size, key);
+}
+} // namespace ETJump
