@@ -1115,6 +1115,9 @@ char *trap_TranslateString(const char *string); // NERVE - SMF - localization
 void ETJump_DrawMapDetails();
 
 namespace ETJump {
+class SyscallExt;
+extern std::unique_ptr<SyscallExt> syscallExt;
+
 void parseMaplist();
 void parseNumCustomvotes();
 void parseCustomvote();
