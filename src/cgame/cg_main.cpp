@@ -1268,7 +1268,7 @@ cvarTable_t cvarTable[] = {
     {&etj_recordingStatusX, "etj_recordingStatusX", "2", CVAR_ARCHIVE},
     {&etj_recordingStatusY, "etj_recordingStatusY", "9", CVAR_ARCHIVE},
 
-    {&etj_smoothAngles, "etj_smoothAngles", "0", CVAR_ARCHIVE},
+    {&etj_smoothAngles, "etj_smoothAngles", "1", CVAR_ARCHIVE},
     {&etj_autoSprint, "etj_autoSprint", "0", CVAR_ARCHIVE},
 };
 

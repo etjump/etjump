@@ -46,7 +46,7 @@ menuDef {
 
         YESNO               (SETTINGS_ITEM_POS(1), "Fixed physics:", 0.2, SETTINGS_ITEM_H, "pmove_fixed", "Enable fixed 125 FPS movement physics\npmove_fixed")
         YESNO               (SETTINGS_ITEM_POS(2), "Unlimited stamina:", 0.2, SETTINGS_ITEM_H, "etj_nofatigue", "Enable unlimited stamina\netj_nofatigue")
-        YESNO               (SETTINGS_ITEM_POS(3), "Smooth angles (EXPERIMENTAL):", 0.2, SETTINGS_ITEM_H, "etj_smoothAngles", "Update client view every frame with pmove_fixed 1\nThis is experimental and might break viewangles in some scenarios\netj_smoothAngles")
+        YESNO               (SETTINGS_ITEM_POS(3), "Smooth angles:", 0.2, SETTINGS_ITEM_H, "etj_smoothAngles", "Update client view every frame with 'pmove_fixed 1'\netj_smoothAngles")
         YESNO               (SETTINGS_ITEM_POS(4), "Load view angles:", 0.2, SETTINGS_ITEM_H, "etj_loadviewangles", "Load view angles when loading position\netj_loadviewangles")
         YESNO               (SETTINGS_ITEM_POS(5), "Auto sprint:", 0.2, SETTINGS_ITEM_H, "etj_autoSprint", "Automatically enables sprint without holding '+sprint'\nHolding '+sprint' enables running instead of sprinting\netj_autoSprint")
         YESNO               (SETTINGS_ITEM_POS(6), "Auto load:", 0.2, SETTINGS_ITEM_H, "etj_autoLoad", "Automatically load to latest saved position when joining team\netj_autoLoad")
