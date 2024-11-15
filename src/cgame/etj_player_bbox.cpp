@@ -61,7 +61,7 @@ void PlayerBBox::drawBBox(const clientInfo_t *ci, const centity_t *cent) const {
 
   const int drawFlags = etj_drawPlayerBBox.integer;
   const bool inFireteam =
-      CG_IsOnSameFireteam(cg.snap->ps.clientNum, cent->currentState.clientNum);
+      CG_IsOnSameFireteam(cg.clientNum, cent->currentState.clientNum);
 
   if (cent->currentState.clientNum == cg.snap->ps.clientNum) {
     if (!(drawFlags & static_cast<int>(DrawFlags::Self))) {
