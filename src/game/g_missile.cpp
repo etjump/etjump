@@ -994,48 +994,27 @@ static constexpr float FLAME_FRICTION_PER_SEC = 2.0f * FLAME_START_SPEED;
 #define GET_FLAME_SIZE_SPEED(x) ((static_cast<float>(x) / FLAME_LIFETIME) / 0.3)
 
 void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
-  int i;
-  float radius, dist;
-  vec3_t point, v;
-  trace_t tr;
-
   if (!body->takedamage) {
     return;
   }
 
-  // JPW NERVE don't catch fire if invulnerable or same team in no FF
-  if (body->client) {
-    if (body->client->ps.powerups[PW_INVULNERABLE] >= level.time) {
-      body->flameQuota = 0;
-      body->s.onFireEnd = level.time - 1;
-      return;
-    }
-
-    //		if( !self->count2 && body == self->parent )
-    //			return;
-
-    if (OnSameTeam(body, self->parent)) {
-      return;
-    }
-  }
-  // jpw
-
-  // JPW NERVE don't catch fire if under water or invulnerable
-  if (body->waterlevel >= 3) {
+  // don't set other players on fire or entities in water
+  if (body->client || body->waterlevel >= 3) {
     body->flameQuota = 0;
     body->s.onFireEnd = level.time - 1;
     return;
   }
-  // jpw
+
+  vec3_t point, v;
 
   if (!body->r.bmodel) {
     VectorCopy(body->r.currentOrigin, point);
     if (body->client) {
-      point[2] += body->client->ps.viewheight;
+      point[2] += static_cast<float>(body->client->ps.viewheight);
     }
     VectorSubtract(point, self->r.currentOrigin, v);
   } else {
-    for (i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
       if (self->s.origin[i] < body->r.absmin[i]) {
         v[i] = body->r.absmin[i] - self->r.currentOrigin[i];
       } else if (self->r.currentOrigin[i] > body->r.absmax[i]) {
@@ -1046,14 +1025,14 @@ void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
     }
   }
 
-  radius = self->speed;
-
-  dist = VectorLength(v);
+  const float radius = self->speed;
+  const float dist = VectorLength(v);
 
   // The person who shot the flame only burns when within 1/2 the radius
-  if (body->s.number == self->r.ownerNum && dist >= (radius * 0.5)) {
+  if (body->s.number == self->r.ownerNum && dist >= radius * 0.5) {
     return;
   }
+
   if (!directhit && dist >= radius) {
     return;
   }
@@ -1071,6 +1050,7 @@ void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
 
   // JPW NERVE -- do a trace to see if there's a wall btwn. body & flame
   // centroid -- prevents damage through walls
+  trace_t tr;
   trap_Trace(&tr, self->r.currentOrigin, nullptr, nullptr, point,
              body->s.number, MASK_SHOT);
   if (tr.fraction < 1.0) {
