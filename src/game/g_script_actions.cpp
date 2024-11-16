@@ -269,7 +269,12 @@ qboolean G_ScriptAction_ChangeModel(gentity_t *ent, char *params) {
   Q_strcat(tagname, MAX_QPATH, ".tag");
   ent->tagNumber = trap_LoadTag(tagname);
 
-  ent->s.modelindex = G_ModelIndex(token);
+  // allow 'misc_gamemodel' models to be changed too
+  if (!Q_stricmp(ent->classname, "misc_gamemodel")) {
+    ent->s.modelindex = G_ModelIndex(token);
+  } else {
+    ent->s.modelindex2 = G_ModelIndex(token);
+  }
 
   return qtrue;
 }
