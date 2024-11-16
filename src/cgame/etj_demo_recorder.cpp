@@ -31,9 +31,10 @@ ETJump::DemoRecorder::DemoRecorder() {}
 ETJump::DemoRecorder::~DemoRecorder() {}
 
 void ETJump::DemoRecorder::start(const std::string &name) {
-  // if (cl_demorecording.integer) return;
-  if (_isLocked)
+  if (_isLocked) {
     return;
+  }
+
   _startTime = cg.time;
 
   trap_SendConsoleCommand("set cl_noprint 1\n");
@@ -42,9 +43,10 @@ void ETJump::DemoRecorder::start(const std::string &name) {
 }
 
 void ETJump::DemoRecorder::stop() {
-  // if (!cl_demorecording.integer) return;
-  if (_isLocked)
+  if (_isLocked) {
     return;
+  }
+
   _stopTime = cg.time;
 
   trap_SendConsoleCommand("set cl_noprint 1\n");
@@ -63,8 +65,8 @@ void ETJump::DemoRecorder::restart(const std::string &name) {
   start(name);
 }
 
-bool ETJump::DemoRecorder::isRecording() {
-  return cl_demorecording.integer == 1;
+bool ETJump::DemoRecorder::recordingAutoDemo() {
+  return StringUtil::startsWith(cl_demofilename.string, "demos/temp/temp_");
 }
 
 int ETJump::DemoRecorder::elapsed() {

@@ -76,7 +76,7 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
 
   playerEventsHandler->subscribe(
       "respawn", [&](const std::vector<std::string> &args) {
-        if (etj_ad_stopInSpec.integer && _demo.isRecording() &&
+        if (etj_ad_stopInSpec.integer && DemoRecorder::recordingAutoDemo() &&
             cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR &&
             !_delayedTimerId) {
           _demo.stop();
@@ -119,15 +119,24 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
 
   consoleCommandsHandler->subscribe(
       "ad_save", [&](const std::vector<std::string> &args) {
-        if (etj_autoDemo.integer <= 0)
+        if (etj_autoDemo.integer <= 0) {
           return;
+        }
+
         if (!cl_demorecording.integer) {
           CG_AddPMItem(PM_MESSAGE, "^7Not recording a demo.\n",
                        cgs.media.voiceChatShader);
           return;
         }
-        auto src = createDemoTempPath(_demoNames.current());
-        auto dst = createDemoPath(args.size() ? args[0] : "demo");
+
+        if (!DemoRecorder::recordingAutoDemo()) {
+          CG_AddPMItem(PM_MESSAGE, "Not recording an autodemo.\n",
+                       cgs.media.voiceChatShader);
+          return;
+        }
+
+        const std::string src = createDemoTempPath(_demoNames.current());
+        const std::string dst = createDemoPath(args.empty() ? "demo" : args[0]);
         saveDemoWithRestart(src, dst);
       });
 }
@@ -174,12 +183,12 @@ void ETJump::AutoDemoRecorder::restart() {
 
 void ETJump::AutoDemoRecorder::trySaveTimerunDemo(const std::string &runName,
                                                   const std::string &runTime) {
-  if (_delayedTimerId)
+  if (_delayedTimerId || !DemoRecorder::recordingAutoDemo()) {
     return;
-  if (!_demo.isRecording())
-    return;
-  auto src = createDemoTempPath(_demoNames.current());
-  auto dst = createTimerunDemoPath(runName, runTime);
+  }
+
+  const std::string src = createDemoTempPath(_demoNames.current());
+  const std::string dst = createTimerunDemoPath(runName, runTime);
   CG_AddPMItem(PM_MESSAGE, "^7Stopping demo...\n", cgs.media.voiceChatShader);
   saveTimerunDemo(src, dst);
 }
