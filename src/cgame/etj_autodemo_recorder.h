@@ -24,13 +24,6 @@
 
 #pragma once
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
-
 #include <string>
 #include <queue>
 #include "etj_demo_recorder.h"
