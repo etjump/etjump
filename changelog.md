@@ -19,7 +19,7 @@
 * fixed bullet impacts producing particle effects unreliably [#1503](https://github.com/etjump/etjump/pull/1503)
 * added `cursorhint` key to `func_button` for specifying the cursorhint, similar to `func_invisible_user` [#1507](https://github.com/etjump/etjump/pull/1507)
 * `etj_hideMe` can no longer be set if fireteam player collision is enabled, and will automatically be disabled if turned on [#1506](https://github.com/etjump/etjump/pull/1506)
-* added `etj_ad_stopInSpec` to automatically stop autodemo recording when switching to spectators [#1510](https://github.com/etjump/etjump/pull/1510)
+* added `etj_ad_stopInSpec` to automatically stop autodemo recording when switching to spectators [#1510](https://github.com/etjump/etjump/pull/1510) [#1542](https://github.com/etjump/etjump/pull/1542)
 * fixed `trigger_teleport_client` not working correctly for spectators [#1511](https://github.com/etjump/etjump/pull/1511)
 * fixed JSON files without a JSON object unexpectedly crashing the game [#1514](https://github.com/etjump/etjump/pull/1514)
 * fixed ammo packs not functioning correctly when picked up by a field ops [#1517](https://github.com/etjump/etjump/pull/1517)
@@ -36,8 +36,7 @@
 * fixed exploits with `noghost` fireteam rule upon joining [#1520](https://github.com/etjump/etjump/pull/1520)
   * clients are now flagged to have enabled `noghost` upon joining, if `noghost` is enabled
   * timeruns are now interrupted when joining to fireteam with `noghost` enabled, if ongoing timerun doesn't allow `noghost`
-* `changemodel` script action now works (was broken in etmain) [#1522](https://github.com/etjump/etjump/pull/1522)
-  * `changemodel <path/to/model.md3>` changes entitys model to the given model
+* `changemodel` script action can now be used on `misc_gamemodel` entities too [#1543](https://github.com/etjump/etjump/pull/1543)
 * increased slick and NJD detector ranges to maximum possible map size [#1530](https://github.com/etjump/etjump/pull/1530)
 * adjusted timerun high ping interrupt to require sustained 100ms of lag before triggering [#1529](https://github.com/etjump/etjump/pull/1529)
   * this should help filter out small lag spikes that are caused by unstable connections, which would trigger timerun interrupts overly aggressively on `sv_fps + snaps 125`
@@ -58,6 +57,10 @@
   * map list scrolls back to first entry when selecting a new list
 * added changelog to the menus [#1532](https://github.com/etjump/etjump/pull/1532)
 * fixed a client crash if server had a custom vote list with an empty `name` or `callvote_text` field [#1536](https://github.com/etjump/etjump/pull/1536)
+* fixed `etj_drawPlayerBBox & 4` drawing fireteam member bboxes of spectated player's fireteam instead of your fireteam [#1538](https://github.com/etjump/etjump/pull/1538)
+* flamethrower no longer sets opposing teams members on fire [#1539](https://github.com/etjump/etjump/pull/1539)
+* fixed flamethrower dps inconsistency if `sv_fps` did not align to 50ms frametimes [#1541](https://github.com/etjump/etjump/pull/1541)
+* `ad_save` can no longer be used if the currently recorded demo isn't an autodemo temp demo [#1542](https://github.com/etjump/etjump/pull/1542)
 
 # ETJump 3.3.0
 
