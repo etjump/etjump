@@ -4284,8 +4284,8 @@ void G_BurnMeGood(gentity_t *self, gentity_t *body, const bool directhit) {
 
   // add the new damage
   body->flameQuota += 5;
-  body->flameQuotaTime = level.time;
-  body->lastBurnedFrametime = level.time;
+  body->flameQuotaTime = level.time - level.time % DEFAULT_SV_FRAMETIME;
+  body->lastBurnedFrametime = level.time - level.time % DEFAULT_SV_FRAMETIME;
 
   G_Damage(body, self->parent, self->parent, vec3_origin, self->r.currentOrigin,
            5, 0, MOD_FLAMETHROWER); // was 2 dmg in release ver, hit
