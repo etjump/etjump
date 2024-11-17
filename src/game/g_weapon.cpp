@@ -3412,21 +3412,19 @@ void Bullet_Fire(gentity_t *ent, float spread, int damage,
 }
 
 namespace ETJump {
-void bulletTrace(gentity_t *source, gentity_t *attacker, trace_t *tr,
-                 vec3_t start, vec3_t end) {
-  G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number,
-          MASK_SHOT);
+void bulletTrace(gentity_t *source, const gentity_t *attacker, trace_t *tr,
+                 vec3_t start, vec3_t end, const int mask) {
+  G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number, mask);
 
   if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
     return;
   }
 
   while (tr->entityNum < MAX_CLIENTS &&
-         !ETJump::EntityUtilities::playerIsSolid(attacker->client->ps.clientNum,
-                                                 tr->entityNum)) {
+         !EntityUtilities::playerIsSolid(attacker->client->ps.clientNum,
+                                         tr->entityNum)) {
     G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
-    G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number,
-            MASK_SHOT);
+    G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number, mask);
   }
 
   G_ResetTempTraceIgnoreEnts();
@@ -3462,7 +3460,7 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
     waslinked = qtrue;
   }
 
-  ETJump::bulletTrace(source, attacker, &tr, start, end);
+  ETJump::bulletTrace(source, attacker, &tr, start, end, MASK_SHOT);
 
   // bani - prevent shooting ourselves in the head when prone,
   // firing through a breakable
@@ -3570,8 +3568,8 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
 
     tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_WALL);
 
-    G_Trace(source, &tr2, start, nullptr, nullptr, end, source->s.number,
-            MASK_WATER | MASK_SHOT);
+    ETJump::bulletTrace(source, attacker, &tr2, start, end,
+                        MASK_WATER | MASK_SHOT);
 
     if ((tr.entityNum != tr2.entityNum && tr2.fraction != 1)) {
       vec3_t v;
