@@ -29,28 +29,28 @@
 #define BACKGROUND_ITEM_NAME "background"
 
 menuDef {
-	name		BACKGROUND_NAME
-	fullScreen	0
-	rect		0 0 640 480
-	visible		0
+    name            BACKGROUND_NAME
+    fullScreen      0
+    rect            0 0 640 480
+    visible         0
 
-	fadeClamp	0.5
-	fadeAmount  0.075
+    fadeClamp       0.5
+    fadeAmount      0.075
 
-	onOpen {
-		setitemcolor BACKGROUND_ITEM_NAME backcolor 0 0 0 0 ;
-		fadein BACKGROUND_ITEM_NAME
-	}
+    onOpen {
+        setitemcolor BACKGROUND_ITEM_NAME backcolor 0 0 0 0 ;
+        fadein BACKGROUND_ITEM_NAME
+    }
 
-	itemDef {
-		name		BACKGROUND_ITEM_NAME
-		rect		0 0 640 480
-		style		WINDOW_STYLE_FILLED
-		background	"ui/assets/fadebox.tga"
-		backcolor	0 0 0 0
-		visible		1
-		decoration
-	}
+    itemDef {
+        name        BACKGROUND_ITEM_NAME
+        rect        0 0 640 480
+        style       WINDOW_STYLE_FILLED
+        background  "ui/assets/fadebox.tga"
+        backcolor   0 0 0 0
+        visible     1
+        decoration
+    }
 }
 
 menuDef {
