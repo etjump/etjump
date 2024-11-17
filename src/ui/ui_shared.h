@@ -24,47 +24,65 @@
 #define MAX_COLOR_RANGES 10
 #define MAX_MODAL_MENUS 16
 
-#define WINDOW_MOUSEOVER 0x00000001 // mouse is over it, non exclusive
-#define WINDOW_HASFOCUS 0x00000002  // has cursor focus, exclusive
-#define WINDOW_VISIBLE 0x00000004   // is visible
-#define WINDOW_GREY 0x00000008      // is visible but grey ( non-active )
-#define WINDOW_DECORATION                                                      \
-  0x00000010 // for decoration only, no mouse, keyboard, etc..
-#define WINDOW_FADINGOUT 0x00000020     // fading out, non-active
-#define WINDOW_FADINGIN 0x00000040      // fading in
-#define WINDOW_MOUSEOVERTEXT 0x00000080 // mouse is over it, non exclusive
-#define WINDOW_INTRANSITION 0x00000100  // window is in transition
-#define WINDOW_FORECOLORSET                                                    \
-  0x00000200 // forecolor was explicitly set ( used to color alpha
-             // images or not
-             // )
-#define WINDOW_HORIZONTAL                                                      \
-  0x00000400 // for list boxes and sliders, vertical is default this is
-             // set of horizontal
-#define WINDOW_LB_LEFTARROW 0x00000800  // mouse is over left/up arrow
-#define WINDOW_LB_RIGHTARROW 0x00001000 // mouse is over right/down arrow
-#define WINDOW_LB_THUMB 0x00002000      // mouse is over thumb
-#define WINDOW_LB_PGUP 0x00004000       // mouse is over page up
-#define WINDOW_LB_PGDN 0x00008000       // mouse is over page down
-#define WINDOW_ORBITING 0x00010000      // item is in orbit
-#define WINDOW_OOB_CLICK 0x00020000     // close on out of bounds click
-#define WINDOW_WRAPPED 0x00040000       // manually wrap text
-#define WINDOW_AUTOWRAPPED 0x00080000   // auto wrap text
-#define WINDOW_FORCED 0x00100000        // forced open
-#define WINDOW_POPUP 0x00200000         // popup
-#define WINDOW_BACKCOLORSET 0x00400000  // backcolor was explicitly set
-#define WINDOW_TIMEDVISIBLE 0x00800000  // visibility timing ( NOT implemented )
-#define WINDOW_IGNORE_HUDALPHA                                                 \
-  0x01000000 // window will apply cg_hudAlpha value to colors unless
-             // this flag is set
-#define WINDOW_DRAWALWAYSONTOP 0x02000000
-#define WINDOW_MODAL                                                           \
-  0x04000000 // window is modal, the window to go back to is stored in a
-             // stack
-#define WINDOW_FOCUSPULSE 0x08000000
-#define WINDOW_TEXTASINT 0x10000000
-#define WINDOW_TEXTASFLOAT 0x20000000
-#define WINDOW_LB_SOMEWHERE 0x40000000
+// mouse is over it, non-exclusive
+static constexpr uint32_t WINDOW_MOUSEOVER = 1 << 0;
+// has cursor focus, exclusive
+static constexpr uint32_t WINDOW_HASFOCUS = 1 << 1;
+// is visible
+static constexpr uint32_t WINDOW_VISIBLE = 1 << 2;
+// is visible but grey ( non-active )
+static constexpr uint32_t WINDOW_GREY = 1 << 3;
+// for decoration only, no mouse, keyboard, etc..
+static constexpr uint32_t WINDOW_DECORATION = 1 << 4;
+// fading out, non-active
+static constexpr uint32_t WINDOW_FADINGOUT = 1 << 5;
+// fading in
+static constexpr uint32_t WINDOW_FADINGIN = 1 << 6;
+// mouse is over it, non-exclusive
+static constexpr uint32_t WINDOW_MOUSEOVERTEXT = 1 << 7;
+// window is in transition
+static constexpr uint32_t WINDOW_INTRANSITION = 1 << 8;
+// forecolor was explicitly set ( used to color alpha images or not )
+static constexpr uint32_t WINDOW_FORECOLORSET = 1 << 9;
+// for list boxes and sliders, vertical is default this is set of horizontal
+static constexpr uint32_t WINDOW_HORIZONTAL = 1 << 10;
+// mouse is over left/up arrow
+static constexpr uint32_t WINDOW_LB_LEFTARROW = 1 << 11;
+// mouse is over right/down arrow
+static constexpr uint32_t WINDOW_LB_RIGHTARROW = 1 << 12;
+// mouse is over thumb
+static constexpr uint32_t WINDOW_LB_THUMB = 1 << 13;
+// mouse is over page up
+static constexpr uint32_t WINDOW_LB_PGUP = 1 << 14;
+// mouse is over page down
+static constexpr uint32_t WINDOW_LB_PGDN = 1 << 15;
+// item is in orbit
+static constexpr uint32_t WINDOW_ORBITING = 1 << 16;
+// close on out-of-bounds click
+static constexpr uint32_t WINDOW_OOB_CLICK = 1 << 17;
+// manually wrap text
+static constexpr uint32_t WINDOW_WRAPPED = 1 << 18;
+// auto wrap text
+static constexpr uint32_t WINDOW_AUTOWRAPPED = 1 << 19;
+// forced open
+static constexpr uint32_t WINDOW_FORCED = 1 << 20;
+// popup
+static constexpr uint32_t WINDOW_POPUP = 1 << 21;
+// backcolor was explicitly set
+static constexpr uint32_t WINDOW_BACKCOLORSET = 1 << 22;
+// visibility timing ( NOT implemented )
+static constexpr uint32_t WINDOW_TIMEDVISIBLE = 1 << 23;
+// window will apply cg_hudAlpha value to colors unless this flag is set
+static constexpr uint32_t WINDOW_IGNORE_HUDALPHA = 1 << 24;
+static constexpr uint32_t WINDOW_DRAWALWAYSONTOP = 1 << 25;
+// window is modal, the window to go back to is stored in a stack
+static constexpr uint32_t WINDOW_MODAL = 1 << 26;
+static constexpr uint32_t WINDOW_FOCUSPULSE = 1 << 27;
+static constexpr uint32_t WINDOW_TEXTASINT = 1 << 28;
+static constexpr uint32_t WINDOW_TEXTASFLOAT = 1 << 29;
+static constexpr uint32_t WINDOW_LB_SOMEWHERE = 1 << 30;
+// horizontally centered
+static constexpr uint32_t WINDOW_CENTERED = 1 << 31;
 
 // CGAME cursor type bits
 #define CURSOR_NONE 0x00000001
@@ -148,7 +166,7 @@ typedef struct {
   int ownerDrawFlags;        // show flags for ownerdraw items
   float borderSize;          //
   int borderFixedSize;
-  int flags;              // visible, focus, mouseover, cursor
+  uint32_t flags;         // visible, focus, mouseover, cursor
   rectDef_t rectEffects;  // for various effects
   rectDef_t rectEffects2; // for various effects
   int offsetTime;         // time based value for various effects
