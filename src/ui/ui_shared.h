@@ -172,10 +172,12 @@ typedef struct {
   int offsetTime;         // time based value for various effects
   int nextTime;           // time next effect should cycle
   vec4_t foreColor;       // text color
-  vec4_t backColor;       // border color
-  vec4_t borderColor;     // border color
-  vec4_t outlineColor;    // border color
-  qhandle_t background;   // background asset
+  vec4_t backColor;       // background color
+  // alt background color, for alternating listbox entry background colors
+  vec4_t backColorAlt;
+  vec4_t borderColor;   // border color
+  vec4_t outlineColor;  // border color
+  qhandle_t background; // background asset
 } windowDef_t;
 
 typedef windowDef_t Window;

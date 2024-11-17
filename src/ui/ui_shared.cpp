@@ -5958,11 +5958,18 @@ void Item_ListBox_Paint(itemDef_t *item) {
     } else {
       x = fillRect.x /*+ 1*/;
       y = fillRect.y /*+ 1*/;
+      const bool hasAltBackground = item->window.backColorAlt[3] > 0;
+
       for (i = listPtr->startPos; i < count; i++) {
         const char *text;
         // always draw at least one
         // which may overdraw the box if it is
         // too small for the element
+
+        if (static_cast<int>(i) % 2 == 0 && hasAltBackground) {
+          DC->fillRect(x, y, fillRect.w - SCROLLBAR_SIZE - 2,
+                       listPtr->elementHeight, item->window.backColorAlt);
+        }
 
         if (listPtr->numColumns > 0) {
           int j, k;
@@ -7234,6 +7241,18 @@ qboolean ItemParse_backcolor(itemDef_t *item, int handle) {
   return qtrue;
 }
 
+qboolean ItemParse_backcolorAlt(itemDef_t *item, int handle) {
+  float f = 0.0f;
+
+  for (int i = 0; i < 4; i++) {
+    if (!PC_Float_Parse(handle, &f)) {
+      return qfalse;
+    }
+    item->window.backColorAlt[i] = f;
+  }
+  return qtrue;
+}
+
 qboolean ItemParse_forecolor(itemDef_t *item, int handle) {
   int i;
   float f = 0.0f;
@@ -7829,6 +7848,7 @@ keywordHash_t itemParseKeywords[] = {
     {"asset_shader", ItemParse_asset_shader, nullptr},
     {"autowrapped", ItemParse_autowrapped, nullptr},
     {"backcolor", ItemParse_backcolor, nullptr},
+    {"backcolorAlt", ItemParse_backcolorAlt, nullptr},
     {"background", ItemParse_background, nullptr},
     {"border", ItemParse_border, nullptr},
     {"bordercolor", ItemParse_bordercolor, nullptr},
