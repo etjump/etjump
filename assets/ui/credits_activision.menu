@@ -20,6 +20,7 @@ menuDef {
 	fullscreen	0
 	rect		WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
 	style		WINDOW_STYLE_FILLED
+	centered
 	
 	onESC {
 		close credits_activision ;

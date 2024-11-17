@@ -512,22 +512,22 @@ void Window_Init(Window *w) {
   w->cinematic = -1;
 }
 
-void Fade(int *flags, float *f, float clamp, int *nextTime, int offsetTime,
-          qboolean bFlags, float fadeAmount) {
-  if (*flags & (WINDOW_FADINGOUT | WINDOW_FADINGIN)) {
+void Fade(uint32_t &flags, float &f, const float clamp, int *nextTime,
+          const int offsetTime, const bool bFlags, const float fadeAmount) {
+  if (flags & (WINDOW_FADINGOUT | WINDOW_FADINGIN)) {
     if (DC->realTime > *nextTime) {
       *nextTime = DC->realTime + offsetTime;
-      if (*flags & WINDOW_FADINGOUT) {
-        *f -= fadeAmount;
-        if (bFlags && *f <= 0.0) {
-          *flags &= ~(WINDOW_FADINGOUT | WINDOW_VISIBLE);
+      if (flags & WINDOW_FADINGOUT) {
+        f -= fadeAmount;
+        if (bFlags && f <= 0.0) {
+          flags &= ~(WINDOW_FADINGOUT | WINDOW_VISIBLE);
         }
       } else {
-        *f += fadeAmount;
-        if (*f >= clamp) {
-          *f = clamp;
+        f += fadeAmount;
+        if (f >= clamp) {
+          f = clamp;
           if (bFlags) {
-            *flags &= ~WINDOW_FADINGIN;
+            flags &= ~WINDOW_FADINGIN;
           }
         }
       }
@@ -560,7 +560,7 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
   if (w->style == WINDOW_STYLE_FILLED) {
     // box, but possible a shader that needs filled
     if (w->background) {
-      Fade(&w->flags, &w->backColor[3], fadeClamp, &w->nextTime,
+      Fade(w->flags, w->backColor[3], fadeClamp, &w->nextTime,
            static_cast<int>(fadeCycle), qtrue, fadeAmount);
       DC->setColor(w->backColor);
       DC->drawHandlePic(fillRect.x, fillRect.y, fillRect.w, fillRect.h,
@@ -728,40 +728,28 @@ void Item_UpdatePosition(itemDef_t *item) {
 
 // menus
 void Menu_UpdatePosition(menuDef_t *menu) {
-  int i;
-  float x, y;
-  rectDef_t *r;
-  qboolean fullscreenItem = qfalse;
-  qboolean fullscreenMenu = qfalse;
-  qboolean centered = qfalse;
-  const char *menuName = NULL;
-  const char *itemName = NULL;
-
-  if (menu == NULL) {
+  if (menu == nullptr) {
     return;
   }
 
-  r = &menu->window.rect;
-  fullscreenMenu =
-      (r->x == 0 && r->y == 0 && r->w == 640 && r->h == SCREEN_HEIGHT) ? qtrue
-                                                                       : qfalse;
-  centered = (r->x == 16 && r->w == 608) ? qtrue : qfalse;
-  menuName = menu->window.name;
+  rectDef_t *r = &menu->window.rect;
+  const bool fullscreenMenu =
+      r->x == 0 && r->y == 0 && r->w == 640 && r->h == SCREEN_HEIGHT;
+  const bool centered = menu->window.flags & WINDOW_CENTERED;
+  const char *menuName = menu->window.name;
 
-  x = r->x;
-  y = r->y;
+  const float x = r->x;
+  const float y = r->y;
 
-  for (i = 0; i < menu->itemCount; i++) {
-
-    itemName = menu->items[i]->window.name;
+  for (int i = 0; i < menu->itemCount; i++) {
+    const char *itemName = menu->items[i]->window.name;
     r = &menu->items[i]->window.rectClient;
-    fullscreenItem =
-        (r->x == 0 && r->y == 0 && r->w == 640 && r->h == SCREEN_HEIGHT)
-            ? qtrue
-            : qfalse;
+
+    const bool fullscreenItem =
+        r->x == 0 && r->y == 0 && r->w == 640 && r->h == SCREEN_HEIGHT;
 
     if (!Q_stricmp(itemName, "clouds")) {
-      r->w = r->w + 2 * SCREEN_OFFSET_X;
+      r->w = r->w + 2.0f * SCREEN_OFFSET_X;
     } else if (fullscreenItem) {
       r->w = SCREEN_WIDTH;
     }
@@ -772,24 +760,18 @@ void Menu_UpdatePosition(menuDef_t *menu) {
       // align to right of screen..
       if (!Q_stricmp(itemName, "atvi_logo") ||
           !Q_stricmp(itemName, "id_logo")) {
-        Item_SetScreenCoords(menu->items[i], x + 2 * SCREEN_OFFSET_X, y);
-      }
-      // horizontally centered..
-      else if (!Q_stricmp(itemName, "et_logo")) {
-        Item_SetScreenCoords(menu->items[i], x + SCREEN_OFFSET_X, y);
-      }
-      // normal (left aligned)..
-      else if (!Q_stricmp(menuName, "main") ||
-               !Q_stricmp(menuName, "ingame_main")) {
+        Item_SetScreenCoords(menu->items[i], x + 2.0f * SCREEN_OFFSET_X, y);
+      } else if ((!Q_stricmp(menuName, "main") ||
+                  !Q_stricmp(menuName, "ingame_main")) &&
+                 Q_stricmp(itemName, "et_logo")) {
+        // normal (left aligned)..
         Item_SetScreenCoords(menu->items[i], x, y);
-
       } else {
         // horizontally centered..
         Item_SetScreenCoords(menu->items[i], x + SCREEN_OFFSET_X, y);
       }
-    }
-    // normal (left aligned)..
-    else {
+    } else {
+      // normal (left aligned)..
       Item_SetScreenCoords(menu->items[i], x, y);
     }
   }
@@ -4408,7 +4390,7 @@ void Item_TextColor(itemDef_t *item, vec4_t *newColor) {
   vec4_t lowLight;
   menuDef_t *parent = (menuDef_t *)item->parent;
 
-  Fade(&item->window.flags, &item->window.foreColor[3], parent->fadeClamp,
+  Fade(item->window.flags, item->window.foreColor[3], parent->fadeClamp,
        &item->window.nextTime, parent->fadeCycle, qtrue, parent->fadeAmount);
 
   if (item->window.flags & WINDOW_HASFOCUS &&
@@ -6065,7 +6047,7 @@ void Item_OwnerDraw_Paint(itemDef_t *item) {
   if (DC->ownerDrawItem) {
     vec4_t color, lowLight;
     menuDef_t *parent = (menuDef_t *)item->parent;
-    Fade(&item->window.flags, &item->window.foreColor[3], parent->fadeClamp,
+    Fade(item->window.flags, item->window.foreColor[3], parent->fadeClamp,
          &item->window.nextTime, parent->fadeCycle, qtrue, parent->fadeAmount);
     memcpy(&color, &item->window.foreColor, sizeof(color));
     if (item->numColors > 0 && DC->getValue) {
@@ -8394,47 +8376,56 @@ qboolean MenuParse_modal(itemDef_t *item, int handle) {
   return qtrue;
 }
 
+qboolean MenuParse_centered(itemDef_t *item, int handle) {
+  const auto menu = reinterpret_cast<menuDef_t *>(item);
+  menu->window.flags |= WINDOW_CENTERED;
+  return qtrue;
+}
+
 keywordHash_t menuParseKeywords[] = {
-    {"name", MenuParse_name, NULL},
-    {"fullscreen", MenuParse_fullscreen, NULL},
-    {"rect", MenuParse_rect, NULL},
-    {"style", MenuParse_style, NULL},
-    {"visible", MenuParse_visible, NULL},
-    {"onOpen", MenuParse_onOpen, NULL},
-    {"onClose", MenuParse_onClose, NULL},
-    {"onTimeout", MenuParse_onTimeout, NULL}, // ydnar: menu timeout function
-    {"onESC", MenuParse_onESC, NULL},
-    {"onEnter", MenuParse_onEnter, NULL},
-    {"border", MenuParse_border, NULL},
-    {"borderSize", MenuParse_borderSize, NULL},
-    {"backcolor", MenuParse_backcolor, NULL},
-    {"forecolor", MenuParse_forecolor, NULL},
-    {"bordercolor", MenuParse_bordercolor, NULL},
-    {"focuscolor", MenuParse_focuscolor, NULL},
-    {"disablecolor", MenuParse_disablecolor, NULL},
-    {"outlinecolor", MenuParse_outlinecolor, NULL},
-    {"background", MenuParse_background, NULL},
-    {"ownerdraw", MenuParse_ownerdraw, NULL},
-    {"ownerdrawFlag", MenuParse_ownerdrawFlag, NULL},
-    {"outOfBoundsClick", MenuParse_outOfBounds, NULL},
-    {"soundLoop", MenuParse_soundLoop, NULL},
-    {"itemDef", MenuParse_itemDef, NULL},
-    {"cinematic", MenuParse_cinematic, NULL},
-    {"popup", MenuParse_popup, NULL},
-    {"fadeClamp", MenuParse_fadeClamp, NULL},
-    {"fadeCycle", MenuParse_fadeCycle, NULL},
-    {"fadeAmount", MenuParse_fadeAmount, NULL},
-    {"execKey", MenuParse_execKey, NULL},       // NERVE - SMF
-    {"execKeyInt", MenuParse_execKeyInt, NULL}, // NERVE - SMF
-    {"alwaysontop", MenuParse_drawAlwaysOnTop, NULL},
-    {"modal", MenuParse_modal, NULL},
+    {"name", MenuParse_name, nullptr},
+    {"fullscreen", MenuParse_fullscreen, nullptr},
+    {"rect", MenuParse_rect, nullptr},
+    {"style", MenuParse_style, nullptr},
+    {"visible", MenuParse_visible, nullptr},
+    {"onOpen", MenuParse_onOpen, nullptr},
+    {"onClose", MenuParse_onClose, nullptr},
+    {"onTimeout", MenuParse_onTimeout, nullptr}, // ydnar: menu timeout function
+    {"onESC", MenuParse_onESC, nullptr},
+    {"onEnter", MenuParse_onEnter, nullptr},
+    {"border", MenuParse_border, nullptr},
+    {"borderSize", MenuParse_borderSize, nullptr},
+    {"backcolor", MenuParse_backcolor, nullptr},
+    {"forecolor", MenuParse_forecolor, nullptr},
+    {"bordercolor", MenuParse_bordercolor, nullptr},
+    {"focuscolor", MenuParse_focuscolor, nullptr},
+    {"disablecolor", MenuParse_disablecolor, nullptr},
+    {"outlinecolor", MenuParse_outlinecolor, nullptr},
+    {"background", MenuParse_background, nullptr},
+    {"ownerdraw", MenuParse_ownerdraw, nullptr},
+    {"ownerdrawFlag", MenuParse_ownerdrawFlag, nullptr},
+    {"outOfBoundsClick", MenuParse_outOfBounds, nullptr},
+    {"soundLoop", MenuParse_soundLoop, nullptr},
+    {"itemDef", MenuParse_itemDef, nullptr},
+    {"cinematic", MenuParse_cinematic, nullptr},
+    {"popup", MenuParse_popup, nullptr},
+    {"fadeClamp", MenuParse_fadeClamp, nullptr},
+    {"fadeCycle", MenuParse_fadeCycle, nullptr},
+    {"fadeAmount", MenuParse_fadeAmount, nullptr},
+    {"execKey", MenuParse_execKey, nullptr},       // NERVE - SMF
+    {"execKeyInt", MenuParse_execKeyInt, nullptr}, // NERVE - SMF
+    {"alwaysontop", MenuParse_drawAlwaysOnTop, nullptr},
+    {"modal", MenuParse_modal, nullptr},
 
     // START - TAT 9/16/2002
     // parse the command to set if we're looping through all items to find the
     // current hotkey
-    {"itemHotkeyMode", MenuParse_itemHotkeyMode, NULL},
+    {"itemHotkeyMode", MenuParse_itemHotkeyMode, nullptr},
     // END - TAT 9/16/2002
-    {NULL, NULL, NULL}};
+
+    {"centered", MenuParse_centered, nullptr},
+
+    {nullptr, nullptr, nullptr}};
 
 keywordHash_t *menuParseKeywordHash[KEYWORDHASH_SIZE];
 
