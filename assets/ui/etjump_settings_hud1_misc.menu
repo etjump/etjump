@@ -76,6 +76,7 @@ menuDef {
         EDITFIELD_EXT       (SETTINGS_EF_POS(16), "Save message:", 0.2, SETTINGS_ITEM_H, "etj_saveMsg", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Message to print when saving position\netj_saveMsg")
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(17), "etj_expandedMapAlpha", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(17), "Expanded map alpha:", 0.2, SETTINGS_ITEM_H, etj_expandedMapAlpha 0.7 0 1 0.05, "Sets transparency of expanded map\netj_expandedMapAlpha")
+        YESNO               (SETTINGS_ITEM_POS(18), "Fixed compass shader:", 0.2, SETTINGS_ITEM_H, "etj_fixedCompassShader", "Override the command map shader and ensure corners are masked off correctly\nMight break certain special command map shaders\nvid_restart required\netj_fixedCompassShader")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
