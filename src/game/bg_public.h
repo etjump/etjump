@@ -2884,7 +2884,6 @@ enum class ViewlockState {
   Medic = 7,   // look at nearest medic
 };
 
-// TODO: use this in save system/goto/call
 enum class PlayerStance {
   Stand = 0,
   Crouch = 1,

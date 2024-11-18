@@ -40,17 +40,15 @@ public:
   static const int MAX_SAVED_POSITIONS = 3;
   static const int MAX_BACKUP_POSITIONS = 3;
 
-  enum SaveStance { Stand, Crouch, Prone };
-
   struct SavePosition {
     SavePosition()
         : isValid(false), isLatest(false), origin{0, 0, 0}, vangles{0, 0, 0},
-          stance(SaveStance::Stand), isTimerunSave(false) {}
+          stance(PlayerStance::Stand), isTimerunSave(false) {}
     bool isValid;
     bool isLatest;
     vec3_t origin;
     vec3_t vangles;
-    SaveStance stance;
+    PlayerStance stance;
     bool isTimerunSave;
   };
 
@@ -139,7 +137,7 @@ private:
   void saveBackupPosition(gentity_t *ent, SavePosition *pos);
 
   // copies player positional info to target position
-  static void storePosition(gclient_s *client, SavePosition *pos);
+  static void storePosition(const gclient_s *client, SavePosition *pos);
 
   // returns the latest save slot number that client used in their current team
   // -1 if no slots found (no saved positions in current team)
@@ -155,7 +153,7 @@ private:
 
   SavePosition *getValidTeamQuickDeploySave(gentity_t *ent, team_t team);
 
-  static void restoreStanceFromSave(gentity_t *ent, SavePosition *pos);
+  static void restoreStanceFromSave(gentity_t *ent, const SavePosition *pos);
 
   SavePosition *getValidTeamSaveForSlot(gentity_t *ent, team_t team, int slot);
 
