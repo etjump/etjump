@@ -1204,7 +1204,7 @@ void InitShooter(gentity_t *ent, const int weapon) {
 
   G_SetMovedir(ent->s.angles, ent->movedir);
 
-  if (ent->random != 0.0f) {
+  if (ent->random == 0.0f) {
     ent->random = 1.0;
   }
 
