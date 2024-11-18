@@ -313,10 +313,12 @@ std::vector<std::string> SavePos::getSaveposNames() {
 PlayerStance SavePos::getStance(const playerState_t *ps) {
   if (ps->eFlags & (EF_PRONE | EF_PRONE_MOVING)) {
     return PlayerStance::Prone;
-  } else if (ps->pm_flags & PMF_DUCKED) {
-    return PlayerStance::Crouch;
-  } else {
-    return PlayerStance::Stand;
   }
+
+  if (ps->eFlags & (EF_CROUCHING | EF_DEAD)) {
+    return PlayerStance::Crouch;
+  }
+
+  return PlayerStance::Stand;
 }
 } // namespace ETJump

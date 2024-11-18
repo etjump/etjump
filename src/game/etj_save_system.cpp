@@ -261,7 +261,7 @@ void SaveSystem::load(gentity_t *ent) {
   const auto pos = getValidTeamSaveForSlot(ent, client->sess.sessionTeam, slot);
 
   if (pos) {
-    if (pos->stance == SaveStance::Prone &&
+    if (pos->stance == PlayerStance::Prone &&
         client->ps.weapon == WP_MORTAR_SET) {
       Printer::center(
           ent,
@@ -342,9 +342,11 @@ void ETJump::SaveSystem::forceSave(gentity_t *location, gentity_t *ent) {
   pos->isLatest = true;
 
   if (client->ps.eFlags & EF_PRONE) {
-    pos->stance = Prone;
+    pos->stance = PlayerStance::Prone;
+  } else if (client->ps.eFlags & (EF_CROUCHING | EF_DEAD)) {
+    pos->stance = PlayerStance::Crouch;
   } else {
-    pos->stance = client->ps.eFlags & EF_CROUCHING ? Crouch : Stand;
+    pos->stance = PlayerStance::Stand;
   }
 
   pos->isTimerunSave = ent->client->sess.timerunActive;
@@ -421,7 +423,8 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
     pos = &_clients[clientNum].axisBackups[slot];
   }
 
-  if (pos->stance == SaveStance::Prone && client->ps.weapon == WP_MORTAR_SET) {
+  if (pos->stance == PlayerStance::Prone &&
+      client->ps.weapon == WP_MORTAR_SET) {
     Printer::center(
         ent, "You cannot ^3load ^7to this position while using a mortar set.");
     return;
@@ -489,7 +492,7 @@ void SaveSystem::unload(gentity_t *ent) {
   const auto pos = getValidTeamUnloadPos(ent, client->sess.sessionTeam);
 
   if (pos) {
-    if (pos->stance == SaveStance::Prone &&
+    if (pos->stance == PlayerStance::Prone &&
         client->ps.weapon == WP_MORTAR_SET) {
       Printer::center(
           ent,
@@ -848,18 +851,19 @@ SaveSystem::getValidTeamQuickDeploySave(gentity_t *ent, team_t team) {
   return pos;
 }
 
-void SaveSystem::restoreStanceFromSave(gentity_t *ent, SavePosition *pos) {
+void SaveSystem::restoreStanceFromSave(gentity_t *ent,
+                                       const SavePosition *pos) {
   if (!ent || !ent->client) {
     return;
   }
 
-  auto client = ent->client;
+  const auto client = ent->client;
 
-  if (pos->stance == Crouch) {
+  if (pos->stance == PlayerStance::Crouch) {
     client->ps.eFlags &= ~EF_PRONE;
     client->ps.eFlags &= ~EF_PRONE_MOVING;
     client->ps.pm_flags |= PMF_DUCKED;
-  } else if (pos->stance == Prone) {
+  } else if (pos->stance == PlayerStance::Prone) {
     client->ps.eFlags |= EF_PRONE;
     SetClientViewAngle(ent, pos->vangles);
   } else {
@@ -902,16 +906,18 @@ void SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos) {
   }
 }
 
-void ETJump::SaveSystem::storePosition(gclient_s *client, SavePosition *pos) {
+void SaveSystem::storePosition(const gclient_s *client, SavePosition *pos) {
   VectorCopy(client->ps.origin, pos->origin);
   VectorCopy(client->ps.viewangles, pos->vangles);
   pos->isValid = true;
   pos->isLatest = true;
 
   if (client->ps.eFlags & EF_PRONE) {
-    pos->stance = Prone;
+    pos->stance = PlayerStance::Prone;
+  } else if (client->ps.eFlags & (EF_CROUCHING | EF_DEAD)) {
+    pos->stance = PlayerStance::Crouch;
   } else {
-    pos->stance = client->ps.eFlags & EF_CROUCHING ? Crouch : Stand;
+    pos->stance = PlayerStance::Stand;
   }
 
   pos->isTimerunSave = client->sess.timerunActive;
