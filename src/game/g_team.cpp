@@ -698,38 +698,24 @@ SelectRandomDeathmatchSpawnPoint
 go to a random point that doesn't telefrag
 ================
 */
-#define MAX_TEAM_SPAWN_POINTS 256
-gentity_t *SelectRandomTeamSpawnPoint(int teamstate, team_t team,
-                                      int spawnObjective) {
-  gentity_t *spot;
+gentity_t *SelectRandomTeamSpawnPoint(const team_t team, int spawnObjective) {
+  static constexpr int MAX_TEAM_SPAWN_POINTS = 256;
   gentity_t *spots[MAX_TEAM_SPAWN_POINTS];
 
-  int count, closest;
-  int i = 0;
-
   const char *classname;
-  float shortest, tmp;
-
-  vec3_t target;
-  vec3_t farthest;
 
   if (team == TEAM_AXIS) {
     classname = "team_CTF_redspawn";
   } else if (team == TEAM_ALLIES) {
     classname = "team_CTF_bluespawn";
   } else {
-    return NULL;
+    return nullptr;
   }
 
-  count = 0;
+  int count = 0;
+  gentity_t *spot = nullptr;
 
-  spot = NULL;
-
-  while ((spot = G_Find(spot, FOFS(classname), classname)) != NULL) {
-    if (SpotWouldTelefrag(spot)) {
-      continue;
-    }
-
+  while ((spot = G_Find(spot, FOFS(classname), classname)) != nullptr) {
     // Arnout - modified to allow initial spawnpoints to be
     // disabled at gamestart
     if (!(spot->spawnflags & 2)) {
@@ -748,18 +734,17 @@ gentity_t *SelectRandomTeamSpawnPoint(int teamstate, team_t team,
     }
   }
 
-  if (!count) // no spots that won't telefrag
-  {
-    spot = NULL;
-    while ((spot = G_Find(spot, FOFS(classname), classname)) != NULL) {
+  // no valid spawnpoints
+  if (!count) {
+    spot = nullptr;
+    while ((spot = G_Find(spot, FOFS(classname), classname)) != nullptr) {
       // Arnout - modified to allow initial spawnpoints
       // to be disabled at gamestart
       if (!(spot->spawnflags & 2)) {
         continue;
       }
 
-      // Arnout: invisible entities can't be used for
-      // spawning
+      // Arnout: invisible entities can't be used for spawning
       if (spot->entstate == STATE_INVISIBLE ||
           spot->entstate == STATE_UNDERCONSTRUCTION) {
         continue;
@@ -768,47 +753,50 @@ gentity_t *SelectRandomTeamSpawnPoint(int teamstate, team_t team,
       return spot;
     }
 
-    return G_Find(NULL, FOFS(classname), classname);
+    return G_Find(nullptr, FOFS(classname), classname);
   }
 
   if ((!level.numspawntargets)) {
     G_Error("No spawnpoints found\n");
-    return NULL;
-  } else {
-    // Gordon: adding ability to set autospawn
-    if (!spawnObjective) {
-      switch (team) {
-        case TEAM_AXIS:
-          spawnObjective = level.axisAutoSpawn + 1;
-          break;
-        case TEAM_ALLIES:
-          spawnObjective = level.alliesAutoSpawn + 1;
-          break;
-        default:
-          break;
-      }
-    }
-
-    i = spawnObjective - 1;
-
-    VectorCopy(level.spawntargets[i], farthest);
-
-    // now that we've got farthest vector, figure closest
-    // spawnpoint to it
-    VectorSubtract(farthest, spots[0]->s.origin, target);
-    shortest = VectorLength(target);
-    closest = 0;
-    for (i = 0; i < count; i++) {
-      VectorSubtract(farthest, spots[i]->s.origin, target);
-      tmp = VectorLength(target);
-
-      if (tmp < shortest) {
-        shortest = tmp;
-        closest = i;
-      }
-    }
-    return spots[closest];
+    return nullptr;
   }
+
+  int i = 0;
+  vec3_t farthest;
+  vec3_t target;
+  // Gordon: adding ability to set autospawn
+  if (!spawnObjective) {
+    switch (team) {
+      case TEAM_AXIS:
+        spawnObjective = level.axisAutoSpawn + 1;
+        break;
+      case TEAM_ALLIES:
+        spawnObjective = level.alliesAutoSpawn + 1;
+        break;
+      default:
+        break;
+    }
+  }
+
+  i = spawnObjective - 1;
+
+  VectorCopy(level.spawntargets[i], farthest);
+
+  // now that we've got the farthest vector, figure closest spawnpoint to it
+  VectorSubtract(farthest, spots[0]->s.origin, target);
+  float shortest = VectorLength(target);
+  int closest = 0;
+  for (i = 0; i < count; i++) {
+    VectorSubtract(farthest, spots[i]->s.origin, target);
+    const float tmp = VectorLength(target);
+
+    if (tmp < shortest) {
+      shortest = tmp;
+      closest = i;
+    }
+  }
+
+  return spots[closest];
 }
 
 /*
@@ -817,11 +805,9 @@ SelectCTFSpawnPoint
 
 ============
 */
-gentity_t *SelectCTFSpawnPoint(team_t team, int teamstate, vec3_t origin,
-                               vec3_t angles, int spawnObjective) {
-  gentity_t *spot;
-
-  spot = SelectRandomTeamSpawnPoint(teamstate, team, spawnObjective);
+gentity_t *SelectCTFSpawnPoint(const team_t team, vec3_t origin, vec3_t angles,
+                               const int spawnObjective) {
+  gentity_t *spot = SelectRandomTeamSpawnPoint(team, spawnObjective);
 
   if (!spot) {
     return SelectSpawnPoint(vec3_origin, origin, angles);

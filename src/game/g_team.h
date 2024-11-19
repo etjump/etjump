@@ -97,8 +97,8 @@ void Team_CheckHurtCarrier(gentity_t *targ, gentity_t *attacker);
 void Team_InitGame(void);
 void Team_ReturnFlag(gentity_t *ent);
 void Team_FreeEntity(gentity_t *ent);
-gentity_t *SelectCTFSpawnPoint(team_t team, int teamstate, vec3_t origin,
-                               vec3_t angles, int spawnObjective);
+gentity_t *SelectCTFSpawnPoint(team_t team, vec3_t origin, vec3_t angles,
+                               int spawnObjective);
 // START Mad Doc - TDF
 gentity_t *SelectPlayerSpawnPoint(team_t team, int teamstate, vec3_t origin,
                                   vec3_t angles);
