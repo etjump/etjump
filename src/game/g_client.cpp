@@ -72,31 +72,7 @@ extern void BotSpeedBonus(int clientNum);
 =======================================================================
 */
 
-/*
-================
-SpotWouldTelefrag
-
-================
-*/
-qboolean SpotWouldTelefrag(gentity_t *spot) {
-  int i, num;
-  int touch[MAX_GENTITIES];
-  gentity_t *hit;
-  vec3_t mins, maxs;
-
-  VectorAdd(spot->r.currentOrigin, playerMins, mins);
-  VectorAdd(spot->r.currentOrigin, playerMaxs, maxs);
-  num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
-
-  for (i = 0; i < num; i++) {
-    hit = &g_entities[touch[i]];
-    if (hit->client && hit->client->ps.stats[STAT_HEALTH] > 0) {
-      return qtrue;
-    }
-  }
-
-  return qfalse;
-}
+static constexpr int MAX_SPAWN_POINTS = 128;
 
 /*
 ================
@@ -105,7 +81,6 @@ SelectNearestDeathmatchSpawnPoint
 Find the spot that we DON'T want to use
 ================
 */
-#define MAX_SPAWN_POINTS 128
 gentity_t *SelectNearestDeathmatchSpawnPoint(vec3_t from) {
   gentity_t *spot;
   vec3_t delta;
@@ -137,31 +112,24 @@ SelectRandomDeathmatchSpawnPoint
 go to a random point that doesn't telefrag
 ================
 */
-#define MAX_SPAWN_POINTS 128
-gentity_t *SelectRandomDeathmatchSpawnPoint(void) {
-  gentity_t *spot;
-  int count;
-  int selection;
+gentity_t *SelectRandomDeathmatchSpawnPoint() {
   gentity_t *spots[MAX_SPAWN_POINTS];
 
-  count = 0;
-  spot = NULL;
+  int count = 0;
+  gentity_t *spot = nullptr;
 
   while ((spot = G_Find(spot, FOFS(classname), "info_player_deathmatch")) !=
-         NULL) {
-    if (SpotWouldTelefrag(spot)) {
-      continue;
-    }
+         nullptr) {
     spots[count] = spot;
     count++;
   }
 
-  if (!count) // no spots that won't telefrag
-  {
-    return G_Find(NULL, FOFS(classname), "info_player_deathmatch");
+  // no spawnpoints found
+  if (!count) {
+    return nullptr;
   }
 
-  selection = rand() % count;
+  const int selection = rand() % count;
   return spots[selection];
 }
 
@@ -2265,29 +2233,25 @@ void ClientBegin(int clientNum) {
   client->ps.persistant[PERS_JUMP_SPEED] = 0;
 }
 
-gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin,
+gentity_t *SelectSpawnPointFromList(const char *list, vec3_t spawn_origin,
                                     vec3_t spawn_angles) {
   const char *pStr, *token;
-  gentity_t *spawnPoint = NULL, *trav;
-#define MAX_SPAWNPOINTFROMLIST_POINTS 16
-  int valid[MAX_SPAWNPOINTFROMLIST_POINTS];
-  int numValid;
-
-  memset(valid, 0, sizeof(valid));
-  numValid = 0;
+  gentity_t *spawnPoint = nullptr;
+  static constexpr int MAX_SPAWNPOINTFROMLIST_POINTS = 16;
+  int valid[MAX_SPAWNPOINTFROMLIST_POINTS] = {};
+  int numValid = 0;
 
   pStr = list;
-  while ((token = COM_Parse(&pStr)) != NULL && token[0]) {
-    trav = g_entities + level.maxclients;
-    while ((trav = G_FindByTargetname(trav, token)) != NULL) {
+  while ((token = COM_Parse(&pStr)) != nullptr && token[0]) {
+    gentity_t *trav = g_entities + level.maxclients;
+    while ((trav = G_FindByTargetname(trav, token)) != nullptr) {
       if (!spawnPoint) {
         spawnPoint = trav;
       }
-      if (!SpotWouldTelefrag(trav)) {
-        valid[numValid++] = trav->s.number;
-        if (numValid >= MAX_SPAWNPOINTFROMLIST_POINTS) {
-          break;
-        }
+
+      valid[numValid++] = trav->s.number;
+      if (numValid >= MAX_SPAWNPOINTFROMLIST_POINTS) {
+        break;
       }
     }
   }
@@ -2371,9 +2335,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
         } else if (client->sess.autoSpawnObjectiveIndex > 0) {
           spawnObjective = client->sess.autoSpawnObjectiveIndex;
         }
-        spawnPoint = SelectCTFSpawnPoint(
-            client->sess.sessionTeam, client->pers.teamState.state,
-            spawn_origin, spawn_angles, spawnObjective);
+        spawnPoint = SelectCTFSpawnPoint(client->sess.sessionTeam, spawn_origin,
+                                         spawn_angles, spawnObjective);
       }
     }
   }

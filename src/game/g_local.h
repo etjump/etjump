@@ -1754,7 +1754,6 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
                 int damage, int mod);
 void AddScore(gentity_t *ent, int score);
 void CalculateRanks(void);
-qboolean SpotWouldTelefrag(gentity_t *spot);
 void G_StartPlayerAppropriateSound(gentity_t *ent, char *soundType);
 void SetWolfSpawnWeapons(gclient_t *client);
 void limbo(gentity_t *ent, qboolean makeCorpse); // JPW NERVE
