@@ -213,8 +213,7 @@ void init() {
         trap_SendClientCommand(command.c_str());
       },
       [](const std::string &message) { CG_Printf(message.c_str()); },
-      bind(&ETJump::OperatingSystem::getHwid, ETJump::operatingSystem),
-      ETJump::serverCommandsHandler);
+      [] { return OperatingSystem::getHwid(); }, ETJump::serverCommandsHandler);
 
   playerEventsHandler = std::make_shared<PlayerEventsHandler>();
   awaitedCommandHandler = std::make_shared<AwaitedCommandHandler>(
@@ -226,8 +225,9 @@ void init() {
   // TODO: move these to own client commands handler
   ////////////////////////////////////////////////////////////////
   auto minimize = [](const std::vector<std::string> &args) {
-    operatingSystem->minimize();
+    OperatingSystem::minimize();
   };
+
   consoleCommandsHandler->subscribe("min", minimize);
   consoleCommandsHandler->subscribe("minimize", minimize);
   ////////////////////////////////////////////////////////////////

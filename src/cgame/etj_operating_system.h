@@ -29,7 +29,11 @@ namespace ETJump {
 class OperatingSystem {
 public:
   OperatingSystem();
-  void minimize();
-  std::string getHwid();
+  static void minimize();
+  static std::string getHwid();
+
+#ifdef WIN32
+  static std::string getCurrentUserSID();
+#endif
 };
 } // namespace ETJump
