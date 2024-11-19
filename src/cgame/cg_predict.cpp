@@ -436,6 +436,11 @@ static void CG_InterpolatePlayerState(qboolean grabAngles) {
     cmdNum = trap_GetCurrentCmdNumber();
     trap_GetUserCmd(cmdNum, &cmd);
 
+    // use cg.pmext here as we haven't setup cg_pmove for interpolation
+    if (cg.pmext.autoSprint) {
+      cmd.buttons ^= BUTTON_SPRINT;
+    }
+
     // rain - added tracemask
     PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID);
   }
@@ -1287,6 +1292,10 @@ void CG_PredictPlayerState() {
     // ETJump: client side no activate lean
     cg_pmove.noActivateLean = etj_noActivateLean.integer ? qtrue : qfalse;
     cg_pmove.noPanzerAutoswitch = etj_noPanzerAutoswitch.integer;
+
+    if (cg_pmove.pmext->autoSprint) {
+      cg_pmove.cmd.buttons ^= BUTTON_SPRINT;
+    }
 
     // grab data, we only want the final result
     // rain - copy the pmext as it was just before we

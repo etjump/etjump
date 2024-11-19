@@ -482,6 +482,10 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd) {
     pm.noActivateLean = client->pers.noActivateLean;
     pm.noPanzerAutoswitch = client->pers.noPanzerAutoswitch;
 
+    if (client->pmext.autoSprint) {
+      pm.cmd.buttons ^= BUTTON_SPRINT;
+    }
+
     Pmove(&pm); // JPW NERVE
 
     // Rafael - Activate
@@ -1200,24 +1204,12 @@ void ClientThink_real(gentity_t *ent) {
   pm.covertopsChargeTime =
       level.covertopsChargeTime[client->sess.sessionTeam - 1];
 
+  if (client->pmext.autoSprint) {
+    pm.cmd.buttons ^= BUTTON_SPRINT;
+  }
+
   if (client->ps.pm_type != PM_DEAD &&
       level.timeCurrent - client->pers.lastBattleSenseBonusTime > 45000) {
-    /*switch( client->combatState )
-    {
-    case COMBATSTATE_COLD:	G_AddSkillPoints( ent,
-    SK_BATTLE_SENSE, 0.f ); G_DebugAddSkillPoints( ent,
-    SK_BATTLE_SENSE, 0.f, "combatstate cold" ); break; case
-    COMBATSTATE_WARM:	G_AddSkillPoints( ent,
-    SK_BATTLE_SENSE, 2.f ); G_DebugAddSkillPoints( ent,
-    SK_BATTLE_SENSE, 2.f, "combatstate warm" ); break; case
-    COMBATSTATE_HOT:	G_AddSkillPoints( ent,
-    SK_BATTLE_SENSE, 5.f ); G_DebugAddSkillPoints( ent,
-    SK_BATTLE_SENSE, 5.f, "combatstate hot" ); break; case
-    COMBATSTATE_SUPERHOT: G_AddSkillPoints( ent,
-    SK_BATTLE_SENSE, 8.f ); G_DebugAddSkillPoints( ent,
-    SK_BATTLE_SENSE, 8.f, "combatstate super-hot" ); break;
-    }*/
-
     if (client->combatState != COMBATSTATE_COLD) {
       if (client->combatState & (1 << COMBATSTATE_KILLEDPLAYER) &&
           client->combatState & (1 << COMBATSTATE_DAMAGERECEIVED)) {

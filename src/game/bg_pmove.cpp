@@ -5896,11 +5896,6 @@ void PmoveSingle(pmove_t *pmove) {
     }
   }
 
-  // flip sprint button bit if autosprint is enabled
-  if (pm->pmext->autoSprint) {
-    pm->cmd.buttons ^= BUTTON_SPRINT;
-  }
-
   // ETJump: no activate lean
   if (pm->noActivateLean) {
     if (pm->cmd.wbuttons & WBUTTON_LEANLEFT &&
