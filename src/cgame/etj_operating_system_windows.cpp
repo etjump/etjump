@@ -115,7 +115,6 @@ std::string ETJump::OperatingSystem::getHwid() {
 
   // Get user SID
   const std::string userSid = getCurrentUserSID();
-  // Convert wide string to regular string
   hardwareId += userSid;
 
   SYSTEM_INFO systemInfo;
