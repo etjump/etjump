@@ -90,7 +90,7 @@ void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
   // don't try to draw things off-screen
   if ((range.x1 == 0 && range.x2 == 0) ||
       (range.x1 == SCREEN_WIDTH && range.x2 == SCREEN_WIDTH) ||
-      (range.x1 == 0 && range.x2 == SCREEN_WIDTH)) {
+      (range.x1 == 0 && range.x2 == SCREEN_WIDTH && range.split)) {
     return;
   }
 
