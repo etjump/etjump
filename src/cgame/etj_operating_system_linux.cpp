@@ -96,6 +96,9 @@ std::string ETJump::OperatingSystem::getHwid() {
                        mac_address[1], mac_address[2], mac_address[3],
                        mac_address[4], mac_address[5]);
 
+  // TODO: include this in HWID, when user database has been refactored
+  //  to store HWIDs of individual components
+  /*
   std::ifstream machineID("/etc/machine-id");
 
   if (!machineID) {
@@ -110,6 +113,8 @@ std::string ETJump::OperatingSystem::getHwid() {
   }
 
   hwid += id;
+  */
+
   return G_SHA1(hwid.c_str());
 }
 
