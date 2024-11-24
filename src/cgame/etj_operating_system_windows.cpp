@@ -113,9 +113,13 @@ std::string ETJump::OperatingSystem::getHwid() {
   std::string rootDrive;
   DWORD vsn = 0;
 
+  // TODO: include once user database is refactored
+  //  to store individual components of HWID
+  /*
   // Get user SID
   const std::string userSid = getCurrentUserSID();
   hardwareId += userSid;
+  */
 
   SYSTEM_INFO systemInfo;
   GetSystemInfo(&systemInfo);
@@ -139,7 +143,9 @@ std::string ETJump::OperatingSystem::getHwid() {
     rootDrive += "failed";
   }
 
-  hardwareId += rootDrive;
+  // TODO: include once user database is refactored
+  //  to store individual components of HWID
+  // hardwareId += rootDrive;
 
   _ultoa(vsn, buffer, 10);
   hardwareId += buffer;
