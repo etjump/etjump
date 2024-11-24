@@ -266,10 +266,13 @@ std::string interpolateNametags(std::string input, const int color) {
       }
     }
   }
+
   if (len % 2 != 0 || i == len) {
     interpolated += split[len - 1];
   }
 
+  // escape '=' for QP-encoding
+  ETJump::StringUtil::replaceAll(interpolated, "=", "\x19=");
   return interpolated;
 }
 
