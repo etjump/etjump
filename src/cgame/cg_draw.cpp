@@ -2113,7 +2113,7 @@ static void CG_DrawMoverHealthBar(float frac, const vec4_t color) {
                barFrac, FilledBarFlags::BAR_BG);
 }
 
-static void CG_DrawPlyerName(vec4_t color) {
+static void CG_DrawPlayerName(vec4_t color) {
   const char *s = va("%s", cgs.clientinfo[cg.crosshairClientNum].name);
   float w = ETJump::DrawStringWidth(s, 0.23f);
 
@@ -2127,7 +2127,11 @@ static void CG_DrawPlyerName(vec4_t color) {
 CG_DrawCrosshairNames
 =====================
 */
-static void CG_DrawCrosshairNames(void) {
+static void CG_DrawCrosshairNames() {
+  if (!cg_drawCrosshairNames.integer) {
+    return;
+  }
+
   if (cg.renderingThirdPerson || cg_drawCrosshair.integer < 0) {
     return;
   }
@@ -2156,10 +2160,6 @@ static void CG_DrawCrosshairNames(void) {
 
   // NERVE - SMF
   if (cg.crosshairClientNum >= MAX_CLIENTS) {
-    if (!cg_drawCrosshairNames.integer) {
-      return;
-    }
-
     if (cg_entities[cg.crosshairClientNum].currentState.eType == ET_MOVER &&
         cg_entities[cg.crosshairClientNum].currentState.effect1Time) {
       isMover = qtrue;
@@ -2197,16 +2197,19 @@ static void CG_DrawCrosshairNames(void) {
   if (isMover) {
     CG_DrawMoverHealthBar(playerHealth / maxHealth, color);
   } else {
-    if ((etj_hide.integer == 1 && dist < etj_hideDistance.integer) ||
-        etj_hide.integer == 2) {
-      return;
-    }
-    if (!cg_drawCrosshairNames.integer ||
-        cgs.clientinfo[cg.crosshairClientNum].hideMe) {
-      return;
-    }
+    // fireteam noghost ignores etj_hide/etj_hideDistance, so always draw names
+    if (CG_IsOnSameFireteam(cg.snap->ps.clientNum, cg.crosshairClientNum) &&
+        cgs.clientinfo[cg.snap->ps.clientNum].fireteamData->noGhost) {
+      CG_DrawPlayerName(color);
+    } else {
+      if ((etj_hide.integer == 1 && dist < etj_hideDistance.integer) ||
+          etj_hide.integer == 2 ||
+          cgs.clientinfo[cg.crosshairClientNum].hideMe) {
+        return;
+      }
 
-    CG_DrawPlyerName(color);
+      CG_DrawPlayerName(color);
+    }
   }
 }
 
