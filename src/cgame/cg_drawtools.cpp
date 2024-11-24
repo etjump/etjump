@@ -87,6 +87,13 @@ void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
 
   const range_t range = AnglesToRange(start, end, yaw, fov);
 
+  // don't try to draw things off-screen
+  if ((range.x1 == 0 && range.x2 == 0) ||
+      (range.x1 == SCREEN_WIDTH && range.x2 == SCREEN_WIDTH) ||
+      (range.x1 == 0 && range.x2 == SCREEN_WIDTH && range.split)) {
+    return;
+  }
+
   if (!range.split) {
     if (borderOnly) {
       CG_DrawRect_FixedBorder(range.x1, y, range.x2 - range.x1, h,
