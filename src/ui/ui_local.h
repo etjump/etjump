@@ -911,6 +911,8 @@ typedef struct {
   std::map<std::string, std::string> changelogs;
   std::vector<std::string> formattedChangelog;
   int changelogLineIndex;
+
+  bool demoPlayback;
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;
@@ -1128,5 +1130,7 @@ void parseMaplist();
 void parseNumCustomvotes();
 void parseCustomvote();
 void resetCustomvotes();
+
+void toggleSettingsMenu();
 } // namespace ETJump
 #endif
