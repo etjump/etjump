@@ -137,12 +137,14 @@ bool Session::GuidReceived(gentity_t *ent) {
   int clientNum = ClientNum(ent);
   char guidBuf[MAX_CVAR_VALUE_STRING];
   char hwidBuf[MAX_CVAR_VALUE_STRING];
+  const std::string cleanName = ETJump::sanitize(ent->client->pers.netname);
 
   // Client sends 'AUTHENTICATE guid hwid'
   constexpr int ARGC = 3;
   if (argc != ARGC) {
-    G_LogPrintf("Possible guid/hwid spoof attempt by %s (%s).\n",
-                ent->client->pers.netname, ClientIPAddr(ent));
+    Printer::logAdminLn(ETJump::stringFormat(
+        "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
+        clientNum, cleanName, ClientIPAddr(ent)));
     return false;
   }
 
@@ -150,8 +152,9 @@ bool Session::GuidReceived(gentity_t *ent) {
   trap_Argv(2, hwidBuf, sizeof(hwidBuf));
 
   if (!ValidGuid(guidBuf) || !ValidGuid(hwidBuf)) {
-    G_LogPrintf("Possible guid/hwid spoof attempt by %s (%s).\n",
-                ent->client->pers.netname, ClientIPAddr(ent));
+    Printer::logAdminLn(ETJump::stringFormat(
+        "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
+        clientNum, cleanName, ClientIPAddr(ent)));
     return false;
   }
 
@@ -164,11 +167,10 @@ bool Session::GuidReceived(gentity_t *ent) {
   GetUserAndLevelData(clientNum);
 
   if (database_->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid)) {
-    G_LogPrintf("Banned player %s tried to connect with guid "
-                "%s and hardware id %s\n",
-                (g_entities + clientNum)->client->pers.netname,
-                clients_[clientNum].guid.c_str(),
-                clients_[clientNum].hwid.c_str());
+    Printer::logAdminLn(ETJump::stringFormat(
+        "authentication: Banned player '%s' tried to connect with GUID '%s' "
+        "and HWID '%s'",
+        cleanName, clients_[clientNum].guid, clients_[clientNum].hwid));
     Printer::popupAll(
         va("Banned player %s ^7tried to connect.", ent->client->pers.netname));
     trap_DropClient(clientNum, "You are banned.", 0);

@@ -62,7 +62,9 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   }
 
   if (ETJump::session->IsIpBanned(clientNum)) {
-    G_LogPrintf("Kicked banned client: %d\n", clientNum);
+    Printer::logAdminLn(
+        "authentication: Rejected connection from IP banned client " +
+        std::to_string(clientNum));
     trap_DropClient(clientNum, "You are banned.", 0);
   }
 }
