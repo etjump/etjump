@@ -2630,6 +2630,27 @@ void Touch_Button(gentity_t *ent, gentity_t *other, trace_t *trace) {
   }
 }
 
+namespace ETJump {
+bool buttonOnCooldown(const gentity_t *ent) {
+  // first activation is always allowed
+  if (ent->timestamp == 0) {
+    return false;
+  }
+
+  return ent->timestamp + static_cast<int>(ent->wait) > level.time;
+}
+
+// true on successful activation
+bool activateButton(gentity_t *ent) {
+  if (buttonOnCooldown(ent)) {
+    return false;
+  }
+
+  ent->timestamp = level.time;
+  return true;
+}
+} // namespace ETJump
+
 /*QUAKED func_button (0 .5 .8) ? x x x TOUCH x x STAYOPEN
 When a button is touched, it moves some distance in the direction of it's angle,
 triggers all of it's targets, waits some time, then returns to it's original
@@ -4400,24 +4421,27 @@ out of date) they /don't/ need to be all uppercase HINT_NONE HINT_PLAYER
 
 void use_invisible_user(gentity_t *ent, gentity_t *other,
                         gentity_t *activator) {
-  if (ent->wait < level.time) {
-    ent->wait = level.time + ent->delay;
+  if (static_cast<int>(ent->wait) < level.time) {
+    ent->wait = level.time + static_cast<int>(ent->delay);
   } else {
     return;
   }
 
-  if (!(other->client)) {
-    if (ent->spawnflags & 1) {
-      ent->spawnflags &= ~1;
+  constexpr auto startOff =
+      static_cast<int>(ETJump::FuncInvisSpawnflags::StartOff);
+
+  if (!other->client) {
+    if (ent->spawnflags & startOff) {
+      ent->spawnflags &= ~startOff;
     } else {
-      ent->spawnflags |= 1;
+      ent->spawnflags |= startOff;
     }
 
-    if (ent->spawnflags & 2 && !(ent->spawnflags & 1)) {
-      G_Script_ScriptEvent(ent, "activate", NULL);
+    if (ent->spawnflags &
+            static_cast<int>(ETJump::FuncInvisSpawnflags::HasUser) &&
+        !(ent->spawnflags & startOff)) {
+      G_Script_ScriptEvent(ent, "activate", nullptr);
       G_UseTargets(ent, other);
-      // G_Printf ("ent%s used by %s\n", ent->classname,
-      // other->classname);
     }
 
     return;
@@ -4426,7 +4450,7 @@ void use_invisible_user(gentity_t *ent, gentity_t *other,
   vec3_t noiseOrigin;
   Utilities::getOriginOrBmodelCenter(ent, noiseOrigin);
 
-  if (other->client && ent->spawnflags & 1) {
+  if (other->client && ent->spawnflags & startOff) {
     //----(SA)	play 'off' sound
     //----(SA)	I think this is where this goes.  Raf, let me
     // know if it's
@@ -4440,7 +4464,8 @@ void use_invisible_user(gentity_t *ent, gentity_t *other,
   }
 
   if (other->client) {
-    if (ent->spawnflags & 8) {
+    if (ent->spawnflags &
+        static_cast<int>(ETJump::FuncInvisSpawnflags::ScriptActivator)) {
       ent->activator = other;
     }
     G_Script_ScriptEvent(
@@ -4492,8 +4517,8 @@ void SP_func_invisible_user(gentity_t *ent) {
   }
   //----(SA)	end
 
-  if (!(ent->spawnflags & 4)) // !NO_OFF_NOISE
-  {
+  if (!(ent->spawnflags &
+        static_cast<int>(ETJump::FuncInvisSpawnflags::NoOffNoise))) {
     if (G_SpawnString("offnoise", "0", &sound)) {
       ent->soundPos1 = G_SoundIndex(sound);
     } else {
