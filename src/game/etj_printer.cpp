@@ -23,7 +23,6 @@
  */
 
 #include <utility>
-#include <ctime>
 
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
