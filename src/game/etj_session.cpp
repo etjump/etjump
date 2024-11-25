@@ -168,8 +168,8 @@ bool Session::GuidReceived(gentity_t *ent) {
 
   if (database_->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid)) {
     Printer::logAdminLn(ETJump::stringFormat(
-        "authentication: Banned player '%s' tried to connect with GUID '%s' "
-        "and HWID '%s'",
+        "authentication: Banned player %s tried to connect with GUID '%s' and "
+        "HWID '%s'",
         cleanName, clients_[clientNum].guid, clients_[clientNum].hwid));
     Printer::popupAll(
         va("Banned player %s ^7tried to connect.", ent->client->pers.netname));
