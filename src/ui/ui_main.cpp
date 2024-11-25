@@ -7312,11 +7312,18 @@ void _UI_KeyEvent(int key, qboolean down) {
           !Q_stricmp(bindBuf, "toggleETJumpSettings") &&
           ETJump::StringUtil::startsWith(menu->window.name,
                                          "etjump_settings_")) {
-        // this is a stupid hack, if we have the color picker or writeconfig
-        // menu open, it runs an exit script which restores the menu from
-        // which they were opened from, and we don't close both menus,
-        // so just close everything twice lol
-        Menus_CloseAll();
+        // color picker and writeconfig menus run an exit script that restores
+        // the previously opened menu, so if we have either of them open,
+        // we end up with a menu open after Menus_CloseAll call
+        // if either is open, close them manually first
+        if (!Q_stricmp(menu->window.name,
+                       "etjump_settings_popup_colorpicker")) {
+          Menus_CloseByName("etjump_settings_popup_colorpicker");
+        } else if (!Q_stricmp(menu->window.name,
+                              "etjump_settings_popup_writeconfig")) {
+          Menus_CloseByName("etjump_settings_popup_writeconfig");
+        }
+
         Menus_CloseAll();
         return;
       }
