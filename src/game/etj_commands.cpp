@@ -2743,13 +2743,32 @@ bool Commands::AdminCommand(gentity_t *ent) {
   }
 
   if (foundCommands.size() == 1) {
-    if (ent) {
+    foundCommands[0]->second.first(ent, argv);
+
+    // check if we should log this command
+    const char flag = FindCommandFlag(foundCommands[0]->first);
+
+    if (std::find(std::begin(CommandFlags::loggedCommandFlags),
+                  std::end(CommandFlags::loggedCommandFlags),
+                  flag) != std::end(CommandFlags::loggedCommandFlags)) {
       char nameBuf[MAX_NETNAME];
-      Q_strncpyz(nameBuf, ent->client->pers.netname, sizeof(nameBuf));
-      Q_CleanStr(nameBuf);
+
+      if (ent) {
+        Q_strncpyz(nameBuf, ent->client->pers.netname, sizeof(nameBuf));
+        Q_CleanStr(nameBuf);
+      } else {
+        Q_strncpyz(nameBuf, "Console", sizeof(nameBuf));
+      }
+
+      // skip the first arg because we might have partially matched the command
+      const std::string cmdArgs = ETJump::StringUtil::join(
+          ETJump::Container::skipFirstN(*argv, 1), " ");
+      Printer::logAdminLn(ETJump::stringFormat(
+          "admincommand: %s%s used '%s%s'",
+          ent ? std::to_string(ent->s.number) + " " : "", nameBuf,
+          foundCommands[0]->first, cmdArgs.empty() ? "" : " " + cmdArgs));
     }
 
-    foundCommands[0]->second.first(ent, argv);
     return true;
   }
 

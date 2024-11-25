@@ -54,30 +54,37 @@ namespace CommandFlags {
 // Silent command execution via '/' flag
 // Not listed here because it's not a command in itself
 
-const char BAN = 'b';
+constexpr char BAN = 'b';
 // For everyone
-const char BASIC = 'a';
-const char CANCELVOTE = 'C';
+constexpr char BASIC = 'a';
+constexpr char CANCELVOTE = 'C';
 // const char EBALL       = '8';
-const char EDIT = 'A';
-const char FINGER = 'f';
+constexpr char EDIT = 'A';
+constexpr char FINGER = 'f';
 // const char HELP        = 'h';
-const char KICK = 'k';
-const char LISTBANS = 'L';
-const char LISTPLAYERS = 'l';
-const char MAP = 'M';
-const char MUTE = 'm';
-const char NOCLIP = 'N';
-const char PASSVOTE = 'P';
+constexpr char KICK = 'k';
+constexpr char LISTBANS = 'L';
+constexpr char LISTPLAYERS = 'l';
+constexpr char MAP = 'M';
+constexpr char MUTE = 'm';
+constexpr char NOCLIP = 'N';
+constexpr char PASSVOTE = 'P';
 // const char READCONFIG  = 'G';
-const char RENAME = 'R';
-const char RESTART = 'r';
-const char TOKENS = 'V';
-const char SETLEVEL = 's';
-const char MOVERSCALE = 'v';
-const char TIMERUN_MANAGEMENT = 'T';
-const char CUSTOMVOTES = 'c';
-const char ADMINCHAT = 'S';
+constexpr char RENAME = 'R';
+constexpr char RESTART = 'r';
+constexpr char TOKENS = 'V';
+constexpr char SETLEVEL = 's';
+constexpr char MOVERSCALE = 'v';
+constexpr char TIMERUN_MANAGEMENT = 'T';
+constexpr char CUSTOMVOTES = 'c';
+constexpr char ADMINCHAT = 'S';
+
+// usage of admin commmands with these flags gets logged to g_adminLog
+constexpr char loggedCommandFlags[] = {
+    BAN,      CANCELVOTE,         EDIT,        KICK, MUTE, PASSVOTE, RENAME,
+    SETLEVEL, TIMERUN_MANAGEMENT, CUSTOMVOTES,
+};
+
 } // namespace CommandFlags
 
 #endif
