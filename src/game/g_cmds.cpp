@@ -3473,13 +3473,13 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt) {
         traceEnt->health++;
       }
       found = qtrue;
-    } else if ((Q_stricmp(traceEnt->classname, "func_button") == 0) &&
-               (traceEnt->s.apos.trType == TR_STATIONARY &&
-                traceEnt->s.pos.trType == TR_STATIONARY) &&
-               traceEnt->active == qfalse) {
-      Use_BinaryMover(traceEnt, ent, ent);
-      traceEnt->active = qtrue;
-      found = qtrue;
+    } else if (!Q_stricmp(traceEnt->classname, "func_button") &&
+               !traceEnt->active) {
+      if (ETJump::activateButton(traceEnt)) {
+        Use_BinaryMover(traceEnt, ent, ent);
+        traceEnt->active = qtrue;
+        found = qtrue;
+      }
     } else if (!Q_stricmp(traceEnt->classname, "func_invisible_user")) {
       if (walking) {
         traceEnt->flags |= FL_SOFTACTIVATE; // no noise

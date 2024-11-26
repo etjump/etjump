@@ -334,7 +334,9 @@ struct gentity_s {
 
   char *message;
 
-  int timestamp; // body queue sinking, etc
+  // body queue sinking, etc.
+  // also activation time of func_button
+  int timestamp;
 
   float angle; // set in editor, -1 = up, -2 = down
   char *target;
@@ -1690,6 +1692,11 @@ void SetMoverState(gentity_t *ent, moverState_t moverState, int time);
 
 void func_constructible_underconstructionthink(gentity_t *ent);
 
+namespace ETJump {
+bool buttonOnCooldown(const gentity_t *ent);
+bool activateButton(gentity_t *ent);
+} // namespace ETJump
+
 //
 // g_trigger.c
 //
@@ -2891,6 +2898,19 @@ enum class TimerunSpawnflags {
   NoPortalgunPickup = 64,
   NoSave = 128,
   AllowFTNoGhost = 256,
+};
+
+enum class FuncButtonSpawnflags {
+  Touch = 8,
+  WaitProgress = 16,
+};
+
+enum class FuncInvisSpawnflags {
+  StartOff = 1,
+  HasUser = 2, // fire targets even if activator isn't a client
+  NoOffNoise = 4,
+  ScriptActivator = 8,
+  WaitProgress = 16,
 };
 
 bool checkCheatCvars(gclient_s *client, int flags);

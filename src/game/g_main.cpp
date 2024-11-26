@@ -923,25 +923,37 @@ void G_CheckForCursorHints(gentity_t *ent) {
       }
 
       if (!Q_stricmp(traceEnt->classname, "func_invisible_user")) {
-        // DHM - Nerve :: Put this back in only
-        // in multiplayer
-        if (traceEnt->s.dmgFlags) // hint icon
-                                  // specified
-                                  // in entity
-        {
+        // DHM - Nerve :: Put this back in only in multiplayer
+        // hint icon specified in entity
+        if (traceEnt->s.dmgFlags) {
           hintType = traceEnt->s.dmgFlags;
           hintDist = CH_ACTIVATE_DIST;
-          checkEnt = 0;
-        } else // use target for hint icon
-        {
-          checkEnt = G_FindByTargetname(NULL, traceEnt->target);
-          if (!checkEnt) // no target
-                         // found
-          {
+          checkEnt = nullptr;
+        } else {
+          // use target for hint icon
+          checkEnt = G_FindByTargetname(nullptr, traceEnt->target);
+          // no target found
+          if (!checkEnt) {
             hintType = HINT_BAD_USER;
-            hintDist =
-                CH_MAX_DIST_ZOOM; // show this one from super far for debugging
+            // show this one from super far for debugging
+            hintDist = CH_MAX_DIST_ZOOM;
           }
+        }
+
+        // check for delay so we don't do div by 0
+        if (traceEnt->spawnflags &
+                static_cast<int>(ETJump::FuncInvisSpawnflags::WaitProgress) &&
+            traceEnt->delay != 0) {
+          if (traceEnt->wait > 0 &&
+              level.time < static_cast<int>(traceEnt->wait)) {
+            hintVal = static_cast<int>(
+                Numeric::clamp(255 * ((static_cast<float>(level.time) -
+                                       traceEnt->wait + traceEnt->delay) /
+                                      traceEnt->delay),
+                               0, 255));
+          }
+        } else {
+          hintVal = 0;
         }
       }
     }
@@ -1196,6 +1208,21 @@ void G_CheckForCursorHints(gentity_t *ent) {
           } else if (!Q_stricmp(checkEnt->classname, "func_button")) {
             hintDist = CH_ACTIVATE_DIST;
             hintType = checkEnt->s.dmgFlags;
+
+            // 'active' is true when the button isn't at the starting position
+            // in other words, when it's been activated and hasn't returned yet
+            if (checkEnt->spawnflags &
+                    static_cast<int>(
+                        ETJump::FuncButtonSpawnflags::WaitProgress) &&
+                ETJump::buttonOnCooldown(checkEnt) && checkEnt->active) {
+              hintVal = static_cast<int>(Numeric::clamp(
+                  255 * (static_cast<float>(level.time - checkEnt->timestamp) /
+                         checkEnt->wait),
+                  0, 255));
+            } else {
+              hintVal = 0;
+            }
+
           } else if (!Q_stricmp(checkEnt->classname, "props_"
                                                      "flamebarrel")) {
             hintDist = CH_BREAKABLE_DIST * 2;
