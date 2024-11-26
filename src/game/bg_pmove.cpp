@@ -3367,8 +3367,8 @@ PM_CoolWeapons
 */
 void PM_CoolWeapons() {
   pm->pmext->weapHeat[WP_DUMMY_MG42] =
-      static_cast<float>(pm->ps->ammo[WP_DUMMY_MG42]) +
-      std::fmodf(pm->pmext->weapHeat[WP_DUMMY_MG42], 1);
+      static_cast<float>(pm->ps->ammo[WP_DUMMY_MG42] +
+                         std::fmod(pm->pmext->weapHeat[WP_DUMMY_MG42], 1));
 
   for (int wp = 0; wp < WP_NUM_WEAPONS; wp++) {
     // if you have the weapon, and it can overheat (or using mounted MG42)
