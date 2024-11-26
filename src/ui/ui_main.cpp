@@ -917,7 +917,7 @@ static void parseChangelogs() {
       File fIn(path + file + ".txt");
       const auto contents = fIn.read();
       uiInfo.changelogs[file] = std::string(contents.begin(), contents.end());
-    } catch (const File::FileNotFoundException &) {
+    } catch (...) {
       Com_Printf(S_COLOR_RED
                  "%s: failed to open changelog '%s.txt' for reading.\n",
                  __func__, file.c_str());
