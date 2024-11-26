@@ -5103,8 +5103,7 @@ void UI_RunMenuScript(const char **args) {
       uiInfo.customvoteMapsOnServerIndex = 0;
       uiInfo.customvoteOtherMapsIndex = 0;
 
-      const char *menuName = nullptr;
-      String_Parse(args, &menuName);
+      const char *menuName = COM_ParseExt(args, qfalse);
 
       // if menuName is nullptr (called without args), active menu name is used
       Menu_SetFeederSelection(nullptr, FEEDER_CUSTOMVOTES_MAPS_ONSERVER, 0,
@@ -5125,8 +5124,16 @@ void UI_RunMenuScript(const char **args) {
       // invalidate cached formatting
       uiInfo.formattedChangelog.clear();
 
-      const char *itemName;
-      String_Parse(args, &itemName);
+      const char *itemName = COM_ParseExt(args, qfalse);
+
+      if (!itemName || itemName[0] == '\0') {
+        Com_Printf(
+            S_COLOR_RED
+            "%s: 'setActiveChangelog' called without a changelog item!\n",
+            __func__);
+        return;
+      }
+
       const itemDef_t *item = Menu_FindItemByName(Menu_GetFocused(), itemName);
 
       if (!item) {
