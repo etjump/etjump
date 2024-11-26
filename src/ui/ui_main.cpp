@@ -956,7 +956,7 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
     std::string tmp;
     tmp.reserve(line.length());
 
-    for (size_t i = 0; i < line.length(); i++) {
+    for (int i = 0; i < static_cast<int>(line.length()); i++) {
       tmp += line[i];
 
       if (std::isspace(line[i])) {
@@ -976,7 +976,6 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
           line.erase(0, i);
         }
 
-        width = 0;
         i = -1; // so we start from 0 again after i++
 
         tmp.clear();
