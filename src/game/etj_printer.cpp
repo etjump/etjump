@@ -38,6 +38,23 @@ void Printer::log(const std::string &message) {
 
 void Printer::logLn(const std::string &message) { log(message + "\n"); }
 
+void Printer::logAdmin(const std::string &message) {
+  if (!level.adminLogFile) {
+    return;
+  }
+
+  qtime_t tm;
+  trap_RealTime(&tm);
+
+  const char *msg = va("%02i:%02i:%02i %s", tm.tm_hour, tm.tm_min, tm.tm_sec,
+                       message.c_str());
+  trap_FS_Write(msg, static_cast<int>(std::strlen(msg)), level.adminLogFile);
+}
+
+void Printer::logAdminLn(const std::string &message) {
+  logAdmin(message + "\n");
+}
+
 void Printer::console(int clientNum, const std::string &message) {
   const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
 

@@ -50,6 +50,18 @@ public:
   static void logLn(const std::string &message);
 
   /**
+   * Logs message to the admin log.
+   * @param message The message to be logged
+   */
+  static void logAdmin(const std::string &message);
+
+  /**
+   * Same functionality as logAdmin but adds a new line in the end
+   * @param message The message to be logged
+   */
+  static void logAdminLn(const std::string &message);
+
+  /**
    * Prints to client console.
    * Will send multiple messages if the message is longer than 998 bytes.
    * If client num is -1 sends to console.

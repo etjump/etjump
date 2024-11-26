@@ -2038,7 +2038,9 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
       color = COLOR_CYAN;
       break;
     case SAY_ADMIN:
-      G_LogPrintf("sayadmin: %s: %s\n", ent->client->pers.netname, chatText);
+      Printer::logAdminLn(ETJump::stringFormat(
+          "adminchat: %i %s: %s", ent->s.number,
+          ETJump::sanitize(ent->client->pers.netname), chatText));
       Com_sprintf(name, sizeof(name),
                   "^A> ^7%s^7: ", ent->client->pers.netname);
       color = COLOR_LTORANGE;
