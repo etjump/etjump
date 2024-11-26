@@ -979,6 +979,8 @@ typedef struct {
 
   // auxiliary storage for pmext.autoSprint
   bool autoSprintAux;
+
+  bool jumpDelayBug;
 } clientPersistant_t;
 
 typedef struct {

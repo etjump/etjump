@@ -1105,6 +1105,8 @@ void ClientThink_real(gentity_t *ent) {
     client->pmext.noclipScale = client->pers.noclipScale;
   }
 
+  client->pmext.jumpDelayBug = client->pers.jumpDelayBug;
+
   if (client->speedScale) // Goalitem speed scale
   {
     client->ps.speed *= (client->speedScale * 0.01);

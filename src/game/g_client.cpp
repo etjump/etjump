@@ -2231,6 +2231,11 @@ void ClientBegin(int clientNum) {
 
   // clear out last jump speed
   client->ps.persistant[PERS_JUMP_SPEED] = 0;
+
+  if (!Q_stricmp(level.rawmapname, "solstice") ||
+      !Q_stricmp(level.rawmapname, "stonehalls2")) {
+    client->pers.jumpDelayBug = true;
+  }
 }
 
 gentity_t *SelectSpawnPointFromList(const char *list, vec3_t spawn_origin,

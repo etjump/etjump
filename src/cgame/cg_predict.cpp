@@ -1031,6 +1031,8 @@ void CG_PredictPlayerState() {
   // the gun, as the correct heat value is never assigned client side
   cg.pmext.weapHeat[WP_DUMMY_MG42] = 0.0f;
 
+  cg.pmext.jumpDelayBug = cg.jumpDelayBug;
+
   memcpy(&oldpmext[current & cg.cmdMask], &cg.pmext, sizeof(pmoveExt_t));
 
   // if we don't have the commands right after the snapshot, we
