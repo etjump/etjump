@@ -3412,6 +3412,7 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt) {
       ent->client->ps.weaponTime = traceEnt->backupWeaponTime;
       ent->client->pmext.weapHeat[WP_DUMMY_MG42] =
           static_cast<float>(traceEnt->mg42weapHeat);
+      ent->client->ps.ammo[WP_DUMMY_MG42] = traceEnt->mg42weapHeat;
 
       ent->tankLink = traceEnt;
       traceEnt->tankLink = ent;
@@ -3453,6 +3454,7 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt) {
       ent->client->ps.weaponTime = traceEnt->backupWeaponTime;
       ent->client->pmext.weapHeat[WP_DUMMY_MG42] =
           static_cast<float>(traceEnt->mg42weapHeat);
+      ent->client->ps.ammo[WP_DUMMY_MG42] = traceEnt->mg42weapHeat;
 
       G_UseTargets(traceEnt,
                    ent); //----(SA)	added for Mike so
