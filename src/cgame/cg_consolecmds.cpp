@@ -1257,6 +1257,10 @@ static void listSavepos() {
 }
 
 static void readSavepos() { savePos->parseExistingPositions(true); }
+
+static void toggleETJumpSettings() {
+  trap_SendConsoleCommand("uiToggleETJumpSettings\n");
+}
 } // namespace ETJump
 
 typedef struct {
@@ -1347,6 +1351,8 @@ static const consoleCommand_t noDemoCommands[] = {
 
     {"openRtvMenu", ETJump::openRtvMenu},
     {"loadpos", ETJump::loadSavepos},
+
+    {"toggleETJumpSettings", ETJump::toggleETJumpSettings},
 };
 
 static const consoleCommand_t anyTimeCommands[] = {

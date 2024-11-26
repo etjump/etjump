@@ -213,6 +213,24 @@ qboolean UI_ConsoleCommand(const int realTime) {
     return qtrue;
   }
 
+  if (!Q_stricmp(cmd, "uiDemoPlaybackEnabled")) {
+    uiInfo.demoPlayback = true;
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "uiToggleETJumpSettings")) {
+    uiClientState_t cstate;
+    trap_GetClientState(&cstate);
+
+    // FIXME: this breaks if 'ui_restart' is performed while in demo playback,
+    //  but there's no nice way to make this work for now, it is what it is
+    if (cstate.connState == CA_ACTIVE && !uiInfo.demoPlayback) {
+      ETJump::toggleSettingsMenu();
+    }
+
+    return qtrue;
+  }
+
   return qfalse;
 }
 

@@ -4095,6 +4095,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   if (cg.demoPlayback) {
     ETJump::demoCompatibility->printDemoInformation();
+
+    // notify UI that we're in demo playback
+    trap_SendConsoleCommand("uiDemoPlaybackEnabled");
   }
 }
 

@@ -7300,17 +7300,34 @@ void _UI_KeyEvent(int key, qboolean down) {
   if (Menu_Count() > 0) {
     menuDef_t *menu = Menu_GetFocused();
     if (menu) {
-      if (trap_Cvar_VariableValue("cl_bypassMouseInput")) {
+      if (trap_Cvar_VariableValue("cl_bypassMouseInput") != 0) {
         bypassKeyClear = qtrue;
       }
 
-      //			if (key == K_ESCAPE &&
-      // down &&
-      //! Menus_AnyFullScreenVisible()) {
-      //! Menus_CloseAll(); 			} else {
-      //				Menu_HandleKey(menu,
-      // key, down );
-      //			}
+      // bypass menu key handling if we're toggling etjump settings menu
+      char bindBuf[MAX_CVAR_VALUE_STRING];
+      DC->getBindingBuf(key, bindBuf, sizeof(bindBuf));
+
+      if (bindBuf[0] != '\0' && down && !g_editingField && !g_waitingForKey &&
+          !Q_stricmp(bindBuf, "toggleETJumpSettings") &&
+          ETJump::StringUtil::startsWith(menu->window.name,
+                                         "etjump_settings_")) {
+        // color picker and writeconfig menus run an exit script that restores
+        // the previously opened menu, so if we have either of them open,
+        // we end up with a menu open after Menus_CloseAll call
+        // if either is open, close them manually first
+        if (!Q_stricmp(menu->window.name,
+                       "etjump_settings_popup_colorpicker")) {
+          Menus_CloseByName("etjump_settings_popup_colorpicker");
+        } else if (!Q_stricmp(menu->window.name,
+                              "etjump_settings_popup_writeconfig")) {
+          Menus_CloseByName("etjump_settings_popup_writeconfig");
+        }
+
+        Menus_CloseAll();
+        return;
+      }
+
       // always have the menus do the proper handling
       Menu_HandleKey(menu, key, down);
     } else {
@@ -7333,10 +7350,6 @@ void _UI_KeyEvent(int key, qboolean down) {
       trap_Cvar_Set("cl_paused", "0");
     }
   }
-
-  // if ((s > 0) && (s != menu_null_sound)) {
-  //	trap_S_StartLocalSound( s, CHAN_LOCAL_SOUND );
-  // }
 }
 
 /*
@@ -7518,6 +7531,20 @@ void resetCustomvotes() {
     Menus_OpenByName("ingame_vote");
   }
 }
+
+void toggleSettingsMenu() {
+  const menuDef_t *activeMenu = Menu_GetFocused();
+
+  if (activeMenu &&
+      StringUtil::startsWith(activeMenu->window.name, "etjump_settings_")) {
+    Menus_CloseAll();
+  } else {
+    trap_Key_SetCatcher(KEYCATCH_UI);
+    Menus_CloseAll();
+    Menus_OpenByName("etjump_settings_general_gameplay");
+  }
+}
+
 } // namespace ETJump
 
 void _UI_SetActiveMenu(uiMenuCommand_t menu) {
