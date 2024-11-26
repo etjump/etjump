@@ -92,7 +92,7 @@ function(create_compiler_opts target)
 
 	if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 		target_compile_options(${target} INTERFACE ${MSVC_CXX_FLAGS})
-		target_link_options(${target} INTERFACE ${MSVC_LINK_LAGS})
+		target_link_options(${target} INTERFACE ${MSVC_LINK_FLAGS})
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		target_compile_options(${target} INTERFACE ${CLANG_CXX_FLAGS})
 		target_link_options(${target} INTERFACE ${CLANG_LINK_FLAGS})
