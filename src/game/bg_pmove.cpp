@@ -3372,8 +3372,11 @@ PM_CoolWeapons
 ==============
 */
 void PM_CoolWeapons() {
-  for (int wp = 0; wp < WP_NUM_WEAPONS; wp++) {
+  pm->pmext->weapHeat[WP_DUMMY_MG42] =
+      static_cast<float>(pm->ps->ammo[WP_DUMMY_MG42] +
+                         std::fmod(pm->pmext->weapHeat[WP_DUMMY_MG42], 1));
 
+  for (int wp = 0; wp < WP_NUM_WEAPONS; wp++) {
     // if you have the weapon, and it can overheat (or using mounted MG42)
     if ((GetAmmoTableData(wp)->maxHeat && COM_BitCheck(pm->ps->weapons, wp)) ||
         wp == WP_DUMMY_MG42) {
@@ -6292,6 +6295,8 @@ void PmoveSingle(pmove_t *pmove) {
 
   // weapons
   PM_Weapon();
+  pm->ps->ammo[WP_DUMMY_MG42] =
+      static_cast<int>(pm->pmext->weapHeat[WP_DUMMY_MG42]);
 
   // footstep events / legs animations
   PM_Footsteps();
