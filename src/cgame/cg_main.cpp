@@ -4091,6 +4091,11 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
     ETJump::execFile("autoexec_default");
   }
 
+  if (!Q_stricmp(cgs.rawmapname, "solstice") ||
+      !Q_stricmp(cgs.rawmapname, "stonehalls2")) {
+    cg.jumpDelayBug = true;
+  }
+
   Com_Printf("CG_Init... DONE\n");
 
   if (cg.demoPlayback) {

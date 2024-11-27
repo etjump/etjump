@@ -1536,9 +1536,15 @@ static void PM_WalkMove(void) {
       if (pm->pmext->sprintTime < 0) {
         pm->pmext->sprintTime = 0;
       }
+
+      if (pm->pmext->jumpDelayBug) {
+        pm->pmext->jumpTime = pm->cmd.serverTime;
+      }
     }
 
-    pm->pmext->jumpTime = pm->cmd.serverTime;
+    if (!pm->pmext->jumpDelayBug) {
+      pm->pmext->jumpTime = pm->cmd.serverTime;
+    }
 
     // JPW NERVE
     pm->ps->jumpTime = pm->cmd.serverTime; // Arnout: NOTE : TEMP DEBUG

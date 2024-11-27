@@ -526,6 +526,10 @@ typedef struct {
   float bobCycle;              // for fps-independent bobCycle
 
   bool autoSprint;
+
+  // enable buggy nojumpdelay behavior on solstice and stonehalls2,
+  // where jump time does not get updated when a player jumps on a NJD surface
+  bool jumpDelayBug;
 } pmoveExt_t; // data used both in client and server - store it here
               // instead of playerstate to prevent different engine versions of
               // playerstate between XP and MP
