@@ -1,3 +1,30 @@
+# ETJump 3.3.2
+
+* fixed players producing water impacts when shot [#1544](https://github.com/etjump/etjump/pull/1544)
+* tweaked changelog UI appearence [#1546](https://github.com/etjump/etjump/pull/1546) [#1550](https://github.com/etjump/etjump/pull/1550)
+  * changelog window is now slightly smaller, with smaller font size
+  * added fullscreen,faded background to improve readability
+  * changelog rows now have alternating background colors to improve readability
+* added missing entry for `etj_fixedCompassShader` to settings menu [#1547](https://github.com/etjump/etjump/pull/1547)
+* fixed `shooter_rocket` calculating target deviation incorrectly [#1549](https://github.com/etjump/etjump/pull/1549)
+* fixed wallbugging by saving while dead and loading [#1552](https://github.com/etjump/etjump/pull/1552)
+* fixed long standing issue with players spawning at incorrect spawn locations if all spawnpoints of a desired spawn were occupied by a player [#1555](https://github.com/etjump/etjump/pull/1555)
+* fixed `etj_autoSprint` not working reliably if clients FPS dropped below 125 with `pmove_fixed 1` [#1556](https://github.com/etjump/etjump/pull/1556)
+* fixed `etj_drawSnapHUD 3` drawing snapzone borders at screen edges for zones which were off screen [#1557](https://github.com/etjump/etjump/pull/1557)
+* fixed `etj_hide` & `etj_hideDistance` affecting `cg_drawCrosshairNames` draw range when fireteam collision was enabled [#1558](https://github.com/etjump/etjump/pull/1558)
+  * movers health bar drawing now also respects `cg_drawCrosshairNames 0` like in VET
+* fixed chat name tagging breaking on encoded chat messages if a player had `=` character in their name [#1561](https://github.com/etjump/etjump/pull/1561)
+* added `toggleETJumpSettings` console command to open/close ETJump settings menu [#1562](https://github.com/etjump/etjump/pull/1562)
+* `g_adminLog` is now used to log admin-related events [#1563](https://github.com/etjump/etjump/pull/1563)
+  * admin commands using flags `b`, `C`, `A`, `k`, `m`, `P`, `R`, `s`, `T` and `c` are logged
+  * admin chats are logged
+    * these used to be logged in the regular log file, they are now only logged into admin log
+  * authentication related events are logged (potential GUID/HWID spoofs, rejected connections due to a ban)
+* added `spawnflags 16` to `func_button` and `func_invisible_user` to show wait time as a progress bar [#1565](https://github.com/etjump/etjump/pull/1565)
+  * if set, both entities show a gradually filling progress bar indicating when they can be used again
+  * slight inaccuracy with `func_button` - does not account for the travel time when the button returns to it's starting position
+* fixed a minor memory leak in UI when switching changelog versions or switching active custom vote list with details panel open [#1567](https://github.com/etjump/etjump/pull/1567)
+
 # ETJump 3.3.1
 
 * fixed backstab hint showing for nonsolid players when holding a knife [#1492](https://github.com/etjump/etjump/pull/1492)

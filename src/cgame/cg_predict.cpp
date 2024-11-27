@@ -1025,6 +1025,8 @@ void CG_PredictPlayerState() {
     cg.pmext.noclipScale = etj_noclipScale.value;
   }
 
+  cg.pmext.jumpDelayBug = cg.jumpDelayBug;
+
   memcpy(&oldpmext[current & cg.cmdMask], &cg.pmext, sizeof(pmoveExt_t));
 
   // if we don't have the commands right after the snapshot, we

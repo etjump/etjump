@@ -1286,6 +1286,8 @@ typedef struct {
   int weapAltB2;
 
   bool showRtvMenu;
+
+  bool jumpDelayBug;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES 21
