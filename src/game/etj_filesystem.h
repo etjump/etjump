@@ -29,8 +29,7 @@
 
 namespace ETJump {
 class FileSystem {
-  // this can hold ~8192 filenames
-  static constexpr int BIG_DIR_BUFFER = 2 << 18;
+  static constexpr int BIG_DIR_BUFFER = 2 << 20;
 
 public:
   static void copy(const std::string &src, const std::string &dst);
