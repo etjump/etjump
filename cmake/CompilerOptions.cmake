@@ -39,7 +39,7 @@ function(create_compiler_opts target)
 
 	# Clang flags
 	set(CLANG_LINK_FLAGS
-		$<IF:$<PLATFORM_ID:Darwin>,-Wl$<COMMA>-undefined$<COMMA>error,-Wl$<COMMA>--no-undefined>
+		$<$<NOT:$<PLATFORM_ID:Darwin>>:-Wl,--no-undefined>
 		$<$<CONFIG:Release>:
 			-flto								# link time optimizations
 			-O3									# max optimization
