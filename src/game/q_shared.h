@@ -1101,6 +1101,9 @@ typedef enum {
 #define MAX_SERVER_TAGS 256
 #define MAX_TAG_FILES 64
 
+// cm_local.h in engine
+static constexpr int MAX_SUBMODELS = 512;
+
 #define MAX_MULTI_SPAWNTARGETS 16 // JPW NERVE
 
 #define MAX_CONFIGSTRINGS 1024

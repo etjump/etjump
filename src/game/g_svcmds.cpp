@@ -376,8 +376,8 @@ static void Svcmd_EntityList_f() {
   G_Printf("-------------------------------------------------------------------"
            "---------------------------------\n");
   G_Printf("%4i / %4i total entities\n", level.num_entities, MAX_GENTITIES);
-  // bmodels are 1-indexed so the limit is actually MAX_MODELS - 1
-  G_Printf("%4i / %4i brush entities\n", numBrushEnts, MAX_MODELS - 1);
+  // bmodels are 1-indexed so the limit is actually MAX_SUBMODELS - 1
+  G_Printf("%4i / %4i brush entities\n", numBrushEnts, MAX_SUBMODELS - 1);
   G_Printf("%4i / %4i entities inactive\n", not_inuse, level.num_entities);
 }
 

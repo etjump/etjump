@@ -2897,16 +2897,10 @@ static void CG_RegisterGraphics(void) {
   CG_LoadingString(" - inline models");
 
   // register the inline models
+  // since we now support 512 inline models like engine does,
+  // we don't need to check the limits here as engine fails to load the map
+  // if we go over MAX_SUBMODELS
   cgs.numInlineModels = trap_CM_NumInlineModels();
-  // TAT 12/23/2002 - as a safety check, let's not let the number of
-  // models exceed MAX_MODELS
-  if (cgs.numInlineModels > MAX_MODELS) {
-    CG_Error("CG_RegisterGraphics: Too many inline models: %i\n",
-             cgs.numInlineModels);
-    // CG_Printf( S_COLOR_RED "WARNING: CG_RegisterGraphics: Too
-    // many inline models: %i\n", cgs.numInlineModels );
-    // cgs.numInlineModels = MAX_MODELS;
-  }
 
   for (i = 1; i < cgs.numInlineModels; i++) {
     char name[10];
