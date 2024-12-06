@@ -312,15 +312,14 @@ Svcmd_EntityList_f
 */
 static void Svcmd_EntityList_f() {
   int e;
-  const gentity_t *check;
   int not_inuse = 0;
-  int numBrushEnts = 1;     // bmodel count is 1-indexed for some reason
+  int numBrushEnts = 0;
   int max_type_length = 20; // starting point, no less than 11
 
   // add removed bmodels since these are still part of bmodel limit
   numBrushEnts += level.numRemovedBModels;
 
-  check = g_entities;
+  const gentity_t *check = g_entities;
   for (e = 0; e < level.num_entities; e++, check++) {
     if (!check->inuse) {
       continue;
@@ -377,7 +376,8 @@ static void Svcmd_EntityList_f() {
   G_Printf("-------------------------------------------------------------------"
            "---------------------------------\n");
   G_Printf("%4i / %4i total entities\n", level.num_entities, MAX_GENTITIES);
-  G_Printf("%4i / %4i brush entities\n", numBrushEnts, MAX_MODELS);
+  // bmodels are 1-indexed so the limit is actually MAX_MODELS - 1
+  G_Printf("%4i / %4i brush entities\n", numBrushEnts, MAX_MODELS - 1);
   G_Printf("%4i / %4i entities inactive\n", not_inuse, level.num_entities);
 }
 
