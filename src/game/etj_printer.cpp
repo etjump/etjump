@@ -82,7 +82,10 @@ void Printer::consoleAll(const std::string &message) {
 
   for (const auto &split : splits) {
     trap_SendServerCommand(-1, va("print \"%s\"", split.c_str()));
-    G_Printf("%s", split.c_str());
+
+    if (g_dedicated.integer) {
+      G_Printf("%s", split.c_str());
+    }
   }
 }
 
@@ -106,7 +109,10 @@ void Printer::chat(gclient_t *client, const std::string &message) {
 
 void Printer::chatAll(const std::string &message) {
   trap_SendServerCommand(-1, va("chat \"%s\"", message.c_str()));
-  G_Printf("%s\n", message.c_str());
+
+  if (g_dedicated.integer) {
+    G_Printf("%s\n", message.c_str());
+  }
 }
 
 void Printer::popup(int clientNum, const std::string &message) {
@@ -129,7 +135,10 @@ void Printer::popup(gclient_t *client, const std::string &message) {
 
 void Printer::popupAll(const std::string &message) {
   trap_SendServerCommand(-1, va("cpm \"%s\n\"", message.c_str()));
-  G_Printf("%s\n", message.c_str());
+
+  if (g_dedicated.integer) {
+    G_Printf("%s\n", message.c_str());
+  }
 }
 
 void Printer::center(int clientNum, const std::string &message) {
@@ -149,7 +158,10 @@ void Printer::center(gclient_t *client, const std::string &message) {
 
 void Printer::centerAll(const std::string &message) {
   trap_SendServerCommand(-1, va("cp \"%s\n\"", message.c_str()));
-  G_Printf("%s\n", message.c_str());
+
+  if (g_dedicated.integer) {
+    G_Printf("%s\n", message.c_str());
+  }
 }
 
 void Printer::banner(int clientNum, const std::string &message) {
@@ -172,7 +184,10 @@ void Printer::banner(gclient_t *client, const std::string &message) {
 
 void Printer::bannerAll(const std::string &message) {
   trap_SendServerCommand(-1, va("bp \"%s\n\"", message.c_str()));
-  G_Printf("%s\n", message.c_str());
+
+  if (g_dedicated.integer) {
+    G_Printf("%s\n", message.c_str());
+  }
 }
 
 void Printer::command(int clientNum, const std::string &command) {
