@@ -2,6 +2,8 @@
 #include <vector>
 
 #include "cg_local.h"
+#include "etj_crosshair.h"
+
 #include "../game/etj_string_utilities.h"
 
 // we have to define these static lists, since we can't alloc memory within the
@@ -1742,7 +1744,7 @@ void CG_SpeakerEditorDraw(void) {
     int bindingkey[2];
     char binding[2][32];
     vec4_t colour;
-    float x, y, w, h;
+    float y;
 
     VectorCopy(colorWhite, colour);
     colour[3] = .8f;
@@ -1796,23 +1798,13 @@ void CG_SpeakerEditorDraw(void) {
     }
 
     // render crosshair
-
-    x = cg_crosshairX.integer;
-    y = cg_crosshairY.integer;
-    w = h = cg_crosshairSize.value;
-
-    CG_AdjustFrom640(&x, &y, &w, &h);
-
-    trap_R_DrawStretchPic(
-        x + 0.5 * (cg.refdef_current->width - w),
-        y + 0.5 * (cg.refdef_current->height - h), w, h, 0, 0, 1, 1,
-        cgs.media.crosshairShader[cg_drawCrosshair.integer % NUM_CROSSHAIRS]);
-
-    if (cg.crosshairShaderAlt[cg_drawCrosshair.integer % NUM_CROSSHAIRS]) {
-      trap_R_DrawStretchPic(
-          x + 0.5 * (cg.refdef_current->width - w),
-          y + 0.5 * (cg.refdef_current->height - h), w, h, 0, 0, 1, 1,
-          cg.crosshairShaderAlt[cg_drawCrosshair.integer % NUM_CROSSHAIRS]);
+    for (const auto &r : ETJump::renderables) {
+      if (const auto crosshair =
+              std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
+        if (crosshair->beforeRender()) {
+          crosshair->render();
+        }
+      }
     }
 
     if (editSpeaker) {

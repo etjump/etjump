@@ -199,12 +199,14 @@ bool Crosshair::canSkipDraw() {
     return true;
   }
 
-  if (cg.zoomedBinoc && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR) {
-    return true;
-  }
+  if (!cg.editingSpeakers) {
+    if (cg.zoomedBinoc && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR) {
+      return true;
+    }
 
-  if (BG_IsScopedWeapon(weapnumForClient())) {
-    return true;
+    if (BG_IsScopedWeapon(weapnumForClient())) {
+      return true;
+    }
   }
 
   if (cg.predictedPlayerState.weapon == WP_MORTAR_SET &&
