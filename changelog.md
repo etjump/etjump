@@ -24,6 +24,15 @@
   * if set, both entities show a gradually filling progress bar indicating when they can be used again
   * slight inaccuracy with `func_button` - does not account for the travel time when the button returns to it's starting position
 * fixed a minor memory leak in UI when switching changelog versions or switching active custom vote list with details panel open [#1567](https://github.com/etjump/etjump/pull/1567)
+* enabled buggy `nojumpdelay` behavior in `solstice` and `stonehalls2` to fix some jumps in them which relied on a bug that was in the mod between versions 2.3.0 and 2.5.0 [#1570](https://github.com/etjump/etjump/pull/1570)
+* increased the number of files that can be read from a directory to support e.g. massive demo directories [#1571](https://github.com/etjump/etjump/pull/1571)
+* fixed mounted MG42 overheat event prediction [#1572](https://github.com/etjump/etjump/pull/1572)
+* `entitylist` now shows the model number of brush entities [#1575](https://github.com/etjump/etjump/pull/1575)
+* increased maximum number of brush entities in a map from `255` to `511` [#1577](https://github.com/etjump/etjump/pull/1577)
+* fixed console prints appearing duplicated in some scenarios on listen servers [#1579](https://github.com/etjump/etjump/pull/1579)
+* fixed crosshair drawing in speaker editor [#1580](https://github.com/etjump/etjump/pull/1580)
+  * ETJump custom crosshairs now draw correctly
+  * crosshair is no longer hidden while zooming
 
 # ETJump 3.3.1
 
