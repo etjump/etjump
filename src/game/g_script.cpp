@@ -513,23 +513,7 @@ G_Script_ScriptParse
 */
 void G_Script_ScriptParse(gentity_t *ent) {
   const char *pScript;
-  char *token;
-  qboolean wantName;
-  qboolean inScript;
-  int eventNum;
-  auto events = std::unique_ptr<g_script_event_t[]>(
-      new g_script_event_t[G_MAX_SCRIPT_STACK_ITEMS]);
-  int numEventItems;
-  g_script_event_t *curEvent;
-  // DHM - Nerve :: Some of our multiplayer script commands have longer
-  // parameters
-  // char		params[MAX_QPATH];
-  char params[MAX_INFO_STRING];
-  // dhm - end
-  g_script_stack_action_t *action;
-  int i;
-  int bracketLevel;
-  qboolean buildScript;
+  auto events = std::make_unique<g_script_event_t[]>(G_MAX_SCRIPT_STACK_ITEMS);
 
   if (!ent->scriptName) {
     return;
@@ -538,28 +522,27 @@ void G_Script_ScriptParse(gentity_t *ent) {
     return;
   }
 
-  buildScript =
-      trap_Cvar_VariableIntegerValue("com_buildScript") ? qtrue : qfalse;
+  const bool buildScript = trap_Cvar_VariableIntegerValue("com_buildScript");
 
   pScript = level.scriptEntity;
-  wantName = qtrue;
-  inScript = qfalse;
+  bool wantName = true;
+  bool inScript = false;
+
   COM_BeginParseSession("G_Script_ScriptParse");
-  bracketLevel = 0;
-  numEventItems = 0;
+  int bracketLevel = 0;
+  int numEventItems = 0;
 
   memset(events.get(), 0, sizeof(g_script_event_t) * G_MAX_SCRIPT_STACK_ITEMS);
 
-  while (1) {
-    token = COM_Parse(&pScript);
+  while (true) {
+    char *token = COM_Parse(&pScript);
 
     if (!token[0]) {
       if (!wantName) {
-        G_Error("G_Script_ScriptParse(), Error "
-                "(line %d): '}' expected, end of "
-                "script found.\n",
-                COM_GetCurrentParseLine());
+        G_Error("%s: Error (line %d): '}' expected, end of script found.\n",
+                __func__, COM_GetCurrentParseLine());
       }
+
       break;
     }
 
@@ -568,18 +551,16 @@ void G_Script_ScriptParse(gentity_t *ent) {
       if (inScript) {
         break;
       }
+
       if (wantName) {
-        G_Error("G_Script_ScriptParse(), Error "
-                "(line %d): '}' found, but not "
-                "expected.\n",
+        G_Error("%s: Error (line %d): '}' found, but not expected.\n", __func__,
                 COM_GetCurrentParseLine());
       }
-      wantName = qtrue;
+
+      wantName = true;
     } else if (token[0] == '{') {
       if (wantName) {
-        G_Error("G_Script_ScriptParse(), Error "
-                "(line %d): '{' found, NAME "
-                "expected.\n",
+        G_Error("%s: Error (line %d): '{' found, NAME expected.\n", __func__,
                 COM_GetCurrentParseLine());
       }
     } else if (wantName) {
@@ -591,77 +572,70 @@ void G_Script_ScriptParse(gentity_t *ent) {
         //
         continue;
       }
+
       if (!Q_stricmp(token, "entity")) {
-        // this is an entity, so go back to look
-        // for a name
+        // this is an entity, so go back to look for a name
         continue;
       }
+
       if (!Q_stricmp(ent->scriptName, token)) {
-        inScript = qtrue;
+        inScript = true;
         numEventItems = 0;
       }
-      wantName = qfalse;
+
+      wantName = false;
     } else if (inScript) {
+      char params[MAX_INFO_STRING];
       Q_strlwr(token);
-      eventNum = G_Script_EventForString(token);
+      const int eventNum = G_Script_EventForString(token);
+
       if (eventNum < 0) {
-        G_Error("G_Script_ScriptParse(), Error "
-                "(line %d): unknown event: %s.\n",
+        G_Error("%s: Error (line %d): unknown event: %s.\n", __func__,
                 COM_GetCurrentParseLine(), token);
       }
 
       if (numEventItems >= G_MAX_SCRIPT_STACK_ITEMS) {
-        G_Error("G_Script_ScriptParse(), Error "
-                "(line %d): "
-                "G_MAX_SCRIPT_STACK_ITEMS "
-                "reached (%d)\n",
-                COM_GetCurrentParseLine(), G_MAX_SCRIPT_STACK_ITEMS);
+        G_Error("%s: Error (line %d): G_MAX_SCRIPT_STACK_ITEMS reached (%d)\n",
+                __func__, COM_GetCurrentParseLine(), G_MAX_SCRIPT_STACK_ITEMS);
       }
 
-      curEvent = &events[numEventItems];
+      g_script_event_t *curEvent = &events[numEventItems];
       curEvent->eventNum = eventNum;
       memset(params, 0, sizeof(params));
 
-      // parse any event params before the start of this
-      // event's actions
-      while ((token = COM_Parse(&pScript)) != NULL && (token[0] != '{')) {
+      // parse any event params before the start of this event's actions
+      while ((token = COM_Parse(&pScript)) != nullptr && (token[0] != '{')) {
         if (!token[0]) {
-          G_Error("G_Script_ScriptParse(), "
-                  "Error (line %d): '}' "
-                  "expected, end "
-                  "of script found.\n",
-                  COM_GetCurrentParseLine());
+          G_Error("%s: Error (line %d): '}' expected, end of script found.\n",
+                  __func__, COM_GetCurrentParseLine());
         }
 
-        if (strlen(params)) // add a space between
-                            // each param
-        {
+        // add a space between each param
+        if (strlen(params)) {
           Q_strcat(params, sizeof(params), " ");
         }
+
         Q_strcat(params, sizeof(params), token);
       }
 
-      if (strlen(params)) // copy the params into the event
-      {
-        curEvent->params = static_cast<char *>(G_Alloc(strlen(params) + 1));
-        Q_strncpyz(curEvent->params, params, strlen(params) + 1);
+      // copy the params into the event
+      if (strlen(params)) {
+        const auto plen = static_cast<int>(strlen(params) + 1);
+        curEvent->params = static_cast<char *>(G_Alloc(plen));
+        Q_strncpyz(curEvent->params, params, plen);
       }
 
       // parse the actions for this event
-      while ((token = COM_Parse(&pScript)) != NULL && (token[0] != '}')) {
+      while ((token = COM_Parse(&pScript)) != nullptr && (token[0] != '}')) {
         if (!token[0]) {
-          G_Error("G_Script_ScriptParse(), "
-                  "Error (line %d): '}' "
-                  "expected, end "
-                  "of script found.\n",
-                  COM_GetCurrentParseLine());
+          G_Error("%s: Error (line %d): '}' expected, end of script found.\n",
+                  __func__, COM_GetCurrentParseLine());
         }
 
-        action = G_Script_ActionForString(token);
+        g_script_stack_action_t *action = G_Script_ActionForString(token);
+
         if (!action) {
-          G_Error("G_Script_ScriptParse(), "
-                  "Error (line %d): "
-                  "unknown action: %s.\n",
+          G_Error("%s: Error (line %d): unknown action: %s.\n", __func__,
                   COM_GetCurrentParseLine(), token);
         }
 
@@ -674,77 +648,47 @@ void G_Script_ScriptParse(gentity_t *ent) {
             !Q_stricmp(action->actionString, "create") ||
             !Q_stricmp(action->actionString, "delete")) {
           token = COM_Parse(&pScript);
+
           if (token[0] != '{') {
-            COM_ParseError("'{' expected, "
-                           "found: %s.\n",
-                           token);
+            COM_ParseError("'{' expected, found: %s.\n", token);
           }
 
-          for (token = COM_Parse(&pScript); token && (token[0] != '}');
+          for (token = COM_Parse(&pScript); token && token[0] != '}';
                token = COM_Parse(&pScript)) {
-            if (strlen(params)) // add a space between each param
-            {
+            // add a space between each param
+            if (strlen(params)) {
               Q_strcat(params, sizeof(params), " ");
             }
 
-            if (strrchr(token,
-                        ' ')) // need
-                              // to
-                              // wrap
-                              // this
-                              // param
-                              // in
-                              // quotes
-                              // since
-                              // it
-                              // has
-                              // more
-                              // than
-                              // one
-                              // word
-            {
+            // need to wrap this param in quotes since it has more than one word
+            if (strrchr(token, ' ')) {
               Q_strcat(params, sizeof(params), "\"");
             }
 
             Q_strcat(params, sizeof(params), token);
 
-            if (strrchr(token,
-                        ' ')) // need
-                              // to
-                              // wrap
-                              // this
-                              // param
-                              // in
-                              // quotes
-                              // since
-                              // it
-                              // has
-                              // mor
-            {
+            // need to wrap this param in quotes since it has more than one word
+            if (strrchr(token, ' ')) {
               Q_strcat(params, sizeof(params), "\"");
             }
           }
         } else
-          // hackly precaching of custom
-          // characters
+          // hackly precaching of custom characters
           if (!Q_stricmp(token, "spawnbot")) {
-            // this is fairly
-            // indepth, so I'll
-            // move it to a
-            // separate function
-            // for readability
+            // this is fairly indepth,
+            // so I'll move it to a separate function for readability
             G_Script_ParseSpawnbot(&pScript, params, MAX_INFO_STRING);
           } else {
             token = COM_ParseExt(&pScript, qfalse);
-            for (i = 0; token[0]; i++) {
-              if (strlen(params)) // add a space between each param
-              {
+
+            for (int i = 0; token[0]; i++) {
+              // add a space between each param
+              if (strlen(params)) {
                 Q_strcat(params, sizeof(params), " ");
               }
 
               if (i == 0) {
-                // Special case: playsound's need to be cached on startup to
-                // prevent in-game pauses
+                // cache sounds, models and skins
                 if (!Q_stricmp(action->actionString, "playsound")) {
                   G_SoundIndex(token);
                 } else if (!Q_stricmp(action->actionString, "changemodel")) {
@@ -756,9 +700,8 @@ void G_Script_ScriptParse(gentity_t *ent) {
                             !Q_stricmp(action->actionString, "mu_play") ||
                             !Q_stricmp(action->actionString, "mu_queue") ||
                             !Q_stricmp(action->actionString, "startcam"))) {
-                  if (strlen(token)) // we know there's a [0], but don't know if
-                                     // it's '0'
-                  {
+                  // we know there's a [0], but don't know if it's '0'
+                  if (strlen(token)) {
                     trap_SendServerCommand(-1, va("addToBuild %s\n", token));
                   }
                 }
@@ -770,19 +713,17 @@ void G_Script_ScriptParse(gentity_t *ent) {
                 }
               }
 
-              if (strrchr(token,
-                          ' ')) // need to wrap this param in quotes
-                                // since it has more than one word
-              {
+              // need to wrap this param in quotes
+              // since it has more than one word
+              if (strrchr(token, ' ')) {
                 Q_strcat(params, sizeof(params), "\"");
               }
 
               Q_strcat(params, sizeof(params), token);
 
-              if (strrchr(token,
-                          ' ')) // need to wrap this param in quotes
-                                // since it has more than one word
-              {
+              // need to wrap this param in quotes
+              // since it has more than one word
+              if (strrchr(token, ' ')) {
                 Q_strcat(params, sizeof(params), "\"");
               }
 
@@ -790,36 +731,31 @@ void G_Script_ScriptParse(gentity_t *ent) {
             }
           }
 
-        if (strlen(params)) { // copy the params
-                              // into the event
+        // copy the params into the event
+        if (strlen(params)) {
+          const auto plen = static_cast<int>(strlen(params) + 1);
           curEvent->stack.items[curEvent->stack.numItems].params =
-              static_cast<char *>(G_Alloc(strlen(params) + 1));
+              static_cast<char *>(G_Alloc(plen));
           Q_strncpyz(curEvent->stack.items[curEvent->stack.numItems].params,
-                     params, strlen(params) + 1);
+                     params, plen);
         }
 
         curEvent->stack.numItems++;
 
         if (curEvent->stack.numItems >= G_MAX_SCRIPT_STACK_ITEMS) {
-          G_Error("G_Script_ScriptParse(): "
-                  "script exceeded "
-                  "G_MAX_SCRIPT_STACK_"
-                  "ITEMS (%d), line %d\n",
-                  G_MAX_SCRIPT_STACK_ITEMS, COM_GetCurrentParseLine());
+          G_Error(
+              "%s: script exceeded G_MAX_SCRIPT_STACK_ITEMS (%d), line %d\n",
+              __func__, G_MAX_SCRIPT_STACK_ITEMS, COM_GetCurrentParseLine());
         }
       }
 
       numEventItems++;
-    } else // skip this character completely
-    {      // TTimo gcc: suggest parentheses around assignment used
-           // as truth value
-      while ((token = COM_Parse(&pScript)) != NULL) {
+    } else {
+      // skip this character completely
+      while ((token = COM_Parse(&pScript)) != nullptr) {
         if (!token[0]) {
-          G_Error("G_Script_ScriptParse(), "
-                  "Error (line %d): '}' "
-                  "expected, end "
-                  "of script found.\n",
-                  COM_GetCurrentParseLine());
+          G_Error("%s: Error (line %d): '}' expected, end of script found.\n",
+                  __func__, COM_GetCurrentParseLine());
         } else if (token[0] == '{') {
           bracketLevel++;
         } else if (token[0] == '}') {
@@ -834,7 +770,7 @@ void G_Script_ScriptParse(gentity_t *ent) {
   // alloc and copy the events into the gentity_t for this cast
   if (numEventItems > 0) {
     ent->scriptEvents = static_cast<g_script_event_t *>(
-        G_Alloc(sizeof(g_script_event_t) * numEventItems));
+        G_Alloc(static_cast<int>(sizeof(g_script_event_t)) * numEventItems));
     memcpy(ent->scriptEvents, events.get(),
            sizeof(g_script_event_t) * numEventItems);
     ent->numScriptEvents = numEventItems;
