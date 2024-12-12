@@ -127,6 +127,7 @@ qboolean G_ScriptAction_UseTarget(gentity_t *ent, char *params);
 qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params);
 
 qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params);
+qboolean G_ScriptAction_ChangeSkin(gentity_t *ent, char *params);
 
 // these are the actions that each event can call
 g_script_stack_action_t gScriptActions[] = {
@@ -244,6 +245,7 @@ g_script_stack_action_t gScriptActions[] = {
     {"usetarget", G_ScriptAction_UseTarget},
     {"wm_announce_private", G_ScriptAction_Announce_Private},
     {"tracker", G_ScriptAction_Tracker},
+    {"changeskin", G_ScriptAction_ChangeSkin},
     {nullptr, nullptr}};
 
 qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event,
@@ -747,6 +749,8 @@ void G_Script_ScriptParse(gentity_t *ent) {
                   G_SoundIndex(token);
                 } else if (!Q_stricmp(action->actionString, "changemodel")) {
                   G_ModelIndex(token);
+                } else if (!Q_stricmp(action->actionString, "changeskin")) {
+                  G_SkinIndex(token);
                 } else if (buildScript &&
                            (!Q_stricmp(action->actionString, "mu_start") ||
                             !Q_stricmp(action->actionString, "mu_play") ||
