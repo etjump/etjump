@@ -1752,6 +1752,13 @@ static void CG_Mover(centity_t *cent) {
       cent->trailTime = 0;
     }
 
+    // misc_constructiblemarker supports 'model2' + 'skin',
+    // latter is stored in ent->s.effect1Time
+    if (cent->currentState.eType == ET_CONSTRUCTIBLE_MARKER &&
+        cent->currentState.effect1Time) {
+      ent.customSkin = cgs.gameModelSkins[cent->currentState.effect1Time];
+    }
+
     trap_R_AddRefEntityToScene(&ent);
     memcpy(&cent->refEnt, &ent, sizeof(refEntity_t));
   } else {
