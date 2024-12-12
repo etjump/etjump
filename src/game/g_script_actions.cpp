@@ -270,7 +270,7 @@ qboolean G_ScriptAction_ChangeModel(gentity_t *ent, char *params) {
   ent->tagNumber = trap_LoadTag(tagname);
 
   // allow 'misc_gamemodel' models to be changed too
-  if (!Q_stricmp(ent->classname, "misc_gamemodel")) {
+  if (ent->s.eType == ET_GAMEMODEL) {
     ent->s.modelindex = G_ModelIndex(token);
   } else {
     ent->s.modelindex2 = G_ModelIndex(token);
@@ -4983,6 +4983,25 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
   }
 
   ETJump::ProgressionTrackers::printTrackerChanges(activator, oldValues);
+
+  return qtrue;
+}
+
+qboolean G_ScriptAction_ChangeSkin(gentity_t *ent, char *params) {
+  const char *pString = params;
+  const char *token = COM_ParseExt(&pString, qfalse);
+
+  if (!token[0]) {
+    G_Error("%s: 'changeskin' must have a target skin name\n", __func__);
+  }
+
+  // misc_constructiblemarker holds the .skin in ent->s.effect1Time,
+  // since it supports 'model2' key for drawing a model
+  if (ent->s.eType == ET_CONSTRUCTIBLE_MARKER) {
+    ent->s.effect1Time = G_SkinIndex(token);
+  } else {
+    ent->s.modelindex2 = G_SkinIndex(token);
+  }
 
   return qtrue;
 }
