@@ -256,7 +256,8 @@ typedef enum {
   F_ENTITY, // index on disk, pointer in memory
   F_ITEM,   // index on disk, pointer in memory
   F_CLIENT, // index on disk, pointer in memory
-  F_IGNORE
+  F_IGNORE,
+  F_CURSORHINT, // maps cursorhint string to a correct int
 } fieldtype_t;
 
 typedef struct {

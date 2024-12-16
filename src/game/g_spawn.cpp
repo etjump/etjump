@@ -4,6 +4,8 @@
  * desc:
  *
  */
+#include "etj_entity_utilities.h"
+
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -171,6 +173,8 @@ field_t fields[] = {
 
     {"targetShaderName", FOFS(targetShaderName), F_LSTRING},
     {"targetShaderNewName", FOFS(targetShaderNewName), F_LSTRING},
+
+    {"cursorhint", FOFS(s.dmgFlags), F_CURSORHINT},
 
     {nullptr}};
 
@@ -808,42 +812,45 @@ in a gentity
 ===============
 */
 void G_ParseField(const char *key, const char *value, gentity_t *ent) {
-  field_t *f;
-  byte *b;
   float v;
   vec3_t vec;
 
-  for (f = fields; f->name; f++) {
+  for (const field_t *f = fields; f->name; f++) {
     if (!Q_stricmp(f->name, key)) {
       // found it
-      b = (byte *)ent;
+      const auto b = reinterpret_cast<byte *>(ent);
 
       switch (f->type) {
         case F_LSTRING:
-          *(char **)(b + f->ofs) = G_NewString(value);
+          *reinterpret_cast<char **>(b + f->ofs) = G_NewString(value);
           break;
         case F_VECTOR:
           sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
-          ((float *)(b + f->ofs))[0] = vec[0];
-          ((float *)(b + f->ofs))[1] = vec[1];
-          ((float *)(b + f->ofs))[2] = vec[2];
+          reinterpret_cast<float *>(b + f->ofs)[0] = vec[0];
+          reinterpret_cast<float *>(b + f->ofs)[1] = vec[1];
+          reinterpret_cast<float *>(b + f->ofs)[2] = vec[2];
           break;
         case F_INT:
-          *(int *)(b + f->ofs) = Q_atoi(value);
+          *reinterpret_cast<int *>(b + f->ofs) = Q_atoi(value);
           break;
         case F_FLOAT:
-          *(float *)(b + f->ofs) = Q_atof(value);
+          *reinterpret_cast<float *>(b + f->ofs) = Q_atof(value);
           break;
         case F_ANGLEHACK:
           v = Q_atof(value);
-          ((float *)(b + f->ofs))[0] = 0;
-          ((float *)(b + f->ofs))[1] = v;
-          ((float *)(b + f->ofs))[2] = 0;
+          reinterpret_cast<float *>(b + f->ofs)[0] = 0;
+          reinterpret_cast<float *>(b + f->ofs)[1] = v;
+          reinterpret_cast<float *>(b + f->ofs)[2] = 0;
           break;
-        default:
+        case F_CURSORHINT:
+          ETJump::EntityUtilities::setCursorhintFromString(
+              *reinterpret_cast<int *>(b + f->ofs), value);
+          break;
         case F_IGNORE:
+        default:
           break;
       }
+
       return;
     }
   }
