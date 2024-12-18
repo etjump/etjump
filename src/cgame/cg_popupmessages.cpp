@@ -428,7 +428,7 @@ void CG_DrawPMItems(void) {
 
   // show repeats counter
   if (cg_pmWaitingList->repeats > 1) {
-    msg = va("%s^9(x%d)", cg_pmWaitingList->message, cg_pmWaitingList->repeats);
+    msg = va("%s ^9(x%d)", cg_pmWaitingList->message, cg_pmWaitingList->repeats);
   } else {
     msg = (char *)&cg_pmWaitingList->message;
   }
@@ -468,7 +468,7 @@ void CG_DrawPMItems(void) {
     }
 
     if (listItem->repeats > 1) {
-      msg = va("%s (x%d)", listItem->message, listItem->repeats);
+      msg = va("%s ^9(x%d)", listItem->message, listItem->repeats);
     } else {
       msg = (char *)&listItem->message;
     }
