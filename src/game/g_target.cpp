@@ -394,12 +394,21 @@ void misc_beam_think(gentity_t *self) {
     self->r.maxs[1] += 4;
     self->r.maxs[2] += 4;
 
-    VectorCopy(self->s.origin, self->r.currentOrigin);
+    // self->s.pos.trBase contains the origin of the beam start
+    // using self->s.origin is wrong here as that's the position of
+    // the misc_beam entity itself, which has no relevance for collision
+    VectorCopy(self->s.pos.trBase, self->r.currentOrigin);
     VectorSubtract(self->r.mins, self->r.currentOrigin, self->r.mins);
     VectorSubtract(self->r.maxs, self->r.currentOrigin, self->r.maxs);
 
     trap_LinkEntity(self);
   }
+
+  // set mins/maxs for prediction on client
+  // angles2 is used for "color" (unsure if this is actually ever used?)
+  // but angles is free to repurpose as it's not used for anything
+  VectorCopy(self->r.mins, self->s.origin2);
+  VectorCopy(self->r.maxs, self->s.angles);
 }
 
 void misc_beam_start(gentity_t *self) {
