@@ -5,6 +5,8 @@
  *
  */
 
+#include <unordered_map>
+
 #include "g_local.h"
 
 typedef struct {
@@ -72,6 +74,18 @@ model / sound configstring indexes
 =========================================================================
 */
 
+static const std::unordered_map<int, std::pair<std::string, std::string>>
+    csStrings = {
+        {CS_MODELS, {"CS_MODELS", "MAX_MODELS"}},
+        {CS_SOUNDS, {"CS_SOUNDS", "MAX_SOUNDS"}},
+        {CS_SHADERS, {"CS_SHADERS", "MAX_CS_SHADERS"}},
+        {CS_SKINS, {"CS_SKINS", "MAX_CS_SKINS"}},
+        {CS_CHARACTERS, {"CS_CHARACTERS", "MAX_CHARACTERS"}},
+        {CS_DLIGHTS, {"CS_DLIGHTS", "MAX_DLIGHT_CONFIGSTRINGS"}},
+        {CS_TAGCONNECTS, {"CS_TAGCONNECTS", "MAX_TAGCONNECTS"}},
+        {CS_STRINGS, {"CS_STRINGS", "MAX_CS_STRINGS"}},
+};
+
 /*
 ================
 G_FindConfigstringIndex
@@ -102,7 +116,9 @@ int G_FindConfigstringIndex(const char *name, int start, int max,
   }
 
   if (i == max) {
-    G_Error("G_FindConfigstringIndex: overflow");
+    G_Error("%s: overflow on index %s (%s = %i)\n", __func__,
+            csStrings.find(start)->second.first.c_str(),
+            csStrings.find(start)->second.second.c_str(), max);
   }
 
   trap_SetConfigstring(start + i, name);
