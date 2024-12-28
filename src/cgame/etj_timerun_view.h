@@ -27,6 +27,7 @@
 #include <string>
 #include "etj_drawable.h"
 #include "etj_timerun.h"
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class TimerunView : public Drawable {
@@ -53,6 +54,9 @@ private:
   static float getTimerAlpha(bool running, bool autoHide, int fadeStart,
                              int duration);
 
+  void setCheckpointSize();
+  void setCheckpointPopupSize();
+
   vec4_t inactiveTimerColor{};
   std::shared_ptr<Timerun> _timerun;
 
@@ -62,6 +66,9 @@ private:
   static const int animationTime = 300;
   static const int fadeHold = 5000; // 5s pause before fade starts
   static const int fadeTime = 2000; // 2s fade
+
+  CvarValue::Size checkpointSize{};
+  CvarValue::Size popupSize{};
 
   static const int popupFadeTime = 100;
 

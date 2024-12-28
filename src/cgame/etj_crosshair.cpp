@@ -26,6 +26,8 @@
 #include "etj_crosshair_drawer.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
+#include "etj_cvar_parser.h"
+
 #include "../game/etj_numeric_utilities.h"
 
 namespace ETJump {
@@ -55,10 +57,10 @@ void Crosshair::parseColors() {
 }
 
 void Crosshair::adjustSize() {
-  const float scaleX = Numeric::clamp(etj_crosshairScaleX.value, -5, 5);
-  const float scaleY = Numeric::clamp(etj_crosshairScaleY.value, -5, 5);
-  crosshair.w = cg_crosshairSize.value * scaleX;
-  crosshair.h = cg_crosshairSize.value * scaleY;
+  const auto size =
+      CvarValueParser::parse<CvarValue::Size>(cg_crosshairSize, -256, 256);
+  crosshair.w = size.x;
+  crosshair.h = size.y;
   crosshair.f = 0.0f;
   crosshair.t = Numeric::clamp(etj_crosshairThickness.value, 0.0f, 5.0f);
 

@@ -101,6 +101,10 @@ OverbounceWatcher::OverbounceWatcher(
     parseColorString(etj_obWatcherColor.string, _color);
   });
 
+  cvarUpdateHandler->subscribe(&etj_obWatcherSize,
+                               [&](const vmCvar_t *) { setSize(); });
+
+  setSize();
   parseColorString(etj_obWatcherColor.string, _color);
 }
 
@@ -109,6 +113,12 @@ OverbounceWatcher::~OverbounceWatcher() {
   _clientCommandsHandler->unsubscribe("ob_load");
   _clientCommandsHandler->unsubscribe("ob_reset");
   _clientCommandsHandler->unsubscribe("ob_list");
+}
+
+void OverbounceWatcher::setSize() {
+  size = CvarValueParser::parse<CvarValue::Size>(etj_obWatcherSize, 0, 10);
+  size.x *= 0.1f;
+  size.y *= 0.1f;
 }
 
 bool OverbounceWatcher::beforeRender() {
@@ -135,10 +145,6 @@ bool OverbounceWatcher::beforeRender() {
 
   endHeight = (*_current)[2];
 
-  sizeX = sizeY = 0.1f;
-  sizeX *= etj_obWatcherSize.value;
-  sizeY *= etj_obWatcherSize.value;
-
   x = etj_obWatcherX.value;
   ETJump_AdjustPosition(&x);
 
@@ -163,7 +169,7 @@ bool OverbounceWatcher::beforeRender() {
 }
 
 void OverbounceWatcher::render() const {
-  DrawString(x, etj_obWatcherY.value, sizeX, sizeY, _color, qfalse, "OB", 0,
+  DrawString(x, etj_obWatcherY.value, size.x, size.y, _color, qfalse, "OB", 0,
              ITEM_TEXTSTYLE_SHADOWED);
 }
 

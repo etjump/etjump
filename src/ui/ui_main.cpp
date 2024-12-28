@@ -14,6 +14,7 @@ USER INTERFACE MAIN
 #include "ui_local.h"
 #include "etj_colorpicker.h"
 
+#include "../cgame/etj_cvar_parser.h"
 #include "../game/etj_string_utilities.h"
 #include "../cgame/etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
@@ -2182,11 +2183,8 @@ static void UI_DrawRedBlue(rectDef_t *rect, float scale, vec4_t color,
              (uiInfo.redBlue == 0) ? "Red" : "Blue", 0, 0, textStyle);
 }
 
-static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color) {
-  float size = cg_crosshairSize.value;
-
-  // Make sure currentCrosshair is updated if crosshair is changed via
-  // console
+static void UI_DrawCrosshair(const rectDef_t *rect) {
+  // Make sure currentCrosshair is updated if crosshair is changed via console
   uiInfo.currentCrosshair = ui_drawCrosshair.integer;
 
   if (uiInfo.currentCrosshair < 0 ||
@@ -2194,28 +2192,40 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color) {
     uiInfo.currentCrosshair = 0;
   }
 
-  size = (rect->w / 96.0f) *
-         ((size > 96.0f) ? 96.0f : ((size < 24.0f) ? 24.0f : size));
-
-  vec4_t crosshairColor = {1.0, 1.0, 1.0, 1.0};
-
   if (uiInfo.currentCrosshair < 10) {
+    vec4_t crosshairColor = {1.0, 1.0, 1.0, 1.0};
+    vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
+
     ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
     crosshairColor[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
-    trap_R_SetColor(crosshairColor);
-    UI_DrawHandlePic(
-        rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size,
-        size, uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
-
-    vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
 
     ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
     crosshairColorAlt[3] =
         Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
+
+    auto size = ETJump::CvarValueParser::parse<ETJump::CvarValue::Size>(
+        cg_crosshairSize, -256, 256);
+
+    // use abs for drawing these so they position correctly
+    size.x = Numeric::clamp(size.x, -96, 96);
+    size.x = rect->w / 96.0f * size.x;
+    size.x = std::abs(size.x);
+
+    size.y = Numeric::clamp(size.y, -96, 96);
+    size.y = rect->h / 96.0f * size.y;
+    size.y = std::abs(size.y);
+
+    trap_R_SetColor(crosshairColor);
+    UI_DrawHandlePic(
+        rect->x + (rect->w - size.x) / 2, rect->y + (rect->h - size.y) / 2,
+        size.x, size.y,
+        uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
+
     trap_R_SetColor(crosshairColorAlt);
     UI_DrawHandlePic(
-        rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size,
-        size, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
+        rect->x + (rect->w - size.x) / 2, rect->y + (rect->h - size.y) / 2,
+        size.x, size.y,
+        uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
   } else {
     const auto text = va("Crosshair %d", uiInfo.currentCrosshair);
     const auto width = static_cast<float>(
@@ -2567,7 +2577,7 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x,
       UI_DrawRedBlue(&rect, scale, color, textStyle);
       break;
     case UI_CROSSHAIR:
-      UI_DrawCrosshair(&rect, scale, color);
+      UI_DrawCrosshair(&rect);
       break;
     case UI_SELECTEDPLAYER:
       UI_DrawSelectedPlayer(&rect, scale, color, textStyle);

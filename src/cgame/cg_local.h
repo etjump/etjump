@@ -2554,7 +2554,7 @@ extern vmCvar_t etj_altScoreboard;
 extern vmCvar_t etj_drawSpectatorInfo;
 extern vmCvar_t etj_spectatorInfoX;
 extern vmCvar_t etj_spectatorInfoY;
-extern vmCvar_t etj_spectatorInfoSize;
+extern vmCvar_t etj_spectatorInfoScale;
 extern vmCvar_t etj_spectatorInfoShadow;
 
 extern vmCvar_t etj_drawRunTimer;
@@ -2764,8 +2764,6 @@ extern vmCvar_t etj_optimizePrediction;
 
 extern vmCvar_t etj_menuSensitivity;
 
-extern vmCvar_t etj_crosshairScaleX;
-extern vmCvar_t etj_crosshairScaleY;
 extern vmCvar_t etj_crosshairThickness;
 extern vmCvar_t etj_crosshairOutline;
 

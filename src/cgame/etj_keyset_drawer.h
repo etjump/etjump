@@ -23,17 +23,12 @@
  */
 
 #pragma once
-#include "cg_local.h"
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
-
-#include "etj_irenderable.h"
 #include <vector>
+
+#include "cg_local.h"
+#include "etj_irenderable.h"
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class KeySetDrawer : public IRenderable {
@@ -66,7 +61,7 @@ public:
   };
 
   KeySetDrawer(const std::vector<KeyShader> &keyShaders);
-  virtual ~KeySetDrawer(){};
+  virtual ~KeySetDrawer() {};
   void render() const override;
   // FIXME: this should to be refactored, see etj_cvar_master_drawer.cpp/h,
   //  this whole system with keysets is more complex than it needs to be
@@ -82,7 +77,7 @@ protected:
   struct KeyAttrs {
     vec4_t color;
     vec4_t shadowColor;
-    float size;
+    CvarValue::Size size;
     Point2d origin;
     bool shouldDrawShadow;
   };
@@ -93,7 +88,7 @@ protected:
   void initListeners();
   void initAttrs();
   void updateKeysColor(const char *str);
-  void updateKeysSize(float size);
+  void updateKeysSize();
   void updateKeysOrigin(float x, float y);
   void updateKeysShadow(bool shouldDrawShadow);
   void updateKeysShadowColor(const vec4_t shadowColor);
@@ -104,9 +99,10 @@ protected:
   static int isKeyPressed(KeyNames key);
 
   template <int Cols>
-  static Point2d calcGridPosition(float cellSize, int cellIndex) {
-    return {cellSize * (cellIndex % Cols),
-            cellSize * static_cast<int>(cellIndex / Cols)};
+  static Point2d calcGridPosition(const float cellSizeX, const float cellSizeY,
+                                  const int cellIndex) {
+    return {cellSizeX * (cellIndex % Cols),
+            cellSizeY * static_cast<int>(cellIndex / Cols)};
   }
 };
 } // namespace ETJump
