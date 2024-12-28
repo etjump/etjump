@@ -2206,14 +2206,22 @@ static void UI_DrawCrosshair(const rectDef_t *rect) {
     auto size = ETJump::CvarValueParser::parse<ETJump::CvarValue::Size>(
         cg_crosshairSize, -256, 256);
 
-    // use abs for drawing these so they position correctly
-    size.x = Numeric::clamp(size.x, -96, 96);
-    size.x = rect->w / 96.0f * size.x;
-    size.x = std::abs(size.x);
+    if (size.x == 0 && size.y == 0) {
+      return;
+    }
 
-    size.y = Numeric::clamp(size.y, -96, 96);
-    size.y = rect->h / 96.0f * size.y;
-    size.y = std::abs(size.y);
+    // use abs for drawing these so they position correctly
+    if (size.x != 0) {
+      size.x = Numeric::clamp(size.x, -96, 96);
+      size.x = rect->w / 96.0f * size.x;
+      size.x = std::abs(size.x);
+    }
+
+    if (size.y != 0) {
+      size.y = Numeric::clamp(size.y, -96, 96);
+      size.y = rect->h / 96.0f * size.y;
+      size.y = std::abs(size.y);
+    }
 
     trap_R_SetColor(crosshairColor);
     UI_DrawHandlePic(
