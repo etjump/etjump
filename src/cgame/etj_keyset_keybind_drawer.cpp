@@ -42,10 +42,11 @@ void ETJump::KeySetKeyBindDrawer::drawPressShader(qhandle_t shader,
   // get command bind key name
   const float sizeX = attrs.size.x / 3;
   const float sizeY = attrs.size.y / 3;
-  const float centerOffset = attrs.size.x / 2;
+  const float centerOffsetX = attrs.size.x / 2;
+  const float centerOffsetY = attrs.size.y / 2;
   const auto pos = calcGridPosition<3>(sizeX, sizeY, position);
-  const float x = attrs.origin.x + pos.x - centerOffset;
-  const float y = attrs.origin.y + pos.y - centerOffset;
+  const float x = attrs.origin.x + pos.x - centerOffsetX;
+  const float y = attrs.origin.y + pos.y - centerOffsetY;
   const vec_t *color = attrs.color;
   const vec_t *shadowColor =
       attrs.shouldDrawShadow ? attrs.shadowColor : nullptr;
