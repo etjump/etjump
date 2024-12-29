@@ -76,12 +76,93 @@ void SP_target_remove_powerups(gentity_t *ent) {
 "wait" seconds to pause before firing targets.
 "random" delay variance, total delay = delay +/- random seconds
 */
+namespace ETJump {
+enum class TargetDelaySpawnflags {
+  PerClientDelay = 1,
+};
+
+bool anyDelaysQueued(const gentity_t *ent) {
+  return std::any_of(ent->targetDelayActivationTime.cbegin(),
+                     ent->targetDelayActivationTime.cend(),
+                     [](const int value) { return value != 0; });
+}
+
+size_t getNextActivationTimeIndex(const gentity_t *ent) {
+  const auto it = std::min_element(ent->targetDelayActivationTime.cbegin(),
+                                   ent->targetDelayActivationTime.cend(),
+                                   [](const int a, const int b) {
+                                     if (a == 0) {
+                                       return false;
+                                     }
+
+                                     if (b == 0) {
+                                       return true;
+                                     }
+
+                                     return a < b;
+                                   });
+
+  return static_cast<size_t>(
+      std::distance(ent->targetDelayActivationTime.cbegin(), it));
+}
+
+void thinkTargetDelayPerClient(gentity_t *ent) {
+  G_UseTargets(ent, ent->activator);
+  ent->targetDelayActivationTime[ClientNum(ent->activator)] = 0;
+
+  // check if there are other delays that need to trigger this frame
+  for (size_t i = 0; i < ent->targetDelayActivationTime.size(); i++) {
+    if (ent->targetDelayActivationTime[i] != 0 &&
+        ent->targetDelayActivationTime[i] <= level.time) {
+      G_UseTargets(ent, &g_entities[i]);
+      ent->targetDelayActivationTime[i] = 0;
+    }
+  }
+
+  // if other delays are queued, set next think *here*, not in use function
+  // otherwise any activation will cancel out the ongoing queue
+  if (anyDelaysQueued(ent)) {
+    const size_t index = getNextActivationTimeIndex(ent);
+    ent->nextthink = ent->targetDelayActivationTime[index];
+    ent->activator = &g_entities[index];
+  }
+}
+} // namespace ETJump
+
 void Think_Target_Delay(gentity_t *ent) { G_UseTargets(ent, ent->activator); }
 
 void Use_Target_Delay(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-  ent->nextthink = level.time + (ent->wait + ent->random * crandom()) * 1000;
-  ent->think = Think_Target_Delay;
-  ent->activator = activator;
+  const int nextThink =
+      level.time +
+      static_cast<int>((ent->wait + ent->random * crandom()) * 1000);
+
+  if (ent->spawnflags &
+      static_cast<int>(ETJump::TargetDelaySpawnflags::PerClientDelay)) {
+    if (!activator || !activator->client) {
+      G_Error("%s: call to client-only 'target_delay' with no activator.\n",
+              __func__);
+    }
+
+    const int cnum = ClientNum(activator);
+
+    // we must determine this *before* we set the activation time,
+    // otherwise we never set nextthink as the array will never be empty
+    const bool setNextThink = !ETJump::anyDelaysQueued(ent) ||
+                              ent->targetDelayActivationTime[cnum] != 0;
+
+    ent->think = ETJump::thinkTargetDelayPerClient;
+    ent->targetDelayActivationTime[cnum] = nextThink;
+
+    if (setNextThink) {
+      const size_t index = ETJump::getNextActivationTimeIndex(ent);
+      ent->nextthink = ent->targetDelayActivationTime[index];
+      ent->activator = &g_entities[index];
+    }
+  } else {
+    ent->think = Think_Target_Delay;
+    ent->nextthink = nextThink;
+    ent->activator = activator;
+  }
 }
 
 void SP_target_delay(gentity_t *ent) {
