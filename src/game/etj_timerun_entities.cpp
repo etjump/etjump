@@ -37,11 +37,12 @@ namespace ETJump {
 std::map<std::string, int> TimerunEntity::runIndices;
 std::set<std::string> TimerunEntity::cleanNames;
 std::set<std::string> TimerunEntity::names;
-ETJump::Log TimerunEntity::logger = ETJump::Log("timerun entity");
 
 void TimerunEntity::setTimerunIndex(gentity_t *self) {
   char *name = nullptr;
   G_SpawnString("name", "default", &name);
+
+  Q_strncpyz(self->runName, name, sizeof(self->runName));
 
   if (level.timerunNamesCount > MAX_TIMERUNS) {
     G_Error("setTimerunIndex: Too many timeruns in the map (%d > %d)\n",
@@ -101,38 +102,48 @@ std::vector<std::string> timerunEntities{
 void TimerunEntity::validateTimerunEntities() {
   std::map<std::string, TimerunEntityValidationResult> validationResults;
 
-  for (int i = 0; i < MAX_GENTITIES; ++i) {
-    auto ent = g_entities[i];
+  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; ++i) {
+    const gentity_t *ent = &g_entities[i];
 
-    if (!Container::isIn(timerunEntities, ent.runName)) {
+    // everything within level.num_entities should be valid but just in case
+    if (!ent) {
       continue;
     }
 
-    if (validationResults.count(ent.runName) == 0) {
-      validationResults[ent.runName] = TimerunEntityValidationResult{};
+    if (!std::any_of(timerunEntities.cbegin(), timerunEntities.cend(),
+                     [&ent](const std::string &entity) {
+                       return StringUtil::iEqual(ent->classname, entity);
+                     })) {
+      continue;
     }
 
-    if (ent.classname == std::string("target_startTimer") ||
-        ent.classname == std::string("trigger_startTimer")) {
-      validationResults[ent.runName].hasStartTimer = true;
-    } else if (ent.classname == std::string("target_stopTimer") ||
-               ent.classname == std::string("trigger_stopTimer")) {
-      validationResults[ent.runName].hasStopTimer = true;
-    } else if (ent.classname == std::string("target_checkpoint") ||
-               ent.classname == std::string("trigger_checkpoint")) {
-      validationResults[ent.runName].hasCheckpoints = true;
+    if (validationResults.count(ent->runName) == 0) {
+      validationResults[ent->runName] = TimerunEntityValidationResult{};
+    }
+
+    if (StringUtil::iEqual(ent->classname, "target_startTimer") ||
+        StringUtil::iEqual(ent->classname, "trigger_startTimer")) {
+      validationResults[ent->runName].hasStartTimer = true;
+    } else if (StringUtil::iEqual(ent->classname, "target_stopTimer") ||
+               StringUtil::iEqual(ent->classname, "trigger_stopTimer")) {
+      validationResults[ent->runName].hasStopTimer = true;
+    } else if (StringUtil::iEqual(ent->classname, "target_checkpoint") ||
+               StringUtil::iEqual(ent->classname, "trigger_checkpoint")) {
+      validationResults[ent->runName].hasCheckpoints = true;
     }
   }
 
   for (const auto &r : validationResults) {
-    if (!r.second.hasStartTimer) {
-
-      logger.error("Timerun `%s` is missing a start timer. Add one.\n",
-                   r.first);
-    }
-    if (!r.second.hasStopTimer) {
-      logger.error("Timerun `%s` is missing a start timer. Add one.\n",
-                   r.first);
+    if (!r.second.hasStartTimer && !r.second.hasStopTimer) {
+      G_Printf("^3WARNING: checkpoint found for timerun '%s^3' without start "
+               "and stop triggers\n",
+               r.first.c_str());
+    } else if (!r.second.hasStartTimer) {
+      G_Printf("^3WARNING: timerun '%s^3' has no start trigger\n",
+               r.first.c_str());
+    } else if (!r.second.hasStopTimer) {
+      G_Printf("^3WARNING: timerun '%s^3' has no stop trigger\n",
+               r.first.c_str());
     }
   }
 }
