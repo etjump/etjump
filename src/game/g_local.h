@@ -597,6 +597,8 @@ struct gentity_s {
   int triggerActivationTime[MAX_CLIENTS];
   // for tracking projectiles entering skybox
   int lastSurfaceFlag;
+
+  std::array<int, MAX_CLIENTS> targetDelayActivationTime;
 };
 
 // Ridah
