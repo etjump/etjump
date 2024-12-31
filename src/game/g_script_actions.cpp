@@ -6,6 +6,7 @@
 // Tab Size:		4 (real tabs)
 //===========================================================================
 
+#include "etj_entity_utilities.h"
 #include "../game/g_local.h"
 #include "../game/q_shared.h"
 #include "etj_printer.h"
@@ -4780,6 +4781,24 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
         }
 
         while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
+        }
+
+        break;
+      case F_CURSORHINT:
+        if (args.size() != 1) {
+          invalidArgCount(1, args.size());
+          break;
+        }
+
+        // set to end cap initially, so we don't delete all entities
+        // with HINT_NONE if we don't find a match
+        valueInt = HINT_NUM_HINTS;
+        ETJump::EntityUtilities::setCursorhintFromString(valueInt, value);
+
+        while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != nullptr) {
           pass[found->s.number].first++;
           pass[found->s.number].second.emplace_back(
               ETJump::stringFormat(R"(%s "%s")", key, value));

@@ -10,33 +10,6 @@
 #include "etj_utilities.h"
 #include "etj_entity_utilities.h"
 
-static constexpr std::array<const char *, HINT_NUM_HINTS + 1> hintStrings = {
-    "",          // HINT_NONE
-    "HINT_NONE", // actually HINT_FORCENONE, but since this is being specified
-                 // in the ent, the designer actually means HINT_FORCENONE
-    "HINT_PLAYER", "HINT_ACTIVATE", "HINT_DOOR", "HINT_DOOR_ROTATING",
-    "HINT_DOOR_LOCKED", "HINT_DOOR_ROTATING_LOCKED", "HINT_MG42",
-    "HINT_BREAKABLE", "HINT_BREAKABLE_BIG", "HINT_CHAIR", "HINT_ALARM",
-    "HINT_HEALTH", "HINT_TREASURE", "HINT_KNIFE", "HINT_LADDER", "HINT_BUTTON",
-    "HINT_WATER", "HINT_CAUTION", "HINT_DANGER", "HINT_SECRET", "HINT_QUESTION",
-    "HINT_EXCLAMATION", "HINT_CLIPBOARD", "HINT_WEAPON", "HINT_AMMO",
-    "HINT_ARMOR", "HINT_POWERUP", "HINT_HOLDABLE", "HINT_INVENTORY",
-    "HINT_SCENARIC", "HINT_EXIT", "HINT_NOEXIT", "HINT_PLYR_FRIEND",
-    "HINT_PLYR_NEUTRAL", "HINT_PLYR_ENEMY", "HINT_PLYR_UNKNOWN",
-    "HINT_BUILD",    // DHM - Nerve
-    "HINT_DISARM",   // DHM - Nerve
-    "HINT_REVIVE",   // DHM - Nerve
-    "HINT_DYNAMITE", // DHM - Nerve
-
-    "HINT_CONSTRUCTIBLE", "HINT_UNIFORM", "HINT_LANDMINE", "HINT_TANK",
-    "HINT_SATCHELCHARGE",
-    // START Mad Doc - TDF
-    "HINT_LOCKPICK",
-    // END Mad Doc - TDF
-
-    "", // HINT_BAD_USER
-};
-
 /*
 ===============================================================================
 
@@ -2699,11 +2672,8 @@ void SP_func_button(gentity_t *ent) {
   ent->s.dmgFlags = HINT_BUTTON;
 
   if (G_SpawnString("cursorhint", "0", &cursorhint)) {
-    for (int i = 0; i < HINT_NUM_HINTS; i++) {
-      if (!Q_stricmp(cursorhint, hintStrings[i])) {
-        ent->s.dmgFlags = i;
-      }
-    }
+    ETJump::EntityUtilities::setCursorhintFromString(ent->s.dmgFlags,
+                                                     cursorhint);
   }
 
   // first position
@@ -4346,22 +4316,12 @@ void SP_func_explosive(gentity_t *ent) {
     }
   }
 
-  //----(SA)	added
-
-  ent->s.dmgFlags = 0;
+  ent->s.dmgFlags = HINT_NONE;
 
   if (G_SpawnString("cursorhint", "0", &cursorhint)) {
-
-    for (i = 0; i < HINT_NUM_HINTS; i++) {
-      if (!Q_stricmp(cursorhint, hintStrings[i])) {
-        ent->s.dmgFlags = i;
-      }
-    }
+    ETJump::EntityUtilities::setCursorhintFromString(ent->s.dmgFlags,
+                                                     cursorhint);
   }
-  //----(SA)	end
-
-  // (SA) shouldn't need this
-  //	ent->s.density = ent->count;	// pass the "mass" to the client
 
   ent->die = func_explosive_explode;
 }
@@ -4506,16 +4466,10 @@ void SP_func_invisible_user(gentity_t *ent) {
 
   ent->use = use_invisible_user;
 
-  //----(SA)	added
   if (G_SpawnString("cursorhint", "0", &cursorhint)) {
-
-    for (i = 0; i < HINT_NUM_HINTS; i++) {
-      if (!Q_stricmp(cursorhint, hintStrings[i])) {
-        ent->s.dmgFlags = i;
-      }
-    }
+    ETJump::EntityUtilities::setCursorhintFromString(ent->s.dmgFlags,
+                                                     cursorhint);
   }
-  //----(SA)	end
 
   if (!(ent->spawnflags &
         static_cast<int>(ETJump::FuncInvisSpawnflags::NoOffNoise))) {

@@ -23,6 +23,7 @@
  */
 
 #include "etj_entity_utilities.h"
+#include "etj_string_utilities.h"
 
 namespace ETJump {
 bool EntityUtilities::isPlayer(gentity_t *ent) {
@@ -124,4 +125,14 @@ bool EntityUtilities::entitiesFree(const int threshold) {
 
   return free > threshold;
 }
+
+void EntityUtilities::setCursorhintFromString(int &value,
+                                              const std::string &hint) {
+  for (int i = 0; i < HINT_NUM_HINTS; i++) {
+    if (StringUtil::iEqual(hint, hintStrings[i])) {
+      value = i;
+    }
+  }
+}
+
 } // namespace ETJump

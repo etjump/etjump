@@ -37,5 +37,9 @@ public:
 
   // 'threshold' indicates the number of entities that must be free
   static bool entitiesFree(int threshold);
+
+  // sets 'value' to corresponding cursorhint from 'hint'
+  // if 'hint' isn't found in hintStrings, no modification is performed
+  static void setCursorhintFromString(int &value, const std::string &hint);
 };
 } // namespace ETJump
