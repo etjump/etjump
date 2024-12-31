@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@
 
 class IAuthentication {
 public:
-  virtual ~IAuthentication(){};
+  virtual ~IAuthentication() {};
   virtual const std::string GetMessage() const = 0;
   virtual bool AddUser(const std::string &guid, const std::string &hardwareId,
                        const std::string &name) = 0;

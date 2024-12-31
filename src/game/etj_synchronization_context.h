@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,18 +50,12 @@ public:
 
   void startWorkerThreads(unsigned numThreads);
   void stopWorkerThreads();
-  void postTask(TaskFn task,
-                CallbackFn callback,
-                ErrorFn errorCallback);
+  void postTask(TaskFn task, CallbackFn callback, ErrorFn errorCallback);
   void processCompletedTasks();
 
 private:
   struct Operation {
-    enum class Status {
-      Incomplete,
-      Complete,
-      Error
-    };
+    enum class Status { Incomplete, Complete, Error };
 
     Status status;
     TaskFn task;
@@ -73,11 +67,10 @@ private:
     Operation() = delete;
 
     explicit Operation(TaskFn task, CallbackFn callback, ErrorFn errorCallback)
-      : status(Status::Incomplete), task(task), callback(callback),
-        errorCallback(errorCallback),
-        result(opt<std::unique_ptr<ResultBase>>()),
-        error(std::runtime_error("")) {
-    }
+        : status(Status::Incomplete), task(task), callback(callback),
+          errorCallback(errorCallback),
+          result(opt<std::unique_ptr<ResultBase>>()),
+          error(std::runtime_error("")) {}
   };
 
   void worker();
@@ -90,4 +83,4 @@ private:
   std::atomic<bool> _running;
   std::vector<std::thread> _threads;
 };
-}
+} // namespace ETJump

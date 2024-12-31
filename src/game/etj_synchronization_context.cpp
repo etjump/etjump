@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@
 void ETJump::SynchronizationContext::startWorkerThreads(unsigned numThreads) {
   if (_running) {
     throw std::runtime_error("Worker threads are already running. Stop them "
-        "before starting them again.");
+                             "before starting them again.");
   }
 
   _running = true;
@@ -50,14 +50,12 @@ void ETJump::SynchronizationContext::stopWorkerThreads() {
   }
 }
 
-void ETJump::SynchronizationContext::postTask(
-    TaskFn task,
-    CallbackFn callback,
-    ErrorFn errorCallback) {
+void ETJump::SynchronizationContext::postTask(TaskFn task, CallbackFn callback,
+                                              ErrorFn errorCallback) {
   std::lock_guard<std::mutex> lock(_incompletedMutex);
 
-  _incompleted.push(
-      std::make_unique<Operation>(std::move(task), std::move(callback), std::move(errorCallback)));
+  _incompleted.push(std::make_unique<Operation>(
+      std::move(task), std::move(callback), std::move(errorCallback)));
 
   _workAvailable.notify_one();
 }
@@ -75,7 +73,7 @@ void ETJump::SynchronizationContext::processCompletedTasks() {
       } else {
         op->errorCallback(std::move(op->error.value()));
       }
-    } catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error &e) {
       op->errorCallback(e);
     }
   }

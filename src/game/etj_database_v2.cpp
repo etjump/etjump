@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,10 +31,9 @@
 ETJump::Log logger("databasev2");
 
 namespace ETJump {
-DatabaseV2::DatabaseV2(const std::string& name, const std::string &fileName)
-  : sql(sqlite::database(fileName)), _name(name) {
-  logger.info(
-      stringFormat("Initializing `%s` at `%s`", name, fileName));
+DatabaseV2::DatabaseV2(const std::string &name, const std::string &fileName)
+    : sql(sqlite::database(fileName)), _name(name) {
+  logger.info(stringFormat("Initializing `%s` at `%s`", name, fileName));
   sql << "PRAGMA journal_mode=WAL;";
 
   sql.define("lsanitize",
@@ -85,8 +84,8 @@ void DatabaseV2::applyMigrations() {
 
     logger.info("Applying migration `%s` to `%s`", migration.name, _name);
 
-    for (const auto& statement : migration.statements) {
-      sql << statement;  
+    for (const auto &statement : migration.statements) {
+      sql << statement;
     }
 
     sql << R"(
@@ -105,8 +104,9 @@ void DatabaseV2::applyMigrations() {
     if (!_migrations.empty()) {
       latestMigration = _migrations[_migrations.size() - 1].name;
     }
-    logger.info(
-        stringFormat("`%s` is up to date. Latest migration `%s`. No migrations applied.", _name, latestMigration));
+    logger.info(stringFormat(
+        "`%s` is up to date. Latest migration `%s`. No migrations applied.",
+        _name, latestMigration));
   }
 }
-}
+} // namespace ETJump

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -81,5 +81,5 @@ std::vector<TElement> skipFirstN(const std::vector<TElement> &input,
 
   return std::vector<TElement>(input.begin() + count, input.end());
 }
-}
-}
+} // namespace Container
+} // namespace ETJump
