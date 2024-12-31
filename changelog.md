@@ -33,6 +33,26 @@
 * fixed crosshair drawing in speaker editor [#1580](https://github.com/etjump/etjump/pull/1580)
   * ETJump custom crosshairs now draw correctly
   * crosshair is no longer hidden while zooming
+* added `changeskin` script action for changing skin used on an entity [#1581](https://github.com/etjump/etjump/pull/1581)
+* fixed skins not working on `misc_constructiblemarker` using a `model2` key [#1582](https://github.com/etjump/etjump/pull/1582)
+* added support for `cursorhint` key on `set/delete` script actions [#1584](https://github.com/etjump/etjump/pull/1584)
+* fixed inconsistency in grouped popup counter formatting [#1585](https://github.com/etjump/etjump/pull/1585)
+* improved error messages when overflowing certain configstring indices, mainly once which are used up by mappers [#1589](https://github.com/etjump/etjump/pull/1589)
+* added new cvar parsing system for cvars expecting size or scale values [#1590](https://github.com/etjump/etjump/pull/1590)
+  * any cvar that expects a size or scale can now either take one or two values
+    * if a single value is given, size/scale is set uniformly
+    * if two values are given, size/scale is set independently on X/Y axes, respectively
+  * breaking changes
+    * `etj_crosshairScaleX/Y` are removed, same functionality can now be achieved with `cg_crosshairSize X Y`
+    * `etj_spectatorInfoSize` has been changed to `etj_spectatorInfoScale`
+* added `spawnflag 1` to `target_delay` for per-client delay cycle [#1591](https://github.com/etjump/etjump/pull/1591)
+  * when set, each client has their own private delay cycle instead of global cycle
+  * re-triggering the entity before the delay is finished only resets the cycle of the activating client
+* fixed timerun entity validation [#1592](https://github.com/etjump/etjump/pull/1592)
+  * warnings are now printed to console if
+    * map contains a start timer without a corresponding stop timer
+    * map contains a stop timer without a corresponding start timer
+    * map contains checkpoints for a timerun without a start and stop timer
 
 # ETJump 3.3.1
 
