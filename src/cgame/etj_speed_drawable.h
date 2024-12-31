@@ -24,10 +24,12 @@
 
 #pragma once
 
+#include <list>
+
 #include "etj_irenderable.h"
 #include "etj_accel_color.h"
 #include "cg_local.h"
-#include <list>
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class DrawSpeed : public IRenderable {
@@ -38,7 +40,7 @@ class DrawSpeed : public IRenderable {
   std::string speedStr;
   float y{};
   float w{};
-  float size{};
+  CvarValue::Size size{};
 
   enum Alignment {
     Left = 1,

@@ -36,10 +36,20 @@
 ETJump::TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
     : Drawable(), _timerun(std::move(timerun)) {
   parseColorString(etj_runTimerInactiveColor.string, inactiveTimerColor);
+  setCheckpointSize();
+  setCheckpointPopupSize();
+
   cvarUpdateHandler->subscribe(
       &etj_runTimerInactiveColor, [&](const vmCvar_t *cvar) {
         parseColorString(cvar->string, inactiveTimerColor);
       });
+
+  cvarUpdateHandler->subscribe(&etj_checkpointsSize,
+                               [&](const vmCvar_t *) { setCheckpointSize(); });
+
+  cvarUpdateHandler->subscribe(
+      &etj_checkpointsPopupSize,
+      [&](const vmCvar_t *) { setCheckpointPopupSize(); });
 
   if (cg.demoPlayback) {
     demoSvFps = getSvFps();
@@ -47,6 +57,16 @@ ETJump::TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
 }
 
 ETJump::TimerunView::~TimerunView() = default;
+
+void ETJump::TimerunView::setCheckpointSize() {
+  checkpointSize =
+      CvarValueParser::parse<CvarValue::Size>(etj_checkpointsSize, 0, 10);
+}
+
+void ETJump::TimerunView::setCheckpointPopupSize() {
+  popupSize =
+      CvarValueParser::parse<CvarValue::Size>(etj_checkpointsPopupSize, 0, 10);
+}
 
 const ETJump::Timerun::PlayerTimerunInformation *
 ETJump::TimerunView::currentRun() const {
@@ -167,7 +187,8 @@ void ETJump::TimerunView::draw() {
 
     const int popupTime =
         run->lastCheckpointTimestamp + etj_checkpointsPopupDuration.integer;
-    const float popupSize = 0.1f * etj_checkpointsPopupSize.value;
+    const float popupSizeX = 0.1f * popupSize.x;
+    const float popupSizeY = 0.1f * popupSize.y;
     const int popupStyle = etj_checkpointsPopupShadow.integer
                                ? ITEM_TEXTSTYLE_SHADOWED
                                : ITEM_TEXTSTYLE_NORMAL;
@@ -176,7 +197,8 @@ void ETJump::TimerunView::draw() {
     ETJump_AdjustPosition(&x2);
 
     const int currentTime = running ? timeVar - startTime : run->completionTime;
-    const float textSize = 0.1f * etj_checkpointsSize.value;
+    const float checkpointSizeX = 0.1f * checkpointSize.x;
+    const float checkpointSizeY = 0.1f * checkpointSize.y;
     const auto textStyle = etj_checkpointsShadow.integer
                                ? ITEM_TEXTSTYLE_SHADOWED
                                : ITEM_TEXTSTYLE_NORMAL;
@@ -267,8 +289,9 @@ void ETJump::TimerunView::draw() {
 
       // we must check for cvar here to allow only checkpoint popups to display
       if (etj_drawCheckpoints.integer) {
-        CG_Text_Paint_Centred_Ext(x, y, textSize, textSize, *checkpointColor,
-                                  timerStr, 0, 0, textStyle, font);
+        CG_Text_Paint_Centred_Ext(x, y, checkpointSizeX, checkpointSizeY,
+                                  *checkpointColor, timerStr, 0, 0, textStyle,
+                                  font);
       }
 
       if (etj_checkpointsPopup.integer && i == startIndex - 1) {
@@ -276,20 +299,22 @@ void ETJump::TimerunView::draw() {
         Vector4Copy(*checkpointColor, cpPopupColor);
 
         if (popupTime >= cg.time) {
-          CG_Text_Paint_Centred_Ext(x2, y2, popupSize, popupSize, cpPopupColor,
-                                    timerStr, 0, 0, popupStyle, font);
+          CG_Text_Paint_Centred_Ext(x2, y2, popupSizeX, popupSizeY,
+                                    cpPopupColor, timerStr, 0, 0, popupStyle,
+                                    font);
         } else if (popupTime + popupFadeTime > cg.time) {
           // we want to always fade here so bypass running/autoHide
           cpPopupColor[3] =
               getTimerAlpha(false, true, popupTime, popupFadeTime);
 
-          CG_Text_Paint_Centred_Ext(x2, y2, popupSize, popupSize, cpPopupColor,
-                                    timerStr, 0, 0, popupStyle, font);
+          CG_Text_Paint_Centred_Ext(x2, y2, popupSizeX, popupSizeY,
+                                    cpPopupColor, timerStr, 0, 0, popupStyle,
+                                    font);
         }
       }
 
-      y += static_cast<float>(2 *
-                              CG_Text_Height_Ext(timerStr, textSize, 0, font));
+      y += static_cast<float>(
+          2 * CG_Text_Height_Ext(timerStr, checkpointSizeY, 0, font));
     }
   }
 

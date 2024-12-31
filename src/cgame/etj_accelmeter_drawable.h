@@ -24,17 +24,19 @@
 
 #pragma once
 
+#include <list>
+
 #include "etj_irenderable.h"
 #include "cg_local.h"
 #include "etj_accel_color.h"
-#include <list>
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class AccelMeter : public IRenderable {
   int textStyle{};
   float y{};
   float halfW{};
-  float size{};
+  CvarValue::Size size{};
   int accelColorStyle{};
   std::vector<std::string> accelStr{};
   bool playing{};

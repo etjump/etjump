@@ -6,11 +6,12 @@
 #include "cg_local.h"
 #include "etj_utilities.h"
 #include "etj_crosshair.h"
-#include "etj_overbounce_shared.h"
-#include "../game/etj_numeric_utilities.h"
-#include "../game/etj_string_utilities.h"
 #include "etj_client_rtv_handler.h"
 #include "etj_demo_compatibility.h"
+#include "etj_cvar_parser.h"
+
+#include "../game/etj_numeric_utilities.h"
+#include "../game/etj_string_utilities.h"
 
 #define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
@@ -494,23 +495,20 @@ float calcBackgroundWidth(int maxChars, float fontScale, fontInfo_t *font) {
 CG_DrawTeamInfo
 =================
 */
-static void CG_DrawTeamInfo(void) {
-  int w;
-  int i, len;
-  vec4_t hcolor;
-  float alphapercent, chatbgalpha;
-  float chatScale = Numeric::clamp(etj_chatScale.value, 0, 5);
-  float fontSize = 0.2f;
-  float fontSizeScaled = chatScale * fontSize;
-  float lineHeight = 9.0f * chatScale;
-  qhandle_t flag;
-  int maxLineLength =
+static void CG_DrawTeamInfo() {
+  const auto scale = ETJump::CvarValueParser::parse<ETJump::CvarValue::Scale>(
+      etj_chatScale, 0, 5);
+  const float fontSizeX = 0.2f * scale.x;
+  const float fontSizeY = 0.2f * scale.y;
+  const float lineHeight = 9.0f * scale.y;
+
+  const int maxLineLength =
       Numeric::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
-  int chatWidth = calcBackgroundWidth(maxLineLength, fontSizeScaled,
-                                      &cgs.media.limboFont2) +
-                  5;
-  int chatHeight =
+  const auto chatWidth = static_cast<int>(
+      calcBackgroundWidth(maxLineLength, fontSizeX, &cgs.media.limboFont2) + 5);
+  const int chatHeight =
       Numeric::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
+
   int textStyle = ITEM_TEXTSTYLE_NORMAL;
   float textAlpha = etj_chatAlpha.value;
 
@@ -528,35 +526,43 @@ static void CG_DrawTeamInfo(void) {
   }
 
   if (cgs.teamLastChatPos != cgs.teamChatPos) {
+    vec4_t hcolor;
+    int i;
+    qhandle_t flag;
+
     if (cg.time - cgs.teamChatMsgTimes[cgs.teamLastChatPos % chatHeight] >
         cg_teamChatTime.integer) {
       cgs.teamLastChatPos++;
     }
 
-    w = 0;
+    int w = 0;
 
     for (i = cgs.teamLastChatPos; i < cgs.teamChatPos; i++) {
-      len = CG_Text_Width_Ext(cgs.teamChatMsgs[i % chatHeight], fontSizeScaled,
-                              0, &cgs.media.limboFont2);
+      const int len = CG_Text_Width_Ext(cgs.teamChatMsgs[i % chatHeight],
+                                        fontSizeX, 0, &cgs.media.limboFont2);
       if (len > w) {
         w = len;
       }
     }
+
     w *= TINYCHAR_WIDTH;
     w += TINYCHAR_WIDTH * 2;
 
     for (i = cgs.teamChatPos - 1; i >= cgs.teamLastChatPos; i--) {
       auto linePosX = CHATLOC_TEXT_X + etj_chatPosX.value;
-      auto linePosY = CHATLOC_Y + etj_chatPosY.value -
-                      (cgs.teamChatPos - i - 1) * lineHeight - 1;
+      const auto linePosY =
+          CHATLOC_Y + etj_chatPosY.value -
+          static_cast<float>(cgs.teamChatPos - i - 1) * lineHeight - 1;
 
       if (linePosY <= 0 || linePosY >= 480 + lineHeight) {
         continue;
       }
 
-      alphapercent = 1.0f - (cg.time - cgs.teamChatMsgTimes[i % chatHeight]) /
-                                (float)(cg_teamChatTime.integer);
-      alphapercent = Numeric::clamp(alphapercent, 0.0f, 1.0f);
+      const float alphapercent = Numeric::clamp(
+          1.0f - static_cast<float>(cg.time -
+                                    cgs.teamChatMsgTimes[i % chatHeight]) /
+                     static_cast<float>(cg_teamChatTime.integer),
+          0.0f, 1.0f);
 
       if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_AXIS) {
         hcolor[0] = 1;
@@ -572,22 +578,23 @@ static void CG_DrawTeamInfo(void) {
         hcolor[2] = 0;
       }
 
-      chatbgalpha = Numeric::clamp(etj_chatBackgroundAlpha.value, 0.0f, 1.0f);
+      const float chatbgalpha =
+          Numeric::clamp(etj_chatBackgroundAlpha.value, 0.0f, 1.0f);
 
       hcolor[3] = chatbgalpha * alphapercent;
 
       trap_R_SetColor(hcolor);
       CG_DrawPic(CHATLOC_X + etj_chatPosX.value,
                  CHATLOC_Y + etj_chatPosY.value -
-                     (cgs.teamChatPos - i) * lineHeight,
-                 chatWidth, lineHeight, cgs.media.teamStatusBar);
+                     static_cast<float>(cgs.teamChatPos - i) * lineHeight,
+                 static_cast<float>(chatWidth), lineHeight,
+                 cgs.media.teamStatusBar);
 
       hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
       hcolor[3] = alphapercent * textAlpha;
       trap_R_SetColor(hcolor);
 
       if (etj_chatFlags.integer) {
-
         if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_AXIS) {
           flag = cgs.media.axisFlag;
         } else if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_ALLIES) {
@@ -595,20 +602,21 @@ static void CG_DrawTeamInfo(void) {
         } else {
           flag = 0;
         }
+
         if (flag) {
-          float flagScaleX = 12.0f * chatScale;
-          float flagScaleY = 9.0f * chatScale;
-          float flagPosX =
-              (CHATLOC_TEXT_X + etj_chatPosX.value) - (13 * chatScale);
-          float flagPosY = (CHATLOC_Y + etj_chatPosY.value -
-                            (cgs.teamChatPos - i - 1) * lineHeight) -
-                           (9 * chatScale);
+          const float flagScaleX = 12.0f * scale.x;
+          const float flagScaleY = 9.0f * scale.y;
+          const float flagPosX =
+              CHATLOC_TEXT_X + etj_chatPosX.value - 13 * scale.x;
+          const float flagPosY =
+              CHATLOC_Y + etj_chatPosY.value -
+              static_cast<float>(cgs.teamChatPos - i - 1) * lineHeight -
+              9 * scale.y;
           CG_DrawPic(flagPosX, flagPosY, flagScaleX, flagScaleY, flag);
         }
       }
 
-      CG_Text_Paint_Ext(linePosX, linePosY - 0.5, fontSizeScaled,
-                        fontSizeScaled, hcolor,
+      CG_Text_Paint_Ext(linePosX, linePosY - 0.5f, fontSizeX, fontSizeY, hcolor,
                         cgs.teamChatMsgs[i % chatHeight], 0, 0, textStyle,
                         &cgs.media.limboFont2);
     }

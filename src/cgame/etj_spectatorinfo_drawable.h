@@ -25,13 +25,20 @@
 #pragma once
 
 #include "etj_irenderable.h"
-#include "cg_local.h"
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class SpectatorInfo : public IRenderable {
+  CvarValue::Scale scale{};
+
   static bool canSkipDraw();
+  void startListeners();
+
+  void setScale();
 
 public:
+  SpectatorInfo();
+
   bool beforeRender() override;
   void render() const override;
 };

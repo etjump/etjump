@@ -61,8 +61,8 @@ menuDef {
         CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_spectatorInfoY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(3), "Spec list Y:", 0.2, SETTINGS_ITEM_H, etj_spectatorInfoY 30 0 480 10, "Sets Y position of spectator list\netj_spectatorInfoY")
         YESNO               (SETTINGS_ITEM_POS(4), "Spec list shadow:", 0.2, SETTINGS_ITEM_H, "etj_spectatorInfoShadow", "Draw shadow on spectator list\netj_spectatorInfoShadow")
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS(5), "etj_spectatorInfoSize", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(5), "Spec list size:", 0.2, SETTINGS_ITEM_H, etj_spectatorInfoSize 2.3 0 10 0.1, "Size of spectator list\netj_spectatorInfoSize")
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(5), "etj_spectatorInfoScale", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(5), "Spec list scale:", 0.2, SETTINGS_ITEM_H, etj_spectatorInfoScale 1.0 0 5 0.1, "Scale of spectator list\netj_spectatorInfoSize")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

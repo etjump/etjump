@@ -34,6 +34,7 @@
 namespace ETJump {
 StrafeQuality::StrafeQuality() {
   parseColor();
+  setSize();
   startListeners();
 }
 
@@ -42,6 +43,9 @@ void StrafeQuality::startListeners() {
   // frame
   cvarUpdateHandler->subscribe(&etj_strafeQualityColor,
                                [&](const vmCvar_t *cvar) { parseColor(); });
+
+  cvarUpdateHandler->subscribe(&etj_strafeQualitySize,
+                               [&](const vmCvar_t *) { setSize(); });
 
   consoleCommandsHandler->subscribe(
       "resetStrafeQuality",
@@ -53,6 +57,12 @@ void StrafeQuality::startListeners() {
 
 void StrafeQuality::parseColor() {
   parseColorString(etj_strafeQualityColor.string, _color);
+}
+
+void StrafeQuality::setSize() {
+  size = CvarValueParser::parse<CvarValue::Size>(etj_strafeQualitySize, 0, 10);
+  size.x *= 0.1f;
+  size.y *= 0.1f;
 }
 
 void StrafeQuality::resetStrafeQuality() {
@@ -146,8 +156,7 @@ bool StrafeQuality::beforeRender() {
 void StrafeQuality::render() const {
   // get coordinates and size
   float x = _x + etj_strafeQualityX.value;
-  float y = _y + etj_strafeQualityY.value;
-  const float size = 0.1f * etj_strafeQualitySize.value;
+  const float y = _y + etj_strafeQualityY.value;
   ETJump_AdjustPosition(&x);
 
   // get hud text
@@ -175,7 +184,7 @@ void StrafeQuality::render() const {
                                             : ITEM_TEXTSTYLE_NORMAL);
 
   // draw quality on screen
-  CG_Text_Paint_Ext(x, y, size, size, _color, str, 0, 0, textStyle,
+  CG_Text_Paint_Ext(x, y, size.x, size.y, _color, str, 0, 0, textStyle,
                     &cgs.media.limboFont1);
 }
 

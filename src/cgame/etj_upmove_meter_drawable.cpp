@@ -32,6 +32,7 @@
 namespace ETJump {
 UpmoveMeter::UpmoveMeter() {
   parseAllColors();
+  setTextSize();
   startListeners();
 
   team_ = 0;
@@ -69,6 +70,9 @@ void UpmoveMeter::startListeners() {
         parseColorString(etj_upmoveMeterTextColor.string, jump_.text_rgba);
       });
 
+  cvarUpdateHandler->subscribe(&etj_upmoveMeterTextSize,
+                               [&](const vmCvar_t *) { setTextSize(); });
+
   consoleCommandsHandler->subscribe(
       "resetUpmoveMeter",
       [&](const std::vector<std::string> &args) { resetUpmoveMeter(); });
@@ -89,6 +93,12 @@ void UpmoveMeter::parseAllColors() {
   parseColorString(etj_upmoveMeterGraphOutlineColor.string,
                    jump_.graph_outline_rgba);
   parseColorString(etj_upmoveMeterTextColor.string, jump_.text_rgba);
+}
+
+void UpmoveMeter::setTextSize() {
+  textSize = CvarValueParser::parse<CvarValue::Size>(etj_upmoveMeterTextSize);
+  textSize.x *= 0.1f;
+  textSize.y *= 0.1f;
 }
 
 void UpmoveMeter::resetUpmoveMeter() {
@@ -230,9 +240,8 @@ void UpmoveMeter::render() const {
   const int textStyle =
       (etj_upmoveMeterTextShadow.integer != 0 ? ITEM_TEXTSTYLE_SHADOWED
                                               : ITEM_TEXTSTYLE_NORMAL);
-  const float textSize = 0.1f * etj_upmoveMeterTextSize.value;
   const float textHeightOffset =
-      0.5f * CG_Text_Height_Ext("0", textSize, 0, &cgs.media.limboFont1);
+      0.5f * CG_Text_Height_Ext("0", textSize.y, 0, &cgs.media.limboFont1);
 
   jump_.graph_xywh[0] = graphX_ + etj_upmoveMeterGraphX.value;
   ETJump_AdjustPosition(&jump_.graph_xywh[0]);
@@ -269,18 +278,18 @@ void UpmoveMeter::render() const {
   if (etj_drawUpmoveMeter.integer & 2) {
     CG_Text_Paint_Ext(jump_.graph_xywh[0] + jump_.graph_xywh[2] +
                           jump_.text_xh[0],
-                      graph_m - jump_.text_xh[1] + textHeightOffset, textSize,
-                      textSize, jump_.text_rgba, va("%i", jump_.postDelay), 0,
+                      graph_m - jump_.text_xh[1] + textHeightOffset, textSize.x,
+                      textSize.y, jump_.text_rgba, va("%i", jump_.postDelay), 0,
                       0, textStyle, &cgs.media.limboFont1);
     CG_Text_Paint_Ext(
         jump_.graph_xywh[0] + jump_.graph_xywh[2] + jump_.text_xh[0],
-        graph_m + textHeightOffset, textSize, textSize, jump_.text_rgba,
+        graph_m + textHeightOffset, textSize.x, textSize.y, jump_.text_rgba,
         va("%i", jump_.fullDelay), 0, 0, textStyle, &cgs.media.limboFont1);
     CG_Text_Paint_Ext(jump_.graph_xywh[0] + jump_.graph_xywh[2] +
                           jump_.text_xh[0],
-                      graph_m + jump_.text_xh[1] + textHeightOffset, textSize,
-                      textSize, jump_.text_rgba, va("%i", jump_.preDelay), 0, 0,
-                      textStyle, &cgs.media.limboFont1);
+                      graph_m + jump_.text_xh[1] + textHeightOffset, textSize.x,
+                      textSize.y, jump_.text_rgba, va("%i", jump_.preDelay), 0,
+                      0, textStyle, &cgs.media.limboFont1);
   }
 }
 

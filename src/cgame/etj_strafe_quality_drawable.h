@@ -23,8 +23,10 @@
  */
 
 #pragma once
+
 #include "etj_irenderable.h"
 #include "cg_local.h"
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class StrafeQuality : public IRenderable {
@@ -35,7 +37,7 @@ class StrafeQuality : public IRenderable {
 
   float _oldSpeed{0};
   int _team{0};
-  mutable vec4_t _color;
+  mutable vec4_t _color{};
 
   // default absolute hud position
   static constexpr float _x = 100;
@@ -43,13 +45,16 @@ class StrafeQuality : public IRenderable {
   // amount of digits to show on hud
   static constexpr std::size_t _digits = 4;
 
+  CvarValue::Size size{};
+
   void startListeners();
   void parseColor();
+  void setSize();
   void resetStrafeQuality();
   bool canSkipDraw() const;
   bool canSkipUpdate(usercmd_t cmd);
 
-  pmove_t *pm;
+  pmove_t *pm{};
 
 public:
   StrafeQuality();
