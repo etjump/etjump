@@ -32,7 +32,6 @@
 namespace ETJump {
 class TimerunEntity {
 private:
-  static Log logger;
   static std::map<std::string, int> runIndices;
   static std::set<std::string> cleanNames;
   static std::set<std::string> names;
