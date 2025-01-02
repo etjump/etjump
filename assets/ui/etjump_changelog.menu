@@ -12,7 +12,7 @@
 
 // for now, increase if needed
 #define MAX_ITEMS        32
-#define POS              WINDOW_WIDTH - 140 - 8, 8, 140, 10, 140, MAX_ITEMS, 0
+#define POS              WINDOW_WIDTH - 140, 10, 140, 10, 140 - 6, MAX_ITEMS, 0
 
 // Macros //
 
