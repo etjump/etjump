@@ -105,11 +105,6 @@ void TimerunEntity::validateTimerunEntities() {
   for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; ++i) {
     const gentity_t *ent = &g_entities[i];
 
-    // everything within level.num_entities should be valid but just in case
-    if (!ent) {
-      continue;
-    }
-
     if (!std::any_of(timerunEntities.cbegin(), timerunEntities.cend(),
                      [&ent](const std::string &entity) {
                        return StringUtil::iEqual(ent->classname, entity);
