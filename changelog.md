@@ -3,7 +3,7 @@
 * fixed players producing water impacts when shot [#1544](https://github.com/etjump/etjump/pull/1544)
 * tweaked changelog UI appearence [#1546](https://github.com/etjump/etjump/pull/1546) [#1550](https://github.com/etjump/etjump/pull/1550)
   * changelog window is now slightly smaller, with smaller font size
-  * added fullscreen,faded background to improve readability
+  * added fullscreen, faded background to improve readability
   * changelog rows now have alternating background colors to improve readability
 * added missing entry for `etj_fixedCompassShader` to settings menu [#1547](https://github.com/etjump/etjump/pull/1547)
 * fixed `shooter_rocket` calculating target deviation incorrectly [#1549](https://github.com/etjump/etjump/pull/1549)
@@ -53,6 +53,7 @@
     * map contains a start timer without a corresponding stop timer
     * map contains a stop timer without a corresponding start timer
     * map contains checkpoints for a timerun without a start and stop timer
+* chat replay timestamps are now calculated on server to ensure clients system clock inaccuracies don't affect the timestamp [#1597](https://github.com/etjump/etjump/pull/1597)
 
 # ETJump 3.3.1
 
