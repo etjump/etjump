@@ -8,6 +8,7 @@
 #include <unordered_map>
 
 #include "g_local.h"
+#include "etj_string_utilities.h"
 
 typedef struct {
   char oldShader[MAX_QPATH];
@@ -116,9 +117,18 @@ int G_FindConfigstringIndex(const char *name, int start, int max,
   }
 
   if (i == max) {
-    G_Error("%s: overflow on index %s (%s = %i)\n", __func__,
-            csStrings.find(start)->second.first.c_str(),
-            csStrings.find(start)->second.second.c_str(), max);
+    const auto it = csStrings.find(start);
+    std::string err;
+
+    if (it != csStrings.end()) {
+      err =
+          ETJump::stringFormat("%s: overflow on index %s (%s = %i)\n", __func__,
+                               it->second.first, it->second.second, max);
+    } else {
+      err = ETJump::stringFormat("%s: overflow on index %i\n", __func__, start);
+    }
+
+    G_Error("%s", err.c_str());
   }
 
   trap_SetConfigstring(start + i, name);
