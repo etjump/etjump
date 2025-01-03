@@ -114,6 +114,9 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
       clientNum,
       "chat \"^gServer: replaying latest chat messages:\" -1 0 1 -1");
 
+  time_t now;
+  now = std::time(&now);
+
   for (const auto &msg : chatReplayBuffer) {
     // skip messages from ignored clients
     if (COM_BitCheck(ent->client->sess.ignoreClients, msg.clientNum)) {
@@ -124,16 +127,18 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
       continue;
     }
 
-    const std::string &message = parseChatMessage(msg);
+    std::string message = parseChatMessage(msg);
+    // FIXME: 32-bit time
+    message += " " + std::to_string(static_cast<int>(now - msg.timestamp));
     trap_SendServerCommand(clientNum, message.c_str());
   }
 }
 
 std::string ChatReplay::parseChatMessage(const ChatMessage &msg) {
   const char *cmd = msg.encoded ? "enc_chat" : "chat";
-  return stringFormat("%s \"^7%s%c%c%s\" %i %i 1 %i", cmd, msg.name,
+  return stringFormat("%s \"^7%s%c%c%s\" %i %i 1", cmd, msg.name,
                       Q_COLOR_ESCAPE, COLOR_LTGREY, msg.message, msg.clientNum,
-                      msg.localize, msg.timestamp);
+                      msg.localize);
 }
 
 void ChatReplay::readChatsFromFile() {

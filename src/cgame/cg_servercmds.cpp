@@ -2154,37 +2154,31 @@ static const char *addChatReplayModifications(const char *text) {
   static char msg[MAX_SAY_TEXT + 32];
   memset(msg, 0, sizeof(msg));
 
-  const int timestamp = Q_atoi(CG_Argv(5));
+  const int diffTime = Q_atoi(CG_Argv(5));
 
   // don't prefix the replay notification message
-  if (timestamp != -1) {
+  if (diffTime != -1) {
     Q_strcat(msg, sizeof(msg), "^g[REPLAY] ");
   }
 
   // no further modifications if timestamps are disabled,
   // or if this is the notify message
-  if (!etj_drawMessageTime.integer || timestamp == -1) {
+  if (!etj_drawMessageTime.integer || diffTime == -1) {
     Q_strcat(msg, sizeof(msg), text);
     return msg;
   }
 
-  const auto mt = static_cast<time_t>(timestamp);
-  const time_t now =
-      std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  const double diffSec = std::difftime(now, mt);
-
-  if (diffSec < 60) {
-    Q_strcat(msg, sizeof(msg),
-             stringFormat("^z[%is ago] ", static_cast<int>(diffSec)).c_str());
-  } else if (diffSec < 60 * 60) {
-    const int min = static_cast<int>(diffSec / 60);
+  if (diffTime < 60) {
+    Q_strcat(msg, sizeof(msg), stringFormat("^z[%is ago] ", diffTime).c_str());
+  } else if (diffTime < 60 * 60) {
+    const int min = diffTime / 60;
     Q_strcat(msg, sizeof(msg), stringFormat("^z[%im ago] ", min).c_str());
   } else {
     // up to 12h
-    if (diffSec >= 60 * 60 * 12) {
+    if (diffTime >= 60 * 60 * 12) {
       Q_strcat(msg, sizeof(msg), "^z[12h+ ago] ");
     } else {
-      const int hours = static_cast<int>(diffSec / 3600);
+      const int hours = diffTime / 3600;
       Q_strcat(msg, sizeof(msg), stringFormat("^z[%ih ago] ", hours).c_str());
     }
   }
