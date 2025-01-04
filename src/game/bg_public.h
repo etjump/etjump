@@ -1825,10 +1825,10 @@ bool BG_WeaponHasAmmo(playerState_t *ps, int weap);
                                    // no longer deadly
 #define MASK_SHOT (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE)
 #define MASK_MISSILESHOT (MASK_SHOT | CONTENTS_MISSILECLIP)
-// Feen: PGM
-#define MASK_PORTAL                                                            \
-  (CONTENTS_SOLID | CONTENTS_PORTALCLIP) // Feen: Trace hits solid objects
-                                         // or emancipation grids
+
+// portalgun trace hits solid objects, players and portalclips
+// corpses are ignored, and players only block portals if they are solid
+#define MASK_PORTAL (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_PORTALCLIP)
 
 //
 // entityState_t->eType
