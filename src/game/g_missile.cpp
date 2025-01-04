@@ -974,6 +974,25 @@ int G_PredictMissile(gentity_t *ent, int duration, vec3_t endPos,
 // DHM - Nerve :: Server side Flamethrower
 //=============================================================================
 
+namespace ETJump {
+void flamechunkTrace(const gentity_t *ent, trace_t *tr, vec3_t start,
+                     vec3_t end, const int mask) {
+  trap_Trace(tr, start, ent->r.mins, ent->r.maxs, end, ent->r.ownerNum, mask);
+
+  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr->entityNum < MAX_CLIENTS &&
+         !EntityUtilities::playerIsSolid(ent->r.ownerNum, tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    trap_Trace(tr, start, ent->r.mins, ent->r.maxs, end, ent->r.ownerNum, mask);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
+
 // copied from cg_flamethrower.c
 static constexpr float FLAME_START_SIZE = 1.0f;
 // when the flame is spawned, it should endeavour to reach this
@@ -1116,7 +1135,7 @@ void G_RunFlamechunk(gentity_t *ent) {
   VectorCopy(ent->s.pos.trDelta, vel);
   speed = VectorNormalize(vel);
 
-  // Adust the current speed of the chunk
+  // Adjust the current speed of the chunk
   // ent->s.pos.trDuration is set to 550ms as that is the time window
   // after which the speed will always be at FLAME_MIN_SPEED,
   // so we just short circuit some unnecessary math with that
@@ -1134,9 +1153,14 @@ void G_RunFlamechunk(gentity_t *ent) {
   // Move the chunk
   VectorMA(ent->r.currentOrigin, deltaTime, ent->s.pos.trDelta, neworg);
 
-  trap_Trace(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, neworg,
-             ent->r.ownerNum,
-             MASK_SHOT | MASK_WATER); // JPW NERVE
+  ETJump::flamechunkTrace(ent, &tr, ent->r.currentOrigin, neworg,
+                          MASK_SHOT | MASK_WATER);
+
+  // fix for engine bug where trace sometimes starts in solid even if
+  // the entity that it starts in is nonsolid
+  if (tr.startsolid && tr.entityNum == ENTITYNUM_NONE) {
+    tr.startsolid = qfalse;
+  }
 
   if (tr.startsolid) {
     VectorClear(ent->s.pos.trDelta);

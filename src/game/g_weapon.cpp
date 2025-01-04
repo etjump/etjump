@@ -4273,6 +4273,31 @@ LIGHTNING GUN
 ======================================================================
 */
 
+// TTimo - for traces calls
+static vec3_t flameChunkMins = {-4, -4, -4};
+static vec3_t flameChunkMaxs = {4, 4, 4};
+
+namespace ETJump {
+void flamethrowerTrace(const gentity_t *ent, trace_t *trace, vec3_t start,
+                       vec3_t end, const int mask) {
+  trap_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, ent->s.number,
+             mask);
+
+  if (g_ghostPlayers.integer != 1 || trace->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (trace->entityNum < MAX_CLIENTS &&
+         !EntityUtilities::playerIsSolid(ent->s.number, trace->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[trace->entityNum]);
+    trap_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, ent->s.number,
+               mask);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
+
 void G_BurnMeGood(gentity_t *self, gentity_t *body, const bool directhit) {
   // normalize dps, direct hits every 50ms, indirect (flamechunks) every 100ms
   if (level.time < body->lastBurnedFrametime +
@@ -4303,10 +4328,6 @@ void G_BurnMeGood(gentity_t *self, gentity_t *body, const bool directhit) {
   }
 }
 
-// TTimo - for traces calls
-static vec3_t flameChunkMins = {-4, -4, -4};
-static vec3_t flameChunkMaxs = {4, 4, 4};
-
 void Weapon_FlamethrowerFire(gentity_t *ent) {
   vec3_t start;
   vec3_t trace_start;
@@ -4326,8 +4347,9 @@ void Weapon_FlamethrowerFire(gentity_t *ent) {
   // view point towards the ground) is enough to cover the area around
   // the feet
   VectorMA(trace_start, 77.0, forward, trace_end);
-  trap_Trace(&trace, trace_start, flameChunkMins, flameChunkMaxs, trace_end,
-             ent->s.number, MASK_SHOT | MASK_WATER);
+  ETJump::flamethrowerTrace(ent, &trace, trace_start, trace_end,
+                            MASK_SHOT | MASK_WATER);
+
   if (trace.fraction != 1.0) {
     // additional checks to filter out false positives
     if (trace.endpos[2] > (ent->r.currentOrigin[2] + ent->r.mins[2] - 8) &&
