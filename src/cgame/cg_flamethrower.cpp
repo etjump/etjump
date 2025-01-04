@@ -7,6 +7,7 @@
 // NOTE: some AI's are treated different, mostly for aesthetical reasons.
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 
 // a flameChunk is a ball or section of fuel which goes from fuel->blue
 // ignition->flame ball optimization is necessary, since lots of these will be
@@ -157,6 +158,26 @@ static vec3_t flameChunkMaxs = {0, 0, 0};
 // run-time)
 int rotatingFlames = qtrue;
 
+namespace ETJump {
+void flamechunkTrace(trace_t *trace, vec3_t start, vec3_t end,
+                     const int skipNumber, const int mask) {
+  CG_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, skipNumber, mask);
+
+  if (trace->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (trace->entityNum < MAX_CLIENTS &&
+         !playerIsSolid(cg.snap->ps.clientNum, trace->entityNum)) {
+    tempTraceIgnoreClient(trace->entityNum);
+    CG_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, skipNumber,
+             mask);
+  }
+
+  resetTempTraceIgnoredClients();
+}
+} // namespace ETJump
+
 /*
 ===============
 CG_FlameLerpVec
@@ -246,10 +267,15 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
     while (t <= cg.time) {
       // spawn a new chunk
       CG_FlameLerpVec(lastOrg, thisOrg, backLerp, org);
+      ETJump::flamechunkTrace(&trace, org, org, cent->currentState.number,
+                              MASK_SHOT | MASK_WATER);
 
-      CG_Trace(&trace, org, flameChunkMins, flameChunkMaxs, org,
-               cent->currentState.number,
-               MASK_SHOT | MASK_WATER); // JPW NERVE water fixes
+      // fix for engine bug where trace sometimes starts in solid even if
+      // the entity that it starts in is nonsolid
+      if (trace.startsolid && trace.entityNum == ENTITYNUM_NONE) {
+        trace.startsolid = qfalse;
+      }
+
       if (trace.startsolid) {
         return; // don't spawn inside a wall
       }
@@ -636,10 +662,14 @@ void CG_MoveFlameChunk(flameChunk_t *f) {
   while (f->velSpeed > 1 && f->baseOrgTime != cg.time) {
     CG_FlameCalcOrg(f, cg.time, newOrigin);
 
-    // trace a line from previous position to new position
-    CG_Trace(&trace, sOrg, flameChunkMins, flameChunkMaxs, newOrigin,
-             f->ownerCent,
-             MASK_SHOT | MASK_WATER); // JPW NERVE water fixes
+    ETJump::flamechunkTrace(&trace, sOrg, newOrigin, f->ownerCent,
+                            MASK_SHOT | MASK_WATER);
+
+    // fix for engine bug where trace sometimes starts in solid even if
+    // the entity that it starts in is nonsolid
+    if (trace.startsolid && trace.entityNum == ENTITYNUM_NONE) {
+      trace.startsolid = qfalse;
+    }
 
     if (trace.startsolid) {
       f->velSpeed = 0;
