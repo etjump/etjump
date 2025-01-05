@@ -213,7 +213,6 @@ As prerequisites you would first need to install `mingw-w64` and all its depende
 sudo apt-get install -y mingw-w64
 ```
 
-_FIXME: on ubuntu `mingw-w64` doesn't support std threads atm, hence failing to compile, use __arch__ instead_
 
 ```sh
 # on arch
