@@ -1,3 +1,7 @@
+# ETJump 3.3.3
+
+* fixed a crash on UI keyhandling on 2.60b and ETL due to out of bounds array access in engine [#1601](https://github.com/etjump/etjump/pull/1601)
+
 # ETJump 3.3.2
 
 * fixed players producing water impacts when shot [#1544](https://github.com/etjump/etjump/pull/1544)
