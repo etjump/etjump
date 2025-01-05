@@ -3429,6 +3429,23 @@ void bulletTrace(gentity_t *source, const gentity_t *attacker, trace_t *tr,
 
   G_ResetTempTraceIgnoreEnts();
 }
+
+void portalTrace(gentity_t *ent, trace_t *tr, vec3_t start, vec3_t end) {
+  G_Trace(ent, tr, start, nullptr, nullptr, end, ent->s.number, MASK_PORTAL);
+
+  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr->entityNum < MAX_CLIENTS &&
+         !EntityUtilities::playerIsSolid(ent->client->ps.clientNum,
+                                         tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    G_Trace(ent, tr, start, nullptr, nullptr, end, ent->s.number, MASK_PORTAL);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
 } // namespace ETJump
 
 /*
@@ -3667,15 +3684,14 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   VectorMA(trace_start, MAX_PORTAL_RANGE, forward, trace_end);
 
   // Trace
-  G_Trace(ent, &tr, trace_start, nullptr, nullptr, trace_end, ent->s.number,
-          MASK_PORTAL);
+  ETJump::portalTrace(ent, &tr, trace_start, trace_end);
 
   if (tr.surfaceFlags & SURF_NOIMPACT || tr.fraction == 1.0f) {
     return;
   }
 
-  // emancipation grid
-  if (tr.contents & CONTENTS_PORTALCLIP) {
+  // portalclip or player = no portal
+  if (tr.contents & (CONTENTS_PORTALCLIP | CONTENTS_BODY)) {
     return;
   }
 
