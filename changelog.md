@@ -54,6 +54,8 @@
     * map contains a stop timer without a corresponding start timer
     * map contains checkpoints for a timerun without a start and stop timer
 * chat replay timestamps are now calculated on server to ensure clients system clock inaccuracies don't affect the timestamp [#1597](https://github.com/etjump/etjump/pull/1597)
+* flamethrower now correctly ignores nonsolid players [#1598](https://github.com/etjump/etjump/pull/1598)
+* portal gun can no longer be fired through solid players [#1599](https://github.com/etjump/etjump/pull/1599)
 
 # ETJump 3.3.1
 
