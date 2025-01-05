@@ -7328,6 +7328,14 @@ void _UI_KeyEvent(int key, qboolean down) {
         bypassKeyClear = qtrue;
       }
 
+      // forward char events to regular key handling,
+      // so we don't do out-of-bounds array access in engine
+      // 2.60b and ETL don't check for key array bounds when reading bind buffer
+      if (key & K_CHAR_FLAG) {
+        Menu_HandleKey(menu, key, down);
+        return;
+      }
+
       // bypass menu key handling if we're toggling etjump settings menu
       char bindBuf[MAX_CVAR_VALUE_STRING];
       DC->getBindingBuf(key, bindBuf, sizeof(bindBuf));
