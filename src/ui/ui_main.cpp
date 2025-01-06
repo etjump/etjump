@@ -3339,8 +3339,11 @@ static void UI_LoadDemos() {
       "dm_" +
       std::to_string(static_cast<int>(trap_Cvar_VariableValue("protocol")));
 
+  // trap_FS_GetFileList doesn't understand backslashes as a file "extension",
+  // so we must always send a forward slash here as the extension,
+  // instead of platform-specific path separator
   const std::vector<std::string> demoDirs =
-      ETJump::FileSystem::getFileList(path, PATH_SEP_STRING, true);
+      ETJump::FileSystem::getFileList(path, "/", true);
   std::vector<FileSystemObjectInfo> directories;
 
   for (const auto &dir : demoDirs) {
