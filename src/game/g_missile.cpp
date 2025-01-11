@@ -1017,8 +1017,20 @@ void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
     return;
   }
 
-  // don't set other players on fire or entities in water
-  if (body->client || body->waterlevel >= 3) {
+  if (body->client) {
+    // don't set clients on fire if the shooter isn't us,
+    // or we're invulnerable
+    if (body->s.number != self->r.ownerNum ||
+        body->client->ps.powerups[PW_INVULNERABLE] >= level.time) {
+      body->flameQuota = 0;
+      body->s.onFireEnd = level.time - 1;
+    }
+
+    return;
+  }
+
+  // don't set underwater entities on fire
+  if (body->waterlevel >= 3) {
     body->flameQuota = 0;
     body->s.onFireEnd = level.time - 1;
     return;
