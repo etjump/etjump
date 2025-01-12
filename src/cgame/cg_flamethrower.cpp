@@ -163,12 +163,17 @@ void flamechunkTrace(trace_t *trace, vec3_t start, vec3_t end,
                      const int skipNumber, const int mask) {
   CG_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, skipNumber, mask);
 
+  // a flamechunk might be spawned by an entity in the map (props_flamethrower)
+  if (!isValidClientNum(skipNumber)) {
+    return;
+  }
+
   if (trace->entityNum >= MAX_CLIENTS) {
     return;
   }
 
   while (trace->entityNum < MAX_CLIENTS &&
-         !playerIsSolid(cg.snap->ps.clientNum, trace->entityNum)) {
+         !playerIsSolid(skipNumber, trace->entityNum)) {
     tempTraceIgnoreClient(trace->entityNum);
     CG_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, skipNumber,
              mask);
@@ -687,7 +692,9 @@ void CG_MoveFlameChunk(flameChunk_t *f) {
 
     if (trace.fraction == 1.0) {
       // check for hitting client
-      if ((f->ownerCent != cg.snap->ps.clientNum) &&
+      if (f->ownerCent != cg.snap->ps.clientNum &&
+          (!ETJump::isValidClientNum(f->ownerCent) ||
+           ETJump::playerIsSolid(f->ownerCent, cg.snap->ps.clientNum)) &&
           !(cg.snap->ps.eFlags & EF_DEAD) &&
           VectorDistance(newOrigin, cg.snap->ps.origin) < 32) {
         VectorNegate(f->velDir, trace.plane.normal);
