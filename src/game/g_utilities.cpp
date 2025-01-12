@@ -219,7 +219,11 @@ std::vector<std::string> getNames(const std::vector<int> &ids) {
   std::vector<std::string> names;
 
   for (auto &id : ids) {
-    names.push_back((g_entities + id)->client->pers.netname);
+    std::string name = (g_entities + id)->client->pers.netname;
+
+    // escape '=' for QP-encoding
+    ETJump::StringUtil::replaceAll(name, "=", "\x19=");
+    names.push_back(name);
   }
 
   return names;
@@ -239,7 +243,7 @@ std::vector<int> getMatchingIds(const std::string &name) {
 
 std::string interpolateNametags(std::string input, const int color) {
   std::string interpolated;
-  std::vector<std::string> split = ETJump::StringUtil::split(input, "@");
+  const std::vector<std::string> split = ETJump::StringUtil::split(input, "@");
 
   if (split.size() == 1 || split.size() == 2) {
     return input;
@@ -271,8 +275,6 @@ std::string interpolateNametags(std::string input, const int color) {
     interpolated += split[len - 1];
   }
 
-  // escape '=' for QP-encoding
-  ETJump::StringUtil::replaceAll(interpolated, "=", "\x19=");
   return interpolated;
 }
 
