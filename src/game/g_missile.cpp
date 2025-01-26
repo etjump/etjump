@@ -975,11 +975,12 @@ int G_PredictMissile(gentity_t *ent, int duration, vec3_t endPos,
 //=============================================================================
 
 namespace ETJump {
-void flamechunkTrace(const gentity_t *ent, trace_t *tr, vec3_t start,
-                     vec3_t end, const int mask) {
+void flamechunkTrace(gentity_t *ent, trace_t *tr, vec3_t start, vec3_t end,
+                     const int mask) {
   trap_Trace(tr, start, ent->r.mins, ent->r.maxs, end, ent->r.ownerNum, mask);
 
-  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+  if (g_ghostPlayers.integer != 1 || !EntityUtilities::isPlayer(ent) ||
+      tr->entityNum >= MAX_CLIENTS) {
     return;
   }
 
@@ -1017,8 +1018,20 @@ void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
     return;
   }
 
-  // don't set other players on fire or entities in water
-  if (body->client || body->waterlevel >= 3) {
+  if (body->client) {
+    // don't set clients on fire if the shooter isn't us,
+    // or we're invulnerable
+    if (body->s.number != self->r.ownerNum ||
+        body->client->ps.powerups[PW_INVULNERABLE] >= level.time) {
+      body->flameQuota = 0;
+      body->s.onFireEnd = level.time - 1;
+    }
+
+    return;
+  }
+
+  // don't set underwater entities on fire
+  if (body->waterlevel >= 3) {
     body->flameQuota = 0;
     body->s.onFireEnd = level.time - 1;
     return;
