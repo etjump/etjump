@@ -975,11 +975,12 @@ int G_PredictMissile(gentity_t *ent, int duration, vec3_t endPos,
 //=============================================================================
 
 namespace ETJump {
-void flamechunkTrace(const gentity_t *ent, trace_t *tr, vec3_t start,
-                     vec3_t end, const int mask) {
+void flamechunkTrace(gentity_t *ent, trace_t *tr, vec3_t start, vec3_t end,
+                     const int mask) {
   trap_Trace(tr, start, ent->r.mins, ent->r.maxs, end, ent->r.ownerNum, mask);
 
-  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+  if (g_ghostPlayers.integer != 1 || !EntityUtilities::isPlayer(ent) ||
+      tr->entityNum >= MAX_CLIENTS) {
     return;
   }
 
