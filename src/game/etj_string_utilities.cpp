@@ -86,7 +86,8 @@ std::string ETJump::getBestMatch(const std::vector<std::string> &words,
   return smallest->first;
 }
 
-static void SanitizeConstString(const char *in, char *out, bool toLower) {
+static void SanitizeConstString(const char *in, char *out, const bool toLower,
+                                const bool removeEscapeChars) {
   while (*in) {
     if (*in == 27 || *in == '^') {
       in++; // skip color code
@@ -96,22 +97,23 @@ static void SanitizeConstString(const char *in, char *out, bool toLower) {
       continue;
     }
 
-    if (*in < 32) {
+    if (removeEscapeChars && *in < 32) {
       in++;
       continue;
     }
 
-    *out++ = (toLower) ? tolower(*in++) : *in++;
+    *out++ = toLower ? static_cast<char>(tolower(*in++)) : *in++;
   }
 
   *out = 0;
 }
 
-std::string ETJump::sanitize(const std::string &text, bool toLower) {
-  auto len = text.length();
+std::string ETJump::sanitize(const std::string &text, const bool toLower,
+                             const bool removeEscapeChars) {
+  const size_t len = text.length();
   std::vector<char> out(len + 1);
-  SanitizeConstString(text.c_str(), out.data(), toLower ? true : false);
-  return std::string(out.data());
+  SanitizeConstString(text.c_str(), out.data(), toLower, removeEscapeChars);
+  return {out.data()};
 }
 
 std::string ETJump::getValue(const char *value,
