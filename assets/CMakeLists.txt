@@ -4,7 +4,7 @@ set(PK_PATH "${BASE_DIR_PATH}/${PK_NAME}.pk3")
 file(GLOB_RECURSE PK_ASSETS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
 list(REMOVE_ITEM PK_ASSETS CMakeLists.txt)
 
-message(STATUS "Coping assets/ to ${BASE_DIR_PATH}")
+message(STATUS "Copying assets/ to ${BASE_DIR_PATH}")
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/assets" "${BASE_DIR_PATH}")
 file(GENERATE OUTPUT "${BASE_DIR_PATH}/description.txt" CONTENT "${PK_NAME}")
 list(APPEND PK_ASSETS "description.txt")
