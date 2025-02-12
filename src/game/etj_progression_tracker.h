@@ -36,7 +36,8 @@ public:
   static const int ProgressionTrackerValueNotSet = -1;
   struct ProgressionTrackerKeys {
     char *equal;
-    char *notEqual;
+    char *notEqualAny;
+    char *notEqualAll;
     char *greaterThan;
     char *lessThan;
     char *set;
@@ -56,7 +57,8 @@ public:
   struct ProgressionTracker {
     ProgressionTracker() {
       std::fill_n(equal, MaxProgressionTrackers, -1);
-      std::fill_n(notEqual, MaxProgressionTrackers, -1);
+      std::fill_n(notEqualAny, MaxProgressionTrackers, -1);
+      std::fill_n(notEqualAll, MaxProgressionTrackers, -1);
       std::fill_n(greaterThan, MaxProgressionTrackers, -1);
       std::fill_n(lessThan, MaxProgressionTrackers, -1);
       std::fill_n(set, MaxProgressionTrackers, -1);
@@ -71,7 +73,8 @@ public:
       std::fill_n(incrementIf, MaxProgressionTrackers, 0);
     }
     int equal[MaxProgressionTrackers]{};
-    int notEqual[MaxProgressionTrackers]{};
+    int notEqualAny[MaxProgressionTrackers]{};
+    int notEqualAll[MaxProgressionTrackers]{};
     int greaterThan[MaxProgressionTrackers]{};
     int lessThan[MaxProgressionTrackers]{};
     int set[MaxProgressionTrackers]{};
