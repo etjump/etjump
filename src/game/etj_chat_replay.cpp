@@ -45,7 +45,7 @@ void ChatReplay::createChatMessage(const int clientNum, const std::string &name,
   msg.name = name;
   msg.localize = localize;
   msg.encoded = encoded;
-  msg.message = sanitize(message);
+  msg.message = sanitize(message, false, false);
   msg.expired = false;
 
   time_t t;
