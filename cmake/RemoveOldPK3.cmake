@@ -4,8 +4,6 @@ endif ()
 
 file(GLOB OLD_PK3_FILES "${PK3_PATH}/etjump-*.pk3")
 
-message("pk3 path: ${PK3_PATH}")
-
 if (NOT OLD_PK3_FILES)
     message("No old PK3 files found.")
 else ()
