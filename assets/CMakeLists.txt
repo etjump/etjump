@@ -10,12 +10,12 @@ file(GENERATE OUTPUT "${BASE_DIR_PATH}/description.txt" CONTENT "${PK_NAME}")
 list(APPEND PK_ASSETS "description.txt")
 
 add_custom_target(mod_pk3
-	COMMAND ${CMAKE_COMMAND} 
+	COMMAND ${CMAKE_COMMAND}
 		-DINPUT="${PK_ASSETS};cgame*.so;cgame*.dll;cgame_mac;ui*.so;ui*.dll;ui_mac"
 		-DOUTPUT="${PK_PATH}"
 		-P ${CMAKE_SOURCE_DIR}/cmake/AssetsPackager.cmake
 	WORKING_DIRECTORY ${BASE_DIR_PATH}
-	# DEPENDS cgame ui
+	DEPENDS remove_old_pk3
 	COMMENT "Packing ${PK_NAME}.pk3"
 )
 
@@ -30,4 +30,12 @@ add_custom_target(mod_release
 	# DEPENDS qagame mod_pk3
 	DEPENDS mod_pk3
 	COMMENT "Packing ${RELEASE_NAME}.zip"
+)
+
+add_custom_target(remove_old_pk3
+		COMMAND ${CMAKE_COMMAND}
+		-DPK3_PATH="${BASE_DIR_PATH}"
+		-P ${CMAKE_SOURCE_DIR}/cmake/RemoveOldPK3.cmake
+		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+		COMMENT "Cleaning old mod pk3 files"
 )
