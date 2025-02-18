@@ -6451,12 +6451,13 @@ menuDef_t *Menus_ActivateByName(const char *p, qboolean modalStack) {
         }
         modalMenuStack[modalMenuCount++] = focus;
       }
-      break; // Arnout: found it, don't continue
-             // searching as we might unfocus the menu
-             // we just activated again.
-    } else {
-      Menus[i].window.flags &= ~(WINDOW_HASFOCUS | WINDOW_MOUSEOVER);
+
+      // Arnout: found it, don't continue searching as we might
+      // unfocus the menu we just activated again.
+      break;
     }
+
+    Menus[i].window.flags &= ~(WINDOW_HASFOCUS | WINDOW_MOUSEOVER);
   }
   Display_CloseCinematics();
   return m;
