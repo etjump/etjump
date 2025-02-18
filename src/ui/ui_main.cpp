@@ -7602,259 +7602,205 @@ void toggleSettingsMenu() {
 
 } // namespace ETJump
 
-void _UI_SetActiveMenu(uiMenuCommand_t menu) {
-  char buf[4096]; // com_errorMessage can go up to 4096
-  char *missing_files;
-
+void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
   // this should be the ONLY way the menu system is brought up
-  // enusure minumum menu data is cached
-  if (Menu_Count() > 0) {
-    vec3_t v;
-    v[0] = v[1] = v[2] = 0;
+  // ensure minimum menu data is cached
+  if (Menu_Count() <= 0) {
+    return;
+  }
 
-    menutype = menu; //----(SA)	added
+  char buf[4096];
+  vec3_t v;
+  v[0] = v[1] = v[2] = 0;
 
-    switch (menu) {
-      case UIMENU_NONE:
-        trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_UI);
-        trap_Key_ClearStates();
-        trap_Cvar_Set("cl_paused", "0");
-        Menus_CloseAll();
+  menutype = menu; //----(SA)	added
 
-        return;
-      case UIMENU_MAIN:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        // Menus_ActivateByName( "background_1",
-        // qtrue );
-        Menus_ActivateByName("backgroundmusic",
-                             qtrue); // Arnout: not nice, but
-                                     // best way to do it -
-                                     // putting the music in it's
-                                     // own menudef makes sure it
-                                     // doesn't get restarted
-                                     // every time you reach the
-                                     // main menu
-        if (!cl_profile.string[0]) {
-          // Menus_ActivateByName(
-          // "profilelogin", qtrue );
-          //  FIXME: initial profile
-          //  popup FIXED: handled in
-          //  opener now
-          Menus_ActivateByName("main_opener", qtrue);
+  switch (menu) {
+    case UIMENU_NONE:
+      trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_UI);
+      trap_Key_ClearStates();
+      trap_Cvar_Set("cl_paused", "0");
+      Menus_CloseAll();
+
+      return;
+    case UIMENU_MAIN:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      // Arnout: not nice, but best way to do it - putting the music in its
+      // own menudef makes sure it doesn't get restarted
+      // every time you reach the main menu
+      Menus_ActivateByName("backgroundmusic", qtrue);
+      Menus_ActivateByName("main_opener", qtrue);
+
+      trap_Cvar_VariableStringBuffer("com_errorMessage", buf, sizeof(buf));
+
+      // JPW NERVE stricmp() is silly but works, take a look at error.menu to
+      // see why.  I think this is bustified in q3ta
+      // NOTE TTimo - I'm not sure Q_stricmp is useful to anything anymore
+      // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=507
+      // TTimo - improved and tweaked that area a whole bunch
+      if ((*buf) && (Q_stricmp(buf, ";"))) {
+        trap_Cvar_Set("ui_connecting", "0");
+
+        if (!Q_stricmpn(buf, "Invalid password", 16)) {
+          // NERVE - SMF
+          trap_Cvar_Set("com_errorMessage", trap_TranslateString(buf));
+          Menus_ActivateByName("popupPassword", qtrue);
+
+        } else if (strlen(buf) > 5 && !Q_stricmpn(buf, "ET://", 5)) { // fretn
+          // legal redirects contain source ip in this variable
+          if (!UI_Cvar_VariableString("com_errorDiagnoseIP")[0]) {
+            ETJump::handleIllegalRedirect();
+            return;
+          }
+
+          Q_strncpyz(buf, buf + 5, sizeof(buf));
+          Com_Printf("Server is full, redirect to: %s\n", buf);
+          switch (ui_autoredirect.integer) {
+            // auto-redirect
+            case 1:
+              trap_Cvar_Set("com_errorMessage", "");
+              trap_Cmd_ExecuteText(EXEC_APPEND, va("connect %s\n", buf));
+              break;
+            // prompt (default)
+            default:
+              trap_Cvar_Set("com_errorMessage", buf);
+              Menus_ActivateByName("popupServerRedirect", qtrue);
+              break;
+          }
         } else {
-          Menus_ActivateByName("main_opener", qtrue);
-        }
+          qboolean pb_enable = qfalse;
 
-        trap_Cvar_VariableStringBuffer("com_errorMessage", buf, sizeof(buf));
+          if (strstr(buf, "must be Enabled")) {
+            pb_enable = qtrue;
+          }
 
-        // JPW NERVE stricmp() is silly but
-        // works, take a look at error.menu to
-        // see why.  I think this is bustified
-        // in q3ta NOTE TTimo - I'm not sure
-        // Q_stricmp is useful to anything
-        // anymore
-        // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=507
-        // TTimo - improved and tweaked that
-        // area a whole bunch
-        if ((*buf) && (Q_stricmp(buf, ";"))) {
-          trap_Cvar_Set("ui_connecting", "0");
+          // NERVE - SMF
+          trap_Cvar_Set("com_errorMessage", trap_TranslateString(buf));
 
-          if (!Q_stricmpn(buf, "Invalid password", 16)) {
-            trap_Cvar_Set("com_"
-                          "errorMessage",
-                          trap_TranslateString(buf)); // NERVE
-                                                      // -
-                                                      // SMF
-            Menus_ActivateByName("popupPassword", qtrue);
-          } else if (strlen(buf) > 5 && !Q_stricmpn(buf, "ET://",
-                                                    5)) // fretn
-          {
-            // legal redirects
-            // contain source ip
-            // in this variable
-            if (!UI_Cvar_VariableString("com_"
-                                        "errorDiagn"
-                                        "oseIP")[0]) {
-              ETJump::handleIllegalRedirect();
-              return;
-            }
+          // hacky, wanted to have the printout of missing files
+          // text printing limitations force us to keep it all
+          // in a single message
+          // NOTE: this works thanks to flip flop in UI_Cvar_VariableString
+          if (UI_Cvar_VariableString("com_errorDiagnoseIP")[0]) {
+            char *missing_files = UI_Cvar_VariableString("com_missingFiles");
 
-            Q_strncpyz(buf, buf + 5, sizeof(buf));
-            Com_Printf("Server is "
-                       "full, "
-                       "redirect to: "
-                       "%s\n",
-                       buf);
-            switch (ui_autoredirect.integer) {
-              // auto-redirect
-              case 1:
-                trap_Cvar_Set("com_errorMessage", "");
-                trap_Cmd_ExecuteText(EXEC_APPEND, va("connect %s\n", buf));
-                break;
-              // prompt
-              // (default)
-              default:
-                trap_Cvar_Set("com_errorMessage", buf);
-                Menus_ActivateByName("popupServerRedirect", qtrue);
-                break;
-            }
-          } else {
-            qboolean pb_enable = qfalse;
-
-            if (strstr(buf, "must be "
-                            "Enable"
-                            "d")) {
-              pb_enable = qtrue;
-            }
-
-            trap_Cvar_Set("com_"
-                          "errorMessage",
-                          trap_TranslateString(buf)); // NERVE
-                                                      // -
-                                                      // SMF
-            // hacky, wanted to
-            // have the printout
-            // of missing files
-            // text printing
-            // limitations force
-            // us to keep it all
-            // in a single
-            // message NOTE:
-            // this works thanks
-            // to flip flop in
-            // UI_Cvar_VariableString
-            if (UI_Cvar_VariableString("com_"
-                                       "errorDiagn"
-                                       "oseIP")[0]) {
-              missing_files = UI_Cvar_VariableString("com_"
-                                                     "miss"
-                                                     "ingF"
-                                                     "ile"
-                                                     "s");
-              if (missing_files[0]) {
-                trap_Cvar_Set("com_errorMessage",
-                              va("%s\n\n%s\n%s",
-                                 UI_Cvar_VariableString("com_errorMessage"),
-                                 trap_TranslateString(MISSING_FILES_MSG),
-                                 missing_files));
-              }
-            }
-            if (pb_enable) {
-              Menus_ActivateByName("popu"
-                                   "pErr"
-                                   "or_"
-                                   "pben"
-                                   "abl"
-                                   "e",
-                                   qtrue);
-            } else {
-              Menus_ActivateByName("popupError", qtrue);
-
-              // invalidate demo queue playback on errors (e.g. missing files)
-              trap_Cvar_Set("etj_demoQueueCurrent", "");
+            if (missing_files[0]) {
+              trap_Cvar_Set(
+                  "com_errorMessage",
+                  va("%s\n\n%s\n%s", UI_Cvar_VariableString("com_errorMessage"),
+                     trap_TranslateString(MISSING_FILES_MSG), missing_files));
             }
           }
+
+          if (pb_enable) {
+            Menus_ActivateByName("popupError_pbenable", qtrue);
+          } else {
+            Menus_ActivateByName("popupError", qtrue);
+
+            // invalidate demo queue playback on errors (e.g. missing files)
+            trap_Cvar_Set("etj_demoQueueCurrent", "");
+          }
         }
+      }
 
-        trap_S_FadeAllSound(1.0f, 1000,
-                            qfalse); // make sure sound fades up
-        return;
+      // make sure sound fades up
+      trap_S_FadeAllSound(1.0f, 1000, qfalse);
+      return;
 
-      case UIMENU_TEAM:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_ActivateByName("team", qtrue);
-        return;
+    case UIMENU_TEAM:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_ActivateByName("team", qtrue);
+      return;
 
-      case UIMENU_NEED_CD:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_ActivateByName("needcd", qtrue);
-        return;
+    case UIMENU_NEED_CD:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_ActivateByName("needcd", qtrue);
+      return;
 
-      case UIMENU_BAD_CD_KEY:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_ActivateByName("badcd", qtrue);
-        return;
+    case UIMENU_BAD_CD_KEY:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_ActivateByName("badcd", qtrue);
+      return;
 
-      case UIMENU_INGAME:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        UI_BuildPlayerList();
-        Menu_SetFeederSelection(NULL, FEEDER_PLAYER_LIST, 0, NULL);
-        Menus_CloseAll();
-        Menus_ActivateByName("ingame_main", qtrue);
-        return;
+    case UIMENU_INGAME:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      UI_BuildPlayerList();
+      Menu_SetFeederSelection(nullptr, FEEDER_PLAYER_LIST, 0, nullptr);
+      Menus_CloseAll();
+      Menus_ActivateByName("ingame_main", qtrue);
+      return;
 
-      // NERVE - SMF
-      case UIMENU_WM_QUICKMESSAGE:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("wm_quickmessage");
-        return;
+    // NERVE - SMF
+    case UIMENU_WM_QUICKMESSAGE:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("wm_quickmessage");
+      return;
 
-      case UIMENU_WM_QUICKMESSAGEALT:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("wm_quickmessageAlt");
-        return;
+    case UIMENU_WM_QUICKMESSAGEALT:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("wm_quickmessageAlt");
+      return;
 
-      case UIMENU_WM_FTQUICKMESSAGE:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("wm_ftquickmessage");
-        return;
+    case UIMENU_WM_FTQUICKMESSAGE:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("wm_ftquickmessage");
+      return;
 
-      case UIMENU_WM_FTQUICKMESSAGEALT:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("wm_ftquickmessageAlt");
-        return;
+    case UIMENU_WM_FTQUICKMESSAGEALT:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("wm_ftquickmessageAlt");
+      return;
 
-      case UIMENU_WM_TAPOUT:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("tapoutmsg");
-        return;
+    case UIMENU_WM_TAPOUT:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("tapoutmsg");
+      return;
 
-      case UIMENU_WM_TAPOUT_LMS:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("tapoutmsglms");
-        return;
+    case UIMENU_WM_TAPOUT_LMS:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("tapoutmsglms");
+      return;
 
-      case UIMENU_WM_AUTOUPDATE:
-        // TTimo - changing the auto-update
-        // strategy to a modal prompt
-        Menus_OpenByName("wm_autoupdate_modal");
-        return;
-      // -NERVE - SMF
+    case UIMENU_WM_AUTOUPDATE:
+      // TTimo - changing the auto-update
+      // strategy to a modal prompt
+      Menus_OpenByName("wm_autoupdate_modal");
+      return;
+    // -NERVE - SMF
 
-      // ydnar: say, team say, etc
-      case UIMENU_INGAME_MESSAGEMODE:
-        // trap_Cvar_Set( "cl_paused", "1" );
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_OpenByName("ingame_messagemode");
-        return;
+    // ydnar: say, team say, etc
+    case UIMENU_INGAME_MESSAGEMODE:
+      // trap_Cvar_Set( "cl_paused", "1" );
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_OpenByName("ingame_messagemode");
+      return;
 
-      case UIMENU_INGAME_FT_SAVELIMIT:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_OpenByName("ingame_ft_savelimit");
-        return;
+    case UIMENU_INGAME_FT_SAVELIMIT:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_OpenByName("ingame_ft_savelimit");
+      return;
 
-      default:
-        return; // TTimo: a lot of not handled
-    }
+    default:
+      return; // TTimo: a lot of not handled
   }
 }
 
