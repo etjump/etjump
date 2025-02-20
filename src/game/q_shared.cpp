@@ -860,7 +860,10 @@ void Q_strcat_fn(char *dest, const int size, const char *src, const char *func,
               line);
   }
 
-  Q_strncpyz(dest + l1, src, size - l1);
+  // we want to use the actual function here and pass the arguments to that,
+  // otherwise this gives no useful debug info as the func will be Q_strcat_fn,
+  // which doesn't tell where this call originated from
+  Q_strncpyz_fn(dest + l1, src, size - l1, func, file, line);
 }
 
 int Q_PrintStrlen(const char *string) {
