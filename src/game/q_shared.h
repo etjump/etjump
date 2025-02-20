@@ -211,6 +211,9 @@ void Sys_PumpEvents(void);
 
 //=============================================================
 
+// relative path to a source file (src/foo/bar.cpp)
+#define SRC_FILENAME ((__FILE__) + (SOURCE_PATH_SIZE))
+
 typedef unsigned char byte;
 
 typedef enum { qfalse, qtrue } qboolean;
@@ -808,8 +811,15 @@ char *Q_strlwr(char *s1);
 char *Q_strupr(char *s1);
 
 // buffer size safe library replacements
-void Q_strncpyz(char *dest, const char *src, int destsize);
-void Q_strcat(char *dest, int size, const char *src);
+#define Q_strncpyz(dest, src, destsize)                                        \
+  Q_strncpyz_fn(dest, src, destsize, __func__, SRC_FILENAME, __LINE__)
+void Q_strncpyz_fn(char *dest, const char *src, int destsize, const char *func,
+                   const char *file, int line);
+
+#define Q_strcat(dest, size, src)                                              \
+  Q_strcat_fn(dest, size, src, __func__, SRC_FILENAME, __LINE__)
+void Q_strcat_fn(char *dest, int size, const char *src, const char *func,
+                 const char *file, int line);
 
 // strlen that discounts Quake color sequences
 int Q_PrintStrlen(const char *string);
@@ -818,7 +828,10 @@ char *Q_CleanStr(char *string);
 // removes whitespaces and other bad directory characters
 char *Q_CleanDirName(char *dirname);
 // safe strlen up to N chars
-size_t Q_strnlen(const char *str, size_t maxlen);
+#define Q_strnlen(str, maxlen)                                                 \
+  Q_strnlen_fn(str, maxlen, __func__, SRC_FILENAME, __LINE__)
+size_t Q_strnlen_fn(const char *str, size_t maxlen, const char *func,
+                    const char *file, int line);
 
 // #define _vsnprintf use_Q_vsnprintf
 // #define vsnprintf use_Q_vsnprintf
