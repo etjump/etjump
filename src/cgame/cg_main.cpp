@@ -675,6 +675,8 @@ vmCvar_t etj_recordingStatusY;
 vmCvar_t etj_smoothAngles;
 vmCvar_t etj_autoSprint;
 
+vmCvar_t etj_onDemoPlaybackStart;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1266,6 +1268,8 @@ cvarTable_t cvarTable[] = {
 
     {&etj_smoothAngles, "etj_smoothAngles", "1", CVAR_ARCHIVE},
     {&etj_autoSprint, "etj_autoSprint", "0", CVAR_ARCHIVE},
+
+    {&etj_onDemoPlaybackStart, "etj_onDemoPlaybackStart", "", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
