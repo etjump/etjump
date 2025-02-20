@@ -127,6 +127,9 @@ extern vmCvar_t etj_menuSensitivity;
 
 extern vmCvar_t ui_currentChangelog;
 
+extern vmCvar_t etj_demoQueueCurrent;
+extern vmCvar_t etj_demoQueueDir;
+
 //
 // ui_qmenu.c
 //
@@ -1132,5 +1135,8 @@ void parseCustomvote();
 void resetCustomvotes();
 
 void toggleSettingsMenu();
+
+class DemoQueue;
+extern std::unique_ptr<DemoQueue> demoQueue;
 } // namespace ETJump
 #endif
