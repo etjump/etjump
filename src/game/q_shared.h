@@ -214,6 +214,13 @@ void Sys_PumpEvents(void);
 // relative path to a source file (src/foo/bar.cpp)
 #define SRC_FILENAME ((__FILE__) + (SOURCE_PATH_SIZE))
 
+// tell compilers that trap_Error syscalls abort execution
+#if defined(_MSC_VER) && !defined(__clang__) // MSVC
+  #define UNREACHABLE __assume(false);
+#else // GCC, Clang
+  #define UNREACHABLE __builtin_unreachable();
+#endif
+
 typedef unsigned char byte;
 
 typedef enum { qfalse, qtrue } qboolean;
@@ -889,7 +896,7 @@ void RemoveDuplicates(char *str);
 void SortString(char *src);
 
 // this is only here so the functions in q_shared.c and bg_*.c can link
-void QDECL Com_Error(int level, const char *error, ...);
+[[noreturn]] void QDECL Com_Error(int level, const char *error, ...);
 void QDECL Com_Printf(const char *msg, ...);
 void QDECL Com_LocalPrintf(const char *msg, ...);
 

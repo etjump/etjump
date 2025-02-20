@@ -33,7 +33,7 @@ void QDECL Com_DPrintf(const char *fmt, ...) {
 }
 // jpw
 
-void QDECL Com_Error(int level, const char *error, ...) {
+[[noreturn]] void QDECL Com_Error(int level, const char *error, ...) {
   va_list argptr;
   char text[1024];
 
