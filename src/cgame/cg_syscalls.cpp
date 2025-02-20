@@ -46,7 +46,7 @@ void trap_PumpEventLoop(void) {
 void trap_Print(const char *fmt) { SystemCall(CG_PRINT, fmt); }
 
 // coverity[+kill]
-void trap_Error(const char *fmt) {
+[[noreturn]] void trap_Error(const char *fmt) {
   SystemCall(CG_ERROR, fmt);
   UNREACHABLE
 }

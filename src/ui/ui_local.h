@@ -991,7 +991,7 @@ void UI_SPSkillMenu_Cache(void);
 // ui_syscalls.c
 //
 void trap_Print(const char *string);
-void trap_Error(const char *string);
+[[noreturn]] void trap_Error(const char *string);
 int trap_Milliseconds(void);
 void trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName,
                         const char *defaultValue, int flags);

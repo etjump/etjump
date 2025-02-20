@@ -40,7 +40,7 @@ inline int PASSFLOAT(const float &f) noexcept {
 void trap_Print(const char *string) { SystemCall(UI_PRINT, string); }
 
 // coverity[+kill]
-void trap_Error(const char *string) {
+[[noreturn]] void trap_Error(const char *string) {
   SystemCall(UI_ERROR, string);
   UNREACHABLE
 }
