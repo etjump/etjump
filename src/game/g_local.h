@@ -599,6 +599,10 @@ struct gentity_s {
   int lastSurfaceFlag;
 
   std::array<int, MAX_CLIENTS> targetDelayActivationTime;
+
+  // target_ft_setrules, just big enough to hold -1 - 100 or 'reset'
+  char ftSavelimit[6];
+  char ftLeaderOnlyMsg[MAX_STRING_CHARS];
 };
 
 // Ridah
@@ -1435,6 +1439,8 @@ typedef struct {
   bool noDrop;
   bool noWallbug;
   bool noFTNoGhost;
+  bool noFTSaveLimit;
+  bool noFTTeamjumpMode;
 
   int portalEnabled; // Feen: PGM - Enabled/Disabled by map key
   qboolean portalSurfaces;
@@ -2560,6 +2566,17 @@ void G_InviteToFireTeam(int entityNum, int otherEntityNum);
 void G_UpdateFireteamConfigString(fireteamData_t *ft);
 void G_RemoveClientFromFireteams(int entityNum, qboolean update,
                                  qboolean print);
+
+namespace ETJump {
+gentity_t *getFireteamLeader(int clientNum);
+void setSaveLimitForFTMembers(fireteamData_t *ft, int limit);
+void setFireTeamGhosting(fireteamData_t *ft, bool noGhost);
+bool canEnableFtNoGhost(int clientNum, fireteamData_t *ft,
+                        const gentity_t *ent);
+bool canSetFtSavelimit(int clientNum, const gentity_t *ent);
+bool canSetFtTeamjumpMode(int clientNum, const gentity_t *ent);
+void setFireteamTeamjumpMode(fireteamData_t *ft, bool teamjumpMode);
+} // namespace ETJump
 
 void G_PrintClientSpammyCenterPrint(int entityNum, const char *text);
 
