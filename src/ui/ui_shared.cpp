@@ -5707,7 +5707,7 @@ static void comboPaint(itemDef_t *item) {
   const bool reversed = item->comboData.reversed;
 
   if (reversed) {
-    item->comboData.rect.y -= item->comboData.rect.h + item->comboData.height;
+    comboRect.y -= item->comboData.rect.h + item->comboData.height;
   }
 
   // we can't use forecolor here because if mouse is over an item,
