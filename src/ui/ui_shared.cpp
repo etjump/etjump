@@ -5748,7 +5748,8 @@ static void comboPaint(itemDef_t *item) {
           item->textRect.y + static_cast<float>(i) * comboRect.h + borderOfs;
     }
 
-    if (Rect_ContainsPoint(&textRect, static_cast<float>(DC->cursorx),
+    if (!Menus_CaptureFuncActive() &&
+        Rect_ContainsPoint(&textRect, static_cast<float>(DC->cursorx),
                            static_cast<float>(DC->cursory))) {
       Vector4Copy(item->window.foreColor, color);
       item->cursorPos = i + startPos;
