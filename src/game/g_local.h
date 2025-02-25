@@ -600,7 +600,7 @@ struct gentity_s {
 
   std::array<int, MAX_CLIENTS> targetDelayActivationTime;
 
-  // target_ft_setrules, just big enough to hold -1 - 100 or 'reset'
+  // target_ft_setrules
   char *ftSavelimit;
 };
 
