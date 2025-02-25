@@ -36,7 +36,7 @@ void TargetFtSetRules::spawn(gentity_t *ent) {
 
   // this must be a string so we can support 'savelimit reset'
   G_SpawnString("savelimit", "", &s);
-  Q_strncpyz(ent->ftSavelimit, s, sizeof(ent->ftSavelimit));
+  ent->ftSavelimit = G_NewString(s);
 
   // this is a boolean but there's no G_SpawnBoolean so bleh
   ent->damage = KEY_NOT_SET;
@@ -50,7 +50,7 @@ void TargetFtSetRules::spawn(gentity_t *ent) {
   }
 
   G_SpawnString("leader_only_message", "", &s);
-  Q_strncpyz(ent->ftLeaderOnlyMsg, s, sizeof(ent->ftLeaderOnlyMsg));
+  ent->message = G_NewString(s);
 
   ent->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
     use(self, activator);
@@ -70,8 +70,8 @@ void TargetFtSetRules::use(const gentity_t *self, gentity_t *activator) {
   }
 
   if (self->spawnflags & LEADER_ONLY && !G_IsFireteamLeader(clientNum, &ft)) {
-    if (self->ftLeaderOnlyMsg[0] != '\0') {
-      std::string msg = self->ftLeaderOnlyMsg;
+    if (self->message[0] != '\0') {
+      std::string msg = self->message;
 
       // this will never be nullptr, otherwise we wouldn't have gotten this far
       const gentity_t *leader = getFireteamLeader(clientNum);

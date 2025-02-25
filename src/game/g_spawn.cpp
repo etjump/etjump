@@ -180,7 +180,7 @@ field_t fields[] = {
     {"savelimit", FOFS(ftSavelimit), F_LSTRING},
     {"noghost", FOFS(damage), F_INT},
     {"teamjumpmode", FOFS(health), F_INT},
-    {"leader_only_message", FOFS(ftLeaderOnlyMsg), F_LSTRING},
+    {"leader_only_message", FOFS(message), F_LSTRING},
 
     {nullptr}};
 
