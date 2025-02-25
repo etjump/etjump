@@ -1,3 +1,16 @@
+# ETJump 3.3.4
+
+* fixed demo subdirectories not loading on replays menu on Windows [#1602](https://github.com/etjump/etjump/pull/1602)
+* fixed nametag interpolation breaking non-ascii characters in the rest of the chat message [#1606](https://github.com/etjump/etjump/pull/1606)
+* several fixes to flamethrower [#1607](https://github.com/etjump/etjump/pull/1607)
+  * fixed not being able to set yourself on fire
+  * fixed visual bug with flamechunks interacting with nonsolid players
+  * fixed potential crash when a flamechunk spawned by `props_flamethrower` entity interacted with players/other entities
+* fixed chat replay storing interpolated names incorrectly if the name had an escape character [#1608](https://github.com/etjump/etjump/pull/1608)
+* fixed potential buffer overflow with `stylestring` key on `dlight` entities [1622](https://github.com/etjump/etjump/pull/1622)
+* fixed listbox & dropdown menus changing selected entry when dragging the scrollbar and moving cursor over the list [#1623](https://github.com/etjump/etjump/pull/1623)
+* fixed reveresed dropdown menus not displaying background [#1626](https://github.com/etjump/etjump/pull/1626)
+
 # ETJump 3.3.3
 
 * fixed a crash on UI keyhandling on 2.60b and ETL due to out of bounds array access in engine [#1601](https://github.com/etjump/etjump/pull/1601)
