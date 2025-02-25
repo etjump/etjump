@@ -6476,7 +6476,7 @@ void UI_FeederSelection(float feederID, int index) {
 }
 
 extern void Item_ListBox_MouseEnter(itemDef_t *item, float x, float y,
-                                    qboolean click);
+                                    bool click);
 qboolean UI_FeederSelectionClick(itemDef_t *item) {
   listBoxDef_t *listPtr = (listBoxDef_t *)item->typeData;
 
