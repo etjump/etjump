@@ -15,6 +15,12 @@ set(CMAKE_CXX_STANDARD 14)
 
 option(BUILD_TESTS "Enable tests building (ON by default)" ON)
 
+# provide individual options too in case a compiler only supports some sanitizers
+option(USE_SANITIZERS "Enable address, leak and undefined behavior sanitizers on supported compilers" OFF)
+option(USE_ASAN "Enable address sanitizer on supported compilers" OFF)
+option(USE_LSAN "Enable leak sanitizer on supported compilers" OFF)
+option(USE_UBSAN "Enable undefined behavior sanitizer on supported compilers" OFF)
+
 set(BUNDLED_TARGETS_FOLDER Bundled)
 set(PACKING_TARGETS_FOLDER Package)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -27,12 +33,27 @@ include(CompilerOptions)
 include(VersionDescription)
 include(SourceGroup)
 include(ParseChangelog)
+include(SetupSanitizers)
 
 get_version_description(GAME_VERSION)
 
 set(BASE_DIR "${CMAKE_PROJECT_NAME}")
 set(BASE_DIR_PATH "${CMAKE_BINARY_DIR}/${BASE_DIR}")
 file(MAKE_DIRECTORY "${BASE_DIR_PATH}")
+
+if (USE_SANITIZERS)
+	set(USE_ASAN ON CACHE BOOL "Enable address sanitizer" FORCE)
+
+	# don't enable these on MSVC as they are not supported
+	if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+		set(USE_LSAN ON CACHE BOOL "Enable leak sanitizer" FORCE)
+		set(USE_UBSAN ON CACHE BOOL "Enable undefined behavior sanitizer" FORCE)
+	endif ()
+endif ()
+
+if (USE_ASAN OR USE_LSAN OR USE_UBSAN)
+	setup_sanitizers()
+endif ()
 
 create_compiler_opts(cxx_compiler_opts WARN 3 DEFINE 
 	GAME_NAME="${CMAKE_PROJECT_NAME}" 
