@@ -103,6 +103,8 @@ This option gives best control over the solution and provides familiar usage exp
     ```
     * Replace the Visual Studio version with the version you have installed, use `cmake --help` or see [CMake documetation](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html#visual-studio-generators).
     * 64-bit architecture is also supported on Windows, and can be generated with `-A x64`. Note that ET 2.60b does not support 64-bit mods on Windows, and you need to debug and run the game with a 64-bit engine, such as [ET: Legacy](https://www.etlegacy.com/) or [ETe](https://github.com/etfdevs/ETe).
+    * CMake variable `ET_PATH` can be used to point CMake to your development installation - Visual Studio sets up debugging with some pre-defined parameters, and this path will be used as `fs_homepath` and the directory where the game is located.
+    * CMake variable `ET_EXE_NAME` can be used to set the engine that gets launched from `ET_PATH` to debug.
 
 2. Open up generated `sln` solution (located in `build` directory) in `Visual Studio`. 
 3. Use `Build` > `Build Solution` option to start compilation process.

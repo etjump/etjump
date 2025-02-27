@@ -21,10 +21,11 @@ option(USE_ASAN "Enable address sanitizer on supported compilers" OFF)
 option(USE_LSAN "Enable leak sanitizer on supported compilers" OFF)
 option(USE_UBSAN "Enable undefined behavior sanitizer on supported compilers" OFF)
 
-set(BUNDLED_TARGETS_FOLDER Bundled)
-set(PACKING_TARGETS_FOLDER Package)
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
+# provide options for Visual Studio to automatically setup debugger paths
+if (CMAKE_GENERATOR_NAME MATCHES "Visual Studio")
+	set(ET_PATH "" CACHE STRING "Path to ET installation used during development")
+	set(ET_EXE_NAME "" CACHE STRING "Name of the engine for launching the game (ET.exe, etl.exe, ETe.exe etc.)")
+endif ()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -95,6 +96,13 @@ target_link_libraries(libsqlite PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(fmt PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsqlite_modern_cpp INTERFACE cxx_compiler_opts_w0)
 
+# setup directories for IDEs that use them (Visual Studio, XCode...)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
+
+set(BUNDLED_TARGETS_FOLDER Bundled)
+set(PACKING_TARGETS_FOLDER Package)
+
 set_target_properties(gmock gmock_main gtest gtest_main libjson libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt
                       PROPERTIES FOLDER ${BUNDLED_TARGETS_FOLDER})
 
@@ -103,11 +111,13 @@ add_subdirectory(src/game)
 add_subdirectory(src/ui)
 add_subdirectory(assets)
 
-set_target_properties(mod_pk3 mod_release 
-                      PROPERTIES FOLDER ${PACKING_TARGETS_FOLDER})
+set_target_properties(mod_pk3 mod_release remove_old_pk3
+		PROPERTIES FOLDER ${PACKING_TARGETS_FOLDER})
 
 # set cgame as startup project in Visual Studio
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT cgame)
+if (CMAKE_GENERATOR MATCHES "Visual Studio")
+	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT cgame)
+endif()
 
 if (BUILD_TESTS)
 	message(STATUS "Enabling tests building -- done")

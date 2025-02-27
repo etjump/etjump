@@ -111,16 +111,37 @@ Or set up debugger (instructions are below) and run the game directly from `Visu
 
 ### Debugging
 
+The general path setup for debugging and developing should be following:
+
+* `fs_homepath` points to an ET installation directory, which contains the engine and `etmain` with the game assets (`pak0-2.pk3`, stock configs etc.)
+* `fs_basepath` is the current development directory (e.g. `build`). The mod binaries are compiled here into `etjump` directory, which mimics the path structure of an ET installation.
+* Working directory should be set to the same as `fs_basepath` (Visual Studio users can use the `$(SolutionDir)` macro for this).
+* The game is launched with `+set fs_basepath . +set fs_homepath <path\to\install\dir> +set fs_game etjump`. This launches the game executable from `fs_homepath`, which contains all the game assets, but loads the mod from `fs_basepath`, which contains our compiled mod binaries. Any files created during runtime by the game/mod will be created in `fs_homepath/etjump`. Additionally, any configs/custom maps you might want to use during development should be placed inside `fs_homepath`.
+
 #### sln based project
 
-* __Option 1.__  
-    Edit debugger settings and specify ET/ETLegacy executable and working directory manually.
-    1. Open up `cgame` project properties using context menu.
-    2. Select `Debugging` tab.
-    3. For `Command` field browse game executable (eg. `C:\Games\ETLegacy\etl.exe`).
-    4. For `Working Directory` field browse game installation directory (eg. `C:\Games\ETLegacy`).
-* __Option 2.__   
-    Set `ETROOT` environmental variable to point to ET/ETLegacy installation (eg. `C:\Games\ETLegacy`).
+##### Option 1 - setup debugger manually
+
+1. Right click `cgame` in Solution Explorer and select `Properties`.
+2. Select `Debugging` tab.
+3. For `Command` field browse game executable (this should be inside your desired `fs_homepath`).
+4. For `Working Directory` field, use the macro `$(SolutionDir)`.
+5. For `Command arguments`, make sure `fs_homepath` points to the correct directory, and define any other cvars you want to pass on init.
+
+##### Option 2 - automatic setup with CMake
+
+You can automatically configure the debugger to sensible defaults using CMake variables `ET_PATH` and `ET_EXE_NAME`.
+
+* `ET_PATH` will be used as `fs_homepath`, and is where `Command` field looks for the engine to run
+* `ET_EXE_NAME` is the executable being launched (ET.exe, etl.exe, ETe.exe etc.)
+
+**IMPORTANT!!!** - because Visual Studio builds the project in parallel, ensure `mod_pk3` target is re-built after the initial build of the project. Otherwise, the mod pk3 might be incomplete and the game might fail to load the mod.
+
+To ensure the mod pk3 is always up-to-date, you can add a post-build event to `cgame` which automates building the mod pk3 every time the project is built.
+
+1. Right click `cgame` in Solution Explorer and select `Properties`.
+2. Navigate to `Build Events` -> `Post-Build Events`.
+3. Set the `Command Line` field to `cd $(SolutionDir) && cmake --build . --target mod_pk3`.
 
 You can then press the green play button to launch the game in debugging mode.
 
