@@ -49,7 +49,8 @@ Note:
 
 ```sh
 # playtest the binaries using et or etl directly from the build directory
-$ etl +set fs_homepath . +set fs_game etjump
+# replace engine/paths to match your specific environment
+$ etl.x86_64 +set fs_basepath ~/dev/etjump/build +set fs_homepath ~/games/et-dev +set fs_game etjump
 ```
 
 ### Debugging
@@ -100,12 +101,11 @@ _TODO_
 
 ### Running
 
-You can test run binaries using terminal:
+You can test run the binaries using terminal directly:
 ```sh
-# playtest the binaries using ETLegacy directly from the build directory
-$ C:\\Games\\ETLegacy\\etl.exe +set fs_basepath C:\\Games\\ETLegacy\\ +set fs_homepath . +set fs_game etjump +set sv_pure 0
-# or for VET
-$  C:\\Games\\WolfET\\ET.exe +set fs_basepath . +set fs_homepath "C:\\[Games]\\ETMAP\\" +set fs_game etjump +set sv_pure 0
+# playtest the binaries directly from the build directory
+# replace engine/paths to match your specific environment
+$ C:\Games\ETDev\ET.exe +set fs_basepath C:\Dev\etjump\build +set fs_homepath C:\Games\ETDev +set fs_game etjump
 ```
 Or set up debugger (instructions are below) and run the game directly from `Visual Studio`.
 
