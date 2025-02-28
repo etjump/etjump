@@ -180,18 +180,11 @@ void UI_LoadArenas() {
       Q_strcat(filename, sizeof(filename), file.c_str());
 
       handle = trap_PC_LoadSource(filename);
-
-      if (!handle) {
-        Com_LocalPrintf(va(S_COLOR_RED "file not found: %s\n", filename));
-      } else {
-        UI_LoadArenasFromFile(handle, filename);
-      }
+      UI_LoadArenasFromFile(handle, filename);
     }
   } else {
     for (const auto &map : uiInfo.serverMaplist) {
-      std::string arenaFile = map;
-      arenaFile.insert(0, "scripts/");
-      arenaFile.append(".arena");
+      const std::string arenaFile = "scripts/" + map + ".arena";
       Q_strncpyz(filename, arenaFile.c_str(), sizeof(filename));
 
       handle = trap_PC_LoadSource(filename);
