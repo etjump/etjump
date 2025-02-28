@@ -51,8 +51,8 @@ class DemoCompatibility {
 public:
   struct CompatibilityFlags {
     bool serverSideCoronas = false;
+    bool svFpsUnavailable = false;
     bool svFpsInSysteminfo = false;
-    bool svFpsInCgs = false;
     bool adjustEntityTypes = false;
     bool noSavePosTimerunInfo = false;
     bool adjustEvTokens = false;

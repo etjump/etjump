@@ -128,18 +128,14 @@ void DemoCompatibility::setupCompatibilityFlags() {
   if (!isCompatible({3, 2, 0})) {
     flags.serverSideCoronas = true;
     compatibilityStrings.emplace_back("- Using fully server-side coronas");
-  }
 
-  if (isCompatible({3, 2, 0})) {
+    flags.svFpsUnavailable = true;
+    compatibilityStrings.emplace_back(
+        "- Unable to determine sv_fps, assuming default");
+  } else if (!isCompatible({3, 3, 0})) {
     flags.svFpsInSysteminfo = true;
     compatibilityStrings.emplace_back(
-        "- sv_fps can be read from systeminfo string");
-  }
-
-  if (isCompatible({3, 3, 0})) {
-    flags.svFpsInCgs = true;
-    compatibilityStrings.emplace_back(
-        "- sv_fps can be read from client game static struct");
+        "- Using systeminfo string to determine sv_fps");
   }
 
   if (!isCompatible({3, 3, 0})) {
