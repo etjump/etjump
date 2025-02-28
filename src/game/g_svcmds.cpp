@@ -424,12 +424,10 @@ gclient_t *ClientForString(const char *s) {
 
 // fretn
 
-static qboolean G_Is_SV_Running(void) {
-
-  char cvar[MAX_TOKEN_CHARS];
-
+static bool G_Is_SV_Running() {
+  char cvar[MAX_CVAR_VALUE_STRING];
   trap_Cvar_VariableStringBuffer("sv_running", cvar, sizeof(cvar));
-  return (qboolean)Q_atoi(cvar);
+  return Q_atoi(cvar);
 }
 
 // -fretn
