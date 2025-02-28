@@ -711,10 +711,9 @@ SetMoverState
 void SetMoverState(gentity_t *ent, moverState_t moverState, int time) {
   vec3_t delta;
   float f;
-  qboolean kicked = qfalse, soft = qfalse;
 
-  kicked = (qboolean)(ent->flags & FL_KICKACTIVATE);
-  soft = (qboolean)(ent->flags & FL_SOFTACTIVATE); //----(SA)	added
+  const bool kicked = ent->flags & FL_KICKACTIVATE;
+  const bool soft = ent->flags & FL_SOFTACTIVATE;
 
   ent->moverState = moverState;
   ent->s.pos.trTime = time;
@@ -2126,9 +2125,7 @@ func_invisible_user's using the regular rules of doors.
 ==============
 */
 void G_TryDoor(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-  qboolean walking = qfalse;
-
-  walking = (qboolean)(ent->flags & FL_SOFTACTIVATE);
+  const bool walking = ent->flags & FL_SOFTACTIVATE;
 
   if ((ent->s.apos.trType == TR_STATIONARY &&
        ent->s.pos.trType == TR_STATIONARY)) {

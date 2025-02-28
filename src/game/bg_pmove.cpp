@@ -3148,7 +3148,6 @@ PM_CheckforReload
 */
 void PM_CheckForReload(int weapon) {
   qboolean autoreload;
-  qboolean reloadRequested;
   int clipWeap, ammoWeap;
 
   if (pm->noWeapClips) // no need to reload
@@ -3164,7 +3163,7 @@ void PM_CheckForReload(int weapon) {
   }
 
   // user is forcing a reload (manual reload)
-  reloadRequested = (qboolean)(pm->cmd.wbuttons & WBUTTON_RELOAD);
+  const bool reloadRequested = pm->cmd.wbuttons & WBUTTON_RELOAD;
 
   switch (pm->ps->weaponstate) {
     case WEAPON_RAISING:
