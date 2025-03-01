@@ -85,6 +85,7 @@ add_library(qagame MODULE
 	"etj_synchronization_context.cpp"
 	"etj_string_utilities.cpp"
 	"etj_target_init.cpp"
+	"etj_target_spawn_relay.cpp"
 	"etj_time_utilities.cpp"
 	"etj_timerun_repository.cpp"
 	"etj_timerun_v2.cpp"
