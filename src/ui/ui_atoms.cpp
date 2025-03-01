@@ -57,12 +57,7 @@ void QDECL Com_Printf(const char *msg, ...) {
 
 // prints only in localhost
 void QDECL Com_LocalPrintf(const char *msg, ...) {
-  uiClientState_t cstate;
-  trap_GetClientState(&cstate);
-
-  // this isn't 100% reliable, but it's the best that we can do
-  if (Q_strncmp(cstate.servername, "localhost",
-                static_cast<int>(strlen("localhost")))) {
+  if (trap_Cvar_VariableValue("sv_running") == 0) {
     return;
   }
 
