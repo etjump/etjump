@@ -696,14 +696,46 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
 
                 if (isOnVisiblePage || isOwnRecord) {
                   auto ownRecord = r->userId == params.userId;
-                  auto rankString = rankToString(rank);
+
+                  std::string rankString;
+
+                  // if the current record has the same time as previous record,
+                  // don't display rank string at all
+                  if (rank != 1 && r->time == std::prev(r)->time) {
+                    // ... unless this is our record,
+                    // and it's not visible on the current page, in which case
+                    // figure out the next faster time to get actual rank
+                    if (isOwnRecord && !isOnVisiblePage) {
+                      int tmpRank = rank;
+                      auto it = r;
+
+                      while (tmpRank > 1) {
+                        if (ownTime > std::prev(it)->time) {
+                          break;
+                        }
+
+                        --it;
+                        --tmpRank;
+                      }
+
+                      rankString = rankToString(tmpRank);
+                    } else {
+                      rankString = "";
+                    }
+                  } else {
+                    rankString = rankToString(rank);
+                  }
+
                   auto millisString = millisToString(r->time);
+
                   std::string diffString;
+
                   if (ownRecord || rank == 1 && ownTime == r->time) {
                     diffString = "";
                   } else {
                     diffString = diffToString(ownTime, r->time);
                   }
+
                   auto playerNameString =
                       ownRecord ? r->playerName + " ^g(You)" : r->playerName;
 
