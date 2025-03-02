@@ -135,4 +135,28 @@ void EntityUtilities::setCursorhintFromString(int &value,
   }
 }
 
+void EntityUtilities::centerBrushOrigin(gentity_t *ent) {
+  // this should not be called if the entity is linked
+  assert(!ent->r.linked);
+
+  // no need to do anything if origin is already centered
+  if (VectorCompareAbs(ent->r.mins, ent->r.maxs)) {
+    return;
+  }
+
+  vec3_t brushExtents{};
+  VectorSubtract(ent->r.maxs, ent->r.mins, brushExtents);
+  VectorScale(brushExtents, 0.5f, brushExtents);
+
+  vec3_t originOffset;
+  VectorAdd(ent->r.mins, brushExtents, originOffset);
+
+  for (int i = 0; i < 3; i++) {
+    ent->r.currentOrigin[i] += originOffset[i];
+    ent->r.mins[i] = -brushExtents[i];
+    ent->r.maxs[i] = brushExtents[i];
+  }
+
+  VectorCopy(ent->r.currentOrigin, ent->s.origin);
+}
 } // namespace ETJump

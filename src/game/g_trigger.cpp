@@ -1,3 +1,4 @@
+#include "etj_entity_utilities.h"
 #include "g_local.h"
 #include "etj_save_system.h"
 #include "etj_entity_utilities_shared.h"
@@ -193,6 +194,8 @@ void SP_trigger_multiple_ext(gentity_t *ent) {
 #ifdef VISIBLE_TRIGGERS
   ent->r.svFlags &= ~SVF_NOCLIENT;
 #endif // VISIBLE_TRIGGERS
+
+  ETJump::EntityUtilities::centerBrushOrigin(ent);
 
   trap_LinkEntity(ent);
 }

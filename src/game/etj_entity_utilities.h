@@ -41,5 +41,10 @@ public:
   // sets 'value' to corresponding cursorhint from 'hint'
   // if 'hint' isn't found in hintStrings, no modification is performed
   static void setCursorhintFromString(int &value, const std::string &hint);
+
+  // fixes brush origin to be in the center of the brush,
+  // and adjusts mins/maxs accordingly
+  // this must be called before linking, so we link with correct values!
+  static void centerBrushOrigin(gentity_t *ent);
 };
 } // namespace ETJump

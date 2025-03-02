@@ -1126,6 +1126,16 @@ int VectorCompare(const vec3_t v1, const vec3_t v2) {
   return 1;
 }
 
+bool VectorCompareAbs(const vec3_t v1, const vec3_t v2) {
+  if (std::abs(v1[0]) != std::abs(v2[0]) ||
+      std::abs(v1[1]) != std::abs(v2[1]) ||
+      std::abs(v1[2]) != std::abs(v2[2])) {
+    return false;
+  }
+
+  return true;
+}
+
 vec_t VectorNormalize(vec3_t v) {
   float length, ilength;
 

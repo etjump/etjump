@@ -32,6 +32,7 @@
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_timerun_v2.h"
+#include "etj_entity_utilities.h"
 
 namespace ETJump {
 std::map<std::string, int> TimerunEntity::runIndices;
@@ -262,6 +263,7 @@ void TriggerStartTimerExt::spawn(gentity_t *self) {
 
   self->s.eType = ET_TRIGGER_MULTIPLE;
   InitTrigger(self);
+  EntityUtilities::centerBrushOrigin(self);
   trap_LinkEntity(self);
 }
 
@@ -343,6 +345,7 @@ void TriggerStopTimerExt::spawn(gentity_t *self) {
 
   self->s.eType = ET_TRIGGER_MULTIPLE;
   InitTrigger(self);
+  EntityUtilities::centerBrushOrigin(self);
   trap_LinkEntity(self);
 }
 
@@ -413,6 +416,7 @@ void TriggerCheckpointExt::spawn(gentity_t *self) {
   };
   self->s.eType = ET_TRIGGER_MULTIPLE;
   InitTrigger(self);
+  EntityUtilities::centerBrushOrigin(self);
   trap_LinkEntity(self);
 }
 

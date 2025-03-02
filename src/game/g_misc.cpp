@@ -3064,6 +3064,8 @@ void SP_func_fakebrush(gentity_t *ent) {
     G_Error("'func_fakebrush' does not have maxs\n");
   }
 
+  ETJump::EntityUtilities::centerBrushOrigin(ent);
+
   ent->clipmask = ent->r.contents;
 
   G_SetOrigin(ent, ent->s.origin);
