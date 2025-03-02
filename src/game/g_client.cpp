@@ -2344,14 +2344,14 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
                   }
                   //
                   if( !spawnPoint ) {*/
-        auto spawnObjective = 0;
-        if (client->sess.spawnObjectiveIndex > 0) {
-          spawnObjective = client->sess.spawnObjectiveIndex;
-        } else if (client->sess.autoSpawnObjectiveIndex > 0) {
-          spawnObjective = client->sess.autoSpawnObjectiveIndex;
-        }
-        spawnPoint = SelectCTFSpawnPoint(client->sess.sessionTeam, spawn_origin,
-                                         spawn_angles, spawnObjective);
+      auto spawnObjective = 0;
+      if (client->sess.spawnObjectiveIndex > 0) {
+        spawnObjective = client->sess.spawnObjectiveIndex;
+      } else if (client->sess.autoSpawnObjectiveIndex > 0) {
+        spawnObjective = client->sess.autoSpawnObjectiveIndex;
+      }
+      spawnPoint = SelectCTFSpawnPoint(client->sess.sessionTeam, spawn_origin,
+                                       spawn_angles, spawnObjective);
       //			}
     }
   }
@@ -2610,6 +2610,11 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   if (G_IsOnFireteam(client->ps.clientNum, &ft) && ft->noGhost) {
     client->ftNoGhostThisLife = true;
   }
+
+  // stop burn from flamethrower
+  // in VET, this is not an issue because spawnshield blocks the damage,
+  // but since we don't have it, burn damage would carry over to respawn
+  ent->s.onFireEnd = level.time - 1;
 
   // run a client frame to drop exactly to the floor,
   // initialize animations and other things
