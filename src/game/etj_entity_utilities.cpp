@@ -145,9 +145,9 @@ void EntityUtilities::centerBrushOrigin(gentity_t *ent) {
   }
 
   // store these so we can print them out later
-  vec3_t oldOrigin;
-  vec3_t oldMins;
-  vec3_t oldMaxs;
+  vec3_t oldOrigin{};
+  vec3_t oldMins{};
+  vec3_t oldMaxs{};
 
   VectorCopy(ent->r.currentOrigin, oldOrigin);
   VectorCopy(ent->r.mins, oldMins);
@@ -157,7 +157,7 @@ void EntityUtilities::centerBrushOrigin(gentity_t *ent) {
   VectorSubtract(ent->r.maxs, ent->r.mins, brushExtents);
   VectorScale(brushExtents, 0.5f, brushExtents);
 
-  vec3_t originOffset;
+  vec3_t originOffset{};
   VectorAdd(ent->r.mins, brushExtents, originOffset);
 
   for (int i = 0; i < 3; i++) {
