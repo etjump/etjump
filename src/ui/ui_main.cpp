@@ -7383,6 +7383,11 @@ void _UI_KeyEvent(int key, qboolean down) {
       bypassKeyClear = qfalse;
 
       trap_Cvar_Set("cl_paused", "0");
+
+      // send this here rather than in 'onClose' script event in the menu,
+      // otherwise there's a small timing error when closing the chat window
+      // where the cgame boolean is false, but keycatcher hasn't changed yet
+      trap_Cmd_ExecuteText(EXEC_APPEND, "uiChatMenuOpen 0");
     }
   }
 }
