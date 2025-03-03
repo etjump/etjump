@@ -144,6 +144,15 @@ void EntityUtilities::centerBrushOrigin(gentity_t *ent) {
     return;
   }
 
+  // store these so we can print them out later
+  vec3_t oldOrigin;
+  vec3_t oldMins;
+  vec3_t oldMaxs;
+
+  VectorCopy(ent->r.currentOrigin, oldOrigin);
+  VectorCopy(ent->r.mins, oldMins);
+  VectorCopy(ent->r.maxs, oldMaxs);
+
   vec3_t brushExtents{};
   VectorSubtract(ent->r.maxs, ent->r.mins, brushExtents);
   VectorScale(brushExtents, 0.5f, brushExtents);
@@ -158,5 +167,14 @@ void EntityUtilities::centerBrushOrigin(gentity_t *ent) {
   }
 
   VectorCopy(ent->r.currentOrigin, ent->s.origin);
+
+  // print the adjusted values if debugging script
+  if (g_scriptDebug.integer) {
+    G_Printf("Automatically adjusted values for entity %i (^3%s^7)\n- origin: "
+             "%s -> ^3%s\n^7- mins:   %s -> ^3%s\n^7- maxs:   %s -> ^3%s\n",
+             ent->s.number, ent->classname, vtos(oldOrigin),
+             vtos(ent->r.currentOrigin), vtos(oldMins), vtos(ent->r.mins),
+             vtos(oldMaxs), vtos(ent->r.maxs));
+  }
 }
 } // namespace ETJump
