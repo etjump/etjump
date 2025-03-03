@@ -27,7 +27,8 @@ menuDef
 	onOpen
 	{
 		closeAllOtherMenus ;
-		setEditFocus "inChatMessageText"	// note this depends on the macro + item name
+		setEditFocus "inChatMessageText" ;	// note this depends on the macro + item name
+		exec "uiChatMenuOpen 1"
 	}
 	
 	onESC
