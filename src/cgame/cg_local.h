@@ -911,6 +911,9 @@ typedef struct {
   int centerPrintLines;
   int centerPrintPriority; // NERVE - SMF
 
+  char lastLoggedCenterPrint[1024];
+  int lastCenterPrintLogTime;
+
   // fade in/out
   int fadeTime;
   float fadeRate;
@@ -2792,6 +2795,8 @@ extern vmCvar_t etj_recordingStatusY;
 extern vmCvar_t etj_smoothAngles;
 extern vmCvar_t etj_autoSprint;
 
+extern vmCvar_t etj_logCenterPrint;
+
 //
 // cg_main.c
 //
@@ -2970,9 +2975,9 @@ void CG_StatsDebugAddText(const char *text);
 
 void CG_AddLagometerFrameInfo(void);
 void CG_AddLagometerSnapshotInfo(snapshot_t *snap);
-void CG_CenterPrint(const char *str, int y, int charWidth);
-void CG_PriorityCenterPrint(const char *str, int y, int charWidth,
-                            int priority);              // NERVE - SMF
+void CG_CenterPrint(const char *str, int y, int charWidth, bool log = true);
+void CG_PriorityCenterPrint(const char *str, int y, int charWidth, int priority,
+                            bool log = true);           // NERVE - SMF
 void CG_ObjectivePrint(const char *str, int charWidth); // NERVE - SMF
 void CG_DrawActive(stereoFrame_t stereoView);
 void CG_CheckForCursorHints(void);

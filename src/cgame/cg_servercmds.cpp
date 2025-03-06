@@ -2854,7 +2854,8 @@ static void CG_ServerCommand(void) {
       saveMsg += '\n' + remainingSavesStr;
     }
 
-    CPri(saveMsg.c_str());
+    CG_CenterPrint(CG_LocalizeServerCommand(saveMsg.c_str()),
+                   SCREEN_HEIGHT - SCREEN_HEIGHT * 0.2, SMALLCHAR_WIDTH, false);
     return;
   }
 
