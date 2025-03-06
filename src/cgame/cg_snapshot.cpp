@@ -183,6 +183,10 @@ void CG_SetInitialSnapshot(snapshot_t *snap) {
     if (demo_infoWindow.integer > 0) {
       CG_ShowHelp_On(&cg.demohelpWindow);
     }
+
+    if (etj_onDemoPlaybackStart.string[0] != '\0') {
+      trap_SendConsoleCommand(etj_onDemoPlaybackStart.string);
+    }
   }
   // OSP
 
