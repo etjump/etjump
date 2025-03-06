@@ -84,6 +84,7 @@ add_library(qagame MODULE
 	"etj_syscall_ext_shared.cpp"
 	"etj_synchronization_context.cpp"
 	"etj_string_utilities.cpp"
+	"etj_target_ft_setrules.cpp"
 	"etj_target_init.cpp"
 	"etj_time_utilities.cpp"
 	"etj_timerun_repository.cpp"
