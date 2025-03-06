@@ -549,6 +549,14 @@ void respawn(gentity_t *ent) {
   ent->client->ps.pm_flags &= ~PMF_LIMBO; // JPW NERVE turns off limbo
 
   ClientSpawn(ent, qfalse);
+
+  const team_t team = ent->client->sess.sessionTeam;
+
+  if (team == TEAM_AXIS && level.spawnRelayEntities.axisRelay) {
+    G_UseEntity(level.spawnRelayEntities.axisRelay, nullptr, ent);
+  } else if (team == TEAM_ALLIES && level.spawnRelayEntities.alliesRelay) {
+    G_UseEntity(level.spawnRelayEntities.alliesRelay, nullptr, ent);
+  }
 }
 
 // NERVE - SMF - merge from team arena
@@ -2285,6 +2293,12 @@ ClientSpawn
 Called every time a client is placed fresh in the world:
 after the first ClientBegin, and after each respawn
 Initializes all non-persistant parts of playerState
+
+Note that this gets called twice if joining a team FROM spectators - once via
+'team' command, once via 'SpectatorEndFrame'. If you must perform actions that
+are executed once per respawn, you should only perform actions meant for
+spectators here. For actions that are meant to be executed while on a team, use
+the 'respawn' function instead.
 ============
 */
 void ClientSpawn(gentity_t *ent, qboolean revived) {
@@ -2647,6 +2661,13 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   if (!revived && client->sess.sessionTeam != TEAM_SPECTATOR) {
     // RF, call entity scripting event
     G_Script_ScriptEvent(ent, "playerstart", "");
+  }
+
+  // fire off spawn relay for spectators here
+  // axis/allies are handled in 'respawn', see the comment above the function
+  if (!revived && client->sess.sessionTeam == TEAM_SPECTATOR &&
+      level.spawnRelayEntities.spectatorRelay) {
+    G_UseEntity(level.spawnRelayEntities.spectatorRelay, nullptr, ent);
   }
 
   // FIXME: doesn't load pos????
