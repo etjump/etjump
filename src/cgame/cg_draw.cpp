@@ -2555,7 +2555,7 @@ static void CG_DrawSpectatorMessage(void) {
     return;
   }
 
-  if (trap_Key_GetCatcher() & KEYCATCH_UI) {
+  if (trap_Key_GetCatcher() & KEYCATCH_UI && !cg.chatMenuOpen) {
     return;
   }
 
@@ -2641,27 +2641,29 @@ static void CG_DrawLimboMessage(void) {
     return;
   }
 
-  if (trap_Key_GetCatcher() & KEYCATCH_UI) {
+  if (trap_Key_GetCatcher() & KEYCATCH_UI && !cg.chatMenuOpen) {
     return;
   }
 
-  if (cg_descriptiveText.integer) {
-    str = "You are wounded and waiting for a medic.";
-    ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
-                       str.c_str(), 0, 0);
-    y += 18;
-
-    str = "Press JUMP to go into reinforcement queue.";
-    ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
-                       str.c_str(), 0, 0);
-    y += 18;
-
-    // JPW NERVE
-    str = "Reinforcements deploy in " +
-          ETJump::getSecondsString(CG_CalculateReinfTime(qfalse)) + ".";
-    ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
-                       str.c_str(), 0, 0);
+  if (!cg_descriptiveText.integer) {
+    return;
   }
+
+  str = "You are wounded and waiting for a medic.";
+  ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
+                     str.c_str(), 0, 0);
+  y += 18;
+
+  str = "Press JUMP to go into reinforcement queue.";
+  ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
+                     str.c_str(), 0, 0);
+  y += 18;
+
+  // JPW NERVE
+  str = "Reinforcements deploy in " +
+        ETJump::getSecondsString(CG_CalculateReinfTime(qfalse)) + ".";
+  ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
+                     str.c_str(), 0, 0);
 }
 // -NERVE - SMF
 
@@ -2732,28 +2734,28 @@ static void CG_DrawJumpDelay(void) {
 CG_DrawFollow
 =================
 */
-static qboolean CG_DrawFollow(void) {
+static void CG_DrawFollow() {
   // MV following info for mainview
   if (CG_ViewingDraw()) {
-    return (qtrue);
+    return;
   }
 
   if (!(cg.snap->ps.pm_flags & PMF_FOLLOW)) {
-    return (qfalse);
+    return;
   }
 
-  if (trap_Key_GetCatcher() & KEYCATCH_UI) {
-    return qfalse;
+  if (trap_Key_GetCatcher() & KEYCATCH_UI && !cg.chatMenuOpen) {
+    return;
   }
 
-  if (cg.snap->ps.clientNum != cg.clientNum) {
-    std::string str = ETJump::stringFormat(
-        "^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name);
-    ETJump::DrawString(INFOTEXT_STARTX, 118 + 12, 0.23f, 0.25f, colorWhite,
-                       qfalse, str.c_str(), 0, ITEM_TEXTSTYLE_SHADOWED);
+  if (cg.snap->ps.clientNum == cg.clientNum) {
+    return;
   }
 
-  return (qtrue);
+  const std::string str = ETJump::stringFormat(
+      "^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name);
+  ETJump::DrawString(INFOTEXT_STARTX, 118 + 12, 0.23f, 0.25f, colorWhite,
+                     qfalse, str.c_str(), 0, ITEM_TEXTSTYLE_SHADOWED);
 }
 
 /*
@@ -3374,7 +3376,9 @@ void CG_DrawCompassIcon(float x, float y, float w, float h, vec3_t origin,
   x += w;
   y += h;
 
-  { w = sqrt((w * w) + (h * h)) / 3.f * 2.f * 0.9f; }
+  {
+    w = sqrt((w * w) + (h * h)) / 3.f * 2.f * 0.9f;
+  }
 
   x = x + (cos(angle) * w);
   y = y + (sin(angle) * w);

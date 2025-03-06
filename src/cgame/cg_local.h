@@ -1288,6 +1288,8 @@ typedef struct {
   bool showRtvMenu;
 
   bool jumpDelayBug;
+
+  bool chatMenuOpen;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES 21
