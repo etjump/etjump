@@ -13,6 +13,7 @@ USER INTERFACE MAIN
 
 #include "ui_local.h"
 #include "etj_colorpicker.h"
+#include "etj_demo_queue.h"
 
 #include "../cgame/etj_cvar_parser.h"
 #include "../game/etj_string_utilities.h"
@@ -814,6 +815,7 @@ void UI_ShowPostGame(qboolean newHigh) {
 namespace ETJump {
 std::unique_ptr<ColorPicker> colorPicker;
 std::unique_ptr<SyscallExt> syscallExt;
+std::unique_ptr<DemoQueue> demoQueue;
 
 static void initColorPicker() {
   colorPicker = std::make_unique<ColorPicker>();
@@ -989,6 +991,10 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
 
   return fmtLines;
 }
+
+static void initDemoQueueHandler() {
+  demoQueue = std::make_unique<DemoQueue>();
+}
 } // namespace ETJump
 
 /*
@@ -1081,8 +1087,14 @@ _UI_Shutdown
 void _UI_Shutdown(void) {
   trap_LAN_SaveCachedServers();
 
+  if (etj_demoQueueCurrent.string[0] != '\0' && uiInfo.demoPlayback &&
+      !ETJump::demoQueue->manualSkip) {
+    trap_Cmd_ExecuteText(EXEC_APPEND, "demoQueue next\n");
+  }
+
   ETJump::colorPicker = nullptr;
   ETJump::syscallExt = nullptr;
+  ETJump::demoQueue = nullptr;
 
   Shutdown_Display();
 }
@@ -7099,6 +7111,11 @@ static void detectClientEngine(int legacyClient, int clientVersion) {
 }
 } // namespace ETJump
 
+static void UI_RegisterConsoleCommands() {
+  trap_AddCommand("ui_report");
+  trap_AddCommand("demoQueue");
+}
+
 /*
 =================
 UI_Init
@@ -7226,6 +7243,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
   ETJump::initColorPicker();
   ETJump::initExtensionSystem();
   ETJump::parseChangelogs();
+  ETJump::initDemoQueueHandler();
 
   Init_Display(&uiInfo.uiDC);
 
@@ -7260,6 +7278,8 @@ void _UI_Init(int legacyClient, int clientVersion) {
   uiInfo.aliasCount = 0;
 
   uiInfo.numCustomvotes = -1;
+
+  uiInfo.demoPlayback = false;
 
   UI_LoadPanel_Init();
 
@@ -7309,7 +7329,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
              sizeof(translated_yes));
   Q_strncpyz(translated_no, DC->translateString("NO"), sizeof(translated_no));
 
-  trap_AddCommand("ui_report");
+  UI_RegisterConsoleCommands();
 
   Com_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                       " " S_COLOR_LTGREY GAME_BINARY_NAME
@@ -7587,259 +7607,205 @@ void toggleSettingsMenu() {
 
 } // namespace ETJump
 
-void _UI_SetActiveMenu(uiMenuCommand_t menu) {
-  char buf[4096]; // com_errorMessage can go up to 4096
-  char *missing_files;
-
+void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
   // this should be the ONLY way the menu system is brought up
-  // enusure minumum menu data is cached
-  if (Menu_Count() > 0) {
-    vec3_t v;
-    v[0] = v[1] = v[2] = 0;
+  // ensure minimum menu data is cached
+  if (Menu_Count() <= 0) {
+    return;
+  }
 
-    menutype = menu; //----(SA)	added
+  char buf[4096];
+  vec3_t v;
+  v[0] = v[1] = v[2] = 0;
 
-    switch (menu) {
-      case UIMENU_NONE:
-        trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_UI);
-        trap_Key_ClearStates();
-        trap_Cvar_Set("cl_paused", "0");
-        Menus_CloseAll();
+  menutype = menu; //----(SA)	added
 
-        return;
-      case UIMENU_MAIN:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        // Menus_ActivateByName( "background_1",
-        // qtrue );
-        Menus_ActivateByName("backgroundmusic",
-                             qtrue); // Arnout: not nice, but
-                                     // best way to do it -
-                                     // putting the music in it's
-                                     // own menudef makes sure it
-                                     // doesn't get restarted
-                                     // every time you reach the
-                                     // main menu
-        if (!cl_profile.string[0]) {
-          // Menus_ActivateByName(
-          // "profilelogin", qtrue );
-          //  FIXME: initial profile
-          //  popup FIXED: handled in
-          //  opener now
-          Menus_ActivateByName("main_opener", qtrue);
+  switch (menu) {
+    case UIMENU_NONE:
+      trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_UI);
+      trap_Key_ClearStates();
+      trap_Cvar_Set("cl_paused", "0");
+      Menus_CloseAll();
+
+      return;
+    case UIMENU_MAIN:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      // Arnout: not nice, but best way to do it - putting the music in its
+      // own menudef makes sure it doesn't get restarted
+      // every time you reach the main menu
+      Menus_ActivateByName("backgroundmusic", qtrue);
+      Menus_ActivateByName("main_opener", qtrue);
+
+      trap_Cvar_VariableStringBuffer("com_errorMessage", buf, sizeof(buf));
+
+      // JPW NERVE stricmp() is silly but works, take a look at error.menu to
+      // see why.  I think this is bustified in q3ta
+      // NOTE TTimo - I'm not sure Q_stricmp is useful to anything anymore
+      // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=507
+      // TTimo - improved and tweaked that area a whole bunch
+      if ((*buf) && (Q_stricmp(buf, ";"))) {
+        trap_Cvar_Set("ui_connecting", "0");
+
+        if (!Q_stricmpn(buf, "Invalid password", 16)) {
+          // NERVE - SMF
+          trap_Cvar_Set("com_errorMessage", trap_TranslateString(buf));
+          Menus_ActivateByName("popupPassword", qtrue);
+
+        } else if (strlen(buf) > 5 && !Q_stricmpn(buf, "ET://", 5)) { // fretn
+          // legal redirects contain source ip in this variable
+          if (!UI_Cvar_VariableString("com_errorDiagnoseIP")[0]) {
+            ETJump::handleIllegalRedirect();
+            return;
+          }
+
+          Q_strncpyz(buf, buf + 5, sizeof(buf));
+          Com_Printf("Server is full, redirect to: %s\n", buf);
+          switch (ui_autoredirect.integer) {
+            // auto-redirect
+            case 1:
+              trap_Cvar_Set("com_errorMessage", "");
+              trap_Cmd_ExecuteText(EXEC_APPEND, va("connect %s\n", buf));
+              break;
+            // prompt (default)
+            default:
+              trap_Cvar_Set("com_errorMessage", buf);
+              Menus_ActivateByName("popupServerRedirect", qtrue);
+              break;
+          }
         } else {
-          Menus_ActivateByName("main_opener", qtrue);
-        }
+          qboolean pb_enable = qfalse;
 
-        trap_Cvar_VariableStringBuffer("com_errorMessage", buf, sizeof(buf));
+          if (strstr(buf, "must be Enabled")) {
+            pb_enable = qtrue;
+          }
 
-        // JPW NERVE stricmp() is silly but
-        // works, take a look at error.menu to
-        // see why.  I think this is bustified
-        // in q3ta NOTE TTimo - I'm not sure
-        // Q_stricmp is useful to anything
-        // anymore
-        // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=507
-        // TTimo - improved and tweaked that
-        // area a whole bunch
-        if ((*buf) && (Q_stricmp(buf, ";"))) {
-          trap_Cvar_Set("ui_connecting", "0");
+          // NERVE - SMF
+          trap_Cvar_Set("com_errorMessage", trap_TranslateString(buf));
 
-          if (!Q_stricmpn(buf, "Invalid password", 16)) {
-            trap_Cvar_Set("com_"
-                          "errorMessage",
-                          trap_TranslateString(buf)); // NERVE
-                                                      // -
-                                                      // SMF
-            Menus_ActivateByName("popupPassword", qtrue);
-          } else if (strlen(buf) > 5 && !Q_stricmpn(buf, "ET://",
-                                                    5)) // fretn
-          {
-            // legal redirects
-            // contain source ip
-            // in this variable
-            if (!UI_Cvar_VariableString("com_"
-                                        "errorDiagn"
-                                        "oseIP")[0]) {
-              ETJump::handleIllegalRedirect();
-              return;
-            }
+          // hacky, wanted to have the printout of missing files
+          // text printing limitations force us to keep it all
+          // in a single message
+          // NOTE: this works thanks to flip flop in UI_Cvar_VariableString
+          if (UI_Cvar_VariableString("com_errorDiagnoseIP")[0]) {
+            char *missing_files = UI_Cvar_VariableString("com_missingFiles");
 
-            Q_strncpyz(buf, buf + 5, sizeof(buf));
-            Com_Printf("Server is "
-                       "full, "
-                       "redirect to: "
-                       "%s\n",
-                       buf);
-            switch (ui_autoredirect.integer) {
-              // auto-redirect
-              case 1:
-                trap_Cvar_Set("com_errorMessage", "");
-                trap_Cmd_ExecuteText(EXEC_APPEND, va("connect %s\n", buf));
-                break;
-              // prompt
-              // (default)
-              default:
-                trap_Cvar_Set("com_errorMessage", buf);
-                Menus_ActivateByName("popupServerRedirect", qtrue);
-                break;
-            }
-          } else {
-            qboolean pb_enable = qfalse;
-
-            if (strstr(buf, "must be "
-                            "Enable"
-                            "d")) {
-              pb_enable = qtrue;
-            }
-
-            trap_Cvar_Set("com_"
-                          "errorMessage",
-                          trap_TranslateString(buf)); // NERVE
-                                                      // -
-                                                      // SMF
-            // hacky, wanted to
-            // have the printout
-            // of missing files
-            // text printing
-            // limitations force
-            // us to keep it all
-            // in a single
-            // message NOTE:
-            // this works thanks
-            // to flip flop in
-            // UI_Cvar_VariableString
-            if (UI_Cvar_VariableString("com_"
-                                       "errorDiagn"
-                                       "oseIP")[0]) {
-              missing_files = UI_Cvar_VariableString("com_"
-                                                     "miss"
-                                                     "ingF"
-                                                     "ile"
-                                                     "s");
-              if (missing_files[0]) {
-                trap_Cvar_Set("com_errorMessage",
-                              va("%s\n\n%s\n%s",
-                                 UI_Cvar_VariableString("com_errorMessage"),
-                                 trap_TranslateString(MISSING_FILES_MSG),
-                                 missing_files));
-              }
-            }
-            if (pb_enable) {
-              Menus_ActivateByName("popu"
-                                   "pErr"
-                                   "or_"
-                                   "pben"
-                                   "abl"
-                                   "e",
-                                   qtrue);
-            } else {
-              Menus_ActivateByName("popu"
-                                   "pErr"
-                                   "or",
-                                   qtrue);
+            if (missing_files[0]) {
+              trap_Cvar_Set(
+                  "com_errorMessage",
+                  va("%s\n\n%s\n%s", UI_Cvar_VariableString("com_errorMessage"),
+                     trap_TranslateString(MISSING_FILES_MSG), missing_files));
             }
           }
+
+          if (pb_enable) {
+            Menus_ActivateByName("popupError_pbenable", qtrue);
+          } else {
+            Menus_ActivateByName("popupError", qtrue);
+
+            // invalidate demo queue playback on errors (e.g. missing files)
+            trap_Cvar_Set("etj_demoQueueCurrent", "");
+          }
         }
+      }
 
-        trap_S_FadeAllSound(1.0f, 1000,
-                            qfalse); // make sure sound fades up
-        return;
+      // make sure sound fades up
+      trap_S_FadeAllSound(1.0f, 1000, qfalse);
+      return;
 
-      case UIMENU_TEAM:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_ActivateByName("team", qtrue);
-        return;
+    case UIMENU_TEAM:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_ActivateByName("team", qtrue);
+      return;
 
-      case UIMENU_NEED_CD:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_ActivateByName("needcd", qtrue);
-        return;
+    case UIMENU_NEED_CD:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_ActivateByName("needcd", qtrue);
+      return;
 
-      case UIMENU_BAD_CD_KEY:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_ActivateByName("badcd", qtrue);
-        return;
+    case UIMENU_BAD_CD_KEY:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_ActivateByName("badcd", qtrue);
+      return;
 
-      case UIMENU_INGAME:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        UI_BuildPlayerList();
-        Menu_SetFeederSelection(NULL, FEEDER_PLAYER_LIST, 0, NULL);
-        Menus_CloseAll();
-        Menus_ActivateByName("ingame_main", qtrue);
-        return;
+    case UIMENU_INGAME:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      UI_BuildPlayerList();
+      Menu_SetFeederSelection(nullptr, FEEDER_PLAYER_LIST, 0, nullptr);
+      Menus_CloseAll();
+      Menus_ActivateByName("ingame_main", qtrue);
+      return;
 
-      // NERVE - SMF
-      case UIMENU_WM_QUICKMESSAGE:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("wm_quickmessage");
-        return;
+    // NERVE - SMF
+    case UIMENU_WM_QUICKMESSAGE:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("wm_quickmessage");
+      return;
 
-      case UIMENU_WM_QUICKMESSAGEALT:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("wm_quickmessageAlt");
-        return;
+    case UIMENU_WM_QUICKMESSAGEALT:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("wm_quickmessageAlt");
+      return;
 
-      case UIMENU_WM_FTQUICKMESSAGE:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("wm_ftquickmessage");
-        return;
+    case UIMENU_WM_FTQUICKMESSAGE:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("wm_ftquickmessage");
+      return;
 
-      case UIMENU_WM_FTQUICKMESSAGEALT:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("wm_ftquickmessageAlt");
-        return;
+    case UIMENU_WM_FTQUICKMESSAGEALT:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("wm_ftquickmessageAlt");
+      return;
 
-      case UIMENU_WM_TAPOUT:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("tapoutmsg");
-        return;
+    case UIMENU_WM_TAPOUT:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("tapoutmsg");
+      return;
 
-      case UIMENU_WM_TAPOUT_LMS:
-        uiInfo.uiDC.cursorx = 640;
-        uiInfo.uiDC.cursory = 480;
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_CloseAll();
-        Menus_OpenByName("tapoutmsglms");
-        return;
+    case UIMENU_WM_TAPOUT_LMS:
+      uiInfo.uiDC.cursorx = 640;
+      uiInfo.uiDC.cursory = 480;
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_CloseAll();
+      Menus_OpenByName("tapoutmsglms");
+      return;
 
-      case UIMENU_WM_AUTOUPDATE:
-        // TTimo - changing the auto-update
-        // strategy to a modal prompt
-        Menus_OpenByName("wm_autoupdate_modal");
-        return;
-      // -NERVE - SMF
+    case UIMENU_WM_AUTOUPDATE:
+      // TTimo - changing the auto-update
+      // strategy to a modal prompt
+      Menus_OpenByName("wm_autoupdate_modal");
+      return;
+    // -NERVE - SMF
 
-      // ydnar: say, team say, etc
-      case UIMENU_INGAME_MESSAGEMODE:
-        // trap_Cvar_Set( "cl_paused", "1" );
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_OpenByName("ingame_messagemode");
-        return;
+    // ydnar: say, team say, etc
+    case UIMENU_INGAME_MESSAGEMODE:
+      // trap_Cvar_Set( "cl_paused", "1" );
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_OpenByName("ingame_messagemode");
+      return;
 
-      case UIMENU_INGAME_FT_SAVELIMIT:
-        trap_Key_SetCatcher(KEYCATCH_UI);
-        Menus_OpenByName("ingame_ft_savelimit");
-        return;
+    case UIMENU_INGAME_FT_SAVELIMIT:
+      trap_Key_SetCatcher(KEYCATCH_UI);
+      Menus_OpenByName("ingame_ft_savelimit");
+      return;
 
-      default:
-        return; // TTimo: a lot of not handled
-    }
+    default:
+      return; // TTimo: a lot of not handled
   }
 }
 
@@ -7889,114 +7855,6 @@ void Text_PaintCenter(float x, float y, float scale, vec4_t color,
   int len = Text_Width(text, scale, 0);
   Text_Paint(x - len / 2, y, scale, color, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED);
 }
-
-#if 0 // rain - unused
-  #define ESTIMATES 80
-static void UI_DisplayDownloadInfo(const char *downloadName, float centerPoint, float yStart, float scale)
-{
-	static char dlText[]                = "Downloading:";
-	static char etaText[]               = "Estimated time left:";
-	static char xferText[]              = "Transfer rate:";
-	static int  tleEstimates[ESTIMATES] = { 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60,
-		                                    60,  60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60,
-		                                    60,  60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60,
-		                                    60,  60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60 };
-	static int  tleIndex = 0;
-
-	int        downloadSize, downloadCount, downloadTime;
-	char       dlSizeBuf[64], totalSizeBuf[64], xferRateBuf[64], dlTimeBuf[64];
-	int        xferRate;
-	const char *s;
-
-	vec4_t bg_color = { 0.3f, 0.3f, 0.3f, 0.8f };
-
-	downloadSize  = trap_Cvar_VariableValue("cl_downloadSize");
-	downloadCount = trap_Cvar_VariableValue("cl_downloadCount");
-	downloadTime  = trap_Cvar_VariableValue("cl_downloadTime");
-
-	// Background
-	UI_FillRect(0, yStart + 185, 640, 83, bg_color);
-
-	UI_SetColor(colorYellow);
-	Text_Paint(92, yStart + 210, scale, colorYellow, dlText, 0, 64, ITEM_TEXTSTYLE_SHADOWEDMORE);
-	Text_Paint(35, yStart + 235, scale, colorYellow, etaText, 0, 64, ITEM_TEXTSTYLE_SHADOWEDMORE);
-	Text_Paint(86, yStart + 260, scale, colorYellow, xferText, 0, 64, ITEM_TEXTSTYLE_SHADOWEDMORE);
-
-	if (downloadSize > 0)
-	{
-		s = va("%s (%d%%)", downloadName, downloadCount * 100 / downloadSize);
-	}
-	else
-	{
-		s = downloadName;
-	}
-
-	Text_Paint(260, yStart + 210, scale, colorYellow, s, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE);
-
-	UI_ReadableSize(dlSizeBuf, sizeof dlSizeBuf, downloadCount);
-	UI_ReadableSize(totalSizeBuf, sizeof totalSizeBuf, downloadSize);
-
-	if (downloadCount < 4096 || !downloadTime)
-	{
-		Text_PaintCenter(centerPoint, yStart + 235, scale, colorYellow, "estimating", 0);
-		Text_PaintCenter(centerPoint, yStart + 340, scale, colorYellow, va("(%s of %s copied)", dlSizeBuf, totalSizeBuf), 0);
-	}
-	else
-	{
-		if ((uiInfo.uiDC.realTime - downloadTime) / 1000)
-		{
-			xferRate = downloadCount / ((uiInfo.uiDC.realTime - downloadTime) / 1000);
-		}
-		else
-		{
-			xferRate = 0;
-		}
-		UI_ReadableSize(xferRateBuf, sizeof xferRateBuf, xferRate);
-
-		// Extrapolate estimated completion time
-		if (downloadSize && xferRate)
-		{
-			int n        = downloadSize / xferRate; // estimated time for entire d/l in secs
-			int timeleft = 0, i;
-
-			// We do it in K (/1024) because we'd overflow around 4MB
-			tleEstimates[tleIndex] = (n - (((downloadCount / 1024) * n) / (downloadSize / 1024)));
-			tleIndex++;
-			if (tleIndex >= ESTIMATES)
-			{
-				tleIndex = 0;
-			}
-
-			for (i = 0; i < ESTIMATES; i++)
-				timeleft += tleEstimates[i];
-
-			timeleft /= ESTIMATES;
-
-			UI_PrintTime(dlTimeBuf, sizeof dlTimeBuf, timeleft);
-
-			Text_Paint(260, yStart + 235, scale, colorYellow, dlTimeBuf, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE);
-			Text_PaintCenter(centerPoint, yStart + 340, scale, colorYellow, va("(%s of %s copied)", dlSizeBuf, totalSizeBuf), 0);
-		}
-		else
-		{
-			Text_PaintCenter(centerPoint, yStart + 235, scale, colorYellow, "estimating", 0);
-			if (downloadSize)
-			{
-				Text_PaintCenter(centerPoint, yStart + 340, scale, colorYellow, va("(%s of %s copied)", dlSizeBuf, totalSizeBuf), 0);
-			}
-			else
-			{
-				Text_PaintCenter(centerPoint, yStart + 340, scale, colorYellow, va("(%s copied)", dlSizeBuf), 0);
-			}
-		}
-
-		if (xferRate)
-		{
-			Text_Paint(260, yStart + 260, scale, colorYellow, va("%s/Sec", xferRateBuf), 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE);
-		}
-	}
-}
-#endif
 
 /*
 ========================
@@ -8314,6 +8172,9 @@ vmCvar_t etj_menuSensitivity;
 
 vmCvar_t ui_currentChangelog;
 
+vmCvar_t etj_demoQueueCurrent;
+vmCvar_t etj_demoQueueDir;
+
 cvarTable_t cvarTable[] = {
 
     {&ui_glCustom, "ui_glCustom", "4",
@@ -8548,6 +8409,9 @@ cvarTable_t cvarTable[] = {
     {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
 
     {&ui_currentChangelog, "ui_currentChangelog", "", CVAR_TEMP | CVAR_ROM},
+
+    {&etj_demoQueueCurrent, "etj_demoQueueCurrent", "", CVAR_TEMP | CVAR_ROM},
+    {&etj_demoQueueDir, "etj_demoQueueDir", "demoqueue", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
