@@ -677,6 +677,14 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
     return qtrue;
   }
 
+  if (command == "uiChatMenuOpen") {
+    if (trap_Argc() > 1) {
+      cg.chatMenuOpen = Q_atoi(CG_Argv(1));
+    }
+
+    return qtrue;
+  }
+
   // cgame handles console commands before UI, so we catch some of the demo
   // queue commands here in order to inform UI that the command was
   // manually executed by the user. This avoids sending automatic

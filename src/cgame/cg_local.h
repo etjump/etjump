@@ -1288,6 +1288,8 @@ typedef struct {
   bool showRtvMenu;
 
   bool jumpDelayBug;
+
+  bool chatMenuOpen;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES 21
@@ -2806,7 +2808,7 @@ void CG_printConsoleString(const char *str);
 void CG_LoadObjectiveData(void);
 
 void QDECL CG_Printf(const char *msg, ...);
-void QDECL CG_Error(const char *msg, ...);
+[[noreturn]] void QDECL CG_Error(const char *msg, ...);
 
 void CG_StartMusic(void);
 void CG_QueueMusic(void);
@@ -3550,7 +3552,7 @@ int trap_RealTime(qtime_t *qtime);
 void trap_Print(const char *fmt);
 
 // abort the game
-void trap_Error(const char *fmt);
+[[noreturn]] void trap_Error(const char *fmt);
 
 // console variable interaction
 void trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName,

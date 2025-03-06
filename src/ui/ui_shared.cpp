@@ -2444,52 +2444,55 @@ int Item_ListBox_OverLB(itemDef_t *item, float x, float y) {
   return 0;
 }
 
-void Item_ListBox_MouseEnter(itemDef_t *item, float x, float y,
-                             qboolean click) {
+void Item_ListBox_MouseEnter(itemDef_t *item, const float x, const float y,
+                             const bool click) {
   rectDef_t r;
-  listBoxDef_t *listPtr = (listBoxDef_t *)item->typeData;
+  auto *listPtr = static_cast<listBoxDef_t *>(item->typeData);
 
   item->window.flags &=
       ~(WINDOW_LB_LEFTARROW | WINDOW_LB_RIGHTARROW | WINDOW_LB_THUMB |
         WINDOW_LB_PGUP | WINDOW_LB_PGDN | WINDOW_LB_SOMEWHERE);
   item->window.flags |= Item_ListBox_OverLB(item, x, y);
 
-  if (click) {
-    if (item->window.flags & WINDOW_HORIZONTAL) {
-      if (!(item->window.flags &
-            (WINDOW_LB_LEFTARROW | WINDOW_LB_RIGHTARROW | WINDOW_LB_THUMB |
-             WINDOW_LB_PGUP | WINDOW_LB_PGDN | WINDOW_LB_SOMEWHERE))) {
-        // check for selection hit as we have
-        // exausted buttons and thumb
-        if (listPtr->elementStyle == LISTBOX_IMAGE) {
-          r.x = item->window.rect.x;
-          r.y = item->window.rect.y;
-          r.h = item->window.rect.h - SCROLLBAR_SIZE;
-          r.w = item->window.rect.w - listPtr->drawPadding;
-          if (Rect_ContainsPoint(&r, x, y)) {
-            listPtr->cursorPos =
-                (int)((x - r.x) / listPtr->elementWidth) + listPtr->startPos;
-            if (listPtr->cursorPos >= listPtr->endPos) {
-              listPtr->cursorPos = listPtr->endPos;
-            }
+  // prevent listbox selection changing if we're dragging the scrollbar
+  // and moving the cursor over the listbox
+  if (Menus_CaptureFuncActive() || !click) {
+    return;
+  }
+
+  if (item->window.flags & WINDOW_HORIZONTAL) {
+    if (!(item->window.flags &
+          (WINDOW_LB_LEFTARROW | WINDOW_LB_RIGHTARROW | WINDOW_LB_THUMB |
+           WINDOW_LB_PGUP | WINDOW_LB_PGDN | WINDOW_LB_SOMEWHERE))) {
+      // check for selection hit as we have exausted buttons and thumb
+      if (listPtr->elementStyle == LISTBOX_IMAGE) {
+        r.x = item->window.rect.x;
+        r.y = item->window.rect.y;
+        r.h = item->window.rect.h - SCROLLBAR_SIZE;
+        r.w = item->window.rect.w - static_cast<float>(listPtr->drawPadding);
+        if (Rect_ContainsPoint(&r, x, y)) {
+          listPtr->cursorPos =
+              static_cast<int>((x - r.x) / listPtr->elementWidth) +
+              listPtr->startPos;
+          if (listPtr->cursorPos >= listPtr->endPos) {
+            listPtr->cursorPos = listPtr->endPos;
           }
-        } else {
-          // text hit..
         }
       }
-    } else if (!(item->window.flags &
-                 (WINDOW_LB_LEFTARROW | WINDOW_LB_RIGHTARROW | WINDOW_LB_THUMB |
-                  WINDOW_LB_PGUP | WINDOW_LB_PGDN | WINDOW_LB_SOMEWHERE))) {
-      r.x = item->window.rect.x;
-      r.y = item->window.rect.y;
-      r.w = item->window.rect.w - SCROLLBAR_SIZE;
-      r.h = item->window.rect.h - listPtr->drawPadding;
-      if (Rect_ContainsPoint(&r, x, y)) {
-        listPtr->cursorPos =
-            (int)((y - 2 - r.y) / listPtr->elementHeight) + listPtr->startPos;
-        if (listPtr->cursorPos > listPtr->endPos) {
-          listPtr->cursorPos = listPtr->endPos;
-        }
+    }
+  } else if (!(item->window.flags &
+               (WINDOW_LB_LEFTARROW | WINDOW_LB_RIGHTARROW | WINDOW_LB_THUMB |
+                WINDOW_LB_PGUP | WINDOW_LB_PGDN | WINDOW_LB_SOMEWHERE))) {
+    r.x = item->window.rect.x;
+    r.y = item->window.rect.y;
+    r.w = item->window.rect.w - SCROLLBAR_SIZE;
+    r.h = item->window.rect.h - static_cast<float>(listPtr->drawPadding);
+    if (Rect_ContainsPoint(&r, x, y)) {
+      listPtr->cursorPos =
+          static_cast<int>((y - 2 - r.y) / listPtr->elementHeight) +
+          listPtr->startPos;
+      if (listPtr->cursorPos > listPtr->endPos) {
+        listPtr->cursorPos = listPtr->endPos;
       }
     }
   }
@@ -5707,7 +5710,7 @@ static void comboPaint(itemDef_t *item) {
   const bool reversed = item->comboData.reversed;
 
   if (reversed) {
-    item->comboData.rect.y -= item->comboData.rect.h + item->comboData.height;
+    comboRect.y -= item->comboData.rect.h + item->comboData.height;
   }
 
   // we can't use forecolor here because if mouse is over an item,
@@ -5745,7 +5748,8 @@ static void comboPaint(itemDef_t *item) {
           item->textRect.y + static_cast<float>(i) * comboRect.h + borderOfs;
     }
 
-    if (Rect_ContainsPoint(&textRect, static_cast<float>(DC->cursorx),
+    if (!Menus_CaptureFuncActive() &&
+        Rect_ContainsPoint(&textRect, static_cast<float>(DC->cursorx),
                            static_cast<float>(DC->cursory))) {
       Vector4Copy(item->window.foreColor, color);
       item->cursorPos = i + startPos;

@@ -1176,8 +1176,6 @@ struct gclient_s {
 
   int lastRevivePushTime;
 
-  bool respawnFromLoad;
-
   int numLagFrames; // for tracking high ping on timeruns to counter lag abuse
 };
 
@@ -1594,7 +1592,7 @@ void G_TouchTriggers(gentity_t *ent);
 
 void G_AddPredictableEvent(gentity_t *ent, int event, int eventParm);
 void G_AddEvent(gentity_t *ent, int event, int eventParm);
-void G_SetOrigin(gentity_t *ent, const vec3_t origin);
+void G_SetOrigin(gentity_t *ent, vec3_t origin);
 void AddRemap(const char *oldShader, const char *newShader, float timeOffset);
 const char *BuildShaderStateConfig();
 void G_SetAngle(gentity_t *ent, vec3_t angle);
@@ -1839,7 +1837,7 @@ void QDECL G_LogPrintf(const char *fmt, ...);
 void SendScoreboardMessageToAllClients(void);
 void QDECL G_Printf(const char *fmt, ...);
 void QDECL G_DPrintf(const char *fmt, ...);
-void QDECL G_Error(const char *fmt, ...);
+[[noreturn]] void QDECL G_Error(const char *fmt, ...);
 void resetVote();
 
 //
@@ -2123,7 +2121,7 @@ extern vmCvar_t g_chatReplay;
 extern vmCvar_t g_chatReplayMaxMessageAge;
 
 void trap_Printf(const char *fmt);
-void trap_Error(const char *fmt);
+[[noreturn]] void trap_Error(const char *fmt);
 int trap_Milliseconds(void);
 int trap_Argc(void);
 void trap_Argv(int n, char *buffer, int bufferLength);

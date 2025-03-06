@@ -615,8 +615,6 @@ void QDECL G_Printf(const char *fmt, ...) {
 
   trap_Printf(text);
 }
-// bani
-void QDECL G_Printf(const char *fmt, ...);
 
 void QDECL G_DPrintf(const char *fmt, ...) {
   va_list argptr;
@@ -632,10 +630,8 @@ void QDECL G_DPrintf(const char *fmt, ...) {
 
   trap_Printf(text);
 }
-// bani
-void QDECL G_DPrintf(const char *fmt, ...);
 
-void QDECL G_Error(const char *fmt, ...) {
+[[noreturn]] void QDECL G_Error(const char *fmt, ...) {
   va_list argptr;
   char text[1024];
 
@@ -645,8 +641,6 @@ void QDECL G_Error(const char *fmt, ...) {
 
   trap_Error(text);
 }
-// bani
-void QDECL G_Error(const char *fmt, ...);
 
 #define CH_KNIFE_DIST 48 // from g_weapon.c
 #define CH_LADDER_DIST 100
@@ -772,8 +766,6 @@ void G_CheckForCursorHints(gentity_t *ent) {
   gentity_t *checkEnt, *traceEnt = 0;
   playerState_t *ps;
   int hintType, hintDist, hintVal;
-  qboolean zooming;   // indirectHit means the checkent was not the ent
-                      // hit by the trace (checkEnt!=traceEnt)
   int trace_contents; // DHM - Nerve
   int numOfIgnoredEnts = 0;
 
@@ -783,7 +775,7 @@ void G_CheckForCursorHints(gentity_t *ent) {
 
   ps = &ent->client->ps;
 
-  zooming = (qboolean)(ps->eFlags & EF_ZOOMING);
+  const bool zooming = ps->eFlags & EF_ZOOMING;
 
   AngleVectors(ps->viewangles, forward, right, up);
 
@@ -2055,7 +2047,7 @@ void G_ShutdownGame(int restart) {
 #ifndef GAME_HARD_LINKED
 // this is only here so the functions in q_shared.c and bg_*.c can link
 
-void QDECL Com_Error(int unused, const char *error, ...) {
+[[noreturn]] void QDECL Com_Error(int level, const char *error, ...) {
   va_list argptr;
   char text[1024];
 
@@ -2065,8 +2057,6 @@ void QDECL Com_Error(int unused, const char *error, ...) {
 
   G_Error("%s", text);
 }
-// bani
-void QDECL Com_Error(int level, const char *error, ...);
 
 void QDECL Com_Printf(const char *msg, ...) {
   va_list argptr;
@@ -2078,8 +2068,6 @@ void QDECL Com_Printf(const char *msg, ...) {
 
   G_Printf("%s", text);
 }
-// bani
-void QDECL Com_Printf(const char *msg, ...);
 
 #endif
 

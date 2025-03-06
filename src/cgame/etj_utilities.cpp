@@ -215,19 +215,18 @@ bool ETJump::isPlaying(const int clientNum) {
 }
 
 int ETJump::getSvFps() {
+  if (!cg.demoPlayback) {
+    return cgs.sv_fps;
+  }
+
   int fps;
 
-  if (cg.demoPlayback) {
-
-    if (demoCompatibility->flags.svFpsInCgs) {
-      fps = cgs.sv_fps;
-    } else if (demoCompatibility->flags.svFpsInSysteminfo) {
-      const char *cs = CG_ConfigString(CS_SYSTEMINFO);
-      fps = Q_atoi(Info_ValueForKey(cs, "sv_fps"));
-    } else {
-      // no way to know for sure, assume default
-      fps = 1000 / DEFAULT_SV_FRAMETIME;
-    }
+  if (demoCompatibility->flags.svFpsUnavailable) {
+    // no way to know for sure, assume default
+    fps = 1000 / DEFAULT_SV_FRAMETIME;
+  } else if (demoCompatibility->flags.svFpsInSysteminfo) {
+    const char *cs = CG_ConfigString(CS_SYSTEMINFO);
+    fps = Q_atoi(Info_ValueForKey(cs, "sv_fps"));
   } else {
     fps = cgs.sv_fps;
   }
