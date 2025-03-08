@@ -1145,6 +1145,7 @@ static constexpr int MAX_SUBMODELS = 512;
 
 #define MAX_CONFIGSTRINGS 1024
 
+static constexpr size_t MAX_DLIGHT_STYLESTRING = 64;
 #define MAX_DLIGHT_CONFIGSTRINGS 16
 #define MAX_SPLINE_CONFIGSTRINGS 8
 
