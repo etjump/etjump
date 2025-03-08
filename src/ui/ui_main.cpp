@@ -5077,7 +5077,7 @@ void UI_RunMenuScript(const char **args) {
       char buf[MAX_CVAR_VALUE_STRING];
 
       trap_Cvar_VariableStringBuffer("ui_writeconfig_name", buf, sizeof(buf));
-      trap_Cmd_ExecuteText(EXEC_NOW, va("writeconfig %s", buf));
+      trap_Cmd_ExecuteText(EXEC_NOW, va("writeconfig %s\n", buf));
 
       return;
     }
@@ -5098,7 +5098,7 @@ void UI_RunMenuScript(const char **args) {
           uiInfo.numCustomvotes) {
         uiInfo.customVotes.clear();
         // cgame handles this as a console command and sends request to qagame
-        trap_Cmd_ExecuteText(EXEC_APPEND, "uiRequestCustomvotes");
+        trap_Cmd_ExecuteText(EXEC_APPEND, "uiRequestCustomvotes\n");
       }
 
       Menu_SetFeederSelection(nullptr, FEEDER_CUSTOMVOTES, 0, nullptr);
@@ -7387,7 +7387,7 @@ void _UI_KeyEvent(int key, qboolean down) {
       // send this here rather than in 'onClose' script event in the menu,
       // otherwise there's a small timing error when closing the chat window
       // where the cgame boolean is false, but keycatcher hasn't changed yet
-      trap_Cmd_ExecuteText(EXEC_APPEND, "uiChatMenuOpen 0");
+      trap_Cmd_ExecuteText(EXEC_APPEND, "uiChatMenuOpen 0\n");
     }
   }
 }
