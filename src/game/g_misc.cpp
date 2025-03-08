@@ -1354,6 +1354,13 @@ dlight_finish_spawning
 ==============
 */
 void dlight_finish_spawning(gentity_t *ent) {
+  if (strlen(ent->dl_stylestring) >= MAX_DLIGHT_STYLESTRING) {
+    char tmp[MAX_DLIGHT_STYLESTRING]{};
+    // Q_strncpyz will null-terminate the string at max length
+    Q_strncpyz(tmp, ent->dl_stylestring, MAX_DLIGHT_STYLESTRING);
+    ent->dl_stylestring = tmp;
+  }
+
   G_FindConfigstringIndex(va("%i %s %i %i %i", ent->s.number,
                              ent->dl_stylestring, ent->health, ent->soundLoop,
                              ent->dl_atten),
