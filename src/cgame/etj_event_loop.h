@@ -78,6 +78,7 @@ private:
   void cleanUpEvents();
   void iterateEvents(function<void(Task &task)> fn);
   void removeEventsIf(function<bool(Task &task)> fn);
+  void removeEvents(function<void(Task &task)> fn);
   Task *findTask(int taskId);
   int64_t getNow();
 };
