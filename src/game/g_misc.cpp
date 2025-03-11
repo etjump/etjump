@@ -9,6 +9,7 @@
 
 #include "g_local.h"
 #include "etj_entity_utilities.h"
+#include "etj_numeric_utilities.h"
 
 extern void AimAtTarget(gentity_t *self);
 extern float AngleDifference(float ang1, float ang2);
@@ -1488,32 +1489,29 @@ void SP_dlight(gentity_t *ent) {
   ent->health = offset; // set the offset into the string
 
   ent->think = dlight_finish_spawning;
-  if (!dlightstarttime) // sync up all the dlights
-  {
+  // sync up all the dlights
+  if (!dlightstarttime) {
     dlightstarttime = level.time + 100;
   }
+
   ent->nextthink = dlightstarttime;
 
-  if (ent->dl_color[0] <=
-          0 && // if it's black or has no color assigned, make it white
-      ent->dl_color[1] <= 0 &&
-      ent->dl_color[2] <= 0) {
-    ent->dl_color[0] = ent->dl_color[1] = ent->dl_color[2] = 1;
+  // if it's black or has no color assigned, make it white
+  if (ent->dl_color[0] <= 0 && ent->dl_color[1] <= 0 && ent->dl_color[2] <= 0) {
+    VectorSet(ent->dl_color, 1.0f, 1.0f, 1.0f);
   }
 
-  ent->dl_color[0] = ent->dl_color[0] * 255; // range 0-255 now so the client
-                                             // doesn't have to on every update
-  ent->dl_color[1] = ent->dl_color[1] * 255;
-  ent->dl_color[2] = ent->dl_color[2] * 255;
+  // range 0-255 now so the client doesn't have to on every update
+  VectorScale(ent->dl_color, 255.0f, ent->dl_color);
 
   auto intensity = static_cast<float>(ent->dl_stylestring[offset] - 'a');
   intensity *= (1000.0f / 24.0f);
-  intensity = std::min(255.0f, intensity / 4);
+  intensity = Numeric::clamp(intensity / 4, 0.0f, 255.0f);
 
   ent->s.constantLight = static_cast<int>(ent->dl_color[0]) |
-                         (static_cast<int>(ent->dl_color[1]) << 8) |
-                         (static_cast<int>(ent->dl_color[2]) << 16) |
-                         (static_cast<int>(intensity) << 24);
+                         static_cast<int>(ent->dl_color[1]) << 8 |
+                         static_cast<int>(ent->dl_color[2]) << 16 |
+                         static_cast<int>(intensity) << 24;
 
   ent->use = use_dlight;
 
