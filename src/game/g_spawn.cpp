@@ -1284,8 +1284,6 @@ void SP_worldspawn(void) {
     level.mapcoordsValid = qtrue;
   }
 
-  BG_InitLocations(level.mapcoordsMins, level.mapcoordsMaxs);
-
   trap_SetConfigstring(CS_MOTD, g_motd.string); // message of the day
 
   G_SpawnString("spawnflags", "0", &s);

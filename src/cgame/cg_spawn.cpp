@@ -410,8 +410,6 @@ void SP_worldspawn(void) {
   cg.mapcoordsScale[0] = 1 / (cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]);
   cg.mapcoordsScale[1] = 1 / (cg.mapcoordsMaxs[1] - cg.mapcoordsMins[1]);
 
-  BG_InitLocations(cg.mapcoordsMins, cg.mapcoordsMaxs);
-
   CG_SpawnString("atmosphere", "", &s);
   CG_EffectParse(s);
 

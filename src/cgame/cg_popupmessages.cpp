@@ -428,7 +428,8 @@ void CG_DrawPMItems(void) {
 
   // show repeats counter
   if (cg_pmWaitingList->repeats > 1) {
-    msg = va("%s ^9(x%d)", cg_pmWaitingList->message, cg_pmWaitingList->repeats);
+    msg =
+        va("%s ^9(x%d)", cg_pmWaitingList->message, cg_pmWaitingList->repeats);
   } else {
     msg = (char *)&cg_pmWaitingList->message;
   }
@@ -554,9 +555,8 @@ const char *CG_GetPMItemText(centity_t *cent) {
       if (cgs.clientinfo[cg.clientNum].team == cent->currentState.effect2Time) {
         return NULL;
       }
-      return va("Spotted by %s^7 at %s",
-                cgs.clientinfo[cent->currentState.effect3Time].name,
-                BG_GetLocationString(cent->currentState.origin));
+      return va("Spotted by %s^7",
+                cgs.clientinfo[cent->currentState.effect3Time].name);
     case PM_OBJECTIVE:
       switch (cent->currentState.density) {
         case 0:
