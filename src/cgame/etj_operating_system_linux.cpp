@@ -85,8 +85,9 @@ std::string ETJump::OperatingSystem::getHwid() {
     }
   }
 
+  closeSocket(sock);
+
   if (!success) {
-    closeSocket(sock);
     return "NOHWID";
   }
 
