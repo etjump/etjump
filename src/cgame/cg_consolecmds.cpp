@@ -14,6 +14,7 @@
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_json_utilities.h"
 #include "etj_savepos.h"
+#include "etj_utilities.h"
 
 /*
 =============
@@ -378,62 +379,39 @@ static void CG_QuickFireteams_f() {
   }
 }
 
-static void CG_FTSayPlayerClass_f(void) {
-  int playerType;
-  const char *s;
+namespace ETJump {
+static const char *getPlayerClassVsayString() {
+  switch (cgs.clientinfo[cg.clientNum].cls) {
+    case PC_MEDIC:
+      return "IamMedic";
+    case PC_ENGINEER:
+      return "IamEngineer";
+    case PC_FIELDOPS:
+      return "IamFieldOps";
+    case PC_COVERTOPS:
+      return "IamCovertOps";
+    default:
+      return "IamSoldier";
+  }
+}
+} // namespace ETJump
 
-  playerType = cgs.clientinfo[cg.clientNum].cls;
-
-  if (playerType == PC_MEDIC) {
-    s = "IamMedic";
-  } else if (playerType == PC_ENGINEER) {
-    s = "IamEngineer";
-  } else if (playerType == PC_FIELDOPS) {
-    s = "IamFieldOps";
-  } else if (playerType == PC_COVERTOPS) {
-    s = "IamCovertOps";
-  } else {
-    s = "IamSoldier";
+static void CG_FTSayPlayerClass_f() {
+  if (!ETJump::isPlaying(cg.clientNum)) {
+    return;
   }
 
-  if (cg.snap && (cg.snap->ps.pm_type != PM_INTERMISSION)) {
-    if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR ||
-        cgs.clientinfo[cg.clientNum].team == TEAM_FREE) {
-      CG_Printf(CG_TranslateString("Can't team voice chat as a spectator.\n"));
-      return;
-    }
-  }
-
+  const char *s = ETJump::getPlayerClassVsayString();
   trap_SendConsoleCommand(
       va("cmd vsay_buddy -1 %s %s\n", CG_BuildSelectedFirteamString(), s));
 }
 
-static void CG_SayPlayerClass_f(void) {
-  int playerType;
-  const char *s;
-
-  playerType = cgs.clientinfo[cg.clientNum].cls;
-
-  if (playerType == PC_MEDIC) {
-    s = "IamMedic";
-  } else if (playerType == PC_ENGINEER) {
-    s = "IamEngineer";
-  } else if (playerType == PC_FIELDOPS) {
-    s = "IamFieldOps";
-  } else if (playerType == PC_COVERTOPS) {
-    s = "IamCovertOps";
-  } else {
-    s = "IamSoldier";
+static void CG_SayPlayerClass_f() {
+  if (!ETJump::isPlaying(cg.clientNum)) {
+    return;
   }
 
-  if (cg.snap && (cg.snap->ps.pm_type != PM_INTERMISSION)) {
-    if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR ||
-        cgs.clientinfo[cg.clientNum].team == TEAM_FREE) {
-      CG_Printf(CG_TranslateString("Can't team voice chat as a spectator.\n"));
-      return;
-    }
-  }
-
+  const char *s = ETJump::getPlayerClassVsayString();
   trap_SendConsoleCommand(va("cmd vsay_team %s\n", s));
 }
 
