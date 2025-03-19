@@ -128,9 +128,7 @@ public:
   void loadPositionsFromDatabase(gentity_t *ent);
 
   void storeTeamQuickDeployPosition(gentity_t *ent, team_t team);
-  // true if valid position was loaded
-  bool loadOnceTeamQuickDeployPosition(gentity_t *ent, team_t team);
-  void invalidateTeamQuickDeployPosition(gentity_t *ent, team_t team);
+  void loadOnceTeamQuickDeployPosition(gentity_t *ent, team_t team);
 
 private:
   // Saves backup position

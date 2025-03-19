@@ -2309,7 +2309,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   clientPersistant_t saved;
   clientSession_t savedSess;
   int persistant[MAX_PERSISTANT];
-  gentity_t *spawnPoint = nullptr;
+  gentity_t *spawnPoint;
   int flags;
   int savedPing;
   int savedTeam;
@@ -2334,29 +2334,39 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   } else {
     // Arnout: let's just be sure it does the right thing at all
     // times. (well maybe not the right thing, but at least not
-    // the bad thing!)
+    // the bad thing!) if( client->sess.sessionTeam ==
+    // TEAM_SPECTATOR || client->sess.sessionTeam == TEAM_FREE )
+    // {
     if (client->sess.sessionTeam != TEAM_AXIS &&
         client->sess.sessionTeam != TEAM_ALLIES) {
       spawnPoint = SelectSpectatorSpawnPoint(spawn_origin, spawn_angles);
     } else {
-      // try to spawn in last load position if autoload is enabled,
-      // or if we're forcing a respawn during death sequence with load/loadpos
-      if ((ent->client->pers.autoLoad &&
-           ETJump::saveSystem->loadOnceTeamQuickDeployPosition(
-               ent, ent->client->sess.sessionTeam)) ||
-          ent->client->respawnFromLoad) {
-        VectorCopy(ent->client->ps.origin, spawn_origin);
-        VectorCopy(ent->client->ps.viewangles, spawn_angles);
-      } else {
-        auto spawnObjective = 0;
-        if (client->sess.spawnObjectiveIndex > 0) {
-          spawnObjective = client->sess.spawnObjectiveIndex;
-        } else if (client->sess.autoSpawnObjectiveIndex > 0) {
-          spawnObjective = client->sess.autoSpawnObjectiveIndex;
-        }
-        spawnPoint = SelectCTFSpawnPoint(client->sess.sessionTeam, spawn_origin,
-                                         spawn_angles, spawnObjective);
+      // RF, if we have requested a specific spawn
+      // point, use it (fixme: what if this will place
+      // us inside another character?)
+      /*			spawnPoint = NULL;
+                  trap_GetUserinfo( ent->s.number,
+         userinfo, sizeof(userinfo) ); if( (str =
+         Info_ValueForKey( userinfo, "spawnPoint" )) !=
+         NULL
+         && str[0] ) { spawnPoint =
+         SelectSpawnPointFromList( str, spawn_origin,
+         spawn_angles ); if (!spawnPoint) { G_Printf(
+         "WARNING: unable to find spawn point \"%s\" for
+         bot \"%s\"\n", str, ent->aiName );
+                      }
+                  }
+                  //
+                  if( !spawnPoint ) {*/
+      auto spawnObjective = 0;
+      if (client->sess.spawnObjectiveIndex > 0) {
+        spawnObjective = client->sess.spawnObjectiveIndex;
+      } else if (client->sess.autoSpawnObjectiveIndex > 0) {
+        spawnObjective = client->sess.autoSpawnObjectiveIndex;
       }
+      spawnPoint = SelectCTFSpawnPoint(client->sess.sessionTeam, spawn_origin,
+                                       spawn_angles, spawnObjective);
+      //			}
     }
   }
 
@@ -2604,8 +2614,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     MoveClientToIntermission(ent);
   } else {
     // fire the targets of the spawn point
-    // this can be null if we're spawning into a save slot
-    if (!revived && spawnPoint != nullptr) {
+    if (!revived) {
       G_UseTargets(spawnPoint, ent);
     }
   }
@@ -2616,9 +2625,14 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     client->ftNoGhostThisLife = true;
   }
 
+  // stop burn from flamethrower
+  // in VET, this is not an issue because spawnshield blocks the damage,
+  // but since we don't have it, burn damage would carry over to respawn
+  ent->s.onFireEnd = level.time - 1;
+
   // run a client frame to drop exactly to the floor,
   // initialize animations and other things
-  client->ps.commandTime = level.time - level.frameTime * 2;
+  client->ps.commandTime = level.time - 100;
   ent->client->pers.cmd.serverTime = level.time;
   ClientThink(ent - g_entities);
 

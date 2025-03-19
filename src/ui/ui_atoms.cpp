@@ -5,6 +5,7 @@
 
     User interface building blocks and support functions.
 **********************************************************************/
+#include "etj_demo_queue.h"
 #include "ui_local.h"
 
 uiStatic_t uis;
@@ -57,12 +58,7 @@ void QDECL Com_Printf(const char *msg, ...) {
 
 // prints only in localhost
 void QDECL Com_LocalPrintf(const char *msg, ...) {
-  uiClientState_t cstate;
-  trap_GetClientState(&cstate);
-
-  // this isn't 100% reliable, but it's the best that we can do
-  if (Q_strncmp(cstate.servername, "localhost",
-                static_cast<int>(strlen("localhost")))) {
+  if (trap_Cvar_VariableValue("sv_running") == 0) {
     return;
   }
 
@@ -210,6 +206,16 @@ qboolean UI_ConsoleCommand(const int realTime) {
 
   if (!Q_stricmp(cmd, "uiResetCustomvotes")) {
     ETJump::resetCustomvotes();
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "demoQueue")) {
+    ETJump::demoQueue->commandHandler();
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "uiDemoQueueManualSkip")) {
+    ETJump::demoQueue->setManualSkip();
     return qtrue;
   }
 

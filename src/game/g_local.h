@@ -599,6 +599,9 @@ struct gentity_s {
   int lastSurfaceFlag;
 
   std::array<int, MAX_CLIENTS> targetDelayActivationTime;
+
+  // target_ft_setrules
+  char *ftSavelimit;
 };
 
 // Ridah
@@ -1176,8 +1179,6 @@ struct gclient_s {
 
   int lastRevivePushTime;
 
-  bool respawnFromLoad;
-
   int numLagFrames; // for tracking high ping on timeruns to counter lag abuse
 };
 
@@ -1441,6 +1442,8 @@ typedef struct {
   bool noDrop;
   bool noWallbug;
   bool noFTNoGhost;
+  bool noFTSaveLimit;
+  bool noFTTeamjumpMode;
 
   int portalEnabled; // Feen: PGM - Enabled/Disabled by map key
   qboolean portalSurfaces;
@@ -1602,7 +1605,7 @@ void G_TouchTriggers(gentity_t *ent);
 
 void G_AddPredictableEvent(gentity_t *ent, int event, int eventParm);
 void G_AddEvent(gentity_t *ent, int event, int eventParm);
-void G_SetOrigin(gentity_t *ent, const vec3_t origin);
+void G_SetOrigin(gentity_t *ent, vec3_t origin);
 void AddRemap(const char *oldShader, const char *newShader, float timeOffset);
 const char *BuildShaderStateConfig();
 void G_SetAngle(gentity_t *ent, vec3_t angle);
@@ -2568,6 +2571,17 @@ void G_InviteToFireTeam(int entityNum, int otherEntityNum);
 void G_UpdateFireteamConfigString(fireteamData_t *ft);
 void G_RemoveClientFromFireteams(int entityNum, qboolean update,
                                  qboolean print);
+
+namespace ETJump {
+gentity_t *getFireteamLeader(int clientNum);
+void setSaveLimitForFTMembers(fireteamData_t *ft, int limit);
+void setFireTeamGhosting(fireteamData_t *ft, bool noGhost);
+bool canEnableFtNoGhost(int clientNum, fireteamData_t *ft,
+                        const gentity_t *ent);
+bool canSetFtSavelimit(int clientNum, const gentity_t *ent);
+bool canSetFtTeamjumpMode(int clientNum, const gentity_t *ent);
+void setFireteamTeamjumpMode(fireteamData_t *ft, bool teamjumpMode);
+} // namespace ETJump
 
 void G_PrintClientSpammyCenterPrint(int entityNum, const char *text);
 

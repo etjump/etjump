@@ -17,6 +17,7 @@
 #include "etj_missilepad.h"
 #include "etj_target_init.h"
 #include "etj_trigger_teleport_client.h"
+#include "etj_target_ft_setrules.h"
 #include "etj_target_spawn_relay.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
@@ -176,6 +177,11 @@ field_t fields[] = {
     {"targetShaderNewName", FOFS(targetShaderNewName), F_LSTRING},
 
     {"cursorhint", FOFS(s.dmgFlags), F_CURSORHINT},
+
+    {"savelimit", FOFS(ftSavelimit), F_LSTRING},
+    {"noghost", FOFS(damage), F_INT},
+    {"teamjumpmode", FOFS(health), F_INT},
+    {"leader_only_message", FOFS(message), F_LSTRING},
 
     {nullptr}};
 
@@ -461,8 +467,6 @@ void SP_target_deathrun_checkpoint(gentity_t *self);
 void SP_target_tjlclear(gentity_t *self);
 void SP_target_tjldisplay(gentity_t *self);
 
-void SP_target_init(gentity_t *self);
-
 spawn_t spawns[] = {
     // info entities don't do anything at all, but provide positional
     // information for things controlled by other processes
@@ -718,6 +722,7 @@ spawn_t spawns[] = {
     {"target_init", ETJump::TargetInit::spawn},
     {"func_missilepad", ETJump::Missilepad::spawn},
     {"trigger_teleport_client", ETJump::TriggerTeleportClient::spawn},
+    {"target_ft_setrules", ETJump::TargetFtSetRules::spawn},
     {"target_spawn_relay", ETJump::TargetSpawnRelay::spawn},
     {nullptr, nullptr},
 };
@@ -1128,8 +1133,26 @@ static void initNoFTNoGhost() {
   G_SpawnInt("noftnoghost", "0", &value);
 
   level.noFTNoGhost = value;
-  G_Printf("Fireteam noghost is %s.\n",
-           level.noFTNoGhost ? "disabled" : "enabled");
+  G_Printf("Fireteam noghost %s be toggled by players.\n",
+           level.noFTNoGhost ? "cannot" : "can");
+}
+
+static void initNoFTSaveLimit() {
+  int value;
+  G_SpawnInt("noftsavelimit", "0", &value);
+
+  level.noFTSaveLimit = value;
+  G_Printf("Fireteam savelimit %s be set by players.\n",
+           level.noFTSaveLimit ? "cannot" : "can");
+}
+
+static void initNoFTTeamjumpMode() {
+  int value;
+  G_SpawnInt("noftteamjumpmode", "0", &value);
+
+  level.noFTTeamjumpMode = value;
+  G_Printf("Fireteam teamjump mode %s be toggled by players.\n",
+           level.noFTTeamjumpMode ? "cannot" : "can");
 }
 } // namespace ETJump
 
@@ -1276,6 +1299,8 @@ void SP_worldspawn(void) {
   ETJump::initNoWallbug();
   ETJump::initNoNoclip();
   ETJump::initNoFTNoGhost();
+  ETJump::initNoFTSaveLimit();
+  ETJump::initNoFTTeamjumpMode();
 
   level.mapcoordsValid = qfalse;
   if (G_SpawnVector2D("mapcoordsmins", "-128 128",

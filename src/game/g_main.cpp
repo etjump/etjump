@@ -767,8 +767,6 @@ void G_CheckForCursorHints(gentity_t *ent) {
   gentity_t *checkEnt, *traceEnt = 0;
   playerState_t *ps;
   int hintType, hintDist, hintVal;
-  qboolean zooming;   // indirectHit means the checkent was not the ent
-                      // hit by the trace (checkEnt!=traceEnt)
   int trace_contents; // DHM - Nerve
   int numOfIgnoredEnts = 0;
 
@@ -778,7 +776,7 @@ void G_CheckForCursorHints(gentity_t *ent) {
 
   ps = &ent->client->ps;
 
-  zooming = (qboolean)(ps->eFlags & EF_ZOOMING);
+  const bool zooming = ps->eFlags & EF_ZOOMING;
 
   AngleVectors(ps->viewangles, forward, right, up);
 

@@ -1169,6 +1169,34 @@ CENTER PRINTING
 ===============================================================================
 */
 
+namespace ETJump {
+void logCenterPrint() {
+  std::string msg = cg.centerPrint;
+
+  // we don't want newlines in the console
+  // this is called before center print gets automatically word wrapped
+  // to fit on screen properly, so it's fairly safe to assume that
+  // explicit newlines should be replaced with whitespace
+  StringUtil::replaceAll(msg, "\n", " ");
+
+  // it's possible to send an empty center print/only whitespace to "clear"
+  // whatever is being displayed, but we don't want to log that obviously
+  if (msg.empty() || std::all_of(msg.begin(), msg.end(),
+                                 [](const char c) { return isspace(c); })) {
+    return;
+  }
+
+  // don't log consecutive messages that are being re-triggered
+  if (cg.time + cg_centertime.integer * 1000 > cg.lastCenterPrintLogTime &&
+      Q_stricmp(msg.c_str(), cg.lastLoggedCenterPrint)) {
+    cg.lastCenterPrintLogTime = cg.time;
+    Q_strncpyz(cg.lastLoggedCenterPrint, msg.c_str(),
+               sizeof(cg.lastLoggedCenterPrint));
+    CG_Printf("%s\n", msg.c_str());
+  }
+}
+}
+
 /*
 ==============
 CG_CenterPrint
@@ -1179,7 +1207,8 @@ for a few moments
 */
 #define CP_LINEWIDTH 56 // NERVE - SMF
 
-void CG_CenterPrint(const char *str, int y, int charWidth) {
+void CG_CenterPrint(const char *str, const int y, const int charWidth,
+                    const bool log) {
   char *s;
   int i, len;                    // NERVE - SMF
   qboolean neednewline = qfalse; // NERVE - SMF
@@ -1192,6 +1221,10 @@ void CG_CenterPrint(const char *str, int y, int charWidth) {
 
   Q_strncpyz(cg.centerPrint, str, sizeof(cg.centerPrint));
   cg.centerPrintPriority = priority; // NERVE - SMF
+
+  if (log && etj_logCenterPrint.integer) {
+    ETJump::logCenterPrint();
+  }
 
   // NERVE - SMF - turn spaces into newlines, if we've run over the
   // linewidth
@@ -1234,8 +1267,8 @@ Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
 */
-void CG_PriorityCenterPrint(const char *str, int y, int charWidth,
-                            int priority) {
+void CG_PriorityCenterPrint(const char *str, const int y, const int charWidth,
+                            const int priority, const bool log) {
   char *s;
   int i, len;                    // NERVE - SMF
   qboolean neednewline = qfalse; // NERVE - SMF
@@ -1247,6 +1280,10 @@ void CG_PriorityCenterPrint(const char *str, int y, int charWidth,
 
   Q_strncpyz(cg.centerPrint, str, sizeof(cg.centerPrint));
   cg.centerPrintPriority = priority; // NERVE - SMF
+
+  if (log && etj_logCenterPrint.integer) {
+    ETJump::logCenterPrint();
+  }
 
   // NERVE - SMF - turn spaces into newlines, if we've run over the
   // linewidth
@@ -1300,6 +1337,10 @@ static void CG_DrawCenterString(void) {
   if (!color) {
     cg.centerPrintTime = 0;
     cg.centerPrintPriority = 0;
+
+    // center print has faded, clear last logged message
+    // to allow same message to be re-logged
+    memset(cg.lastLoggedCenterPrint, 0, sizeof(cg.lastLoggedCenterPrint));
     return;
   }
 
@@ -2555,7 +2596,7 @@ static void CG_DrawSpectatorMessage(void) {
     return;
   }
 
-  if (trap_Key_GetCatcher() & KEYCATCH_UI) {
+  if (trap_Key_GetCatcher() & KEYCATCH_UI && !cg.chatMenuOpen) {
     return;
   }
 
@@ -2641,27 +2682,29 @@ static void CG_DrawLimboMessage(void) {
     return;
   }
 
-  if (trap_Key_GetCatcher() & KEYCATCH_UI) {
+  if (trap_Key_GetCatcher() & KEYCATCH_UI && !cg.chatMenuOpen) {
     return;
   }
 
-  if (cg_descriptiveText.integer) {
-    str = "You are wounded and waiting for a medic.";
-    ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
-                       str.c_str(), 0, 0);
-    y += 18;
-
-    str = "Press JUMP to go into reinforcement queue.";
-    ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
-                       str.c_str(), 0, 0);
-    y += 18;
-
-    // JPW NERVE
-    str = "Reinforcements deploy in " +
-          ETJump::getSecondsString(CG_CalculateReinfTime(qfalse)) + ".";
-    ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
-                       str.c_str(), 0, 0);
+  if (!cg_descriptiveText.integer) {
+    return;
   }
+
+  str = "You are wounded and waiting for a medic.";
+  ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
+                     str.c_str(), 0, 0);
+  y += 18;
+
+  str = "Press JUMP to go into reinforcement queue.";
+  ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
+                     str.c_str(), 0, 0);
+  y += 18;
+
+  // JPW NERVE
+  str = "Reinforcements deploy in " +
+        ETJump::getSecondsString(CG_CalculateReinfTime(qfalse)) + ".";
+  ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
+                     str.c_str(), 0, 0);
 }
 // -NERVE - SMF
 
@@ -2732,28 +2775,28 @@ static void CG_DrawJumpDelay(void) {
 CG_DrawFollow
 =================
 */
-static qboolean CG_DrawFollow(void) {
+static void CG_DrawFollow() {
   // MV following info for mainview
   if (CG_ViewingDraw()) {
-    return (qtrue);
+    return;
   }
 
   if (!(cg.snap->ps.pm_flags & PMF_FOLLOW)) {
-    return (qfalse);
+    return;
   }
 
-  if (trap_Key_GetCatcher() & KEYCATCH_UI) {
-    return qfalse;
+  if (trap_Key_GetCatcher() & KEYCATCH_UI && !cg.chatMenuOpen) {
+    return;
   }
 
-  if (cg.snap->ps.clientNum != cg.clientNum) {
-    std::string str = ETJump::stringFormat(
-        "^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name);
-    ETJump::DrawString(INFOTEXT_STARTX, 118 + 12, 0.23f, 0.25f, colorWhite,
-                       qfalse, str.c_str(), 0, ITEM_TEXTSTYLE_SHADOWED);
+  if (cg.snap->ps.clientNum == cg.clientNum) {
+    return;
   }
 
-  return (qtrue);
+  const std::string str = ETJump::stringFormat(
+      "^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name);
+  ETJump::DrawString(INFOTEXT_STARTX, 118 + 12, 0.23f, 0.25f, colorWhite,
+                     qfalse, str.c_str(), 0, ITEM_TEXTSTYLE_SHADOWED);
 }
 
 /*
@@ -3374,7 +3417,9 @@ void CG_DrawCompassIcon(float x, float y, float w, float h, vec3_t origin,
   x += w;
   y += h;
 
-  { w = sqrt((w * w) + (h * h)) / 3.f * 2.f * 0.9f; }
+  {
+    w = sqrt((w * w) + (h * h)) / 3.f * 2.f * 0.9f;
+  }
 
   x = x + (cos(angle) * w);
   y = y + (sin(angle) * w);

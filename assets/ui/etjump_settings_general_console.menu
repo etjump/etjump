@@ -55,8 +55,9 @@ menuDef {
         YESNO               (SETTINGS_ITEM_POS(3), "Console shader:", 0.2, SETTINGS_ITEM_H, "etj_consoleShader", "Draw console background shader (vid_restart required)\netj_consoleShader")
         COMBO               (SETTINGS_COMBO_POS(4), "Console color:", 0.2, SETTINGS_ITEM_H, "etj_consoleColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets console color when console shader is disabled (vid_restart required)\netj_consoleColor")
         YESNO               (SETTINGS_ITEM_POS(5), "Log banners:", 0.2, SETTINGS_ITEM_H, "etj_logBanner", "Log banners into console\netj_logBanner")
-        YESNO               (SETTINGS_ITEM_POS(6), "Notify messages:", 0.2, SETTINGS_ITEM_H, "etj_drawNotify", "Draw console output at top left\netj_drawNotify (con_drawnotify)")
-        COMBO               (SETTINGS_COMBO_POS(7), "Renderer speeds:", 0.2, SETTINGS_ITEM_H, "etj_speeds", cvarFloatList { "Off" 0 "Surfaces" 1 "Culling" 2 "Viewcluster" 3 "Dlights" 4 "Render distance" 5 "Flares" 6 "Decals" 7 }, none, "Output various render statistics to console\netj_speeds (r_speeds)")
+        YESNO               (SETTINGS_ITEM_POS(6), "Log center prints:", 0.2, SETTINGS_ITEM_H, "etj_logCenterPrint", "Log center prints into console (excl. save messages)\netj_logCenterPrint")
+        YESNO               (SETTINGS_ITEM_POS(7), "Notify messages:", 0.2, SETTINGS_ITEM_H, "etj_drawNotify", "Draw console output at top left\netj_drawNotify (con_drawnotify)")
+        COMBO               (SETTINGS_COMBO_POS(8), "Renderer speeds:", 0.2, SETTINGS_ITEM_H, "etj_speeds", cvarFloatList { "Off" 0 "Surfaces" 1 "Culling" 2 "Viewcluster" 3 "Dlights" 4 "Render distance" 5 "Flares" 6 "Decals" 7 }, none, "Output various render statistics to console\netj_speeds (r_speeds)")
 
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
