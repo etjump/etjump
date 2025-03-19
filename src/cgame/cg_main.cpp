@@ -677,6 +677,8 @@ vmCvar_t etj_autoSprint;
 
 vmCvar_t etj_logCenterPrint;
 
+vmCvar_t etj_onDemoPlaybackStart;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1270,6 +1272,8 @@ cvarTable_t cvarTable[] = {
     {&etj_autoSprint, "etj_autoSprint", "0", CVAR_ARCHIVE},
 
     {&etj_logCenterPrint, "etj_logCenterPrint", "0", CVAR_ARCHIVE},
+
+    {&etj_onDemoPlaybackStart, "etj_onDemoPlaybackStart", "", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

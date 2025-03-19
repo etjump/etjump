@@ -58,6 +58,7 @@ menuDef {
         SLIDER              (SETTINGS_ITEM_POS(7), "Max FOV speed:", 0.2, SETTINGS_ITEM_H, movie_fovMaxSpeed 1200 500 2500 10, "Speed required to reach maximum FOV\nmovie_fovMaxSpeed")
         EDITFIELD_EXT       (SETTINGS_EF_POS(8), "Freecam camera lock:", 0.2, SETTINGS_ITEM_H, "b_demo_lookat", 5, 5, "Entity number to lock viewangles towards to when in freecam mode, -1 to disable\nb_demo_lookat")
         EDITFIELD_EXT       (SETTINGS_EF_POS(9), "Demo queue directory:", 0.2, SETTINGS_ITEM_H, "etj_demoQueueDir", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Directory inside 'demos' to playback demo queue from\nLeave empty to playback from the root of 'demos' directory\netj_demoQueueDir")
+        EDITFIELD_EXT       (SETTINGS_EF_POS(10), "On playback start:", 0.2, SETTINGS_ITEM_H, "etj_onDemoPlaybackStart", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Command(s) to execute on the first frame of demo playback\nThis also gets re-executed if 'vid_restart' is used during playback\netj_onDemoPlaybackStart")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

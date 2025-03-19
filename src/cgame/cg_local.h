@@ -2797,6 +2797,8 @@ extern vmCvar_t etj_autoSprint;
 
 extern vmCvar_t etj_logCenterPrint;
 
+extern vmCvar_t etj_onDemoPlaybackStart;
+
 //
 // cg_main.c
 //
