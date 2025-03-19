@@ -127,6 +127,9 @@ extern vmCvar_t etj_menuSensitivity;
 
 extern vmCvar_t ui_currentChangelog;
 
+extern vmCvar_t etj_demoQueueCurrent;
+extern vmCvar_t etj_demoQueueDir;
+
 //
 // ui_qmenu.c
 //
@@ -991,7 +994,7 @@ void UI_SPSkillMenu_Cache(void);
 // ui_syscalls.c
 //
 void trap_Print(const char *string);
-void trap_Error(const char *string);
+[[noreturn]] void trap_Error(const char *string);
 int trap_Milliseconds(void);
 void trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName,
                         const char *defaultValue, int flags);
@@ -1132,5 +1135,8 @@ void parseCustomvote();
 void resetCustomvotes();
 
 void toggleSettingsMenu();
+
+class DemoQueue;
+extern std::unique_ptr<DemoQueue> demoQueue;
 } // namespace ETJump
 #endif

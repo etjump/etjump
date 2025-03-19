@@ -4,7 +4,7 @@
 #include "../game/etj_syscall_ext_shared.h"
 
 static intptr_t(QDECL *syscall)(intptr_t arg,
-                                ...) = (intptr_t(QDECL *)(intptr_t, ...)) - 1;
+                                ...) = (intptr_t(QDECL *)(intptr_t, ...))-1;
 
 #if defined(__MACOS__)
   #ifndef __GNUC__
@@ -46,7 +46,10 @@ void trap_PumpEventLoop(void) {
 void trap_Print(const char *fmt) { SystemCall(CG_PRINT, fmt); }
 
 // coverity[+kill]
-void trap_Error(const char *fmt) { SystemCall(CG_ERROR, fmt); }
+[[noreturn]] void trap_Error(const char *fmt) {
+  SystemCall(CG_ERROR, fmt);
+  UNREACHABLE
+}
 
 int trap_Milliseconds(void) { return SystemCall(CG_MILLISECONDS); }
 

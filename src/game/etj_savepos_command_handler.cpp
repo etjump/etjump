@@ -40,12 +40,7 @@ void SavePosHandler::execSaveposCommand(gentity_t *ent,
   }
 
   if (ent->client->ps.stats[STAT_HEALTH] <= GIB_HEALTH) {
-    ent->client->respawnFromLoad = true;
-    // set origin from savepos before calling respawn, so we can grab
-    // the spawnpoint location from the savepos
-    G_SetOrigin(ent, data.pos.origin);
     respawn(ent);
-    ent->client->respawnFromLoad = false;
   }
 
   game.timerunV2->interrupt(ClientNum(ent));

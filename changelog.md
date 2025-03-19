@@ -1,3 +1,22 @@
+# ETJump 3.3.4
+
+* fixed demo subdirectories not loading on replays menu on Windows [#1602](https://github.com/etjump/etjump/pull/1602)
+* fixed nametag interpolation breaking non-ascii characters in the rest of the chat message [#1606](https://github.com/etjump/etjump/pull/1606)
+* several fixes to flamethrower [#1607](https://github.com/etjump/etjump/pull/1607)
+  * fixed not being able to set yourself on fire
+  * fixed visual bug with flamechunks interacting with nonsolid players
+  * fixed potential crash when a flamechunk spawned by `props_flamethrower` entity interacted with players/other entities
+* fixed chat replay storing interpolated names incorrectly if the name had an escape character [#1608](https://github.com/etjump/etjump/pull/1608)
+* fixed potential buffer overflow with `stylestring` key on `dlight` entities [1622](https://github.com/etjump/etjump/pull/1622)
+* fixed listbox & dropdown menus changing selected entry when dragging the scrollbar and moving cursor over the list [#1623](https://github.com/etjump/etjump/pull/1623)
+* fixed reversed dropdown menus not displaying background [#1626](https://github.com/etjump/etjump/pull/1626)
+* reverted change done in 3.3.1 which changed the way `etj_autoLoad` works [#1635](https://github.com/etjump/etjump/pull/1635)
+  * players are now initially placed on their active spawnpoint, and then teleported to their last save position, like `etj_autoLoad` worked prior to the change
+  * this ensures players are not able to bypass any setup that a mapper has designed to be ran on player spawn, such as init triggers
+* flipped logic in demo compatibility print for `sv_fps` detection support - prints are now only visible when using an outdated method, or if the info is not available [#1632](https://github.com/etjump/etjump/pull/1632)
+* fixed flamethrower burn status persisting on respawn [#1637](https://github.com/etjump/etjump/pull/1637)
+* spectator help text/follow text no longer disappears when chat window is opened [#1640](https://github.com/etjump/etjump/pull/1640)
+
 # ETJump 3.3.3
 
 * fixed a crash on UI keyhandling on 2.60b and ETL due to out of bounds array access in engine [#1601](https://github.com/etjump/etjump/pull/1601)

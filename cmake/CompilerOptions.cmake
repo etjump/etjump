@@ -81,6 +81,7 @@ function(create_compiler_opts target)
 			/Gy                # generate useful information for optimizer
 			/Ob2               # let compiler inline freely
 			/fp:fast>          # fast floating point math
+			/FC                # full path of source code file in diagnostics (/Zi in debug implies this)
 		$<$<CONFIG:Debug>:
 			/Ob0               # no inlining
 			/Od                # no optimizations
@@ -89,6 +90,10 @@ function(create_compiler_opts target)
 			/RTC1>)            # run-time checking
 
 	add_library(${target} INTERFACE)
+
+	# we use this to print out relative path to a source code file for __FILE__ macro replacement
+	string(LENGTH "${CMAKE_SOURCE_DIR}/" SOURCE_PATH_SIZE)
+	add_definitions("-DSOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}")
 
 	if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 		target_compile_options(${target} INTERFACE ${MSVC_CXX_FLAGS})

@@ -211,6 +211,16 @@ void Sys_PumpEvents(void);
 
 //=============================================================
 
+// relative path to a source file (src/foo/bar.cpp)
+#define SRC_FILENAME ((__FILE__) + (SOURCE_PATH_SIZE))
+
+// tell compilers that trap_Error syscalls abort execution
+#if defined(_MSC_VER) && !defined(__clang__) // MSVC
+  #define UNREACHABLE __assume(false);
+#else // GCC, Clang
+  #define UNREACHABLE __builtin_unreachable();
+#endif
+
 typedef unsigned char byte;
 
 typedef enum { qfalse, qtrue } qboolean;
@@ -225,6 +235,23 @@ typedef int qhandle_t;
 typedef int sfxHandle_t;
 typedef int fileHandle_t;
 typedef int clipHandle_t;
+
+// networked fields in entityState_t and playerState_t,
+// with their respective networked sizes
+typedef int net_uint2_t;
+typedef int net_uint4_t;
+typedef int net_uint7_t;
+typedef int net_uint8_t;
+typedef int net_uint9_t;
+typedef int net_uint10_t;
+typedef int net_uint16_t;
+typedef int net_uint24_t;
+
+typedef int net_int8_t;
+typedef int net_int16_t;
+typedef int net_int32_t;
+
+typedef float net_float;
 
 // #define	SND_NORMAL			0x000	// (default) Allow sound
 //  to be cut off only by the same sound on this channel
@@ -808,8 +835,15 @@ char *Q_strlwr(char *s1);
 char *Q_strupr(char *s1);
 
 // buffer size safe library replacements
-void Q_strncpyz(char *dest, const char *src, int destsize);
-void Q_strcat(char *dest, int size, const char *src);
+#define Q_strncpyz(dest, src, destsize)                                        \
+  Q_strncpyz_fn(dest, src, destsize, __func__, SRC_FILENAME, __LINE__)
+void Q_strncpyz_fn(char *dest, const char *src, int destsize, const char *func,
+                   const char *file, int line);
+
+#define Q_strcat(dest, size, src)                                              \
+  Q_strcat_fn(dest, size, src, __func__, SRC_FILENAME, __LINE__)
+void Q_strcat_fn(char *dest, int size, const char *src, const char *func,
+                 const char *file, int line);
 
 // strlen that discounts Quake color sequences
 int Q_PrintStrlen(const char *string);
@@ -818,7 +852,10 @@ char *Q_CleanStr(char *string);
 // removes whitespaces and other bad directory characters
 char *Q_CleanDirName(char *dirname);
 // safe strlen up to N chars
-size_t Q_strnlen(const char *str, size_t maxlen);
+#define Q_strnlen(str, maxlen)                                                 \
+  Q_strnlen_fn(str, maxlen, __func__, SRC_FILENAME, __LINE__)
+size_t Q_strnlen_fn(const char *str, size_t maxlen, const char *func,
+                    const char *file, int line);
 
 // #define _vsnprintf use_Q_vsnprintf
 // #define vsnprintf use_Q_vsnprintf
@@ -876,7 +913,7 @@ void RemoveDuplicates(char *str);
 void SortString(char *src);
 
 // this is only here so the functions in q_shared.c and bg_*.c can link
-void QDECL Com_Error(int level, const char *error, ...);
+[[noreturn]] void QDECL Com_Error(int level, const char *error, ...);
 void QDECL Com_Printf(const char *msg, ...);
 void QDECL Com_LocalPrintf(const char *msg, ...);
 
@@ -1139,7 +1176,7 @@ typedef struct {
 } gameState_t;
 
 // xkan, 1/10/2003 - adapted from original SP
-typedef enum {
+typedef enum : net_uint2_t {
   AISTATE_RELAXED,
   AISTATE_QUERY,
   AISTATE_ALERT,
@@ -1173,208 +1210,163 @@ typedef enum {
 
 #define PS_PMOVEFRAMECOUNTBITS 6
 
-// playerState_t is the information needed by both the client and server
-// to predict player motion and actions
-// nothing outside of pmove should modify these, or some degree of prediction
-// error will occur
-
-// you can't add anything to this without modifying the code in msg.c
-// (Gordon: unless it doesnt need transmitted over the network, in which case it
-// should prolly go in the new pmext struct anyway)
-
-// playerState_t is a full superset of entityState_t as it is used by players,
-// so if a playerState_t is transmitted, the entityState_t can be fully derived
-// from it.
-//
-// NOTE: all fields in here must be 32 bits (or those within sub-structures)
-
-// actual communicated field sizes (msg.c)
-// unless mentioned otherwise, everything is unsigned
-// floats might be short packed if they fit within range
-
-// commandTime              32
-// pm_type                  8
-// bobCycle                 8
-// pm_flags                 16
-// pm_time                  16 (signed)
-// origin[0-2]              32.f
-// velocity[0-2]            32.f
-// weaponTime               16 (signed)
-// weaponDelay              16 (signed)
-// grenadeTimeLeft          16 (signed)
-// gravity                  16
-// leanf                    32.f
-// speed                    16
-// delta_angles[0-2]        16
-// groundEntityNum          10 (GENTITYNUM_BITS)
-// legsTimer                16
-// legsAnim                 10 (ANIM_BITS)
-// torsoTimer               16
-// torsoAnim                10 (ANIM_BITS)
-// movementDir              8
-// eFlags                   24
-// eventSequence            8
-// events[0-3]              8
-// eventParms[0-3]          8
-// oldEventSequence         ??? (not in msg.c)
-// externalEvent            ??? (not in msg.c)
-// externalEventParm        ??? (not in msg.c)
-// externalEventTime        ??? (not in msg.c)
-// clientNum                8
-// weapon                   7
-// weaponstate              4
-// item                     ??? (not in msg.c)
-// viewangles[0-2]          32.f
-// viewheight               8 (signed)
-// damageEvent              8
-// damageYaw                8
-// damagePitch              8
-// damageCount              8
-// stats[0-15]              16
-// persistant[0-15]         16
-// powerups[0-15]           32
-// ammo[0-63]               16
-// ammoclip[0-63]           16
-// holdable[0-15]           16
-// holding                  ??? (not in msg.c)
-// weapons[0-1]             32
-// weapAnim                 10
-// mins[0-2]                32.f
-// maxs[0-2]                32.f
-// crouchMaxZ               32.f
-// crouchViewHeight         32.f
-// standViewHeight          32.f
-// deadViewHeight           32.f
-// runSpeedScale            32.f
-// sprintSpeedScale         32.f
-// crouchSpeedScale         32.f
-// friction                 32.f
-// viewlocked               8
-// viewlocked_entNum        16
-// nextWeapon               8
-// teamNum                  8
-// onFireStart              32
-// curWeapHeat              8
-// aimSpreadScale           8
-// serverCursorHint         8
-// serverCursorHintVal      8
-// classWeaponTime          32
-// identifyClient           8
-// identifyClientHealth     8
-// aiState[0-4]             2
+/*
+ * playerState_t is the information needed by both the client and server
+ * to predict player motion and actions. Nothing outside Pmove should
+ * modify these, or some degree of prediction error will occur.
+ *
+ * You can't add anything to this without modifying the code in msg.c
+ * (Gordon: unless it doesn't need transmitted over the network,
+ * in which case it should proxy go in the new text struct anyway)
+ *
+ * playerState_t is a full superset of entityState_t as it is used by players,
+ * so if a playerState_t is transmitted, the entityState_t can be fully derived
+ * from it.
+ *
+ * NOTE: all fields in here must be 32 bits (or those within sub-structures)
+ *
+ * The actual communicated field sizes are represented by the typedefs.
+ * If a field is not declared as a net_* type, it is likely not communicated
+ * (unless it's an enum or another typedef such as vec3_t).
+ *
+ * Fields that are NOT networked:
+ *
+ * oldEventSequence
+ * externalEvent
+ * externalEventParm
+ * externalEventTime
+ * item
+ * holding
+ * serverCursorHintTrace
+ * ping
+ * pmove_framecount
+ * entityEventSequence
+ * sprintExertTime
+ * jumpTime
+ * aimSpreadScaleFloat
+ * lastFireTime
+ * quickGrenTime
+ * leanStopDebounceTime
+ * weapHeat
+ */
 
 typedef struct playerState_s {
-  int commandTime; // cmd->serverTime of last executed command
-  int pm_type;
-  int bobCycle; // for view bobbing and footstep generation
-  int pm_flags; // ducked, jump_held, etc
-  int pm_time;
+  net_int32_t commandTime; // cmd->serverTime of last executed command
+  net_uint8_t pm_type;
+  net_uint8_t bobCycle;  // for view bobbing and footstep generation
+  net_uint16_t pm_flags; // ducked, jump_held, etc
+  net_int16_t pm_time;
 
   vec3_t origin;
   vec3_t velocity;
-  int weaponTime;
-  int weaponDelay;     // for weapons that don't fire immediately when
-                       // 'fire' is hit (grenades, venom, ...)
-  int grenadeTimeLeft; // for delayed grenade throwing.  this is set to
-                       // a #define for grenade lifetime when the attack
-                       // button goes down, then when attack is released
-                       // this is the amount of time left before the
-                       // grenade goes off (or if it gets to 0 while in
-                       // players hand, it explodes)
+  net_int16_t weaponTime;
 
-  int gravity;
-  float leanf; // amount of 'lean' when player is looking around corner
-               // //----(SA)	added
+  // for weapons that don't fire immediately when 'fire' is hit
+  // (grenades, panzer, satchel...)
+  net_int16_t weaponDelay;
 
-  int speed;
-  int delta_angles[3]; // add to command angles to get view direction
-                       // changed by spawns, rotating objects, and
-                       // teleporters
+  // for delayed grenade throwing. This is set to 5s when
+  // the attack button goes down, then when attack is released,
+  // this is the amount of time left before the grenade goes off
+  // (or if it gets to 0 while in players hand, it explodes)
+  net_int16_t grenadeTimeLeft;
 
-  int groundEntityNum; // ENTITYNUM_NONE = in air
+  net_uint16_t gravity;
+  net_float leanf; // amount of 'lean' when player is looking around corner
 
-  int legsTimer; // don't change low priority animations until this runs
-                 // out
-  int legsAnim;  // mask off ANIM_TOGGLEBIT
+  net_uint16_t speed;
 
-  int torsoTimer; // don't change low priority animations until this
-                  // runs out
-  int torsoAnim;  // mask off ANIM_TOGGLEBIT
+  // add to command angles to get view direction changed by spawns,
+  // rotating objects, and teleporters
+  net_uint16_t delta_angles[3];
 
-  int movementDir; // a number 0 to 7 that represents the reletive angle
-                   // of movement to the view angle (axial and
-                   // diagonals) when at rest, the value will remain
-                   // unchanged used to twist the legs during strafing
+  net_uint10_t groundEntityNum; // ENTITYNUM_NONE = in air
 
-  int eFlags; // copied to entityState_t->eFlags
+  // don't change low priority animations until this runs out
+  net_uint16_t legsTimer;
+  net_uint10_t legsAnim; // mask off ANIM_TOGGLEBIT
 
-  int eventSequence; // pmove generated events
-  int events[MAX_EVENTS];
-  int eventParms[MAX_EVENTS];
-  int oldEventSequence; // so we can see which events have been added
-                        // since we last converted to entityState_t
+  // don't change low priority animations until this runs out
+  net_uint16_t torsoTimer;
+  net_uint10_t torsoAnim; // mask off ANIM_TOGGLEBIT
+
+  // a number 0 to 7 that represents the reletive angle of movement
+  // to the view angle (axial and diagonals)
+  // when at rest, the value will remain unchanged
+  // used to twist the legs during strafing
+  net_uint8_t movementDir;
+
+  // copied to entityState_t->eFlags
+  net_uint24_t eFlags;
+
+  net_uint8_t eventSequence; // pmove generated events
+  net_uint8_t events[MAX_EVENTS];
+  net_uint8_t eventParms[MAX_EVENTS];
+
+  // so we can see which events have been added
+  // since we last converted to entityState_t
+  int oldEventSequence;
 
   int externalEvent; // events set on player from another source
   int externalEventParm;
   int externalEventTime;
 
-  int clientNum; // ranges from 0 to MAX_CLIENTS-1
+  net_uint8_t clientNum; // ranges from 0 to MAX_CLIENTS-1
 
   // weapon info
-  int weapon; // copied to entityState_t->weapon
-  int weaponstate;
+  net_uint7_t weapon; // copied to entityState_t->weapon
+  net_uint4_t weaponstate;
 
   // item info
   int item;
 
   vec3_t viewangles; // for fixed views
-  int viewheight;
+  net_int8_t viewheight;
 
   // damage feedback
-  int damageEvent; // when it changes, latch the other parms
-  int damageYaw;
-  int damagePitch;
-  int damageCount;
+  net_uint8_t damageEvent; // when it changes, latch the other parms
+  net_uint8_t damageYaw;
+  net_uint8_t damagePitch;
+  net_uint8_t damageCount;
 
-  int stats[MAX_STATS];
-  int persistant[MAX_PERSISTANT]; // stats that aren't cleared on death
-  int powerups[MAX_POWERUPS];     // level.time that the powerup runs out
-  int ammo[MAX_WEAPONS];          // total amount of ammo
-  int ammoclip[MAX_WEAPONS];      // ammo in clip
-  int holdable[16];
+  net_uint16_t stats[MAX_STATS];
+  net_uint16_t persistant[MAX_PERSISTANT]; // stats that aren't cleared on death
+  net_int32_t powerups[MAX_POWERUPS]; // level.time that the powerup runs out
+  net_uint16_t ammo[MAX_WEAPONS];     // total amount of ammo
+  net_uint16_t ammoclip[MAX_WEAPONS]; // ammo in clip
+  net_uint16_t holdable[16];
   int holding; // the current item in holdable[] that is selected (held)
-  int weapons[MAX_WEAPONS / (sizeof(int) * 8)]; // 64 bits for weapons held
+  // 64 bits for weapons held
+  net_int32_t weapons[MAX_WEAPONS / (sizeof(int) * 8)];
 
   // Ridah, allow for individual bounding boxes
   vec3_t mins, maxs;
-  float crouchMaxZ;
-  float crouchViewHeight, standViewHeight, deadViewHeight;
+  net_float crouchMaxZ;
+  net_float crouchViewHeight, standViewHeight, deadViewHeight;
   // variable movement speed
-  float runSpeedScale, sprintSpeedScale, crouchSpeedScale;
+  net_float runSpeedScale, sprintSpeedScale, crouchSpeedScale;
   // done.
 
   // Ridah, view locking for mg42
-  int viewlocked;
-  int viewlocked_entNum;
+  net_uint8_t viewlocked;
+  net_uint16_t viewlocked_entNum;
 
-  float friction;
+  net_float friction;
 
-  int nextWeapon;
-  int teamNum; // Arnout: doesn't seem to be communicated over the net
-
-  // Rafael
-  // int			gunfx;
+  net_uint8_t nextWeapon;
+  net_uint8_t teamNum;
 
   // RF, burning effect is required for view blending effect
-  int onFireStart;
+  net_int32_t onFireStart;
 
-  int serverCursorHint;    // what type of cursor hint the server is
-                           // dictating
-  int serverCursorHintVal; // a value (0-255) associated with the above
+  // what type of cursor hint the server is dictating
+  net_uint8_t serverCursorHint;
+  // a value (0-255) associated with the above
+  net_uint8_t serverCursorHintVal;
 
-  trace_t serverCursorHintTrace; // not communicated over net, but used
-                                 // to store the current server-side
-                                 // cursorhint trace
+  // not communicated over net, but used to store
+  // the current server-side cursorhint trace
+  trace_t serverCursorHintTrace;
 
   // ----------------------------------------------------------------------
   // So to use persistent variables here, which don't need to come from
@@ -1399,19 +1391,20 @@ typedef struct playerState_s {
   int jumpTime;        // used in MP to prevent jump accel
   // jpw
 
-  int weapAnim; // mask off ANIM_TOGGLEBIT
-                // //----(SA)	added		// Arnout : DOES get
-                // send over the network
+  net_uint10_t weapAnim; // mask off ANIM_TOGGLEBIT
 
   qboolean releasedFire;
 
-  float aimSpreadScaleFloat; // (SA) the server-side aimspreadscale that
-                             // lets it track finer changes but still
-                             // only transmit the 8bit int to the client
-  int aimSpreadScale;        // 0 - 255 increases with angular movement
-                             // // Arnout : DOES get send over the network
-  int lastFireTime;          // used by server to hold last firing frame briefly
-                             // when randomly releasing trigger (AI)
+  // (SA) the server-side aimspreadscale that lets it track finer changes,
+  // but still only transmit the 8bit int to the client
+  float aimSpreadScaleFloat;
+  // 0 - 255 increases with angular movement
+  // // Arnout : DOES get send over the network
+  net_uint8_t aimSpreadScale;
+
+  // used by server to hold last firing frame briefly
+  // when randomly releasing trigger (AI)
+  int lastFireTime;
 
   int quickGrenTime;
 
@@ -1424,17 +1417,16 @@ typedef struct playerState_s {
   // currently see how to optimize this to one server->client
   // transmission "weapstatus" value.
 
+  // some weapons can overheat, this tracks (server-side) how hot
+  // each weapon currently is.
   // ETJump: unused, we track this in pmext instead
   // this doesn't get communicated though, weapHeat is communicated
   // by storing currently held weapon's heat to curWeapHeat
-  int weapHeat[MAX_WEAPONS]; // some weapons can overheat.  this tracks
-                             // (server-side) how hot each weapon
-                             // currently is.
-  int curWeapHeat;           // value for the currently selected weapon (for
-                             // transmission to client)		// Arnout : DOES
-                             // get send over the network
-  int identifyClient;        // NERVE - SMF
-  int identifyClientHealth;
+  int weapHeat[MAX_WEAPONS];
+  // value for the currently selected weapon (for transmission to client)
+  net_uint8_t curWeapHeat;
+  net_uint8_t identifyClient; // NERVE - SMF
+  net_uint8_t identifyClientHealth;
 
   aistateEnum_t aiState; // xkan, 1/10/2003
 } playerState_t;
@@ -1519,7 +1511,7 @@ typedef struct usercmd_s {
 // if entityState->solid == SOLID_BMODEL, modelindex is an inline model number
 #define SOLID_BMODEL 0xffffff
 
-typedef enum {
+typedef enum : net_uint8_t {
   TR_STATIONARY,
   TR_INTERPOLATE, // non-parametric, but interpolate between snapshots
   TR_LINEAR,
@@ -1552,15 +1544,6 @@ typedef struct {
   vec3_t trDelta; // velocity, etc
                   //----(SA)	removed
 } trajectory_t;
-
-// entityState_t is the information conveyed from the server
-// in an update message about entities that the client will
-// need to render in some way
-// Different eTypes may use the information in different ways
-// The messages are delta compressed, so it doesn't really matter if
-// the structure size is fairly large
-//
-// NOTE: all fields in here must be 32 bits (or those within sub-structures)
 
 typedef enum {
   ET_GENERAL,
@@ -1749,70 +1732,31 @@ static_assert(sizeof(entityTypeNames) / sizeof(entityTypeNames[0]) ==
                   ET_EVENTS + 1,
               "Entity types array size does not match enum list");
 
-// actual communicated field sizes (msg.c)
-
-// number                  10 (GENTITYNUM_BITS)
-// eType                   8
-// eFlags                  24
-// pos.trType              8
-// pos.trTime              32
-// pos.trDuration          32
-// pos.trBase[0-2]         32.f
-// pos.trDelta[0-2]        32.f
-// apos.trType             8
-// apos.trTime             32
-// apos.trDuration         32
-// apos.trBase[0-2]        32.f
-// apos.trDelta[0-2]       32.f
-// time                    32
-// time2                   32
-// origin[0-2]             32.f
-// origin2[0-2]            32.f
-// angles[0-2]             32.f
-// angles2[0-2]            32.f
-// otherEntityNum          10 (GENTITYNUM_BITS)
-// otherEntityNum2         10 (GENTITYNUM_BITS)
-// groundEntityNum         10 (GENTITYNUM_BITS)
-// constantLight           32
-// dl_intensity            32
-// loopSound               8
-// modelindex              9
-// modelindex2             9
-// clientNum               8
-// frame                   16
-// solid                   24
-// event                   10
-// eventParm               8
-// eventSequence           8
-// events[0-3]             8
-// eventParms[0-3]         8
-// powerups                16
-// weapon                  8
-// legsAnim                10 (ANIM_BITS)
-// torsoAnim               10 (ANIM_BITS)
-// density                 10
-// dmgFlags                32
-// onFireStart             32
-// onFireEnd               32
-// nextWeapon              8
-// teamNum                 8
-// effect1Time             32
-// effect2Time             32
-// effect3Time             32
-// aiState[0-4]            2
-// animMovetype            4
+/*
+ * entityState_t is the information conveyed from the server in an update
+ * message about entities that the client will need to render in some way.
+ * Different eTypes may use the information in different ways.
+ * The messages are delta compressed, so it doesn't really matter
+ * if the structure size is fairly large.
+ *
+ * Adding new fields to this and making them transmit over network
+ * would require changes in msg.c, so we cannot add anything new here.
+ * Use the fields sparingly when repurposing these.
+ *
+ * NOTE: all fields in here must be 32 bits (or those within sub-structures)
+ */
 
 typedef struct entityState_s {
-  int number; // entity index
-  int eType;  // changed from entityType_t to int to allow ET_EVENTS +
-              // eventNum
-  int eFlags;
+  net_uint8_t number; // entity index
+  // changed from entityType_t to int to allow ET_EVENTS + eventNum
+  net_uint8_t eType;
+  net_uint24_t eFlags;
 
   trajectory_t pos;  // for calculating position
   trajectory_t apos; // for calculating angles
 
-  int time;
-  int time2;
+  net_int32_t time;
+  net_int32_t time2;
 
   vec3_t origin;
   vec3_t origin2;
@@ -1820,61 +1764,59 @@ typedef struct entityState_s {
   vec3_t angles;
   vec3_t angles2;
 
-  int otherEntityNum; // shotgun sources, etc
-  int otherEntityNum2;
+  net_uint10_t otherEntityNum; // shotgun sources, etc
+  net_uint10_t otherEntityNum2;
 
-  int groundEntityNum; // -1 = in air
+  net_uint10_t groundEntityNum; // -1 = in air
 
-  int constantLight; // r + (g<<8) + (b<<16) + (intensity<<24)
-  int dl_intensity;  // used for coronas
-  int loopSound;     // constantly loop this sound
+  net_int32_t constantLight; // r + (g<<8) + (b<<16) + (intensity<<24)
+  net_int32_t dl_intensity;  // used for coronas
+  net_uint8_t loopSound;     // constantly loop this sound
 
-  int modelindex;
-  int modelindex2;
-  int clientNum; // 0 to (MAX_CLIENTS - 1), for players and corpses
-  int frame;
+  net_uint9_t modelindex;
+  net_uint9_t modelindex2;
+  net_uint8_t clientNum; // 0 to (MAX_CLIENTS - 1), for players and corpses
+  net_uint16_t frame;
 
-  int solid; // for client side prediction, trap_linkentity sets this
-             // properly
+  // for client side prediction
+  // trap_LinkEntity sets this properly if the entity has an inline model
+  net_uint24_t solid;
 
   // old style events, in for compatibility only
-  int event;
-  int eventParm;
+  net_uint8_t event;
+  net_uint8_t eventParm;
 
-  int eventSequence; // pmove generated events
-  int events[MAX_EVENTS];
-  int eventParms[MAX_EVENTS];
+  net_uint8_t eventSequence; // pmove generated events
+  net_uint8_t events[MAX_EVENTS];
+  net_uint8_t eventParms[MAX_EVENTS];
 
   // for players
-  int powerups;  // bit flags	// Arnout: used to store entState_t for
-                 // non-player entities (so we know to draw them
-                 // translucent clientsided)
-  int weapon;    // determines weapon and flash model, etc
-  int legsAnim;  // mask off ANIM_TOGGLEBIT
-  int torsoAnim; // mask off ANIM_TOGGLEBIT
-                 //	int		weapAnim;		// mask
-                 // off
-                 // ANIM_TOGGLEBIT	//----(SA) removed (weap anims
-                 // will be client-side only)
+  // bit flags
+  // Arnout: used to store entState_t for non-player entities
+  // (so we know to draw them translucent clientsided)
+  net_uint16_t powerups;
+  net_uint8_t weapon;     // determines weapon and flash model, etc
+  net_uint10_t legsAnim;  // mask off ANIM_TOGGLEBIT
+  net_uint10_t torsoAnim; // mask off ANIM_TOGGLEBIT
 
   // for particle effects, PlayerDensityFlags for players in entityState
-  int density;
+  net_uint10_t density;
 
-  int dmgFlags; // to pass along additional information for damage
-                // effects for players/ Also used for cursorhints for
-                // non-player entities
+  // to pass along additional information for damage effects for players
+  // Also used for cursorhints for non-player entities
+  net_int32_t dmgFlags;
 
   // Ridah
-  int onFireStart, onFireEnd;
+  net_int32_t onFireStart, onFireEnd;
 
-  int nextWeapon;
-  int teamNum;
+  net_uint8_t nextWeapon;
+  net_uint8_t teamNum;
 
-  int effect1Time, effect2Time, effect3Time;
+  net_int32_t effect1Time, effect2Time, effect3Time;
 
   aistateEnum_t aiState; // xkan, 1/10/2003
-  int animMovetype;      // clients can't derive movetype of other clients
-                         // for anim scripting system
+  // clients can't derive movetype of other clients for anim scripting system
+  net_uint4_t animMovetype;
 } entityState_t;
 
 typedef enum {

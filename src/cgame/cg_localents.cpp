@@ -3,6 +3,7 @@
 // processed entities, like smoke puffs, gibs, shells, etc.
 
 #include "cg_local.h"
+#include "../game/etj_numeric_utilities.h"
 
 // Ridah, increased this
 // #define	MAX_LOCAL_ENTITIES	512
@@ -1080,18 +1081,14 @@ CG_AddFadeRGB
 ====================
 */
 void CG_AddFadeRGB(localEntity_t *le) {
-  refEntity_t *re;
-  float c;
+  refEntity_t *re = &le->refEntity;
+  const float c =
+      static_cast<float>(le->endTime - cg.time) * le->lifeRate * 0xff;
 
-  re = &le->refEntity;
-
-  c = (le->endTime - cg.time) * le->lifeRate;
-  c *= 0xff;
-
-  re->shaderRGBA[0] = le->color[0] * c;
-  re->shaderRGBA[1] = le->color[1] * c;
-  re->shaderRGBA[2] = le->color[2] * c;
-  re->shaderRGBA[3] = le->color[3] * c;
+  for (int i = 0; i < 4; i++) {
+    re->shaderRGBA[i] =
+        static_cast<byte>(Numeric::clamp(le->color[i] * c, 0, 255));
+  }
 
   trap_R_AddRefEntityToScene(re);
 }

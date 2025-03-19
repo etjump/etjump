@@ -7,7 +7,7 @@
 // g_syscalls.asm is included instead when building a qvm
 
 static intptr_t(QDECL *syscall)(intptr_t arg,
-                                ...) = (intptr_t(QDECL *)(intptr_t, ...)) - 1;
+                                ...) = (intptr_t(QDECL *)(intptr_t, ...))-1;
 
 #if defined(__MACOS__)
   #ifndef __GNUC__
@@ -42,7 +42,10 @@ inline int PASSFLOAT(const float &f) noexcept {
 void trap_Printf(const char *fmt) { SystemCall(G_PRINT, fmt); }
 
 // coverity[+kill]
-void trap_Error(const char *fmt) { SystemCall(G_ERROR, fmt); }
+[[noreturn]] void trap_Error(const char *fmt) {
+  SystemCall(G_ERROR, fmt);
+  UNREACHABLE
+}
 
 int trap_Milliseconds(void) { return SystemCall(G_MILLISECONDS); }
 int trap_Argc(void) { return SystemCall(G_ARGC); }

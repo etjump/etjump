@@ -759,15 +759,17 @@ Q_strncpyz
 Safe strncpy that ensures a trailing zero
 =============
 */
-void Q_strncpyz(char *dest, const char *src, int destsize) {
+void Q_strncpyz_fn(char *dest, const char *src, const int destsize,
+                   const char *func, const char *file, const int line) {
   if (!dest) {
-    Com_Error(ERR_FATAL, "Q_strncpyz: NULL dest");
+    Com_Error(ERR_FATAL, "Q_strncpyz: NULL dest (%s, %s:%i)", func, file, line);
   }
   if (!src) {
-    Com_Error(ERR_FATAL, "Q_strncpyz: NULL src");
+    Com_Error(ERR_FATAL, "Q_strncpyz: NULL src (%s, %s:%i)", func, file, line);
   }
   if (destsize < 1) {
-    Com_Error(ERR_FATAL, "Q_strncpyz: destsize < 1");
+    Com_Error(ERR_FATAL, "Q_strncpyz: destsize < 1 (%s, %s:%i)", func, file,
+              line);
   }
 
   strncpy(dest, src, destsize - 1);
@@ -849,14 +851,19 @@ char *Q_strupr(char *s1) {
 }
 
 // never goes past bounds or leaves without a terminating 0
-void Q_strcat(char *dest, int size, const char *src) {
-  int l1;
+void Q_strcat_fn(char *dest, const int size, const char *src, const char *func,
+                 const char *file, const int line) {
+  const int l1 = static_cast<int>(strlen(dest));
 
-  l1 = strlen(dest);
   if (l1 >= size) {
-    Com_Error(ERR_FATAL, "Q_strcat: already overflowed");
+    Com_Error(ERR_FATAL, "Q_strcat: already overflowed (%s, %s:%i)", func, file,
+              line);
   }
-  Q_strncpyz(dest + l1, src, size - l1);
+
+  // we want to use the actual function here and pass the arguments to that,
+  // otherwise this gives no useful debug info as the func will be Q_strcat_fn,
+  // which doesn't tell where this call originated from
+  Q_strncpyz_fn(dest + l1, src, size - l1, func, file, line);
 }
 
 int Q_PrintStrlen(const char *string) {
@@ -939,9 +946,10 @@ char *Q_CleanDirName(char *dirname) {
   return dirname;
 }
 
-size_t Q_strnlen(const char *str, size_t maxlen) {
+size_t Q_strnlen_fn(const char *str, const size_t maxlen, const char *func,
+                    const char *file, const int line) {
   if (!str) {
-    Com_Error(ERR_FATAL, "Q_strnlen: NULL str");
+    Com_Error(ERR_FATAL, "Q_strnlen: NULL str (%s, %s:%i)", func, file, line);
     return 0; // blah blah silence warning about str being null
   }
 

@@ -675,6 +675,8 @@ vmCvar_t etj_recordingStatusY;
 vmCvar_t etj_smoothAngles;
 vmCvar_t etj_autoSprint;
 
+vmCvar_t etj_logCenterPrint;
+
 vmCvar_t etj_onDemoPlaybackStart;
 
 typedef struct {
@@ -1269,6 +1271,8 @@ cvarTable_t cvarTable[] = {
     {&etj_smoothAngles, "etj_smoothAngles", "1", CVAR_ARCHIVE},
     {&etj_autoSprint, "etj_autoSprint", "0", CVAR_ARCHIVE},
 
+    {&etj_logCenterPrint, "etj_logCenterPrint", "0", CVAR_ARCHIVE},
+
     {&etj_onDemoPlaybackStart, "etj_onDemoPlaybackStart", "", CVAR_ARCHIVE},
 };
 
@@ -1475,7 +1479,7 @@ void QDECL CG_Printf(const char *msg, ...) {
   trap_Print(text);
 }
 
-void QDECL CG_Error(const char *msg, ...) {
+[[noreturn]] void QDECL CG_Error(const char *msg, ...) {
   va_list argptr;
   char text[1024];
 
@@ -1489,7 +1493,7 @@ void QDECL CG_Error(const char *msg, ...) {
 #ifndef CGAME_HARD_LINKED
 // this is only here so the functions in q_shared.c and bg_*.c can link (FIXME)
 
-void QDECL Com_Error(int level, const char *error, ...) {
+[[noreturn]] void QDECL Com_Error(int level, const char *error, ...) {
   va_list argptr;
   char text[1024];
 
@@ -1741,7 +1745,7 @@ void CG_SetupDlightstyles(void) {
     cent = &cg_entities[entnum];
 
     token = COM_Parse(&str); // stylestring
-    Q_strncpyz(cent->dl_stylestring, token, strlen(token));
+    Q_strncpyz(cent->dl_stylestring, token, sizeof(cent->dl_stylestring));
 
     token = COM_Parse(&str); // offset
     cent->dl_frame = Q_atoi(token);
