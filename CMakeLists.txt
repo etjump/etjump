@@ -11,7 +11,7 @@ string(REGEX MATCH "VERSION_PATCH ([0-9]+)" _patch_match "${version_content}")
 set(VERSION_PATCH "${CMAKE_MATCH_1}")
 
 project(etjump VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" HOMEPAGE_URL "etjump.com" LANGUAGES C CXX)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 option(BUILD_TESTS "Enable tests building (ON by default)" ON)
 

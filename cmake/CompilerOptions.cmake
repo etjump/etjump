@@ -117,5 +117,5 @@ function(create_compiler_opts target)
 			_SCL_SECURE_NO_WARNINGS>
 		${arg_DEFINE})
 
-	target_compile_features(${target} INTERFACE cxx_std_14)
+	target_compile_features(${target} INTERFACE cxx_std_17)
 endfunction()
