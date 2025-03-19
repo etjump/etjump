@@ -35,7 +35,7 @@ namespace Container {
 template <typename InputContainer, typename UnaryFunction>
 auto map(const InputContainer &container, UnaryFunction &&func) {
   using InputType = typename InputContainer::value_type;
-  using ResultType = std::result_of_t<UnaryFunction(InputType)>;
+  using ResultType = std::invoke_result_t<UnaryFunction, InputType>;
 
   std::vector<ResultType> result;
   result.reserve(container.size());
