@@ -25,7 +25,6 @@
 #include "etj_keyset_drawer.h"
 #include "etj_utilities.h"
 #include "etj_cvar_update_handler.h"
-#include "../game/etj_numeric_utilities.h"
 
 ETJump::KeySetDrawer::KeySetDrawer(const std::vector<KeyShader> &keyShaders)
     : keyShaders(keyShaders) {
@@ -68,8 +67,8 @@ void ETJump::KeySetDrawer::updateKeysSize() {
 }
 
 void ETJump::KeySetDrawer::updateKeysOrigin(float x, float y) {
-  attrs.origin.x = ETJump_AdjustPosition(Numeric::clamp(x, 0.f, 640.f));
-  attrs.origin.y = Numeric::clamp(y, 0.f, 480.f);
+  attrs.origin.x = ETJump_AdjustPosition(std::clamp(x, 0.f, 640.f));
+  attrs.origin.y = std::clamp(y, 0.f, 480.f);
 }
 
 void ETJump::KeySetDrawer::updateKeysShadow(bool shouldDrawShadow) {

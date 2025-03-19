@@ -30,7 +30,6 @@
   #include "../ui/ui_local.h"
 #endif
 
-#include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_shared.h"
 
@@ -72,7 +71,7 @@ public:
       float ufScale = Q_atof(scaleComponents[0].c_str());
 
       if (clamp) {
-        ufScale = Numeric::clamp(ufScale, min.value(), max.value());
+        ufScale = std::clamp(ufScale, min.value(), max.value());
       }
 
       return T{ufScale, ufScale};
@@ -82,8 +81,8 @@ public:
     float scaleY = Q_atof(scaleComponents[1].c_str());
 
     if (clamp) {
-      scaleX = Numeric::clamp(scaleX, min.value(), max.value());
-      scaleY = Numeric::clamp(scaleY, min.value(), max.value());
+      scaleX = std::clamp(scaleX, min.value(), max.value());
+      scaleY = std::clamp(scaleY, min.value(), max.value());
     }
 
     return T{scaleX, scaleY};

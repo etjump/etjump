@@ -1,7 +1,6 @@
 #include "g_local.h"
 #include "etj_save_system.h"
 #include "etj_string_utilities.h"
-#include "etj_numeric_utilities.h"
 #include "etj_printer.h"
 #include "etj_rtv.h"
 
@@ -1746,7 +1745,7 @@ bool UpdateClientConfigString(gentity_t &gent) {
 
   // while engine caps at 1000 fps, 2.60b doesn't actually cap com_maxfps
   // value, but let's not display such silliness
-  gent.client->pers.maxFPS = Numeric::clamp(gent.client->pers.maxFPS, 0, 1000);
+  gent.client->pers.maxFPS = std::clamp(gent.client->pers.maxFPS, 0, 1000);
 
   // send over a subset of the userinfo keys so other clients can
   // print scoreboards, display models, and play custom sounds

@@ -1,7 +1,9 @@
 // cg_view.c -- setup all the parameters (position, angle, etc)
 // for a 3D rendering
+
+#include <algorithm>
+
 #include "cg_local.h"
-#include "../game/etj_numeric_utilities.h"
 
 //========================
 extern pmove_t cg_pmove;
@@ -243,7 +245,7 @@ static void CG_OffsetFreeCamView(void) {
   if (etj_demo_lookat.integer != -1) {
     centity_t *temp;
     vec3_t dir;
-    int entNum = Numeric::clamp(etj_demo_lookat.integer, 0, MAX_GENTITIES - 1);
+    int entNum = std::clamp(etj_demo_lookat.integer, 0, MAX_GENTITIES - 1);
     temp = &cg_entities[entNum];
     VectorSubtract(temp->lerpOrigin, cgs.demoCam.camOrigin, dir);
 

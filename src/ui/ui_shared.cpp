@@ -9,7 +9,6 @@
 #include "ui_shared.h"
 #include "ui_local.h" // For CS settings/retrieval
 
-#include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 
 #define SCROLL_TIME_START 500
@@ -3022,7 +3021,7 @@ static float getComboThumbPosition(const itemDef_t *item,
 
   // we're dragging the thumb, use cursor position for smooth dragging
   if (itemCapture == item && item->window.flags & WINDOW_LB_THUMB) {
-    pos = Numeric::clamp(static_cast<float>(DC->cursory), posMin, posMax);
+    pos = std::clamp(static_cast<float>(DC->cursory), posMin, posMax);
   } else if (item->comboData.startPos == 0) {
     pos = posMin;
   } else {
@@ -3104,11 +3103,12 @@ static void comboDragThumb(void *funcPtr) {
 
   const auto md = static_cast<multiDef_t *>(si->item->typeData);
 
-  si->item->comboData.startPos = static_cast<int>(Numeric::clamp(
-      (cursorY - rect.y) *
+  si->item->comboData.startPos = std::clamp(
+      static_cast<int>(
+          (cursorY - rect.y) *
           static_cast<float>(md->count - si->item->comboData.maxItems) /
-          scrollHeight,
-      0, md->count - si->item->comboData.maxItems));
+          scrollHeight),
+      0, md->count - si->item->comboData.maxItems);
   si->yStart = cursorY;
 
   // don't scroll if mouse is above or below scrollbar, otherwise when we

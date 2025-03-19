@@ -4,7 +4,6 @@
 
 #include "cg_local.h"
 #include "etj_utilities.h"
-#include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 
 /******************************************************************************
@@ -281,8 +280,7 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
   const float fireteamOffsetX = ETJump_AdjustPosition(etj_fireteamPosX.value);
   x += fireteamOffsetX;
 
-  const float fireteamAlpha =
-      Numeric::clamp(etj_fireteamAlpha.value, 0.0f, 1.0f);
+  const float fireteamAlpha = std::clamp(etj_fireteamAlpha.value, 0.0f, 1.0f);
 
   clr1[3] *= fireteamAlpha;
   clr2[3] *= fireteamAlpha;

@@ -23,7 +23,6 @@
  */
 
 #include "etj_target_ft_setrules.h"
-#include "etj_numeric_utilities.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 
@@ -41,12 +40,12 @@ void TargetFtSetRules::spawn(gentity_t *ent) {
   // this is a boolean but there's no G_SpawnBoolean so bleh
   ent->damage = KEY_NOT_SET;
   if (G_SpawnInt("noghost", keyNotSet, &ent->damage)) {
-    ent->damage = Numeric::clamp(ent->damage, 0, 1);
+    ent->damage = std::clamp(ent->damage, 0, 1);
   }
 
   ent->health = KEY_NOT_SET;
   if (G_SpawnInt("teamjumpmode", keyNotSet, &ent->health)) {
-    ent->health = Numeric::clamp(ent->health, 0, 1);
+    ent->health = std::clamp(ent->health, 0, 1);
   }
 
   G_SpawnString("leader_only_message", "", &s);
@@ -94,7 +93,7 @@ void TargetFtSetRules::use(const gentity_t *self, gentity_t *activator) {
       // configstrings for 'reset', see g_fireteams.cpp -> setFireTeamRules
       setSaveLimitForFTMembers(ft, ft->saveLimit);
     } else {
-      const int limit = Numeric::clamp(Q_atoi(self->ftSavelimit), -1, 100);
+      const int limit = std::clamp(Q_atoi(self->ftSavelimit), -1, 100);
       setSaveLimitForFTMembers(ft, limit);
       rulesChanged = true;
     }

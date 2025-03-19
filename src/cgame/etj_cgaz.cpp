@@ -25,11 +25,12 @@
 // HUGE thanks to Jelvan1 for CGaz 1 code
 // https://github.com/Jelvan1/cgame_proxymod/
 
+#include <algorithm>
+
 #include "etj_cgaz.h"
 #include "etj_snaphud.h"
 #include "etj_utilities.h"
 #include "etj_pmove_utils.h"
-#include "../game/etj_numeric_utilities.h"
 #include "etj_cvar_update_handler.h"
 
 namespace ETJump {
@@ -279,11 +280,10 @@ void CGaz::render() const {
     if (etj_CGazFov.value == 0) {
       fov = cg.refdef.fov_x;
     } else {
-      fov = Numeric::clamp(etj_CGazFov.value, 1, 179);
+      fov = std::clamp(etj_CGazFov.value, 1.0f, 179.0f);
     }
 
     const float zone1 = drawMin;
-
     float zone2 = drawOpt;
 
     if (drawSnap != Snaphud::INVALID_SNAP_DIR) {

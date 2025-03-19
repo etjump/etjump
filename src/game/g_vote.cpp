@@ -6,7 +6,6 @@
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_map_statistics.h"
-#include "etj_numeric_utilities.h"
 #include "etj_rtv.h"
 #include "etj_custom_map_votes.h"
 #include <set>
@@ -546,7 +545,7 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     }
 
     const size_t maxMaps =
-        Numeric::clamp(g_rtvMapCount.integer, 2, std::min(numMaps, 9));
+        std::clamp(g_rtvMapCount.integer, 2, std::min(numMaps, 9));
     std::set<std::string> uniqueMaps;
     auto rtvMaps = game.rtv->getRtvMaps();
 

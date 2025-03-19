@@ -26,9 +26,10 @@
  * Crosshair stats HUD inspired by DeFRaG one.
  */
 
+#include <algorithm>
+
 #include "cg_local.h"
 #include "etj_utilities.h"
-#include "../game/etj_numeric_utilities.h"
 
 // TODO make font size configurable via cvars, see CG_DrawSpeed2()
 #define CHSCHAR_SIZEX 0.2
@@ -537,7 +538,7 @@ static void CG_CHS_DrawSingleInfo(int x, int y, int stat, qboolean drawName,
 
   ETJump::parseColorString(etj_CHSColor.string, CHSColor);
 
-  CHSColor[3] = Numeric::clamp(textAlpha, 0.0f, 1.0f);
+  CHSColor[3] = std::clamp(textAlpha, 0.0f, 1.0f);
   // end alpha, shadow and color stuff
 
   if (drawName) {

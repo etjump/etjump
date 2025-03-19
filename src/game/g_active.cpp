@@ -3,7 +3,6 @@
 #include "etj_save_system.h"
 #include "etj_printer.h"
 #include "etj_inactivity_timer.h"
-#include "etj_numeric_utilities.h"
 #include "etj_string_utilities.h"
 #include "etj_utilities.h"
 #include "etj_entity_utilities.h"
@@ -1090,8 +1089,7 @@ void ClientThink_real(gentity_t *ent) {
 
   if (client->sess.velocityScale != 1) {
     if (ent->scaleTime > level.time) {
-      client->ps.speed *=
-          Numeric::clamp(client->sess.velocityScale, 0.25f, 3.0f);
+      client->ps.speed *= std::clamp(client->sess.velocityScale, 0.25f, 3.0f);
     } else {
       client->sess.velocityScale = 1;
     }

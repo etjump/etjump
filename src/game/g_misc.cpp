@@ -9,7 +9,6 @@
 
 #include "g_local.h"
 #include "etj_entity_utilities.h"
-#include "etj_numeric_utilities.h"
 
 extern void AimAtTarget(gentity_t *self);
 extern float AngleDifference(float ang1, float ang2);
@@ -1513,7 +1512,7 @@ void SP_dlight(gentity_t *ent) {
 
   auto intensity = static_cast<float>(ent->dl_stylestring[offset] - 'a');
   intensity *= (1000.0f / 24.0f);
-  intensity = Numeric::clamp(intensity / 4, 0.0f, 255.0f);
+  intensity = std::clamp(intensity / 4, 0.0f, 255.0f);
 
   ent->s.constantLight = static_cast<int>(ent->dl_color[0]) |
                          static_cast<int>(ent->dl_color[1]) << 8 |

@@ -10,7 +10,6 @@
 #include "etj_demo_compatibility.h"
 #include "etj_cvar_parser.h"
 
-#include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 
 #define STATUSBARHEIGHT 452
@@ -503,11 +502,11 @@ static void CG_DrawTeamInfo() {
   const float lineHeight = 9.0f * scale.y;
 
   const int maxLineLength =
-      Numeric::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
+      std::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
   const auto chatWidth = static_cast<int>(
       calcBackgroundWidth(maxLineLength, fontSizeX, &cgs.media.limboFont2) + 5);
   const int chatHeight =
-      Numeric::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
+      std::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
 
   int textStyle = ITEM_TEXTSTYLE_NORMAL;
   float textAlpha = etj_chatAlpha.value;
@@ -558,7 +557,7 @@ static void CG_DrawTeamInfo() {
         continue;
       }
 
-      const float alphapercent = Numeric::clamp(
+      const float alphapercent = std::clamp(
           1.0f - static_cast<float>(cg.time -
                                     cgs.teamChatMsgTimes[i % chatHeight]) /
                      static_cast<float>(cg_teamChatTime.integer),
@@ -579,7 +578,7 @@ static void CG_DrawTeamInfo() {
       }
 
       const float chatbgalpha =
-          Numeric::clamp(etj_chatBackgroundAlpha.value, 0.0f, 1.0f);
+          std::clamp(etj_chatBackgroundAlpha.value, 0.0f, 1.0f);
 
       hcolor[3] = chatbgalpha * alphapercent;
 
@@ -864,7 +863,7 @@ static void CG_DrawLagometer() {
   x = SCREEN_WIDTH - 48 + ETJump_AdjustPosition(etj_lagometerX.value);
   y = 480 - 200 + etj_lagometerY.value;
 
-  const float alpha = Numeric::clamp(etj_lagometerAlpha.value, 0.0f, 1.0f);
+  const float alpha = std::clamp(etj_lagometerAlpha.value, 0.0f, 1.0f);
 
   if (etj_lagometerShader.integer) {
     vec4_t mainColor;
@@ -2151,7 +2150,7 @@ void CG_CheckForCursorHints() {
 static void CG_DrawMoverHealthBar(float frac, const vec4_t color) {
   vec4_t bgcolor;
   vec4_t c;
-  float barFrac = Numeric::clamp(frac, 0, 1.0);
+  const float barFrac = std::clamp(frac, 0.0f, 1.0f);
 
   c[0] = 1.0f;
   c[1] = c[2] = barFrac;

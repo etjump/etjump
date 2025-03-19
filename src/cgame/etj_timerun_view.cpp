@@ -31,7 +31,6 @@
 #include "etj_cvar_update_handler.h"
 #include "etj_player_events_handler.h"
 #include "../game/etj_string_utilities.h"
-#include "../game/etj_numeric_utilities.h"
 
 ETJump::TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
     : Drawable(), _timerun(std::move(timerun)) {
@@ -203,7 +202,7 @@ void ETJump::TimerunView::draw() {
                                ? ITEM_TEXTSTYLE_SHADOWED
                                : ITEM_TEXTSTYLE_NORMAL;
 
-    const int count = Numeric::clamp(etj_checkpointsCount.integer, 1, 5);
+    const int count = std::clamp(etj_checkpointsCount.integer, 1, 5);
     const int startIndex = run->numCheckpointsHit;
     const int endIndex = run->numCheckpointsHit - count;
     const bool previousRecordSet = run->previousRecord >= 0;

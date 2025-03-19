@@ -18,7 +18,6 @@ USER INTERFACE MAIN
 #include "../cgame/etj_cvar_parser.h"
 #include "../game/etj_string_utilities.h"
 #include "../cgame/etj_utilities.h"
-#include "../game/etj_numeric_utilities.h"
 #include "../game/etj_filesystem.h"
 #include "../game/etj_file.h"
 #include "../game/etj_syscall_ext_shared.h"
@@ -1493,8 +1492,7 @@ static void UI_DrawGameType(rectDef_t *rect, float scale, vec4_t color,
                             int textStyle) {
   Text_Paint(
       rect->x, rect->y, scale, color,
-      uiInfo
-          .gameTypes[Numeric::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
+      uiInfo.gameTypes[std::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
           .gameType,
       0, 0, textStyle);
 }
@@ -1854,7 +1852,7 @@ void UI_DrawMapDescription(rectDef_t *rect, float scale, const vec4_t color,
       }
 
       Vector4Copy(color, textColor);
-      textColor[3] *= Numeric::clamp(fadeFactor, 0.0f, 1.0f);
+      textColor[3] *= std::clamp(fadeFactor, 0.0f, 1.0f);
     } else {
       Vector4Copy(color, textColor);
     }
@@ -2146,8 +2144,7 @@ static int UI_OwnerDrawWidth(int ownerDraw, float scale) {
   switch (ownerDraw) {
     case UI_GAMETYPE:
       s = uiInfo
-              .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
-                                        MAX_GAMETYPES - 1)]
+              .gameTypes[std::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
               .gameType;
       break;
     case UI_NETFILTER:
@@ -2209,11 +2206,10 @@ static void UI_DrawCrosshair(const rectDef_t *rect) {
     vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
 
     ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
-    crosshairColor[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
+    crosshairColor[3] = std::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
 
     ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
-    crosshairColorAlt[3] =
-        Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
+    crosshairColorAlt[3] = std::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
 
     auto size = ETJump::CvarValueParser::parse<ETJump::CvarValue::Size>(
         cg_crosshairSize, -256, 256);
@@ -2224,13 +2220,13 @@ static void UI_DrawCrosshair(const rectDef_t *rect) {
 
     // use abs for drawing these so they position correctly
     if (size.x != 0) {
-      size.x = Numeric::clamp(size.x, -96, 96);
+      size.x = std::clamp(size.x, -96.0f, 96.0f);
       size.x = rect->w / 96.0f * size.x;
       size.x = std::abs(size.x);
     }
 
     if (size.y != 0) {
-      size.y = Numeric::clamp(size.y, -96, 96);
+      size.y = std::clamp(size.y, -96.0f, 96.0f);
       size.y = rect->h / 96.0f * size.y;
       size.y = std::abs(size.y);
     }
@@ -2859,11 +2855,10 @@ static qboolean UI_GameType_HandleKey(int flags, float *special, int key,
     trap_Cvar_Set("ui_Q3Model", "0");
 
     trap_Cvar_Set("ui_gameType", va("%d", ui_gameType.integer));
-    UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-                      uiInfo
-                          .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
-                                                    MAX_GAMETYPES - 1)]
-                          .gtEnum);
+    UI_LoadBestScores(
+        uiInfo.mapList[ui_currentMap.integer].mapLoadName,
+        uiInfo.gameTypes[std::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
+            .gtEnum);
     if (resetMap && oldCount != UI_MapCountByGameType()) {
       trap_Cvar_Set("ui_currentMap", "0");
       Menu_SetFeederSelection(nullptr, FEEDER_MAPS, 0, nullptr);
@@ -3741,9 +3736,6 @@ void UI_RunMenuScript(const char **args) {
     }
     if (Q_stricmp(name, "loadGameInfo") == 0) {
       UI_ParseGameInfo("gameinfo.txt");
-      //			UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-      // uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer, 0,
-      // MAX_GAMETYPES-1)].gtEnum);
       return;
     }
     if (Q_stricmp(name, "resetScores") == 0) {
@@ -7292,8 +7284,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
   trap_LAN_LoadCachedServers();
   UI_LoadBestScores(
       uiInfo.mapList[0].mapLoadName,
-      uiInfo
-          .gameTypes[Numeric::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
+      uiInfo.gameTypes[std::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
           .gtEnum);
 
   // sets defaults for ui temp cvars
