@@ -1355,16 +1355,14 @@ dlight_finish_spawning
 ==============
 */
 void dlight_finish_spawning(gentity_t *ent) {
-  if (strlen(ent->dl_stylestring) >= MAX_DLIGHT_STYLESTRING) {
-    char tmp[MAX_DLIGHT_STYLESTRING]{};
-    // Q_strncpyz will null-terminate the string at max length
-    Q_strncpyz(tmp, ent->dl_stylestring, MAX_DLIGHT_STYLESTRING);
-    ent->dl_stylestring = tmp;
+  std::string styleStr = ent->dl_stylestring;
+
+  if (styleStr.length() >= MAX_DLIGHT_STYLESTRING) {
+    styleStr = styleStr.substr(0, MAX_DLIGHT_STYLESTRING - 1);
   }
 
-  G_FindConfigstringIndex(va("%i %s %i %i %i", ent->s.number,
-                             ent->dl_stylestring, ent->health, ent->soundLoop,
-                             ent->dl_atten),
+  G_FindConfigstringIndex(va("%i %s %i %i %i", ent->s.number, styleStr.c_str(),
+                             ent->health, ent->soundLoop, ent->dl_atten),
                           CS_DLIGHTS, MAX_DLIGHT_CONFIGSTRINGS, qtrue);
 }
 
