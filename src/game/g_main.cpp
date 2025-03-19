@@ -13,6 +13,7 @@
 #include "etj_numeric_utilities.h"
 #include "etj_rtv.h"
 #include "etj_syscall_ext_shared.h"
+#include "etj_target_spawn_relay.h"
 
 level_locals_t level;
 
@@ -1932,6 +1933,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   G_SpawnEntitiesFromString();
 
   ETJump::TimerunEntity::validateTimerunEntities();
+  ETJump::TargetSpawnRelay::validateSpawnRelayEntities();
 
   // TAT 11/13/2002 - entities are spawned, so now we can do setup
   InitialServerEntitySetup();

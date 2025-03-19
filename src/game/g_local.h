@@ -1231,6 +1231,12 @@ typedef struct voteInfo_s {
   bool isAutoRtvVote;
 } voteInfo_t;
 
+struct SpawnRelayEntities {
+  gentity_t *axisRelay;
+  gentity_t *alliesRelay;
+  gentity_t *spectatorRelay;
+};
+
 typedef struct {
   struct gclient_s *clients; // [maxclients]
 
@@ -1455,6 +1461,8 @@ typedef struct {
   bool hasTimerun;
   int saveLoadRestrictions;
   int checkpointsCount[MAX_TIMERUNS];
+
+  SpawnRelayEntities spawnRelayEntities;
 } level_locals_t;
 
 //

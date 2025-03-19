@@ -18,6 +18,7 @@
 #include "etj_target_init.h"
 #include "etj_trigger_teleport_client.h"
 #include "etj_target_ft_setrules.h"
+#include "etj_target_spawn_relay.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -722,6 +723,7 @@ spawn_t spawns[] = {
     {"func_missilepad", ETJump::Missilepad::spawn},
     {"trigger_teleport_client", ETJump::TriggerTeleportClient::spawn},
     {"target_ft_setrules", ETJump::TargetFtSetRules::spawn},
+    {"target_spawn_relay", ETJump::TargetSpawnRelay::spawn},
     {nullptr, nullptr},
 };
 
