@@ -1799,11 +1799,13 @@ void CG_SpeakerEditorDraw(void) {
 
     // render crosshair
     for (const auto &r : ETJump::renderables) {
-      if (const auto crosshair =
+      if (const auto &crosshair =
               std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
         if (crosshair->beforeRender()) {
           crosshair->render();
         }
+
+        break;
       }
     }
 
