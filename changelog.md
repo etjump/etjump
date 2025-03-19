@@ -27,10 +27,10 @@
   * consecutive, identical messages are not logged multiple times - same message will be logged only if it has already disappeared from screen, as controlled by `cg_centertime` cvar
   * save messges are not logged
 * console no longer prints a warning when trying to vsay current class as a spectator [#1648](https://github.com/etjump/etjump/pull/1648)
-* spectators can now use the fireteam general vsay menu [1649](https://github.com/etjump/etjump/pull/1649)
-* fully removed location grid system from the mod - team/ft chats no longer display coordinates on chat [1651](https://github.com/etjump/etjump/pull/1651)
-* fixed Linux HWID generation leaking a socket [1652](https://github.com/etjump/etjump/pull/1652)
-* added `target_spawn_relay` entity to execute actions on player respawn [1636](https://github.com/etjump/etjump/pull/1636)
+* spectators can now use the fireteam general vsay menu [#1649](https://github.com/etjump/etjump/pull/1649)
+* fully removed location grid system from the mod - team/ft chats no longer display coordinates on chat [#1651](https://github.com/etjump/etjump/pull/1651)
+* fixed Linux HWID generation leaking a socket [#1652](https://github.com/etjump/etjump/pull/1652)
+* added `target_spawn_relay` entity to execute actions on player respawn [#1636](https://github.com/etjump/etjump/pull/1636)
   * passive entity that doesn't need to be explicitly targeted, fired automatically on respawns (not revives)
   * keys:
     * `team` - comma-separated list of teams that this relay fires for. If not set, fires for all teams, including spectators. Valid team names are "axis", "allies" and "spectator".
