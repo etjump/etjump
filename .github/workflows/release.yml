@@ -46,7 +46,7 @@ jobs:
 
   Linux:
     name: Linux ${{ matrix.arch }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -122,7 +122,7 @@ jobs:
         path: ${{ github.workspace }}/build/etjump
 
   package:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [Windows, Linux, macOS]
 
     steps:
