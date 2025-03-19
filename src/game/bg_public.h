@@ -142,13 +142,12 @@ static constexpr int MG42_HEAT_RECOVERY = 2000;
 #define AAGUN_RATE_OF_FIRE 100
 #define MG42_YAWSPEED 300.f // degrees per second
 
-static constexpr int SAY_ALL = 0;
-static constexpr int SAY_TEAM = 1;
-static constexpr int SAY_BUDDY = 2;
-static constexpr int SAY_TEAMNL = 3;
-static constexpr int SAY_ADMIN = 4;
-
-// RF, client damage identifiers
+enum ChatMode {
+  SAY_ALL,
+  SAY_TEAM,
+  SAY_BUDDY,
+  SAY_ADMIN,
+};
 
 // Arnout: different entity states
 typedef enum {
@@ -2441,9 +2440,6 @@ void BG_LinearPathOrigin2(float radius, splinePath_t **pSpline,
                           float *deltaTime, vec3_t result, qboolean backwards);
 
 int BG_MaxAmmoForWeapon(weapon_t weaponNum, int *skill);
-
-void BG_InitLocations(vec2_t world_mins, vec2_t world_maxs);
-char *BG_GetLocationString(vec_t *pos);
 
 // START Mad Doc - TDF
 typedef struct botpool_x {

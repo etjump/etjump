@@ -1489,7 +1489,6 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("readyteam");
   trap_AddCommand("ready");
   trap_AddCommand("ref");
-  trap_AddCommand("say_teamnl");
   trap_AddCommand("say_team");
   trap_AddCommand("say_buddy");
   trap_AddCommand("say_admin");

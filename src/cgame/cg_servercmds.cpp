@@ -1432,7 +1432,6 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color,
   sfxHandle_t snd;
   qhandle_t sprite;
   bufferedVoiceChat_t vchat;
-  const char *loc = " "; // NERVE - SMF
   const char *msgColor = "^z";
   const char *msgTime = "";
   qtime_t t;
@@ -1458,14 +1457,6 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color,
       VectorCopy(origin, vchat.origin); // NERVE - SMF
       Q_strncpyz(vchat.cmd, vsay->id, sizeof(vchat.cmd));
 
-      if (mode != SAY_ALL) {
-        // NERVE - SMF - get location
-        loc = BG_GetLocationString(origin);
-        if (!loc || !*loc) {
-          loc = " ";
-        }
-      }
-
       if (vsay->custom[0] != '\0') {
         chat = vsay->custom;
       }
@@ -1483,13 +1474,13 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color,
       }
 
       if (mode == SAY_TEAM) {
-        Com_sprintf(vchat.message, sizeof(vchat.message),
-                    "%s(%s^7)^3(%s): %c%c%s", msgTime, ci->name, loc,
-                    Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
+        Com_sprintf(vchat.message, sizeof(vchat.message), "%s(%s^7)^3: %c%c%s",
+                    msgTime, ci->name, Q_COLOR_ESCAPE, color,
+                    CG_TranslateString(chat));
       } else if (mode == SAY_BUDDY) {
-        Com_sprintf(vchat.message, sizeof(vchat.message),
-                    "%s<%s^7>^3<%s>: %c%c%s", msgTime, ci->name, loc,
-                    Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
+        Com_sprintf(vchat.message, sizeof(vchat.message), "%s<%s^7>^3: %c%c%s",
+                    msgTime, ci->name, Q_COLOR_ESCAPE, color,
+                    CG_TranslateString(chat));
       } else {
         Com_sprintf(vchat.message, sizeof(vchat.message), "%s%s^3: %c%c%s",
                     msgTime, ci->name, Q_COLOR_ESCAPE, color,

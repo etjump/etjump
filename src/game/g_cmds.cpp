@@ -1963,7 +1963,8 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
   if (!other || !other->inuse || !other->client) {
     return;
   }
-  if ((mode == SAY_TEAM || mode == SAY_TEAMNL) && !OnSameTeam(ent, other)) {
+
+  if (mode == SAY_TEAM && !OnSameTeam(ent, other)) {
     return;
   }
 
@@ -2006,7 +2007,6 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   char text[MAX_CHAT_TEXT];
   const char *escapedName = nullptr;
   qboolean localize = qfalse;
-  char *loc;
   const char *printText = nullptr;
   const int clientNum = ClientNum(ent);
 
@@ -2017,25 +2017,18 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
       Com_sprintf(name, sizeof(name), "%s^7: ", ent->client->pers.netname);
       color = COLOR_GREEN;
       break;
-    case SAY_BUDDY:
-      localize = qtrue;
-      loc = BG_GetLocationString(ent->r.currentOrigin);
-      Com_sprintf(name, sizeof(name),
-                  "[lof](%s^7) (%s): ", ent->client->pers.netname, loc);
-      color = COLOR_YELLOW;
-      break;
     case SAY_TEAM:
       localize = qtrue;
       G_LogPrintf("sayteam: %s: %s\n", ent->client->pers.netname, chatText);
-      loc = BG_GetLocationString(ent->r.currentOrigin);
       Com_sprintf(name, sizeof(name),
-                  "[lof](%s^7) (%s): ", ent->client->pers.netname, loc);
+                  "[lof](%s^7): ", ent->client->pers.netname);
       color = COLOR_CYAN;
       break;
-    case SAY_TEAMNL:
-      G_LogPrintf("sayteamnl: %s: %s\n", ent->client->pers.netname, chatText);
-      Com_sprintf(name, sizeof(name), "(%s^7): ", ent->client->pers.netname);
-      color = COLOR_CYAN;
+    case SAY_BUDDY:
+      localize = qtrue;
+      Com_sprintf(name, sizeof(name),
+                  "[lof](%s^7): ", ent->client->pers.netname);
+      color = COLOR_YELLOW;
       break;
     case SAY_ADMIN:
       Printer::logAdminLn(ETJump::stringFormat(

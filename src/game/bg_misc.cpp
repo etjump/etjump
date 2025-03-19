@@ -5054,67 +5054,6 @@ qboolean BG_IsScopedWeapon(int weapon) {
   return qfalse;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-typedef struct locInfo_s {
-  vec2_t gridStartCoord;
-  vec2_t gridStep;
-} locInfo_t;
-
-static locInfo_t locInfo;
-
-void BG_InitLocations(vec2_t world_mins, vec2_t world_maxs) {
-  // keep this in sync with CG_DrawGrid
-  locInfo.gridStep[0] = 1200.f;
-  locInfo.gridStep[1] = 1200.f;
-
-  // ensure minimal grid density
-  while (locInfo.gridStep[0] > 50.f &&
-         (world_maxs[0] - world_mins[0]) / locInfo.gridStep[0] < 7)
-    locInfo.gridStep[0] -= 50.f;
-  while (locInfo.gridStep[1] > 50.f &&
-         (world_mins[1] - world_maxs[1]) / locInfo.gridStep[1] < 7)
-    locInfo.gridStep[1] -= 50.f;
-
-  locInfo.gridStartCoord[0] =
-      world_mins[0] +
-      .5f * ((((world_maxs[0] - world_mins[0]) / locInfo.gridStep[0]) -
-              ((int)((world_maxs[0] - world_mins[0]) / locInfo.gridStep[0]))) *
-             locInfo.gridStep[0]);
-  locInfo.gridStartCoord[1] =
-      world_mins[1] -
-      .5f * ((((world_mins[1] - world_maxs[1]) / locInfo.gridStep[1]) -
-              ((int)((world_mins[1] - world_maxs[1]) / locInfo.gridStep[1]))) *
-             locInfo.gridStep[1]);
-}
-
-char *BG_GetLocationString(vec_t *pos) {
-  static char coord[6];
-  int x, y;
-
-  coord[0] = '\0';
-
-  x = (pos[0] - locInfo.gridStartCoord[0]) / locInfo.gridStep[0];
-  y = (locInfo.gridStartCoord[1] - pos[1]) / locInfo.gridStep[1];
-
-  if (x < 0) {
-    x = 0;
-  }
-  if (y < 0) {
-    y = 0;
-  }
-
-  // if coords get pretty big,
-  // mostly because of getting out of mapcoords, and gridstep being
-  // calculated wrong just set them to 0 character
-  if (x > 26) {
-    x = -17;
-  }
-
-  Com_sprintf(coord, sizeof(coord), "%c,%i", 'A' + x, y);
-
-  return coord;
-}
-
 qboolean BG_BBoxCollision(vec3_t min1, vec3_t max1, vec3_t min2, vec3_t max2) {
   int i;
 

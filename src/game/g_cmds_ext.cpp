@@ -73,9 +73,6 @@ static const cmd_reference_t aCommandInfo[] = {
     {"readyteam", qfalse, qtrue, G_teamready_cmd,
      ":^7 Sets an entire team's status to ^5ready^7 to start a match"},
 
-    {"say_teamnl", qtrue, qtrue, G_say_teamnl_cmd,
-     "<msg>:^7 Sends a team chat without location info"},
-
     {"scores", qtrue, qtrue, G_scores_cmd,
      ":^7 Displays current match stat info"},
 
@@ -384,15 +381,6 @@ void G_ready_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state) {
   }
 
   G_readyMatchState();
-}
-
-// ************** SAY_TEAMNL
-//
-// Team chat w/no location info
-void G_say_teamnl_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
-  if (!ent->client->sess.muted) {
-    Cmd_Say_f(ent, SAY_TEAMNL, qfalse, qtrue);
-  }
 }
 
 // ************** SCORES
