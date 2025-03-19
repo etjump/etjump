@@ -685,6 +685,30 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
     return qtrue;
   }
 
+  // cgame handles console commands before UI, so we catch some of the demo
+  // queue commands here in order to inform UI that the command was
+  // manually executed by the user. This avoids sending automatic
+  // 'next' command on UI shutdown, as we can inform the UI that the command
+  // was executed manually. On normal queue behavior, UI sends 'next' command
+  // on shutdown, but because cgame isn't loaded at that point, it's ignored.
+  if (command == "demoQueue") {
+    const int argc = trap_Argc();
+    if (argc < 2) {
+      return qfalse;
+    }
+
+    const char *demoQueueCmd = CG_Argv(1);
+
+    if (!Q_stricmp(demoQueueCmd, "next") ||
+        !Q_stricmp(demoQueueCmd, "previous") ||
+        !Q_stricmp(demoQueueCmd, "restart") ||
+        !Q_stricmp(demoQueueCmd, "goto")) {
+      trap_SendConsoleCommand("uiDemoQueueManualSkip 1\n");
+      // return qfalse here so the original command gets handled by UI!
+      return qfalse;
+    }
+  }
+
   return qfalse;
 }
 
