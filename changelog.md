@@ -1,3 +1,43 @@
+# ETJump 3.4.0
+
+* `records` output no longer shows duplicate rank strings for tied times [#1603](https://github.com/etjump/etjump/pull/1603)
+* added `tracker_not_eq_any` and `tracker_not_eq_all` keys to `target/trigger_tracker` [#1614](https://github.com/etjump/etjump/pull/1614)
+  * this allows mappers to pick desired behavior for "not equal" trackers - either all values or one of the values
+  * old `tracker_not_eq` is now deprecated and functionality is provided by `tracker_not_eq_any`
+* added ability to automatically play all demos from a directory with `demoQueue` command [#1616](https://github.com/etjump/etjump/pull/1616) 
+  * `etj_demoQueueDir` cvar sets subdirectory inside `demos` to play demos from, leave empty to play from `demos` directory (default `demoqueue`)
+  * commands:
+    * `demoQueue start` - starts playback
+    * `demoQueue stop` - stops playback (this must be issued to stop the playback, `ESC` will just go to next demo)
+    * `demoQueue restart` - restart playback from the beginning
+    * `demoQueue next` -  skips to next demo
+    * `demoQueue previous` - skips to previous demo
+    * `demoQueue goto <index>` - skips to specified demo in the queue
+    * `demoQueue status` - prints status about the current demo queue
+    * `demoQueue help [command]` - prints usage information or detailed help about a command
+* added `target_ft_setrules` entity to set fireteam rules for the activators fireteam + supplementary worldspawn keys [#1625](https://github.com/etjump/etjump/pull/1625)
+  * bypasses `noftnoghost` and new `noftsavelimit` & `noftteamjumpmode` worldspawn keys
+  * `spawnflag 1` means only fireteam leader can activate the entity
+  * keys:
+    * `savelimit (-1 - 100 or reset)` - sets savelimit
+    * `noghost 0/1` - disable/enable fireteam noghost
+    * `teamjumpmode 0/1` - disable/enable teamjump mode
+    * `leader_only_message` - message to print to activator if `spawnflag 1` is set and the activator is not the fireteam leader, `%s` will be substituted with the fireteam leaders name
+* added `etj_logCenterPrint` cvar to log center prints to console [#1627](https://github.com/etjump/etjump/pull/1627)
+  * consecutive, identical messages are not logged multiple times - same message will be logged only if it has already disappeared from screen, as controlled by `cg_centertime` cvar
+  * save messges are not logged
+* console no longer prints a warning when trying to vsay current class as a spectator [#1648](https://github.com/etjump/etjump/pull/1648)
+* spectators can now use the fireteam general vsay menu [1649](https://github.com/etjump/etjump/pull/1649)
+* fully removed location grid system from the mod - team/ft chats no longer display coordinates on chat [1651](https://github.com/etjump/etjump/pull/1651)
+* fixed Linux HWID generation leaking a socket [1652](https://github.com/etjump/etjump/pull/1652)
+* added `target_spawn_relay` entity to execute actions on player respawn [1636](https://github.com/etjump/etjump/pull/1636)
+  * passive entity that doesn't need to be explicitly targeted, fired automatically on respawns (not revives)
+  * keys:
+    * `team` - comma-separated list of teams that this relay fires for. If not set, fires for all teams, including spectators. Valid team names are "axis", "allies" and "spectator".
+    * `scriptname` - name of the scriptblock to activate, calls the `activate` trigger, also supports `activate axis/allies`. Passes activator to mapscript.
+    * `target` - targets to fire
+* added `etj_onDemoPlaybackStart` cvar to execute commands on first frame of demo playback [#1617](https://github.com/etjump/etjump/pull/1617)
+
 # ETJump 3.3.4
 
 * fixed demo subdirectories not loading on replays menu on Windows [#1602](https://github.com/etjump/etjump/pull/1602)
