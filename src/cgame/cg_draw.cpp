@@ -1169,6 +1169,34 @@ CENTER PRINTING
 ===============================================================================
 */
 
+namespace ETJump {
+void logCenterPrint() {
+  std::string msg = cg.centerPrint;
+
+  // we don't want newlines in the console
+  // this is called before center print gets automatically word wrapped
+  // to fit on screen properly, so it's fairly safe to assume that
+  // explicit newlines should be replaced with whitespace
+  StringUtil::replaceAll(msg, "\n", " ");
+
+  // it's possible to send an empty center print/only whitespace to "clear"
+  // whatever is being displayed, but we don't want to log that obviously
+  if (msg.empty() || std::all_of(msg.begin(), msg.end(),
+                                 [](const char c) { return isspace(c); })) {
+    return;
+  }
+
+  // don't log consecutive messages that are being re-triggered
+  if (cg.time + cg_centertime.integer * 1000 > cg.lastCenterPrintLogTime &&
+      Q_stricmp(msg.c_str(), cg.lastLoggedCenterPrint)) {
+    cg.lastCenterPrintLogTime = cg.time;
+    Q_strncpyz(cg.lastLoggedCenterPrint, msg.c_str(),
+               sizeof(cg.lastLoggedCenterPrint));
+    CG_Printf("%s\n", msg.c_str());
+  }
+}
+}
+
 /*
 ==============
 CG_CenterPrint
@@ -1179,7 +1207,8 @@ for a few moments
 */
 #define CP_LINEWIDTH 56 // NERVE - SMF
 
-void CG_CenterPrint(const char *str, int y, int charWidth) {
+void CG_CenterPrint(const char *str, const int y, const int charWidth,
+                    const bool log) {
   char *s;
   int i, len;                    // NERVE - SMF
   qboolean neednewline = qfalse; // NERVE - SMF
@@ -1192,6 +1221,10 @@ void CG_CenterPrint(const char *str, int y, int charWidth) {
 
   Q_strncpyz(cg.centerPrint, str, sizeof(cg.centerPrint));
   cg.centerPrintPriority = priority; // NERVE - SMF
+
+  if (log && etj_logCenterPrint.integer) {
+    ETJump::logCenterPrint();
+  }
 
   // NERVE - SMF - turn spaces into newlines, if we've run over the
   // linewidth
@@ -1234,8 +1267,8 @@ Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
 */
-void CG_PriorityCenterPrint(const char *str, int y, int charWidth,
-                            int priority) {
+void CG_PriorityCenterPrint(const char *str, const int y, const int charWidth,
+                            const int priority, const bool log) {
   char *s;
   int i, len;                    // NERVE - SMF
   qboolean neednewline = qfalse; // NERVE - SMF
@@ -1247,6 +1280,10 @@ void CG_PriorityCenterPrint(const char *str, int y, int charWidth,
 
   Q_strncpyz(cg.centerPrint, str, sizeof(cg.centerPrint));
   cg.centerPrintPriority = priority; // NERVE - SMF
+
+  if (log && etj_logCenterPrint.integer) {
+    ETJump::logCenterPrint();
+  }
 
   // NERVE - SMF - turn spaces into newlines, if we've run over the
   // linewidth
@@ -1300,6 +1337,10 @@ static void CG_DrawCenterString(void) {
   if (!color) {
     cg.centerPrintTime = 0;
     cg.centerPrintPriority = 0;
+
+    // center print has faded, clear last logged message
+    // to allow same message to be re-logged
+    memset(cg.lastLoggedCenterPrint, 0, sizeof(cg.lastLoggedCenterPrint));
     return;
   }
 
