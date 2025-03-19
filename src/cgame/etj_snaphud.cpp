@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
+#include <algorithm>
+
 #include "etj_snaphud.h"
 #include "etj_utilities.h"
-#include "../game/etj_numeric_utilities.h"
 #include "etj_pmove_utils.h"
 #include "etj_cgaz.h"
 #include "etj_cvar_update_handler.h"
@@ -292,13 +293,13 @@ bool Snaphud::beforeRender() {
 
   switch (hudType) {
     case HudType::SNAP_EDGE:
-      edgeThickness = Numeric::clamp(etj_snapHUDEdgeThickness.integer, 0, 128);
+      edgeThickness = std::clamp(etj_snapHUDEdgeThickness.integer, 0, 128);
       break;
     case HudType::SNAP_BORDER:
       borderOnly = true;
       borderThickness =
-          Numeric::clamp(etj_snapHUDBorderThickness.value, 0.1f,
-                         std::min(etj_snapHUDHeight.value * 2, 10.0f));
+          std::clamp(etj_snapHUDBorderThickness.value, 0.1f,
+                     std::min(etj_snapHUDHeight.value * 2, 10.0f));
       break;
     default:
       borderOnly = false;
@@ -336,7 +337,7 @@ void Snaphud::render() const {
   if (!etj_snapHUDFov.value) {
     fov = cg.refdef.fov_x;
   } else {
-    fov = Numeric::clamp(etj_snapHUDFov.value, 1, 179);
+    fov = std::clamp(etj_snapHUDFov.value, 1.0f, 179.0f);
   }
 
   for (const DrawableSnap &ds : drawableSnaps) {

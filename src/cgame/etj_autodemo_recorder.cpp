@@ -27,7 +27,6 @@
 #include "etj_demo_recorder.h"
 #include "../game/etj_filesystem.h"
 #include "../game/etj_string_utilities.h"
-#include "../game/etj_numeric_utilities.h"
 #include "../game/etj_time_utilities.h"
 #include "etj_client_commands_handler.h"
 #include "etj_player_events_handler.h"
@@ -195,7 +194,8 @@ void ETJump::AutoDemoRecorder::trySaveTimerunDemo(const std::string &runName,
 
 void ETJump::AutoDemoRecorder::saveTimerunDemo(const std::string &src,
                                                const std::string &dst) {
-  auto delay = Numeric::clamp(etj_ad_stopDelay.integer, 0, DEMO_MAX_SAVE_DELAY);
+  const int delay =
+      std::clamp(etj_ad_stopDelay.integer, 0, DEMO_MAX_SAVE_DELAY);
   _delayedTimerId =
       setTimeout([&, src, dst] { saveDemoWithRestart(src, dst); }, delay);
 }

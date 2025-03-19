@@ -11,7 +11,6 @@
 #endif // CGAMEDLL
 
 #include "bg_local.h"
-#include "etj_numeric_utilities.h"
 #include "etj_string_utilities.h"
 
 #ifdef CGAMEDLL
@@ -3412,7 +3411,7 @@ void PM_CoolWeapons() {
   }
 
   // sanity check, cap weapon heat for 8-bit transmission to prevent wrap
-  Numeric::clamp(pm->ps->curWeapHeat, 0, 255);
+  pm->ps->curWeapHeat = std::clamp(pm->ps->curWeapHeat, 0, 255);
 }
 
 /*

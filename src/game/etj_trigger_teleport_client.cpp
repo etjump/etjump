@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
+#include <algorithm>
+
 #include "g_local.h"
 #include "etj_trigger_teleport_client.h"
-#include "etj_numeric_utilities.h"
 #include "etj_entity_utilities_shared.h"
 
 namespace ETJump {
@@ -102,7 +103,7 @@ void TriggerTeleportClient::spawn(gentity_t *self) {
   self->noise_index = G_SoundIndex(noise);
 
   G_SpawnFloat("outspeed", "0", &self->speed);
-  Numeric::clamp(self->speed, 0, UINT16_MAX);
+  self->speed = std::clamp(self->speed, 0.0f, static_cast<float>(UINT16_MAX));
 
   // 16 bits for outspeed, should be more than enough
   self->s.frame = static_cast<int>(self->speed);

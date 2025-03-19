@@ -895,7 +895,7 @@ typedef struct {
   bool snaphud;
   bool noPanzerAutoswitch;
 
-  unsigned int maxFPS;
+  int maxFPS;
   char netname[MAX_NETNAME];
 
   int autoActivate; // based on cg_autoactivate userinfo

@@ -6,7 +6,6 @@
 #include "etj_save_system.h"
 #include "etj_entity_utilities.h"
 #include "etj_string_utilities.h"
-#include "etj_numeric_utilities.h"
 #include "etj_rtv.h"
 #include "etj_utilities.h"
 #include "etj_chat_replay.h"
@@ -899,7 +898,7 @@ void setPlayerOffset(gentity_t *ent) {
   for (auto i = 0; i < 3; i++) {
     trap_Argv(i + 1, buffer, sizeof buffer);
     const float value = Q_atof(buffer);
-    dst[i] += Numeric::clamp(value, -MaxAxisOffset, MaxAxisOffset);
+    dst[i] += std::clamp(value, -MaxAxisOffset, MaxAxisOffset);
   }
 
   // check if there is a non-noclippable content between our position and
@@ -2938,7 +2937,7 @@ void Cmd_Vote_f(gentity_t *ent) {
       return;
     }
 
-    Numeric::clamp(mapNum, 0, maxMaps);
+    mapNum = std::clamp(mapNum, 0, static_cast<int>(maxMaps));
   }
 
   if (ent->client->ps.eFlags & EF_VOTED) {

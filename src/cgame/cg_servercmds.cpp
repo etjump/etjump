@@ -11,7 +11,6 @@
 #include "etj_client_commands_handler.h"
 #include "etj_client_rtv_handler.h"
 
-#include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_syscall_ext_shared.h"
 
@@ -742,9 +741,10 @@ static void CG_AddToTeamChat(const char *str, int clientnum, int msgType) {
   int len;
   char *p, *ls;
   int lastcolor;
-  int chatHeight =
-      Numeric::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
-  int chatWidth = Numeric::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
+  const int chatHeight =
+      std::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
+  const int chatWidth =
+      std::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
   const team_t team = ((msgType & REPLAY_MSG || msgType & SERVER_MSG)
                            ? TEAM_SPECTATOR
                            : cgs.clientinfo[clientnum].team);

@@ -10,7 +10,6 @@
 #include "etj_progression_tracker.h"
 #include "etj_timerun_entities.h"
 #include "etj_entity_utilities.h"
-#include "etj_numeric_utilities.h"
 #include "etj_rtv.h"
 #include "etj_syscall_ext_shared.h"
 #include "etj_target_spawn_relay.h"
@@ -940,10 +939,10 @@ void G_CheckForCursorHints(gentity_t *ent) {
           if (traceEnt->wait > 0 &&
               level.time < static_cast<int>(traceEnt->wait)) {
             hintVal = static_cast<int>(
-                Numeric::clamp(255 * ((static_cast<float>(level.time) -
-                                       traceEnt->wait + traceEnt->delay) /
-                                      traceEnt->delay),
-                               0, 255));
+                std::clamp(255 * ((static_cast<float>(level.time) -
+                                   traceEnt->wait + traceEnt->delay) /
+                                  traceEnt->delay),
+                           0.0f, 255.0f));
           }
         } else {
           hintVal = 0;
@@ -1208,10 +1207,10 @@ void G_CheckForCursorHints(gentity_t *ent) {
                     static_cast<int>(
                         ETJump::FuncButtonSpawnflags::WaitProgress) &&
                 ETJump::buttonOnCooldown(checkEnt) && checkEnt->active) {
-              hintVal = static_cast<int>(Numeric::clamp(
+              hintVal = static_cast<int>(std::clamp(
                   255 * (static_cast<float>(level.time - checkEnt->timestamp) /
                          checkEnt->wait),
-                  0, 255));
+                  0.0f, 255.0f));
             } else {
               hintVal = 0;
             }
@@ -2882,9 +2881,9 @@ void CheckVote() {
   // duration for rtv to give everyone some time to pick a map
   // I'd really like this to be seconds but bleh, consistency I guess...
   if (isRtvVote) {
-    minVoteDuration = Numeric::clamp(vote_minRtvDuration.integer, 1000, 29000);
+    minVoteDuration = std::clamp(vote_minRtvDuration.integer, 1000, 29000);
   } else {
-    minVoteDuration = Numeric::clamp(vote_minVoteDuration.integer, 1000, 29000);
+    minVoteDuration = std::clamp(vote_minVoteDuration.integer, 1000, 29000);
   }
 
   if (!level.voteInfo.voteTime || level.voteInfo.vote_fn == nullptr ||
@@ -2892,7 +2891,7 @@ void CheckVote() {
     return;
   }
 
-  const int requiredPercentage = Numeric::clamp(vote_percent.integer, 1, 99);
+  const int requiredPercentage = std::clamp(vote_percent.integer, 1, 99);
   const int validVotingClients = getNumValidVoters();
   const int requiredClients = validVotingClients * requiredPercentage / 100;
   const auto voter =

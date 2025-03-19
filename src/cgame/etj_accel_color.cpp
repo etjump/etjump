@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 
+#include <algorithm>
+
 #include "etj_accel_color.h"
 #include "etj_pmove_utils.h"
 #include "etj_cgaz.h"
-#include "../game/etj_numeric_utilities.h"
 
 namespace ETJump {
 void AccelColor::setAccelColor(int &style, float &speed, float &alpha,
@@ -52,7 +53,7 @@ void AccelColor::setAccelColor(int &style, float &speed, float &alpha,
     calcAccelColor(pm, ps, accel, color);
   }
 
-  color[3] *= Numeric::clamp(0.0f, 1.0f, alpha);
+  color[3] *= std::clamp(alpha, 0.0f, 1.0f);
 }
 
 void AccelColor::calcAccelColor(const pmove_t *pm, const playerState_t *ps,
@@ -156,7 +157,7 @@ void AccelColor::calcAccelColor(const pmove_t *pm, const playerState_t *ps,
             std::abs(accel[1]) -
             std::abs(std::max(std::abs(optAccelY), std::abs(altOptAccelY)));
 
-        frac = Numeric::clamp(0.0f, 1.0f, 1.0f - absDiffX - absDiffY);
+        frac = std::clamp(1.0f - absDiffX - absDiffY, 0.0f, 1.0f);
       }
     } else {
       if ((maxAccelY > 0 && accel[1] >= 0) ||
@@ -166,7 +167,7 @@ void AccelColor::calcAccelColor(const pmove_t *pm, const playerState_t *ps,
             std::abs(accel[0]) -
             std::abs(std::max(std::abs(optAccelX), std::abs(altOptAccelX)));
 
-        frac = Numeric::clamp(0.0f, 1.0f, 1.0f - absDiffY - absDiffX);
+        frac = std::clamp(1.0f - absDiffY - absDiffX, 0.0f, 1.0f);
       }
     }
 

@@ -32,7 +32,6 @@
 #include "etj_custom_map_votes.h"
 #include "g_local.h"
 #include "etj_map_statistics.h"
-#include "etj_numeric_utilities.h"
 #include "etj_utilities.h"
 #include "etj_tokens.h"
 #include "etj_string_utilities.h"
@@ -192,7 +191,7 @@ bool Rankings(gentity_t *ent, Arguments argv) {
   auto page = optPage.hasValue() ? optPage.value().integer - 1 : 0;
   auto pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
 
-  pageSize = Numeric::clamp(pageSize, 1, 100);
+  pageSize = std::clamp(pageSize, 1, 100);
 
   auto userId = ETJump::session->GetId(ent);
 
@@ -306,11 +305,11 @@ bool Records(gentity_t *ent, Arguments argv) {
   params.page = optPage.hasValue() ? optPage.value().integer : 1;
   if (!params.run.hasValue()) {
     params.pageSize = optPageSize.hasValue()
-                          ? Numeric::clamp(optPageSize.value().integer, 1, 10)
+                          ? std::clamp(optPageSize.value().integer, 1, 10)
                           : 3;
   } else {
     params.pageSize = optPageSize.hasValue()
-                          ? Numeric::clamp(optPageSize.value().integer, 1, 100)
+                          ? std::clamp(optPageSize.value().integer, 1, 100)
                           : 20;
   }
   params.userId = ETJump::session->GetId(ent);

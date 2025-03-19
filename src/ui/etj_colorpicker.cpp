@@ -26,7 +26,6 @@
 
 #include "ui_shared.h"
 #include "../cgame/etj_utilities.h"
-#include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 
 #include "etj_colorpicker.h"
@@ -139,25 +138,22 @@ void ColorPicker::resetColorPickerState() {
 
 inline void ColorPicker::setHSV(vec4_t hsv, const float h, const float s,
                                 const float v, const float a) {
-  Vector4Set(hsv, Numeric::clamp(h, 0.0f, 360.0f),
-             Numeric::clamp(s, 0.0f, 100.0f), Numeric::clamp(v, 0.0f, 100.0f),
-             Numeric::clamp(a, 0.0f, 1.0f));
+  Vector4Set(hsv, std::clamp(h, 0.0f, 360.0f), std::clamp(s, 0.0f, 100.0f),
+             std::clamp(v, 0.0f, 100.0f), std::clamp(a, 0.0f, 1.0f));
 }
 
 inline void ColorPicker::setRGB(vec4_t rgb, const float r, const float g,
                                 const float b, const float a) {
-  Vector4Set(rgb, Numeric::clamp(r, 0.0f, 255.0f),
-             Numeric::clamp(g, 0.0f, 255.0f), Numeric::clamp(b, 0.0f, 255.0f),
-             Numeric::clamp(a, 0.0f, 1.0f));
+  Vector4Set(rgb, std::clamp(r, 0.0f, 255.0f), std::clamp(g, 0.0f, 255.0f),
+             std::clamp(b, 0.0f, 255.0f), std::clamp(a, 0.0f, 1.0f));
 }
 
 inline void ColorPicker::setRGBNormalized(vec4_t rgb, const float r,
                                           const float g, const float b,
                                           const float a) {
-  Vector4Set(rgb, Numeric::clamp(r / 255, 0.0f, 1.0f),
-             Numeric::clamp(g / 255, 0.0f, 1.0f),
-             Numeric::clamp(b / 255, 0.0f, 1.0f),
-             Numeric::clamp(a, 0.0f, 1.0f));
+  Vector4Set(rgb, std::clamp(r / 255, 0.0f, 1.0f),
+             std::clamp(g / 255, 0.0f, 1.0f), std::clamp(b / 255, 0.0f, 1.0f),
+             std::clamp(a, 0.0f, 1.0f));
 }
 
 void ColorPicker::updateRGBSliderState(const vec4_t rgb) const {
@@ -360,13 +356,13 @@ void ColorPicker::colorPickerDragFunc(const itemDef_t *item,
 
   // mouse2 adjusts only saturation, mouse3 only value
   if (key != K_MOUSE2) {
-    const float y = Numeric::clamp(cursorY, rect.y, rect.y + rect.h);
+    const float y = std::clamp(cursorY, rect.y, rect.y + rect.h);
     // value increases as Y pos decreases, so invert the movement
     setColorSliderValue(COLOR_PICKER_V, rect.h - (y - rect.y));
   }
 
   if (key != K_MOUSE3) {
-    const float x = Numeric::clamp(cursorX, rect.x, rect.x + rect.w);
+    const float x = std::clamp(cursorX, rect.x, rect.x + rect.w);
     setColorSliderValue(COLOR_PICKER_S, x - rect.x);
   }
 

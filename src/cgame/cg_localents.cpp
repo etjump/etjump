@@ -2,8 +2,9 @@
 // cg_localents.c -- every frame, generate renderer commands for locally
 // processed entities, like smoke puffs, gibs, shells, etc.
 
+#include <algorithm>
+
 #include "cg_local.h"
-#include "../game/etj_numeric_utilities.h"
 
 // Ridah, increased this
 // #define	MAX_LOCAL_ENTITIES	512
@@ -1087,7 +1088,7 @@ void CG_AddFadeRGB(localEntity_t *le) {
 
   for (int i = 0; i < 4; i++) {
     re->shaderRGBA[i] =
-        static_cast<byte>(Numeric::clamp(le->color[i] * c, 0, 255));
+        static_cast<byte>(std::clamp(le->color[i] * c, 0.0f, 255.0f));
   }
 
   trap_R_AddRefEntityToScene(re);

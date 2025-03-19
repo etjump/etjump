@@ -1,5 +1,4 @@
 #include "g_local.h"
-#include "etj_numeric_utilities.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_entity_utilities.h"
@@ -892,7 +891,7 @@ static void setFireTeamRules(const int &clientNum) {
     }
 
     trap_Argv(3, val, sizeof(val));
-    const int limit = Numeric::clamp(Q_atoi(val), -1, 100);
+    const int limit = std::clamp(Q_atoi(val), -1, 100);
 
     if (!Q_stricmp(val, "reset")) {
       setSaveLimitForFTMembers(ft, ft->saveLimit);

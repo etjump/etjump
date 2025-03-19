@@ -28,8 +28,6 @@
 #include "etj_utilities.h"
 #include "etj_cvar_parser.h"
 
-#include "../game/etj_numeric_utilities.h"
-
 namespace ETJump {
 Crosshair::Crosshair() {
   startListeners();
@@ -62,7 +60,7 @@ void Crosshair::adjustSize() {
   crosshair.w = size.x;
   crosshair.h = size.y;
   crosshair.f = 0.0f;
-  crosshair.t = Numeric::clamp(etj_crosshairThickness.value, 0.0f, 5.0f);
+  crosshair.t = std::clamp(etj_crosshairThickness.value, 0.0f, 5.0f);
 
   if (crosshair.current < 10) {
     // using abs makes sure negative scale will flip correctly
@@ -102,9 +100,8 @@ bool Crosshair::beforeRender() {
   }
 
   // alpha adjustment here to make it work with crosshair health too
-  crosshair.color[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
-  crosshair.colorAlt[3] =
-      Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
+  crosshair.color[3] = std::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
+  crosshair.colorAlt[3] = std::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
 
   return true;
 }

@@ -22,8 +22,9 @@
  * SOFTWARE.
  */
 
+#include <algorithm>
+
 #include "etj_cvar_master_drawer.h"
-#include "../game/etj_numeric_utilities.h"
 
 ETJump::CvarBasedMasterDrawer::CvarBasedMasterDrawer(const vmCvar_t &cvar)
     : selector(cvar) {
@@ -33,7 +34,7 @@ ETJump::CvarBasedMasterDrawer::CvarBasedMasterDrawer(const vmCvar_t &cvar)
 }
 
 void ETJump::CvarBasedMasterDrawer::updateCurrentIndex(int index) {
-  currentIndex = Numeric::clamp(index, 1, renderables.size()) - 1;
+  currentIndex = std::clamp(index, 1, static_cast<int>(renderables.size())) - 1;
 }
 
 bool ETJump::CvarBasedMasterDrawer::beforeRender() {

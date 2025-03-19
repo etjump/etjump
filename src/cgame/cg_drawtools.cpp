@@ -1,7 +1,9 @@
 // cg_drawtools.c -- helper functions called by cg_draw, cg_scoreboard, cg_info,
 // etc
+
+#include <algorithm>
+
 #include "cg_local.h"
-#include "../game/etj_numeric_utilities.h"
 
 /*
 ================
@@ -206,12 +208,12 @@ void DrawLine(float x1, float y1, float x2, float y2, float w, float h,
 
   // Use a single DrawPic for horizontal or vertical lines
   if (x1 == x2) {
-    x1 = Numeric::clamp(x1, 0, scrw);
+    x1 = std::clamp(x1, 0.0f, scrw);
 
     CG_DrawPic(x1, std::min(y1, y2), w, std::abs(y1 - y2),
                cgs.media.whiteShader);
   } else if (y1 == y2) {
-    y1 = Numeric::clamp(y1, 0, scrh);
+    y1 = std::clamp(y1, 0.0f, scrh);
 
     CG_DrawPic(std::min(x1, x2), y1, std::abs(x1 - x2), h,
                cgs.media.whiteShader);
