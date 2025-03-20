@@ -1,15 +1,11 @@
 // bg_local.h -- local definitions for the bg (both games) files
 
-#define MIN_WALK_NORMAL 0.7 // can't walk on very steep slopes
+#pragma once
 
-#define STEPSIZE 18
+// can't walk on very steep slopes
+inline constexpr float MIN_WALK_NORMAL = 0.7f;
 
-#define JUMP_VELOCITY 270
-
-#define TIMER_LAND 130
-#define TIMER_GESTURE (34 * 66 + 50)
-
-#define DOUBLE_TAP_DELAY 400
+inline constexpr int STEPSIZE = 18;
 
 // all of the locals will be zeroed before each
 // pmove, just to make damn sure we don't have
