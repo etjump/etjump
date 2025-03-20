@@ -1317,6 +1317,7 @@ typedef struct {
 } keys_set_t;
 
 #define MAX_LOCKER_DEBRIS 5
+inline constexpr int MAX_COMMANDMAP_LAYERS = 4;
 
 // all of the model, shader, and sound references that are
 // loaded at gamestate time are stored in cgMedia_t
@@ -1738,16 +1739,6 @@ typedef struct {
   qhandle_t ccMortarHit;
   qhandle_t ccMortarTarget;
   qhandle_t ccMortarTargetArrow;
-
-  qhandle_t currentSquadBackground;
-  qhandle_t SPTeamOverlayUnitBackground;
-  qhandle_t SPTeamOverlayUnitSelected;
-  qhandle_t SPTeamOverlayBotOrders[BOT_ACTION_MAX];
-  qhandle_t SPTeamOverlayBotOrdersBkg;
-  qhandle_t SPPlayerInfoSpecialIcon;
-  qhandle_t SPPlayerInfoHealthIcon;
-  qhandle_t SPPlayerInfoStaminaIcon;
-  qhandle_t SPPlayerInfoAmmoIcon;
 
   // Gordon: for commandmap
   qhandle_t medicIcon;

@@ -106,7 +106,7 @@ void CG_ParseServerinfo(void) {
 
   info = CG_ConfigString(CS_SERVERINFO);
   cg_gameType.integer = cgs.gametype =
-      (gametype_t)Q_atoi(Info_ValueForKey(info, "g_gametype"));
+      Q_atoi(Info_ValueForKey(info, "g_gametype"));
   cg_antilag.integer = cgs.antilag =
       Q_atoi(Info_ValueForKey(info, "g_antilag"));
   if (!cgs.localServer) {

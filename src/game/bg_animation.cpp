@@ -23,8 +23,8 @@ extern vmCvar_t g_gametype;
 #endif
 
 // debug defines, to prevent doing costly string cvar lookups
-//#define	DBGANIMS
-//#define	DBGANIMEVENTS
+// #define	DBGANIMS
+// #define	DBGANIMEVENTS
 
 // this is used globally within this file to reduce redundant params
 static animScriptData_t *globalScriptData = NULL;
@@ -320,44 +320,6 @@ void QDECL BG_AnimParseError(const char *msg, ...) {
     Com_Error(ERR_DROP, "%s", text);
   }
 }
-
-/*
-=================
-BG_ModelInfoForClient
-=================
-*/
-/*animModelInfo_t *BG_ModelInfoForClient( int client ) {
-    if (!globalScriptData)
-        BG_AnimParseError( "BG_ModelInfoForClient: NULL globalScriptData" );
-    //
-    if (!globalScriptData->clientModels[client])
-        BG_AnimParseError( "BG_ModelInfoForClient: client %i has no modelinfo",
-client );
-    //
-    return &globalScriptData->modelInfo[globalScriptData->clientModels[client] -
-1];
-}*/
-
-/*
-=================
-BG_ModelInfoForModelname
-=================
-*/
-/*animModelInfo_t *BG_ModelInfoForModelname( char *modelname ) {
-    int i;
-    animModelInfo_t *modelInfo;
-    //
-    if (!globalScriptData)
-        BG_AnimParseError( "BG_ModelInfoForModelname: NULL globalScriptData" );
-    //
-    for (i=0, modelInfo=globalScriptData->modelInfo; i<MAX_ANIMSCRIPT_MODELS;
-i++, modelInfo++) { if (!modelInfo->modelname[0]) continue; if (!Q_stricmp(
-modelname, modelInfo->modelname )) { return modelInfo;
-        }
-    }
-    //
-    return NULL;
-}*/
 
 /*
 =================
