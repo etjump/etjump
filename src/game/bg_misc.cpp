@@ -2645,48 +2645,6 @@ int BG_AkimboSidearm(int weaponNum) {
   }
 }
 
-/*
-==============
-BG_AkimboForSideArm
-==============
-*/
-/*int BG_AkimboForSideArm( int weaponNum ) {
-    switch( weaponNum )
-    {
-    case WP_COLT:			return WP_AKIMBO_COLT;
-break; case WP_SILENCED_COLT:	return WP_AKIMBO_SILENCEDCOLT;	break; case
-WP_LUGER:			return WP_AKIMBO_LUGER;			break;
-    case WP_SILENCER:		return WP_AKIMBO_SILENCEDLUGER;	break;
-    default:				return WP_NONE;
-break;
-    }
-}*/
-
-//----(SA) Added keys
-/*
-==============
-BG_FindItemForKey
-==============
-*/
-/*gitem_t *BG_FindItemForKey(wkey_t k, int *indexreturn)
-{
-    int		i;
-
-    for ( i = 0 ; i < bg_numItems ; i++ ) {
-        if ( bg_itemlist[i].giType == IT_KEY && bg_itemlist[i].giTag == k ) {
-            {
-                if(indexreturn)
-                    *indexreturn = i;
-                return &bg_itemlist[i];
-            }
-        }
-    }
-
-    Com_Error( ERR_DROP, "Key %d not found", k );
-    return NULL;
-}*/
-//----(SA) end
-
 //----(SA) added
 /*
 ==============

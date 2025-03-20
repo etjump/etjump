@@ -2714,65 +2714,6 @@ static void CG_RegisterGraphics(void) {
   cgs.media.skillPics[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS] =
       trap_R_RegisterShaderNoMip("gfx/limbo/ic_covertops");
 
-  /*cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_MOVETOLOC] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_default" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_CONSTRUCT] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_construct"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_USEDYNAMITE] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_usedynamite"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_REPAIR] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_fixgun" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_MOUNTGUN] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_mountgun" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_OPENDOOR] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_opendoor" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_REVIVE] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_revive" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_GETDISGUISE] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_getdisguise"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_HEAL] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_heal" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_AMMO] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_ammo" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_DISARM] =
-  trap_R_RegisterShaderNoMip(
-  "ui/assets2/ingame/bot_action_disarmdynamite" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_ATTACK] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_attack" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_COVER] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_cover" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_RECON] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_recon" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_SMOKEBOMB] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_smoke" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_FINDMINES] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_findmines"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_PLANTMINE] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_plantmine"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_ARTILLERY] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_artillery"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_AIRSTRIKE] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_airstrike"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_GRENADELAUNCH]=
-  trap_R_RegisterShaderNoMip(
-  "ui/assets2/ingame/bot_action_grenadelaunch" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_PICKUPITEM] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_pickup" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_PANZERFAUST] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_panzerfaust"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_FLAMETHROW] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_flamethrow"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_MG42] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_mg42" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_MOUNTEDATTACK]=
-  trap_R_RegisterShaderNoMip(
-  "ui/assets2/ingame/bot_action_mountedattack" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_KNIFEATTACK] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_knifeattack"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_LOCKPICK] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_lockpick"
-  );*/
-
   WM_RegisterWeaponTypeShaders();
 
   CG_LoadRankIcons();

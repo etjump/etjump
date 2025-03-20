@@ -122,35 +122,6 @@ int Pickup_Key(gentity_t *ent, gentity_t *other) {
   return RESPAWN_KEY;
 }
 
-#ifdef KITS
-
-// START Mad Doc - TDF
-// in single player, the player can pick up the 'kits' of dead allies. Kits
-// contain ammo for the special weapons that bot was carrying
-int Pickup_Kit(gentity_t *ent, gentity_t *other) {
-
-  switch (ent->item->giTag) {
-    case KIT_ENGINEER:
-      drop->item->giAmmoIndex = ps->ammoclip[BG_FindClipForWeapon(WP_LANDMINE)];
-      drop->item->giClipIndex = ps->ammoclip[BG_FindClipForWeapon(WP_DYNAMITE)];
-      break;
-  }
-  case PC_FIELDOPS: {
-    drop->item->giAmmoIndex = ps->ammoclip[BG_FindClipForWeapon(WP_AMMO)];
-    drop->item->giClipIndex =
-        ps->ammoclip[BG_FindClipForWeapon(WP_SMOKE_MARKER)];
-    break;
-  }
-  case PC_COVERTOPS: {
-    drop->item->giAmmoIndex = ps->ammoclip[BG_FindClipForWeapon(WP_SMOKE_BOMB)];
-    // no second special for covert ops
-    break;
-  }
-}
-  // END Mad Doc - TDF
-
-#endif
-
 /*
 ==============
 Pickup_Clipboard

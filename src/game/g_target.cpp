@@ -765,42 +765,6 @@ void target_relay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
         }
         return;
       }
-
-      /*			item =
-         BG_FindItemForKey(self->key, 0);
-
-                  if(item)
-                  {
-                      if(activator->client->ps.stats[STAT_KEYS]
-         & (1<<item->giTag))	// user has key
-                      {
-                          if (self->spawnflags & 8 ) {
-         // relay is NOKEY_ONLY and player has key if
-         (self->soundPos1) G_Sound( self,
-         self->soundPos1);	//----(SA)	added
-         return;
-                          }
-                      }
-                      else // user does not have key
-                      {
-                          if (!(self->spawnflags & 8) )
-                          {
-                              if (self->soundPos1)
-                                  G_Sound( self,
-         self->soundPos1);
-         //----(SA)	added return;
-                          }
-                      }
-                  }*/
-
-      /*			if(self->spawnflags &
-         16) {	// (SA) take key
-                      activator->client->ps.stats[STAT_KEYS]
-         &=
-         ~(1<<item->giTag);
-                      // (SA) TODO: "took inventory
-         item" sound
-                  }*/
     }
   }
 
@@ -1520,20 +1484,16 @@ Resets saved positions
 
 void target_savereset_use(gentity_t *self, gentity_t *other,
                           gentity_t *activator) {
-
   if (!activator || !activator->client) {
-    G_DPrintf("Error: trying to activate \"target_savereset\" "
-              "without an "
+    G_DPrintf("Error: trying to activate \"target_savereset\" without an "
               "activator.\n");
     return;
   }
 
-  if (activator->client) {
-    ETJump::saveSystem->resetSavedPositions(activator);
+  ETJump::saveSystem->resetSavedPositions(activator);
 
-    if (!(self->spawnflags & 1)) {
-      CPx(activator - g_entities, "cp \"^7 Your saves were removed.\n\"");
-    }
+  if (!(self->spawnflags & 1)) {
+    Printer::center(activator, "^7Your saves were removed.");
   }
 }
 
