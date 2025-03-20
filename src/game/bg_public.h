@@ -376,9 +376,8 @@ extern const char *bg_fireteamNames[MAX_FIRETEAMS];
 #define CS_STRINGS (CS_CUSTMOTD + MAX_MOTDLINES)
 #define CS_MAX (CS_STRINGS + MAX_CSSTRINGS)
 
-#if (CS_MAX) > MAX_CONFIGSTRINGS
-  #error overflow: (CS_MAX) > MAX_CONFIGSTRINGS
-#endif
+static_assert(CS_MAX <= MAX_CONFIGSTRINGS,
+              "CS_MAX cannot exceed MAX_CONFIGSTRINGS");
 
 typedef enum {
   ETJUMP_GAMETYPE = 2,

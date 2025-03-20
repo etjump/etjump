@@ -3672,43 +3672,6 @@ void UI_RunMenuScript(const char **args) {
       trap_Cmd_ExecuteText(EXEC_APPEND, "vid_restart\n");
       return;
     }
-    if (Q_stricmp(name, "getCDKey") == 0) {
-      char out[17];
-      trap_GetCDKey(buff, 17);
-      trap_Cvar_Set("cdkey1", "");
-      trap_Cvar_Set("cdkey2", "");
-      trap_Cvar_Set("cdkey3", "");
-      trap_Cvar_Set("cdkey4", "");
-      if (strlen(buff) == CDKEY_LEN) {
-        Q_strncpyz(out, buff, 5);
-        trap_Cvar_Set("cdkey1", out);
-        Q_strncpyz(out, buff + 4, 5);
-        trap_Cvar_Set("cdkey2", out);
-        Q_strncpyz(out, buff + 8, 5);
-        trap_Cvar_Set("cdkey3", out);
-        Q_strncpyz(out, buff + 12, 5);
-        trap_Cvar_Set("cdkey4", out);
-      }
-      return;
-    }
-    if (Q_stricmp(name, "verifyCDKey") == 0) {
-      buff[0] = '\0';
-      Q_strcat(buff, 1024, UI_Cvar_VariableString("cdkey1"));
-      Q_strcat(buff, 1024, UI_Cvar_VariableString("cdkey2"));
-      Q_strcat(buff, 1024, UI_Cvar_VariableString("cdkey3"));
-      Q_strcat(buff, 1024, UI_Cvar_VariableString("cdkey4"));
-      trap_Cvar_Set("cdkey", buff);
-      if (trap_VerifyCDKey(buff, UI_Cvar_VariableString("cdkeychecksum"))) {
-        trap_Cvar_Set("ui_cdkeyvalid",
-                      trap_TranslateString("CD key appears to be valid."));
-        trap_SetCDKey(buff);
-      } else {
-        trap_Cvar_Set(
-            "ui_cdkeyvalid",
-            trap_TranslateString("CD key does not appear to be valid."));
-      }
-      return;
-    }
     if (Q_stricmp(name, "loadArenas") == 0) {
       UI_LoadArenas();
       UI_MapCountByGameType();
