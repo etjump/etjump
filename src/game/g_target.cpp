@@ -1520,20 +1520,16 @@ Resets saved positions
 
 void target_savereset_use(gentity_t *self, gentity_t *other,
                           gentity_t *activator) {
-
   if (!activator || !activator->client) {
-    G_DPrintf("Error: trying to activate \"target_savereset\" "
-              "without an "
+    G_DPrintf("Error: trying to activate \"target_savereset\" without an "
               "activator.\n");
     return;
   }
 
-  if (activator->client) {
-    ETJump::saveSystem->resetSavedPositions(activator);
+  ETJump::saveSystem->resetSavedPositions(activator);
 
-    if (!(self->spawnflags & 1)) {
-      CPx(activator - g_entities, "cp \"^7 Your saves were removed.\n\"");
-    }
+  if (!(self->spawnflags & 1)) {
+    Printer::center(activator, "^7Your saves were removed.");
   }
 }
 
