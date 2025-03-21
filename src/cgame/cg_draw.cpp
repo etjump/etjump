@@ -537,8 +537,8 @@ LAGOMETER
 */
 
 // lagometer sample count, enough for ~5ms server frame intervals
-static constexpr int LAG_SAMPLES = 1024;
-static constexpr int LAG_PERIOD = 5000;
+inline constexpr int LAG_SAMPLES = 1024;
+inline constexpr int LAG_PERIOD = 5000;
 
 struct sample_t {
   int elapsed;

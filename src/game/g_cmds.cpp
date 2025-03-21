@@ -23,8 +23,8 @@ enum class VotingTypes {
   RevoteRtv
 };
 
-static constexpr int VOTING_ATTEMPTS{3};
-static constexpr int VOTING_TIMEOUT{1000};
+inline constexpr int VOTING_ATTEMPTS = 3;
+inline constexpr int VOTING_TIMEOUT = 1000;
 } // namespace ETJump
 
 /*

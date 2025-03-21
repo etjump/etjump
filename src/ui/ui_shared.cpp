@@ -3007,10 +3007,10 @@ qboolean Item_Multi_HandleKey(itemDef_t *item, int key) {
 }
 
 namespace ETJump {
-static constexpr int8_t DIRECTION_UP = 1;
-static constexpr int8_t DIRECTION_DOWN = -1;
-static constexpr uint8_t SCROLL_SMALL = 1;
-static constexpr uint8_t SCROLL_BIG = 3;
+inline constexpr int8_t DIRECTION_UP = 1;
+inline constexpr int8_t DIRECTION_DOWN = -1;
+inline constexpr uint8_t SCROLL_SMALL = 1;
+inline constexpr uint8_t SCROLL_BIG = 3;
 
 static float getComboThumbPosition(const itemDef_t *item,
                                    const rectDef_t *rect) {
