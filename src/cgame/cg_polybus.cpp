@@ -2,7 +2,7 @@
 
 #include "cg_local.h"
 
-#define MAX_PB_BUFFERS 128
+inline constexpr int MAX_PB_BUFFERS = 128;
 
 polyBuffer_t cg_polyBuffers[MAX_PB_BUFFERS];
 qboolean cg_polyBuffersInuse[MAX_PB_BUFFERS];

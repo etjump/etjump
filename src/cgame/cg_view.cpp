@@ -259,7 +259,8 @@ CG_OffsetThirdPersonView
 
 ===============
 */
-#define FOCUS_DISTANCE 400 // 800	//512
+inline constexpr int FOCUS_DISTANCE = 400;
+
 void CG_OffsetThirdPersonView(void) {
   vec3_t forward, right, up;
   vec3_t view;
@@ -803,21 +804,7 @@ static void CG_OffsetFirstPersonView(void) {
   }
 
   // add kick offset
-
   VectorAdd(origin, cg.kick_origin, origin);
-
-  // pivot the eye based on a neck length
-#if 0
-	{
-  #define NECK_LENGTH 8
-		vec3_t forward, up;
-
-		cg.refdef_current->vieworg[2] -= NECK_LENGTH;
-		AngleVectors(cg.refdefViewAngles, forward, NULL, up);
-		VectorMA(cg.refdef_current->vieworg, 3, forward, cg.refdef_current->vieworg);
-		VectorMA(cg.refdef_current->vieworg, NECK_LENGTH, up, cg.refdef_current->vieworg);
-	}
-#endif
 }
 
 //======================================================================
@@ -955,8 +942,8 @@ CG_CalcFov
 Fixed fov at intermissions, otherwise account for fov variable and zooms.
 ====================
 */
-#define WAVE_AMPLITUDE 1
-#define WAVE_FREQUENCY 0.4
+inline constexpr float WAVE_AMPLITUDE = 1.0f;
+inline constexpr float WAVE_FREQUENCY = 0.4f;
 
 static int CG_CalcFov(void) {
   static float lastfov = 90; // for transitions back from zoomed in modes
@@ -1124,10 +1111,8 @@ static int CG_CalcFov(void) {
 CG_UnderwaterSounds
 ==============
 */
-#define UNDERWATER_BIT 16
-static void CG_UnderwaterSounds(void) {
-  //	trap_S_AddLoopingSound( cent->lerpOrigin, vec3_origin,
-  // cgs.media.underWaterSound, 255, 0 );
+inline constexpr int UNDERWATER_BIT = 16;
+static void CG_UnderwaterSounds() {
   trap_S_AddLoopingSound(cg.snap->ps.origin, vec3_origin,
                          cgs.media.underWaterSound, 255 | (1 << UNDERWATER_BIT),
                          0);

@@ -27,8 +27,6 @@
 
 #include <cmath>
 
-#define PI 3.14159265
-
 class RotationMatrix {
 
 public:

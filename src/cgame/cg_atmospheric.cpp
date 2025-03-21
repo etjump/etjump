@@ -8,70 +8,28 @@
 **
 */
 
-#define ATM_NEW
-
 #include "cg_local.h"
 
-#define MAX_ATMOSPHERIC_HEIGHT MAX_MAP_SIZE  // maximum world height
-#define MIN_ATMOSPHERIC_HEIGHT -MAX_MAP_SIZE // minimum world height
+// maximum world height
+inline constexpr int MAX_ATMOSPHERIC_HEIGHT = MAX_MAP_SIZE;
 
-// int getgroundtime, getskytime, rendertime, checkvisibletime, generatetime;
-// int n_getgroundtime, n_getskytime, n_rendertime, n_checkvisibletime,
-// n_generatetime;
+// maximum # of particles
+inline constexpr int MAX_ATMOSPHERIC_PARTICLES = 4000;
+// maximum distance from refdef origin that particles are visible
+inline constexpr int MAX_ATMOSPHERIC_DISTANCE = 1000;
+// maximum different effectshaders for an atmospheric effect
+inline constexpr int MAX_ATMOSPHERIC_EFFECTSHADERS = 6;
+inline constexpr int ATMOSPHERIC_DROPDELAY = 1000;
 
-// static qboolean CG_LoadTraceMap( void );
+inline constexpr float ATMOSPHERIC_RAIN_SPEED = 1.1f * DEFAULT_GRAVITY;
+inline constexpr int ATMOSPHERIC_RAIN_HEIGHT = 150;
 
-#define MAX_ATMOSPHERIC_PARTICLES 4000 // maximum # of particles
-#define MAX_ATMOSPHERIC_DISTANCE                                               \
-  1000 // maximum distance from refdef origin that particles are visible
-#define MAX_ATMOSPHERIC_EFFECTSHADERS                                          \
-  6 // maximum different effectshaders for an atmospheric effect
-#define ATMOSPHERIC_DROPDELAY 1000
-#define ATMOSPHERIC_CUTHEIGHT 800
-
-#define ATMOSPHERIC_RAIN_SPEED (1.1f * DEFAULT_GRAVITY)
-#define ATMOSPHERIC_RAIN_HEIGHT 150
-
-#define ATMOSPHERIC_SNOW_SPEED (0.1f * DEFAULT_GRAVITY)
-#define ATMOSPHERIC_SNOW_HEIGHT 3
+inline constexpr float ATMOSPHERIC_SNOW_SPEED = 0.1f * DEFAULT_GRAVITY;
+inline constexpr int ATMOSPHERIC_SNOW_HEIGHT = 3;
 
 typedef enum { ATM_NONE, ATM_RAIN, ATM_SNOW } atmFXType_t;
 
-#ifndef ATM_NEW
-/*
-** Atmospheric Particles PolyPool
-*/
-static polyVert_t atmPolyPool[MAX_ATMOSPHERIC_PARTICLES * 3];
-static int numParticlesInFrame;
-static qhandle_t atmPolyShader;
-
-static void CG_ClearPolyPool(void) {
-  numParticlesInFrame = 0;
-  atmPolyShader = 0;
-}
-
-static void CG_RenderPolyPool(void) {
-  if (numParticlesInFrame) {
-    trap_R_AddPolysToScene(atmPolyShader, 3, atmPolyPool, numParticlesInFrame);
-    CG_ClearPolyPool();
-  }
-}
-#endif // ATM_NEW
-
 static void CG_AddPolyToPool(qhandle_t shader, const polyVert_t *verts) {
-#ifndef ATM_NEW
-  if (atmPolyShader && atmPolyShader != shader) {
-    CG_RenderPolyPool();
-  }
-
-  if (numParticlesInFrame == MAX_ATMOSPHERIC_PARTICLES) {
-    CG_RenderPolyPool();
-  }
-
-  atmPolyShader = shader;
-  memcpy(&atmPolyPool[numParticlesInFrame * 3], verts, 3 * sizeof(polyVert_t));
-  numParticlesInFrame++;
-#else
   int firstIndex;
   int firstVertex;
   int i;
@@ -99,7 +57,6 @@ static void CG_AddPolyToPool(qhandle_t shader, const polyVert_t *verts) {
 
   pPolyBuffer->numIndicies += 3;
   pPolyBuffer->numVerts += 3;
-#endif // ATM_NEW
 }
 
 /*
@@ -116,48 +73,6 @@ qboolean CG_AtmosphericKludge() {
   }
   kludgeChecked = qtrue;
   kludgeResult = qfalse;
-
-  /*if( !Q_stricmp( cgs.mapname, "maps/trainyard.bsp" ) )
-  {
-      //CG_EffectParse( "T=RAIN,B=5 10,C=0.5 2,G=0.5 2,BV=30 100,GV=20
-  80,W=1 2,D=1000 1000" ); CG_EffectParse( "T=RAIN,B=5 10,C=0.5,G=0.5
-  2,BV=50 50,GV=200 200,W=1 2,D=1000" ); return( kludgeResult = qtrue );
-  }*/
-  /*	if( !Q_stricmp( cgs.mapname, "maps/mp_railgun.bsp" ) )
-      {
-          //CG_EffectParse( "T=RAIN,B=5 10,C=0.5 2,G=0.5 2,BV=30
-  100,GV=20 80,W=1 2,D=1000 1000" );
-  //		CG_EffectParse( "T=SNOW,B=5 10,C=0.5,G=0.3 2,BV=50
-  50,GV=30 80,W=1 2,D=5000" );
-
-          // snow storm, quite horizontally
-          //CG_EffectParse( "T=SNOW,B=20 30,C=0.8,G=0.5 8,BV=100
-  100,GV=70 150,W=3 5,D=5000" );
-
-          // mild snow storm, quite vertically - likely go for this
-          //CG_EffectParse( "T=SNOW,B=5 10,C=0.5,G=0.3 2,BV=20 30,GV=25
-  40,W=3 5,D=5000" ); CG_EffectParse( "T=SNOW,B=5 10,C=0.5,G=0.3 2,BV=20
-  30,GV=25 40,W=3 5,D=2000" );
-
-          // cpu-cheap press event effect
-          //CG_EffectParse( "T=SNOW,B=5 10,C=0.5,G=0.3 2,BV=20 30,GV=25
-  40,W=3 5,D=500" );
-  //		CG_EffectParse( "T=SNOW,B=5 10,C=0.5,G=0.3 2,BV=20
-  30,GV=25 40,W=3 5,D=750" ); return( kludgeResult = qtrue );
-      }*/
-
-  /*if( !Q_stricmp( cgs.mapname, "maps/mp_goliath.bsp" ) ) {
-      //CG_EffectParse( "T=SNOW,B=5 7,C=0.2,G=0.1 5,BV=15 25,GV=25
-  40,W=3 5,D=400" ); CG_EffectParse( "T=SNOW,B=5 7,C=0.2,G=0.1 5,BV=15
-  25,GV=25 40,W=3 5,H=512,D=2000" ); return( kludgeResult = qtrue );
-  }*/
-  /*if( !Q_stricmp( cgs.rawmapname, "sp_bruck_test006" ) ) {
-      //T=SNOW,B=5 10,C=0.5,G=0.3 2,BV=20 30,GV=25 40,W=3 5,H=608,D=2000
-      CG_EffectParse( "T=SNOW,B=5 10,C=0.5,G=0.3 2,BV=20 30,GV=25 40,W=3
-  5,H=512,D=2000 4000" );
-      //CG_EffectParse( "T=SNOW,B=5 7,C=0.2,G=0.1 5,BV=15 25,GV=25
-  40,W=3 5,H=512,D=2000" ); return( kludgeResult = qtrue );
-  }*/
 
   return (kludgeResult = qfalse);
 }
@@ -711,8 +626,7 @@ static void CG_EP_ParseFloats(char *floatstr, float *f1, float *f2) {
   char buff[64];
 
   Q_strncpyz(buff, floatstr, sizeof(buff));
-  for (middleptr = buff; *middleptr && *middleptr != ' '; middleptr++)
-    ;
+  for (middleptr = buff; *middleptr && *middleptr != ' '; middleptr++);
   if (*middleptr) {
     *middleptr++ = 0;
     *f1 = Q_atof(floatstr);
@@ -729,8 +643,7 @@ static void CG_EP_ParseInts(char *intstr, int *i1, int *i2) {
   char buff[64];
 
   Q_strncpyz(buff, intstr, sizeof(buff));
-  for (middleptr = buff; *middleptr && *middleptr != ' '; middleptr++)
-    ;
+  for (middleptr = buff; *middleptr && *middleptr != ' '; middleptr++);
   if (*middleptr) {
     *middleptr++ = 0;
     *i1 = Q_atof(intstr);
@@ -770,8 +683,7 @@ void CG_EffectParse(const char *effectstr) {
   // Parse the parameter string
   Q_strncpyz(workbuff, effectstr, sizeof(workbuff));
   for (startptr = workbuff; *startptr;) {
-    for (eqptr = startptr; *eqptr && *eqptr != '=' && *eqptr != ','; eqptr++)
-      ;
+    for (eqptr = startptr; *eqptr && *eqptr != '=' && *eqptr != ','; eqptr++);
     if (!*eqptr) {
       break; // No more string
     }
@@ -780,8 +692,7 @@ void CG_EffectParse(const char *effectstr) {
       continue;
     }
     *eqptr++ = 0;
-    for (endptr = eqptr; *endptr && *endptr != ','; endptr++)
-      ;
+    for (endptr = eqptr; *endptr && *endptr != ','; endptr++);
     if (*endptr) {
       *endptr++ = 0;
     }
@@ -910,10 +821,6 @@ void CG_AddAtmosphericEffects() {
       cg_atmosphericEffects.value <= 0) {
     return;
   }
-
-#ifndef ATM_NEW
-  CG_ClearPolyPool();
-#endif // ATM_NEW
 
   max = cg_atmosphericEffects.value < 1
             ? cg_atmosphericEffects.value * cg_atmFx.numDrops

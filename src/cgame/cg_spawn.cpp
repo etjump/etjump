@@ -265,7 +265,7 @@ spawn_t spawns[] = {
     {"corona", SP_corona},
 };
 
-#define NUMSPAWNS (sizeof(spawns) / sizeof(spawn_t))
+inline constexpr int NUMSPAWNS = sizeof(spawns) / sizeof(spawn_t);
 
 /*
 ===================
@@ -286,7 +286,7 @@ void CG_ParseEntityFromSpawnVars(void) {
   }
 
   if (CG_SpawnString("classname", "", &classname)) {
-    for (i = 0; i < static_cast<int>(NUMSPAWNS); i++) {
+    for (i = 0; i < NUMSPAWNS; i++) {
       if (!Q_stricmp(spawns[i].name, classname)) {
         spawns[i].spawn();
         break;

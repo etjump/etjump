@@ -73,9 +73,8 @@ void P_DamageFeedback(gentity_t *player) {
   client->damage_knockback = 0;
 }
 
-#define MIN_BURN_INTERVAL                                                      \
-  399 // JPW NERVE set burn timeinterval so we can do more precise
-      // damage (was 199 old model)
+// burn time interval so we can do more precise damage
+inline constexpr int MIN_BURN_INTERVAL = 399;
 
 /*
 =============

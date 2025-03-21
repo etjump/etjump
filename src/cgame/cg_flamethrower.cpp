@@ -53,7 +53,7 @@ typedef struct flameChunk_s {
 } flameChunk_t;
 
 // DHM - Nerve :: lowered this from 2048.  Still allows 6-9 people flaming.
-#define MAX_FLAME_CHUNKS 1024
+inline constexpr int MAX_FLAME_CHUNKS = 1024;
 static flameChunk_t flameChunks[MAX_FLAME_CHUNKS];
 static flameChunk_t *freeFlameChunks, *activeFlameChunks, *headFlameChunks;
 
@@ -103,56 +103,36 @@ void CG_FlameGetMuzzlePoint(vec3_t org, vec3_t fwd, vec3_t right, vec3_t up,
 //	stuck in geometry. therefore when a chunk hits a surface, we should
 // deflect it away from the surface 	slightly, rather than running along it,
 // so that as the chink grows, the sprites don't sink into the 	wall too much.
-static vec3_t flameChunkMins = {0, 0, 0};
-static vec3_t flameChunkMaxs = {0, 0, 0};
+inline constexpr vec3_t flameChunkMins = {0, 0, 0};
+inline constexpr vec3_t flameChunkMaxs = {0, 0, 0};
 
 // these define how the flame looks
-#define FLAME_START_SIZE 1.0
-#define FLAME_START_MAX_SIZE                                                   \
-  140.0 // when the flame is spawned, it should endevour to reach this
-        // size
-#define FLAME_START_MAX_SIZE_RAND 60.0
-#define FLAME_MAX_SIZE 200.0   // flame sprites cannot be larger than this
-#define FLAME_MIN_MAXSIZE 40.0 // don't ever let the sizeMax go less than this
-#define FLAME_START_SPEED                                                      \
-  1200.0                     // 1200.0	// speed of flame as it leaves the nozzle
-#define FLAME_MIN_SPEED 60.0 // 200.0
-#define FLAME_CHUNK_DIST 8.0 // space in between chunks when fired
+// shared constants between server and client are defined in bg_public.h
 
-#define FLAME_BLUE_LENGTH 130.0
-#define FLAME_BLUE_MAX_ALPHA 1.0
+// when the flame is spawned, it should endeavour to reach this
+inline constexpr float FLAME_START_MAX_SIZE = 140.0f;
+inline constexpr float FLAME_START_MAX_SIZE_RAND = 60.0f;
+// flame sprites cannot be larger than this
+inline constexpr float FLAME_MAX_SIZE = 200.0f;
+// don't ever let the sizeMax go less than this
+inline constexpr float FLAME_MIN_MAXSIZE = 40.0f;
+// space in between chunks when fired
+inline constexpr float FLAME_CHUNK_DIST = 8.0f;
 
-#define FLAME_FUEL_LENGTH 48.0
-#define FLAME_FUEL_MAX_ALPHA 0.35
-#define FLAME_FUEL_MIN_WIDTH 1.0
+inline constexpr float FLAME_BLUE_LENGTH = 130.0f;
+inline constexpr float FLAME_BLUE_MAX_ALPHA = 1.0f;
 
-// these are calculated (don't change)
-#define FLAME_LENGTH                                                           \
-  (FLAMETHROWER_RANGE + 50.0) // NOTE: only modify the range, since this
-                              // should always reflect that range
+inline constexpr float FLAME_FUEL_LENGTH = 48.0f;
+inline constexpr float FLAME_FUEL_MAX_ALPHA = 0.35f;
+inline constexpr float FLAME_FUEL_MIN_WIDTH = 1.0f;
 
-#define FLAME_LIFETIME                                                         \
-  (int)((FLAME_LENGTH / FLAME_START_SPEED) *                                   \
-        1000) // life duration in milliseconds
-#define FLAME_FRICTION_PER_SEC (2.0 * FLAME_START_SPEED)
-#define FLAME_BLUE_LIFE (int)((FLAME_BLUE_LENGTH / FLAME_START_SPEED) * 1000)
-#define FLAME_FUEL_LIFE (int)((FLAME_FUEL_LENGTH / FLAME_START_SPEED) * 1000)
-#define FLAME_FUEL_FADEIN_TIME (0.2 * FLAME_FUEL_LIFE)
+inline constexpr int FLAME_BLUE_LIFE =
+    static_cast<int>((FLAME_BLUE_LENGTH / FLAME_START_SPEED) * 1000);
 
 #define FLAME_BLUE_FADEIN_TIME(x) (0.2 * x)
 #define FLAME_BLUE_FADEOUT_TIME(x) (0.05 * x)
 #define GET_FLAME_BLUE_SIZE_SPEED(x)                                           \
   (((float)x / FLAME_LIFETIME) / 1.0) // x is the current sizeMax
-#define GET_FLAME_SIZE_SPEED(x)                                                \
-  (((float)x / FLAME_LIFETIME) / 0.3) // x is the current sizeMax
-
-// #define	FLAME_MIN_DRAWSIZE		20
-
-// enable this for the fuel stream
-// #define FLAME_ENABLE_FUEL_STREAM
-
-// enable this for dynamic lighting around flames
-// #define FLAMETHROW_LIGHTS
 
 // disable this to stop rotating flames (this is variable so we can change it at
 // run-time)
@@ -735,19 +715,19 @@ static vec3_t rright, rup;
   #endif // ALLOW_GEN_SHADERS
 #endif   // _DEBUG
 
-#define FLAME_BLEND_SRC "GL_ONE"
-#define FLAME_BLEND_DST "GL_ONE_MINUS_SRC_COLOR"
+#ifdef GEN_FLAME_SHADER
+  #define FLAME_BLEND_SRC "GL_ONE"
+  #define FLAME_BLEND_DST "GL_ONE_MINUS_SRC_COLOR"
+  #define FLAME_SPRITE_DIR "twiltb2"
+#endif
 
-#define NUM_FLAME_SPRITES 45
-#define FLAME_SPRITE_DIR "twiltb2"
-
-#define NUM_NOZZLE_SPRITES 8
+inline constexpr int NUM_FLAME_SPRITES = 45;
+inline constexpr int NUM_NOZZLE_SPRITES = 8;
 
 static qhandle_t flameShaders[NUM_FLAME_SPRITES];
 static qhandle_t nozzleShaders[NUM_NOZZLE_SPRITES];
 static qboolean initFlameShaders = qtrue;
 
-#define MAX_CLIPPED_FLAMES 8 // dont draw more than this many per frame
 static int numClippedFlames;
 
 void CG_FlameDamage(int owner, vec3_t org, float radius) { return; }
@@ -872,7 +852,7 @@ void CG_AddFlameSpriteToScene(flameChunk_t *f, float lifeFrac, float alpha) {
 static int nextFlameLight = 0;
 static int lastFlameOwner = -1;
 
-#define FLAME_SOUND_RANGE 1024.0
+inline constexpr float FLAME_SOUND_RANGE = 1024.0f;
 
 /*
 ===============
@@ -1053,10 +1033,10 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
       }
     }
 
-#define FLAME_SPRITE_START_BLUE_SCALE 0.2
+    static constexpr float FLAME_SPRITE_START_BLUE_SCALE = 0.2f;
 
-    if (!f->ignitionOnly && (static_cast<float>(FLAME_SPRITE_START_BLUE_SCALE *
-                                                f->blueLife) < lived)) {
+    if (!f->ignitionOnly &&
+        FLAME_SPRITE_START_BLUE_SCALE * f->blueLife < lived) {
 
       float balpha, lifeFrac;
 
@@ -1074,9 +1054,8 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
         }
       }
 
-      lifeFrac = static_cast<float>(
-          (lived - FLAME_SPRITE_START_BLUE_SCALE * f->blueLife) /
-          (FLAME_LIFETIME - FLAME_SPRITE_START_BLUE_SCALE * f->blueLife));
+      lifeFrac = (lived - FLAME_SPRITE_START_BLUE_SCALE * f->blueLife) /
+                 (FLAME_LIFETIME - FLAME_SPRITE_START_BLUE_SCALE * f->blueLife);
 
       balpha = (1.0f - lifeFrac) * 1.4f;
       if (balpha > 1.0) {
@@ -1300,7 +1279,7 @@ CG_UpdateFlamethrowerSounds
 void CG_UpdateFlamethrowerSounds(void) {
   flameChunk_t *f,
       *trav; // , *lastSoundFlameChunk=NULL; // TTimo: unused
-#define MIN_BLOW_VOLUME 30
+  static constexpr float MIN_BLOW_VOLUME = 30.0f;
 
   // draw each of the headFlameChunk's
   f = headFlameChunks;

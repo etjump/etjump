@@ -1,7 +1,7 @@
 #include "q_shared.h"
 #include "bg_public.h"
 
-#define MAX_SCRIPTSPEAKERS 256
+inline constexpr int MAX_SCRIPTSPEAKERS = 256;
 
 static bg_speaker_t scriptSpeakers[MAX_SCRIPTSPEAKERS];
 static int numScriptSpeakers;

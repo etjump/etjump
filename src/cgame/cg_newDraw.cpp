@@ -239,7 +239,7 @@ void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted,
   }
 }
 
-#define CURSORHINT_SCALE 10
+inline constexpr float CURSORHINT_SCALE = 10.0f;
 
 /*
 ==============
@@ -470,8 +470,6 @@ qboolean CG_YourTeamHasFlag() { return qfalse; }
 // THINKABOUTME: should these be exclusive or inclusive..
 //
 qboolean CG_OwnerDrawVisible(int flags) { return qfalse; }
-
-#define PIC_WIDTH 12
 
 /*
 ==============

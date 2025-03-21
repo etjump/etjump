@@ -2791,7 +2791,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
     // continuous flash
   } else {
     // continuous smoke after firing
-#define BARREL_SMOKE_TIME 1000
+    static constexpr int BARREL_SMOKE_TIME = 1000;
 
     if (ps || cg.renderingThirdPerson || !isPlayer) {
       if (weaponNum == WP_STEN || weaponNum == WP_MOBILE_MG42 ||
@@ -3137,18 +3137,6 @@ WEAPON SELECTION
 
 ==============================================================================
 */
-
-#define WP_ICON_X 38      // new sizes per MK
-#define WP_ICON_X_WIDE 72 // new sizes per MK
-#define WP_ICON_Y 38
-#define WP_ICON_SPACE_Y 10
-#define WP_DRAW_X 640 - WP_ICON_X - 4 // 4 is 'selected' border width
-#define WP_DRAW_X_WIDE 640 - WP_ICON_X_WIDE - 4
-#define WP_DRAW_Y 4
-
-// secondary fire icons
-#define WP_ICON_SEC_X 18 // new sizes per MK
-#define WP_ICON_SEC_Y 18
 
 /*
 ==============
@@ -5439,6 +5427,8 @@ void CG_WaterRipple(qhandle_t shader, vec3_t loc, vec3_t dir, int size,
   le->color[3] = 1.0;
 }
 
+inline constexpr int MAX_IMPACT_SOUNDS = 5;
+
 /*
 =================
 CG_MissileHitWall
@@ -5591,7 +5581,6 @@ void CG_MissileHitWall(int weapon, int clientNum, vec3_t origin, vec3_t dir,
           mark = cgs.media.bulletMarkShader; // default
           radius = 1.0f + 0.5f * static_cast<float>(rand() % 2);
 
-#define MAX_IMPACT_SOUNDS 5
           if (surfFlags & SURF_METAL || surfFlags & SURF_ROOF) {
             sfx = cgs.media.sfx_bullet_metalhit[rand() % MAX_IMPACT_SOUNDS];
             mark = cgs.media.bulletMarkShaderMetal;
@@ -6016,20 +6005,6 @@ void CG_MissileHitPlayer(centity_t *cent, int weapon, vec3_t origin, vec3_t dir,
       break;
   }
 }
-
-/*
-============================================================================
-
-VENOM GUN TRACING
-
-============================================================================
-*/
-
-//----(SA)	all changes to venom below should be mine
-#define DEFAULT_VENOM_COUNT 10
-// #define DEFAULT_VENOM_SPREAD 20
-// #define DEFAULT_VENOM_SPREAD 400
-#define DEFAULT_VENOM_SPREAD 700
 
 /*
 ============================================================================

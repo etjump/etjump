@@ -50,7 +50,7 @@ typedef struct ipGUID_s {
   char compare[33];
 } ipGUID_t;
 
-#define MAX_IPFILTERS 1024
+inline constexpr int MAX_IPFILTERS = 1024;
 
 typedef struct ipFilterList_s {
   ipFilter_t ipFilters[MAX_IPFILTERS];

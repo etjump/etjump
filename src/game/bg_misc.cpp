@@ -62,11 +62,11 @@ int numPathCorners;
 pathCorner_t pathCorners[MAX_PATH_CORNERS];
 
 // these defines are matched with the character torso animations
-#define DELAY_LOW 100     // machineguns, tesla, spear, flame
-#define DELAY_HIGH 100    // mauser, garand
-#define DELAY_PISTOL 100  // colt, luger, sp5, cross
-#define DELAY_SHOULDER 50 // rl
-#define DELAY_THROW 250   // grenades, dynamite
+inline constexpr int DELAY_LOW = 100;     // machineguns, tesla, spear, flame
+inline constexpr int DELAY_HIGH = 100;    // mauser, garand
+inline constexpr int DELAY_PISTOL = 100;  // colt, luger, sp5, cross
+inline constexpr int DELAY_SHOULDER = 50; // rl
+inline constexpr int DELAY_THROW = 250;   // grenades, dynamite
 
 // Arnout: the new loadout for WolfXP
 int weapBanksMultiPlayer[MAX_WEAP_BANKS_MP][MAX_WEAPS_IN_BANK_MP] = {
@@ -2514,10 +2514,6 @@ gitem_t *BG_FindItemForWeapon(weapon_t weapon) {
   Com_Error(ERR_DROP, "Couldn't find item for weapon %i", weapon);
   return NULL;
 }
-
-//----(SA) added
-
-#define DEATHMATCH_SHARED_AMMO 0
 
 /*
 ==============

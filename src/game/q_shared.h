@@ -308,6 +308,8 @@ inline constexpr int MAX_CHAT_TEXT = MAX_SAY_TEXT - 64;
 
 inline constexpr int MAX_BINARY_MESSAGE = 32768; // max length of binary message
 
+inline constexpr int MAX_VA_STRING = 32000;
+
 typedef enum {
   MESSAGE_EMPTY = 0,
   MESSAGE_WAITING,          // rate/packet limited

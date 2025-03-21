@@ -2,7 +2,7 @@
 #include "etj_printer.h"
 #include "etj_entity_utilities.h"
 
-#define MISSILE_PRESTEP_TIME 50
+inline constexpr int MISSILE_PRESTEP_TIME = 50;
 
 extern void gas_think(gentity_t *gas);
 extern void gas_touch(gentity_t *gas, gentity_t *other, trace_t *trace);
@@ -979,25 +979,6 @@ void flamechunkTrace(gentity_t *ent, trace_t *tr, vec3_t start, vec3_t end,
 }
 } // namespace ETJump
 
-// copied from cg_flamethrower.c
-static constexpr float FLAME_START_SIZE = 1.0f;
-// when the flame is spawned, it should endeavour to reach this
-static constexpr float FLAME_START_MAX_SIZE = 100.0f;
-// speed of flame as it leaves the nozzle
-static constexpr float FLAME_START_SPEED = 1200.0f;
-static constexpr float FLAME_MIN_SPEED = 60.0f;
-
-// these are calculated (don't change)
-// NOTE: only modify the range, since this should always reflect that range
-static constexpr int FLAME_LENGTH = FLAMETHROWER_RANGE + 50;
-
-// life duration in milliseconds
-static constexpr int FLAME_LIFETIME =
-    static_cast<int>((FLAME_LENGTH / FLAME_START_SPEED) * 1000);
-static constexpr float FLAME_FRICTION_PER_SEC = 2.0f * FLAME_START_SPEED;
-// x is the current sizeMax
-#define GET_FLAME_SIZE_SPEED(x) ((static_cast<float>(x) / FLAME_LIFETIME) / 0.3)
-
 void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
   if (!body->takedamage) {
     return;
@@ -1125,6 +1106,7 @@ void G_RunFlamechunk(gentity_t *ent) {
   gentity_t *ignoreent = nullptr;
   const auto deltaTime =
       static_cast<float>(level.time - ent->s.pos.trTime) / 1000.0f;
+  static constexpr float FLAME_START_MAX_SIZE = 100.0f;
 
   // TAT 11/12/2002
   // vel was only being set if (level.time - ent->timestamp > 50)
@@ -1700,7 +1682,7 @@ G_LandmineThink
 
 // TAT 11/20/2002
 //		Function to check if an entity will set off a landmine
-#define LANDMINE_TRIGGER_DIST 64.0f
+inline constexpr float LANDMINE_TRIGGER_DIST = 64.0f;
 
 qboolean sEntWillTriggerMine(gentity_t *ent, gentity_t *mine) {
   // player types are the only things that set off mines (human and bot)

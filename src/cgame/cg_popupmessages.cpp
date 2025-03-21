@@ -1,9 +1,7 @@
 #include "cg_local.h"
 
-#define NUM_PM_STACK_ITEMS 32
-#define MAX_VISIBLE_ITEMS 5
-
-#define NUM_PM_STACK_ITEMS_BIG 8 // Gordon: we shouldn't need many of these
+inline constexpr int NUM_PM_STACK_ITEMS = 32;
+inline constexpr int NUM_PM_STACK_ITEMS_BIG = 8;
 
 typedef struct pmStackItem_s pmListItem_t;
 typedef struct pmStackItemBig_s pmListItemBig_t;
@@ -92,15 +90,8 @@ void CG_InitPM(void) {
   cg_pmWaitingListBig = NULL;
 }
 
-/*
-Replaced these with etj_popupTime,
-etj_popupFadeTime & etj_popupStayTime
-#define PM_FADETIME 2500
-#define PM_WAITTIME 2000
-*/
-
-#define PM_FADETIME_BIG 1000
-#define PM_WAITTIME_BIG 3500
+inline constexpr int PM_FADETIME_BIG = 1000;
+inline constexpr int PM_WAITTIME_BIG = 3500;
 
 int CG_TimeForPopup(popupMessageType_t type) { return etj_popupTime.integer; }
 
@@ -378,8 +369,9 @@ void CG_AddPMItemBig(popupMessageBigType_t type, const char *message,
   }
 }
 
-#define PM_ICON_SIZE_NORMAL 20
-#define PM_ICON_SIZE_SMALL 12
+inline constexpr int PM_ICON_SIZE_NORMAL = 20;
+inline constexpr int PM_ICON_SIZE_SMALL = 12;
+
 void CG_DrawPMItems(void) {
   vec4_t colour = {0.f, 0.f, 0.f, 1.f};
   vec4_t colourText = {1.f, 1.f, 1.f, 1.f};

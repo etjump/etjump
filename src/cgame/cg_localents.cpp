@@ -6,14 +6,13 @@
 
 #include "cg_local.h"
 
-// Ridah, increased this
-// #define	MAX_LOCAL_ENTITIES	512
-#define MAX_LOCAL_ENTITIES                                                     \
-  768 // renderer can only handle 1024 entities max, so we should avoid
-      // overwriting game entities
-// done.
+// renderer can only handle 1024 entities max,
+// so we should avoid overwriting game entities
+inline constexpr int MAX_LOCAL_ENTITIES = 768;
 
 localEntity_t cg_localEntities[MAX_LOCAL_ENTITIES];
+// TODO: make these vectors some day?
+//  probably performs a lot better, given how small these datasets are
 localEntity_t cg_activeLocalEntities; // double linked list
 localEntity_t *cg_freeLocalEntities;  // single linked list
 

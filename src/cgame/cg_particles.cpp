@@ -3,11 +3,11 @@
 
 #include "cg_local.h"
 
-#define MUSTARD 1
-#define BLOODRED 2
-#define EMISIVEFADE 3
-#define GREY75 4
-#define ZOMBIE 5
+inline constexpr int MUSTARD = 1;
+inline constexpr int BLOODRED = 2;
+inline constexpr int EMISIVEFADE = 3;
+inline constexpr int GREY75 = 4;
+inline constexpr int ZOMBIE = 5;
 
 typedef struct particle_s {
   struct particle_s *next;
@@ -67,8 +67,9 @@ typedef enum {
   P_SPRITE
 } particle_type_t;
 
-#define MAX_SHADER_ANIMS 8
-#define MAX_SHADER_ANIM_FRAMES 64
+inline constexpr int MAX_SHADER_ANIMS = 8;
+inline constexpr int MAX_SHADER_ANIM_FRAMES = 64;
+
 static const char *shaderAnimNames[MAX_SHADER_ANIMS] = {
     "explode1", "blacksmokeanim", "twiltb2", "blacksmokeanimc",
     //	"expblue",
@@ -88,8 +89,8 @@ static float shaderAnimSTRatio[MAX_SHADER_ANIMS] = {
 static int numShaderAnims;
 // done.
 
-#define PARTICLE_GRAVITY 40
-#define MAX_PARTICLES 1024 * 8
+inline constexpr int PARTICLE_GRAVITY = 40;
+inline constexpr int MAX_PARTICLES = 1024 * 8;
 
 cparticle_t *active_particles, *free_particles;
 cparticle_t particles[MAX_PARTICLES];
@@ -142,7 +143,7 @@ void CG_ClearParticles(void) {
 CG_AddParticleToScene
 =====================
 */
-#define ROOT_2 1.414213562373f
+inline constexpr float ROOT_2 = 1.414213562373f;
 
 void CG_AddParticleToScene(cparticle_t *p, vec3_t org, float alpha) {
 
@@ -1801,7 +1802,7 @@ void CG_OilSlickRemove(centity_t *cent) {
 }
 
 qboolean ValidBloodPool(vec3_t start) {
-#define EXTRUDE_DIST 0.5
+  static constexpr float EXTRUDE_DIST = 0.5f;
 
   vec3_t angles;
   vec3_t right, up;
@@ -1844,8 +1845,8 @@ qboolean ValidBloodPool(vec3_t start) {
   return qtrue;
 }
 
-#define NORMALSIZE 16
-#define LARGESIZE 32
+inline constexpr float NORMALSIZE = 16.0f;
+inline constexpr float LARGESIZE = 32.0f;
 
 void CG_ParticleBloodCloud(centity_t *cent, vec3_t origin, vec3_t dir) {
   float length;

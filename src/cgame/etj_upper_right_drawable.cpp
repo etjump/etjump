@@ -163,8 +163,8 @@ void ETJump::UpperRight::DrawFPS(float &y) const {
 }
 
 void ETJump::UpperRight::DrawSpeed(float &y) const {
-#define SPEED_US_TO_KPH 14.56f
-#define SPEED_US_TO_MPH 23.44f
+  static constexpr float SPEED_US_TO_KPH = 14.56f;
+  static constexpr float SPEED_US_TO_MPH = 23.44f;
   static vec_t highestSpeed, speed;
   static int lasttime;
 

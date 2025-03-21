@@ -29,7 +29,7 @@ extern vmCvar_t g_gametype;
 // this is used globally within this file to reduce redundant params
 static animScriptData_t *globalScriptData = NULL;
 
-#define MAX_ANIM_DEFINES 16
+inline constexpr int MAX_ANIM_DEFINES = 16;
 
 static const char *globalFilename; // to prevent redundant params
 
@@ -848,10 +848,11 @@ static animStringItem_t animParseModesStr[] = {
     {NULL, -1},
 };
 
+inline constexpr int MAX_INDENT_LEVELS = 3;
+
 void BG_AnimParseAnimScript(animModelInfo_t *animModelInfo,
                             animScriptData_t *scriptData, const char *filename,
                             char *input) {
-#define MAX_INDENT_LEVELS 3
 
   // FIXME: change this to use the botlib parser
 
