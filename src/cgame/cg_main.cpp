@@ -2648,17 +2648,6 @@ static void CG_RegisterGraphics(void) {
       trap_R_RegisterShaderNoMip("gfx/limbo/filter_back_on");
   cgs.media.ccFilterBackOff =
       trap_R_RegisterShaderNoMip("gfx/limbo/filter_back_off");
-  /*
-  #define CC_FILTER_AXIS			(1 << 0)
-  #define CC_FILTER_ALLIES		(1 << 1)
-  #define CC_FILTER_SPAWNS		(1 << 2)
-  #define CC_FILTER_CMDPOST		(1 << 3) // TODO
-  #define CC_FILTER_HACABINETS	(1 << 4) // TODO
-  #define CC_FILTER_CONSTRUCTIONS	(1 << 5)
-  #define CC_FILTER_DESTRUCTIONS	(1 << 6)
-  #define CC_FILTER_WAYPOINTS		(1 << 7)
-  #define CC_FILTER_OBJECTIVES	(1 << 8) // TODO
-  */
 
   // used in:
   //  statsranksmedals
