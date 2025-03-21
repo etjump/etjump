@@ -68,15 +68,6 @@ void CG_DrawInformation(qboolean forcerefresh) {
   }
 
   CG_DrawConnectScreen(qfalse, forcerefresh);
-
-  // OSP - Server MOTD window
-  /*	if(cg.motdWindow == NULL) {
-          CG_createMOTDWindow();
-      }
-      if(cg.motdWindow != NULL) {
-          CG_windowDraw();
-      }*/
-  // OSP*/
 }
 
 void CG_ShowHelp_On(int *status) {
@@ -389,24 +380,15 @@ void CG_DemoClick(int key, qboolean down) {
 //
 // Color/font info used for all overlays (below)
 //
-#define COLOR_BG                                                               \
-  { 0.0f, 0.0f, 0.0f, 0.6f }
-#define COLOR_BORDER                                                           \
-  { 0.5f, 0.5f, 0.5f, 0.5f }
-#define COLOR_BG_TITLE                                                         \
-  { 0.16f, 0.2f, 0.17f, 0.8f }
-#define COLOR_BG_VIEW                                                          \
-  { 0.16f, 0.2f, 0.17f, 0.8f }
-#define COLOR_BORDER_TITLE                                                     \
-  { 0.1f, 0.1f, 0.1f, 0.2f }
-#define COLOR_BORDER_VIEW                                                      \
-  { 0.2f, 0.2f, 0.2f, 0.4f }
-#define COLOR_HDR                                                              \
-  { 0.6f, 0.6f, 0.6f, 1.0f }
-#define COLOR_HDR2                                                             \
-  { 0.6f, 0.6f, 0.4f, 1.0f }
-#define COLOR_TEXT                                                             \
-  { 0.625f, 0.625f, 0.6f, 1.0f }
+#define COLOR_BG {0.0f, 0.0f, 0.0f, 0.6f}
+#define COLOR_BORDER {0.5f, 0.5f, 0.5f, 0.5f}
+#define COLOR_BG_TITLE {0.16f, 0.2f, 0.17f, 0.8f}
+#define COLOR_BG_VIEW {0.16f, 0.2f, 0.17f, 0.8f}
+#define COLOR_BORDER_TITLE {0.1f, 0.1f, 0.1f, 0.2f}
+#define COLOR_BORDER_VIEW {0.2f, 0.2f, 0.2f, 0.4f}
+#define COLOR_HDR {0.6f, 0.6f, 0.6f, 1.0f}
+#define COLOR_HDR2 {0.6f, 0.6f, 0.4f, 1.0f}
+#define COLOR_TEXT {0.625f, 0.625f, 0.6f, 1.0f}
 
 #define FONT_HEADER &cgs.media.limboFont1
 #define FONT_SUBHEADER &cgs.media.limboFont1_lo

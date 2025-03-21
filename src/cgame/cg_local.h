@@ -18,131 +18,122 @@
 #include <vector>
 
 #include "../game/q_shared.h"
-#include "tr_types.h"
 #include "../game/bg_public.h"
-#include "cg_public.h"
 #include "../ui/ui_shared.h"
+
+#include "tr_types.h"
+#include "cg_public.h"
 #include "etj_awaited_command_handler.h"
 
-#define MAX_LOCATIONS 256
-#define POWERUP_BLINKS 5
+inline constexpr float STATS_FADE_TIME = 200.0f;
+inline constexpr int FADE_TIME = 200;
 
-#define STATS_FADE_TIME 200.0f
-#define POWERUP_BLINK_TIME 1000
-#define FADE_TIME 200
-#define DAMAGE_DEFLECT_TIME 100
-#define DAMAGE_RETURN_TIME 400
-#define DAMAGE_TIME 500
-#define LAND_DEFLECT_TIME 150
-#define LAND_RETURN_TIME 300
-#define STEP_TIME 200
-#define DUCK_TIME 100
-#define PAIN_TWITCH_TIME 200
-#define ZOOM_TIME 150
-#define MUZZLE_FLASH_TIME 30
-#define SINK_TIME                                                              \
-  1000 // time for fragments to sink into ground before going away
-#define REWARD_TIME 3000
+inline constexpr int DAMAGE_DEFLECT_TIME = 100;
+inline constexpr int DAMAGE_RETURN_TIME = 400;
+inline constexpr int DAMAGE_TIME = 500;
+inline constexpr int LAND_DEFLECT_TIME = 150;
+inline constexpr int LAND_RETURN_TIME = 300;
+inline constexpr int STEP_TIME = 200;
+inline constexpr int DUCK_TIME = 100;
+inline constexpr int PAIN_TWITCH_TIME = 200;
+inline constexpr int ZOOM_TIME = 150;
+inline constexpr int MUZZLE_FLASH_TIME = 30;
+// time for fragments to sink into ground before going away
+inline constexpr int SINK_TIME = 1000;
 
-#define PRONE_TIME 500
+inline constexpr int PRONE_TIME = 500;
 
-#define PULSE_SCALE 1.5 // amount to scale up the icons when activating
+inline constexpr int MAX_STEP_CHANGE = 32;
 
-#define MAX_STEP_CHANGE 32
+inline constexpr int MAX_VERTS_ON_POLY = 10;
+inline constexpr int MAX_MARK_POLYS = 256; // JPW NERVE was 1024
 
-#define MAX_VERTS_ON_POLY 10
-#define MAX_MARK_POLYS 256 // JPW NERVE was 1024
+inline constexpr int TEAMCHAT_WIDTH = 200;
+inline constexpr int TEAMCHAT_HEIGHT = 64;
 
-#define STAT_MINUS 10 // num frame for '-' stats digit
-
-#define ICON_SIZE 48
-#undef CHAR_WIDTH
-#define CHAR_WIDTH 32
-#define CHAR_HEIGHT 48
-#define TEXT_ICON_SPACE 4
-
-#define TEAMCHAT_WIDTH 200
-#define TEAMCHAT_HEIGHT 64
-
-#define NOTIFY_WIDTH 80
-#define NOTIFY_HEIGHT 5
-
-// very large characters
-#define GIANT_WIDTH 32
-#define GIANT_HEIGHT 48
-
-#define NUM_CROSSHAIRS 17
+inline constexpr int NOTIFY_WIDTH = 80;
+inline constexpr int NOTIFY_HEIGHT = 5;
 
 // Ridah, trails
-#define STYPE_STRETCH 0
-#define STYPE_REPEAT 1
+inline constexpr int STYPE_STRETCH = 0;
+inline constexpr int STYPE_REPEAT = 1;
 
-#define TJFL_FADEIN (1 << 0)
-#define TJFL_CROSSOVER (1 << 1)
-#define TJFL_NOCULL (1 << 2)
-#define TJFL_FIXDISTORT (1 << 3)
-#define TJFL_SPARKHEADFLARE (1 << 4)
-#define TJFL_NOPOLYMERGE (1 << 5)
+inline constexpr int TJFL_FADEIN = 1 << 0;
+inline constexpr int TJFL_CROSSOVER = 1 << 1;
+inline constexpr int TJFL_NOCULL = 1 << 2;
+inline constexpr int TJFL_FIXDISTORT = 1 << 3;
+inline constexpr int TJFL_SPARKHEADFLARE = 1 << 4;
+inline constexpr int TJFL_NOPOLYMERGE = 1 << 5;
 // done.
 
 // OSP
 // Autoaction values
-#define AA_DEMORECORD 0x01
-#define AA_SCREENSHOT 0x02
-#define AA_STATSDUMP 0x04
-
-// Cursor
-#define CURSOR_OFFSETX 13
-#define CURSOR_OFFSETY 12
+// FIXME: remove
+inline constexpr int AA_DEMORECORD = 0x01;
+inline constexpr int AA_SCREENSHOT = 0x02;
+inline constexpr int AA_STATSDUMP = 0x04;
 
 // Demo controls
-#define DEMO_THIRDPERSONUPDATE 0
-#define DEMO_RANGEDELTA 6
-#define DEMO_ANGLEDELTA 4
+inline constexpr int DEMO_THIRDPERSONUPDATE = 0;
+inline constexpr int DEMO_RANGEDELTA = 6;
+inline constexpr int DEMO_ANGLEDELTA = 4;
 
 // MV overlay
-#define MVINFO_TEXTSIZE 10
-#define MVINFO_RIGHT 640 - 3
-#define MVINFO_TOP 100
+// FIXME: remove
+inline constexpr int MVINFO_TEXTSIZE = 10;
+inline constexpr int MVINFO_RIGHT = 640 - 3;
+inline constexpr int MVINFO_TOP = 100;
 
-#define MAX_WINDOW_COUNT 10
-#define MAX_WINDOW_LINES 64
+inline constexpr int MAX_WINDOW_COUNT = 10;
+inline constexpr int MAX_WINDOW_LINES = 64;
 
-#define MAX_STRINGS 80
-#define MAX_STRING_POOL_LENGTH 128
+inline constexpr int MAX_STRINGS = 80;
+inline constexpr int MAX_STRING_POOL_LENGTH = 128;
 
-#define WINDOW_FONTWIDTH 8  // For non-true-type: width to scale from
-#define WINDOW_FONTHEIGHT 8 // For non-true-type: height to scale from
+// For non-true-type: width to scale from
+inline constexpr int WINDOW_FONTWIDTH = 8;
+// For non-true-type: height to scale from
+inline constexpr int WINDOW_FONTHEIGHT = 8;
 
-#define WID_NONE 0x00     // General window
-#define WID_STATS 0x01    // Stats (reusable due to scroll effect)
-#define WID_TOPSHOTS 0x02 // Top/Bottom-shots
-#define WID_MOTD 0x04     // MOTD
-// #define WID_DEMOHELP		0x08	// Demo key control info
-// #define WID_SPECHELP		0x10	// MV spectator key control info
+inline constexpr int WID_NONE = 0x00;  // General window
+inline constexpr int WID_STATS = 0x01; // Stats (reusable due to scroll effect)
 
-#define WFX_TEXTSIZING 0x01 // Size the window based on text/font setting
-#define WFX_FLASH 0x02      // Alternate between bg and b2 every half second
-#define WFX_TRUETYPE 0x04   // Use truetype fonts for text
-#define WFX_MULTIVIEW 0x08  // Multiview window
+// Size the window based on text/font setting
+inline constexpr int WFX_TEXTSIZING = 0x01;
+// Alternate between bg and b2 every half second
+inline constexpr int WFX_FLASH = 0x02;
+// Use truetype fonts for text
+inline constexpr int WFX_TRUETYPE = 0x04;
+// Multiview window
+inline constexpr int WFX_MULTIVIEW = 0x08;
+
 // These need to be last
-#define WFX_FADEIN 0x10 // Fade the window in (and back out when closing)
-#define WFX_SCROLLUP                                                           \
-  0x20 // Scroll window up from the bottom (and back down when closing)
-#define WFX_SCROLLDOWN                                                         \
-  0x40 // Scroll window down from the top (and back up when closing)
-#define WFX_SCROLLLEFT                                                         \
-  0x80 // Scroll window in from the left (and back right when closing)
-#define WFX_SCROLLRIGHT                                                        \
-  0x100 // Scroll window in from the right (and back left when closing)
 
-#define WSTATE_COMPLETE 0x00 // Window is up with startup effects complete
-#define WSTATE_START 0x01    // Window is "initializing" w/effects
-#define WSTATE_SHUTDOWN 0x02 // Window is shutting down with effects
-#define WSTATE_OFF 0x04      // Window is completely shutdown
+// Fade the window in (and back out when closing)
+inline constexpr int WFX_FADEIN = 0x10;
+// Scroll window up from the bottom (and back down when closing)
+inline constexpr int WFX_SCROLLUP = 0x20;
+// Scroll window down from the top (and back up when closing)
+inline constexpr int WFX_SCROLLDOWN = 0x40;
+// Scroll window in from the left (and back right when closing)
+inline constexpr int WFX_SCROLLLEFT = 0x80;
+// Scroll window in from the right (and back left when closing)
+inline constexpr int WFX_SCROLLRIGHT = 0x100;
 
-#define MV_PID 0x00FF // Bits available for player IDs for MultiView windows
-#define MV_SELECTED 0x0100 // MultiView selected window flag is the 9th bit
+// Window is up with startup effects complete
+inline constexpr int WSTATE_COMPLETE = 0x00;
+// Window is "initializing" w/effects
+inline constexpr int WSTATE_START = 0x01;
+// Window is shutting down with effects
+inline constexpr int WSTATE_SHUTDOWN = 0x02;
+// Window is completely shutdown
+inline constexpr int WSTATE_OFF = 0x04;
+
+// FIXME: remove
+// Bits available for player IDs for MultiView windows
+inline constexpr int MV_PID = 0x00FF;
+// MultiView selected window flag is the 9th bit
+inline constexpr int MV_SELECTED = 0x0100;
 
 typedef struct {
   vec4_t colorBorder;      // Window border color
@@ -198,10 +189,6 @@ typedef struct {
   cg_window_t *w;   // Window handle (may be NULL)
 } cg_mvinfo_t;
 // OSP
-
-// START Mad Doc - TDF
-#define NUM_OVERLAY_FACES 1
-// END Mad Doc - TDF
 
 //=================================================
 
@@ -522,7 +509,6 @@ typedef struct {
 // client model and other color coded effects
 // this is regenerated each time a client's configstring changes,
 // usually as a result of a userinfo (name, model, etc) change
-#define MAX_CUSTOM_SOUNDS 32
 typedef struct clientInfo_s {
   qboolean infoValid;
 
@@ -697,13 +683,14 @@ typedef struct {
   int itemNum;
 } powerupInfo_t;
 
-#define MAX_VIEWDAMAGE 8
+inline constexpr int MAX_VIEWDAMAGE = 8;
+
 typedef struct {
   int damageTime, damageDuration;
   float damageX, damageY, damageValue;
 } viewDamage_t;
 
-#define MAX_REWARDSTACK 5
+inline constexpr int MAX_REWARDSTACK = 5;
 
 //======================================================================
 
@@ -711,17 +698,16 @@ typedef struct {
 // action occurs, and they will have visible effects for #define STEP_TIME or
 // whatever msec after
 
-#define MAX_PREDICTED_EVENTS 16
+inline constexpr int MAX_PREDICTED_EVENTS = 16;
 
-#define MAX_SPAWN_VARS 128
-#define MAX_SPAWN_VARS_CHARS 2048
+inline constexpr int MAX_SPAWN_VARS = 128;
+inline constexpr int MAX_SPAWN_VARS_CHARS = 2048;
 
-#define MAX_SPAWNPOINTS 32
-#define MAX_SPAWNDESC 128
+inline constexpr int MAX_SPAWNPOINTS = 32;
+inline constexpr int MAX_SPAWNDESC = 128;
 
-#define MAX_BUFFERED_SOUNDSCRIPTS 16
-
-#define MAX_SOUNDSCRIPT_SOUNDS 16
+inline constexpr int MAX_BUFFERED_SOUNDSCRIPTS = 16;
+inline constexpr int MAX_SOUNDSCRIPT_SOUNDS = 16;
 
 typedef struct soundScriptHandle_s {
   char filename[MAX_QPATH];
@@ -768,18 +754,13 @@ typedef struct {
   team_t team;
 } mapEntityData_t;
 
-// START	xkan, 8/29/2002
-// the most buddies we can have
-#define MAX_NUM_BUDDY 6
-// END		xkan, 8/29/2002
-
 typedef enum { SHOW_OFF, SHOW_SHUTDOWN, SHOW_ON } showView_t;
 
 void CG_ParseMapEntityInfo(int axis_number, int allied_number);
 
 // we need to reserve the extended value for this, it doesn't matter
 // if the client doesn't actually support CMD_BACKUP_EXT
-static constexpr int MAX_BACKUP_STATES = CMD_BACKUP_EXT + 2;
+inline constexpr int MAX_BACKUP_STATES = CMD_BACKUP_EXT + 2;
 
 typedef struct {
   int clientFrame; // incremented each frame
@@ -1168,10 +1149,6 @@ typedef struct {
   int engineerChargeTime[2];
   int medicChargeTime[2];
   int covertopsChargeTime[2];
-  // START	xkan, 8/29/2002
-  // which bots are currently selected
-  int selectedBotClientNumber[MAX_NUM_BUDDY];
-  // END		xkan, 8/29/2002
   int binocZoomTime;
   int limboEndCinematicTime;
   int proneMovingTime;
@@ -1295,7 +1272,7 @@ typedef struct {
   bool chatMenuOpen;
 } cg_t;
 
-#define NUM_FUNNEL_SPRITES 21
+inline constexpr int NUM_FUNNEL_SPRITES = 21;
 
 typedef struct {
   qhandle_t ForwardPressedShader;
@@ -1316,7 +1293,7 @@ typedef struct {
   qhandle_t ProneNotPressedShader;
 } keys_set_t;
 
-#define MAX_LOCKER_DEBRIS 5
+inline constexpr int MAX_LOCKER_DEBRIS = 5;
 inline constexpr int MAX_COMMANDMAP_LAYERS = 4;
 
 // all of the model, shader, and sound references that are
@@ -1878,8 +1855,8 @@ typedef struct {
   char author[128];
 } arenaInfo_t;
 
-#define MAX_STATIC_GAMEMODELS 1024
-constexpr int MAX_STATIC_CORONAS = 1024;
+inline constexpr int MAX_STATIC_GAMEMODELS = 1024;
+inline constexpr int MAX_STATIC_CORONAS = 1024;
 
 typedef struct cg_gamemodel_s {
   qhandle_t model;
@@ -1926,8 +1903,6 @@ typedef struct oidInfo_s {
   char name[MAX_QPATH];
   vec3_t origin;
 } oidInfo_t;
-
-#define NUM_ENDGAME_AWARDS 14
 
 typedef struct demoCam_s {
   qboolean renderingFreeCam;
@@ -2151,13 +2126,12 @@ typedef struct {
   int sv_fps;
 } cgs_t;
 
-// CGaz 5
+// CGaz 1
 struct range_t {
   float x1;
   float x2;
   bool split;
 };
-// End CGaz 5
 
 enum class FTMenuOptions {
   FT_DISBAND_PROPOSE = 0,
@@ -2534,7 +2508,9 @@ extern vmCvar_t etj_fireteamPosX;
 extern vmCvar_t etj_fireteamPosY;
 extern vmCvar_t etj_fireteamAlpha;
 
-#define CONLOG_BANNERPRINT 1
+// TODO: this is a bitflag option for etj_logBanner, move it elsewhere
+//  or just get rid of it entirely (why is this a bitflag to begin with???)
+inline constexpr int CONLOG_BANNERPRINT = 1;
 extern vmCvar_t etj_logBanner;
 extern vmCvar_t etj_weaponVolume;
 extern vmCvar_t etj_footstepVolume;
@@ -3340,24 +3316,6 @@ void CG_ClearFlameChunks(void);
 void CG_ProjectedSpotLight(vec3_t start, vec3_t dir);
 // done.
 
-#define SL_NOTRACE                                                             \
-  0x001 // don't do a trace check for shortening the beam, always draw
-        // at full 'range' length
-#define SL_NODLIGHT 0x002   // don't put a dlight at the end
-#define SL_NOSTARTCAP 0x004 // dont' cap the start circle
-#define SL_LOCKTRACETORANGE                                                    \
-  0x010 // only trace out as far as the specified range (rather than to
-        // max spot range)
-#define SL_NOFLARE                                                             \
-  0x020 // don't draw a flare when the light is pointing at the camera
-#define SL_NOIMPACT 0x040 // don't draw the impact mark
-#define SL_LOCKUV                                                              \
-  0x080 // lock the texture coordinates at the 'true' length of the
-        // requested beam.
-#define SL_NOCORE 0x100 // don't draw the center 'core' beam
-#define SL_TRACEWORLDONLY 0x200
-//----(SA)	done
-
 void CG_RumbleEfx(float pitch, float yaw);
 
 void InitSmokeSprites(void);
@@ -3849,7 +3807,7 @@ int trap_R_GetTextureId(const char *name);
 void trap_R_Finish(void);
 
 // Duffy, camera stuff
-#define CAM_PRIMARY 0 // the main camera for cutscenes, etc.
+inline constexpr int CAM_PRIMARY = 0; // the main camera for cutscenes, etc.
 qboolean trap_loadCamera(int camNum, const char *name);
 void trap_startCamera(int camNum, int time);
 void trap_stopCamera(int camNum);
@@ -3899,16 +3857,14 @@ void CG_MenuSetAnimation(playerInfo_t *pi, const char *legsAnim,
                          const char *torsoAnim, qboolean force,
                          qboolean clearpending);
 
-#define CC_FILTER_AXIS (1 << 0)
-#define CC_FILTER_ALLIES (1 << 1)
-#define CC_FILTER_SPAWNS (1 << 2)
-#define CC_FILTER_CMDPOST (1 << 3)
-#define CC_FILTER_HACABINETS (1 << 4)
-#define CC_FILTER_CONSTRUCTIONS (1 << 5)
-#define CC_FILTER_DESTRUCTIONS (1 << 6)
-#define CC_FILTER_OBJECTIVES (1 << 7)
-// #define CC_FILTER_WAYPOINTS		(1 << 7)
-// #define CC_FILTER_OBJECTIVES	(1 << 8)
+inline constexpr int CC_FILTER_AXIS = 1 << 0;
+inline constexpr int CC_FILTER_ALLIES = 1 << 1;
+inline constexpr int CC_FILTER_SPAWNS = 1 << 2;
+inline constexpr int CC_FILTER_CMDPOST = 1 << 3;
+inline constexpr int CC_FILTER_HACABINETS = 1 << 4;
+inline constexpr int CC_FILTER_CONSTRUCTIONS = 1 << 5;
+inline constexpr int CC_FILTER_DESTRUCTIONS = 1 << 6;
+inline constexpr int CC_FILTER_OBJECTIVES = 1 << 7;
 
 typedef struct {
   qhandle_t shader;
@@ -3918,9 +3874,6 @@ typedef struct {
 } rankicon_t;
 
 extern rankicon_t rankicons[NUM_EXPERIENCE_LEVELS][2];
-
-#define TAB_LEFT_WIDTH 178
-#define TAB_LEFT_EDGE (640 - TAB_LEFT_WIDTH)
 
 fireteamData_t *CG_IsOnSameFireteam(int clientNum, int clientNum2);
 
@@ -3982,10 +3935,8 @@ bool CG_addString(cg_window_t *w, const char *buf);
 // void CG_createDemoHelpWindow(void);
 // void CG_createSpecHelpWindow(void);
 void CG_createStatsWindow(void);
-void CG_createTopShotsWindow(void);
 void CG_createWstatsMsgWindow(void);
 void CG_createWtopshotsMsgWindow(void);
-void CG_createMOTDWindow(void);
 void CG_cursorUpdate(void);
 void CG_initStrings(void);
 void CG_printWindow(const char *str);
@@ -4127,15 +4078,16 @@ void CG_CommandMap_DrawHighlightText(void);
 qboolean CG_CommandCentreSpawnPointClick(void);
 void CG_InitLocations(void);
 
+// this has to be a macro because we get screen width from cgDC
 #define LIMBO_3D_X 287 + SCREEN_OFFSET_X //% 280
-#define LIMBO_3D_Y 382
-#define LIMBO_3D_W 128
-#define LIMBO_3D_H 96 //%	94
+inline constexpr int LIMBO_3D_Y = 382;
+inline constexpr int LIMBO_3D_W = 128;
+inline constexpr int LIMBO_3D_H = 96; //%	94
 
-#define CC_2D_X 64
-#define CC_2D_Y 23
-#define CC_2D_W 352
-#define CC_2D_H 352
+inline constexpr int CC_2D_X = 64;
+inline constexpr int CC_2D_Y = 23;
+inline constexpr int CC_2D_W = 352;
+inline constexpr int CC_2D_H = 352;
 
 void CG_DrawPlayerHead(rectDef_t *rect, bg_character_t *character,
                        bg_character_t *headcharacter, float yaw, float pitch,
