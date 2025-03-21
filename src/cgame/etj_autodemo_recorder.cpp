@@ -33,11 +33,11 @@
 #include "cg_local.h"
 
 // constants
-static constexpr int DEMO_SAVE_DELAY = 500;
-static constexpr int DEMO_MAX_SAVE_DELAY = 10000;
-static constexpr int DEMO_START_TIMEOUT = 500;
-static constexpr int MAX_TEMP = 20;
-static constexpr char TEMP_PATH[] = "temp";
+inline constexpr int DEMO_SAVE_DELAY = 500;
+inline constexpr int DEMO_MAX_SAVE_DELAY = 10000;
+inline constexpr int DEMO_START_TIMEOUT = 500;
+inline constexpr int MAX_TEMP = 20;
+inline constexpr char TEMP_PATH[] = "temp";
 
 std::string ETJump::AutoDemoRecorder::TempNameGenerator::pop() {
   if (!names.size())

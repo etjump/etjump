@@ -62,7 +62,7 @@ extern void BotSpeedBonus(int clientNum);
 =======================================================================
 */
 
-static constexpr int MAX_SPAWN_POINTS = 128;
+inline constexpr int MAX_SPAWN_POINTS = 128;
 
 /*
 ================

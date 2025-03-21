@@ -1749,9 +1749,9 @@ void SP_target_savelimit_inc(gentity_t *self) {
   self->use = target_savelimit_inc_use;
 }
 
-static constexpr int NO_DECAY_IDENT = -1;
-static constexpr int NO_DECAY_VALUE = -1;
-static constexpr int NO_DECAY_TIME = -1;
+inline constexpr int NO_DECAY_IDENT = -1;
+inline constexpr int NO_DECAY_VALUE = -1;
+inline constexpr int NO_DECAY_TIME = -1;
 
 void target_decay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (self->decayTime == NO_DECAY_TIME) {

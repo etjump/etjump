@@ -53,7 +53,7 @@ static int ui_serverFilterType = 0;
 
 static char uiPreviousMenu[256]{};
 
-static constexpr char DEFAULT_MENU_FILE[] = "ui/menus.txt";
+inline constexpr char DEFAULT_MENU_FILE[] = "ui/menus.txt";
 
 // NERVE - SMF - enabled for multiplayer
 static void UI_StartServerRefresh(qboolean full);
