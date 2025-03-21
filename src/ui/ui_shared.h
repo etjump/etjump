@@ -13,136 +13,124 @@
 #include "../../assets/ui/menudef.h"
 #include "../../assets/ui/menudef_ext.h"
 
-#define MAX_MENUNAME 32
-#define MAX_ITEMTEXT 64
-#define MAX_ITEMACTION 64
-#define MAX_MENUDEFFILE 4096
-#define MAX_MENUFILE 32768
-#define MAX_MENUS 256 // was 128
-// #define MAX_MENUITEMS 256
-#define MAX_MENUITEMS 128 // JPW NERVE q3ta was 96
-#define MAX_COLOR_RANGES 10
-#define MAX_MODAL_MENUS 16
+inline constexpr int MAX_MENUDEFFILE = 4096;
+inline constexpr int MAX_MENUFILE = 32768;
+inline constexpr int MAX_MENUS = 256;     // was 128
+inline constexpr int MAX_MENUITEMS = 128; // JPW NERVE q3ta was 96
+inline constexpr int MAX_COLOR_RANGES = 10;
+inline constexpr int MAX_MODAL_MENUS = 16;
 
 // mouse is over it, non-exclusive
-static constexpr uint32_t WINDOW_MOUSEOVER = 1 << 0;
+inline constexpr uint32_t WINDOW_MOUSEOVER = 1 << 0;
 // has cursor focus, exclusive
-static constexpr uint32_t WINDOW_HASFOCUS = 1 << 1;
+inline constexpr uint32_t WINDOW_HASFOCUS = 1 << 1;
 // is visible
-static constexpr uint32_t WINDOW_VISIBLE = 1 << 2;
+inline constexpr uint32_t WINDOW_VISIBLE = 1 << 2;
 // is visible but grey ( non-active )
-static constexpr uint32_t WINDOW_GREY = 1 << 3;
+inline constexpr uint32_t WINDOW_GREY = 1 << 3;
 // for decoration only, no mouse, keyboard, etc..
-static constexpr uint32_t WINDOW_DECORATION = 1 << 4;
+inline constexpr uint32_t WINDOW_DECORATION = 1 << 4;
 // fading out, non-active
-static constexpr uint32_t WINDOW_FADINGOUT = 1 << 5;
+inline constexpr uint32_t WINDOW_FADINGOUT = 1 << 5;
 // fading in
-static constexpr uint32_t WINDOW_FADINGIN = 1 << 6;
+inline constexpr uint32_t WINDOW_FADINGIN = 1 << 6;
 // mouse is over it, non-exclusive
-static constexpr uint32_t WINDOW_MOUSEOVERTEXT = 1 << 7;
+inline constexpr uint32_t WINDOW_MOUSEOVERTEXT = 1 << 7;
 // window is in transition
-static constexpr uint32_t WINDOW_INTRANSITION = 1 << 8;
+inline constexpr uint32_t WINDOW_INTRANSITION = 1 << 8;
 // forecolor was explicitly set ( used to color alpha images or not )
-static constexpr uint32_t WINDOW_FORECOLORSET = 1 << 9;
+inline constexpr uint32_t WINDOW_FORECOLORSET = 1 << 9;
 // for list boxes and sliders, vertical is default this is set of horizontal
-static constexpr uint32_t WINDOW_HORIZONTAL = 1 << 10;
+inline constexpr uint32_t WINDOW_HORIZONTAL = 1 << 10;
 // mouse is over left/up arrow
-static constexpr uint32_t WINDOW_LB_LEFTARROW = 1 << 11;
+inline constexpr uint32_t WINDOW_LB_LEFTARROW = 1 << 11;
 // mouse is over right/down arrow
-static constexpr uint32_t WINDOW_LB_RIGHTARROW = 1 << 12;
+inline constexpr uint32_t WINDOW_LB_RIGHTARROW = 1 << 12;
 // mouse is over thumb
-static constexpr uint32_t WINDOW_LB_THUMB = 1 << 13;
+inline constexpr uint32_t WINDOW_LB_THUMB = 1 << 13;
 // mouse is over page up
-static constexpr uint32_t WINDOW_LB_PGUP = 1 << 14;
+inline constexpr uint32_t WINDOW_LB_PGUP = 1 << 14;
 // mouse is over page down
-static constexpr uint32_t WINDOW_LB_PGDN = 1 << 15;
+inline constexpr uint32_t WINDOW_LB_PGDN = 1 << 15;
 // item is in orbit
-static constexpr uint32_t WINDOW_ORBITING = 1 << 16;
+inline constexpr uint32_t WINDOW_ORBITING = 1 << 16;
 // close on out-of-bounds click
-static constexpr uint32_t WINDOW_OOB_CLICK = 1 << 17;
+inline constexpr uint32_t WINDOW_OOB_CLICK = 1 << 17;
 // manually wrap text
-static constexpr uint32_t WINDOW_WRAPPED = 1 << 18;
+inline constexpr uint32_t WINDOW_WRAPPED = 1 << 18;
 // auto wrap text
-static constexpr uint32_t WINDOW_AUTOWRAPPED = 1 << 19;
+inline constexpr uint32_t WINDOW_AUTOWRAPPED = 1 << 19;
 // forced open
-static constexpr uint32_t WINDOW_FORCED = 1 << 20;
+inline constexpr uint32_t WINDOW_FORCED = 1 << 20;
 // popup
-static constexpr uint32_t WINDOW_POPUP = 1 << 21;
+inline constexpr uint32_t WINDOW_POPUP = 1 << 21;
 // backcolor was explicitly set
-static constexpr uint32_t WINDOW_BACKCOLORSET = 1 << 22;
+inline constexpr uint32_t WINDOW_BACKCOLORSET = 1 << 22;
 // visibility timing ( NOT implemented )
-static constexpr uint32_t WINDOW_TIMEDVISIBLE = 1 << 23;
+inline constexpr uint32_t WINDOW_TIMEDVISIBLE = 1 << 23;
 // window will apply cg_hudAlpha value to colors unless this flag is set
-static constexpr uint32_t WINDOW_IGNORE_HUDALPHA = 1 << 24;
-static constexpr uint32_t WINDOW_DRAWALWAYSONTOP = 1 << 25;
+inline constexpr uint32_t WINDOW_IGNORE_HUDALPHA = 1 << 24;
+inline constexpr uint32_t WINDOW_DRAWALWAYSONTOP = 1 << 25;
 // window is modal, the window to go back to is stored in a stack
-static constexpr uint32_t WINDOW_MODAL = 1 << 26;
-static constexpr uint32_t WINDOW_FOCUSPULSE = 1 << 27;
-static constexpr uint32_t WINDOW_TEXTASINT = 1 << 28;
-static constexpr uint32_t WINDOW_TEXTASFLOAT = 1 << 29;
-static constexpr uint32_t WINDOW_LB_SOMEWHERE = 1 << 30;
+inline constexpr uint32_t WINDOW_MODAL = 1 << 26;
+inline constexpr uint32_t WINDOW_FOCUSPULSE = 1 << 27;
+inline constexpr uint32_t WINDOW_TEXTASINT = 1 << 28;
+inline constexpr uint32_t WINDOW_TEXTASFLOAT = 1 << 29;
+inline constexpr uint32_t WINDOW_LB_SOMEWHERE = 1 << 30;
 // horizontally centered
-static constexpr uint32_t WINDOW_CENTERED = 1 << 31;
-
-// CGAME cursor type bits
-#define CURSOR_NONE 0x00000001
-#define CURSOR_ARROW 0x00000002
-#define CURSOR_SIZER 0x00000004
+inline constexpr uint32_t WINDOW_CENTERED = 1 << 31;
 
 #ifdef CGAME
-  #define STRING_POOL_SIZE 128 * 2048
+inline constexpr int STRING_POOL_SIZE = 128 * 2048;
 #else
-  #define STRING_POOL_SIZE 384 * 2048
+inline constexpr int STRING_POOL_SIZE = 384 * 2048;
 #endif
 
-#define MAX_STRING_HANDLES 4096
-#define MAX_SCRIPT_ARGS 12
-#define MAX_EDITFIELD 256
+inline constexpr int MAX_EDITFIELD = 256;
 
-#define ART_FX_BASE "menu/art/fx_base"
-#define ART_FX_BLUE "menu/art/fx_blue"
-#define ART_FX_CYAN "menu/art/fx_cyan"
-#define ART_FX_GREEN "menu/art/fx_grn"
-#define ART_FX_RED "menu/art/fx_red"
-#define ART_FX_TEAL "menu/art/fx_teal"
-#define ART_FX_WHITE "menu/art/fx_white"
-#define ART_FX_YELLOW "menu/art/fx_yel"
+inline constexpr char ART_FX_BASE[] = "menu/art/fx_base";
+inline constexpr char ART_FX_BLUE[] = "menu/art/fx_blue";
+inline constexpr char ART_FX_CYAN[] = "menu/art/fx_cyan";
+inline constexpr char ART_FX_GREEN[] = "menu/art/fx_grn";
+inline constexpr char ART_FX_RED[] = "menu/art/fx_red";
+inline constexpr char ART_FX_TEAL[] = "menu/art/fx_teal";
+inline constexpr char ART_FX_WHITE[] = "menu/art/fx_white";
+inline constexpr char ART_FX_YELLOW[] = "menu/art/fx_yel";
 
-#define ASSET_GRADIENTBAR "ui/assets/gradientbar2.tga"
-#define ASSET_SCROLLBAR "ui/assets/scrollbar.tga"
-#define ASSET_SCROLLBAR_ARROWDOWN "ui/assets/scrollbar_arrow_dwn_a.tga"
-#define ASSET_SCROLLBAR_ARROWUP "ui/assets/scrollbar_arrow_up_a.tga"
-#define ASSET_SCROLLBAR_ARROWLEFT "ui/assets/scrollbar_arrow_left.tga"
-#define ASSET_SCROLLBAR_ARROWRIGHT "ui/assets/scrollbar_arrow_right.tga"
-#define ASSET_SCROLL_THUMB "ui/assets/scrollbar_thumb.tga"
-#define ASSET_SLIDER_BAR "ui/assets/slider2.tga"
-#define ASSET_SLIDER_THUMB "ui/assets/sliderbutt_1.tga"
-#define ASSET_CHECKBOX_CHECK "ui/assets/check.tga"
-#define ASSET_CHECKBOX_CHECK_NOT "ui/assets/check_not.tga"
-#define ASSET_CHECKBOX_CHECK_NO "ui/assets/check_no.tga"
+inline constexpr char ASSET_GRADIENTBAR[] = "ui/assets/gradientbar2.tga";
+inline constexpr char ASSET_SCROLLBAR[] = "ui/assets/scrollbar.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWDOWN[] =
+    "ui/assets/scrollbar_arrow_dwn_a.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWUP[] =
+    "ui/assets/scrollbar_arrow_up_a.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWLEFT[] =
+    "ui/assets/scrollbar_arrow_left.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWRIGHT[] =
+    "ui/assets/scrollbar_arrow_right.tga";
+inline constexpr char ASSET_SCROLL_THUMB[] = "ui/assets/scrollbar_thumb.tga";
+inline constexpr char ASSET_SLIDER_BAR[] = "ui/assets/slider2.tga";
+inline constexpr char ASSET_SLIDER_THUMB[] = "ui/assets/sliderbutt_1.tga";
+inline constexpr char ASSET_CHECKBOX_CHECK[] = "ui/assets/check.tga";
+inline constexpr char ASSET_CHECKBOX_CHECK_NOT[] = "ui/assets/check_not.tga";
+inline constexpr char ASSET_CHECKBOX_CHECK_NO[] = "ui/assets/check_no.tga";
 
-#define ASSET_REPLAY_DIRECTORY "gfx/2d/directory"
-#define ASSET_REPLAY_HOME "gfx/2d/home"
-#define ASSET_REPLAY_UP "gfx/2d/up"
+inline constexpr char ASSET_REPLAY_DIRECTORY[] = "gfx/2d/directory";
+inline constexpr char ASSET_REPLAY_HOME[] = "gfx/2d/home";
+inline constexpr char ASSET_REPLAY_UP[] = "gfx/2d/up";
 
-#define ASSET_COLORPICKER_MASK "gfx/2d/colorpicker_mask"
+inline constexpr char ASSET_COLORPICKER_MASK[] = "gfx/2d/colorpicker_mask";
 
-static constexpr float SCROLLBAR_SIZE = 16.0f;
-static constexpr float SCROLLBAR_SIZE_COMBO = 10.0f;
-static constexpr float SLIDER_WIDTH = 96.0f;
-static constexpr float SLIDER_HEIGHT = 10.0f;
-static constexpr float SLIDER_THUMB_WIDTH = 12.0f;
-static constexpr float SLIDER_THUMB_HEIGHT = 12.0f;
+inline constexpr float SCROLLBAR_SIZE = 16.0f;
+inline constexpr float SCROLLBAR_SIZE_COMBO = 10.0f;
+inline constexpr float SLIDER_WIDTH = 96.0f;
+inline constexpr float SLIDER_HEIGHT = 10.0f;
+inline constexpr float SLIDER_THUMB_WIDTH = 12.0f;
+inline constexpr float SLIDER_THUMB_HEIGHT = 12.0f;
 
-static constexpr int NUM_CROSSHAIRS = 17;
+inline constexpr int NUM_CROSSHAIRS = 17;
 
 // y offset applied to each line of autowrapped text, along with text height
-static constexpr int AUTOWRAP_OFFSET = 5;
-
-typedef struct scriptDef_s {
-  const char *command;
-  const char *args[MAX_SCRIPT_ARGS];
-} scriptDef_t;
+inline constexpr int AUTOWRAP_OFFSET = 5;
 
 typedef struct rectDef_s {
   float x; // horiz position
@@ -189,18 +177,7 @@ typedef struct {
   float high;
 } colorRangeDef_t;
 
-// FIXME: combine flags into bitfields to save space
-// FIXME: consolidate all of the common stuff in one structure for menus and
-// items THINKABOUTME: is there any compelling reason not to have items contain
-// items and do away with a menu per say.. major issue is not being able to
-// dynamically allocate and destroy stuff.. Another point to consider is adding
-// an alloc free call for vm's and have the engine just allocate the pool for it
-// based on a cvar many of the vars are re-used for different item types, as
-// such they are not always named appropriately the benefits of c++ in DOOM will
-// greatly help crap like this
-// FIXME: need to put a type ptr that points to specific type info per type
-//
-#define MAX_LB_COLUMNS 16
+inline constexpr int MAX_LB_COLUMNS = 16;
 
 typedef struct columnInfo_s {
   int pos;
@@ -234,7 +211,7 @@ typedef struct editFieldDef_s {
   int paintOffset;   //
 } editFieldDef_t;
 
-#define MAX_MULTI_CVARS 64
+inline constexpr int MAX_MULTI_CVARS = 64;
 
 typedef struct multiDef_s {
   const char *cvarList[MAX_MULTI_CVARS];
@@ -301,19 +278,17 @@ struct textScroll_t {
   bool scrolling;
 };
 
-#define CVAR_ENABLE 0x00000001
-#define CVAR_DISABLE 0x00000002
-#define CVAR_SHOW 0x00000004
-#define CVAR_HIDE 0x00000008
-#define CVAR_NOTOGGLE 0x00000010
+inline constexpr int CVAR_ENABLE = 0x00000001;
+inline constexpr int CVAR_DISABLE = 0x00000002;
+inline constexpr int CVAR_SHOW = 0x00000004;
+inline constexpr int CVAR_HIDE = 0x00000008;
+inline constexpr int CVAR_NOTOGGLE = 0x00000010;
 
 // OSP - "setting" flags for items
-#define SVS_DISABLED_SHOW 0x01
-#define SVS_ENABLED_SHOW 0x02
+inline constexpr int SVS_DISABLED_SHOW = 0x01;
+inline constexpr int SVS_ENABLED_SHOW = 0x02;
 
-#define UI_MAX_TEXT_LINES 64
-
-constexpr float DEFAULT_LINEHEIGHT = 11.0f;
+inline constexpr float DEFAULT_LINEHEIGHT = 11.0f;
 
 typedef struct itemDef_s {
   Window window;      // common positional, border, style, layout info
@@ -660,7 +635,6 @@ qboolean Menus_CaptureFuncActive(void);
 displayContextDef_t *Display_GetContext();
 void *Display_CaptureItem(int x, int y);
 qboolean Display_MouseMove(void *p, int x, int y);
-int Display_CursorType(int x, int y);
 qboolean Display_KeyBindPending();
 void Menus_OpenByName(const char *p);
 menuDef_t *Menus_FindByName(const char *p);
