@@ -98,6 +98,72 @@ inline constexpr int CHAT_OPTIONS_INTERPOLATE_NAME_TAGS = 0x000001;
 // TODO: and this should also probably be somewhere else
 inline constexpr int SPECFREE_COOLDOWN = 200;
 
+// XP stuff
+// one day we should nuke these
+
+// stealing objective (first part of capture)
+inline constexpr int WOLF_STEAL_OBJ_BONUS = 10;
+// securing objective from slain enemy
+inline constexpr int WOLF_SECURE_OBJ_BONUS = 10;
+// medic resurrect teammate
+inline constexpr int WOLF_MEDIC_BONUS = 2;
+// engineer repair (mg42 etc) bonus
+inline constexpr int WOLF_REPAIR_BONUS = 2;
+// bonus for fragging enemy carrier
+inline constexpr int WOLF_FRAG_CARRIER_BONUS = 10;
+// bonus for frag when shooter or target near flag position
+inline constexpr int WOLF_FLAG_DEFENSE_BONUS = 5;
+// uncapped checkpoint bonus
+inline constexpr int WOLF_CP_CAPTURE = 3;
+// capping an enemy-held checkpoint bonus
+inline constexpr int WOLF_CP_RECOVER = 5;
+// uncapped spawnpoint bonus
+inline constexpr int WOLF_SP_CAPTURE = 1;
+// recovering enemy-held spawnpoint
+inline constexpr int WOLF_SP_RECOVER = 2;
+// protect a capture point by shooting target near it
+inline constexpr int WOLF_CP_PROTECT_BONUS = 3;
+// protect a spawnpoint
+inline constexpr int WOLF_SP_PROTECT_BONUS = 1;
+// score for fragging enemy soldier
+inline constexpr int WOLF_FRAG_BONUS = 1;
+// planted dynamite at objective
+inline constexpr int WOLF_DYNAMITE_PLANT = 5;
+// diffused dynamite at objective
+inline constexpr int WOLF_DYNAMITE_DIFFUSE = 5;
+// wolf capture protect radius
+inline constexpr int WOLF_CP_PROTECT_RADIUS = 600;
+// pt for giving ammo not to self
+inline constexpr int WOLF_AMMO_UP = 1;
+// pt for giving health not to self
+inline constexpr int WOLF_HEALTH_UP = 1;
+
+// the radius around an object being defended
+// where a target will be worth extra frags
+inline constexpr int CTF_TARGET_PROTECT_RADIUS = 400;
+
+// spawnflags for various objective-related entities
+inline constexpr int AXIS_OBJECTIVE = 1;
+inline constexpr int ALLIED_OBJECTIVE = 2;
+inline constexpr int OBJECTIVE_DESTROYED = 4;
+
+// func_constructible
+// TODO: 16, 32 & 64 can probably be removed?
+inline constexpr int CONSTRUCTIBLE_START_BUILT = 1;
+inline constexpr int CONSTRUCTIBLE_INVULNERABLE = 2;
+inline constexpr int AXIS_CONSTRUCTIBLE = 4;
+inline constexpr int ALLIED_CONSTRUCTIBLE = 8;
+inline constexpr int CONSTRUCTIBLE_BLOCK_PATHS_WHEN_BUILD = 16;
+inline constexpr int CONSTRUCTIBLE_NO_AAS_BLOCKING = 32;
+inline constexpr int CONSTRUCTIBLE_AAS_SCRIPTED = 64;
+
+// func_explosive
+inline constexpr int EXPLOSIVE_START_INVIS = 1;
+inline constexpr int EXPLOSIVE_TOUCHABLE = 2;
+inline constexpr int EXPLOSIVE_USESHADER = 4;
+inline constexpr int EXPLOSIVE_LOWGRAV = 8;
+inline constexpr int EXPLOSIVE_TANK = 32;
+
 //============================================================================
 
 typedef struct gentity_s gentity_t;
@@ -1881,9 +1947,6 @@ float AngleDifference(float ang1, float ang2);
 // g_props.c
 void Props_Chair_Skyboxtouch(gentity_t *ent);
 
-// TODO: this header should probably just be removed and merged with this
-#include "g_team.h" // teamplay specific stuff
-
 extern level_locals_t level;
 extern gentity_t g_entities[]; // DAJ was explicit set to MAX_ENTITIES
 
@@ -2676,6 +2739,25 @@ unsigned int G_weapStatIndex_MOD(int iWeaponMOD);
 //
 extern const char *aTeams[TEAM_NUM_TEAMS];
 extern team_info teamInfo[TEAM_NUM_TEAMS];
+
+int OtherTeam(int team);
+const char *TeamName(int team);
+const char *OtherTeamName(int team);
+const char *TeamColorString(int team);
+
+void Team_DroppedFlagThink(gentity_t *ent);
+void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor,
+                      gentity_t *attacker);
+void Team_CheckHurtCarrier(gentity_t *targ, gentity_t *attacker);
+void Team_InitGame(void);
+void Team_ReturnFlag(gentity_t *ent);
+gentity_t *SelectCTFSpawnPoint(team_t team, vec3_t origin, vec3_t angles,
+                               int spawnObjective);
+
+void TeamplayInfoMessage(team_t team);
+void CheckTeamStatus(void);
+
+int Pickup_Team(gentity_t *ent, gentity_t *other);
 
 qboolean G_allowFollow(gentity_t *ent, int nTeam);
 int G_blockoutTeam(gentity_t *ent, int nTeam);
