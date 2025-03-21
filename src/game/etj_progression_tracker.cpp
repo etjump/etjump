@@ -53,13 +53,13 @@ void ETJump::ProgressionTrackers::printParserErrors(
 
 void ETJump::ProgressionTrackers::updateTracker(
     std::vector<ProgressionTrackerParser::IndexValuePair> pairs,
-    int tracker[MaxProgressionTrackers]) {
+    int tracker[MAX_PROGRESSION_TRACKERS]) {
   for (const auto &pair : pairs) {
-    if (pair.index >= MaxProgressionTrackers) {
+    if (pair.index >= MAX_PROGRESSION_TRACKERS) {
       G_Error("Tracker error: specified index (%d) is "
               "greater than maximum "
               "number of trackers indices (%d)",
-              pair.index + 1, MaxProgressionTrackers);
+              pair.index + 1, MAX_PROGRESSION_TRACKERS);
       return;
     }
 
@@ -100,7 +100,7 @@ int ETJump::ProgressionTrackers::registerTracker(ProgressionTrackerKeys keys) {
 
 void ETJump::ProgressionTrackers::useTracker(
     gentity_t *ent, gentity_t *activator, const ProgressionTracker &tracker) {
-  int oldValues[MaxProgressionTrackers];
+  int oldValues[MAX_PROGRESSION_TRACKERS];
 
   if (g_debugTrackers.integer > 0) {
     memcpy(oldValues, activator->client->sess.progression, sizeof(oldValues));
@@ -150,7 +150,7 @@ void ETJump::ProgressionTrackers::useTracker(
   //  Logically you should never specify multiple of these keys, and that's what
   //  this assumes, but there's nothing stopping mappers from doing that for
   //  any other keys besides 'tracker_not_eq_any' and 'tracker_not_eq_all'.
-  for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
+  for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
     const int clientTracker = activator->client->sess.progression[idx];
 
     if ((tracker.equal[idx] != ProgressionTrackerValueNotSet &&
@@ -179,7 +179,7 @@ void ETJump::ProgressionTrackers::useTracker(
   }
 
   if (activate) {
-    for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
+    for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
       const auto clientBits =
           std::bitset<32>(activator->client->sess.progression[idx]);
 
@@ -200,7 +200,7 @@ void ETJump::ProgressionTrackers::useTracker(
   if (activate) {
     G_UseTargetedEntities(ent, activator);
 
-    for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
+    for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
       if (tracker.setIf[idx] >= 0) {
         activator->client->sess.progression[idx] = tracker.setIf[idx];
       }
@@ -221,7 +221,7 @@ void ETJump::ProgressionTrackers::printTrackerChanges(gentity_t *activator,
   }
   const auto clientNum = ClientNum(activator);
 
-  for (int i = 0; i < MaxProgressionTrackers; i++) {
+  for (int i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
     if (oldValues[i] != activator->client->sess.progression[i]) {
       const std::string &trackerChangeMsg = stringFormat(
           "^7Tracker change - index: ^3%i ^7value: ^2%i ^7from: ^9%i^7\n",

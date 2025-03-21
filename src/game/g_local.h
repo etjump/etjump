@@ -2,21 +2,15 @@
 #define G_LOCAL_H
 // g_local.h -- local definitions for game module
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
-
 #include <climits>
 #include <memory>
 #include <string>
 #include <vector>
+#include <stdint.h>
+
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
-#include <stdint.h>
 
 //==================================================================
 
@@ -29,52 +23,30 @@
   #define MOD_VERSION "ettest"
 #endif // PRE_RELEASE_DEMO
 
-#define BODY_QUEUE_SIZE 8
+inline constexpr int BODY_QUEUE_SIZE = 8;
+inline constexpr int BODY_TIME = 10000;
 
-#define EVENT_VALID_MSEC 300
-#define CARNAGE_REWARD_TIME 3000
+inline constexpr int EVENT_VALID_MSEC = 300;
 
-#define INTERMISSION_DELAY_TIME 1000
-
-#define MG42_MULTIPLAYER_HEALTH 350 // JPW NERVE
-#define NO_BOT_SUPPORT
-
-static constexpr int BODY_TIME = 10000;
+inline constexpr int MG42_MULTIPLAYER_HEALTH = 350; // JPW NERVE
 
 // gentity->flags
-#define FL_GODMODE 0x00000010
-#define FL_NOTARGET 0x00000020
-#define FL_TEAMSLAVE 0x00000400 // not the first on the team
-#define FL_NO_KNOCKBACK 0x00000800
-#define FL_DROPPED_ITEM 0x00001000
-#define FL_NO_BOTS 0x00002000   // spawn point not for bot use
-#define FL_NO_HUMANS 0x00004000 // spawn point just for bots
-#define FL_AI_GRENADE_KICK                                                     \
-  0x00008000 // an AI has already decided to kick this grenade
-// Rafael
-#define FL_NOFATIGUE 0x00010000 // cheat flag no fatigue
-
-#define FL_TOGGLE 0x00020000 //----(SA)	ent is toggling (doors use this for ex.)
-#define FL_KICKACTIVATE                                                        \
-  0x00040000 //----(SA)	ent has been activated by a kick (doors use this
-             // too for
-             // ex.)
-#define FL_SOFTACTIVATE                                                        \
-  0x00000040 //----(SA)	ent has been activated while 'walking' (doors
-             // use this
-             // too for ex.)
-#define FL_DEFENSE_GUARD 0x00080000 // warzombie defense pose
-
-#define FL_BLANK 0x00100000
-#define FL_BLANK2 0x00200000
-#define FL_NO_MONSTERSLICK 0x00400000
-#define FL_NO_HEADCHECK 0x00800000
-
-#define FL_NODRAW 0x01000000
-
-#define TKFL_MINES 0x00000001
-#define TKFL_AIRSTRIKE 0x00000002
-#define TKFL_MORTAR 0x00000004
+inline constexpr int FL_GODMODE = 0x00000010;
+inline constexpr int FL_NOTARGET = 0x00000020;
+// not the first on the team
+inline constexpr int FL_TEAMSLAVE = 0x00000400;
+inline constexpr int FL_NO_KNOCKBACK = 0x00000800;
+inline constexpr int FL_DROPPED_ITEM = 0x00001000;
+// cheat flag no fatigue
+inline constexpr int FL_NOFATIGUE = 0x00010000;
+// ent is toggling (doors use this for ex.)
+inline constexpr int FL_TOGGLE = 0x00020000;
+// ent has been activated by a kick (doors use this too for ex.)
+// FIXME: remove
+inline constexpr int FL_KICKACTIVATE = 0x00040000;
+// ent has been activated while 'walking' (doors use this too for ex.)
+inline constexpr int FL_SOFTACTIVATE = 0x00000040;
+inline constexpr int FL_NODRAW = 0x01000000;
 
 // movers are things like doors, plats, buttons, etc
 typedef enum {
@@ -95,31 +67,36 @@ typedef enum {
   MOVER_2TO1ROTATE
 } moverState_t;
 
-#define MAX_CONSTRUCT_STAGES 3
+inline constexpr int MAX_CONSTRUCT_STAGES = 3;
 
-#define ALLOW_AXIS_TEAM 1
-#define ALLOW_ALLIED_TEAM 2
-#define ALLOW_DISGUISED_CVOPS 4
+inline constexpr int ALLOW_AXIS_TEAM = 1;
+inline constexpr int ALLOW_ALLIED_TEAM = 2;
+inline constexpr int ALLOW_DISGUISED_CVOPS = 4;
 
 // RF, different types of dynamic area flags
-#define AAS_AREA_ENABLED 0x0000
-#define AAS_AREA_DISABLED 0x0001
-#define AAS_AREA_AVOID 0x0010
-#define AAS_AREA_TEAM_AXIS 0x0020
-#define AAS_AREA_TEAM_ALLIES 0x0040
-#define AAS_AREA_TEAM_AXIS_DISGUISED 0x0080
-#define AAS_AREA_TEAM_ALLIES_DISGUISED 0x0100
+// FIXME: remove? I think these are only for bot stuff
+inline constexpr int AAS_AREA_ENABLED = 0x0000;
+inline constexpr int AAS_AREA_DISABLED = 0x0001;
+inline constexpr int AAS_AREA_AVOID = 0x0010;
+inline constexpr int AAS_AREA_TEAM_AXIS = 0x0020;
+inline constexpr int AAS_AREA_TEAM_ALLIES = 0x0040;
+inline constexpr int AAS_AREA_TEAM_AXIS_DISGUISED = 0x0080;
+inline constexpr int AAS_AREA_TEAM_ALLIES_DISGUISED = 0x0100;
+
 // I have no idea how I managed to forget these :D
 // Hopefully no1 will ever notice versions < 2.0.1 have the g_gravity
 // & g_speed cvars :p
-#define G_GRAVITY 800
-#define G_SPEED 320
+inline constexpr int G_GRAVITY = 800;
+inline constexpr int G_SPEED = 320;
 
-#define CHAT_OPTIONS_INTERPOLATE_NAME_TAGS 0x000001
+// TODO: relocate, this is a cvar bitflag for g_chatOptions
+inline constexpr int CHAT_OPTIONS_INTERPOLATE_NAME_TAGS = 0x000001;
+
 // ETJump: defines window that stops players from freeing themselves from
 // following right after the team change. Fixes issue when quick follow is used,
 // and +activate is handled for both following and freeing on adjacent frames
-#define SPECFREE_COOLDOWN 200
+// TODO: and this should also probably be somewhere else
+inline constexpr int SPECFREE_COOLDOWN = 200;
 
 //============================================================================
 
@@ -128,50 +105,43 @@ typedef struct gclient_s gclient_t;
 typedef struct g_serverEntity_s g_serverEntity_t;
 
 //====================================================================
-//
-// Scripting, these structure are not saved into savegames (parsed each start)
+
 typedef struct {
   const char *actionString;
   qboolean (*actionFunc)(gentity_t *ent, char *params);
   int hash;
 } g_script_stack_action_t;
-//
+
 typedef struct {
-  //
   // set during script parsing
   g_script_stack_action_t *action; // points to an action to perform
   char *params;
 } g_script_stack_item_t;
-//
-// Gordon: need to up this, forest has a HUGE script for the tank.....
-// #define	G_MAX_SCRIPT_STACK_ITEMS	128
-// #define	G_MAX_SCRIPT_STACK_ITEMS	176
-// RF, upped this again for the tank
-// Gordon: and again...
-#define G_MAX_SCRIPT_STACK_ITEMS 196
-//
+
+inline constexpr int G_MAX_SCRIPT_STACK_ITEMS = 196;
+
 typedef struct {
   g_script_stack_item_t items[G_MAX_SCRIPT_STACK_ITEMS];
   int numItems;
 } g_script_stack_t;
-//
+
 typedef struct {
   int eventNum; // index in scriptEvents[]
   char *params; // trigger targetname, etc
   g_script_stack_t stack;
 } g_script_event_t;
-//
+
 typedef struct {
   const char *eventStr;
   qboolean (*eventMatch)(g_script_event_t *event, const char *eventParm);
   int hash;
 } g_script_event_define_t;
-//
+
 // Script Flags
-#define SCFL_GOING_TO_MARKER 0x1
-#define SCFL_ANIMATING 0x2
-#define SCFL_FIRST_CALL 0x4
-//
+inline constexpr int SCFL_GOING_TO_MARKER = 0x1;
+inline constexpr int SCFL_ANIMATING = 0x2;
+inline constexpr int SCFL_FIRST_CALL = 0x4;
+
 // Scripting Status (NOTE: this MUST NOT contain any pointer vars)
 typedef struct {
   int scriptStackHead, scriptStackChangeTime;
@@ -185,7 +155,7 @@ typedef struct {
                          // code ;)
 } g_script_status_t;
 
-constexpr int MAX_SCRIPT_ACCUM_BUFFERS = 10;
+inline constexpr int MAX_SCRIPT_ACCUM_BUFFERS = 10;
 
 void G_Script_ScriptEvent(gentity_t *ent, const char *eventStr,
                           const char *params);
@@ -200,7 +170,7 @@ typedef struct g_constructible_stats_s {
   int duration;
 } g_constructible_stats_t;
 
-#define NUM_CONSTRUCTIBLE_CLASSES 3
+inline constexpr int NUM_CONSTRUCTIBLE_CLASSES = 3;
 
 extern g_constructible_stats_t
     g_constructible_classes[NUM_CONSTRUCTIBLE_CLASSES];
@@ -211,15 +181,6 @@ int G_GetWeaponClassForMOD(meansOfDeath_t mod);
 //====================================================================
 // ETJump
 
-#define MAX_SAVE_POSITIONS 3
-
-typedef struct {
-  qboolean isValid;
-  vec3_t origin;
-  vec3_t vangles;
-  vec3_t velocity;
-} save_position_t;
-
 struct TokenInformation_s {
   // The index in the Tokens-class tokens array
   int idx;
@@ -228,16 +189,14 @@ struct TokenInformation_s {
 };
 typedef struct TokenInformation_s TokenInformation;
 
-constexpr int MAX_TIMERUNS = 20;
-constexpr int MAX_TIMERUN_NAME_LENGTH = 64;
+inline constexpr int MAX_TIMERUNS = 20;
+inline constexpr int MAX_TIMERUN_NAME_LENGTH = 64;
 
 //====================================================================
 
-#define MAX_NETNAME 36
+inline constexpr int MAX_NETNAME = 36;
 
-#define CFOFS(x) ((int)&(((gclient_t *)0)->x))
-
-#define MAX_COMMANDER_TEAM_SOUNDS 16
+inline constexpr int MAX_COMMANDER_TEAM_SOUNDS = 16;
 
 typedef struct commanderTeamChat_s {
   int index;
@@ -604,10 +563,6 @@ struct gentity_s {
   char *ftSavelimit;
 };
 
-// Ridah
-// #include "ai_cast_global.h"
-// done.
-
 typedef enum {
   CON_DISCONNECTED,
   CON_CONNECTING,
@@ -650,11 +605,6 @@ typedef struct {
   float flagsince;
   float lastfraggedcarrier;
 } playerTeamState_t;
-
-// the auto following clients don't follow a specific client
-// number, but instead follow the first two active players
-#define FOLLOW_ACTIVE1 -1
-#define FOLLOW_ACTIVE2 -2
 
 // OSP - weapon stat counters
 typedef struct {
@@ -701,7 +651,9 @@ enum class TriggerMultipleFlags {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define MAX_IP_LEN 15
+inline constexpr int MAX_IP_LEN = 15;
+
+inline constexpr int MAX_PROGRESSION_TRACKERS = 50;
 
 // client data that stays across multiple levels or tournament restarts
 // this is achieved by writing all the data to cvar strings at game shutdown
@@ -811,7 +763,6 @@ typedef struct {
   bool timerunCheatsNotified;
 
   // new implementation of progression
-#define MAX_PROGRESSION_TRACKERS 50
   int progression[MAX_PROGRESSION_TRACKERS];
   int deathrunFlags;
 
@@ -824,17 +775,14 @@ typedef struct {
   int ammoclipOnSpawn[MAX_WEAPONS];      // ammo in clip on spawn
 } clientSession_t;
 
-//
-#define MAX_VOTE_COUNT 3
-
-#define PICKUP_ACTIVATE 0 // pickup items only when using "+activate"
-#define PICKUP_TOUCH 1    // pickup items when touched
-#define PICKUP_FORCE                                                           \
-  2 // pickup the next item when touched (and reset to PICKUP_ACTIVATE
-    // when done)
+// pickup items only when using "+activate"
+inline constexpr int PICKUP_ACTIVATE = 0;
+// pickup items when touched
+inline constexpr int PICKUP_TOUCH = 1;
+// pickup the next item when touched (and reset to PICKUP_ACTIVATE when done)
+inline constexpr int PICKUP_FORCE = 2;
 
 // OSP -- multiview handling
-#define MULTIVIEW_MAXVIEWS 16
 typedef struct {
   qboolean fActive;
   int entID;
@@ -852,7 +800,10 @@ typedef struct ipXPStorage_s {
   int timeadded;
 } ipXPStorage_t;
 
-#define MAX_RACE_CHECKPOINTS 20
+// TODO: remove this? I have no idea what this,
+//  seems like some unfinished feature from 10+ years ago
+inline constexpr int MAX_RACE_CHECKPOINTS = 20;
+
 typedef struct raceStruct_s {
   int startTime;
   int endTime;
@@ -874,7 +825,7 @@ struct votingInfo_t {
   int lastRtvMapVoted; // used for re-votes, the last map number we voted on
 };
 
-static constexpr int MAX_TOKENS_PER_DIFFICULTY = 32;
+inline constexpr int MAX_TOKENS_PER_DIFFICULTY = 32;
 } // namespace ETJump
 
 // client data that stays across multiple respawns, but is cleared
@@ -998,12 +949,12 @@ typedef struct {
   int time;
 } clientMarker_t;
 
-#define MAX_CLIENT_MARKERS 10
+inline constexpr int MAX_CLIENT_MARKERS = 10;
 
-#define LT_SPECIAL_PICKUP_MOD                                                  \
-  3 // JPW NERVE # of times (minus one for modulo) LT must drop ammo
-    // before scoring a point
-#define MEDIC_SPECIAL_PICKUP_MOD 4 // JPW NERVE same thing for medic
+// # of times (minus one for modulo) LT must drop ammo before scoring a point
+inline constexpr int LT_SPECIAL_PICKUP_MOD = 3;
+// same thing for medic
+inline constexpr int MEDIC_SPECIAL_PICKUP_MOD = 4;
 
 // Gordon: debris test
 typedef struct debrisChunk_s {
@@ -1014,7 +965,7 @@ typedef struct debrisChunk_s {
   char targetname[32];
 } debrisChunk_t;
 
-#define MAX_DEBRISCHUNKS 256
+inline constexpr int MAX_DEBRISCHUNKS = 256;
 
 // ===================
 
@@ -1196,10 +1147,9 @@ typedef struct limbo_cam_s {
   int info;
 } limbo_cam_t;
 
-#define MAX_LIMBO_CAMS 32
+inline constexpr int MAX_LIMBO_CAMS = 32;
 
-#define MAX_IP_LEN 15
-#define MAX_IP_MUTES 16
+inline constexpr int MAX_IP_MUTES = 16;
 
 typedef struct ipMute_s {
   qboolean inuse;
@@ -1207,11 +1157,9 @@ typedef struct ipMute_s {
 } ipMute_t;
 
 // this structure is cleared as each map is entered
-#define MAX_SPAWN_VARS 128
-#define MAX_SPAWN_VARS_CHARS 2048
-#define VOTE_MAXSTRING 256 // Same value as MAX_STRING_TOKENS
-
-#define MAX_BUFFERED_CONFIGSTRINGS 128
+inline constexpr int MAX_SPAWN_VARS = 128;
+inline constexpr int MAX_SPAWN_VARS_CHARS = 2048;
+inline constexpr int VOTE_MAXSTRING = 256; // Same value as MAX_STRING_TOKENS
 
 typedef struct voteInfo_s {
   char voteString[MAX_STRING_CHARS];
@@ -1454,8 +1402,6 @@ typedef struct {
   int limitedSaves;
   int portalTeam;
 
-#define MAX_TIMERUNS 20
-#define MAX_TIMERUN_NAME_LENGTH 64
   int timerunNamesCount;
   char timerunNames[MAX_TIMERUNS][MAX_TIMERUN_NAME_LENGTH];
   bool hasTimerun;
@@ -1643,17 +1589,19 @@ gentity_t *G_BuildHead(gentity_t *ent);
 gentity_t *G_BuildLeg(gentity_t *ent);
 
 // damage flags
-#define DAMAGE_RADIUS 0x00000001         // damage was indirect
-#define DAMAGE_HALF_KNOCKBACK 0x00000002 // Gordon: do less knockback
-#define DAMAGE_NO_KNOCKBACK                                                    \
-  0x00000008 // do not affect velocity, just view angles
-#define DAMAGE_NO_PROTECTION                                                   \
-  0x00000020 // armor, shields, invulnerability, and godmode have no
-             // effect
-#define DAMAGE_NO_TEAM_PROTECTION                                              \
-  0x00000010 // armor, shields, invulnerability, and godmode have no
-             // effect
-#define DAMAGE_DISTANCEFALLOFF 0x00000040 // distance falloff
+
+// damage was indirect
+inline constexpr int DAMAGE_RADIUS = 0x00000001;
+// Gordon: do less knockback
+inline constexpr int DAMAGE_HALF_KNOCKBACK = 0x00000002;
+// do not affect velocity, just view angles
+inline constexpr int DAMAGE_NO_KNOCKBACK = 0x00000008;
+// armor, shields, invulnerability, and godmode have no effect
+inline constexpr int DAMAGE_NO_PROTECTION = 0x00000020;
+// armor, shields, invulnerability, and godmode have no effect
+inline constexpr int DAMAGE_NO_TEAM_PROTECTION = 0x00000010;
+// distance falloff
+inline constexpr int DAMAGE_DISTANCEFALLOFF = 0x00000040;
 
 //
 // g_missile.c
@@ -1906,9 +1854,6 @@ void G_WriteSessionData(qboolean restart);
 
 void G_CalcRank(gclient_t *client);
 
-// ai_main.c
-#define MAX_FILEPATH 144
-
 // g_cmd.c
 void Cmd_Activate_f(gentity_t *ent);
 void Cmd_Activate2_f(gentity_t *ent);
@@ -1936,7 +1881,9 @@ float AngleDifference(float ang1, float ang2);
 // g_props.c
 void Props_Chair_Skyboxtouch(gentity_t *ent);
 
+// TODO: this header should probably just be removed and merged with this
 #include "g_team.h" // teamplay specific stuff
+
 extern level_locals_t level;
 extern gentity_t g_entities[]; // DAJ was explicit set to MAX_ENTITIES
 
@@ -2458,8 +2405,6 @@ void G_Trace(gentity_t *ent, trace_t *results, const vec3_t start,
 
 // g_buddy_list.c
 
-#define MAX_FIRE_TEAMS 8
-
 typedef struct {
   char name[32];
   char clientbits[8];
@@ -2470,11 +2415,6 @@ typedef struct {
 } fireteam_t;
 
 void Cmd_FireTeam_MP_f(gentity_t *ent);
-
-/*
-void G_SetWayPoint( gentity_t* ent, wayPointType_t wayPointType, vec3_t loc );
-void G_RemoveWayPoint( gclient_t *client );
-*/
 
 void G_RemoveFromAllIgnoreLists(int clientNum);
 
@@ -2523,8 +2463,6 @@ void G_LogTeamKill(gentity_t *ent, weapon_t weap);
 void G_LogDeath(gentity_t *ent, weapon_t weap);
 void G_LogKill(gentity_t *ent, weapon_t weap);
 void G_LogRegionHit(gentity_t *ent, hitRegion_t hr);
-// void G_SetPlayerRank(	gentity_t* ent );
-// void G_AddExperience(	gentity_t* ent, float exp );
 
 // Skills
 void G_SetPlayerScore(gclient_t *client);
@@ -2637,35 +2575,36 @@ void InitialServerEntitySetup();
 g_serverEntity_t *FindServerEntity(g_serverEntity_t *from, int fieldofs,
                                    char *match);
 
-#define SE_FOFS(x) ((int)&(((g_serverEntity_t *)0)->x))
-
 // Match settings
-#define PAUSE_NONE 0x00      // Match is NOT paused.
-#define PAUSE_UNPAUSING 0x01 // Pause is about to expire
+// TODO: remove
+inline constexpr int PAUSE_NONE = 0x00;      // Match is NOT paused.
+inline constexpr int PAUSE_UNPAUSING = 0x01; // Pause is about to expire
 
-// HRESULTS
-#define G_OK 0
-#define G_INVALID -1
-#define G_NOTFOUND -2
+// vote command results
+
+inline constexpr int G_OK = 0;
+inline constexpr int G_INVALID = -1;
+inline constexpr int G_NOTFOUND = -2;
 
 #define AP(x) trap_SendServerCommand(-1, x)               // Print to all
 #define CP(x) trap_SendServerCommand(ent - g_entities, x) // Print to an ent
 #define CPx(x, y) trap_SendServerCommand(x, y)            // Print to id = x
 
-#define PAUSE_NONE 0x00      // Match is NOT paused.
-#define PAUSE_UNPAUSING 0x01 // Pause is about to expire
+inline constexpr int HELP_COLUMNS = 4;
 
-#define ZSF_COMP 0x01 // Have comp settings loaded for current gametype?
+inline constexpr int CMD_DEBOUNCE = 5000; // 5s between cmds
 
-#define HELP_COLUMNS 4
+// TODO: remove
+// Dump of player weapon stats at end of match.
+inline constexpr int EOM_WEAPONSTATS = 0x01;
+// Dump of match stats at end of match.
+inline constexpr int EOM_MATCHINFO = 0x02;
 
-#define CMD_DEBOUNCE 5000 // 5s between cmds
-
-#define EOM_WEAPONSTATS 0x01 // Dump of player weapon stats at end of match.
-#define EOM_MATCHINFO 0x02   // Dump of match stats at end of match.
-
-#define AA_STATSALL 0x01  // Client AutoAction: Dump ALL player stats
-#define AA_STATSTEAM 0x02 // Client AutoAction: Dump TEAM player stats
+// TODO: remove
+// Client AutoAction: Dump ALL player stats
+inline constexpr int AA_STATSALL = 0x01;
+// Client AutoAction: Dump TEAM player stats
+inline constexpr int AA_STATSTEAM = 0x02;
 
 // "Delayed Print" ent enumerations
 typedef enum {
@@ -2852,9 +2791,6 @@ qboolean Q_SayArgv(int n, char *buffer, int bufferLength);
 
 // Feen: PGM
 
-// g_portalgun.c
-// gentity_t *fire_portalgun(gentity_t *self, vec3_t start, vec3_t dir);
-
 void Portal_Think(gentity_t *self);
 void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace);
 
@@ -2898,9 +2834,8 @@ void G_increasePassedCount(const char *mapName);
 void LogServerState();
 
 namespace ETJump {
-// finds an entity with a scriptname, if not found,
-// we spawn in 'etjump_game_manager' so we always have
-// access to mapscripting
+// finds an entity with a scriptname, if not found, we spawn in
+// 'etjump_game_manager' so we always have access to mapscripting
 bool checkEntsForScriptname();
 void spawnGameManager();
 } // namespace ETJump
@@ -2983,6 +2918,6 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const size_t BYTES_PER_PACKET = 998;
+inline constexpr size_t BYTES_PER_PACKET = 998;
 
 #endif // G_LOCAL_H
