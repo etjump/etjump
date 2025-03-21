@@ -37,21 +37,6 @@ void G_BounceMissile(gentity_t *ent, trace_t *trace) {
     }
   }
 
-  // Arnout: removed this for MP as well (was already gone from SP)
-  /*
-          // Ridah, if we are a grenade, and we have hit an AI that is
-     waiting to catch us, give them a grenade, and delete ourselves if
-     ((ent->splashMethodOfDeath == MOD_GRENADE_SPLASH) &&
-     (g_entities[trace->entityNum].flags & FL_AI_GRENADE_KICK) &&
-          (trace->endpos[2] >
-     g_entities[trace->entityNum].r.currentOrigin[2])) {
-     g_entities[trace->entityNum].grenadeExplodeTime = ent->nextthink;
-          g_entities[trace->entityNum].flags &= ~FL_AI_GRENADE_KICK;
-          Add_Ammo( &g_entities[trace->entityNum], WP_GRENADE_LAUNCHER,
-     1, qfalse );	//----(SA)	modified G_FreeEntity( ent );
-     return;
-      }
-  */
   // reflect the velocity on the trace plane
   hitTime =
       level.previousTime + (level.time - level.previousTime) * trace->fraction;
