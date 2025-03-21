@@ -1,53 +1,53 @@
 #ifndef __TR_TYPES_H
 #define __TR_TYPES_H
 
-#define MAX_CORONAS                                                            \
-  32 //----(SA)	not really a reason to limit this other than trying to
-     // keep a
-     // reasonable count
-#define MAX_DLIGHTS                                                            \
-  32 // can't be increased, because bit flags are used on surfaces
-#define MAX_ENTITIES                                                           \
-  1023 // can't be increased without changing drawsurf bit packing
+// renderer limit for a scene
+inline constexpr int MAX_CORONAS = 32;
+// renderer limit for a scene
+inline constexpr int MAX_DLIGHTS = 32;
+
+// can't be increased without changing drawsurf bit packing
+inline constexpr int MAX_ENTITIES = 1023;
 
 // renderfx flags
-#define RF_MINLIGHT 0x000001 // allways have some light (viewmodel, some items)
-#define RF_THIRD_PERSON                                                        \
-  0x000002 // don't draw through eyes, only mirrors (player bodies, chat
-           // sprites)
-#define RF_FIRST_PERSON                                                        \
-  0x000004 // only draw through eyes (view weapon, damage blood blob)
-#define RF_DEPTHHACK 0x000008 // for view weapon Z crunching
-#define RF_NOSHADOW 0x000010  // don't add stencil shadows
 
-#define RF_LIGHTING_ORIGIN                                                     \
-  0x000020 // use refEntity->lightingOrigin instead of refEntity->origin
-           // for lighting.  This allows entities to sink into the floor
-           // with their origin going solid, and allows all parts of a
-           // player to get the same lighting
-#define RF_SHADOW_PLANE 0x000040 // use refEntity->shadowPlane
-#define RF_WRAP_FRAMES                                                         \
-  0x000080 // mod the model frames by the maxframes to allow continuous
-           // animation without needing to know the frame count
-#define RF_HILIGHT                                                             \
-  0x000100 // more than RF_MINLIGHT.  For when an object is
-           // "Highlighted" (looked at/training identification/etc)
-#define RF_BLINK 0x000200 // eyes in 'blink' state
-#define RF_FORCENOLOD 0x000400
+// always have some light (viewmodel, some items)
+inline constexpr int RF_MINLIGHT = 0x000001;
+// don't draw through eyes, only mirrors (player bodies, chat sprites)
+inline constexpr int RF_THIRD_PERSON = 0x000002;
+// only draw through eyes (view weapon, damage blood blob)
+inline constexpr int RF_FIRST_PERSON = 0x000004;
+// for view weapon Z crunching
+inline constexpr int RF_DEPTHHACK = 0x000008;
+// don't add stencil shadows
+inline constexpr int RF_NOSHADOW = 0x000010;
+// use refEntity->lightingOrigin instead of refEntity->origin for lighting.
+// This allows entities to sink into the floor with their origin going solid,
+// and allows all parts of a player to get the same lighting
+inline constexpr int RF_LIGHTING_ORIGIN = 0x000020;
+// use refEntity->shadowPlane
+inline constexpr int RF_SHADOW_PLANE = 0x000040;
+// mod the model frames by the maxframes to allow continuous animation
+// without needing to know the frame count
+inline constexpr int RF_WRAP_FRAMES = 0x000080;
+// more than RF_MINLIGHT, for when an object is "highlighted"
+// (looked at/training identification/etc)
+inline constexpr int RF_HILIGHT = 0x000100;
+// eyes in 'blink' state
+inline constexpr int RF_BLINK = 0x000200;
+inline constexpr int RF_FORCENOLOD = 0x000400;
 
 // refdef flags
-#define RDF_NOWORLDMODEL 1 // used for player configuration screen
-#define RDF_HYPERSPACE 4   // teleportation effect
 
-// Rafael
-#define RDF_SKYBOXPORTAL 8
-
-//----(SA)
-#define RDF_UNDERWATER                                                         \
-  (1 << 4) // so the renderer knows to use underwater fog when the
-           // player is underwater
-#define RDF_DRAWINGSKY (1 << 5)
-#define RDF_SNOOPERVIEW (1 << 6) //----(SA)	added
+// used for player configuration screen
+inline constexpr int RDF_NOWORLDMODEL = 1;
+// teleportation effect (unused in ET)
+inline constexpr int RDF_HYPERSPACE = 4;
+inline constexpr int RDF_SKYBOXPORTAL = 8;
+// so the renderer knows to use underwater fog when the player is underwater
+inline constexpr int RDF_UNDERWATER = 1 << 4;
+inline constexpr int RDF_DRAWINGSKY = 1 << 5;
+inline constexpr int RDF_SNOOPERVIEW = 1 << 6;
 
 typedef struct {
   vec3_t xyz;
@@ -77,13 +77,14 @@ typedef enum {
   RT_MAX_REF_ENTITY_TYPE
 } refEntityType_t;
 
-#define ZOMBIEFX_FADEOUT_TIME 10000
-
-#define REFLAG_ONLYHAND 1  // only draw hand surfaces
-#define REFLAG_FORCE_LOD 8 // force a low lod
-#define REFLAG_ORIENT_LOD                                                      \
-  16 // on LOD switch, align the model to the player's camera
-#define REFLAG_DEAD_LOD 32 // allow the LOD to go lower than recommended
+// only draw hand surfaces
+inline constexpr int REFLAG_ONLYHAND = 1;
+// force a low lod
+inline constexpr int REFLAG_FORCE_LOD = 8;
+// on LOD switch, align the model to the player's camera
+inline constexpr int REFLAG_ORIENT_LOD = 16;
+// allow the LOD to go lower than recommended
+inline constexpr int REFLAG_DEAD_LOD = 32;
 
 typedef struct {
   refEntityType_t reType;
@@ -157,11 +158,11 @@ typedef struct {
 typedef enum {
   FOG_NONE, //	0
 
-  FOG_SKY, //	1	fog values to apply to the sky when using density
-           // fog
-           // for the world (non-distance clipping fog) (only used
-           // if(glfogsettings[FOG_MAP].registered) or
-           // if(glfogsettings[FOG_MAP].registered))
+  FOG_SKY,        //	1	fog values to apply to the sky when using density
+                  // fog
+                  // for the world (non-distance clipping fog) (only used
+                  // if(glfogsettings[FOG_MAP].registered) or
+                  // if(glfogsettings[FOG_MAP].registered))
   FOG_PORTALVIEW, //	2	used by the portal sky scene
   FOG_HUD,        //	3	used by the 3D hud scene
 
@@ -169,18 +170,18 @@ typedef enum {
   // scene.glFog when the scene is rendered
 
   // the following are fogs applied to the main world scene
-  FOG_MAP, //	4	use fog parameter specified using the "fogvars" in
-           // the
-           // sky shader
+  FOG_MAP,     //	4	use fog parameter specified using the "fogvars" in
+               // the
+               // sky shader
   FOG_WATER,   //	5	used when underwater
   FOG_SERVER,  //	6	the server has set my fog (probably a
                // target_fog) (keep synch in sv_ccmds.c !!!)
   FOG_CURRENT, //	7	stores the current values when a
                // transition
                // starts
-  FOG_LAST,   //	8	stores the current values when a transition
-              // starts
-  FOG_TARGET, //	9	the values it's transitioning to.
+  FOG_LAST,    //	8	stores the current values when a transition
+               // starts
+  FOG_TARGET,  //	9	the values it's transitioning to.
 
   FOG_CMD_SWITCHFOG, // 10	transition to the fog specified in the
                      // second parameter of R_SetFog(...) (keep synch in
@@ -207,8 +208,8 @@ typedef struct {
 
 //----(SA)	end
 
-#define MAX_RENDER_STRINGS 8
-#define MAX_RENDER_STRING_LENGTH 32
+inline constexpr int MAX_RENDER_STRINGS = 8;
+inline constexpr int MAX_RENDER_STRING_LENGTH = 32;
 
 typedef struct {
   int x, y, width, height;
@@ -310,25 +311,11 @@ typedef struct {
   qboolean smpActive; // dual processor
 } glconfig_t;
 
-#if !defined _WIN32
-
-  #define _3DFX_DRIVER_NAME "libMesaVoodooGL.so.3.1"
-  #define OPENGL_DRIVER_NAME "libGL.so.1"
-
-#else
-
-  #define _3DFX_DRIVER_NAME "3dfxvgl"
-  #define OPENGL_DRIVER_NAME "opengl32"
-  #define WICKED3D_V5_DRIVER_NAME "gl/openglv5.dll"
-  #define WICKED3D_V3_DRIVER_NAME "gl/openglv3.dll"
-
-#endif // !defined _WIN32
-
 // =========================================
 // Gordon, these MUST NOT exceed the values for
 // SHADER_MAX_VERTEXES/SHADER_MAX_INDEXES
-#define MAX_PB_VERTS 1025
-#define MAX_PB_INDICIES (MAX_PB_VERTS * 6)
+inline constexpr int MAX_PB_VERTS = 1025;
+inline constexpr int MAX_PB_INDICIES = MAX_PB_VERTS * 6;
 
 typedef struct polyBuffer_s {
   vec4_t xyz[MAX_PB_VERTS];
