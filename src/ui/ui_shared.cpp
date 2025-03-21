@@ -8643,20 +8643,6 @@ qboolean Display_MouseMove(void *p, int x, int y) {
   return qtrue;
 }
 
-int Display_CursorType(int x, int y) {
-  int i;
-  for (i = 0; i < menuCount; i++) {
-    rectDef_t r2;
-    r2.x = Menus[i].window.rect.x - 3;
-    r2.y = Menus[i].window.rect.y - 3;
-    r2.w = r2.h = 7;
-    if (Rect_ContainsPoint(&r2, x, y)) {
-      return CURSOR_SIZER;
-    }
-  }
-  return CURSOR_ARROW;
-}
-
 void Display_HandleKey(int key, qboolean down, int x, int y) {
   menuDef_t *menu = (menuDef_t *)Display_CaptureItem(x, y);
   if (menu == NULL) {
