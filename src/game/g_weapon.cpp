@@ -103,8 +103,6 @@ int G_GetWeaponClassForMOD(meansOfDeath_t mod) {
   }
 }
 
-#define NUM_NAILSHOTS 10
-
 /*
 ======================================================================
 
@@ -756,7 +754,7 @@ int EntsThatRadiusCanDamage(vec3_t origin, float radius, int *damagedList) {
 void G_LandminePrime(gentity_t *self);
 extern void explosive_indicator_think(gentity_t *ent);
 
-#define MIN_BLOCKINGWARNING_INTERVAL 5000
+inline constexpr int MIN_BLOCKINGWARNING_INTERVAL = 5000;
 
 static void MakeTemporarySolid(gentity_t *ent) {
   if (ent->entstate == STATE_UNDERCONSTRUCTION) {
@@ -1001,7 +999,7 @@ static void HandleEntsThatBlockConstructible(gentity_t *constructor,
   }
 }
 
-#define CONSTRUCT_POSTDECAY_TIME 500
+inline constexpr int CONSTRUCT_POSTDECAY_TIME = 500;
 
 // !! NOTE !!: if the conditions here of a buildable constructible change, then
 // BotIsConstructible() must reflect those changes
@@ -2451,11 +2449,8 @@ void G_AddAirstrikeToCounters(gentity_t *ent) {
   }
 }
 
-#define NUMBOMBS 10
-#define BOMBSPREAD 150
-extern void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
-                    const char *name, const char *message, qboolean localize,
-                    qboolean encoded);
+inline constexpr int NUMBOMBS = 10;
+inline constexpr int BOMBSPREAD = 150;
 
 void weapon_checkAirStrikeThink1(gentity_t *ent) {
   if (!weapon_checkAirStrike(ent)) {
@@ -3080,9 +3075,10 @@ void Weapon_Artillery(gentity_t *ent) {
     ent->client->sess.aWeaponStats[WS_ARTILLERY].atts++;
 }
 
-#define SMOKEBOMB_GROWTIME 1000
-#define SMOKEBOMB_SMOKETIME 15000
-#define SMOKEBOMB_POSTSMOKETIME 2000
+inline constexpr int SMOKEBOMB_GROWTIME = 1000;
+inline constexpr int SMOKEBOMB_SMOKETIME = 15000;
+inline constexpr int SMOKEBOMB_POSTSMOKETIME = 2000;
+
 // xkan, 11/25/2002 - increases postsmoke time from 2000->32000, this way, the
 // entity is still around while the smoke is around, so we can check if it
 // blocks bot's vision Arnout: eeeeeh this is wrong. 32 seconds is way too long.

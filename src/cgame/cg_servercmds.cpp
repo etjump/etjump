@@ -14,8 +14,6 @@
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_syscall_ext_shared.h"
 
-#define SCOREPARSE_COUNT 9
-
 void CG_LimboMenu_f();
 
 /*
@@ -74,8 +72,8 @@ CG_ParseTeamInfo
 
 =================
 */
-#define NUMARGS 5
 static void CG_ParseTeamInfo(void) {
+  static constexpr int NUMARGS = 5;
   int i;
   int client;
   int numSortedTeamPlayers;
@@ -1032,19 +1030,14 @@ static void CG_MapRestart(void) {
 }
 // NERVE - SMF
 
-#define MAX_VOICEFILES 8
+inline constexpr int MAX_VOICEFILES = 8;
 
-// TAT - 10/28/2002 we've got some really big VO files now
-#define MAX_VOICEFILESIZE 32768
-#define MAX_VOICECHATS 272
-// TAT - NOTE: If we're worried about space - do we really need 96 possible
-// sounds for any one chat?
-//			I think this is used to allow multiple sound clips for
-// one command, so do we need 96 available selection sounds?
-#define MAX_VOICESOUNDS 32
+inline constexpr int MAX_VOICEFILESIZE = 32768;
+inline constexpr int MAX_VOICECHATS = 272;
+inline constexpr int MAX_VOICESOUNDS = 32;
 
-#define MAX_CHATSIZE 64
-#define MAX_HEADMODELS 64
+inline constexpr int MAX_CHATSIZE = 64;
+inline constexpr int MAX_HEADMODELS = 64;
 
 typedef struct voiceChat_s {
   char id[64];
@@ -1324,8 +1317,6 @@ voiceChatList_t *CG_VoiceChatListForClient(int clientNum) {
   }
 }
 
-#define MAX_VOICECHATBUFFER 32
-
 typedef struct bufferedVoiceChat_s {
   int clientNum;
   sfxHandle_t snd;
@@ -1336,6 +1327,7 @@ typedef struct bufferedVoiceChat_s {
   vec3_t origin; // NERVE - SMF
 } bufferedVoiceChat_t;
 
+inline constexpr int MAX_VOICECHATBUFFER = 32;
 bufferedVoiceChat_t voiceChatBuffer[MAX_VOICECHATBUFFER];
 
 /*

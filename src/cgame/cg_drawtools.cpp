@@ -1359,9 +1359,9 @@ static int propMapB[26][3] = {
     {11, 139, 32}, {42, 139, 51}, {93, 139, 32}, {126, 139, 31}, {158, 139, 25},
 };
 
-#define PROPB_GAP_WIDTH 4
-#define PROPB_SPACE_WIDTH 12
-#define PROPB_HEIGHT 36
+inline constexpr int PROPB_GAP_WIDTH = 4;
+inline constexpr int PROPB_SPACE_WIDTH = 12;
+inline constexpr int PROPB_HEIGHT = 36;
 
 /*
 =================
@@ -1605,8 +1605,6 @@ void UI_DrawProportionalString(int x, int y, const char *str, int style,
   UI_DrawProportionalString2(x, y, str, color, sizeScale,
                              cgs.media.charsetProp);
 }
-
-#define MAX_VA_STRING 32000
 
 char *CG_TranslateString(const char *string) {
   static char staticbuf[2][MAX_VA_STRING];

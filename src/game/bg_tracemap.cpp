@@ -8,11 +8,12 @@
 **  Map tracemap view generation
 */
 
-#define MAX_WORLD_HEIGHT MAX_MAP_SIZE  // maximum world height
-#define MIN_WORLD_HEIGHT -MAX_MAP_SIZE // minimum world height
+inline constexpr int MAX_WORLD_HEIGHT = MAX_MAP_SIZE;  // maximum world height
+inline constexpr int MIN_WORLD_HEIGHT = -MAX_MAP_SIZE; // minimum world height
 
-//#define TRACEMAP_SIZE				1024
-#define TRACEMAP_SIZE 256
+// TODO: perhaps make this configurable some day?
+//  so users can generate higher resolution tracemaps if they wish to
+inline constexpr int TRACEMAP_SIZE = 256;
 
 typedef struct tracemap_s {
   qboolean loaded;

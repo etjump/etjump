@@ -1549,8 +1549,9 @@ void target_save_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
 
 void SP_target_save(gentity_t *self) { self->use = target_save_use; }
 
-#define SF_REMOVE_PORTALS_NO_TEXT 0x1
-#define SF_REMOVE_PORTALS_ACTIVATE_TARGETS 0x2
+inline constexpr int SF_REMOVE_PORTALS_NO_TEXT = 0x1;
+inline constexpr int SF_REMOVE_PORTALS_ACTIVATE_TARGETS = 0x2;
+
 void target_remove_portals_use(gentity_t *self, gentity_t *other,
                                gentity_t *activator) {
   if (!activator || !activator->client) {
@@ -1922,7 +1923,8 @@ void SP_target_interrupt_timerun(gentity_t *self) {
 // 1 => once per life
 // keys
 // delay => how long in ms before next activation by same player
-#define SF_SET_HEALTH_ONCE 0x1
+inline constexpr int SF_SET_HEALTH_ONCE = 0x1;
+
 void target_set_health_use(gentity_t *self, gentity_t *other,
                            gentity_t *activator) {
   if (!activator || !activator->client) {

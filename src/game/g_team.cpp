@@ -111,15 +111,15 @@ qboolean OnAnyTeam(gentity_t *ent1, gentity_t *ent2) {
 }
 
 // JPW NERVE moved these up
-#define WCP_ANIM_NOFLAG 0
-#define WCP_ANIM_RAISE_AXIS 1
-#define WCP_ANIM_RAISE_AMERICAN 2
-#define WCP_ANIM_AXIS_RAISED 3
-#define WCP_ANIM_AMERICAN_RAISED 4
-#define WCP_ANIM_AXIS_TO_AMERICAN 5
-#define WCP_ANIM_AMERICAN_TO_AXIS 6
-#define WCP_ANIM_AXIS_FALLING 7
-#define WCP_ANIM_AMERICAN_FALLING 8
+inline constexpr int WCP_ANIM_NOFLAG = 0;
+inline constexpr int WCP_ANIM_RAISE_AXIS = 1;
+inline constexpr int WCP_ANIM_RAISE_AMERICAN = 2;
+inline constexpr int WCP_ANIM_AXIS_RAISED = 3;
+inline constexpr int WCP_ANIM_AMERICAN_RAISED = 4;
+inline constexpr int WCP_ANIM_AXIS_TO_AMERICAN = 5;
+inline constexpr int WCP_ANIM_AMERICAN_TO_AXIS = 6;
+inline constexpr int WCP_ANIM_AXIS_FALLING = 7;
+inline constexpr int WCP_ANIM_AMERICAN_FALLING = 8;
 // jpw
 
 /*
@@ -906,6 +906,7 @@ void TeamplayInfoMessage(team_t team) {
 void CheckTeamStatus(void) {
   int i;
   gentity_t *ent;
+  static constexpr int TEAM_LOCATION_UPDATE_TIME = 1000;
 
   if (level.time - level.lastTeamLocationTime > TEAM_LOCATION_UPDATE_TIME) {
     level.lastTeamLocationTime = level.time;
@@ -1158,11 +1159,11 @@ void SP_team_WOLF_objective(gentity_t *ent) {
   }
 }
 
-// DHM - Nerve :: Capture and Hold Checkpoint flag
-#define SPAWNPOINT 1
-#define CP_HOLD 2
-#define AXIS_ONLY 4
-#define ALLIED_ONLY 8
+// team_WOLF_checkpoint spawnflags
+inline constexpr int SPAWNPOINT = 1;
+inline constexpr int CP_HOLD = 2;
+inline constexpr int AXIS_ONLY = 4;
+inline constexpr int ALLIED_ONLY = 8;
 
 void checkpoint_touch(gentity_t *self, gentity_t *other, trace_t *trace);
 

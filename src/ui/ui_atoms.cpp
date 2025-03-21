@@ -12,10 +12,9 @@ uiStatic_t uis;
 qboolean m_entersound; // after a frame, so caching won't disrupt the sound
 
 // these are here so the functions in q_shared.c can link
-#ifndef UI_HARD_LINKED
 
-  // JPW NERVE added Com_DPrintf
-  #define MAXPRINTMSG 4096
+inline constexpr int MAXPRINTMSG = 4096;
+
 void QDECL Com_DPrintf(const char *fmt, ...) {
   va_list argptr;
   char msg[MAXPRINTMSG];
@@ -71,8 +70,6 @@ void QDECL Com_LocalPrintf(const char *msg, ...) {
 
   trap_Print(va("%s", text));
 }
-
-#endif
 
 /*
 =================

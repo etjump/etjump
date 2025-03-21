@@ -716,7 +716,8 @@ void heal_touch(gentity_t *self, gentity_t *other, trace_t *trace) {
   }
 }
 
-#define HEALTH_REGENTIME 10000
+inline constexpr int HEALTH_REGENTIME = 10000;
+
 void trigger_heal_think(gentity_t *self) {
   self->nextthink = level.time + HEALTH_REGENTIME;
   /*	if(self->timestamp - level.time > -HEALTH_REGENTIME) {
@@ -729,7 +730,8 @@ void trigger_heal_think(gentity_t *self) {
   }
 }
 
-#define TRIGGER_HEAL_CANTHINK(self) self->count != -9999
+#define TRIGGER_HEAL_CANTHINK(self) (self->count != -9999)
+
 void trigger_heal_setup(gentity_t *self) {
   self->target_ent = G_FindByTargetname(NULL, self->target);
   if (!self->target_ent) {
@@ -916,7 +918,8 @@ void ammo_touch(gentity_t *self, gentity_t *other, trace_t *trace) {
   }
 }
 
-#define AMMO_REGENTIME 60000
+inline constexpr int AMMO_REGENTIME = 60000;
+
 void trigger_ammo_think(gentity_t *self) {
   self->nextthink = level.time + AMMO_REGENTIME;
   /*	if(self->timestamp - level.time > -AMMO_REGENTIME) {
@@ -929,7 +932,8 @@ void trigger_ammo_think(gentity_t *self) {
   }
 }
 
-#define TRIGGER_AMMO_CANTHINK(self) self->count != -9999
+#define TRIGGER_AMMO_CANTHINK(self) (self->count != -9999)
+
 void trigger_ammo_setup(gentity_t *self) {
   self->target_ent = G_FindByTargetname(NULL, self->target);
   if (!self->target_ent) {
@@ -1110,8 +1114,9 @@ void SP_gas(gentity_t *self) {}
 
 // DHM - Nerve :: Multiplayer triggers
 
-#define RED_FLAG 1
-#define BLUE_FLAG 2
+// trigger_flagonly_multiple spawnflags
+inline constexpr int RED_FLAG = 1;
+inline constexpr int BLUE_FLAG = 2;
 
 void Touch_flagonly(gentity_t *ent, gentity_t *other, trace_t *trace) {
   gentity_t *tmp;
@@ -1592,10 +1597,9 @@ in this field will see a message saying that they are near an objective.
   "track"		Mandatory, this is the text that is appended to "You are
 near " "shortname"	Short name to show on command centre
 */
-#define AXIS_OBJECTIVE 1
-#define ALLIED_OBJECTIVE 2
-#define MESSAGE_OVERRIDE 4
-#define TANK 8
+
+inline constexpr int MESSAGE_OVERRIDE = 4;
+inline constexpr int TANK = 8;
 
 void SP_trigger_objective_info(gentity_t *ent) {
   char *scorestring;

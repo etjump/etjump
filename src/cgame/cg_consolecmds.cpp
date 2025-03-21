@@ -202,7 +202,7 @@ static void CG_TellAttacker_f(void) {
 
 /////////// cameras
 
-#define MAX_CAMERAS 64 // matches define in splines.cpp
+inline constexpr int MAX_CAMERAS = 64; // matches define in splines.cpp
 qboolean cameraInuse[MAX_CAMERAS];
 
 int CG_LoadCamera(const char *name) {

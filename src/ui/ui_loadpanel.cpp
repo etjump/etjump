@@ -12,9 +12,6 @@ fontInfo_t bg_loadscreenfont2;
 
 void UI_LoadPanel_RenderHeaderText(panel_button_t *button);
 void UI_LoadPanel_RenderLoadingText(panel_button_t *button);
-void UI_LoadPanel_RenderPercentageMeter(panel_button_t *button);
-
-// panel_button_text_t FONTNAME = { SCALEX, SCALEY, COLOUR, STYLE, FONT };
 
 panel_button_text_t missiondescriptionTxt = {
     0.2f, 0.2f, {0.0f, 0.0f, 0.0f, 1.f}, 0, 0, &bg_loadscreenfont2,
@@ -142,27 +139,6 @@ void UI_DrawLoadPanel(qboolean forcerefresh, qboolean ownerdraw,
   inside = qfalse;
 }
 
-#define STARTANGLE 40
-void UI_LoadPanel_RenderPercentageMeter(panel_button_t *button) {
-  float hunkfrac;
-  float w, h;
-  vec2_t org;
-  polyVert_t verts[4];
-
-  org[0] = button->rect.x;
-  org[1] = button->rect.y;
-  w = button->rect.w;
-  h = button->rect.h;
-
-  hunkfrac = 0.f;
-  AdjustFrom640(&org[0], &org[1], &w, &h);
-  SetupRotatedThing(
-      verts, org, w, h,
-      DEG2RAD((180 - STARTANGLE) - ((180 - (2 * STARTANGLE)) * hunkfrac)));
-
-  trap_R_Add2dPolys(verts, 4, button->hShaderNormal);
-}
-
 void MiniAngleToAxis(vec_t angle, vec2_t axes[2]) {
   axes[0][0] = (vec_t)sin(-angle);
   axes[0][1] = -(vec_t)cos(-angle);
@@ -252,7 +228,8 @@ void UI_LoadPanel_RenderHeaderText(panel_button_t *button) {
   BG_PanelButtonsRender_Text(button);
 }
 
-#define ESTIMATES 80
+inline constexpr int ESTIMATES = 80;
+
 const char *UI_DownloadInfo(const char *downloadName) {
   static char dlText[] = "Downloading:";
   static char etaText[] = "Estimated time left:";

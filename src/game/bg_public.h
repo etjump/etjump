@@ -939,6 +939,25 @@ inline constexpr weapon_t WP_LASTSECONDARY = WP_SILENCED_COLT;
    weapon == WP_GARAND || weapon == WP_K43_SCOPE || weapon == WP_FG42SCOPE ||  \
    BG_IsAkimboWeapon(weapon) || weapon == WP_MOBILE_MG42_SET)
 
+// shared flamethrower constants
+
+inline constexpr float FLAME_START_SIZE = 1.0f;
+
+// speed of flame as it leaves the nozzle
+inline constexpr float FLAME_START_SPEED = 1200.0f;
+inline constexpr float FLAME_MIN_SPEED = 60.0f;
+
+// these are calculated (don't change)
+// NOTE: only modify the range, since this should always reflect that range
+inline constexpr int FLAME_LENGTH = FLAMETHROWER_RANGE + 50;
+
+// life duration in milliseconds
+inline constexpr int FLAME_LIFETIME =
+    static_cast<int>((FLAME_LENGTH / FLAME_START_SPEED) * 1000);
+inline constexpr float FLAME_FRICTION_PER_SEC = 2.0f * FLAME_START_SPEED;
+// x is the current sizeMax
+#define GET_FLAME_SIZE_SPEED(x) ((static_cast<float>(x) / FLAME_LIFETIME) / 0.3)
+
 // entityState_t->event values
 // entity events are for effects that take place reletive
 // to an existing entities origin.  Very network efficient.
@@ -1512,9 +1531,6 @@ enum team_t : int8_t {
   TEAM_NUM_TEAMS
 };
 
-// Time between location updates
-#define TEAM_LOCATION_UPDATE_TIME 1000
-
 // OSP - weapon stat info: mapping between MOD_ and WP_ types (FIXME for new ET
 // weapons)
 typedef enum extWeaponStats_s {
@@ -1831,6 +1847,24 @@ static constexpr std::array<const char *, HINT_NUM_HINTS + 1> hintStrings = {
 
     "", // HINT_BAD_USER
 };
+
+// cursorhint trace distances
+// most of these are server only and could live somewhere in qagame headers,
+// but to avoid any accidents with mismatched distances, they should live here
+
+inline constexpr float CH_DIST = 100.0f;
+inline constexpr float CH_KNIFE_DIST = 48.0f;
+inline constexpr float CH_LADDER_DIST = 100.0f;
+inline constexpr float CH_WATER_DIST = 100.0f;
+inline constexpr float CH_BREAKABLE_DIST = 64.0f;
+inline constexpr float CH_DOOR_DIST = 96.0f;
+inline constexpr float CH_ACTIVATE_DIST = 96.0f;
+inline constexpr float CH_FRIENDLY_DIST = 1024.0f;
+
+// use the largest value from above
+inline constexpr float CH_MAX_DIST = 1024.0f;
+// max dist for zooming hints
+inline constexpr float CH_MAX_DIST_ZOOM = 8192.0f;
 
 void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result,
                            qboolean isAngle, int splinePath);
@@ -2285,7 +2319,7 @@ typedef struct {
 extern int numPathCorners;
 extern pathCorner_t pathCorners[MAX_PATH_CORNERS];
 
-#define NUM_EXPERIENCE_LEVELS 11
+inline constexpr int NUM_EXPERIENCE_LEVELS = 11;
 
 typedef enum {
   ME_PLAYER,

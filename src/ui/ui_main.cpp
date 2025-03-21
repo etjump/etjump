@@ -25,9 +25,9 @@ USER INTERFACE MAIN
 #include "../../assets/ui/changelog/version_headers.h"
 
 // NERVE - SMF
-#define AXIS_TEAM 0
-#define ALLIES_TEAM 1
-#define SPECT_TEAM 2
+inline constexpr int AXIS_TEAM = 0;
+inline constexpr int ALLIES_TEAM = 1;
+inline constexpr int SPECT_TEAM = 2;
 // -NERVE - SMF
 
 extern qboolean g_waitingForKey;
@@ -72,28 +72,9 @@ qboolean UI_CheckExecKey(int key);
 // -NERVE - SMF - enabled for multiplayer
 
 static void UI_ParseGameInfo(const char *teamFile);
-// static void UI_ParseTeamInfo(const char *teamFile); // TTimo: unused
-
-// int ProcessNewUI( int command, int arg0, int arg1, int arg2, int arg3, int
-// arg4, int arg5, int arg6 );
 
 itemDef_t *Menu_FindItemByName(menuDef_t *menu, const char *p);
 void Menu_ShowItemByName(menuDef_t *menu, const char *p, qboolean bShow);
-
-#define ITEM_GRENADES 1
-#define ITEM_MEDKIT 2
-
-#define ITEM_PISTOL 1
-
-#define DEFAULT_PISTOL
-
-#define PT_KNIFE (1)
-#define PT_PISTOL (1 << 2)
-#define PT_RIFLE (1 << 3)
-#define PT_LIGHTONLY (1 << 4)
-#define PT_GRENADES (1 << 5)
-#define PT_EXPLOSIVES (1 << 6)
-#define PT_MEDKIT (1 << 7)
 
 // TTimo
 static char translated_yes[4], translated_no[4];
@@ -103,132 +84,11 @@ typedef struct {
   int items;
 } playerType_t;
 
-/*typedef struct {
-    int			weapindex;
-
-    const char	*desc;
-//	int			flags;
-    const char	*cvar;
-    int			value;
-    const char	*shadername;
-
-    const char	*torso_anim;
-    const char	*legs_anim;
-
-//	const char	*large_shader;
-} weaponType_t;*/
-
-#define ENG_WEAPMASK_1 (0 | 1 | 2)
-#define ENG_WEAPMASK_2 (4 | 8)
-
-// NERVE - SMF - this is the weapon info list [what can and can't be used by
-// character classes]
-//   - This list is seperate from the actual text names in the listboxes for
-//   localization purposes.
-//   - The list boxes look up this list by the cvar value.
-// Gordon: stripped out some useless stuff, and moved some other stuff to
-// generic class stuff
-/*static weaponType_t weaponTypes[] = {
-    { 0,					"NULL",
-"none", -1, "none",
-"",						""
-},
-
-    { WP_COLT,				"1911 pistol",
-"mp_weapon", -1, "ui/assets/weapon_colt1911.tga",
-"firing_pistolB_1", "stand_pistolB"			}, { WP_LUGER,
-"Luger pistol",				"mp_weapon",	-1,
-"ui/assets/weapon_luger.tga",			"firing_pistolB_1",
-"stand_pistolB"			},
-
-    { WP_MP40,				"MP 40",
-"mp_weapon", 0, "ui/assets/weapon_mp40.tga",
-"relaxed_idle_2h_1", "relaxed_idle_2h_1"		}, { WP_THOMPSON,
-"Thompson",					"mp_weapon", 1,
-"ui/assets/weapon_thompson.tga",		"relaxed_idle_2h_1",
-"relaxed_idle_2h_1"		}, { WP_STEN,				"Sten",
-"mp_weapon",	2,	"ui/assets/weapon_sten.tga",
-"relaxed_idle_2h_1",	"relaxed_idle_2h_1"		},
-
-    { WP_PANZERFAUST,		"Panzerfaust",
-"mp_weapon", 4, "ui/assets/weapon_panzerfaust.tga",		"stand_panzer",
-"stand_panzer"
-}, { WP_FLAMETHROWER,		"Flamethrower", "mp_weapon",	6,
-"ui/assets/weapon_flamethrower.tga",
-"stand_machinegun",		"stand_machinegun"		},
-
-    { WP_GRENADE_PINEAPPLE,	"Pineapple grenade",		"mp_weapon_2",
-8, "ui/assets/weapon_grenade.tga",			"firing_pistolB_1",
-"stand_pistolB"			}, { WP_GRENADE_LAUNCHER,	"Stick grenade",
-"mp_weapon_2",	8,	"ui/assets/weapon_grenade_ger.tga",
-"firing_pistolB_1",		"stand_pistolB"			},
-
-    { WP_DYNAMITE,			"Explosives",
-"mp_item2", -1, "ui/assets/weapon_dynamite.tga",
-"firing_pistolB_1", "stand_pistolB"			},
-
-    { WP_KAR98,				"Kar98",                    "mp_weapon",
-2, "ui/assets/weapon_kar98.tga",			"stand_rifle",
-"stand_rifle"			},
-    { WP_CARBINE,			"M1 Garand",                "mp_weapon",
-2, "ui/assets/weapon_carbine.tga",			"stand_rifle",
-"stand_rifle"			},
-
-    { WP_FG42,				"FG42",
-"mp_weapon", 7, "ui/assets/weapon_fg42.tga",			"stand_rifle",
-"stand_rifle"
-}, { WP_GARAND,			"M1 Garand", "mp_weapon",	8,
-"ui/assets/weapon_carbine.tga", "stand_rifle",
-"stand_rifle"			}, { WP_MOBILE_MG42,		"Mobile MG42",
-"mp_weapon",	9, "ui/assets/weapon_mg42.tga",			"stand_rifle",
-"stand_rifle"			},
-
-    { WP_LANDMINE,			"Land Mines",
-"mp_weapon_2", 4, "ui/assets/weapon_landmine.tga",
-"firing_pistolB_1", "stand_pistolB"			},
-
-    { WP_K43,				"K43",
-"mp_weapon", 8, "ui/assets/weapon_kar98.tga",			"stand_rifle",
-"stand_rifle"			},
-//	{ WP_SATCHEL,			"Satchel Charges",
-"mp_weapon",	10, "ui/assets/weapon_satchel.tga",
-"firing_pistolB_1",		"stand_pistolB"			}, {
-WP_TRIPMINE,			"Trip Mines",
-"mp_weapon",	9,	"ui/assets/weapon_tripmine.tga",
-"firing_pistolB_1",		"stand_pistolB"			},
-
-    { 0,					NULL,
-NULL, -1, NULL,					NULL },
-};*/
-
 typedef struct {
   char *name;
   int flags;
   char *shader;
 } uiitemType_t;
-
-#define UI_KNIFE_PIC "window_knife_pic"
-#define UI_PISTOL_PIC "window_pistol_pic"
-#define UI_WEAPON_PIC "window_weapon_pic"
-#define UI_ITEM1_PIC "window_item1_pic"
-#define UI_ITEM2_PIC "window_item2_pic"
-
-#if 0 // rain - not used
-static uiitemType_t itemTypes[] =
-{
-	{ UI_KNIFE_PIC,  PT_KNIFE,      "ui/assets/weapon_knife.tga"    },
-	{ UI_PISTOL_PIC, PT_PISTOL,     "ui/assets/weapon_colt1911.tga" },
-
-	{ UI_WEAPON_PIC, PT_RIFLE,      "ui/assets/weapon_mauser.tga"   },
-
-	{ UI_ITEM1_PIC,  PT_MEDKIT,     "ui/assets/item_medkit.tga"     },
-
-	{ UI_ITEM1_PIC,  PT_GRENADES,   "ui/assets/weapon_grenade.tga"  },
-	{ UI_ITEM2_PIC,  PT_EXPLOSIVES, "ui/assets/weapon_dynamite.tga" },
-
-	{ NULL,          0,             NULL                            }
-};
-#endif
 
 extern displayContextDef_t *DC;
 
@@ -1012,7 +872,8 @@ void UI_DrawCenteredPic(qhandle_t image, int w, int h) {
 int frameCount = 0;
 int startTime;
 
-#define UI_FPS_FRAMES 4
+inline constexpr int UI_FPS_FRAMES = 4;
+
 void _UI_Refresh(int realtime) {
   static int index;
   static int previousTimes[UI_FPS_FRAMES];
@@ -7403,7 +7264,7 @@ static uiMenuCommand_t menutype = UIMENU_NONE;
 uiMenuCommand_t _UI_GetActiveMenu(void) { return menutype; }
 //----(SA)	end
 
-#define MISSING_FILES_MSG "The following packs are missing:"
+inline constexpr char MISSING_FILES_MSG[] = "The following packs are missing:";
 
 /*
  *	We handle here illegal redirects, that happen upon serverlist loading
@@ -7818,153 +7679,12 @@ This will also be overlaid on the cgame info screen during loading
 to prevent it from blinking away too rapidly on local or lan games.
 ========================
 */
-#define CP_LINEWIDTH 50
-
 void UI_DrawConnectScreen(qboolean overlay) {
   //	static qboolean playingMusic = qfalse;
 
   if (!overlay) {
     UI_DrawLoadPanel(qfalse, qfalse, qfalse);
-  } else {
-    //		if( !playingMusic ) {
-    //			trap_S_StartBackgroundTrack(
-    //"sound/music/level_load.wav",
-    //"", 1000
-    //); 			playingMusic = qtrue;
-    //		}
   }
-
-  /*	if( !overlay ) {
-          BG_DrawConnectScreen( qfalse );
-      }*/
-  /*
-      char			*s;
-      uiClientState_t	cstate;
-      char			info[MAX_INFO_VALUE];
-      char text[256];
-      float centerPoint, yStart, scale;
-      vec4_t color = { 0.3f, 0.3f, 0.3f, 0.8f };
-  //	static qboolean playingMusic = qfalse;
-
-      char downloadName[MAX_INFO_VALUE];
-
-      menuDef_t *menu = Menus_FindByName("Connect");
-
-      if ( !overlay && menu ) {
-          Menu_Paint(menu, qtrue);
-      }
-
-      if (!overlay) {
-          centerPoint = 320;
-          yStart = 130;
-          scale = 0.4f;
-      } else {
-          centerPoint = 320;
-          yStart = 32;
-          scale = 0.6f;
-
-          // see what information we should display
-          trap_GetClientState( &cstate );
-
-
-          return;
-      }
-
-  //	playingMusic = qfalse;
-
-      // see what information we should display
-      trap_GetClientState( &cstate );
-
-      info[0] = '\0';
-
-      if (!Q_stricmp(cstate.servername,"localhost")) {
-          Text_PaintCenter(centerPoint, yStart + 48, scale,
-  colorWhite,va( "Enemy Territory - Version: %s", Q3_VERSION ),
-  ITEM_TEXTSTYLE_SHADOWEDMORE); } else { strcpy(text, va(
-  trap_TranslateString( "Connecting to %s" ), cstate.servername));
-  Text_PaintCenter(centerPoint, yStart + 48, scale, colorWhite,text ,
-  ITEM_TEXTSTYLE_SHADOWEDMORE);
-      }
-
-      // display global MOTD at bottom (don't draw during download, the
-  space is already used)
-      // moved downloadName query up, this is used in CA_CONNECTED
-      trap_Cvar_VariableStringBuffer( "cl_downloadName", downloadName,
-  sizeof(downloadName) );
-
-      if (!*downloadName) {
-          Text_PaintCenter(centerPoint, 475, scale, colorWhite,
-  Info_ValueForKey( cstate.updateInfoString, "motd" ), 0);
-      }
-
-      // print any server info (server full, bad version, etc)
-      // DHM - Nerve :: This now accepts strings up to 256 chars long,
-  and will break them up into multiple lines.
-      //					They are also now printed
-  in Yellow for readability. if ( cstate.connState < CA_CONNECTED ) {
-  char	*s; char ps[60]; int		i, len, index = 0, yPrint =
-  yStart + 210; qboolean neednewline = qfalse;
-
-          s = trap_TranslateString( cstate.messageString );
-          len = strlen( s );
-
-          for ( i = 0; i < len; i++, index++ ) {
-
-              // copy to temp buffer
-              ps[index] = s[i];
-
-              if ( index > (CP_LINEWIDTH - 10) && i > 0 )
-                  neednewline = qtrue;
-
-              // if out of temp buffer room OR end of string OR it is
-  time to linebreak & we've found a space if ( (index >= 58) || (i ==
-  (len-1)) || (neednewline && s[i] == ' ') ) { ps[index+1] = '\0';
-
-                  DC->fillRect(0, yPrint - 17, 640, 22, color);
-                  Text_PaintCenter(centerPoint, yPrint, scale,
-  colorYellow, ps, 0);
-
-                  neednewline = qfalse;
-                  yPrint += 22;		// next line
-                  index = -1;			// sigh, for loop will
-  increment to 0
-              }
-          }
-
-      }
-
-      if ( lastConnState > cstate.connState ) {
-          lastLoadingText[0] = '\0';
-      }
-      lastConnState = cstate.connState;
-
-      switch ( cstate.connState ) {
-      case CA_CONNECTING:
-          s = va( trap_TranslateString( "Awaiting connection...%i" ),
-  cstate.connectPacketCount); break; case CA_CHALLENGING: s = va(
-  trap_TranslateString( "Awaiting challenge...%i" ),
-  cstate.connectPacketCount); break; case CA_CONNECTED: if
-  (*downloadName) { UI_DisplayDownloadInfo( downloadName, centerPoint,
-  yStart, scale ); return;
-              }
-          s = trap_TranslateString( "Awaiting gamestate..." );
-          break;
-      case CA_LOADING:
-          return;
-      case CA_PRIMED:
-          return;
-      default:
-          return;
-      }
-
-
-      if (Q_stricmp(cstate.servername,"localhost")) {
-          Text_PaintCenter(centerPoint, yStart + 80, scale, colorWhite,
-  s, 0);
-      }
-
-      // password required / connection rejected information goes here
-  */
 }
 
 /*

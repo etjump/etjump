@@ -359,13 +359,11 @@ Portal Gun Mod: Teleport Method
 
 =================================================================================
 */
-#define PORTAL_NUDGE 50.0f // Feen: Extra little boost coming out of a portal...
 
 void PortalTeleport(gentity_t *player, vec3_t origin, vec3_t angles) {
-
-  vec_t velocityLength;
-
-  velocityLength = VectorLength(player->client->ps.velocity); // Speed...
+  // Feen: Extra little boost coming out of a portal...
+  static constexpr float PORTAL_NUDGE = 50.0f;
+  const vec_t velocityLength = VectorLength(player->client->ps.velocity);
 
   // VectorCopy ( origin, player->client->ps.origin ); //Changed to...
   // VectorMA(origin, 32.0f, angles, player->client->ps.origin); moved
@@ -2428,18 +2426,15 @@ void SP_mg42(gentity_t *self) {
   }
 }
 
-#define FLAK_SPREAD 100
-#define FLAK_DAMAGE 36
+inline constexpr int GUN1_IDLE = 0;
+inline constexpr int GUN2_IDLE = 4;
+inline constexpr int GUN3_IDLE = 8;
+inline constexpr int GUN4_IDLE = 12;
 
-#define GUN1_IDLE 0
-#define GUN2_IDLE 4
-#define GUN3_IDLE 8
-#define GUN4_IDLE 12
-
-#define GUN1_LASTFIRE 3
-#define GUN2_LASTFIRE 7
-#define GUN3_LASTFIRE 11
-#define GUN4_LASTFIRE 15
+inline constexpr int GUN1_LASTFIRE = 3;
+inline constexpr int GUN2_LASTFIRE = 7;
+inline constexpr int GUN3_LASTFIRE = 11;
+inline constexpr int GUN4_LASTFIRE = 15;
 
 void Flak_Animate(gentity_t *ent) {
   // G_Printf ("frame %i\n", ent->s.frame);

@@ -32,8 +32,8 @@
 #include "etj_utilities.h"
 
 // TODO make font size configurable via cvars, see CG_DrawSpeed2()
-#define CHSCHAR_SIZEX 0.2
-#define CHSCHAR_SIZEY 0.2
+inline constexpr float CHSCHAR_SIZEX = 0.2;
+inline constexpr float CHSCHAR_SIZEY = 0.2;
 
 static playerState_t *CG_CHS_GetPlayerState(void) {
   if (cg.snap->ps.clientNum != cg.clientNum) {

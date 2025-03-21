@@ -5,7 +5,7 @@
 #include "q_shared.h"
 #include "bg_public.h"
 
-#define MAX_ANIMPOOL_SIZE 5 * MAX_MODEL_ANIMATIONS
+inline constexpr int MAX_ANIMPOOL_SIZE = 5 * MAX_MODEL_ANIMATIONS;
 
 static animation_t animationPool[MAX_ANIMPOOL_SIZE];
 
