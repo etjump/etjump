@@ -130,58 +130,9 @@ extern vmCvar_t ui_currentChangelog;
 extern vmCvar_t etj_demoQueueCurrent;
 extern vmCvar_t etj_demoQueueDir;
 
-//
-// ui_qmenu.c
-//
+inline constexpr int MAX_EDIT_LINE = 256;
 
-#define RCOLUMN_OFFSET (BIGCHAR_WIDTH)
-#define LCOLUMN_OFFSET (-BIGCHAR_WIDTH)
-
-#define SLIDER_RANGE 10
-#define MAX_EDIT_LINE 256
-
-#define MAX_MENUDEPTH 8
-#define MAX_MENUITEMS 128 // JPW NERVE put this back for MP
-// #define MAX_MENUITEMS			256
-
-#define MTYPE_NULL 0
-#define MTYPE_SLIDER 1
-#define MTYPE_ACTION 2
-#define MTYPE_SPINCONTROL 3
-#define MTYPE_FIELD 4
-#define MTYPE_RADIOBUTTON 5
-#define MTYPE_BITMAP 6
-#define MTYPE_TEXT 7
-#define MTYPE_SCROLLLIST 8
-#define MTYPE_PTEXT 9
-#define MTYPE_BTEXT 10
-
-#define QMF_BLINK 0x00000001
-#define QMF_SMALLFONT 0x00000002
-#define QMF_LEFT_JUSTIFY 0x00000004
-#define QMF_CENTER_JUSTIFY 0x00000008
-#define QMF_RIGHT_JUSTIFY 0x00000010
-#define QMF_NUMBERSONLY 0x00000020 // edit field is only numbers
-#define QMF_HIGHLIGHT 0x00000040
-#define QMF_HIGHLIGHT_IF_FOCUS 0x00000080 // steady focus
-#define QMF_PULSEIFFOCUS 0x00000100       // pulse if focus
-#define QMF_HASMOUSEFOCUS 0x00000200
-#define QMF_NOONOFFTEXT 0x00000400
-#define QMF_MOUSEONLY 0x00000800     // only mouse input allowed
-#define QMF_HIDDEN 0x00001000        // skips drawing
-#define QMF_GRAYED 0x00002000        // grays and disables
-#define QMF_INACTIVE 0x00004000      // disables any input
-#define QMF_NODEFAULTINIT 0x00008000 // skip default initialization
-#define QMF_OWNERDRAW 0x00010000
-#define QMF_PULSE 0x00020000
-#define QMF_LOWERCASE 0x00040000 // edit field is all lower case
-#define QMF_UPPERCASE 0x00080000 // edit field is all upper case
-#define QMF_SILENT 0x00100000
-
-// callback notifications
-#define QM_GOTFOCUS 1
-#define QM_LOSTFOCUS 2
-#define QM_ACTIVATED 3
+inline constexpr int MAX_MENUDEPTH = 8;
 
 typedef struct _tag_menuframework {
   int cursor;
@@ -343,20 +294,6 @@ extern char *ui_medalPicNames[];
 extern char *ui_medalSounds[];
 
 //
-// ui_mfield.c
-//
-extern void MField_Clear(mfield_t *edit);
-extern void MField_KeyDownEvent(mfield_t *edit, int key);
-extern void MField_CharEvent(mfield_t *edit, int ch);
-extern void MField_Draw(mfield_t *edit, int x, int y, int style, vec4_t color);
-// JOSEPH 11-23-99
-extern void MenuField_Draw2(menufield_s *f, int specialtype);
-// END JOSEPH
-extern void MenuField_Init(menufield_s *m);
-extern void MenuField_Draw(menufield_s *f);
-extern sfxHandle_t MenuField_Key(menufield_s *m, int *key);
-
-//
 // ui_main.c
 //
 void UI_Report();
@@ -374,77 +311,11 @@ void UI_PrintTime(char *buf, int bufsize, int time);
 void Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color,
                     const char *text, float adjust, int limit, int style,
                     fontInfo_t *font);
-
-#define GLINFO_LINES 128
-
-//
-// ui_menu.c
-//
-extern void MainMenu_Cache(void);
-extern void UI_MainMenu(void);
 extern void UI_RegisterCvars(void);
 extern void UI_UpdateCvars(void);
-
-//
-// ui_credits.c
-//
-extern void UI_CreditMenu(void);
-
-//
-// ui_ingame.c
-//
-extern void InGame_Cache(void);
-extern void UI_InGameMenu(void);
-
-//
-// ui_confirm.c
-//
-extern void ConfirmMenu_Cache(void);
-extern void UI_ConfirmMenu(const char *question, void (*draw)(void),
-                           void (*action)(qboolean result));
-
-//
-// ui_setup.c
-//
-extern void UI_SetupMenu_Cache(void);
-extern void UI_SetupMenu(void);
-
-//
-// ui_team.c
-//
-extern void UI_TeamMainMenu(void);
-extern void TeamMain_Cache(void);
-
-//
-// ui_connect.c
-//
 extern void UI_DrawConnectScreen(qboolean overlay);
 
-//
-// ui_controls2.c
-//
-extern void UI_ControlsMenu(void);
-extern void Controls_Cache(void);
-
-//
-// ui_demo2.c
-//
-extern void UI_DemosMenu(void);
-extern void Demos_Cache(void);
-
-//
-// ui_cinematics.c
-//
-extern void UI_CinematicsMenu(void);
-extern void UI_CinematicsMenu_f(void);
-extern void UI_CinematicsMenu_Cache(void);
-
-//
-// ui_cdkey.c
-//
-extern void UI_CDKeyMenu(void);
-extern void UI_CDKeyMenu_Cache(void);
-extern void UI_CDKeyMenu_f(void);
+inline constexpr int GLINFO_LINES = 128;
 
 //
 // ui_loadpanel.c
@@ -452,156 +323,6 @@ extern void UI_CDKeyMenu_f(void);
 void UI_LoadPanel_Init();
 extern void UI_DrawLoadPanel(qboolean forcerefresh, qboolean ownerdraw,
                              qboolean uihack);
-
-//
-// ui_playermodel.c
-//
-extern void UI_PlayerModelMenu(void);
-extern void PlayerModel_Cache(void);
-
-//
-// ui_playersettings.c
-//
-extern void UI_PlayerSettingsMenu(void);
-extern void PlayerSettings_Cache(void);
-
-//
-// ui_preferences.c
-//
-extern void UI_PreferencesMenu(void);
-extern void Preferences_Cache(void);
-
-//
-// ui_specifyserver.c
-//
-extern void UI_SpecifyServerMenu(void);
-extern void SpecifyServer_Cache(void);
-
-//
-// ui_servers2.c
-//
-#define MAX_FAVORITESERVERS 16
-
-extern void UI_ArenaServersMenu(void);
-extern void ArenaServers_Cache(void);
-
-//
-// ui_startserver.c
-//
-extern void UI_StartServerMenu(qboolean multiplayer);
-extern void StartServer_Cache(void);
-extern void ServerOptions_Cache(void);
-extern void UI_BotSelectMenu(char *bot);
-extern void UI_BotSelectMenu_Cache(void);
-
-//
-// ui_serverinfo.c
-//
-extern void UI_ServerInfoMenu(void);
-extern void ServerInfo_Cache(void);
-
-//
-// ui_video.c
-//
-extern void UI_GraphicsOptionsMenu(void);
-extern void GraphicsOptions_Cache(void);
-extern void DriverInfo_Cache(void);
-
-//
-// ui_players.c
-//
-
-// FIXME ripped from cg_local.h
-typedef struct {
-  int oldFrame;
-  int oldFrameTime; // time when ->oldFrame was exactly on
-
-  int frame;
-  int frameTime; // time when ->frame will be exactly on
-
-  float backlerp;
-
-  float yawAngle;
-  int yawing; // 0 = off, 1 = right, 2 = left
-  float pitchAngle;
-  int pitching; // 0 = off, 1/2 presumably up/down, however 2 unused
-
-  int animationNumber; // may include ANIM_TOGGLEBIT
-  animation_t *animation;
-  int animationTime; // time when the first frame of the animation will
-                     // be exact
-} lerpFrame_t;
-
-typedef struct {
-  // model info
-  qhandle_t legsModel;
-  qhandle_t legsSkin;
-  lerpFrame_t legs;
-
-  qhandle_t torsoModel;
-  qhandle_t torsoSkin;
-  lerpFrame_t torso;
-
-  qhandle_t headModel;
-  qhandle_t headSkin;
-
-  animation_t animations[MAX_ANIMATIONS];
-
-  qhandle_t weaponModel;
-  qhandle_t barrelModel;
-  qhandle_t flashModel;
-  vec3_t flashDlightColor;
-  int muzzleFlashTime;
-
-  // currently in use drawing parms
-  vec3_t viewAngles;
-  vec3_t moveAngles;
-  weapon_t currentWeapon;
-  int legsAnim;
-  int torsoAnim;
-
-  // animation vars
-  weapon_t weapon;
-  weapon_t lastWeapon;
-  weapon_t pendingWeapon;
-  int weaponTimer;
-  int pendingLegsAnim;
-  int torsoAnimationTimer;
-
-  int pendingTorsoAnim;
-  int legsAnimationTimer;
-
-  qboolean chat;
-  qboolean newModel;
-
-  qboolean barrelSpinning;
-  float barrelAngle;
-  int barrelTime;
-
-  int realWeapon;
-
-  // NERVE - SMF - added fields so it will work with wolf's skeletal
-  // animation system parsed from the start of the cfg file
-  gender_t gender;
-  footstep_t footsteps;
-  vec3_t headOffset;
-  int version;
-  qboolean isSkeletal;
-  int numAnimations;
-
-  qhandle_t backpackModel;
-  qhandle_t helmetModel;
-  // -NERVE - SMF
-} playerInfo_t;
-
-void UI_DrawPlayer(float x, float y, float w, float h, playerInfo_t *pi,
-                   int time);
-void UI_PlayerInfo_SetModel(playerInfo_t *pi, const char *model);
-void UI_PlayerInfo_SetInfo(playerInfo_t *pi, int legsAnim, int torsoAnim,
-                           vec3_t viewAngles, vec3_t moveAngles,
-                           weapon_t weaponNum, qboolean chat);
-qboolean UI_RegisterClientModelname(playerInfo_t *pi,
-                                    const char *modelSkinName);
 
 //
 // ui_atoms.c
@@ -641,44 +362,24 @@ typedef struct {
 } uiStatic_t;
 
 // new ui stuff
-#define UI_NUMFX 7
-#define MAX_HEADS 64
-#define MAX_ALIASES 64
-#define MAX_HEADNAME 32
-#define MAX_TEAMS 64
-// #define MAX_GAMETYPES 16 // moved up
-#define MAX_MAPS 8192
-#define MAX_SPMAPS 16
-#define PLAYERS_PER_TEAM 5
-#define MAX_PINGREQUESTS 16
-#define MAX_ADDRESSLENGTH 64
-#define MAX_HOSTNAMELENGTH 22
-#define MAX_MAPNAMELENGTH 16
-#define MAX_STATUSLENGTH 64
-#define MAX_LISTBOXWIDTH 59
-#define UI_FONT_THRESHOLD 0.1
-#define MAX_DISPLAY_SERVERS 2048
-#define MAX_SERVERSTATUS_LINES 128
-#define MAX_SERVERSTATUS_TEXT 2048
-#define MAX_FOUNDPLAYER_SERVERS 16
-#define TEAM_MEMBERS 5
-#define GAMES_ALL 0
-#define GAMES_FFA 1
-#define GAMES_TEAMPLAY 2
-#define GAMES_TOURNEY 3
-#define GAMES_CTF 4
-// #define MAPS_PER_TIER 3
-// #define MAX_TIERS 16
-#define MAX_MODS 64
-#define MAX_DEMOS 256
-#define MAX_MOVIES 256
-#define MAX_PLAYERMODELS 256
-#define MAX_SPAWNPOINTS 128 // NERVE - SMF
-#define MAX_SPAWNDESC 128   // NERVE - SMF
-#define MAX_PBLINES 128     // DHM - Nerve
-#define MAX_PBWIDTH 42      // DHM - Nerve
+inline constexpr int MAX_HEADS = 64;
+inline constexpr int MAX_ALIASES = 64;
+inline constexpr int MAX_TEAMS = 64;
+inline constexpr int MAX_MAPS = 8192;
 
-#define MAX_PROFILES 64
+inline constexpr int MAX_ADDRESSLENGTH = 64;
+inline constexpr int MAX_DISPLAY_SERVERS = 2048;
+inline constexpr int MAX_SERVERSTATUS_LINES = 128;
+inline constexpr int MAX_SERVERSTATUS_TEXT = 2048;
+inline constexpr int MAX_FOUNDPLAYER_SERVERS = 16;
+
+inline constexpr int TEAM_MEMBERS = 5;
+
+inline constexpr int MAX_MODS = 64;
+inline constexpr int MAX_MOVIES = 256;
+inline constexpr int MAX_PLAYERMODELS = 256;
+
+inline constexpr int MAX_PROFILES = 64;
 
 typedef struct {
   const char *name;
@@ -709,13 +410,6 @@ typedef struct {
   int gtEnum;
   const char *gameTypeDescription;
 } gameTypeInfo;
-
-/*typedef struct {
-    const char *tierName;
-    const char *maps[MAPS_PER_TIER];
-    int gameTypes[MAPS_PER_TIER];
-    qhandle_t mapHandles[MAPS_PER_TIER];
-} tierInfo;*/
 
 typedef struct {
   const char *name;
@@ -966,31 +660,6 @@ extern qboolean m_entersound;
 extern uiStatic_t uis;
 
 //
-// ui_spLevel.c
-//
-void UI_SPLevelMenu_Cache(void);
-void UI_SPLevelMenu(void);
-void UI_SPLevelMenu_f(void);
-void UI_SPLevelMenu_ReInit(void);
-
-//
-// ui_spArena.c
-//
-void UI_SPArena_Start(const char *arenaInfo);
-
-//
-// ui_spPostgame.c
-//
-void UI_SPPostgameMenu_Cache(void);
-void UI_SPPostgameMenu_f(void);
-
-//
-// ui_spSkill.c
-//
-void UI_SPSkillMenu(const char *arenaInfo);
-void UI_SPSkillMenu_Cache(void);
-
-//
 // ui_syscalls.c
 //
 void trap_Print(const char *string);
@@ -1122,8 +791,6 @@ void trap_openURL(const char *url); // TTimo
 void trap_GetHunkData(int *hunkused, int *hunkexpected);
 
 char *trap_TranslateString(const char *string); // NERVE - SMF - localization
-
-void ETJump_DrawMapDetails();
 
 namespace ETJump {
 class SyscallExt;
