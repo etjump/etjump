@@ -202,7 +202,7 @@ static void CG_TellAttacker_f(void) {
 
 /////////// cameras
 
-#define MAX_CAMERAS 64 // matches define in splines.cpp
+inline constexpr int MAX_CAMERAS = 64; // matches define in splines.cpp
 qboolean cameraInuse[MAX_CAMERAS];
 
 int CG_LoadCamera(const char *name) {
@@ -447,10 +447,10 @@ static void CG_BuddyVoiceChat_f() {
                              CG_BuildSelectedFirteamString(), chatCmd));
 }
 
-static constexpr int MSGTYPE_ALL = 1;
-static constexpr int MSGTYPE_TEAM = 2;
-static constexpr int MSGTYPE_BUDDY = 3;
-static constexpr int MSGTYPE_ADMIN = 4;
+inline constexpr int MSGTYPE_ALL = 1;
+inline constexpr int MSGTYPE_TEAM = 2;
+inline constexpr int MSGTYPE_BUDDY = 3;
+inline constexpr int MSGTYPE_ADMIN = 4;
 
 // ydnar: say, team say, etc
 static void CG_MessageMode_f(void) {

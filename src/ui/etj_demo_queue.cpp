@@ -28,19 +28,19 @@
 #include "../game/etj_filesystem.h"
 
 namespace ETJump {
-static constexpr char startHelp[] =
+inline constexpr char startHelp[] =
     "Starts playback from the directory specified by ^3'etj_demoQueueDir'^7.";
-static constexpr char stopHelp[] =
+inline constexpr char stopHelp[] =
     "Stops demo queue playback.\n\nDue to communication limitations with the "
     "engine, it's necessary to issue this command to prevent the next demo "
     "from playing when hitting ESC while the queue playback is active";
-static constexpr char nextHelp[] = "Skip to next demo in queue.";
-static constexpr char prevHelp[] = "Go back to previous demo in queue.";
-static constexpr char restartHelp[] = "Restarts the queue from beginning.";
-static constexpr char gotoHelp[] =
+inline constexpr char nextHelp[] = "Skip to next demo in queue.";
+inline constexpr char prevHelp[] = "Go back to previous demo in queue.";
+inline constexpr char restartHelp[] = "Restarts the queue from beginning.";
+inline constexpr char gotoHelp[] =
     "Skips to a specified demo number in the queue.";
-static constexpr char statusHelp[] = "Prints the current status of demo queue.";
-static constexpr char helpHelp[] =
+inline constexpr char statusHelp[] = "Prints the current status of demo queue.";
+inline constexpr char helpHelp[] =
     "Prints general usage information or details about specific command.";
 
 DemoQueue::DemoQueue() {

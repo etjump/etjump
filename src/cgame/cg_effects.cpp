@@ -271,7 +271,7 @@ This is the spurt of blood when a character gets hit
 =================
 */
 void CG_Bleed(vec3_t origin, int entityNum) {
-#define BLOOD_SPURT_COUNT 4
+  static constexpr int BLOOD_SPURT_COUNT = 4;
   int i, j;
 
   if (!cg_showblood.integer) {
@@ -401,11 +401,8 @@ void CG_LaunchGib(centity_t *cent, vec3_t origin, vec3_t angles,
   }
 }
 
-// #define	GIB_VELOCITY	250
-// #define	GIB_JUMP		250
-
-#define GIB_VELOCITY 75
-#define GIB_JUMP 250
+inline constexpr float GIB_VELOCITY = 75.0f;
+inline constexpr float GIB_JUMP = 250.0f;
 
 /*
 ==============
@@ -533,8 +530,6 @@ CG_GibPlayer
 Generated a bunch of gibs launching out from the bodies location
 ===================
 */
-#define MAXJUNCTIONS 8
-
 void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
   int i, count = 0, tagIndex, gibIndex;
   vec3_t origin, velocity, dir;
@@ -544,6 +539,7 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
   int clientNum;
   bg_character_t *character;
   vec4_t projection, color;
+  static constexpr int MAXJUNCTIONS = 8;
 
   // Rafael
   // BloodCloud
@@ -650,8 +646,8 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
       }
     }
 
-// Ridah, spawn a bunch of blood dots around the place
-#define GIB_BLOOD_DOTS 3
+    // Ridah, spawn a bunch of blood dots around the place
+    static constexpr int GIB_BLOOD_DOTS = 3;
     for (i = 0, count = 0; i < GIB_BLOOD_DOTS * 2; i++) {
       if (i > 0) {
         velocity[0] =
@@ -731,7 +727,7 @@ void CG_SparklerSparks(vec3_t origin, int count) {
 }
 
 // just a bunch of numbers we can use for pseudo-randomizing based on time
-#define NUMRANDTABLE 257
+inline constexpr int NUMRANDTABLE = 257;
 unsigned short randtable[NUMRANDTABLE] = {
     0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50a5, 0x60c6, 0x70e7, 0x8108,
     0x9129, 0xa14a, 0xb16b, 0xc18c, 0xd1ad, 0xe1ce, 0xf1ef, 0x1231, 0x0210,
@@ -763,8 +759,9 @@ unsigned short randtable[NUMRANDTABLE] = {
     0xdf7c, 0xaf9b, 0xbfba, 0x8fd9, 0x9ff8, 0x6e17, 0x7e36, 0x4e55, 0x5e74,
     0x2e93, 0x3eb2, 0x0ed1, 0x1ef0};
 
-#define LT_MS 100 // random number will change every LT_MS millseconds
-#define LT_RANDMAX ((unsigned short)0xffff)
+// random number will change every LT_MS millseconds
+inline constexpr int LT_MS = 100;
+inline constexpr uint16_t LT_RANDMAX = 0xffff;
 
 float lt_random(int thisrandseed, int t) {
   return (float)randtable[(thisrandseed + t +
@@ -883,10 +880,10 @@ void CG_RumbleEfx(float pitch, float yaw) {
   cg.recoilPitch -= pitchRecoilAdd;
 }
 
-#define MAX_SMOKESPRITES 512
-#define SMOKEBOMB_DISTANCEBETWEENSPRITES 16.f
-#define SMOKEBOMB_SPAWNRATE 10
-#define SMOKEBOMB_SMOKEVELOCITY ((640.f - 16.f) / 8) / 1000.f // units per msec
+inline constexpr int MAX_SMOKESPRITES = 512;
+inline constexpr int SMOKEBOMB_SPAWNRATE = 10;
+// units per msec
+inline constexpr float SMOKEBOMB_SMOKEVELOCITY = (640.f - 16.f) / 8 / 1000.f;
 
 typedef struct smokesprite_s {
   struct smokesprite_s *next;
@@ -1091,34 +1088,12 @@ void CG_RenderSmokeGrenadeSmoke(centity_t *cent, const weaponInfo_t *weapon) {
       return;
     }
 
-    // Number of sprites for radius calculation:
-    // lifetime of a sprite : (.5f * radius) / velocity
-    // number of sprites in a row: radius /
-    // SMOKEBOMB_DISTANCEBETWEENSPRITES
-    //		numSpritesForRadius = cent->currentState.effect1Time
-    ///
-    // SMOKEBOMB_DISTANCEBETWEENSPRITES;
-
-    //		numSpritesForRadius = cent->currentState.effect1Time /
-    //((((640.f
-    //- 16.f)/16)/1000.f) * cg.frametime);
-    // numNewSpritesNeeded =
-    // numSpritesForRadius - cent->miscTime;
-
-    //		CG_Printf( "numSpritesForRadius: %i /
-    // numNewSpritesNeeded: %i /
-    // cent->miscTime: %i\n", numSpritesForRadius,
-    // numNewSpritesNeeded, cent->miscTime );
-
     if (cg.oldTime && cent->lastFuseSparkTime != cg.time) {
       cent->muzzleFlashTime += cg.frametime;
       spritesNeeded = cent->muzzleFlashTime / spawnrate;
       cent->muzzleFlashTime -= (spawnrate * spritesNeeded);
       cent->lastFuseSparkTime = cg.time;
     }
-
-    //		if( spritesNeeded + cent->miscTime < 40 )
-    //			spritesNeeded = 40 - cent->miscTime;
 
     if (!spritesNeeded) {
       return;

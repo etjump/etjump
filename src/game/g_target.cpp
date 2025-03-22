@@ -765,42 +765,6 @@ void target_relay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
         }
         return;
       }
-
-      /*			item =
-         BG_FindItemForKey(self->key, 0);
-
-                  if(item)
-                  {
-                      if(activator->client->ps.stats[STAT_KEYS]
-         & (1<<item->giTag))	// user has key
-                      {
-                          if (self->spawnflags & 8 ) {
-         // relay is NOKEY_ONLY and player has key if
-         (self->soundPos1) G_Sound( self,
-         self->soundPos1);	//----(SA)	added
-         return;
-                          }
-                      }
-                      else // user does not have key
-                      {
-                          if (!(self->spawnflags & 8) )
-                          {
-                              if (self->soundPos1)
-                                  G_Sound( self,
-         self->soundPos1);
-         //----(SA)	added return;
-                          }
-                      }
-                  }*/
-
-      /*			if(self->spawnflags &
-         16) {	// (SA) take key
-                      activator->client->ps.stats[STAT_KEYS]
-         &=
-         ~(1<<item->giTag);
-                      // (SA) TODO: "took inventory
-         item" sound
-                  }*/
     }
   }
 
@@ -1589,8 +1553,9 @@ void target_save_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
 
 void SP_target_save(gentity_t *self) { self->use = target_save_use; }
 
-#define SF_REMOVE_PORTALS_NO_TEXT 0x1
-#define SF_REMOVE_PORTALS_ACTIVATE_TARGETS 0x2
+inline constexpr int SF_REMOVE_PORTALS_NO_TEXT = 0x1;
+inline constexpr int SF_REMOVE_PORTALS_ACTIVATE_TARGETS = 0x2;
+
 void target_remove_portals_use(gentity_t *self, gentity_t *other,
                                gentity_t *activator) {
   if (!activator || !activator->client) {
@@ -1788,9 +1753,9 @@ void SP_target_savelimit_inc(gentity_t *self) {
   self->use = target_savelimit_inc_use;
 }
 
-static constexpr int NO_DECAY_IDENT = -1;
-static constexpr int NO_DECAY_VALUE = -1;
-static constexpr int NO_DECAY_TIME = -1;
+inline constexpr int NO_DECAY_IDENT = -1;
+inline constexpr int NO_DECAY_VALUE = -1;
+inline constexpr int NO_DECAY_TIME = -1;
 
 void target_decay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (self->decayTime == NO_DECAY_TIME) {
@@ -1962,7 +1927,8 @@ void SP_target_interrupt_timerun(gentity_t *self) {
 // 1 => once per life
 // keys
 // delay => how long in ms before next activation by same player
-#define SF_SET_HEALTH_ONCE 0x1
+inline constexpr int SF_SET_HEALTH_ONCE = 0x1;
+
 void target_set_health_use(gentity_t *self, gentity_t *other,
                            gentity_t *activator) {
   if (!activator || !activator->client) {

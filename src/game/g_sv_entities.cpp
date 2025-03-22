@@ -13,7 +13,7 @@
 // those don't clutter up the real game entities
 
 // how many of these entities?
-#define MAX_SERVER_ENTITIES 4096
+inline constexpr int MAX_SERVER_ENTITIES = 4096;
 
 // for now, statically allocate them
 g_serverEntity_t g_serverEntities[MAX_SERVER_ENTITIES];

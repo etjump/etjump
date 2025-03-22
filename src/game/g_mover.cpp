@@ -25,7 +25,7 @@ void Use_Func_Rotate(gentity_t *ent, gentity_t *other, gentity_t *activator);
 void Blocked_Door(gentity_t *ent, gentity_t *other);
 void Blocked_DoorRotate(gentity_t *ent, gentity_t *other);
 
-#define PUSH_STACK_DEPTH 3
+inline constexpr int PUSH_STACK_DEPTH = 3;
 int pushedStackDepth = 0;
 
 typedef struct {
@@ -34,8 +34,9 @@ typedef struct {
   vec3_t angles;
   float deltayaw;
 } pushed_t;
-pushed_t pushed[MAX_GENTITIES * PUSH_STACK_DEPTH],
-    *pushed_p; // Arnout *PUSH_STACK_DEPTH to prevent overflows
+
+// *PUSH_STACK_DEPTH to prevent overflows
+pushed_t pushed[MAX_GENTITIES * PUSH_STACK_DEPTH], *pushed_p;
 
 /*
 ============
@@ -220,14 +221,16 @@ G_TryPushingEntity
 Returns qfalse if the move is blocked
 ==================
 */
+
+#define JITTER_MAX (check->r.maxs[0] / 2.0)
+
 qboolean G_TryPushingEntity(gentity_t *check, gentity_t *pusher, vec3_t move,
                             vec3_t amove) {
   vec3_t org, org2, move2;
   gentity_t *block;
   vec3_t matrix[3], transpose[3];
   float x, fx, y, fy, z, fz;
-#define JITTER_INC 4
-#define JITTER_MAX (check->r.maxs[0] / 2.0)
+  static constexpr float JITTER_INC = 4.0f;
 
   // EF_MOVER_STOP will just stop when contacting another entity
   // instead of pushing it, but entities can still ride on top of it
@@ -1853,8 +1856,6 @@ Blocked_DoorRotate
 ================
 */
 
-#define DOORPUSHBACK 16
-
 void Blocked_DoorRotate(gentity_t *ent, gentity_t *other) {
 
   gentity_t *slave;
@@ -2709,9 +2710,7 @@ TRAIN
 ===============================================================================
 */
 
-#define TRAIN_START_ON 1
-#define TRAIN_TOGGLE 2
-#define TRAIN_BLOCK_STOPS 4
+inline constexpr int TRAIN_BLOCK_STOPS = 4;
 
 /*
 ===============
@@ -4881,10 +4880,10 @@ void func_constructible_explode(gentity_t *self, gentity_t *inflictor,
 func_constructible_underconstructionthink
 ==============
 */
-// #define CONSTRUCT_PREDECAY_TIME	3000	// if not under construction for
-//  this duration, start decaying
-#define CONSTRUCT_PREDECAY_TIME                                                \
-  30000 // if not under construction for this duration, start decaying
+
+// if not under construction for this duration, start decaying
+inline constexpr int CONSTRUCT_PREDECAY_TIME = 30000;
+
 void func_constructible_underconstructionthink(gentity_t *ent) {
   if (level.time - ent->lastHintCheckTime >= CONSTRUCT_PREDECAY_TIME) {
     // ent->s.angles2[0] -=

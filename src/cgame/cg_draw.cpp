@@ -12,14 +12,11 @@
 
 #include "../game/etj_string_utilities.h"
 
-#define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
 void Controls_GetConfig(void);
 void SetHeadOrigin(clientInfo_t *ci, playerInfo_t *pi);
 void CG_DrawOverlays();
 int activeFont;
-
-#define TEAM_OVERLAY_TIME 1000
 
 ////////////////////////
 ////////////////////////
@@ -254,125 +251,6 @@ void CG_Text_Paint(float x, float y, float scale, vec4_t color,
                     font);
 }
 
-// NERVE - SMF - added back in
-int CG_DrawFieldWidth(int x, int y, int width, int value, int charWidth,
-                      int charHeight) {
-  char num[16], *ptr;
-  int l;
-  int totalwidth = 0;
-
-  if (width < 1) {
-    return 0;
-  }
-
-  // draw number string
-  if (width > 5) {
-    width = 5;
-  }
-
-  switch (width) {
-    case 1:
-      value = value > 9 ? 9 : value;
-      value = value < 0 ? 0 : value;
-      break;
-    case 2:
-      value = value > 99 ? 99 : value;
-      value = value < -9 ? -9 : value;
-      break;
-    case 3:
-      value = value > 999 ? 999 : value;
-      value = value < -99 ? -99 : value;
-      break;
-    case 4:
-      value = value > 9999 ? 9999 : value;
-      value = value < -999 ? -999 : value;
-      break;
-  }
-
-  Com_sprintf(num, sizeof(num), "%i", value);
-  l = strlen(num);
-  if (l > width) {
-    l = width;
-  }
-
-  ptr = num;
-  while (*ptr && l) {
-    totalwidth += charWidth;
-    ptr++;
-    l--;
-  }
-
-  return totalwidth;
-}
-
-int CG_DrawField(int x, int y, int width, int value, int charWidth,
-                 int charHeight, qboolean dodrawpic, qboolean leftAlign) {
-  char num[16], *ptr;
-  int l;
-  int frame;
-  int startx;
-
-  if (width < 1) {
-    return 0;
-  }
-
-  // draw number string
-  if (width > 5) {
-    width = 5;
-  }
-
-  switch (width) {
-    case 1:
-      value = value > 9 ? 9 : value;
-      value = value < 0 ? 0 : value;
-      break;
-    case 2:
-      value = value > 99 ? 99 : value;
-      value = value < -9 ? -9 : value;
-      break;
-    case 3:
-      value = value > 999 ? 999 : value;
-      value = value < -99 ? -99 : value;
-      break;
-    case 4:
-      value = value > 9999 ? 9999 : value;
-      value = value < -999 ? -999 : value;
-      break;
-  }
-
-  Com_sprintf(num, sizeof(num), "%i", value);
-  l = strlen(num);
-  if (l > width) {
-    l = width;
-  }
-
-  // NERVE - SMF
-  if (!leftAlign) {
-    x -= 2 + charWidth * (l);
-  }
-
-  startx = x;
-
-  ptr = num;
-  while (*ptr && l) {
-    if (*ptr == '-') {
-      frame = STAT_MINUS;
-    } else {
-      frame = *ptr - '0';
-    }
-
-    if (dodrawpic) {
-      CG_DrawPic(x, y, charWidth, charHeight, cgs.media.numberShaders[frame]);
-    }
-    x += charWidth;
-    ptr++;
-    l--;
-  }
-
-  return startx;
-}
-// -NERVE - SMF
-
 /*
 ================
 CG_Draw3DModel
@@ -480,9 +358,9 @@ void CG_DrawTeamBackground(int x, int y, int w, int h, float alpha, int team) {
 ===========================================================================================
 */
 
-#define CHATLOC_X 160
-#define CHATLOC_Y 478
-#define CHATLOC_TEXT_X (CHATLOC_X + 0.25f * TINYCHAR_WIDTH)
+inline constexpr float CHATLOC_X = 160.0f;
+inline constexpr float CHATLOC_Y = 478.0f;
+inline constexpr float CHATLOC_TEXT_X = CHATLOC_X + 0.25f * TINYCHAR_WIDTH;
 
 // Calculate chat background width based on etj_chatWidth value
 float calcBackgroundWidth(int maxChars, float fontScale, fontInfo_t *font) {
@@ -659,8 +537,8 @@ LAGOMETER
 */
 
 // lagometer sample count, enough for ~5ms server frame intervals
-static constexpr int LAG_SAMPLES = 1024;
-static constexpr int LAG_PERIOD = 5000;
+inline constexpr int LAG_SAMPLES = 1024;
+inline constexpr int LAG_PERIOD = 5000;
 
 struct sample_t {
   int elapsed;
@@ -837,8 +715,8 @@ static void CG_DrawDisconnect(void) {
   CG_DrawPic(x, y, 48, 48, cgs.media.disconnectIcon);
 }
 
-#define MAX_LAGOMETER_PING 900
-#define MAX_LAGOMETER_RANGE 300
+inline constexpr int MAX_LAGOMETER_PING = 900;
+inline constexpr int MAX_LAGOMETER_RANGE = 300;
 
 /*
 ==============
@@ -1007,8 +885,8 @@ for a few moments
 ==============
 */
 
-#define BP_LINEWIDTH 80
-#define BP_TIME 10000
+inline constexpr int BP_LINEWIDTH = 80;
+inline constexpr int BP_TIME = 10000;
 
 void CG_BannerPrint(const char *str) {
   char buff[MAX_STRING_CHARS];
@@ -1204,7 +1082,7 @@ Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
 */
-#define CP_LINEWIDTH 56 // NERVE - SMF
+inline constexpr int CP_LINEWIDTH = 56; // NERVE - SMF
 
 void CG_CenterPrint(const char *str, const int y, const int charWidth,
                     const bool log) {
@@ -2057,10 +1935,6 @@ void cursorhintTrace(trace_t *trace, vec3_t start, vec3_t end) {
 }
 } // namespace ETJump
 
-static constexpr float CH_KNIFE_DIST = 48.0f; // from g_weapon.c
-static constexpr float CH_LADDER_DIST = 100.0f;
-static constexpr float CH_DIST = 100.0f;
-
 /*
 ==============
 CG_CheckForCursorHints
@@ -2660,7 +2534,7 @@ CG_DrawLimboMessage
 =================
 */
 
-#define INFOTEXT_STARTX 8
+inline constexpr float INFOTEXT_STARTX = 8.0f;
 
 static void CG_DrawLimboMessage(void) {
   float color[4] = {1, 1, 1, 1};
@@ -3109,8 +2983,7 @@ static void CG_DrawFlashBlend(void) {
 CG_DrawObjectiveInfo
 =================
 */
-#define OID_LEFT 10
-#define OID_TOP 360
+inline constexpr int OID_TOP = 360;
 
 void CG_ObjectivePrint(const char *str, int charWidth) {
   char *s;
@@ -3815,9 +3688,6 @@ int CG_PlayerAmmoValue(int *ammo, int *clips, int *akimboammo) {
   return weap;
 }
 
-#define HEAD_TURNTIME 10000
-#define HEAD_TURNANGLE 20
-#define HEAD_PITCHANGLE 2.5
 static void CG_DrawPlayerStatusHead(void) {
   hudHeadAnimNumber_t anim;
   rectDef_t headRect = {44, 480 - 92, 62, 80};
@@ -4146,23 +4016,26 @@ static void CG_DrawSkillBar(float x, float y, float w, float h, int skill) {
   }
 }
 
-#define SKILL_ICON_SIZE 14
+inline constexpr float SKILL_ICON_SIZE = 14.0f;
 
-#define SKILLS_X 112
-#define SKILLS_Y 20
+inline constexpr float SKILLS_X = 112.0f;
+inline constexpr float SKILLS_Y = 20.0f;
 
-#define SKILL_BAR_OFFSET (2 * SKILL_BAR_X_INDENT)
-#define SKILL_BAR_X_INDENT 0
-#define SKILL_BAR_Y_INDENT 6
+inline constexpr float SKILL_BAR_X_INDENT = 0.0f;
+inline constexpr float SKILL_BAR_Y_INDENT = 6.0f;
+inline constexpr float SKILL_BAR_OFFSET = 2 * SKILL_BAR_X_INDENT;
 
-#define SKILL_BAR_WIDTH (SKILL_ICON_SIZE - SKILL_BAR_OFFSET)
-#define SKILL_BAR_X (SKILL_BAR_OFFSET + SKILL_BAR_X_INDENT + SKILLS_X)
-#define SKILL_BAR_X_SCALE (SKILL_ICON_SIZE + 2)
-#define SKILL_ICON_X (SKILL_BAR_OFFSET + SKILLS_X)
-#define SKILL_ICON_X_SCALE (SKILL_ICON_SIZE + 2)
-#define SKILL_BAR_Y (SKILL_BAR_Y_INDENT - SKILL_BAR_OFFSET - SKILLS_Y)
-#define SKILL_BAR_Y_SCALE (SKILL_ICON_SIZE + 2)
-#define SKILL_ICON_Y (-(SKILL_ICON_SIZE + 2) - SKILL_BAR_OFFSET - SKILLS_Y)
+inline constexpr float SKILL_BAR_WIDTH = SKILL_ICON_SIZE - SKILL_BAR_OFFSET;
+inline constexpr float SKILL_BAR_X =
+    SKILL_BAR_OFFSET + SKILL_BAR_X_INDENT + SKILLS_X;
+inline constexpr float SKILL_BAR_X_SCALE = SKILL_ICON_SIZE + 2;
+inline constexpr float SKILL_ICON_X = SKILL_BAR_OFFSET + SKILLS_X;
+inline constexpr float SKILL_ICON_X_SCALE = SKILL_ICON_SIZE + 2;
+inline constexpr float SKILL_BAR_Y =
+    SKILL_BAR_Y_INDENT - SKILL_BAR_OFFSET - SKILLS_Y;
+inline constexpr float SKILL_BAR_Y_SCALE = SKILL_ICON_SIZE + 2;
+inline constexpr float SKILL_ICON_Y =
+    -(SKILL_ICON_SIZE + 2) - SKILL_BAR_OFFSET - SKILLS_Y;
 
 skillType_t CG_ClassSkillForPosition(clientInfo_t *ci, int pos) {
   switch (pos) {

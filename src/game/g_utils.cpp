@@ -16,7 +16,7 @@ typedef struct {
   float timeOffset;
 } shaderRemap_t;
 
-#define MAX_SHADER_REMAPS 128
+inline constexpr int MAX_SHADER_REMAPS = 128;
 
 int remapCount = 0;
 shaderRemap_t remappedShaders[MAX_SHADER_REMAPS];
@@ -366,7 +366,7 @@ G_PickTarget
 Selects a random entity from among the targets
 =============
 */
-#define MAXCHOICES 32
+inline constexpr int MAXCHOICES = 32;
 
 gentity_t *G_PickTarget(char *targetname) {
   gentity_t *ent = NULL;

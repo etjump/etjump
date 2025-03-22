@@ -9,14 +9,14 @@
 // we have to define these static lists, since we can't alloc memory within the
 // cgame
 
-#define FILE_HASH_SIZE 1024
+inline constexpr int FILE_HASH_SIZE = 1024;
 static soundScript_t *hashTable[FILE_HASH_SIZE];
 
-#define MAX_SOUND_SCRIPTS 4096
+inline constexpr int MAX_SOUND_SCRIPTS = 4096;
 static soundScript_t soundScripts[MAX_SOUND_SCRIPTS];
 int numSoundScripts = 0;
 
-#define MAX_SOUND_SCRIPT_SOUNDS 8192
+inline constexpr int MAX_SOUND_SCRIPT_SOUNDS = 8192;
 static soundScriptSound_t soundScriptSounds[MAX_SOUND_SCRIPT_SOUNDS];
 int numSoundScriptSounds = 0;
 
@@ -446,8 +446,8 @@ CG_SoundLoadSoundFiles
 ===============
 */
 extern char bigTextBuffer[100000]; // we got it anyway, might as well use it
+inline constexpr int MAX_SOUND_FILES = 128;
 
-#define MAX_SOUND_FILES 128
 static void CG_SoundLoadSoundFiles() {
   char soundFiles[MAX_SOUND_FILES][MAX_QPATH];
   const char *text;

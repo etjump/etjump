@@ -657,9 +657,9 @@ const char *predictionStrings[] = {
     "grenadeTimeLeft", // 27
 };
 
-#define MAX_PREDICT_ORIGIN_DELTA 0.1f
-#define MAX_PREDICT_VELOCITY_DELTA 0.1f
-#define MAX_PREDICT_VIEWANGLES_DELTA 1.0f
+inline constexpr float MAX_PREDICT_ORIGIN_DELTA = 0.1f;
+inline constexpr float MAX_PREDICT_VELOCITY_DELTA = 0.1f;
+inline constexpr float MAX_PREDICT_VIEWANGLES_DELTA = 1.0f;
 
 // error codes returned by this function are not sequential
 // this is just kept in sync with legacy to keep comparisons easier

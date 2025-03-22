@@ -2,8 +2,6 @@
 #include "cg_local.h"
 #include "../game/etj_string_utilities.h"
 
-#define SCOREBOARD_WIDTH (31 * BIGCHAR_WIDTH)
-
 vec4_t clrUiBack = {0.f, 0.f, 0.f, .6f};
 vec4_t clrUiBackDark = {0.f, 0.f, 0.f, .8f};
 vec4_t clrUiBar = {.16f, .2f, .17f, .8f};
@@ -15,16 +13,16 @@ vec4_t compactUiBorder = {.75f, .75f, .75f, .75f};
 
 // Begin of alt scoreboard 1
 
-#define ALT_SCOREBOARD_WIDTH 600
-#define ALT_SCOREBOARD_HEIGHT 460
+inline constexpr float ALT_SCOREBOARD_WIDTH = 600.0f;
+inline constexpr float ALT_SCOREBOARD_HEIGHT = 460.0f;
 
-#define ALT_SCOREBOARD_HORIZONTAL_DELTA 20
-#define ALT_SCOREBOARD_VERTICAL_DELTA 13
+inline constexpr float ALT_SCOREBOARD_HORIZONTAL_DELTA = 20.0f;
+inline constexpr float ALT_SCOREBOARD_VERTICAL_DELTA = 13.0f;
 
-#define ALT_SCOREBOARD_PLAYER_WIDTH 105
-#define ALT_SCOREBOARD_INFO_WIDTH 40
-#define ALT_SCOREBOARD_FPS_WIDTH 36
-#define ALT_SCOREBOARD_PING_WIDTH 40
+inline constexpr float ALT_SCOREBOARD_PLAYER_WIDTH = 105.0f;
+inline constexpr float ALT_SCOREBOARD_INFO_WIDTH = 40.0f;
+inline constexpr float ALT_SCOREBOARD_FPS_WIDTH = 36.0f;
+inline constexpr float ALT_SCOREBOARD_PING_WIDTH = 40.0f;
 
 void CG_DrawHeader(float x, float y, float fade) {
   fontInfo_t *font = &cgs.media.limboFont1;
@@ -184,14 +182,15 @@ Alt scoreboard 2
 =================
 */
 
-#define THIRD_SCOREBOARD_HEADER_HEIGHT 50
-#define THIRD_SCOREBOARD_SUBHEADER_HEIGHT 30
-#define THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT 20 // TODO: rename pls :D
-#define THIRD_SCOREBOARD_DIVIDER_WIDTH 4
-#define THIRD_SCOREBOARD_PLAYER_WIDTH 180
-#define THIRD_SCOREBOARD_FPS_WIDTH 36
-#define THIRD_SCOREBOARD_PING_WIDTH 40
-#define THIRD_SCOREBOARD_INFO_WIDTH 40
+inline constexpr float THIRD_SCOREBOARD_HEADER_HEIGHT = 50.0f;
+inline constexpr float THIRD_SCOREBOARD_SUBHEADER_HEIGHT = 30.0f;
+// TODO: rename pls :D
+inline constexpr float THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT = 20.0f;
+inline constexpr float THIRD_SCOREBOARD_DIVIDER_WIDTH = 4.0f;
+inline constexpr float THIRD_SCOREBOARD_PLAYER_WIDTH = 180.0f;
+inline constexpr float THIRD_SCOREBOARD_FPS_WIDTH = 36.0f;
+inline constexpr float THIRD_SCOREBOARD_PING_WIDTH = 40.0f;
+inline constexpr float THIRD_SCOREBOARD_INFO_WIDTH = 40.0f;
 
 void CG_DrawHeader2(float x, float y, float fade) {
   fontInfo_t *font = &cgs.media.limboFont2;
@@ -503,20 +502,20 @@ Alt scoreboard 3
 =================
 */
 
-#define ALT_SCOREBOARD_3_HEADER_WIDTH 320
-#define ALT_SCOREBOARD_3_HEADER_HEIGHT 32
+inline constexpr float ALT_SCOREBOARD_3_HEADER_WIDTH = 320.0f;
+inline constexpr float ALT_SCOREBOARD_3_HEADER_HEIGHT = 32.0f;
 
-#define ALT_SCOREBOARD_3_ROW_WIDTH 350
-#define ALT_SCOREBOARD_3_ROW_HEIGHT 14
+inline constexpr float ALT_SCOREBOARD_3_ROW_WIDTH = 350.0f;
+inline constexpr float ALT_SCOREBOARD_3_ROW_HEIGHT = 14.0f;
 
-#define ALT_SCOREBOARD_3_TEXT_XY_PADDING 5
+inline constexpr float ALT_SCOREBOARD_3_TEXT_XY_PADDING = 5;
 
-#define ALT_SCOREBOARD_3_DIVIDER 20
+inline constexpr float ALT_SCOREBOARD_3_DIVIDER = 20;
 
-#define ALT_SCOREBOARD_3_PLAYER_WIDTH 242
-#define ALT_SCOREBOARD_3_FPS_WIDTH 23
-#define ALT_SCOREBOARD_3_INFO_WIDTH 52
-#define ALT_SCOREBOARD_3_PING_WIDTH 23
+inline constexpr float ALT_SCOREBOARD_3_PLAYER_WIDTH = 242;
+inline constexpr float ALT_SCOREBOARD_3_FPS_WIDTH = 23;
+inline constexpr float ALT_SCOREBOARD_3_INFO_WIDTH = 52;
+inline constexpr float ALT_SCOREBOARD_3_PING_WIDTH = 23;
 
 #define ALT_SCOREBOARD_3_PLAYER_X                                              \
   (SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f +                       \

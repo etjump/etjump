@@ -18,15 +18,6 @@ void SP_info_player_deathmatch(gentity_t *ent) {
   int i;
   vec3_t dir;
 
-  G_SpawnInt("nobots", "0", &i);
-  if (i) {
-    ent->flags |= FL_NO_BOTS;
-  }
-  G_SpawnInt("nohumans", "0", &i);
-  if (i) {
-    ent->flags |= FL_NO_HUMANS;
-  }
-
   ent->enemy = G_PickTarget(ent->target);
   if (ent->enemy) {
     VectorSubtract(ent->enemy->s.origin, ent->s.origin, dir);
@@ -71,7 +62,7 @@ extern void BotSpeedBonus(int clientNum);
 =======================================================================
 */
 
-static constexpr int MAX_SPAWN_POINTS = 128;
+inline constexpr int MAX_SPAWN_POINTS = 128;
 
 /*
 ================

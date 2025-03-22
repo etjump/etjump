@@ -3,58 +3,47 @@
 
 // g_public.h -- game module information visible to server
 
-#define GAME_API_VERSION 8
+#pragma once
 
 // entity->svFlags
 // the server does not know how to interpret most of the values
 // in entityStates (level eType), so the game must explicitly flag
 // special server behaviors
-#define SVF_NOCLIENT                                                           \
-  0x00000001 // don't send entity to clients, even if it has effects
-#define SVF_VISDUMMY                                                           \
-  0x00000004 // this ent is a "visibility dummy" and needs it's master
-             // to be sent to clients that can see it even if they can't
-             // see the master ent
-#define SVF_BOT 0x00000008
-#define SVF_POW 0x00000010 // Gordon: stole SVF_CASTAI as it's no longer used
 
-#define SVF_BROADCAST 0x00000020 // send to all connected clients
-#define SVF_PORTAL 0x00000040    // merge a second pvs at origin2 into snapshots
-#define SVF_BLANK                                                              \
-  0x00000080 // Gordon: removed SVF_USE_CURRENT_ORIGIN as it plain
-             // doesnt do anything
-#define SVF_NOFOOTSTEPS 0x00000100
-
-// MrE:
-#define SVF_CAPSULE 0x00000200 // use capsule for collision detection
-
-#define SVF_VISDUMMY_MULTIPLE                                                  \
-  0x00000400 // so that one vis dummy can add to snapshot multiple
-             // speakers
-
-// recent id changes
-#define SVF_SINGLECLIENT                                                       \
-  0x00000800 // only send to a single client
-             // (entityShared_t->singleClient)
-#define SVF_NOSERVERINFO                                                       \
-  0x00001000 // don't send CS_SERVERINFO updates to this client
-             // so that it can be updated for ping tools without
-             // lagging clients
-#define SVF_NOTSINGLECLIENT                                                    \
-  0x00002000 // send entity to everyone but one client
-             // (entityShared_t->singleClient)
-// Gordon:
-#define SVF_IGNOREBMODELEXTENTS                                                \
-  0x00004000 // just use origin for in pvs check for snapshots, ignore
-             // the bmodel extents
-#define SVF_SELF_PORTAL 0x00008000 // use self->origin2 as portal
-#define SVF_SELF_PORTAL_EXCLUSIVE                                              \
-  0x00010000 // use self->origin2 as portal and DONT add self->origin
-             // PVS ents
+// don't send entity to clients, even if it has effects
+inline constexpr int SVF_NOCLIENT = 0x00000001;
+// this ent is a "visibility dummy" and needs it's master to be
+// sent to clients that can see it even if they can't see the master ent
+inline constexpr int SVF_VISDUMMY = 0x00000004;
+inline constexpr int SVF_BOT = 0x00000008;
+inline constexpr int SVF_POW = 0x00000010;
+// send to all connected clients
+inline constexpr int SVF_BROADCAST = 0x00000020;
+// merge a second pvs at origin2 into snapshots
+inline constexpr int SVF_PORTAL = 0x00000040;
+inline constexpr int SVF_BLANK = 0x00000080;
+inline constexpr int SVF_NOFOOTSTEPS = 0x00000100;
+// use capsule for collision detection
+inline constexpr int SVF_CAPSULE = 0x00000200;
+// so that one vis dummy can add to snapshot multiple speakers
+inline constexpr int SVF_VISDUMMY_MULTIPLE = 0x00000400;
+// only send to a single client (entityShared_t->singleClient)
+inline constexpr int SVF_SINGLECLIENT = 0x00000800;
+// don't send CS_SERVERINFO updates to this client
+// so that it can be updated for ping tools without lagging clients
+inline constexpr int SVF_NOSERVERINFO = 0x00001000;
+// send entity to everyone but one client (entityShared_t->singleClient)
+inline constexpr int SVF_NOTSINGLECLIENT = 0x00002000;
+// just use origin for in pvs check for snapshots, ignore the bmodel extents
+inline constexpr int SVF_IGNOREBMODELEXTENTS = 0x00004000;
+// use self->origin2 as portal
+inline constexpr int SVF_SELF_PORTAL = 0x00008000;
+// use self->origin2 as portal and DON'T add self->origin PVS ents
+inline constexpr int SVF_SELF_PORTAL_EXCLUSIVE = 0x00010000;
 
 //===============================================================
 
-#define MAX_TEAM_LANDMINES 10
+inline constexpr int MAX_TEAM_LANDMINES = 10;
 
 typedef qboolean (*addToSnapshotCallback)(int entityNum, int clientNum);
 

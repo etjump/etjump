@@ -68,15 +68,6 @@ void CG_DrawInformation(qboolean forcerefresh) {
   }
 
   CG_DrawConnectScreen(qfalse, forcerefresh);
-
-  // OSP - Server MOTD window
-  /*	if(cg.motdWindow == NULL) {
-          CG_createMOTDWindow();
-      }
-      if(cg.motdWindow != NULL) {
-          CG_windowDraw();
-      }*/
-  // OSP*/
 }
 
 void CG_ShowHelp_On(int *status) {
@@ -389,40 +380,31 @@ void CG_DemoClick(int key, qboolean down) {
 //
 // Color/font info used for all overlays (below)
 //
-#define COLOR_BG                                                               \
-  { 0.0f, 0.0f, 0.0f, 0.6f }
-#define COLOR_BORDER                                                           \
-  { 0.5f, 0.5f, 0.5f, 0.5f }
-#define COLOR_BG_TITLE                                                         \
-  { 0.16f, 0.2f, 0.17f, 0.8f }
-#define COLOR_BG_VIEW                                                          \
-  { 0.16f, 0.2f, 0.17f, 0.8f }
-#define COLOR_BORDER_TITLE                                                     \
-  { 0.1f, 0.1f, 0.1f, 0.2f }
-#define COLOR_BORDER_VIEW                                                      \
-  { 0.2f, 0.2f, 0.2f, 0.4f }
-#define COLOR_HDR                                                              \
-  { 0.6f, 0.6f, 0.6f, 1.0f }
-#define COLOR_HDR2                                                             \
-  { 0.6f, 0.6f, 0.4f, 1.0f }
-#define COLOR_TEXT                                                             \
-  { 0.625f, 0.625f, 0.6f, 1.0f }
+#define COLOR_BG {0.0f, 0.0f, 0.0f, 0.6f}
+#define COLOR_BORDER {0.5f, 0.5f, 0.5f, 0.5f}
+#define COLOR_BG_TITLE {0.16f, 0.2f, 0.17f, 0.8f}
+#define COLOR_BG_VIEW {0.16f, 0.2f, 0.17f, 0.8f}
+#define COLOR_BORDER_TITLE {0.1f, 0.1f, 0.1f, 0.2f}
+#define COLOR_BORDER_VIEW {0.2f, 0.2f, 0.2f, 0.4f}
+#define COLOR_HDR {0.6f, 0.6f, 0.6f, 1.0f}
+#define COLOR_HDR2 {0.6f, 0.6f, 0.4f, 1.0f}
+#define COLOR_TEXT {0.625f, 0.625f, 0.6f, 1.0f}
 
-#define FONT_HEADER &cgs.media.limboFont1
-#define FONT_SUBHEADER &cgs.media.limboFont1_lo
-#define FONT_TEXT &cgs.media.limboFont2
+inline constexpr fontInfo_t *FONT_HEADER = &cgs.media.limboFont1;
+inline constexpr fontInfo_t *FONT_SUBHEADER = &cgs.media.limboFont1_lo;
+inline constexpr fontInfo_t *FONT_TEXT = &cgs.media.limboFont2;
 
 vec4_t color_bg = COLOR_BG_VIEW;
 vec4_t color_border = COLOR_BORDER_VIEW;
 vec4_t color_hdr = COLOR_HDR2;
 vec4_t color_name = COLOR_TEXT;
 
-#define VD_X 4
-#define VD_Y 78
-#define VD_SCALE_X_HDR 0.25f
-#define VD_SCALE_Y_HDR 0.30f
-#define VD_SCALE_X_NAME 0.30f
-#define VD_SCALE_Y_NAME 0.30f
+inline constexpr float VD_X = 4;
+inline constexpr float VD_Y = 78;
+inline constexpr float VD_SCALE_X_HDR = 0.25f;
+inline constexpr float VD_SCALE_Y_HDR = 0.30f;
+inline constexpr float VD_SCALE_X_NAME = 0.30f;
+inline constexpr float VD_SCALE_Y_NAME = 0.30f;
 
 qboolean CG_ViewingDraw() {
   if (cg.mvTotalClients < 1) {
@@ -457,9 +439,9 @@ qboolean CG_ViewingDraw() {
   }
 }
 
-#define GS_X 166 + SCREEN_OFFSET_X
-#define GS_Y 10
-#define GS_W 308
+#define GS_X (166 + SCREEN_OFFSET_X)
+inline constexpr float GS_Y = 10.0f;
+inline constexpr float GS_W = 308.0f;
 
 void CG_GameStatsDraw() {
   if (cgs.gamestats.show == SHOW_OFF) {
@@ -600,9 +582,9 @@ void CG_GameStatsDraw() {
   }
 }
 
-#define TS_X SCREEN_WIDTH - 20 // spacing from right
-#define TS_Y -60               // spacing from bottom
-#define TS_W 308
+#define TS_X (SCREEN_WIDTH - 20)      // spacing from right
+inline constexpr float TS_Y = -60.0f; // spacing from bottom
+inline constexpr float TS_W = 308.0f;
 
 void CG_TopShotsDraw() {
   if (cgs.topshots.show == SHOW_OFF) {
@@ -726,9 +708,9 @@ void CG_TopShotsDraw() {
   }
 }
 
-#define DH_X SCREEN_WIDTH - 20 // spacing from right
-#define DH_Y -60               // spacing from bottom
-#define DH_W 148
+#define DH_X (SCREEN_WIDTH - 20) // spacing from right
+constexpr float DH_Y = -60.0f;   // spacing from bottom
+constexpr float DH_W = 148.0f;
 
 void CG_DemoHelpDraw() {
   if (cg.demohelpWindow == SHOW_OFF) {
@@ -884,9 +866,10 @@ typedef struct {
   const char *info;
 } helpType_t;
 
-#define SH_X 2   // spacing from left
-#define SH_Y 155 // spacing from top
+inline constexpr float SH_X = 2.0f;   // spacing from left
+inline constexpr float SH_Y = 155.0f; // spacing from top
 
+// FIXME: remove
 void CG_SpecHelpDraw() {
   if (cg.spechelpWindow == SHOW_OFF) {
     return;

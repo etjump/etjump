@@ -62,11 +62,11 @@ int numPathCorners;
 pathCorner_t pathCorners[MAX_PATH_CORNERS];
 
 // these defines are matched with the character torso animations
-#define DELAY_LOW 100     // machineguns, tesla, spear, flame
-#define DELAY_HIGH 100    // mauser, garand
-#define DELAY_PISTOL 100  // colt, luger, sp5, cross
-#define DELAY_SHOULDER 50 // rl
-#define DELAY_THROW 250   // grenades, dynamite
+inline constexpr int DELAY_LOW = 100;     // machineguns, tesla, spear, flame
+inline constexpr int DELAY_HIGH = 100;    // mauser, garand
+inline constexpr int DELAY_PISTOL = 100;  // colt, luger, sp5, cross
+inline constexpr int DELAY_SHOULDER = 50; // rl
+inline constexpr int DELAY_THROW = 250;   // grenades, dynamite
 
 // Arnout: the new loadout for WolfXP
 int weapBanksMultiPlayer[MAX_WEAP_BANKS_MP][MAX_WEAPS_IN_BANK_MP] = {
@@ -2515,10 +2515,6 @@ gitem_t *BG_FindItemForWeapon(weapon_t weapon) {
   return NULL;
 }
 
-//----(SA) added
-
-#define DEATHMATCH_SHARED_AMMO 0
-
 /*
 ==============
 BG_FindClipForWeapon
@@ -2644,48 +2640,6 @@ int BG_AkimboSidearm(int weaponNum) {
       break;
   }
 }
-
-/*
-==============
-BG_AkimboForSideArm
-==============
-*/
-/*int BG_AkimboForSideArm( int weaponNum ) {
-    switch( weaponNum )
-    {
-    case WP_COLT:			return WP_AKIMBO_COLT;
-break; case WP_SILENCED_COLT:	return WP_AKIMBO_SILENCEDCOLT;	break; case
-WP_LUGER:			return WP_AKIMBO_LUGER;			break;
-    case WP_SILENCER:		return WP_AKIMBO_SILENCEDLUGER;	break;
-    default:				return WP_NONE;
-break;
-    }
-}*/
-
-//----(SA) Added keys
-/*
-==============
-BG_FindItemForKey
-==============
-*/
-/*gitem_t *BG_FindItemForKey(wkey_t k, int *indexreturn)
-{
-    int		i;
-
-    for ( i = 0 ; i < bg_numItems ; i++ ) {
-        if ( bg_itemlist[i].giType == IT_KEY && bg_itemlist[i].giTag == k ) {
-            {
-                if(indexreturn)
-                    *indexreturn = i;
-                return &bg_itemlist[i];
-            }
-        }
-    }
-
-    Com_Error( ERR_DROP, "Key %d not found", k );
-    return NULL;
-}*/
-//----(SA) end
 
 //----(SA) added
 /*

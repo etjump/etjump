@@ -9,11 +9,8 @@
 #include "etj_utilities.h"
 #include "etj_player_bbox.h"
 
-#define SWING_RIGHT 1
-#define SWING_LEFT 2
-
-#define JUMP_HEIGHT 56
-#define SWINGSPEED 0.3
+inline constexpr int SWING_RIGHT = 1;
+inline constexpr int SWING_LEFT = 2;
 
 static int dp_realtime;
 static float jumpHeight;
@@ -625,11 +622,11 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
   animation_t *otherAnim = NULL;
   qboolean isLadderAnim;
 
-#define ANIM_SCALEMAX_LOW 1.1
-#define ANIM_SCALEMAX_HIGH 1.6
+  static constexpr float ANIM_SCALEMAX_LOW = 1.1;
+  static constexpr float ANIM_SCALEMAX_HIGH = 1.6;
 
-#define ANIM_SPEEDMAX_LOW 100
-#define ANIM_SPEEDMAX_HIGH 20
+  static constexpr int ANIM_SPEEDMAX_LOW = 100;
+  static constexpr int ANIM_SPEEDMAX_HIGH = 20;
 
   // debugging tool to get no animations
   if (cg_animSpeed.integer == 0) {
@@ -1491,10 +1488,9 @@ Returns the Z component of the surface being shadowed
   should it return a full plane instead of a Z?
 ===============
 */
-#define SHADOW_DISTANCE 64
-#define ZOFS 6.0
-#define SHADOW_MIN_DIST 250.0f
-#define SHADOW_MAX_DIST 512.0f
+inline constexpr float SHADOW_DISTANCE = 64.0f;
+inline constexpr float SHADOW_MIN_DIST = 250.0f;
+inline constexpr float SHADOW_MAX_DIST = 512.0f;
 
 typedef struct {
   const char *tagname;

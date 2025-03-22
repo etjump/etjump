@@ -50,41 +50,40 @@ public:
     char *bitReset;
   };
 
-  static const int MaxProgressionTrackers = 50;
   static ETJump::ProgressionTrackers::ProgressionTrackerKeys ParseTrackerKeys();
   static void printTrackerChanges(gentity_t *activator, int *oldValues);
 
   struct ProgressionTracker {
     ProgressionTracker() {
-      std::fill_n(equal, MaxProgressionTrackers, -1);
-      std::fill_n(notEqualAny, MaxProgressionTrackers, -1);
-      std::fill_n(notEqualAll, MaxProgressionTrackers, -1);
-      std::fill_n(greaterThan, MaxProgressionTrackers, -1);
-      std::fill_n(lessThan, MaxProgressionTrackers, -1);
-      std::fill_n(set, MaxProgressionTrackers, -1);
-      std::fill_n(setIf, MaxProgressionTrackers, -1);
-      std::fill_n(bitIsSet, MaxProgressionTrackers, -1);
-      std::fill_n(bitNotSet, MaxProgressionTrackers, -1);
-      std::fill_n(bitSet, MaxProgressionTrackers, -1);
-      std::fill_n(bitReset, MaxProgressionTrackers, -1);
+      std::fill_n(equal, MAX_PROGRESSION_TRACKERS, -1);
+      std::fill_n(notEqualAny, MAX_PROGRESSION_TRACKERS, -1);
+      std::fill_n(notEqualAll, MAX_PROGRESSION_TRACKERS, -1);
+      std::fill_n(greaterThan, MAX_PROGRESSION_TRACKERS, -1);
+      std::fill_n(lessThan, MAX_PROGRESSION_TRACKERS, -1);
+      std::fill_n(set, MAX_PROGRESSION_TRACKERS, -1);
+      std::fill_n(setIf, MAX_PROGRESSION_TRACKERS, -1);
+      std::fill_n(bitIsSet, MAX_PROGRESSION_TRACKERS, -1);
+      std::fill_n(bitNotSet, MAX_PROGRESSION_TRACKERS, -1);
+      std::fill_n(bitSet, MAX_PROGRESSION_TRACKERS, -1);
+      std::fill_n(bitReset, MAX_PROGRESSION_TRACKERS, -1);
 
       // increments default to 0
-      std::fill_n(increment, MaxProgressionTrackers, 0);
-      std::fill_n(incrementIf, MaxProgressionTrackers, 0);
+      std::fill_n(increment, MAX_PROGRESSION_TRACKERS, 0);
+      std::fill_n(incrementIf, MAX_PROGRESSION_TRACKERS, 0);
     }
-    int equal[MaxProgressionTrackers]{};
-    int notEqualAny[MaxProgressionTrackers]{};
-    int notEqualAll[MaxProgressionTrackers]{};
-    int greaterThan[MaxProgressionTrackers]{};
-    int lessThan[MaxProgressionTrackers]{};
-    int set[MaxProgressionTrackers]{};
-    int setIf[MaxProgressionTrackers]{};
-    int increment[MaxProgressionTrackers]{};
-    int incrementIf[MaxProgressionTrackers]{};
-    int bitIsSet[MaxProgressionTrackers]{};
-    int bitNotSet[MaxProgressionTrackers]{};
-    int bitSet[MaxProgressionTrackers]{};
-    int bitReset[MaxProgressionTrackers]{};
+    int equal[MAX_PROGRESSION_TRACKERS]{};
+    int notEqualAny[MAX_PROGRESSION_TRACKERS]{};
+    int notEqualAll[MAX_PROGRESSION_TRACKERS]{};
+    int greaterThan[MAX_PROGRESSION_TRACKERS]{};
+    int lessThan[MAX_PROGRESSION_TRACKERS]{};
+    int set[MAX_PROGRESSION_TRACKERS]{};
+    int setIf[MAX_PROGRESSION_TRACKERS]{};
+    int increment[MAX_PROGRESSION_TRACKERS]{};
+    int incrementIf[MAX_PROGRESSION_TRACKERS]{};
+    int bitIsSet[MAX_PROGRESSION_TRACKERS]{};
+    int bitNotSet[MAX_PROGRESSION_TRACKERS]{};
+    int bitSet[MAX_PROGRESSION_TRACKERS]{};
+    int bitReset[MAX_PROGRESSION_TRACKERS]{};
   };
 
   ProgressionTrackers();
@@ -95,7 +94,7 @@ public:
   parseKey(const std::string &key);
   void
   updateTracker(std::vector<ProgressionTrackerParser::IndexValuePair> pairs,
-                int tracker[MaxProgressionTrackers]);
+                int tracker[MAX_PROGRESSION_TRACKERS]);
   int registerTracker(ProgressionTrackerKeys keys);
   void useTargetTracker(gentity_t *ent, gentity_t *other, gentity_t *activator);
   void useTriggerTracker(gentity_t *ent, gentity_t *activator);

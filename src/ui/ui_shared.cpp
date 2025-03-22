@@ -11,10 +11,10 @@
 
 #include "../game/etj_string_utilities.h"
 
-#define SCROLL_TIME_START 500
-#define SCROLL_TIME_ADJUST 150
-#define SCROLL_TIME_ADJUSTOFFSET 40
-#define SCROLL_TIME_FLOOR 20
+inline constexpr int SCROLL_TIME_START = 500;
+inline constexpr int SCROLL_TIME_ADJUST = 150;
+inline constexpr int SCROLL_TIME_ADJUSTOFFSET = 40;
+inline constexpr int SCROLL_TIME_FLOOR = 20;
 
 typedef struct scrollInfo_s {
   int nextScrollTime;
@@ -53,7 +53,7 @@ int modalMenuCount = 0;
 
 static qboolean debugMode = qfalse;
 
-#define DOUBLE_CLICK_DELAY 300
+inline constexpr int DOUBLE_CLICK_DELAY = 300;
 static int lastListBoxClickTime = 0;
 
 void Item_MouseLeave(itemDef_t *item);
@@ -70,15 +70,15 @@ static qboolean Menu_OverActiveItem(menuDef_t *menu, float x, float y);
 
 #ifdef CGAMEDLL
   #if id386
-    #define MEM_POOL_SIZE (128 * 1024)
+inline constexpr int MEM_POOL_SIZE = 128 * 1024;
   #else
-    #define MEM_POOL_SIZE (256 * 1024)
+inline constexpr int MEM_POOL_SIZE = 256 * 1024;
   #endif
 #else
   #if id386
-    #define MEM_POOL_SIZE (8192 * 1024) // Arnout: was 1024
+inline constexpr int MEM_POOL_SIZE = 8192 * 1024; // Arnout: was 1024
   #else
-    #define MEM_POOL_SIZE (16384 * 1024)
+inline constexpr int MEM_POOL_SIZE = 16384 * 1024;
   #endif
 #endif
 
@@ -190,7 +190,7 @@ void UI_InitMemory(void) {
 
 qboolean UI_OutOfMemory() { return outOfMemory ? qtrue : qfalse; }
 
-#define HASH_TABLE_SIZE 2048
+inline constexpr int HASH_TABLE_SIZE = 2048;
 /*
 ================
 return a hash value for the string
@@ -3007,10 +3007,10 @@ qboolean Item_Multi_HandleKey(itemDef_t *item, int key) {
 }
 
 namespace ETJump {
-static constexpr int8_t DIRECTION_UP = 1;
-static constexpr int8_t DIRECTION_DOWN = -1;
-static constexpr uint8_t SCROLL_SMALL = 1;
-static constexpr uint8_t SCROLL_BIG = 3;
+inline constexpr int8_t DIRECTION_UP = 1;
+inline constexpr int8_t DIRECTION_DOWN = -1;
+inline constexpr uint8_t SCROLL_SMALL = 1;
+inline constexpr uint8_t SCROLL_BIG = 3;
 
 static float getComboThumbPosition(const itemDef_t *item,
                                    const rectDef_t *rect) {
@@ -6721,7 +6721,7 @@ Keyword Hash
 ===============
 */
 
-#define KEYWORDHASH_SIZE 512
+inline constexpr int KEYWORDHASH_SIZE = 512;
 
 typedef struct keywordHash_s {
   const char *keyword;
@@ -8641,20 +8641,6 @@ qboolean Display_MouseMove(void *p, int x, int y) {
     Menu_UpdatePosition(menu);
   }
   return qtrue;
-}
-
-int Display_CursorType(int x, int y) {
-  int i;
-  for (i = 0; i < menuCount; i++) {
-    rectDef_t r2;
-    r2.x = Menus[i].window.rect.x - 3;
-    r2.y = Menus[i].window.rect.y - 3;
-    r2.w = r2.h = 7;
-    if (Rect_ContainsPoint(&r2, x, y)) {
-      return CURSOR_SIZER;
-    }
-  }
-  return CURSOR_ARROW;
 }
 
 void Display_HandleKey(int key, qboolean down, int x, int y) {

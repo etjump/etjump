@@ -119,8 +119,6 @@ typedef struct {
   int anim;
 } painAnimForTag_t;
 
-#define PEFOFS(x) ((int)&(((playerEntity_t *)0)->x))
-
 void CG_PainEvent(centity_t *cent, int health, qboolean crouching) {
   const char *snd;
 
@@ -157,7 +155,7 @@ cent->currentState.angles2[2])
 ==============
 */
 
-#define POSSIBLE_PIECES 6
+inline constexpr int POSSIBLE_PIECES = 6;
 
 typedef struct fxSound_s {
   int max;

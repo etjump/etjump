@@ -642,18 +642,6 @@ void QDECL G_DPrintf(const char *fmt, ...) {
   trap_Error(text);
 }
 
-#define CH_KNIFE_DIST 48 // from g_weapon.c
-#define CH_LADDER_DIST 100
-#define CH_WATER_DIST 100
-#define CH_BREAKABLE_DIST 64
-#define CH_DOOR_DIST 96
-#define CH_ACTIVATE_DIST 96
-#define CH_EXIT_DIST 256
-#define CH_FRIENDLY_DIST 1024
-
-#define CH_MAX_DIST 1024      // use the largest value from above
-#define CH_MAX_DIST_ZOOM 8192 // max dist for zooming hints
-
 /*
 ==============
 G_CursorHintIgnoreEnt: returns whether the ent should be ignored
@@ -1605,9 +1593,6 @@ void G_wipeCvars(void) {
 
   G_UpdateCvars();
 }
-
-// bani - #113
-#define SNIPSIZE 250
 
 void G_ExecMapSpecificConfig() {
   int len;

@@ -89,13 +89,14 @@ panel_button_t rightLimboPannel = {
     NULL,
 };
 
-#define MEDAL_PIC_GAP                                                          \
-  ((MEDAL_PIC_SIZE - (MEDAL_PIC_WIDTH * MEDAL_PIC_COUNT)) /                    \
-   (MEDAL_PIC_COUNT + 1.f))
-#define MEDAL_PIC_COUNT 7.f
-#define MEDAL_PIC_WIDTH 22.f
-#define MEDAL_PIC_X 450.f
-#define MEDAL_PIC_SIZE (630.f - MEDAL_PIC_X)
+inline constexpr float MEDAL_PIC_COUNT = 7.f;
+inline constexpr float MEDAL_PIC_WIDTH = 22.f;
+inline constexpr float MEDAL_PIC_X = 450.f;
+inline constexpr float MEDAL_PIC_SIZE = 630.f - MEDAL_PIC_X;
+inline constexpr float MEDAL_PIC_GAP =
+    (MEDAL_PIC_SIZE - (MEDAL_PIC_WIDTH * MEDAL_PIC_COUNT)) /
+    (MEDAL_PIC_COUNT + 1.f);
+
 #define MEDAL_PIC(number)                                                      \
   panel_button_t medalPic##number = {                                          \
       NULL,                                                                    \
@@ -119,15 +120,15 @@ MEDAL_PIC(4);
 MEDAL_PIC(5);
 MEDAL_PIC(6);
 
-#define TEAM_COUNTER_GAP                                                       \
-  ((TEAM_COUNTER_SIZE - (TEAM_COUNTER_WIDTH * TEAM_COUNTER_COUNT)) /           \
-   (TEAM_COUNTER_COUNT + 1.f))
-#define TEAM_COUNTER_COUNT 3.f
-#define TEAM_COUNTER_WIDTH 20.f
-#define TEAM_COUNTER_X 432.f
-#define TEAM_COUNTER_SIZE (660.f - TEAM_COUNTER_X)
-#define TEAM_COUNTER_BUTTON_DIFF -24.f
-#define TEAM_COUNTER_SPACING 4.f
+inline constexpr float TEAM_COUNTER_COUNT = 3.f;
+inline constexpr float TEAM_COUNTER_WIDTH = 20.f;
+inline constexpr float TEAM_COUNTER_X = 432.f;
+inline constexpr float TEAM_COUNTER_SIZE = 660.f - TEAM_COUNTER_X;
+inline constexpr float TEAM_COUNTER_BUTTON_DIFF = -24.f;
+inline constexpr float TEAM_COUNTER_SPACING = 4.f;
+inline constexpr float TEAM_COUNTER_GAP =
+    (TEAM_COUNTER_SIZE - (TEAM_COUNTER_WIDTH * TEAM_COUNTER_COUNT)) /
+    (TEAM_COUNTER_COUNT + 1.f);
 
 #define TEAM_COUNTER(number)                                                   \
   panel_button_t teamCounter##number = {                                       \
@@ -179,15 +180,16 @@ TEAM_COUNTER(0);
 TEAM_COUNTER(1);
 TEAM_COUNTER(2);
 
-#define CLASS_COUNTER_GAP                                                      \
-  ((CLASS_COUNTER_SIZE - (CLASS_COUNTER_WIDTH * CLASS_COUNTER_COUNT)) /        \
-   (CLASS_COUNTER_COUNT + 1.f))
-#define CLASS_COUNTER_COUNT 5.f
-#define CLASS_COUNTER_WIDTH 20.f
-#define CLASS_COUNTER_X 435.f
-#define CLASS_COUNTER_SIZE (645.f - CLASS_COUNTER_X)
-#define CLASS_COUNTER_LIGHT_DIFF 4.f
-#define CLASS_COUNTER_BUTTON_DIFF -18.f
+inline constexpr float CLASS_COUNTER_COUNT = 5.f;
+inline constexpr float CLASS_COUNTER_WIDTH = 20.f;
+inline constexpr float CLASS_COUNTER_X = 435.f;
+inline constexpr float CLASS_COUNTER_SIZE = 645.f - CLASS_COUNTER_X;
+inline constexpr float CLASS_COUNTER_LIGHT_DIFF = 4.f;
+inline constexpr float CLASS_COUNTER_BUTTON_DIFF = -18.f;
+inline constexpr float CLASS_COUNTER_GAP =
+    (CLASS_COUNTER_SIZE - (CLASS_COUNTER_WIDTH * CLASS_COUNTER_COUNT)) /
+    (CLASS_COUNTER_COUNT + 1.f);
+
 #define CLASS_COUNTER(number)                                                  \
   panel_button_t classCounter##number = {                                      \
       NULL,                                                                    \
@@ -294,21 +296,21 @@ panel_button_t filterTitleText = {
       NULL,                                                                    \
   }
 
-#define LF_X1 64
-#define LF_X2 416
-#define LF_X3 440
+inline constexpr int LF_X1 = 64;
+inline constexpr int LF_X2 = 416;
+inline constexpr int LF_X3 = 440;
 
-#define LF_W1 (LF_X1 - 0)
-#define LF_W2 (LF_X2 - LF_X1)
-#define LF_W3 (LF_X3 - LF_X2)
+inline constexpr int LF_W1 = LF_X1 - 0;
+inline constexpr int LF_W2 = LF_X2 - LF_X1;
+inline constexpr int LF_W3 = LF_X3 - LF_X2;
 
-#define LF_Y1 23
-#define LF_Y2 375
-#define LF_Y3 480
+inline constexpr int LF_Y1 = 23;
+inline constexpr int LF_Y2 = 375;
+inline constexpr int LF_Y3 = 480;
 
-#define LF_H1 (LF_Y1 - 0)
-#define LF_H2 (LF_Y2 - LF_Y1)
-#define LF_H3 (LF_Y3 - LF_Y2)
+inline constexpr int LF_H1 = LF_Y1 - 0;
+inline constexpr int LF_H2 = LF_Y2 - LF_Y1;
+inline constexpr int LF_H3 = LF_Y3 - LF_Y2;
 
 LEFT_FRAME("gfx/limbo/limbo_frame01", 1, 0, 0, LF_W1, LF_H1);
 LEFT_FRAME("gfx/limbo/limbo_frame02", 2, LF_X1, 0, LF_W2, LF_H1);
@@ -1898,10 +1900,9 @@ void CG_LimboPanel_WeaponPanel_DrawWeapon(rectDef_t *rect, weapon_t weap,
   CG_Text_Paint_Ext(x, rect->y + rect->h - 2, 0.2f, 0.2f, colorBlack, ofTxt, 0,
                     0, 0, &cgs.media.limboFont2);
 }
-
-#define BRDRSIZE 4
 void CG_DrawBorder(float x, float y, float w, float h, qboolean fill,
                    qboolean drawMouseOver) {
+  static constexpr int BRDRSIZE = 4;
   vec4_t clrBack = {0.1f, 0.1f, 0.1f, 1.f};
   vec4_t clrBack2 = {0.2f, 0.2f, 0.2f, 1.f};
 
@@ -2273,10 +2274,10 @@ void CG_LimboPanelRenderText_SkillsText(panel_button_t *button) {
   BG_PanelButtonsRender_Text(button);
 }
 
-#define MAX_ROLLERS 8
 #define COUNTER_ROLLTOTAL (cg.time - button->data[4])
 // Gordon: this function is mental, i love it :)
 void CG_LimboPanel_RenderCounter(panel_button_t *button) {
+  static constexpr int MAX_ROLLERS = 8;
   float x, w;
   float count[MAX_ROLLERS];
   int i, j;
