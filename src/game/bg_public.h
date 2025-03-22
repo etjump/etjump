@@ -921,7 +921,8 @@ enum weapon_t : int8_t {
   WP_NUM_WEAPONS
 };
 
-static_assert(WP_NUM_WEAPONS < 64, "WP_NUM_WEAPONS must be less than 64");
+static_assert(WP_NUM_WEAPONS < MAX_WEAPONS,
+              "WP_NUM_WEAPONS must be less than MAX_WEAPONS");
 
 // JPW NERVE moved from cg_weapons (now used in g_active) for drop command,
 // actual array in bg_misc.c
