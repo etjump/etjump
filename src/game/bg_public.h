@@ -858,41 +858,35 @@ typeef enum {
 // END Mad Doc - TDF
 #endif
 
-// NOTE: we can only use up to 15 in the client-server stream
-// SA NOTE: should be 31 now (I added 1 bit in msg.c)
-// RF NOTE: if this changes, please update etmain\botfiles\inv.h
-enum weapon_t : char {
-  WP_NONE,             // 0
-  WP_KNIFE,            // 1
-  WP_LUGER,            // 2
-  WP_MP40,             // 3
-  WP_GRENADE_LAUNCHER, // 4
-  WP_PANZERFAUST,      // 5
-  WP_FLAMETHROWER,     // 6
+enum weapon_t : int8_t {
+  WP_NONE,              // 0
+  WP_KNIFE,             // 1
+  WP_LUGER,             // 2
+  WP_MP40,              // 3
+  WP_GRENADE_LAUNCHER,  // 4   // axis hand grenade
+  WP_PANZERFAUST,       // 5
+  WP_FLAMETHROWER,      // 6
+  WP_COLT,              // 7   // equivalent american weapon to german luger
+  WP_THOMPSON,          // 8   // equivalent american weapon to german mp40
+  WP_GRENADE_PINEAPPLE, // 9   // allied hand grenade
 
-  WP_COLT,              // 7	// equivalent american weapon to german luger
-  WP_THOMPSON,          // 8	// equivalent american weapon to german mp40
-  WP_GRENADE_PINEAPPLE, // 9
-  WP_STEN,              // 10	// silenced sten sub-machinegun
-  WP_MEDIC_SYRINGE,     // 11	// JPW NERVE -- broken out from
-                        // CLASS_SPECIAL per Id request
-  WP_AMMO,              // 12	// JPW NERVE likewise
-  WP_ARTY,              // 13
-
-  WP_SILENCER,      // 14	// used to be sp5
+  WP_STEN,          // 10   // silenced sten sub-machinegun
+  WP_MEDIC_SYRINGE, // 11
+  WP_AMMO,          // 12
+  WP_ARTY,          // 13
+  WP_SILENCER,      // 14   // silenced luger
   WP_DYNAMITE,      // 15
-  WP_SMOKETRAIL,    // 16
-  WP_MAPMORTAR,     // 17
-  VERYBIGEXPLOSION, // 18	// explosion effect for airplanes
+  WP_SMOKETRAIL,    // 16   // smoke grenade
+  WP_MAPMORTAR,     // 17   // shooter_mortar
+  VERYBIGEXPLOSION, // 18   // explosion effect for airplanes
   WP_MEDKIT,        // 19
-  WP_BINOCULARS,    // 20
 
+  WP_BINOCULARS,   // 20
   WP_PLIERS,       // 21
-  WP_SMOKE_MARKER, // 22	// Arnout: changed name to cause less
-                   // confusion
-  WP_KAR98,        // 23	// WolfXP weapons
-  WP_CARBINE,      // 24
-  WP_GARAND,       // 25
+  WP_SMOKE_MARKER, // 22
+  WP_KAR98,        // 23	// axis engineer rifle
+  WP_CARBINE,      // 24   // allied engineer rifle
+  WP_GARAND,       // 25   // allied sniper rifle
   WP_LANDMINE,     // 26
   WP_SATCHEL,      // 27
   WP_SATCHEL_DET,  // 28
@@ -900,23 +894,21 @@ enum weapon_t : char {
   WP_SMOKE_BOMB,   // 30
 
   WP_MOBILE_MG42,  // 31
-  WP_K43,          // 32
+  WP_K43,          // 32   // axis sniper rifle
   WP_FG42,         // 33
-  WP_DUMMY_MG42,   // 34 // Gordon: for storing heat on mounted mg42s...
+  WP_DUMMY_MG42,   // 34   // Gordon: for storing heat on mounted mg42s...
   WP_MORTAR,       // 35
   WP_LOCKPICK,     // 36	// Mad Doc - TDF lockpick
   WP_AKIMBO_COLT,  // 37
   WP_AKIMBO_LUGER, // 38
-  WP_PORTAL_GUN,   // Feen: Portal Gun Mod (PGM) New 39
+  WP_PORTAL_GUN,   // 39   // Feen: Portal Gun Mod (PGM)
 
-  // Gordon: ONLY secondaries below this mark, as they are checked >=
-  // WP_GPG40
-  // && < WP_NUM_WEAPONS
+  // Gordon: ONLY secondaries below this mark,
+  // as they are checked >= WP_GPG40 && < WP_NUM_WEAPONS
 
-  WP_GPG40, // 40
-
-  WP_M7,                   // 41
-  WP_SILENCED_COLT,        // 43
+  WP_GPG40,                // 40   // axis rifle grenade
+  WP_M7,                   // 41   // allied rifle grenade
+  WP_SILENCED_COLT,        // 42
   WP_GARAND_SCOPE,         // 43
   WP_K43_SCOPE,            // 44
   WP_FG42SCOPE,            // 45
@@ -926,10 +918,10 @@ enum weapon_t : char {
   WP_AKIMBO_SILENCEDLUGER, // 49
   WP_MOBILE_MG42_SET,      // 50
 
-  WP_NUM_WEAPONS // WolfMP: 32 WolfXP: 51
-                 // NOTE: this cannot be larger than 64 for AI/player
-                 // weapons!
+  WP_NUM_WEAPONS
 };
+
+static_assert(WP_NUM_WEAPONS < 64, "WP_NUM_WEAPONS must be less than 64");
 
 // JPW NERVE moved from cg_weapons (now used in g_active) for drop command,
 // actual array in bg_misc.c
@@ -1588,7 +1580,7 @@ typedef struct headAnimation_s {
 #define ANIM_TOGGLEBIT (1 << (ANIM_BITS - 1))
 
 // Gordon: renamed these to team_axis/allies, it really was awful....
-enum team_t : char {
+enum team_t : int8_t {
   TEAM_FREE,
   TEAM_AXIS,
   TEAM_ALLIES,
