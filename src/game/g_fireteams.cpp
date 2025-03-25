@@ -1027,6 +1027,7 @@ static void setFireTeamRules(const int &clientNum) {
     } else {
       Printer::popup(clientNum, "fireteam: invalid ^3shove ^7value");
       Printer::popup(clientNum, "Valid values are: ^3<on|1> <off|0>");
+      return;
     }
 
     G_UpdateFireteamConfigString(ft);
