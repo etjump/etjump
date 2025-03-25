@@ -891,7 +891,7 @@ bool canEnableFtShove(const int clientNum, const fireteamData_t *ft,
   // so mappers have control of where in the map shoving will be toggled
   if (level.noFTShove && ent && ent->client) {
     Printer::popup(clientNum,
-                   "fireteam: ^3shove^7cannot be enabled on this map");
+                   "fireteam: ^3shove^7 cannot be enabled on this map");
     return false;
   }
 
