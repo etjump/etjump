@@ -3660,7 +3660,7 @@ tryagain:
 }
 
 namespace ETJump {
-static bool inNoShoveArea(gentity_t *ent) {
+static bool inNoShoveArea(const gentity_t *ent) {
   trace_t tr;
   trap_TraceCapsule(&tr, ent->client->ps.origin, ent->r.mins, ent->r.maxs,
                     ent->client->ps.origin, ent->client->ps.clientNum,
@@ -3735,7 +3735,8 @@ static void shovePlayer(gentity_t *ent, gentity_t *target) {
   G_AddEvent(target, EV_SHOVE, 0);
 }
 
-static void shoveTrace(trace_t *tr, vec3_t start, vec3_t end, gentity_t *ent) {
+static void shoveTrace(trace_t *tr, const vec3_t start, const vec3_t end,
+                       gentity_t *ent) {
   const int passEntityNum = ClientNum(ent);
   trap_Trace(tr, start, nullptr, nullptr, end, passEntityNum, CONTENTS_BODY);
 
@@ -3756,7 +3757,6 @@ static void shoveTrace(trace_t *tr, vec3_t start, vec3_t end, gentity_t *ent) {
 void Cmd_Activate2_f(gentity_t *ent) {
   trace_t tr;
   vec3_t end;
-  gentity_t *traceEnt;
   vec3_t forward, right, up, offset;
   bool pass2 = false;
 
