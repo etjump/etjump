@@ -1254,9 +1254,12 @@ static constexpr std::array<const char *, EV_MAX_EVENTS + 1> eventnames = {
     "EV_UPHILLSTEP",
     "EV_SAVE",
     "EV_CUSHIONFALLSTEP",
+    "EV_SHOVE",
     "EV_MAX_EVENTS",
 };
 
+// FIXME: this allows adding new events without enforcing addition
+//  to the event array as well, figure out a better way
 static_assert(sizeof(eventnames) / sizeof(eventnames[0]) == EV_MAX_EVENTS + 1,
               "Event names array size does not match enum list");
 
