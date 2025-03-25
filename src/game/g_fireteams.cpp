@@ -770,7 +770,7 @@ void setFireteamTeamjumpMode(fireteamData_t *ft, const bool teamjumpMode) {
   }
 }
 
-static void setFireteamShove(fireteamData_t *ft, const bool shove) {
+void setFireteamShove(fireteamData_t *ft, const bool shove) {
   const std::string msg = stringFormat("fireteam: ^3shoving ^7has been ^3%s",
                                        shove ? "enabled" : "disabled");
 

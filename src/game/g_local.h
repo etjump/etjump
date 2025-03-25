@@ -2583,9 +2583,12 @@ namespace ETJump {
 gentity_t *getFireteamLeader(int clientNum);
 void setSaveLimitForFTMembers(fireteamData_t *ft, int limit);
 void setFireTeamGhosting(fireteamData_t *ft, bool noGhost);
+void setFireteamShove(fireteamData_t *ft, bool shove);
 bool canEnableFtNoGhost(int clientNum, const fireteamData_t *ft,
                         const gentity_t *ent);
 bool canSetFtSavelimit(int clientNum, const gentity_t *ent);
+bool canEnableFtShove(int clientNum, const fireteamData_t *ft,
+                      const gentity_t *ent);
 bool canSetFtTeamjumpMode(int clientNum, const gentity_t *ent);
 void setFireteamTeamjumpMode(fireteamData_t *ft, bool teamjumpMode);
 } // namespace ETJump
