@@ -43,6 +43,11 @@ void TargetFtSetRules::spawn(gentity_t *ent) {
     ent->damage = std::clamp(ent->damage, 0, 1);
   }
 
+  ent->force = KEY_NOT_SET;
+  if (G_SpawnInt("shove", keyNotSet, &ent->force)) {
+    ent->force = std::clamp(ent->force, 0, 1);
+  }
+
   ent->health = KEY_NOT_SET;
   if (G_SpawnInt("teamjumpmode", keyNotSet, &ent->health)) {
     ent->health = std::clamp(ent->health, 0, 1);
@@ -102,6 +107,12 @@ void TargetFtSetRules::use(const gentity_t *self, gentity_t *activator) {
   if (self->damage != KEY_NOT_SET && ft->noGhost != self->damage &&
       canEnableFtNoGhost(clientNum, ft, self)) {
     setFireTeamGhosting(ft, self->damage);
+    rulesChanged = true;
+  }
+
+  if (self->force != KEY_NOT_SET && ft->shove != self->force &&
+      canEnableFtShove(clientNum, ft, self)) {
+    setFireteamShove(ft, self->force);
     rulesChanged = true;
   }
 
