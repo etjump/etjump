@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,18 +27,17 @@
 #include "etj_demo_recorder.h"
 #include "../game/etj_filesystem.h"
 #include "../game/etj_string_utilities.h"
-#include "../game/etj_numeric_utilities.h"
 #include "../game/etj_time_utilities.h"
 #include "etj_client_commands_handler.h"
 #include "etj_player_events_handler.h"
 #include "cg_local.h"
 
 // constants
-static const int DEMO_SAVE_DELAY = 500;
-static const int DEMO_MAX_SAVE_DELAY = 10000;
-static const int DEMO_START_TIMEOUT = 500;
-static const int MAX_TEMP = 20;
-static const char *TEMP_PATH = "temp";
+inline constexpr int DEMO_SAVE_DELAY = 500;
+inline constexpr int DEMO_MAX_SAVE_DELAY = 10000;
+inline constexpr int DEMO_START_TIMEOUT = 500;
+inline constexpr int MAX_TEMP = 20;
+inline constexpr char TEMP_PATH[] = "temp";
 
 std::string ETJump::AutoDemoRecorder::TempNameGenerator::pop() {
   if (!names.size())
@@ -68,21 +67,30 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
   if (cg.demoPlayback)
     return;
 
-  playerEventsHandler->subscribe(
-      "load",
-      [&](const std::vector<std::string> &args) {
-        if (etj_autoDemo.integer > 0)
-          tryRestart();
-      });
+  playerEventsHandler->subscribe("load",
+                                 [&](const std::vector<std::string> &args) {
+                                   if (etj_autoDemo.integer > 0)
+                                     tryRestart();
+                                 });
 
   playerEventsHandler->subscribe(
-      "respawn",
-      [&](const std::vector<std::string> &args) {
-        auto revive = Q_atoi(args[0].c_str());
-        if (revive)
+      "respawn", [&](const std::vector<std::string> &args) {
+        if (etj_ad_stopInSpec.integer && DemoRecorder::recordingAutoDemo() &&
+            cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR &&
+            !_delayedTimerId) {
+          _demo.stop();
           return;
-        if (etj_autoDemo.integer > 0)
+        }
+
+        const int revive = Q_atoi(args[0].c_str());
+
+        if (revive) {
+          return;
+        }
+
+        if (etj_autoDemo.integer) {
           tryRestart();
+        }
       });
 
   playerEventsHandler->subscribe(
@@ -98,8 +106,7 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
       });
 
   playerEventsHandler->subscribe(
-      "timerun:record",
-      [&](const std::vector<std::string> &args) {
+      "timerun:record", [&](const std::vector<std::string> &args) {
         auto clientNum = std::stoi(args[0]);
         if (clientNum != cg.clientNum) {
           return;
@@ -111,39 +118,57 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
 
   consoleCommandsHandler->subscribe(
       "ad_save", [&](const std::vector<std::string> &args) {
-        if (etj_autoDemo.integer <= 0)
+        if (etj_autoDemo.integer <= 0) {
           return;
+        }
+
         if (!cl_demorecording.integer) {
           CG_AddPMItem(PM_MESSAGE, "^7Not recording a demo.\n",
                        cgs.media.voiceChatShader);
           return;
         }
-        auto src = createDemoTempPath(_demoNames.current());
-        auto dst = createDemoPath(args.size() ? args[0] : "demo");
+
+        if (!DemoRecorder::recordingAutoDemo()) {
+          CG_AddPMItem(PM_MESSAGE, "Not recording an autodemo.\n",
+                       cgs.media.voiceChatShader);
+          return;
+        }
+
+        const std::string src = createDemoTempPath(_demoNames.current());
+        const std::string dst = createDemoPath(args.empty() ? "demo" : args[0]);
         saveDemoWithRestart(src, dst);
       });
 }
 
-ETJump::AutoDemoRecorder::~AutoDemoRecorder() {
-}
+ETJump::AutoDemoRecorder::~AutoDemoRecorder() {}
 
 void ETJump::AutoDemoRecorder::tryRestart() {
   // no autodemo for specs
-  if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR)
+  if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
     return;
+  }
+
   // start autodemo for timerun maps only
-  if (etj_autoDemo.integer == 1 && !cg.hasTimerun)
+  if (etj_autoDemo.integer == 1 && !cg.hasTimerun) {
     return;
+  }
+
   // don't start autodemo if timeruns are disabled unless autodemo is
   // enabled for all maps
-  if (etj_autoDemo.integer < 2 && !etj_enableTimeruns.integer)
+  if (etj_autoDemo.integer < 2 && !etj_enableTimeruns.integer) {
     return;
+  }
+
   // timeout
-  if (_demo.getStartTime() + DEMO_START_TIMEOUT >= cg.time)
+  if (_demo.getStartTime() + DEMO_START_TIMEOUT >= cg.time) {
     return;
+  }
+
   // dont attempt to restart if in timerun mode
-  if (cgs.clientinfo[cg.clientNum].timerunActive || _delayedTimerId)
+  if (cgs.clientinfo[cg.clientNum].timerunActive || _delayedTimerId) {
     return;
+  }
+
   restart();
 }
 
@@ -157,19 +182,20 @@ void ETJump::AutoDemoRecorder::restart() {
 
 void ETJump::AutoDemoRecorder::trySaveTimerunDemo(const std::string &runName,
                                                   const std::string &runTime) {
-  if (_delayedTimerId)
+  if (_delayedTimerId || !DemoRecorder::recordingAutoDemo()) {
     return;
-  if (!_demo.isRecording())
-    return;
-  auto src = createDemoTempPath(_demoNames.current());
-  auto dst = createTimerunDemoPath(runName, runTime);
+  }
+
+  const std::string src = createDemoTempPath(_demoNames.current());
+  const std::string dst = createTimerunDemoPath(runName, runTime);
   CG_AddPMItem(PM_MESSAGE, "^7Stopping demo...\n", cgs.media.voiceChatShader);
   saveTimerunDemo(src, dst);
 }
 
 void ETJump::AutoDemoRecorder::saveTimerunDemo(const std::string &src,
                                                const std::string &dst) {
-  auto delay = Numeric::clamp(etj_ad_stopDelay.integer, 0, DEMO_MAX_SAVE_DELAY);
+  const int delay =
+      std::clamp(etj_ad_stopDelay.integer, 0, DEMO_MAX_SAVE_DELAY);
   _delayedTimerId =
       setTimeout([&, src, dst] { saveDemoWithRestart(src, dst); }, delay);
 }

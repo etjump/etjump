@@ -15,6 +15,7 @@ menuDef {
     fullscreen 0
     rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
     style WINDOW_STYLE_FILLED
+    centered
 
     onOpen {
         conditionalscript uiCheckBackground 2
@@ -50,28 +51,28 @@ menuDef {
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CGAZ")
     
-        MULTI               (SETTINGS_ITEM_POS(1), "Draw CGaz HUD:", 0.2, SETTINGS_ITEM_H, "etj_drawCGaz", cvarFloatList { "No" 0 "CGaz 1" 1 "CGaz 2" 2 "CGaz 1 and 2" 3 }, "Draw CGaz HUD(s)\netj_drawCGaz")
-        MULTI               (SETTINGS_ITEM_POS(2), "CGaz 1 color 1:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1Color1", COLOR_LIST, "Sets no accel zone color of CGaz 1\netj_CGaz1Color1")
-        MULTI               (SETTINGS_ITEM_POS(3), "CGaz 1 color 2:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1Color2", COLOR_LIST, "Sets min angle color of CGaz 1\netj_CGaz1Color2")
-        MULTI               (SETTINGS_ITEM_POS(4), "CGaz 1 color 3:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1Color3", COLOR_LIST, "Sets accel zone color of CGaz 1\netj_CGaz1Color3")
-        MULTI               (SETTINGS_ITEM_POS(5), "CGaz 1 color 4:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1Color4", COLOR_LIST, "Sets max angle color of CGaz 1\netj_CGaz1Color4")
-        MULTI               (SETTINGS_ITEM_POS(6), "CGaz 2 color 1:", 0.2, SETTINGS_ITEM_H, "etj_CGaz2Color1", COLOR_LIST, "Sets primary color of CGaz 2\netj_CGaz2Color1")
-        MULTI               (SETTINGS_ITEM_POS(7), "CGaz 2 color 2:", 0.2, SETTINGS_ITEM_H, "etj_CGaz2Color2", COLOR_LIST, "Sets secondary color of CGaz 2\netj_CGaz2Color2")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(8), "etj_CGazHeight", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        COMBO_BIT           (SETTINGS_COMBO_POS(1), "Draw CGaz HUD:", 0.2, SETTINGS_ITEM_H, "etj_drawCGaz", cvarFloatList { "CGaz 1" 1 "CGaz 2" 2 }, none, "Draw CGaz HUD(s)\netj_drawCGaz")
+        COMBO               (SETTINGS_COMBO_POS(2), "CGaz 1 color 1:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1Color1", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets no accel zone color of CGaz 1\netj_CGaz1Color1")
+        COMBO               (SETTINGS_COMBO_POS(3), "CGaz 1 color 2:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1Color2", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets min angle color of CGaz 1\netj_CGaz1Color2")
+        COMBO               (SETTINGS_COMBO_POS(4), "CGaz 1 color 3:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1Color3", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets accel zone color of CGaz 1\netj_CGaz1Color3")
+        COMBO               (SETTINGS_COMBO_POS(5), "CGaz 1 color 4:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1Color4", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets max angle color of CGaz 1\netj_CGaz1Color4")
+        COMBO               (SETTINGS_COMBO_POS(6), "CGaz 2 color 1:", 0.2, SETTINGS_ITEM_H, "etj_CGaz2Color1", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets primary color of CGaz 2\netj_CGaz2Color1")
+        COMBO               (SETTINGS_COMBO_POS(7), "CGaz 2 color 2:", 0.2, SETTINGS_ITEM_H, "etj_CGaz2Color2", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets secondary color of CGaz 2\netj_CGaz2Color2")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(8), "etj_CGazHeight", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(8), "CGaz height:", 0.2, SETTINGS_ITEM_H, etj_CGazHeight 20 1 100 1, "Sets height of CGaz 1\netj_CGazHeight")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(9), "etj_CGazY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(9), "etj_CGazY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(9), "CGaz Y position:", 0.2, SETTINGS_ITEM_H, etj_CGazY 260 0 480 10, "Sets Y position of CGaz 1\netj_CGazY")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(10), "etj_CGazFov", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(10), "etj_CGazFov", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(10), "CGaz FOV:", 0.2, SETTINGS_ITEM_H, etj_CGazFov 0 0 179 5, "Sets FOV of CGaz 1, 0 to use your current FOV\netj_CGazFov")
         YESNO               (SETTINGS_ITEM_POS(11), "Stretch CGaz:", 0.2, SETTINGS_ITEM_H, "etj_stretchCgaz", "Stretch CGaz 2 when using widescreen resolution\netj_stretchCgaz")
-        MULTI               (SETTINGS_ITEM_POS(12), "CGaz trueness:", 0.2, SETTINGS_ITEM_H, "etj_CGazTrueness", cvarFloatList { "Off" 0 "Upmove" 1 "Groundzones" 2 "Upmove + Groundzones" 3 }, "Sets trueness of CGaz\netj_CGazTrueness")
+        COMBO_BIT           (SETTINGS_COMBO_POS(12), "CGaz trueness:", 0.2, SETTINGS_ITEM_H, "etj_CGazTrueness", cvarFloatList { "Upmove" 1 "Groundzones" 2 }, none, "Sets trueness of CGaz\netj_CGazTrueness")
         YESNO               (SETTINGS_ITEM_POS(13), "CGaz over Snaphud:", 0.2, SETTINGS_ITEM_H, "etj_CGazOnTop", "Draw CGaz on top of snaphud (vid_restart required)\netj_CGazOnTop")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(14), "etj_CGaz2FixedSpeed", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(14), "etj_CGaz2FixedSpeed", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(14), "CGaz fixed speed:", 0.2, SETTINGS_ITEM_H, etj_CGaz2FixedSpeed 0 0 6500 50, "Fixed speed value to use for drawing CGaz 2 instead of real speed, 0 to disable\netj_CGaz2FixedSpeed")
         MULTI               (SETTINGS_ITEM_POS(15), "Hide velocity direction:", 0.2, SETTINGS_ITEM_H, "etj_CGaz2NoVelocityDir", cvarFloatList { "No" 0 "Always" 1 "When over wishspeed" 2 }, "Hide velocity direction line on CGaz2\netj_CGaz2NoVelocityDir")
         YESNO               (SETTINGS_ITEM_POS(16), "Draw snap zone:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1DrawSnapZone", "Extend minimum angle drawing to the end of current snap zone (CGaz 1 only)\netj_CGaz1DrawSnapZone")
         YESNO               (SETTINGS_ITEM_POS(17), "Uniform wishdir length:", 0.2, SETTINGS_ITEM_H, "etj_CGaz2WishDirUniformLength", "Use uniform length for wishdir line drawing (CGaz 2 only)\netj_CGaz2WishDirUniformLength")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(18), "etj_CGaz2WishDirFixedSpeed", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(18), "etj_CGaz2WishDirFixedSpeed", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(18), "CGaz fixed wishdir speed:", 0.2, SETTINGS_ITEM_H, etj_CGaz2WishDirFixedSpeed 0 0 6500 50, "Fixed speed value to use for drawing CGaz 2 wishdir, 0 to use default\netj_CGaz2WishDirFixedSpeed")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)

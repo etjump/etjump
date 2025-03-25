@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -122,16 +122,16 @@ bool DrawSpeed::beforeRender() {
 
   // need to calculate this every frame because speed string changes
   switch (etj_speedAlign.integer) {
-    case Alignment::Left:
+    case Left:
       w = 0;
       break;
-    case Alignment::Right:
+    case Right:
       w = static_cast<float>(
-          CG_Text_Width_Ext(speedStr, size, 0, &cgs.media.limboFont2));
+          CG_Text_Width_Ext(speedStr, size.x, 0, &cgs.media.limboFont2));
       break;
     default: // center align
       w = static_cast<float>(
-              CG_Text_Width_Ext(speedStr, size, 0, &cgs.media.limboFont2)) *
+              CG_Text_Width_Ext(speedStr, size.x, 0, &cgs.media.limboFont2)) *
           0.5f;
       break;
   }
@@ -146,8 +146,8 @@ void DrawSpeed::render() const {
   vec4_t color;
   Vector4Copy(speedColor, color);
 
-  CG_Text_Paint_Ext(speedX - w, y, size, size, color, speedStr, 0, 0, textStyle,
-                    &cgs.media.limboFont1);
+  CG_Text_Paint_Ext(speedX - w, y, size.x, size.y, color, speedStr, 0, 0,
+                    textStyle, &cgs.media.limboFont1);
 }
 
 void DrawSpeed::resetMaxSpeed() {
@@ -168,7 +168,11 @@ void DrawSpeed::setAccelColorStyle() {
   accelColorStyle = etj_speedColorUsesAccel.integer;
 }
 
-void DrawSpeed::setSize() { size = 0.1f * etj_speedSize.value; }
+void DrawSpeed::setSize() {
+  size = CvarValueParser::parse<CvarValue::Size>(etj_speedSize, 1, 10);
+  size.x *= 0.1f;
+  size.y *= 0.1f;
+}
 
 std::string DrawSpeed::getSpeedString() const {
   switch (etj_drawSpeed2.integer) {

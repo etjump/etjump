@@ -6,20 +6,17 @@
 #include "cg_local.h"
 #include "etj_utilities.h"
 #include "etj_crosshair.h"
-#include "etj_overbounce_shared.h"
-#include "../game/etj_numeric_utilities.h"
-#include "../game/etj_string_utilities.h"
 #include "etj_client_rtv_handler.h"
 #include "etj_demo_compatibility.h"
+#include "etj_cvar_parser.h"
 
-#define STATUSBARHEIGHT 452
+#include "../game/etj_string_utilities.h"
+
 char *BindingFromName(const char *cvar);
 void Controls_GetConfig(void);
 void SetHeadOrigin(clientInfo_t *ci, playerInfo_t *pi);
 void CG_DrawOverlays();
 int activeFont;
-
-#define TEAM_OVERLAY_TIME 1000
 
 ////////////////////////
 ////////////////////////
@@ -254,125 +251,6 @@ void CG_Text_Paint(float x, float y, float scale, vec4_t color,
                     font);
 }
 
-// NERVE - SMF - added back in
-int CG_DrawFieldWidth(int x, int y, int width, int value, int charWidth,
-                      int charHeight) {
-  char num[16], *ptr;
-  int l;
-  int totalwidth = 0;
-
-  if (width < 1) {
-    return 0;
-  }
-
-  // draw number string
-  if (width > 5) {
-    width = 5;
-  }
-
-  switch (width) {
-    case 1:
-      value = value > 9 ? 9 : value;
-      value = value < 0 ? 0 : value;
-      break;
-    case 2:
-      value = value > 99 ? 99 : value;
-      value = value < -9 ? -9 : value;
-      break;
-    case 3:
-      value = value > 999 ? 999 : value;
-      value = value < -99 ? -99 : value;
-      break;
-    case 4:
-      value = value > 9999 ? 9999 : value;
-      value = value < -999 ? -999 : value;
-      break;
-  }
-
-  Com_sprintf(num, sizeof(num), "%i", value);
-  l = strlen(num);
-  if (l > width) {
-    l = width;
-  }
-
-  ptr = num;
-  while (*ptr && l) {
-    totalwidth += charWidth;
-    ptr++;
-    l--;
-  }
-
-  return totalwidth;
-}
-
-int CG_DrawField(int x, int y, int width, int value, int charWidth,
-                 int charHeight, qboolean dodrawpic, qboolean leftAlign) {
-  char num[16], *ptr;
-  int l;
-  int frame;
-  int startx;
-
-  if (width < 1) {
-    return 0;
-  }
-
-  // draw number string
-  if (width > 5) {
-    width = 5;
-  }
-
-  switch (width) {
-    case 1:
-      value = value > 9 ? 9 : value;
-      value = value < 0 ? 0 : value;
-      break;
-    case 2:
-      value = value > 99 ? 99 : value;
-      value = value < -9 ? -9 : value;
-      break;
-    case 3:
-      value = value > 999 ? 999 : value;
-      value = value < -99 ? -99 : value;
-      break;
-    case 4:
-      value = value > 9999 ? 9999 : value;
-      value = value < -999 ? -999 : value;
-      break;
-  }
-
-  Com_sprintf(num, sizeof(num), "%i", value);
-  l = strlen(num);
-  if (l > width) {
-    l = width;
-  }
-
-  // NERVE - SMF
-  if (!leftAlign) {
-    x -= 2 + charWidth * (l);
-  }
-
-  startx = x;
-
-  ptr = num;
-  while (*ptr && l) {
-    if (*ptr == '-') {
-      frame = STAT_MINUS;
-    } else {
-      frame = *ptr - '0';
-    }
-
-    if (dodrawpic) {
-      CG_DrawPic(x, y, charWidth, charHeight, cgs.media.numberShaders[frame]);
-    }
-    x += charWidth;
-    ptr++;
-    l--;
-  }
-
-  return startx;
-}
-// -NERVE - SMF
-
 /*
 ================
 CG_Draw3DModel
@@ -480,9 +358,9 @@ void CG_DrawTeamBackground(int x, int y, int w, int h, float alpha, int team) {
 ===========================================================================================
 */
 
-#define CHATLOC_X 160
-#define CHATLOC_Y 478
-#define CHATLOC_TEXT_X (CHATLOC_X + 0.25f * TINYCHAR_WIDTH)
+inline constexpr float CHATLOC_X = 160.0f;
+inline constexpr float CHATLOC_Y = 478.0f;
+inline constexpr float CHATLOC_TEXT_X = CHATLOC_X + 0.25f * TINYCHAR_WIDTH;
 
 // Calculate chat background width based on etj_chatWidth value
 float calcBackgroundWidth(int maxChars, float fontScale, fontInfo_t *font) {
@@ -494,23 +372,20 @@ float calcBackgroundWidth(int maxChars, float fontScale, fontInfo_t *font) {
 CG_DrawTeamInfo
 =================
 */
-static void CG_DrawTeamInfo(void) {
-  int w;
-  int i, len;
-  vec4_t hcolor;
-  float alphapercent, chatbgalpha;
-  float chatScale = Numeric::clamp(etj_chatScale.value, 0, 5);
-  float fontSize = 0.2f;
-  float fontSizeScaled = chatScale * fontSize;
-  float lineHeight = 9.0f * chatScale;
-  qhandle_t flag;
-  int maxLineLength =
-      Numeric::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
-  int chatWidth = calcBackgroundWidth(maxLineLength, fontSizeScaled,
-                                      &cgs.media.limboFont2) +
-                  5;
-  int chatHeight =
-      Numeric::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
+static void CG_DrawTeamInfo() {
+  const auto scale = ETJump::CvarValueParser::parse<ETJump::CvarValue::Scale>(
+      etj_chatScale, 0, 5);
+  const float fontSizeX = 0.2f * scale.x;
+  const float fontSizeY = 0.2f * scale.y;
+  const float lineHeight = 9.0f * scale.y;
+
+  const int maxLineLength =
+      std::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
+  const auto chatWidth = static_cast<int>(
+      calcBackgroundWidth(maxLineLength, fontSizeX, &cgs.media.limboFont2) + 5);
+  const int chatHeight =
+      std::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
+
   int textStyle = ITEM_TEXTSTYLE_NORMAL;
   float textAlpha = etj_chatAlpha.value;
 
@@ -528,35 +403,43 @@ static void CG_DrawTeamInfo(void) {
   }
 
   if (cgs.teamLastChatPos != cgs.teamChatPos) {
+    vec4_t hcolor;
+    int i;
+    qhandle_t flag;
+
     if (cg.time - cgs.teamChatMsgTimes[cgs.teamLastChatPos % chatHeight] >
         cg_teamChatTime.integer) {
       cgs.teamLastChatPos++;
     }
 
-    w = 0;
+    int w = 0;
 
     for (i = cgs.teamLastChatPos; i < cgs.teamChatPos; i++) {
-      len = CG_Text_Width_Ext(cgs.teamChatMsgs[i % chatHeight], fontSizeScaled,
-                              0, &cgs.media.limboFont2);
+      const int len = CG_Text_Width_Ext(cgs.teamChatMsgs[i % chatHeight],
+                                        fontSizeX, 0, &cgs.media.limboFont2);
       if (len > w) {
         w = len;
       }
     }
+
     w *= TINYCHAR_WIDTH;
     w += TINYCHAR_WIDTH * 2;
 
     for (i = cgs.teamChatPos - 1; i >= cgs.teamLastChatPos; i--) {
       auto linePosX = CHATLOC_TEXT_X + etj_chatPosX.value;
-      auto linePosY = CHATLOC_Y + etj_chatPosY.value -
-                      (cgs.teamChatPos - i - 1) * lineHeight - 1;
+      const auto linePosY =
+          CHATLOC_Y + etj_chatPosY.value -
+          static_cast<float>(cgs.teamChatPos - i - 1) * lineHeight - 1;
 
       if (linePosY <= 0 || linePosY >= 480 + lineHeight) {
         continue;
       }
 
-      alphapercent = 1.0f - (cg.time - cgs.teamChatMsgTimes[i % chatHeight]) /
-                                (float)(cg_teamChatTime.integer);
-      alphapercent = Numeric::clamp(alphapercent, 0.0f, 1.0f);
+      const float alphapercent = std::clamp(
+          1.0f - static_cast<float>(cg.time -
+                                    cgs.teamChatMsgTimes[i % chatHeight]) /
+                     static_cast<float>(cg_teamChatTime.integer),
+          0.0f, 1.0f);
 
       if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_AXIS) {
         hcolor[0] = 1;
@@ -572,22 +455,23 @@ static void CG_DrawTeamInfo(void) {
         hcolor[2] = 0;
       }
 
-      chatbgalpha = Numeric::clamp(etj_chatBackgroundAlpha.value, 0.0f, 1.0f);
+      const float chatbgalpha =
+          std::clamp(etj_chatBackgroundAlpha.value, 0.0f, 1.0f);
 
       hcolor[3] = chatbgalpha * alphapercent;
 
       trap_R_SetColor(hcolor);
       CG_DrawPic(CHATLOC_X + etj_chatPosX.value,
                  CHATLOC_Y + etj_chatPosY.value -
-                     (cgs.teamChatPos - i) * lineHeight,
-                 chatWidth, lineHeight, cgs.media.teamStatusBar);
+                     static_cast<float>(cgs.teamChatPos - i) * lineHeight,
+                 static_cast<float>(chatWidth), lineHeight,
+                 cgs.media.teamStatusBar);
 
       hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
       hcolor[3] = alphapercent * textAlpha;
       trap_R_SetColor(hcolor);
 
       if (etj_chatFlags.integer) {
-
         if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_AXIS) {
           flag = cgs.media.axisFlag;
         } else if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_ALLIES) {
@@ -595,20 +479,21 @@ static void CG_DrawTeamInfo(void) {
         } else {
           flag = 0;
         }
+
         if (flag) {
-          float flagScaleX = 12.0f * chatScale;
-          float flagScaleY = 9.0f * chatScale;
-          float flagPosX =
-              (CHATLOC_TEXT_X + etj_chatPosX.value) - (13 * chatScale);
-          float flagPosY = (CHATLOC_Y + etj_chatPosY.value -
-                            (cgs.teamChatPos - i - 1) * lineHeight) -
-                           (9 * chatScale);
+          const float flagScaleX = 12.0f * scale.x;
+          const float flagScaleY = 9.0f * scale.y;
+          const float flagPosX =
+              CHATLOC_TEXT_X + etj_chatPosX.value - 13 * scale.x;
+          const float flagPosY =
+              CHATLOC_Y + etj_chatPosY.value -
+              static_cast<float>(cgs.teamChatPos - i - 1) * lineHeight -
+              9 * scale.y;
           CG_DrawPic(flagPosX, flagPosY, flagScaleX, flagScaleY, flag);
         }
       }
 
-      CG_Text_Paint_Ext(linePosX, linePosY - 0.5, fontSizeScaled,
-                        fontSizeScaled, hcolor,
+      CG_Text_Paint_Ext(linePosX, linePosY - 0.5f, fontSizeX, fontSizeY, hcolor,
                         cgs.teamChatMsgs[i % chatHeight], 0, 0, textStyle,
                         &cgs.media.limboFont2);
     }
@@ -652,8 +537,8 @@ LAGOMETER
 */
 
 // lagometer sample count, enough for ~5ms server frame intervals
-static constexpr int LAG_SAMPLES = 1024;
-static constexpr int LAG_PERIOD = 5000;
+inline constexpr int LAG_SAMPLES = 1024;
+inline constexpr int LAG_PERIOD = 5000;
 
 struct sample_t {
   int elapsed;
@@ -805,7 +690,7 @@ static void CG_DrawDisconnect(void) {
   }
 
   // draw the phone jack if we are completely past our buffers
-  cmdNum = trap_GetCurrentCmdNumber() - CMD_BACKUP + 1;
+  cmdNum = trap_GetCurrentCmdNumber() - cg.cmdBackup + 1;
   trap_GetUserCmd(cmdNum, &cmd);
   if (cmd.serverTime <= cg.snap->ps.commandTime ||
       cmd.serverTime > cg.time) // special check for map_restart // bk
@@ -830,8 +715,8 @@ static void CG_DrawDisconnect(void) {
   CG_DrawPic(x, y, 48, 48, cgs.media.disconnectIcon);
 }
 
-#define MAX_LAGOMETER_PING 900
-#define MAX_LAGOMETER_RANGE 300
+inline constexpr int MAX_LAGOMETER_PING = 900;
+inline constexpr int MAX_LAGOMETER_RANGE = 300;
 
 /*
 ==============
@@ -856,7 +741,7 @@ static void CG_DrawLagometer() {
   x = SCREEN_WIDTH - 48 + ETJump_AdjustPosition(etj_lagometerX.value);
   y = 480 - 200 + etj_lagometerY.value;
 
-  const float alpha = Numeric::clamp(etj_lagometerAlpha.value, 0.0f, 1.0f);
+  const float alpha = std::clamp(etj_lagometerAlpha.value, 0.0f, 1.0f);
 
   if (etj_lagometerShader.integer) {
     vec4_t mainColor;
@@ -1000,8 +885,8 @@ for a few moments
 ==============
 */
 
-#define BP_LINEWIDTH 80
-#define BP_TIME 10000
+inline constexpr int BP_LINEWIDTH = 80;
+inline constexpr int BP_TIME = 10000;
 
 void CG_BannerPrint(const char *str) {
   char buff[MAX_STRING_CHARS];
@@ -1161,6 +1046,34 @@ CENTER PRINTING
 ===============================================================================
 */
 
+namespace ETJump {
+void logCenterPrint() {
+  std::string msg = cg.centerPrint;
+
+  // we don't want newlines in the console
+  // this is called before center print gets automatically word wrapped
+  // to fit on screen properly, so it's fairly safe to assume that
+  // explicit newlines should be replaced with whitespace
+  StringUtil::replaceAll(msg, "\n", " ");
+
+  // it's possible to send an empty center print/only whitespace to "clear"
+  // whatever is being displayed, but we don't want to log that obviously
+  if (msg.empty() || std::all_of(msg.begin(), msg.end(),
+                                 [](const char c) { return isspace(c); })) {
+    return;
+  }
+
+  // don't log consecutive messages that are being re-triggered
+  if (cg.time + cg_centertime.integer * 1000 > cg.lastCenterPrintLogTime &&
+      Q_stricmp(msg.c_str(), cg.lastLoggedCenterPrint)) {
+    cg.lastCenterPrintLogTime = cg.time;
+    Q_strncpyz(cg.lastLoggedCenterPrint, msg.c_str(),
+               sizeof(cg.lastLoggedCenterPrint));
+    CG_Printf("%s\n", msg.c_str());
+  }
+}
+}
+
 /*
 ==============
 CG_CenterPrint
@@ -1169,9 +1082,10 @@ Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
 */
-#define CP_LINEWIDTH 56 // NERVE - SMF
+inline constexpr int CP_LINEWIDTH = 56; // NERVE - SMF
 
-void CG_CenterPrint(const char *str, int y, int charWidth) {
+void CG_CenterPrint(const char *str, const int y, const int charWidth,
+                    const bool log) {
   char *s;
   int i, len;                    // NERVE - SMF
   qboolean neednewline = qfalse; // NERVE - SMF
@@ -1184,6 +1098,10 @@ void CG_CenterPrint(const char *str, int y, int charWidth) {
 
   Q_strncpyz(cg.centerPrint, str, sizeof(cg.centerPrint));
   cg.centerPrintPriority = priority; // NERVE - SMF
+
+  if (log && etj_logCenterPrint.integer) {
+    ETJump::logCenterPrint();
+  }
 
   // NERVE - SMF - turn spaces into newlines, if we've run over the
   // linewidth
@@ -1226,8 +1144,8 @@ Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
 */
-void CG_PriorityCenterPrint(const char *str, int y, int charWidth,
-                            int priority) {
+void CG_PriorityCenterPrint(const char *str, const int y, const int charWidth,
+                            const int priority, const bool log) {
   char *s;
   int i, len;                    // NERVE - SMF
   qboolean neednewline = qfalse; // NERVE - SMF
@@ -1239,6 +1157,10 @@ void CG_PriorityCenterPrint(const char *str, int y, int charWidth,
 
   Q_strncpyz(cg.centerPrint, str, sizeof(cg.centerPrint));
   cg.centerPrintPriority = priority; // NERVE - SMF
+
+  if (log && etj_logCenterPrint.integer) {
+    ETJump::logCenterPrint();
+  }
 
   // NERVE - SMF - turn spaces into newlines, if we've run over the
   // linewidth
@@ -1292,6 +1214,10 @@ static void CG_DrawCenterString(void) {
   if (!color) {
     cg.centerPrintTime = 0;
     cg.centerPrintPriority = 0;
+
+    // center print has faded, clear last logged message
+    // to allow same message to be re-logged
+    memset(cg.lastLoggedCenterPrint, 0, sizeof(cg.lastLoggedCenterPrint));
     return;
   }
 
@@ -1989,13 +1915,25 @@ static float CG_ScanForCrosshairEntity(float *zChange, qboolean *hitClient) {
   return dist;
 }
 
-#define CH_KNIFE_DIST 48 // from g_weapon.c
-#define CH_LADDER_DIST 100
-#define CH_WATER_DIST 100
-#define CH_BREAKABLE_DIST 64
-#define CH_DOOR_DIST 96
+namespace ETJump {
+void cursorhintTrace(trace_t *trace, vec3_t start, vec3_t end) {
+  CG_Trace(trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
+           MASK_PLAYERSOLID);
 
-#define CH_DIST 100 // 128		// use the largest value from above
+  if (trace->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (trace->entityNum < MAX_CLIENTS &&
+         !playerIsSolid(cg.snap->ps.clientNum, trace->entityNum)) {
+    tempTraceIgnoreClient(trace->entityNum);
+    CG_Trace(trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
+             MASK_PLAYERSOLID);
+  }
+
+  resetTempTraceIgnoredClients();
+}
+} // namespace ETJump
 
 /*
 ==============
@@ -2003,20 +1941,16 @@ CG_CheckForCursorHints
     concept in progress...
 ==============
 */
-void CG_CheckForCursorHints(void) {
+void CG_CheckForCursorHints() {
   trace_t trace;
   vec3_t start, end;
-  centity_t *tracent;
-  vec3_t pforward, eforward;
-  float dist;
 
   if (cg.renderingThirdPerson) {
     return;
   }
 
-  if (cg.snap->ps.serverCursorHint) // server is dictating a cursor
-                                    // hint, use it.
-  {
+  // server is dictating a cursor hint, use it.
+  if (cg.snap->ps.serverCursorHint) {
     cg.cursorHintTime = cg.time;
     cg.cursorHintFade = 500; // fade out time
     cg.cursorHintIcon = cg.snap->ps.serverCursorHint;
@@ -2033,16 +1967,14 @@ void CG_CheckForCursorHints(void) {
   VectorCopy(cg.refdef_current->vieworg, start);
   VectorMA(start, CH_DIST, cg.refdef_current->viewaxis[0], end);
 
-  CG_Trace(&trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
-           MASK_PLAYERSOLID);
+  ETJump::cursorhintTrace(&trace, start, end);
 
   if (trace.fraction == 1.0f) {
     return;
   }
 
-  dist = trace.fraction * CH_DIST;
-
-  tracent = &cg_entities[trace.entityNum];
+  const float dist = trace.fraction * CH_DIST;
+  const centity_t *tracent = &cg_entities[trace.entityNum];
 
   // Arnout: invisible entities don't show hints
   if (trace.entityNum >= MAX_CLIENTS &&
@@ -2051,11 +1983,9 @@ void CG_CheckForCursorHints(void) {
     return;
   }
 
-  //
   // world
-  //
   if (trace.entityNum == ENTITYNUM_WORLD) {
-    if ((trace.surfaceFlags & SURF_LADDER) &&
+    if (trace.surfaceFlags & SURF_LADDER &&
         !(cg.snap->ps.pm_flags & PMF_LADDER)) {
       if (dist <= CH_LADDER_DIST) {
         cg.cursorHintIcon = HINT_LADDER;
@@ -2064,31 +1994,37 @@ void CG_CheckForCursorHints(void) {
         cg.cursorHintValue = 0;
       }
     }
+  }
 
-  } else if (trace.entityNum < MAX_CLIENTS) // people
-  {                                         // knife
-    if (trace.entityNum < MAX_CLIENTS && (cg.snap->ps.weapon == WP_KNIFE)) {
-      if (dist <= CH_KNIFE_DIST) {
+  // for players, we only care about knife for backstab hint
+  if (trace.entityNum >= MAX_CLIENTS || cg.snap->ps.weapon != WP_KNIFE) {
+    return;
+  }
 
-        AngleVectors(cg.snap->ps.viewangles, pforward, NULL, NULL);
-        AngleVectors(tracent->lerpAngles, eforward, NULL, NULL);
+  // too far
+  if (dist > CH_KNIFE_DIST) {
+    return;
+  }
 
-        if (DotProduct(eforward, pforward) > 0.6f) // from behind(-ish)
-        {
-          cg.cursorHintIcon = HINT_KNIFE;
-          cg.cursorHintTime = cg.time;
-          cg.cursorHintFade = 100;
-          cg.cursorHintValue = 0;
-        }
-      }
-    }
+  vec3_t eforward;
+  vec3_t pforward;
+
+  AngleVectors(cg.snap->ps.viewangles, pforward, nullptr, nullptr);
+  AngleVectors(tracent->lerpAngles, eforward, nullptr, nullptr);
+
+  // from behind(-ish)
+  if (DotProduct(eforward, pforward) > 0.6f) {
+    cg.cursorHintIcon = HINT_KNIFE;
+    cg.cursorHintTime = cg.time;
+    cg.cursorHintFade = 100;
+    cg.cursorHintValue = 0;
   }
 }
 
 static void CG_DrawMoverHealthBar(float frac, const vec4_t color) {
   vec4_t bgcolor;
   vec4_t c;
-  float barFrac = Numeric::clamp(frac, 0, 1.0);
+  const float barFrac = std::clamp(frac, 0.0f, 1.0f);
 
   c[0] = 1.0f;
   c[1] = c[2] = barFrac;
@@ -2099,7 +2035,7 @@ static void CG_DrawMoverHealthBar(float frac, const vec4_t color) {
                barFrac, FilledBarFlags::BAR_BG);
 }
 
-static void CG_DrawPlyerName(vec4_t color) {
+static void CG_DrawPlayerName(vec4_t color) {
   const char *s = va("%s", cgs.clientinfo[cg.crosshairClientNum].name);
   float w = ETJump::DrawStringWidth(s, 0.23f);
 
@@ -2113,7 +2049,11 @@ static void CG_DrawPlyerName(vec4_t color) {
 CG_DrawCrosshairNames
 =====================
 */
-static void CG_DrawCrosshairNames(void) {
+static void CG_DrawCrosshairNames() {
+  if (!cg_drawCrosshairNames.integer) {
+    return;
+  }
+
   if (cg.renderingThirdPerson || cg_drawCrosshair.integer < 0) {
     return;
   }
@@ -2142,10 +2082,6 @@ static void CG_DrawCrosshairNames(void) {
 
   // NERVE - SMF
   if (cg.crosshairClientNum >= MAX_CLIENTS) {
-    if (!cg_drawCrosshairNames.integer) {
-      return;
-    }
-
     if (cg_entities[cg.crosshairClientNum].currentState.eType == ET_MOVER &&
         cg_entities[cg.crosshairClientNum].currentState.effect1Time) {
       isMover = qtrue;
@@ -2183,16 +2119,19 @@ static void CG_DrawCrosshairNames(void) {
   if (isMover) {
     CG_DrawMoverHealthBar(playerHealth / maxHealth, color);
   } else {
-    if ((etj_hide.integer == 1 && dist < etj_hideDistance.integer) ||
-        etj_hide.integer == 2) {
-      return;
-    }
-    if (!cg_drawCrosshairNames.integer ||
-        cgs.clientinfo[cg.crosshairClientNum].hideMe) {
-      return;
-    }
+    // fireteam noghost ignores etj_hide/etj_hideDistance, so always draw names
+    if (CG_IsOnSameFireteam(cg.snap->ps.clientNum, cg.crosshairClientNum) &&
+        cgs.clientinfo[cg.snap->ps.clientNum].fireteamData->noGhost) {
+      CG_DrawPlayerName(color);
+    } else {
+      if ((etj_hide.integer == 1 && dist < etj_hideDistance.integer) ||
+          etj_hide.integer == 2 ||
+          cgs.clientinfo[cg.crosshairClientNum].hideMe) {
+        return;
+      }
 
-    CG_DrawPlyerName(color);
+      CG_DrawPlayerName(color);
+    }
   }
 }
 
@@ -2244,9 +2183,7 @@ static void CG_DrawVote() {
                              cgs.clientinfo[cgs.applicationClient].name);
     line_b =
         ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
-  }
-
-  if (cgs.propositionEndTime > cg.time && cgs.propositionClient >= 0) {
+  } else if (cgs.propositionEndTime > cg.time && cgs.propositionClient >= 0) {
     line_a = ETJump::stringFormat(
         "Accept %s's proposition to invite %s to join your "
         "fireteam?",
@@ -2254,17 +2191,13 @@ static void CG_DrawVote() {
         cgs.clientinfo[cgs.propositionClient].name);
     line_b =
         ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
-  }
-
-  if (cgs.invitationEndTime > cg.time && cgs.invitationClient >= 0) {
+  } else if (cgs.invitationEndTime > cg.time && cgs.invitationClient >= 0) {
     line_a =
         ETJump::stringFormat("Accept %s's invitation to join their fireteam?",
                              cgs.clientinfo[cgs.invitationClient].name);
     line_b =
         ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
-  }
-
-  if (cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -1) {
+  } else if (cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -1) {
     // make sure we're still on the fireteam before displaying
     // this prompt
     if (CG_IsOnFireteam(cg.clientNum)) {
@@ -2276,9 +2209,7 @@ static void CG_DrawVote() {
     else {
       cgs.autoFireteamEndTime = cg.time;
     }
-  }
-
-  if (cgs.voteTime) {
+  } else if (cgs.voteTime) {
     // play a talk beep whenever it is modified
     if (cgs.voteModified) {
       cgs.voteModified = qfalse;
@@ -2374,9 +2305,7 @@ static void CG_DrawVote() {
         }
       }
     }
-  }
-
-  if (cgs.applicationEndTime > cg.time && cgs.applicationClient < 0) {
+  } else if (cgs.applicationEndTime > cg.time && cgs.applicationClient < 0) {
     switch (cgs.applicationClient) {
       case -1:
         line_a = "Your application has been "
@@ -2394,9 +2323,7 @@ static void CG_DrawVote() {
                  "been sent";
         break;
     }
-  }
-
-  if (cgs.propositionEndTime > cg.time && cgs.propositionClient < 0) {
+  } else if (cgs.propositionEndTime > cg.time && cgs.propositionClient < 0) {
     switch (cgs.propositionClient) {
       case -1:
         line_a = "Your proposition has been "
@@ -2413,9 +2340,7 @@ static void CG_DrawVote() {
                  "been sent";
         break;
     }
-  }
-
-  if (cgs.invitationEndTime > cg.time && cgs.invitationClient < 0) {
+  } else if (cgs.invitationEndTime > cg.time && cgs.invitationClient < 0) {
     switch (cgs.invitationClient) {
       case -1:
         line_a = "Your invitation has been "
@@ -2432,13 +2357,11 @@ static void CG_DrawVote() {
                  "been sent";
         break;
     }
-  }
-
-  if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) ||
-      (cgs.autoFireteamCreateEndTime > cg.time &&
-       cgs.autoFireteamCreateNum == -2) ||
-      (cgs.autoFireteamJoinEndTime > cg.time &&
-       cgs.autoFireteamJoinNum == -2)) {
+  } else if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) ||
+             (cgs.autoFireteamCreateEndTime > cg.time &&
+              cgs.autoFireteamCreateNum == -2) ||
+             (cgs.autoFireteamJoinEndTime > cg.time &&
+              cgs.autoFireteamJoinNum == -2)) {
     line_a = "Response Sent";
   }
 
@@ -2546,7 +2469,7 @@ static void CG_DrawSpectatorMessage(void) {
     return;
   }
 
-  if (trap_Key_GetCatcher() & KEYCATCH_UI) {
+  if (trap_Key_GetCatcher() & KEYCATCH_UI && !cg.chatMenuOpen) {
     return;
   }
 
@@ -2611,7 +2534,7 @@ CG_DrawLimboMessage
 =================
 */
 
-#define INFOTEXT_STARTX 8
+inline constexpr float INFOTEXT_STARTX = 8.0f;
 
 static void CG_DrawLimboMessage(void) {
   float color[4] = {1, 1, 1, 1};
@@ -2632,27 +2555,29 @@ static void CG_DrawLimboMessage(void) {
     return;
   }
 
-  if (trap_Key_GetCatcher() & KEYCATCH_UI) {
+  if (trap_Key_GetCatcher() & KEYCATCH_UI && !cg.chatMenuOpen) {
     return;
   }
 
-  if (cg_descriptiveText.integer) {
-    str = "You are wounded and waiting for a medic.";
-    ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
-                       str.c_str(), 0, 0);
-    y += 18;
-
-    str = "Press JUMP to go into reinforcement queue.";
-    ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
-                       str.c_str(), 0, 0);
-    y += 18;
-
-    // JPW NERVE
-    str = "Reinforcements deploy in " +
-          ETJump::getSecondsString(CG_CalculateReinfTime(qfalse)) + ".";
-    ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
-                       str.c_str(), 0, 0);
+  if (!cg_descriptiveText.integer) {
+    return;
   }
+
+  str = "You are wounded and waiting for a medic.";
+  ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
+                     str.c_str(), 0, 0);
+  y += 18;
+
+  str = "Press JUMP to go into reinforcement queue.";
+  ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
+                     str.c_str(), 0, 0);
+  y += 18;
+
+  // JPW NERVE
+  str = "Reinforcements deploy in " +
+        ETJump::getSecondsString(CG_CalculateReinfTime(qfalse)) + ".";
+  ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
+                     str.c_str(), 0, 0);
 }
 // -NERVE - SMF
 
@@ -2675,7 +2600,7 @@ static void CG_DrawSlick(void) {
   ETJump_AdjustPosition(&x);
 
   VectorCopy(cg.refdef.vieworg, start);
-  VectorMA(start, 8192, cg.refdef.viewaxis[0], end);
+  VectorMA(start, MAX_MAP_SIZE * 2, cg.refdef.viewaxis[0], end);
 
   CG_Trace(&trace, start, NULL, NULL, end, ps->clientNum, traceContents);
 
@@ -2703,7 +2628,7 @@ static void CG_DrawJumpDelay(void) {
 
   ETJump_AdjustPosition(&x);
   VectorCopy(cg.refdef.vieworg, start);
-  VectorMA(start, 8192, cg.refdef.viewaxis[0], end);
+  VectorMA(start, MAX_MAP_SIZE * 2, cg.refdef.viewaxis[0], end);
 
   CG_Trace(&trace, start, nullptr, nullptr, end, ps->clientNum, traceContents);
 
@@ -2723,28 +2648,28 @@ static void CG_DrawJumpDelay(void) {
 CG_DrawFollow
 =================
 */
-static qboolean CG_DrawFollow(void) {
+static void CG_DrawFollow() {
   // MV following info for mainview
   if (CG_ViewingDraw()) {
-    return (qtrue);
+    return;
   }
 
   if (!(cg.snap->ps.pm_flags & PMF_FOLLOW)) {
-    return (qfalse);
+    return;
   }
 
-  if (trap_Key_GetCatcher() & KEYCATCH_UI) {
-    return qfalse;
+  if (trap_Key_GetCatcher() & KEYCATCH_UI && !cg.chatMenuOpen) {
+    return;
   }
 
-  if (cg.snap->ps.clientNum != cg.clientNum) {
-    std::string str = ETJump::stringFormat(
-        "^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name);
-    ETJump::DrawString(INFOTEXT_STARTX, 118 + 12, 0.23f, 0.25f, colorWhite,
-                       qfalse, str.c_str(), 0, ITEM_TEXTSTYLE_SHADOWED);
+  if (cg.snap->ps.clientNum == cg.clientNum) {
+    return;
   }
 
-  return (qtrue);
+  const std::string str = ETJump::stringFormat(
+      "^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name);
+  ETJump::DrawString(INFOTEXT_STARTX, 118 + 12, 0.23f, 0.25f, colorWhite,
+                     qfalse, str.c_str(), 0, ITEM_TEXTSTYLE_SHADOWED);
 }
 
 /*
@@ -3058,8 +2983,7 @@ static void CG_DrawFlashBlend(void) {
 CG_DrawObjectiveInfo
 =================
 */
-#define OID_LEFT 10
-#define OID_TOP 360
+inline constexpr int OID_TOP = 360;
 
 void CG_ObjectivePrint(const char *str, int charWidth) {
   char *s;
@@ -3113,10 +3037,6 @@ static void CG_DrawObjectiveInfo(void) {
   int x1, y1, x2, y2;
   float *color;
   vec4_t backColor;
-  backColor[0] = 0.2f;
-  backColor[1] = 0.2f;
-  backColor[2] = 0.2f;
-  backColor[2] = 1.f;
 
   if (!cg.oidPrintTime) {
     return;
@@ -3369,7 +3289,9 @@ void CG_DrawCompassIcon(float x, float y, float w, float h, vec3_t origin,
   x += w;
   y += h;
 
-  { w = sqrt((w * w) + (h * h)) / 3.f * 2.f * 0.9f; }
+  {
+    w = sqrt((w * w) + (h * h)) / 3.f * 2.f * 0.9f;
+  }
 
   x = x + (cos(angle) * w);
   y = y + (sin(angle) * w);
@@ -3766,9 +3688,6 @@ int CG_PlayerAmmoValue(int *ammo, int *clips, int *akimboammo) {
   return weap;
 }
 
-#define HEAD_TURNTIME 10000
-#define HEAD_TURNANGLE 20
-#define HEAD_PITCHANGLE 2.5
 static void CG_DrawPlayerStatusHead(void) {
   hudHeadAnimNumber_t anim;
   rectDef_t headRect = {44, 480 - 92, 62, 80};
@@ -4097,23 +4016,26 @@ static void CG_DrawSkillBar(float x, float y, float w, float h, int skill) {
   }
 }
 
-#define SKILL_ICON_SIZE 14
+inline constexpr float SKILL_ICON_SIZE = 14.0f;
 
-#define SKILLS_X 112
-#define SKILLS_Y 20
+inline constexpr float SKILLS_X = 112.0f;
+inline constexpr float SKILLS_Y = 20.0f;
 
-#define SKILL_BAR_OFFSET (2 * SKILL_BAR_X_INDENT)
-#define SKILL_BAR_X_INDENT 0
-#define SKILL_BAR_Y_INDENT 6
+inline constexpr float SKILL_BAR_X_INDENT = 0.0f;
+inline constexpr float SKILL_BAR_Y_INDENT = 6.0f;
+inline constexpr float SKILL_BAR_OFFSET = 2 * SKILL_BAR_X_INDENT;
 
-#define SKILL_BAR_WIDTH (SKILL_ICON_SIZE - SKILL_BAR_OFFSET)
-#define SKILL_BAR_X (SKILL_BAR_OFFSET + SKILL_BAR_X_INDENT + SKILLS_X)
-#define SKILL_BAR_X_SCALE (SKILL_ICON_SIZE + 2)
-#define SKILL_ICON_X (SKILL_BAR_OFFSET + SKILLS_X)
-#define SKILL_ICON_X_SCALE (SKILL_ICON_SIZE + 2)
-#define SKILL_BAR_Y (SKILL_BAR_Y_INDENT - SKILL_BAR_OFFSET - SKILLS_Y)
-#define SKILL_BAR_Y_SCALE (SKILL_ICON_SIZE + 2)
-#define SKILL_ICON_Y (-(SKILL_ICON_SIZE + 2) - SKILL_BAR_OFFSET - SKILLS_Y)
+inline constexpr float SKILL_BAR_WIDTH = SKILL_ICON_SIZE - SKILL_BAR_OFFSET;
+inline constexpr float SKILL_BAR_X =
+    SKILL_BAR_OFFSET + SKILL_BAR_X_INDENT + SKILLS_X;
+inline constexpr float SKILL_BAR_X_SCALE = SKILL_ICON_SIZE + 2;
+inline constexpr float SKILL_ICON_X = SKILL_BAR_OFFSET + SKILLS_X;
+inline constexpr float SKILL_ICON_X_SCALE = SKILL_ICON_SIZE + 2;
+inline constexpr float SKILL_BAR_Y =
+    SKILL_BAR_Y_INDENT - SKILL_BAR_OFFSET - SKILLS_Y;
+inline constexpr float SKILL_BAR_Y_SCALE = SKILL_ICON_SIZE + 2;
+inline constexpr float SKILL_ICON_Y =
+    -(SKILL_ICON_SIZE + 2) - SKILL_BAR_OFFSET - SKILLS_Y;
 
 skillType_t CG_ClassSkillForPosition(clientInfo_t *ci, int pos) {
   switch (pos) {
@@ -4277,37 +4199,36 @@ static void CG_DrawStatsDebug(void) {
 }
 
 // bani
-void CG_DrawDemoRecording(void) {
-  char status[1024];
-  char demostatus[128];
-  char wavestatus[128];
-
+void CG_DrawDemoRecording() {
   if (!cl_demorecording.integer && !cl_waverecording.integer) {
     return;
   }
 
-  if (!cg_recording_statusline.integer) {
+  if (!etj_drawRecordingStatus.integer) {
     return;
   }
 
+  std::string demoStatus;
+  std::string waveStatus;
+
   if (cl_demorecording.integer) {
-    Com_sprintf(demostatus, sizeof(demostatus), " demo %s: %ik ",
-                cl_demofilename.string, cl_demooffset.integer / 1024);
-  } else {
-    strncpy(demostatus, "", sizeof(demostatus));
+    demoStatus = ETJump::stringFormat(" demo %s: %ik ", cl_demofilename.string,
+                                      cl_demooffset.integer / 1024);
   }
 
   if (cl_waverecording.integer) {
-    Com_sprintf(wavestatus, sizeof(demostatus), " audio %s: %ik ",
-                cl_wavefilename.string, cl_waveoffset.integer / 1024);
-  } else {
-    strncpy(wavestatus, "", sizeof(wavestatus));
+    waveStatus = ETJump::stringFormat(" audio: %s %ik ", cl_wavefilename.string,
+                                      cl_waveoffset.integer / 1024);
   }
 
-  Com_sprintf(status, sizeof(status), "RECORDING%s%s", demostatus, wavestatus);
+  const std::string status =
+      ETJump::stringFormat("RECORDING%s%s", demoStatus, waveStatus);
 
-  CG_Text_Paint_Ext(5, cg_recording_statusline.integer, 0.2f, 0.2f, colorWhite,
-                    status, 0, 0, 0, &cgs.media.limboFont2);
+  const float x = ETJump_AdjustPosition(etj_recordingStatusX.value);
+  const float y = etj_recordingStatusY.value;
+
+  CG_Text_Paint_Ext(x, y, 0.2f, 0.2f, colorWhite, status, 0, 0,
+                    ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
 }
 
 /*
@@ -4344,10 +4265,13 @@ static void CG_Draw2D() {
 
     // crosshair is the only renderable that should be drawn here
     for (const auto &r : ETJump::renderables) {
-      if (auto crosshair = std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
+      if (const auto &crosshair =
+              std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
         if (crosshair->beforeRender()) {
           crosshair->render();
         }
+
+        break;
       }
     }
     CG_DrawFlashFade();
@@ -4591,10 +4515,7 @@ void CG_DrawMiscGamemodels() {
 }
 
 void CG_DrawCoronas() {
-  static bool clientSideCoronas =
-      ETJump::demoCompatibility->isCompatible({3, 2, 0});
-
-  if (cg.demoPlayback && !clientSideCoronas) {
+  if (ETJump::demoCompatibility->flags.serverSideCoronas) {
     return;
   }
 

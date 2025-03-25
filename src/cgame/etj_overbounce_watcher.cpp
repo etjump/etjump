@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -101,6 +101,10 @@ OverbounceWatcher::OverbounceWatcher(
     parseColorString(etj_obWatcherColor.string, _color);
   });
 
+  cvarUpdateHandler->subscribe(&etj_obWatcherSize,
+                               [&](const vmCvar_t *) { setSize(); });
+
+  setSize();
   parseColorString(etj_obWatcherColor.string, _color);
 }
 
@@ -109,6 +113,12 @@ OverbounceWatcher::~OverbounceWatcher() {
   _clientCommandsHandler->unsubscribe("ob_load");
   _clientCommandsHandler->unsubscribe("ob_reset");
   _clientCommandsHandler->unsubscribe("ob_list");
+}
+
+void OverbounceWatcher::setSize() {
+  size = CvarValueParser::parse<CvarValue::Size>(etj_obWatcherSize, 0, 10);
+  size.x *= 0.1f;
+  size.y *= 0.1f;
 }
 
 bool OverbounceWatcher::beforeRender() {
@@ -121,7 +131,11 @@ bool OverbounceWatcher::beforeRender() {
   gravity = ps->gravity;
   zVel = ps->velocity[2];
   startHeight = ps->origin[2] + ps->mins[2];
-  x = etj_obWatcherX.value;
+
+  // impossible OB - negative z velocity & below saved coordinate
+  if (zVel < 0 && startHeight < endHeight) {
+    return false;
+  }
 
   overbounce = false;
 
@@ -131,10 +145,7 @@ bool OverbounceWatcher::beforeRender() {
 
   endHeight = (*_current)[2];
 
-  sizeX = sizeY = 0.1f;
-  sizeX *= etj_obWatcherSize.value;
-  sizeY *= etj_obWatcherSize.value;
-
+  x = etj_obWatcherX.value;
   ETJump_AdjustPosition(&x);
 
   // setup & do trace, so we can determine if surface allows OB
@@ -158,7 +169,7 @@ bool OverbounceWatcher::beforeRender() {
 }
 
 void OverbounceWatcher::render() const {
-  DrawString(x, etj_obWatcherY.value, sizeX, sizeY, _color, qfalse, "OB", 0,
+  DrawString(x, etj_obWatcherY.value, size.x, size.y, _color, qfalse, "OB", 0,
              ITEM_TEXTSTYLE_SHADOWED);
 }
 
@@ -196,11 +207,6 @@ bool OverbounceWatcher::canSkipDraw() const {
   }
 
   if (ps->groundEntityNum != ENTITYNUM_NONE) {
-    return true;
-  }
-
-  // impossible OB - negative z velocity & below saved coordinate
-  if (zVel < 0 && startHeight < endHeight) {
     return true;
   }
 

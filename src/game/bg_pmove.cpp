@@ -11,7 +11,7 @@
 #endif // CGAMEDLL
 
 #include "bg_local.h"
-#include "etj_numeric_utilities.h"
+#include "etj_string_utilities.h"
 
 #ifdef CGAMEDLL
   #define PM_Cheats cgs.cheats
@@ -27,13 +27,18 @@ static const int PRONE_DELAY_TIME = 750;
 static bool hasJustStoodUp() {
   return pm->pmext->proneTime - pm->pmext->jumpTime == PRONE_JUMP_DELAY_TIME;
 }
-} // namespace ETJump
 
-// JPW NERVE -- stuck this here so it can be seen client & server side
-float Com_GetFlamethrowerRange(void) {
-  return 2500; // multiplayer range is longer for balance
+template <typename... Targs>
+static void bgPrint(const std::string &msg, const Targs &...fargs) {
+  const std::string fmt = stringFormat(msg, fargs...);
+
+#ifdef CGAMEDLL
+  Com_Printf("^g[cl] ^7%s\n", fmt.c_str());
+#else
+  Com_Printf("^z[sv] ^7%s\n", fmt.c_str());
+#endif
 }
-// jpw
+} // namespace ETJump
 
 pmove_t *pm;
 pml_t pml;
@@ -66,8 +71,6 @@ float pm_spectatorfriction = 5.0f;
 //----(SA)	end
 
 int c_pmove = 0;
-
-#define TRIPMINE_RANGE 512.f
 
 #ifdef GAMEDLL
 
@@ -1347,7 +1350,7 @@ void PM_CheckPortal(void) {
   trace_t trace;
   vec3_t newOrigin; // Let's do a broader trace..
 
-#define TRACE_PORTAL_DIST 64.0
+  static constexpr float TRACE_PORTAL_DIST = 64.0f;
 
   if (pm->ps->pm_time) {
     return;
@@ -1530,9 +1533,15 @@ static void PM_WalkMove(void) {
       if (pm->pmext->sprintTime < 0) {
         pm->pmext->sprintTime = 0;
       }
+
+      if (pm->pmext->jumpDelayBug) {
+        pm->pmext->jumpTime = pm->cmd.serverTime;
+      }
     }
 
-    pm->pmext->jumpTime = pm->cmd.serverTime;
+    if (!pm->pmext->jumpDelayBug) {
+      pm->pmext->jumpTime = pm->cmd.serverTime;
+    }
 
     // JPW NERVE
     pm->ps->jumpTime = pm->cmd.serverTime; // Arnout: NOTE : TEMP DEBUG
@@ -3136,7 +3145,6 @@ PM_CheckforReload
 */
 void PM_CheckForReload(int weapon) {
   qboolean autoreload;
-  qboolean reloadRequested;
   int clipWeap, ammoWeap;
 
   if (pm->noWeapClips) // no need to reload
@@ -3152,7 +3160,7 @@ void PM_CheckForReload(int weapon) {
   }
 
   // user is forcing a reload (manual reload)
-  reloadRequested = (qboolean)(pm->cmd.wbuttons & WBUTTON_RELOAD);
+  const bool reloadRequested = pm->cmd.wbuttons & WBUTTON_RELOAD;
 
   switch (pm->ps->weaponstate) {
     case WEAPON_RAISING:
@@ -3360,8 +3368,11 @@ PM_CoolWeapons
 ==============
 */
 void PM_CoolWeapons() {
-  for (int wp = 0; wp < WP_NUM_WEAPONS; wp++) {
+  pm->pmext->weapHeat[WP_DUMMY_MG42] =
+      static_cast<float>(pm->ps->ammo[WP_DUMMY_MG42] +
+                         std::fmod(pm->pmext->weapHeat[WP_DUMMY_MG42], 1));
 
+  for (int wp = 0; wp < WP_NUM_WEAPONS; wp++) {
     // if you have the weapon, and it can overheat (or using mounted MG42)
     if ((GetAmmoTableData(wp)->maxHeat && COM_BitCheck(pm->ps->weapons, wp)) ||
         wp == WP_DUMMY_MG42) {
@@ -3398,22 +3409,19 @@ void PM_CoolWeapons() {
   }
 
   // sanity check, cap weapon heat for 8-bit transmission to prevent wrap
-  Numeric::clamp(pm->ps->curWeapHeat, 0, 255);
+  pm->ps->curWeapHeat = std::clamp(pm->ps->curWeapHeat, 0, 255);
 }
+
+inline constexpr float AIMSPREAD_DECREASE_RATE = 200.0f;
+inline constexpr float AIMSPREAD_INCREASE_RATE = 800.0f;
+inline constexpr float AIMSPREAD_VIEWRATE_MIN = 30.0f;    // degrees per second
+inline constexpr float AIMSPREAD_VIEWRATE_RANGE = 120.0f; // degrees per second
 
 /*
 ==============
 PM_AdjustAimSpreadScale
 ==============
 */
-// #define	AIMSPREAD_DECREASE_RATE		300.0f
-#define AIMSPREAD_DECREASE_RATE                                                \
-  200.0f // (SA) when I made the increase/decrease floats (so slower
-         // weapon recover could happen for scoped weaps) the average
-         // rate increased significantly
-#define AIMSPREAD_INCREASE_RATE 800.0f
-#define AIMSPREAD_VIEWRATE_MIN 30.0f    // degrees per second
-#define AIMSPREAD_VIEWRATE_RANGE 120.0f // degrees per second
 
 void PM_AdjustAimSpreadScale(void) {
   //	int		increase, decrease, i;
@@ -3654,6 +3662,8 @@ static bool mountedFire() {
   (pm->ps->weaponstate == WEAPON_FIRING ||                                     \
    pm->ps->weaponstate == WEAPON_FIRINGALT)
 
+// #define DO_WEAPON_DBG 1
+
 /*
 ==============
 PM_Weapon
@@ -3661,15 +3671,6 @@ PM_Weapon
 Generates weapon events and modifes the weapon counter
 ==============
 */
-
-#define VENOM_LOW_IDLE WEAP_IDLE1
-#define VENOM_HI_IDLE WEAP_IDLE2
-#define VENOM_RAISE WEAP_ATTACK1
-#define VENOM_ATTACK WEAP_ATTACK2
-#define VENOM_LOWER WEAP_ATTACK_LASTSHOT
-
-// #define DO_WEAPON_DBG 1
-
 static void PM_Weapon(void) {
   int addTime = 0; // TTimo: init
   int ammoNeeded;
@@ -4156,51 +4157,6 @@ static void PM_Weapon(void) {
       return;
     }
   }
-
-  /*	if( pm->ps->weapon == WP_TRIPMINE ) {
-          trace_t trace;
-          vec3_t start, end, forward;
-
-          VectorCopy( pm->ps->origin, start );
-          start[2] += pm->ps->viewheight;
-
-          AngleVectors(pm->ps->viewangles, forward, NULL, NULL);
-
-          VectorMA(start, 64, forward, end);
-
-          pm->trace(&trace, start, NULL, NULL, end, pm->ps->clientNum,
-     MASK_SHOT);
-
-          if(trace.fraction == 1.f) {
-              return; // didnt hit a nearby wall
-          }
-
-          if(trace.surfaceFlags & SURF_NOIMPACT) {
-              return;
-          }
-
-          if(trace.entityNum != ENTITYNUM_WORLD) {
-              return; // hit a player, door, etc
-          }
-
-          VectorCopy(trace.endpos, start);
-          VectorMA(start, TRIPMINE_RANGE, trace.plane.normal, end);
-
-          pm->trace(&trace, start, NULL, NULL, end, pm->ps->clientNum,
-     MASK_SHOT);
-
-          if(trace.fraction == 1.f) {
-              return; // gap to opposite wall was too big
-          }
-
-          if(trace.surfaceFlags & SURF_NOIMPACT) {
-              return;
-          }
-
-          if(trace.entityNum != ENTITYNUM_WORLD) {
-              return; // hit a player, door, etc
-          }
-      }*/
 
   // check for fire
   // if not on fire button and there's not a delayed shot this frame...
@@ -4963,14 +4919,6 @@ static void PM_Weapon(void) {
 
 /*
 ================
-PM_Animate
-================
-*/
-#define MYTIMER_SALUTE 1133  // 17 frames, 15 fps
-#define MYTIMER_DISMOUNT 667 // 10 frames, 15 fps
-
-/*
-================
 PM_DropTimers
 ================
 */
@@ -5009,14 +4957,13 @@ static void PM_DropTimers(void) {
   }
 }
 
-#define LEAN_MAX 28.0f
-#define LEAN_TIME_TO 200.0f // time to get to/from full lean
-#define LEAN_TIME_FR 300.0f // time to get to/from full lean
+inline constexpr float LEAN_MAX = 28.0f;
+inline constexpr float LEAN_TIME_TO = 200.0f; // time to get to/from full lean
+inline constexpr float LEAN_TIME_FR = 300.0f; // time to get to/from full lean
 
 /*
 ==============
 PM_CalcLean
-
 ==============
 */
 void PM_UpdateLean(playerState_t *ps, usercmd_t *cmd, pmove_t *tpm) {
@@ -5534,12 +5481,13 @@ PM_CheckLadderMove
 qboolean ladderforward;
 vec3_t laddervec;
 
+inline constexpr float TRACE_LADDER_DIST = 48.0f;
+
 void PM_CheckLadderMove(void) {
   vec3_t spot;
   vec3_t flatforward;
   trace_t trace;
   float tracedist;
-#define TRACE_LADDER_DIST 48.0
   qboolean wasOnLadder;
 
   if (pm->ps->pm_time) {
@@ -6280,6 +6228,8 @@ void PmoveSingle(pmove_t *pmove) {
 
   // weapons
   PM_Weapon();
+  pm->ps->ammo[WP_DUMMY_MG42] =
+      static_cast<int>(pm->pmext->weapHeat[WP_DUMMY_MG42]);
 
   // footstep events / legs animations
   PM_Footsteps();

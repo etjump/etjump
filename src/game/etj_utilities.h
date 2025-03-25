@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,8 @@
 
 #pragma once
 
-#include <algorithm>
-#include <iterator>
 #include <vector>
+
 #include "etj_levels.h"
 
 namespace Utilities {
@@ -70,29 +69,9 @@ void Console(const std::string &message);
 void Log(const std::string &message);
 
 /**
- * Log a message & appends a newline
- */
-void Logln(const std::string &message);
-
-/**
- * Writes string to specified file
- */
-void WriteFile(const std::string &filepath, const std::string &content);
-
-/**
- * Reads contents of specified file and returns std moved string
- */
-std::string ReadFile(const std::string &filepath);
-
-/**
  * Returns true if there is atleast one player on team
  */
 bool anyonePlaying();
-
-/**
- * Returns the q3 engine path for a file
- */
-std::string getPath(const std::string &name);
 
 /**
  * Converts timestamp to date
@@ -101,7 +80,10 @@ std::string timestampToString(int timestamp,
                               const char *format = "%d/%m/%y %H:%M:%S",
                               const char *start = "never");
 
-void RemovePlayerWeapons(int clientNum);
+/**
+ * Sets a valid weapon as currently held weapon
+ */
+void selectValidWeapon(const gentity_t *ent);
 
 /**
  * Returns true if the player is inside a no-noclip area

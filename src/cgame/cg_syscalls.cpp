@@ -1,24 +1,34 @@
 // cg_syscalls.c -- this file is only included when building a dll
 // cg_syscalls.asm is included instead when building a qvm
 #include "cg_local.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 static intptr_t(QDECL *syscall)(intptr_t arg,
-                                ...) = (intptr_t(QDECL *)(intptr_t, ...)) - 1;
+                                ...) = (intptr_t(QDECL *)(intptr_t, ...))-1;
 
 #if defined(__MACOS__)
   #ifndef __GNUC__
     #pragma export on
   #endif
 #endif
+
 extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
                                                                ...)) {
   syscall = syscallptr;
 }
+
 #if defined(__MACOS__)
   #ifndef __GNUC__
     #pragma export off
   #endif
 #endif
+
+template <typename T, typename... Types>
+static intptr_t ExpandSyscall(T syscallArg, Types... args) {
+  // we have to do C-style casting here to support all types
+  // of arguments passed onto syscalls
+  return syscall((intptr_t)syscallArg, (intptr_t)args...);
+}
 
 inline int PASSFLOAT(const float &f) noexcept {
   floatint_t fi;
@@ -36,7 +46,10 @@ void trap_PumpEventLoop(void) {
 void trap_Print(const char *fmt) { SystemCall(CG_PRINT, fmt); }
 
 // coverity[+kill]
-void trap_Error(const char *fmt) { SystemCall(CG_ERROR, fmt); }
+[[noreturn]] void trap_Error(const char *fmt) {
+  SystemCall(CG_ERROR, fmt);
+  UNREACHABLE
+}
 
 int trap_Milliseconds(void) { return SystemCall(CG_MILLISECONDS); }
 
@@ -923,3 +936,31 @@ int trap_R_GetTextureId(const char *name) {
 
 // bani - sync rendering
 void trap_R_Finish(void) { SystemCall(CG_R_FINISH); }
+
+// ETJump: syscall extensions
+namespace ETJump {
+// entry point for additional system calls for other engines (ETe, ET: Legacy)
+bool SyscallExt::trap_GetValue(char *value, const int size, const char *key) {
+  return SystemCall(syscallExt->dll_com_trapGetValue, value, size, key);
+}
+
+// ET: Legacy - flash client window
+void SyscallExt::trap_SysFlashWindowETLegacy(const FlashWindowState state) {
+  if (syscallExt->cgameExtensions[syscallExt->flashWindowETLegacy]) {
+    SystemCall(syscallExt->cgameExtensions[syscallExt->flashWindowETLegacy],
+               static_cast<int>(state));
+  }
+}
+
+void SyscallExt::trap_CmdBackup_Ext() {
+  if (syscallExt->cgameExtensions[syscallExt->cmdBackupExt]) {
+    cg.cmdBackup = CMD_BACKUP_EXT;
+    cg.cmdMask = CMD_MASK_EXT;
+    SystemCall(syscallExt->cgameExtensions[syscallExt->cmdBackupExt]);
+  } else {
+    cg.cmdBackup = CMD_BACKUP;
+    cg.cmdMask = CMD_MASK;
+  }
+}
+
+} // namespace ETJump

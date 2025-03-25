@@ -359,13 +359,11 @@ Portal Gun Mod: Teleport Method
 
 =================================================================================
 */
-#define PORTAL_NUDGE 50.0f // Feen: Extra little boost coming out of a portal...
 
 void PortalTeleport(gentity_t *player, vec3_t origin, vec3_t angles) {
-
-  vec_t velocityLength;
-
-  velocityLength = VectorLength(player->client->ps.velocity); // Speed...
+  // Feen: Extra little boost coming out of a portal...
+  static constexpr float PORTAL_NUDGE = 50.0f;
+  const vec_t velocityLength = VectorLength(player->client->ps.velocity);
 
   // VectorCopy ( origin, player->client->ps.origin ); //Changed to...
   // VectorMA(origin, 32.0f, angles, player->client->ps.origin); moved
@@ -1132,8 +1130,12 @@ void SP_misc_portal_camera(gentity_t *ent) {
 
 void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   vec3_t dir;
-  float deg;
   vec3_t up, right;
+
+  // don't let players crash servers by spamming shooter entities
+  if (!ETJump::EntityUtilities::entitiesFree(16)) {
+    return;
+  }
 
   // see if we have a target
   if (ent->enemy) {
@@ -1144,8 +1146,9 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   }
 
   if (ent->s.weapon == WP_MAPMORTAR) {
-    AimAtTarget(ent); // store in ent->s.origin2 the direction/force
-                      // needed to pass through the target
+    // store in ent->s.origin2 the direction/force
+    // needed to pass through the target
+    AimAtTarget(ent);
     VectorCopy(ent->s.origin2, dir);
   }
 
@@ -1153,7 +1156,7 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   PerpendicularVector(up, dir);
   CrossProduct(up, dir, right);
 
-  deg = crandom() * ent->random;
+  float deg = crandom() * ent->random;
   VectorMA(dir, deg, up, dir);
 
   deg = crandom() * ent->random;
@@ -1163,11 +1166,9 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
   switch (ent->s.weapon) {
     case WP_GRENADE_LAUNCHER:
-      VectorScale(dir, 700,
-                  dir); //----(SA)	had to add this
-                        // as fire_grenade now
-                        // expects a non-normalized
-                        // direction vector
+      //----(SA)	had to add this as fire_grenade
+      // now expects a non-normalized direction vector
+      VectorScale(dir, 700, dir);
       fire_grenade(ent, ent->s.origin, dir, WP_GRENADE_LAUNCHER);
       break;
     case WP_PANZERFAUST:
@@ -1175,19 +1176,15 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
       VectorScale(ent->s.pos.trDelta, 2, ent->s.pos.trDelta);
       SnapVector(ent->s.pos.trDelta); // save net bandwidth
       break;
-
-      /*	case WP_SPEARGUN:
-          case WP_SPEARGUN_CO2:
-              fire_speargun(ent, ent->s.origin, dir);
-              break;*/
-
     case WP_MAPMORTAR:
-      AimAtTarget(ent); // store in ent->s.origin2 the
-                        // direction/force needed to
-                        // pass through the target
+      // store in ent->s.origin2 the direction/force
+      // needed to pass through the target
+      AimAtTarget(ent);
       VectorScale(dir, VectorLength(ent->s.origin2), dir);
       fire_mortar(ent, ent->s.origin, dir);
       break;
+    default:
+      return;
   }
 
   G_AddEvent(ent, EV_FIRE_WEAPON, 0);
@@ -1195,21 +1192,21 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
 static void InitShooter_Finish(gentity_t *ent) {
   ent->enemy = G_PickTarget(ent->target);
-  ent->think = 0;
+  ent->think = nullptr;
   ent->nextthink = 0;
 }
 
-void InitShooter(gentity_t *ent, int weapon) {
+void InitShooter(gentity_t *ent, const int weapon) {
   ent->use = Use_Shooter;
   ent->s.weapon = weapon;
 
   G_SetMovedir(ent->s.angles, ent->movedir);
 
-  if (!ent->random) {
+  if (ent->random == 0.0f) {
     ent->random = 1.0;
   }
 
-  ent->random = sin(M_PI * ent->random / 180);
+  ent->random = std::sin(static_cast<float>(M_PI) * ent->random / 180);
 
   // target might be a moving object, so we can't set movedir for it
   if (ent->target) {
@@ -1355,9 +1352,14 @@ dlight_finish_spawning
 ==============
 */
 void dlight_finish_spawning(gentity_t *ent) {
-  G_FindConfigstringIndex(va("%i %s %i %i %i", ent->s.number,
-                             ent->dl_stylestring, ent->health, ent->soundLoop,
-                             ent->dl_atten),
+  std::string styleStr = ent->dl_stylestring;
+
+  if (styleStr.length() >= MAX_DLIGHT_STYLESTRING) {
+    styleStr = styleStr.substr(0, MAX_DLIGHT_STYLESTRING - 1);
+  }
+
+  G_FindConfigstringIndex(va("%i %s %i %i %i", ent->s.number, styleStr.c_str(),
+                             ent->health, ent->soundLoop, ent->dl_atten),
                           CS_DLIGHTS, MAX_DLIGHT_CONFIGSTRINGS, qtrue);
 }
 
@@ -1489,32 +1491,29 @@ void SP_dlight(gentity_t *ent) {
   ent->health = offset; // set the offset into the string
 
   ent->think = dlight_finish_spawning;
-  if (!dlightstarttime) // sync up all the dlights
-  {
+  // sync up all the dlights
+  if (!dlightstarttime) {
     dlightstarttime = level.time + 100;
   }
+
   ent->nextthink = dlightstarttime;
 
-  if (ent->dl_color[0] <=
-          0 && // if it's black or has no color assigned, make it white
-      ent->dl_color[1] <= 0 &&
-      ent->dl_color[2] <= 0) {
-    ent->dl_color[0] = ent->dl_color[1] = ent->dl_color[2] = 1;
+  // if it's black or has no color assigned, make it white
+  if (ent->dl_color[0] <= 0 && ent->dl_color[1] <= 0 && ent->dl_color[2] <= 0) {
+    VectorSet(ent->dl_color, 1.0f, 1.0f, 1.0f);
   }
 
-  ent->dl_color[0] = ent->dl_color[0] * 255; // range 0-255 now so the client
-                                             // doesn't have to on every update
-  ent->dl_color[1] = ent->dl_color[1] * 255;
-  ent->dl_color[2] = ent->dl_color[2] * 255;
+  // range 0-255 now so the client doesn't have to on every update
+  VectorScale(ent->dl_color, 255.0f, ent->dl_color);
 
   auto intensity = static_cast<float>(ent->dl_stylestring[offset] - 'a');
   intensity *= (1000.0f / 24.0f);
-  intensity = std::min(255.0f, intensity / 4);
+  intensity = std::clamp(intensity / 4, 0.0f, 255.0f);
 
   ent->s.constantLight = static_cast<int>(ent->dl_color[0]) |
-                         (static_cast<int>(ent->dl_color[1]) << 8) |
-                         (static_cast<int>(ent->dl_color[2]) << 16) |
-                         (static_cast<int>(intensity) << 24);
+                         static_cast<int>(ent->dl_color[1]) << 8 |
+                         static_cast<int>(ent->dl_color[2]) << 16 |
+                         static_cast<int>(intensity) << 24;
 
   ent->use = use_dlight;
 
@@ -2243,6 +2242,7 @@ void mg42_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
     // owner->client->ps.gunfx = 0;
     other->client->pmext.weapHeat[WP_DUMMY_MG42] =
         static_cast<float>(ent->mg42weapHeat);
+    other->client->ps.ammo[WP_DUMMY_MG42] = ent->mg42weapHeat;
     ent->backupWeaponTime = owner->client->ps.weaponTime;
     owner->backupWeaponTime = owner->client->ps.weaponTime;
   }
@@ -2426,18 +2426,15 @@ void SP_mg42(gentity_t *self) {
   }
 }
 
-#define FLAK_SPREAD 100
-#define FLAK_DAMAGE 36
+inline constexpr int GUN1_IDLE = 0;
+inline constexpr int GUN2_IDLE = 4;
+inline constexpr int GUN3_IDLE = 8;
+inline constexpr int GUN4_IDLE = 12;
 
-#define GUN1_IDLE 0
-#define GUN2_IDLE 4
-#define GUN3_IDLE 8
-#define GUN4_IDLE 12
-
-#define GUN1_LASTFIRE 3
-#define GUN2_LASTFIRE 7
-#define GUN3_LASTFIRE 11
-#define GUN4_LASTFIRE 15
+inline constexpr int GUN1_LASTFIRE = 3;
+inline constexpr int GUN2_LASTFIRE = 7;
+inline constexpr int GUN3_LASTFIRE = 11;
+inline constexpr int GUN4_LASTFIRE = 15;
 
 void Flak_Animate(gentity_t *ent) {
   // G_Printf ("frame %i\n", ent->s.frame);
@@ -3073,9 +3070,20 @@ void SP_func_fakebrush(gentity_t *ent) {
   // prediction
   VectorCopy(ent->r.mins, ent->s.origin2);
   VectorCopy(ent->r.maxs, ent->s.angles2);
-  ent->s.eFlags |= EF_FAKEBMODEL;
 
-  ent->s.eType = ET_GENERAL;
+  ent->s.eType = ET_FAKEBRUSH;
 
   trap_LinkEntity(ent);
+
+  // SV_LinkEntity only sets the entity to solid if entity has a bmodel
+  // or r.contents is either CONTENTS_SOLID or CONTENTS_BODY,
+  // so if we try to make a playerclip fakebrush,
+  // it won't have solid flag set and prediction is broken
+  if (ent->r.contents & CONTENTS_PLAYERCLIP && !ent->s.solid) {
+    ent->s.solid = 1;
+
+    // also pass along contents so we can filter this out for stuff
+    // such as bullet traces, to avoid bullet marks on playerclip fakebrushes
+    ent->s.dmgFlags = ent->r.contents;
+  }
 }

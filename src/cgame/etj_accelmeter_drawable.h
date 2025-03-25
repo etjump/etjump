@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,17 +24,19 @@
 
 #pragma once
 
+#include <list>
+
 #include "etj_irenderable.h"
 #include "cg_local.h"
 #include "etj_accel_color.h"
-#include <list>
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class AccelMeter : public IRenderable {
   int textStyle{};
   float y{};
   float halfW{};
-  float size{};
+  CvarValue::Size size{};
   int accelColorStyle{};
   std::vector<std::string> accelStr{};
   bool playing{};

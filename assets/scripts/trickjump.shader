@@ -934,3 +934,20 @@ gfx/2d/lagometer
 		rgbGen vertex
 	}
 }
+
+gfx/2d/colorpicker_mask
+{
+	noPicMip
+	noMipMaps
+	nocompress
+	{
+		clampMap gfx/2d/colorpicker_mask_s.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+	{
+		clampMap gfx/2d/colorpicker_mask_v.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}

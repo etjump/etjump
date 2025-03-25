@@ -1,26 +1,35 @@
-#include <cstdint>
 #include "ui_local.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 // this file is only included when building a dll
 // syscalls.asm is included instead when building a qvm
 
 static intptr_t(QDECL *syscall)(intptr_t arg,
-                                ...) = (intptr_t(QDECL *)(intptr_t, ...)) - 1;
+                                ...) = (intptr_t(QDECL *)(intptr_t, ...))-1;
 
 #if defined(__MACOS__)
   #ifndef __GNUC__
     #pragma export on
   #endif
 #endif
+
 extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
                                                                ...)) {
   syscall = syscallptr;
 }
+
 #if defined(__MACOS__)
   #ifndef __GNUC__
     #pragma export off
   #endif
 #endif
+
+template <typename T, typename... Types>
+static intptr_t ExpandSyscall(T syscallArg, Types... args) {
+  // we have to do C-style casting here to support all types
+  // of arguments passed onto syscalls
+  return syscall((intptr_t)syscallArg, (intptr_t)args...);
+}
 
 inline int PASSFLOAT(const float &f) noexcept {
   floatint_t fi;
@@ -31,7 +40,10 @@ inline int PASSFLOAT(const float &f) noexcept {
 void trap_Print(const char *string) { SystemCall(UI_PRINT, string); }
 
 // coverity[+kill]
-void trap_Error(const char *string) { SystemCall(UI_ERROR, string); }
+[[noreturn]] void trap_Error(const char *string) {
+  SystemCall(UI_ERROR, string);
+  UNREACHABLE
+}
 
 int trap_Milliseconds(void) { return SystemCall(UI_MILLISECONDS); }
 
@@ -462,8 +474,6 @@ qboolean trap_GetLimboString(int index, char *buf) {
   return SystemCall(UI_CL_GETLIMBOSTRING, index, buf) ? qtrue : qfalse;
 }
 
-#define MAX_VA_STRING 32000
-
 char *trap_TranslateString(const char *string) {
   static char staticbuf[2][MAX_VA_STRING];
   static int bufcount = 0;
@@ -491,3 +501,11 @@ void trap_openURL(const char *s) { SystemCall(UI_OPENURL, s); }
 void trap_GetHunkData(int *hunkused, int *hunkexpected) {
   SystemCall(UI_GETHUNKDATA, hunkused, hunkexpected);
 }
+
+// ETJump: syscall extensions
+namespace ETJump {
+// entry point for additional system calls for other engines (ETe, ET: Legacy)
+bool SyscallExt::trap_GetValue(char *value, const int size, const char *key) {
+  return SystemCall(syscallExt->dll_com_trapGetValue, value, size, key);
+}
+} // namespace ETJump

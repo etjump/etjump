@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,11 +61,13 @@ void Timerun::onInterrupt(const TimerunCommands::Interrupt *interrupt) {
 }
 
 void Timerun::onCheckpoint(const TimerunCommands::Checkpoint *cp) {
-  _playersTimerunInformation[cp->clientNum].checkpoints[cp->checkpointIndex] =
+  _playersTimerunInformation[cp->clientNum].checkpoints[cp->checkpointNum] =
       cp->checkpointTime;
   _playersTimerunInformation[cp->clientNum].numCheckpointsHit =
-      cp->checkpointIndex + 1;
+      cp->checkpointNum + 1;
   _playersTimerunInformation[cp->clientNum].lastCheckpointTimestamp = cg.time;
+  _playersTimerunInformation[cp->clientNum]
+      .checkpointIndicesHit[cp->checkpointIndex] = true;
 }
 
 void Timerun::onStart(const TimerunCommands::Start *start) {
@@ -77,13 +79,13 @@ void Timerun::onStart(const TimerunCommands::Start *start) {
   _playersTimerunInformation[clientNum].running = true;
   _playersTimerunInformation[clientNum].checkpoints =
       start->currentRunCheckpoints;
-  _playersTimerunInformation[clientNum].nextFreeCheckpointIdx = 0;
   _playersTimerunInformation[clientNum].runHasCheckpoints =
       start->runHasCheckpoints;
   _playersTimerunInformation[clientNum].numCheckpointsHit =
       Timerun::getNumCheckpointsHit(start->currentRunCheckpoints);
   _playersTimerunInformation[clientNum].previousRecordCheckpoints =
       start->checkpoints;
+  _playersTimerunInformation[clientNum].checkpointIndicesHit.fill(false);
   _playerEventsHandler->check(
       "timerun:start", {std::to_string(start->clientNum), start->runName,
                         std::to_string(start->startTime),
@@ -127,7 +129,7 @@ void Timerun::parseServerCommand(const std::vector<std::string> &args) {
     return;
   }
 
-  if (args[1] == "start") {
+  if (args[1] == "start" || args[1] == "saveposstart") {
     auto startOpt = TimerunCommands::Start::deserialize(args);
     if (!startOpt.hasValue()) {
       return;

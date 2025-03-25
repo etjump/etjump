@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
  */
 
 #include <utility>
+#include <chrono>
 
 #include "etj_timerun_v2.h"
 
@@ -246,8 +247,8 @@ void ETJump::TimerunV2::initialize() {
                                    ", "));
 
   } catch (const std::exception &e) {
-    Printer::LogPrintln(std::string("Unable to initialize timerun database") +
-                        e.what());
+    Printer::logLn(std::string("Unable to initialize timerun database") +
+                   e.what());
   }
 
   _sc->startWorkerThreads(1);
@@ -299,12 +300,11 @@ void ETJump::TimerunV2::clientConnect(int clientNum, int userId) {
         _logger->info("Unable to load player information for clientNum: `%d` "
                       "userId: `%d`: %s",
                       clientNum, userId, error.what());
-        Printer::SendChatMessage(
-            clientNum, "Unable to load player information. Any timeruns will "
-                       "not work. Try to reconnect or file a bug report at "
-                       "github.com/etjump/etjump.");
-        Printer::SendConsoleMessage(clientNum,
-                                    stringFormat("cause: %s\n", error.what()));
+        Printer::chat(clientNum,
+                      "Unable to load player information. Any timeruns will "
+                      "not work. Try to reconnect or file a bug report at "
+                      "github.com/etjump/etjump.");
+        Printer::console(clientNum, stringFormat("cause: %s\n", error.what()));
       });
 }
 
@@ -312,22 +312,23 @@ void ETJump::TimerunV2::clientDisconnect(int clientNum) {
   _players[clientNum] = nullptr;
 }
 
-void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
-                                   const std::string &playerName,
-                                   int currentTimeMs) {
-  auto player = _players[clientNum].get();
+ETJump::TimerunV2::Player *ETJump::TimerunV2::setupPlayerData(
+    const int clientNum, const std::string &runName,
+    const std::string &playerName, const int currentTimeMs) const {
+  const auto player = _players[clientNum].get();
+
   if (!player) {
     _logger->error("Trying to start run `%s` for client `%d` but no player "
                    "object available.",
                    runName, clientNum);
-    Printer::SendChatMessage(
-        clientNum, "Unable to start timerun. Reconnect and if this persists, "
-                   "report the bug at github.com/etjump/etjump");
-    return;
+    Printer::chat(clientNum,
+                  "Unable to start timerun. Reconnect and if this persists, "
+                  "report the bug at github.com/etjump/etjump");
+    return nullptr;
   }
 
   if (player->running) {
-    return;
+    return nullptr;
   }
 
   player->running = true;
@@ -338,16 +339,52 @@ void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
   player->runHasCheckpoints =
       level.checkpointsCount[indexForRunname(runName)] != 0;
   player->checkpointTimes.fill(TIMERUN_CHECKPOINT_NOT_SET);
-  player->checkpointIndexesHit.fill(false);
+  player->checkpointIndicesHit.fill(false);
   player->nextCheckpointIdx = 0;
 
+  return player;
+}
+
+void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
+                                   const std::string &playerName,
+                                   int currentTimeMs) {
+  const auto player =
+      setupPlayerData(clientNum, runName, playerName, currentTimeMs);
+
+  if (!player) {
+    return;
+  }
+
   startNotify(player);
+  Utilities::startRun(clientNum);
+}
+
+void ETJump::TimerunV2::startSaveposTimer(int clientNum,
+                                          const std::string &playerName,
+                                          const int currentTimeMs,
+                                          const ETJump::SavePosData &data) {
+  const auto player = setupPlayerData(clientNum, data.timerunInfo.runName,
+                                      playerName, currentTimeMs);
+
+  if (!player) {
+    return;
+  }
+
+  Printer::commandAll(
+      TimerunCommands::SavePosStart(
+          player->clientNum, player->startTime.value(), player->activeRunName,
+          data.timerunInfo.previousRecord, player->runHasCheckpoints,
+          data.timerunInfo.previousRecordCheckpoints,
+          data.timerunInfo.checkpoints)
+          .serialize());
 
   Utilities::startRun(clientNum);
 }
 
-void ETJump::TimerunV2::checkpoint(const std::string &runName, int clientNum,
-                                   int checkpointIndex, int currentTimeMs) {
+void ETJump::TimerunV2::checkpoint(const std::string &runName,
+                                   const int clientNum,
+                                   const int checkpointIndex,
+                                   const int currentTimeMs) const {
   Player *player = _players[clientNum].get();
 
   if (player == nullptr) {
@@ -362,20 +399,20 @@ void ETJump::TimerunV2::checkpoint(const std::string &runName, int clientNum,
     return;
   }
 
-  if (player->checkpointIndexesHit[checkpointIndex]) {
+  if (player->checkpointIndicesHit[checkpointIndex]) {
     return;
   }
 
-  player->checkpointIndexesHit[checkpointIndex] = true;
+  player->checkpointIndicesHit[checkpointIndex] = true;
 
   player->checkpointTimes[player->nextCheckpointIdx++] =
       currentTimeMs - player->startTime.value();
 
-  Printer::SendCommandToAll(
+  Printer::commandAll(
       TimerunCommands::Checkpoint(
           clientNum, player->nextCheckpointIdx - 1,
           player->checkpointTimes[player->nextCheckpointIdx - 1],
-          player->activeRunName)
+          player->activeRunName, checkpointIndex)
           .serialize());
 }
 
@@ -400,7 +437,7 @@ void ETJump::TimerunV2::stopTimer(const std::string &runName, int clientNum,
 
   player->running = false;
 
-  Printer::SendCommandToAll(
+  Printer::commandAll(
       TimerunCommands::Stop(clientNum, millis, player->activeRunName)
           .serialize());
 
@@ -434,14 +471,12 @@ void ETJump::TimerunV2::addSeason(Timerun::AddSeasonParams season) {
        season](std::unique_ptr<SynchronizationContext::ResultBase> result) {
         auto addSeasonResult = dynamic_cast<AddSeasonResult *>(result.get());
 
-        Printer::SendConsoleMessage(season.clientNum,
-                                    addSeasonResult->message + "\n");
+        Printer::console(season.clientNum, addSeasonResult->message + "\n");
       },
       [this, season](const std::runtime_error &e) {
         const char *what = e.what();
-        Printer::SendConsoleMessage(
-            season.clientNum,
-            stringFormat("Unable to add season: %s\n", e.what()));
+        Printer::console(season.clientNum,
+                         stringFormat("Unable to add season: %s\n", e.what()));
       });
 }
 
@@ -470,13 +505,11 @@ void ETJump::TimerunV2::editSeason(Timerun::EditSeasonParams params) {
       },
       [this, params](auto r) {
         auto editSeasonResult = dynamic_cast<EditSeasonResult *>(r.get());
-        Printer::SendConsoleMessage(params.clientNum,
-                                    editSeasonResult->message + "\n");
+        Printer::console(params.clientNum, editSeasonResult->message + "\n");
       },
       [this, params](const std::runtime_error &e) {
-        Printer::SendConsoleMessage(
-            params.clientNum,
-            stringFormat("Unable to edit season: %s\n", e.what()));
+        Printer::console(params.clientNum,
+                         stringFormat("Unable to edit season: %s\n", e.what()));
       });
 }
 
@@ -491,7 +524,7 @@ void ETJump::TimerunV2::interrupt(int clientNum) {
   player->activeRunName = "";
 
   Utilities::stopRun(clientNum);
-  Printer::SendCommandToAll(TimerunCommands::Interrupt(clientNum).serialize());
+  Printer::commandAll(TimerunCommands::Interrupt(clientNum).serialize());
 }
 
 void ETJump::TimerunV2::connectNotify(int clientNum) {
@@ -519,7 +552,7 @@ void ETJump::TimerunV2::connectNotify(int clientNum) {
         }
       }
 
-      Printer::SendCommand(
+      Printer::command(
           clientNum, TimerunCommands::Start(
                          idx, player->startTime.value(), player->activeRunName,
                          fastestCompletionTime, player->runHasCheckpoints,
@@ -578,8 +611,7 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
         }
 
         if (result->records.empty()) {
-          Printer::SendConsoleMessage(params.clientNum,
-                                      "No records available.\n");
+          Printer::console(params.clientNum, "No records available.\n");
           return;
         }
 
@@ -664,14 +696,46 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
 
                 if (isOnVisiblePage || isOwnRecord) {
                   auto ownRecord = r->userId == params.userId;
-                  auto rankString = rankToString(rank);
+
+                  std::string rankString;
+
+                  // if the current record has the same time as previous record,
+                  // don't display rank string at all
+                  if (rank != 1 && r->time == std::prev(r)->time) {
+                    // ... unless this is our record,
+                    // and it's not visible on the current page, in which case
+                    // figure out the next faster time to get actual rank
+                    if (isOwnRecord && !isOnVisiblePage) {
+                      int tmpRank = rank;
+                      auto it = r;
+
+                      while (tmpRank > 1) {
+                        if (ownTime > std::prev(it)->time) {
+                          break;
+                        }
+
+                        --it;
+                        --tmpRank;
+                      }
+
+                      rankString = rankToString(tmpRank);
+                    } else {
+                      rankString = "";
+                    }
+                  } else {
+                    rankString = rankToString(rank);
+                  }
+
                   auto millisString = millisToString(r->time);
+
                   std::string diffString;
+
                   if (ownRecord || rank == 1 && ownTime == r->time) {
                     diffString = "";
                   } else {
                     diffString = diffToString(ownTime, r->time);
                   }
+
                   auto playerNameString =
                       ownRecord ? r->playerName + " ^g(You)" : r->playerName;
 
@@ -701,18 +765,22 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
                 rank++;
               }
 
-              if (ownRecordString.length() > 0) {
+              if (!ownRecordString.empty()) {
                 message += "\n" + ownRecordString;
+              }
+
+              if (processedRecords.size() > 1 &&
+                  skvp.first != std::prev(processedRecords.end())->first) {
+                message += "\n";
               }
             }
           }
         }
 
-        Printer::SendConsoleMessage(params.clientNum, std::move(message));
+        Printer::console(params.clientNum, message);
       },
       [this, params](const std::runtime_error &e) {
-        Printer::SendConsoleMessage(params.clientNum,
-                                    e.what() + std::string("\n"));
+        Printer::console(params.clientNum, e.what() + std::string("\n"));
       });
 }
 
@@ -823,19 +891,18 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
         std::copy_n(begin(result->checkpoints), checkpointsToCopy,
                     begin(_players[clientNum]->overriddenCheckpoints[runName]));
 
-        Printer::SendConsoleMessage(
-            clientNum, stringFormat("^7Loaded checkpoints for run ^3`%s`^7 "
-                                    "from rank ^3`%d`^7 record.\n",
-                                    runName, rank));
+        Printer::console(clientNum,
+                         stringFormat("^7Loaded checkpoints for run ^3`%s`^7 "
+                                      "from rank ^3`%d`^7 record.\n",
+                                      runName, rank));
 
         if (_players[clientNum]->running) {
-          Printer::SendConsoleMessage(clientNum,
-                                      "^7You need to restart the run for the "
+          Printer::console(clientNum, "^7You need to restart the run for the "
                                       "changes to take effect.\n");
         }
       },
       [clientNum](auto e) {
-        Printer::SendConsoleMessage(clientNum, e.what() + std::string("\n"));
+        Printer::console(clientNum, e.what() + std::string("\n"));
       });
 }
 
@@ -875,7 +942,7 @@ std::string ETJump::TimerunV2::getRankingsStringFor(
     if (isOwnRanking && !isOnVisiblePage) {
       auto rankString = rankToString(i + 1);
       auto rankStringWidth = 5 + StringUtil::countExtraPadding(rankString);
-      auto name = isOwnRanking ? (r->name + " ^g(You)") : r->name;
+      auto name = r->name + " ^g(You)";
       auto nameStringWidth =
           MAX_NAME_LENGTH + 1 + 5 + StringUtil::countExtraPadding(name);
 
@@ -905,7 +972,7 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
           } else {
             for (const auto &s : matchingSeasons) {
               if (_rankingsPerSeason.count(s.id) == 0) {
-                message = stringFormat("No records for season `%s`", s.name);
+                message = stringFormat("No records for season `%s`\n", s.name);
               } else {
                 // clang-format off
                 message =
@@ -923,7 +990,7 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
 
         } else {
           if (_rankingsPerSeason.count(defaultSeasonId) == 0) {
-            message += "No overall records";
+            message += "No overall records\n";
           } else {
             // clang-format off
             message =
@@ -950,10 +1017,10 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
               "change, please report the bug at github.com/etjump/etjump");
         }
 
-        Printer::SendConsoleMessage(params.clientNum, result->message);
+        Printer::console(params.clientNum, result->message);
       },
       [params](auto e) {
-        Printer::SendConsoleMessage(
+        Printer::console(
             params.clientNum,
             stringFormat("Unable to print rankings: %s\n", e.what()));
       });
@@ -1054,10 +1121,10 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
               "change, please report the bug at github.com/etjump/etjump");
         }
 
-        Printer::SendConsoleMessage(clientNum, result->message);
+        Printer::console(clientNum, result->message);
       },
       [clientNum](auto e) {
-        Printer::SendConsoleMessage(
+        Printer::console(
             clientNum, stringFormat("Unable to print seasons: %s\n", e.what()));
       });
 }
@@ -1087,18 +1154,16 @@ void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
         auto deleteSeasonResult =
             dynamic_cast<DeleteSeasonResult *>(result.get());
 
-        Printer::SendConsoleMessage(clientNum,
-                                    deleteSeasonResult->message + "\n");
+        Printer::console(clientNum, deleteSeasonResult->message + "\n");
       },
       [this, clientNum](const std::runtime_error &e) {
         const char *what = e.what();
-        Printer::SendConsoleMessage(
+        Printer::console(
             clientNum, stringFormat("Unable to delete season: %s\n", e.what()));
       });
 }
 
 void ETJump::TimerunV2::startNotify(Player *player) const {
-  auto spectators = Utilities::getSpectators(player->clientNum);
   auto previousRecord =
       player->getRecord(defaultSeasonId, player->activeRunName);
 
@@ -1118,7 +1183,7 @@ void ETJump::TimerunV2::startNotify(Player *player) const {
     checkpoints = player->checkpointTimes;
   }
 
-  Printer::SendCommandToAll(
+  Printer::commandAll(
       TimerunCommands::Start(player->clientNum, player->startTime.value(),
                              player->activeRunName, fastestCompletionTime,
                              player->runHasCheckpoints, checkpoints,
@@ -1126,29 +1191,25 @@ void ETJump::TimerunV2::startNotify(Player *player) const {
           .serialize());
 }
 
-bool ETJump::TimerunV2::isDebugging(int clientNum) {
+bool ETJump::TimerunV2::isDebugging(const int clientNum) {
   std::vector<std::string> debuggers;
 
-  if (g_debugTimeruns.integer > 0) {
-    debuggers.emplace_back("Timerun");
-  }
-
-  if (g_debugTrackers.integer > 0) {
+  if (g_debugTrackers.integer) {
     debuggers.emplace_back("Tracker");
   }
 
-  if (!debuggers.empty()) {
-    Printer::SendPopupMessage(clientNum, "Record not saved:\n");
-
-    for (auto &debugger : debuggers) {
-      std::string fmt = stringFormat("- ^3%s ^7debugging enabled.\n", debugger);
-      Printer::SendPopupMessage(clientNum, fmt);
-    }
-
-    return true;
+  if (debuggers.empty()) {
+    return false;
   }
 
-  return false;
+  Printer::popup(clientNum, "Record not saved:\n");
+
+  for (auto &debugger : debuggers) {
+    std::string fmt = stringFormat("- ^3%s ^7debugging enabled.\n", debugger);
+    Printer::popup(clientNum, fmt);
+  }
+
+  return true;
 }
 
 int ETJump::TimerunV2::indexForRunname(const std::string &runName) {
@@ -1376,14 +1437,13 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
                          diffToString(completionTime, previousTopRecordTime) +
                          "^7)";
 
-            Printer::BroadCastBannerMessage(stringFormat(
-                // clang-format off
-              "^7%s ^7broke the overall server record for ^3%s\n^7with ^3%s %s ^7!!!\n",
-                // clang-format on
-                playerName, sanitize(record.record.run),
-                millisToString(record.record.time), diffString));
+            Printer::bannerAll(
+                stringFormat("^7%s ^7broke the overall server record for "
+                             "^3%s\n^7with ^3%s %s ^7!!!\n",
+                             playerName, sanitize(record.record.run),
+                             millisToString(record.record.time), diffString));
           }
-          Printer::SendCommandToAll(
+          Printer::commandAll(
               TimerunCommands::Record(clientNum, record.record.time,
                                       record.previousTime.valueOr(
                                           TimerunCommands::NO_PREVIOUS_RECORD),
@@ -1409,23 +1469,21 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
                          diffToString(completionTime, previousTopRecordTime) +
                          "^7)";
 
-            Printer::BroadCastBannerMessage(stringFormat(
-                // clang-format off
-              "^7%s ^7broke the server record on ^3%s^7 season for ^3%s\n^7with ^3%s %s ^7!!!\n",
-                // clang-format on
+            Printer::bannerAll(stringFormat(
+                "^7%s ^7broke the server record on ^3%s^7 season for "
+                "^3%s\n^7with ^3%s %s ^7!!!\n",
                 playerName, record.seasonName, sanitize(record.record.run),
                 millisToString(record.record.time), diffString));
           }
 
           // Send a record only if we beat our old PB
           if (completionTime < playerPreviousRecord) {
-            Printer::SendCommandToAll(
-                TimerunCommands::Record(
-                    clientNum, record.record.time,
-                    record.previousTime.valueOr(
-                        TimerunCommands::NO_PREVIOUS_RECORD),
-                    record.record.run)
-                    .serialize());
+            Printer::commandAll(TimerunCommands::Record(
+                                    clientNum, record.record.time,
+                                    record.previousTime.valueOr(
+                                        TimerunCommands::NO_PREVIOUS_RECORD),
+                                    record.record.run)
+                                    .serialize());
             isNewRecord = true;
           }
         }
@@ -1444,7 +1502,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
                                       record.second.previousTime.value()) +
                          "^7)";
           }
-          Printer::SendConsoleMessage(
+          Printer::console(
               checkRecordResult->clientNum,
               stringFormat("^7New personal record on season ^3%s^7 for ^7^3%s "
                            "^7with ^3%s %s^7!\n",
@@ -1475,7 +1533,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
         // so we should send a record so autodemo can save the demo
         if (!isNewRecord) {
           if (playerPreviousRecord && playerPreviousRecord < completionTime) {
-            Printer::SendCommandToAll(
+            Printer::commandAll(
                 TimerunCommands::Completion(
                     clientNum, completionTime,
                     checkRecordResult->playerPreviousOverallRecord.hasValue()
@@ -1485,7 +1543,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
                     activeRunName)
                     .serialize());
           } else {
-            Printer::SendCommandToAll(
+            Printer::commandAll(
                 TimerunCommands::Record(
                     clientNum, completionTime,
                     checkRecordResult->playerPreviousOverallRecord.hasValue()
@@ -1502,9 +1560,9 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
         _logger->error("Unable to check the record (%s/%s/%d) for %d: %s",
                        _currentMap, activeRunName, completionTime, clientNum,
                        e.what());
-        Printer::SendChatMessage(
-            clientNum, "Unable to process your timerun record. Please report "
-                       "this as a bug at github.com/etjump/etjump.");
+        Printer::chat(clientNum,
+                      "Unable to process your timerun record. Please report "
+                      "this as a bug at github.com/etjump/etjump.");
       });
 }
 
@@ -1529,4 +1587,51 @@ const ETJump::Timerun::Season *ETJump::TimerunV2::getMostRelevantSeason() {
     }
   }
   return mostRelevant;
+}
+
+void ETJump::TimerunV2::removeDisallowedWeapons(gentity_t *ent) {
+  for (int i = 0; i < WP_NUM_WEAPONS; i++) {
+    if (BG_WeaponDisallowedInTimeruns(i)) {
+      COM_BitClear(ent->client->ps.weapons, i);
+      ent->client->ps.ammo[i] = 0;
+      ent->client->ps.ammoclip[i] = 0;
+    }
+  }
+
+  // expire grenades
+  ent->client->ps.grenadeTimeLeft = 0;
+}
+
+void ETJump::TimerunV2::removePlayerProjectiles(gentity_t *ent) {
+  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; i++) {
+    if (ent->s.eType == ET_MISSILE) {
+      if (ent->parent && ent->parent->s.number == ClientNum(ent)) {
+        G_FreeEntity(ent);
+      }
+    }
+  }
+}
+
+bool ETJump::TimerunV2::weaponIsExplosivePickup(const int weapon) {
+  // FIXME: we should allow K43/Garand, but remove rifle nades on pickup
+  switch (weapon) {
+    case WP_GRENADE_LAUNCHER:
+    case WP_PANZERFAUST:
+    case WP_FLAMETHROWER:
+    case WP_GRENADE_PINEAPPLE:
+    case WP_DYNAMITE:
+    case WP_PLIERS:
+    case WP_KAR98:
+    case WP_CARBINE:
+    case WP_LANDMINE:
+    case WP_SATCHEL:
+    case WP_SATCHEL_DET:
+    case WP_MORTAR:
+    case WP_GPG40:
+    case WP_M7:
+    case WP_MORTAR_SET:
+      return true;
+    default:
+      return false;
+  }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,22 +35,27 @@
  * }
  */
 
+#pragma once
+
 #include <string>
-#include <ostream>
+#include "g_local.h"
+#include "etj_log.h"
 
-struct gentity_s;
-typedef struct gentity_s gentity_t;
-
+namespace ETJump {
 class Motd {
-public:
-  Motd();
-  ~Motd();
-  void Initialize();
-  void GenerateMotdFile();
-  void PrintMotd(gentity_t *ent);
+  bool initialized;
+  std::string chatMotd;
+  std::string consoleMotd;
 
-private:
-  bool initialized_;
-  std::string chatMessage_;
-  std::string motd_;
+  std::unique_ptr<Log> logger;
+  std::string errors;
+
+public:
+  explicit Motd(std::unique_ptr<Log> log);
+  ~Motd() = default;
+
+  void initialize();
+  void generateMotdFile();
+  void printMotd(gentity_t *ent) const;
 };
+} // namespace ETJump

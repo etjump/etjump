@@ -1,3 +1,189 @@
+# ETJump 3.4.0
+
+* `records` output no longer shows duplicate rank strings for tied times [#1603](https://github.com/etjump/etjump/pull/1603)
+* added `tracker_not_eq_any` and `tracker_not_eq_all` keys to `target/trigger_tracker` [#1614](https://github.com/etjump/etjump/pull/1614)
+  * this allows mappers to pick desired behavior for "not equal" trackers - either all values or one of the values
+  * old `tracker_not_eq` is now deprecated and functionality is provided by `tracker_not_eq_any`
+* added ability to automatically play all demos from a directory with `demoQueue` command [#1616](https://github.com/etjump/etjump/pull/1616) 
+  * `etj_demoQueueDir` cvar sets subdirectory inside `demos` to play demos from, leave empty to play from `demos` directory (default `demoqueue`)
+  * commands:
+    * `demoQueue start` - starts playback
+    * `demoQueue stop` - stops playback (this must be issued to stop the playback, `ESC` will just go to next demo)
+    * `demoQueue restart` - restart playback from the beginning
+    * `demoQueue next` -  skips to next demo
+    * `demoQueue previous` - skips to previous demo
+    * `demoQueue goto <index>` - skips to specified demo in the queue
+    * `demoQueue status` - prints status about the current demo queue
+    * `demoQueue help [command]` - prints usage information or detailed help about a command
+* added `target_ft_setrules` entity to set fireteam rules for the activators fireteam + supplementary worldspawn keys [#1625](https://github.com/etjump/etjump/pull/1625)
+  * bypasses `noftnoghost` and new `noftsavelimit` & `noftteamjumpmode` worldspawn keys
+  * `spawnflag 1` means only fireteam leader can activate the entity
+  * keys:
+    * `savelimit (-1 - 100 or reset)` - sets savelimit
+    * `noghost 0/1` - disable/enable fireteam noghost
+    * `teamjumpmode 0/1` - disable/enable teamjump mode
+    * `leader_only_message` - message to print to activator if `spawnflag 1` is set and the activator is not the fireteam leader, `%s` will be substituted with the fireteam leaders name
+* added `etj_logCenterPrint` cvar to log center prints to console [#1627](https://github.com/etjump/etjump/pull/1627)
+  * consecutive, identical messages are not logged multiple times - same message will be logged only if it has already disappeared from screen, as controlled by `cg_centertime` cvar
+  * save messges are not logged
+* console no longer prints a warning when trying to vsay current class as a spectator [#1648](https://github.com/etjump/etjump/pull/1648)
+* spectators can now use the fireteam general vsay menu [#1649](https://github.com/etjump/etjump/pull/1649)
+* fully removed location grid system from the mod - team/ft chats no longer display coordinates on chat [#1651](https://github.com/etjump/etjump/pull/1651)
+* fixed Linux HWID generation leaking a socket [#1652](https://github.com/etjump/etjump/pull/1652)
+* added `target_spawn_relay` entity to execute actions on player respawn [#1636](https://github.com/etjump/etjump/pull/1636)
+  * passive entity that doesn't need to be explicitly targeted, fired automatically on respawns (not revives)
+  * keys:
+    * `team` - comma-separated list of teams that this relay fires for. If not set, fires for all teams, including spectators. Valid team names are "axis", "allies" and "spectator".
+    * `scriptname` - name of the scriptblock to activate, calls the `activate` trigger, also supports `activate axis/allies`. Passes activator to mapscript.
+    * `target` - targets to fire
+* added `etj_onDemoPlaybackStart` cvar to execute commands on first frame of demo playback [#1617](https://github.com/etjump/etjump/pull/1617)
+
+# ETJump 3.3.4
+
+* fixed demo subdirectories not loading on replays menu on Windows [#1602](https://github.com/etjump/etjump/pull/1602)
+* fixed nametag interpolation breaking non-ascii characters in the rest of the chat message [#1606](https://github.com/etjump/etjump/pull/1606)
+* several fixes to flamethrower [#1607](https://github.com/etjump/etjump/pull/1607)
+  * fixed not being able to set yourself on fire
+  * fixed visual bug with flamechunks interacting with nonsolid players
+  * fixed potential crash when a flamechunk spawned by `props_flamethrower` entity interacted with players/other entities
+* fixed chat replay storing interpolated names incorrectly if the name had an escape character [#1608](https://github.com/etjump/etjump/pull/1608)
+* fixed potential buffer overflow with `stylestring` key on `dlight` entities [1622](https://github.com/etjump/etjump/pull/1622)
+* fixed listbox & dropdown menus changing selected entry when dragging the scrollbar and moving cursor over the list [#1623](https://github.com/etjump/etjump/pull/1623)
+* fixed reversed dropdown menus not displaying background [#1626](https://github.com/etjump/etjump/pull/1626)
+* reverted change done in 3.3.1 which changed the way `etj_autoLoad` works [#1635](https://github.com/etjump/etjump/pull/1635)
+  * players are now initially placed on their active spawnpoint, and then teleported to their last save position, like `etj_autoLoad` worked prior to the change
+  * this ensures players are not able to bypass any setup that a mapper has designed to be ran on player spawn, such as init triggers
+* flipped logic in demo compatibility print for `sv_fps` detection support - prints are now only visible when using an outdated method, or if the info is not available [#1632](https://github.com/etjump/etjump/pull/1632)
+* fixed flamethrower burn status persisting on respawn [#1637](https://github.com/etjump/etjump/pull/1637)
+* spectator help text/follow text no longer disappears when chat window is opened [#1640](https://github.com/etjump/etjump/pull/1640)
+
+# ETJump 3.3.3
+
+* fixed a crash on UI keyhandling on 2.60b and ETL due to out of bounds array access in engine [#1601](https://github.com/etjump/etjump/pull/1601)
+
+# ETJump 3.3.2
+
+* fixed players producing water impacts when shot [#1544](https://github.com/etjump/etjump/pull/1544)
+* tweaked changelog UI appearence [#1546](https://github.com/etjump/etjump/pull/1546) [#1550](https://github.com/etjump/etjump/pull/1550)
+  * changelog window is now slightly smaller, with smaller font size
+  * added fullscreen, faded background to improve readability
+  * changelog rows now have alternating background colors to improve readability
+* added missing entry for `etj_fixedCompassShader` to settings menu [#1547](https://github.com/etjump/etjump/pull/1547)
+* fixed `shooter_rocket` calculating target deviation incorrectly [#1549](https://github.com/etjump/etjump/pull/1549)
+* fixed wallbugging by saving while dead and loading [#1552](https://github.com/etjump/etjump/pull/1552)
+* fixed long standing issue with players spawning at incorrect spawn locations if all spawnpoints of a desired spawn were occupied by a player [#1555](https://github.com/etjump/etjump/pull/1555)
+* fixed `etj_autoSprint` not working reliably if clients FPS dropped below 125 with `pmove_fixed 1` [#1556](https://github.com/etjump/etjump/pull/1556)
+* fixed `etj_drawSnapHUD 3` drawing snapzone borders at screen edges for zones which were off screen [#1557](https://github.com/etjump/etjump/pull/1557)
+* fixed `etj_hide` & `etj_hideDistance` affecting `cg_drawCrosshairNames` draw range when fireteam collision was enabled [#1558](https://github.com/etjump/etjump/pull/1558)
+  * movers health bar drawing now also respects `cg_drawCrosshairNames 0` like in VET
+* fixed chat name tagging breaking on encoded chat messages if a player had `=` character in their name [#1561](https://github.com/etjump/etjump/pull/1561)
+* added `toggleETJumpSettings` console command to open/close ETJump settings menu [#1562](https://github.com/etjump/etjump/pull/1562)
+* `g_adminLog` is now used to log admin-related events [#1563](https://github.com/etjump/etjump/pull/1563)
+  * admin commands using flags `b`, `C`, `A`, `k`, `m`, `P`, `R`, `s`, `T` and `c` are logged
+  * admin chats are logged
+    * these used to be logged in the regular log file, they are now only logged into admin log
+  * authentication related events are logged (potential GUID/HWID spoofs, rejected connections due to a ban)
+* added `spawnflags 16` to `func_button` and `func_invisible_user` to show wait time as a progress bar [#1565](https://github.com/etjump/etjump/pull/1565)
+  * if set, both entities show a gradually filling progress bar indicating when they can be used again
+  * slight inaccuracy with `func_button` - does not account for the travel time when the button returns to it's starting position
+* fixed a minor memory leak in UI when switching changelog versions or switching active custom vote list with details panel open [#1567](https://github.com/etjump/etjump/pull/1567)
+* enabled buggy `nojumpdelay` behavior in `solstice` and `stonehalls2` to fix some jumps in them which relied on a bug that was in the mod between versions 2.3.0 and 2.5.0 [#1570](https://github.com/etjump/etjump/pull/1570)
+* increased the number of files that can be read from a directory to support e.g. massive demo directories [#1571](https://github.com/etjump/etjump/pull/1571)
+* fixed mounted MG42 overheat event prediction [#1572](https://github.com/etjump/etjump/pull/1572)
+* `entitylist` now shows the model number of brush entities [#1575](https://github.com/etjump/etjump/pull/1575)
+* increased maximum number of brush entities in a map from `255` to `511` [#1577](https://github.com/etjump/etjump/pull/1577)
+* fixed console prints appearing duplicated in some scenarios on listen servers [#1579](https://github.com/etjump/etjump/pull/1579)
+* fixed crosshair drawing in speaker editor [#1580](https://github.com/etjump/etjump/pull/1580)
+  * ETJump custom crosshairs now draw correctly
+  * crosshair is no longer hidden while zooming
+* added `changeskin` script action for changing skin used on an entity [#1581](https://github.com/etjump/etjump/pull/1581)
+* fixed skins not working on `misc_constructiblemarker` using a `model2` key [#1582](https://github.com/etjump/etjump/pull/1582)
+* added support for `cursorhint` key on `set/delete` script actions [#1584](https://github.com/etjump/etjump/pull/1584)
+* fixed inconsistency in grouped popup counter formatting [#1585](https://github.com/etjump/etjump/pull/1585)
+* improved error messages when overflowing certain configstring indices, mainly once which are used up by mappers [#1589](https://github.com/etjump/etjump/pull/1589)
+* added new cvar parsing system for cvars expecting size or scale values [#1590](https://github.com/etjump/etjump/pull/1590)
+  * any cvar that expects a size or scale can now either take one or two values
+    * if a single value is given, size/scale is set uniformly
+    * if two values are given, size/scale is set independently on X/Y axes, respectively
+  * breaking changes
+    * `etj_crosshairScaleX/Y` are removed, same functionality can now be achieved with `cg_crosshairSize X Y`
+    * `etj_spectatorInfoSize` has been changed to `etj_spectatorInfoScale`
+* added `spawnflag 1` to `target_delay` for per-client delay cycle [#1591](https://github.com/etjump/etjump/pull/1591)
+  * when set, each client has their own private delay cycle instead of global cycle
+  * re-triggering the entity before the delay is finished only resets the cycle of the activating client
+* fixed timerun entity validation [#1592](https://github.com/etjump/etjump/pull/1592)
+  * warnings are now printed to console if
+    * map contains a start timer without a corresponding stop timer
+    * map contains a stop timer without a corresponding start timer
+    * map contains checkpoints for a timerun without a start and stop timer
+* chat replay timestamps are now calculated on server to ensure clients system clock inaccuracies don't affect the timestamp [#1597](https://github.com/etjump/etjump/pull/1597)
+* flamethrower now correctly ignores nonsolid players [#1598](https://github.com/etjump/etjump/pull/1598)
+* portal gun can no longer be fired through solid players [#1599](https://github.com/etjump/etjump/pull/1599)
+
+# ETJump 3.3.1
+
+* fixed backstab hint showing for nonsolid players when holding a knife [#1492](https://github.com/etjump/etjump/pull/1492)
+  * also fixes a long standing issue where knife would "hit" nonsolid players
+* fixed `etj_drawPlayerBBox` + `etj_hideFadeRange` interaction with solid players - bbox alpha now ignores this correctly for solid players [#1493](https://github.com/etjump/etjump/pull/1493)
+* added `etj_snapHUDBorderThickness` to control `etj_drawSnapHUD 3` border thickness [#1494](https://github.com/etjump/etjump/pull/1494)
+  * valid range is `0.1 - 10.0 or etj_snapHUDHeight * 2`
+* added `g_chatReplay` cvar to turn off chat replay on server [#1497](https://github.com/etjump/etjump/pull/1497)
+  * chats are still logged when the feature is turned off, the messages are just not sent to clients
+* fixed overbounce watcher breaking until cgame was reloaded if an impossible OB was detected (negative z-velocity & start height > current height) [#1496](https://github.com/etjump/etjump/pull/1496)
+* added experimental `etj_smoothAngles` cvar to decouple client view updates from Pmove update rate [#1495](https://github.com/etjump/etjump/pull/1495)
+  * when enabled, clients viewangles used to render the scene are updated every frame with new values, as opposed to using viewangle results from Pmove, which would limit the updates to 125Hz with `pmove_fixed 1`
+  * every time client runs Pmove via prediction code, the client viewangles are synced back to match with the viewangle results from Pmove
+  * does not affect physics calculations - the updates ran outside of Pmove calls are purely visual
+    * this means that e.g. at 250FPS, every other viewangle update is not actually what is being sent to Pmove to calculate physics
+  * no effect while spectating or if `pmove_fixed` is `0`
+* fixed old etmain bug which caused bullet flesh impact sounds to play at wrong location [#1500](https://github.com/etjump/etjump/pull/1500)
+* fixed corpses producing water impact particles when shot [#1501](https://github.com/etjump/etjump/pull/1501)
+* fixed bullet impacts producing particle effects unreliably [#1503](https://github.com/etjump/etjump/pull/1503)
+* added `cursorhint` key to `func_button` for specifying the cursorhint, similar to `func_invisible_user` [#1507](https://github.com/etjump/etjump/pull/1507)
+* `etj_hideMe` can no longer be set if fireteam player collision is enabled, and will automatically be disabled if turned on [#1506](https://github.com/etjump/etjump/pull/1506)
+* added `etj_ad_stopInSpec` to automatically stop autodemo recording when switching to spectators [#1510](https://github.com/etjump/etjump/pull/1510) [#1542](https://github.com/etjump/etjump/pull/1542)
+* fixed `trigger_teleport_client` not working correctly for spectators [#1511](https://github.com/etjump/etjump/pull/1511)
+* fixed JSON files without a JSON object unexpectedly crashing the game [#1514](https://github.com/etjump/etjump/pull/1514)
+* fixed ammo packs not functioning correctly when picked up by a field ops [#1517](https://github.com/etjump/etjump/pull/1517)
+* fixed `etj_autoLoad` and `load` executed during a death sequence initially spawning you in original spawn location, which could cause entities to trigger unexpectedly on original spawn location [#1516](https://github.com/etjump/etjump/pull/1516)
+* fixed `target_init` and timerun start not clearing the ammo for removed weapons, which would cause the weapons to have incorrect ammo when picked up again [#1515](https://github.com/etjump/etjump/pull/1515)
+* changes to chat replay [#1508](https://github.com/etjump/etjump/pull/1508) [#1521](https://github.com/etjump/etjump/pull/1521)
+  * messages are now timestamped with relative timestamps (10s ago, 1min ago, 1h ago etc.)
+  * `g_chatReplayMaxMessageAge` now only applies to messages that were sent prior to your session starting
+    * any message send after you have connected to the server will always be replayed, regardless of the message age
+    * default is now `5`
+* bundled `sv_fps 125` compatible mapscript for `GreenJumps_f.bsp` with the mod [#1518](https://github.com/etjump/etjump/pull/1518)
+* added `etj_autoSprint` to flip `+sprint` button behavior [#1519](https://github.com/etjump/etjump/pull/1519)
+  * when enabled, player automatically sprints, and holding `+sprint` runs instead
+* fixed exploits with `noghost` fireteam rule upon joining [#1520](https://github.com/etjump/etjump/pull/1520)
+  * clients are now flagged to have enabled `noghost` upon joining, if `noghost` is enabled
+  * timeruns are now interrupted when joining to fireteam with `noghost` enabled, if ongoing timerun doesn't allow `noghost`
+* `changemodel` script action can now be used on `misc_gamemodel` entities too [#1543](https://github.com/etjump/etjump/pull/1543)
+* increased slick and NJD detector ranges to maximum possible map size [#1530](https://github.com/etjump/etjump/pull/1530)
+* adjusted timerun high ping interrupt to require sustained 100ms of lag before triggering [#1529](https://github.com/etjump/etjump/pull/1529)
+  * this should help filter out small lag spikes that are caused by unstable connections, which would trigger timerun interrupts overly aggressively on `sv_fps + snaps 125`
+* added initial support for `author` key to `.arena` files [#1528](https://github.com/etjump/etjump/pull/1528)
+  * currently not used for anything
+* fixed in-game `Vote -> Map` list breaking if `ui_netGameType` was not set to `2` [#1527](https://github.com/etjump/etjump/pull/1527)
+* fixed nonsolid player pushing each other while riding on movers [#1526](https://github.com/etjump/etjump/pull/1526)
+* added missing newline to print output when viewing run records for multiple seasons [#1525](https://github.com/etjump/etjump/pull/1525)
+* reintroduced `etj_viewlog` setting to the menus for ET: Legacy clients [#1524](https://github.com/etjump/etjump/pull/1524)
+  * ET: Legacy version 2.83.0 and newer can now toggle the external console while the game is running
+* added support for engine extensions [#1531](https://github.com/etjump/etjump/pull/1531) [#1535](https://github.com/etjump/etjump/pull/1535)
+  * currently supports two extensions
+    * extended `CMD_BACKUP/MASK` on ET: Legacy clients to allow for higher ping + FPS combinations
+    * window flash on ET: Legacy on chat mentions and incoming private messages (requires `etj_highlight & 2`)
+* fixed buggy behavior with `TAB` and `UP/DOWNARROW` keys with expanded dropdown menus
+* improved custom vote UI [#1534](https://github.com/etjump/etjump/pull/1534)
+  * map list scrolling is now more responsive
+  * map list scrolls back to first entry when selecting a new list
+* added changelog to the menus [#1532](https://github.com/etjump/etjump/pull/1532)
+* fixed a client crash if server had a custom vote list with an empty `name` or `callvote_text` field [#1536](https://github.com/etjump/etjump/pull/1536)
+* fixed `etj_drawPlayerBBox & 4` drawing fireteam member bboxes of spectated player's fireteam instead of your fireteam [#1538](https://github.com/etjump/etjump/pull/1538)
+* flamethrower no longer sets opposing teams members on fire [#1539](https://github.com/etjump/etjump/pull/1539)
+* fixed flamethrower dps inconsistency if `sv_fps` did not align to 50ms frametimes [#1541](https://github.com/etjump/etjump/pull/1541)
+* `ad_save` can no longer be used if the currently recorded demo isn't an autodemo temp demo [#1542](https://github.com/etjump/etjump/pull/1542)
+
 # ETJump 3.3.0
 
 * added `portalsize` key to `func_portaltarget` to allow scaling the size of the portal fired onto it (up to `512u`) [#1324](https://github.com/etjump/etjump/pull/1324)
@@ -7,10 +193,11 @@
   * added `etj_lagometerShader` to toggle displaying the background image or solid color
   * demo playback will now display snapshot delta values as ping in demo playback (ETPro/legacy style)
   * added client/server snapshot rate display to lagometer
-* fixed server side framerate dependencies, the mod should now be fully compatible with higher `sv_fps` values [#1327](https://github.com/etjump/etjump/pull/1327) [#1330](https://github.com/etjump/etjump/pull/1330)
+* fixed server side framerate dependencies, the mod should now be fully compatible with higher `sv_fps` values [#1327](https://github.com/etjump/etjump/pull/1327) [#1330](https://github.com/etjump/etjump/pull/1330) [#1407](https://github.com/etjump/etjump/pull/1407)
   * `wait` key in mapscripts simulates `sv_fps 20` timings
   * disguise stealing speed is normalized to `sv_fps 20`
   * flamethrower firing range is normalized to `sv_fps 20`
+  * flamethrower damage normalized to `sv_fps 20`
   * player pushing when players are stuck in each other is normalized to `sv_fps 20`
   * projectiles entering skyboxes no longer get stuck in skyboxes due to higher trace frequency
 * added support for `private` keyword to `playsound` script actions to allow playing sound only to activator [#1314](https://github.com/etjump/etjump/pull/1314)
@@ -21,10 +208,13 @@
   * slightly reduced the size of the token bbox to better match the visual size
   * tokens can no longer be collected while noclipping
 * lean angles are now interpolated on spec/demo playback to smooth out viewangle transitions [#1337](https://github.com/etjump/etjump/pull/1337)
-* added chat replay system [#1335](https://github.com/etjump/etjump/pull/1335)
+* added chat replay system [#1335](https://github.com/etjump/etjump/pull/1335) [#1488](https://github.com/etjump/etjump/pull/1488)
   * server replays 10 latest global chat messages to clients after connecting/map change/`vid_restart`
     * chats are stored on server in `chatreplay.json`
     * timestamps or chat flags are not preserved from original messages
+    * `etj_chatReplay` cvar toggles the replay on client side, any chat messages you send are still included for other players chat replays
+  * server cvar `g_chatReplayMaxMessageAge <minutes>` can be set to make chats expire, any message older than specified won't be included in a chat replay
+    * default value `0` means chats never expire
 * fixed potential crash on host game menu when over 500 maps were installed [#1343](https://github.com/etjump/etjump/pull/1343)
 * added `trigger_teleport_client` entity to enable client side predicted teleports [#1332](https://github.com/etjump/etjump/pull/1332)
   * supports same keys/spawnflags as other teleport entities, except `spawnflags 4/8`
@@ -55,6 +245,122 @@
     * regular teleports no longer add +1u z offset to destination if this is set
     * relative angle teleports no longer offset destination z origin by distance between player z origin and the trigger origin
 * fixed `SPIN` spawnflag not working on some weapon_ entities, spinning now works correctly in all of them [#1365](https://github.com/etjump/etjump/pull/1365)
+* timerun timer now displays white for tied records and first records (no previous record) [#1367](https://github.com/etjump/etjump/pull/1367)
+* added `spawnflags 4096` to `trigger_multiple` to disable activation while noclipping [#1368](https://github.com/etjump/etjump/pull/1368)
+* custom vote list names can no longer be just color codes, and mapnames are forced to lowercase [#1369](https://github.com/etjump/etjump/pull/1369)
+* `records <runname>` no longer returns additional partial matches if the queried run is an exact match for a run [#1371](https://github.com/etjump/etjump/pull/1371)
+* added `etj_drawPlayerBBox` to draw bounding boxes of players [#1372](https://github.com/etjump/etjump/pull/1372)
+  * `etj_drawPlayerBBox` - bitflag value to draw bboxes
+    * `1` = draw self
+    * `2` = draw others
+    * `4` = draw fireteam members
+  * `etj_playerBBoxBottomOnly` - bitflag to draw only bottom of bbox instead of full box
+    * same flags as `etj_drawPlayerBBox`
+  * `etj_playerBBoxColorSelf/Other/Fireteam` - sets the color of the bbox
+    * might not work correctly if using a custom shader
+  * `etj_playerBBoxShader` - shader to use for drawing
+* fixed `!spectate` not triggering timerun interrupt when a timerun was set to interrupt on team change [#1375](https://github.com/etjump/etjump/pull/1375)
+* improvements to fireteam teamjump mode & `target_ftrelay` [#1364](https://github.com/etjump/etjump/pull/1364)
+  * `target_ftrelay` no longer fires for spectators
+  * added `spawnflags 1/2/4/8/16/32`
+    * `4` - fire all targets intead of one random target
+    * `32` - only fire for other fireteam members
+    * rest match regular `target_relay`
+  * improved fireteam prints related to teamjump mode
+  * added menu option to toggle fireteam teamjump mode
+  * added indicator to fireteam overlay to show if teamjump mode is active
+* fixed excess overheat events triggering for mounted MG42s [#1376](https://github.com/etjump/etjump/pull/1376)
+  * `+attack2` now works on mounted MG42s
+* fixed missing newlines on some `records` prints [#1378](https://github.com/etjump/etjump/pull/1378)
+* fixed chat highlighting not working for server chat messages [#1381](https://github.com/etjump/etjump/pull/1381)
+* fixed unrelated fireteam/vote messages being visible simultaneously [#1383](https://github.com/etjump/etjump/pull/1383)
+* fixed portalgun portals drawing mirrored on 2.60b clients [#1388](https://github.com/etjump/etjump/pull/1388)
+* fixed systemcalls working unreliably on 64-bit clients [#1396](https://github.com/etjump/etjump/pull/1396)
+* timeruns no longer interrupt due to too low fps with `com_maxfps 0` [#1405](https://github.com/etjump/etjump/pull/1405)
+* added dropdown menus to UI for more convenient multi-selection menu entries [#1406](https://github.com/etjump/etjump/pull/1406)
+* added autospec feature to automatically follow next client when idling in free spec [#1382](https://github.com/etjump/etjump/pull/1382)
+  * `etj_autoSpec` - toggle on/off
+  * `etj_autoSpecDelay` - time in milliseconds to wait before automatically following next client
+* fixed `!listbans` output being affected by the color of "banned by" entry [#1419](https://github.com/etjump/etjump/pull/1419)
+* fixed `!ban` failing if time was 0, making it impossible to ban someone permantently while also giving a reason for the ban [#1418](https://github.com/etjump/etjump/pull/1418)
+* menu entries with `Custom` value now display the actual cvar value [#1416](https://github.com/etjump/etjump/pull/1416)
+* menu options that are incompatible with players client are now hidden [#1413](https://github.com/etjump/etjump/pull/1413)
+* added adminchat functionality [#1415](https://github.com/etjump/etjump/pull/1415)
+  * can be toggled on server with `g_adminChat`
+  * available to players with adminflag `S`
+  * `say_admin`, `ma` and `enc_say_admin` will send a message to adminchat
+  * also available as a target in regular chat window (`adminChat` command opens the message window with adminchat selected
+* IP address is now visible in `!userinfo` output if a player is connected [#1417](https://github.com/etjump/etjump/pull/1417)
+* dragging a scrollbar in listbox menu no longer stops the scroll if cursor moves outside the window [#1424](https://github.com/etjump/etjump/pull/1424)
+* fixed `Write Config` button in settings menu not focusing on the text field upon opening [#1425](https://github.com/etjump/etjump/pull/1425)
+* added `etj_drawSnapHUD 3` to draw snaphud with borders only instead of solid colored blocks [#1430](https://github.com/etjump/etjump/pull/1430)
+* fixed collision on `func_fakebrush` with `CONTENTS_PLAYECLIP` not working correctly [#1429](https://github.com/etjump/etjump/pull/1429)
+* re-fixed demo list sorting to be case-insensitive - this was already the case on earlier versions but broke at some point [#1437](https://github.com/etjump/etjump/pull/1437)
+* added color picker to UI [#1422](https://github.com/etjump/etjump/pull/1422)
+  * avaialble via `Color picker...` menu option in dropdown menus
+  * sliders for RGB, HSV and Alpha, preview boxes for old/new color
+    * RGB sliders can be set to either `0-1` or `0-255` range
+  * interactive HSV color picker, usable with mouse
+    * `MOUSE2` only adjusts saturation
+    * `MOUSE3` only adjusts value
+* `Vote -> Map` menu now lists all maps on the server, regardless of the amount of pk3 files on the server [#1431](https://github.com/etjump/etjump/pull/1431)
+  * the list is also now sorted alphabetically
+* fixes to `Vote -> Map -> Details` menu [#1442](https://github.com/etjump/etjump/pull/1442)
+  * details now update automatically as you select new map on the vote list
+  * levelshot is now displayed in correct aspect ratio
+  * added text scrolling to the briefing drawing if it didn't fit on screen fully
+  * unfortunately you'll likely never see this panel properly because the files won't be loaded with `sv_pure 1` if server has a lot of maps
+* fixed `!add-customvote` deleting existing customvote file if the file contained a syntax error [#1443](https://github.com/etjump/etjump/pull/1443)
+* fixed menu loading fallback not working if custom menufile was not found [#1446](https://github.com/etjump/etjump/pull/1446)
+* added custom votes to vote UI [#1447](https://github.com/etjump/etjump/pull/1447)
+  * details panel contains the list of maps on the server and any unavailable maps
+  * menu contains a toggle for voting a random map or RTV from given list
+* improvements to menu sliders [#1455](https://github.com/etjump/etjump/pull/1455) [#1466](https://github.com/etjump/etjump/pull/1466)
+  * sliders no longer send cvar updates every frame mouse is not moved
+  * added "cached" menu sliders, which update the real cvar value only when mouse click state changes
+    * used for `etj_noclipScale` to prevent spamming userinfo updates, and `etj_menuSensitivity` to make the slider easier to use
+* improved logging for tokens, motd and custom votes [#1463](https://github.com/etjump/etjump/pull/1463)
+  * fixed several crashes related to JSON parsing
+  * various errors from `!tokens` no longer crash the server, but are gracefully handled with an error message
+* fixed `!tokens move` not shifting token to ground level like `!tokens add` [#1463](https://github.com/etjump/etjump/pull/1463)
+* fixed `listinfo/customvotes` output if server has no custom votes set [#1463](https://github.com/etjump/etjump/pull/1463)
+* `shooter_rocket/grenade/mortar` no longer spawn entities if entity limit is close to full, to prevent them working as an effective DoS in some maps [#1467](https://github.com/etjump/etjump/pull/1467)
+* runtimer now uses correct timestamps for spectators/demo playback if server runs/was running at `sv_fps 125` [#1468](https://github.com/etjump/etjump/pull/1468)
+* added info print to the start of demo playback [#1470](https://github.com/etjump/etjump/pull/1470)
+  * displays mod version for demo, player name, map, server and any compatibility flags used during demo playback
+* deprecated `g_debugTimeruns` as it serves no real purpose anymore [#1469](https://github.com/etjump/etjump/pull/1469)
+* fixed various backwards compatibility issues with old demos [1472](https://github.com/etjump/etjump/pull/1472)
+  * events are now correctly adjusted to account for new events/entity types added in ETJump 2.0.6, 2.3.0 and 3.3.0 (for this release)
+* added cvars to control demo recording status line [#1475](https://github.com/etjump/etjump/pull/1475)
+  * `etj_drawRecordingStatus` - toggle demo recording status on/off
+  * `etj_recordingStatusX/Y` - X/Y position
+  * etmain's `cg_recording_statusline` is removed in favor of these
+  * the default position is very slightly shifted to left
+* added `savepos/loadpos` system [#1456](https://github.com/etjump/etjump/pull/1456)
+  * allows saving players position, angles, velocity, stance and timerun state into a file
+    * files are saved into `etjump/savepos/<name>.dat` (if no name is given, `default.dat`)
+    * can also be used in demo playback
+    * timerun state can only be saved from demos recorded in ETJump 3.3.0 and newer
+  * `loadpos` restores the state from a given file
+  * `savepos` can be used any time, whereas `loadpos` requires cheats to be enabled
+  * usage:
+    * `savepos <optional name> <optional flags>` - saves a position
+      * `1` - don't save velocity (will be cleared)
+      * `2` - don't save pitch angle (will reset to 0)
+      * if only one parameter is given, it's treated as a flag if it's numeric and one character only
+    * `loadpos <optional name>` - loads a position
+    * `listsavepos` - list all saved savepos files
+    * `readsavepos` - reload savepos files
+* `set` script action can no longer change entitys `classname` outside of `spawn` script events [#1480](https://github.com/etjump/etjump/pull/1480)
+  * `classname_nospawn` can still be used as it doesn't re-spawn the entity
+* added `delete` script action for deleting entities by their entity key/value pairs [#1481](https://github.com/etjump/etjump/pull/1481)
+  * `delete { origin "16 16 16" }`, `delete { origin "16 16 16" targetname "foo" ... }`
+  * if multiple key/value pairs are provided, an entity must match all of them to be deleted
+  * not all entity keys are supported with this script action - this will be improved in future releases
+    * for the currently supported keys, see [here](https://github.com/etjump/etjump/blob/d75422cb0d81be51575dffa5121079547a68a867/src/game/g_spawn.cpp#L84-L175)
+* fixed `!rename` ignoring spaces for the new name [#1485](https://github.com/etjump/etjump/pull/1485)
+  * the command also won't execute if the resulting name would be too long, while previously the new name was truncated to stay within limits
+* `cg_fov` can now be set outside of 90-160 range in demo playback without setting `developer 1` [#1489](https://github.com/etjump/etjump/pull/1489)
 
 # ETJump 3.2.2
 
@@ -145,7 +451,7 @@
 * added `wait` key to `trigger_push` and fixed multiple activations on client side, causing prediction errors when traveling through large triggers [#1217](https://github.com/etjump/etjump/pull/1217)
   * default **100ms**, valid range is **0 - 65535**
 * loading to a prone position while using mortar set is no longer possible [#1221](https://github.com/etjump/etjump/pull/1221)
-* `goto/call/iwant` now teleport you to the same stance as the target/caller`[#1223](https://github.com/etjump/etjump/pull/1223)
+* `goto/call/iwant` now teleport you to the same stance as the target/caller [#1223](https://github.com/etjump/etjump/pull/1223)
 * fixed issues with `!rename` command
   * `!rename` no longer works on admins that are same/higher level than you
   * `!rename` no longer reduced name change limit (unless using it on yourself)
@@ -753,8 +1059,8 @@
   * voting can now be correctly disabled by setting all `vote_allow_` cvars to 0
   * added `g_spectatorVote` to control spectator voting
     * __1__ spectators can cast votes
-	* __2__ spectators can also call votes
-	* only spectators who cast votes are count towards `vote_percent` to prevent votes never passing on servers with multiple afk spectators
+    * __2__ spectators can also call votes
+    * only spectators who cast votes are count towards `vote_percent` to prevent votes never passing on servers with multiple afk spectators
   * removed in-game vote -> misc menu and replaced it with map restart & random map buttons
   * various string formatting and spelling fixes
   * `callvote map` now lists matched maps if more than one match was found
@@ -770,14 +1076,14 @@
 * added CHS 53 to display Z angle of a plane
 * added `etj_extraTrace` cvar to toggle tracing of playerclips on various detectors
   * takes bitmask value
-  * __1__ = OB detector
-  * __2__ = slick detector
-  * __4__ = no jump delay detector
-  * __8__ = CHS 10-11
-  * __16__ = CHS 12
-  * __32__ = CHS 13-15
-  * __64__ = CHS 16
-  * __128__ = CHS 53
+    * __1__ = OB detector
+    * __2__ = slick detector
+    * __4__ = no jump delay detector
+    * __8__ = CHS 10-11
+    * __16__ = CHS 12
+    * __32__ = CHS 13-15
+    * __64__ = CHS 16
+    * __128__ = CHS 53
   * the list above can be checked in game with `extraTrace` console command
 * character strings now always draw at least 1px high/wide characters even if scaled to very low size
 * added spawnflag __1__ `SILENT` to `target/trigger_savereset` to omit the print it makes
@@ -865,8 +1171,8 @@
   * `damageplayer N`, inflicts __N__ hp damage to the activator
   * `killplayer`
 * added new keys for `func_invisible_user` entity:
-  - `noise <sound file>` sets sound file to play when activated
-  - `volume <0-255>` controls sound volume
+  * `noise <sound file>` sets sound file to play when activated
+  * `volume <0-255>` controls sound volume
 * fixed `func_static` spawnflag __2__ (PAIN), direct activation of entities don't crash the game anymore 
 * fixed `target_speaker` spawnflag **8** (ACTIVATOR) didn't play sound to the activator
 * added `etj_OBX/Y` to move OB detector
@@ -1065,13 +1371,13 @@
 * Added spawnflag 8 to `target_startTimer` to reset the runtimer if pmove is not fixed
 * Added spawnflag 16 to `target_startTimer` to disable use of save slots and backups
 * Portal gun changes:
-  - Both portal gun fire rates are now equal.
-  - Lowered the minimum allowed distance between the portal gun portals.
-  - Changed other players' portal color 1 to green to make it more distinct on light surfaces.
+  * Both portal gun fire rates are now equal.
+  * Lowered the minimum allowed distance between the portal gun portals.
+  * Changed other players' portal color 1 to green to make it more distinct on light surfaces.
 * Enhanced vote UX
-  - Spectators can now see the y/n count.
-  - Selected y/n is highlighted.
-  - Revoting is now possible. Players can change their vote 3 times 10 seconds after the vote.
+  * Spectators can now see the y/n count.
+  * Selected y/n is highlighted.
+  * Revoting is now possible. Players can change their vote 3 times 10 seconds after the vote.
 * Removed unused cvars.
 * Vsay now plays the same voice for every player.
 * Fixed a click event issue in the widescreen UI.
@@ -1085,19 +1391,19 @@
 * CHS 50 displays the last jump coordinates.
 * !spec now correctly only tries to match players that are not spectating.
 * Added two new spawnflags for `target_startTimer`
-  - __32__ disable explosive weapons pickup
-  - __64__ disable portal gun pickup
+  * __32__ disable explosive weapons pickup
+  * __64__ disable portal gun pickup
 * Drowned players are now correctly put to spec after a period of inactivity.
 * Added worldspawn key `nooverbounce`.  Disables overbounce if set to anything but __0__.
-  - Surfaceparm monsterslicksouth enables overbounce on maps with no overbounce enabled.
+  * Surfaceparm monsterslicksouth enables overbounce on maps with no overbounce enabled.
 * Added spawnflag __8__ to `target_teleporter`. Works like __4__ (preserves yaw) except keeps the pitch value as well.
 * `trigger_teleporter` now supports same spawnflags as `target_teleporter`.
 * Added overbounce watcher. You can save a position and the watcher will display whenever you are pointing at an OB location.
-  - `etj_drawObWatcher` to toggle the OB watcher.
-  - `etj_obWatcherX/Y` to change the location of the watcher.
-  - `ob_save <optional name>` to save the current position. Saved position will be displayed.
-  - `ob_load <optional name>` to load the saved position to be displayed. 
-  - `ob_reset` to remove the displayed position. (Nothing will be displayed)
+  * `etj_drawObWatcher` to toggle the OB watcher.
+  * `etj_obWatcherX/Y` to change the location of the watcher.
+  * `ob_save <optional name>` to save the current position. Saved position will be displayed.
+  * `ob_load <optional name>` to load the saved position to be displayed. 
+  * `ob_reset` to remove the displayed position. (Nothing will be displayed)
 * HUD/UI clean up (replaced some drawchars on proper text drawing method)
 * Value __9__ for `etj_drawSpeed2` now displays only tens in speedometer (ignores hundreds & thousands)
 * Added 'etj_drawMaxSpeed' variable and etj_maxSpeedX/Y/Duration to display max speed from previous load session
@@ -1110,25 +1416,25 @@
   * spawnflags __8__: only fires targets if the activating player is currently timerunning  
   * spawnflags __16__: only fires targets if the activating player is currently __NOT__ timerunning
 * Added `speed_limit` key to `target_starttimer`.  
-Timer will not be started if player's speed is higher than the value. Default value is __700__.
+  * Timer will not be started if player's speed is higher than the value. Default value is __700__.
 * Added `etj_drawTokens`.
 * Added `etj_enableTimeruns`.
 * Fixed issues with timerun timer.
 * Added `trigger_tracker` and `target_tracker`.  
-A replacement for `target_activate` that's easier to use and allows more complex designs.
+  * A replacement for `target_activate` that's easier to use and allows more complex designs.
 * Fixed lines ending with a ^ breaking newlines.
 * `g_banners` to enable/disable banners altogether.
 * Client side autoexec for map specific configs. (autoexec_mapname.cfg)
 * Added spawnflags 1 to `target_remove_portals` to disable the text print.
 * Added `target_interrupt_timerun` to stop any timerun without setting a record.
 * Added `target_set_health`.  
-Set's activator's health to the value specified by the health key.  
-Spawnflags __1__ to set once per life.
+  * Set's activator's health to the value specified by the health key.  
+  * Spawnflags __1__ to set once per life.
 * Fixed a likely crash on linux client.
 * Added cvars to control ghost player's transparency:  
-`etj_ghostPlayersOpacity` controls ghostplayer's transparency.  
-`etj_ghostPlayersFadeRange`  controls distance when ghostplayer starts to fade.
-* Custom vsays: /vsay &lt;variation&gt;  &lt;id&gt;  &lt;custom text&gt; e.g. `/vsay 4 hi Good evening!`.
+  * `etj_ghostPlayersOpacity` controls ghostplayer's transparency.  
+  * `etj_ghostPlayersFadeRange`  controls distance when ghostplayer starts to fade.
+* Custom vsays: `/vsay <variation> <id> <custom text>` e.g. `/vsay 4 hi Good evening!`.
 * UI enhancements:
   * optional shadows for runtimer and speed
   * runtimer user experience improved 
@@ -1136,13 +1442,13 @@ Spawnflags __1__ to set once per life.
   * popup message grouping (avoid duplicates) `etj_popupGrouped`
   * teamchat height increased up to 14 lines (from 8)
 * Added cvar to control explosives shake `etj_explosivesShake`  
-  __0__ disables shaking, __1__ disables shaking from own explosives, __2__ disables shaking from other player's explosives, __3__ default behaviour
+  * __0__ disables shaking, __1__ disables shaking from own explosives, __2__ disables shaking from other player's explosives, __3__ default behaviour
 * Widescreen support
 * `etj_chatFlags` toggles team flags next to chat messages.
 * Improved callvote:  
-Specs can no longer vote.  
-Votes will stay for full 30 seconds unless the percentage needed out of number of connected clients has exceeded for either yes or no votes.  
-For example: 51% => 2 players are in team, 2 in spec => 3 votes are needed. If both players in team vote yes it will wait for 30 seconds and pass. If one of the specs join team vote yes, it will pass instantly. If one of the specs join team and vote no, it will wait for the vote to expire and pass.
+  * Specs can no longer vote.  
+  * Votes will stay for full 30 seconds unless the percentage needed out of number of connected clients has exceeded for either yes or no votes.  
+  * For example: 51% => 2 players are in team, 2 in spec => 3 votes are needed. If both players in team vote yes it will wait for 30 seconds and pass. If one of the specs join team vote yes, it will pass instantly. If one of the specs join team and vote no, it will wait for the vote to expire and pass.
 * Fixed a bug in listbans.
 * Fixed weird coordinates in the chat causing undesired mouse movements.
 * Bullets and explosives go through ghost players.

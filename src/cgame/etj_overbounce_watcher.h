@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,8 @@
 #include <map>
 
 #include "etj_irenderable.h"
+#include "etj_cvar_parser.h"
+
 #include "../game/q_shared.h"
 
 namespace ETJump {
@@ -59,6 +61,8 @@ private:
   // lists all available positions
   void list() const;
 
+  void setSize();
+
   bool overbounce = false;
 
   playerState_t *ps;
@@ -72,7 +76,7 @@ private:
 
   int gravity{};
 
-  float sizeX{}, sizeY{};
+  CvarValue::Size size;
   qhandle_t shader;
   vec4_t _color{};
 };

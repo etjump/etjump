@@ -23,7 +23,32 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
                               vec3_t start, vec3_t end, float spread,
                               int damage, qboolean distance_falloff);
 
-int G_GetWeaponDamage(int weapon); // JPW
+namespace ETJump {
+bool weaponAllowedWithNoExplosives(const int weapon) {
+  switch (weapon) {
+    case WP_GRENADE_LAUNCHER:
+    case WP_PANZERFAUST:
+    case WP_GRENADE_PINEAPPLE:
+    case WP_LANDMINE:
+    case WP_SATCHEL:
+    case WP_SATCHEL_DET:
+    case WP_MORTAR:
+    case WP_GPG40:
+    case WP_M7:
+    case WP_MORTAR_SET:
+      return false;
+    case WP_DYNAMITE:
+    case WP_PLIERS:
+      if (level.noExplosives == 2) {
+        return false;
+      }
+
+      return true;
+    default:
+      return true;
+  }
+}
+} // namespace ETJump
 
 qboolean G_WeaponIsExplosive(meansOfDeath_t mod) {
   switch (mod) {
@@ -78,8 +103,6 @@ int G_GetWeaponClassForMOD(meansOfDeath_t mod) {
   }
 }
 
-#define NUM_NAILSHOTS 10
-
 /*
 ======================================================================
 
@@ -88,10 +111,29 @@ KNIFE/GAUNTLET (NOTE: gauntlet is now the Zombie melee)
 ======================================================================
 */
 
-#define KNIFE_DIST 48
-
 // Let's use the same angle between function we've used before
 extern float sAngleBetweenVectors(vec3_t a, vec3_t b);
+
+namespace ETJump {
+void historicalKnifeTrace(gentity_t *ent, trace_t *tr, vec3_t start, vec3_t end,
+                          int passEntityNum) {
+  G_HistoricalTrace(ent, tr, start, nullptr, nullptr, end, passEntityNum,
+                    MASK_SHOT);
+
+  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr->entityNum < MAX_CLIENTS &&
+         !EntityUtilities::playerIsSolid(ClientNum(ent), tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    G_HistoricalTrace(ent, tr, start, nullptr, nullptr, end, passEntityNum,
+                      MASK_SHOT);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
 
 /*
 ==============
@@ -100,19 +142,17 @@ Weapon_Knife
 */
 void Weapon_Knife(gentity_t *ent) {
   trace_t tr;
-  gentity_t *traceEnt, *tent;
-  int damage, mod;
-  vec3_t pforward, eforward;
-
+  gentity_t *tent;
   vec3_t end;
 
-  mod = MOD_KNIFE;
+  static constexpr float KNIFE_DIST = 48.0f;
+  static constexpr int mod = MOD_KNIFE;
 
   AngleVectors(ent->client->ps.viewangles, forward, right, up);
   CalcMuzzlePoint(ent, ent->s.weapon, forward, right, up, muzzleTrace);
   VectorMA(muzzleTrace, KNIFE_DIST, forward, end);
-  G_HistoricalTrace(ent, &tr, muzzleTrace, NULL, NULL, end, ent->s.number,
-                    MASK_SHOT);
+
+  ETJump::historicalKnifeTrace(ent, &tr, muzzleTrace, end, ent->s.number);
 
   if (tr.surfaceFlags & SURF_NOIMPACT) {
     return;
@@ -142,31 +182,31 @@ void Weapon_Knife(gentity_t *ent) {
     return;
   }
 
-  traceEnt = &g_entities[tr.entityNum];
+  gentity_t *traceEnt = &g_entities[tr.entityNum];
 
   if (!(traceEnt->takedamage)) {
     return;
   }
 
-  damage = G_GetWeaponDamage(ent->s.weapon); // JPW		// default knife
-                                             // damage for frontal attacks
+  // default knife damage for frontal attacks
+  int damage = G_GetWeaponDamage(ent->s.weapon);
 
   /* CHECK WITH PAUL */
   if (ent->client->sess.playerType == PC_COVERTOPS) {
     damage *= 2; // Watch it - you could hurt someone with that thing!
   }
   if (traceEnt->client) {
+    vec3_t eforward;
+    vec3_t pforward;
     AngleVectors(ent->client->ps.viewangles, pforward, NULL, NULL);
     AngleVectors(traceEnt->client->ps.viewangles, eforward, NULL, NULL);
 
     if (DotProduct(eforward, pforward) > 0.6f) // from behind(-ish)
     {
-      damage = 100; // enough to drop a 'normal' (100
-                    // health) human with one jab
-      mod = MOD_KNIFE;
+      // enough to drop a 'normal' (100 health) human with one jab
+      damage = 100;
 
-      // rain - only do this if they have a positive
-      // health
+      // rain - only do this if they have a positive health
       if (traceEnt->health > 0 &&
           ent->client->sess
                   .skill[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS] >= 4) {
@@ -571,7 +611,10 @@ qboolean ReviveEntity(gentity_t *ent, gentity_t *traceEnt) {
 void Weapon_Syringe(gentity_t *ent) {
   vec3_t end;
   trace_t tr;
-  gentity_t *traceEnt;
+
+  if (!ent || !ent->client) {
+    return;
+  }
 
   AngleVectors(ent->client->ps.viewangles, forward, right, up);
   CalcMuzzlePointForActivate(ent, forward, right, up, muzzleTrace);
@@ -585,35 +628,36 @@ void Weapon_Syringe(gentity_t *ent) {
                MASK_SHOT);
   }
 
-  if (tr.fraction < 1.0) {
-    traceEnt = &g_entities[tr.entityNum];
-    if (traceEnt->client != nullptr) {
+  if (tr.fraction == 1.0f) {
+    return;
+  }
 
-      if ((traceEnt->client->ps.pm_type == PM_DEAD) &&
-          (traceEnt->client->sess.sessionTeam ==
-           ent->client->sess.sessionTeam)) {
-        // Mad Doc - TDF moved all the revive stuff into its own function
-        ReviveEntity(ent, traceEnt);
+  gentity_t *traceEnt = &g_entities[tr.entityNum];
 
-        // OSP - syringe "hit"
-        if (g_gamestate.integer == GS_PLAYING) {
-          ent->client->sess.aWeaponStats[WS_SYRINGE].hits++;
-        }
-        if (ent->client) {
-          G_LogPrintf("Medic_Revive: %d %d\n", ClientNum(ent),
-                      ClientNum(traceEnt)); // OSP
-        }
-        // Gordon: flag for if they were teamkilled or not
-        if (!traceEnt->isProp) {
-          // JPW NERVE
-          // props to the medic for the swift and dexterous bit o healitude
-          AddScore(ent, WOLF_MEDIC_BONUS);
+  if (!traceEnt->client || traceEnt->client->ps.pm_type != PM_DEAD ||
+      traceEnt->client->sess.sessionTeam != ent->client->sess.sessionTeam) {
+    return;
+  }
 
-          G_AddSkillPoints(ent, SK_FIRST_AID, 4.f);
-          G_DebugAddSkillPoints(ent, SK_FIRST_AID, 4.f, "reviving a player");
-        }
-      }
-    }
+  // Mad Doc - TDF moved all the revive stuff into its own function
+  ReviveEntity(ent, traceEnt);
+
+  // OSP - syringe "hit"
+  if (g_gamestate.integer == GS_PLAYING) {
+    ent->client->sess.aWeaponStats[WS_SYRINGE].hits++;
+  }
+
+  G_LogPrintf("Medic_Revive: %d %d\n", ClientNum(ent),
+              ClientNum(traceEnt)); // OSP
+
+  // Gordon: flag for if they were teamkilled or not
+  if (!traceEnt->isProp) {
+    // JPW NERVE
+    // props to the medic for the swift and dexterous bit o healitude
+    AddScore(ent, WOLF_MEDIC_BONUS);
+
+    G_AddSkillPoints(ent, SK_FIRST_AID, 4.f);
+    G_DebugAddSkillPoints(ent, SK_FIRST_AID, 4.f, "reviving a player");
   }
 }
 // jpw
@@ -710,7 +754,7 @@ int EntsThatRadiusCanDamage(vec3_t origin, float radius, int *damagedList) {
 void G_LandminePrime(gentity_t *self);
 extern void explosive_indicator_think(gentity_t *ent);
 
-#define MIN_BLOCKINGWARNING_INTERVAL 5000
+inline constexpr int MIN_BLOCKINGWARNING_INTERVAL = 5000;
 
 static void MakeTemporarySolid(gentity_t *ent) {
   if (ent->entstate == STATE_UNDERCONSTRUCTION) {
@@ -955,7 +999,7 @@ static void HandleEntsThatBlockConstructible(gentity_t *constructor,
   }
 }
 
-#define CONSTRUCT_POSTDECAY_TIME 500
+inline constexpr int CONSTRUCT_POSTDECAY_TIME = 500;
 
 // !! NOTE !!: if the conditions here of a buildable constructible change, then
 // BotIsConstructible() must reflect those changes
@@ -1696,7 +1740,7 @@ void Weapon_Engineer(gentity_t *ent) {
       traceEnt->takedamage = qtrue;
       traceEnt->s.eFlags &= ~EF_SMOKING;
 
-      Printer::SendCenterMessage(clientNum, "You have repaired the MG!");
+      Printer::center(clientNum, "You have repaired the MG!");
       G_AddEvent(ent, EV_MG42_FIXED, 0);
     } else {
       traceEnt->health += 3;
@@ -2405,11 +2449,8 @@ void G_AddAirstrikeToCounters(gentity_t *ent) {
   }
 }
 
-#define NUMBOMBS 10
-#define BOMBSPREAD 150
-extern void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
-                    const char *name, const char *message, qboolean localize,
-                    qboolean encoded);
+inline constexpr int NUMBOMBS = 10;
+inline constexpr int BOMBSPREAD = 150;
 
 void weapon_checkAirStrikeThink1(gentity_t *ent) {
   if (!weapon_checkAirStrike(ent)) {
@@ -3034,9 +3075,10 @@ void Weapon_Artillery(gentity_t *ent) {
     ent->client->sess.aWeaponStats[WS_ARTILLERY].atts++;
 }
 
-#define SMOKEBOMB_GROWTIME 1000
-#define SMOKEBOMB_SMOKETIME 15000
-#define SMOKEBOMB_POSTSMOKETIME 2000
+inline constexpr int SMOKEBOMB_GROWTIME = 1000;
+inline constexpr int SMOKEBOMB_SMOKETIME = 15000;
+inline constexpr int SMOKEBOMB_POSTSMOKETIME = 2000;
+
 // xkan, 11/25/2002 - increases postsmoke time from 2000->32000, this way, the
 // entity is still around while the smoke is around, so we can check if it
 // blocks bot's vision Arnout: eeeeeh this is wrong. 32 seconds is way too long.
@@ -3366,21 +3408,36 @@ void Bullet_Fire(gentity_t *ent, float spread, int damage,
 }
 
 namespace ETJump {
-void bulletTrace(gentity_t *source, gentity_t *attacker, trace_t *tr,
-                 vec3_t start, vec3_t end) {
-  G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number,
-          MASK_SHOT);
+void bulletTrace(gentity_t *source, const gentity_t *attacker, trace_t *tr,
+                 vec3_t start, vec3_t end, const int mask) {
+  G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number, mask);
 
   if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
     return;
   }
 
   while (tr->entityNum < MAX_CLIENTS &&
-         !ETJump::EntityUtilities::playerIsSolid(attacker->client->ps.clientNum,
-                                                 tr->entityNum)) {
+         !EntityUtilities::playerIsSolid(attacker->client->ps.clientNum,
+                                         tr->entityNum)) {
     G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
-    G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number,
-            MASK_SHOT);
+    G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number, mask);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+
+void portalTrace(gentity_t *ent, trace_t *tr, vec3_t start, vec3_t end) {
+  G_Trace(ent, tr, start, nullptr, nullptr, end, ent->s.number, MASK_PORTAL);
+
+  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr->entityNum < MAX_CLIENTS &&
+         !EntityUtilities::playerIsSolid(ent->client->ps.clientNum,
+                                         tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    G_Trace(ent, tr, start, nullptr, nullptr, end, ent->s.number, MASK_PORTAL);
   }
 
   G_ResetTempTraceIgnoreEnts();
@@ -3416,7 +3473,7 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
     waslinked = qtrue;
   }
 
-  ETJump::bulletTrace(source, attacker, &tr, start, end);
+  ETJump::bulletTrace(source, attacker, &tr, start, end, MASK_SHOT);
 
   // bani - prevent shooting ourselves in the head when prone,
   // firing through a breakable
@@ -3524,8 +3581,8 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
 
     tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_WALL);
 
-    G_Trace(source, &tr2, start, nullptr, nullptr, end, source->s.number,
-            MASK_WATER | MASK_SOLID);
+    ETJump::bulletTrace(source, attacker, &tr2, start, end,
+                        MASK_WATER | MASK_SHOT);
 
     if ((tr.entityNum != tr2.entityNum && tr2.fraction != 1)) {
       vec3_t v;
@@ -3623,15 +3680,14 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   VectorMA(trace_start, MAX_PORTAL_RANGE, forward, trace_end);
 
   // Trace
-  G_Trace(ent, &tr, trace_start, nullptr, nullptr, trace_end, ent->s.number,
-          MASK_PORTAL);
+  ETJump::portalTrace(ent, &tr, trace_start, trace_end);
 
   if (tr.surfaceFlags & SURF_NOIMPACT || tr.fraction == 1.0f) {
     return;
   }
 
-  // emancipation grid
-  if (tr.contents & CONTENTS_PORTALCLIP) {
+  // portalclip or player = no portal
+  if (tr.contents & (CONTENTS_PORTALCLIP | CONTENTS_BODY)) {
     return;
   }
 
@@ -4229,21 +4285,45 @@ LIGHTNING GUN
 ======================================================================
 */
 
-void G_BurnMeGood(gentity_t *self, gentity_t *body) {
+// TTimo - for traces calls
+static vec3_t flameChunkMins = {-4, -4, -4};
+static vec3_t flameChunkMaxs = {4, 4, 4};
+
+namespace ETJump {
+void flamethrowerTrace(const gentity_t *ent, trace_t *trace, vec3_t start,
+                       vec3_t end, const int mask) {
+  trap_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, ent->s.number,
+             mask);
+
+  if (g_ghostPlayers.integer != 1 || trace->entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (trace->entityNum < MAX_CLIENTS &&
+         !EntityUtilities::playerIsSolid(ent->s.number, trace->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[trace->entityNum]);
+    trap_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, ent->s.number,
+               mask);
+  }
+
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
+
+void G_BurnMeGood(gentity_t *self, gentity_t *body, const bool directhit) {
+  // normalize dps, direct hits every 50ms, indirect (flamechunks) every 100ms
+  if (level.time < body->lastBurnedFrametime +
+                       (directhit ? DEFAULT_SV_FRAMETIME : FRAMETIME)) {
+    return;
+  }
+
   // add the new damage
   body->flameQuota += 5;
-  body->flameQuotaTime = level.time;
+  body->flameQuotaTime = level.time - level.time % DEFAULT_SV_FRAMETIME;
+  body->lastBurnedFrametime = level.time - level.time % DEFAULT_SV_FRAMETIME;
 
-  // JPW NERVE -- yet another flamethrower damage model, trying to find
-  // a feels-good damage combo that isn't overpowered
-  if (body->lastBurnedFrameNumber != level.framenum) {
-    G_Damage(body, self->parent, self->parent, vec3_origin,
-             self->r.currentOrigin, 5, 0,
-             MOD_FLAMETHROWER); // was 2 dmg in release ver, hit
-                                // avg. 2.5 times per frame
-    body->lastBurnedFrameNumber = level.framenum;
-  }
-  // jpw
+  G_Damage(body, self->parent, self->parent, vec3_origin, self->r.currentOrigin,
+           5, 0, MOD_FLAMETHROWER); // was 2 dmg in release ver, hit
 
   // make em burn
   if (body->client && (body->health <= 0 ||
@@ -4260,10 +4340,6 @@ void G_BurnMeGood(gentity_t *self, gentity_t *body) {
   }
 }
 
-// TTimo - for traces calls
-static vec3_t flameChunkMins = {-4, -4, -4};
-static vec3_t flameChunkMaxs = {4, 4, 4};
-
 void Weapon_FlamethrowerFire(gentity_t *ent) {
   vec3_t start;
   vec3_t trace_start;
@@ -4278,13 +4354,14 @@ void Weapon_FlamethrowerFire(gentity_t *ent) {
   VectorMA(start, 10, right, start);
   VectorMA(start, -6, up, start);
 
-  // prevent flame thrower cheat, run & fire while aiming at the ground,
+  // prevent flamethrower cheat, run & fire while aiming at the ground,
   // don't get hurt 72 total box height, 18 xy -> 77 trace radius (from
   // view point towards the ground) is enough to cover the area around
   // the feet
   VectorMA(trace_start, 77.0, forward, trace_end);
-  trap_Trace(&trace, trace_start, flameChunkMins, flameChunkMaxs, trace_end,
-             ent->s.number, MASK_SHOT | MASK_WATER);
+  ETJump::flamethrowerTrace(ent, &trace, trace_start, trace_end,
+                            MASK_SHOT | MASK_WATER);
+
   if (trace.fraction != 1.0) {
     // additional checks to filter out false positives
     if (trace.endpos[2] > (ent->r.currentOrigin[2] + ent->r.mins[2] - 8) &&
@@ -4295,7 +4372,7 @@ void Weapon_FlamethrowerFire(gentity_t *ent) {
       if (trace_start[0] * trace_start[0] + trace_start[1] * trace_start[1] <
           441) {
         // set self in flames
-        G_BurnMeGood(ent, ent);
+        G_BurnMeGood(ent, ent, true);
       }
     }
   }

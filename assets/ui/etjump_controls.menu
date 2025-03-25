@@ -26,7 +26,7 @@
 // Right side menus
 #define SUBW_MISC_Y SUBW_Y
 #define SUBW_MISC_ITEM_Y SUBW_MISC_Y + SUBW_HEADER_HEIGHT
-#define SUBW_MISC_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 4)
+#define SUBW_MISC_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 5)
 
 #define GROUP_NAME "groupETJumpControls"
 
@@ -36,6 +36,8 @@ menuDef {
     fullscreen 0
     rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
     style WINDOW_STYLE_FILLED
+    centered
+
     onESC {
         close etjump_controls; open etjump;
     }
@@ -84,6 +86,7 @@ menuDef {
         BIND                (SUBW_ITEM_RIGHT_X, SUBW_MISC_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Interrupt timerun:", .2, SUBW_ITEM_HEIGHT, "interruptrun", "Stops current timerun without setting a record\ninterruptRun")
         BIND                (SUBW_ITEM_RIGHT_X, SUBW_MISC_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "No call:", .2, SUBW_ITEM_HEIGHT, "nocall", "Toggle allowing other players to target you with call\nnocall")
         BIND                (SUBW_ITEM_RIGHT_X, SUBW_MISC_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "No goto:", .2, SUBW_ITEM_HEIGHT, "nogoto", "Toggle allowing other players to target you with goto\nnogoto")
+        BIND                (SUBW_ITEM_RIGHT_X, SUBW_MISC_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "ETJump settings:", .2, SUBW_ITEM_HEIGHT, "toggleETJumpSettings", "Toggles ETJump settings menu\ntoggleETJumpSettings")
 
         BUTTON              (ETJ_BUTTON_X, ETJ_BUTTON_Y, WINDOW_WIDTH - 16, ETJ_BUTTON_HEIGHT, "BACK", .3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_controls; open etjump)
 }

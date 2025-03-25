@@ -10,6 +10,7 @@
 *.opendb
 *.VC.db
 assets/ui/git_version.h
+assets/ui/changelog/*
 
 #################
 ## Eclipse
@@ -156,7 +157,7 @@ Desktop.ini
 *.egg
 *.egg-info
 dist
-build
+build*
 eggs
 parts
 bin
@@ -192,4 +193,3 @@ scons.signatures.dblite
 out
 cmake-build*/
 checks.json
-build-linux-x64/

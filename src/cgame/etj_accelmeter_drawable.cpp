@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 #include "etj_cvar_update_handler.h"
 #include "etj_pmove_utils.h"
 #include "etj_utilities.h"
+
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
@@ -73,9 +74,12 @@ void AccelMeter::setTextStyle() {
 }
 
 void AccelMeter::setSize() {
-  size = 0.1f * etj_accelSize.value;
+  size = CvarValueParser::parse<CvarValue::Size>(etj_accelSize, 1, 10);
+  size.x *= 0.1f;
+  size.y *= 0.1f;
+
   halfW = static_cast<float>(
-              CG_Text_Width_Ext("-88  -88", size, 0, &cgs.media.limboFont1)) *
+              CG_Text_Width_Ext("-88  -88", size.x, 0, &cgs.media.limboFont1)) *
           0.5f;
 }
 
@@ -155,25 +159,26 @@ void AccelMeter::render() const {
   Vector4Copy(accelColor, color);
 
   switch (etj_accelAlign.integer) {
-    case Alignment::Left:
-      CG_Text_Paint_Ext(accelX, y, size, size, color, accelStr[0], 0, 0,
+    case Left:
+      CG_Text_Paint_Ext(accelX, y, size.x, size.y, color, accelStr[0], 0, 0,
                         textStyle, &cgs.media.limboFont1);
-      CG_Text_Paint_Ext(accelX + halfW, y, size, size, color, accelStr[1], 0, 0,
-                        textStyle, &cgs.media.limboFont1);
+      CG_Text_Paint_Ext(accelX + halfW, y, size.x, size.y, color, accelStr[1],
+                        0, 0, textStyle, &cgs.media.limboFont1);
       break;
-    case Alignment::Right:
-      CG_Text_Paint_RightAligned_Ext(accelX, y, size, size, color, accelStr[0],
-                                     0, 0, textStyle, &cgs.media.limboFont1);
-      CG_Text_Paint_RightAligned_Ext(accelX - halfW, y, size, size, color,
+    case Right:
+      CG_Text_Paint_RightAligned_Ext(accelX, y, size.x, size.y, color,
+                                     accelStr[0], 0, 0, textStyle,
+                                     &cgs.media.limboFont1);
+      CG_Text_Paint_RightAligned_Ext(accelX - halfW, y, size.x, size.y, color,
                                      accelStr[1], 0, 0, textStyle,
                                      &cgs.media.limboFont1);
       break;
     default: // center align
-      CG_Text_Paint_Centred_Ext(accelX - (halfW * 0.5f), y, size, size, color,
-                                accelStr[0], 0, 0, textStyle,
+      CG_Text_Paint_Centred_Ext(accelX - (halfW * 0.5f), y, size.x, size.y,
+                                color, accelStr[0], 0, 0, textStyle,
                                 &cgs.media.limboFont1);
-      CG_Text_Paint_Centred_Ext(accelX + (halfW * 0.5f), y, size, size, color,
-                                accelStr[1], 0, 0, textStyle,
+      CG_Text_Paint_Centred_Ext(accelX + (halfW * 0.5f), y, size.x, size.y,
+                                color, accelStr[1], 0, 0, textStyle,
                                 &cgs.media.limboFont1);
       break;
   }

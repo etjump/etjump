@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,6 @@
 namespace ETJump {
 class TimerunEntity {
 private:
-  static Log logger;
   static std::map<std::string, int> runIndices;
   static std::set<std::string> cleanNames;
   static std::set<std::string> names;
@@ -41,8 +40,8 @@ protected:
   static void setTimerunIndex(gentity_t *self);
   static bool canActivate(gentity_t *activator);
   static int getOrSetTimerunIndex(const std::string &runName);
-  static bool canStartTimerun(gentity_t *self, gentity_t *activator,
-                              const int *clientNum, const float *speed);
+  static bool canStartTimerun(const gentity_t *self, const gentity_t *activator,
+                              int clientNum, float speed);
 
 public:
   static void validateTimerunEntities();

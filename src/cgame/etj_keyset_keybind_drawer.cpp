@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,35 +38,39 @@ void ETJump::KeySetKeyBindDrawer::drawPressShader(qhandle_t shader,
   if (!shader) {
     return;
   }
+
   // get command bind key name
-  auto size = attrs.size / 3;
-  auto centerOffset = attrs.size / 2;
-  auto pos = calcGridPosition<3>(size, position);
-  auto x = attrs.origin.x + pos.x - centerOffset;
-  auto y = attrs.origin.y + pos.y - centerOffset;
-  auto color = attrs.color;
-  auto shadowColor = attrs.shouldDrawShadow ? attrs.shadowColor : nullptr;
+  const float sizeX = attrs.size.x / 3;
+  const float sizeY = attrs.size.y / 3;
+  const float centerOffsetX = attrs.size.x / 2;
+  const float centerOffsetY = attrs.size.y / 2;
+  const auto pos = calcGridPosition<3>(sizeX, sizeY, position);
+  const float x = attrs.origin.x + pos.x - centerOffsetX;
+  const float y = attrs.origin.y + pos.y - centerOffsetY;
+  const vec_t *color = attrs.color;
+  const vec_t *shadowColor =
+      attrs.shouldDrawShadow ? attrs.shadowColor : nullptr;
 
   // key code handling
-  auto keyShader = keyShaders[position];
+  const auto keyShader = keyShaders[position];
   auto command = keyNameToCommand(keyShader.key);
   auto keyCode = getKeyCodeForName(command);
   keyCode = checkKeyCodeRemap(keyCode);
-  auto keyCodeShader = checkIfKeyCodeHasShader(keyCode);
+  const auto keyCodeShader = checkIfKeyCodeHasShader(keyCode);
 
   // background
-  drawPic(x, y, size, size, shader, color, shadowColor);
+  drawPic(x, y, sizeX, sizeY, shader, color, shadowColor);
 
   if (keyCodeShader) {
-    drawPic(x, y, size, size, keyCodeShader, color, shadowColor);
+    drawPic(x, y, sizeX, sizeY, keyCodeShader, color, shadowColor);
   } else {
     auto binding = ETJump::StringUtil::toUpperCase(getKeyCodeBinding(keyCode));
     // factor = 16 / ... = 0.20
     // size / factor;
     auto bindWidth = DrawStringWidth(binding.c_str(), 0.2f);
     auto bindHeight = DrawStringHeight(binding.c_str(), 0.2f);
-    auto charOffsetX = (size - bindWidth) / 2;
-    auto charOffsetY = (size + bindHeight + 1) / 2;
+    auto charOffsetX = (sizeX - bindWidth) / 2;
+    auto charOffsetY = (sizeY + bindHeight + 1) / 2;
     DrawString(x + charOffsetX, y + charOffsetY, 0.20f, 0.20f, color, qfalse,
                binding.c_str(), 0, 0);
   }

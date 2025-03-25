@@ -1,5 +1,6 @@
+#include <algorithm>
+
 #include "cg_local.h"
-#include "../game/etj_numeric_utilities.h"
 
 static mapEntityData_t mapEntities[MAX_GENTITIES];
 static int mapEntityCount = 0;
@@ -242,8 +243,11 @@ void CG_InitLocations(void) {
        gridStep[1]);
 }
 
-#define COMMANDMAP_PLAYER_ICON_SIZE 6
-#define AUTOMAP_PLAYER_ICON_SIZE 5
+inline constexpr int COMMANDMAP_PLAYER_ICON_SIZE = 6;
+inline constexpr int AUTOMAP_PLAYER_ICON_SIZE = 5;
+
+inline constexpr float CONST_ICON_NORMAL_SIZE = 32.0f;
+inline constexpr float CONST_ICON_EXPANDED_SIZE = 48.0f;
 
 // xkan: extracted from CG_DrawCommandMap.
 // drawingCommandMap - qfalse: command map; qtrue: auto map (upper left in main
@@ -636,9 +640,6 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
         icon_pos[1] = y + mEnt->transformed[1];
       }
 
-#define CONST_ICON_NORMAL_SIZE 32.f
-#define CONST_ICON_EXPANDED_SIZE 48.f
-
       if (interactive && !expanded &&
           BG_RectContainsPoint(
               x + mEnt->transformed[0] - (CONST_ICON_NORMAL_SIZE * 0.5f),
@@ -920,7 +921,7 @@ void CG_DrawExpandedAutoMap(void) {
   }
 
   CG_DrawMap(x, y, w, h, cgs.ccFilter, NULL, qfalse,
-             Numeric::clamp(etj_expandedMapAlpha.value, 0, 1), qfalse);
+             std::clamp(etj_expandedMapAlpha.value, 0.0f, 1.0f), qfalse);
 
   // Draw the border
 
@@ -1115,45 +1116,11 @@ void CG_DrawAutoMap(void) {
   CG_DrawMap(x, y, w, h, cgs.ccFilter, &mapScissor, qfalse, 1.f, qfalse);
 }
 
-/*void CG_DrawWaypointInfo( int x, int y, int w, int h ) {
-    snapshot_t	*snap;
-    vec2_t		pos;
-    int			i;
-
-    if( cgs.ccFilter & CC_FILTER_WAYPOINTS ) {
-        return;
-    }
-
-    if ( cg.nextSnap && !cg.nextFrameTeleport && !cg.thisFrameTeleport ) {
-        snap = cg.nextSnap;
-    } else {
-        snap = cg.snap;
-    }
-
-    for ( i = 0; i < snap->numEntities; i++ ) {
-        entityState_t *ent = &snap->entities[i];
-
-        if ( ent->eType != ET_WAYPOINT )
-            continue;
-
-        // see if the waypoint owner is someone that you accept waypoints from
-        if(!CG_IsOnSameFireteam( cg.clientNum, ent->clientNum )) {
-            continue;
-        }
-
-        pos[0] = x + ((ent->pos.trBase[0] - cg.mapcoordsMins[0]) *
-cg.mapcoordsScale[0]) * w; pos[1] = y + ((ent->pos.trBase[1] -
-cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h;
-
-        switch( ent->frame ) {
-            case WAYP_ATTACK:	CG_DrawPic( pos[0] - 6, pos[1] - 6, 12, 12,
-cgs.media.waypointAttackShader ); break; case WAYP_DEFEND:	CG_DrawPic(
-pos[0] - 6, pos[1] - 6, 12, 12, cgs.media.waypointDefendShader ); break; case
-WAYP_REGROUP:	CG_DrawPic( pos[0] - 6, pos[1] - 6, 12, 12,
-cgs.media.waypointRegroupShader ); break;
-        }
-    }
-}*/
+inline constexpr float FLAGSIZE_EXPANDED = 48.f;
+inline constexpr float FLAGSIZE_NORMAL = 32.f;
+inline constexpr float FLAG_LEFTFRAC = 25 / 128.f;
+inline constexpr float FLAG_TOPFRAC = 95 / 128.f;
+inline constexpr float SPAWN_SIZEUPTIME = 1000.f;
 
 int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
                           mapScissor_t *scissor, int expand) {
@@ -1169,11 +1136,6 @@ int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
     return -1;
   }
 
-#define FLAGSIZE_EXPANDED 48.f
-#define FLAGSIZE_NORMAL 32.f
-#define FLAG_LEFTFRAC (25 / 128.f)
-#define FLAG_TOPFRAC (95 / 128.f)
-#define SPAWN_SIZEUPTIME 1000.f
   for (i = 1; i < cg.spawnCount; i++) {
     float changetime = 0;
     if (cg.spawnTeams_changeTime[i]) {
@@ -1542,8 +1504,6 @@ qboolean CG_PlayerSelected(void) {
   }
   return qfalse;
 }
-
-#define CC_MENU_WIDTH 150
 
 qboolean CG_CommandCentreLayersClick(void) {
   int x, y;

@@ -2,7 +2,7 @@
 #include "etj_printer.h"
 #include "etj_entity_utilities.h"
 
-#define MISSILE_PRESTEP_TIME 50
+inline constexpr int MISSILE_PRESTEP_TIME = 50;
 
 extern void gas_think(gentity_t *gas);
 extern void gas_touch(gentity_t *gas, gentity_t *other, trace_t *trace);
@@ -37,21 +37,6 @@ void G_BounceMissile(gentity_t *ent, trace_t *trace) {
     }
   }
 
-  // Arnout: removed this for MP as well (was already gone from SP)
-  /*
-          // Ridah, if we are a grenade, and we have hit an AI that is
-     waiting to catch us, give them a grenade, and delete ourselves if
-     ((ent->splashMethodOfDeath == MOD_GRENADE_SPLASH) &&
-     (g_entities[trace->entityNum].flags & FL_AI_GRENADE_KICK) &&
-          (trace->endpos[2] >
-     g_entities[trace->entityNum].r.currentOrigin[2])) {
-     g_entities[trace->entityNum].grenadeExplodeTime = ent->nextthink;
-          g_entities[trace->entityNum].flags &= ~FL_AI_GRENADE_KICK;
-          Add_Ammo( &g_entities[trace->entityNum], WP_GRENADE_LAUNCHER,
-     1, qfalse );	//----(SA)	modified G_FreeEntity( ent );
-     return;
-      }
-  */
   // reflect the velocity on the trace plane
   hitTime =
       level.previousTime + (level.time - level.previousTime) * trace->fraction;
@@ -208,7 +193,6 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage) {
   // impact damage
   if (other->takedamage || other->dmgparent) {
     if (ent->damage) {
-      AccuracyHit(other, &g_entities[ent->r.ownerNum]);
       BG_EvaluateTrajectoryDelta(&ent->s.pos, level.time, velocity, qfalse,
                                  ent->s.effect2Time);
       if (VectorLengthSquared(velocity) == 0) {
@@ -975,71 +959,60 @@ int G_PredictMissile(gentity_t *ent, int duration, vec3_t endPos,
 // DHM - Nerve :: Server side Flamethrower
 //=============================================================================
 
-// copied from cg_flamethrower.c
-#define FLAME_START_SIZE 1.0
-#define FLAME_START_MAX_SIZE                                                   \
-  100.0 // when the flame is spawned, it should endevour to reach this
-        // size
-#define FLAME_START_SPEED 1200.0 // speed of flame as it leaves the nozzle
-#define FLAME_MIN_SPEED 60.0
+namespace ETJump {
+void flamechunkTrace(gentity_t *ent, trace_t *tr, vec3_t start, vec3_t end,
+                     const int mask) {
+  trap_Trace(tr, start, ent->r.mins, ent->r.maxs, end, ent->r.ownerNum, mask);
 
-// these are calculated (don't change)
-#define FLAME_LENGTH                                                           \
-  (FLAMETHROWER_RANGE + 50.0) // NOTE: only modify the range, since this
-                              // should always reflect that range
+  if (g_ghostPlayers.integer != 1 || !EntityUtilities::isPlayer(ent) ||
+      tr->entityNum >= MAX_CLIENTS) {
+    return;
+  }
 
-#define FLAME_LIFETIME                                                         \
-  (int)((FLAME_LENGTH / FLAME_START_SPEED) *                                   \
-        1000) // life duration in milliseconds
-#define FLAME_FRICTION_PER_SEC (2.0f * FLAME_START_SPEED)
-#define GET_FLAME_SIZE_SPEED(x)                                                \
-  (((float)x / FLAME_LIFETIME) / 0.3) // x is the current sizeMax
+  while (tr->entityNum < MAX_CLIENTS &&
+         !EntityUtilities::playerIsSolid(ent->r.ownerNum, tr->entityNum)) {
+    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
+    trap_Trace(tr, start, ent->r.mins, ent->r.maxs, end, ent->r.ownerNum, mask);
+  }
 
-#define FLAME_THRESHOLD 50
+  G_ResetTempTraceIgnoreEnts();
+}
+} // namespace ETJump
 
 void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
-  int i;
-  float radius, dist;
-  vec3_t point, v;
-  trace_t tr;
-
   if (!body->takedamage) {
     return;
   }
 
-  // JPW NERVE don't catch fire if invulnerable or same team in no FF
   if (body->client) {
-    if (body->client->ps.powerups[PW_INVULNERABLE] >= level.time) {
+    // don't set clients on fire if the shooter isn't us,
+    // or we're invulnerable
+    if (body->s.number != self->r.ownerNum ||
+        body->client->ps.powerups[PW_INVULNERABLE] >= level.time) {
       body->flameQuota = 0;
       body->s.onFireEnd = level.time - 1;
-      return;
     }
 
-    //		if( !self->count2 && body == self->parent )
-    //			return;
-
-    if (OnSameTeam(body, self->parent)) {
-      return;
-    }
+    return;
   }
-  // jpw
 
-  // JPW NERVE don't catch fire if under water or invulnerable
+  // don't set underwater entities on fire
   if (body->waterlevel >= 3) {
     body->flameQuota = 0;
     body->s.onFireEnd = level.time - 1;
     return;
   }
-  // jpw
+
+  vec3_t point, v;
 
   if (!body->r.bmodel) {
     VectorCopy(body->r.currentOrigin, point);
     if (body->client) {
-      point[2] += body->client->ps.viewheight;
+      point[2] += static_cast<float>(body->client->ps.viewheight);
     }
     VectorSubtract(point, self->r.currentOrigin, v);
   } else {
-    for (i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
       if (self->s.origin[i] < body->r.absmin[i]) {
         v[i] = body->r.absmin[i] - self->r.currentOrigin[i];
       } else if (self->r.currentOrigin[i] > body->r.absmax[i]) {
@@ -1050,31 +1023,34 @@ void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
     }
   }
 
-  radius = self->speed;
-
-  dist = VectorLength(v);
+  const float radius = self->speed;
+  const float dist = VectorLength(v);
 
   // The person who shot the flame only burns when within 1/2 the radius
-  if (body->s.number == self->r.ownerNum && dist >= (radius * 0.5)) {
+  if (body->s.number == self->r.ownerNum && dist >= radius * 0.5) {
     return;
   }
+
   if (!directhit && dist >= radius) {
     return;
   }
 
   // Non-clients that take damage get damaged here
   if (!body->client) {
-    if (body->health > 0) {
+    if (body->health > 0 &&
+        level.time + FRAMETIME >= body->lastBurnedFrametime) {
       G_Damage(body, self->parent, self->parent, vec3_origin,
                self->r.currentOrigin, 2, 0, MOD_FLAMETHROWER);
+      body->lastBurnedFrametime = level.time;
     }
     return;
   }
 
   // JPW NERVE -- do a trace to see if there's a wall btwn. body & flame
   // centroid -- prevents damage through walls
-  trap_Trace(&tr, self->r.currentOrigin, NULL, NULL, point, body->s.number,
-             MASK_SHOT);
+  trace_t tr;
+  trap_Trace(&tr, self->r.currentOrigin, nullptr, nullptr, point,
+             body->s.number, MASK_SHOT);
   if (tr.fraction < 1.0) {
     return;
   }
@@ -1083,14 +1059,14 @@ void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
   // now check the damageQuota to see if we should play a pain animation
   // first reduce the current damageQuota with time
   if (body->flameQuotaTime && body->flameQuota > 0) {
-    body->flameQuota -=
-        (int)(((float)(level.time - body->flameQuotaTime) / 1000) * 2.5f);
+    body->flameQuota -= static_cast<int>(
+        (static_cast<float>(level.time - body->flameQuotaTime) / 1000) * 2.5f);
     if (body->flameQuota < 0) {
       body->flameQuota = 0;
     }
   }
 
-  G_BurnMeGood(self, body);
+  G_BurnMeGood(self, body, directhit);
 }
 
 void G_FlameDamage(gentity_t *self, gentity_t *ignoreent) {
@@ -1101,8 +1077,8 @@ void G_FlameDamage(gentity_t *self, gentity_t *ignoreent) {
   vec3_t mins, maxs;
 
   radius = self->speed;
-  boxradius =
-      1.41421356 * radius; // radius * sqrt(2) for bounding box enlargement
+  // radius * sqrt(2) for bounding box enlargement
+  boxradius = 1.41421356f * radius;
 
   for (i = 0; i < 3; i++) {
     mins[i] = self->r.currentOrigin[i] - boxradius;
@@ -1130,6 +1106,7 @@ void G_RunFlamechunk(gentity_t *ent) {
   gentity_t *ignoreent = nullptr;
   const auto deltaTime =
       static_cast<float>(level.time - ent->s.pos.trTime) / 1000.0f;
+  static constexpr float FLAME_START_MAX_SIZE = 100.0f;
 
   // TAT 11/12/2002
   // vel was only being set if (level.time - ent->timestamp > 50)
@@ -1138,15 +1115,15 @@ void G_RunFlamechunk(gentity_t *ent) {
   VectorCopy(ent->s.pos.trDelta, vel);
   speed = VectorNormalize(vel);
 
-  // Adust the current speed of the chunk
+  // Adjust the current speed of the chunk
   // ent->s.pos.trDuration is set to 550ms as that is the time window
   // after which the speed will always be at FLAME_MIN_SPEED,
   // so we just short circuit some unnecessary math with that
   if (level.time - ent->timestamp <= MISSILE_PRESTEP_TIME) {
     speed = FLAME_START_SPEED;
   } else if (level.time - ent->timestamp <= ent->s.pos.trDuration) {
-    speed -= deltaTime * static_cast<float>(FLAME_FRICTION_PER_SEC);
-    speed = std::max(speed, static_cast<float>(FLAME_MIN_SPEED));
+    speed -= deltaTime * FLAME_FRICTION_PER_SEC;
+    speed = std::max(speed, FLAME_MIN_SPEED);
 
     VectorScale(vel, speed, ent->s.pos.trDelta);
   }
@@ -1156,9 +1133,14 @@ void G_RunFlamechunk(gentity_t *ent) {
   // Move the chunk
   VectorMA(ent->r.currentOrigin, deltaTime, ent->s.pos.trDelta, neworg);
 
-  trap_Trace(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, neworg,
-             ent->r.ownerNum,
-             MASK_SHOT | MASK_WATER); // JPW NERVE
+  ETJump::flamechunkTrace(ent, &tr, ent->r.currentOrigin, neworg,
+                          MASK_SHOT | MASK_WATER);
+
+  // fix for engine bug where trace sometimes starts in solid even if
+  // the entity that it starts in is nonsolid
+  if (tr.startsolid && tr.entityNum == ENTITYNUM_NONE) {
+    tr.startsolid = qfalse;
+  }
 
   if (tr.startsolid) {
     VectorClear(ent->s.pos.trDelta);
@@ -1170,7 +1152,7 @@ void G_RunFlamechunk(gentity_t *ent) {
     VectorMA(vel, -2 * dot, tr.plane.normal, vel);
     VectorNormalize(vel);
     speed *= 0.5f * (0.25f + 0.75f * ((dot + 1.0f) * 0.5f));
-    speed = std::max(speed, static_cast<float>(FLAME_MIN_SPEED));
+    speed = std::max(speed, FLAME_MIN_SPEED);
 
     VectorScale(vel, speed, ent->s.pos.trDelta);
 
@@ -1185,8 +1167,10 @@ void G_RunFlamechunk(gentity_t *ent) {
   }
 
   // Do damage to nearby entities, every 100ms
+  // gate the calls here too instead of only at G_BurnMeGood to avoid
+  // tracing entities in box every frame
   if (ent->flameQuotaTime <= level.time) {
-    ent->flameQuotaTime = level.time + 100;
+    ent->flameQuotaTime = level.time + FRAMETIME;
     G_FlameDamage(ent, ignoreent);
   }
 
@@ -1209,7 +1193,8 @@ void G_RunFlamechunk(gentity_t *ent) {
 
   // Adjust the size
   if (ent->speed < FLAME_START_MAX_SIZE) {
-    ent->speed += 10.f;
+    ent->speed +=
+        10.f * (static_cast<float>(level.frameTime) / DEFAULT_SV_FRAMETIME);
 
     if (ent->speed > FLAME_START_MAX_SIZE) {
       ent->speed = FLAME_START_MAX_SIZE;
@@ -1217,10 +1202,8 @@ void G_RunFlamechunk(gentity_t *ent) {
   }
 
   // Remove after 2 seconds
-  if (level.time - ent->timestamp >
-      (FLAME_LIFETIME - 150)) // JPW NERVE increased to 350 from 250 to
-                              // match visuals better
-  {
+  // JPW NERVE increased to 350 from 250 to match visuals better
+  if (level.time - ent->timestamp > (FLAME_LIFETIME - 150)) {
     G_FreeEntity(ent);
     return;
   }
@@ -1248,8 +1231,11 @@ gentity_t *fire_flamechunk(gentity_t *self, const vec3_t start, vec3_t dir) {
   bolt = G_Spawn();
   bolt->classname = "flamechunk";
 
+  // always generate chunks at 100ms intervals to prevent tap-firing causing
+  // potentially massive dps increase due to different chunks burning
+  // at non-100ms intervals
+  bolt->flameQuotaTime = (level.time + FRAMETIME) - (level.time % FRAMETIME);
   bolt->timestamp = level.time;
-  bolt->flameQuotaTime = level.time + 50;
   bolt->s.eType = ET_FLAMETHROWER_CHUNK;
   bolt->r.svFlags = SVF_NOCLIENT;
   bolt->s.weapon = self->s.weapon;
@@ -1696,7 +1682,7 @@ G_LandmineThink
 
 // TAT 11/20/2002
 //		Function to check if an entity will set off a landmine
-#define LANDMINE_TRIGGER_DIST 64.0f
+inline constexpr float LANDMINE_TRIGGER_DIST = 64.0f;
 
 qboolean sEntWillTriggerMine(gentity_t *ent, gentity_t *mine) {
   // player types are the only things that set off mines (human and bot)
@@ -2011,8 +1997,7 @@ gentity_t *fire_grenade(gentity_t *self, const vec3_t start, const vec3_t dir,
       // JPW NERVE sets to score below if dynamite is in
       // trigger_objective_info & it's an objective
       bolt->accuracy = 0;
-      Printer::SendCenterMessage(ClientNum(self),
-                                 "Dynamite is set, but NOT armed!");
+      Printer::center(ClientNum(self), "Dynamite is set, but NOT armed!");
       // differentiate non-armed dynamite with non-pulsing dlight
       bolt->s.teamNum =
           self->client ? self->client->sess.sessionTeam + 4 : self->s.teamNum;

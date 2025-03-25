@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef SESSION_HPP
-#define SESSION_HPP
+#pragma once
 
 #include <string>
 #include <vector>
@@ -46,6 +45,7 @@ public:
     std::string hwid;
     std::bitset<MAX_COMMANDS> permissions;
     std::string ip;
+    int sessionStartTime; // FIXME: 32-bit time
     const User_s *user;
     const Levels::Level *level;
   };
@@ -62,6 +62,7 @@ public:
   int GetLevel(gentity_t *ent) const;
   int GetId(gentity_t *ent) const;
   int GetId(int clientNum) const;
+  gentity_t *gentityFromId(unsigned id);
   bool SetLevel(gentity_t *target, int level);
   bool SetLevel(int id, int level);
   int GetLevelById(unsigned id) const;
@@ -78,6 +79,7 @@ public:
   // Returns the amount of users with that level
   int LevelDeleted(int level);
   std::vector<Session::Client *> FindUsersByLevel(int level);
+  int getSessionStartTime(int clientNum) const;
 
 private:
   std::shared_ptr<IAuthentication> database_;
@@ -86,5 +88,3 @@ private:
   Client clients_[MAX_CLIENTS];
   std::string message_;
 };
-
-#endif

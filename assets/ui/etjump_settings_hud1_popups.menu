@@ -15,6 +15,7 @@ menuDef {
     fullscreen 0
     rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
     style WINDOW_STYLE_FILLED
+    centered
 
     onOpen {
         conditionalscript uiCheckBackground 2
@@ -55,20 +56,20 @@ menuDef {
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "POPUPS")
 
         MULTI               (SETTINGS_ITEM_POS(1), "Draw popups:", 0.2, SETTINGS_ITEM_H, "etj_HUD_popup", cvarFloatList { "No" 0 "Left side" 1 "Right side" 2 }, "Draw popups on HUD\netj_HUD_popup")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_numPopups", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_numPopups", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "Number of popups:", 0.2, SETTINGS_ITEM_H, etj_numPopups 5 1 16 1, "Maximum number of popup messages to display at once\netj_numPopups")
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS(3), "etj_popupAlpha", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(3), "etj_popupAlpha", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(3), "Popup alpha:", 0.2, SETTINGS_ITEM_H, etj_popupAlpha 1 0 1 0.05, "Sets transparency of popup messages\netj_popupAlpha")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_popupPosX", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_popupPosX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(4), "Popup offset X:", 0.2, SETTINGS_ITEM_H, etj_popupPosX 0 -640 640 10, "Sets X offset for popup messages\netj_popupPosX")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(5), "etj_popupPosY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(5), "etj_popupPosY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(5), "Popup offset Y:", 0.2, SETTINGS_ITEM_H, etj_popupPosY 0 -480 480 10, "Sets Y offset for popup messages\netj_popupPosY")
         YESNO               (SETTINGS_ITEM_POS(6), "Popup shadow:", 0.2, SETTINGS_ITEM_H, "etj_popupShadow", "Draw shadow on popup messages\netj_popupShadow")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(7), "etj_popupTime", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(7), "etj_popupTime", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(7), "Popup delay:", 0.2, SETTINGS_ITEM_H, etj_popupTime 1000 0 5000 250, "Time in milliseconds before new popup message is drawn after previous one\netj_popupTime")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(8), "etj_popupStayTime", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(8), "etj_popupStayTime", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(8), "Popup stay time:", 0.2, SETTINGS_ITEM_H, etj_popupStayTime 2000 0 30000 250, "How long in milliseconds popup messages stay on screen\netj_popupStayTime")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(9), "etj_popupFadeTime", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(9), "etj_popupFadeTime", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(9), "Popup fade time:", 0.2, SETTINGS_ITEM_H, etj_popupFadeTime 2500 0 10000 250, "Duration of fade animation in milliseconds on popup messages\netj_popupFadeTime")
         MULTI               (SETTINGS_ITEM_POS(10), "Group identical popups:", 0.2, SETTINGS_ITEM_H, "etj_popupGrouped", cvarFloatList { "No" 0 "On HUD" 1 "On HUD + console" 2 }, "Group subsequent identical popup messages to one message\netj_popupGrouped")
         YESNO               (SETTINGS_ITEM_POS(11), "Item pickup popups:", 0.2, SETTINGS_ITEM_H, "etj_itemPickupText", "Enable popups for item pickups\netj_itemPickupText")

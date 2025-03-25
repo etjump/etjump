@@ -10,8 +10,9 @@
 #include "etj_progression_tracker.h"
 #include "etj_timerun_entities.h"
 #include "etj_entity_utilities.h"
-#include "etj_numeric_utilities.h"
 #include "etj_rtv.h"
+#include "etj_syscall_ext_shared.h"
+#include "etj_target_spawn_relay.h"
 
 level_locals_t level;
 
@@ -37,6 +38,7 @@ std::shared_ptr<SaveSystem> saveSystem;
 std::shared_ptr<Database> database;
 std::shared_ptr<Session> session;
 std::shared_ptr<ProgressionTrackers> progressionTrackers;
+std::unique_ptr<SyscallExt> syscallExt;
 } // namespace ETJump
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,6 +51,9 @@ static void initializeETJump() {
   ETJump::session = std::make_shared<Session>(ETJump::database);
   ETJump::saveSystem = std::make_shared<ETJump::SaveSystem>(ETJump::session);
   ETJump::progressionTrackers = std::make_shared<ETJump::ProgressionTrackers>();
+
+  ETJump::syscallExt = std::make_unique<ETJump::SyscallExt>();
+  ETJump::syscallExt->setupExtensions();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,6 +66,7 @@ static void shutdownETJump() {
   ETJump::session = nullptr;
   ETJump::saveSystem = nullptr;
   ETJump::progressionTrackers = nullptr;
+  ETJump::syscallExt = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -254,13 +260,17 @@ vmCvar_t shared;
 vmCvar_t vote_minVoteDuration;
 vmCvar_t g_moverScale;
 vmCvar_t g_debugTrackers;
-vmCvar_t g_debugTimeruns;
 vmCvar_t g_spectatorVote;
 vmCvar_t g_enableVote;
 
 vmCvar_t g_autoRtv;
 vmCvar_t g_rtvMapCount;
 vmCvar_t vote_minRtvDuration;
+
+vmCvar_t g_adminChat;
+
+vmCvar_t g_chatReplay;
+vmCvar_t g_chatReplayMaxMessageAge;
 
 // ETLegacy server browser integration
 // os support - this SERVERINFO cvar specifies supported client operating
@@ -502,7 +512,6 @@ cvarTable_t gameCvarTable[] = {
     {&vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE},
     {&g_moverScale, "g_moverScale", "1.0", 0},
     {&g_debugTrackers, "g_debugTrackers", "0", CVAR_ARCHIVE | CVAR_LATCH},
-    {&g_debugTimeruns, "g_debugTimeruns", "0", CVAR_ARCHIVE | CVAR_LATCH},
     {&g_spectatorVote, "g_spectatorVote", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
     {&g_enableVote, "g_enableVote", "1", CVAR_ARCHIVE},
     {&g_oss, "g_oss", "399", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse, qfalse},
@@ -510,6 +519,12 @@ cvarTable_t gameCvarTable[] = {
     {&g_autoRtv, "g_autoRtv", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
     {&vote_minRtvDuration, "vote_minRtvDuration", "15000", CVAR_ARCHIVE},
     {&g_rtvMapCount, "g_rtvMapCount", "5", CVAR_ARCHIVE},
+
+    {&g_adminChat, "g_adminChat", "1", CVAR_ARCHIVE},
+
+    {&g_chatReplay, "g_chatReplay", "1", CVAR_ARCHIVE},
+    {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "5",
+     CVAR_ARCHIVE | CVAR_LATCH},
 };
 
 // bk001129 - made static to avoid aliasing
@@ -600,8 +615,6 @@ void QDECL G_Printf(const char *fmt, ...) {
 
   trap_Printf(text);
 }
-// bani
-void QDECL G_Printf(const char *fmt, ...);
 
 void QDECL G_DPrintf(const char *fmt, ...) {
   va_list argptr;
@@ -617,10 +630,8 @@ void QDECL G_DPrintf(const char *fmt, ...) {
 
   trap_Printf(text);
 }
-// bani
-void QDECL G_DPrintf(const char *fmt, ...);
 
-void QDECL G_Error(const char *fmt, ...) {
+[[noreturn]] void QDECL G_Error(const char *fmt, ...) {
   va_list argptr;
   char text[1024];
 
@@ -630,20 +641,6 @@ void QDECL G_Error(const char *fmt, ...) {
 
   trap_Error(text);
 }
-// bani
-void QDECL G_Error(const char *fmt, ...);
-
-#define CH_KNIFE_DIST 48 // from g_weapon.c
-#define CH_LADDER_DIST 100
-#define CH_WATER_DIST 100
-#define CH_BREAKABLE_DIST 64
-#define CH_DOOR_DIST 96
-#define CH_ACTIVATE_DIST 96
-#define CH_EXIT_DIST 256
-#define CH_FRIENDLY_DIST 1024
-
-#define CH_MAX_DIST 1024      // use the largest value from above
-#define CH_MAX_DIST_ZOOM 8192 // max dist for zooming hints
 
 /*
 ==============
@@ -757,8 +754,6 @@ void G_CheckForCursorHints(gentity_t *ent) {
   gentity_t *checkEnt, *traceEnt = 0;
   playerState_t *ps;
   int hintType, hintDist, hintVal;
-  qboolean zooming;   // indirectHit means the checkent was not the ent
-                      // hit by the trace (checkEnt!=traceEnt)
   int trace_contents; // DHM - Nerve
   int numOfIgnoredEnts = 0;
 
@@ -768,7 +763,7 @@ void G_CheckForCursorHints(gentity_t *ent) {
 
   ps = &ent->client->ps;
 
-  zooming = (qboolean)(ps->eFlags & EF_ZOOMING);
+  const bool zooming = ps->eFlags & EF_ZOOMING;
 
   AngleVectors(ps->viewangles, forward, right, up);
 
@@ -908,25 +903,37 @@ void G_CheckForCursorHints(gentity_t *ent) {
       }
 
       if (!Q_stricmp(traceEnt->classname, "func_invisible_user")) {
-        // DHM - Nerve :: Put this back in only
-        // in multiplayer
-        if (traceEnt->s.dmgFlags) // hint icon
-                                  // specified
-                                  // in entity
-        {
+        // DHM - Nerve :: Put this back in only in multiplayer
+        // hint icon specified in entity
+        if (traceEnt->s.dmgFlags) {
           hintType = traceEnt->s.dmgFlags;
           hintDist = CH_ACTIVATE_DIST;
-          checkEnt = 0;
-        } else // use target for hint icon
-        {
-          checkEnt = G_FindByTargetname(NULL, traceEnt->target);
-          if (!checkEnt) // no target
-                         // found
-          {
+          checkEnt = nullptr;
+        } else {
+          // use target for hint icon
+          checkEnt = G_FindByTargetname(nullptr, traceEnt->target);
+          // no target found
+          if (!checkEnt) {
             hintType = HINT_BAD_USER;
-            hintDist =
-                CH_MAX_DIST_ZOOM; // show this one from super far for debugging
+            // show this one from super far for debugging
+            hintDist = CH_MAX_DIST_ZOOM;
           }
+        }
+
+        // check for delay so we don't do div by 0
+        if (traceEnt->spawnflags &
+                static_cast<int>(ETJump::FuncInvisSpawnflags::WaitProgress) &&
+            traceEnt->delay != 0) {
+          if (traceEnt->wait > 0 &&
+              level.time < static_cast<int>(traceEnt->wait)) {
+            hintVal = static_cast<int>(
+                std::clamp(255 * ((static_cast<float>(level.time) -
+                                   traceEnt->wait + traceEnt->delay) /
+                                  traceEnt->delay),
+                           0.0f, 255.0f));
+          }
+        } else {
+          hintVal = 0;
         }
       }
     }
@@ -1180,7 +1187,22 @@ void G_CheckForCursorHints(gentity_t *ent) {
             }
           } else if (!Q_stricmp(checkEnt->classname, "func_button")) {
             hintDist = CH_ACTIVATE_DIST;
-            hintType = HINT_BUTTON;
+            hintType = checkEnt->s.dmgFlags;
+
+            // 'active' is true when the button isn't at the starting position
+            // in other words, when it's been activated and hasn't returned yet
+            if (checkEnt->spawnflags &
+                    static_cast<int>(
+                        ETJump::FuncButtonSpawnflags::WaitProgress) &&
+                ETJump::buttonOnCooldown(checkEnt) && checkEnt->active) {
+              hintVal = static_cast<int>(std::clamp(
+                  255 * (static_cast<float>(level.time - checkEnt->timestamp) /
+                         checkEnt->wait),
+                  0.0f, 255.0f));
+            } else {
+              hintVal = 0;
+            }
+
           } else if (!Q_stricmp(checkEnt->classname, "props_"
                                                      "flamebarrel")) {
             hintDist = CH_BREAKABLE_DIST * 2;
@@ -1514,9 +1536,8 @@ void G_UpdateCvars(void) {
 
               if (ent->client->sess.specLocked) {
                 ent->client->sess.specLocked = qfalse;
-                Printer::SendPopupMessage(
-                    ClientNum(ent),
-                    "You are no longer locked from spectators.");
+                Printer::popup(ClientNum(ent),
+                               "You are no longer locked from spectators.");
                 ETJump::UpdateClientConfigString(*ent);
               }
             }
@@ -1572,9 +1593,6 @@ void G_wipeCvars(void) {
 
   G_UpdateCvars();
 }
-
-// bani - #113
-#define SNIPSIZE 250
 
 void G_ExecMapSpecificConfig() {
   int len;
@@ -1899,6 +1917,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   G_SpawnEntitiesFromString();
 
   ETJump::TimerunEntity::validateTimerunEntities();
+  ETJump::TargetSpawnRelay::validateSpawnRelayEntities();
 
   // TAT 11/13/2002 - entities are spawned, so now we can do setup
   InitialServerEntitySetup();
@@ -1953,6 +1972,10 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
   OnGameInit();
   ETJump_InitGame(levelTime, randomSeed, restart);
+
+  // setup voteflags, must be called after ETJump init because we need
+  // to check the amount of custom votes on server in here
+  G_voteFlags();
 
   if (G_PatchFixEnabled()) {
     G_Printf("\n^7--------- ^1!!! WARNING !!! ^7---------\n\n^7Server started "
@@ -2010,7 +2033,7 @@ void G_ShutdownGame(int restart) {
 #ifndef GAME_HARD_LINKED
 // this is only here so the functions in q_shared.c and bg_*.c can link
 
-void QDECL Com_Error(int unused, const char *error, ...) {
+[[noreturn]] void QDECL Com_Error(int level, const char *error, ...) {
   va_list argptr;
   char text[1024];
 
@@ -2020,8 +2043,6 @@ void QDECL Com_Error(int unused, const char *error, ...) {
 
   G_Error("%s", text);
 }
-// bani
-void QDECL Com_Error(int level, const char *error, ...);
 
 void QDECL Com_Printf(const char *msg, ...) {
   va_list argptr;
@@ -2033,8 +2054,6 @@ void QDECL Com_Printf(const char *msg, ...) {
 
   G_Printf("%s", text);
 }
-// bani
-void QDECL Com_Printf(const char *msg, ...);
 
 #endif
 
@@ -2847,9 +2866,9 @@ void CheckVote() {
   // duration for rtv to give everyone some time to pick a map
   // I'd really like this to be seconds but bleh, consistency I guess...
   if (isRtvVote) {
-    minVoteDuration = Numeric::clamp(vote_minRtvDuration.integer, 1000, 29000);
+    minVoteDuration = std::clamp(vote_minRtvDuration.integer, 1000, 29000);
   } else {
-    minVoteDuration = Numeric::clamp(vote_minVoteDuration.integer, 1000, 29000);
+    minVoteDuration = std::clamp(vote_minVoteDuration.integer, 1000, 29000);
   }
 
   if (!level.voteInfo.voteTime || level.voteInfo.vote_fn == nullptr ||
@@ -2857,7 +2876,7 @@ void CheckVote() {
     return;
   }
 
-  const int requiredPercentage = Numeric::clamp(vote_percent.integer, 1, 99);
+  const int requiredPercentage = std::clamp(vote_percent.integer, 1, 99);
   const int validVotingClients = getNumValidVoters();
   const int requiredClients = validVotingClients * requiredPercentage / 100;
   const auto voter =
@@ -2865,14 +2884,14 @@ void CheckVote() {
 
   if (!isAutoRtvVote &&
       level.voteInfo.voter_team != voter->client->sess.sessionTeam) {
-    Printer::BroadcastPopupMessage("^7Vote canceled: caller switched team.");
+    Printer::popupAll("^7Vote canceled: caller switched team.");
     G_LogPrintf("Vote canceled: %s (caller %s switched teams)\n",
                 level.voteInfo.voteString, voter->client->pers.netname);
 
     level.voteInfo.voteYes = 0;
     level.voteInfo.voteNo = level.numConnectedClients;
   } else if (level.voteInfo.voteYes > requiredClients) {
-    Printer::BroadcastPopupMessage("^5Vote passed!");
+    Printer::popupAll("^5Vote passed!");
     G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
 
     level.voteInfo.voteTime = 0;
@@ -2883,7 +2902,7 @@ void CheckVote() {
              level.time - level.voteInfo.voteTime >= VOTE_TIME) {
     std::string voteFailedMsg = ETJump::stringFormat("^3Vote FAILED! ^3(%s)",
                                                      level.voteInfo.voteString);
-    Printer::BroadcastPopupMessage(voteFailedMsg);
+    Printer::popupAll(voteFailedMsg);
     G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
 
     level.voteInfo.voteTime = 0;

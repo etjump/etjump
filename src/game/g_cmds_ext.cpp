@@ -73,9 +73,6 @@ static const cmd_reference_t aCommandInfo[] = {
     {"readyteam", qfalse, qtrue, G_teamready_cmd,
      ":^7 Sets an entire team's status to ^5ready^7 to start a match"},
 
-    {"say_teamnl", qtrue, qtrue, G_say_teamnl_cmd,
-     "<msg>:^7 Sends a team chat without location info"},
-
     {"scores", qtrue, qtrue, G_scores_cmd,
      ":^7 Displays current match stat info"},
 
@@ -241,11 +238,11 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   playersCmdHeader header;
 
   if (ent) {
-    Printer::SendConsoleMessage(
-        clientNum, va("\n^g  %-4s%-25s%-8s%-6s%-9s%-7s%s\n", header.id,
-                      header.player, header.nudge, header.rate,
-                      header.maxPackets, header.snaps, header.engine));
-    Printer::SendConsoleMessage(clientNum, va("^g%s\n", header.divider));
+    Printer::console(clientNum,
+                     va("\n^g  %-4s%-25s%-8s%-6s%-9s%-7s%s\n", header.id,
+                        header.player, header.nudge, header.rate,
+                        header.maxPackets, header.snaps, header.engine));
+    Printer::console(clientNum, va("^g%s\n", header.divider));
   } else {
     G_Printf("  %-4s%-25s%-8s%-6s%-9s%-7s%s\n", header.id, header.player,
              header.nudge, header.rate, header.maxPackets, header.snaps,
@@ -312,9 +309,8 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     }
 
     if (ent) {
-      Printer::SendConsoleMessage(
-          clientNum,
-          va("%s%2d  %-*s^7%s\n", team, idNum, 25 + colorChars, name, info));
+      Printer::console(clientNum, va("%s%2d  %-*s^7%s\n", team, idNum,
+                                     25 + colorChars, name, info));
     } else {
       G_Printf("%s%2d  %-25s%s\n", team, idNum,
                ETJump::sanitize(name, false).c_str(), info);
@@ -325,8 +321,7 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
 
   if (ent) {
     // can't use getPluralizedString() here due to color codes
-    Printer::SendConsoleMessage(clientNum,
-                                va("\n^3%2d^7 total player%s\n\n", count,
+    Printer::console(clientNum, va("\n^3%2d^7 total player%s\n\n", count,
                                    level.numConnectedClients == 1 ? "" : "s"));
   } else {
     G_Printf("\n%s\n\n",
@@ -386,15 +381,6 @@ void G_ready_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state) {
   }
 
   G_readyMatchState();
-}
-
-// ************** SAY_TEAMNL
-//
-// Team chat w/no location info
-void G_say_teamnl_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
-  if (!ent->client->sess.muted) {
-    Cmd_Say_f(ent, SAY_TEAMNL, qfalse, qtrue);
-  }
 }
 
 // ************** SCORES
@@ -743,7 +729,7 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
 
   if (ClientIsFlooding(ent)) {
     selfMsg = "^1Spam Protection:^7 Specinvite ignored\n";
-    Printer::SendConsoleMessage(selfClient, selfMsg);
+    Printer::console(selfClient, selfMsg);
     return;
   }
 
@@ -759,7 +745,7 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
   if (other == ent) {
     selfMsg = ETJump::stringFormat("You can not spec%sinvite yourself!\n",
                                    invite ? "" : "un");
-    Printer::SendConsoleMessage(selfClient, selfMsg);
+    Printer::console(selfClient, selfMsg);
     return;
   }
 
@@ -767,7 +753,7 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
     if (COM_BitCheck(ent->client->sess.specInvitedClients, targetClient)) {
       selfMsg = ETJump::stringFormat("%s^7 is already specinvited.\n",
                                      other->client->pers.netname);
-      Printer::SendConsoleMessage(selfClient, selfMsg);
+      Printer::console(selfClient, selfMsg);
       return;
     }
     COM_BitSet(ent->client->sess.specInvitedClients, targetClient);
@@ -775,15 +761,15 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
     selfMsg =
         ETJump::stringFormat("%s^7 has been sent a spectator invitation.\n",
                              other->client->pers.netname);
-    Printer::SendConsoleMessage(selfClient, selfMsg);
-    otherMsg = ETJump::stringFormat("You have been invited to spectate %s^7.\n",
+    Printer::console(selfClient, selfMsg);
+    otherMsg = ETJump::stringFormat("You have been invited to spectate %s^7.",
                                     ent->client->pers.netname);
-    Printer::SendPopupMessage(targetClient, otherMsg);
+    Printer::popup(targetClient, otherMsg);
   } else {
     if (!COM_BitCheck(ent->client->sess.specInvitedClients, targetClient)) {
       selfMsg = ETJump::stringFormat("%s^7 is not specinvited.\n",
                                      other->client->pers.netname);
-      Printer::SendConsoleMessage(selfClient, selfMsg);
+      Printer::console(selfClient, selfMsg);
       return;
     }
 
@@ -797,11 +783,11 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
     selfMsg =
         ETJump::stringFormat("%s^7 was removed from invited spectators.\n",
                              other->client->pers.netname);
-    Printer::SendConsoleMessage(selfClient, std::move(selfMsg));
+    Printer::console(selfClient, selfMsg);
     otherMsg =
-        ETJump::stringFormat("^7You are no longer invited to spectate %s^7.\n",
+        ETJump::stringFormat("^7You are no longer invited to spectate %s^7.",
                              ent->client->pers.netname);
-    Printer::SendPopupMessage(targetClient, otherMsg);
+    Printer::popup(targetClient, otherMsg);
   }
 }
 
@@ -819,7 +805,7 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand,
   // about clients trying to turn off speclock when g_allowSpeclock is 0
   if (!g_allowSpeclock.integer) {
     msg = "Speclock is disabled on this server.\n";
-    Printer::SendConsoleMessage(client, msg);
+    Printer::console(client, msg);
     return;
   }
 
@@ -827,14 +813,14 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand,
     msg = ETJump::stringFormat(
         "^7You cannot use ^3spec%slock ^7while spectating!\n",
         lock ? "" : "un");
-    Printer::SendConsoleMessage(client, msg);
+    Printer::console(client, msg);
     return;
   }
 
   if (ent->client->sess.specLocked == lock) {
     msg = ETJump::stringFormat("You are already %slocked from spectators!\n",
                                lock ? "" : "un");
-    Printer::SendConsoleMessage(client, std::move(msg));
+    Printer::console(client, msg);
     return;
   }
 
@@ -843,15 +829,13 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand,
 
   // unlocked
   if (!ent->client->sess.specLocked) {
-    Printer::SendPopupMessage(client,
-                              "You are now unlocked from spectators!\n");
+    Printer::popup(client, "You are now unlocked from spectators!");
     return;
   }
 
   // locked
-  Printer::SendPopupMessage(client, "You are now locked from spectators!\n");
-  Printer::SendPopupMessage(
-      client, "Use ^3specinvite ^7to invite people to spectate.\n");
+  Printer::popup(client, "You are now locked from spectators!");
+  Printer::popup(client, "Use ^3specinvite ^7to invite people to spectate.");
 
   // update following players
   for (i = 0; i < level.numConnectedClients; i++) {
@@ -880,7 +864,7 @@ static void Cmd_SpecList_f(gentity_t *ent, unsigned int dwCommand,
 
   // print zza warning
   if (!ent->client->sess.specLocked) {
-    Printer::SendConsoleMessage(client, "You are not speclocked.\n");
+    Printer::console(client, "You are not speclocked.\n");
   }
 
   for (i = 0; i < level.numConnectedClients; i++)
@@ -889,6 +873,6 @@ static void Cmd_SpecList_f(gentity_t *ent, unsigned int dwCommand,
       msg = ETJump::stringFormat(
           "%s ^7is specinvited.\n",
           level.clients[level.sortedClients[i]].pers.netname);
-      Printer::SendConsoleMessage(client, msg);
+      Printer::console(client, msg);
     }
 }

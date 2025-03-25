@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,17 +25,40 @@
 #pragma once
 
 #include "json/json.h"
-#include "etj_log.h"
+#include "etj_string_utilities.h"
 
 namespace ETJump {
 class JsonUtils {
-  static Log logger;
-
 public:
   // returns true on successful read
-  static bool readFile(const std::string &file, Json::Value &root);
+  static bool readFile(const std::string &file, Json::Value &root,
+                       std::string *errors = nullptr);
 
   // returns true on successful write
-  static bool writeFile(const std::string &file, const Json::Value &root);
+  static bool writeFile(const std::string &file, const Json::Value &root,
+                        std::string *errors = nullptr);
+
+  // tries to parse a JSON value
+  // returns true if parse was successful, otherwise false
+  // if provided, any errors are written to 'errors'
+  // 'field' can be provided as the key for more descriptive error messages
+  template <typename T>
+  static bool parseValue(T &value, const Json::Value &jsonValue,
+                         std::string *errors = nullptr,
+                         const std::string &field = "") {
+    try {
+      value = jsonValue.as<T>();
+      return true;
+    } catch (const Json::LogicError &e) {
+      if (errors) {
+        *errors = stringFormat(
+            "Failed to parse JSON value%s: %s",
+            field.empty() ? "" : stringFormat(" for field '%s'", field),
+            e.what());
+      }
+
+      return false;
+    }
+  }
 };
 } // namespace ETJump

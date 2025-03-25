@@ -76,12 +76,93 @@ void SP_target_remove_powerups(gentity_t *ent) {
 "wait" seconds to pause before firing targets.
 "random" delay variance, total delay = delay +/- random seconds
 */
+namespace ETJump {
+enum class TargetDelaySpawnflags {
+  PerClientDelay = 1,
+};
+
+bool anyDelaysQueued(const gentity_t *ent) {
+  return std::any_of(ent->targetDelayActivationTime.cbegin(),
+                     ent->targetDelayActivationTime.cend(),
+                     [](const int value) { return value != 0; });
+}
+
+size_t getNextActivationTimeIndex(const gentity_t *ent) {
+  const auto it = std::min_element(ent->targetDelayActivationTime.cbegin(),
+                                   ent->targetDelayActivationTime.cend(),
+                                   [](const int a, const int b) {
+                                     if (a == 0) {
+                                       return false;
+                                     }
+
+                                     if (b == 0) {
+                                       return true;
+                                     }
+
+                                     return a < b;
+                                   });
+
+  return static_cast<size_t>(
+      std::distance(ent->targetDelayActivationTime.cbegin(), it));
+}
+
+void thinkTargetDelayPerClient(gentity_t *ent) {
+  G_UseTargets(ent, ent->activator);
+  ent->targetDelayActivationTime[ClientNum(ent->activator)] = 0;
+
+  // check if there are other delays that need to trigger this frame
+  for (size_t i = 0; i < ent->targetDelayActivationTime.size(); i++) {
+    if (ent->targetDelayActivationTime[i] != 0 &&
+        ent->targetDelayActivationTime[i] <= level.time) {
+      G_UseTargets(ent, &g_entities[i]);
+      ent->targetDelayActivationTime[i] = 0;
+    }
+  }
+
+  // if other delays are queued, set next think *here*, not in use function
+  // otherwise any activation will cancel out the ongoing queue
+  if (anyDelaysQueued(ent)) {
+    const size_t index = getNextActivationTimeIndex(ent);
+    ent->nextthink = ent->targetDelayActivationTime[index];
+    ent->activator = &g_entities[index];
+  }
+}
+} // namespace ETJump
+
 void Think_Target_Delay(gentity_t *ent) { G_UseTargets(ent, ent->activator); }
 
 void Use_Target_Delay(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-  ent->nextthink = level.time + (ent->wait + ent->random * crandom()) * 1000;
-  ent->think = Think_Target_Delay;
-  ent->activator = activator;
+  const int nextThink =
+      level.time +
+      static_cast<int>((ent->wait + ent->random * crandom()) * 1000);
+
+  if (ent->spawnflags &
+      static_cast<int>(ETJump::TargetDelaySpawnflags::PerClientDelay)) {
+    if (!activator || !activator->client) {
+      G_Error("%s: call to client-only 'target_delay' with no activator.\n",
+              __func__);
+    }
+
+    const int cnum = ClientNum(activator);
+
+    // we must determine this *before* we set the activation time,
+    // otherwise we never set nextthink as the array will never be empty
+    const bool setNextThink = !ETJump::anyDelaysQueued(ent) ||
+                              ent->targetDelayActivationTime[cnum] != 0;
+
+    ent->think = ETJump::thinkTargetDelayPerClient;
+    ent->targetDelayActivationTime[cnum] = nextThink;
+
+    if (setNextThink) {
+      const size_t index = ETJump::getNextActivationTimeIndex(ent);
+      ent->nextthink = ent->targetDelayActivationTime[index];
+      ent->activator = &g_entities[index];
+    }
+  } else {
+    ent->think = Think_Target_Delay;
+    ent->nextthink = nextThink;
+    ent->activator = activator;
+  }
 }
 
 void SP_target_delay(gentity_t *ent) {
@@ -684,42 +765,6 @@ void target_relay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
         }
         return;
       }
-
-      /*			item =
-         BG_FindItemForKey(self->key, 0);
-
-                  if(item)
-                  {
-                      if(activator->client->ps.stats[STAT_KEYS]
-         & (1<<item->giTag))	// user has key
-                      {
-                          if (self->spawnflags & 8 ) {
-         // relay is NOKEY_ONLY and player has key if
-         (self->soundPos1) G_Sound( self,
-         self->soundPos1);	//----(SA)	added
-         return;
-                          }
-                      }
-                      else // user does not have key
-                      {
-                          if (!(self->spawnflags & 8) )
-                          {
-                              if (self->soundPos1)
-                                  G_Sound( self,
-         self->soundPos1);
-         //----(SA)	added return;
-                          }
-                      }
-                  }*/
-
-      /*			if(self->spawnflags &
-         16) {	// (SA) take key
-                      activator->client->ps.stats[STAT_KEYS]
-         &=
-         ~(1<<item->giTag);
-                      // (SA) TODO: "took inventory
-         item" sound
-                  }*/
     }
   }
 
@@ -1439,20 +1484,16 @@ Resets saved positions
 
 void target_savereset_use(gentity_t *self, gentity_t *other,
                           gentity_t *activator) {
-
   if (!activator || !activator->client) {
-    G_DPrintf("Error: trying to activate \"target_savereset\" "
-              "without an "
+    G_DPrintf("Error: trying to activate \"target_savereset\" without an "
               "activator.\n");
     return;
   }
 
-  if (activator->client) {
-    ETJump::saveSystem->resetSavedPositions(activator);
+  ETJump::saveSystem->resetSavedPositions(activator);
 
-    if (!(self->spawnflags & 1)) {
-      CPx(activator - g_entities, "cp \"^7 Your saves were removed.\n\"");
-    }
+  if (!(self->spawnflags & 1)) {
+    Printer::center(activator, "^7Your saves were removed.");
   }
 }
 
@@ -1508,8 +1549,9 @@ void target_save_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
 
 void SP_target_save(gentity_t *self) { self->use = target_save_use; }
 
-#define SF_REMOVE_PORTALS_NO_TEXT 0x1
-#define SF_REMOVE_PORTALS_ACTIVATE_TARGETS 0x2
+inline constexpr int SF_REMOVE_PORTALS_NO_TEXT = 0x1;
+inline constexpr int SF_REMOVE_PORTALS_ACTIVATE_TARGETS = 0x2;
+
 void target_remove_portals_use(gentity_t *self, gentity_t *other,
                                gentity_t *activator) {
   if (!activator || !activator->client) {
@@ -1553,8 +1595,8 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
     }
 
     if (!(self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)) {
-      Printer::SendCenterMessage(ClientNum(activator),
-                                 "^7Your portal gun portals have been reset.");
+      Printer::center(ClientNum(activator),
+                      "^7Your portal gun portals have been reset.");
     }
   }
 
@@ -1707,41 +1749,47 @@ void SP_target_savelimit_inc(gentity_t *self) {
   self->use = target_savelimit_inc_use;
 }
 
-#define NO_DECAY_IDENT -1
-#define NO_DECAY_VALUE -1
-#define NO_DECAY_TIME -1
+inline constexpr int NO_DECAY_IDENT = -1;
+inline constexpr int NO_DECAY_VALUE = -1;
+inline constexpr int NO_DECAY_TIME = -1;
 
 void target_decay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (self->decayTime == NO_DECAY_TIME) {
-    C_ConsolePrintAll("target_decay: no \"decay_time\" specified.");
-
-  } else if (self->decayValue == NO_DECAY_VALUE) {
-    C_ConsolePrintAll("target_decay: no \"decay_value\" specified.");
-  } else if (self->decayTime < 0) {
-    C_ConsolePrintAll("target_decay: \"decay_time\" is below 0.");
-  } else {
-    if (!activator || !activator->client) {
-      return;
-    }
-    if (self->ident != NO_DECAY_IDENT) {
-      activator->client->sess.upcomingClientMapProgression =
-          activator->client->sess.clientMapProgression;
-    } else {
-      activator->client->sess.upcomingClientMapProgression = self->decayValue;
-    }
-
-    activator->client->sess.previousClientMapProgression =
-        activator->client->sess.clientMapProgression;
-    activator->client->sess.clientMapProgression = self->ident;
-
-    activator->client->sess.nextProgressionDecayEvent =
-        level.time + self->decayTime;
-    activator->client->sess.decayProgression = qtrue;
+    G_Printf(S_COLOR_YELLOW "%s: no 'decay_time' specified.", __func__);
+    return;
   }
+
+  if (self->decayValue == NO_DECAY_VALUE) {
+    G_Printf(S_COLOR_YELLOW "%s: no 'decay_value' specified.", __func__);
+    return;
+  }
+
+  if (self->decayTime < 0) {
+    G_Printf(S_COLOR_YELLOW "%s: 'decay_time' cannot be negative.", __func__);
+    return;
+  }
+
+  if (!activator || !activator->client) {
+    return;
+  }
+
+  if (self->ident != NO_DECAY_IDENT) {
+    activator->client->sess.upcomingClientMapProgression =
+        activator->client->sess.clientMapProgression;
+  } else {
+    activator->client->sess.upcomingClientMapProgression = self->decayValue;
+  }
+
+  activator->client->sess.previousClientMapProgression =
+      activator->client->sess.clientMapProgression;
+  activator->client->sess.clientMapProgression = self->ident;
+
+  activator->client->sess.nextProgressionDecayEvent =
+      level.time + self->decayTime;
+  activator->client->sess.decayProgression = qtrue;
 }
 
 void SP_target_decay(gentity_t *self) {
-  // FIXME: -1 instead of "-1"
   G_SpawnInt("ident", "-1", &self->ident);
   G_SpawnInt("decay_time", "-1", &self->decayTime);
   G_SpawnInt("decay_value", "-1", &self->decayValue);
@@ -1875,7 +1923,8 @@ void SP_target_interrupt_timerun(gentity_t *self) {
 // 1 => once per life
 // keys
 // delay => how long in ms before next activation by same player
-#define SF_SET_HEALTH_ONCE 0x1
+inline constexpr int SF_SET_HEALTH_ONCE = 0x1;
+
 void target_set_health_use(gentity_t *self, gentity_t *other,
                            gentity_t *activator) {
   if (!activator || !activator->client) {

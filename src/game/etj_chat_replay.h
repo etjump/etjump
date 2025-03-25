@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,27 +35,34 @@ class ChatReplay {
     std::string message;
     bool localize;
     bool encoded;
-  };
 
-  static Log logger;
+    // true if timestamp is older than current time - g_chatReplayMaxMessageAge
+    bool expired;
+    int timestamp;
+  };
 
   static constexpr int MAX_CHAT_REPLAY_BUFFER = 10;
   const std::string chatReplayFile = "chatreplay.json";
+
+  std::unique_ptr<Log> logger;
+  std::string errors{};
 
   std::list<ChatMessage> chatReplayBuffer;
 
   static std::string parseChatMessage(const ChatMessage &msg);
   void readChatsFromFile();
-  void writeChatsToFile();
+  void storeChatMessage(const ChatMessage &msg);
 
 public:
-  ChatReplay();
-  ~ChatReplay();
+  explicit ChatReplay(std::unique_ptr<Log> log);
+  ~ChatReplay() = default;
 
-  void storeChatMessage(int clientNum, const std::string &name,
-                        const std::string &message, bool localize,
-                        bool encoded);
+  void createChatMessage(int clientNum, const std::string &name,
+                         const std::string &message, bool localize,
+                         bool encoded);
 
   void sendChatMessages(gentity_t *ent);
+
+  void writeChatsToFile();
 };
 } // namespace ETJump

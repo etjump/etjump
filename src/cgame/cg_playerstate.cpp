@@ -252,6 +252,7 @@ void CG_Respawn(qboolean revived) {
 
   cg.pmext.noclipScale = etj_noclipScale.value;
   cg.pmext.bAutoReload = cg_autoReload.integer ? qtrue : qfalse;
+  cg.pmext.autoSprint = etj_autoSprint.integer;
 
   cg.pmext.sprintTime = SPRINTTIME;
 
@@ -282,8 +283,6 @@ void CG_Respawn(qboolean revived) {
   trap_R_SetFog(FOG_CMD_SWITCHFOG, FOG_MAP, 20, 0, 0, 0, 0);
   // dhm - end
 }
-
-extern char *eventnames[];
 
 /*
 ==============

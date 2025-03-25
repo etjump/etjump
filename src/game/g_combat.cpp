@@ -1273,7 +1273,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     }
 
     if (g_debugBullets.integer) {
-      Printer::SendConsoleMessage(attackerNum, "Head Shot\n");
+      Printer::console(attackerNum, "Head Shot\n");
     }
     G_LogRegionHit(attacker, HR_HEAD);
     hr = HR_HEAD;
@@ -1281,19 +1281,19 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     G_LogRegionHit(attacker, HR_LEGS);
     hr = HR_LEGS;
     if (g_debugBullets.integer) {
-      Printer::SendConsoleMessage(attackerNum, "Leg Shot\n");
+      Printer::console(attackerNum, "Leg Shot\n");
     }
   } else if (IsArmShot(targ, attacker, point, mod)) {
     G_LogRegionHit(attacker, HR_ARMS);
     hr = HR_ARMS;
     if (g_debugBullets.integer) {
-      Printer::SendConsoleMessage(attackerNum, "Arm Shot\n");
+      Printer::console(attackerNum, "Arm Shot\n");
     }
   } else if (targ->client && targ->health > 0 && IsHeadShotWeapon(mod)) {
     G_LogRegionHit(attacker, HR_BODY);
     hr = HR_BODY;
     if (g_debugBullets.integer) {
-      Printer::SendConsoleMessage(attackerNum, "Body Shot\n");
+      Printer::console(attackerNum, "Body Shot\n");
     }
   }
 
@@ -1488,7 +1488,7 @@ void G_RailTrail(vec_t *start, vec_t *end) {
   temp->s.dmgFlags = 0;
 }
 
-#define MASK_CAN_DAMAGE (CONTENTS_SOLID | CONTENTS_BODY)
+inline constexpr uint32_t MASK_CAN_DAMAGE = CONTENTS_SOLID | CONTENTS_BODY;
 
 qboolean CanDamage(gentity_t *targ, vec3_t origin) {
   vec3_t dest;

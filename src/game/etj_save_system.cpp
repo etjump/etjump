@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 
 #include "etj_save_system.h"
 #include "utilities.hpp"
+#include "etj_printer.h"
 #include "etj_session.h"
 #include <iostream>
 
@@ -72,14 +73,14 @@ void SaveSystem::save(gentity_t *ent) {
   }
 
   if (!g_save.integer) {
-    CPTo(ent, "^3Save ^7is not enabled.");
+    Printer::center(ent, "^3Save ^7is not enabled.");
     return;
   }
 
   if (!g_cheats.integer &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave))) {
-    CPTo(ent, "^3Save ^7is disabled for this death run.");
+    Printer::center(ent, "^3Save ^7is disabled for this death run.");
     return;
   }
 
@@ -87,7 +88,7 @@ void SaveSystem::save(gentity_t *ent) {
                                static_cast<int>(SaveLoadRestrictions::Move)) {
     // comparing to zero vector
     if (!VectorCompare(client->ps.velocity, vec3_origin)) {
-      CPTo(ent, "^3Save ^7is disabled while moving on this map.");
+      Printer::center(ent, "^3Save ^7is disabled while moving on this map.");
       return;
     }
   }
@@ -96,7 +97,7 @@ void SaveSystem::save(gentity_t *ent) {
   if (!g_cheats.integer && client->ps.pm_type == PM_DEAD &&
       level.saveLoadRestrictions &
           static_cast<int>(SaveLoadRestrictions::Dead)) {
-    CPTo(ent, "^3Save ^7is disabled while dead on this map.");
+    Printer::center(ent, "^3Save ^7is disabled while dead on this map.");
     return;
   }
 
@@ -107,32 +108,32 @@ void SaveSystem::save(gentity_t *ent) {
     ToInt((*argv)[1], position);
 
     if (position < 0 || position >= MAX_SAVED_POSITIONS) {
-      CPTo(ent, "Invalid position.");
+      Printer::center(ent, "Invalid position.");
       return;
     }
 
     if (!g_cheats.integer && position > 0 && client->sess.timerunActive &&
         client->sess.runSpawnflags &
             static_cast<int>(ETJump::TimerunSpawnflags::NoBackups)) {
-      CPTo(ent, "Save slots are disabled for this timerun.");
+      Printer::center(ent, "Save slots are disabled for this timerun.");
       return;
     }
   }
 
   if (!client->sess.saveAllowed) {
-    CPTo(ent, "You are not allowed to save a position.");
+    Printer::center(ent, "You are not allowed to save a position.");
     return;
   }
 
   if (client->sess.sessionTeam == TEAM_SPECTATOR) {
-    CPTo(ent, "^7You can not ^3save^7 as a spectator.");
+    Printer::center(ent, "^7You can not ^3save^7 as a spectator.");
     return;
   }
 
   if (!g_cheats.integer && client->sess.timerunActive &&
       client->sess.runSpawnflags &
           static_cast<int>(ETJump::TimerunSpawnflags::NoSave)) {
-    CPTo(ent, "^3Save ^7is disabled for this timerun.");
+    Printer::center(ent, "^3Save ^7is disabled for this timerun.");
     return;
   }
 
@@ -143,19 +144,19 @@ void SaveSystem::save(gentity_t *ent) {
   if (!g_cheats.integer) {
     if (level.noSave) {
       if (trace.fraction == 1.0f) {
-        CPTo(ent, "^7You can not ^3save ^7inside this area.");
+        Printer::center(ent, "^7You can not ^3save ^7inside this area.");
         return;
       }
     } else {
       if (trace.fraction != 1.0f) {
-        CPTo(ent, "^7You can not ^3save ^7inside this area.");
+        Printer::center(ent, "^7You can not ^3save ^7inside this area.");
         return;
       }
     }
 
     if (level.limitedSaves > 0) {
       if (client->sess.saveLimit == 0) {
-        CPTo(ent, "^7You've used all your saves.");
+        Printer::center(ent, "^7You've used all your saves.");
         return;
       }
 
@@ -163,7 +164,7 @@ void SaveSystem::save(gentity_t *ent) {
     } else {
       if (client->pers.race.isRacing) {
         if (client->pers.race.saveLimit == 0) {
-          CPTo(ent, "^7You've used all your saves.");
+          Printer::center(ent, "^7You've used all your saves.");
           return;
         }
 
@@ -179,7 +180,7 @@ void SaveSystem::save(gentity_t *ent) {
             if (client->sess.saveLimitFt) {
               client->sess.saveLimitFt--;
             } else {
-              CPTo(ent, "^7You've used all your fireteam saves.");
+              Printer::center(ent, "^7You've used all your fireteam saves.");
               return;
             }
           }
@@ -217,26 +218,26 @@ void SaveSystem::load(gentity_t *ent) {
   }
 
   if (!g_save.integer) {
-    CPTo(ent, "^3Load ^7is not enabled.");
+    Printer::center(ent, "^3Load ^7is not enabled.");
     return;
   }
 
   if (!client->sess.saveAllowed) {
-    CPTo(ent, "You are not allowed to load a position.");
+    Printer::center(ent, "You are not allowed to load a position.");
     return;
   }
 
   if (!g_cheats.integer &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave))) {
-    CPTo(ent, "^3Load ^7is disabled for this death run.");
+    Printer::center(ent, "^3Load ^7is disabled for this death run.");
     return;
   }
 
   if (!g_cheats.integer && client->ps.pm_type == PM_DEAD &&
       level.saveLoadRestrictions &
           static_cast<int>(SaveLoadRestrictions::Dead)) {
-    CPTo(ent, "^3Load ^7is disabled while dead on this map.");
+    Printer::center(ent, "^3Load ^7is disabled while dead on this map.");
     return;
   }
 
@@ -247,23 +248,24 @@ void SaveSystem::load(gentity_t *ent) {
     ToInt((*argv)[1], slot);
 
     if (slot < 0 || slot >= MAX_SAVED_POSITIONS) {
-      CPTo(ent, "^7Invalid save slot.");
+      Printer::center(ent, "^7Invalid save slot.");
       return;
     }
   }
 
   if (client->sess.sessionTeam == TEAM_SPECTATOR) {
-    CPTo(ent, "^7You can not ^3load ^7as a spectator.");
+    Printer::center(ent, "^7You can not ^3load ^7as a spectator.");
     return;
   }
 
   const auto pos = getValidTeamSaveForSlot(ent, client->sess.sessionTeam, slot);
 
   if (pos) {
-    if (pos->stance == SaveStance::Prone &&
+    if (pos->stance == PlayerStance::Prone &&
         client->ps.weapon == WP_MORTAR_SET) {
-      CPTo(ent,
-           "You cannot ^3load ^7to this position while using a mortar set.");
+      Printer::center(
+          ent,
+          "You cannot ^3load ^7to this position while using a mortar set.");
       return;
     }
 
@@ -273,7 +275,7 @@ void SaveSystem::load(gentity_t *ent) {
       if (!pos->isTimerunSave) {
         InterruptRun(ent);
       } else {
-        CPTo(ent, "Save slots are disabled for this timerun.");
+        Printer::center(ent, "Save slots are disabled for this timerun.");
         return;
       }
     }
@@ -290,13 +292,12 @@ void SaveSystem::load(gentity_t *ent) {
 
     // allow fast respawn + load if we got gibbed to skip death sequence
     if (ent->client->ps.stats[STAT_HEALTH] <= GIB_HEALTH) {
-      ent->client->ps.pm_flags &= ~PMF_LIMBO;
-      ClientSpawn(ent, qfalse);
+      respawn(ent);
     }
 
     teleportPlayer(ent, pos);
   } else {
-    CPTo(ent, "^7Use ^3save ^7first.");
+    Printer::center(ent, "^7Use ^3save ^7first.");
   }
 }
 
@@ -336,9 +337,11 @@ void ETJump::SaveSystem::forceSave(gentity_t *location, gentity_t *ent) {
   pos->isLatest = true;
 
   if (client->ps.eFlags & EF_PRONE) {
-    pos->stance = Prone;
+    pos->stance = PlayerStance::Prone;
+  } else if (client->ps.eFlags & (EF_CROUCHING | EF_DEAD)) {
+    pos->stance = PlayerStance::Crouch;
   } else {
-    pos->stance = client->ps.eFlags & EF_CROUCHING ? Crouch : Stand;
+    pos->stance = PlayerStance::Stand;
   }
 
   pos->isTimerunSave = ent->client->sess.timerunActive;
@@ -356,33 +359,33 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
   }
 
   if (!g_save.integer) {
-    CPTo(ent, "^3Load ^7is not enabled.");
+    Printer::center(ent, "^3Load ^7is not enabled.");
     return;
   }
 
   if (!client->sess.saveAllowed) {
-    CPTo(ent, "You are not allowed to load a position.");
+    Printer::center(ent, "You are not allowed to load a position.");
     return;
   }
 
   if (!g_cheats.integer && client->sess.timerunActive &&
       client->sess.runSpawnflags &
           static_cast<int>(ETJump::TimerunSpawnflags::NoBackups)) {
-    CPTo(ent, "Backup is disabled for this timerun.");
+    Printer::center(ent, "Backup is disabled for this timerun.");
     return;
   }
 
   if (!g_cheats.integer &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave))) {
-    CPTo(ent, "^3Backup ^7is disabled for this death run.");
+    Printer::center(ent, "^3Backup ^7is disabled for this death run.");
     return;
   }
 
   if (!g_cheats.integer && client->ps.pm_type == PM_DEAD &&
       level.saveLoadRestrictions &
           static_cast<int>(SaveLoadRestrictions::Dead)) {
-    CPTo(ent, "^3Backup ^7is disabled while dead on this map.");
+    Printer::center(ent, "^3Backup ^7is disabled while dead on this map.");
     return;
   }
 
@@ -393,7 +396,7 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
     ToInt(argv->at(1), slot);
 
     if (slot < 1 || slot > MAX_SAVED_POSITIONS) {
-      CPTo(ent, "^7Invalid backup slot.");
+      Printer::center(ent, "^7Invalid backup slot.");
       return;
     }
 
@@ -403,7 +406,7 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
   }
 
   if (client->sess.sessionTeam == TEAM_SPECTATOR) {
-    CPTo(ent, "^7You can not ^3load ^7as a spectator.");
+    Printer::center(ent, "^7You can not ^3load ^7as a spectator.");
     return;
   }
 
@@ -415,8 +418,10 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
     pos = &_clients[clientNum].axisBackups[slot];
   }
 
-  if (pos->stance == SaveStance::Prone && client->ps.weapon == WP_MORTAR_SET) {
-    CPTo(ent, "You cannot ^3load ^7to this position while using a mortar set.");
+  if (pos->stance == PlayerStance::Prone &&
+      client->ps.weapon == WP_MORTAR_SET) {
+    Printer::center(
+        ent, "You cannot ^3load ^7to this position while using a mortar set.");
     return;
   }
 
@@ -432,7 +437,7 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
 
     teleportPlayer(ent, pos);
   } else {
-    CPTo(ent, "^7Use ^3save ^7first.");
+    Printer::center(ent, "^7Use ^3save ^7first.");
   }
 }
 
@@ -446,46 +451,47 @@ void SaveSystem::unload(gentity_t *ent) {
   }
 
   if (!g_save.integer) {
-    CPTo(ent, "^3Unload ^7is not enabled.");
+    Printer::center(ent, "^3Unload ^7is not enabled.");
     return;
   }
 
   if (!client->sess.saveAllowed) {
-    CPTo(ent, "^7You are not allowed to ^3unload ^7a position.");
+    Printer::center(ent, "^7You are not allowed to ^3unload ^7a position.");
     return;
   }
 
   if (!g_cheats.integer &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave))) {
-    CPTo(ent, "^3unload ^7is disabled for this death run.");
+    Printer::center(ent, "^3unload ^7is disabled for this death run.");
     return;
   }
 
   if (!g_cheats.integer && client->ps.pm_type == PM_DEAD &&
       level.saveLoadRestrictions &
           static_cast<int>(SaveLoadRestrictions::Dead)) {
-    CPTo(ent, "^3unload ^7is disabled while dead on this map.");
+    Printer::center(ent, "^3unload ^7is disabled while dead on this map.");
     return;
   }
 
   if (client->sess.sessionTeam == TEAM_SPECTATOR) {
-    CPTo(ent, "^7You can not ^3unload ^7as a spectator.");
+    Printer::center(ent, "^7You can not ^3unload ^7as a spectator.");
     return;
   }
 
   if (!g_cheats.integer && client->sess.timerunActive) {
-    CPTo(ent, "^3unload ^7is not available during timeruns.");
+    Printer::center(ent, "^3unload ^7is not available during timeruns.");
     return;
   }
 
   const auto pos = getValidTeamUnloadPos(ent, client->sess.sessionTeam);
 
   if (pos) {
-    if (pos->stance == SaveStance::Prone &&
+    if (pos->stance == PlayerStance::Prone &&
         client->ps.weapon == WP_MORTAR_SET) {
-      CPTo(ent,
-           "You cannot ^3unload ^7to this position while using a mortar set.");
+      Printer::center(
+          ent,
+          "You cannot ^3unload ^7to this position while using a mortar set.");
       return;
     }
 
@@ -497,12 +503,12 @@ void SaveSystem::unload(gentity_t *ent) {
 
       if (level.noSave) {
         if (trace.fraction == 1.0f) {
-          CPTo(ent, "^7You can not ^3unload ^7to this area.");
+          Printer::center(ent, "^7You can not ^3unload ^7to this area.");
           return;
         }
       } else {
         if (trace.fraction != 1.0f) {
-          CPTo(ent, "^7You can not ^3unload ^7to this area.");
+          Printer::center(ent, "^7You can not ^3unload ^7to this area.");
           return;
         }
       }
@@ -511,7 +517,7 @@ void SaveSystem::unload(gentity_t *ent) {
     restoreStanceFromSave(ent, pos);
     teleportPlayer(ent, pos);
   } else {
-    CPTo(ent, "^7Use ^3load ^7first.");
+    Printer::center(ent, "^7Use ^3load ^7first.");
   }
 }
 
@@ -731,8 +737,8 @@ void SaveSystem::loadPositionsFromDatabase(gentity_t *ent) {
     ent->client->sess.saveLimit = it->second.saveLimit;
 
     if (validPositionsCount) {
-      ChatPrintTo(ent,
-                  "^gETJump: ^7loaded saved positions from previous session.");
+      Printer::chat(
+          ent, "^gETJump: ^7loaded saved positions from previous session.");
     }
   }
 }
@@ -829,18 +835,19 @@ SaveSystem::getValidTeamQuickDeploySave(gentity_t *ent, team_t team) {
   return pos;
 }
 
-void SaveSystem::restoreStanceFromSave(gentity_t *ent, SavePosition *pos) {
+void SaveSystem::restoreStanceFromSave(gentity_t *ent,
+                                       const SavePosition *pos) {
   if (!ent || !ent->client) {
     return;
   }
 
-  auto client = ent->client;
+  const auto client = ent->client;
 
-  if (pos->stance == Crouch) {
+  if (pos->stance == PlayerStance::Crouch) {
     client->ps.eFlags &= ~EF_PRONE;
     client->ps.eFlags &= ~EF_PRONE_MOVING;
     client->ps.pm_flags |= PMF_DUCKED;
-  } else if (pos->stance == Prone) {
+  } else if (pos->stance == PlayerStance::Prone) {
     client->ps.eFlags |= EF_PRONE;
     SetClientViewAngle(ent, pos->vangles);
   } else {
@@ -883,16 +890,18 @@ void SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos) {
   }
 }
 
-void ETJump::SaveSystem::storePosition(gclient_s *client, SavePosition *pos) {
+void SaveSystem::storePosition(const gclient_s *client, SavePosition *pos) {
   VectorCopy(client->ps.origin, pos->origin);
   VectorCopy(client->ps.viewangles, pos->vangles);
   pos->isValid = true;
   pos->isLatest = true;
 
   if (client->ps.eFlags & EF_PRONE) {
-    pos->stance = Prone;
+    pos->stance = PlayerStance::Prone;
+  } else if (client->ps.eFlags & (EF_CROUCHING | EF_DEAD)) {
+    pos->stance = PlayerStance::Crouch;
   } else {
-    pos->stance = client->ps.eFlags & EF_CROUCHING ? Crouch : Stand;
+    pos->stance = PlayerStance::Stand;
   }
 
   pos->isTimerunSave = client->sess.timerunActive;

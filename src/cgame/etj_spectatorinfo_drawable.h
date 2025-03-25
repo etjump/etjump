@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,13 +25,20 @@
 #pragma once
 
 #include "etj_irenderable.h"
-#include "cg_local.h"
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class SpectatorInfo : public IRenderable {
+  CvarValue::Scale scale{};
+
   static bool canSkipDraw();
+  void startListeners();
+
+  void setScale();
 
 public:
+  SpectatorInfo();
+
   bool beforeRender() override;
   void render() const override;
 };

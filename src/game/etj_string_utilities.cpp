@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
 
 #include "etj_string_utilities.h"
 
@@ -85,7 +86,8 @@ std::string ETJump::getBestMatch(const std::vector<std::string> &words,
   return smallest->first;
 }
 
-static void SanitizeConstString(const char *in, char *out, bool toLower) {
+static void SanitizeConstString(const char *in, char *out, const bool toLower,
+                                const bool removeEscapeChars) {
   while (*in) {
     if (*in == 27 || *in == '^') {
       in++; // skip color code
@@ -95,22 +97,23 @@ static void SanitizeConstString(const char *in, char *out, bool toLower) {
       continue;
     }
 
-    if (*in < 32) {
+    if (removeEscapeChars && *in < 32) {
       in++;
       continue;
     }
 
-    *out++ = (toLower) ? tolower(*in++) : *in++;
+    *out++ = toLower ? static_cast<char>(tolower(*in++)) : *in++;
   }
 
   *out = 0;
 }
 
-std::string ETJump::sanitize(const std::string &text, bool toLower) {
-  auto len = text.length();
+std::string ETJump::sanitize(const std::string &text, const bool toLower,
+                             const bool removeEscapeChars) {
+  const size_t len = text.length();
   std::vector<char> out(len + 1);
-  SanitizeConstString(text.c_str(), out.data(), toLower ? true : false);
-  return std::string(out.data());
+  SanitizeConstString(text.c_str(), out.data(), toLower, removeEscapeChars);
+  return {out.data()};
 }
 
 std::string ETJump::getValue(const char *value,
@@ -145,8 +148,8 @@ std::string ETJump::trim(const std::string &input) {
 }
 
 // word-wrapper
-std::vector<std::string> ETJump::wrapWords(std::string &input, char separator,
-                                           size_t maxLength) {
+std::vector<std::string> ETJump::wrapWords(const std::string &input,
+                                           char separator, size_t maxLength) {
   std::vector<std::string> output;
   size_t lastPos = 0;
 
@@ -317,4 +320,64 @@ bool ETJump::StringUtil::iEqual(const std::string &str1,
 
 unsigned ETJump::StringUtil::countExtraPadding(const std::string &input) {
   return input.length() - sanitize(input).length();
+}
+
+std::string
+ETJump::StringUtil::normalizeNumberString(const std::string &input) {
+  if (input.empty()) {
+    return "";
+  }
+
+  double number;
+
+  try {
+    number = std::stod(input);
+  } catch (...) {
+    return "";
+  }
+
+  std::ostringstream oss;
+  oss << std::setprecision(10) << std::fixed << number;
+  std::string result = oss.str();
+
+  if (result.find('.') != std::string::npos) {
+    removeTrailingChars(result, '0');
+
+    // remove trailing dot if the result is just an integer
+    if (result.back() == '.') {
+      result.pop_back();
+    }
+  }
+
+  return result;
+}
+
+void ETJump::StringUtil::removeTrailingChars(std::string &str,
+                                             const char charToRemove) {
+  if (str.empty()) {
+    return;
+  }
+
+  const size_t pos = str.find_last_not_of(charToRemove);
+
+  if (pos == std::string::npos) {
+    str.clear();
+  } else {
+    str.erase(pos + 1);
+  }
+}
+
+void ETJump::StringUtil::removeLeadingChars(std::string &str,
+                                            const char charToRemove) {
+  if (str.empty()) {
+    return;
+  }
+
+  const size_t pos = str.find_first_not_of(charToRemove);
+
+  if (pos == std::string::npos) {
+    str.clear();
+  } else {
+    str.erase(0, pos);
+  }
 }

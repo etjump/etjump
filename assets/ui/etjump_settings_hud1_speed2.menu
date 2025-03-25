@@ -15,6 +15,7 @@ menuDef {
     fullscreen 0
     rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
     style WINDOW_STYLE_FILLED
+    centered
 
     onOpen {
         conditionalscript uiCheckBackground 2
@@ -54,15 +55,15 @@ menuDef {
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "SPEED 2")
     
-        MULTI               (SETTINGS_ITEM_POS(1), "Draw speed meter 2:", 0.2, SETTINGS_ITEM_H, "etj_drawSpeed2", cvarFloatList { "No" 0 "Yes" 1 "Speed + max" 2 "Speed ^zmax" 3 "Speed (max)" 4 "Speed ^z(max)" 5 "Speed ^z[max]" 6 "Speed | max" 7 "Speed: speed" 8 "Tens only" 9 }, "Draw ETJump speed meter\netj_drawSpeed2")
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS(2), "etj_speedAlpha", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        COMBO               (SETTINGS_COMBO_POS(1), "Draw speed meter 2:", 0.2, SETTINGS_ITEM_H, "etj_drawSpeed2", cvarFloatList { "No" 0 "Yes" 1 "Speed + max" 2 "Speed ^zmax" 3 "Speed (max)" 4 "Speed ^z(max)" 5 "Speed ^z[max]" 6 "Speed | max" 7 "Speed: speed" 8 "Tens only" 9 }, none, "Draw ETJump speed meter\netj_drawSpeed2")
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(2), "etj_speedAlpha", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "Speed meter alpha:", 0.2, SETTINGS_ITEM_H, etj_speedAlpha 1 0 1 0.05, "Sets transparency of ETJump speed meter\netj_speedAlpha")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_speedX", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_speedX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(3), "Speed meter X:", 0.2, SETTINGS_ITEM_H, etj_speedX 320 0 640 10, "Sets X position of ETJump speed meter\netj_speedX")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_speedY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_speedY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(4), "Speed meter Y:", 0.2, SETTINGS_ITEM_H, etj_speedY 320 0 480 10, "Sets Y position of ETJump speed meter\netj_speedY")
         MULTI               (SETTINGS_ITEM_POS(5), "Speed meter size:", 0.2, SETTINGS_ITEM_H, "etj_speedSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of ETJump speed meter\netj_speedSize")
-        MULTI               (SETTINGS_ITEM_POS(6), "Speed meter color:", 0.2, SETTINGS_ITEM_H, "etj_speedColor", COLOR_LIST, "Sets color of ETJump speed meter\netj_speedColor")
+        COMBO               (SETTINGS_COMBO_POS(6), "Speed meter color:", 0.2, SETTINGS_ITEM_H, "etj_speedColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of ETJump speed meter\netj_speedColor")
         MULTI               (SETTINGS_ITEM_POS(7), "Accel-based color:", 0.2, SETTINGS_ITEM_H, "etj_speedColorUsesAccel", cvarFloatList { "Off" 0 "Simple" 1 "Advanced" 2 }, "Color ETJump speed meter based on accel/decel\nNote: advanced coloring is disabled on spec/demo playback\netj_speedColorUsesAccel")
         YESNO               (SETTINGS_ITEM_POS(8), "Speed meter shadow:", 0.2, SETTINGS_ITEM_H, "etj_speedShadow", "Draw shadow on ETJump speed meter\netj_speedShadow")
         MULTI               (SETTINGS_ITEM_POS(9), "Speed meter align:", 0.2, SETTINGS_ITEM_H, "etj_speedAlign", cvarFloatList { "Center" 0 "Left" 1 "Right" 2 }, "Sets alignment of ETJump speed meter\netj_speedAlign")

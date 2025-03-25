@@ -6,6 +6,7 @@
 // Tab Size:		4 (real tabs)
 //===========================================================================
 
+#include "etj_entity_utilities.h"
 #include "../game/g_local.h"
 #include "../game/q_shared.h"
 #include "etj_printer.h"
@@ -269,7 +270,12 @@ qboolean G_ScriptAction_ChangeModel(gentity_t *ent, char *params) {
   Q_strcat(tagname, MAX_QPATH, ".tag");
   ent->tagNumber = trap_LoadTag(tagname);
 
-  ent->s.modelindex2 = G_ModelIndex(token);
+  // allow 'misc_gamemodel' models to be changed too
+  if (ent->s.eType == ET_GAMEMODEL) {
+    ent->s.modelindex = G_ModelIndex(token);
+  } else {
+    ent->s.modelindex2 = G_ModelIndex(token);
+  }
 
   return qtrue;
 }
@@ -3500,7 +3506,7 @@ qboolean G_ScriptAction_Announce(gentity_t *ent, char *params) {
     ETJump::StringUtil::replaceAll(str, "%s", name);
   }
 
-  Printer::BroadcastPopupMessage(str);
+  Printer::popupAll(str);
 
   return qtrue;
 }
@@ -4542,9 +4548,15 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
   // rain - if the classname was changed, call the spawn func again
   if (classchanged) {
     if (!nospawn) {
-      level.spawning = qtrue;
+      // provide a bit more meaningful error message if someone
+      // tries to do this while spawning is disabled
+      if (!level.spawning) {
+        G_Error(
+            "%s: 'classname' must be changed inside a 'spawn' script event.\n",
+            __func__);
+      }
+
       G_CallSpawn(ent);
-      level.spawning = qfalse;
     }
 
     trap_LinkEntity(ent);
@@ -4601,6 +4613,229 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params) {
     level.numSpawnVars++;
   }
   G_SpawnGEntityFromSpawnVars();
+
+  return qtrue;
+}
+
+extern field_t fields[];
+
+qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
+  char key[MAX_TOKEN_CHARS]{};
+  char value[MAX_TOKEN_CHARS]{};
+  const char *p = params;
+
+  // params may contain multiple k/v pairs for more precise targeting,
+  // each of these values must match the entity before we delete it
+  std::array<std::pair<uint8_t, std::vector<std::string>>, MAX_GENTITIES>
+      pass{};
+  int count = 0; // number of valid k/v pairs in params
+
+  bool parse = true;
+
+  while (parse) {
+    const char *token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0]) {
+      break;
+    }
+
+    Q_strncpyz(key, token, sizeof(key));
+
+    token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0]) {
+      G_Error("%s: key '%s' has no value.\n", __func__, key);
+    }
+
+    Q_strncpyz(value, token, sizeof(value));
+
+    // validate the key
+    int i;
+
+    for (i = 0; fields[i].name; ++i) {
+      if (!Q_stricmp(fields[i].name, key)) {
+        break;
+      }
+    }
+
+    if (!fields[i].name) {
+      G_Error("%s: non-existing key '%s'\n", __func__, key);
+    }
+
+    // k/v pair parsed successfully, add it to count
+    count++;
+    gentity_t *found = nullptr;
+
+    int valueInt{};
+    float valueFloat{};
+    vec3_t valueVec{};
+    std::vector<std::string> args = ETJump::StringUtil::split(value, " ");
+
+    // can't capture __func__ for the lambda directly
+    constexpr auto func = __func__;
+
+    const auto invalidArgCount = [&](const int expectedArgs,
+                                     const size_t numArgs) {
+      G_Printf("%s: Invalid number of arguments for ^3'%s'^7, expected ^3%i^7, "
+               "got ^3%i\n",
+               func, key, expectedArgs, static_cast<int>(numArgs));
+      count--;
+    };
+
+    const auto invalidArgType = [&](const std::string &expectedType,
+                                    const std::string &type) {
+      G_Printf(
+          "%s: Invalid argument for ^3'%s'^7, expected ^3%s^7, got ^3'%s'\n",
+          func, key, expectedType.c_str(), type.c_str());
+      count--;
+    };
+
+    switch (fields[i].type) {
+      case F_INT:
+        if (args.size() != 1) {
+          invalidArgCount(1, args.size());
+          break;
+        }
+
+        try {
+          valueInt = std::stoi(value);
+        } catch (const std::logic_error &) {
+          invalidArgType("number", args[0]);
+          break;
+        }
+
+        while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != nullptr) {
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
+        }
+
+        break;
+      case F_FLOAT:
+        if (args.size() != 1) {
+          invalidArgCount(1, args.size());
+          break;
+        }
+
+        try {
+          valueFloat = std::stof(value);
+        } catch (const std::logic_error &) {
+          invalidArgType("number", args[0]);
+          break;
+        }
+
+        while ((found = G_FindFloat(found, fields[i].ofs, valueFloat)) !=
+               nullptr) {
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
+        }
+
+        break;
+      case F_LSTRING:
+      case F_GSTRING:
+        while ((found = G_Find(found, fields[i].ofs, value)) != nullptr) {
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
+        }
+        break;
+
+      case F_VECTOR:
+        if (args.size() != 3) {
+          invalidArgCount(3, args.size());
+          break;
+        }
+
+        int j;
+
+        try {
+          for (j = 0; j < 3; j++) {
+            valueVec[j] = std::stof(args[j]);
+          }
+        } catch (const std::logic_error &) {
+          invalidArgType("number", args[j]);
+          break;
+        }
+
+        while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
+        }
+
+        break;
+      case F_ANGLEHACK:
+        if (args.size() != 1) {
+          invalidArgCount(1, args.size());
+          break;
+        }
+
+        VectorClear(valueVec);
+
+        try {
+          valueVec[2] = std::stof(args[0]);
+        } catch (const std::logic_error &) {
+          invalidArgType("number", args[0]);
+          break;
+        }
+
+        while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
+        }
+
+        break;
+      case F_CURSORHINT:
+        if (args.size() != 1) {
+          invalidArgCount(1, args.size());
+          break;
+        }
+
+        // set to end cap initially, so we don't delete all entities
+        // with HINT_NONE if we don't find a match
+        valueInt = HINT_NUM_HINTS;
+        ETJump::EntityUtilities::setCursorhintFromString(valueInt, value);
+
+        while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != nullptr) {
+          pass[found->s.number].first++;
+          pass[found->s.number].second.emplace_back(
+              ETJump::stringFormat(R"(%s "%s")", key, value));
+        }
+
+        break;
+      default:
+        G_Printf(S_COLOR_YELLOW "%s: invalid key '%s'\n", __func__, key);
+        parse = false;
+        break;
+    }
+  }
+
+  // no k/v pairs found?
+  if (!count) {
+    return qtrue;
+  }
+
+  int numDeleted = 0;
+
+  // delete all entities that passed the tests
+  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < ENTITYNUM_MAX_NORMAL; i++) {
+    if (pass[i].first == count) {
+      numDeleted++;
+      const std::string paramsMatched =
+          ETJump::StringUtil::join(pass[i].second, ", ");
+      G_Printf("%s: deleted entity %i [^z%s^7], matched params: ^3'%s'\n",
+               __func__, i, g_entities[i].classname, paramsMatched.c_str());
+      G_FreeEntity(&g_entities[i]);
+    }
+  }
+
+  // did we actually delete anything?
+  if (!numDeleted) {
+    G_Printf("%s: no entities found matching params ^3'%s'\n", __func__,
+             params);
+  }
 
   return qtrue;
 }
@@ -4668,7 +4903,7 @@ qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params) {
       ETJump::stringFormat("%s^7", activator->client->pers.netname);
   ETJump::StringUtil::replaceAll(str, "%s", name);
 
-  Printer::SendPopupMessage(ClientNum(activator), str);
+  Printer::popup(ClientNum(activator), str);
 
   return qtrue;
 }
@@ -4767,6 +5002,25 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
   }
 
   ETJump::ProgressionTrackers::printTrackerChanges(activator, oldValues);
+
+  return qtrue;
+}
+
+qboolean G_ScriptAction_ChangeSkin(gentity_t *ent, char *params) {
+  const char *pString = params;
+  const char *token = COM_ParseExt(&pString, qfalse);
+
+  if (!token[0]) {
+    G_Error("%s: 'changeskin' must have a target skin name\n", __func__);
+  }
+
+  // misc_constructiblemarker holds the .skin in ent->s.effect1Time,
+  // since it supports 'model2' key for drawing a model
+  if (ent->s.eType == ET_CONSTRUCTIBLE_MARKER) {
+    ent->s.effect1Time = G_SkinIndex(token);
+  } else {
+    ent->s.modelindex2 = G_SkinIndex(token);
+  }
 
   return qtrue;
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,6 @@
 #include <vector>
 #include <string>
 
-#include "etj_printer.h"
 #include "etj_string_utilities.h"
 
 namespace ETJump {
@@ -50,6 +49,7 @@ public:
   }
 
   static void processMessages();
+
 private:
   std::string _name;
 
@@ -57,4 +57,4 @@ private:
   static std::mutex _messagesLock;
   static std::vector<std::string> _messages;
 };
-}
+} // namespace ETJump

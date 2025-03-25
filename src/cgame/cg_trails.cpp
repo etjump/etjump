@@ -31,7 +31,7 @@ typedef struct trailJunc_s {
 
 } trailJunc_t;
 
-#define MAX_TRAILJUNCS 4096
+inline constexpr int MAX_TRAILJUNCS = 4096;
 
 trailJunc_t trailJuncs[MAX_TRAILJUNCS];
 trailJunc_t *freeTrails, *activeTrails;
@@ -298,7 +298,7 @@ CG_AddSmokeJunc
 int CG_AddSmokeJunc(int headJuncIndex, void *usedby, qhandle_t shader,
                     vec3_t pos, int trailLife, float alpha, float startWidth,
                     float endWidth) {
-#define ST_RATIO 4.0 // sprite image: width / height
+  static constexpr float ST_RATIO = 4.0f; // sprite image: width / height
   trailJunc_t *j, *headJunc;
 
   if (headJuncIndex < 0 || headJuncIndex >= MAX_TRAILJUNCS) {
@@ -436,7 +436,7 @@ CG_AddTrailToScene
 ==============
 */
 static vec3_t vforward, vright, vup;
-#define MAX_TRAIL_VERTS 2048
+inline constexpr int MAX_TRAIL_VERTS = 2048;
 static polyVert_t verts[MAX_TRAIL_VERTS];
 static polyVert_t outVerts[MAX_TRAIL_VERTS * 3];
 
@@ -447,9 +447,9 @@ void CG_AddTrailToScene(trailJunc_t *trail, int iteration, int numJuncs) {
   float sInc, s;
   trailJunc_t *j, *jNext;
   vec3_t fwd, up, p, v;
-// clipping vars
-#define TRAIL_FADE_CLOSE_DIST 64.0
-#define TRAIL_FADE_FAR_SCALE 4.0
+  // clipping vars
+  static constexpr float TRAIL_FADE_CLOSE_DIST = 64.0;
+  static constexpr float TRAIL_FADE_FAR_SCALE = 4.0;
   vec3_t viewProj;
   float viewDist, fadeAlpha;
 

@@ -7,34 +7,8 @@
  */
 
 #include "g_local.h"
-#include "etj_utilities.h";
-
-const char *hintStrings[HINT_NUM_HINTS] = {
-    "",          // HINT_NONE
-    "HINT_NONE", // actually HINT_FORCENONE, but since this is being specified
-                 // in the ent, the designer actually means HINT_FORCENONE
-    "HINT_PLAYER", "HINT_ACTIVATE", "HINT_DOOR", "HINT_DOOR_ROTATING",
-    "HINT_DOOR_LOCKED", "HINT_DOOR_ROTATING_LOCKED", "HINT_MG42",
-    "HINT_BREAKABLE", "HINT_BREAKABLE_BIG", "HINT_CHAIR", "HINT_ALARM",
-    "HINT_HEALTH", "HINT_TREASURE", "HINT_KNIFE", "HINT_LADDER", "HINT_BUTTON",
-    "HINT_WATER", "HINT_CAUTION", "HINT_DANGER", "HINT_SECRET", "HINT_QUESTION",
-    "HINT_EXCLAMATION", "HINT_CLIPBOARD", "HINT_WEAPON", "HINT_AMMO",
-    "HINT_ARMOR", "HINT_POWERUP", "HINT_HOLDABLE", "HINT_INVENTORY",
-    "HINT_SCENARIC", "HINT_EXIT", "HINT_NOEXIT", "HINT_PLYR_FRIEND",
-    "HINT_PLYR_NEUTRAL", "HINT_PLYR_ENEMY", "HINT_PLYR_UNKNOWN",
-    "HINT_BUILD",    // DHM - Nerve
-    "HINT_DISARM",   // DHM - Nerve
-    "HINT_REVIVE",   // DHM - Nerve
-    "HINT_DYNAMITE", // DHM - Nerve
-
-    "HINT_CONSTRUCTIBLE", "HINT_UNIFORM", "HINT_LANDMINE", "HINT_TANK",
-    "HINT_SATCHELCHARGE",
-    // START Mad Doc - TDF
-    "HINT_LOCKPICK",
-    // END Mad Doc - TDF
-
-    "", // HINT_BAD_USER
-};
+#include "etj_utilities.h"
+#include "etj_entity_utilities.h"
 
 /*
 ===============================================================================
@@ -51,7 +25,7 @@ void Use_Func_Rotate(gentity_t *ent, gentity_t *other, gentity_t *activator);
 void Blocked_Door(gentity_t *ent, gentity_t *other);
 void Blocked_DoorRotate(gentity_t *ent, gentity_t *other);
 
-#define PUSH_STACK_DEPTH 3
+inline constexpr int PUSH_STACK_DEPTH = 3;
 int pushedStackDepth = 0;
 
 typedef struct {
@@ -60,8 +34,9 @@ typedef struct {
   vec3_t angles;
   float deltayaw;
 } pushed_t;
-pushed_t pushed[MAX_GENTITIES * PUSH_STACK_DEPTH],
-    *pushed_p; // Arnout *PUSH_STACK_DEPTH to prevent overflows
+
+// *PUSH_STACK_DEPTH to prevent overflows
+pushed_t pushed[MAX_GENTITIES * PUSH_STACK_DEPTH], *pushed_p;
 
 /*
 ============
@@ -97,8 +72,19 @@ gentity_t *G_TestEntityPosition(gentity_t *ent) {
   }
 
   if (ent->client) {
+    // setup nonsolid players
+    for (int i = 0; i < level.numConnectedClients; i++) {
+      const int otherNum = level.sortedClients[i];
+
+      if (!ETJump::EntityUtilities::playerIsSolid(ClientNum(ent), otherNum)) {
+        G_TempTraceIgnoreEntity(g_entities + otherNum);
+      }
+    }
+
     trap_TraceCapsule(&tr, ent->client->ps.origin, ent->r.mins, ent->r.maxs,
                       ent->client->ps.origin, ent->s.number, mask);
+
+    G_ResetTempTraceIgnoreEnts();
 
     if (!tr.startsolid && ent->client->ps.eFlags & EF_PRONE) {
       vec3_t org, flatforward, point;
@@ -235,14 +221,16 @@ G_TryPushingEntity
 Returns qfalse if the move is blocked
 ==================
 */
+
+#define JITTER_MAX (check->r.maxs[0] / 2.0)
+
 qboolean G_TryPushingEntity(gentity_t *check, gentity_t *pusher, vec3_t move,
                             vec3_t amove) {
   vec3_t org, org2, move2;
   gentity_t *block;
   vec3_t matrix[3], transpose[3];
   float x, fx, y, fy, z, fz;
-#define JITTER_INC 4
-#define JITTER_MAX (check->r.maxs[0] / 2.0)
+  static constexpr float JITTER_INC = 4.0f;
 
   // EF_MOVER_STOP will just stop when contacting another entity
   // instead of pushing it, but entities can still ride on top of it
@@ -726,10 +714,9 @@ SetMoverState
 void SetMoverState(gentity_t *ent, moverState_t moverState, int time) {
   vec3_t delta;
   float f;
-  qboolean kicked = qfalse, soft = qfalse;
 
-  kicked = (qboolean)(ent->flags & FL_KICKACTIVATE);
-  soft = (qboolean)(ent->flags & FL_SOFTACTIVATE); //----(SA)	added
+  const bool kicked = ent->flags & FL_KICKACTIVATE;
+  const bool soft = ent->flags & FL_SOFTACTIVATE;
 
   ent->moverState = moverState;
   ent->s.pos.trTime = time;
@@ -1869,8 +1856,6 @@ Blocked_DoorRotate
 ================
 */
 
-#define DOORPUSHBACK 16
-
 void Blocked_DoorRotate(gentity_t *ent, gentity_t *other) {
 
   gentity_t *slave;
@@ -2141,9 +2126,7 @@ func_invisible_user's using the regular rules of doors.
 ==============
 */
 void G_TryDoor(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-  qboolean walking = qfalse;
-
-  walking = (qboolean)(ent->flags & FL_SOFTACTIVATE);
+  const bool walking = ent->flags & FL_SOFTACTIVATE;
 
   if ((ent->s.apos.trType == TR_STATIONARY &&
        ent->s.pos.trType == TR_STATIONARY)) {
@@ -2618,6 +2601,27 @@ void Touch_Button(gentity_t *ent, gentity_t *other, trace_t *trace) {
   }
 }
 
+namespace ETJump {
+bool buttonOnCooldown(const gentity_t *ent) {
+  // first activation is always allowed
+  if (ent->timestamp == 0) {
+    return false;
+  }
+
+  return ent->timestamp + static_cast<int>(ent->wait) > level.time;
+}
+
+// true on successful activation
+bool activateButton(gentity_t *ent) {
+  if (buttonOnCooldown(ent)) {
+    return false;
+  }
+
+  ent->timestamp = level.time;
+  return true;
+}
+} // namespace ETJump
+
 /*QUAKED func_button (0 .5 .8) ? x x x TOUCH x x STAYOPEN
 When a button is touched, it moves some distance in the direction of it's angle,
 triggers all of it's targets, waits some time, then returns to it's original
@@ -2655,6 +2659,21 @@ void SP_func_button(gentity_t *ent) {
   }
   ent->wait *= 1000;
 
+  // allow custom cursorhint, but default to HINT_BUTTON
+  // FIXME: does this need to be networked??? No, I don't think so???
+  //  func_invisible_user uses dmgFlags too to store the cursorhint value,
+  //  but it's never actually read on client, it's just stored into
+  //  ps->serverCursorHint, and CG_CheckForCursorHints on client side only
+  //  checks for ladders and backstab hints if server doesn't set cursorhint
+  //  also this is a 32-bit (!!!) field, while atm HINT_NUM_HINTS is 49
+  char *cursorhint;
+  ent->s.dmgFlags = HINT_BUTTON;
+
+  if (G_SpawnString("cursorhint", "0", &cursorhint)) {
+    ETJump::EntityUtilities::setCursorhintFromString(ent->s.dmgFlags,
+                                                     cursorhint);
+  }
+
   // first position
   VectorCopy(ent->s.origin, ent->pos1);
 
@@ -2691,9 +2710,7 @@ TRAIN
 ===============================================================================
 */
 
-#define TRAIN_START_ON 1
-#define TRAIN_TOGGLE 2
-#define TRAIN_BLOCK_STOPS 4
+inline constexpr int TRAIN_BLOCK_STOPS = 4;
 
 /*
 ===============
@@ -4295,22 +4312,12 @@ void SP_func_explosive(gentity_t *ent) {
     }
   }
 
-  //----(SA)	added
-
-  ent->s.dmgFlags = 0;
+  ent->s.dmgFlags = HINT_NONE;
 
   if (G_SpawnString("cursorhint", "0", &cursorhint)) {
-
-    for (i = 0; i < HINT_NUM_HINTS; i++) {
-      if (!Q_stricmp(cursorhint, hintStrings[i])) {
-        ent->s.dmgFlags = i;
-      }
-    }
+    ETJump::EntityUtilities::setCursorhintFromString(ent->s.dmgFlags,
+                                                     cursorhint);
   }
-  //----(SA)	end
-
-  // (SA) shouldn't need this
-  //	ent->s.density = ent->count;	// pass the "mass" to the client
 
   ent->die = func_explosive_explode;
 }
@@ -4370,24 +4377,27 @@ out of date) they /don't/ need to be all uppercase HINT_NONE HINT_PLAYER
 
 void use_invisible_user(gentity_t *ent, gentity_t *other,
                         gentity_t *activator) {
-  if (ent->wait < level.time) {
-    ent->wait = level.time + ent->delay;
+  if (static_cast<int>(ent->wait) < level.time) {
+    ent->wait = level.time + static_cast<int>(ent->delay);
   } else {
     return;
   }
 
-  if (!(other->client)) {
-    if (ent->spawnflags & 1) {
-      ent->spawnflags &= ~1;
+  constexpr auto startOff =
+      static_cast<int>(ETJump::FuncInvisSpawnflags::StartOff);
+
+  if (!other->client) {
+    if (ent->spawnflags & startOff) {
+      ent->spawnflags &= ~startOff;
     } else {
-      ent->spawnflags |= 1;
+      ent->spawnflags |= startOff;
     }
 
-    if (ent->spawnflags & 2 && !(ent->spawnflags & 1)) {
-      G_Script_ScriptEvent(ent, "activate", NULL);
+    if (ent->spawnflags &
+            static_cast<int>(ETJump::FuncInvisSpawnflags::HasUser) &&
+        !(ent->spawnflags & startOff)) {
+      G_Script_ScriptEvent(ent, "activate", nullptr);
       G_UseTargets(ent, other);
-      // G_Printf ("ent%s used by %s\n", ent->classname,
-      // other->classname);
     }
 
     return;
@@ -4396,7 +4406,7 @@ void use_invisible_user(gentity_t *ent, gentity_t *other,
   vec3_t noiseOrigin;
   Utilities::getOriginOrBmodelCenter(ent, noiseOrigin);
 
-  if (other->client && ent->spawnflags & 1) {
+  if (other->client && ent->spawnflags & startOff) {
     //----(SA)	play 'off' sound
     //----(SA)	I think this is where this goes.  Raf, let me
     // know if it's
@@ -4410,7 +4420,8 @@ void use_invisible_user(gentity_t *ent, gentity_t *other,
   }
 
   if (other->client) {
-    if (ent->spawnflags & 8) {
+    if (ent->spawnflags &
+        static_cast<int>(ETJump::FuncInvisSpawnflags::ScriptActivator)) {
       ent->activator = other;
     }
     G_Script_ScriptEvent(
@@ -4451,19 +4462,13 @@ void SP_func_invisible_user(gentity_t *ent) {
 
   ent->use = use_invisible_user;
 
-  //----(SA)	added
   if (G_SpawnString("cursorhint", "0", &cursorhint)) {
-
-    for (i = 0; i < HINT_NUM_HINTS; i++) {
-      if (!Q_stricmp(cursorhint, hintStrings[i])) {
-        ent->s.dmgFlags = i;
-      }
-    }
+    ETJump::EntityUtilities::setCursorhintFromString(ent->s.dmgFlags,
+                                                     cursorhint);
   }
-  //----(SA)	end
 
-  if (!(ent->spawnflags & 4)) // !NO_OFF_NOISE
-  {
+  if (!(ent->spawnflags &
+        static_cast<int>(ETJump::FuncInvisSpawnflags::NoOffNoise))) {
     if (G_SpawnString("offnoise", "0", &sound)) {
       ent->soundPos1 = G_SoundIndex(sound);
     } else {
@@ -4875,10 +4880,10 @@ void func_constructible_explode(gentity_t *self, gentity_t *inflictor,
 func_constructible_underconstructionthink
 ==============
 */
-// #define CONSTRUCT_PREDECAY_TIME	3000	// if not under construction for
-//  this duration, start decaying
-#define CONSTRUCT_PREDECAY_TIME                                                \
-  30000 // if not under construction for this duration, start decaying
+
+// if not under construction for this duration, start decaying
+inline constexpr int CONSTRUCT_PREDECAY_TIME = 30000;
+
 void func_constructible_underconstructionthink(gentity_t *ent) {
   if (level.time - ent->lastHintCheckTime >= CONSTRUCT_PREDECAY_TIME) {
     // ent->s.angles2[0] -=

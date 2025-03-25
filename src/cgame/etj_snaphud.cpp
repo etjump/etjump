@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
+#include <algorithm>
+
 #include "etj_snaphud.h"
 #include "etj_utilities.h"
-#include "../game/etj_numeric_utilities.h"
 #include "etj_pmove_utils.h"
 #include "etj_cgaz.h"
 #include "etj_cvar_update_handler.h"
@@ -288,8 +289,22 @@ bool Snaphud::beforeRender() {
     UpdateSnapState();
   }
 
-  edgesOnly = etj_drawSnapHUD.integer == 2;
-  edgeThickness = Numeric::clamp(etj_snapHUDEdgeThickness.integer, 1, 128);
+  hudType = static_cast<HudType>(etj_drawSnapHUD.integer);
+
+  switch (hudType) {
+    case HudType::SNAP_EDGE:
+      edgeThickness = std::clamp(etj_snapHUDEdgeThickness.integer, 0, 128);
+      break;
+    case HudType::SNAP_BORDER:
+      borderOnly = true;
+      borderThickness =
+          std::clamp(etj_snapHUDBorderThickness.value, 0.1f,
+                     std::min(etj_snapHUDHeight.value * 2, 10.0f));
+      break;
+    default:
+      borderOnly = false;
+      break;
+  }
 
   PrepareDrawables();
 
@@ -322,7 +337,7 @@ void Snaphud::render() const {
   if (!etj_snapHUDFov.value) {
     fov = cg.refdef.fov_x;
   } else {
-    fov = Numeric::clamp(etj_snapHUDFov.value, 1, 179);
+    fov = std::clamp(etj_snapHUDFov.value, 1.0f, 179.0f);
   }
 
   for (const DrawableSnap &ds : drawableSnaps) {
@@ -336,14 +351,15 @@ void Snaphud::render() const {
       color += 2;
     }
 
-    if (edgesOnly) {
+    if (hudType == HudType::SNAP_EDGE) {
       CG_FillAngleYaw(SHORT2RAD(ds.bSnap), SHORT2RAD(ds.bSnap + edgeThickness),
                       SHORT2RAD(yaw), y, h, fov, snaphudColors[color]);
       CG_FillAngleYaw(SHORT2RAD(ds.eSnap), SHORT2RAD(ds.eSnap - edgeThickness),
                       SHORT2RAD(yaw), y, h, fov, snaphudColors[color]);
     } else {
-      CG_FillAngleYaw(SHORT2RAD(ds.bSnap), SHORT2RAD(ds.eSnap), SHORT2RAD(yaw),
-                      y, h, fov, snaphudColors[color]);
+      CG_FillAngleYawExt(SHORT2RAD(ds.bSnap), SHORT2RAD(ds.eSnap),
+                         SHORT2RAD(yaw), y, h, fov, snaphudColors[color],
+                         borderOnly, borderThickness);
     }
   }
 }

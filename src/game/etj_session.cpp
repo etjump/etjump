@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +22,14 @@
  * SOFTWARE.
  */
 
+#include <iostream>
+#include <ctime>
+
 #include "etj_session.h"
 #include "utilities.hpp"
+#include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_levels.h"
-#include <iostream>
 
 Session::Session(std::shared_ptr<IAuthentication> database)
     : database_(database) {
@@ -42,6 +45,7 @@ void Session::ResetClient(int clientNum) {
   clients_[clientNum].hwid = "";
   clients_[clientNum].user = NULL;
   clients_[clientNum].level = NULL;
+  clients_[clientNum].sessionStartTime = 0;
   clients_[clientNum].permissions.reset();
 }
 
@@ -51,13 +55,17 @@ void Session::Init(int clientNum) {
   clients_[clientNum].hwid = "";
   clients_[clientNum].user = NULL;
   clients_[clientNum].level = NULL;
+  clients_[clientNum].sessionStartTime = 0;
   clients_[clientNum].permissions.reset();
 
   std::string ip = ValueForKey(clientNum, "ip");
-  std::string::size_type pos = ip.find(":");
+  const size_t pos = ip.find(':');
   clients_[clientNum].ip = ip.substr(0, pos);
 
-  WriteSessionData(clientNum);
+  // FIXME: 32-bit time
+  time_t t;
+  t = std::time(&t);
+  clients_[clientNum].sessionStartTime = static_cast<int>(t);
 }
 
 void Session::UpdateLastSeen(int clientNum) {
@@ -86,8 +94,9 @@ void Session::UpdateLastSeen(int clientNum) {
 void Session::WriteSessionData(int clientNum) {
   G_DPrintf("DEBUG: Writing client %d etjump session data\n", clientNum);
 
-  const char *sessionData = va("%s %s", clients_[clientNum].guid.c_str(),
-                               clients_[clientNum].hwid.c_str());
+  const char *sessionData = va("%s %s %i", clients_[clientNum].guid.c_str(),
+                               clients_[clientNum].hwid.c_str(),
+                               clients_[clientNum].sessionStartTime);
 
   trap_Cvar_Set(va("etjumpsession%i", clientNum), sessionData);
 }
@@ -99,18 +108,20 @@ std::string Session::Guid(gentity_t *ent) const {
 void Session::ReadSessionData(int clientNum) {
   G_DPrintf("Session::ReadSessionData called for %d\n", clientNum);
 
-  char sessionData[MAX_STRING_CHARS] = "\0";
+  char sessionData[MAX_CVAR_VALUE_STRING] = "\0";
 
   trap_Cvar_VariableStringBuffer(va("etjumpsession%i", clientNum), sessionData,
                                  sizeof(sessionData));
 
-  char guidBuf[MAX_TOKEN_CHARS] = "\0";
-  char hwidBuf[MAX_TOKEN_CHARS] = "\0";
+  char guidBuf[MAX_CVAR_VALUE_STRING] = "\0";
+  char hwidBuf[MAX_CVAR_VALUE_STRING] = "\0";
+  char sessStartTimeBuf[MAX_CVAR_VALUE_STRING] = "\0";
 
-  sscanf(sessionData, "%s %s", guidBuf, hwidBuf);
+  sscanf(sessionData, "%s %s %s", guidBuf, hwidBuf, sessStartTimeBuf);
 
-  CharPtrToString(guidBuf, clients_[clientNum].guid);
-  CharPtrToString(hwidBuf, clients_[clientNum].hwid);
+  clients_[clientNum].guid = guidBuf;
+  clients_[clientNum].hwid = hwidBuf;
+  clients_[clientNum].sessionStartTime = Q_atoi(sessStartTimeBuf);
 
   GetUserAndLevelData(clientNum);
 
@@ -124,14 +135,16 @@ void Session::ReadSessionData(int clientNum) {
 bool Session::GuidReceived(gentity_t *ent) {
   int argc = trap_Argc();
   int clientNum = ClientNum(ent);
-  char guidBuf[MAX_TOKEN_CHARS];
-  char hwidBuf[MAX_TOKEN_CHARS];
+  char guidBuf[MAX_CVAR_VALUE_STRING];
+  char hwidBuf[MAX_CVAR_VALUE_STRING];
+  const std::string cleanName = ETJump::sanitize(ent->client->pers.netname);
 
-  // Client sends "AUTHENTICATE guid hwid
-  const int ARGC = 3;
+  // Client sends 'AUTHENTICATE guid hwid'
+  constexpr int ARGC = 3;
   if (argc != ARGC) {
-    G_LogPrintf("Possible guid/hwid spoof attempt by %s (%s).\n",
-                ent->client->pers.netname, ClientIPAddr(ent));
+    Printer::logAdminLn(ETJump::stringFormat(
+        "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
+        clientNum, cleanName, ClientIPAddr(ent)));
     return false;
   }
 
@@ -139,8 +152,9 @@ bool Session::GuidReceived(gentity_t *ent) {
   trap_Argv(2, hwidBuf, sizeof(hwidBuf));
 
   if (!ValidGuid(guidBuf) || !ValidGuid(hwidBuf)) {
-    G_LogPrintf("Possible guid/hwid spoof attempt by %s (%s).\n",
-                ent->client->pers.netname, ClientIPAddr(ent));
+    Printer::logAdminLn(ETJump::stringFormat(
+        "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
+        clientNum, cleanName, ClientIPAddr(ent)));
     return false;
   }
 
@@ -153,16 +167,17 @@ bool Session::GuidReceived(gentity_t *ent) {
   GetUserAndLevelData(clientNum);
 
   if (database_->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid)) {
-    G_LogPrintf("Banned player %s tried to connect with guid "
-                "%s and hardware id %s\n",
-                (g_entities + clientNum)->client->pers.netname,
-                clients_[clientNum].guid.c_str(),
-                clients_[clientNum].hwid.c_str());
-    CPMAll(
+    Printer::logAdminLn(ETJump::stringFormat(
+        "authentication: Banned player %s tried to connect with GUID '%s' and "
+        "HWID '%s'",
+        cleanName, clients_[clientNum].guid, clients_[clientNum].hwid));
+    Printer::popupAll(
         va("Banned player %s ^7tried to connect.", ent->client->pers.netname));
     trap_DropClient(clientNum, "You are banned.", 0);
     return false;
   }
+
+  WriteSessionData(clientNum);
 
   ClientNameChanged(ent);
 
@@ -217,8 +232,9 @@ void Session::GetUserAndLevelData(int clientNum) {
 
   if (ent->client->sess.firstTime) {
     PrintGreeting(ent);
-    CPMTo(ent, std::string("^5Your last visit was on ") +
-                   clients_[clientNum].user->GetLastSeenString() + ".");
+    Printer::popup(ent, "^5Your last visit was on " +
+                            clients_[clientNum].user->GetLastSeenString() +
+                            ".");
   }
 
   if (!clients_[clientNum].user) {
@@ -276,6 +292,7 @@ void Session::OnClientDisconnect(int clientNum) {
 
   clients_[clientNum].user = NULL;
   clients_[clientNum].level = NULL;
+  clients_[clientNum].sessionStartTime = 0;
   clients_[clientNum].permissions.reset();
 }
 
@@ -292,7 +309,7 @@ void Session::PrintGreeting(gentity_t *ent) {
     ETJump::StringUtil::replaceAll(greeting, "[d]",
                                    cl->user->GetLastVisitString());
     G_DPrintf("Printing greeting %s\n", greeting.c_str());
-    ChatPrintAll(greeting);
+    Printer::chatAll(greeting);
   } else {
     if (!cl->level) {
       return;
@@ -307,7 +324,7 @@ void Session::PrintGreeting(gentity_t *ent) {
       ETJump::StringUtil::replaceAll(greeting, "[d]",
                                      cl->user->GetLastVisitString());
       G_DPrintf("Printing greeting %s\n", greeting.c_str());
-      ChatPrintAll(greeting);
+      Printer::chatAll(greeting);
     }
   }
 }
@@ -338,9 +355,8 @@ bool Session::SetLevel(int id, int level) {
   for (int i = 0; i < MAX_CLIENTS; i++) {
     if (clients_[i].user && clients_[i].user->id == id) {
       ParsePermissions(i);
-      ChatPrintTo(g_entities + i, va("^3setlevel: ^7you are now a "
-                                     "level %d user.",
-                                     level));
+      Printer::chat(g_entities + i,
+                    va("^3setlevel: ^7you are now a level %d user.", level));
     }
   }
   return true;
@@ -366,6 +382,22 @@ int Session::GetId(int clientNum) const {
   }
 
   return clients_[clientNum].user->id;
+}
+
+gentity_t *Session::gentityFromId(unsigned id) {
+  if (!UserExists(id)) {
+    return nullptr;
+  }
+
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    const int clientNum = level.sortedClients[i];
+
+    if (GetId(clientNum) == id) {
+      return g_entities + clientNum;
+    }
+  }
+
+  return nullptr;
 }
 
 int Session::GetLevel(gentity_t *ent) const {
@@ -412,24 +444,25 @@ void Session::PrintFinger(gentity_t *ent, gentity_t *target) {
     return;
   }
 
-  ChatPrintTo(ent, "^3finger: ^7check console for more information.");
-  BeginBufferPrint();
-  BufferPrint(ent, va("^7Name: %s\n", target->client->pers.netname));
-  BufferPrint(ent,
-              va("^7Original name: %s\n", clients_[num].user->name.c_str()));
-  BufferPrint(ent, va("^7ID: %d\n", clients_[num].user->id));
-  BufferPrint(ent, va("^7Level: %d\n", clients_[num].user->level));
-  BufferPrint(ent,
-              va("^7Title: %s\n", clients_[num].user->title.length() > 0
-                                      ? clients_[num].user->title.c_str()
-                                      : clients_[num].level->name.c_str()));
-  FinishBufferPrint(ent, false);
+  Printer::chat(ent, "^3finger: ^7check console for more information.");
+
+  const auto user = clients_[num].user;
+  Printer::console(
+      ent, ETJump::stringFormat(
+               "^7Name: %s\n"
+               "^7Original name: %s\n"
+               "^7ID: %d\n"
+               "^7Level: %d\n"
+               "^7Title: %s\n",
+               target->client->pers.netname, user->name, user->id, user->level,
+               user->title.empty() ? clients_[num].level->name : user->title));
 }
 
 void Session::PrintAdmintest(gentity_t *ent) {
   int clientNum = ClientNum(ent);
 
   if (!clients_[ClientNum(ent)].user) {
+    // TODO: what is this for?
     message_ = "you must wait until user has connected.";
     return;
   }
@@ -442,7 +475,7 @@ void Session::PrintAdmintest(gentity_t *ent) {
                ? clients_[clientNum].user->title.c_str()
                : clients_[clientNum].level->name.c_str());
 
-    ChatPrintAll(message);
+    Printer::chatAll(message);
   }
 }
 
@@ -495,4 +528,8 @@ void Session::NewName(gentity_t *ent) {
 
 bool Session::HasPermission(gentity_t *ent, char flag) {
   return clients_[ClientNum(ent)].permissions[flag];
+}
+
+int Session::getSessionStartTime(const int clientNum) const {
+  return clients_[clientNum].sessionStartTime;
 }

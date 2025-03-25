@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,6 +62,9 @@ bool configFileExists(const std::string &filename);
 
 // executes a cfg file with given name, omit .cfg extension
 void execFile(const std::string &filename);
+
+// returns true if clientNum is a valid number for client
+bool isValidClientNum(int clientNum);
 
 // returns true if client is currently playing (team axis/allies)
 bool isPlaying(int clientNum);

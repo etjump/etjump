@@ -1,7 +1,7 @@
 #include "g_local.h"
-#include "etj_numeric_utilities.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
+#include "etj_entity_utilities.h"
 
 // Gordon
 // What we need....
@@ -296,6 +296,25 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
       ft->joinOrder[i] = static_cast<char>(entityNum);
 
       otherEnt->client->sess.saveLimitFt = ft->saveLimit;
+
+      if (ft->noGhost) {
+        if (otherEnt->client->pers.hideMe) {
+          otherEnt->client->pers.hideMe = false;
+          Printer::popup(
+              otherEnt,
+              "Fireteam ^3noghost ^7is enabled, disabling ^3etj_hideMe\n");
+        }
+
+        otherEnt->client->ftNoGhostThisLife = true;
+
+        if (otherEnt->client->sess.timerunActive &&
+            !(otherEnt->client->sess.runSpawnflags &
+              static_cast<int>(ETJump::TimerunSpawnflags::AllowFTNoGhost))) {
+          Printer::popup(otherEnt, "Fireteam ^3noghost ^7is not allowed in "
+                                   "this timerun, interrupting!\n");
+          InterruptRun(otherEnt);
+        }
+      }
 
       G_UpdateFireteamConfigString(ft);
 
@@ -666,25 +685,51 @@ void G_FireteamRace(int clientNum) {
 }
 
 namespace ETJump {
-static void setSaveLimitForFTMembers(fireteamData_t *ft, int limit) {
-  gentity_t *ent;
+// if the client is not in a fireteam, returns nullptr
+gentity_t *getFireteamLeader(const int clientNum) {
+  if (!EntityUtilities::isPlayer(&g_entities[clientNum])) {
+    G_Error("%s: invalid client", __func__);
+  }
+
+  for (auto &ft : level.fireTeams) {
+    if (!ft.inuse) {
+      continue;
+    }
+
+    // this is a char array....
+    for (const char &c : ft.joinOrder) {
+      if (c == -1) {
+        break;
+      }
+
+      // we're in this fireteam, get the leader
+      if (c == clientNum) {
+        return g_entities + static_cast<unsigned char>(ft.joinOrder[0]);
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+void setSaveLimitForFTMembers(fireteamData_t *ft, const int limit) {
+  ft->saveLimit = limit;
 
   for (int i = 0; i < level.numConnectedClients; i++) {
     if (ft->joinOrder[i] == -1) {
       continue;
-    } else {
-      ent = g_entities + ft->joinOrder[i];
-      ent->client->sess.saveLimitFt = limit;
-      Printer::SendPopupMessage(
-          ClientNum(ent),
-          stringFormat("fireteam: ^3savelimit ^7was set to ^3%i", limit));
     }
+
+    gentity_t *ent = g_entities + ft->joinOrder[i];
+    ent->client->sess.saveLimitFt = limit;
+    Printer::popup(
+        ent, stringFormat("fireteam: ^3savelimit ^7was set to ^3%i", limit));
   }
 }
 
-static void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
-  const std::string &msg = stringFormat("fireteam: ^3noghost ^7has been ^3%s",
-                                        noGhost ? "enabled" : "disabled");
+void setFireTeamGhosting(fireteamData_t *ft, const bool noGhost) {
+  const std::string msg = stringFormat("fireteam: ^3noghost ^7has been ^3%s",
+                                       noGhost ? "enabled" : "disabled");
 
   ft->noGhost = noGhost;
 
@@ -697,32 +742,37 @@ static void setFireTeamGhosting(fireteamData_t *ft, bool noGhost) {
 
     if (noGhost) {
       ent->client->ftNoGhostThisLife = true;
+
+      if (ent->client->pers.hideMe) {
+        ent->client->pers.hideMe = false;
+        Printer::popup(ent,
+                       "fireteam: disabling ^3etj_hideMe ^7due to ^3noghost\n");
+      }
     }
 
-    Printer::SendPopupMessage(ClientNum(ent), msg);
+    Printer::popup(ent, msg);
   }
 }
 
-static bool fireTeamMemberIsTimerunning(fireteamData_t *ft, int checkFlag) {
+void setFireteamTeamjumpMode(fireteamData_t *ft, const bool teamjumpMode) {
+  const std::string msg =
+      stringFormat("fireteam: ^3teamjump mode ^7has been ^3%s",
+                   teamjumpMode ? "enabled" : "disabled");
+
+  ft->teamJumpMode = teamjumpMode;
+
   for (int i = 0; i < level.numConnectedClients; i++) {
     if (ft->joinOrder[i] == -1) {
       continue;
     }
 
-    gentity_t *ent = g_entities + ft->joinOrder[i];
-
-    if (ent->client->sess.timerunActive &&
-        !(ent->client->sess.runSpawnflags & checkFlag)) {
-      return true;
-    }
+    Printer::popup(ft->joinOrder[i], msg);
   }
-
-  return false;
 }
 
-static void setFireteamShove(fireteamData_t *ft, bool shove) {
-  const std::string &msg = stringFormat("fireteam: ^3shoving ^7has been ^3%s",
-                                        shove ? "enabled" : "disabled");
+static void setFireteamShove(fireteamData_t *ft, const bool shove) {
+  const std::string msg = stringFormat("fireteam: ^3shoving ^7has been ^3%s",
+                                       shove ? "enabled" : "disabled");
 
   ft->shove = shove;
 
@@ -738,24 +788,133 @@ static void setFireteamShove(fireteamData_t *ft, bool shove) {
       ent->client->ftShoveThisLife = true;
     }
 
-    Printer::SendPopupMessage(clientNum, msg);
+    Printer::popup(clientNum, msg);
 
     if (ft->shove && (!ft->noGhost && g_ghostPlayers.integer == 1)) {
-      Printer::SendPopupMessage(
+      Printer::popup(
           clientNum,
           "^3noghost ^7must be enabled before shoving is functional");
     }
   }
 }
 
+static bool fireTeamMemberIsTimerunning(const fireteamData_t *ft,
+                                        TimerunSpawnflags checkFlag) {
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    if (ft->joinOrder[i] == -1) {
+      continue;
+    }
+
+    const gentity_t *ent = g_entities + ft->joinOrder[i];
+
+    if (ent->client->sess.timerunActive &&
+        !(ent->client->sess.runSpawnflags & static_cast<int>(checkFlag))) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool canEnableFtNoGhost(const int clientNum, const fireteamData_t *ft,
+                        const gentity_t *ent) {
+  if (g_cheats.integer) {
+    return true;
+  }
+
+  // 'target_ft_setrules' bypasses worldspawn key restriction
+  // so mappers have control of where in the map ghosting will be toggled
+  if (level.noFTNoGhost && ent && ent->client) {
+    Printer::popup(clientNum,
+                   "fireteam: ^3noghost ^7cannot be set on this map");
+    return false;
+  }
+
+  // ghosting cannot be enabled if someone is already timerunning unless
+  // the run allows it, so we need to only check for enabling here
+  if (!ft->noGhost &&
+      fireTeamMemberIsTimerunning(ft, TimerunSpawnflags::AllowFTNoGhost)) {
+    Printer::popup(clientNum, "fireteam: a member of your fireteam is "
+                              "timerunning, cannot enable ^3noghost");
+    return false;
+  }
+
+  return true;
+}
+
+bool canSetFtSavelimit(const int clientNum, const gentity_t *ent) {
+  if (g_cheats.integer) {
+    return true;
+  }
+
+  // 'target_ft_setrules' bypasses worldspawn key restriction
+  // so mappers have control of where in the map savelimit will be set
+  if (level.noFTSaveLimit && ent && ent->client) {
+    Printer::popup(clientNum,
+                   "fireteam: ^3savelimit ^7cannot be set on this map");
+    return false;
+  }
+
+  if (level.limitedSaves > 0) {
+    Printer::popup(
+        clientNum,
+        "fireteam: ^7unable to set ^3savelimit ^7- save is limited by the map");
+    return false;
+  }
+
+  return true;
+}
+
+bool canSetFtTeamjumpMode(const int clientNum, const gentity_t *ent) {
+  if (g_cheats.integer) {
+    return true;
+  }
+
+  // 'target_ft_setrules' bypasses worldspawn key restriction
+  // so mappers have control of where in the map teamjump mode will be set
+  if (level.noFTTeamjumpMode && ent && ent->client) {
+    Printer::popup(clientNum,
+                   "fireteam: ^3teamjump mode ^7cannot be set on this map");
+    return false;
+  }
+
+  return true;
+}
+
+bool canEnableFtShove(const int clientNum, const fireteamData_t *ft,
+                      const gentity_t *ent) {
+  if (g_cheats.integer) {
+    return true;
+  }
+
+  // 'target_ft_setrules' bypasses worldspawn key restriction
+  // so mappers have control of where in the map shoving will be toggled
+  if (level.noFTShove && ent && ent->client) {
+    Printer::popup(clientNum,
+                   "fireteam: ^3shove^7cannot be enabled on this map");
+    return false;
+  }
+
+  // shoving cannot be enabled if someone is already timerunning unless
+  // the run allows it, so we need to only check for enabling here
+  if (!ft->shove &&
+      fireTeamMemberIsTimerunning(ft, TimerunSpawnflags::AllowFTShove)) {
+    Printer::popup(clientNum, "fireteam: a member of your fireteam is "
+                              "timerunning, cannot enable ^3shove");
+    return false;
+  }
+
+  return true;
+}
+
 static bool canSetFireteamRules(const int &clientNum, fireteamData_t **ft) {
   if (!G_IsOnFireteam(clientNum, ft)) {
-    Printer::SendPopupMessage(clientNum, "You are not in a fireteam");
+    Printer::popup(clientNum, "You are not in a fireteam");
     return false;
   }
 
   if (!G_IsFireteamLeader(clientNum, ft)) {
-    Printer::SendPopupMessage(clientNum, "You are not the fireteam leader");
+    Printer::popup(clientNum, "You are not the fireteam leader");
     return false;
   }
 
@@ -766,7 +925,7 @@ static void setFireTeamRules(const int &clientNum) {
   char arg1[MAX_TOKEN_CHARS];
   char val[MAX_TOKEN_CHARS];
   fireteamData_t *ft;
-  const std::string &usageStr = stringFormat(
+  const std::string usageStr = stringFormat(
       "^3usage: ^7fireteam rules <rule> <value>\n\nAvailable rules:\n\n%-12s "
       "<value|reset>\n%-12s <on|off>\n%-12s <on|off>\n",
       "savelimit", "noghost", "shove");
@@ -776,86 +935,67 @@ static void setFireTeamRules(const int &clientNum) {
   }
 
   if (trap_Argc() < 4) {
-    Printer::SendConsoleMessage(clientNum, usageStr);
+    Printer::console(clientNum, usageStr);
     return;
   }
 
   trap_Argv(2, arg1, sizeof(arg1));
+  const gentity_t *ent = &g_entities[clientNum];
 
   if (!Q_stricmp(arg1, "savelimit")) {
-    if (level.limitedSaves > 0) {
-      Printer::SendPopupMessage(clientNum,
-                                "fireteam: ^7unable to set ^3savelimit ^7- "
-                                "save is limited by the map");
+    if (!canSetFtSavelimit(clientNum, ent)) {
       return;
     }
 
     trap_Argv(3, val, sizeof(val));
+    const int limit = std::clamp(Q_atoi(val), -1, 100);
 
     if (!Q_stricmp(val, "reset")) {
       setSaveLimitForFTMembers(ft, ft->saveLimit);
+      // we can return here as we don't need to update the limit in fireteam cs,
+      // since we're re-using the existing value and just re-setting
+      // the amount of saves available for each member
+      // TODO: if we want to support dynamic changes in the fireteam UI for
+      //  savelimit amount, we must perform an update here too
       return;
     }
 
-    const int limit = Numeric::clamp(Q_atoi(val), -1, 100);
-    ft->saveLimit = limit;
     setSaveLimitForFTMembers(ft, limit);
-
     G_UpdateFireteamConfigString(ft);
     return;
   }
 
   if (!Q_stricmp(arg1, "noghost")) {
     if (g_ghostPlayers.integer != 1) {
-      Printer::SendPopupMessage(
-          clientNum, stringFormat("fireteam: ^3noghost ^7is disabled by the %s",
+      Printer::popup(clientNum,
+                     stringFormat("fireteam: ^3noghost ^7is disabled by the %s",
                                   level.noGhost ? "map" : "server"));
       return;
     }
 
-    // disable some checks if cheats are enabled
-    if (!g_cheats.integer) {
-      if (level.noFTNoGhost) {
-        Printer::SendPopupMessage(
-            clientNum, "fireteam: ^3noghost ^7cannot be enabled on this map");
-        return;
-      }
-
-      // ghosting cannot be enabled if someone is already timerunning unless
-      // the run allows it, so we need to only check for enabling here
-      if (!ft->noGhost &&
-          fireTeamMemberIsTimerunning(
-              ft, static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
-        Printer::SendPopupMessage(clientNum,
-                                  "fireteam: a member of your fireteam is "
-                                  "timerunning, cannot enable ^3noghost");
-        return;
-      }
+    if (!canEnableFtNoGhost(clientNum, ft, ent)) {
+      return;
     }
 
     trap_Argv(3, val, sizeof(val));
 
     if (!Q_stricmp(val, "on") || !Q_stricmp(val, "1")) {
       if (ft->noGhost) {
-        Printer::SendPopupMessage(clientNum,
-                                  "fireteam: ^3noghost ^7is already enabled");
+        Printer::popup(clientNum, "fireteam: ^3noghost ^7is already enabled");
         return;
       }
 
       setFireTeamGhosting(ft, true);
     } else if (!Q_stricmp(val, "off") || !Q_stricmp(val, "0")) {
       if (!ft->noGhost) {
-        Printer::SendPopupMessage(clientNum,
-                                  "fireteam: ^3noghost ^7is already disabled");
+        Printer::popup(clientNum, "fireteam: ^3noghost ^7is already disabled");
         return;
       }
 
       setFireTeamGhosting(ft, false);
     } else {
-      Printer::SendPopupMessage(clientNum,
-                                "fireteam: invalid ^3noghost ^7value");
-      Printer::SendPopupMessage(clientNum,
-                                "Valid values are: ^3<on|1> <off|0>");
+      Printer::popup(clientNum, "fireteam: invalid ^3noghost ^7value");
+      Printer::popup(clientNum, "Valid values are: ^3<on|1> <off|0>");
       return;
     }
 
@@ -864,12 +1004,7 @@ static void setFireTeamRules(const int &clientNum) {
   }
 
   if (!Q_stricmp(arg1, "shove")) {
-    if (!ft->shove &&
-        fireTeamMemberIsTimerunning(
-            ft, static_cast<int>(TimerunSpawnflags::AllowFTShove))) {
-      Printer::SendPopupMessage(clientNum,
-                                "fireteam: a member of your fireteam is "
-                                "timerunning, cannot enable ^3shove");
+    if (!canEnableFtShove(clientNum, ft, ent)) {
       return;
     }
 
@@ -877,33 +1012,30 @@ static void setFireTeamRules(const int &clientNum) {
 
     if (!Q_stricmp(val, "on") || !Q_stricmp(val, "1")) {
       if (ft->shove) {
-        Printer::SendPopupMessage(clientNum,
-                                  "fireteam: ^3shoving ^7is already enabled");
+        Printer::popup(clientNum, "fireteam: ^3shoving ^7is already enabled");
         return;
       }
 
       setFireteamShove(ft, true);
     } else if (!Q_stricmp(val, "off") || !Q_stricmp(val, "0")) {
       if (!ft->shove) {
-        Printer::SendPopupMessage(clientNum,
-                                  "fireteam: ^3shoving ^7is already disabled");
+        Printer::popup(clientNum, "fireteam: ^3shoving ^7is already disabled");
         return;
       }
 
       setFireteamShove(ft, false);
     } else {
-      Printer::SendPopupMessage(clientNum, "fireteam: invalid ^3shove ^7value");
-      Printer::SendPopupMessage(clientNum,
-                                "Valid values are: ^3<on|1> <off|0>");
+      Printer::popup(clientNum, "fireteam: invalid ^3shove ^7value");
+      Printer::popup(clientNum, "Valid values are: ^3<on|1> <off|0>");
     }
 
     G_UpdateFireteamConfigString(ft);
     return;
   }
 
-  Printer::SendPopupMessage(
-      clientNum, "Failed to set fireteam rules, see console for usage");
-  Printer::SendConsoleMessage(clientNum, usageStr);
+  Printer::popup(clientNum,
+                 "Failed to set fireteam rules, see console for usage");
+  Printer::console(clientNum, usageStr);
 }
 
 void setupTeamJumpMode(const int &clientNum) {
@@ -914,52 +1046,40 @@ void setupTeamJumpMode(const int &clientNum) {
   }
 
   if (trap_Argc() != 3) {
-    Printer::SendPopupMessage(clientNum,
-                              "^3usage: ^7fireteam <tj|teamjump> <on|off>");
+    Printer::popup(clientNum, "^3usage: ^7fireteam <tj|teamjump> <on|off>");
+    return;
+  }
+
+  if (!canSetFtTeamjumpMode(clientNum, &g_entities[clientNum])) {
     return;
   }
 
   char arg[MAX_STRING_TOKENS] = "\0";
   trap_Argv(2, arg, sizeof(arg));
-  std::string message;
-  bool announce = false;
 
   if (!Q_stricmp(arg, "on") || !Q_stricmp(arg, "1")) {
     if (ft->teamJumpMode) {
-      message = "fireteam: ^3teamjump mode ^7is already enabled";
-    } else {
-      message = "fireteam: ^3teamjump mode ^7has been enabled";
-      announce = true;
-      ft->teamJumpMode = true;
+      Printer::popup(clientNum,
+                     "fireteam: ^3teamjump mode ^7is already enabled");
+      return;
     }
+
+    setFireteamTeamjumpMode(ft, true);
   } else if (!Q_stricmp(arg, "off") || !Q_stricmp(arg, "0")) {
     if (!ft->teamJumpMode) {
-      message = "fireteam: ^3teamjump mode ^7is already disabled";
-    } else {
-      message = "fireteam: ^3teamjump mode ^7has been disabled";
-      announce = true;
-      ft->teamJumpMode = false;
+      Printer::popup(clientNum,
+                     "fireteam: ^3teamjump mode ^7is already disabled");
+      return;
     }
+
+    setFireteamTeamjumpMode(ft, false);
   } else {
-    Printer::SendPopupMessage(clientNum,
-                              "fireteam: invalid ^3teamjump ^7value");
-    Printer::SendPopupMessage(clientNum, "Valid values are: ^3<on|1> <off|0>");
+    Printer::popup(clientNum, "fireteam: invalid ^3teamjump ^7value");
+    Printer::popup(clientNum, "Valid values are: ^3<on|1> <off|0>");
     return;
   }
 
-  if (!announce) {
-    Printer::SendPopupMessage(clientNum, message);
-  } else {
-    for (int i = 0; i < level.numConnectedClients; i++) {
-      if (ft->joinOrder[i] == -1) {
-        continue;
-      }
-
-      Printer::SendPopupMessage(ft->joinOrder[i], message);
-    }
-
-    G_UpdateFireteamConfigString(ft);
-  }
+  G_UpdateFireteamConfigString(ft);
 }
 } // namespace ETJump
 

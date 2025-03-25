@@ -11,8 +11,10 @@
 #include <string>
 #include <vector>
 #include "etj_client_commands_handler.h"
-#include "etj_inline_command_parser.h"
 #include "../game/etj_string_utilities.h"
+#include "../game/etj_json_utilities.h"
+#include "etj_savepos.h"
+#include "etj_utilities.h"
 
 /*
 =============
@@ -200,7 +202,7 @@ static void CG_TellAttacker_f(void) {
 
 /////////// cameras
 
-#define MAX_CAMERAS 64 // matches define in splines.cpp
+inline constexpr int MAX_CAMERAS = 64; // matches define in splines.cpp
 qboolean cameraInuse[MAX_CAMERAS];
 
 int CG_LoadCamera(const char *name) {
@@ -333,11 +335,7 @@ void CG_QuickMessage_f(void) {
   }
 }
 
-void CG_QuickFireteamMessage_f(void) {
-  if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
-    return;
-  }
-
+void CG_QuickFireteamMessage_f() {
   CG_EventHandling(CGAME_EVENT_NONE, qfalse);
 
   if (cg_quickMessageAlt.integer) {
@@ -377,62 +375,39 @@ static void CG_QuickFireteams_f() {
   }
 }
 
-static void CG_FTSayPlayerClass_f(void) {
-  int playerType;
-  const char *s;
+namespace ETJump {
+static const char *getPlayerClassVsayString() {
+  switch (cgs.clientinfo[cg.clientNum].cls) {
+    case PC_MEDIC:
+      return "IamMedic";
+    case PC_ENGINEER:
+      return "IamEngineer";
+    case PC_FIELDOPS:
+      return "IamFieldOps";
+    case PC_COVERTOPS:
+      return "IamCovertOps";
+    default:
+      return "IamSoldier";
+  }
+}
+} // namespace ETJump
 
-  playerType = cgs.clientinfo[cg.clientNum].cls;
-
-  if (playerType == PC_MEDIC) {
-    s = "IamMedic";
-  } else if (playerType == PC_ENGINEER) {
-    s = "IamEngineer";
-  } else if (playerType == PC_FIELDOPS) {
-    s = "IamFieldOps";
-  } else if (playerType == PC_COVERTOPS) {
-    s = "IamCovertOps";
-  } else {
-    s = "IamSoldier";
+static void CG_FTSayPlayerClass_f() {
+  if (!ETJump::isPlaying(cg.clientNum)) {
+    return;
   }
 
-  if (cg.snap && (cg.snap->ps.pm_type != PM_INTERMISSION)) {
-    if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR ||
-        cgs.clientinfo[cg.clientNum].team == TEAM_FREE) {
-      CG_Printf(CG_TranslateString("Can't team voice chat as a spectator.\n"));
-      return;
-    }
-  }
-
+  const char *s = ETJump::getPlayerClassVsayString();
   trap_SendConsoleCommand(
       va("cmd vsay_buddy -1 %s %s\n", CG_BuildSelectedFirteamString(), s));
 }
 
-static void CG_SayPlayerClass_f(void) {
-  int playerType;
-  const char *s;
-
-  playerType = cgs.clientinfo[cg.clientNum].cls;
-
-  if (playerType == PC_MEDIC) {
-    s = "IamMedic";
-  } else if (playerType == PC_ENGINEER) {
-    s = "IamEngineer";
-  } else if (playerType == PC_FIELDOPS) {
-    s = "IamFieldOps";
-  } else if (playerType == PC_COVERTOPS) {
-    s = "IamCovertOps";
-  } else {
-    s = "IamSoldier";
+static void CG_SayPlayerClass_f() {
+  if (!ETJump::isPlaying(cg.clientNum)) {
+    return;
   }
 
-  if (cg.snap && (cg.snap->ps.pm_type != PM_INTERMISSION)) {
-    if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR ||
-        cgs.clientinfo[cg.clientNum].team == TEAM_FREE) {
-      CG_Printf(CG_TranslateString("Can't team voice chat as a spectator.\n"));
-      return;
-    }
-  }
-
+  const char *s = ETJump::getPlayerClassVsayString();
   trap_SendConsoleCommand(va("cmd vsay_team %s\n", s));
 }
 
@@ -460,29 +435,22 @@ static void CG_TeamVoiceChat_f(void) {
   trap_SendConsoleCommand(va("cmd vsay_team %s\n", chatCmd));
 }
 
-static void CG_BuddyVoiceChat_f(void) {
+static void CG_BuddyVoiceChat_f() {
   char chatCmd[64];
 
   if (trap_Argc() != 2) {
     return;
   }
 
-  // NERVE - SMF - don't let spectators voice chat
-  // NOTE - This cg.snap will be the person you are following, but its
-  // just for intermission test
-  if (cg.snap && (cg.snap->ps.pm_type != PM_INTERMISSION)) {
-    if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR ||
-        cgs.clientinfo[cg.clientNum].team == TEAM_FREE) {
-      CG_Printf(CG_TranslateString("Can't buddy voice chat as a spectator.\n"));
-      return;
-    }
-  }
-
-  trap_Argv(1, chatCmd, 64);
-
+  trap_Argv(1, chatCmd, sizeof(chatCmd));
   trap_SendConsoleCommand(va("cmd vsay_buddy -1 %s %s\n",
                              CG_BuildSelectedFirteamString(), chatCmd));
 }
+
+inline constexpr int MSGTYPE_ALL = 1;
+inline constexpr int MSGTYPE_TEAM = 2;
+inline constexpr int MSGTYPE_BUDDY = 3;
+inline constexpr int MSGTYPE_ADMIN = 4;
 
 // ydnar: say, team say, etc
 static void CG_MessageMode_f(void) {
@@ -497,7 +465,7 @@ static void CG_MessageMode_f(void) {
 
   // team say
   if (!Q_stricmp(cmd, "messagemode2")) {
-    trap_Cvar_Set("cg_messageType", "2");
+    trap_Cvar_Set("cg_messageType", std::to_string(MSGTYPE_TEAM).c_str());
   }
   // fireteam say
   else if (!Q_stricmp(cmd, "messagemode3")) {
@@ -505,11 +473,15 @@ static void CG_MessageMode_f(void) {
       return;
     }
 
-    trap_Cvar_Set("cg_messageType", "3");
+    trap_Cvar_Set("cg_messageType", std::to_string(MSGTYPE_BUDDY).c_str());
+  }
+  // admin say
+  else if (!Q_stricmp(cmd, "adminChat")) {
+    trap_Cvar_Set("cg_messageType", std::to_string(MSGTYPE_ADMIN).c_str());
   }
   // (normal) say
   else {
-    trap_Cvar_Set("cg_messageType", "1");
+    trap_Cvar_Set("cg_messageType", std::to_string(MSGTYPE_ALL).c_str());
   }
 
   // clear the chat text
@@ -543,21 +515,23 @@ static void CG_MessageSend_f(void) {
 
   CG_EncodeQP(messageText, messageTextEncoded, sizeof(messageTextEncoded));
 
-  // team say
-  if (messageType == 2) {
-    trap_SendConsoleCommand(va("enc_say_team \"%s\"\n", messageTextEncoded));
-  }
-  // fireteam say
-  else if (messageType == 3) {
-    if (!CG_IsOnFireteam(cg.clientNum)) {
-      return;
-    }
+  switch (messageType) {
+    case MSGTYPE_TEAM:
+      trap_SendConsoleCommand(va("enc_say_team \"%s\"\n", messageTextEncoded));
+      break;
+    case MSGTYPE_BUDDY:
+      if (!CG_IsOnFireteam(cg.clientNum)) {
+        return;
+      }
 
-    trap_SendConsoleCommand(va("enc_say_buddy \"%s\"\n", messageTextEncoded));
-  }
-  // normal say
-  else {
-    trap_SendConsoleCommand(va("enc_say \"%s\"\n", messageTextEncoded));
+      trap_SendConsoleCommand(va("enc_say_buddy \"%s\"\n", messageTextEncoded));
+      break;
+    case MSGTYPE_ADMIN:
+      trap_SendConsoleCommand(va("enc_say_admin \"%s\"\n", messageTextEncoded));
+      break;
+    default:
+      trap_SendConsoleCommand(va("enc_say \"%s\"\n", messageTextEncoded));
+      break;
   }
 }
 
@@ -1178,6 +1152,77 @@ void openRtvMenu() {
     CG_EventHandling(CGAME_EVENT_RTV, qfalse);
   }
 }
+
+static void storeSavepos() {
+  const int argc = trap_Argc();
+  std::string filename{};
+  int flags = 0;
+
+  if (argc == 2) {
+    const char *arg = CG_Argv(1);
+
+    // if 1st arg is one character long and numeric, treat it as a flag
+    if (strlen(arg) == 1 && Q_isnumeric(*arg)) {
+      flags = Q_atoi(arg);
+    } else {
+      filename = arg;
+    }
+  } else if (argc > 2) {
+    filename = CG_Argv(1);
+    flags = Q_atoi(CG_Argv(2));
+  }
+
+  savePos->createSaveposData(filename, flags);
+}
+
+static void loadSavepos() {
+  const int argc = trap_Argc();
+  std::string filename = savePos->getDefaultSaveposName();
+
+  if (argc > 1) {
+    filename = CG_Argv(1);
+  }
+
+  if (!savePos->saveposExists(filename)) {
+    CG_Printf("No savepos found with name ^3'%s'\n", filename.c_str());
+    return;
+  }
+
+  const SavePosData &data = savePos->getSaveposData(filename);
+
+  // this is obviously trivial to bypass by just editing the mapname field
+  // in the savepos file, but it's a good idea to check this anyway
+  if (!StringUtil::iEqual(data.mapname, cgs.rawmapname, true)) {
+    CG_Printf("Savepos ^3'%s' ^7was not saved in the current map, change map "
+              "to ^3'%s' ^7to load this position.\n",
+              filename.c_str(), ETJump::sanitize(data.mapname).c_str());
+    return;
+  }
+
+  trap_SendClientCommand(va("%s", SavePosData::serialize(data).c_str()));
+}
+
+static void listSavepos() {
+  const std::vector<std::string> saveposNames = savePos->getSaveposNames();
+
+  if (saveposNames.empty()) {
+    CG_Printf("No positions found. Make sure savepos files are located in "
+              "^3'etjump/savepos/' ^7directory.\n");
+    return;
+  }
+
+  CG_Printf("Available ^3savepos ^7positions:\n");
+
+  for (const auto &name : saveposNames) {
+    CG_Printf("- %s\n", name.c_str());
+  }
+}
+
+static void readSavepos() { savePos->parseExistingPositions(true); }
+
+static void toggleETJumpSettings() {
+  trap_SendConsoleCommand("uiToggleETJumpSettings\n");
+}
 } // namespace ETJump
 
 typedef struct {
@@ -1226,6 +1271,7 @@ static const consoleCommand_t noDemoCommands[] = {
     {"messageMode", CG_MessageMode_f},
     {"messageMode2", CG_MessageMode_f},
     {"messageMode3", CG_MessageMode_f},
+    {"adminChat", CG_MessageMode_f},
     {"messageSend", CG_MessageSend_f},
 
     {"openlimbomenu", CG_LimboMenu_f},
@@ -1266,6 +1312,9 @@ static const consoleCommand_t noDemoCommands[] = {
     {"stopTimer", CG_StopTimer},
 
     {"openRtvMenu", ETJump::openRtvMenu},
+    {"loadpos", ETJump::loadSavepos},
+
+    {"toggleETJumpSettings", ETJump::toggleETJumpSettings},
 };
 
 static const consoleCommand_t anyTimeCommands[] = {
@@ -1310,6 +1359,9 @@ static const consoleCommand_t anyTimeCommands[] = {
     {"incrementVar", CG_IncrementVar_f},
     {"extraTrace", CG_ExtraTrace_f},
     {"listspawnpt", ETJump::listSpawnPoints},
+    {"savepos", ETJump::storeSavepos},
+    {"listsavepos", ETJump::listSavepos},
+    {"readsavepos", ETJump::readSavepos},
 };
 
 /*
@@ -1437,9 +1489,10 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("readyteam");
   trap_AddCommand("ready");
   trap_AddCommand("ref");
-  trap_AddCommand("say_teamnl");
   trap_AddCommand("say_team");
   trap_AddCommand("say_buddy");
+  trap_AddCommand("say_admin");
+  trap_AddCommand("ma"); // message-admin
   trap_AddCommand("scores");
   trap_AddCommand("specinvite");
   trap_AddCommand("specuninvite");
@@ -1534,6 +1587,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("enc_say");
   trap_AddCommand("enc_say_team");
   trap_AddCommand("enc_say_buddy");
+  trap_AddCommand("enc_say_admin");
 
   trap_AddCommand("generateCustomvotes");
   trap_AddCommand("readCustomvotes");

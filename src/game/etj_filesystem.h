@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,18 +24,13 @@
 
 #pragma once
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
-
 #include <string>
 #include <vector>
 
 namespace ETJump {
 class FileSystem {
+  static constexpr int BIG_DIR_BUFFER = 2 << 20;
+
 public:
   static void copy(const std::string &src, const std::string &dst);
   static void move(const std::string &src, const std::string &dst);
@@ -43,13 +38,21 @@ public:
   static bool exists(const std::string &path);
   static bool safeCopy(const std::string &src, const std::string &dst);
   static bool safeMove(const std::string &src, const std::string &dst);
-  static std::vector<std::string> getFileList(const std::string &path,
-                                              const std::string &ext);
+  static std::vector<std::string>
+
+  // if sort is true, the returned list is sorted case-insensitively
+  getFileList(const std::string &path, const std::string &ext, bool sort);
+
   class Path {
+    static std::string buildOSPath(const std::string &file);
+
   public:
     static std::string sanitize(std::string path);
     static std::string sanitizeFile(std::string path);
     static std::string sanitizeFolder(std::string path);
+
+    // returns the full filesystem path to a file
+    static std::string getPath(const std::string &file);
   };
 };
 } // namespace ETJump

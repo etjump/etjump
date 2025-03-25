@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -145,7 +145,7 @@ bool RockTheVote::checkAutoRtv() {
   // printed when adjusting auto rtv time so that it gets instantly called
   if (level.time == autoRtvCooldown - (1000 * 60 * 2) &&
       g_autoRtv.integer >= 2) {
-    Printer::BroadcastChatMessage(
+    Printer::chatAll(
         "^gServer: automatic Rock The Vote will be called in ^32 ^gminutes.");
     return false;
   }
@@ -197,8 +197,8 @@ void RockTheVote::callAutoRtv() {
   std::string voteMsg = stringFormat("Server called an automatic %s.\n",
                                      level.voteInfo.voteString);
 
-  Printer::BroadcastConsoleMessage(voteMsg);
-  Printer::BroadcastCenterMessage("Server called an automatic vote.");
+  Printer::consoleAll(voteMsg);
+  Printer::centerAll("Server called an automatic vote.");
   G_LogPrintf("%s", voteMsg.c_str());
 
   G_globalSound("sound/misc/vote.wav");

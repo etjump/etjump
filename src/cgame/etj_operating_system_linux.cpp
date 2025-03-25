@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,57 +29,94 @@
   #include <net/if.h>
   #include <netinet/in.h>
   #include <cstring>
+  #include <unistd.h>
+  #include <fstream>
   #include "../game/etj_string_utilities.h"
 
 const char *G_SHA1(const char *str);
 
-ETJump::OperatingSystem::OperatingSystem() {}
+ETJump::OperatingSystem::OperatingSystem() = default;
 
 void ETJump::OperatingSystem::minimize() {}
 
 std::string ETJump::OperatingSystem::getHwid() {
-  struct ifreq ifr;
-  struct ifconf ifc;
+  ifreq ifr{};
+  ifconf ifc{};
   char buf[1024];
-  int success = 0;
+  bool success = false;
+  std::string hwid;
 
-  int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
-  if (sock == -1) { /* handle error*/
+  const auto closeSocket = [](const int sock) {
+    if (sock >= 0) {
+      close(sock);
+    }
+  };
+
+  const int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+  if (sock == -1) {
+    closeSocket(sock);
+    return "NOHWID";
   }
 
   ifc.ifc_len = sizeof(buf);
   ifc.ifc_buf = buf;
-  if (ioctl(sock, SIOCGIFCONF, &ifc) == -1) { /* handle error */
+  if (ioctl(sock, SIOCGIFCONF, &ifc) == -1) {
+    closeSocket(sock);
+    return "NOHWID";
   }
 
-  struct ifreq *it = ifc.ifc_req;
-  const struct ifreq *const end = it + (ifc.ifc_len / sizeof(struct ifreq));
+  const ifreq *it = ifc.ifc_req;
 
-  for (; it != end; ++it) {
+  for (const ifreq *const end = it + ifc.ifc_len / sizeof(struct ifreq);
+       it != end; ++it) {
     strcpy(ifr.ifr_name, it->ifr_name);
+
     if (ioctl(sock, SIOCGIFFLAGS, &ifr) == 0) {
-      if (!(ifr.ifr_flags & IFF_LOOPBACK)) // don't count loopback
-      {
+      // don't count loopback
+      if (!(ifr.ifr_flags & IFF_LOOPBACK)) {
         if (ioctl(sock, SIOCGIFHWADDR, &ifr) == 0) {
-          success = 1;
+          success = true;
           break;
         }
       }
-    } else { /* handle error */
+    } else {
+      closeSocket(sock);
+      return "NOHWID";
     }
   }
 
-  unsigned char mac_address[6];
+  closeSocket(sock);
 
-  if (success) {
-    memcpy(mac_address, ifr.ifr_hwaddr.sa_data, 6);
-    auto fmt = ETJump::stringFormat(
-        "%02X:%02X:%02X:%02X:%02X:%02X", mac_address[0], mac_address[1],
-        mac_address[2], mac_address[3], mac_address[4], mac_address[5]);
-    return G_SHA1(fmt.c_str());
-  } else {
+  if (!success) {
     return "NOHWID";
   }
+
+  unsigned char mac_address[6];
+  memcpy(mac_address, ifr.ifr_hwaddr.sa_data, sizeof(mac_address));
+  hwid += stringFormat("%02X:%02X:%02X:%02X:%02X:%02X", mac_address[0],
+                       mac_address[1], mac_address[2], mac_address[3],
+                       mac_address[4], mac_address[5]);
+
+  // TODO: include this in HWID, when user database has been refactored
+  //  to store HWIDs of individual components
+  /*
+  std::ifstream machineID("/etc/machine-id");
+
+  if (!machineID) {
+    return "NOHWID";
+  }
+
+  std::string id;
+  std::getline(machineID, id);
+
+  if (id.empty()) {
+    return "NOHWID";
+  }
+
+  hwid += id;
+  */
+
+  return G_SHA1(hwid.c_str());
 }
 
 #endif

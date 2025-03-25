@@ -129,12 +129,14 @@ typedef enum {
   K_AUX15,
   K_AUX16,
 
-  K_LAST_KEY // this had better be <256!
+  K_LAST_KEY = 256,
 } keyNum_t;
+
+inline constexpr int K_MAX_KEYS = K_LAST_KEY;
 
 // The menu code needs to get both key and char events, but
 // to avoid duplicating the paths, the char events are just
 // distinguished by or'ing in K_CHAR_FLAG (ugly)
-#define K_CHAR_FLAG 1024
+inline constexpr int K_CHAR_FLAG = 1024;
 
 #endif

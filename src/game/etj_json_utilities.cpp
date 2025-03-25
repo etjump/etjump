@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,28 +24,40 @@
 
 #include <fstream>
 #include "etj_json_utilities.h"
-#include "utilities.hpp"
+#include "etj_filesystem.h"
+#include "etj_file.h"
 
 namespace ETJump {
-Log JsonUtils::logger = Log("JSON-utils");
-
-bool JsonUtils::writeFile(const std::string &file, const Json::Value &root) {
+bool JsonUtils::writeFile(const std::string &file, const Json::Value &root,
+                          std::string *errors) {
   Json::StyledWriter writer;
   const std::string &output = writer.write(root);
-  std::ofstream fOut(GetPath(file));
 
-  if (!fOut) {
-    fOut.close();
+  if (file.empty()) {
+    if (errors) {
+      *errors = "Failed to write JSON file: empty filename\n";
+    }
+
     return false;
   }
 
-  fOut << output;
-  fOut.close();
-  return true;
+  const File fOut(file, File::Mode::Write);
+
+  try {
+    fOut.write(output);
+    return true;
+  } catch (const File::WriteFailedException &e) {
+    if (errors) {
+      *errors = stringFormat("Failed to write JSON file: %s\n", e.what());
+    }
+
+    return false;
+  }
 }
 
-bool JsonUtils::readFile(const std::string &file, Json::Value &root) {
-  std::ifstream fIn(GetPath(file));
+bool JsonUtils::readFile(const std::string &file, Json::Value &root,
+                         std::string *errors) {
+  std::ifstream fIn(FileSystem::Path::getPath(file));
 
   if (!fIn) {
     fIn.close();
@@ -53,10 +65,14 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root) {
   }
 
   Json::CharReaderBuilder readerBuilder;
-  std::string errors;
+  readerBuilder["strictRoot"] = true;
+  std::string err;
 
-  if (!Json::parseFromStream(readerBuilder, fIn, &root, &errors)) {
-    logger.error("Failed to parse JSON file '%s': %s", file, errors);
+  if (!parseFromStream(readerBuilder, fIn, &root, &err)) {
+    if (errors) {
+      *errors = stringFormat("Failed to parse JSON file '%s':\n%s", file, err);
+    }
+
     return false;
   }
 

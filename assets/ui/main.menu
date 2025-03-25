@@ -142,7 +142,7 @@ menuDef {
 	WINDOW( "MAIN", 50 )
 	
 // Buttons //
-#ifdef LEGACY
+#ifdef ETLEGACY
 	BUTTON( 6, 32, WINDOW_WIDTH-12, 18, "PLAY ONLINE", .3, 14, close main ; /*close backgroundmusic ; open backgroundmusic_server ;*/ uiScript UpdateFilter ; uiScript ServerSortDown 4 ; open playonline )
 #else
 	BUTTON( 6, 32, WINDOW_WIDTH-12, 18, "PLAY ONLINE", .3, 14, close main ; open playonline )

@@ -12,6 +12,7 @@
 #include "etj_init.h"
 #include "etj_cvar_shadow.h"
 #include "etj_cvar_update_handler.h"
+#include "etj_demo_compatibility.h"
 #include "etj_utilities.h"
 #include "etj_rtv_drawable.h"
 
@@ -280,7 +281,6 @@ vmCvar_t cl_demooffset;
 vmCvar_t cl_waverecording;
 vmCvar_t cl_wavefilename;
 vmCvar_t cl_waveoffset;
-vmCvar_t cg_recording_statusline;
 vmCvar_t cg_ghostPlayers;
 vmCvar_t etj_hide;
 vmCvar_t etj_hideDistance;
@@ -378,6 +378,7 @@ vmCvar_t etj_chatBackgroundAlpha;
 vmCvar_t etj_chatFlags;
 vmCvar_t etj_chatShadow;
 vmCvar_t etj_chatAlpha;
+vmCvar_t etj_chatReplay;
 
 // crosshair stats
 vmCvar_t etj_drawCHS1;
@@ -436,7 +437,7 @@ vmCvar_t etj_altScoreboard;
 vmCvar_t etj_drawSpectatorInfo;
 vmCvar_t etj_spectatorInfoX;
 vmCvar_t etj_spectatorInfoY;
-vmCvar_t etj_spectatorInfoSize;
+vmCvar_t etj_spectatorInfoScale;
 vmCvar_t etj_spectatorInfoShadow;
 
 vmCvar_t etj_drawRunTimer;
@@ -573,6 +574,7 @@ vmCvar_t etj_autoDemo;
 vmCvar_t etj_ad_savePBOnly;
 vmCvar_t etj_ad_stopDelay;
 vmCvar_t etj_ad_targetPath;
+vmCvar_t etj_ad_stopInSpec;
 
 vmCvar_t etj_chatScale;
 
@@ -588,6 +590,7 @@ vmCvar_t etj_snapHUDFov;
 vmCvar_t etj_snapHUDHLActive;
 vmCvar_t etj_snapHUDTrueness;
 vmCvar_t etj_snapHUDEdgeThickness;
+vmCvar_t etj_snapHUDBorderThickness;
 vmCvar_t etj_snapHUDActiveIsPrimary;
 
 vmCvar_t etj_gunSway;
@@ -647,8 +650,6 @@ vmCvar_t etj_optimizePrediction;
 
 vmCvar_t etj_menuSensitivity;
 
-vmCvar_t etj_crosshairScaleX;
-vmCvar_t etj_crosshairScaleY;
 vmCvar_t etj_crosshairThickness;
 vmCvar_t etj_crosshairOutline;
 
@@ -664,10 +665,22 @@ vmCvar_t etj_drawPlayerBBox;
 vmCvar_t etj_playerBBoxColorSelf;
 vmCvar_t etj_playerBBoxColorOther;
 vmCvar_t etj_playerBBoxColorFireteam;
-vmCvar_t etj_playerBBoxBottomOnlySelf;
-vmCvar_t etj_playerBBoxBottomOnlyOther;
-vmCvar_t etj_playerBBoxBottomOnlyFireteam;
+vmCvar_t etj_playerBBoxBottomOnly;
 vmCvar_t etj_playerBBoxShader;
+
+vmCvar_t etj_autoSpec;
+vmCvar_t etj_autoSpecDelay;
+
+vmCvar_t etj_drawRecordingStatus;
+vmCvar_t etj_recordingStatusX;
+vmCvar_t etj_recordingStatusY;
+
+vmCvar_t etj_smoothAngles;
+vmCvar_t etj_autoSprint;
+
+vmCvar_t etj_logCenterPrint;
+
+vmCvar_t etj_onDemoPlaybackStart;
 
 typedef struct {
   vmCvar_t *vmCvar;
@@ -854,7 +867,6 @@ cvarTable_t cvarTable[] = {
     {&cl_waverecording, "cl_waverecording", "0", CVAR_ROM},
     {&cl_wavefilename, "cl_wavefilename", "", CVAR_ROM},
     {&cl_waveoffset, "cl_waveoffset", "0", CVAR_ROM},
-    {&cg_recording_statusline, "cg_recording_statusline", "9", CVAR_ARCHIVE},
 
     {&cg_ghostPlayers, "", "0", 0},
     {&etj_hide, "etj_hide", "1", CVAR_ARCHIVE},
@@ -948,6 +960,7 @@ cvarTable_t cvarTable[] = {
     {&etj_chatFlags, "etj_chatFlags", "1", CVAR_ARCHIVE},
     {&etj_chatShadow, "etj_chatShadow", "0", CVAR_ARCHIVE},
     {&etj_chatAlpha, "etj_chatAlpha", "1.0", CVAR_ARCHIVE},
+    {&etj_chatReplay, "etj_chatReplay", "1", CVAR_ARCHIVE},
 
     // crosshair stats
     {&etj_drawCHS1, "etj_drawCHS1", "0", CVAR_ARCHIVE},
@@ -1000,7 +1013,7 @@ cvarTable_t cvarTable[] = {
     {&etj_drawSpectatorInfo, "etj_drawSpectatorInfo", "0", CVAR_ARCHIVE},
     {&etj_spectatorInfoX, "etj_spectatorInfoX", "320", CVAR_ARCHIVE},
     {&etj_spectatorInfoY, "etj_spectatorInfoY", "30", CVAR_ARCHIVE},
-    {&etj_spectatorInfoSize, "etj_spectatorInfoSize", "2.3", CVAR_ARCHIVE},
+    {&etj_spectatorInfoScale, "etj_spectatorInfoScale", "1.0", CVAR_ARCHIVE},
     {&etj_spectatorInfoShadow, "etj_spectatorInfoShadow", "1", CVAR_ARCHIVE},
     {&etj_drawRunTimer, "etj_drawRunTimer", "1", CVAR_ARCHIVE},
     {&etj_runTimerX, "etj_runTimerX", "320", CVAR_ARCHIVE},
@@ -1139,6 +1152,8 @@ cvarTable_t cvarTable[] = {
     {&etj_ad_savePBOnly, "etj_ad_savePBOnly", "0", CVAR_ARCHIVE},
     {&etj_ad_stopDelay, "etj_ad_stopDelay", "2000", CVAR_ARCHIVE},
     {&etj_ad_targetPath, "etj_ad_targetPath", "autodemo", CVAR_ARCHIVE},
+    {&etj_ad_stopInSpec, "etj_ad_stopInSpec", "1", CVAR_ARCHIVE},
+
     {&etj_chatScale, "etj_chatScale", "1.0", CVAR_ARCHIVE},
     // Snaphud
     {&etj_drawSnapHUD, "etj_drawSnapHUD", "0", CVAR_ARCHIVE},
@@ -1155,6 +1170,8 @@ cvarTable_t cvarTable[] = {
     {&etj_snapHUDHLActive, "etj_snapHUDHLActive", "0", CVAR_ARCHIVE},
     {&etj_snapHUDTrueness, "etj_snapHUDTrueness", "0", CVAR_ARCHIVE},
     {&etj_snapHUDEdgeThickness, "etj_snapHUDEdgeThickness", "10", CVAR_ARCHIVE},
+    {&etj_snapHUDBorderThickness, "etj_snapHUDBorderThickness", "1",
+     CVAR_ARCHIVE},
     {&etj_snapHUDActiveIsPrimary, "etj_snapHUDActiveIsPrimary", "0",
      CVAR_ARCHIVE},
 
@@ -1227,8 +1244,6 @@ cvarTable_t cvarTable[] = {
 
     {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
 
-    {&etj_crosshairScaleX, "etj_crosshairScaleX", "1.0", CVAR_ARCHIVE},
-    {&etj_crosshairScaleY, "etj_crosshairScaleY", "1.0", CVAR_ARCHIVE},
     {&etj_crosshairThickness, "etj_crosshairThickness", "1.0", CVAR_ARCHIVE},
     {&etj_crosshairOutline, "etj_crosshairOutline", "1", CVAR_ARCHIVE},
 
@@ -1249,14 +1264,23 @@ cvarTable_t cvarTable[] = {
      CVAR_ARCHIVE},
     {&etj_playerBBoxColorFireteam, "etj_playerBBoxColorFireteam",
      "0.0 0.0 1.0 0.5", CVAR_ARCHIVE},
-    {&etj_playerBBoxBottomOnlySelf, "etj_playerBBoxBottomOnlySelf", "0",
-     CVAR_ARCHIVE},
-    {&etj_playerBBoxBottomOnlyOther, "etj_playerBBoxBottomOnlyOther", "0",
-     CVAR_ARCHIVE},
-    {&etj_playerBBoxBottomOnlyFireteam, "etj_playerBBoxBottomOnlyFireteam", "0",
-     CVAR_ARCHIVE},
+    {&etj_playerBBoxBottomOnly, "etj_playerBBoxBottomOnly", "0", CVAR_ARCHIVE},
     {&etj_playerBBoxShader, "etj_playerBBoxShader", "bbox_nocull",
      CVAR_ARCHIVE | CVAR_LATCH},
+
+    {&etj_autoSpec, "etj_autoSpec", "0", CVAR_ARCHIVE},
+    {&etj_autoSpecDelay, "etj_autoSpecDelay", "10000", CVAR_ARCHIVE},
+
+    {&etj_drawRecordingStatus, "etj_drawRecordingStatus", "1", CVAR_ARCHIVE},
+    {&etj_recordingStatusX, "etj_recordingStatusX", "2", CVAR_ARCHIVE},
+    {&etj_recordingStatusY, "etj_recordingStatusY", "9", CVAR_ARCHIVE},
+
+    {&etj_smoothAngles, "etj_smoothAngles", "1", CVAR_ARCHIVE},
+    {&etj_autoSprint, "etj_autoSprint", "0", CVAR_ARCHIVE},
+
+    {&etj_logCenterPrint, "etj_logCenterPrint", "0", CVAR_ARCHIVE},
+
+    {&etj_onDemoPlaybackStart, "etj_onDemoPlaybackStart", "", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -1335,7 +1359,8 @@ void CG_UpdateCvars(void) {
             cv->vmCvar == &etj_touchPickupWeapons ||
             cv->vmCvar == &etj_autoLoad || cv->vmCvar == &etj_quickFollow ||
             cv->vmCvar == &etj_drawSnapHUD ||
-            cv->vmCvar == &etj_noPanzerAutoswitch) {
+            cv->vmCvar == &etj_noPanzerAutoswitch ||
+            cv->vmCvar == &etj_autoSprint) {
           fSetFlags = qtrue;
         } else if (cv->vmCvar == &cg_rconPassword && *cg_rconPassword.string) {
           trap_SendConsoleCommand(va("rconAuth %s\n", cg_rconPassword.string));
@@ -1371,12 +1396,23 @@ void CG_UpdateCvars(void) {
   }
 }
 
-void CG_setClientFlags(void) {
+void CG_setClientFlags() {
   if (cg.demoPlayback) {
     return;
   }
 
+  const fireteamData_t *ft = CG_IsOnFireteam(cg.clientNum);
+
+  if (ft && ft->noGhost && etj_hideMe.integer) {
+    CG_AddPMItem(PM_MESSAGE,
+                 "Fireteam ^3noghost ^7is enabled, cannot set ^3etj_hideMe\n",
+                 cgs.media.voiceChatShader);
+    trap_Cvar_Set("etj_hideMe", "0");
+  }
+
   cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
+  cg.pmext.autoSprint = etj_autoSprint.integer;
+
   trap_Cvar_Set(
       "cg_uinfo",
       va("%d %d %d %d %f %d",
@@ -1397,7 +1433,8 @@ void CG_setClientFlags(void) {
           ((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0) |
           ((etj_quickFollow.integer > 0) ? CGF_QUICK_FOLLOW : 0) |
           ((etj_drawSnapHUD.integer > 0) ? CGF_SNAPHUD : 0) |
-          ((etj_noPanzerAutoswitch.integer > 0) ? CGF_NOPANZERSWITCH : 0)
+          ((etj_noPanzerAutoswitch.integer > 0) ? CGF_NOPANZERSWITCH : 0) |
+          (etj_autoSprint.integer ? CGF_AUTOSPRINT : 0)
           // Add more in here, as needed
           ),
 
@@ -1449,7 +1486,7 @@ void QDECL CG_Printf(const char *msg, ...) {
   trap_Print(text);
 }
 
-void QDECL CG_Error(const char *msg, ...) {
+[[noreturn]] void QDECL CG_Error(const char *msg, ...) {
   va_list argptr;
   char text[1024];
 
@@ -1463,7 +1500,7 @@ void QDECL CG_Error(const char *msg, ...) {
 #ifndef CGAME_HARD_LINKED
 // this is only here so the functions in q_shared.c and bg_*.c can link (FIXME)
 
-void QDECL Com_Error(int level, const char *error, ...) {
+[[noreturn]] void QDECL Com_Error(int level, const char *error, ...) {
   va_list argptr;
   char text[1024];
 
@@ -1715,7 +1752,7 @@ void CG_SetupDlightstyles(void) {
     cent = &cg_entities[entnum];
 
     token = COM_Parse(&str); // stylestring
-    Q_strncpyz(cent->dl_stylestring, token, strlen(token));
+    Q_strncpyz(cent->dl_stylestring, token, sizeof(cent->dl_stylestring));
 
     token = COM_Parse(&str); // offset
     cent->dl_frame = Q_atoi(token);
@@ -2621,17 +2658,6 @@ static void CG_RegisterGraphics(void) {
       trap_R_RegisterShaderNoMip("gfx/limbo/filter_back_on");
   cgs.media.ccFilterBackOff =
       trap_R_RegisterShaderNoMip("gfx/limbo/filter_back_off");
-  /*
-  #define CC_FILTER_AXIS			(1 << 0)
-  #define CC_FILTER_ALLIES		(1 << 1)
-  #define CC_FILTER_SPAWNS		(1 << 2)
-  #define CC_FILTER_CMDPOST		(1 << 3) // TODO
-  #define CC_FILTER_HACABINETS	(1 << 4) // TODO
-  #define CC_FILTER_CONSTRUCTIONS	(1 << 5)
-  #define CC_FILTER_DESTRUCTIONS	(1 << 6)
-  #define CC_FILTER_WAYPOINTS		(1 << 7)
-  #define CC_FILTER_OBJECTIVES	(1 << 8) // TODO
-  */
 
   // used in:
   //  statsranksmedals
@@ -2686,65 +2712,6 @@ static void CG_RegisterGraphics(void) {
       trap_R_RegisterShaderNoMip("gfx/limbo/ic_soldier");
   cgs.media.skillPics[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS] =
       trap_R_RegisterShaderNoMip("gfx/limbo/ic_covertops");
-
-  /*cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_MOVETOLOC] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_default" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_CONSTRUCT] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_construct"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_USEDYNAMITE] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_usedynamite"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_REPAIR] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_fixgun" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_MOUNTGUN] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_mountgun" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_OPENDOOR] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_opendoor" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_REVIVE] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_revive" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_GETDISGUISE] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_getdisguise"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_HEAL] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_heal" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_AMMO] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_ammo" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_DISARM] =
-  trap_R_RegisterShaderNoMip(
-  "ui/assets2/ingame/bot_action_disarmdynamite" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_ATTACK] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_attack" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_COVER] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_cover" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_RECON] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_recon" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_SMOKEBOMB] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_smoke" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_FINDMINES] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_findmines"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_PLANTMINE] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_plantmine"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_ARTILLERY] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_artillery"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_AIRSTRIKE] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_airstrike"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_GRENADELAUNCH]=
-  trap_R_RegisterShaderNoMip(
-  "ui/assets2/ingame/bot_action_grenadelaunch" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_PICKUPITEM] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_pickup" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_PANZERFAUST] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_panzerfaust"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_FLAMETHROW] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_flamethrow"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_MG42] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_mg42" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_MOUNTEDATTACK]=
-  trap_R_RegisterShaderNoMip(
-  "ui/assets2/ingame/bot_action_mountedattack" );
-  cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_KNIFEATTACK] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_knifeattack"
-  ); cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_LOCKPICK] =
-  trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_lockpick"
-  );*/
 
   WM_RegisterWeaponTypeShaders();
 
@@ -2874,16 +2841,10 @@ static void CG_RegisterGraphics(void) {
   CG_LoadingString(" - inline models");
 
   // register the inline models
+  // since we now support 512 inline models like engine does,
+  // we don't need to check the limits here as engine fails to load the map
+  // if we go over MAX_SUBMODELS
   cgs.numInlineModels = trap_CM_NumInlineModels();
-  // TAT 12/23/2002 - as a safety check, let's not let the number of
-  // models exceed MAX_MODELS
-  if (cgs.numInlineModels > MAX_MODELS) {
-    CG_Error("CG_RegisterGraphics: Too many inline models: %i\n",
-             cgs.numInlineModels);
-    // CG_Printf( S_COLOR_RED "WARNING: CG_RegisterGraphics: Too
-    // many inline models: %i\n", cgs.numInlineModels );
-    // cgs.numInlineModels = MAX_MODELS;
-  }
 
   for (i = 1; i < cgs.numInlineModels; i++) {
     char name[10];
@@ -4057,19 +4018,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   cgs.demoCam.startLean = qfalse;
   cgs.demoCam.noclip = qfalse;
 
-  if (cg.demoPlayback) {
-    // Marks the right 2.3.0 version to perform the entity type
-    // adjustement hack
-    char *pakBaseName = strchr(Info_ValueForKey(CG_ConfigString(CS_SYSTEMINFO),
-                                                "sv_referencedPakNames"),
-                               '/') +
-                        1;
-    if (!Q_strncmp(pakBaseName, "etjump-2_3_0-RC4 ", 17) ||
-        !Q_strncmp(pakBaseName, "etjump-2_3_0 ", 13)) {
-      cg.requiresEntityTypeAdjustment = true;
-    }
-  }
-
   CG_InitLocations();
 
   ETJump::init();
@@ -4082,7 +4030,19 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
     ETJump::execFile("autoexec_default");
   }
 
+  if (!Q_stricmp(cgs.rawmapname, "solstice") ||
+      !Q_stricmp(cgs.rawmapname, "stonehalls2")) {
+    cg.jumpDelayBug = true;
+  }
+
   Com_Printf("CG_Init... DONE\n");
+
+  if (cg.demoPlayback) {
+    ETJump::demoCompatibility->printDemoInformation();
+
+    // notify UI that we're in demo playback
+    trap_SendConsoleCommand("uiDemoPlaybackEnabled");
+  }
 }
 
 /*

@@ -24,18 +24,14 @@
 // 1.1b - TTimo SP linux release (+ MP updates)
 // 1.1b5 - Mac update merge in
 
-#define CONFIG_NAME "etconfig.cfg"
+inline constexpr char CONFIG_NAME[] = "etconfig.cfg";
 
 // #define LOCALIZATION_SUPPORT
 
-#define NEW_ANIMS
-#define MAX_TEAMNAME 32
-
-#define MOD_VERSION_DATA_CHECK(x) (x && x >= 272 && x < 3000)
-#define MOD_CHECK_LEGACY(islegacy, versionNum, outputValue)                    \
-  outputValue = (islegacy == qtrue ? qtrue : qfalse);                          \
-  if (outputValue && MOD_VERSION_DATA_CHECK(versionNum)) {                     \
-    outputValue = versionNum;                                                  \
+#define MOD_CHECK_ETLEGACY(isETLegacy, versionNum, outputValue)                \
+  outputValue = ((isETLegacy) ? true : false);                                 \
+  if (outputValue) {                                                           \
+    (outputValue) = versionNum;                                                \
   }
 
 #if defined _WIN32 && !defined __GNUC__
@@ -106,10 +102,12 @@
   #include <float.h>
   #include <cstdlib>
   #include <string>
+  #include <cstdint>
+  #include <array>
 
 #endif
 
-#include "etj_public.h"
+#include "etj_syscalls.h"
 
 #ifdef _WIN32
 
@@ -153,8 +151,8 @@
     #define CPUSTRING "win-x86"
   #endif
 
-  #define PATH_SEP '\\'
-  #define PATH_SEP_STRING "\\"
+inline constexpr char PATH_SEP_STRING[] = "\\";
+inline constexpr char PATH_SEP = '\\';
 
 #endif
 
@@ -166,8 +164,8 @@
 
   #define CPUSTRING "MacOS"
 
-  #define PATH_SEP '/'
-  #define PATH_SEP_STRING "/"
+inline constexpr char PATH_SEP_STRING[] = "/";
+inline constexpr char PATH_SEP = '/';
 
 #endif
 
@@ -179,8 +177,8 @@
 
   #define CPUSTRING "MacOS-PPC"
 
-  #define PATH_SEP_STRING "/"
-  #define PATH_SEP '/'
+inline constexpr char PATH_SEP_STRING[] = "/";
+inline constexpr char PATH_SEP = '/';
 
 void Sys_PumpEvents(void);
 
@@ -206,12 +204,22 @@ void Sys_PumpEvents(void);
     #define CPUSTRING "linux-other"
   #endif
 
-  #define PATH_SEP_STRING "/"
-  #define PATH_SEP '/'
+inline constexpr char PATH_SEP_STRING[] = "/";
+inline constexpr char PATH_SEP = '/';
 
 #endif
 
 //=============================================================
+
+// relative path to a source file (src/foo/bar.cpp)
+#define SRC_FILENAME ((__FILE__) + (SOURCE_PATH_SIZE))
+
+// tell compilers that trap_Error syscalls abort execution
+#if defined(_MSC_VER) && !defined(__clang__) // MSVC
+  #define UNREACHABLE __assume(false);
+#else // GCC, Clang
+  #define UNREACHABLE __builtin_unreachable();
+#endif
 
 typedef unsigned char byte;
 
@@ -228,69 +236,79 @@ typedef int sfxHandle_t;
 typedef int fileHandle_t;
 typedef int clipHandle_t;
 
-// #define	SND_NORMAL			0x000	// (default) Allow sound
-//  to be cut off only by the same sound on this channel
-#define SND_OKTOCUT                                                            \
-  0x001 // Allow sound to be cut off by any following sounds on this
-        // channel
-#define SND_REQUESTCUT                                                         \
-  0x002 // Allow sound to be cut off by following sounds on this channel
-        // only for sounds who request cutoff
-#define SND_CUTOFF                                                             \
-  0x004                      // Cut off sounds on this channel that are marked
-                             // 'SND_REQUESTCUT'
-#define SND_CUTOFF_ALL 0x008 // Cut off all sounds on this channel
-#define SND_NOCUT                                                              \
-  0x010 // Don't cut off.  Always let finish (overridden by
-        // SND_CUTOFF_ALL)
-#define SND_NO_ATTENUATION                                                     \
-  0x020 // don't attenuate (even though the sound is in voice channel,
-        // for example)
+// networked fields in entityState_t and playerState_t,
+// with their respective networked sizes
+typedef int net_uint2_t;
+typedef int net_uint4_t;
+typedef int net_uint7_t;
+typedef int net_uint8_t;
+typedef int net_uint9_t;
+typedef int net_uint10_t;
+typedef int net_uint16_t;
+typedef int net_uint24_t;
+
+typedef int net_int8_t;
+typedef int net_int16_t;
+typedef int net_int32_t;
+
+typedef float net_float;
+
+// allow sound to be cut off by any following sounds on this channel
+inline constexpr int SND_OKTOCUT = 0x001;
+// allow sound to be cut off by following sounds on this channel
+// only for sounds who request cutoff
+inline constexpr int SND_REQUESTCUT = 0x002;
+// cut off sounds on this channel that are marked 'SND_REQUESTCUT'
+inline constexpr int SND_CUTOFF = 0x004;
+// cut off all sounds on this channel
+inline constexpr int SND_CUTOFF_ALL = 0x008;
+// don't cut off, always let finish (overridden by SND_CUTOFF_ALL)
+inline constexpr int SND_NOCUT = 0x010;
+// don't attenuate (even though the sound is in voice channel, for example)
+inline constexpr int SND_NO_ATTENUATION = 0x020;
 
 #ifndef NULL
   #define NULL ((void *)0)
 #endif
 
-#define MAX_QINT 0x7fffffff
-#define MIN_QINT (-MAX_QINT - 1)
+inline constexpr int32_t MAX_QINT = 0x7fffffff;
+inline constexpr int32_t MIN_QINT = -MAX_QINT - 1;
 
 // angle indexes
-#define PITCH 0 // up / down
-#define YAW 1   // left / right
-#define ROLL 2  // fall over
+inline constexpr int PITCH = 0; // up / down
+inline constexpr int YAW = 1;   // left / right
+inline constexpr int ROLL = 2;  // fall over
 
-// RF, this is just here so different elements of the engine can be aware of
-// this setting as it changes
-#define MAX_SP_CLIENTS                                                         \
-  64 // increasing this will increase memory usage significantly
-#define PB_GUID_LEN 32
+// the game guarantees that no string from the network
+// will ever exceed MAX_STRING_CHARS
+// max length of a string passed to Cmd_TokenizeString
+inline constexpr int MAX_STRING_CHARS = 1024;
+// max tokens resulting from Cmd_TokenizeString
+inline constexpr int MAX_STRING_TOKENS = 256;
+// max length of an individual token
+inline constexpr int MAX_TOKEN_CHARS = 1024;
 
-// the game guarantees that no string from the network will ever
-// exceed MAX_STRING_CHARS
-#define MAX_STRING_CHARS                                                       \
-  1024 // max length of a string passed to Cmd_TokenizeString
-#define MAX_STRING_TOKENS 256 // max tokens resulting from Cmd_TokenizeString
-#define MAX_TOKEN_CHARS 1024  // max length of an individual token
+inline constexpr int MAX_INFO_STRING = 1024;
+inline constexpr int MAX_INFO_KEY = 1024;
+inline constexpr int MAX_INFO_VALUE = 1024;
 
-#define MAX_INFO_STRING 1024
-#define MAX_INFO_KEY 1024
-#define MAX_INFO_VALUE 1024
+inline constexpr int BIG_INFO_STRING = 8192; // used for system info key only
+inline constexpr int BIG_INFO_KEY = 8192;
+inline constexpr int BIG_INFO_VALUE = 8192;
 
-#define BIG_INFO_STRING 8192 // used for system info key only
-#define BIG_INFO_KEY 8192
-#define BIG_INFO_VALUE 8192
-
-#define MAX_QPATH 64   // max length of a quake game pathname
-#define MAX_OSPATH 256 // max length of a filesystem pathname
+inline constexpr int MAX_QPATH = 64;   // max length of a quake game pathname
+inline constexpr int MAX_OSPATH = 256; // max length of a filesystem pathname
 
 // rain - increased to 36 to match MAX_NETNAME, fixes #13 - UI stuff breaks
 // with very long names
-#define MAX_NAME_LENGTH 36 // max length of a client name
+inline constexpr int MAX_NAME_LENGTH = 36; // max length of a client name
 
-#define MAX_SAY_TEXT 265
-#define MAX_CHAT_TEXT MAX_SAY_TEXT - 64
+inline constexpr int MAX_SAY_TEXT = 265;
+inline constexpr int MAX_CHAT_TEXT = MAX_SAY_TEXT - 64;
 
-#define MAX_BINARY_MESSAGE 32768 // max length of binary message
+inline constexpr int MAX_BINARY_MESSAGE = 32768; // max length of binary message
+
+inline constexpr int MAX_VA_STRING = 32000;
 
 typedef enum {
   MESSAGE_EMPTY = 0,
@@ -301,16 +319,12 @@ typedef enum {
 // paramters for command buffer stuffing
 typedef enum {
   EXEC_NOW,    // don't return until completed, a VM should NEVER use this,
-               // because some commands might cause the VM to be
-               // unloaded...
+               // because some commands might cause the VM to be unloaded...
   EXEC_INSERT, // insert at current position, but don't run yet
   EXEC_APPEND  // add to end of the command buffer (normal case)
 } cbufExec_t;
 
-//
-// these aren't needed by any of the VMs.  put in another header?
-//
-#define MAX_MAP_AREA_BYTES 32 // bit vector of area visibility
+inline constexpr int MAX_MAP_AREA_BYTES = 32; // bit vector of area visibility
 
 // print levels from renderer (FIXME: set up for game / cgame?)
 typedef enum {
@@ -338,65 +352,39 @@ typedef enum {
 
 // font rendering values used by ui and cgame
 
-#define PROP_GAP_WIDTH 3
-#define PROP_SPACE_WIDTH 8
-#define PROP_HEIGHT 27
-#define PROP_SMALL_SIZE_SCALE 0.75
+inline constexpr int PROP_GAP_WIDTH = 3;
+inline constexpr int PROP_SPACE_WIDTH = 8;
+inline constexpr int PROP_HEIGHT = 27;
+inline constexpr float PROP_SMALL_SIZE_SCALE = 0.75f;
 
-#define BLINK_DIVISOR 200
-#define PULSE_DIVISOR 75
+// only used in bitwise checks and should stay int
+inline constexpr int BLINK_DIVISOR = 200;
+// floating point for higher pulse accuracy
+inline constexpr float PULSE_DIVISOR = 75.0f;
 
-#define UI_LEFT 0x00000000 // default
-#define UI_CENTER 0x00000001
-#define UI_RIGHT 0x00000002
-#define UI_FORMATMASK 0x00000007
-#define UI_SMALLFONT 0x00000010
-#define UI_BIGFONT 0x00000020 // default
-#define UI_GIANTFONT 0x00000040
-#define UI_DROPSHADOW 0x00000800
-#define UI_BLINK 0x00001000
-#define UI_INVERSE 0x00002000
-#define UI_PULSE 0x00004000
-// JOSEPH 10-24-99
-#define UI_MENULEFT 0x00008000
-#define UI_MENURIGHT 0x00010000
-#define UI_EXSMALLFONT 0x00020000
-#define UI_MENUFULL 0x00080000
-// END JOSEPH
+inline constexpr int UI_LEFT = 0x00000000; // default
+inline constexpr int UI_CENTER = 0x00000001;
+inline constexpr int UI_RIGHT = 0x00000002;
+inline constexpr int UI_FORMATMASK = 0x00000007;
+inline constexpr int UI_SMALLFONT = 0x00000010;
+inline constexpr int UI_BIGFONT = 0x00000020; // default
+inline constexpr int UI_GIANTFONT = 0x00000040;
+inline constexpr int UI_DROPSHADOW = 0x00000800;
+inline constexpr int UI_BLINK = 0x00001000;
+inline constexpr int UI_INVERSE = 0x00002000;
+inline constexpr int UI_PULSE = 0x00004000;
+inline constexpr int UI_MENULEFT = 0x00008000;
+inline constexpr int UI_MENURIGHT = 0x00010000;
+inline constexpr int UI_EXSMALLFONT = 0x00020000;
+inline constexpr int UI_MENUFULL = 0x00080000;
 
-#define UI_SMALLFONT75 0x00100000
+inline constexpr int UI_SMALLFONT75 = 0x00100000;
 
-#if defined(_DEBUG) && !defined(BSPC)
-  #define HUNK_DEBUG
-#endif
-
-typedef enum { h_high, h_low, h_dontcare } ha_pref;
-
-#ifdef HUNK_DEBUG
-  #define Hunk_Alloc(size, preference)                                         \
-    Hunk_AllocDebug(size, preference, #size, __FILE__, __LINE__)
-void *Hunk_AllocDebug(int size, ha_pref preference, char *label, char *file,
-                      int line);
-#else
-void *Hunk_Alloc(int size, ha_pref preference);
-#endif
-
-#ifdef __linux__
-// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=371
-// custom Snd_Memset implementation for glibc memset bug workaround
-void Snd_Memset(void *dest, const int val, const size_t count);
-#else
-  #define Snd_Memset Com_Memset
-#endif
-
-void Com_Memset(void *dest, const int val, const size_t count);
-void Com_Memcpy(void *dest, const void *src, const size_t count);
-
-#define CIN_system 1
-#define CIN_loop 2
-#define CIN_hold 4
-#define CIN_silent 8
-#define CIN_shader 16
+inline constexpr int CIN_system = 1;
+inline constexpr int CIN_loop = 2;
+inline constexpr int CIN_hold = 4;
+inline constexpr int CIN_silent = 8;
+inline constexpr int CIN_shader = 16;
 
 /*
 ==============================================================
@@ -420,23 +408,23 @@ typedef int fixed16_t;
   #define M_PI 3.14159265358979323846f // matches value in gcc v2 math.h
 #endif
 
-#define NUMVERTEXNORMALS 162
+inline constexpr int NUMVERTEXNORMALS = 162;
 extern vec3_t bytedirs[NUMVERTEXNORMALS];
 
-#define TINYCHAR_WIDTH (SMALLCHAR_WIDTH)
-#define TINYCHAR_HEIGHT (SMALLCHAR_HEIGHT)
+inline constexpr int MINICHAR_WIDTH = 8;
+inline constexpr int MINICHAR_HEIGHT = 12;
 
-#define MINICHAR_WIDTH 8
-#define MINICHAR_HEIGHT 12
+inline constexpr int SMALLCHAR_WIDTH = 8;
+inline constexpr int SMALLCHAR_HEIGHT = 16;
 
-#define SMALLCHAR_WIDTH 8
-#define SMALLCHAR_HEIGHT 16
+inline constexpr int TINYCHAR_WIDTH = SMALLCHAR_WIDTH;
+inline constexpr int TINYCHAR_HEIGHT = SMALLCHAR_HEIGHT;
 
-#define BIGCHAR_WIDTH 16
-#define BIGCHAR_HEIGHT 16
+inline constexpr int BIGCHAR_WIDTH = 16;
+inline constexpr int BIGCHAR_HEIGHT = 16;
 
-#define GIANTCHAR_WIDTH 32
-#define GIANTCHAR_HEIGHT 48
+inline constexpr int GIANTCHAR_WIDTH = 32;
+inline constexpr int GIANTCHAR_HEIGHT = 48;
 
 extern vec4_t colorBlack;
 extern vec4_t colorRed;
@@ -468,36 +456,38 @@ extern vec4_t clrBrownTextLt;
 extern vec4_t clrBrownTextLt2;
 extern vec4_t clrBrownLineFull;
 
-#define GAME_INIT_FRAMES 6
-#define FRAMETIME 100 // msec
+inline constexpr int GAME_INIT_FRAMES = 6;
+inline constexpr int FRAMETIME = 100; // msec
 
-#define Q_COLOR_ESCAPE '^'
+inline constexpr char Q_COLOR_ESCAPE = '^';
 #define Q_IsColorString(p)                                                     \
   (p && *(p) == Q_COLOR_ESCAPE && *((p) + 1) && *((p) + 1) != Q_COLOR_ESCAPE)
 
-#define COLOR_BLACK '0'
-#define COLOR_RED '1'
-#define COLOR_GREEN '2'
-#define COLOR_YELLOW '3'
-#define COLOR_BLUE '4'
-#define COLOR_CYAN '5'
-#define COLOR_MAGENTA '6'
-#define COLOR_WHITE '7'
-#define COLOR_ORANGE '8'
-#define COLOR_MDGREY '9'
-#define COLOR_LTGREY ':'
-// #define COLOR_LTGREY	';'
-#define COLOR_MDGREEN '<'
-#define COLOR_MDYELLOW '='
-#define COLOR_MDBLUE '>'
-#define COLOR_MDRED '?'
-#define COLOR_LTORANGE 'A'
-#define COLOR_MDCYAN 'B'
-#define COLOR_MDPURPLE 'C'
-#define COLOR_NULL '*'
+inline constexpr char COLOR_BLACK = '0';
+inline constexpr char COLOR_RED = '1';
+inline constexpr char COLOR_GREEN = '2';
+inline constexpr char COLOR_YELLOW = '3';
+inline constexpr char COLOR_BLUE = '4';
+inline constexpr char COLOR_CYAN = '5';
+inline constexpr char COLOR_MAGENTA = '6';
+inline constexpr char COLOR_WHITE = '7';
+inline constexpr char COLOR_ORANGE = '8';
+inline constexpr char COLOR_MDGREY = '9';
+inline constexpr char COLOR_LTGREY = ':';
+inline constexpr char COLOR_MDGREEN = '<';
+inline constexpr char COLOR_MDYELLOW = '=';
+inline constexpr char COLOR_MDBLUE = '>';
+inline constexpr char COLOR_MDRED = '?';
+inline constexpr char COLOR_LTORANGE = 'A';
+inline constexpr char COLOR_MDCYAN = 'B';
+inline constexpr char COLOR_MDPURPLE = 'C';
+inline constexpr char COLOR_NULL = '*';
 
-#define COLOR_BITS 31
+inline constexpr int COLOR_BITS = 31;
 #define ColorIndex(c) (((c) - '0') & COLOR_BITS)
+
+// these should stay as macros due to the way they are used in variadic print
+// funcs, otherwise we'd have to go and surround all the usages with quotes
 
 #define S_COLOR_BLACK "^0"
 #define S_COLOR_RED "^1"
@@ -510,7 +500,6 @@ extern vec4_t clrBrownLineFull;
 #define S_COLOR_ORANGE "^8"
 #define S_COLOR_MDGREY "^9"
 #define S_COLOR_LTGREY "^:"
-// #define S_COLOR_LTGREY		"^;"
 #define S_COLOR_MDGREEN "^<"
 #define S_COLOR_MDYELLOW "^="
 #define S_COLOR_MDBLUE "^>"
@@ -677,8 +666,8 @@ void AnglesToAxis(const vec3_t angles, vec3_t axis[3]);
 // TTimo: const vec_t ** would require explicit casts for ANSI C conformance
 // see unix/const-arg.c
 void AxisToAngles(/*const*/ vec3_t axis[3], vec3_t angles);
-float VectorDistance(vec3_t v1, vec3_t v2);
-float VectorDistanceSquared(vec3_t v1, vec3_t v2);
+float VectorDistance(const vec3_t v1, const vec3_t v2);
+float VectorDistanceSquared(const vec3_t v1, const vec3_t v2);
 
 void AxisClear(vec3_t axis[3]);
 void AxisCopy(vec3_t in[3], vec3_t out[3]);
@@ -751,15 +740,15 @@ qboolean COM_BitCheck(const int array[], int bitNum);
 void COM_BitSet(int array[], int bitNum);
 void COM_BitClear(int array[], int bitNum);
 
-#define MAX_TOKENLENGTH 1024
+inline constexpr int MAX_TOKENLENGTH = 1024;
 
 #ifndef TT_STRING
-  // token types
-  #define TT_STRING 1      // string
-  #define TT_LITERAL 2     // literal
-  #define TT_NUMBER 3      // number
-  #define TT_NAME 4        // name
-  #define TT_PUNCTUATION 5 // punctuation
+// token types
+inline constexpr int TT_STRING = 1;      // string
+inline constexpr int TT_LITERAL = 2;     // literal
+inline constexpr int TT_NUMBER = 3;      // number
+inline constexpr int TT_NAME = 4;        // name
+inline constexpr int TT_PUNCTUATION = 5; // punctuation
 #endif
 
 typedef struct pc_token_s {
@@ -810,8 +799,15 @@ char *Q_strlwr(char *s1);
 char *Q_strupr(char *s1);
 
 // buffer size safe library replacements
-void Q_strncpyz(char *dest, const char *src, int destsize);
-void Q_strcat(char *dest, int size, const char *src);
+#define Q_strncpyz(dest, src, destsize)                                        \
+  Q_strncpyz_fn(dest, src, destsize, __func__, SRC_FILENAME, __LINE__)
+void Q_strncpyz_fn(char *dest, const char *src, int destsize, const char *func,
+                   const char *file, int line);
+
+#define Q_strcat(dest, size, src)                                              \
+  Q_strcat_fn(dest, size, src, __func__, SRC_FILENAME, __LINE__)
+void Q_strcat_fn(char *dest, int size, const char *src, const char *func,
+                 const char *file, int line);
 
 // strlen that discounts Quake color sequences
 int Q_PrintStrlen(const char *string);
@@ -820,7 +816,10 @@ char *Q_CleanStr(char *string);
 // removes whitespaces and other bad directory characters
 char *Q_CleanDirName(char *dirname);
 // safe strlen up to N chars
-size_t Q_strnlen(const char *str, size_t maxlen);
+#define Q_strnlen(str, maxlen)                                                 \
+  Q_strnlen_fn(str, maxlen, __func__, SRC_FILENAME, __LINE__)
+size_t Q_strnlen_fn(const char *str, size_t maxlen, const char *func,
+                    const char *file, int line);
 
 // #define _vsnprintf use_Q_vsnprintf
 // #define vsnprintf use_Q_vsnprintf
@@ -878,8 +877,9 @@ void RemoveDuplicates(char *str);
 void SortString(char *src);
 
 // this is only here so the functions in q_shared.c and bg_*.c can link
-void QDECL Com_Error(int level, const char *error, ...);
+[[noreturn]] void QDECL Com_Error(int level, const char *error, ...);
 void QDECL Com_Printf(const char *msg, ...);
+void QDECL Com_LocalPrintf(const char *msg, ...);
 
 /*
 ==========================================================
@@ -892,37 +892,38 @@ default values.
 ==========================================================
 */
 
-#define CVAR_ARCHIVE                                                           \
-  1                       // set to cause it to be saved to vars.rc
-                          // used for system variables, not for player
-                          // specific configurations
-#define CVAR_USERINFO 2   // sent to server on connect or change
-#define CVAR_SERVERINFO 4 // sent in response to front end requests
-#define CVAR_SYSTEMINFO 8 // these cvars will be duplicated on all clients
-#define CVAR_INIT                                                              \
-  16 // don't allow change from console at all,
-     // but can be set from the command line
-#define CVAR_LATCH                                                             \
-  32                          // will only change when C code next does
-                              // a Cvar_Get(), so it can't be changed
-                              // without proper initialization.  modified
-                              // will be set, even though the value hasn't
-                              // changed yet
-#define CVAR_ROM 64           // display only, cannot be set by user at all
-#define CVAR_USER_CREATED 128 // created by a set command
-#define CVAR_TEMP                                                              \
-  256 // can be set even when cheats are disabled, but is not archived
-#define CVAR_CHEAT 512      // can not be changed if cheats are disabled
-#define CVAR_NORESTART 1024 // do not clear when a cvar_restart is issued
-#define CVAR_WOLFINFO                                                          \
-  2048 // DHM - NERVE :: Like userinfo, but for wolf multiplayer info
-
-#define CVAR_UNSAFE                                                            \
-  4096 // ydnar: unsafe system cvars (renderer, sound settings, anything
-       // that might cause a crash)
-#define CVAR_SERVERINFO_NOUPDATE                                               \
-  8192 // gordon: WONT automatically send this to clients, but server
-       // browsers will see it
+// saved to etconfig.cfg
+inline constexpr int CVAR_ARCHIVE = 1;
+// sent to server on connect or change
+inline constexpr int CVAR_USERINFO = 2;
+// sent in response to front end requests
+inline constexpr int CVAR_SERVERINFO = 4;
+// these cvars will be duplicated on all clients
+inline constexpr int CVAR_SYSTEMINFO = 8;
+// don't allow change from console at all, but can be set from the command line
+inline constexpr int CVAR_INIT = 16;
+// will only change when C code next does a Cvar_Get(),
+// so it can't be changed without proper initialization
+// modified will be set, even though the value hasn't changed yet
+inline constexpr int CVAR_LATCH = 32;
+// display only, cannot be set by user at all
+inline constexpr int CVAR_ROM = 64;
+// created by a set command
+inline constexpr int CVAR_USER_CREATED = 128;
+// can be set even when cheats are disabled, but is not archived
+inline constexpr int CVAR_TEMP = 256;
+// can not be changed if cheats are disabled
+inline constexpr int CVAR_CHEAT = 512;
+// do not clear when a cvar_restart is issued
+inline constexpr int CVAR_NORESTART = 1024;
+// DHM - NERVE :: Like userinfo, but for wolf multiplayer info
+inline constexpr int CVAR_WOLFINFO = 2048;
+// ydnar: unsafe system cvars
+// (renderer, sound settings, anything that might cause a crash)
+inline constexpr int CVAR_UNSAFE = 4096;
+// gordon: WON'T automatically send this to clients,
+// but server browsers will see it
+inline constexpr int CVAR_SERVERINFO_NOUPDATE = 8192;
 
 // nothing outside the Cvar_*() functions should modify these fields!
 typedef struct cvar_s {
@@ -939,7 +940,7 @@ typedef struct cvar_s {
   struct cvar_s *hashNext;
 } cvar_t;
 
-#define MAX_CVAR_VALUE_STRING 256
+inline constexpr int MAX_CVAR_VALUE_STRING = 256;
 
 typedef int cvarHandle_t;
 
@@ -965,11 +966,11 @@ COLLISION DETECTION
 
 // plane types are used to speed some tests
 // 0-2 are axial planes
-#define PLANE_X 0
-#define PLANE_Y 1
-#define PLANE_Z 2
-#define PLANE_NON_AXIAL 3
-#define PLANE_NON_PLANAR 4
+inline constexpr int PLANE_X = 0;
+inline constexpr int PLANE_Y = 1;
+inline constexpr int PLANE_Z = 2;
+inline constexpr int PLANE_NON_AXIAL = 3;
+inline constexpr int PLANE_NON_PLANAR = 4;
 
 /*
 =================
@@ -1032,14 +1033,14 @@ typedef struct {
 
 // in order from highest priority to lowest
 // if none of the catchers are active, bound key strings will be executed
-#define KEYCATCH_CONSOLE 0x0001
-#define KEYCATCH_UI 0x0002
-#define KEYCATCH_MESSAGE 0x0004
-#define KEYCATCH_CGAME 0x0008
+inline constexpr int KEYCATCH_CONSOLE = 0x0001;
+inline constexpr int KEYCATCH_UI = 0x0002;
+inline constexpr int KEYCATCH_MESSAGE = 0x0004;
+inline constexpr int KEYCATCH_CGAME = 0x0008;
 
 // sound channels
 // channel 0 never willingly overrides
-// other channels will allways override a playing sound on that channel
+// other channels will always override a playing sound on that channel
 typedef enum {
   CHAN_AUTO,
   CHAN_LOCAL, // menu sounds, etc
@@ -1049,8 +1050,7 @@ typedef enum {
   CHAN_BODY,
   CHAN_LOCAL_SOUND, // chat messages, etc
   CHAN_ANNOUNCER,   // announcer voices, etc
-  CHAN_VOICE_BG,    // xkan - background sound for voice (radio static,
-                    // etc.)
+  CHAN_VOICE_BG,    // xkan - background sound for voice (radio static, etc.)
 } soundChannel_t;
 
 /*
@@ -1060,76 +1060,82 @@ typedef enum {
 
 ========================================================================
 */
-#define ANIM_BITS 10
+inline constexpr int ANIM_BITS = 10;
 
 #define ANGLE2SHORT(x) ((int)((x) * 65536 / 360) & 65535)
 #define SHORT2ANGLE(x) ((x) * (360.0 / 65536))
 
-#define SNAPFLAG_RATE_DELAYED 1
-#define SNAPFLAG_NOT_ACTIVE 2 // snapshot used during connection and for zombies
-#define SNAPFLAG_SERVERCOUNT                                                   \
-  4 // toggled every map_restart so transitions can be detected
+inline constexpr int SNAPFLAG_RATE_DELAYED = 1;
+// snapshot used during connection and for zombies
+inline constexpr int SNAPFLAG_NOT_ACTIVE = 2;
+// toggled every map_restart so transitions can be detected
+inline constexpr int SNAPFLAG_SERVERCOUNT = 4;
 
 //
 // per-level limits
 //
-#define MAX_CLIENTS                                                            \
-  64 // JPW NERVE back to q3ta default was 128		// absolute
-     // limit
+// JPW NERVE back to q3ta default was 128
+// absolute limit
+inline constexpr int MAX_CLIENTS = 64;
 
-#define GENTITYNUM_BITS                                                        \
-  10 // JPW NERVE put q3ta default back for testing	// don't need to
-     // send any more
-#define MAX_GENTITIES (1 << GENTITYNUM_BITS)
+// JPW NERVE put q3ta default back for testing
+// don't need to send any more
+inline constexpr int GENTITYNUM_BITS = 10;
+inline constexpr int MAX_GENTITIES = 1 << GENTITYNUM_BITS;
 
-// entitynums are communicated with GENTITY_BITS, so any reserved
-// values thatare going to be communcated over the net need to
-// also be in this range
-#define ENTITYNUM_NONE (MAX_GENTITIES - 1)
-#define ENTITYNUM_WORLD (MAX_GENTITIES - 2)
-#define ENTITYNUM_MAX_NORMAL (MAX_GENTITIES - 2)
+// entitynums are communicated with GENTITYNUM_BITS,
+// so any reserved values that are going to be communicated
+// over the net need to also be in this range
+inline constexpr int ENTITYNUM_NONE = MAX_GENTITIES - 1;
+inline constexpr int ENTITYNUM_WORLD = MAX_GENTITIES - 2;
+inline constexpr int ENTITYNUM_MAX_NORMAL = MAX_GENTITIES - 2;
 
-#define MAX_MODELS                                                             \
-  256 // these are sent over the net as 8 bits (Gordon: upped to 9 bits,
-      // erm actually it was already at 9 bits, wtf? NEVAR TRUST
-      // GAMECODE COMMENTS, comments are evil :E, lets hope it doesnt
-      // horribly break anything....)
-#define MAX_SOUNDS 256 // so they cannot be blindly increased
-#define MAX_CS_SKINS 64
-#define MAX_CSSTRINGS 32
+// these are sent over the net as 8 bits (Gordon: upped to 9 bits, erm actually
+// it was already at 9 bits, wtf? NEVAR TRUST GAMECODE COMMENTS, comments are
+// evil :E, lets hope it doesn't horribly break anything....)
+inline constexpr int MAX_MODELS = 256;
+inline constexpr int MAX_SOUNDS = 256; // so they cannot be blindly increased
+inline constexpr int MAX_CS_SKINS = 64;
+inline constexpr int MAX_CSSTRINGS = 32;
 
-#define MAX_CS_SHADERS 32
-#define MAX_SERVER_TAGS 256
-#define MAX_TAG_FILES 64
+inline constexpr int MAX_CS_SHADERS = 32;
+inline constexpr int MAX_SERVER_TAGS = 256;
+inline constexpr int MAX_TAG_FILES = 64;
 
-#define MAX_MULTI_SPAWNTARGETS 16 // JPW NERVE
+// cm_local.h in engine
+inline constexpr int MAX_SUBMODELS = 512;
 
-#define MAX_CONFIGSTRINGS 1024
+inline constexpr int MAX_MULTI_SPAWNTARGETS = 16; // JPW NERVE
 
-#define MAX_DLIGHT_CONFIGSTRINGS 16
-#define MAX_SPLINE_CONFIGSTRINGS 8
+inline constexpr int MAX_CONFIGSTRINGS = 1024;
 
-#define PARTICLE_SNOW128 1
-#define PARTICLE_SNOW64 2
-#define PARTICLE_SNOW32 3
-#define PARTICLE_SNOW256 0
+inline constexpr size_t MAX_DLIGHT_STYLESTRING = 64;
+inline constexpr int MAX_DLIGHT_CONFIGSTRINGS = 16;
+inline constexpr int MAX_SPLINE_CONFIGSTRINGS = 8;
 
-#define PARTICLE_BUBBLE8 4
-#define PARTICLE_BUBBLE16 5
-#define PARTICLE_BUBBLE32 6
-#define PARTICLE_BUBBLE64 7
+inline constexpr int PARTICLE_SNOW128 = 1;
+inline constexpr int PARTICLE_SNOW64 = 2;
+inline constexpr int PARTICLE_SNOW32 = 3;
+inline constexpr int PARTICLE_SNOW256 = 0;
+
+inline constexpr int PARTICLE_BUBBLE8 = 4;
+inline constexpr int PARTICLE_BUBBLE16 = 5;
+inline constexpr int PARTICLE_BUBBLE32 = 6;
+inline constexpr int PARTICLE_BUBBLE64 = 7;
 
 // these are the only configstrings that the system reserves, all the
 // other ones are strictly for servergame to clientgame communication
-#define CS_SERVERINFO 0 // an info string with all the serverinfo cvars
-#define CS_SYSTEMINFO                                                          \
-  1 // an info string for server system to client system configuration
-    // (timescale, etc)
 
-#define RESERVED_CONFIGSTRINGS                                                 \
-  2 // game can't modify below this, only the system can
+// an info string with all the serverinfo cvars
+inline constexpr int CS_SERVERINFO = 0;
+// an info string for server system to client system configuration
+// (timescale, etc.)
+inline constexpr int CS_SYSTEMINFO = 1;
+// game can't modify below this, only the system can
+inline constexpr int RESERVED_CONFIGSTRINGS = 2;
 
-#define MAX_GAMESTATE_CHARS 16000
+inline constexpr int MAX_GAMESTATE_CHARS = 16000;
+
 typedef struct {
   int stringOffsets[MAX_CONFIGSTRINGS];
   char stringData[MAX_GAMESTATE_CHARS];
@@ -1137,7 +1143,7 @@ typedef struct {
 } gameState_t;
 
 // xkan, 1/10/2003 - adapted from original SP
-typedef enum {
+typedef enum : net_uint2_t {
   AISTATE_RELAXED,
   AISTATE_QUERY,
   AISTATE_ALERT,
@@ -1146,233 +1152,183 @@ typedef enum {
   MAX_AISTATES
 } aistateEnum_t;
 
-#define REF_FORCE_DLIGHT                                                       \
-  (1 << 31) // RF, passed in through overdraw parameter, force this
-            // dlight under all conditions
-#define REF_JUNIOR_DLIGHT                                                      \
-  (1 << 30) // (SA) this dlight does not light surfaces.  it only
-            // affects dynamic light grid
-#define REF_DIRECTED_DLIGHT                                                    \
-  (1 << 29) // ydnar: global directional light, origin should be
-            // interpreted as a normal vector
+// RF, passed in through overdraw parameter,
+// force this dlight under all conditions
+inline constexpr int REF_FORCE_DLIGHT = 1 << 31;
+// (SA) this dlight does not light surfaces, it only affects dynamic light grid
+inline constexpr int REF_JUNIOR_DLIGHT = 1 << 30;
+// ydnar: global directional light,
+// origin should be interpreted as a normal vector
+inline constexpr int REF_DIRECTED_DLIGHT = 1 << 29;
 
 // bit field limits
-#define MAX_STATS 16
-#define MAX_PERSISTANT 16
-#define MAX_POWERUPS 16
-#define MAX_WEAPONS 64 // (SA) and yet more!
+inline constexpr int MAX_STATS = 16;
+inline constexpr int MAX_PERSISTANT = 16;
+inline constexpr int MAX_POWERUPS = 16;
+inline constexpr int MAX_WEAPONS = 64; // (SA) and yet more!
 
-// Ridah, increased this
-// #define	MAX_PS_EVENTS			2
-// ACK: I'd really like to make this 4, but that seems to cause network problems
-#define MAX_EVENTS 4 // max events per frame before we drop events
-// #define	MAX_EVENTS				2	// max events
-//  per frame before we drop events
+inline constexpr int MAX_EVENTS =
+    4; // max events per frame before we drop events
 
-#define PS_PMOVEFRAMECOUNTBITS 6
+inline constexpr int PS_PMOVEFRAMECOUNTBITS = 6;
 
-// playerState_t is the information needed by both the client and server
-// to predict player motion and actions
-// nothing outside of pmove should modify these, or some degree of prediction
-// error will occur
-
-// you can't add anything to this without modifying the code in msg.c
-// (Gordon: unless it doesnt need transmitted over the network, in which case it
-// should prolly go in the new pmext struct anyway)
-
-// playerState_t is a full superset of entityState_t as it is used by players,
-// so if a playerState_t is transmitted, the entityState_t can be fully derived
-// from it.
-//
-// NOTE: all fields in here must be 32 bits (or those within sub-structures)
-
-// actual communicated field sizes (msg.c)
-// unless mentioned otherwise, everything is unsigned
-// floats might be short packed if they fit within range
-
-// commandTime              32
-// pm_type                  8
-// bobCycle                 8
-// pm_flags                 16
-// pm_time                  16 (signed)
-// origin[0-2]              32.f
-// velocity[0-2]            32.f
-// weaponTime               16 (signed)
-// weaponDelay              16 (signed)
-// grenadeTimeLeft          16 (signed)
-// gravity                  16
-// leanf                    32.f
-// speed                    16
-// delta_angles[0-2]        16
-// groundEntityNum          10 (GENTITYNUM_BITS)
-// legsTimer                16
-// legsAnim                 10 (ANIM_BITS)
-// torsoTimer               16
-// torsoAnim                10 (ANIM_BITS)
-// movementDir              8
-// eFlags                   24
-// eventSequence            8
-// events[0-3]              8
-// eventParms[0-3]          8
-// oldEventSequence         ??? (not in msg.c)
-// externalEvent            ??? (not in msg.c)
-// externalEventParm        ??? (not in msg.c)
-// externalEventTime        ??? (not in msg.c)
-// clientNum                8
-// weapon                   7
-// weaponstate              4
-// item                     ??? (not in msg.c)
-// viewangles[0-2]          32.f
-// viewheight               8 (signed)
-// damageEvent              8
-// damageYaw                8
-// damagePitch              8
-// damageCount              8
-// stats[0-15]              16
-// persistant[0-15]         16
-// powerups[0-15]           32
-// ammo[0-63]               16
-// ammoclip[0-63]           16
-// holdable[0-15]           16
-// holding                  ??? (not in msg.c)
-// weapons[0-1]             32
-// weapAnim                 10
-// mins[0-2]                32.f
-// maxs[0-2]                32.f
-// crouchMaxZ               32.f
-// crouchViewHeight         32.f
-// standViewHeight          32.f
-// deadViewHeight           32.f
-// runSpeedScale            32.f
-// sprintSpeedScale         32.f
-// crouchSpeedScale         32.f
-// friction                 32.f
-// viewlocked               8
-// viewlocked_entNum        16
-// nextWeapon               8
-// teamNum                  8
-// onFireStart              32
-// curWeapHeat              8
-// aimSpreadScale           8
-// serverCursorHint         8
-// serverCursorHintVal      8
-// classWeaponTime          32
-// identifyClient           8
-// identifyClientHealth     8
-// aiState[0-4]             2
+/*
+ * playerState_t is the information needed by both the client and server
+ * to predict player motion and actions. Nothing outside Pmove should
+ * modify these, or some degree of prediction error will occur.
+ *
+ * You can't add anything to this without modifying the code in msg.c
+ * (Gordon: unless it doesn't need transmitted over the network,
+ * in which case it should proxy go in the new text struct anyway)
+ *
+ * playerState_t is a full superset of entityState_t as it is used by players,
+ * so if a playerState_t is transmitted, the entityState_t can be fully derived
+ * from it.
+ *
+ * NOTE: all fields in here must be 32 bits (or those within sub-structures)
+ *
+ * The actual communicated field sizes are represented by the typedefs.
+ * If a field is not declared as a net_* type, it is likely not communicated
+ * (unless it's an enum or another typedef such as vec3_t).
+ *
+ * Fields that are NOT networked:
+ *
+ * oldEventSequence
+ * externalEvent
+ * externalEventParm
+ * externalEventTime
+ * item
+ * holding
+ * serverCursorHintTrace
+ * ping
+ * pmove_framecount
+ * entityEventSequence
+ * sprintExertTime
+ * jumpTime
+ * aimSpreadScaleFloat
+ * lastFireTime
+ * quickGrenTime
+ * leanStopDebounceTime
+ * weapHeat
+ */
 
 typedef struct playerState_s {
-  int commandTime; // cmd->serverTime of last executed command
-  int pm_type;
-  int bobCycle; // for view bobbing and footstep generation
-  int pm_flags; // ducked, jump_held, etc
-  int pm_time;
+  net_int32_t commandTime; // cmd->serverTime of last executed command
+  net_uint8_t pm_type;
+  net_uint8_t bobCycle;  // for view bobbing and footstep generation
+  net_uint16_t pm_flags; // ducked, jump_held, etc
+  net_int16_t pm_time;
 
   vec3_t origin;
   vec3_t velocity;
-  int weaponTime;
-  int weaponDelay;     // for weapons that don't fire immediately when
-                       // 'fire' is hit (grenades, venom, ...)
-  int grenadeTimeLeft; // for delayed grenade throwing.  this is set to
-                       // a #define for grenade lifetime when the attack
-                       // button goes down, then when attack is released
-                       // this is the amount of time left before the
-                       // grenade goes off (or if it gets to 0 while in
-                       // players hand, it explodes)
+  net_int16_t weaponTime;
 
-  int gravity;
-  float leanf; // amount of 'lean' when player is looking around corner
-               // //----(SA)	added
+  // for weapons that don't fire immediately when 'fire' is hit
+  // (grenades, panzer, satchel...)
+  net_int16_t weaponDelay;
 
-  int speed;
-  int delta_angles[3]; // add to command angles to get view direction
-                       // changed by spawns, rotating objects, and
-                       // teleporters
+  // for delayed grenade throwing. This is set to 5s when
+  // the attack button goes down, then when attack is released,
+  // this is the amount of time left before the grenade goes off
+  // (or if it gets to 0 while in players hand, it explodes)
+  net_int16_t grenadeTimeLeft;
 
-  int groundEntityNum; // ENTITYNUM_NONE = in air
+  net_uint16_t gravity;
+  net_float leanf; // amount of 'lean' when player is looking around corner
 
-  int legsTimer; // don't change low priority animations until this runs
-                 // out
-  int legsAnim;  // mask off ANIM_TOGGLEBIT
+  net_uint16_t speed;
 
-  int torsoTimer; // don't change low priority animations until this
-                  // runs out
-  int torsoAnim;  // mask off ANIM_TOGGLEBIT
+  // add to command angles to get view direction changed by spawns,
+  // rotating objects, and teleporters
+  net_uint16_t delta_angles[3];
 
-  int movementDir; // a number 0 to 7 that represents the reletive angle
-                   // of movement to the view angle (axial and
-                   // diagonals) when at rest, the value will remain
-                   // unchanged used to twist the legs during strafing
+  net_uint10_t groundEntityNum; // ENTITYNUM_NONE = in air
 
-  int eFlags; // copied to entityState_t->eFlags
+  // don't change low priority animations until this runs out
+  net_uint16_t legsTimer;
+  net_uint10_t legsAnim; // mask off ANIM_TOGGLEBIT
 
-  int eventSequence; // pmove generated events
-  int events[MAX_EVENTS];
-  int eventParms[MAX_EVENTS];
-  int oldEventSequence; // so we can see which events have been added
-                        // since we last converted to entityState_t
+  // don't change low priority animations until this runs out
+  net_uint16_t torsoTimer;
+  net_uint10_t torsoAnim; // mask off ANIM_TOGGLEBIT
+
+  // a number 0 to 7 that represents the reletive angle of movement
+  // to the view angle (axial and diagonals)
+  // when at rest, the value will remain unchanged
+  // used to twist the legs during strafing
+  net_uint8_t movementDir;
+
+  // copied to entityState_t->eFlags
+  net_uint24_t eFlags;
+
+  net_uint8_t eventSequence; // pmove generated events
+  net_uint8_t events[MAX_EVENTS];
+  net_uint8_t eventParms[MAX_EVENTS];
+
+  // so we can see which events have been added
+  // since we last converted to entityState_t
+  int oldEventSequence;
 
   int externalEvent; // events set on player from another source
   int externalEventParm;
   int externalEventTime;
 
-  int clientNum; // ranges from 0 to MAX_CLIENTS-1
+  net_uint8_t clientNum; // ranges from 0 to MAX_CLIENTS-1
 
   // weapon info
-  int weapon; // copied to entityState_t->weapon
-  int weaponstate;
+  net_uint7_t weapon; // copied to entityState_t->weapon
+  net_uint4_t weaponstate;
 
   // item info
   int item;
 
   vec3_t viewangles; // for fixed views
-  int viewheight;
+  net_int8_t viewheight;
 
   // damage feedback
-  int damageEvent; // when it changes, latch the other parms
-  int damageYaw;
-  int damagePitch;
-  int damageCount;
+  net_uint8_t damageEvent; // when it changes, latch the other parms
+  net_uint8_t damageYaw;
+  net_uint8_t damagePitch;
+  net_uint8_t damageCount;
 
-  int stats[MAX_STATS];
-  int persistant[MAX_PERSISTANT]; // stats that aren't cleared on death
-  int powerups[MAX_POWERUPS];     // level.time that the powerup runs out
-  int ammo[MAX_WEAPONS];          // total amount of ammo
-  int ammoclip[MAX_WEAPONS];      // ammo in clip
-  int holdable[16];
+  net_uint16_t stats[MAX_STATS];
+  net_uint16_t persistant[MAX_PERSISTANT]; // stats that aren't cleared on death
+  net_int32_t powerups[MAX_POWERUPS]; // level.time that the powerup runs out
+  net_uint16_t ammo[MAX_WEAPONS];     // total amount of ammo
+  net_uint16_t ammoclip[MAX_WEAPONS]; // ammo in clip
+  net_uint16_t holdable[16];
   int holding; // the current item in holdable[] that is selected (held)
-  int weapons[MAX_WEAPONS / (sizeof(int) * 8)]; // 64 bits for weapons held
+  // 64 bits for weapons held
+  net_int32_t weapons[MAX_WEAPONS / (sizeof(int) * 8)];
 
   // Ridah, allow for individual bounding boxes
   vec3_t mins, maxs;
-  float crouchMaxZ;
-  float crouchViewHeight, standViewHeight, deadViewHeight;
+  net_float crouchMaxZ;
+  net_float crouchViewHeight, standViewHeight, deadViewHeight;
   // variable movement speed
-  float runSpeedScale, sprintSpeedScale, crouchSpeedScale;
+  net_float runSpeedScale, sprintSpeedScale, crouchSpeedScale;
   // done.
 
   // Ridah, view locking for mg42
-  int viewlocked;
-  int viewlocked_entNum;
+  net_uint8_t viewlocked;
+  net_uint16_t viewlocked_entNum;
 
-  float friction;
+  net_float friction;
 
-  int nextWeapon;
-  int teamNum; // Arnout: doesn't seem to be communicated over the net
-
-  // Rafael
-  // int			gunfx;
+  net_uint8_t nextWeapon;
+  net_uint8_t teamNum;
 
   // RF, burning effect is required for view blending effect
-  int onFireStart;
+  net_int32_t onFireStart;
 
-  int serverCursorHint;    // what type of cursor hint the server is
-                           // dictating
-  int serverCursorHintVal; // a value (0-255) associated with the above
+  // what type of cursor hint the server is dictating
+  net_uint8_t serverCursorHint;
+  // a value (0-255) associated with the above
+  net_uint8_t serverCursorHintVal;
 
-  trace_t serverCursorHintTrace; // not communicated over net, but used
-                                 // to store the current server-side
-                                 // cursorhint trace
+  // not communicated over net, but used to store
+  // the current server-side cursorhint trace
+  trace_t serverCursorHintTrace;
 
   // ----------------------------------------------------------------------
   // So to use persistent variables here, which don't need to come from
@@ -1397,19 +1353,20 @@ typedef struct playerState_s {
   int jumpTime;        // used in MP to prevent jump accel
   // jpw
 
-  int weapAnim; // mask off ANIM_TOGGLEBIT
-                // //----(SA)	added		// Arnout : DOES get
-                // send over the network
+  net_uint10_t weapAnim; // mask off ANIM_TOGGLEBIT
 
   qboolean releasedFire;
 
-  float aimSpreadScaleFloat; // (SA) the server-side aimspreadscale that
-                             // lets it track finer changes but still
-                             // only transmit the 8bit int to the client
-  int aimSpreadScale;        // 0 - 255 increases with angular movement
-                             // // Arnout : DOES get send over the network
-  int lastFireTime;          // used by server to hold last firing frame briefly
-                             // when randomly releasing trigger (AI)
+  // (SA) the server-side aimspreadscale that lets it track finer changes,
+  // but still only transmit the 8bit int to the client
+  float aimSpreadScaleFloat;
+  // 0 - 255 increases with angular movement
+  // // Arnout : DOES get send over the network
+  net_uint8_t aimSpreadScale;
+
+  // used by server to hold last firing frame briefly
+  // when randomly releasing trigger (AI)
+  int lastFireTime;
 
   int quickGrenTime;
 
@@ -1422,17 +1379,16 @@ typedef struct playerState_s {
   // currently see how to optimize this to one server->client
   // transmission "weapstatus" value.
 
+  // some weapons can overheat, this tracks (server-side) how hot
+  // each weapon currently is.
   // ETJump: unused, we track this in pmext instead
   // this doesn't get communicated though, weapHeat is communicated
   // by storing currently held weapon's heat to curWeapHeat
-  int weapHeat[MAX_WEAPONS]; // some weapons can overheat.  this tracks
-                             // (server-side) how hot each weapon
-                             // currently is.
-  int curWeapHeat;           // value for the currently selected weapon (for
-                             // transmission to client)		// Arnout : DOES
-                             // get send over the network
-  int identifyClient;        // NERVE - SMF
-  int identifyClientHealth;
+  int weapHeat[MAX_WEAPONS];
+  // value for the currently selected weapon (for transmission to client)
+  net_uint8_t curWeapHeat;
+  net_uint8_t identifyClient; // NERVE - SMF
+  net_uint8_t identifyClientHealth;
 
   aistateEnum_t aiState; // xkan, 1/10/2003
 } playerState_t;
@@ -1443,44 +1399,37 @@ typedef struct playerState_s {
 // usercmd_t->button bits, many of which are generated by the client system,
 // so they aren't game/cgame only definitions
 //
-// Feen: I documented the actual command associated with the buttons that are of
-// use to us. 		BUTTON_ cmds are cmd.buttons 		WBUTTON_ cmds
-// are cmd.wbuttons 		All tested... All work...
-#define BUTTON_ATTACK 1 // +attack
-#define BUTTON_TALK 2   // displays talk balloon and disables actions
-#define BUTTON_USE_HOLDABLE                                                    \
-  4 // +useitem //Feen: this cmd and +salute are not currently used for
-    // anything...
-#define BUTTON_GESTURE                                                         \
-  8 // +salute  //Feen: normally used for bot taunts, nothing now....
-#define BUTTON_WALKING                                                         \
-  16 // walking can't just be infered from MOVE_RUN
-     // because a key pressed late in the frame will
-     // only generate a small move value for that frame
-     // walking will use different animations and
-     // won't generate footsteps
-//----(SA)	added
-#define BUTTON_SPRINT 32   // +sprint
-#define BUTTON_ACTIVATE 64 // +activate
-//----(SA)	end
 
-#define BUTTON_ANY 128 // any key whatsoever
+// +attack
+inline constexpr uint8_t BUTTON_ATTACK = 1;
+// displays talk balloon and disables actions
+inline constexpr uint8_t BUTTON_TALK = 2;
+// +useitem
+// //Feen: this cmd and +salute are not currently used for anything...
+inline constexpr uint8_t BUTTON_USE_HOLDABLE = 4;
+// +salute
+// //Feen: normally used for bot taunts, nothing now....
+inline constexpr uint8_t BUTTON_GESTURE = 8;
+// walking can't just be inferred from MOVE_RUN because a key pressed
+// late in the frame will only generate a small move value for that frame
+// walking will use different animations and won't generate footsteps
+inline constexpr uint8_t BUTTON_WALKING = 16;
+// +sprint
+inline constexpr uint8_t BUTTON_SPRINT = 32;
+// +activate
+inline constexpr uint8_t BUTTON_ACTIVATE = 64;
+// any key whatsoever
+inline constexpr uint8_t BUTTON_ANY = 128;
 
 //----(SA) wolf buttons
-#define WBUTTON_ATTACK2 1 // +attack2
-#define WBUTTON_ZOOM 2    // +zoom
-#define WBUTTON_RELOAD 8
-#define WBUTTON_LEANLEFT 16
-#define WBUTTON_LEANRIGHT 32
-#define WBUTTON_DROP 64 // JPW NERVE
-#define WBUTTON_PRONE                                                          \
-  128 // Arnout: wbutton now //Feen: How does this indicate prone? It's
-      // basically just a heartbeat....
+inline constexpr uint8_t WBUTTON_ATTACK2 = 1; // +attack2
+inline constexpr uint8_t WBUTTON_ZOOM = 2;    // +zoom
+inline constexpr uint8_t WBUTTON_RELOAD = 8;
+inline constexpr uint8_t WBUTTON_LEANLEFT = 16;
+inline constexpr uint8_t WBUTTON_LEANRIGHT = 32;
+inline constexpr uint8_t WBUTTON_DROP = 64; // Arnout: wbutton now
+inline constexpr uint8_t WBUTTON_PRONE = 128;
 //----(SA) end
-
-#define MOVE_RUN                                                               \
-  120 // if forwardmove or rightmove are >= MOVE_RUN,
-      // then BUTTON_WALKING should be set
 
 // Arnout: doubleTap buttons - DT_NUM can be max 8
 typedef enum {
@@ -1515,9 +1464,9 @@ typedef struct usercmd_s {
 //===================================================================
 
 // if entityState->solid == SOLID_BMODEL, modelindex is an inline model number
-#define SOLID_BMODEL 0xffffff
+inline constexpr int SOLID_BMODEL = 0xffffff;
 
-typedef enum {
+typedef enum : net_uint8_t {
   TR_STATIONARY,
   TR_INTERPOLATE, // non-parametric, but interpolate between snapshots
   TR_LINEAR,
@@ -1550,15 +1499,6 @@ typedef struct {
   vec3_t trDelta; // velocity, etc
                   //----(SA)	removed
 } trajectory_t;
-
-// entityState_t is the information conveyed from the server
-// in an update message about entities that the client will
-// need to render in some way
-// Different eTypes may use the information in different ways
-// The messages are delta compressed, so it doesn't really matter if
-// the structure size is fairly large
-//
-// NOTE: all fields in here must be 32 bits (or those within sub-structures)
 
 typedef enum {
   ET_GENERAL,
@@ -1663,75 +1603,115 @@ typedef enum {
 
   ET_TELEPORT_TRIGGER_CLIENT, // client side predicted teleport
 
+  ET_FAKEBRUSH, // func_fakebrush
+
   ET_EVENTS, // any of the EV_* events can be added freestanding
              // by setting eType to ET_EVENTS + eventNum
              // this avoids having to set eFlags and eventNum
 } entityType_t;
 
-// actual communicated field sizes (msg.c)
+static constexpr std::array<const char *, ET_EVENTS + 1> entityTypeNames = {
+    "ET_GENERAL",
+    "ET_PLAYER",
+    "ET_ITEM",
+    "ET_MISSILE",
+    "ET_MOVER",
+    "ET_BEAM",
+    "ET_PORTAL",
+    "ET_SPEAKER",
+    "ET_PUSH_TRIGGER",
+    "ET_TELEPORT_TRIGGER",
+    "ET_INVISIBLE",
+    "ET_CONCUSSIVE_TRIGGER",
+    "ET_OID_TRIGGER",
+    "ET_EXPLOSIVE_INDICATOR",
+    "ET_EXPLOSIVE",
+    "ET_EF_SPOTLIGHT",
+    "ET_ALARMBOX",
+    "ET_CORONA",
+    "ET_TRAP",
+    "ET_GAMEMODEL",
+    "ET_FOOTLOCKER",
+    "ET_FLAMEBARREL",
+    "ET_FP_PARTS",
+    "ET_FIRE_COLUMN",
+    "ET_FIRE_COLUMN_SMOKE",
+    "ET_RAMJET",
+    "ET_FLAMETHROWER_CHUNK",
+    "ET_EXPLO_PART",
+    "ET_PROP",
+    "ET_AI_EFFECT",
+    "ET_CAMERA",
+    "ET_MOVERSCALED",
+    "ET_CONSTRUCTIBLE_INDICATOR",
+    "ET_CONSTRUCTIBLE",
+    "ET_CONSTRUCTIBLE_MARKER",
+    "ET_BOMB",
+    "ET_WAYPOINT",
+    "ET_BEAM_2",
+    "ET_TANK_INDICATOR",
+    "ET_TANK_INDICATOR_DEAD",
+    "ET_BOTGOAL_INDICATOR",
+    "ET_CORPSE",
+    "ET_SMOKER",
+    "ET_TEMPHEAD",
+    "ET_MG42_BARREL",
+    "ET_TEMPLEGS",
+    "ET_TRIGGER_MULTIPLE",
+    "ET_TRIGGER_FLAGONLY",
+    "ET_TRIGGER_FLAGONLY_MULTIPLE",
+    "ET_GAMEMANAGER",
+    "ET_AAGUN",
+    "ET_CABINET_H",
+    "ET_CABINET_A",
+    "ET_HEALER",
+    "ET_SUPPLIER",
+    "ET_PORTAL_BLUE",
+    "ET_PORTAL_RED",
+    "ET_TOKEN_EASY",
+    "ET_TOKEN_MEDIUM",
+    "ET_TOKEN_HARD",
+    "ET_LANDMINE_HINT",
+    "ET_ATTRACTOR_HINT",
+    "ET_SNIPER_HINT",
+    "ET_LANDMINESPOT_HINT",
+    "ET_COMMANDMAP_MARKER",
+    "ET_WOLF_OBJECTIVE",
+    "ET_VELOCITY_PUSH_TRIGGER",
+    "ET_TELEPORT_TRIGGER_CLIENT",
+    "ET_FAKEBRUSH",
+    "ET_EVENTS",
+};
 
-// number                  10 (GENTITYNUM_BITS)
-// eType                   8
-// eFlags                  24
-// pos.trType              8
-// pos.trTime              32
-// pos.trDuration          32
-// pos.trBase[0-2]         32.f
-// pos.trDelta[0-2]        32.f
-// apos.trType             8
-// apos.trTime             32
-// apos.trDuration         32
-// apos.trBase[0-2]        32.f
-// apos.trDelta[0-2]       32.f
-// time                    32
-// time2                   32
-// origin[0-2]             32.f
-// origin2[0-2]            32.f
-// angles[0-2]             32.f
-// angles2[0-2]            32.f
-// otherEntityNum          10 (GENTITYNUM_BITS)
-// otherEntityNum2         10 (GENTITYNUM_BITS)
-// groundEntityNum         10 (GENTITYNUM_BITS)
-// constantLight           32
-// dl_intensity            32
-// loopSound               8
-// modelindex              9
-// modelindex2             9
-// clientNum               8
-// frame                   16
-// solid                   24
-// event                   10
-// eventParm               8
-// eventSequence           8
-// events[0-3]             8
-// eventParms[0-3]         8
-// powerups                16
-// weapon                  8
-// legsAnim                10 (ANIM_BITS)
-// torsoAnim               10 (ANIM_BITS)
-// density                 10
-// dmgFlags                32
-// onFireStart             32
-// onFireEnd               32
-// nextWeapon              8
-// teamNum                 8
-// effect1Time             32
-// effect2Time             32
-// effect3Time             32
-// aiState[0-4]            2
-// animMovetype            4
+static_assert(sizeof(entityTypeNames) / sizeof(entityTypeNames[0]) ==
+                  ET_EVENTS + 1,
+              "Entity types array size does not match enum list");
+
+/*
+ * entityState_t is the information conveyed from the server in an update
+ * message about entities that the client will need to render in some way.
+ * Different eTypes may use the information in different ways.
+ * The messages are delta compressed, so it doesn't really matter
+ * if the structure size is fairly large.
+ *
+ * Adding new fields to this and making them transmit over network
+ * would require changes in msg.c, so we cannot add anything new here.
+ * Use the fields sparingly when repurposing these.
+ *
+ * NOTE: all fields in here must be 32 bits (or those within sub-structures)
+ */
 
 typedef struct entityState_s {
-  int number; // entity index
-  int eType;  // changed from entityType_t to int to allow ET_EVENTS +
-              // eventNum
-  int eFlags;
+  net_uint8_t number; // entity index
+  // changed from entityType_t to int to allow ET_EVENTS + eventNum
+  net_uint8_t eType;
+  net_uint24_t eFlags;
 
   trajectory_t pos;  // for calculating position
   trajectory_t apos; // for calculating angles
 
-  int time;
-  int time2;
+  net_int32_t time;
+  net_int32_t time2;
 
   vec3_t origin;
   vec3_t origin2;
@@ -1739,61 +1719,59 @@ typedef struct entityState_s {
   vec3_t angles;
   vec3_t angles2;
 
-  int otherEntityNum; // shotgun sources, etc
-  int otherEntityNum2;
+  net_uint10_t otherEntityNum; // shotgun sources, etc
+  net_uint10_t otherEntityNum2;
 
-  int groundEntityNum; // -1 = in air
+  net_uint10_t groundEntityNum; // -1 = in air
 
-  int constantLight; // r + (g<<8) + (b<<16) + (intensity<<24)
-  int dl_intensity;  // used for coronas
-  int loopSound;     // constantly loop this sound
+  net_int32_t constantLight; // r + (g<<8) + (b<<16) + (intensity<<24)
+  net_int32_t dl_intensity;  // used for coronas
+  net_uint8_t loopSound;     // constantly loop this sound
 
-  int modelindex;
-  int modelindex2;
-  int clientNum; // 0 to (MAX_CLIENTS - 1), for players and corpses
-  int frame;
+  net_uint9_t modelindex;
+  net_uint9_t modelindex2;
+  net_uint8_t clientNum; // 0 to (MAX_CLIENTS - 1), for players and corpses
+  net_uint16_t frame;
 
-  int solid; // for client side prediction, trap_linkentity sets this
-             // properly
+  // for client side prediction
+  // trap_LinkEntity sets this properly if the entity has an inline model
+  net_uint24_t solid;
 
   // old style events, in for compatibility only
-  int event;
-  int eventParm;
+  net_uint8_t event;
+  net_uint8_t eventParm;
 
-  int eventSequence; // pmove generated events
-  int events[MAX_EVENTS];
-  int eventParms[MAX_EVENTS];
+  net_uint8_t eventSequence; // pmove generated events
+  net_uint8_t events[MAX_EVENTS];
+  net_uint8_t eventParms[MAX_EVENTS];
 
   // for players
-  int powerups;  // bit flags	// Arnout: used to store entState_t for
-                 // non-player entities (so we know to draw them
-                 // translucent clientsided)
-  int weapon;    // determines weapon and flash model, etc
-  int legsAnim;  // mask off ANIM_TOGGLEBIT
-  int torsoAnim; // mask off ANIM_TOGGLEBIT
-                 //	int		weapAnim;		// mask
-                 // off
-                 // ANIM_TOGGLEBIT	//----(SA) removed (weap anims
-                 // will be client-side only)
+  // bit flags
+  // Arnout: used to store entState_t for non-player entities
+  // (so we know to draw them translucent clientsided)
+  net_uint16_t powerups;
+  net_uint8_t weapon;     // determines weapon and flash model, etc
+  net_uint10_t legsAnim;  // mask off ANIM_TOGGLEBIT
+  net_uint10_t torsoAnim; // mask off ANIM_TOGGLEBIT
 
   // for particle effects, PlayerDensityFlags for players in entityState
-  int density;
+  net_uint10_t density;
 
-  int dmgFlags; // to pass along additional information for damage
-                // effects for players/ Also used for cursorhints for
-                // non-player entities
+  // to pass along additional information for damage effects for players
+  // Also used for cursorhints for non-player entities
+  net_int32_t dmgFlags;
 
   // Ridah
-  int onFireStart, onFireEnd;
+  net_int32_t onFireStart, onFireEnd;
 
-  int nextWeapon;
-  int teamNum;
+  net_uint8_t nextWeapon;
+  net_uint8_t teamNum;
 
-  int effect1Time, effect2Time, effect3Time;
+  net_int32_t effect1Time, effect2Time, effect3Time;
 
   aistateEnum_t aiState; // xkan, 1/10/2003
-  int animMovetype;      // clients can't derive movetype of other clients
-                         // for anim scripting system
+  // clients can't derive movetype of other clients for anim scripting system
+  net_uint4_t animMovetype;
 } entityState_t;
 
 typedef enum {
@@ -1813,11 +1791,12 @@ typedef enum {
 
 // font support
 
-#define GLYPH_START 0
-#define GLYPH_END 255
-#define GLYPH_CHARSTART 32
-#define GLYPH_CHAREND 127
-#define GLYPHS_PER_FONT GLYPH_END - GLYPH_START + 1
+inline constexpr int GLYPH_START = 0;
+inline constexpr int GLYPH_END = 255;
+inline constexpr int GLYPH_CHARSTART = 32;
+inline constexpr int GLYPH_CHAREND = 127;
+inline constexpr int GLYPHS_PER_FONT = GLYPH_END - GLYPH_START + 1;
+
 typedef struct {
   int height;      // number of scan lines
   int top;         // top of glyph in buffer
@@ -1858,9 +1837,9 @@ typedef struct qtime_s {
 } qtime_t;
 
 // server browser sources
-#define AS_LOCAL 0
-#define AS_GLOBAL 1 // NERVE - SMF - modified
-#define AS_FAVORITES 2
+inline constexpr int AS_LOCAL = 0;
+inline constexpr int AS_GLOBAL = 1; // NERVE - SMF - modified
+inline constexpr int AS_FAVORITES = 2;
 
 // cinematic states
 typedef enum {
@@ -1881,13 +1860,10 @@ typedef enum _flag_status {
   FLAG_DROPPED
 } flagStatus_t;
 
-#define MAX_GLOBAL_SERVERS 4096
-#define MAX_OTHER_SERVERS 128
-#define MAX_PINGREQUESTS 16
-#define MAX_SERVERSTATUSREQUESTS 16
-
-#define CDKEY_LEN 16
-#define CDCHKSUM_LEN 2
+inline constexpr int MAX_GLOBAL_SERVERS = 4096;
+inline constexpr int MAX_OTHER_SERVERS = 128;
+inline constexpr int MAX_PINGREQUESTS = 16;
+inline constexpr int MAX_SERVERSTATUSREQUESTS = 16;
 
 // NERVE - SMF - localization
 typedef enum {
@@ -1913,16 +1889,7 @@ typedef enum {
 
 #define SQR(a) ((a) * (a))
 
-constexpr int MAX_TIMERUN_CHECKPOINTS = 16;
-constexpr int TIMERUN_CHECKPOINT_NOT_SET = -1;
-
-/**
- * @def VM_CALL_END
- *
- * @brief This should be something like INT_MAX but that would need limits.h
- * everywhere so meh and negative values should be somewhat safe
- */
-#define VM_CALL_END -1337
-#define SystemCall(...) syscall(__VA_ARGS__, VM_CALL_END)
+inline constexpr int MAX_TIMERUN_CHECKPOINTS = 16;
+inline constexpr int TIMERUN_CHECKPOINT_NOT_SET = -1;
 
 #endif // __Q_SHARED_H

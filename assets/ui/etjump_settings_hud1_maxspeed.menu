@@ -15,6 +15,7 @@ menuDef {
     fullscreen 0
     rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
     style WINDOW_STYLE_FILLED
+    centered
 
     onOpen {
         conditionalscript uiCheckBackground 2
@@ -55,11 +56,11 @@ menuDef {
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "MAX SPEED")
     
         YESNO               (SETTINGS_ITEM_POS(1), "Draw max speed:", 0.2, SETTINGS_ITEM_H, "etj_drawMaxSpeed", "Draw max speed after previous load session\netj_drawMaxSpeed")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_maxSpeedX", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_maxSpeedX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "Max speed X:", 0.2, SETTINGS_ITEM_H, etj_maxSpeedX 320 0 640 10, "Sets X position of max speed\netj_maxSpeedX")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_maxSpeedY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_maxSpeedY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(3), "Max speed Y:", 0.2, SETTINGS_ITEM_H, etj_maxSpeedY 300 0 480 10, "Sets Y position of max speed\netj_maxSpeedY")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_maxSpeedDuration", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_maxSpeedDuration", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(4), "Max speed duration:", 0.2, SETTINGS_ITEM_H, etj_maxSpeedDuration 2000 0 15000 250, "How long in milliseconds to display max speed\netj_maxSpeedDuration")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)

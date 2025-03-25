@@ -5,7 +5,10 @@
  *
  */
 
+#include <unordered_map>
+
 #include "g_local.h"
+#include "etj_string_utilities.h"
 
 typedef struct {
   char oldShader[MAX_QPATH];
@@ -13,7 +16,7 @@ typedef struct {
   float timeOffset;
 } shaderRemap_t;
 
-#define MAX_SHADER_REMAPS 128
+inline constexpr int MAX_SHADER_REMAPS = 128;
 
 int remapCount = 0;
 shaderRemap_t remappedShaders[MAX_SHADER_REMAPS];
@@ -72,6 +75,18 @@ model / sound configstring indexes
 =========================================================================
 */
 
+static const std::unordered_map<int, std::pair<std::string, std::string>>
+    csStrings = {
+        {CS_MODELS, {"CS_MODELS", "MAX_MODELS"}},
+        {CS_SOUNDS, {"CS_SOUNDS", "MAX_SOUNDS"}},
+        {CS_SHADERS, {"CS_SHADERS", "MAX_CS_SHADERS"}},
+        {CS_SKINS, {"CS_SKINS", "MAX_CS_SKINS"}},
+        {CS_CHARACTERS, {"CS_CHARACTERS", "MAX_CHARACTERS"}},
+        {CS_DLIGHTS, {"CS_DLIGHTS", "MAX_DLIGHT_CONFIGSTRINGS"}},
+        {CS_TAGCONNECTS, {"CS_TAGCONNECTS", "MAX_TAGCONNECTS"}},
+        {CS_STRINGS, {"CS_STRINGS", "MAX_CS_STRINGS"}},
+};
+
 /*
 ================
 G_FindConfigstringIndex
@@ -102,7 +117,18 @@ int G_FindConfigstringIndex(const char *name, int start, int max,
   }
 
   if (i == max) {
-    G_Error("G_FindConfigstringIndex: overflow");
+    const auto it = csStrings.find(start);
+    std::string err;
+
+    if (it != csStrings.end()) {
+      err =
+          ETJump::stringFormat("%s: overflow on index %s (%s = %i)\n", __func__,
+                               it->second.first, it->second.second, max);
+    } else {
+      err = ETJump::stringFormat("%s: overflow on index %i\n", __func__, start);
+    }
+
+    G_Error("%s", err.c_str());
   }
 
   trap_SetConfigstring(start + i, name);
@@ -167,9 +193,8 @@ NULL will be returned if the end of the list is reached.
 
 =============
 */
-gentity_t *G_Find(gentity_t *from, int fieldofs, const char *match) {
-  char *s;
-  gentity_t *max = &g_entities[level.num_entities];
+gentity_t *G_Find(gentity_t *from, const size_t fieldofs, const char *match) {
+  const gentity_t *max = &g_entities[level.num_entities];
 
   if (!from) {
     from = g_entities;
@@ -181,16 +206,105 @@ gentity_t *G_Find(gentity_t *from, int fieldofs, const char *match) {
     if (!from->inuse) {
       continue;
     }
-    s = *(char **)((byte *)from + fieldofs);
+
+    const char *s =
+        *reinterpret_cast<char **>(reinterpret_cast<byte *>(from) + fieldofs);
+
     if (!s) {
       continue;
     }
+
     if (!Q_stricmp(s, match)) {
       return from;
     }
   }
 
-  return NULL;
+  return nullptr;
+}
+
+// like G_Find, but searches for an int
+gentity_t *G_FindInt(gentity_t *from, const size_t fieldofs, const int match) {
+  const gentity_t *max = &g_entities[level.num_entities];
+
+  if (!from) {
+    from = g_entities;
+  } else {
+    from++;
+  }
+
+  for (; from < max; from++) {
+    if (!from->inuse) {
+      continue;
+    }
+
+    const int i =
+        *reinterpret_cast<int *>(reinterpret_cast<byte *>(from) + fieldofs);
+
+    if (i == match) {
+      return from;
+    }
+  }
+
+  return nullptr;
+}
+
+// like G_Find, but searches for a float
+gentity_t *G_FindFloat(gentity_t *from, const size_t fieldofs,
+                       const float match) {
+  const gentity_t *max = &g_entities[level.num_entities];
+
+  if (!from) {
+    from = g_entities;
+  } else {
+    from++;
+  }
+
+  for (; from < max; from++) {
+    if (!from->inuse) {
+      continue;
+    }
+
+    const float f =
+        *reinterpret_cast<float *>(reinterpret_cast<byte *>(from) + fieldofs);
+
+    if (f == match) {
+      return from;
+    }
+  }
+
+  return nullptr;
+}
+
+// like G_Find, but searches for a vec3_t
+gentity_t *G_FindVec(gentity_t *from, const size_t fieldofs,
+                     const vec3_t match) {
+  const gentity_t *max = &g_entities[level.num_entities];
+
+  if (!from) {
+    from = g_entities;
+  } else {
+    from++;
+  }
+
+  for (; from < max; from++) {
+    if (!from->inuse) {
+      continue;
+    }
+
+    vec3_t v;
+    v[0] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) +
+                                      fieldofs + 0);
+    v[1] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) +
+                                      fieldofs + 4);
+    v[2] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) +
+                                      fieldofs + 8);
+
+    if (VectorCompare(v, match)) {
+      return from;
+    }
+  }
+
+  return nullptr;
 }
 
 /*
@@ -252,7 +366,7 @@ G_PickTarget
 Selects a random entity from among the targets
 =============
 */
-#define MAXCHOICES 32
+inline constexpr int MAXCHOICES = 32;
 
 gentity_t *G_PickTarget(char *targetname) {
   gentity_t *ent = NULL;
@@ -468,12 +582,13 @@ void G_SetMovedir(vec3_t angles, vec3_t movedir) {
 void G_InitGentity(gentity_t *e) {
   e->inuse = qtrue;
   e->classname = "noclass";
-  e->s.number = e - g_entities;
+  e->s.number = ClientNum(e);
   e->r.ownerNum = ENTITYNUM_NONE;
   e->aiInactive = 0xffffffff;
   e->nextthink = 0;
   memset(e->goalPriority, 0, sizeof(e->goalPriority));
-  e->free = NULL;
+  e->free = nullptr;
+  e->s.solid = 0;
 
   // RF, init scripting
   e->scriptStatus.scriptEventIndex = -1;
@@ -545,26 +660,6 @@ gentity_t *G_Spawn(void) {
 
   G_InitGentity(e);
   return e;
-}
-
-/*
-=================
-G_EntitiesFree
-=================
-*/
-qboolean G_EntitiesFree(void) {
-  int i;
-  gentity_t *e;
-
-  e = &g_entities[MAX_CLIENTS];
-  for (i = MAX_CLIENTS; i < level.num_entities; i++, e++) {
-    if (e->inuse) {
-      continue;
-    }
-    // slot available
-    return qtrue;
-  }
-  return qfalse;
 }
 
 /*

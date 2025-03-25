@@ -82,6 +82,7 @@ add_library(cgame MODULE
 	"etj_pmove_utils.cpp"
 	"etj_quick_follow_drawable.cpp"
 	"etj_rtv_drawable.cpp"
+	"etj_savepos.cpp"
 	"etj_snaphud.cpp"
 	"etj_speed_drawable.cpp"
 	"etj_spectatorinfo_drawable.cpp"
@@ -108,9 +109,12 @@ add_library(cgame MODULE
 	"../game/etj_entity_utilities_shared.cpp"
 	"../game/etj_file.cpp"
 	"../game/etj_filesystem.cpp"
+	"../game/etj_json_utilities.cpp"
+	"../game/etj_savepos_shared.cpp"
 	"../game/etj_string_utilities.cpp"
 	"../game/etj_time_utilities.cpp"
 	"../game/etj_timerun_shared.cpp"
+	"../game/etj_syscall_ext_shared.cpp"
 	"../ui/ui_shared.cpp"
 	${CGAME_HEADERS}
 )
@@ -123,10 +127,13 @@ set_target_properties(cgame PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_DIR_PATH}")
 set_target_platform_details(cgame)
 
-set_target_properties(cgame PROPERTIES
-	VS_DEBUGGER_COMMAND "$(ETROOT)\\ET.exe"
-	VS_DEBUGGER_COMMAND_ARGUMENTS "+set fs_basepath \"$(SolutionDir)\" +set fs_homepath . +set fs_game ${CMAKE_PROJECT_NAME} +set sv_pure 0"
-	VS_DEBUGGER_WORKING_DIRECTORY "$(ETROOT)")
+if (CMAKE_GENERATOR_NAME MATCHES "Visual Studio")
+	set_target_properties(cgame PROPERTIES
+			VS_DEBUGGER_COMMAND "${ET_PATH}\\${ET_EXE_NAME}"
+			VS_DEBUGGER_COMMAND_ARGUMENTS "+set fs_basepath . +set fs_homepath \"${ET_PATH}\" +set fs_game ${CMAKE_PROJECT_NAME}"
+			VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)"
+	)
+endif ()
 
 if(APPLE)
 	# These are just for generating the hardware id

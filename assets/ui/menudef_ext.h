@@ -49,9 +49,18 @@
 #define SETTINGS_EF_MAXCHARS 255
 #define SETTINGS_EF_MAXPAINTCHARS 32
 
+#define SETTINGS_COMBO_H 10
+
+// these truncate to an int, so we'll always get a correct count (we never want to round these up)
+// - 2 is to account for subwindow borders
+#define SETTINGS_COMBO_MAXITEMS(pos) ((SETTINGS_SUBW_Y + SETTINGS_SUBW_H - SETTINGS_COMBO_H - 2) - (SETTINGS_ITEM_Y + ((SETTINGS_ITEM_H + SETTINGS_ITEM_MARGIN) * (pos - 1)))) / SETTINGS_COMBO_H
+#define SETTINGS_COMBO_MAXITEMS_REVERSE(pos) (SETTINGS_SUBW_Y + SETTINGS_SUBW_H - MAIN_ELEMENT_MARGIN + SETTINGS_ITEM_MARGIN - ((SETTINGS_ITEM_MARGIN + SETTINGS_ITEM_H) * (pos + 1)) - SETTINGS_ITEM_Y) / SETTINGS_COMBO_H
+
 #define SETTINGS_ITEM_POS(pos) SETTINGS_ITEM_X, SETTINGS_ITEM_Y + ((SETTINGS_ITEM_H + SETTINGS_ITEM_MARGIN) * (pos - 1)), SETTINGS_ITEM_W, SETTINGS_ITEM_H
 #define SETTINGS_ITEM_POS_REVERSE(pos) SETTINGS_ITEM_X, SETTINGS_SUBW_Y + SETTINGS_SUBW_H - MAIN_ELEMENT_MARGIN + SETTINGS_ITEM_MARGIN - ((SETTINGS_ITEM_MARGIN + SETTINGS_ITEM_H) * (pos + 1)), SETTINGS_ITEM_W, SETTINGS_ITEM_H
 #define SETTINGS_EF_POS(pos) SETTINGS_ITEM_X, SETTINGS_ITEM_Y + ((SETTINGS_ITEM_H + SETTINGS_ITEM_MARGIN) * (pos - 1)), SETTINGS_ITEM_W, SETTINGS_EF_H, SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN
+#define SETTINGS_COMBO_POS(pos) SETTINGS_ITEM_X, SETTINGS_ITEM_Y + ((SETTINGS_ITEM_H + SETTINGS_ITEM_MARGIN) * (pos - 1)), SETTINGS_ITEM_W, SETTINGS_COMBO_H, SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN, SETTINGS_COMBO_MAXITEMS(pos), 0
+#define SETTINGS_COMBO_POS_REVERSE(pos) SETTINGS_ITEM_X, SETTINGS_SUBW_Y + SETTINGS_SUBW_H - MAIN_ELEMENT_MARGIN + SETTINGS_ITEM_MARGIN - ((SETTINGS_ITEM_MARGIN + SETTINGS_ITEM_H) * (pos + 1)), SETTINGS_ITEM_W, SETTINGS_COMBO_H, SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN, SETTINGS_COMBO_MAXITEMS_REVERSE(pos), 1
 
 // Bottom buttons
 #ifdef FUI
@@ -68,10 +77,23 @@
 
 #define LOWERBUTTON(pos, text, cmd) BUTTON(BTN_LOWER_X + ((BTN_LOWER_W + MAIN_ELEMENT_MARGIN) * (pos - 1)), BTN_LOWER_Y, BTN_LOWER_W, BTN_LOWER_H, text, 0.25, BTN_LOWER_TEXT_ALIGN, cmd)
 
+// color picker menu
+#define COLOR_PICKER_MENU "etjump_settings_popup_colorpicker"
+#define OPEN_COLOR_PICKER "openColorPicker" // magic string that opens the color picker
+
+#define COLOR_PICKER_H "colorPickerH"
+#define COLOR_PICKER_S "colorPickerS"
+#define COLOR_PICKER_V "colorPickerV"
+#define COLOR_PICKER_R "colorPickerR"
+#define COLOR_PICKER_G "colorPickerG"
+#define COLOR_PICKER_B "colorPickerB"
+#define COLOR_PICKER_A "colorPickerA"
+
 // Helper macros
-#define SLIDER_LABEL_X $evalfloat(SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN)
-#define COLOR_LIST cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }
+#define SLIDER_LABEL_X (SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN)
+#define COLOR_LIST cvarStrList { "Color picker..."; OPEN_COLOR_PICKER; "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }
 #define CHS_LIST cvarFloatList { "Off" 0 "Speed" 1 "Health" 2 "Ammo" 4 "Distance XY" 10 "Distance Z" 11 "Distance XYZ" 12 "Distance ViewXYZ" 13 "Distance XY Z XYZ" 14 "Distance XY Z ViewXYZ" 15 "Look XYZ" 16 "Speed X" 20 "Speed Y" 21 "Speed Z" 22 "Speed XY" 23 "Speed XYZ" 24 "Speed forward" 25 "Speed sideways" 26 "Speed forward sideways" 27 "Speed XY forward sideways" 28 "Pitch" 30 "Yaw" 31 "Roll" 32 "Position X" 33 "Position Y" 34 "Position Z" 35 "View position X" 36 "View position Y" 37 "View position Z" 38 "Pitch yaw" 40 "Player XYZ" 41 "Player XYZ pitch yaw" 42 "View position XYZ pitch yaw" 43 "Position XYZ" 44 "View position XYZ" 45 "Angles XYZ" 46 "Velocity XYZ" 47 "Jump XYZ" 50 "Plane Angle Z" 53 "Last Jump Speed" 55 }
+#define EXTRATRACE_LIST cvarFloatList { "OB Detector" 1 "Slick Detector" 2 "NJD Detector" 4 "CHS 10-11" 8 "CHS 12" 16 "CHS 13-15" 32 "CHS 16" 64 "CHS 53" 128 }
 
 // 'subwindow*' will greedily match 'subwindowtitle' so we need to explicitly set those colors to keep the subwindow titles intact
 #define BACKGROUND_OFF "setitemcolor window backcolor 0 0 0 0; setitemcolor subwindow* backcolor 0 0 0 0; setitemcolor subwindowtitle* backcolor .16 .2 .17 .8"

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
 #include "etj_utilities.h"
 #include "etj_save_system.h"
 #include "etj_map_statistics.h"
+#include "etj_timerun_v2.h"
 
 std::vector<int> Utilities::getSpectators(int clientNum) {
   std::vector<int> spectators;
@@ -54,42 +55,6 @@ std::vector<int> Utilities::getSpectators(int clientNum) {
   return spectators;
 }
 
-static void SelectCorrectWeapon(gclient_t *cl) {
-  auto primary = cl->sess.playerWeapon;
-  auto secondary = cl->sess.playerWeapon2;
-
-  // early out if our currently held weapon is allowed
-  // even though disallowed weapons are already removed, we'll still get to
-  // keep any if it's currently equipped, so we force a weapon swap later
-  if (!BG_WeaponDisallowedInTimeruns(cl->ps.weapon)) {
-    return;
-  }
-
-  // our currently held weapon was removed, so swap to a valid one
-  if (COM_BitCheck(cl->ps.weapons, primary) &&
-      BG_WeaponHasAmmo(&cl->ps, primary)) {
-    cl->ps.weapon = primary;
-  } else if (COM_BitCheck(cl->ps.weapons, secondary) &&
-             BG_WeaponHasAmmo(&cl->ps, secondary)) {
-    cl->ps.weapon = secondary;
-  } else {
-    cl->ps.weapon = WP_KNIFE;
-  }
-}
-
-static void RemovePlayerProjectiles(int clientNum) {
-  // Iterate entitylist and remove all projectiles
-  // that belong to the activator
-  for (int i = MAX_CLIENTS; i < level.num_entities; i++) {
-    auto ent = g_entities + i;
-    if (ent->s.eType == ET_MISSILE) {
-      if (ent->parent && ent->parent->s.number == clientNum) {
-        G_FreeEntity(ent);
-      }
-    }
-  }
-}
-
 void Utilities::startRun(int clientNum) {
   gentity_t *player = g_entities + clientNum;
 
@@ -101,14 +66,19 @@ void Utilities::startRun(int clientNum) {
     ETJump::saveSystem->clearTimerunSaves(player);
   }
 
-  // If we are debugging, just exit here
-  if (g_debugTimeruns.integer > 0) {
+  // if cheats are enabled, just exit here
+  if (g_cheats.integer) {
     return;
   }
 
-  RemovePlayerWeapons(clientNum);
-  RemovePlayerProjectiles(clientNum);
-  SelectCorrectWeapon(player->client);
+  ETJump::TimerunV2::removeDisallowedWeapons(player);
+  ETJump::TimerunV2::removePlayerProjectiles(player);
+
+  // force swap if the current weapon isn't allowed in timeruns
+  if (BG_WeaponDisallowedInTimeruns(player->client->ps.weapon)) {
+    selectValidWeapon(player);
+  }
+
   ClearPortals(player);
 }
 
@@ -119,47 +89,16 @@ void Utilities::stopRun(int clientNum) {
   ETJump::UpdateClientConfigString(*player);
 }
 
-namespace UtilityHelperFunctions {
-static void FS_ReplaceSeparators(char *path) {
-  char *s;
-
-  for (s = path; *s; s++) {
-    if (*s == '/' || *s == '\\') {
-      *s = PATH_SEP;
-    }
+void Utilities::selectValidWeapon(const gentity_t *ent) {
+  // primary > secondary > knife
+  if (BG_WeaponHasAmmo(&ent->client->ps, ent->client->sess.playerWeapon)) {
+    ent->client->ps.weapon = ent->client->sess.playerWeapon;
+  } else if (BG_WeaponHasAmmo(&ent->client->ps,
+                              ent->client->sess.playerWeapon2)) {
+    ent->client->ps.weapon = ent->client->sess.playerWeapon2;
+  } else {
+    ent->client->ps.weapon = WP_KNIFE;
   }
-}
-
-static char *BuildOSPath(const char *file) {
-  char base[MAX_CVAR_VALUE_STRING] = "\0";
-  char temp[MAX_OSPATH] = "\0";
-  char game[MAX_CVAR_VALUE_STRING] = "\0";
-  static char ospath[2][MAX_OSPATH] = {"\0", "\0"};
-  static int toggle;
-
-  toggle ^= 1; // flip-flop to allow two returns without clash
-
-  trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
-  trap_Cvar_VariableStringBuffer("fs_homepath", base, sizeof(base));
-
-  Com_sprintf(temp, sizeof(temp), "/%s/%s", game, file);
-  FS_ReplaceSeparators(temp);
-  Com_sprintf(ospath[toggle], sizeof(ospath[0]), "%s%s", base, temp);
-
-  return ospath[toggle];
-}
-} // namespace UtilityHelperFunctions
-
-void Utilities::RemovePlayerWeapons(int clientNum) {
-  auto *cl = (g_entities + clientNum)->client;
-
-  for (int i = 0; i < WP_NUM_WEAPONS; i++) {
-    if (BG_WeaponDisallowedInTimeruns(i)) {
-      COM_BitClear(cl->ps.weapons, i);
-    }
-  }
-
-  cl->ps.grenadeTimeLeft = 0;
 }
 
 bool Utilities::inNoNoclipArea(gentity_t *ent) {
@@ -211,11 +150,6 @@ std::string Utilities::timestampToString(int timestamp, const char *format,
   return std::string(buf);
 }
 
-std::string Utilities::getPath(const std::string &name) {
-  auto osPath = UtilityHelperFunctions::BuildOSPath(name.c_str());
-  return osPath ? osPath : std::string();
-}
-
 bool Utilities::anyonePlaying() {
   for (auto i = 0; i < level.numConnectedClients; i++) {
     auto clientNum = level.sortedClients[i];
@@ -232,40 +166,6 @@ void Utilities::Log(const std::string &message) {
   G_LogPrintf(message.c_str());
 }
 
-std::string Utilities::ReadFile(const std::string &filepath) {
-  fileHandle_t f;
-  auto len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_READ);
-  if (len == -1) {
-    throw std::runtime_error("Could not open file for reading: " + filepath);
-  }
-
-  std::unique_ptr<char[]> buf(new char[len + 1]);
-  trap_FS_Read(buf.get(), len, f);
-  trap_FS_FCloseFile(f);
-  buf[len] = 0;
-  return std::string(buf.get());
-}
-
-void Utilities::WriteFile(const std::string &filepath,
-                          const std::string &content) {
-  fileHandle_t f;
-  auto len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_WRITE);
-  if (len == -1) {
-    throw std::runtime_error("Could not open file for writing: " + filepath);
-  }
-
-  auto bytesWritten = trap_FS_Write(content.c_str(), content.length(), f);
-  if (bytesWritten == 0) {
-    trap_FS_FCloseFile(f);
-    throw std::runtime_error("Wrote 0 bytes to " + filepath);
-  }
-  trap_FS_FCloseFile(f);
-}
-
-void Utilities::Logln(const std::string &message) {
-  G_LogPrintf("%s\n", message.c_str());
-}
-
 void Utilities::Console(const std::string &message) {
   G_Printf(message.c_str());
 }
@@ -274,7 +174,7 @@ void Utilities::Error(const std::string &error) { G_Error(error.c_str()); }
 
 std::vector<std::string> Utilities::getMaps() {
   std::vector<std::string> maps;
-  MapStatistics mapStats;
+  ETJump::MapStatistics mapStats;
 
   int i = 0;
   int numDirs = 0;
@@ -294,7 +194,7 @@ std::vector<std::string> Utilities::getMaps() {
     Q_strncpyz(buf, dirPtr, sizeof(buf));
     Q_strlwr(buf);
 
-    if (MapStatistics::isBlockedMap(buf)) {
+    if (ETJump::MapStatistics::isBlockedMap(buf)) {
       continue;
     }
 

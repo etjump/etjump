@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 #include "etj_crosshair_drawer.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
-#include "../game/etj_numeric_utilities.h"
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 Crosshair::Crosshair() {
@@ -55,12 +55,12 @@ void Crosshair::parseColors() {
 }
 
 void Crosshair::adjustSize() {
-  const float scaleX = Numeric::clamp(etj_crosshairScaleX.value, -5, 5);
-  const float scaleY = Numeric::clamp(etj_crosshairScaleY.value, -5, 5);
-  crosshair.w = cg_crosshairSize.value * scaleX;
-  crosshair.h = cg_crosshairSize.value * scaleY;
+  const auto size =
+      CvarValueParser::parse<CvarValue::Size>(cg_crosshairSize, -256, 256);
+  crosshair.w = size.x;
+  crosshair.h = size.y;
   crosshair.f = 0.0f;
-  crosshair.t = Numeric::clamp(etj_crosshairThickness.value, 0.0f, 5.0f);
+  crosshair.t = std::clamp(etj_crosshairThickness.value, 0.0f, 5.0f);
 
   if (crosshair.current < 10) {
     // using abs makes sure negative scale will flip correctly
@@ -100,9 +100,8 @@ bool Crosshair::beforeRender() {
   }
 
   // alpha adjustment here to make it work with crosshair health too
-  crosshair.color[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
-  crosshair.colorAlt[3] =
-      Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
+  crosshair.color[3] = std::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
+  crosshair.colorAlt[3] = std::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
 
   return true;
 }
@@ -199,12 +198,14 @@ bool Crosshair::canSkipDraw() {
     return true;
   }
 
-  if (cg.zoomedBinoc && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR) {
-    return true;
-  }
+  if (!cg.editingSpeakers) {
+    if (cg.zoomedBinoc && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR) {
+      return true;
+    }
 
-  if (BG_IsScopedWeapon(weapnumForClient())) {
-    return true;
+    if (BG_IsScopedWeapon(weapnumForClient())) {
+      return true;
+    }
   }
 
   if (cg.predictedPlayerState.weapon == WP_MORTAR_SET &&

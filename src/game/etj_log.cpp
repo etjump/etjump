@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,8 +39,8 @@ void Log::println(const std::string &level, const std::string &message) const {
 void Log::processMessages() {
   std::lock_guard<std::mutex> lock(Log::_messagesLock);
   for (const auto &msg : _messages) {
-    Printer::LogPrintln(msg);
+    Printer::logLn(msg);
   }
   _messages.clear();
 }
-}
+} // namespace ETJump

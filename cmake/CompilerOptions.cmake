@@ -33,18 +33,19 @@ function(create_compiler_opts target)
 			-O3					# max optimization
 			-ffast-math>		# fast floating point math
 		$<$<CONFIG:Debug>:
-			-Og					# supress optimizations
+			-O0					# suppress optimizations
 			-g3					# generate debug info
 			-ggdb3>)			# generate gdb friendly debug info
 
 	# Clang flags
-	set (CLANG_LINK_FLAGS
-		$<IF:$<PLATFORM_ID:Darwin>,-Wl$<COMMA>-undefined$<COMMA>error,-Wl$<COMMA>--no-undefined>
-		-flto								# link time optimizations
-		-O3									# max optimization
-		$<IF:$<PLATFORM_ID:Darwin>,,-s>)	# strip symbols (if not on macOS)
+	set(CLANG_LINK_FLAGS
+		$<$<NOT:$<PLATFORM_ID:Darwin>>:-Wl,--no-undefined>
+		$<$<CONFIG:Release>:
+			-flto								# link time optimizations
+			-O3									# max optimization
+			$<IF:$<PLATFORM_ID:Darwin>,,-s>>)	# strip symbols
 
-	set (CLANG_CXX_FLAGS
+	set(CLANG_CXX_FLAGS
 		-pipe
 		-fPIC
 		-fvisibility=hidden
@@ -57,16 +58,14 @@ function(create_compiler_opts target)
 			-flto				# link time optimizations
 			-ffast-math>		# fast floating point math
 		$<$<CONFIG:Debug>:
-			-Og					# supress optimizations
+			-O0					# suppress optimizations
 			-g3					# generate debug info
 			-ggdb3>)			# generate gdb friendly debug info
 
 	# MSVC flags
-	# link time optimizations disabled for now, possibly due to MSVC 2019-specific bug
-	
-	# set(MSVC_LINK_FLAGS 
-	# 	$<$<CONFIG:Release>:
-	# 		/LTCG>) # perform link time optimizations
+	set(MSVC_LINK_FLAGS 
+		$<$<CONFIG:Release>:
+			/LTCG>) # perform link time optimizations
 
 	set(MSVC_CXX_FLAGS
 		/wd4068                # ignore GCC pragmas
@@ -78,10 +77,11 @@ function(create_compiler_opts target)
 		$<$<CONFIG:Release>:
 			/MT                # use static runtime
 			/O2                # max optimizations
-			# /GL                # full exe/dll optimization
+			/GL                # full exe/dll optimization
 			/Gy                # generate useful information for optimizer
 			/Ob2               # let compiler inline freely
 			/fp:fast>          # fast floating point math
+			/FC                # full path of source code file in diagnostics (/Zi in debug implies this)
 		$<$<CONFIG:Debug>:
 			/Ob0               # no inlining
 			/Od                # no optimizations
@@ -91,9 +91,13 @@ function(create_compiler_opts target)
 
 	add_library(${target} INTERFACE)
 
+	# we use this to print out relative path to a source code file for __FILE__ macro replacement
+	string(LENGTH "${CMAKE_SOURCE_DIR}/" SOURCE_PATH_SIZE)
+	add_definitions("-DSOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}")
+
 	if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 		target_compile_options(${target} INTERFACE ${MSVC_CXX_FLAGS})
-		target_link_options(${target} INTERFACE ${MSVC_LINK_LAGS})
+		target_link_options(${target} INTERFACE ${MSVC_LINK_FLAGS})
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		target_compile_options(${target} INTERFACE ${CLANG_CXX_FLAGS})
 		target_link_options(${target} INTERFACE ${CLANG_LINK_FLAGS})
@@ -113,5 +117,5 @@ function(create_compiler_opts target)
 			_SCL_SECURE_NO_WARNINGS>
 		${arg_DEFINE})
 
-	target_compile_features(${target} INTERFACE cxx_std_14)
+	target_compile_features(${target} INTERFACE cxx_std_17)
 endfunction()

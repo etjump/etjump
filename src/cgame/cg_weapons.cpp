@@ -2325,43 +2325,46 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
   gun.renderfx = parent->renderfx;
   ETJump_SetEntityRGBA(&gun, 1.0, 1.0, 1.0, 1.0);
 
-  if (ps) {
-    team_t team = (team_t)ps->persistant[PERS_TEAM];
+  team_t team = ps ? static_cast<team_t>(ps->persistant[PERS_TEAM])
+                   : cgs.clientinfo[cent->currentState.clientNum].team;
+  const modelViewType_t modelViewType = ps ? W_FP_MODEL : W_TP_MODEL;
 
-    if ((weaponNum != WP_SATCHEL) &&
+  if (ps) {
+    if (weaponNum != WP_SATCHEL &&
         (cent->currentState.powerups & (1 << PW_OPS_DISGUISED))) {
       team = team == TEAM_AXIS ? TEAM_ALLIES : TEAM_AXIS;
     }
 
-    gun.hModel = weapon->weaponModel[W_FP_MODEL].model;
-    if ((team == TEAM_AXIS) &&
-        weapon->weaponModel[W_FP_MODEL].skin[TEAM_AXIS]) {
-      gun.customSkin = weapon->weaponModel[W_FP_MODEL].skin[TEAM_AXIS];
-    } else if ((team == TEAM_ALLIES) &&
-               weapon->weaponModel[W_FP_MODEL].skin[TEAM_ALLIES]) {
-      gun.customSkin = weapon->weaponModel[W_FP_MODEL].skin[TEAM_ALLIES];
+    gun.hModel = weapon->weaponModel[modelViewType].model;
+
+    if (team == TEAM_AXIS &&
+        weapon->weaponModel[modelViewType].skin[TEAM_AXIS]) {
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[TEAM_AXIS];
+    } else if (team == TEAM_ALLIES &&
+               weapon->weaponModel[modelViewType].skin[TEAM_ALLIES]) {
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[TEAM_ALLIES];
     } else {
       // if not loaded it's 0 so doesn't do any harm
-      gun.customSkin = weapon->weaponModel[W_FP_MODEL].skin[0];
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[0];
     }
   } else {
-    team_t team = cgs.clientinfo[cent->currentState.clientNum].team;
 
-    if ((weaponNum != WP_SATCHEL) &&
-        cent->currentState.powerups & (1 << PW_OPS_DISGUISED)) {
+    if (weaponNum != WP_SATCHEL &&
+        (cent->currentState.powerups & (1 << PW_OPS_DISGUISED))) {
       team = team == TEAM_AXIS ? TEAM_ALLIES : TEAM_AXIS;
     }
 
-    gun.hModel = weapon->weaponModel[W_TP_MODEL].model;
-    if ((team == TEAM_AXIS) &&
-        weapon->weaponModel[W_TP_MODEL].skin[TEAM_AXIS]) {
-      gun.customSkin = weapon->weaponModel[W_FP_MODEL].skin[TEAM_AXIS];
-    } else if ((team == TEAM_ALLIES) &&
-               weapon->weaponModel[W_TP_MODEL].skin[TEAM_ALLIES]) {
-      gun.customSkin = weapon->weaponModel[W_TP_MODEL].skin[TEAM_ALLIES];
+    gun.hModel = weapon->weaponModel[modelViewType].model;
+
+    if (team == TEAM_AXIS &&
+        weapon->weaponModel[modelViewType].skin[TEAM_AXIS]) {
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[TEAM_AXIS];
+    } else if (team == TEAM_ALLIES &&
+               weapon->weaponModel[modelViewType].skin[TEAM_ALLIES]) {
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[TEAM_ALLIES];
     } else {
       // if not loaded it's 0 so doesn't do any harm
-      gun.customSkin = weapon->weaponModel[W_TP_MODEL].skin[0];
+      gun.customSkin = weapon->weaponModel[modelViewType].skin[0];
     }
 
     ETJump_SetEntityAutoTransparency(&gun);
@@ -2788,7 +2791,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
     // continuous flash
   } else {
     // continuous smoke after firing
-#define BARREL_SMOKE_TIME 1000
+    static constexpr int BARREL_SMOKE_TIME = 1000;
 
     if (ps || cg.renderingThirdPerson || !isPlayer) {
       if (weaponNum == WP_STEN || weaponNum == WP_MOBILE_MG42 ||
@@ -3134,18 +3137,6 @@ WEAPON SELECTION
 
 ==============================================================================
 */
-
-#define WP_ICON_X 38      // new sizes per MK
-#define WP_ICON_X_WIDE 72 // new sizes per MK
-#define WP_ICON_Y 38
-#define WP_ICON_SPACE_Y 10
-#define WP_DRAW_X 640 - WP_ICON_X - 4 // 4 is 'selected' border width
-#define WP_DRAW_X_WIDE 640 - WP_ICON_X_WIDE - 4
-#define WP_DRAW_Y 4
-
-// secondary fire icons
-#define WP_ICON_SEC_X 18 // new sizes per MK
-#define WP_ICON_SEC_Y 18
 
 /*
 ==============
@@ -5436,6 +5427,8 @@ void CG_WaterRipple(qhandle_t shader, vec3_t loc, vec3_t dir, int size,
   le->color[3] = 1.0;
 }
 
+inline constexpr int MAX_IMPACT_SOUNDS = 5;
+
 /*
 =================
 CG_MissileHitWall
@@ -5588,7 +5581,6 @@ void CG_MissileHitWall(int weapon, int clientNum, vec3_t origin, vec3_t dir,
           mark = cgs.media.bulletMarkShader; // default
           radius = 1.0f + 0.5f * static_cast<float>(rand() % 2);
 
-#define MAX_IMPACT_SOUNDS 5
           if (surfFlags & SURF_METAL || surfFlags & SURF_ROOF) {
             sfx = cgs.media.sfx_bullet_metalhit[rand() % MAX_IMPACT_SOUNDS];
             mark = cgs.media.bulletMarkShaderMetal;
@@ -6017,20 +6009,6 @@ void CG_MissileHitPlayer(centity_t *cent, int weapon, vec3_t origin, vec3_t dir,
 /*
 ============================================================================
 
-VENOM GUN TRACING
-
-============================================================================
-*/
-
-//----(SA)	all changes to venom below should be mine
-#define DEFAULT_VENOM_COUNT 10
-// #define DEFAULT_VENOM_SPREAD 20
-// #define DEFAULT_VENOM_SPREAD 400
-#define DEFAULT_VENOM_SPREAD 700
-
-/*
-============================================================================
-
 BULLETS
 
 ============================================================================
@@ -6384,20 +6362,16 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
                int fleshEntityNum, int otherEntNum2, float waterfraction,
                int seed) {
   trace_t trace, trace2;
-  int sourceContentType, destContentType;
   vec3_t dir;
   vec3_t start{};
-  vec3_t trend; // JPW
-  vec4_t projection;
   static int lastBloodSpat;
-  centity_t *cent;
 
   // shouldn't ever happen
   if (sourceEntityNum < 0 || sourceEntityNum >= MAX_GENTITIES) {
     return;
   }
 
-  cent = &cg_entities[fleshEntityNum];
+  centity_t *cent = &cg_entities[fleshEntityNum];
 
   // Hideme check to prevent tracers & impact sounds
   // FIXME: currently this works for players only
@@ -6415,7 +6389,6 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
   if (cgs.antilag && otherEntNum2 == cg.snap->ps.clientNum &&
       cg_entities[otherEntNum2].currentState.eFlags & EF_MG42_ACTIVE) {
     vec3_t muzzle, forward, right, up;
-    float r, u;
     trace_t tr;
 
     AngleVectors(cg.predictedPlayerState.viewangles, forward, right, up);
@@ -6426,8 +6399,8 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
       VectorMA(muzzle, 16, up, muzzle);
     }
 
-    r = Q_crandom(&seed) * MG42_SPREAD_MP;
-    u = Q_crandom(&seed) * MG42_SPREAD_MP;
+    const float r = Q_crandom(&seed) * MG42_SPREAD_MP;
+    const float u = Q_crandom(&seed) * MG42_SPREAD_MP;
 
     VectorMA(muzzle, 8192, forward, end);
     VectorMA(end, r, right, end);
@@ -6443,22 +6416,20 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
   // do trail effects
   if (cg_tracerChance.value > 0) {
     if (CG_CalcMuzzlePoint(sourceEntityNum, start)) {
-      sourceContentType = CG_PointContents(start, 0);
-      destContentType = CG_PointContents(end, 0);
+      const int sourceContentType = CG_PointContents(start, 0);
+      const int destContentType = CG_PointContents(end, 0);
 
       // do a complete bubble trail if necessary
-      if ((sourceContentType == destContentType) &&
-          (sourceContentType & CONTENTS_WATER)) {
+      if (sourceContentType == destContentType &&
+          sourceContentType & CONTENTS_WATER) {
         CG_BubbleTrail(start, end, .5, 8);
-      } else if ((sourceContentType &
-                  CONTENTS_WATER)) // bubble trail from water into air
-      {
+      } else if ((sourceContentType & CONTENTS_WATER)) {
+        // bubble trail from water into air
         trap_CM_BoxTrace(&trace, end, start, nullptr, nullptr, 0,
                          CONTENTS_WATER);
         CG_BubbleTrail(start, trace.endpos, .5, 8);
-      } else if ((destContentType &
-                  CONTENTS_WATER)) // bubble trail from air into water
-      {
+      } else if (destContentType & CONTENTS_WATER) {
+        // bubble trail from air into water
         // only add bubbles if effect is close to viewer
         if (Distance(cg.snap->ps.origin, end) < 1024) {
           trap_CM_BoxTrace(&trace, start, end, nullptr, nullptr, 0,
@@ -6471,8 +6442,7 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
       if (flesh && random() < cg_tracerChance.value) {
         // draw a tracer
         CG_Tracer(start, end, 0);
-      } else // (not flesh)
-      {
+      } else {
         if (otherEntNum2 >= 0 && otherEntNum2 != ENTITYNUM_NONE) {
           CG_SpawnTracer(otherEntNum2, start, end);
         } else {
@@ -6557,8 +6527,8 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
     } else {
       // JPW NERVE changed from,origin, to this
       trap_S_StartSound(
-          cg_entities[fleshEntityNum].currentState.origin, ENTITYNUM_WORLD,
-          CHAN_BODY, cgs.media.sfx_bullet_stonehit[rand() % MAX_IMPACT_SOUNDS]);
+          cg_entities[fleshEntityNum].lerpOrigin, ENTITYNUM_WORLD, CHAN_BODY,
+          cgs.media.sfx_bullet_stonehit[rand() % MAX_IMPACT_SOUNDS]);
     }
 
     // if we haven't dropped a blood spat in a while, check if
@@ -6568,6 +6538,8 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
       vec4_t color;
 
       if (CG_CalcMuzzlePoint(sourceEntityNum, start)) {
+        vec4_t projection;
+        vec3_t trend;
         VectorSubtract(end, start, dir);
         VectorNormalize(dir);
         VectorMA(end, 128, dir, trend);
@@ -6604,26 +6576,13 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
       }
     }
 
-  } else // (not flesh)
-  {
+  } else { // (not flesh)
     // Gordon: all bullet weapons have the same fx,
     // and this stops pvs issues causing grenade explosions
-    int fromweap = WP_MP40; // cg_entities[sourceEntityNum].currentState.weapon;
-
-    if (!fromweap ||
-        cg_entities[sourceEntityNum].currentState.eFlags & EF_MG42_ACTIVE ||
-        cg_entities[sourceEntityNum].currentState.eFlags &
-            EF_MOUNTEDTANK) // mounted
-    {
-      fromweap = WP_MP40;
-    }
+    constexpr int fromweap = WP_MP40;
 
     if (CG_CalcMuzzlePoint(sourceEntityNum, start) ||
         cg.snap->ps.persistant[PERS_HWEAPON_USE]) {
-
-      ETJump::bulletTrace(&trace, start, end, MASK_SHOT);
-      ETJump::bulletTrace(&trace2, start, end, (MASK_SHOT | MASK_WATER));
-
       if (waterfraction != 0) {
         vec3_t dist;
         vec3_t end2;
@@ -6631,15 +6590,26 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         VectorSubtract(end, start, dist);
         VectorMA(start, waterfraction, dist, end2);
 
+        ETJump::bulletTrace(&trace2, start, end, MASK_SHOT | MASK_WATER);
+
         trap_S_StartSound(end, -1, CHAN_AUTO,
                           cgs.media.sfx_bullet_waterhit[rand() % 5]);
 
         CG_MissileHitWall(fromweap, 2, end2, tv(0, 0, 1), 0);
-        CG_MissileHitWall(fromweap, 1, end, trace2.plane.normal, 0);
+
+        // for reasons beyond my understanding this trace sometimes fails
+        // and does not actually hit anything, if this happens,
+        // don't try to create a particle if the trace results aren't valid
+        if (trace2.fraction != 1.0f) {
+          CG_MissileHitWall(fromweap, 1, end, trace2.plane.normal, 0);
+        }
       } else {
         VectorSubtract(end, start, dir);
         VectorNormalizeFast(dir);
         VectorMA(end, 4, dir, end);
+
+        ETJump::bulletTrace(&trace, start, end, MASK_SHOT);
+        ETJump::bulletTrace(&trace2, start, end, MASK_SHOT | MASK_WATER);
 
         if (trace.fraction != trace2.fraction) {
           trap_S_StartSound(end, -1, CHAN_AUTO,

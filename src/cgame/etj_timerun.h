@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +52,9 @@ public:
     PlayerTimerunInformation() {
       previousRecordCheckpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
       checkpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
-    };
+      checkpointIndicesHit.fill(false);
+    }
+
     int startTime{};
     int completionTime{};
     std::string runName;
@@ -64,8 +66,8 @@ public:
     bool runHasCheckpoints = false;
     int numCheckpointsHit{};
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
-    int nextFreeCheckpointIdx{};
     int lastCheckpointTimestamp{};
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
   };
 
   explicit Timerun(int clientNum,

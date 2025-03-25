@@ -71,6 +71,10 @@
 #define FEEDER_SERVERSTATUS 		0x0d	// server status
 #define FEEDER_FINDPLAYER			0x0e	// find player
 #define FEEDER_CINEMATICS			0x0f	// cinematics
+#define FEEDER_CUSTOMVOTES			0x10	// ETJump: custom vote lists
+#define FEEDER_CUSTOMVOTES_MAPS_ONSERVER	0x11	// ETJump: maps available on server from customvote list
+#define FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE	0x12	// ETJump: maps not available on server from customvote list
+#define FEEDER_CHANGELOG			0x13	// ETJump: changelog
 #define FEEDER_PROFILES				0x1c	// Arnout: profiles
 #define FEEDER_GLINFO				0x1d	// Arnout: glinfo
 
@@ -287,13 +291,21 @@
 // -NERVE - SMF
 
 // Arnout: Enemy Territory
-#define UI_CAMPAIGNDESCRIPTION		262
+#define UI_MAPDESCRIPTION		262
 #define UI_GAMETYPEDESCRIPTION		280
 
 // Gordon: Mission briefing
 #define UI_MB_MAP					300
 #define UI_MB_TITLE					301
 #define UI_MB_OBJECTIVES			302
+
+// ETJump: color picker
+#define UI_COLOR_PICKER 303
+#define UI_COLOR_PICKER_PREVIEW_OLD 304
+#define UI_COLOR_PICKER_PREVIEW_NEW 305
+
+#define UI_MAPNAME 306
+#define UI_LEVELSHOT_PREVIEW 307
 
 #define VOICECHAT_GETFLAG			"getflag"				// command someone to get the flag
 #define VOICECHAT_OFFENSE			"offense"				// command someone to go on offense
@@ -394,6 +406,9 @@
 #define CV_SVF_RANDOMMAP		4
 #define CV_SVF_RTV			8
 #define CV_SVF_AUTORTV			16
+// there's no actual cvar associated with this flag, but we turn this off
+// if there are no custom votes defined on the server
+#define CV_SVF_CUSTOMVOTE		32
 
 // referee level
 #define RL_NONE					0

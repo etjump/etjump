@@ -2,15 +2,17 @@
 // these are processed at snapshot transition time, so there will definately
 // be a valid snapshot this frame
 
+#include <vector>
+#include <ctime>
+#include <chrono>
+
 #include "cg_local.h"
 #include "etj_init.h"
-#include <vector>
 #include "etj_client_commands_handler.h"
-#include "../game/etj_numeric_utilities.h"
-#include "etj_cvar_shadow.h"
 #include "etj_client_rtv_handler.h"
 
-#define SCOREPARSE_COUNT 9
+#include "../game/etj_string_utilities.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 void CG_LimboMenu_f();
 
@@ -70,8 +72,8 @@ CG_ParseTeamInfo
 
 =================
 */
-#define NUMARGS 5
 static void CG_ParseTeamInfo(void) {
+  static constexpr int NUMARGS = 5;
   int i;
   int client;
   int numSortedTeamPlayers;
@@ -102,7 +104,7 @@ void CG_ParseServerinfo(void) {
 
   info = CG_ConfigString(CS_SERVERINFO);
   cg_gameType.integer = cgs.gametype =
-      (gametype_t)Q_atoi(Info_ValueForKey(info, "g_gametype"));
+      Q_atoi(Info_ValueForKey(info, "g_gametype"));
   cg_antilag.integer = cgs.antilag =
       Q_atoi(Info_ValueForKey(info, "g_antilag"));
   if (!cgs.localServer) {
@@ -724,19 +726,26 @@ static void CG_ConfigStringModified(void) {
   }
 }
 
+constexpr int REPLAY_MSG = 1 << 0;
+constexpr int SERVER_MSG = 1 << 1;
+
 /*
 =======================
 CG_AddToTeamChat
 
 =======================
 */
-static void CG_AddToTeamChat(const char *str, int clientnum, bool replayMsg) {
+static void CG_AddToTeamChat(const char *str, int clientnum, int msgType) {
   int len;
   char *p, *ls;
   int lastcolor;
-  int chatHeight =
-      Numeric::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
-  int chatWidth = Numeric::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
+  const int chatHeight =
+      std::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
+  const int chatWidth =
+      std::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
+  const team_t team = ((msgType & REPLAY_MSG || msgType & SERVER_MSG)
+                           ? TEAM_SPECTATOR
+                           : cgs.clientinfo[clientnum].team);
 
   if (chatHeight <= 0 || cg_teamChatTime.integer <= 0) {
     // team chat disabled, dump into normal chat
@@ -762,8 +771,7 @@ static void CG_AddToTeamChat(const char *str, int clientnum, bool replayMsg) {
       *p = 0;
 
       cgs.teamChatMsgTimes[cgs.teamChatPos % chatHeight] = cg.time;
-      cgs.teamChatMsgTeams[cgs.teamChatPos % chatHeight] =
-          cgs.clientinfo[clientnum].team;
+      cgs.teamChatMsgTeams[cgs.teamChatPos % chatHeight] = team;
 
       cgs.teamChatPos++;
       p = cgs.teamChatMsgs[cgs.teamChatPos % chatHeight];
@@ -788,9 +796,7 @@ static void CG_AddToTeamChat(const char *str, int clientnum, bool replayMsg) {
   }
   *p = 0;
 
-  // chat replay should have no flag
-  cgs.teamChatMsgTeams[cgs.teamChatPos % chatHeight] =
-      replayMsg ? TEAM_SPECTATOR : cgs.clientinfo[clientnum].team;
+  cgs.teamChatMsgTeams[cgs.teamChatPos % chatHeight] = team;
 
   cgs.teamChatMsgTimes[cgs.teamChatPos % chatHeight] = cg.time;
   cgs.teamChatPos++;
@@ -939,6 +945,7 @@ static void CG_MapRestart(void) {
   memset(&cg.pmext, 0, sizeof(cg.pmext));
 
   cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
+  cg.pmext.autoSprint = etj_autoSprint.integer;
 
   numSplinePaths = 0;
   numPathCorners = 0;
@@ -1023,19 +1030,14 @@ static void CG_MapRestart(void) {
 }
 // NERVE - SMF
 
-#define MAX_VOICEFILES 8
+inline constexpr int MAX_VOICEFILES = 8;
 
-// TAT - 10/28/2002 we've got some really big VO files now
-#define MAX_VOICEFILESIZE 32768
-#define MAX_VOICECHATS 272
-// TAT - NOTE: If we're worried about space - do we really need 96 possible
-// sounds for any one chat?
-//			I think this is used to allow multiple sound clips for
-// one command, so do we need 96 available selection sounds?
-#define MAX_VOICESOUNDS 32
+inline constexpr int MAX_VOICEFILESIZE = 32768;
+inline constexpr int MAX_VOICECHATS = 272;
+inline constexpr int MAX_VOICESOUNDS = 32;
 
-#define MAX_CHATSIZE 64
-#define MAX_HEADMODELS 64
+inline constexpr int MAX_CHATSIZE = 64;
+inline constexpr int MAX_HEADMODELS = 64;
 
 typedef struct voiceChat_s {
   char id[64];
@@ -1315,8 +1317,6 @@ voiceChatList_t *CG_VoiceChatListForClient(int clientNum) {
   }
 }
 
-#define MAX_VOICECHATBUFFER 32
-
 typedef struct bufferedVoiceChat_s {
   int clientNum;
   sfxHandle_t snd;
@@ -1327,6 +1327,7 @@ typedef struct bufferedVoiceChat_s {
   vec3_t origin; // NERVE - SMF
 } bufferedVoiceChat_t;
 
+inline constexpr int MAX_VOICECHATBUFFER = 32;
 bufferedVoiceChat_t voiceChatBuffer[MAX_VOICECHATBUFFER];
 
 /*
@@ -1373,7 +1374,7 @@ void CG_PlayVoiceChat(bufferedVoiceChat_t *vchat) {
     }
   }
   if (!vchat->voiceOnly && !cg_noVoiceText.integer) {
-    CG_AddToTeamChat(vchat->message, vchat->clientNum, false);
+    CG_AddToTeamChat(vchat->message, vchat->clientNum, 0);
     CG_Printf(va("[skipnotify]%s\n", vchat->message)); // JPW NERVE
   }
   voiceChatBuffer[cg.voiceChatBufferOut].snd = 0;
@@ -1423,7 +1424,6 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color,
   sfxHandle_t snd;
   qhandle_t sprite;
   bufferedVoiceChat_t vchat;
-  const char *loc = " "; // NERVE - SMF
   const char *msgColor = "^z";
   const char *msgTime = "";
   qtime_t t;
@@ -1449,14 +1449,6 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color,
       VectorCopy(origin, vchat.origin); // NERVE - SMF
       Q_strncpyz(vchat.cmd, vsay->id, sizeof(vchat.cmd));
 
-      if (mode != SAY_ALL) {
-        // NERVE - SMF - get location
-        loc = BG_GetLocationString(origin);
-        if (!loc || !*loc) {
-          loc = " ";
-        }
-      }
-
       if (vsay->custom[0] != '\0') {
         chat = vsay->custom;
       }
@@ -1474,13 +1466,13 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color,
       }
 
       if (mode == SAY_TEAM) {
-        Com_sprintf(vchat.message, sizeof(vchat.message),
-                    "%s(%s^7)^3(%s): %c%c%s", msgTime, ci->name, loc,
-                    Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
+        Com_sprintf(vchat.message, sizeof(vchat.message), "%s(%s^7)^3: %c%c%s",
+                    msgTime, ci->name, Q_COLOR_ESCAPE, color,
+                    CG_TranslateString(chat));
       } else if (mode == SAY_BUDDY) {
-        Com_sprintf(vchat.message, sizeof(vchat.message),
-                    "%s<%s^7>^3<%s>: %c%c%s", msgTime, ci->name, loc,
-                    Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
+        Com_sprintf(vchat.message, sizeof(vchat.message), "%s<%s^7>^3: %c%c%s",
+                    msgTime, ci->name, Q_COLOR_ESCAPE, color,
+                    CG_TranslateString(chat));
       } else {
         Com_sprintf(vchat.message, sizeof(vchat.message), "%s%s^3: %c%c%s",
                     msgTime, ci->name, Q_COLOR_ESCAPE, color,
@@ -2140,66 +2132,92 @@ void CG_dumpStats(void) {
 }
 // -OSP
 
-/*
-=================
-CG_ServerCommand
+namespace ETJump {
+static const char *addChatReplayModifications(const char *text) {
+  static char msg[MAX_SAY_TEXT + 32];
+  memset(msg, 0, sizeof(msg));
 
-The string has been tokenized and can be retrieved with
-Cmd_Argc() / Cmd_Argv()
-=================
-*/
+  const int diffTime = Q_atoi(CG_Argv(5));
 
-void CG_ForceTapOut_f(void);
-
-/**
- * @param text The unmodified text (excl. encoding/decoding)
- * @param clientNum The user who sent the message
- * @param replayMsg Is this a chat replay message?
- */
-const char *CG_AddChatModifications(char *text, int clientNum, bool replayMsg) {
-  // don't perform chat modifications to chat replay messages
-  if (replayMsg) {
-    return text;
+  // don't prefix the replay notification message
+  if (diffTime != -1) {
+    Q_strcat(msg, sizeof(msg), "^g[REPLAY] ");
   }
 
-  static char message[MAX_SAY_TEXT + 32] = "\0";
-  const char *msgColor = "^z";
-  qtime_t t;
+  // no further modifications if timestamps are disabled,
+  // or if this is the notify message
+  if (!etj_drawMessageTime.integer || diffTime == -1) {
+    Q_strcat(msg, sizeof(msg), text);
+    return msg;
+  }
 
+  if (diffTime < 60) {
+    Q_strcat(msg, sizeof(msg), stringFormat("^z[%is ago] ", diffTime).c_str());
+  } else if (diffTime < 60 * 60) {
+    const int min = diffTime / 60;
+    Q_strcat(msg, sizeof(msg), stringFormat("^z[%im ago] ", min).c_str());
+  } else {
+    // up to 12h
+    if (diffTime >= 60 * 60 * 12) {
+      Q_strcat(msg, sizeof(msg), "^z[12h+ ago] ");
+    } else {
+      const int hours = diffTime / 3600;
+      Q_strcat(msg, sizeof(msg), stringFormat("^z[%ih ago] ", hours).c_str());
+    }
+  }
+
+  Q_strcat(msg, sizeof(msg), text);
+  return msg;
+}
+
+static const char *addChatModifications(char *text, const int clientNum,
+                                        const bool serverSay) {
+  static char message[MAX_SAY_TEXT + 32];
   memset(message, 0, sizeof(message));
-  trap_RealTime(&t);
-  if (etj_highlight.integer && cg.clientNum != clientNum) {
-    if (strstr(text + strlen(cgs.clientinfo[clientNum].name),
-               cgs.clientinfo[cg.clientNum].name) != NULL) {
+
+  if (etj_highlight.integer && (serverSay || cg.clientNum != clientNum) &&
+      strstr(text + strlen(cgs.clientinfo[clientNum].name),
+             cgs.clientinfo[cg.clientNum].name) != nullptr) {
+    if (etj_highlight.integer &
+        static_cast<int>(ChatHighlightFlags::HIGHLIGHT_BEEPER)) {
       Q_strcat(message, sizeof(message), etj_highlightText.string);
       Q_strcat(message, sizeof(message), "^7");
 
       trap_S_StartLocalSound(
           trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
     }
+
+    if (etj_highlight.integer &
+        static_cast<int>(ChatHighlightFlags::HIGHLIGHT_FLASH)) {
+      SyscallExt::trap_SysFlashWindowETLegacy(
+          SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
+    }
   }
 
   if (etj_drawMessageTime.integer) {
-    if (cg.clientNum == clientNum) {
-      msgColor = "^g";
-    }
+    const char *msgColor =
+        cg.clientNum == clientNum && !serverSay ? "^g" : "^z";
+
+    time_t t = std::time(&t);
+    const tm *lt = std::localtime(&t);
+
     if (etj_drawMessageTime.integer == 2) {
-      Q_strcat(
-          message, sizeof(message),
-          va("%s[%02d:%02d:%02d]^7 ", msgColor, t.tm_hour, t.tm_min, t.tm_sec));
+      Q_strcat(message, sizeof(message),
+               va("%s[%02d:%02d:%02d]^7 ", msgColor, lt->tm_hour, lt->tm_min,
+                  lt->tm_sec));
     } else {
       Q_strcat(message, sizeof(message),
-               va("%s[%02d:%02d]^7 ", msgColor, t.tm_hour, t.tm_min));
+               va("%s[%02d:%02d]^7 ", msgColor, lt->tm_hour, lt->tm_min));
     }
   }
 
   Q_strcat(message, sizeof(message), text);
-
   return message;
 }
 
-void CG_FixLinesEndingWithCaret(char *text, int size) {
-  int len = strlen(text);
+static void fixLinesEndingWithCaret(char *text, int size) {
+  const size_t len = strlen(text);
+
   if (text[len - 1] != '^') {
     return;
   }
@@ -2209,6 +2227,16 @@ void CG_FixLinesEndingWithCaret(char *text, int size) {
   text[size - 2] = '2';
   text[size - 1] = 0;
 }
+} // namespace ETJump
+
+/*
+=================
+CG_ServerCommand
+
+The string has been tokenized and can be retrieved with
+Cmd_Argc() / Cmd_Argv()
+=================
+*/
 
 static void CG_ServerCommand(void) {
   const char *cmd;
@@ -2356,8 +2384,19 @@ static void CG_ServerCommand(void) {
 
   enc = !Q_stricmp(cmd, "enc_chat") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "chat") || enc) {
-    const char *s;
-    const bool chatReplay = Q_atoi(CG_Argv(4));
+    int msgType = 0;
+
+    if (Q_atoi(CG_Argv(4))) {
+      msgType |= REPLAY_MSG;
+    }
+
+    const char *s = CG_Argv(2);
+
+    if (s[0] == '\0') { // server sends empty clientNum
+      msgType |= SERVER_MSG;
+    }
+
+    const int clientNum = Q_atoi(s);
 
     if (cg_teamChatsOnly.integer) {
       return;
@@ -2376,9 +2415,15 @@ static void CG_ServerCommand(void) {
     }
 
     CG_RemoveChatEscapeChar(text);
-    CG_FixLinesEndingWithCaret(text, MAX_SAY_TEXT);
-    s = CG_AddChatModifications(text, Q_atoi(CG_Argv(2)), chatReplay);
-    CG_AddToTeamChat(s, Q_atoi(CG_Argv(2)), chatReplay);
+    ETJump::fixLinesEndingWithCaret(text, MAX_SAY_TEXT);
+
+    if (msgType & REPLAY_MSG) {
+      s = ETJump::addChatReplayModifications(text);
+    } else {
+      s = ETJump::addChatModifications(text, clientNum, msgType);
+    }
+
+    CG_AddToTeamChat(s, clientNum, msgType);
     CG_Printf("%s\n", s);
 
     return;
@@ -2386,7 +2431,6 @@ static void CG_ServerCommand(void) {
 
   enc = !Q_stricmp(cmd, "enc_tchat") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "tchat") || enc) {
-
     const char *s;
 
     if (Q_atoi(CG_Argv(3))) {
@@ -2399,13 +2443,14 @@ static void CG_ServerCommand(void) {
     if (enc) {
       CG_DecodeQP(text);
     }
+
     CG_RemoveChatEscapeChar(text);
 
-    s = CG_AddChatModifications(text, Q_atoi(CG_Argv(2)), false);
+    s = ETJump::addChatModifications(text, Q_atoi(CG_Argv(2)), false);
     Q_strncpyz(text, s, MAX_SAY_TEXT);
 
-    CG_FixLinesEndingWithCaret(text, MAX_SAY_TEXT);
-    CG_AddToTeamChat(text, Q_atoi(CG_Argv(2)), false);
+    ETJump::fixLinesEndingWithCaret(text, MAX_SAY_TEXT);
+    CG_AddToTeamChat(text, Q_atoi(CG_Argv(2)), 0);
     CG_Printf("%s\n", text); // JPW NERVE
 
     return;
@@ -2792,7 +2837,8 @@ static void CG_ServerCommand(void) {
       saveMsg += '\n' + remainingSavesStr;
     }
 
-    CPri(saveMsg.c_str());
+    CG_CenterPrint(CG_LocalizeServerCommand(saveMsg.c_str()),
+                   SCREEN_HEIGHT - SCREEN_HEIGHT * 0.2, SMALLCHAR_WIDTH, false);
     return;
   }
 

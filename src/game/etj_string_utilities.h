@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,13 +24,6 @@
 
 #pragma once
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
-
 #include <string>
 #include <sstream>
 #include <vector>
@@ -40,7 +33,8 @@ namespace ETJump {
 std::string hash(const std::string &input);
 std::string getBestMatch(const std::vector<std::string> &words,
                          const std::string &current);
-std::string sanitize(const std::string &text, bool toLower = false);
+std::string sanitize(const std::string &text, bool toLower = false,
+                     bool removeEscapeChars = true);
 // returns the value if it's specified, else the default value
 std::string getValue(const char *value, const std::string &defaultValue = "");
 std::string getValue(const std::string &value,
@@ -48,14 +42,23 @@ std::string getValue(const std::string &value,
 
 template <typename... Targs>
 std::string stringFormat(const std::string &format, const Targs &...Fargs) {
-  return fmt::sprintf(format, Fargs...);
+  try {
+    return fmt::sprintf(format, Fargs...);
+  } catch (const fmt::v10::format_error &e) {
+#ifdef _DEBUG
+    return "^3" + std::string(__func__) + ": ^7" + e.what() + "\n";
+#else
+    return "^3" + std::string(__func__) + ": ^7" + e.what() +
+           ", please report this error to the developers.\n";
+#endif
+  }
 }
 
 std::string trimStart(const std::string &input);
 std::string trimEnd(const std::string &input);
 std::string trim(const std::string &input);
 
-std::vector<std::string> wrapWords(std::string &input, char separator,
+std::vector<std::string> wrapWords(const std::string &input, char separator,
                                    size_t maxLength);
 
 template <typename T>
@@ -107,5 +110,32 @@ bool iEqual(const std::string &str1, const std::string &str2,
 // Counts the extra padding needed when using format specifiers like
 // %-20s with text that contains ET color codes
 unsigned countExtraPadding(const std::string &input);
+
+// removes any leading and trailing zeroes from a number
+// always returns at least 0 even if there are no significant numbers
+// e.g. 0000.0000 returns 0
+// this expects a valid integer/floating point string as an input
+// if input is invalid, returns an empty string
+std::string normalizeNumberString(const std::string &input);
+
+// if input contains only chars to remove, result is empty string
+void removeTrailingChars(std::string &str, char charToRemove);
+
+// if input contains only chars to remove, result is empty string
+void removeLeadingChars(std::string &str, char charToRemove);
+
+// sorts strings either with case sensitivity or insensitivity
+// identical strings are kept in order
+template <typename T>
+void sortStrings(T &v, const bool noCase) {
+  std::sort(
+      v.begin(), v.end(), [&](const std::string &lhs, const std::string &rhs) {
+        if (noCase) {
+          return StringUtil::toUpperCase(lhs) < StringUtil::toUpperCase(rhs);
+        } else {
+          return lhs < rhs;
+        }
+      });
+}
 } // namespace StringUtil
 } // namespace ETJump

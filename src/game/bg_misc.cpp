@@ -62,11 +62,11 @@ int numPathCorners;
 pathCorner_t pathCorners[MAX_PATH_CORNERS];
 
 // these defines are matched with the character torso animations
-#define DELAY_LOW 100     // machineguns, tesla, spear, flame
-#define DELAY_HIGH 100    // mauser, garand
-#define DELAY_PISTOL 100  // colt, luger, sp5, cross
-#define DELAY_SHOULDER 50 // rl
-#define DELAY_THROW 250   // grenades, dynamite
+inline constexpr int DELAY_LOW = 100;     // machineguns, tesla, spear, flame
+inline constexpr int DELAY_HIGH = 100;    // mauser, garand
+inline constexpr int DELAY_PISTOL = 100;  // colt, luger, sp5, cross
+inline constexpr int DELAY_SHOULDER = 50; // rl
+inline constexpr int DELAY_THROW = 250;   // grenades, dynamite
 
 // Arnout: the new loadout for WolfXP
 int weapBanksMultiPlayer[MAX_WEAP_BANKS_MP][MAX_WEAPS_IN_BANK_MP] = {
@@ -2515,10 +2515,6 @@ gitem_t *BG_FindItemForWeapon(weapon_t weapon) {
   return NULL;
 }
 
-//----(SA) added
-
-#define DEATHMATCH_SHARED_AMMO 0
-
 /*
 ==============
 BG_FindClipForWeapon
@@ -2645,48 +2641,6 @@ int BG_AkimboSidearm(int weaponNum) {
   }
 }
 
-/*
-==============
-BG_AkimboForSideArm
-==============
-*/
-/*int BG_AkimboForSideArm( int weaponNum ) {
-    switch( weaponNum )
-    {
-    case WP_COLT:			return WP_AKIMBO_COLT;
-break; case WP_SILENCED_COLT:	return WP_AKIMBO_SILENCEDCOLT;	break; case
-WP_LUGER:			return WP_AKIMBO_LUGER;			break;
-    case WP_SILENCER:		return WP_AKIMBO_SILENCEDLUGER;	break;
-    default:				return WP_NONE;
-break;
-    }
-}*/
-
-//----(SA) Added keys
-/*
-==============
-BG_FindItemForKey
-==============
-*/
-/*gitem_t *BG_FindItemForKey(wkey_t k, int *indexreturn)
-{
-    int		i;
-
-    for ( i = 0 ; i < bg_numItems ; i++ ) {
-        if ( bg_itemlist[i].giType == IT_KEY && bg_itemlist[i].giTag == k ) {
-            {
-                if(indexreturn)
-                    *indexreturn = i;
-                return &bg_itemlist[i];
-            }
-        }
-    }
-
-    Com_Error( ERR_DROP, "Key %d not found", k );
-    return NULL;
-}*/
-//----(SA) end
-
 //----(SA) added
 /*
 ==============
@@ -2795,28 +2749,7 @@ qboolean BG_WeaponInWolfMP(int weapon) {
   }
 }
 
-qboolean BG_WeaponIsExplosive(int weap) {
-  switch (weap) {
-    case WP_CARBINE:
-    case WP_KAR98:
-    case WP_M7:
-    case WP_GRENADE_LAUNCHER:
-    case WP_GRENADE_PINEAPPLE:
-    case WP_PANZERFAUST:
-    case WP_LANDMINE:
-    case WP_ARTY:
-    case WP_GPG40:
-    case WP_FLAMETHROWER:
-    case WP_MORTAR:
-    case WP_SATCHEL:
-    case WP_DYNAMITE:
-      return qtrue;
-    default:
-      return qfalse;
-  }
-}
-
-bool BG_WeaponDisallowedInTimeruns(int weap) {
+bool BG_WeaponDisallowedInTimeruns(const int weap) {
   switch (weap) {
     case WP_DYNAMITE:
     case WP_GRENADE_LAUNCHER:
@@ -2853,20 +2786,23 @@ Items can be picked up without actually touching their physical bounds to make
 grabbing them easier
 ============
 */
-qboolean BG_PlayerTouchesItem(playerState_t *ps, entityState_t *item,
-                              int atTime) {
+bool BG_PlayerTouchesItem(playerState_t *ps, entityState_t *item, int atTime) {
   vec3_t origin;
 
   BG_EvaluateTrajectory(&item->pos, atTime, origin, qfalse, item->effect2Time);
+  static constexpr int boxSide = 36;
 
   // we are ignoring ducked differences here
-  if (ps->origin[0] - origin[0] > 36 || ps->origin[0] - origin[0] < -36 ||
-      ps->origin[1] - origin[1] > 36 || ps->origin[1] - origin[1] < -36 ||
-      ps->origin[2] - origin[2] > 36 || ps->origin[2] - origin[2] < -36) {
-    return qfalse;
+  if (ps->origin[0] - origin[0] > boxSide ||
+      ps->origin[0] - origin[0] < -boxSide ||
+      ps->origin[1] - origin[1] > boxSide ||
+      ps->origin[1] - origin[1] < -boxSide ||
+      ps->origin[2] - origin[2] > boxSide ||
+      ps->origin[2] - origin[2] < -boxSide) {
+    return false;
   }
 
-  return qtrue;
+  return true;
 }
 
 /*
@@ -3808,150 +3744,6 @@ void BG_GetMarkDir(const vec3_t dir, const vec3_t normal, vec3_t out) {
 
   VectorCopy(ndir, out);
 }
-
-const char *eventnames[] = {
-    "EV_NONE",
-    "EV_FOOTSTEP",
-    "EV_FOOTSTEP_METAL",
-    "EV_FOOTSTEP_WOOD",
-    "EV_FOOTSTEP_GRASS",
-    "EV_FOOTSTEP_GRAVEL",
-    "EV_FOOTSTEP_ROOF",
-    "EV_FOOTSTEP_SNOW",
-    "EV_FOOTSTEP_CARPET",
-    "EV_FOOTSPLASH",
-    "EV_FOOTWADE",
-    "EV_SWIM",
-    "EV_STEP_4",
-    "EV_STEP_8",
-    "EV_STEP_12",
-    "EV_STEP_16",
-    "EV_FALL_SHORT",
-    "EV_FALL_MEDIUM",
-    "EV_FALL_FAR",
-    "EV_FALL_NDIE",
-    "EV_FALL_DMG_10",
-    "EV_FALL_DMG_15",
-    "EV_FALL_DMG_25",
-    "EV_FALL_DMG_50",
-    "EV_JUMP",
-    "EV_WATER_TOUCH",
-    "EV_WATER_LEAVE",
-    "EV_WATER_UNDER",
-    "EV_WATER_CLEAR",
-    "EV_ITEM_PICKUP",
-    "EV_ITEM_PICKUP_QUIET",
-    "EV_GLOBAL_ITEM_PICKUP",
-    "EV_NOAMMO",
-    "EV_WEAPONSWITCHED",
-    "EV_EMPTYCLIP",
-    "EV_FILL_CLIP",
-    "EV_MG42_FIXED",
-    "EV_WEAP_OVERHEAT",
-    "EV_CHANGE_WEAPON",
-    "EV_CHANGE_WEAPON_2",
-    "EV_FIRE_WEAPON",
-    "EV_FIRE_WEAPONB",
-    "EV_FIRE_WEAPON_LASTSHOT",
-    "EV_NOFIRE_UNDERWATER",
-    "EV_FIRE_WEAPON_MG42",
-    "EV_FIRE_WEAPON_MOUNTEDMG42",
-    "EV_ITEM_RESPAWN",
-    "EV_ITEM_POP",
-    "EV_PLAYER_TELEPORT_IN",
-    "EV_PLAYER_TELEPORT_OUT",
-    "EV_GRENADE_BOUNCE",
-    "EV_GENERAL_SOUND",
-    "EV_GENERAL_SOUND_VOLUME",
-    "EV_GENERAL_CLIENT_SOUND_VOLUME",
-    "EV_GLOBAL_SOUND",
-    "EV_GLOBAL_CLIENT_SOUND",
-    "EV_GLOBAL_TEAM_SOUND",
-    "EV_FX_SOUND",
-    "EV_BULLET_HIT_FLESH",
-    "EV_BULLET_HIT_WALL",
-    "EV_MISSILE_HIT",
-    "EV_MISSILE_MISS",
-    "EV_RAILTRAIL",
-    "EV_VENOM",
-    "EV_BULLET",
-    "EV_LOSE_HAT",
-    "EV_PAIN",
-    "EV_CROUCH_PAIN",
-    "EV_DEATH1",
-    "EV_DEATH2",
-    "EV_DEATH3",
-    "EV_OBITUARY",
-    "EV_STOPSTREAMINGSOUND",
-    "EV_POWERUP_QUAD",
-    "EV_POWERUP_BATTLESUIT",
-    "EV_POWERUP_REGEN",
-    "EV_GIB_PLAYER",
-    "EV_DEBUG_LINE",
-    "EV_STOPLOOPINGSOUND",
-    "EV_TAUNT",
-    "EV_SMOKE",
-    "EV_SPARKS",
-    "EV_SPARKS_ELECTRIC",
-    "EV_EXPLODE",
-    "EV_RUBBLE",
-    "EV_EFFECT",
-    "EV_MORTAREFX",
-    "EV_SPINUP",
-    "EV_SNOW_ON",
-    "EV_SNOW_OFF",
-    "EV_MISSILE_MISS_SMALL",
-    "EV_MISSILE_MISS_LARGE",
-    "EV_MORTAR_IMPACT",
-    "EV_MORTAR_MISS",
-    "EV_SPIT_HIT",
-    "EV_SPIT_MISS",
-    "EV_SHARD",
-    "EV_JUNK",
-    "EV_EMITTER",
-    "EV_OILPARTICLES",
-    "EV_OILSLICK",
-    "EV_OILSLICKREMOVE",
-    "EV_MG42EFX",
-    "EV_FLAKGUN1",
-    "EV_FLAKGUN2",
-    "EV_FLAKGUN3",
-    "EV_FLAKGUN4",
-    "EV_EXERT1",
-    "EV_EXERT2",
-    "EV_EXERT3",
-    "EV_SNOWFLURRY",
-    "EV_CONCUSSIVE",
-    "EV_DUST",
-    "EV_RUMBLE_EFX",
-    "EV_GUNSPARKS",
-    "EV_FLAMETHROWER_EFFECT",
-    "EV_POPUP",
-    "EV_POPUPBOOK",
-    "EV_GIVEPAGE",
-    "EV_MG42BULLET_HIT_FLESH",
-    "EV_MG42BULLET_HIT_WALL",
-    "EV_SHAKE",
-    "EV_DISGUISE_SOUND",
-    "EV_BUILDDECAYED_SOUND",
-    "EV_FIRE_WEAPON_AAGUN",
-    "EV_DEBRIS",
-    "EV_ALERT_SPEAKER",
-    "EV_POPUPMESSAGE",
-    "EV_ARTYMESSAGE",
-    "EV_AIRSTRIKEMESSAGE",
-    "EV_MEDIC_CALL",
-    "EV_PORTAL_TELEPORT",
-    "EV_LOAD_TELEPORT",
-    "EV_UPHILLSTEP",
-    "EV_SAVE",
-    "EV_CUSHIONFALLSTEP",
-    "EV_SHOVE",
-    "EV_MAX_EVENTS",
-};
-
-static_assert(sizeof(eventnames) / sizeof(eventnames[0]) == EV_MAX_EVENTS + 1,
-              "Event names array size does not match enum list");
 
 /*
 ===============
@@ -5214,67 +5006,6 @@ qboolean BG_IsScopedWeapon(int weapon) {
       return qtrue;
   }
   return qfalse;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-typedef struct locInfo_s {
-  vec2_t gridStartCoord;
-  vec2_t gridStep;
-} locInfo_t;
-
-static locInfo_t locInfo;
-
-void BG_InitLocations(vec2_t world_mins, vec2_t world_maxs) {
-  // keep this in sync with CG_DrawGrid
-  locInfo.gridStep[0] = 1200.f;
-  locInfo.gridStep[1] = 1200.f;
-
-  // ensure minimal grid density
-  while (locInfo.gridStep[0] > 50.f &&
-         (world_maxs[0] - world_mins[0]) / locInfo.gridStep[0] < 7)
-    locInfo.gridStep[0] -= 50.f;
-  while (locInfo.gridStep[1] > 50.f &&
-         (world_mins[1] - world_maxs[1]) / locInfo.gridStep[1] < 7)
-    locInfo.gridStep[1] -= 50.f;
-
-  locInfo.gridStartCoord[0] =
-      world_mins[0] +
-      .5f * ((((world_maxs[0] - world_mins[0]) / locInfo.gridStep[0]) -
-              ((int)((world_maxs[0] - world_mins[0]) / locInfo.gridStep[0]))) *
-             locInfo.gridStep[0]);
-  locInfo.gridStartCoord[1] =
-      world_mins[1] -
-      .5f * ((((world_mins[1] - world_maxs[1]) / locInfo.gridStep[1]) -
-              ((int)((world_mins[1] - world_maxs[1]) / locInfo.gridStep[1]))) *
-             locInfo.gridStep[1]);
-}
-
-char *BG_GetLocationString(vec_t *pos) {
-  static char coord[6];
-  int x, y;
-
-  coord[0] = '\0';
-
-  x = (pos[0] - locInfo.gridStartCoord[0]) / locInfo.gridStep[0];
-  y = (locInfo.gridStartCoord[1] - pos[1]) / locInfo.gridStep[1];
-
-  if (x < 0) {
-    x = 0;
-  }
-  if (y < 0) {
-    y = 0;
-  }
-
-  // if coords get pretty big,
-  // mostly because of getting out of mapcoords, and gridstep being
-  // calculated wrong just set them to 0 character
-  if (x > 26) {
-    x = -17;
-  }
-
-  Com_sprintf(coord, sizeof(coord), "%c,%i", 'A' + x, y);
-
-  return coord;
 }
 
 qboolean BG_BBoxCollision(vec3_t min1, vec3_t max1, vec3_t min2, vec3_t max2) {

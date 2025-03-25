@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ namespace Container {
 template <typename InputContainer, typename UnaryFunction>
 auto map(const InputContainer &container, UnaryFunction &&func) {
   using InputType = typename InputContainer::value_type;
-  using ResultType = std::result_of_t<UnaryFunction(InputType)>;
+  using ResultType = std::invoke_result_t<UnaryFunction, InputType>;
 
   std::vector<ResultType> result;
   result.reserve(container.size());
@@ -81,5 +81,5 @@ std::vector<TElement> skipFirstN(const std::vector<TElement> &input,
 
   return std::vector<TElement>(input.begin() + count, input.end());
 }
-}
-}
+} // namespace Container
+} // namespace ETJump

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ public:
   const std::map<int, qhandle_t> controlShaders;
   KeySetKeyBindDrawer(const std::vector<KeyShader> &keyShaders,
                       const std::map<int, qhandle_t> controlShaders);
-  virtual ~KeySetKeyBindDrawer(){};
+  virtual ~KeySetKeyBindDrawer() {};
 
 protected:
   void drawReleaseShader(qhandle_t shader, int position) const override;

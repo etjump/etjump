@@ -5,16 +5,16 @@
 
     User interface building blocks and support functions.
 **********************************************************************/
+#include "etj_demo_queue.h"
 #include "ui_local.h"
 
 uiStatic_t uis;
 qboolean m_entersound; // after a frame, so caching won't disrupt the sound
 
 // these are here so the functions in q_shared.c can link
-#ifndef UI_HARD_LINKED
 
-  // JPW NERVE added Com_DPrintf
-  #define MAXPRINTMSG 4096
+inline constexpr int MAXPRINTMSG = 4096;
+
 void QDECL Com_DPrintf(const char *fmt, ...) {
   va_list argptr;
   char msg[MAXPRINTMSG];
@@ -33,7 +33,7 @@ void QDECL Com_DPrintf(const char *fmt, ...) {
 }
 // jpw
 
-void QDECL Com_Error(int level, const char *error, ...) {
+[[noreturn]] void QDECL Com_Error(int level, const char *error, ...) {
   va_list argptr;
   char text[1024];
 
@@ -55,7 +55,21 @@ void QDECL Com_Printf(const char *msg, ...) {
   trap_Print(va("%s", text));
 }
 
-#endif
+// prints only in localhost
+void QDECL Com_LocalPrintf(const char *msg, ...) {
+  if (trap_Cvar_VariableValue("sv_running") == 0) {
+    return;
+  }
+
+  va_list argptr;
+  char text[1024];
+
+  va_start(argptr, msg);
+  Q_vsnprintf(text, sizeof(text), msg, argptr);
+  va_end(argptr);
+
+  trap_Print(va("%s", text));
+}
 
 /*
 =================
@@ -129,17 +143,10 @@ static void UI_CalcPostGameStats() {}
 UI_ConsoleCommand
 =================
 */
-qboolean UI_ConsoleCommand(int realTime) {
-  char *cmd;
-  uiClientState_t cstate;
-
+qboolean UI_ConsoleCommand(const int realTime) {
+  const char *cmd = UI_Argv(0);
   uiInfo.uiDC.frameTime = realTime - uiInfo.uiDC.realTime;
   uiInfo.uiDC.realTime = realTime;
-
-  cmd = UI_Argv(0);
-
-  // ensure minimum menu data is available
-  // Menu_Cache();
 
   if (Q_stricmp(cmd, "ui_test") == 0) {
     UI_ShowPostGame(qtrue);
@@ -179,7 +186,53 @@ qboolean UI_ConsoleCommand(int realTime) {
     return qtrue;
   }
 
-  trap_GetClientState(&cstate);
+  if (!Q_stricmp(cmd, "uiParseMaplist")) {
+    ETJump::parseMaplist();
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "uiNumCustomvotes")) {
+    ETJump::parseNumCustomvotes();
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "uiParseCustomvote")) {
+    ETJump::parseCustomvote();
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "uiResetCustomvotes")) {
+    ETJump::resetCustomvotes();
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "demoQueue")) {
+    ETJump::demoQueue->commandHandler();
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "uiDemoQueueManualSkip")) {
+    ETJump::demoQueue->setManualSkip();
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "uiDemoPlaybackEnabled")) {
+    uiInfo.demoPlayback = true;
+    return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "uiToggleETJumpSettings")) {
+    uiClientState_t cstate;
+    trap_GetClientState(&cstate);
+
+    // FIXME: this breaks if 'ui_restart' is performed while in demo playback,
+    //  but there's no nice way to make this work for now, it is what it is
+    if (cstate.connState == CA_ACTIVE && !uiInfo.demoPlayback) {
+      ETJump::toggleSettingsMenu();
+    }
+
+    return qtrue;
+  }
 
   return qfalse;
 }

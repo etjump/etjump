@@ -159,8 +159,12 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
       BG_EvaluateTrajectory(&cent->currentState.pos, cg.physicsTime, origin,
                             qfalse, cent->currentState.effect2Time);
     } else {
-      // see g_misc.c SP_func_fakebrush...
-      if (ent->eFlags & EF_FAKEBMODEL && ent->eType != ET_PLAYER) {
+      // dmgFlags are set to r.contents if the fakebrush is playerclip,
+      // so only grab mins/maxs if we're doing a player trace (capsule),
+      // or if dmgFlags are not set (regular CONTENTS_SOLID), otherwise stuff
+      // like bullets and flame particles collide with playerclip fakebrushes
+      // on client side, visually
+      if (ent->eType == ET_FAKEBRUSH && (capsule || !ent->dmgFlags)) {
         VectorCopy(ent->origin2, bmins);
         VectorCopy(ent->angles2, bmaxs);
       } else {
@@ -432,6 +436,11 @@ static void CG_InterpolatePlayerState(qboolean grabAngles) {
     cmdNum = trap_GetCurrentCmdNumber();
     trap_GetUserCmd(cmdNum, &cmd);
 
+    // use cg.pmext here as we haven't setup cg_pmove for interpolation
+    if (cg.pmext.autoSprint) {
+      cmd.buttons ^= BUTTON_SPRINT;
+    }
+
     // rain - added tracemask
     PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID);
   }
@@ -648,9 +657,9 @@ const char *predictionStrings[] = {
     "grenadeTimeLeft", // 27
 };
 
-#define MAX_PREDICT_ORIGIN_DELTA 0.1f
-#define MAX_PREDICT_VELOCITY_DELTA 0.1f
-#define MAX_PREDICT_VIEWANGLES_DELTA 1.0f
+inline constexpr float MAX_PREDICT_ORIGIN_DELTA = 0.1f;
+inline constexpr float MAX_PREDICT_VELOCITY_DELTA = 0.1f;
+inline constexpr float MAX_PREDICT_VIEWANGLES_DELTA = 1.0f;
 
 // error codes returned by this function are not sequential
 // this is just kept in sync with legacy to keep comparisons easier
@@ -847,7 +856,9 @@ to ease the jerk.
 // appear to be set for prediction runs where they previously weren't
 // is a Bad Thing.  This is my bugfix for #166.
 
-pmoveExt_t oldpmext[CMD_BACKUP];
+// reserve extended buffer size even if the client doesn't support it,
+// the unsupported slots just won't get used
+pmoveExt_t oldpmext[CMD_BACKUP_EXT];
 
 void CG_PredictPlayerState() {
   int cmdNum, current;
@@ -1014,18 +1025,14 @@ void CG_PredictPlayerState() {
     cg.pmext.noclipScale = etj_noclipScale.value;
   }
 
-  // let server handle mounted MG42 cooldown since client doesn't know
-  // the heat values of each individual mounted gun in the map
-  // otherwise we fire excess overheat events when client exits and re-enters
-  // the gun, as the correct heat value is never assigned client side
-  cg.pmext.weapHeat[WP_DUMMY_MG42] = 0.0f;
+  cg.pmext.jumpDelayBug = cg.jumpDelayBug;
 
-  memcpy(&oldpmext[current & CMD_MASK], &cg.pmext, sizeof(pmoveExt_t));
+  memcpy(&oldpmext[current & cg.cmdMask], &cg.pmext, sizeof(pmoveExt_t));
 
   // if we don't have the commands right after the snapshot, we
   // can't accurately predict a current position, so just freeze at
   // the last good position we had
-  cmdNum = current - CMD_BACKUP + 1;
+  cmdNum = current - cg.cmdBackup + 1;
   trap_GetUserCmd(cmdNum, &oldestCmd);
   if (oldestCmd.serverTime > cg.snap->ps.commandTime &&
       oldestCmd.serverTime < cg.time) // special check for map_restart
@@ -1090,7 +1097,7 @@ void CG_PredictPlayerState() {
       // do a full predict
       cg.lastPredictedCommand = 0;
       cg.backupStateTail = cg.backupStateTop;
-      predictCmd = current - CMD_BACKUP + 1;
+      predictCmd = current - cg.cmdBackup + 1;
     }
     // cg.physicsTime is the current snapshot's physicsTime
     // if it's the same as the last one
@@ -1142,7 +1149,7 @@ void CG_PredictPlayerState() {
         // do a full predict
         cg.lastPredictedCommand = 0;
         cg.backupStateTail = cg.backupStateTop;
-        predictCmd = current - CMD_BACKUP + 1;
+        predictCmd = current - cg.cmdBackup + 1;
       }
     }
 
@@ -1156,7 +1163,7 @@ void CG_PredictPlayerState() {
   // run cmds
   moved = false;
   predictError = true;
-  for (cmdNum = current - CMD_BACKUP + 1; cmdNum <= current; cmdNum++) {
+  for (cmdNum = current - cg.cmdBackup + 1; cmdNum <= current; cmdNum++) {
     // get the command
     trap_GetUserCmd(cmdNum, &cg_pmove.cmd);
     // get the previous command
@@ -1190,9 +1197,11 @@ void CG_PredictPlayerState() {
       } else if (cg.thisFrameTeleport) {
         // a teleport will not cause an error decay
         VectorClear(cg.predictedError);
+
         if (cg_showmiss.integer) {
           CG_Printf("PredictionTeleport\n");
         }
+
         cg.thisFrameTeleport = qfalse;
       } else if (!cg.showGameView) {
         vec3_t adjusted;
@@ -1233,7 +1242,7 @@ void CG_PredictPlayerState() {
 
     // don't do anything if the time is before the snapshot player time
     if (cg_pmove.cmd.serverTime <= cg.predictedPlayerState.commandTime) {
-      memcpy(&pmext, &oldpmext[cmdNum & CMD_MASK], sizeof(pmoveExt_t));
+      memcpy(&pmext, &oldpmext[cmdNum & cg.cmdMask], sizeof(pmoveExt_t));
       continue;
     }
 
@@ -1280,11 +1289,15 @@ void CG_PredictPlayerState() {
     cg_pmove.noActivateLean = etj_noActivateLean.integer ? qtrue : qfalse;
     cg_pmove.noPanzerAutoswitch = etj_noPanzerAutoswitch.integer;
 
+    if (cg_pmove.pmext->autoSprint) {
+      cg_pmove.cmd.buttons ^= BUTTON_SPRINT;
+    }
+
     // grab data, we only want the final result
     // rain - copy the pmext as it was just before we
     // previously ran this cmd (or, this will be the
     // current predicted data if this is the current cmd) (#166)
-    memcpy(&pmext, &oldpmext[cmdNum & CMD_MASK], sizeof(pmoveExt_t));
+    memcpy(&pmext, &oldpmext[cmdNum & cg.cmdMask], sizeof(pmoveExt_t));
 
     fflush(stdout);
 
@@ -1333,6 +1346,13 @@ void CG_PredictPlayerState() {
     // END unlagged - optimized prediction
 
     moved = true;
+
+    // after Pmove is run, sync playerstate viewangles with refdef angles
+    // if etj_smoothAngles is enabled, to apply any changes done in Pmove
+    if (etj_smoothAngles.integer && cg_pmove.pmove_fixed) {
+      VectorCopy(cg_pmove.ps->viewangles, cg.refdefViewAngles);
+      VectorCopy(cg_pmove.ps->delta_angles, cg.refdefDeltaAngles);
+    }
 
     // add push trigger movement effects
     CG_TouchTriggerPrediction();

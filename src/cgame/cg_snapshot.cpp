@@ -2,6 +2,7 @@
 // not necessarily every single rendered frame
 
 #include "cg_local.h"
+#include "etj_demo_compatibility.h"
 #if __MACOS__
   #ifdef GAMERANGER
     #include "GameRanger SDK/GameRanger.h"
@@ -181,6 +182,10 @@ void CG_SetInitialSnapshot(snapshot_t *snap) {
     CG_keyOn_f();
     if (demo_infoWindow.integer > 0) {
       CG_ShowHelp_On(&cg.demohelpWindow);
+    }
+
+    if (etj_onDemoPlaybackStart.string[0] != '\0') {
+      trap_SendConsoleCommand(etj_onDemoPlaybackStart.string);
     }
   }
   // OSP
@@ -416,27 +421,17 @@ static snapshot_t *CG_ReadNextSnapshot(void) {
         CG_ResetTransitionEffects();
       }
 
-      // ETJump: This whole block is pretty hacky, but
-      // it fixes the bug, that was introduced in 2.3.0,
-      // which made some old demos unplayable due to the
-      // introduced shifting in the entityType_t. This
-      // code just tries to remap everything back, when
-      // necessary. This is perfomed for all new
-      // snapshots (so should roughly run just 20 times
-      // a second).
-      if (cg.requiresEntityTypeAdjustment) {
+      // adjust entity types to be compatible with 2.3.0/2.3.0 RC4
+      if (ETJump::demoCompatibility->flags.adjustEntityTypes) {
         for (int i = 0; i < dest->numEntities; i++) {
           entityState_t *es = &dest->entities[i];
-          // ET_VELOCITY_PUSH_TRIGGER =
-          // 9 in 2.3.0, so we should
-          // remap it to the current
-          // position
+          // ET_VELOCITY_PUSH_TRIGGER = 9 in 2.3.0,
+          // so we should remap it to the current position
           if (es->eType == 9) {
             es->eType = ET_VELOCITY_PUSH_TRIGGER;
           }
-          // shifting back all eTypes in
-          // demo, so it would match the
-          // current enum order
+          // shifting back all eTypes in demo,
+          // so it would match the current enum order
           else if (es->eType > 9) {
             --es->eType;
           }

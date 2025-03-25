@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,13 +53,13 @@ void ETJump::ProgressionTrackers::printParserErrors(
 
 void ETJump::ProgressionTrackers::updateTracker(
     std::vector<ProgressionTrackerParser::IndexValuePair> pairs,
-    int tracker[MaxProgressionTrackers]) {
+    int tracker[MAX_PROGRESSION_TRACKERS]) {
   for (const auto &pair : pairs) {
-    if (pair.index >= MaxProgressionTrackers) {
+    if (pair.index >= MAX_PROGRESSION_TRACKERS) {
       G_Error("Tracker error: specified index (%d) is "
               "greater than maximum "
               "number of trackers indices (%d)",
-              pair.index + 1, MaxProgressionTrackers);
+              pair.index + 1, MAX_PROGRESSION_TRACKERS);
       return;
     }
 
@@ -81,7 +81,8 @@ int ETJump::ProgressionTrackers::registerTracker(ProgressionTrackerKeys keys) {
   auto progressionTracker = ProgressionTracker();
 
   updateTracker(parseKey(keys.equal), progressionTracker.equal);
-  updateTracker(parseKey(keys.notEqual), progressionTracker.notEqual);
+  updateTracker(parseKey(keys.notEqualAny), progressionTracker.notEqualAny);
+  updateTracker(parseKey(keys.notEqualAll), progressionTracker.notEqualAll);
   updateTracker(parseKey(keys.greaterThan), progressionTracker.greaterThan);
   updateTracker(parseKey(keys.lessThan), progressionTracker.lessThan);
   updateTracker(parseKey(keys.set), progressionTracker.set);
@@ -99,7 +100,7 @@ int ETJump::ProgressionTrackers::registerTracker(ProgressionTrackerKeys keys) {
 
 void ETJump::ProgressionTrackers::useTracker(
     gentity_t *ent, gentity_t *activator, const ProgressionTracker &tracker) {
-  int oldValues[MaxProgressionTrackers];
+  int oldValues[MAX_PROGRESSION_TRACKERS];
 
   if (g_debugTrackers.integer > 0) {
     memcpy(oldValues, activator->client->sess.progression, sizeof(oldValues));
@@ -140,10 +141,17 @@ void ETJump::ProgressionTrackers::useTracker(
   }
 
   auto activate = true;
-  int clientTracker;
+  uint8_t numNotEqualAllKeys = 0;
+  uint8_t numNotEqualAllMatches = 0;
 
-  for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
-    clientTracker = activator->client->sess.progression[idx];
+  // FIXME: I really, really do not like this loop. This is very error prone
+  //  for mappers, because they can specify keys which cancel out each others
+  //  functionality with seemingly no logic, and no error messages whatsoever.
+  //  Logically you should never specify multiple of these keys, and that's what
+  //  this assumes, but there's nothing stopping mappers from doing that for
+  //  any other keys besides 'tracker_not_eq_any' and 'tracker_not_eq_all'.
+  for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
+    const int clientTracker = activator->client->sess.progression[idx];
 
     if ((tracker.equal[idx] != ProgressionTrackerValueNotSet &&
          tracker.equal[idx] != clientTracker) ||
@@ -151,15 +159,27 @@ void ETJump::ProgressionTrackers::useTracker(
          tracker.lessThan[idx] <= clientTracker) ||
         (tracker.greaterThan[idx] != ProgressionTrackerValueNotSet &&
          tracker.greaterThan[idx] >= clientTracker) ||
-        (tracker.notEqual[idx] != ProgressionTrackerValueNotSet &&
-         tracker.notEqual[idx] == clientTracker)) {
+        (tracker.notEqualAny[idx] != ProgressionTrackerValueNotSet &&
+         tracker.notEqualAny[idx] == clientTracker)) {
       activate = false;
       break;
     }
+
+    if (tracker.notEqualAll[idx] != ProgressionTrackerValueNotSet) {
+      numNotEqualAllKeys++;
+
+      if (tracker.notEqualAll[idx] == clientTracker) {
+        numNotEqualAllMatches++;
+      }
+    }
+  }
+
+  if (numNotEqualAllKeys > 0 && numNotEqualAllKeys == numNotEqualAllMatches) {
+    activate = false;
   }
 
   if (activate) {
-    for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
+    for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
       const auto clientBits =
           std::bitset<32>(activator->client->sess.progression[idx]);
 
@@ -180,7 +200,7 @@ void ETJump::ProgressionTrackers::useTracker(
   if (activate) {
     G_UseTargetedEntities(ent, activator);
 
-    for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
+    for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
       if (tracker.setIf[idx] >= 0) {
         activator->client->sess.progression[idx] = tracker.setIf[idx];
       }
@@ -201,12 +221,12 @@ void ETJump::ProgressionTrackers::printTrackerChanges(gentity_t *activator,
   }
   const auto clientNum = ClientNum(activator);
 
-  for (int i = 0; i < MaxProgressionTrackers; i++) {
+  for (int i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
     if (oldValues[i] != activator->client->sess.progression[i]) {
       const std::string &trackerChangeMsg = stringFormat(
           "^7Tracker change - index: ^3%i ^7value: ^2%i ^7from: ^9%i^7\n",
           i + 1, activator->client->sess.progression[i], oldValues[i]);
-      Printer::SendPopupMessage(clientNum, trackerChangeMsg);
+      Printer::popup(clientNum, trackerChangeMsg);
     }
   }
 }
@@ -236,6 +256,15 @@ void ETJump::ProgressionTrackers::useTargetTracker(gentity_t *ent,
 
 void SP_target_tracker(gentity_t *self) {
   const auto keys = ETJump::ProgressionTrackers::ParseTrackerKeys();
+  const char *defaultValue =
+      ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET;
+
+  if (Q_stricmp(keys.notEqualAny, defaultValue) &&
+      Q_stricmp(keys.notEqualAll, defaultValue)) {
+    G_Error("%s: 'tracker_not_eq_any' and 'tracker_not_eq_all' cannot be used "
+            "in the same tracker entity.",
+            __func__);
+  }
 
   self->key = ETJump::progressionTrackers->registerTracker(keys);
   self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator) {
@@ -249,6 +278,15 @@ void SP_trigger_tracker(gentity_t *self) {
   self->s.eType = ET_TRIGGER_MULTIPLE;
 
   const auto keys = ETJump::ProgressionTrackers::ParseTrackerKeys();
+  const char *defaultValue =
+      ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET;
+
+  if (Q_stricmp(keys.notEqualAny, defaultValue) &&
+      Q_stricmp(keys.notEqualAll, defaultValue)) {
+    G_Error("%s: 'tracker_not_eq_any' and 'tracker_not_eq_all' cannot be used "
+            "in the same tracker entity.",
+            __func__);
+  }
 
   self->key = ETJump::progressionTrackers->registerTracker(keys);
   self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator) {
@@ -267,7 +305,14 @@ ETJump::ProgressionTrackers::ParseTrackerKeys() {
       ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET;
 
   G_SpawnString("tracker_eq", VALUE_NOT_SET, &keys.equal);
-  G_SpawnString("tracker_not_eq", VALUE_NOT_SET, &keys.notEqual);
+
+  // legacy 'tracker_not_eq', superseded by 'tracker_not_eq_any'
+  // kept here for backwards compatibility with old maps
+  if (!G_SpawnString("tracker_not_eq", VALUE_NOT_SET, &keys.notEqualAny)) {
+    G_SpawnString("tracker_not_eq_any", VALUE_NOT_SET, &keys.notEqualAny);
+  }
+
+  G_SpawnString("tracker_not_eq_all", VALUE_NOT_SET, &keys.notEqualAll);
   G_SpawnString("tracker_gt", VALUE_NOT_SET, &keys.greaterThan);
   G_SpawnString("tracker_lt", VALUE_NOT_SET, &keys.lessThan);
   G_SpawnString("tracker_set", VALUE_NOT_SET, &keys.set);

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,9 +31,10 @@ ETJump::DemoRecorder::DemoRecorder() {}
 ETJump::DemoRecorder::~DemoRecorder() {}
 
 void ETJump::DemoRecorder::start(const std::string &name) {
-  // if (cl_demorecording.integer) return;
-  if (_isLocked)
+  if (_isLocked) {
     return;
+  }
+
   _startTime = cg.time;
 
   trap_SendConsoleCommand("set cl_noprint 1\n");
@@ -42,9 +43,10 @@ void ETJump::DemoRecorder::start(const std::string &name) {
 }
 
 void ETJump::DemoRecorder::stop() {
-  // if (!cl_demorecording.integer) return;
-  if (_isLocked)
+  if (_isLocked) {
     return;
+  }
+
   _stopTime = cg.time;
 
   trap_SendConsoleCommand("set cl_noprint 1\n");
@@ -54,11 +56,17 @@ void ETJump::DemoRecorder::stop() {
 
 void ETJump::DemoRecorder::restart(const std::string &name) {
   stop();
+
+  if (etj_ad_stopInSpec.integer &&
+      cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
+    return;
+  }
+
   start(name);
 }
 
-bool ETJump::DemoRecorder::isRecording() {
-  return cl_demorecording.integer == 1;
+bool ETJump::DemoRecorder::recordingAutoDemo() {
+  return StringUtil::startsWith(cl_demofilename.string, "demos/temp/temp_");
 }
 
 int ETJump::DemoRecorder::elapsed() {

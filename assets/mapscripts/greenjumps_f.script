@@ -1,0 +1,37 @@
+// ETJump mapscript for GreenJumps_f.bsp
+// Modifications:
+// - fixed mapscript entrypoint (game_manager -> etjump_manager, map has no script_multiplayer entity)
+// - tweaked func_door speed at the end of customs section to work on sv_fps 125 servers
+
+etjump_manager
+{
+   spawn
+   {
+      // delete the original door at the end of customs section, which is used for wallclipping
+      // there are 2 func_doors in the map, the one we want has speed 5000
+      delete
+      {
+         classname "func_door"
+         speed "5000"
+      }
+
+      // create a replacement with higher speed value to make the wallclipping work with sv_fps 125
+      create
+      {
+         classname "func_door"
+         angle "180"
+         speed "10000"
+         closespeed "25"
+         spawnflags "4"
+         dmg "999"
+         health "1"
+         model "*20"
+      }
+
+      wm_axis_respawntime 1
+      wm_allied_respawntime 1
+      wm_set_round_timelimit 60
+      wm_number_of_objectives 1
+      wm_setwinner -1
+   }
+}

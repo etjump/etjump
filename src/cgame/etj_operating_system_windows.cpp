@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
 #ifdef WIN32
 
   #include <windows.h>
+  #include <sddl.h>
   #include "etj_operating_system.h"
   #include "etj_client_authentication.h"
 
@@ -58,33 +59,95 @@ void ETJump::OperatingSystem::minimize() {
   }
 }
 
+std::string ETJump::OperatingSystem::getCurrentUserSID() {
+  HANDLE hToken = nullptr;
+  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+    return "";
+  }
+
+  DWORD dwBufferSize = 0;
+  GetTokenInformation(hToken, TokenUser, nullptr, 0, &dwBufferSize);
+  if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+    CloseHandle(hToken);
+    return "";
+  }
+
+  const auto pTokenUser =
+      static_cast<PTOKEN_USER>(LocalAlloc(LPTR, dwBufferSize));
+  if (!pTokenUser) {
+    CloseHandle(hToken);
+    return "";
+  }
+
+  if (!GetTokenInformation(hToken, TokenUser, pTokenUser, dwBufferSize,
+                           &dwBufferSize)) {
+    LocalFree(pTokenUser);
+    CloseHandle(hToken);
+    return "";
+  }
+
+  LPWSTR stringSID = nullptr;
+  if (!ConvertSidToStringSidW(pTokenUser->User.Sid, &stringSID)) {
+    LocalFree(pTokenUser);
+    CloseHandle(hToken);
+    return "";
+  }
+
+  // convert from wide string to ASCII string
+  const int size = WideCharToMultiByte(CP_UTF8, 0, stringSID, -1, nullptr, 0,
+                                       nullptr, nullptr);
+  // -1 because we don't need the null terminator in std::string
+  std::string result(size - 1, 0);
+  WideCharToMultiByte(CP_UTF8, 0, stringSID, -1, &result[0], size, nullptr,
+                      nullptr);
+
+  LocalFree(stringSID);
+  LocalFree(pTokenUser);
+  CloseHandle(hToken);
+
+  return result;
+}
+
 std::string ETJump::OperatingSystem::getHwid() {
-  std::string hardwareId = "";
-  std::string rootDrive = "";
-  int systemInfoSum = 0;
-  char vsnc[MAX_PATH] = "\0";
-  DWORD vsn;
+  std::string hardwareId;
+  std::string rootDrive;
+  DWORD vsn = 0;
+
+  // TODO: include once user database is refactored
+  //  to store individual components of HWID
+  /*
+  // Get user SID
+  const std::string userSid = getCurrentUserSID();
+  hardwareId += userSid;
+  */
 
   SYSTEM_INFO systemInfo;
   GetSystemInfo(&systemInfo);
 
   // Random data from processor
-  systemInfoSum = systemInfo.dwProcessorType + systemInfo.wProcessorLevel +
-                  systemInfo.wProcessorArchitecture;
+  const unsigned int systemInfoSum = systemInfo.dwProcessorType +
+                                     systemInfo.wProcessorLevel +
+                                     systemInfo.wProcessorArchitecture;
 
   char buffer[MAX_PATH]{};
-  _itoa(systemInfoSum, buffer, 10);
+  _ultoa(systemInfoSum, buffer, 10);
   hardwareId += buffer;
+
   // volume serial number
   GetEnvironmentVariable("HOMEDRIVE", buffer, sizeof(buffer));
   rootDrive = std::string(buffer) + "\\";
 
-  if (GetVolumeInformation(rootDrive.c_str(), 0, 0, &vsn, 0, 0, 0, 0) == 0) {
+  if (GetVolumeInformation(rootDrive.c_str(), nullptr, 0, &vsn, nullptr,
+                           nullptr, nullptr, 0) == 0) {
     // Failed to get volume info
     rootDrive += "failed";
   }
 
-  _itoa(vsn, buffer, 10);
+  // TODO: include once user database is refactored
+  //  to store individual components of HWID
+  // hardwareId += rootDrive;
+
+  _ultoa(vsn, buffer, 10);
   hardwareId += buffer;
 
   return G_SHA1(hardwareId.c_str());

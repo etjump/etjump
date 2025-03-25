@@ -1,7 +1,7 @@
 #ifndef __UI_PUBLIC_H__
 #define __UI_PUBLIC_H__
 
-#define UI_API_VERSION 4
+inline constexpr int UI_API_VERSION = 4;
 
 typedef struct {
   connstate_t connState;
@@ -143,13 +143,13 @@ typedef enum {
 
 } uiImport_t;
 
-#define SORT_HOST 0
-#define SORT_MAP 1
-#define SORT_CLIENTS 2
-#define SORT_GAME 3
-#define SORT_PING 4
-#define SORT_FILTERS 5
-#define SORT_FAVOURITES 6
+inline constexpr int SORT_HOST = 0;
+inline constexpr int SORT_MAP = 1;
+inline constexpr int SORT_CLIENTS = 2;
+inline constexpr int SORT_GAME = 3;
+inline constexpr int SORT_PING = 4;
+inline constexpr int SORT_FILTERS = 5;
+inline constexpr int SORT_FAVOURITES = 6;
 
 typedef enum {
   UI_GETAPIVERSION = 0, // system reserved

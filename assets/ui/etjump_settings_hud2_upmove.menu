@@ -15,6 +15,7 @@ menuDef {
     fullscreen 0
     rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
     style WINDOW_STYLE_FILLED
+    centered
 
     onOpen {
         conditionalscript uiCheckBackground 2
@@ -50,29 +51,29 @@ menuDef {
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "UPMOVE METER")
     
-        MULTI               (SETTINGS_ITEM_POS(1), "Draw upmove meter:", 0.2, SETTINGS_ITEM_H, "etj_drawUpmoveMeter", cvarFloatList { "Off" 0 "Bar" 1 "Text" 2 "Bar + Text" 3 }, "Draw upmove meter\netj_drawUpmoveMeter")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_upmoveMeterMaxDelay", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        COMBO_BIT           (SETTINGS_COMBO_POS(1), "Draw upmove meter:", 0.2, SETTINGS_ITEM_H, "etj_drawUpmoveMeter", cvarFloatList { "Bar" 1 "Text" 2 }, none, "Draw upmove meter\netj_drawUpmoveMeter")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_upmoveMeterMaxDelay", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "Max delay:", 0.2, SETTINGS_ITEM_H, etj_upmoveMeterMaxDelay 360 10 1000 10, "Sets max delay of upmove meter\netj_upmoveMeterMaxDelay")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_upmoveMeterGraphX", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_upmoveMeterGraphX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(3), "Upmove meter X:", 0.2, SETTINGS_ITEM_H, etj_upmoveMeterGraphX 0 -8 632 5, "Sets X offset of upmove meter\netj_upmoveMeterGraphX")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_upmoveMeterGraphY", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_upmoveMeterGraphY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(4), "Upmove meter Y:", 0.2, SETTINGS_ITEM_H, etj_upmoveMeterGraphY 0 -8 472 5, "Sets Y offset of upmove meter\netj_upmoveMeterGraphY")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(5), "etj_upmoveMeterGraphW", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(5), "etj_upmoveMeterGraphW", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(5), "Upmove meter width:", 0.2, SETTINGS_ITEM_H, etj_upmoveMeterGraphW 6 2 40 1, "Sets width of upmove meter\netj_upmoveMeterGraphW")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(6), "etj_upmoveMeterGraphH", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(6), "etj_upmoveMeterGraphH", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(6), "Upmove meter height:", 0.2, SETTINGS_ITEM_H, etj_upmoveMeterGraphH 104 10 400 10, "Sets height of upmove meter\netj_upmoveMeterGraphH")
-        MULTI               (SETTINGS_ITEM_POS(7), "Graph color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterGraphColor", COLOR_LIST, "Sets upmove meter graph color\netj_upmoveMeterGraphColor")
-        MULTI               (SETTINGS_ITEM_POS(8), "Ground color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterGraphOnGroundColor", COLOR_LIST, "Sets on ground graph color\netj_upmoveMeterGraphOnGroundColor")
-        MULTI               (SETTINGS_ITEM_POS(9), "Pre-jump color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterGraphPreJumpColor", COLOR_LIST, "Sets prejump graph color\netj_upmoveMeterGraphPreJumpColor")
-        MULTI               (SETTINGS_ITEM_POS(10), "Post-jump color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterGraphPostJumpColor", COLOR_LIST, "Sets postjump graph color\netj_upmoveMeterGraphPostJumpColor")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(11), "etj_upmoveMeterGraphOutlineW", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        COMBO               (SETTINGS_COMBO_POS(7), "Graph color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterGraphColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets upmove meter graph color\netj_upmoveMeterGraphColor")
+        COMBO               (SETTINGS_COMBO_POS(8), "Ground color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterGraphOnGroundColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets on ground graph color\netj_upmoveMeterGraphOnGroundColor")
+        COMBO               (SETTINGS_COMBO_POS(9), "Pre-jump color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterGraphPreJumpColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets prejump graph color\netj_upmoveMeterGraphPreJumpColor")
+        COMBO               (SETTINGS_COMBO_POS(10), "Post-jump color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterGraphPostJumpColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets postjump graph color\netj_upmoveMeterGraphPostJumpColor")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(11), "etj_upmoveMeterGraphOutlineW", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(11), "Outline width:", 0.2, SETTINGS_ITEM_H, etj_upmoveMeterGraphOutlineW 1 1 10 1, "Sets width of upmove meter outline\netj_upmoveMeterGraphOutlineW")
-        MULTI               (SETTINGS_ITEM_POS(12), "Outline color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterGraphOutlineColor", COLOR_LIST, "Sets graph outline color\netj_upmoveMeterGraphOutlineColor")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(13), "etj_upmoveMeterTextX", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        COMBO               (SETTINGS_COMBO_POS(12), "Outline color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterGraphOutlineColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets graph outline color\netj_upmoveMeterGraphOutlineColor")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(13), "etj_upmoveMeterTextX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(13), "Text distance:", 0.2, SETTINGS_ITEM_H, etj_upmoveMeterTextX 6 0 20 1, "Sets horizontal text distance to upmove meter\netj_upmoveMeterTextX")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(14), "etj_upmoveMeterTextH", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(14), "etj_upmoveMeterTextH", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(14), "Text spacing:", 0.2, SETTINGS_ITEM_H, etj_upmoveMeterTextH 12 5 200 5, "Sets vertical spacing of upmove meter text\netj_upmoveMeterTextH")
-        MULTI               (SETTINGS_ITEM_POS(15), "Text color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterTextColor", COLOR_LIST, "Sets upmove meter graph text color\netj_upmoveMeterTextColor")
+        COMBO               (SETTINGS_COMBO_POS(15), "Text color:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterTextColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets upmove meter graph text color\netj_upmoveMeterTextColor")
         YESNO               (SETTINGS_ITEM_POS(16), "Text shadow:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterTextShadow", "Draw shadow on upmove meter text\netj_upmoveMeterTextShadow")
         MULTI               (SETTINGS_ITEM_POS(17), "Text size:", 0.2, SETTINGS_ITEM_H, "etj_upmoveMeterTextSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of upmove meter text\netj_upmoveMeterTextSize")
 

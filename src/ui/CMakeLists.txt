@@ -1,6 +1,8 @@
 file(GLOB UI_HEADERS "*.h" "*.hpp")
 
 add_library(ui MODULE
+	"etj_colorpicker.cpp"
+	"etj_demo_queue.cpp"
 	"ui_atoms.cpp"
 	"ui_gameinfo.cpp"
 	"ui_loadpanel.cpp"
@@ -13,7 +15,10 @@ add_library(ui MODULE
 	"../game/q_math.cpp"
 	"../game/q_shared.cpp"
 	"../cgame/etj_utilities.cpp"
+	"../game/etj_file.cpp"
+	"../game/etj_filesystem.cpp"
 	"../game/etj_string_utilities.cpp"
+	"../game/etj_syscall_ext_shared.cpp"
 	${UI_HEADERS}
 )
 target_compile_definitions(ui PRIVATE UIDLL)

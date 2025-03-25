@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,9 @@
 #include "etj_utilities.h"
 #include "etj_string_utilities.h"
 #include "g_local.h"
+#include "etj_filesystem.h"
 
+namespace ETJump {
 MapStatistics::MapStatistics()
     : _previousLevelTime(0), _currentMillisecondsPlayed(0),
       _currentMillisecondsOnServer(0), _currentMap(nullptr) {}
@@ -145,7 +147,8 @@ void MapStatistics::saveChanges() {
   _currentMap->lastPlayed = static_cast<int>(t);
 
   sqlite3 *db = nullptr;
-  auto rc = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
+  auto rc = sqlite3_open(
+      ETJump::FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
     Utilities::Error(ETJump::stringFormat("MapStatistics::saveChanges: Error: "
                                           "Failed to open database. (%d) %s.\n",
@@ -308,7 +311,8 @@ void MapStatistics::addNewMaps() {
 
 void MapStatistics::saveNewMaps(std::vector<std::string> newMaps) {
   sqlite3 *db = nullptr;
-  auto rc = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
+  auto rc = sqlite3_open(
+      ETJump::FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
     Utilities::Error(ETJump::stringFormat(
         "MapStatistics::saveNewMaps: Error: Could not open map "
@@ -370,7 +374,8 @@ bool MapStatistics::loadFromDatabase() {
 bool MapStatistics::loadMaps() {
   sqlite3 *db = nullptr;
 
-  auto rc = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
+  auto rc = sqlite3_open(
+      ETJump::FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
     Utilities::Error(ETJump::stringFormat("MapStatistics::loadMaps: Error: "
                                           "Failed to open database %s\n",
@@ -432,7 +437,8 @@ bool MapStatistics::loadMaps() {
 
 bool MapStatistics::createDatabase() {
   sqlite3 *db = nullptr;
-  auto rc = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
+  auto rc = sqlite3_open(
+      ETJump::FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
     Utilities::Error(ETJump::stringFormat(
         "MapStatistics::createDatabase: Error: Failed to open "
@@ -541,5 +547,4 @@ void MapStatistics::writeMapsToDisk(const std::string &fileName) {
   trap_FS_Write(str.c_str(), str.length(), f);
   trap_FS_FCloseFile(f);
 }
-
-MapStatistics::~MapStatistics() {}
+} // namespace ETJump

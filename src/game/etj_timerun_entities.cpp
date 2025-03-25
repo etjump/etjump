@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,11 +37,12 @@ namespace ETJump {
 std::map<std::string, int> TimerunEntity::runIndices;
 std::set<std::string> TimerunEntity::cleanNames;
 std::set<std::string> TimerunEntity::names;
-ETJump::Log TimerunEntity::logger = ETJump::Log("timerun entity");
 
 void TimerunEntity::setTimerunIndex(gentity_t *self) {
   char *name = nullptr;
   G_SpawnString("name", "default", &name);
+
+  Q_strncpyz(self->runName, name, sizeof(self->runName));
 
   if (level.timerunNamesCount > MAX_TIMERUNS) {
     G_Error("setTimerunIndex: Too many timeruns in the map (%d > %d)\n",
@@ -101,118 +102,123 @@ std::vector<std::string> timerunEntities{
 void TimerunEntity::validateTimerunEntities() {
   std::map<std::string, TimerunEntityValidationResult> validationResults;
 
-  for (int i = 0; i < MAX_GENTITIES; ++i) {
-    auto ent = g_entities[i];
+  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; ++i) {
+    const gentity_t *ent = &g_entities[i];
 
-    if (!Container::isIn(timerunEntities, ent.runName)) {
+    if (!std::any_of(timerunEntities.cbegin(), timerunEntities.cend(),
+                     [&ent](const std::string &entity) {
+                       return StringUtil::iEqual(ent->classname, entity);
+                     })) {
       continue;
     }
 
-    if (validationResults.count(ent.runName) == 0) {
-      validationResults[ent.runName] = TimerunEntityValidationResult{};
+    if (validationResults.count(ent->runName) == 0) {
+      validationResults[ent->runName] = TimerunEntityValidationResult{};
     }
 
-    if (ent.classname == std::string("target_startTimer") ||
-        ent.classname == std::string("trigger_startTimer")) {
-      validationResults[ent.runName].hasStartTimer = true;
-    } else if (ent.classname == std::string("target_stopTimer") ||
-               ent.classname == std::string("trigger_stopTimer")) {
-      validationResults[ent.runName].hasStopTimer = true;
-    } else if (ent.classname == std::string("target_checkpoint") ||
-               ent.classname == std::string("trigger_checkpoint")) {
-      validationResults[ent.runName].hasCheckpoints = true;
+    if (StringUtil::iEqual(ent->classname, "target_startTimer") ||
+        StringUtil::iEqual(ent->classname, "trigger_startTimer")) {
+      validationResults[ent->runName].hasStartTimer = true;
+    } else if (StringUtil::iEqual(ent->classname, "target_stopTimer") ||
+               StringUtil::iEqual(ent->classname, "trigger_stopTimer")) {
+      validationResults[ent->runName].hasStopTimer = true;
+    } else if (StringUtil::iEqual(ent->classname, "target_checkpoint") ||
+               StringUtil::iEqual(ent->classname, "trigger_checkpoint")) {
+      validationResults[ent->runName].hasCheckpoints = true;
     }
   }
 
   for (const auto &r : validationResults) {
-    if (!r.second.hasStartTimer) {
-
-      logger.error("Timerun `%s` is missing a start timer. Add one.\n",
-                   r.first);
-    }
-    if (!r.second.hasStopTimer) {
-      logger.error("Timerun `%s` is missing a start timer. Add one.\n",
-                   r.first);
+    if (!r.second.hasStartTimer && !r.second.hasStopTimer) {
+      G_Printf("^3WARNING: checkpoint found for timerun '%s^3' without start "
+               "and stop triggers\n",
+               r.first.c_str());
+    } else if (!r.second.hasStartTimer) {
+      G_Printf("^3WARNING: timerun '%s^3' has no start trigger\n",
+               r.first.c_str());
+    } else if (!r.second.hasStopTimer) {
+      G_Printf("^3WARNING: timerun '%s^3' has no stop trigger\n",
+               r.first.c_str());
     }
   }
 }
 
-bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
-                                    const int *clientNum, const float *speed) {
-  auto client = activator->client;
+bool TimerunEntity::canStartTimerun(const gentity_t *self,
+                                    const gentity_t *activator,
+                                    const int clientNum, const float speed) {
+  const auto client = activator->client;
 
   if (!client->pers.enableTimeruns || client->sess.timerunActive) {
     return false;
   }
 
-  // disable some checks if we're on a debugging session
-  if (!g_debugTimeruns.integer) {
-    if (client->noclip || activator->flags & FL_GODMODE) {
-      Printer::SendCenterMessage(
-          *clientNum,
-          "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
-      return false;
-    }
+  // disable checks if cheats are enabled
+  if (g_cheats.integer) {
+    return true;
+  }
 
-    if (client->noclipThisLife) {
-      Printer::SendCenterMessage(
-          *clientNum, "^3WARNING: ^7Timerun was not started. ^3noclip "
-                      "^7activated this life, ^3/kill ^7required!");
-      return false;
-    }
+  if (client->noclip || activator->flags & FL_GODMODE) {
+    Printer::center(
+        clientNum,
+        "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
+    return false;
+  }
 
-    if (client->setoffsetThisLife) {
-      Printer::SendCenterMessage(
-          *clientNum, "^3WARNING: ^7Timerun was not started. ^3setoffset "
-                      "^7activated this life, ^3/kill ^7required!");
-      return false;
-    }
+  if (client->noclipThisLife) {
+    Printer::center(clientNum, "^3WARNING: ^7Timerun was not started. ^3noclip "
+                               "^7activated this life, ^3/kill ^7required!");
+    return false;
+  }
 
-    if (client->ftNoGhostThisLife &&
-        !(self->spawnflags &
-          static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
-      Printer::SendCenterMessage(
-          *clientNum,
-          "^3WARNING: ^7Timerun was not started. ^3fireteam noghost ^7enabled "
-          "this life & run does not allow noghost, ^3/kill ^7required!");
-      return false;
-    }
+  if (client->setoffsetThisLife) {
+    Printer::center(clientNum,
+                    "^3WARNING: ^7Timerun was not started. ^3setoffset "
+                    "^7activated this life, ^3/kill ^7required!");
+    return false;
+  }
 
-    if (client->ftShoveThisLife &&
-        !(self->spawnflags &
-          static_cast<int>(TimerunSpawnflags::AllowFTShove))) {
-      Printer::SendCenterMessage(
-          *clientNum,
-          "^3WARNING: ^7Timerun was not started. ^3fireteam shove ^7enabled "
-          "this life & run does not allow shove, ^3/kill ^7required!");
-      return false;
-    }
+  if (client->ftNoGhostThisLife &&
+      !(self->spawnflags &
+        static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
+    Printer::center(
+        clientNum,
+        "^3WARNING: ^7Timerun was not started. ^3fireteam noghost ^7enabled "
+        "this life & run does not allow noghost, ^3/kill ^7required!");
+    return false;
+  }
 
-    if (client->pmoveOffThisLife &&
-        (!self->spawnflags ||
-         self->spawnflags &
-             static_cast<int>(TimerunSpawnflags::ResetNoPmove))) {
-      Printer::SendCenterMessage(
-          *clientNum, "^3WARNING: ^7Timerun was not started. ^3pmove_fixed 0 "
-                      "^7set this life, ^3/kill ^7required!");
-      return false;
-    }
+  if (client->ftShoveThisLife &&
+      !(self->spawnflags & static_cast<int>(TimerunSpawnflags::AllowFTShove))) {
+    Printer::center(
+        clientNum,
+        "^3WARNING: ^7Timerun was not started. ^3fireteam shove ^7enabled this "
+        "life & run does not allow shove, ^3/kill ^7required!");
+    return false;
+  }
 
-    if (*speed > self->velocityUpperLimit) {
-      Printer::SendCenterMessage(
-          *clientNum, stringFormat("^3WARNING: ^7Timerun was not started. Too "
-                                   "high starting speed (%.2f > %.2f)\n",
-                                   *speed, self->velocityUpperLimit));
-      return false;
-    }
+  if (client->pmoveOffThisLife &&
+      (!self->spawnflags ||
+       self->spawnflags & static_cast<int>(TimerunSpawnflags::ResetNoPmove))) {
+    Printer::center(clientNum,
+                    "^3WARNING: ^7Timerun was not started. ^3pmove_fixed 0 "
+                    "^7set this life, ^3/kill ^7required!");
+    return false;
+  }
 
-    if (client->ps.viewangles[ROLL] != 0) {
-      Printer::SendCenterMessage(
-          *clientNum, stringFormat("^3WARNING: ^7Timerun was not started. "
-                                   "Illegal roll angles (%.2f != 0)",
-                                   client->ps.viewangles[ROLL]));
-      return false;
-    }
+  if (speed > self->velocityUpperLimit) {
+    Printer::center(clientNum,
+                    stringFormat("^3WARNING: ^7Timerun was not started. Too "
+                                 "high starting speed (%.2f > %.2f)\n",
+                                 speed, self->velocityUpperLimit));
+    return false;
+  }
+
+  if (client->ps.viewangles[ROLL] != 0) {
+    Printer::center(clientNum,
+                    stringFormat("^3WARNING: ^7Timerun was not started. "
+                                 "Illegal roll angles (%.2f != 0)",
+                                 client->ps.viewangles[ROLL]));
+    return false;
   }
 
   return true;
@@ -276,7 +282,7 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
   auto client = activator->client;
   const float speed = VectorLength(client->ps.velocity);
 
-  if (!canStartTimerun(self, activator, &clientNum, &speed)) {
+  if (!canStartTimerun(self, activator, clientNum, speed)) {
     return;
   }
 
@@ -287,7 +293,7 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
       client->sess.runSpawnflags &
           static_cast<int>(TimerunSpawnflags::ResetNoPmove)) {
     if (!client->pers.pmoveFixed) {
-      Printer::SendCenterMessage(
+      Printer::center(
           clientNum,
           "^3WARNING: ^7Timerun was not started. ^3pmove_fixed ^7is disabled!");
       return;
@@ -295,8 +301,7 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
   }
 
   if (!client->sess.timerunCheatsNotified && g_cheats.integer) {
-    Printer::SendPopupMessage(clientNum,
-                              "^3WARNING: ^7Cheats are enabled! Timerun "
+    Printer::popup(clientNum, "^3WARNING: ^7Cheats are enabled! Timerun "
                               "records will not be saved!\n");
     client->sess.timerunCheatsNotified = true;
   }

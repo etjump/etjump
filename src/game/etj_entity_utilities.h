@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,5 +34,12 @@ public:
   static bool isPlayer(gentity_t *ent);
   static void checkForRailBox(gentity_t *ent);
   static bool playerIsSolid(int self, int other);
+
+  // 'threshold' indicates the number of entities that must be free
+  static bool entitiesFree(int threshold);
+
+  // sets 'value' to corresponding cursorhint from 'hint'
+  // if 'hint' isn't found in hintStrings, no modification is performed
+  static void setCursorhintFromString(int &value, const std::string &hint);
 };
 } // namespace ETJump

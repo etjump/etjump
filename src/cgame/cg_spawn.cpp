@@ -265,7 +265,7 @@ spawn_t spawns[] = {
     {"corona", SP_corona},
 };
 
-#define NUMSPAWNS (sizeof(spawns) / sizeof(spawn_t))
+inline constexpr int NUMSPAWNS = sizeof(spawns) / sizeof(spawn_t);
 
 /*
 ===================
@@ -286,7 +286,7 @@ void CG_ParseEntityFromSpawnVars(void) {
   }
 
   if (CG_SpawnString("classname", "", &classname)) {
-    for (i = 0; i < static_cast<int>(NUMSPAWNS); i++) {
+    for (i = 0; i < NUMSPAWNS; i++) {
       if (!Q_stricmp(spawns[i].name, classname)) {
         spawns[i].spawn();
         break;
@@ -409,8 +409,6 @@ void SP_worldspawn(void) {
 
   cg.mapcoordsScale[0] = 1 / (cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]);
   cg.mapcoordsScale[1] = 1 / (cg.mapcoordsMaxs[1] - cg.mapcoordsMins[1]);
-
-  BG_InitLocations(cg.mapcoordsMins, cg.mapcoordsMaxs);
 
   CG_SpawnString("atmosphere", "", &s);
   CG_EffectParse(s);

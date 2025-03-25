@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@ public:
   static bool inMainAccelZone(const playerState_t &ps, pmove_t *pm);
 
   Snaphud();
-  ~Snaphud(){};
+  ~Snaphud() {};
 
 private:
   bool canSkipDraw() const;
@@ -57,6 +57,13 @@ private:
   void startListeners();
 
   enum class SnapTrueness { SNAP_JUMPCROUCH = 1, SNAP_GROUND = 2 };
+
+  enum class HudType {
+    SNAP_OFF = 0,
+    SNAP_NORMAL = 1,
+    SNAP_EDGE = 2,
+    SNAP_BORDER = 3,
+  };
 
   struct snaphud_t {
     float a = 0.0f;
@@ -73,8 +80,10 @@ private:
 
   int yaw{};
   vec4_t snaphudColors[4]{};
-  bool edgesOnly{};
   int edgeThickness{};
+  float borderThickness{};
+  HudType hudType{};
+  bool borderOnly{};
   int lastUpdateTime{};
 
   playerState_t *ps = &cg.predictedPlayerState;

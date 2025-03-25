@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,9 +48,8 @@ public:
 
   template <typename T>
   static std::string createPlaceholderString(const std::vector<T> &input) {
-    return StringUtil::join(Container::map(input, [](const auto &e) {
-      return "?";
-    }), ",");
+    return StringUtil::join(
+        Container::map(input, [](const auto &e) { return "?"; }), ",");
   }
 
   // expose the database object directly
@@ -62,4 +61,4 @@ private:
   std::string _name;
   std::vector<Migration> _migrations;
 };
-}
+} // namespace ETJump

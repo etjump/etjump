@@ -15,6 +15,7 @@ menuDef {
     fullscreen 0
     rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
     style WINDOW_STYLE_FILLED
+    centered
 
     onOpen {
         conditionalscript uiCheckBackground 2
@@ -55,7 +56,7 @@ menuDef {
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "MISCELLANEOUS")
 
         YESNO               (SETTINGS_ITEM_POS(1), "Draw FPS:", 0.2, SETTINGS_ITEM_H, "cg_drawFPS", "Draw FPS meter\ncg_drawFPS")
-        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_FPSMeterUpdateInterval", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
+        CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_FPSMeterUpdateInterval", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "FPS meter update interval:", 0.2, SETTINGS_ITEM_H, etj_FPSMeterUpdateInterval 250 0 1000 10, "Sets FPS meter update interval in milliseconds\netj_FPSMeterUpdateInterval")
         MULTI               (SETTINGS_ITEM_POS(3), "Draw clock:", 0.2, SETTINGS_ITEM_H, "etj_drawClock", cvarFloatList { "No" 0 "24h" 1 "12h" 2 }, "Draw local clock\netj_drawClock")
         YESNO               (SETTINGS_ITEM_POS(4), "Draw charge bar:", 0.2, SETTINGS_ITEM_H, "etj_HUD_chargeBar", "Draw charge bar on HUD\netj_HUD_chargeBar")
@@ -67,9 +68,15 @@ menuDef {
         YESNO               (SETTINGS_ITEM_POS(10), "Draw XP info:", 0.2, SETTINGS_ITEM_H, "etj_HUD_xpInfo", "Draw XP info on HUD\netj_HUD_xpInfo")
         MULTI               (SETTINGS_ITEM_POS(11), "HUD projection:", 0.2, SETTINGS_ITEM_H, "etj_projection", cvarFloatList { "Rectilinear" 0 "Cylindrical" 1 "Panini" 2 }, "Sets projection type of CGaz 1 and snaphud\netj_projection")
         YESNO               (SETTINGS_ITEM_POS(12), "Draw banners:", 0.2, SETTINGS_ITEM_H, "etj_drawBanners", "Draw banner prints on HUD\netj_drawBanners")
-        EDITFIELD_EXT       (SETTINGS_EF_POS(13), "Save message:", 0.2, SETTINGS_ITEM_H, "etj_saveMsg", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Message to print when saving position\netj_saveMsg")
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS(14), "etj_expandedMapAlpha", 0.2, ITEM_ALIGN_RIGHT, SLIDER_LABEL_X, SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(14), "Expanded map alpha:", 0.2, SETTINGS_ITEM_H, etj_expandedMapAlpha 0.7 0 1 0.05, "Sets transparency of expanded map\netj_expandedMapAlpha")
+        YESNO               (SETTINGS_ITEM_POS(13), "Draw recording status:", 0.2, SETTINGS_ITEM_H, "etj_drawRecordingStatus", "Draw demo/wav recording status on HUD\netj_drawRecordingStatus")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(14), "etj_recordingStatusX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(14), "Recording status X:", 0.2, SETTINGS_ITEM_H, etj_recordingStatusX 2 0 640 5, "Sets X position of recording status text\netj_recordingStatusX")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(15), "etj_recordingStatusY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(15), "Recording status Y:", 0.2, SETTINGS_ITEM_H, etj_recordingStatusY 9 0 480 5, "Sets Y position of recording status text\netj_recordingStatusY")
+        EDITFIELD_EXT       (SETTINGS_EF_POS(16), "Save message:", 0.2, SETTINGS_ITEM_H, "etj_saveMsg", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Message to print when saving position\netj_saveMsg")
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(17), "etj_expandedMapAlpha", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(17), "Expanded map alpha:", 0.2, SETTINGS_ITEM_H, etj_expandedMapAlpha 0.7 0 1 0.05, "Sets transparency of expanded map\netj_expandedMapAlpha")
+        YESNO               (SETTINGS_ITEM_POS(18), "Fixed compass shader:", 0.2, SETTINGS_ITEM_H, "etj_fixedCompassShader", "Override the command map shader and ensure corners are masked off correctly\nMight break certain special command map shaders\nvid_restart required\netj_fixedCompassShader")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

@@ -97,7 +97,8 @@ void CG_SetEntitySoundPosition(centity_t *cent) {
   }
 }
 
-#define LS_FRAMETIME 100 // (ms)  cycle through lightstyle characters at 10fps
+// (ms) cycle through lightstyle characters at 10fps
+inline constexpr int LS_FRAMETIME = 100;
 
 /*
 ==============
@@ -1752,6 +1753,13 @@ static void CG_Mover(centity_t *cent) {
       cent->trailTime = 0;
     }
 
+    // misc_constructiblemarker supports 'model2' + 'skin',
+    // latter is stored in ent->s.effect1Time
+    if (cent->currentState.eType == ET_CONSTRUCTIBLE_MARKER &&
+        cent->currentState.effect1Time) {
+      ent.customSkin = cgs.gameModelSkins[cent->currentState.effect1Time];
+    }
+
     trap_R_AddRefEntityToScene(&ent);
     memcpy(&cent->refEnt, &ent, sizeof(refEntity_t));
   } else {
@@ -2061,7 +2069,8 @@ typedef enum cabinetType_e {
   CT_MAX,
 } cabinetType_t;
 
-#define MAX_CABINET_TAGS 6
+inline constexpr int MAX_CABINET_TAGS = 6;
+
 typedef struct cabinetTag_s {
   const char *tagsnames[MAX_CABINET_TAGS];
 
@@ -2440,12 +2449,15 @@ static void CG_PortalGate(centity_t *cent) {
 
 // TODO: This is just a straight copy from tjl addIndicator
 // Should prolly use a common function/maybe even a 3d ball/model?.
-#define TOKEN_DIFFICULTY_EASY 0
-#define TOKEN_DIFFICULTY_MEDIUM 1
-#define TOKEN_DIFFICULTY_HARD 2
-static vec4_t clrRed = {255, 0, 0, 255};
-static vec4_t clrGreen = {0, 255, 0, 255};
-static vec4_t clrOrange = {128, 128, 0, 255};
+
+inline constexpr int TOKEN_DIFFICULTY_EASY = 0;
+inline constexpr int TOKEN_DIFFICULTY_MEDIUM = 1;
+inline constexpr int TOKEN_DIFFICULTY_HARD = 2;
+
+inline constexpr vec4_t clrRed = {255, 0, 0, 255};
+inline constexpr vec4_t clrGreen = {0, 255, 0, 255};
+inline constexpr vec4_t clrOrange = {128, 128, 0, 255};
+
 static void CG_TokenMarker(centity_t *cent, int difficulty) {
   float quadSize = 16;
   vec3_t point;

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,14 +22,30 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include "etj_syscall_ext_shared.h"
 
-namespace Numeric {
-template <typename T, typename U, typename V>
-inline T clamp(const T &value, const U &min, const V &max) noexcept {
-  if (std::is_floating_point<T>::value && !std::isfinite(value)) {
-    return 0;
+namespace ETJump {
+void SyscallExt::setupExtensions() {
+  trap_Cvar_VariableStringBuffer(entryPointCvar, value, sizeof(value));
+
+  // extension system not supported by the engine
+  if (value[0] == '\0') {
+    return;
   }
-  return std::min(std::max(value, static_cast<T>(min)), static_cast<T>(max));
+
+  dll_com_trapGetValue = Q_atoi(value);
+
+#ifdef CGAMEDLL
+  for (auto &ext : cgameExtensions) {
+    setupExtensionTrap(value, ext.first, ext.second);
+  }
+#endif
 }
-} // namespace Numeric
+
+void SyscallExt::setupExtensionTrap(char *value, const std::string &name,
+                                    int &trap) {
+  if (trap_GetValue(value, MAX_CVAR_VALUE_STRING, name.c_str())) {
+    trap = Q_atoi(value);
+  }
+}
+} // namespace ETJump

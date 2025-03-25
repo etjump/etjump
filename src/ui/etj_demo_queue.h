@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,51 @@
 
 #pragma once
 
-#if defined(__linux__) || defined(__APPLE__)
-  #define FN_PUBLIC __attribute__((visibility("default")))
-#elif defined(_WIN32)
-  // https://msdn.microsoft.com/en-us/library/wf2w9f6x.aspx
-  #define FN_PUBLIC __declspec(dllexport)
-#else
-  #error "Unsupported compiler"
-#endif
+#include <string>
+#include <vector>
+#include <array>
+#include <functional>
+
+namespace ETJump {
+class DemoQueue {
+public:
+  DemoQueue();
+  ~DemoQueue() = default;
+
+  void commandHandler();
+  void setManualSkip();
+
+  bool manualSkip{};
+
+private:
+  std::vector<std::string> queue;
+  std::string demoExt;
+
+  void initCommands();
+  void initProtocol();
+  void initQueue();
+  static void playDemo();
+
+  void start() const;
+  static void stop();
+  void restart() const;
+  void gotoDemo(const std::vector<std::string> &args);
+  void printStatus();
+  void printHelp(const std::string &cmd) const;
+
+  int getCurrentDemoIndex();
+  bool isValidCommand(const std::string &cmd) const;
+  bool canStartPlayback() const;
+  static bool playbackActive();
+  static void disableManualSkip();
+
+  struct DemoQueueCommand {
+    std::string cmdString;
+    std::string helpText;
+    std::function<void()> callback;
+  };
+
+  static constexpr int NUM_DEMOQUEUE_COMMANDS = 8;
+  std::array<DemoQueueCommand, NUM_DEMOQUEUE_COMMANDS> commands{};
+};
+} // namespace ETJump

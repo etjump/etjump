@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -63,6 +63,9 @@
 #include "etj_accel_color.h"
 #include "etj_utilities.h"
 #include "etj_player_bbox.h"
+#include "etj_pmove_utils.h"
+#include "etj_savepos.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -84,10 +87,12 @@ std::shared_ptr<TimerunView> timerunView;
 std::shared_ptr<TrickjumpLines> trickjumpLines;
 std::shared_ptr<ClientRtvHandler> rtvHandler;
 std::shared_ptr<AreaIndicator> areaIndicator;
-std::shared_ptr<DemoCompatibility> demoCompatibility;
+std::unique_ptr<DemoCompatibility> demoCompatibility;
 std::shared_ptr<AccelColor> accelColor;
 std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 std::shared_ptr<PlayerBBox> playerBBox;
+std::unique_ptr<SavePos> savePos;
+std::unique_ptr<SyscallExt> syscallExt;
 } // namespace ETJump
 
 static bool isInitialized{false};
@@ -208,8 +213,7 @@ void init() {
         trap_SendClientCommand(command.c_str());
       },
       [](const std::string &message) { CG_Printf(message.c_str()); },
-      bind(&ETJump::OperatingSystem::getHwid, ETJump::operatingSystem),
-      ETJump::serverCommandsHandler);
+      [] { return OperatingSystem::getHwid(); }, ETJump::serverCommandsHandler);
 
   playerEventsHandler = std::make_shared<PlayerEventsHandler>();
   awaitedCommandHandler = std::make_shared<AwaitedCommandHandler>(
@@ -221,8 +225,9 @@ void init() {
   // TODO: move these to own client commands handler
   ////////////////////////////////////////////////////////////////
   auto minimize = [](const std::vector<std::string> &args) {
-    operatingSystem->minimize();
+    OperatingSystem::minimize();
   };
+
   consoleCommandsHandler->subscribe("min", minimize);
   consoleCommandsHandler->subscribe("minimize", minimize);
   ////////////////////////////////////////////////////////////////
@@ -230,7 +235,7 @@ void init() {
   rtvHandler = std::make_shared<ClientRtvHandler>();
   rtvHandler->initialize();
 
-  demoCompatibility = std::make_shared<DemoCompatibility>();
+  demoCompatibility = std::make_unique<DemoCompatibility>();
   accelColor = std::make_shared<AccelColor>();
 
   playerBBox = std::make_shared<PlayerBBox>();
@@ -322,7 +327,14 @@ void init() {
   // restores timerun after vid_restart (if required)
   trap_SendClientCommand("timerun_status");
 
+  // must be called after 'initTimer' so the pointer is valid!
+  savePos = std::make_unique<SavePos>(timerun);
+
   std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
+
+  syscallExt = std::make_unique<SyscallExt>();
+  syscallExt->setupExtensions();
+  SyscallExt::trap_CmdBackup_Ext();
 
   trickjumpLines = std::make_shared<TrickjumpLines>();
 
@@ -380,11 +392,25 @@ void shutdown() {
   ETJump::playerEventsHandler = nullptr;
   ETJump::entityEventsHandler = nullptr;
 
+  ETJump::savePos = nullptr;
+
+  syscallExt = nullptr;
+
   isInitialized = false;
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
                                      " shutdown... " S_COLOR_GREEN "DONE\n");
+}
+
+// FIXME: this should probably be somewhere else
+void resetCustomvoteInfo() {
+  cg.numCustomvotesRequested = false;
+  cg.customvoteInfoRequested = false;
+  cg.numCustomvotes = -1;
+  cg.numCustomvoteInfosRequested = 0;
+
+  trap_SendConsoleCommand("uiResetCustomvotes\n");
 }
 } // namespace ETJump
 
@@ -417,6 +443,66 @@ qboolean CG_ServerCommandExt(const char *cmd) {
 
   if (command == "tjl_displaybynumber") {
     return CG_displaybynumber();
+  }
+
+  // TODO: The client will always request map list after cgame is initialized,
+  //  thus making '!listmaps' command sort of redundant. The command itself
+  //  should probably stay (the output formatting is nice and all),
+  //  but now that we're always receiving a full map list from server,
+  //  we could use a local cache for map list instead of requesting it again.
+  if (command == "maplist") {
+    std::string uiCommand = "uiParseMaplist";
+
+    // start iterating from 1 to skip the command string
+    for (int i = 1, len = trap_Argc(); i < len; i++) {
+      uiCommand += " " + std::string(CG_Argv(i));
+    }
+
+    uiCommand += '\n';
+
+    // we need to forward this command to UI to parse the list there,
+    // so we can populate the map vote list
+    trap_SendConsoleCommand(uiCommand.c_str());
+    return qtrue;
+  }
+
+  if (command == "forceCustomvoteRefresh") {
+    ETJump::resetCustomvoteInfo();
+    return qtrue;
+  }
+
+  if (command == "numcustomvotes") {
+    if (trap_Argc() < 2) {
+      return qtrue;
+    }
+
+    cg.numCustomvotes = Q_atoi(CG_Argv(1));
+    // forward count to UI
+    trap_SendConsoleCommand(va("uiNumCustomvotes %i\n", cg.numCustomvotes));
+    return qtrue;
+  }
+
+  if (command == "customvotelist") {
+    std::string uiCommand = "uiParseCustomvote";
+
+    for (int i = 1, len = trap_Argc(); i < len; i++) {
+      uiCommand += " " + std::string(CG_Argv(i));
+    }
+
+    uiCommand += '\n';
+
+    trap_SendConsoleCommand(uiCommand.c_str());
+    return qtrue;
+  }
+
+  if (command == "pmFlashWindow") {
+    if (etj_highlight.integer &
+        static_cast<int>(ETJump::ChatHighlightFlags::HIGHLIGHT_FLASH)) {
+      ETJump::SyscallExt::trap_SysFlashWindowETLegacy(
+          ETJump::SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
+    }
+
+    return qtrue;
   }
 
   return qfalse;
@@ -575,6 +661,54 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
     trap_SendConsoleCommand(va("fireteam rules savelimit %i\n", limit));
     return qtrue;
   }
+
+  if (command == "forceMaplistRefresh") {
+    cg.maplistRequested = false;
+    return qtrue;
+  }
+
+  if (command == "forceCustomvoteRefresh") {
+    ETJump::resetCustomvoteInfo();
+    return qtrue;
+  }
+
+  if (command == "uiRequestCustomvotes") {
+    cg.customvoteInfoRequested = true;
+    return qtrue;
+  }
+
+  if (command == "uiChatMenuOpen") {
+    if (trap_Argc() > 1) {
+      cg.chatMenuOpen = Q_atoi(CG_Argv(1));
+    }
+
+    return qtrue;
+  }
+
+  // cgame handles console commands before UI, so we catch some of the demo
+  // queue commands here in order to inform UI that the command was
+  // manually executed by the user. This avoids sending automatic
+  // 'next' command on UI shutdown, as we can inform the UI that the command
+  // was executed manually. On normal queue behavior, UI sends 'next' command
+  // on shutdown, but because cgame isn't loaded at that point, it's ignored.
+  if (command == "demoQueue") {
+    const int argc = trap_Argc();
+    if (argc < 2) {
+      return qfalse;
+    }
+
+    const char *demoQueueCmd = CG_Argv(1);
+
+    if (!Q_stricmp(demoQueueCmd, "next") ||
+        !Q_stricmp(demoQueueCmd, "previous") ||
+        !Q_stricmp(demoQueueCmd, "restart") ||
+        !Q_stricmp(demoQueueCmd, "goto")) {
+      trap_SendConsoleCommand("uiDemoQueueManualSkip 1\n");
+      // return qfalse here so the original command gets handled by UI!
+      return qfalse;
+    }
+  }
+
   return qfalse;
 }
 
@@ -637,7 +771,13 @@ void runFrameEnd() {
   }
 
   if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.chatReplayReceived) {
-    trap_SendConsoleCommand("getchatreplay");
+    if (etj_chatReplay.integer) {
+      trap_SendConsoleCommand("getchatreplay");
+    }
+
+    // keep this separate from the cvar check, so client doesn't immediately
+    // receive chat replay in the middle of a map when toggling this,
+    // as the replay would just be whatever is currently in chat
     cg.chatReplayReceived = true;
   }
 
@@ -675,6 +815,52 @@ void runFrameEnd() {
         cg.portalgunBindingsAdjusted = false;
       }
     }
+  }
+
+  // handle autospec feature
+  if (!cg.demoPlayback && etj_autoSpec.integer) {
+    constexpr int minAutoSpecDelay = 1000; // 1s
+    static int lastActivity = -minAutoSpecDelay;
+
+    const auto ps = getValidPlayerState();
+    const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, CMDSCALE_DEFAULT);
+    const auto team = cgs.clientinfo[cg.clientNum].team;
+    const bool moving = (cmd.forwardmove || cmd.rightmove || cmd.forwardmove);
+    const bool following = ps->pm_flags & PMF_FOLLOW;
+
+    if (team != TEAM_SPECTATOR || (!following && moving) ||
+        (following && moving)) {
+      lastActivity = cg.time;
+    } else if (cg.time - lastActivity >=
+               std::max(etj_autoSpecDelay.integer, minAutoSpecDelay)) {
+      // it's time to follow the next player
+      trap_SendClientCommand("follownext");
+      lastActivity = cg.time;
+    }
+  }
+
+  // populate map vote menu
+  if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.maplistRequested) {
+    trap_SendClientCommand("requestmaplist");
+    cg.maplistRequested = true;
+  }
+
+  if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.numCustomvotesRequested) {
+    cg.numCustomvotes = -1;
+    cg.numCustomvoteInfosRequested = 0;
+
+    trap_SendClientCommand("requestnumcustomvotes");
+    cg.numCustomvotesRequested = true;
+  }
+
+  // space out customvote info requests a bit, otherwise we get a
+  // big lag spike if the server has lots of data to send
+  if (!cg.demoPlayback && cg.customvoteInfoRequested && cg.numCustomvotes > 0 &&
+      cg.clientFrame >= 10 + (cg.numCustomvoteInfosRequested * 25) &&
+      cg.numCustomvoteInfosRequested < cg.numCustomvotes) {
+    trap_SendClientCommand(
+        va("requestcustomvoteinfo %i", cg.numCustomvoteInfosRequested));
+    cg.numCustomvoteInfosRequested++;
   }
 }
 

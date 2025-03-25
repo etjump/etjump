@@ -1,7 +1,9 @@
 // cg_view.c -- setup all the parameters (position, angle, etc)
 // for a 3D rendering
+
+#include <algorithm>
+
 #include "cg_local.h"
-#include "../game/etj_numeric_utilities.h"
 
 //========================
 extern pmove_t cg_pmove;
@@ -243,7 +245,7 @@ static void CG_OffsetFreeCamView(void) {
   if (etj_demo_lookat.integer != -1) {
     centity_t *temp;
     vec3_t dir;
-    int entNum = Numeric::clamp(etj_demo_lookat.integer, 0, MAX_GENTITIES - 1);
+    int entNum = std::clamp(etj_demo_lookat.integer, 0, MAX_GENTITIES - 1);
     temp = &cg_entities[entNum];
     VectorSubtract(temp->lerpOrigin, cgs.demoCam.camOrigin, dir);
 
@@ -257,7 +259,8 @@ CG_OffsetThirdPersonView
 
 ===============
 */
-#define FOCUS_DISTANCE 400 // 800	//512
+inline constexpr int FOCUS_DISTANCE = 400;
+
 void CG_OffsetThirdPersonView(void) {
   vec3_t forward, right, up;
   vec3_t view;
@@ -801,21 +804,7 @@ static void CG_OffsetFirstPersonView(void) {
   }
 
   // add kick offset
-
   VectorAdd(origin, cg.kick_origin, origin);
-
-  // pivot the eye based on a neck length
-#if 0
-	{
-  #define NECK_LENGTH 8
-		vec3_t forward, up;
-
-		cg.refdef_current->vieworg[2] -= NECK_LENGTH;
-		AngleVectors(cg.refdefViewAngles, forward, NULL, up);
-		VectorMA(cg.refdef_current->vieworg, 3, forward, cg.refdef_current->vieworg);
-		VectorMA(cg.refdef_current->vieworg, NECK_LENGTH, up, cg.refdef_current->vieworg);
-	}
-#endif
 }
 
 //======================================================================
@@ -953,8 +942,8 @@ CG_CalcFov
 Fixed fov at intermissions, otherwise account for fov variable and zooms.
 ====================
 */
-#define WAVE_AMPLITUDE 1
-#define WAVE_FREQUENCY 0.4
+inline constexpr float WAVE_AMPLITUDE = 1.0f;
+inline constexpr float WAVE_FREQUENCY = 0.4f;
 
 static int CG_CalcFov(void) {
   static float lastfov = 90; // for transitions back from zoomed in modes
@@ -988,7 +977,7 @@ static int CG_CalcFov(void) {
     fov_x = 90;
   } else {
     fov_x = cg_fov.value;
-    if (!developer.integer) {
+    if (!developer.integer && !cg.demoPlayback) {
       if (fov_x < 90) {
         fov_x = 90;
       } else if (fov_x > 160) {
@@ -1122,10 +1111,8 @@ static int CG_CalcFov(void) {
 CG_UnderwaterSounds
 ==============
 */
-#define UNDERWATER_BIT 16
-static void CG_UnderwaterSounds(void) {
-  //	trap_S_AddLoopingSound( cent->lerpOrigin, vec3_origin,
-  // cgs.media.underWaterSound, 255, 0 );
+inline constexpr int UNDERWATER_BIT = 16;
+static void CG_UnderwaterSounds() {
   trap_S_AddLoopingSound(cg.snap->ps.origin, vec3_origin,
                          cgs.media.underWaterSound, 255 | (1 << UNDERWATER_BIT),
                          0);
@@ -1206,48 +1193,64 @@ static void CG_DamageBlendBlob(void) {
   }
 }
 
-/*
-===============
-CG_DrawScreenFade
-===============
-*/
-static void CG_DrawScreenFade(void) {
-  /* moved over to cg_draw.c
-      static int lastTime;
-      int elapsed, time;
-      refEntity_t		ent;
+namespace ETJump {
+void updateRefdefAngles(const playerState_t *ps) {
+  // sync up with playerstate values and exit if we're:
+  // - prone
+  // - mounted
+  // - using a set weapon (mortar, mobile mg42)
+  // - wounded and waiting for medic
+  //
+  // this is because we need pmext values to accurately calculate viewangles
+  // in these scenarios, but the values might be out of date since we're not
+  // necessarily running pmove as fast as we update viewangles,
+  // which causes the refdef angles to gradually desync with real viewangles
+  // TODO: see if we could make this work? it's not critical though
+  if (ps->eFlags & EF_PRONE || BG_PlayerMounted(ps->eFlags) ||
+      ps->weapon == WP_MORTAR_SET || ps->weapon == WP_MOBILE_MG42_SET) {
+    VectorCopy(ps->viewangles, cg.refdefViewAngles);
+    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
+    return;
+  }
 
-      if (cgs.fadeStartTime + cgs.fadeDuration < cg.time) {
-          cgs.fadeAlphaCurrent = cgs.fadeAlpha;
-      } else if (cgs.fadeAlphaCurrent != cgs.fadeAlpha) {
-          elapsed = (time = trap_Milliseconds()) - lastTime;	// we
-     need to use trap_Milliseconds() here since the cg.time gets
-     modified upon reloading lastTime = time; if (elapsed < 500 &&
-     elapsed > 0) { if (cgs.fadeAlphaCurrent > cgs.fadeAlpha) {
-                  cgs.fadeAlphaCurrent -=
-     ((float)elapsed/(float)cgs.fadeDuration); if (cgs.fadeAlphaCurrent
-     < cgs.fadeAlpha) cgs.fadeAlphaCurrent = cgs.fadeAlpha; } else {
-                  cgs.fadeAlphaCurrent +=
-     ((float)elapsed/(float)cgs.fadeDuration); if (cgs.fadeAlphaCurrent
-     > cgs.fadeAlpha) cgs.fadeAlphaCurrent = cgs.fadeAlpha;
-              }
-          }
+  // DHM - Nerve :: Added support for PMF_TIME_LOCKPLAYER
+  if (ps->pm_type == PM_INTERMISSION || ps->pm_flags & PMF_TIME_LOCKPLAYER) {
+    VectorCopy(ps->viewangles, cg.refdefViewAngles);
+    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
+    return;
+  }
+
+  if (ps->pm_type != PM_SPECTATOR && ps->stats[STAT_HEALTH] <= 0) {
+    VectorCopy(ps->viewangles, cg.refdefViewAngles);
+    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
+    return;
+  }
+
+  usercmd_t cmd;
+  const int cmdNum = trap_GetCurrentCmdNumber();
+  trap_GetUserCmd(cmdNum, &cmd);
+
+  // circularly clamp the angles with deltas
+  for (int i = 0; i < 2; i++) {
+    auto temp = static_cast<int16_t>(cmd.angles[i] + cg.refdefDeltaAngles[i]);
+    if (i == PITCH) {
+      // don't let the player look up or down more than 90 degrees
+      if (temp > 16000) {
+        cg.refdefDeltaAngles[i] = 16000 - cmd.angles[i];
+        temp = 16000;
+      } else if (temp < -16000) {
+        cg.refdefDeltaAngles[i] = -16000 - cmd.angles[i];
+        temp = -16000;
       }
-      // now draw the fade
-      if (cgs.fadeAlphaCurrent > 0.0) {
-          memset( &ent, 0, sizeof( ent ) );
-          ent.reType = RT_SPRITE;
-          ent.renderfx = RF_FIRST_PERSON;
+    }
 
-          VectorMA( cg.refdef_current->vieworg, 8,
-     cg.refdef_current->viewaxis[0], ent.origin ); ent.radius = 80;
-     // occupy entire screen ent.customShader = cgs.media.viewFadeBlack;
-          ent.shaderRGBA[3] = (int)(255.0 * cgs.fadeAlphaCurrent);
+    cg.refdefViewAngles[i] = SHORT2ANGLE(temp);
+  }
 
-          trap_R_AddRefEntityToScene( &ent );
-      }
-  */
+  // copy ROLL angles from playerstate since only server can set them
+  cg.refdefViewAngles[ROLL] = ps->viewangles[ROLL];
 }
+} // namespace ETJump
 
 /*
 ===============
@@ -1256,20 +1259,12 @@ CG_CalcViewValues
 Sets cg.refdef view values
 ===============
 */
-int CG_CalcViewValues(void) {
-  playerState_t *ps;
-
+int CG_CalcViewValues() {
   memset(cg.refdef_current, 0, sizeof(cg.refdef));
-
-  // strings for in game rendering
-  // Q_strncpyz( cg.refdef.text[0], "Park Ranger",
-  // sizeof(cg.refdef_current->text[0]) ); Q_strncpyz(
-  // cg.refdef.text[1], "19", sizeof(cg.refdef_current->text[1]) );
 
   // calculate size of 3D view
   CG_CalcVrect();
-
-  ps = &cg.predictedPlayerState;
+  const playerState_t *ps = &cg.predictedPlayerState;
 
   if (cg.cameraMode) {
     vec3_t origin, angles;
@@ -1314,6 +1309,7 @@ int CG_CalcViewValues(void) {
   if (ps->pm_type == PM_INTERMISSION) {
     VectorCopy(ps->origin, cg.refdef_current->vieworg);
     VectorCopy(ps->viewangles, cg.refdefViewAngles);
+    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
     AnglesToAxis(cg.refdefViewAngles, cg.refdef_current->viewaxis);
     return CG_CalcFov();
   }
@@ -1324,9 +1320,9 @@ int CG_CalcViewValues(void) {
   }
 
   cg.bobcycle = (ps->bobCycle & 128) >> 7;
-  cg.bobfracsin = fabs(sin((ps->bobCycle & 127) / 127.0 * M_PI));
-  cg.xyspeed = sqrt(ps->velocity[0] * ps->velocity[0] +
-                    ps->velocity[1] * ps->velocity[1]);
+  cg.bobfracsin = std::fabs(std::sin(static_cast<float>(ps->bobCycle & 127) /
+                                     127.0f * static_cast<float>(M_PI)));
+  cg.xyspeed = VectorLength2(ps->velocity);
 
   if (cg.showGameView) {
     VectorCopy(cgs.ccPortalPos, cg.refdef_current->vieworg);
@@ -1345,7 +1341,7 @@ int CG_CalcViewValues(void) {
               ps->eFlags & EF_AAGUN_ACTIVE)) // Arnout: see if we're
                                              // attached to a gun
   {
-    centity_t *mg42 = &cg_entities[ps->viewlocked_entNum];
+    const centity_t *mg42 = &cg_entities[ps->viewlocked_entNum];
     vec3_t forward;
 
     AngleVectors(ps->viewangles, forward, NULL, NULL);
@@ -1353,16 +1349,25 @@ int CG_CalcViewValues(void) {
              cg.refdef_current->vieworg);
     cg.refdef_current->vieworg[2] = ps->origin[2];
     VectorCopy(ps->viewangles, cg.refdefViewAngles);
+    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
   } else if (ps->eFlags & EF_MOUNTEDTANK) {
-    centity_t *tank =
+    const centity_t *tank =
         &cg_entities[cg_entities[cg.snap->ps.clientNum].tagParent];
 
     VectorCopy(tank->mountedMG42Player.origin, cg.refdef_current->vieworg);
     VectorCopy(ps->viewangles, cg.refdefViewAngles);
+    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
   } else {
     if (!cgs.demoCam.renderingFreeCam) {
       VectorCopy(ps->origin, cg.refdef_current->vieworg);
-      VectorCopy(ps->viewangles, cg.refdefViewAngles);
+
+      if (etj_smoothAngles.integer && cg_pmove.pmove_fixed &&
+          !(ps->pm_flags & PMF_FOLLOW)) {
+        ETJump::updateRefdefAngles(ps);
+      } else {
+        VectorCopy(ps->viewangles, cg.refdefViewAngles);
+        VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
+      }
     }
   }
 
@@ -1394,8 +1399,8 @@ int CG_CalcViewValues(void) {
       }
 
       if (ps->viewlocked == static_cast<int>(ETJump::ViewlockState::Jitter)) {
-        cg.refdefViewAngles[0] += crandom();
-        cg.refdefViewAngles[1] += crandom();
+        cg.refdefViewAngles[PITCH] += crandom();
+        cg.refdefViewAngles[YAW] += crandom();
       }
     }
 
@@ -2140,11 +2145,6 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
       cg.oldTime = cg.time;
       CG_AddLagometerFrameInfo();
     }
-
-    DEBUGTIME
-
-    // Ridah, fade the screen
-    CG_DrawScreenFade();
 
     DEBUGTIME
 

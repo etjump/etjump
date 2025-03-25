@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@
 #include "etj_keyset_drawer.h"
 #include "etj_utilities.h"
 #include "etj_cvar_update_handler.h"
-#include "../game/etj_numeric_utilities.h"
 
 ETJump::KeySetDrawer::KeySetDrawer(const std::vector<KeyShader> &keyShaders)
     : keyShaders(keyShaders) {
@@ -37,9 +36,8 @@ void ETJump::KeySetDrawer::initListeners() {
   cvarUpdateHandler->subscribe(&etj_keysColor, [&](const vmCvar_t *cvar) {
     updateKeysColor(etj_keysColor.string);
   });
-  cvarUpdateHandler->subscribe(&etj_keysSize, [&](const vmCvar_t *cvar) {
-    updateKeysSize(etj_keysSize.integer);
-  });
+  cvarUpdateHandler->subscribe(&etj_keysSize,
+                               [&](const vmCvar_t *cvar) { updateKeysSize(); });
   cvarUpdateHandler->subscribe(&etj_keysX, [&](const vmCvar_t *cvar) {
     updateKeysOrigin(etj_keysX.value, etj_keysY.value);
   });
@@ -53,7 +51,7 @@ void ETJump::KeySetDrawer::initListeners() {
 
 void ETJump::KeySetDrawer::initAttrs() {
   updateKeysColor(etj_keysColor.string);
-  updateKeysSize(etj_keysSize.value);
+  updateKeysSize();
   updateKeysOrigin(etj_keysX.value, etj_keysY.value);
   updateKeysShadow(etj_keysShadow.integer > 0);
   vec4_t shadowColor{0.0f, 0.0f, 0.0f, 1.0f};
@@ -64,13 +62,13 @@ void ETJump::KeySetDrawer::updateKeysColor(const char *str) {
   parseColorString(str, attrs.color);
 }
 
-void ETJump::KeySetDrawer::updateKeysSize(float size) {
-  attrs.size = Numeric::clamp(size, 0, 256);
+void ETJump::KeySetDrawer::updateKeysSize() {
+  attrs.size = CvarValueParser::parse<CvarValue::Size>(etj_keysSize, 0, 256);
 }
 
 void ETJump::KeySetDrawer::updateKeysOrigin(float x, float y) {
-  attrs.origin.x = ETJump_AdjustPosition(Numeric::clamp(x, 0.f, 640.f));
-  attrs.origin.y = Numeric::clamp(y, 0.f, 480.f);
+  attrs.origin.x = ETJump_AdjustPosition(std::clamp(x, 0.f, 640.f));
+  attrs.origin.y = std::clamp(y, 0.f, 480.f);
 }
 
 void ETJump::KeySetDrawer::updateKeysShadow(bool shouldDrawShadow) {
@@ -82,7 +80,7 @@ void ETJump::KeySetDrawer::updateKeysShadowColor(const vec4_t shadowColor) {
 }
 
 void ETJump::KeySetDrawer::render() const {
-  if (attrs.size <= 0) {
+  if (attrs.size.x == 0 || attrs.size.y == 0) {
     return;
   }
 
@@ -110,14 +108,19 @@ void ETJump::KeySetDrawer::drawShader(qhandle_t shader, int position) const {
   if (!shader) {
     return;
   }
-  auto size = attrs.size / 3;
-  auto centerOffset = attrs.size / 2;
-  auto pos = calcGridPosition<3>(size, position);
-  auto x = attrs.origin.x + pos.x - centerOffset;
-  auto y = attrs.origin.y + pos.y - centerOffset;
-  auto color = attrs.color;
-  auto shadowColor = attrs.shouldDrawShadow ? attrs.shadowColor : nullptr;
-  drawPic(x, y, size, size, shader, color, shadowColor);
+
+  const float sizeX = attrs.size.x / 3;
+  const float sizeY = attrs.size.y / 3;
+  const float centerOffsetX = attrs.size.x / 2;
+  const float centerOffsetY = attrs.size.y / 2;
+  const auto pos = calcGridPosition<3>(sizeX, sizeY, position);
+  const float x = attrs.origin.x + pos.x - centerOffsetX;
+  const float y = attrs.origin.y + pos.y - centerOffsetY;
+  const vec_t *color = attrs.color;
+  const vec_t *shadowColor =
+      attrs.shouldDrawShadow ? attrs.shadowColor : nullptr;
+
+  drawPic(x, y, sizeX, sizeY, shader, color, shadowColor);
 }
 
 int ETJump::KeySetDrawer::isKeyPressed(KeyNames key) {

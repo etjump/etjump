@@ -4,7 +4,6 @@
 
 #include "cg_local.h"
 #include "etj_utilities.h"
-#include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 
 /******************************************************************************
@@ -116,7 +115,7 @@ void CG_ParseFireteams() {
 
     s = Info_ValueForKey(p, "s");
     cg.fireTeams[i].shove = Q_atoi(s);
-    
+
     s = Info_ValueForKey(p, "tj");
     cg.fireTeams[i].teamJumpMode = Q_atoi(s);
 
@@ -132,6 +131,11 @@ void CG_ParseFireteams() {
       if (COM_BitCheck(clnts, j)) {
         cg.fireTeams[i].joinOrder[j] = qtrue;
         cgs.clientinfo[j].fireteamData = &cg.fireTeams[i];
+
+        if (cgs.clientinfo[j].fireteamData->noGhost &&
+            cgs.clientinfo[j].hideMe) {
+          trap_Cvar_Set("etj_hideMe", "0");
+        }
       } else {
         cg.fireTeams[i].joinOrder[j] = qfalse;
       }
@@ -279,8 +283,7 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
   const float fireteamOffsetX = ETJump_AdjustPosition(etj_fireteamPosX.value);
   x += fireteamOffsetX;
 
-  const float fireteamAlpha =
-      Numeric::clamp(etj_fireteamAlpha.value, 0.0f, 1.0f);
+  const float fireteamAlpha = std::clamp(etj_fireteamAlpha.value, 0.0f, 1.0f);
 
   clr1[3] *= fireteamAlpha;
   clr2[3] *= fireteamAlpha;

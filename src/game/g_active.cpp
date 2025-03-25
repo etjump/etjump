@@ -3,7 +3,6 @@
 #include "etj_save_system.h"
 #include "etj_printer.h"
 #include "etj_inactivity_timer.h"
-#include "etj_numeric_utilities.h"
 #include "etj_string_utilities.h"
 #include "etj_utilities.h"
 #include "etj_entity_utilities.h"
@@ -74,9 +73,8 @@ void P_DamageFeedback(gentity_t *player) {
   client->damage_knockback = 0;
 }
 
-#define MIN_BURN_INTERVAL                                                      \
-  399 // JPW NERVE set burn timeinterval so we can do more precise
-      // damage (was 199 old model)
+// burn time interval so we can do more precise damage
+inline constexpr int MIN_BURN_INTERVAL = 399;
 
 /*
 =============
@@ -378,7 +376,8 @@ void G_TouchTriggers(gentity_t *ent) {
 
     // ignore most entities if a spectator
     if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
-      if (hit->s.eType != ET_TELEPORT_TRIGGER) {
+      if (hit->s.eType != ET_TELEPORT_TRIGGER &&
+          hit->s.eType != ET_TELEPORT_TRIGGER_CLIENT) {
         continue;
       }
     }
@@ -480,6 +479,10 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd) {
     pm.pointcontents = trap_PointContents;
     pm.noActivateLean = client->pers.noActivateLean;
     pm.noPanzerAutoswitch = client->pers.noPanzerAutoswitch;
+
+    if (client->pmext.autoSprint) {
+      pm.cmd.buttons ^= BUTTON_SPRINT;
+    }
 
     Pmove(&pm); // JPW NERVE
 
@@ -771,7 +774,7 @@ void ClientEvents(gentity_t *ent, int oldEventSequence) {
       default:
         break;
     } // switch case
-  }   // event loop
+  } // event loop
 
   // Feen: CrashLand fix
 
@@ -1005,8 +1008,7 @@ void ClientThink_real(gentity_t *ent) {
   if (!g_cheats.integer) {
     if (ent->client->noclip && Utilities::inNoNoclipArea(ent)) {
       ent->client->noclip = qfalse;
-      Printer::SendCenterMessage(clientNum,
-                                 "^7You cannot ^3noclip ^7inside this area.\n");
+      Printer::center(clientNum, "^7You cannot ^3noclip ^7inside this area.\n");
     }
   }
 
@@ -1086,8 +1088,7 @@ void ClientThink_real(gentity_t *ent) {
 
   if (client->sess.velocityScale != 1) {
     if (ent->scaleTime > level.time) {
-      client->ps.speed *=
-          Numeric::clamp(client->sess.velocityScale, 0.25f, 3.0f);
+      client->ps.speed *= std::clamp(client->sess.velocityScale, 0.25f, 3.0f);
     } else {
       client->sess.velocityScale = 1;
     }
@@ -1101,6 +1102,8 @@ void ClientThink_real(gentity_t *ent) {
     client->pmext.noclipScale = client->pers.noclipScale;
   }
 
+  client->pmext.jumpDelayBug = client->pers.jumpDelayBug;
+
   if (client->speedScale) // Goalitem speed scale
   {
     client->ps.speed *= (client->speedScale * 0.01);
@@ -1109,13 +1112,22 @@ void ClientThink_real(gentity_t *ent) {
   // Stop lagging through triggers in timeruns
   if (client->sess.timerunActive) {
     if (client->ps.ping > 400) {
-      Printer::SendCenterMessage(
-          clientNum, "^3WARNING: ^7Timerun stopped due to high ping!");
-      InterruptRun(ent);
+      client->numLagFrames++;
+
+      // allow 100ms of sustained lag
+      if (client->numLagFrames * level.frameTime >= FRAMETIME) {
+        Printer::center(clientNum,
+                        "^3WARNING: ^7Timerun stopped due to high ping!");
+        InterruptRun(ent);
+        client->numLagFrames = 0;
+      }
+    } else {
+      client->numLagFrames = 0;
     }
-    if (client->pers.maxFPS < 25) {
-      Printer::SendCenterMessage(
-          clientNum, "^3WARNING: ^7Timerun stopped due to low FPS!");
+
+    if (client->pers.maxFPS > 0 && client->pers.maxFPS < 25) {
+      Printer::center(clientNum,
+                      "^3WARNING: ^7Timerun stopped due to low FPS!");
       InterruptRun(ent);
     }
   }
@@ -1191,24 +1203,12 @@ void ClientThink_real(gentity_t *ent) {
   pm.covertopsChargeTime =
       level.covertopsChargeTime[client->sess.sessionTeam - 1];
 
+  if (client->pmext.autoSprint) {
+    pm.cmd.buttons ^= BUTTON_SPRINT;
+  }
+
   if (client->ps.pm_type != PM_DEAD &&
       level.timeCurrent - client->pers.lastBattleSenseBonusTime > 45000) {
-    /*switch( client->combatState )
-    {
-    case COMBATSTATE_COLD:	G_AddSkillPoints( ent,
-    SK_BATTLE_SENSE, 0.f ); G_DebugAddSkillPoints( ent,
-    SK_BATTLE_SENSE, 0.f, "combatstate cold" ); break; case
-    COMBATSTATE_WARM:	G_AddSkillPoints( ent,
-    SK_BATTLE_SENSE, 2.f ); G_DebugAddSkillPoints( ent,
-    SK_BATTLE_SENSE, 2.f, "combatstate warm" ); break; case
-    COMBATSTATE_HOT:	G_AddSkillPoints( ent,
-    SK_BATTLE_SENSE, 5.f ); G_DebugAddSkillPoints( ent,
-    SK_BATTLE_SENSE, 5.f, "combatstate hot" ); break; case
-    COMBATSTATE_SUPERHOT: G_AddSkillPoints( ent,
-    SK_BATTLE_SENSE, 8.f ); G_DebugAddSkillPoints( ent,
-    SK_BATTLE_SENSE, 8.f, "combatstate super-hot" ); break;
-    }*/
-
     if (client->combatState != COMBATSTATE_COLD) {
       if (client->combatState & (1 << COMBATSTATE_KILLEDPLAYER) &&
           client->combatState & (1 << COMBATSTATE_DAMAGERECEIVED)) {
@@ -1656,7 +1656,7 @@ qboolean StuckInClient(gentity_t *self) {
 }
 
 extern vec3_t playerMins, playerMaxs;
-static constexpr float WR_PUSHAMOUNT = 25.0f;
+inline constexpr float WR_PUSHAMOUNT = 25.0f;
 
 void WolfRevivePushEnt(gentity_t *self, gentity_t *other) {
   vec3_t dir, push;

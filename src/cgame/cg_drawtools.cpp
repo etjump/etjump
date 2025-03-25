@@ -1,7 +1,9 @@
 // cg_drawtools.c -- helper functions called by cg_draw, cg_scoreboard, cg_info,
 // etc
+
+#include <algorithm>
+
 #include "cg_local.h"
-#include "../game/etj_numeric_utilities.h"
 
 /*
 ================
@@ -74,11 +76,12 @@ void CG_FillRectGradient(float x, float y, float width, float height,
 
 /*
 ==============
-CG_FillAngleYaw
+CG_FillAngleYawExt
 ==============
 */
-void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
-                     float fov, vec4_t const color) {
+void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
+                        float fov, vec4_t const color, bool borderOnly,
+                        float borderThickness) {
   // don't try to draw lines with no width
   if (start == end) {
     return;
@@ -86,12 +89,40 @@ void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
 
   const range_t range = AnglesToRange(start, end, yaw, fov);
 
-  if (!range.split) {
-    CG_FillRect(range.x1, y, range.x2 - range.x1, h, color);
-  } else {
-    CG_FillRect(0, y, range.x1, h, color);
-    CG_FillRect(range.x2, y, SCREEN_WIDTH - range.x2, h, color);
+  // don't try to draw things off-screen
+  if ((range.x1 == 0 && range.x2 == 0) ||
+      (range.x1 == SCREEN_WIDTH && range.x2 == SCREEN_WIDTH) ||
+      (range.x1 == 0 && range.x2 == SCREEN_WIDTH && range.split)) {
+    return;
   }
+
+  if (!range.split) {
+    if (borderOnly) {
+      CG_DrawRect_FixedBorder(range.x1, y, range.x2 - range.x1, h,
+                              borderThickness, color);
+    } else {
+      CG_FillRect(range.x1, y, range.x2 - range.x1, h, color);
+    }
+  } else {
+    if (borderOnly) {
+      CG_DrawRect_FixedBorder(0, y, range.x1, h, borderThickness, color);
+      CG_DrawRect_FixedBorder(range.x2, y, SCREEN_WIDTH - range.x2, h,
+                              borderThickness, color);
+    } else {
+      CG_FillRect(0, y, range.x1, h, color);
+      CG_FillRect(range.x2, y, SCREEN_WIDTH - range.x2, h, color);
+    }
+  }
+}
+
+/*
+==============
+CG_FillAngleYaw
+==============
+*/
+void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
+                     float fov, const vec4_t color) {
+  CG_FillAngleYawExt(start, end, yaw, y, h, fov, color, false, 1);
 }
 
 /*
@@ -177,12 +208,12 @@ void DrawLine(float x1, float y1, float x2, float y2, float w, float h,
 
   // Use a single DrawPic for horizontal or vertical lines
   if (x1 == x2) {
-    x1 = Numeric::clamp(x1, 0, scrw);
+    x1 = std::clamp(x1, 0.0f, scrw);
 
     CG_DrawPic(x1, std::min(y1, y2), w, std::abs(y1 - y2),
                cgs.media.whiteShader);
   } else if (y1 == y2) {
-    y1 = Numeric::clamp(y1, 0, scrh);
+    y1 = std::clamp(y1, 0.0f, scrh);
 
     CG_DrawPic(std::min(x1, x2), y1, std::abs(x1 - x2), h,
                cgs.media.whiteShader);
@@ -503,7 +534,7 @@ void CG_DrawRect(float x, float y, float width, float height, float size,
 }
 
 void CG_DrawRect_FixedBorder(float x, float y, float width, float height,
-                             int border, const vec4_t color) {
+                             float border, const vec4_t color) {
   trap_R_SetColor(color);
 
   CG_DrawTopBottom_NoScale(x, y, width, height, border);
@@ -1328,9 +1359,9 @@ static int propMapB[26][3] = {
     {11, 139, 32}, {42, 139, 51}, {93, 139, 32}, {126, 139, 31}, {158, 139, 25},
 };
 
-#define PROPB_GAP_WIDTH 4
-#define PROPB_SPACE_WIDTH 12
-#define PROPB_HEIGHT 36
+inline constexpr int PROPB_GAP_WIDTH = 4;
+inline constexpr int PROPB_SPACE_WIDTH = 12;
+inline constexpr int PROPB_HEIGHT = 36;
 
 /*
 =================
@@ -1574,8 +1605,6 @@ void UI_DrawProportionalString(int x, int y, const char *str, int style,
   UI_DrawProportionalString2(x, y, str, color, sizeScale,
                              cgs.media.charsetProp);
 }
-
-#define MAX_VA_STRING 32000
 
 char *CG_TranslateString(const char *string) {
   static char staticbuf[2][MAX_VA_STRING];

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,13 +24,6 @@
 
 #pragma once
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
-
 #include <string>
 
 namespace ETJump {
@@ -45,7 +38,7 @@ public:
   void start(const std::string &name);
   void stop();
   void restart(const std::string &name);
-  static bool isRecording();
+  static bool recordingAutoDemo();
   int elapsed();
   void lock();
   void unlock();

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
 #include <string>
 #include "etj_drawable.h"
 #include "etj_timerun.h"
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class TimerunView : public Drawable {
@@ -53,6 +54,9 @@ private:
   static float getTimerAlpha(bool running, bool autoHide, int fadeStart,
                              int duration);
 
+  void setCheckpointSize();
+  void setCheckpointPopupSize();
+
   vec4_t inactiveTimerColor{};
   std::shared_ptr<Timerun> _timerun;
 
@@ -63,7 +67,12 @@ private:
   static const int fadeHold = 5000; // 5s pause before fade starts
   static const int fadeTime = 2000; // 2s fade
 
+  CvarValue::Size checkpointSize{};
+  CvarValue::Size popupSize{};
+
   static const int popupFadeTime = 100;
+
+  int demoSvFps{};
 
   static bool canSkipDraw();
 };

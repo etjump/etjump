@@ -4,6 +4,8 @@
  * desc:
  *
  */
+#include "etj_entity_utilities.h"
+
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -15,6 +17,8 @@
 #include "etj_missilepad.h"
 #include "etj_target_init.h"
 #include "etj_trigger_teleport_client.h"
+#include "etj_target_ft_setrules.h"
+#include "etj_target_spawn_relay.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -79,29 +83,8 @@ qboolean G_SpawnVector2DExt(const char *key, const char *defaultString,
   return present;
 }
 
-//
-// fields are needed for spawning from the entity string
-//
-typedef enum {
-  F_INT,
-  F_FLOAT,
-  F_LSTRING, // string on disk, pointer in memory, TAG_LEVEL
-  F_GSTRING, // string on disk, pointer in memory, TAG_GAME
-  F_VECTOR,
-  F_ANGLEHACK,
-  F_ENTITY, // index on disk, pointer in memory
-  F_ITEM,   // index on disk, pointer in memory
-  F_CLIENT, // index on disk, pointer in memory
-  F_IGNORE
-} fieldtype_t;
-
-typedef struct {
-  const char *name;
-  int ofs;
-  fieldtype_t type;
-  int flags;
-} field_t;
-
+// FIXME: this is woefully out of date, it doesn't contain *ANY* custom keys
+//  we've added for ETJump, and is also lacking a lot of stock entity keys
 field_t fields[] = {
     {"classname", FOFS(classname), F_LSTRING},
     {"origin", FOFS(s.origin), F_VECTOR},
@@ -193,7 +176,14 @@ field_t fields[] = {
     {"targetShaderName", FOFS(targetShaderName), F_LSTRING},
     {"targetShaderNewName", FOFS(targetShaderNewName), F_LSTRING},
 
-    {NULL}};
+    {"cursorhint", FOFS(s.dmgFlags), F_CURSORHINT},
+
+    {"savelimit", FOFS(ftSavelimit), F_LSTRING},
+    {"noghost", FOFS(damage), F_INT},
+    {"teamjumpmode", FOFS(health), F_INT},
+    {"leader_only_message", FOFS(message), F_LSTRING},
+
+    {nullptr}};
 
 typedef struct {
   const char *name;
@@ -477,8 +467,6 @@ void SP_target_deathrun_checkpoint(gentity_t *self);
 void SP_target_tjlclear(gentity_t *self);
 void SP_target_tjldisplay(gentity_t *self);
 
-void SP_target_init(gentity_t *self);
-
 spawn_t spawns[] = {
     // info entities don't do anything at all, but provide positional
     // information for things controlled by other processes
@@ -734,6 +722,8 @@ spawn_t spawns[] = {
     {"target_init", ETJump::TargetInit::spawn},
     {"func_missilepad", ETJump::Missilepad::spawn},
     {"trigger_teleport_client", ETJump::TriggerTeleportClient::spawn},
+    {"target_ft_setrules", ETJump::TargetFtSetRules::spawn},
+    {"target_spawn_relay", ETJump::TargetSpawnRelay::spawn},
     {nullptr, nullptr},
 };
 
@@ -829,42 +819,45 @@ in a gentity
 ===============
 */
 void G_ParseField(const char *key, const char *value, gentity_t *ent) {
-  field_t *f;
-  byte *b;
   float v;
   vec3_t vec;
 
-  for (f = fields; f->name; f++) {
+  for (const field_t *f = fields; f->name; f++) {
     if (!Q_stricmp(f->name, key)) {
       // found it
-      b = (byte *)ent;
+      const auto b = reinterpret_cast<byte *>(ent);
 
       switch (f->type) {
         case F_LSTRING:
-          *(char **)(b + f->ofs) = G_NewString(value);
+          *reinterpret_cast<char **>(b + f->ofs) = G_NewString(value);
           break;
         case F_VECTOR:
           sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
-          ((float *)(b + f->ofs))[0] = vec[0];
-          ((float *)(b + f->ofs))[1] = vec[1];
-          ((float *)(b + f->ofs))[2] = vec[2];
+          reinterpret_cast<float *>(b + f->ofs)[0] = vec[0];
+          reinterpret_cast<float *>(b + f->ofs)[1] = vec[1];
+          reinterpret_cast<float *>(b + f->ofs)[2] = vec[2];
           break;
         case F_INT:
-          *(int *)(b + f->ofs) = Q_atoi(value);
+          *reinterpret_cast<int *>(b + f->ofs) = Q_atoi(value);
           break;
         case F_FLOAT:
-          *(float *)(b + f->ofs) = Q_atof(value);
+          *reinterpret_cast<float *>(b + f->ofs) = Q_atof(value);
           break;
         case F_ANGLEHACK:
           v = Q_atof(value);
-          ((float *)(b + f->ofs))[0] = 0;
-          ((float *)(b + f->ofs))[1] = v;
-          ((float *)(b + f->ofs))[2] = 0;
+          reinterpret_cast<float *>(b + f->ofs)[0] = 0;
+          reinterpret_cast<float *>(b + f->ofs)[1] = v;
+          reinterpret_cast<float *>(b + f->ofs)[2] = 0;
           break;
-        default:
+        case F_CURSORHINT:
+          ETJump::EntityUtilities::setCursorhintFromString(
+              *reinterpret_cast<int *>(b + f->ofs), value);
+          break;
         case F_IGNORE:
+        default:
           break;
       }
+
       return;
     }
   }
@@ -1140,8 +1133,26 @@ static void initNoFTNoGhost() {
   G_SpawnInt("noftnoghost", "0", &value);
 
   level.noFTNoGhost = value;
-  G_Printf("Fireteam noghost is %s.\n",
-           level.noFTNoGhost ? "disabled" : "enabled");
+  G_Printf("Fireteam noghost %s be toggled by players.\n",
+           level.noFTNoGhost ? "cannot" : "can");
+}
+
+static void initNoFTSaveLimit() {
+  int value;
+  G_SpawnInt("noftsavelimit", "0", &value);
+
+  level.noFTSaveLimit = value;
+  G_Printf("Fireteam savelimit %s be set by players.\n",
+           level.noFTSaveLimit ? "cannot" : "can");
+}
+
+static void initNoFTTeamjumpMode() {
+  int value;
+  G_SpawnInt("noftteamjumpmode", "0", &value);
+
+  level.noFTTeamjumpMode = value;
+  G_Printf("Fireteam teamjump mode %s be toggled by players.\n",
+           level.noFTTeamjumpMode ? "cannot" : "can");
 }
 
 static void initNoFTShove() {
@@ -1300,6 +1311,8 @@ void SP_worldspawn(void) {
   ETJump::initNoWallbug();
   ETJump::initNoNoclip();
   ETJump::initNoFTNoGhost();
+  ETJump::initNoFTSaveLimit();
+  ETJump::initNoFTTeamjumpMode();
   ETJump::initNoFTShove();
 
   level.mapcoordsValid = qfalse;
@@ -1310,8 +1323,6 @@ void SP_worldspawn(void) {
   {
     level.mapcoordsValid = qtrue;
   }
-
-  BG_InitLocations(level.mapcoordsMins, level.mapcoordsMaxs);
 
   trap_SetConfigstring(CS_MOTD, g_motd.string); // message of the day
 

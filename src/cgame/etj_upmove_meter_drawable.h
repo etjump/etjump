@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,10 @@
  */
 
 #pragma once
+
 #include "etj_irenderable.h"
 #include "cg_local.h"
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class UpmoveMeter : public IRenderable {
@@ -70,11 +72,14 @@ class UpmoveMeter : public IRenderable {
   static constexpr float graphX_ = 8.0f;
   static constexpr float graphY_ = 8.0f;
 
+  CvarValue::Size textSize;
+
   int lastUpdateTime{};
   pmove_t *pm{};
 
   void startListeners();
   void parseAllColors();
+  void setTextSize();
   void resetUpmoveMeter();
   bool canSkipDraw() const;
   bool canSkipUpdate() const;

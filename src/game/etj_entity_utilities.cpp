@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
  */
 
 #include "etj_entity_utilities.h"
+#include "etj_string_utilities.h"
 
 namespace ETJump {
 bool EntityUtilities::isPlayer(gentity_t *ent) {
@@ -110,4 +111,28 @@ bool EntityUtilities::playerIsSolid(const int self, const int other) {
 
   return true;
 }
+
+bool EntityUtilities::entitiesFree(const int threshold) {
+  int free = 0;
+
+  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < ENTITYNUM_MAX_NORMAL; i++) {
+    const gentity_t *ent = &g_entities[i];
+
+    if (!ent->inuse) {
+      free++;
+    }
+  }
+
+  return free > threshold;
+}
+
+void EntityUtilities::setCursorhintFromString(int &value,
+                                              const std::string &hint) {
+  for (int i = 0; i < HINT_NUM_HINTS; i++) {
+    if (StringUtil::iEqual(hint, hintStrings[i])) {
+      value = i;
+    }
+  }
+}
+
 } // namespace ETJump

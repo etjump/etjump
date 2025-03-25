@@ -2,16 +2,17 @@
 // cg_localents.c -- every frame, generate renderer commands for locally
 // processed entities, like smoke puffs, gibs, shells, etc.
 
+#include <algorithm>
+
 #include "cg_local.h"
 
-// Ridah, increased this
-// #define	MAX_LOCAL_ENTITIES	512
-#define MAX_LOCAL_ENTITIES                                                     \
-  768 // renderer can only handle 1024 entities max, so we should avoid
-      // overwriting game entities
-// done.
+// renderer can only handle 1024 entities max,
+// so we should avoid overwriting game entities
+inline constexpr int MAX_LOCAL_ENTITIES = 768;
 
 localEntity_t cg_localEntities[MAX_LOCAL_ENTITIES];
+// TODO: make these vectors some day?
+//  probably performs a lot better, given how small these datasets are
 localEntity_t cg_activeLocalEntities; // double linked list
 localEntity_t *cg_freeLocalEntities;  // single linked list
 
@@ -1080,18 +1081,14 @@ CG_AddFadeRGB
 ====================
 */
 void CG_AddFadeRGB(localEntity_t *le) {
-  refEntity_t *re;
-  float c;
+  refEntity_t *re = &le->refEntity;
+  const float c =
+      static_cast<float>(le->endTime - cg.time) * le->lifeRate * 0xff;
 
-  re = &le->refEntity;
-
-  c = (le->endTime - cg.time) * le->lifeRate;
-  c *= 0xff;
-
-  re->shaderRGBA[0] = le->color[0] * c;
-  re->shaderRGBA[1] = le->color[1] * c;
-  re->shaderRGBA[2] = le->color[2] * c;
-  re->shaderRGBA[3] = le->color[3] * c;
+  for (int i = 0; i < 4; i++) {
+    re->shaderRGBA[i] =
+        static_cast<byte>(std::clamp(le->color[i] * c, 0.0f, 255.0f));
+  }
 
   trap_R_AddRefEntityToScene(re);
 }

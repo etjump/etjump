@@ -1,8 +1,6 @@
 #include "g_local.h"
 #include "etj_save_system.h"
-#include "etj_inactivity_timer.h"
 #include "etj_string_utilities.h"
-#include "etj_numeric_utilities.h"
 #include "etj_printer.h"
 #include "etj_rtv.h"
 
@@ -19,15 +17,6 @@ facing that ent (like an info_notnull)
 void SP_info_player_deathmatch(gentity_t *ent) {
   int i;
   vec3_t dir;
-
-  G_SpawnInt("nobots", "0", &i);
-  if (i) {
-    ent->flags |= FL_NO_BOTS;
-  }
-  G_SpawnInt("nohumans", "0", &i);
-  if (i) {
-    ent->flags |= FL_NO_HUMANS;
-  }
 
   ent->enemy = G_PickTarget(ent->target);
   if (ent->enemy) {
@@ -73,31 +62,7 @@ extern void BotSpeedBonus(int clientNum);
 =======================================================================
 */
 
-/*
-================
-SpotWouldTelefrag
-
-================
-*/
-qboolean SpotWouldTelefrag(gentity_t *spot) {
-  int i, num;
-  int touch[MAX_GENTITIES];
-  gentity_t *hit;
-  vec3_t mins, maxs;
-
-  VectorAdd(spot->r.currentOrigin, playerMins, mins);
-  VectorAdd(spot->r.currentOrigin, playerMaxs, maxs);
-  num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
-
-  for (i = 0; i < num; i++) {
-    hit = &g_entities[touch[i]];
-    if (hit->client && hit->client->ps.stats[STAT_HEALTH] > 0) {
-      return qtrue;
-    }
-  }
-
-  return qfalse;
-}
+inline constexpr int MAX_SPAWN_POINTS = 128;
 
 /*
 ================
@@ -106,7 +71,6 @@ SelectNearestDeathmatchSpawnPoint
 Find the spot that we DON'T want to use
 ================
 */
-#define MAX_SPAWN_POINTS 128
 gentity_t *SelectNearestDeathmatchSpawnPoint(vec3_t from) {
   gentity_t *spot;
   vec3_t delta;
@@ -138,31 +102,24 @@ SelectRandomDeathmatchSpawnPoint
 go to a random point that doesn't telefrag
 ================
 */
-#define MAX_SPAWN_POINTS 128
-gentity_t *SelectRandomDeathmatchSpawnPoint(void) {
-  gentity_t *spot;
-  int count;
-  int selection;
+gentity_t *SelectRandomDeathmatchSpawnPoint() {
   gentity_t *spots[MAX_SPAWN_POINTS];
 
-  count = 0;
-  spot = NULL;
+  int count = 0;
+  gentity_t *spot = nullptr;
 
   while ((spot = G_Find(spot, FOFS(classname), "info_player_deathmatch")) !=
-         NULL) {
-    if (SpotWouldTelefrag(spot)) {
-      continue;
-    }
+         nullptr) {
     spots[count] = spot;
     count++;
   }
 
-  if (!count) // no spots that won't telefrag
-  {
-    return G_Find(NULL, FOFS(classname), "info_player_deathmatch");
+  // no spawnpoints found
+  if (!count) {
+    return nullptr;
   }
 
-  selection = rand() % count;
+  const int selection = rand() % count;
   return spots[selection];
 }
 
@@ -447,7 +404,7 @@ SetClientViewAngle
 
 ==================
 */
-void SetClientViewAngle(gentity_t *ent, vec3_t angle) {
+void SetClientViewAngle(gentity_t *ent, const vec3_t angle) {
   int i;
 
   // set the delta angle
@@ -582,6 +539,14 @@ void respawn(gentity_t *ent) {
   ent->client->ps.pm_flags &= ~PMF_LIMBO; // JPW NERVE turns off limbo
 
   ClientSpawn(ent, qfalse);
+
+  const team_t team = ent->client->sess.sessionTeam;
+
+  if (team == TEAM_AXIS && level.spawnRelayEntities.axisRelay) {
+    G_UseEntity(level.spawnRelayEntities.axisRelay, nullptr, ent);
+  } else if (team == TEAM_ALLIES && level.spawnRelayEntities.alliesRelay) {
+    G_UseEntity(level.spawnRelayEntities.alliesRelay, nullptr, ent);
+  }
 }
 
 // NERVE - SMF - merge from team arena
@@ -742,12 +707,16 @@ Resets players ammo to default
 =================================
 */
 void ResetPlayerAmmo(gclient_t *client, gentity_t *ent) {
-  auto ammoMultiplier = 0;
-  auto nadeCount = 0;
+  // clear everything - AddWeaponToPlayer adds back the correct amount of ammo
+  memset(client->ps.ammo, 0, MAX_WEAPONS * sizeof(int));
+  memset(client->ps.ammoclip, 0, MAX_WEAPONS * sizeof(int));
 
-  // set default ammo multiplier for thompson/mp40/sten
+  // set default ammo multiplier for thompson/mp40/sten,
   // and grenade count per class, as these do not follow ammotable data
   // ammo from skill bonuses is handled in AddWeaponToPlayer
+  int ammoMultiplier = 0;
+  int nadeCount = 0;
+
   switch (client->sess.playerType) {
     case PC_SOLDIER:
       ammoMultiplier = 2;
@@ -778,26 +747,31 @@ void ResetPlayerAmmo(gclient_t *client, gentity_t *ent) {
   // grenades are cleared from ps.weapons when they run out of ammo so
   // they are handled seperately dynamite, pliers, satchel & satchel
   // detonator have 0 ammo in ammotable so they must be given manually
-  for (auto i = 0; i < WP_NUM_WEAPONS; i++) {
+  for (int i = WP_NONE; i < WP_NUM_WEAPONS; i++) {
     if (COM_BitCheck(client->ps.weapons, i)) {
       if (i == WP_GRENADE_LAUNCHER || i == WP_GRENADE_PINEAPPLE) {
         continue;
       }
+
       if (client->sess.timerunActive && BG_WeaponDisallowedInTimeruns(i)) {
         continue;
       }
+
       if ((i == WP_DYNAMITE || i == WP_PLIERS) && level.noExplosives != 2) {
         AddWeaponToPlayer(client, static_cast<weapon_t>(i), 0, 1, qfalse);
         continue;
       }
+
       if (i == WP_SATCHEL && !level.noExplosives) {
         AddWeaponToPlayer(client, WP_SATCHEL, 0, 1, qfalse);
         AddWeaponToPlayer(client, WP_SATCHEL_DET, 0, 0, qfalse);
         continue;
       }
-      if (BG_WeaponIsExplosive(i) && level.noExplosives) {
+
+      if (level.noExplosives && !ETJump::weaponAllowedWithNoExplosives(i)) {
         continue;
       }
+
       if (i == WP_MP40 || i == WP_THOMPSON || i == WP_STEN) {
         AddWeaponToPlayer(client, static_cast<weapon_t>(i),
                           GetAmmoTableData(i)->defaultStartingAmmo *
@@ -1698,16 +1672,16 @@ void G_NameChanged(gentity_t *ent) {
   }
 
   if (g_nameChangeLimit.integer - client->sess.nameChangeCount == 0) {
-    C_CPMTo(ent,
-            va("^3WARNING: ^7You must wait at least %s "
-               "before renaming.",
-               ETJump::getSecondsString(g_nameChangeInterval.integer).c_str()));
+    Printer::popup(
+        ent,
+        va("^3WARNING: ^7You must wait at least %s before renaming.",
+           ETJump::getSecondsString(g_nameChangeInterval.integer).c_str()));
   } else if (client->sess.nameChangeCount > g_nameChangeLimit.integer) {
     trap_DropClient(ClientNum(ent), "You were kicked for spamming rename.", 0);
   } else {
-    C_CPMTo(ent,
-            va("^3WARNING: ^7You have %d name changes left",
-               (g_nameChangeLimit.integer - client->sess.nameChangeCount)));
+    Printer::popup(
+        ent, va("^3WARNING: ^7You have %d name changes left",
+                (g_nameChangeLimit.integer - client->sess.nameChangeCount)));
   }
 
   client->sess.nameChangeCount++;
@@ -1762,7 +1736,7 @@ bool UpdateClientConfigString(gentity_t &gent) {
 
   // while engine caps at 1000 fps, 2.60b doesn't actually cap com_maxfps
   // value, but let's not display such silliness
-  gent.client->pers.maxFPS = Numeric::clamp(gent.client->pers.maxFPS, 0, 1000);
+  gent.client->pers.maxFPS = std::clamp(gent.client->pers.maxFPS, 0, 1000);
 
   // send over a subset of the userinfo keys so other clients can
   // print scoreboards, display models, and play custom sounds
@@ -1883,6 +1857,14 @@ void ClientUserinfoChanged(int clientNum) {
   client->pers.snaphud = (client->pers.clientFlags & CGF_SNAPHUD) != 0;
   client->pers.noPanzerAutoswitch =
       (client->pers.clientFlags & CGF_NOPANZERSWITCH) != 0;
+
+  if (client->pers.clientFlags & CGF_AUTOSPRINT) {
+    client->pers.autoSprintAux = true;
+    client->pmext.autoSprint = true;
+  } else {
+    client->pers.autoSprintAux = false;
+    client->pmext.autoSprint = false;
+  }
 
   // set name
   Q_strncpyz(oldname, client->pers.netname, sizeof(oldname));
@@ -2247,31 +2229,32 @@ void ClientBegin(int clientNum) {
 
   // clear out last jump speed
   client->ps.persistant[PERS_JUMP_SPEED] = 0;
+
+  if (!Q_stricmp(level.rawmapname, "solstice") ||
+      !Q_stricmp(level.rawmapname, "stonehalls2")) {
+    client->pers.jumpDelayBug = true;
+  }
 }
 
-gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin,
+gentity_t *SelectSpawnPointFromList(const char *list, vec3_t spawn_origin,
                                     vec3_t spawn_angles) {
   const char *pStr, *token;
-  gentity_t *spawnPoint = NULL, *trav;
-#define MAX_SPAWNPOINTFROMLIST_POINTS 16
-  int valid[MAX_SPAWNPOINTFROMLIST_POINTS];
-  int numValid;
-
-  memset(valid, 0, sizeof(valid));
-  numValid = 0;
+  gentity_t *spawnPoint = nullptr;
+  static constexpr int MAX_SPAWNPOINTFROMLIST_POINTS = 16;
+  int valid[MAX_SPAWNPOINTFROMLIST_POINTS] = {};
+  int numValid = 0;
 
   pStr = list;
-  while ((token = COM_Parse(&pStr)) != NULL && token[0]) {
-    trav = g_entities + level.maxclients;
-    while ((trav = G_FindByTargetname(trav, token)) != NULL) {
+  while ((token = COM_Parse(&pStr)) != nullptr && token[0]) {
+    gentity_t *trav = g_entities + level.maxclients;
+    while ((trav = G_FindByTargetname(trav, token)) != nullptr) {
       if (!spawnPoint) {
         spawnPoint = trav;
       }
-      if (!SpotWouldTelefrag(trav)) {
-        valid[numValid++] = trav->s.number;
-        if (numValid >= MAX_SPAWNPOINTFROMLIST_POINTS) {
-          break;
-        }
+
+      valid[numValid++] = trav->s.number;
+      if (numValid >= MAX_SPAWNPOINTFROMLIST_POINTS) {
+        break;
       }
     }
   }
@@ -2300,6 +2283,12 @@ ClientSpawn
 Called every time a client is placed fresh in the world:
 after the first ClientBegin, and after each respawn
 Initializes all non-persistant parts of playerState
+
+Note that this gets called twice if joining a team FROM spectators - once via
+'team' command, once via 'SpectatorEndFrame'. If you must perform actions that
+are executed once per respawn, you should only perform actions meant for
+spectators here. For actions that are meant to be executed while on a team, use
+the 'respawn' function instead.
 ============
 */
 void ClientSpawn(gentity_t *ent, qboolean revived) {
@@ -2365,9 +2354,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
       } else if (client->sess.autoSpawnObjectiveIndex > 0) {
         spawnObjective = client->sess.autoSpawnObjectiveIndex;
       }
-      spawnPoint = SelectCTFSpawnPoint(
-          client->sess.sessionTeam, client->pers.teamState.state, spawn_origin,
-          spawn_angles, spawnObjective);
+      spawnPoint = SelectCTFSpawnPoint(client->sess.sessionTeam, spawn_origin,
+                                       spawn_angles, spawnObjective);
       //			}
     }
   }
@@ -2483,6 +2471,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   // beause we need it in bg_*)
   client->pmext.bAutoReload = client->pers.bAutoReloadAux;
   // done
+
+  client->pmext.autoSprint = client->pers.autoSprintAux;
 
   client->ps.clientNum = index;
 
@@ -2626,6 +2616,11 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     client->ftShoveThisLife = ft->shove;
   }
 
+  // stop burn from flamethrower
+  // in VET, this is not an issue because spawnshield blocks the damage,
+  // but since we don't have it, burn damage would carry over to respawn
+  ent->s.onFireEnd = level.time - 1;
+
   // run a client frame to drop exactly to the floor,
   // initialize animations and other things
   client->ps.commandTime = level.time - 100;
@@ -2657,6 +2652,13 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   if (!revived && client->sess.sessionTeam != TEAM_SPECTATOR) {
     // RF, call entity scripting event
     G_Script_ScriptEvent(ent, "playerstart", "");
+  }
+
+  // fire off spawn relay for spectators here
+  // axis/allies are handled in 'respawn', see the comment above the function
+  if (!revived && client->sess.sessionTeam == TEAM_SPECTATOR &&
+      level.spawnRelayEntities.spectatorRelay) {
+    G_UseEntity(level.spawnRelayEntities.spectatorRelay, nullptr, ent);
   }
 
   // FIXME: doesn't load pos????
@@ -2836,7 +2838,7 @@ void ClientDisconnect(int clientNum) {
   // note: after CalculateRanks so level.numConnectedClients is up-to-date
   if (level.voteInfo.voteTime) {
     if (level.voteInfo.voter_cn == clientNum) {
-      Printer::BroadcastPopupMessage("^7Vote canceled: caller disconnected.");
+      Printer::popupAll("^7Vote canceled: caller disconnected.");
       G_LogPrintf("Vote canceled: %s (caller %s disconnected)\n",
                   level.voteInfo.voteString, ent->client->pers.netname);
       resetVote();

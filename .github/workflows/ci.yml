@@ -1,166 +1,162 @@
-name: etjump-CI
+name: ETJump CI/CD
 
 on:
   workflow_dispatch:
   push:
     branches: [ master ]
+    tags-ignore:
+      - '*'
+    paths-ignore:
+      - docs/*
+      - .gitignore
+      - .gitattributes
+      - .clang-format
+      - README.md
+      - VERSION.txt
+      - release.sh
   pull_request:
     branches: [ master ]
+    paths-ignore:
+      - docs/*
+      - .gitignore
+      - .gitattributes
+      - .clang-format
+      - README.md
+      - VERSION.txt
+      - release.sh
   merge_group:
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
-  linux-x86_64:
-    runs-on: ubuntu-20.04
+  Windows:
+    name: Windows ${{ matrix.arch }}
+    runs-on: windows-2019
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86, x64]
+        config: [Release]
+        include:
+          - arch: x86
+            platform: Win32
 
+          - arch: x64
+            platform: x64
+    
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -G "Visual Studio 16 2019" -A ${{ matrix.platform }}
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel
+      run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}
+      run: ctest -C ${{ matrix.config }}
 
-    - name: Archive linux-x86_64 artifacts
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: etjump-artifacts-${{ github.job }}
-        path: |
-          ${{github.workspace}}/build/etjump
+        name: etjump-artifacts-win-${{ matrix.arch }}
+        path: ${{ github.workspace }}/build/etjump
 
-  linux-x86:
-    runs-on: ubuntu-20.04
+  Linux:
+    name: Linux ${{ matrix.arch }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86, x86_64]
+        config: [Release]
 
     steps:
-    - name: Install deps
+    - name: Install dependencies
+      if: matrix.arch == 'x86'
       run: |
         sudo apt-get update
-        sudo apt-get install gcc-multilib g++-multilib
-    
+        sudo apt-get install gcc-multilib g++-multilib    
+
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-cross-x86-linux.cmake
+      run: |
+        if [ ${{ matrix.arch }} == "x86" ]; then
+          cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-cross-x86-linux.cmake
+        else
+          cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        fi
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel
+      run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}
-    
-    - name: Archive linux-x86 artifacts
+      run: ctest -C ${{ matrix.config }}
+
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: etjump-artifacts-${{ github.job }}
-        path: |
-          ${{github.workspace}}/build/etjump
-  
-  windows-x86_64:
-    runs-on: windows-2019
+        name: etjump-artifacts-linux-${{ matrix.arch }}
+        path: ${{ github.workspace }}/build/etjump
 
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: '0'
-
-    - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "Visual Studio 16 2019" -A x64
-
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}
-
-    - name: Archive windows-x86_64 artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: etjump-artifacts-${{ github.job }}
-        path: |
-          ${{github.workspace}}/build/etjump
-  
-  windows-x86:
-    runs-on: windows-2019
-
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: '0'
-
-    - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "Visual Studio 16 2019" -A Win32
-
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}
-
-    - name: Archive windows-x86 artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: etjump-artifacts-${{ github.job }}
-        path: |
-          ${{github.workspace}}/build/etjump
-      
   macOS:
-    runs-on: macos-12
+    name: macOS ${{ matrix.arch }}
+    runs-on: macos-13
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64]
+        config: [Release]
+        include:
+          - arch: x64
+            platforms: "\"x86_64;arm64\""
+            osx-target: "10.12"
 
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.10
+      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_OSX_ARCHITECTURES=${{ matrix.platforms }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.osx-target }}
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel
+      run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}  
+      working-directory: ${{ github.workspace }}/build
+      run: ctest -C ${{ matrix.config }}  
 
-    - name: Archive macos-11 artifacts
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: etjump-artifacts-${{ github.job }}
-        path: |
-          ${{github.workspace}}/build/etjump
+        name: etjump-artifacts-macos-${{ matrix.arch }}
+        path: ${{ github.workspace }}/build/etjump
 
   package:
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    runs-on: ubuntu-20.04
-    needs: [linux-x86, linux-x86_64, windows-x86, windows-x86_64, macOS]
+    runs-on: ubuntu-22.04
+    needs: [Windows, Linux, macOS]
 
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: '0'
+        fetch-depth: 0
 
     - name: Download artifacts
       uses: actions/download-artifact@v4
       with: 
         pattern: etjump-artifacts-*
         merge-multiple: true
-        path: ${{github.workspace}}/build/etjump
+        path: ${{ github.workspace }}/build/etjump
 
     - name: Pack release zip
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{ github.workspace }}/build
       run: |
         cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
         make mod_release
@@ -169,14 +165,13 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: etjump-snapshot-release
-        path: ${{github.workspace}}/build/*.zip
+        path: ${{ github.workspace }}/build/*.zip
 
     - name: Create latest build
-      uses: marvinpinto/action-automatic-releases@latest
+      uses: czietz/action-automatic-releases@latest
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         automatic_release_tag: "latest"
         prerelease: false
         title: Latest Build
-        files: |
-          ${{github.workspace}}/build/*.zip
+        files: ${{ github.workspace }}/build/*.zip

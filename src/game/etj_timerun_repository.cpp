@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,16 +43,11 @@ ETJump::Timerun::Record getRecordFromStandardQueryResult(
       [](const std::string &checkpoint) {
         try {
           return std::stoi(ETJump::trim(checkpoint));
-        } catch (const std::runtime_error &e) {
+        } catch (const std::logic_error &) {
           return TIMERUN_CHECKPOINT_NOT_SET;
         }
       });
-  ETJump::Time recordDateTime{};
-  try {
-    recordDateTime = ETJump::Time::fromString(recordDate);
-  } catch (const std::runtime_error &e) {
-    recordDateTime = ETJump::Time::fromString("1900-01-01 00:00:00");
-  }
+  ETJump::Time recordDateTime = ETJump::Time::fromString(recordDate);
 
   std::map<std::string, std::string> metadata;
   for (const auto &kvp :
