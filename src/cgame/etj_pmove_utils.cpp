@@ -140,7 +140,7 @@ float PmoveUtils::getSprintScale() const {
 }
 
 float PmoveUtils::getWishspeed(vec3_t wishvel, const float scale,
-                               vec3_t forward, vec3_t right, vec3_t up) {
+                               vec3_t forward, vec3_t right, vec3_t up) const {
   updateWishvel(wishvel, forward, right, up, pm.cmd);
 
   float wishspeed = scale * VectorLength2(wishvel);
@@ -179,7 +179,7 @@ float PmoveUtils::getWishspeed(vec3_t wishvel, const float scale,
 }
 
 void PmoveUtils::updateWishvel(vec3_t wishvel, vec3_t forward, vec3_t right,
-                               vec3_t up, const usercmd_t &ucmd) {
+                               vec3_t up, const usercmd_t &ucmd) const {
   AngleVectors(ps->viewangles, forward, right, up);
 
   // project moves down to flat plane
@@ -207,7 +207,7 @@ float PmoveUtils::getFrameAccel(const bool upmoveTrueness) {
   return pm.pmext->accel * wishspeed * pm.pmext->frametime;
 }
 
-bool PmoveUtils::skipUpdate(int &lastUpdateTime) {
+bool PmoveUtils::skipUpdate(int &lastUpdateTime) const {
   const int frameTime = cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback
                             ? cg.time
                             : ps->commandTime;

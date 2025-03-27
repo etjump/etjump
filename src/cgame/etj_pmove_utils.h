@@ -39,7 +39,7 @@ public:
 
   // calculates wishspeed projected onto flat ground plane
   float getWishspeed(vec3_t wishvel, float scale, vec3_t forward, vec3_t right,
-                     vec3_t up);
+                     vec3_t up) const;
 
   // updates XY wishvel based on cmdScale and angle vectors
   // projects velocity down to a flat ground plane
@@ -48,14 +48,14 @@ public:
   // so cgaz & snaphud can send in a "fake" usercmd for drawing
   // if there's no user input
   void updateWishvel(vec3_t wishvel, vec3_t forward, vec3_t right, vec3_t up,
-                     const usercmd_t &ucmd);
+                     const usercmd_t &ucmd) const;
 
   // returns total acceleration per frame
   float getFrameAccel(bool upmoveTrueness);
 
   // if an update should happen, updates lastUpdateTime to current frametime
   // and returns false
-  bool skipUpdate(int &lastUpdateTime);
+  bool skipUpdate(int &lastUpdateTime) const;
 
   const pmove_t *getPmove() const;
   const usercmd_t *getUserCmd() const;
