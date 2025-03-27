@@ -98,12 +98,9 @@ bool AccelMeter::beforeRender() {
 
   playing = cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback;
 
-  const int8_t ucmdScale = CMDSCALE_DEFAULT;
-  const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, ucmdScale);
+  pm = pmoveUtils->getPmove();
 
-  pm = PmoveUtils::getPmove(cmd);
-
-  if (PmoveUtils::skipUpdate(lastUpdateTime, pm, ps)) {
+  if (pmoveUtils->skipUpdate(lastUpdateTime)) {
     return true;
   }
 

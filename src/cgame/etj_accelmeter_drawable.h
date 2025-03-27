@@ -57,7 +57,7 @@ class AccelMeter : public IRenderable {
   void startListeners();
   static bool canSkipDraw();
 
-  pmove_t *pm{};
+  const pmove_t *pm{};
   playerState_t *ps = &cg.predictedPlayerState;
 
 public:

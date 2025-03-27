@@ -93,6 +93,7 @@ std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 std::shared_ptr<PlayerBBox> playerBBox;
 std::unique_ptr<SavePos> savePos;
 std::unique_ptr<SyscallExt> syscallExt;
+std::unique_ptr<PmoveUtils> pmoveUtils;
 } // namespace ETJump
 
 static bool isInitialized{false};
@@ -236,6 +237,10 @@ void init() {
   rtvHandler->initialize();
 
   demoCompatibility = std::make_unique<DemoCompatibility>();
+
+  // must be initialized before accelColor & renderables!
+  pmoveUtils = std::make_unique<PmoveUtils>();
+
   accelColor = std::make_shared<AccelColor>();
 
   playerBBox = std::make_shared<PlayerBBox>();
@@ -823,9 +828,9 @@ void runFrameEnd() {
     static int lastActivity = -minAutoSpecDelay;
 
     const auto ps = getValidPlayerState();
-    const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, CMDSCALE_DEFAULT);
+    const usercmd_t *cmd = pmoveUtils->getUserCmd();
     const auto team = cgs.clientinfo[cg.clientNum].team;
-    const bool moving = (cmd.forwardmove || cmd.rightmove || cmd.forwardmove);
+    const bool moving = cmd->forwardmove || cmd->rightmove || cmd->upmove;
     const bool following = ps->pm_flags & PMF_FOLLOW;
 
     if (team != TEAM_SPECTATOR || (!following && moving) ||

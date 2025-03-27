@@ -72,19 +72,19 @@ private:
   vec4_t CGaz2Colors[2]{};
 
   bool canSkipDraw() const;
-  void UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
-  void UpdateCGaz2();
+  void UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale) const;
+  void UpdateCGaz2() const;
   static float GetSlickGravity(const playerState_t *ps, const pmove_t *pm);
   static float UpdateDrawMin(state_t const *state);
   static float UpdateDrawOpt(state_t const *state);
   static float UpdateDrawMaxCos(state_t const *state);
   static float UpdateDrawMax(state_t const *state);
-  static float UpdateDrawSnap(const playerState_t *ps, pmove_t *pm);
+  static float UpdateDrawSnap(const playerState_t *ps, const pmove_t *pm);
   static void UpdateDraw(float wishspeed, const playerState_t *ps,
                          const pmove_t *pm);
   void startListeners();
 
-  playerState_t *ps = &cg.predictedPlayerState;
-  pmove_t *pm{};
+  const playerState_t *ps = &cg.predictedPlayerState;
+  const pmove_t *pm{};
 };
 } // namespace ETJump

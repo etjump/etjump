@@ -23,114 +23,154 @@
  */
 
 #include "etj_pmove_utils.h"
+#include "etj_cvar_update_handler.h"
+
 #include "../game/bg_local.h"
 
-// etj_pmove_utils.cpp - helper functions for pmove related calculations
-
 namespace ETJump {
-static pmove_t pmove;
-static pmoveExt_t pmext;
-static playerState_t temp_ps;
-
-usercmd_t PmoveUtils::getUserCmd(const playerState_t &ps, int8_t uCmdScale) {
-  usercmd_t cmd{};
-
-  if (!cg.demoPlayback && !(cg.snap->ps.pm_flags & PMF_FOLLOW)) {
-    int32_t const cmdNum = trap_GetCurrentCmdNumber();
-    trap_GetUserCmd(cmdNum, &cmd);
-  }
-  // generate fake userCmd for following spectators and demos
-  else {
-    cmd.forwardmove = static_cast<signed char>(
-        uCmdScale * (!!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD) -
-                     !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD)));
-    cmd.rightmove = static_cast<signed char>(
-        uCmdScale * (!!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT) -
-                     !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_LEFT)));
-    cmd.upmove = static_cast<signed char>(
-        uCmdScale * (!!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_UP) -
-                     !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_DOWN)));
-
-    // store buttons too, so we get correct scale when sprint is held
-    cmd.buttons = ps.stats[STAT_USERCMD_BUTTONS] >> 8;
-    cmd.wbuttons = ps.stats[STAT_USERCMD_BUTTONS] & 0xff;
-
-    // generate correct angles
-    for (auto i = 0; i < 3; i++) {
-      cmd.angles[i] = ANGLE2SHORT(ps.viewangles[i]) - ps.delta_angles[i];
-    }
-
-    cmd.serverTime = cg.snap->serverTime;
-  }
-  return cmd;
+PmoveUtils::PmoveUtils() {
+  initCvars();
+  setupCallbacks();
+  setPmoveStatus();
 }
 
-pmove_t *PmoveUtils::getPmove(usercmd_t cmd) {
-  if (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback) {
-    cg_pmove.pmext = &cg.pmext;
-    return &cg_pmove;
+void PmoveUtils::initCvars() {
+  cvars.emplace_back(&etj_drawSpeed2);
+  cvars.emplace_back(&etj_drawCGaz);
+  cvars.emplace_back(&etj_drawSnapHUD);
+  cvars.emplace_back(&etj_drawAccel);
+  cvars.emplace_back(&etj_drawStrafeQuality);
+  cvars.emplace_back(&etj_drawUpmoveMeter);
+}
+
+void PmoveUtils::setupCallbacks() {
+  for (const auto &cvar : cvars) {
+    cvarUpdateHandler->subscribe(
+        cvar, [this](const vmCvar_t *) { setPmoveStatus(); });
+  }
+}
+
+void PmoveUtils::setPmoveStatus() {
+  for (const auto &cvar : cvars) {
+    if (cvar->integer != 0) {
+      doPmove = true;
+      return;
+    }
   }
 
-  temp_ps = cg.predictedPlayerState;
-  pmove.ps = &temp_ps;
-  pmove.pmext = &pmext;
-  pmove.character =
+  doPmove = false;
+}
+
+void PmoveUtils::setupUserCmd() {
+  uCmdScale = ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_WALKING << 8
+                  ? CMDSCALE_WALK
+                  : CMDSCALE_DEFAULT;
+
+  if (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback) {
+    const int cmdNum = trap_GetCurrentCmdNumber();
+    trap_GetUserCmd(cmdNum, &cmd);
+    return;
+  }
+
+  cmd.forwardmove = static_cast<signed char>(
+      uCmdScale * (!!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD) -
+                   !!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD)));
+  cmd.rightmove = static_cast<signed char>(
+      uCmdScale * (!!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT) -
+                   !!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT)));
+  cmd.upmove = static_cast<signed char>(
+      uCmdScale * (!!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP) -
+                   !!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN)));
+
+  // store buttons too, so we get correct scale when sprint is held
+  cmd.buttons = ps->stats[STAT_USERCMD_BUTTONS] >> 8;
+  cmd.wbuttons = ps->stats[STAT_USERCMD_BUTTONS] & 0xff;
+
+  // generate correct angles
+  for (int i = 0; i < 3; i++) {
+    cmd.angles[i] = ANGLE2SHORT(ps->viewangles[i]) - ps->delta_angles[i];
+  }
+
+  cmd.serverTime = cg.snap->serverTime;
+}
+
+void PmoveUtils::setupPmove() {
+  if (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback) {
+    pm = cg_pmove;
+    pm.pmext = &cg.pmext;
+    return;
+  }
+
+  pm.ps = ps;
+  pm.pmext = &pmext;
+  pm.character =
       CG_CharacterForClientinfo(&cgs.clientinfo[cg.snap->ps.clientNum],
                                 &cg_entities[cg.snap->ps.clientNum]);
-  pmove.trace = CG_TraceCapsule;
-  pmove.tracemask = cg.snap->ps.pm_type == PM_DEAD
-                        ? MASK_PLAYERSOLID & ~CONTENTS_BODY
-                        : MASK_PLAYERSOLID;
-  pmove.pointcontents = CG_PointContents;
-  pmove.skill = cgs.clientinfo[cg.snap->ps.clientNum].skill;
-  pmove.cmd = cmd;
-  pmove.pmove_msec = cgs.pmove_msec;
-  PmoveSingle(&pmove);
-  return &pmove;
+  pm.trace = CG_TraceCapsule;
+  pm.tracemask = cg.snap->ps.pm_type == PM_DEAD
+                     ? MASK_PLAYERSOLID & ~CONTENTS_BODY
+                     : MASK_PLAYERSOLID;
+  pm.pointcontents = CG_PointContents;
+  pm.skill = cgs.clientinfo[cg.snap->ps.clientNum].skill;
+  pm.cmd = cmd;
+  pm.pmove_msec = cgs.pmove_msec;
 }
 
-float PmoveUtils::PM_SprintScale(const playerState_t *ps) {
-  // based on PM_CmdScale from bg_pmove.c
-  float scale = ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) &&
-                        cg.pmext.sprintTime > 50
-                    ? ps->sprintSpeedScale
-                    : ps->runSpeedScale;
-  return scale;
+void PmoveUtils::runPmove() {
+  // this should never be called before client prediction has run at least once
+  assert(cg.validPPS);
+
+  setupUserCmd();
+  setupPmove();
+
+  // if not spectating/in demo playback, we have everything we need
+  if (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback) {
+    return;
+  }
+
+  PmoveSingle(&pm);
 }
 
-float PmoveUtils::PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd,
-                                  vec3_t forward, vec3_t right, vec3_t up,
-                                  const playerState_t &ps, const pmove_t *pm) {
-  PM_UpdateWishvel(wishvel, cmd, forward, right, up, ps);
+float PmoveUtils::getSprintScale() const {
+  // based on PM_CmdScale from bg_pmove.cpp
+  return ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_SPRINT << 8 &&
+                 cg.pmext.sprintTime > 50
+             ? ps->sprintSpeedScale
+             : ps->runSpeedScale;
+}
+
+float PmoveUtils::getWishspeed(vec3_t wishvel, const float scale,
+                               vec3_t forward, vec3_t right, vec3_t up) {
+  updateWishvel(wishvel, forward, right, up, pm.cmd);
 
   float wishspeed = scale * VectorLength2(wishvel);
 
   // if walking, account for prone, crouch and water
-  if (pm->pmext->walking) {
+  if (pm.pmext->walking) {
     // clamp the speed lower if prone
-    if (pm->ps->eFlags & EF_PRONE) {
-      if (wishspeed > pm->ps->speed * pm_proneSpeedScale) {
-        wishspeed = pm->ps->speed * pm_proneSpeedScale;
+    if (pm.ps->eFlags & EF_PRONE) {
+      if (wishspeed > pm.ps->speed * pm_proneSpeedScale) {
+        wishspeed = pm.ps->speed * pm_proneSpeedScale;
       }
     }
     // clamp the speed lower if ducking
-    else if (pm->ps->pm_flags & PMF_DUCKED) {
-      if (wishspeed > pm->ps->speed * pm->ps->crouchSpeedScale) {
-        wishspeed = pm->ps->speed * pm->ps->crouchSpeedScale;
+    else if (pm.ps->pm_flags & PMF_DUCKED) {
+      if (wishspeed > pm.ps->speed * pm.ps->crouchSpeedScale) {
+        wishspeed = pm.ps->speed * pm.ps->crouchSpeedScale;
       }
     }
 
     // clamp the speed lower if wading or walking on the bottom
-    if (pm->pmext->waterlevel) {
-      float waterScale = pm->pmext->waterlevel / 3.0f;
-      if (pm->watertype == CONTENTS_SLIME) {
+    if (pm.pmext->waterlevel) {
+      float waterScale = pm.pmext->waterlevel / 3.0f;
+      if (pm.watertype == CONTENTS_SLIME) {
         waterScale = 1.0 - (1.0 - pm_slagSwimScale) * waterScale;
       } else {
         waterScale = 1.0 - (1.0 - pm_waterSwimScale) * waterScale;
       }
 
-      if (wishspeed > pm->ps->speed * waterScale) {
-        wishspeed = pm->ps->speed * waterScale;
+      if (wishspeed > pm.ps->speed * waterScale) {
+        wishspeed = pm.ps->speed * waterScale;
       }
     }
   }
@@ -138,10 +178,9 @@ float PmoveUtils::PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd,
   return wishspeed;
 }
 
-void PmoveUtils::PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward,
-                                  vec3_t right, vec3_t up,
-                                  const playerState_t &ps) {
-  AngleVectors(ps.viewangles, forward, right, up);
+void PmoveUtils::updateWishvel(vec3_t wishvel, vec3_t forward, vec3_t right,
+                               vec3_t up, const usercmd_t &ucmd) {
+  AngleVectors(ps->viewangles, forward, right, up);
 
   // project moves down to flat plane
   forward[2] = 0;
@@ -150,46 +189,45 @@ void PmoveUtils::PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward,
   VectorNormalize(right);
 
   for (uint8_t i = 0; i < 2; ++i) {
-    wishvel[i] = cmd.forwardmove * forward[i] + cmd.rightmove * right[i];
+    wishvel[i] = ucmd.forwardmove * forward[i] + ucmd.rightmove * right[i];
   }
 }
 
-float PmoveUtils::getFrameAccel(const playerState_t &ps, const pmove_t *pm,
-                                const bool upmoveTrueness) {
-  const auto ucmdScale =
-      static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
-                              ? CMDSCALE_WALK
-                              : CMDSCALE_DEFAULT);
-  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
-
+float PmoveUtils::getFrameAccel(const bool upmoveTrueness) {
   // no meaningful value if no user input
   if (cmd.forwardmove == 0 && cmd.rightmove == 0) {
     return 0;
   }
 
   vec3_t wishvel;
-  const float scale = upmoveTrueness ? pm->pmext->scale : pm->pmext->scaleAlt;
-  const float wishspeed =
-      PmoveUtils::PM_GetWishspeed(wishvel, scale, cmd, pm->pmext->forward,
-                                  pm->pmext->right, pm->pmext->up, ps, pm);
+  const float scale = upmoveTrueness ? pm.pmext->scale : pm.pmext->scaleAlt;
+  const float wishspeed = getWishspeed(wishvel, scale, pm.pmext->forward,
+                                       pm.pmext->right, pm.pmext->up);
 
-  return pm->pmext->accel * wishspeed * pm->pmext->frametime;
+  return pm.pmext->accel * wishspeed * pm.pmext->frametime;
 }
 
-bool PmoveUtils::skipUpdate(int &lastUpdateTime, const pmove_t *pm,
-                            const playerState_t *ps) {
-  const int frameTime = (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback)
+bool PmoveUtils::skipUpdate(int &lastUpdateTime) {
+  const int frameTime = cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback
                             ? cg.time
                             : ps->commandTime;
 
-  if (!pm->ps || lastUpdateTime + pm->pmove_msec > frameTime) {
+  if (!pm.ps || lastUpdateTime + pm.pmove_msec > frameTime) {
     return true;
   }
 
   // ensure lastUpdateTime is always aligned to pmove_msec interval
   // even if cg.time does not exactly align to it correctly to prevent
   // uneven update rates across various drawables that utilize this
-  lastUpdateTime = frameTime - (frameTime % pm->pmove_msec);
+  lastUpdateTime = frameTime - frameTime % pm.pmove_msec;
   return false;
 }
+
+bool PmoveUtils::check() const { return doPmove; }
+
+const pmove_t *PmoveUtils::getPmove() const { return &pm; }
+
+const usercmd_t *PmoveUtils::getUserCmd() const { return &cmd; }
+
+int8_t PmoveUtils::getUserCmdScale() const { return uCmdScale; }
 } // namespace ETJump
