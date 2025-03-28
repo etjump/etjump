@@ -72,10 +72,11 @@ class UpmoveMeter : public IRenderable {
   static constexpr float graphX_ = 8.0f;
   static constexpr float graphY_ = 8.0f;
 
-  CvarValue::Size textSize;
+  CvarValue::Size textSize{};
 
   int lastUpdateTime{};
-  pmove_t *pm{};
+  const pmove_t *pm{};
+  const playerState_t *ps = &cg.predictedPlayerState;
 
   void startListeners();
   void parseAllColors();

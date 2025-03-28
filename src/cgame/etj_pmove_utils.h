@@ -29,36 +29,55 @@
 namespace ETJump {
 class PmoveUtils {
 public:
-  // returns real userCmd for players and a faked
-  // one for spectators/demo playback
-  static usercmd_t getUserCmd(const playerState_t &ps, int8_t uCmdScale);
-
-  // returns cg_pmove for players or runs PmoveSingle again
-  // for spectators/demo playback to get correct values for pmext
-  static pmove_t *getPmove(usercmd_t cmd);
+  PmoveUtils();
+  ~PmoveUtils() = default;
+  bool check() const;
+  void runPmove();
 
   // returns either sprintSpeedScale or runSpeedScale
-  static float PM_SprintScale(const playerState_t *ps);
+  float getSprintScale() const;
 
   // calculates wishspeed projected onto flat ground plane
-  static float PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd,
-                               vec3_t forward, vec3_t right, vec3_t up,
-                               const playerState_t &ps, const pmove_t *pm);
+  float getWishspeed(vec3_t wishvel, float scale, vec3_t forward, vec3_t right,
+                     vec3_t up) const;
 
   // updates XY wishvel based on cmdScale and angle vectors
   // projects velocity down to a flat ground plane
   // Z vector is taken as input for AngleVectors
-  static void PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward,
-                               vec3_t right, vec3_t up,
-                               const playerState_t &ps);
+  // this takes in usercmd_t instead of using the class member variable,
+  // so cgaz & snaphud can send in a "fake" usercmd for drawing
+  // if there's no user input
+  void updateWishvel(vec3_t wishvel, vec3_t forward, vec3_t right, vec3_t up,
+                     const usercmd_t &ucmd) const;
 
   // returns total acceleration per frame
-  static float getFrameAccel(const playerState_t &ps, const pmove_t *pm,
-                             bool upmoveTrueness);
+  float getFrameAccel(bool upmoveTrueness);
 
   // if an update should happen, updates lastUpdateTime to current frametime
   // and returns false
-  static bool skipUpdate(int &lastUpdateTime, const pmove_t *pm,
-                         const playerState_t *ps);
+  bool skipUpdate(int &lastUpdateTime) const;
+
+  const pmove_t *getPmove() const;
+  const usercmd_t *getUserCmd() const;
+  int8_t getUserCmdScale() const;
+
+private:
+  void initCvars();
+  void setupCallbacks();
+  void setPmoveStatus();
+  void setupUserCmd();
+  void setupPmove();
+
+  pmove_t pm{};
+  pmoveExt_t pmext{};
+  usercmd_t cmd{};
+  playerState_t *ps = &cg.predictedPlayerState;
+
+  // a lot of drawables need this so make it accessible here since
+  // we need to calculate it here to set up usercmd anyway
+  int8_t uCmdScale{};
+
+  bool doPmove{};
+  std::vector<const vmCvar_t *> cvars{};
 };
 } // namespace ETJump

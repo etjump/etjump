@@ -41,16 +41,16 @@ public:
 
   void render() const override;
   bool beforeRender() override;
-  static CurrentSnap getCurrentSnap(const playerState_t &ps, pmove_t *pm,
+  static CurrentSnap getCurrentSnap(const playerState_t &ps, const pmove_t *pm,
                                     bool upmoveTrueness);
-  static bool inMainAccelZone(const playerState_t &ps, pmove_t *pm);
+  static bool inMainAccelZone(const playerState_t &ps, const pmove_t *pm);
 
   Snaphud();
   ~Snaphud() {};
 
 private:
   bool canSkipDraw() const;
-  void InitSnaphud(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
+  void InitSnaphud(vec3_t wishvel, int8_t uCmdScale);
   void UpdateMaxSnapZones();
   void UpdateSnapState();
   void PrepareDrawables();
@@ -86,8 +86,8 @@ private:
   bool borderOnly{};
   int lastUpdateTime{};
 
-  playerState_t *ps = &cg.predictedPlayerState;
-  pmove_t *pm{};
+  const playerState_t *ps = &cg.predictedPlayerState;
+  const pmove_t *pm{};
 
   struct DrawableSnap {
     int bSnap;

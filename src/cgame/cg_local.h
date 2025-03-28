@@ -4197,6 +4197,7 @@ extern std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 extern std::shared_ptr<PlayerBBox> playerBBox;
 extern std::unique_ptr<SavePos> savePos;
 extern std::unique_ptr<SyscallExt> syscallExt;
+extern std::unique_ptr<PmoveUtils> pmoveUtils;
 
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume, int soundTime);

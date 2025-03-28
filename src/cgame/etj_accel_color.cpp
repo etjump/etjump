@@ -29,13 +29,13 @@
 #include "etj_cgaz.h"
 
 namespace ETJump {
-void AccelColor::setAccelColor(int &style, float &speed, float &alpha,
-                               const pmove_t *pm, const playerState_t *ps,
+void AccelColor::setAccelColor(const int style, const float speed,
+                               const float alpha, const pmove_t *pm,
+                               const playerState_t *ps,
                                std::list<StoredSpeed> &storedSpeeds,
-                               vec3_t &accel, vec4_t &color) {
-  if (style == Style::Simple ||
-      (style == Style::Advanced &&
-       lowSpeedOnGround(speed, ps->groundEntityNum))) {
+                               const vec3_t &accel, vec4_t &color) {
+  if (style == Simple ||
+      (style == Advanced && lowSpeedOnGround(speed, ps->groundEntityNum))) {
     float avgAccel = calcAvgAccel(storedSpeeds);
     vec4_t currentAccelColor;
     Vector4Copy(colorGreen, currentAccelColor);
@@ -49,7 +49,7 @@ void AccelColor::setAccelColor(int &style, float &speed, float &alpha,
     frac = std::min(frac, 1.f);
 
     LerpColor(colorWhite, currentAccelColor, color, frac);
-  } else if (style == Style::Advanced) {
+  } else if (style == Advanced) {
     calcAccelColor(pm, ps, accel, color);
   }
 
@@ -57,20 +57,20 @@ void AccelColor::setAccelColor(int &style, float &speed, float &alpha,
 }
 
 void AccelColor::calcAccelColor(const pmove_t *pm, const playerState_t *ps,
-                                vec3_t &accel, vec4_t &outColor) {
+                                const vec3_t &accel, vec4_t &outColor) {
   vec4_t color;
-  const int8_t ucmdScale = CMDSCALE_DEFAULT;
-  const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, ucmdScale);
+  const usercmd_t *cmd = pmoveUtils->getUserCmd();
 
   float speedX = ps->velocity[0];
   float speedY = ps->velocity[1];
 
-  const float accelAngle = RAD2DEG(std::atan2(-cmd.rightmove, cmd.forwardmove));
+  const float accelAngle =
+      RAD2DEG(std::atan2(-cmd->rightmove, cmd->forwardmove));
   const float accelAngleAlt =
-      RAD2DEG(std::atan2(cmd.rightmove, cmd.forwardmove));
+      RAD2DEG(std::atan2(cmd->rightmove, cmd->forwardmove));
 
   // max acceleration possible per frame
-  const float frameAccel = PmoveUtils::getFrameAccel(*ps, pm, true);
+  const float frameAccel = pmoveUtils->getFrameAccel(true);
   const float gravityAccel =
       -std::round(static_cast<float>(ps->gravity) * pm->pmext->frametime);
 
@@ -178,9 +178,9 @@ void AccelColor::calcAccelColor(const pmove_t *pm, const playerState_t *ps,
 
   // we want a solid color all the time, no dark tints
   if (color[0] != 0.0f && color[1] != 0.0f) { // if we have a mix of R & G
-    size_t maxColorIndex = color[0] > color[1] ? 0 : 1;
-    float maxShade = 1.0f; // min value to show per color
-    float coef = maxShade / color[maxColorIndex];
+    const size_t maxColorIndex = color[0] > color[1] ? 0 : 1;
+    constexpr float maxShade = 1.0f; // min value to show per color
+    const float coef = maxShade / color[maxColorIndex];
 
     VectorScale(color, coef, color);
   }

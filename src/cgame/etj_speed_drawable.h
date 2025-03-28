@@ -51,8 +51,8 @@ class DrawSpeed : public IRenderable {
   vec3_t accel{};
   vec4_t speedColor{};
 
-  playerState_t *ps = &cg.predictedPlayerState;
-  pmove_t *pm{};
+  const playerState_t *ps = &cg.predictedPlayerState;
+  const pmove_t *pm{};
   int textStyle{};
   int lastUpdateTime{0};
   int accelColorStyle{};

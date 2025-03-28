@@ -27,7 +27,6 @@
 #include "etj_client_commands_handler.h"
 #include "etj_utilities.h"
 #include "etj_snaphud.h"
-#include "etj_cgaz.h"
 #include "etj_pmove_utils.h"
 #include "etj_player_events_handler.h"
 
@@ -72,12 +71,10 @@ void StrafeQuality::resetStrafeQuality() {
 }
 
 bool StrafeQuality::beforeRender() {
-  const playerState_t &ps = cg.predictedPlayerState;
-
   // update team before checking if we should draw or not,
   // since we don't draw for spectators
-  if (_team != ps.persistant[PERS_TEAM]) {
-    _team = ps.persistant[PERS_TEAM];
+  if (_team != ps->persistant[PERS_TEAM]) {
+    _team = ps->persistant[PERS_TEAM];
     // reset strafe quality upon team change
     // note: not handled by consoleCommandsHandler because _team
     // is needed in render() either ways
@@ -88,21 +85,15 @@ bool StrafeQuality::beforeRender() {
     return false;
   }
 
-  // get usercmd
-  // cmdScale is only checked here to be 0 or !0
-  // so we can just use CMDSCALE_DEFAULT
-  const int8_t ucmdScale = CMDSCALE_DEFAULT;
-  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
-
   // get correct pmove
-  pm = PmoveUtils::getPmove(cmd);
+  pm = pmoveUtils->getPmove();
 
-  if (PmoveUtils::skipUpdate(_lastUpdateTime, pm, &ps)) {
+  if (pmoveUtils->skipUpdate(_lastUpdateTime)) {
     return true;
   }
 
   // just skip update, but return true so that we actually still draw
-  if (canSkipUpdate(cmd)) {
+  if (canSkipUpdate(pm->cmd)) {
     return true;
   }
 
@@ -110,21 +101,20 @@ bool StrafeQuality::beforeRender() {
   ++_totalFrames;
 
   // check whether user input is good
-  const float speed = VectorLength2(ps.velocity);
+  const float speed = VectorLength2(ps->velocity);
   vec3_t wishvel;
-  const float wishspeed = PmoveUtils::PM_GetWishspeed(
-      wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
-      pm->pmext->up, ps, pm);
+  const float wishspeed =
+      pmoveUtils->getWishspeed(wishvel, pm->pmext->scale, pm->pmext->forward,
+                               pm->pmext->right, pm->pmext->up);
   if (speed < wishspeed) {
     // possibly good frame under ground speed if speed increased
     // note that without speed increased you could go forward in
-    // a "ps.speed - 1" angle endlessly because of velocity
-    // snapping
+    // a "ps.speed - 1" angle endlessly because of velocity snapping
     if (speed > _oldSpeed) {
-      // good frame if no upmove and either only
-      // forwardmove or only rightmove
-      if (cmd.upmove == 0 && ((cmd.forwardmove != 0 && cmd.rightmove == 0) ||
-                              (cmd.forwardmove == 0 && cmd.rightmove != 0))) {
+      // good frame if no upmove and either only forwardmove or only rightmove
+      if (pm->cmd.upmove == 0 &&
+          ((pm->cmd.forwardmove != 0 && pm->cmd.rightmove == 0) ||
+           (pm->cmd.forwardmove == 0 && pm->cmd.rightmove != 0))) {
         ++_goodFrames;
       }
       // otherwise only half as good because not optimal
@@ -133,9 +123,8 @@ bool StrafeQuality::beforeRender() {
       }
     }
   } else {
-    // good frame above ground speed if no upmove and in main
-    // accel zone
-    if (cmd.upmove == 0 && Snaphud::inMainAccelZone(ps, pm)) {
+    // good frame above ground speed if no upmove and in main accel zone
+    if (pm->cmd.upmove == 0 && Snaphud::inMainAccelZone(*ps, pm)) {
       ++_goodFrames;
     }
     // or if speed increased, half as good because not optimal

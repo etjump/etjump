@@ -42,10 +42,10 @@ public:
 
   static void popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds,
                                  int time);
-  static void setAccelColor(int &style, float &speed, float &alpha,
+  static void setAccelColor(int style, float speed, float alpha,
                             const pmove_t *pm, const playerState_t *ps,
-                            std::list<StoredSpeed> &storedSpeeds, vec3_t &accel,
-                            vec4_t &color);
+                            std::list<StoredSpeed> &storedSpeeds,
+                            const vec3_t &accel, vec4_t &color);
   static bool lowSpeedOnGround(float speed, int groundEntityNum);
 
 private:
@@ -54,6 +54,6 @@ private:
 
   static float calcAvgAccel(std::list<StoredSpeed> &storedSpeeds);
   static void calcAccelColor(const pmove_t *pm, const playerState_t *ps,
-                             vec3_t &accel, vec4_t &outColor);
+                             const vec3_t &accel, vec4_t &outColor);
 };
 } // namespace ETJump
