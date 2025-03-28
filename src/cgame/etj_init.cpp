@@ -825,7 +825,7 @@ void runFrameEnd() {
     const auto ps = getValidPlayerState();
     const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, CMDSCALE_DEFAULT);
     const auto team = cgs.clientinfo[cg.clientNum].team;
-    const bool moving = (cmd.forwardmove || cmd.rightmove || cmd.forwardmove);
+    const bool moving = cmd.forwardmove || cmd.rightmove || cmd.upmove;
     const bool following = ps->pm_flags & PMF_FOLLOW;
 
     if (team != TEAM_SPECTATOR || (!following && moving) ||
