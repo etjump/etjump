@@ -127,7 +127,7 @@ set_target_properties(cgame PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_DIR_PATH}")
 set_target_platform_details(cgame)
 
-if (CMAKE_GENERATOR_NAME MATCHES "Visual Studio")
+if (CMAKE_GENERATOR MATCHES "Visual Studio")
 	set_target_properties(cgame PROPERTIES
 			VS_DEBUGGER_COMMAND "${ET_PATH}\\${ET_EXE_NAME}"
 			VS_DEBUGGER_COMMAND_ARGUMENTS "+set fs_basepath . +set fs_homepath \"${ET_PATH}\" +set fs_game ${CMAKE_PROJECT_NAME}"

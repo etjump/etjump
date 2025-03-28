@@ -22,7 +22,7 @@ option(USE_LSAN "Enable leak sanitizer on supported compilers" OFF)
 option(USE_UBSAN "Enable undefined behavior sanitizer on supported compilers" OFF)
 
 # provide options for Visual Studio to automatically setup debugger paths
-if (CMAKE_GENERATOR_NAME MATCHES "Visual Studio")
+if (CMAKE_GENERATOR MATCHES "Visual Studio")
 	set(ET_PATH "" CACHE STRING "Path to ET installation used during development")
 	set(ET_EXE_NAME "" CACHE STRING "Name of the engine for launching the game (ET.exe, etl.exe, ETe.exe etc.)")
 endif ()
