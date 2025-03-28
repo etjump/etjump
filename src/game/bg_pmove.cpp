@@ -21,9 +21,10 @@ extern vmCvar_t g_cheats;
 #endif
 
 namespace ETJump {
-static const int JUMP_DELAY_TIME = 850;
-static const int PRONE_JUMP_DELAY_TIME = 650;
-static const int PRONE_DELAY_TIME = 750;
+inline constexpr int JUMP_DELAY_TIME = 850;
+inline constexpr int PRONE_JUMP_DELAY_TIME = 650;
+inline constexpr int PRONE_DELAY_TIME = 750;
+
 static bool hasJustStoodUp() {
   return pm->pmext->proneTime - pm->pmext->jumpTime == PRONE_JUMP_DELAY_TIME;
 }
@@ -42,33 +43,6 @@ static void bgPrint(const std::string &msg, const Targs &...fargs) {
 
 pmove_t *pm;
 pml_t pml;
-
-// movement parameters
-float pm_stopspeed = 100;
-// float	pm_duckScale = 0.25;
-
-//----(SA)	modified
-float pm_waterSwimScale = 0.5;
-float pm_waterWadeScale = 0.70;
-float pm_slagSwimScale = 0.30;
-float pm_slagWadeScale = 0.70;
-
-float pm_proneSpeedScale = 0.21; // was: 0.18 (too slow) then: 0.24 (too fast)
-
-float pm_accelerate = 10;
-float pm_airaccelerate = 1;
-float pm_wateraccelerate = 4;
-float pm_slagaccelerate = 2;
-float pm_flyaccelerate = 8;
-
-float pm_friction = 6;
-float pm_waterfriction = 1;
-float pm_slagfriction = 1;
-float pm_flightfriction = 3;
-float pm_ladderfriction = 14;
-float pm_spectatorfriction = 5.0f;
-
-//----(SA)	end
 
 int c_pmove = 0;
 
