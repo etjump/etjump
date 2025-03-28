@@ -30,6 +30,8 @@
 #include "etj_cgaz.h"
 #include "etj_cvar_update_handler.h"
 
+#include "../game/bg_local.h"
+
 // Snaphud implementation based on cgame_proxymod
 // HUGE thanks to Jelvan1 for his snaphud code
 // https://github.com/Jelvan1/cgame_proxymod/
