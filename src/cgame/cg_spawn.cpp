@@ -4,6 +4,8 @@
  * desc:		Client sided only map entities
  */
 
+#include <algorithm>
+
 #include "cg_local.h"
 
 qboolean CG_SpawnString(const char *key, const char *defaultString,
@@ -249,6 +251,102 @@ void SP_trigger_objective_info(void) {
   cg.numOIDtriggers2++;
 }
 
+void SP_dlight() {
+  char *s{};
+
+  // server-side dlight
+  // TODO: see if we could make sound work?
+  //  pretty sure it requires a proper entitynum but need to investigate
+  if (CG_SpawnString("targetname", "", &s) ||
+      CG_SpawnString("scriptname", "", &s) ||
+      CG_SpawnString("spawnflags", "", &s) ||
+      CG_SpawnString("sound", "0", &s)) {
+    return;
+  }
+
+  if (cg.numDlights >= MAX_STATIC_DLIGHTS) {
+    CG_Error("%s: MAX_STATIC_DLIGHTS (%i) exceeded\n", __func__,
+             MAX_STATIC_DLIGHTS);
+  }
+
+  centity_t *dlight = &cgs.dlights[cg.numDlights];
+  cg.numDlights++;
+
+  CG_SpawnVector("origin", "0 0 0", dlight->currentState.origin);
+  CG_SpawnVector("angles", "0 0 0", dlight->currentState.angles);
+
+  VectorCopy(dlight->currentState.origin, dlight->lerpOrigin);
+  VectorCopy(dlight->currentState.angles, dlight->lerpAngles);
+
+  int style = 0;
+  CG_SpawnInt("style", "0", &style);
+
+  // 'stylestring' overrides pre-defined style strings
+  if (CG_SpawnString("stylestring", "", &s)) {
+    std::string styleString = s;
+
+    // spawnvars are 2048 chars, but dlights are capped to 64
+    if (styleString.length() >= MAX_DLIGHT_STYLESTRING) {
+      styleString = styleString.substr(0, MAX_DLIGHT_STYLESTRING - 1);
+    }
+
+    Q_strncpyz(dlight->dl_stylestring, styleString.c_str(),
+               sizeof(dlight->dl_stylestring));
+  } else if (style) {
+    style = std::clamp(style, 1, NUM_PREDEF_DLIGHT_STRINGS);
+    Q_strncpyz(dlight->dl_stylestring, predef_lightstyles[style - 1],
+               sizeof(dlight->dl_stylestring));
+  } else {
+    // default to a strobe to call attention to this not being set
+    Q_strncpyz(dlight->dl_stylestring, "mmmaaa",
+               sizeof(dlight->dl_stylestring));
+  }
+
+  const auto styleStringLen = static_cast<int>(strlen(dlight->dl_stylestring));
+
+  if (CG_SpawnInt("atten", "0", &dlight->dl_atten)) {
+    for (int i = 0; i < styleStringLen; i++) {
+      // FIXME: this will wrap if 'atten' is too big or small and causes
+      //  the clamping to behave unexpectedly, but that's VET behavior
+      //  https://github.com/etjump/etjump/issues/1667
+      dlight->dl_stylestring[i] += dlight->dl_atten;
+      dlight->dl_stylestring[i] =
+          std::clamp(dlight->dl_stylestring[i], 'a', 'z');
+    }
+  }
+
+  CG_SpawnInt("offset", "0", &dlight->dl_frame);
+  dlight->dl_frame = dlight->dl_frame % styleStringLen;
+  dlight->dl_oldframe = dlight->dl_frame - 1;
+
+  // wrap negative offset
+  if (dlight->dl_oldframe < 0) {
+    dlight->dl_oldframe = styleStringLen;
+  }
+
+  vec3_t color;
+  CG_SpawnVector("color", "", color);
+
+  // if the color is black or isn't set, default to white
+  if (color[0] <= 0 && color[1] <= 0 && color[2] <= 0) {
+    VectorSet(color, 1.0f, 1.0f, 1.0f);
+  }
+
+  VectorScale(color, 255, color);
+
+  auto intensity =
+      static_cast<float>(dlight->dl_stylestring[dlight->dl_frame] - 'a');
+  intensity *= 1000.0f / 24.0f;
+  intensity = std::clamp(intensity / 4, 0.0f, 255.0f);
+
+  dlight->currentState.constantLight =
+      static_cast<int>(color[0]) | static_cast<int>(color[1]) << 8 |
+      static_cast<int>(color[2]) << 16 | static_cast<int>(intensity) << 24;
+
+  dlight->dl_backlerp = 0;
+  dlight->dl_time = cg.time;
+}
+
 typedef struct {
   const char *name;
   void (*spawn)(void);
@@ -263,6 +361,7 @@ spawn_t spawns[] = {
     {"trigger_objective_info", SP_trigger_objective_info},
     {"misc_gamemodel", SP_misc_gamemodel},
     {"corona", SP_corona},
+    {"dlight", SP_dlight},
 };
 
 inline constexpr int NUMSPAWNS = sizeof(spawns) / sizeof(spawn_t);
@@ -511,6 +610,7 @@ void CG_ParseEntitiesFromString(void) {
   cg.numSpawnVars = 0;
   cg.numMiscGameModels = 0;
   cg.numCoronas = 0;
+  cg.numDlights = 0;
 
   // the worldspawn is not an actual entity, but it still
   // has a "spawn" function to perform any global setup
