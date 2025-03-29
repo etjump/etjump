@@ -10,6 +10,24 @@ set(VERSION_MINOR "${CMAKE_MATCH_1}")
 string(REGEX MATCH "VERSION_PATCH ([0-9]+)" _patch_match "${version_content}")
 set(VERSION_PATCH "${CMAKE_MATCH_1}")
 
+# this must be setup before project() is called
+# TODO: windows + clang support some day?
+if (UNIX AND NOT APPLE)
+	option(USE_CLANG "Use Clang as the compiler instead of GCC" OFF)
+
+	if (USE_CLANG)
+		find_program(CLANG_C_EXECUTABLE clang)
+		find_program(CLANG_CXX_EXECUTABLE clang++)
+
+		if (CLANG_C_EXECUTABLE AND CLANG_CXX_EXECUTABLE)
+			set(CMAKE_C_COMPILER ${CLANG_C_EXECUTABLE})
+			set(CMAKE_CXX_COMPILER ${CLANG_CXX_EXECUTABLE})
+		else ()
+			message("Unable to find Clang, using default compiler")
+		endif ()
+	endif ()
+endif ()
+
 project(etjump VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" HOMEPAGE_URL "etjump.com" LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
