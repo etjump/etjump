@@ -4533,12 +4533,9 @@ static void drawCoronas() {
 }
 
 static void drawClientDlights() {
-  // TODO: demo compatibility
-  /*
   if (demoCompatibility->flags.serverSideDlights) {
     return;
   }
-  */
 
   for (int i = 0; i < cg.numDlights; i++) {
     centity_t *dlight = &cgs.dlights[i];

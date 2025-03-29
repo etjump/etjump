@@ -148,6 +148,11 @@ void DemoCompatibility::setupCompatibilityFlags() {
         "- Adjusted event indices for ET_FAKEBRUSH and "
         "ET_TELEPORT_TRIGGER_CLIENT");
   }
+
+  if (!isCompatible({3, 4, 0})) {
+    flags.serverSideDlights = true;
+    compatibilityStrings.emplace_back("- Using fully server-side dlights");
+  }
 }
 
 int DemoCompatibility::adjustedEventNum(const int event) const {
