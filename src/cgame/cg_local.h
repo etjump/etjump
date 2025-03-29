@@ -1088,6 +1088,7 @@ typedef struct {
 
   int numMiscGameModels;
   int numCoronas;
+  int numDlights;
 
   qboolean showGameView;
   qboolean showFireteamMenu;
@@ -1857,6 +1858,7 @@ typedef struct {
 
 inline constexpr int MAX_STATIC_GAMEMODELS = 1024;
 inline constexpr int MAX_STATIC_CORONAS = 1024;
+inline constexpr int MAX_STATIC_DLIGHTS = 1024;
 
 typedef struct cg_gamemodel_s {
   qhandle_t model;
@@ -2088,6 +2090,7 @@ typedef struct {
 
   cg_gamemodel_t miscGameModels[MAX_STATIC_GAMEMODELS];
   centity_t coronas[MAX_STATIC_CORONAS];
+  centity_t dlights[MAX_STATIC_DLIGHTS];
 
   vec2_t ccMenuPos;
   qboolean ccMenuShowing;
@@ -3100,6 +3103,7 @@ void CG_PositionRotatedEntityOnTag(refEntity_t *entity,
                                    const refEntity_t *parent,
                                    const char *tagName);
 void CG_Corona(centity_t *cent);
+void CG_AddLightstyle(centity_t *cent);
 
 //
 // cg_weapons.c

@@ -1866,6 +1866,28 @@ inline constexpr float CH_MAX_DIST = 1024.0f;
 // max dist for zooming hints
 inline constexpr float CH_MAX_DIST_ZOOM = 8192.0f;
 
+inline constexpr int NUM_PREDEF_DLIGHT_STRINGS = 19;
+inline constexpr std::array<const char *, NUM_PREDEF_DLIGHT_STRINGS>
+    predef_lightstyles = {"mmnmmommommnonmmonqnmmo",
+                          "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba",
+                          "mmmmmaaaaammmmmaaaaaabcdefgabcdefg",
+                          "ma",
+                          "jklmnopqrstuvwxyzyxwvutsrqponmlkj",
+                          "nmonqnmomnmomomono",
+                          "mmmaaaabcdefgmmmmaaaammmaamm",
+                          "aaaaaaaazzzzzzzz",
+                          "mmamammmmammamamaaamammma",
+                          "abcdefghijklmnopqrrqponmlkjihgfedcba",
+                          "mmnommomhkmmomnonmmonqnmmo",
+                          "kmamaamakmmmaakmamakmakmmmma",
+                          "kmmmakakmmaaamammamkmamakmmmma",
+                          "mmnnoonnmmmmmmmmmnmmmmnonmmmmmmm",
+                          "mmmmnonmmmmnmmmmmnonmmmmmnmmmmmmm",
+                          "zzzzzzzzaaaaaaaa",
+                          "zzzzzzzzaaaaaaaaaaaaaaaa",
+                          "aaaaaaaazzzzzzzzaaaaaaaa",
+                          "aaaaaaaaaaaaaaaazzzzzzzz"};
+
 void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result,
                            qboolean isAngle, int splinePath);
 void BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int atTime,
