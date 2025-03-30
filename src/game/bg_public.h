@@ -2533,8 +2533,7 @@ extern int numVotesAvailable;
 #ifdef CGAMEDLL
 void CG_GenerateTracemap(void);
 #endif // CGAMEDLL
-qboolean BG_LoadTraceMap(char *rawmapname, vec2_t world_mins,
-                         vec2_t world_maxs);
+bool BG_LoadTraceMap(char *rawmapname, vec2_t world_mins, vec2_t world_maxs);
 float BG_GetSkyHeightAtPoint(vec3_t pos);
 float BG_GetSkyGroundHeightAtPoint(vec3_t pos);
 float BG_GetGroundHeightAtPoint(vec3_t pos);
