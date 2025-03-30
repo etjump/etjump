@@ -1108,8 +1108,13 @@ void G_CheckForCursorHints(gentity_t *ent) {
               hintType = HINT_TREASURE;
               break;
             case IT_WEAPON: {
-              qboolean canPickup =
-                  COM_BitCheck(ent->client->ps.weapons, it->giTag);
+              bool canPickup = COM_BitCheck(ent->client->ps.weapons, it->giTag);
+
+              // portal gun works the opposite way from other weapons:
+              // we can only pick it up if we don't have it
+              if (it->giTag == WP_PORTAL_GUN) {
+                canPickup = !canPickup;
+              }
 
               if (!canPickup) {
                 if (it->giTag == WP_AMMO) {
