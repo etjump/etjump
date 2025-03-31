@@ -569,7 +569,7 @@ void target_laser_think(gentity_t *self) {
   trap_Trace(&tr, self->s.origin, NULL, NULL, end, self->s.number,
              CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE);
 
-  if (tr.entityNum) {
+  if (tr.fraction != 1.0f) {
     // hurt it if we can
     G_Damage(&g_entities[tr.entityNum], self, self->activator, self->movedir,
              tr.endpos, self->damage, DAMAGE_NO_KNOCKBACK, MOD_TARGET_LASER);
@@ -621,10 +621,6 @@ void target_laser_start(gentity_t *self) {
   self->use = target_laser_use;
   self->think = target_laser_think;
 
-  if (!self->damage) {
-    self->damage = 1;
-  }
-
   if (self->spawnflags & 1) {
     target_laser_on(self);
   } else {
@@ -638,6 +634,14 @@ void SP_target_laser(gentity_t *self) {
   self->s.angles2[0] = 1.f;
   self->s.angles2[1] = 1.f;
   self->s.angles2[2] = 1.f;
+
+  char *s{};
+
+  if (G_SpawnString("damage", "1", &s)) {
+    self->damage = Q_atoi(s);
+  } else {
+    self->damage = 1;
+  }
 
   // let everything else get spawned before we start firing
   self->think = target_laser_start;
