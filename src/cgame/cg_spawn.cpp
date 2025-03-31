@@ -197,7 +197,8 @@ void SP_corona() {
 
   // server-side coronas
   if (CG_SpawnString("targetname", "", &tmp) ||
-      CG_SpawnString("spawnflags", "", &tmp)) {
+      CG_SpawnString("spawnflags", "", &tmp) ||
+      CG_SpawnString("scriptname", "", &tmp)) {
     return;
   }
 
@@ -218,21 +219,26 @@ void SP_corona() {
   corona->currentState.eType = ET_CORONA;
 
   vec3_t origin{};
-  CG_SpawnVector("origin", "", origin);
+  CG_SpawnVector("origin", "0 0 0", origin);
   VectorCopy(origin, corona->lerpOrigin);
 
-  vec3_t color = {1.0f, 1.0f, 1.0f}; // default to white
+  vec3_t color{};
 
   // both 'color' and '_color' are valid keys
   if (!CG_SpawnVector("color", "", color)) {
     CG_SpawnVector("_color", "", color);
   }
 
+  // if it's black or color isn't set, default to white
+  if (color[0] <= 0 && color[1] <= 0 && color[2] <= 0) {
+    VectorSet(color, 1.0f, 1.0f, 1.0f);
+  }
+
   VectorScale(color, 255, color);
 
-  corona->currentState.dl_intensity =
-      ((static_cast<int>(color[0])) | (static_cast<int>(color[1]) << 8) |
-       (static_cast<int>(color[2]) << 16));
+  corona->currentState.dl_intensity = static_cast<int>(color[0]) |
+                                      static_cast<int>(color[1]) << 8 |
+                                      static_cast<int>(color[2]) << 16;
 
   float scale;
   CG_SpawnFloat("scale", "1", &scale);

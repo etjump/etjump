@@ -1291,7 +1291,7 @@ void SP_corona(gentity_t *ent) {
   float scale;
 
   // static corona, handle on client side only
-  if (!ent->targetname && !ent->spawnflags) {
+  if (!ent->targetname && !ent->spawnflags && !ent->scriptName) {
     G_FreeEntity(ent);
     return;
   }
