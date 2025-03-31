@@ -1318,7 +1318,9 @@ void target_rumble_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
     ent->nextthink = level.time + 50;
   } else {
     ent->spawnflags |= 1;
-    ent->think = NULL;
+    ent->think = nullptr;
+    ent->nextthink = 0;
+    ent->s.loopSound = 0; // turn it off since the entity is off
     ent->count = 0;
   }
 }
