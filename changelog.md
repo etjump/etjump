@@ -37,6 +37,21 @@
     * `scriptname` - name of the scriptblock to activate, calls the `activate` trigger, also supports `activate axis/allies`. Passes activator to mapscript.
     * `target` - targets to fire
 * added `etj_onDemoPlaybackStart` cvar to execute commands on first frame of demo playback [#1617](https://github.com/etjump/etjump/pull/1617)
+* fixed `target_savereset` print containing an unnecessary whitespace at the beginning of the message [#1658](https://github.com/etjump/etjump/pull/1658)
+* fixed `etj_autoSpec` ignoring upmove when determining whether you or the spectated client are moving [#1662](https://github.com/etjump/etjump/pull/1662)
+* improved performance of some HUD elements when spectating or playing back demos [#1663](https://github.com/etjump/etjump/pull/1663)
+* static `dlight` entities are now fully client sided [#1668](https://github.com/etjump/etjump/pull/1668)
+  * a dlight is considered static if it doesn't have `scriptname`, `targetname` or `spawnflags` set
+  * client sided dlights allow more 16 dlights in a map (1024 to be precise)
+  * renderer is still limited to max 32 dlights in a rendered scene
+* fixed `target_laser` not dealing damage to client 0 [#1669](https://github.com/etjump/etjump/pull/1669)
+* fixed `target_rumble` crashing the server if re-triggered again before the previous rumble sequence had ended [#1670](https://github.com/etjump/etjump/pull/1670)
+* `weapon_portalgun` now supports `noise` key like other weapons & items, and properly displays cursorhint for pickup [#1671](https://github.com/etjump/etjump/pull/1671)
+  * if `noise` is set, the sound overrides the default item pickup sound
+* fixes to client-side coronas [#1673](https://github.com/etjump/etjump/pull/1673)
+  * coronas that have no color set or are set to black are now set to white to match behavior of server-sider coronas
+  * coronas with `scriptname` set are now correctly processed on the server rather than client
+* fixed a crash if shutdown was executed during `etj_ad_stopDelay` period after a timerun was finished [#1380](https://github.com/etjump/etjump/pull/1380)
 
 # ETJump 3.3.4
 
