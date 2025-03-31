@@ -34,29 +34,29 @@ extern pmove_t *pm;
 extern pml_t pml;
 
 // movement parameters
-extern float pm_stopspeed;
-// extern	float	pm_duckScale;
 
-//----(SA)	modified
-extern float pm_waterSwimScale;
-extern float pm_waterWadeScale;
-extern float pm_slagSwimScale;
-extern float pm_slagWadeScale;
+inline constexpr float pm_stopspeed = 100;
 
-extern float pm_proneSpeedScale;
+inline constexpr float pm_waterSwimScale = 0.5;
+inline constexpr float pm_waterWadeScale = 0.70;
+inline constexpr float pm_slagSwimScale = 0.30;
+inline constexpr float pm_slagWadeScale = 0.70;
 
-extern float pm_accelerate;
-extern float pm_airaccelerate;
-extern float pm_wateraccelerate;
-extern float pm_slagaccelerate;
-extern float pm_flyaccelerate;
+// was: 0.18 (too slow) then: 0.24 (too fast)
+inline constexpr float pm_proneSpeedScale = 0.21;
 
-extern float pm_friction;
-extern float pm_waterfriction;
-extern float pm_slagfriction;
-extern float pm_flightfriction;
+inline constexpr float pm_accelerate = 10;
+inline constexpr float pm_airaccelerate = 1;
+inline constexpr float pm_wateraccelerate = 4;
+inline constexpr float pm_slagaccelerate = 2;
+inline constexpr float pm_flyaccelerate = 8;
 
-//----(SA)	end
+inline constexpr float pm_friction = 6;
+inline constexpr float pm_waterfriction = 1;
+inline constexpr float pm_slagfriction = 1;
+inline constexpr float pm_flightfriction = 3;
+inline constexpr float pm_ladderfriction = 14;
+inline constexpr float pm_spectatorfriction = 5.0f;
 
 extern int c_pmove;
 

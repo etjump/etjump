@@ -405,11 +405,6 @@ inline constexpr int PMF_TIME_LOCKPLAYER = 32768;
 inline constexpr int PMF_ALL_TIMES = PMF_TIME_WATERJUMP | PMF_TIME_LAND |
                                      PMF_TIME_KNOCKBACK | PMF_TIME_LOCKPLAYER;
 
-extern float pm_stopspeed;
-extern float pm_accelerate;
-extern float pm_airaccelerate;
-extern float pm_friction;
-
 typedef struct {
   qboolean bAutoReload; // do we predict autoreload of weapons
 
