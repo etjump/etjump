@@ -63,15 +63,16 @@ void Snaphud::startListeners() {
   });
 }
 
-void Snaphud::InitSnaphud(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd) {
+void Snaphud::InitSnaphud(vec3_t wishvel, const int8_t uCmdScale) {
   // set default key combination if no user input
-  if (!cmd.forwardmove && !cmd.rightmove) {
+  if (!pm->cmd.forwardmove && !pm->cmd.rightmove) {
+    usercmd_t cmd = pm->cmd;
     cmd.forwardmove = uCmdScale;
     cmd.rightmove = uCmdScale;
 
     // recalculate wishvel with defaulted forward/rightmove
-    PmoveUtils::PM_UpdateWishvel(wishvel, cmd, pm->pmext->forward,
-                                 pm->pmext->right, pm->pmext->up, *ps);
+    pmoveUtils->updateWishvel(wishvel, pm->pmext->forward, pm->pmext->right,
+                              pm->pmext->up, cmd);
   }
 
   // set correct yaw based on strafe style/keys pressed
@@ -230,14 +231,7 @@ bool Snaphud::beforeRender() {
     return false;
   }
 
-  const int8_t uCmdScale =
-      ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
-          ? CMDSCALE_WALK
-          : CMDSCALE_DEFAULT;
-  const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, uCmdScale);
-
-  // get correct pmove state
-  pm = PmoveUtils::getPmove(cmd);
+  pm = pmoveUtils->getPmove();
 
   // water and ladder movement are not important
   // since speed is capped anyway
@@ -246,34 +240,34 @@ bool Snaphud::beforeRender() {
     return false;
   }
 
-  if (PmoveUtils::skipUpdate(lastUpdateTime, pm, ps)) {
+  if (pmoveUtils->skipUpdate(lastUpdateTime)) {
     return true;
   }
 
   // show upmove influence?
-  float scale = etj_snapHUDTrueness.integer &
-                        static_cast<int>(SnapTrueness::SNAP_JUMPCROUCH)
-                    ? pm->pmext->scale
-                    : pm->pmext->scaleAlt;
+  const float scale = etj_snapHUDTrueness.integer &
+                              static_cast<int>(SnapTrueness::SNAP_JUMPCROUCH)
+                          ? pm->pmext->scale
+                          : pm->pmext->scaleAlt;
 
   // calculate wishspeed
   vec3_t wishvel;
-  float wishspeed =
-      PmoveUtils::PM_GetWishspeed(wishvel, scale, cmd, pm->pmext->forward,
-                                  pm->pmext->right, pm->pmext->up, *ps, pm);
+  float wishspeed = pmoveUtils->getWishspeed(wishvel, scale, pm->pmext->forward,
+                                             pm->pmext->right, pm->pmext->up);
 
   // set default wishspeed for drawing if no user input
-  if (!cmd.forwardmove && !cmd.rightmove) {
+  if (!pm->cmd.forwardmove && !pm->cmd.rightmove) {
     wishspeed = ps->speed * ps->sprintSpeedScale;
   }
 
-  InitSnaphud(wishvel, uCmdScale, cmd);
+  const int8_t uCmdScale = pmoveUtils->getUserCmdScale();
+  InitSnaphud(wishvel, uCmdScale);
 
   // show true groundzones?
-  float accel = (etj_snapHUDTrueness.integer &
-                 static_cast<int>(SnapTrueness::SNAP_GROUND))
-                    ? pm->pmext->accel
-                    : pm_airaccelerate;
+  const float accel =
+      etj_snapHUDTrueness.integer & static_cast<int>(SnapTrueness::SNAP_GROUND)
+          ? pm->pmext->accel
+          : pm_airaccelerate;
 
   float a = accel * wishspeed * pm->pmext->frametime;
 
@@ -365,7 +359,7 @@ void Snaphud::render() const {
 }
 
 Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
-                                             pmove_t *pm,
+                                             const pmove_t *pm,
                                              const bool upmoveTrueness) {
   static Snaphud s;
   CurrentSnap cs{};
@@ -373,25 +367,21 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
   // get player yaw
   float yaw = ps.viewangles[YAW];
 
-  // get usercmd
-  const int8_t ucmdScale =
-      ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8) ? CMDSCALE_WALK
-                                                             : CMDSCALE_DEFAULT;
-  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
+  const usercmd_t *cmd = pmoveUtils->getUserCmd();
 
   // determine whether strafestyle is "forwards"
   const bool forwards = CGaz::strafingForwards(ps, pm);
 
   // determine whether strafing to the right ("moving mouse rightwards")
   const bool rightStrafe =
-      (forwards && cmd.rightmove > 0) ||
+      (forwards && cmd->rightmove > 0) ||
       (!forwards &&
-       (cmd.rightmove < 0 || (cmd.forwardmove != 0 && cmd.rightmove == 0)));
+       (cmd->rightmove < 0 || (cmd->forwardmove != 0 && cmd->rightmove == 0)));
 
   // get opt angle
   float opt = CGaz::getOptAngle(ps, pm, false);
 
-  float frameAccel = PmoveUtils::getFrameAccel(ps, pm, upmoveTrueness);
+  float frameAccel = pmoveUtils->getFrameAccel(upmoveTrueness);
 
   // clamp the max value to match max scaling of target_scale_velocity
   if (frameAccel > 85) {
@@ -412,8 +402,8 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
   }
 
   // necessary 45 degrees shift to match snapzones
-  if ((cmd.forwardmove != 0 && cmd.rightmove != 0) ||
-      (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
+  if ((cmd->forwardmove != 0 && cmd->rightmove != 0) ||
+      (cmd->forwardmove == 0 && cmd->rightmove == 0)) {
     yaw += 45;
     opt += 45;
   }
@@ -451,8 +441,8 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
   return cs;
 }
 
-bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
-  const Snaphud::CurrentSnap cs = getCurrentSnap(ps, pm, true);
+bool Snaphud::inMainAccelZone(const playerState_t &ps, const pmove_t *pm) {
+  const CurrentSnap cs = getCurrentSnap(ps, pm, true);
 
   if (cs.snap == INVALID_SNAP_DIR) {
     return false;

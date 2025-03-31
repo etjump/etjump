@@ -54,7 +54,8 @@ class StrafeQuality : public IRenderable {
   bool canSkipDraw() const;
   bool canSkipUpdate(usercmd_t cmd);
 
-  pmove_t *pm{};
+  const pmove_t *pm{};
+  const playerState_t *ps = &cg.predictedPlayerState;
 
 public:
   StrafeQuality();

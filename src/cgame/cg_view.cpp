@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "etj_pmove_utils.h"
 
 //========================
 extern pmove_t cg_pmove;
@@ -2152,6 +2153,11 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
     // origin
     trap_SetClientLerpOrigin(cg.refdef.vieworg[0], cg.refdef.vieworg[1],
                              cg.refdef.vieworg[2]);
+
+    // setup pmove for renderables
+    if (ETJump::pmoveUtils->check()) {
+      ETJump::pmoveUtils->runPmove();
+    }
 
     // actually issue the rendering calls
     CG_DrawActive(stereoView);

@@ -107,12 +107,10 @@ void UpmoveMeter::resetUpmoveMeter() {
 }
 
 bool UpmoveMeter::beforeRender() {
-  const playerState_t &ps = cg.predictedPlayerState;
-
   // update team before checking if we should draw or not,
   // since we don't draw for spectators
-  if (team_ != ps.persistant[PERS_TEAM]) {
-    team_ = ps.persistant[PERS_TEAM];
+  if (team_ != ps->persistant[PERS_TEAM]) {
+    team_ = ps->persistant[PERS_TEAM];
     // reset upon team change
     // note: not handled by consoleCommandsHandler because team
     // is needed in render() either ways
@@ -123,16 +121,10 @@ bool UpmoveMeter::beforeRender() {
     return false;
   }
 
-  // get usercmd
-  // cmdScale is only checked here to be 0 or !0
-  // so we can just use CMDSCALE_DEFAULT
-  const int8_t ucmdScale = CMDSCALE_DEFAULT;
-  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
-
   // get correct pmove
-  pm = PmoveUtils::getPmove(cmd);
+  pm = pmoveUtils->getPmove();
 
-  if (PmoveUtils::skipUpdate(lastUpdateTime, pm, &ps)) {
+  if (pmoveUtils->skipUpdate(lastUpdateTime)) {
     return true;
   }
 
@@ -141,8 +133,8 @@ bool UpmoveMeter::beforeRender() {
     return true;
   }
 
-  const bool inAir = ps.groundEntityNum == ENTITYNUM_NONE;
-  const bool jumping = cmd.upmove > 0;
+  const bool inAir = ps->groundEntityNum == ENTITYNUM_NONE;
+  const bool jumping = pm->cmd.upmove > 0;
 
   // determine current state
   state_t state;
@@ -218,9 +210,6 @@ bool UpmoveMeter::beforeRender() {
         jump_.preDelay = jump_.t_jumpPreGround - lastUpdateTime;
       }
       jump_.postDelay = lastUpdateTime - jump_.t_groundTouch; // ms
-      break;
-
-    default:
       break;
   }
 
