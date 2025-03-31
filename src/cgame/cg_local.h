@@ -320,6 +320,8 @@ typedef struct centity_s {
   char dl_stylestring[MAX_DLIGHT_STYLESTRING];
   int dl_sound;
   int dl_atten;
+  // for differentiating client-only dlights, so we know where to grab sounds
+  bool dl_clientOnly;
 
   lerpFrame_t lerpFrame;  //----(SA)	added
   vec3_t highlightOrigin; // center of the geometry.  for things like

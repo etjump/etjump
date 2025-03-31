@@ -141,15 +141,21 @@ void CG_AddLightstyle(centity_t *cent) {
     cent->dl_frame = cent->dl_oldframe + 1;
     if (cent->dl_oldframe >= stringlength) {
       cent->dl_oldframe = (cent->dl_oldframe) % stringlength;
-      if (cent->dl_oldframe < 3 && cent->dl_sound) // < 3 so if an alarm comes
-                                                   // back into the pvs it will
-                                                   // only start a sound if it's
-                                                   // going to be closely synced
-                                                   // with the light, otherwise
-                                                   // wait till the next cycle
-      {
-        trap_S_StartSound(NULL, cent->currentState.number, CHAN_AUTO,
-                          cgs.gameSounds[cent->dl_sound]);
+
+      // < 3 so if an alarm comes back into the pvs it will only start a sound
+      // if it's going to be closely synced with the light,
+      // otherwise wait till the next cycle
+      if (cent->dl_oldframe < 3 && cent->dl_sound) {
+        const sfxHandle_t sound = cent->dl_clientOnly
+                                      ? cent->dl_sound
+                                      : cgs.gameSounds[cent->dl_sound];
+
+        if (cent->dl_clientOnly) {
+          trap_S_StartSound(cent->lerpOrigin, -1, CHAN_AUTO, sound);
+        } else {
+          trap_S_StartSound(nullptr, cent->currentState.number, CHAN_AUTO,
+                            sound);
+        }
       }
     }
 

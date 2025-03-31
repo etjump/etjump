@@ -1429,13 +1429,8 @@ void SP_dlight(gentity_t *ent) {
   char *snd, *shader;
   int offset, style, atten;
 
-  if (G_SpawnString("sound", "0", &snd)) {
-    ent->soundLoop = G_SoundIndex(snd);
-  }
-
   // client-side dlight
-  if (!ent->targetname && !ent->scriptName && !ent->spawnflags &&
-      !ent->soundLoop) {
+  if (!ent->targetname && !ent->scriptName && !ent->spawnflags) {
     G_FreeEntity(ent);
     return;
   }
@@ -1446,6 +1441,10 @@ void SP_dlight(gentity_t *ent) {
   G_SpawnInt("atten", "0", &atten); //
   G_SpawnString("shader", "",
                 &shader); // name of shader to use for this dlight image
+
+  if (G_SpawnString("sound", "0", &snd)) {
+    ent->soundLoop = G_SoundIndex(snd);
+  }
 
   if (ent->dl_stylestring &&
       strlen(ent->dl_stylestring)) // if they're specified in a string,

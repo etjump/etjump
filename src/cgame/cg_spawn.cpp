@@ -259,8 +259,7 @@ void SP_dlight() {
   //  pretty sure it requires a proper entitynum but need to investigate
   if (CG_SpawnString("targetname", "", &s) ||
       CG_SpawnString("scriptname", "", &s) ||
-      CG_SpawnString("spawnflags", "", &s) ||
-      CG_SpawnString("sound", "0", &s)) {
+      CG_SpawnString("spawnflags", "", &s)) {
     return;
   }
 
@@ -277,6 +276,14 @@ void SP_dlight() {
 
   VectorCopy(dlight->currentState.origin, dlight->lerpOrigin);
   VectorCopy(dlight->currentState.angles, dlight->lerpAngles);
+
+  if (CG_SpawnString("sound", "", &s)) {
+    // normally this would be an array index set by the server,
+    // which corresponds to cgs.gameSounds index as determined by CS_SOUNDS,
+    // but because we don't store the sound for local dlights anywhere,
+    // just set this to the file handle itself
+    dlight->dl_sound = trap_S_RegisterSound(s, qfalse);
+  }
 
   int style = 0;
   CG_SpawnInt("style", "0", &style);
@@ -345,6 +352,8 @@ void SP_dlight() {
 
   dlight->dl_backlerp = 0;
   dlight->dl_time = cg.time;
+
+  dlight->dl_clientOnly = true;
 }
 
 typedef struct {
