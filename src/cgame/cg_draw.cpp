@@ -4514,8 +4514,9 @@ void CG_DrawMiscGamemodels() {
   }
 }
 
-void CG_DrawCoronas() {
-  if (ETJump::demoCompatibility->flags.serverSideCoronas) {
+namespace ETJump {
+static void drawCoronas() {
+  if (demoCompatibility->flags.serverSideCoronas) {
     return;
   }
 
@@ -4529,6 +4530,23 @@ void CG_DrawCoronas() {
 
     CG_Corona(corona);
   }
+}
+
+static void drawClientDlights() {
+  if (demoCompatibility->flags.serverSideDlights) {
+    return;
+  }
+
+  for (int i = 0; i < cg.numDlights; i++) {
+    centity_t *dlight = &cgs.dlights[i];
+
+    if (!trap_R_inPVS(cg.refdef_current->vieworg, dlight->lerpOrigin)) {
+      continue;
+    }
+
+    CG_AddLightstyle(dlight);
+  }
+}
 }
 
 void SetFov(float fov) {
@@ -4674,7 +4692,8 @@ void CG_DrawActive(stereoFrame_t stereoView) {
   // Gordon
   CG_DrawMiscGamemodels();
 
-  CG_DrawCoronas();
+  ETJump::drawCoronas();
+  ETJump::drawClientDlights();
 
   if (!(cg.limboEndCinematicTime > cg.time && cg.showGameView)) {
     for (int i = 0; i < MAX_RENDER_STRINGS; i++) {

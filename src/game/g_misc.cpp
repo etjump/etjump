@@ -1318,32 +1318,6 @@ void SP_corona(gentity_t *ent) {
   }
 }
 
-// (SA) dlights and dlightstyles
-// TTimo gcc: lots of braces around scalar initializer
-// char* predef_lightstyles[] = {
-//	{"mmnmmommommnonmmonqnmmo"},
-
-const char *predef_lightstyles[] = {
-    "mmnmmommommnonmmonqnmmo",
-    "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba",
-    "mmmmmaaaaammmmmaaaaaabcdefgabcdefg",
-    "ma",
-    "jklmnopqrstuvwxyzyxwvutsrqponmlkj",
-    "nmonqnmomnmomomono",
-    "mmmaaaabcdefgmmmmaaaammmaamm",
-    "aaaaaaaazzzzzzzz",
-    "mmamammmmammamamaaamammma",
-    "abcdefghijklmnopqrrqponmlkjihgfedcba",
-    "mmnommomhkmmomnonmmonqnmmo",
-    "kmamaamakmmmaakmamakmakmmmma",
-    "kmmmakakmmaaamammamkmamakmmmma",
-    "mmnnoonnmmmmmmmmmnmmmmnonmmmmmmm",
-    "mmmmnonmmmmnmmmmmnonmmmmmnmmmmmmm",
-    "zzzzzzzzaaaaaaaa",
-    "zzzzzzzzaaaaaaaaaaaaaaaa",
-    "aaaaaaaazzzzzzzzaaaaaaaa",
-    "aaaaaaaaaaaaaaaazzzzzzzz"};
-
 /*
 ==============
 dlight_finish_spawning
@@ -1455,10 +1429,15 @@ void SP_dlight(gentity_t *ent) {
   char *snd, *shader;
   int offset, style, atten;
 
+  // client-side dlight
+  if (!ent->targetname && !ent->scriptName && !ent->spawnflags) {
+    G_FreeEntity(ent);
+    return;
+  }
+
   G_SpawnInt("offset", "0",
              &offset);              // starting index into the stylestring
   G_SpawnInt("style", "0", &style); // predefined stylestring
-  G_SpawnString("sound", "", &snd); //
   G_SpawnInt("atten", "0", &atten); //
   G_SpawnString("shader", "",
                 &shader); // name of shader to use for this dlight image
