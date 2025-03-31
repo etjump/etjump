@@ -494,16 +494,17 @@ whatever value it is. People with the same portal team value can use eachothers
 portals. Clear portal team on death, team switch etc.
 */
 void SP_weapon_portalgun(gentity_t *ent) {
-
-  // TODO: spawn portalgun ent
-  // gentity_t*  ent;
   gitem_t *item;
 
   G_SpawnInt("portal_team", "0", &ent->portalTeam);
 
   item = BG_FindItemForWeapon(WP_PORTAL_GUN);
 
-  // ent = G_Spawn();
+  char *noise{};
+
+  if (G_SpawnString("noise", "", &noise)) {
+    ent->noise_index = G_SoundIndex(noise);
+  }
 
   ent->s.eType = ET_ITEM;
   ent->s.modelindex = item - bg_itemlist; // store item number in modelindex
