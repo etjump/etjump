@@ -88,7 +88,7 @@ bool StrafeQuality::beforeRender() {
   // get correct pmove
   pm = pmoveUtils->getPmove();
 
-  if (pmoveUtils->skipUpdate(_lastUpdateTime)) {
+  if (pmoveUtils->skipUpdate(_lastUpdateTime, HUDLerpFlags::STRAFE_QUALITY)) {
     return true;
   }
 

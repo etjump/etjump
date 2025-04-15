@@ -2771,6 +2771,8 @@ extern vmCvar_t etj_logCenterPrint;
 
 extern vmCvar_t etj_onDemoPlaybackStart;
 
+extern vmCvar_t etj_HUD_noLerp;
+
 //
 // cg_main.c
 //
@@ -4231,6 +4233,13 @@ enum extraTraceOptions {
 enum class ChatHighlightFlags {
   HIGHLIGHT_BEEPER = 1,
   HIGHLIGHT_FLASH = 2,
+};
+
+enum class HUDLerpFlags {
+  DRAWSPEED2 = 1 << 0,
+  CGAZ = 1 << 1,
+  SNAPHUD = 1 << 2,
+  STRAFE_QUALITY = 1 << 3,
 };
 } // namespace ETJump
 

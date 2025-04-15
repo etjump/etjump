@@ -242,7 +242,7 @@ bool Snaphud::beforeRender() {
     return false;
   }
 
-  if (pmoveUtils->skipUpdate(lastUpdateTime)) {
+  if (pmoveUtils->skipUpdate(lastUpdateTime, HUDLerpFlags::SNAPHUD)) {
     return true;
   }
 

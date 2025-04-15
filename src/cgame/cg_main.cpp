@@ -679,6 +679,8 @@ vmCvar_t etj_logCenterPrint;
 
 vmCvar_t etj_onDemoPlaybackStart;
 
+vmCvar_t etj_HUD_noLerp;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1274,6 +1276,8 @@ cvarTable_t cvarTable[] = {
     {&etj_logCenterPrint, "etj_logCenterPrint", "0", CVAR_ARCHIVE},
 
     {&etj_onDemoPlaybackStart, "etj_onDemoPlaybackStart", "", CVAR_ARCHIVE},
+
+    {&etj_HUD_noLerp, "etj_HUD_noLerp", "0", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

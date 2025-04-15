@@ -81,7 +81,10 @@ bool DrawSpeed::beforeRender() {
 
   pm = pmoveUtils->getPmove();
 
-  if (pmoveUtils->skipUpdate(lastUpdateTime)) {
+  // store the old last update time so we can re-check it accel coloring
+  int oldLastUpdateTime = lastUpdateTime;
+
+  if (pmoveUtils->skipUpdate(lastUpdateTime, HUDLerpFlags::DRAWSPEED2)) {
     return true;
   }
 
@@ -108,8 +111,8 @@ bool DrawSpeed::beforeRender() {
   VectorSubtract(ps->velocity, lastSpeed, accel);
   VectorCopy(ps->velocity, lastSpeed);
 
-  if (accelColorStyle) {
-
+  if (accelColorStyle &&
+      !pmoveUtils->skipUpdate(oldLastUpdateTime, std::nullopt)) {
     AccelColor::setAccelColor(style, currentSpeed, etj_speedAlpha.value, pm, ps,
                               storedSpeeds, accel, speedColor);
   }
