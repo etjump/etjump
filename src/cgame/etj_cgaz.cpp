@@ -227,7 +227,7 @@ bool CGaz::beforeRender() {
     return false;
   }
 
-  if (pmoveUtils->skipUpdate(lastUpdateTime)) {
+  if (pmoveUtils->skipUpdate(lastUpdateTime, HUDLerpFlags::CGAZ)) {
     return true;
   }
 

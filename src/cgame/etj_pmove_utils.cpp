@@ -207,19 +207,25 @@ float PmoveUtils::getFrameAccel(const bool upmoveTrueness) {
   return pm.pmext->accel * wishspeed * pm.pmext->frametime;
 }
 
-bool PmoveUtils::skipUpdate(int &lastUpdateTime) const {
+bool PmoveUtils::skipUpdate(int &lastUpdateTime,
+                            std::optional<HUDLerpFlags> flag) const {
   const int frameTime = cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback
                             ? cg.time
                             : ps->commandTime;
+  const int now = frameTime - frameTime % pm.pmove_msec;
+
+  // never skip updates if lerping is requested
+  if (flag.has_value() &&
+      !(etj_HUD_noLerp.integer & static_cast<int>(flag.value()))) {
+    lastUpdateTime = now;
+    return false;
+  }
 
   if (!pm.ps || lastUpdateTime + pm.pmove_msec > frameTime) {
     return true;
   }
 
-  // ensure lastUpdateTime is always aligned to pmove_msec interval
-  // even if cg.time does not exactly align to it correctly to prevent
-  // uneven update rates across various drawables that utilize this
-  lastUpdateTime = frameTime - frameTime % pm.pmove_msec;
+  lastUpdateTime = now;
   return false;
 }
 
