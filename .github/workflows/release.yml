@@ -97,7 +97,7 @@ jobs:
         include:
           - arch: x64
             platforms: "\"x86_64;arm64\""
-            osx-target: "10.12"
+            osx-target: "10.13"
 
     steps:
     - uses: actions/checkout@v4
