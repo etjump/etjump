@@ -1050,6 +1050,7 @@ struct gclient_s {
   bool setoffsetThisLife;
   bool pmoveOffThisLife;
   bool ftNoGhostThisLife;
+  bool ftShoveThisLife;
 
   int lastCmdTime; // level.time of last usercmd_t, for EF_CONNECTION
                    // we can't just use pers.lastCommand.time, because
@@ -1197,6 +1198,11 @@ struct gclient_s {
   int lastRevivePushTime;
 
   int numLagFrames; // for tracking high ping on timeruns to counter lag abuse
+
+  // client is holding down '+activate'
+  // used to disallow multiple shoves by holding down +activate
+  bool activateHeld;
+  int shoveTime;
 };
 
 typedef struct {
@@ -1458,6 +1464,7 @@ typedef struct {
   bool noFTNoGhost;
   bool noFTSaveLimit;
   bool noFTTeamjumpMode;
+  bool noFTShove;
 
   int portalEnabled; // Feen: PGM - Enabled/Disabled by map key
   qboolean portalSurfaces;
@@ -2576,9 +2583,12 @@ namespace ETJump {
 gentity_t *getFireteamLeader(int clientNum);
 void setSaveLimitForFTMembers(fireteamData_t *ft, int limit);
 void setFireTeamGhosting(fireteamData_t *ft, bool noGhost);
-bool canEnableFtNoGhost(int clientNum, fireteamData_t *ft,
+void setFireteamShove(fireteamData_t *ft, bool shove);
+bool canEnableFtNoGhost(int clientNum, const fireteamData_t *ft,
                         const gentity_t *ent);
 bool canSetFtSavelimit(int clientNum, const gentity_t *ent);
+bool canEnableFtShove(int clientNum, const fireteamData_t *ft,
+                      const gentity_t *ent);
 bool canSetFtTeamjumpMode(int clientNum, const gentity_t *ent);
 void setFireteamTeamjumpMode(fireteamData_t *ft, bool teamjumpMode);
 } // namespace ETJump
@@ -2940,6 +2950,7 @@ enum class TimerunSpawnflags {
   NoPortalgunPickup = 64,
   NoSave = 128,
   AllowFTNoGhost = 256,
+  AllowFTShove = 512,
 };
 
 enum class FuncButtonSpawnflags {
