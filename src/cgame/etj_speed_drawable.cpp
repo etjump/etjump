@@ -81,7 +81,8 @@ bool DrawSpeed::beforeRender() {
 
   pm = pmoveUtils->getPmove();
 
-  if (pmoveUtils->skipUpdate(lastUpdateTime)) {
+  // FIXME: allow this to be lerped too, currently breaks speed-based coloring
+  if (pmoveUtils->skipUpdate(lastUpdateTime, std::nullopt)) {
     return true;
   }
 

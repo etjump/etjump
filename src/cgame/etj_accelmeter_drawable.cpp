@@ -100,7 +100,8 @@ bool AccelMeter::beforeRender() {
 
   pm = pmoveUtils->getPmove();
 
-  if (pmoveUtils->skipUpdate(lastUpdateTime)) {
+  // FIXME: allow this to be lerped too, currently something breaks this
+  if (pmoveUtils->skipUpdate(lastUpdateTime, std::nullopt)) {
     return true;
   }
 

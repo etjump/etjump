@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include "cg_local.h"
 
 namespace ETJump {
@@ -53,9 +55,10 @@ public:
   // returns total acceleration per frame
   float getFrameAccel(bool upmoveTrueness);
 
-  // if an update should happen, updates lastUpdateTime to current frametime
-  // and returns false
-  bool skipUpdate(int &lastUpdateTime) const;
+  // true if current time is < lastUpdateTime + pmove_msec,
+  // except if lerping is requested for the HUD element
+  // updates lastUpdateTime if the frame is not skipped
+  bool skipUpdate(int &lastUpdateTime, std::optional<HUDLerpFlags> flag) const;
 
   const pmove_t *getPmove() const;
   const usercmd_t *getUserCmd() const;

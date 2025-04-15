@@ -124,7 +124,8 @@ bool UpmoveMeter::beforeRender() {
   // get correct pmove
   pm = pmoveUtils->getPmove();
 
-  if (pmoveUtils->skipUpdate(lastUpdateTime)) {
+  // never lerp this, because it would just produce unrealistic jump timings
+  if (pmoveUtils->skipUpdate(lastUpdateTime, std::nullopt)) {
     return true;
   }
 
