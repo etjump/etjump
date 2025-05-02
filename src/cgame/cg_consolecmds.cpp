@@ -23,10 +23,13 @@ CG_Viewpos_f
 Debugging command to print the current position
 =============
 */
-static void CG_Viewpos_f(void) {
-  CG_Printf("(%i %i %i) : %i\n", (int)cg.refdef.vieworg[0],
-            (int)cg.refdef.vieworg[1], (int)cg.refdef.vieworg[2],
-            (int)cg.refdefViewAngles[YAW]);
+static void CG_Viewpos_f() {
+  CG_Printf("(%i %i %i) : %i %i %i\n", static_cast<int>(cg.refdef.vieworg[0]),
+            static_cast<int>(cg.refdef.vieworg[1]),
+            static_cast<int>(cg.refdef.vieworg[2]),
+            static_cast<int>(cg.refdefViewAngles[PITCH]),
+            static_cast<int>(cg.refdefViewAngles[YAW]),
+            static_cast<int>(cg.refdefViewAngles[ROLL]));
 }
 
 void CG_LimboMenu_f(void) {

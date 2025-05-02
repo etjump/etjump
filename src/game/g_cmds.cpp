@@ -3120,28 +3120,32 @@ Cmd_SetViewpos_f
 =================
 */
 void Cmd_SetViewpos_f(gentity_t *ent) {
+  if (!g_cheats.integer) {
+    Printer::console(ent, "Cheats are not enabled on this server.\n");
+    return;
+  }
+
+  const int argc = trap_Argc();
+
+  if (argc != 4 && argc != 7) {
+    Printer::console(
+        ent, "Usage:\nsetviewpos x y z\nsetviewpos x y z pitch yaw roll\n");
+    return;
+  }
+
   vec3_t origin, angles;
   char buffer[MAX_TOKEN_CHARS];
-  int i;
 
-  if (!g_cheats.integer) {
-    trap_SendServerCommand(ent - g_entities,
-                           va("print \"Cheats are not enabled "
-                              "on this server.\n\""));
-    return;
-  }
-  if (trap_Argc() != 7) {
-    trap_SendServerCommand(ent - g_entities,
-                           va("print \"usage: setviewpos x y z "
-                              "pitch yaw roll\n\""));
-    return;
-  }
-
-  for (i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++) {
     trap_Argv(i + 1, buffer, sizeof(buffer));
     origin[i] = Q_atof(buffer);
-    trap_Argv(i + 4, buffer, sizeof(buffer));
-    angles[i] = AngleNormalize180(Q_atof(buffer));
+
+    if (argc == 4) {
+      angles[i] = ent->client->ps.viewangles[i];
+    } else {
+      trap_Argv(i + 4, buffer, sizeof(buffer));
+      angles[i] = AngleNormalize180(Q_atof(buffer));
+    }
   }
 
   DirectTeleport(ent, origin, angles);
