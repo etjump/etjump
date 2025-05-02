@@ -1108,6 +1108,7 @@ typedef enum {
   EV_UPHILLSTEP,
   EV_PORTAL_TRAIL,
   EV_CUSHIONFALLSTEP,
+  EV_SHOVE,
   EV_MAX_EVENTS // just added as an 'endcap'
 } entity_event_t;
 
@@ -1248,9 +1249,12 @@ static constexpr std::array<const char *, EV_MAX_EVENTS + 1> eventnames = {
     "EV_UPHILLSTEP",
     "EV_SAVE",
     "EV_CUSHIONFALLSTEP",
+    "EV_SHOVE",
     "EV_MAX_EVENTS",
 };
 
+// FIXME: this allows adding new events without enforcing addition
+//  to the event array as well, figure out a better way
 static_assert(sizeof(eventnames) / sizeof(eventnames[0]) == EV_MAX_EVENTS + 1,
               "Event names array size does not match enum list");
 
@@ -2430,6 +2434,7 @@ typedef struct {
   qboolean priv;
 
   bool noGhost; // disable ghostplayers between fireteam members
+  bool shove;
 } fireteamData_t;
 
 long BG_StringHashValue(const char *fname);
@@ -2820,6 +2825,8 @@ inline constexpr int BG_LEVEL_NO_DROP = 1 << 6;
 inline constexpr int BG_LEVEL_NO_WALLBUG = 1 << 7;
 // Noclip is disabled
 inline constexpr int BG_LEVEL_NO_NOCLIP = 1 << 8;
+// FT Shove is disabled
+inline constexpr int BG_LEVEL_NO_FTSHOVE = 1 << 9;
 
 namespace ETJump {
 inline constexpr char CUSTOMVOTE_TYPE[] = "type";
