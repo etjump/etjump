@@ -80,8 +80,8 @@ function(create_compiler_opts target)
 			/GL                # full exe/dll optimization
 			/Gy                # generate useful information for optimizer
 			/Ob2               # let compiler inline freely
-			/fp:fast>          # fast floating point math
-			/FC                # full path of source code file in diagnostics (/Zi in debug implies this)
+			/fp:fast           # fast floating point math
+			/FC>               # full path of source code file in diagnostics (/Zi in debug implies this)
 		$<$<CONFIG:Debug>:
 			/Ob0               # no inlining
 			/Od                # no optimizations
