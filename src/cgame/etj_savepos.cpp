@@ -194,7 +194,7 @@ void SavePos::parseSavepos(const std::string &file) {
       "savepos/" + (file.empty() ? defaultName + ".dat" : file);
 
   if (!JsonUtils::readFile(filename, root, &errors)) {
-    CG_Printf("%s", errors.c_str());
+    CG_Printf("%s\n", errors.c_str());
     return;
   }
 
