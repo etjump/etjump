@@ -814,7 +814,6 @@ typedef struct {
   team_t teamBeforeInactivitySpec;
 
   qboolean firstTime;
-  qboolean loadPreviousSavedPositions;
 
   qboolean versionOK;
 

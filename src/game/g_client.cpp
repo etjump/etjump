@@ -2066,7 +2066,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   for (i = 0; i < MAX_PROGRESSION_TRACKERS; ++i) {
     ent->client->sess.progression[i] = 0;
   }
-  client->sess.loadPreviousSavedPositions = qtrue;
+
   // read or initialize the session data
   if (firstTime) {
     G_InitSessionData(client, userinfo);
@@ -2121,9 +2121,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     ent->client->sess.muted = qtrue;
   }
 
-  ETJump::saveSystem->resetSavedPositions(ent);
-
-  return NULL;
+  return nullptr;
 }
 
 /*
@@ -2204,7 +2202,6 @@ void ClientBegin(int clientNum) {
   // No surface determined yet.
   ent->surfaceFlags = 0;
 
-  ETJump::saveSystem->loadPositionsFromDatabase(ent);
   OnClientBegin(ent);
   if (level.hasTimerun) {
     trap_SendServerCommand(clientNum, "hasTimerun 1");

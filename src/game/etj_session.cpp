@@ -30,6 +30,7 @@
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_levels.h"
+#include "etj_save_system.h"
 
 Session::Session(std::shared_ptr<IAuthentication> database)
     : database_(database) {
@@ -132,6 +133,18 @@ void Session::ReadSessionData(int clientNum) {
   }
 }
 
+void Session::OnGuidReceived(gentity_t *ent) {
+  const int clientNum = ClientNum(ent);
+
+  GetUserAndLevelData(clientNum);
+  WriteSessionData(clientNum);
+  ClientNameChanged(ent);
+
+  if (g_save.integer) {
+    ETJump::saveSystem->loadPositionsFromDatabase(ent);
+  }
+}
+
 bool Session::GuidReceived(gentity_t *ent) {
   int argc = trap_Argc();
   int clientNum = ClientNum(ent);
@@ -164,8 +177,6 @@ bool Session::GuidReceived(gentity_t *ent) {
   G_DPrintf("GuidReceived: %d GUID: %s HWID: %s\n", clientNum,
             clients_[clientNum].guid.c_str(), clients_[clientNum].hwid.c_str());
 
-  GetUserAndLevelData(clientNum);
-
   if (database_->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid)) {
     Printer::logAdminLn(ETJump::stringFormat(
         "authentication: Banned player %s tried to connect with GUID '%s' and "
@@ -177,9 +188,7 @@ bool Session::GuidReceived(gentity_t *ent) {
     return false;
   }
 
-  WriteSessionData(clientNum);
-
-  ClientNameChanged(ent);
+  OnGuidReceived(ent);
 
   return true;
 }
