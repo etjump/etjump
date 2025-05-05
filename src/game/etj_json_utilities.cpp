@@ -61,6 +61,13 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root,
 
   if (!fIn) {
     fIn.close();
+
+    if (errors) {
+      *errors = stringFormat(
+          "Failed to read JSON file: unable to open file '%s' for reading\n",
+          file);
+    }
+
     return false;
   }
 

@@ -171,6 +171,13 @@ void ChatReplay::readChatsFromFile() {
 }
 
 void ChatReplay::writeChatsToFile() {
+  // if the chat replay file does not exist, and there have been no chats
+  // to store during current session, the replay buffer will be empty
+  // -> exit so we don't write a null JSON object for no reason
+  if (chatReplayBuffer.empty()) {
+    return;
+  }
+
   Json::Value root;
 
   for (const auto &msg : chatReplayBuffer) {
