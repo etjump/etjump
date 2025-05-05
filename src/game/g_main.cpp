@@ -13,6 +13,7 @@
 #include "etj_rtv.h"
 #include "etj_syscall_ext_shared.h"
 #include "etj_target_spawn_relay.h"
+#include "etj_time_utilities.h"
 
 level_locals_t level;
 
@@ -1680,17 +1681,12 @@ G_InitGame
 void G_InitGame(int levelTime, int randomSeed, int restart) {
   int i;
   char cs[MAX_INFO_STRING];
-  const char *Months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-  qtime_t ct;
 
   G_Printf(S_COLOR_LTGREY GAME_HEADER);
   G_Printf(S_COLOR_LTGREY "____________________________\n");
   G_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
                                     " init...\n");
-
-  trap_RealTime(&ct);
 
   G_Printf("\n\n------- Game Initialization -------\n");
   G_Printf("gamename: %s %s\n", GAME_NAME, GAME_VERSION);
@@ -1819,11 +1815,12 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   G_DebugOpenSkillLog();
 
   if (g_dailyLogs.integer) {
-    trap_Cvar_Set("g_log", va("logs/%s-%02d-%02d.log", Months[ct.tm_mon],
-                              ct.tm_mday, 1900 + ct.tm_year));
-    trap_Cvar_Set("g_adminLog",
-                  va("logs/admin-%s-%02d-%02d.log", Months[ct.tm_mon],
-                     ct.tm_mday, 1900 + ct.tm_year));
+    const ETJump::Date date = ETJump::getCurrentDate();
+    const std::string dateStr = date.toDateString();
+
+    trap_Cvar_Set("g_log", va("logs/%s.log", dateStr.c_str()));
+    trap_Cvar_Set("g_adminLog", va("logs/%s-admin.log", dateStr.c_str()));
+
     trap_Cvar_Update(&g_logFile);
     trap_Cvar_Update(&g_adminLog);
   }
