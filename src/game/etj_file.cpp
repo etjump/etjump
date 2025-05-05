@@ -33,13 +33,10 @@
   #include "../ui/ui_local.h"
 #endif
 
-ETJump::File::File(std::string path, Mode mode)
+ETJump::File::File(std::string path, const Mode mode)
     : _path(std::move(path)), _handle(INVALID_FILE_HANDLE), _mode(mode) {
   fsMode_t fsMode;
   switch (_mode) {
-    case Mode::Read:
-      fsMode = FS_READ;
-      break;
     case Mode::Write:
       fsMode = FS_WRITE;
       break;
@@ -55,8 +52,9 @@ ETJump::File::File(std::string path, Mode mode)
   }
 
   _length = trap_FS_FOpenFile(_path.c_str(), &_handle, fsMode);
-  if (_mode == Mode::Read && _length == FILE_NOT_FOUND) {
-    throw FileNotFoundException(_path);
+
+  if (_length == FILE_NOT_FOUND) {
+    throw FileIOException(_path);
   }
 }
 
@@ -66,12 +64,13 @@ ETJump::File::~File() {
   }
 }
 
-std::vector<char> ETJump::File::read(int bytes) {
+std::vector<char> ETJump::File::read(const int bytes) const {
   if (_mode != Mode::Read) {
-    throw std::logic_error(
+    throw FileIOException(
         "Cannot read from a file when mode is not Mode::Read.");
   }
-  auto readBytes =
+
+  const auto readBytes =
       bytes == READ_ALL_BYTES ? _length : (_length >= bytes ? bytes : _length);
   auto buffer = std::vector<char>(readBytes);
 
@@ -89,15 +88,16 @@ void ETJump::File::write(const std::vector<char> &data) const {
 
 void ETJump::File::write(const char *data, int len) const {
   if (_mode == Mode::Read) {
-    throw std::logic_error("Cannot write to a file when mode is Mode::Read.");
+    throw FileIOException("Cannot write to a file when mode is Mode::Read.");
   }
 
 #ifdef GAMEDLL
-  auto bytesWritten = trap_FS_Write(data, len, _handle);
+  const auto bytesWritten = trap_FS_Write(data, len, _handle);
+
   if (bytesWritten != len) {
-    throw WriteFailedException(ETJump::stringFormat(
-        "Write to file %s failed. Wrote %d out of %d bytes.", _path,
-        bytesWritten, len));
+    throw FileIOException(
+        stringFormat("Write to file '%s' failed. Wrote %d out of %d bytes.",
+                     _path, bytesWritten, len));
   }
 #else
   trap_FS_Write(data, len, _handle);

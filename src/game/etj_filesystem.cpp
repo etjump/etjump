@@ -39,13 +39,17 @@
 
 namespace ETJump {
 void FileSystem::copy(const std::string &src, const std::string &dst) {
-  if (src == dst)
+  if (src == dst) {
     return;
-  File srcFile(src, File::Mode::Read);
-  File dstFile(dst, File::Mode::Write);
+  }
+
+  const File srcFile(src, File::Mode::Read);
+  const File dstFile(dst, File::Mode::Write);
   dstFile.write(srcFile.read());
 }
 
+// FIXME: THIS IS NOT SAFE AND CAN BLOW UP!
+//  add safeMove if you actually want to use this somewhere (see safeCopy)
 void FileSystem::move(const std::string &src, const std::string &dst) {
   copy(src, dst);
   remove(src);
@@ -57,24 +61,27 @@ bool FileSystem::remove(const std::string &path) {
   trap_FS_Rename(path.c_str(), "");
   return true;
 #else
-  int success = trap_FS_Delete(path.c_str());
+  const int success = trap_FS_Delete(path.c_str());
   return success == 1;
 #endif
 }
 
 bool FileSystem::exists(const std::string &path) {
-  int length = trap_FS_FOpenFile(path.c_str(), nullptr, FS_READ);
+  const int length = trap_FS_FOpenFile(path.c_str(), nullptr, FS_READ);
   return length != File::FILE_NOT_FOUND;
 }
 
 bool FileSystem::safeCopy(const std::string &src, const std::string &dst) {
   try {
     copy(src, dst);
-  } catch (const File::FileNotFoundException &) {
-    return false;
-  } catch (const File::WriteFailedException &) {
-    return false;
-  } catch (const std::logic_error &) {
+  } catch (const File::FileIOException &e) {
+    Com_Printf("%s: failed to copy file '%s' to '%s'\n", __func__, src.c_str(),
+               dst.c_str());
+
+    if (*e.what()) {
+      Com_Printf("%s\n", e.what());
+    }
+
     return false;
   }
 
@@ -103,7 +110,7 @@ std::vector<std::string> FileSystem::getFileList(const std::string &path,
   }
 
   if (sort) {
-    ETJump::StringUtil::sortStrings(files, true);
+    StringUtil::sortStrings(files, true);
   }
 
   return files;
@@ -146,20 +153,20 @@ std::string FileSystem::Path::buildOSPath(const std::string &file) {
   return path;
 }
 
-std::string ETJump::FileSystem::Path::sanitize(std::string path) {
+std::string FileSystem::Path::sanitize(const std::string &path) {
   return sanitizeFile(path);
 }
 
-std::string ETJump::FileSystem::Path::sanitizeFile(std::string path) {
-  static const char illegalChars[] = "\\/:*?\"<>.|";
+std::string FileSystem::Path::sanitizeFile(std::string path) {
+  static constexpr char illegalChars[] = "\\/:*?\"<>.|";
   for (char ch : illegalChars) {
     std::replace(path.begin(), path.end(), ch, '_');
   }
   return path;
 }
 
-std::string ETJump::FileSystem::Path::sanitizeFolder(std::string path) {
-  static const char illegalChars[] = "\\:*?\"<>.|";
+std::string FileSystem::Path::sanitizeFolder(std::string path) {
+  static constexpr char illegalChars[] = "\\:*?\"<>.|";
   for (char ch : illegalChars) {
     std::replace(path.begin(), path.end(), ch, '_');
   }

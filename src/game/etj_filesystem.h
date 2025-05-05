@@ -47,7 +47,7 @@ public:
     static std::string buildOSPath(const std::string &file);
 
   public:
-    static std::string sanitize(std::string path);
+    static std::string sanitize(const std::string &path);
     static std::string sanitizeFile(std::string path);
     static std::string sanitizeFolder(std::string path);
 

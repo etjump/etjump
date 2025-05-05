@@ -33,39 +33,30 @@
 namespace ETJump {
 class File {
 public:
-  class FileNotFoundException : public std::runtime_error {
+  class FileIOException : public std::runtime_error {
   public:
-    explicit FileNotFoundException(const std::string &message)
-        : runtime_error(message) {}
-  };
-
-  class WriteFailedException : public std::runtime_error {
-  public:
-    explicit WriteFailedException(const std::string &message)
-        : runtime_error(message) {}
+    explicit FileIOException(const std::string &what)
+        : std::runtime_error(what) {}
   };
 
   typedef int FileHandle;
   enum class Mode { Read, Write, Append, AppendSync };
 
-  static const int FILE_NOT_FOUND = -1;
-  static const int INVALID_FILE_HANDLE = 0;
-  static const int READ_ALL_BYTES = -1;
+  static constexpr int FILE_NOT_FOUND = -1;
+  static constexpr int INVALID_FILE_HANDLE = 0;
+  static constexpr int READ_ALL_BYTES = -1;
 
-  // throws FileNotFoundException if the mode is read and there's no
-  // such file.
-  // Write will create the file in that case
+  // throws FileIOException if file handle cannot be opened
+  // (file not found, path is not writable etc.)
   explicit File(std::string path, Mode mode = Mode::Read);
   ~File();
 
   // reads `bytes` bytes from the file.
   // if file length < bytes, reads length bytes
-  std::vector<char> read(int bytes = READ_ALL_BYTES);
+  std::vector<char> read(int bytes = READ_ALL_BYTES) const;
 
   // writes all data to the file
-  // throws std::logic_error if mode is Read
-  // throws WriteFailedException if written bytes count != data bytes
-  // count
+  // throws FileIOException if operation fails
   void write(const std::string &data) const;
   void write(const std::vector<char> &data) const;
   void write(const char *data, int len) const;
