@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <deque>
 
@@ -37,8 +37,8 @@ public:
       : _session(session) {}
   ~SaveSystem() = default;
 
-  static const int MAX_SAVED_POSITIONS = 3;
-  static const int MAX_BACKUP_POSITIONS = 3;
+  static constexpr int MAX_SAVED_POSITIONS = 3;
+  static constexpr int MAX_BACKUP_POSITIONS = 3;
 
   struct SavePosition {
     SavePosition()
@@ -81,6 +81,7 @@ public:
     SavePosition alliesLastLoadPos;
 
     // So called "map ident"
+    // FIXME: why tf is this here, it has nothing to do with save positions
     int progression;
 
     // Global map savelimit
@@ -100,7 +101,7 @@ public:
   void load(gentity_t *ent);
 
   // Saves position, does not check for anything
-  void forceSave(gentity_t *location, gentity_t *ent);
+  void forceSave(const gentity_t *location, gentity_t *ent);
 
   // Loads backup position
   void loadBackupPosition(gentity_t *ent);
@@ -110,9 +111,6 @@ public:
 
   // Saves last position client loaded from
   void saveLastLoadPos(gentity_t *ent);
-
-  // resets all clients positions
-  void reset();
 
   // Resets targets positions
   void resetSavedPositions(gentity_t *ent);
@@ -132,14 +130,14 @@ public:
 
 private:
   // Saves backup position
-  void saveBackupPosition(gentity_t *ent, SavePosition *pos);
+  void saveBackupPosition(gentity_t *ent, const SavePosition *pos);
 
   // copies player positional info to target position
   static void storePosition(const gclient_s *client, SavePosition *pos);
 
   // returns the latest save slot number that client used in their current team
   // -1 if no slots found (no saved positions in current team)
-  int getLatestSaveSlot(gclient_s *client);
+  int getLatestSaveSlot(gentity_t *ent);
 
   // marks all save slots as 'not latest', called before storing a new save pos
   // this does not touch backup positions as we don't care about them
@@ -148,6 +146,9 @@ private:
 
   // Teleports player to the saved position
   static void teleportPlayer(gentity_t *ent, SavePosition *pos);
+
+  // true if '_clients' contains data for the ent
+  inline bool clientHasSaveData(gentity_t *ent);
 
   SavePosition *getValidTeamQuickDeploySave(gentity_t *ent, team_t team);
 
@@ -161,10 +162,10 @@ private:
   static void sendClientCommands(gentity_t *ent, int position);
 
   // All clients' save related data
-  Client _clients[MAX_CLIENTS];
+  std::unordered_map<std::string, Client> _clients;
 
   // Disconnected clients saved position data
-  std::map<std::string, DisconnectedClient> _savedPositions;
+  std::unordered_map<std::string, DisconnectedClient> _savedPositions;
 
   // Interface to get player guid
   const std::shared_ptr<Session> _session;

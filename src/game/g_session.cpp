@@ -26,9 +26,8 @@ void G_WriteClientSessionData(gclient_t *client, qboolean restart) {
     G_deleteStats(clientNum);
   }
 
-  s = va("%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i "
-         "%i %i %i "
-         "%i %i %i %i %i %i",
+  s = va("%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i "
+         "%i %i %i %i %i",
          client->sess.sessionTeam, client->sess.spectatorTime,
          client->sess.spectatorState, client->sess.spectatorClient,
          client->sess.specLocked, client->sess.specInvitedClients[0],
@@ -43,17 +42,14 @@ void G_WriteClientSessionData(gclient_t *client, qboolean restart) {
          // OSP
          client->sess.coach_team, client->sess.deaths, client->sess.game_points,
          client->sess.kills, client->sess.spec_invite, client->sess.spec_team,
-         client->sess.suicides,
-         client->sess.team_kills
+         client->sess.suicides, client->sess.team_kills,
          // Damage and rounds played rolled in with weapon stats (below)
          // OSP
 
-         ,
-         //		client->sess.experience,
          client->sess.muted, client->sess.ignoreClients[0],
          client->sess.ignoreClients[1], client->pers.enterTime,
-         restart ? client->sess.spawnObjectiveIndex : 0, client->sess.firstTime,
-         client->sess.loadPreviousSavedPositions);
+         restart ? client->sess.spawnObjectiveIndex : 0,
+         client->sess.firstTime);
 
   trap_Cvar_Set(va("session%i", clientNum), s);
 
@@ -164,33 +160,34 @@ void G_ReadSessionData(gclient_t *client) {
 
   trap_Cvar_VariableStringBuffer(va("session%i", clientNum), s, sizeof(s));
 
-  sscanf(s,
-         "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i "
-         "%i %i %i "
-         "%i %i %i %i %i %i",
-         (int *)&client->sess.sessionTeam, &client->sess.spectatorTime,
-         (int *)&client->sess.spectatorState, &client->sess.spectatorClient,
-         (int *)&client->sess.specLocked, &client->sess.specInvitedClients[0],
-         &client->sess.specInvitedClients[1],
-         &client->sess.playerType,   // DHM - Nerve
-         &client->sess.playerWeapon, // DHM - Nerve
-         &client->sess.playerWeapon2,
-         &client->sess.latchPlayerType,   // DHM - Nerve
-         &client->sess.latchPlayerWeapon, // DHM - Nerve
-         &client->sess.latchPlayerWeapon2, &client->sess.clientLastActive,
+  sscanf(
+      s,
+      "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i "
+      "%i %i %i %i",
+      reinterpret_cast<int *>(&client->sess.sessionTeam),
+      &client->sess.spectatorTime,
+      reinterpret_cast<int *>(&client->sess.spectatorState),
+      &client->sess.spectatorClient,
+      reinterpret_cast<int *>(&client->sess.specLocked),
+      &client->sess.specInvitedClients[0], &client->sess.specInvitedClients[1],
+      &client->sess.playerType,   // DHM - Nerve
+      &client->sess.playerWeapon, // DHM - Nerve
+      &client->sess.playerWeapon2,
+      &client->sess.latchPlayerType,   // DHM - Nerve
+      &client->sess.latchPlayerWeapon, // DHM - Nerve
+      &client->sess.latchPlayerWeapon2, &client->sess.clientLastActive,
 
-         // OSP
-         &client->sess.coach_team, &client->sess.deaths,
-         &client->sess.game_points, &client->sess.kills,
-         &client->sess.spec_invite, &client->sess.spec_team,
-         &client->sess.suicides, &client->sess.team_kills,
-         // Damage and round count rolled in with weapon stats (below)
-         // OSP
-         //		&client->sess.experience,
-         (int *)&client->sess.muted, &client->sess.ignoreClients[0],
-         &client->sess.ignoreClients[1], &client->pers.enterTime,
-         &client->sess.spawnObjectiveIndex, (int *)&client->sess.firstTime,
-         (int *)&client->sess.loadPreviousSavedPositions);
+      // OSP
+      &client->sess.coach_team, &client->sess.deaths, &client->sess.game_points,
+      &client->sess.kills, &client->sess.spec_invite, &client->sess.spec_team,
+      &client->sess.suicides, &client->sess.team_kills,
+      // Damage and round count rolled in with weapon stats (below)
+      // OSP
+
+      reinterpret_cast<int *>(&client->sess.muted),
+      &client->sess.ignoreClients[0], &client->sess.ignoreClients[1],
+      &client->pers.enterTime, &client->sess.spawnObjectiveIndex,
+      reinterpret_cast<int *>(&client->sess.firstTime));
 
   // OSP -- pull and parse weapon stats
   *s = 0;
@@ -261,7 +258,6 @@ void G_InitSessionData(gclient_t *client, char *userinfo) {
   sess->spec_invite = 0;
   sess->spec_team = 0;
   sess->firstTime = qtrue;
-  sess->loadPreviousSavedPositions = qtrue;
 
   G_deleteStats(client - level.clients);
   // OSP

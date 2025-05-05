@@ -55,6 +55,7 @@ public:
   void WriteSessionData(int clientNum);
   void GetUserAndLevelData(int clientNum);
   bool GuidReceived(gentity_t *ent);
+  void OnGuidReceived(gentity_t *ent);
   void PrintGreeting(gentity_t *ent);
   void OnClientDisconnect(int clientNum);
   std::string Guid(gentity_t *ent) const;
