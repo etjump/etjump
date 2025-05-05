@@ -41,12 +41,11 @@ bool JsonUtils::writeFile(const std::string &file, const Json::Value &root,
     return false;
   }
 
-  const File fOut(file, File::Mode::Write);
-
   try {
+    const File fOut(file, File::Mode::Write);
     fOut.write(output);
     return true;
-  } catch (const File::WriteFailedException &e) {
+  } catch (const File::FileIOException &e) {
     if (errors) {
       *errors = stringFormat("Failed to write JSON file: %s", e.what());
     }
