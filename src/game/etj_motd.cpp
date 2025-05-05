@@ -110,7 +110,7 @@ void Motd::generateMotdFile() {
     G_Printf("Generated new motd file '%s'\n", g_motdFile.string);
     initialize();
   } else {
-    G_Printf("%s", errors.c_str());
+    G_Printf("%s\n", errors.c_str());
   }
 }
 } // namespace ETJump

@@ -35,7 +35,7 @@ bool JsonUtils::writeFile(const std::string &file, const Json::Value &root,
 
   if (file.empty()) {
     if (errors) {
-      *errors = "Failed to write JSON file: empty filename\n";
+      *errors = "Failed to write JSON file: empty filename";
     }
 
     return false;
@@ -48,7 +48,7 @@ bool JsonUtils::writeFile(const std::string &file, const Json::Value &root,
     return true;
   } catch (const File::WriteFailedException &e) {
     if (errors) {
-      *errors = stringFormat("Failed to write JSON file: %s\n", e.what());
+      *errors = stringFormat("Failed to write JSON file: %s", e.what());
     }
 
     return false;
@@ -64,7 +64,7 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root,
 
     if (errors) {
       *errors = stringFormat(
-          "Failed to read JSON file: unable to open file '%s' for reading\n",
+          "Failed to read JSON file: unable to open file '%s' for reading",
           file);
     }
 

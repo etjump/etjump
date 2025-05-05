@@ -248,7 +248,7 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
                        stringFormat("^3add-customvote: ^7couldn't open the "
                                     "file ^3'%s' ^7for reading:\n",
                                     customVotesFile));
-      Printer::console(clientNum, errors);
+      Printer::console(clientNum, errors + '\n');
       return;
     }
   }
@@ -273,7 +273,7 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
                      stringFormat("^3add-customvote: ^7couldn't open the file "
                                   "^3'%s' ^7for writing:\n",
                                   customVotesFile));
-    Printer::console(clientNum, errors);
+    Printer::console(clientNum, errors + '\n');
     return;
   }
 
@@ -295,7 +295,7 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
                      stringFormat("^3delete-customvote: ^7couldn't open the "
                                   "file ^3'%s' ^7for reading.\n",
                                   customVotesFile));
-    Printer::console(clientNum, errors);
+    Printer::console(clientNum, errors + '\n');
     return;
   }
 
@@ -324,7 +324,7 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
                      stringFormat("^3delete-customvote: ^7couldn't open the "
                                   "file ^3'%s' ^7for writing.\n",
                                   customVotesFile));
-    Printer::console(clientNum, errors);
+    Printer::console(clientNum, errors + '\n');
     return;
   }
 
@@ -351,7 +351,7 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
                      stringFormat("^3edit-customvote: ^7couldn't open the file "
                                   "^3'%s' ^7for reading.\n",
                                   customVotesFile));
-    Printer::console(clientNum, errors);
+    Printer::console(clientNum, errors + '\n');
     return;
   }
 
@@ -450,7 +450,7 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
                      stringFormat("^3edit-customvote: ^7couldn't open the file "
                                   "^3'%s' ^7for writing.\n",
                                   customVotesFile));
-    Printer::console(clientNum, errors);
+    Printer::console(clientNum, errors + '\n');
     return;
   }
 
