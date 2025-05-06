@@ -128,7 +128,7 @@ void removeLeadingChars(std::string &str, char charToRemove);
 // color codes are excluded from the truncation length, so this can be used
 // to truncate colored strings to display only a certain number of characters
 // e.g. truncate("^1foo^2bar", 3) -> "^1foo"
-std::string truncate(const std::string &str, int len);
+std::string truncate(const std::string &str, size_t len);
 
 // sorts strings either with case sensitivity or insensitivity
 // identical strings are kept in order
