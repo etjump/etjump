@@ -209,6 +209,13 @@ float PmoveUtils::getFrameAccel(const bool upmoveTrueness) {
 
 bool PmoveUtils::skipUpdate(int &lastUpdateTime,
                             std::optional<HUDLerpFlags> flag) const {
+  // pmove hasn't run yet
+  // this can happen for the first few frames of a game in localhost,
+  // if the client is fast enough to load everything
+  if (!pm.ps) {
+    return true;
+  }
+
   const int frameTime = cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback
                             ? cg.time
                             : ps->commandTime;
@@ -221,7 +228,7 @@ bool PmoveUtils::skipUpdate(int &lastUpdateTime,
     return false;
   }
 
-  if (!pm.ps || lastUpdateTime + pm.pmove_msec > frameTime) {
+  if (lastUpdateTime + pm.pmove_msec > frameTime) {
     return true;
   }
 
