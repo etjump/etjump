@@ -2708,40 +2708,29 @@ void Cmd_Vote_f(gentity_t *ent) {
                        [&msg](const char *nm) { return nm == msg; });
   };
 
-  static const auto printVoteMsgs = [&]() {
+  const auto printVoteMsgs = [&] {
     std::string voteMsgs = "^7Invalid vote argument.\n";
-    voteMsgs += "  ^7Valid arguments for '^2Yes^7' are: ";
-    for (const auto &ym : yesMsgs) {
-      voteMsgs += std::string(ym) + " ";
-    }
-    voteMsgs += "\n  ^7Valid arguments for '^1No^7' are: ";
-    for (const auto &nm : noMsgs) {
-      voteMsgs += std::string(nm) + " ";
-    }
-    voteMsgs += "\n";
+    voteMsgs += "  ^7Valid arguments for '^2Yes^7' are: ^3<" +
+                ETJump::StringUtil::join(yesMsgs, "|") + "^3>\n";
+    voteMsgs += "  ^7Valid arguments for '^1No^7' are: ^3<" +
+                ETJump::StringUtil::join(noMsgs, "|") + "^3>\n";
     Printer::console(clientNum, voteMsgs);
   };
 
-  static const auto printRtvVoteMsgs = [&]() {
-    auto rtvMaps = game.rtv->getRtvMaps();
+  const auto printRtvVoteMsgs = [&] {
+    const auto *rtvMaps = game.rtv->getRtvMaps();
     std::string voteMsgs = "^7Invalid vote argument.\n";
-    voteMsgs += ETJump::stringFormat("^7Valid arguments for this vote are\n"
-                                     "  ^3rtvVote 1-%i\n",
-                                     rtvMaps->size());
-    voteMsgs += "  ^7Open map selection with: ^3vote ";
-    for (const auto &ym : yesMsgs) {
-      voteMsgs += std::string(ym) + " ";
-    }
-    voteMsgs += "\n  ^7Vote '^1No^7' to keep current map with: ^3vote ";
-    for (const auto &nm : noMsgs) {
-      voteMsgs += std::string(nm) + " ";
-    }
-
-    voteMsgs += "\n";
+    voteMsgs += ETJump::stringFormat(
+        "^7Valid arguments for this vote are:\n  ^3rtvVote 1-%i\n",
+        rtvMaps->size());
+    voteMsgs += "  ^7Open map selection with: ^3vote <" +
+                ETJump::StringUtil::join(yesMsgs, "|") + ">\n";
+    voteMsgs += "  ^7Vote '^1No^7' to keep current map with: ^3vote <" +
+                ETJump::StringUtil::join(noMsgs, "|") + ">\n";
     Printer::console(clientNum, voteMsgs);
   };
 
-  static const auto cancelVote = [&]() {
+  static const auto cancelVote = [&] {
     level.voteInfo.voteCanceled = qtrue;
     level.voteInfo.voteNo = level.numConnectedClients;
     level.voteInfo.voteYes = 0;
