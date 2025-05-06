@@ -381,3 +381,34 @@ void ETJump::StringUtil::removeLeadingChars(std::string &str,
     str.erase(0, pos);
   }
 }
+
+std::string ETJump::StringUtil::truncate(const std::string &str,
+                                         const int len) {
+  // TODO: check for stripped string length here too, once sanitize() is fixed
+  //  https://github.com/etjump/etjump/issues/1684
+  if (str.empty() || len < 0) {
+    return str;
+  }
+
+  const auto isColorString = [&](const std::string &s, const int idx) {
+    return s[idx] == '^' && s[idx + 1] != std::string::npos &&
+           s[idx + 1] != '^';
+  };
+
+  int outLen = len;
+  int idx = 0;
+
+  for (int i = 0; i < outLen && outLen < str.length(); i++) {
+    if (isColorString(str, idx)) {
+      outLen += 2;
+      idx += 2;
+      i++;
+      continue;
+    }
+
+    idx++;
+  }
+
+  std::string out = str.substr(0, outLen);
+  return out;
+}
