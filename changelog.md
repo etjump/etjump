@@ -52,6 +52,21 @@
   * coronas that have no color set or are set to black are now set to white to match behavior of server-sider coronas
   * coronas with `scriptname` set are now correctly processed on the server rather than client
 * fixed a crash if shutdown was executed during `etj_ad_stopDelay` period after a timerun was finished [#1380](https://github.com/etjump/etjump/pull/1380)
+* drawspeed2, CGaz, snaphud & strafe quality meter are now interpolated by default [#1674](https://github.com/etjump/etjump/pull/1674)
+  * interpolation can be disabled per element with `etj_HUD_noLerp` cvar (bitflag)
+    * 1 = drawspeed2
+    * 2 = CGaz
+    * 4 = snaphud
+    * 8 = strafe quality
+* improvements to `viewpos` & `setviewpos` [#1675](https://github.com/etjump/etjump/pull/1675)
+  * `viewpos` now prints viewangles for all axes
+  * `setviewpos` now accepts either 3 or 6 arguments - omitting angles takes current viewangles as input
+* fixed chat replay potentially writing a null JSON object in some scenarios [#1678](https://github.com/etjump/etjump/pull/1678)
+* logs created by `g_dailyLogs` are now named as per ISO 8061 date standard [#1680](https://github.com/etjump/etjump/pull/1680)
+  * admin logs now have a `-admin` suffix rather than a prefix
+* fixed a long standing issue where client's backed up saves from a session would sometimes disappear when reconnecting to a server [#1681](https://github.com/etjump/etjump/pull/1681)
+* fixed a potential crash when invalid vote argument was given [#1682](https://github.com/etjump/etjump/pull/1682)
+* fixed a potential crash with `players` command [#1685](https://github.com/etjump/etjump/pull/1685)
 
 # ETJump 3.3.4
 
