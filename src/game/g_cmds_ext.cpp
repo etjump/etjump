@@ -229,7 +229,7 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   int idNum, count = 0;
   int userRate, userSnaps;
   gclient_t *client;
-  char name[MAX_NETNAME], info[256];
+  char info[256];
   const char *s;
   char userinfo[MAX_INFO_STRING];
   const char *team;
@@ -256,12 +256,6 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   for (int i = 0; i < level.numConnectedClients; i++) {
     idNum = level.sortedClients[i]; // level.sortedNames[i];
     client = &level.clients[idNum];
-
-    Q_strncpyz(name, client->pers.netname, sizeof(name));
-    // exclude color codes from the max string length
-    const auto colorChars =
-        static_cast<int>(strlen(name)) - Q_PrintStrlen(name);
-    name[23 + colorChars] = 0;
 
     // player info
     if (client->pers.connected == CON_CONNECTING) {
@@ -308,12 +302,19 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
         break;
     }
 
+    const std::string name =
+        ETJump::StringUtil::truncate(client->pers.netname, 23);
+
     if (ent) {
-      Printer::console(clientNum, va("%s%2d  %-*s^7%s\n", team, idNum,
-                                     25 + colorChars, name, info));
+      const int colorChars =
+          strlen(client->pers.netname) - Q_PrintStrlen(client->pers.netname);
+      Printer::console(clientNum,
+                       ETJump::stringFormat("%s%2d  %-*s^7%s\n", team, idNum,
+                                            25 + colorChars, name, info));
     } else {
-      G_Printf("%s%2d  %-25s%s\n", team, idNum,
-               ETJump::sanitize(name, false).c_str(), info);
+      char cleanName[MAX_NETNAME];
+      Q_strncpyz(cleanName, name.c_str(), sizeof(cleanName));
+      G_Printf("%s%2d  %-25s%s\n", team, idNum, Q_CleanStr(cleanName), info);
     }
 
     count++;

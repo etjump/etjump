@@ -281,3 +281,39 @@ TEST_F(StringUtilitiesTests, sortStrings_SortWithCase) {
   ASSERT_EQ(vec[4], "aA");
   ASSERT_EQ(vec[5], "aC");
 }
+
+TEST_F(StringUtilitiesTests, truncate_BasicTruncate) {
+  const std::string in = "^1test^2test";
+
+  ASSERT_EQ(StringUtil::truncate(in, 4), "^1test");
+  ASSERT_EQ(StringUtil::truncate(in, 2), "^1te");
+  ASSERT_EQ(StringUtil::truncate(in, 8), "^1test^2test");
+  ASSERT_EQ(StringUtil::truncate(in, 10), "^1test^2test");
+  ASSERT_EQ(StringUtil::truncate(in, 11), "^1test^2test");
+  ASSERT_EQ(StringUtil::truncate(in, 12), "^1test^2test");
+  ASSERT_EQ(StringUtil::truncate(in, 13), "^1test^2test");
+}
+
+TEST_F(StringUtilitiesTests, truncate_InvalidInput) {
+  const std::string in = "^1test^2test";
+
+  ASSERT_EQ(StringUtil::truncate(in, -1), "^1test^2test");
+  ASSERT_EQ(StringUtil::truncate("", 10), "");
+}
+
+TEST_F(StringUtilitiesTests, truncate_LenIsInColorCode) {
+  const std::string in = "^1test^2test";
+
+  ASSERT_EQ(StringUtil::truncate(in, 5), "^1test^2t");
+  ASSERT_EQ(StringUtil::truncate(in, 6), "^1test^2te");
+}
+
+TEST_F(StringUtilitiesTests, truncate_MultipleCarets) {
+  const std::string in = "^^1test^^^2test";
+
+  ASSERT_EQ(StringUtil::truncate(in, 1), "^");
+  ASSERT_EQ(StringUtil::truncate(in, 3), "^^1te");
+  ASSERT_EQ(StringUtil::truncate(in, 6), "^^1test^");
+  ASSERT_EQ(StringUtil::truncate(in, 7), "^^1test^^");
+  ASSERT_EQ(StringUtil::truncate(in, 9), "^^1test^^^2te");
+}

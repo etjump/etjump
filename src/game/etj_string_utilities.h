@@ -124,6 +124,12 @@ void removeTrailingChars(std::string &str, char charToRemove);
 // if input contains only chars to remove, result is empty string
 void removeLeadingChars(std::string &str, char charToRemove);
 
+// truncates a string, preserving any color codes in the string
+// color codes are excluded from the truncation length, so this can be used
+// to truncate colored strings to display only a certain number of characters
+// e.g. truncate("^1foo^2bar", 3) -> "^1foo"
+std::string truncate(const std::string &str, size_t len);
+
 // sorts strings either with case sensitivity or insensitivity
 // identical strings are kept in order
 template <typename T>
