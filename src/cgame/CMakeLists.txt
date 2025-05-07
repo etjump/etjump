@@ -47,6 +47,7 @@ add_library(cgame MODULE
 	"etj_awaited_command_handler.cpp"
 	"etj_cgaz.cpp"
 	"etj_chs.cpp"
+	"etj_client_auth.cpp"
 	"etj_client_authentication.cpp"
 	"etj_client_commands_handler.cpp"
 	"etj_client_rtv_handler.cpp"

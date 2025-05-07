@@ -38,5 +38,5 @@ std::string ValueForKey(int clientNum, const std::string &key);
 std::string TimeStampToString(int timeStamp);
 std::string TimeStampDifferenceToString(int diff);
 
-bool ValidGuid(std::string guid);
+bool ValidGuid(const std::string &guid);
 #endif // g_utilities_h__

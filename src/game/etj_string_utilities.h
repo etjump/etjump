@@ -93,6 +93,9 @@ std::vector<std::string> split(const std::string &input,
                                const std::string &delimiter);
 void replaceAll(std::string &input, const std::string &from,
                 const std::string &to);
+// wstring variant
+void replaceAll(std::wstring &input, const std::wstring &from,
+                const std::wstring &to);
 
 // replaces all occurrences of specified character
 // and the following N characters in the string

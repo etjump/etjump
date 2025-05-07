@@ -28,11 +28,52 @@
 
   #include <IOKit/IOKitLib.h>
 
-const char *G_SHA1(const char *str);
+  #ifdef NEW_AUTH
+    #include "../game/etj_shared.h"
+  #endif
+
+const char *G_SHA1(const std::string &str);
 
 ETJump::OperatingSystem::OperatingSystem() = default;
 
 void ETJump::OperatingSystem::minimize() {}
+
+  #ifdef NEW_AUTH
+
+// TODO: improve this? this is VERY basic
+std::vector<std::string> ETJump::OperatingSystem::getHwid() {
+  char buf[512]{};
+  io_registry_entry_t ioRegistryRoot =
+      IORegistryEntryFromPath(kIOMasterPortDefault, "IOService:/");
+  auto uuidCf = (CFStringRef)IORegistryEntryCreateCFProperty(
+      ioRegistryRoot, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, 0);
+  IOObjectRelease(ioRegistryRoot);
+  CFStringGetCString(uuidCf, buf, sizeof(buf), kCFStringEncodingMacRoman);
+  CFRelease(uuidCf);
+
+  std::vector<std::string> hwid{};
+
+  // not sure if this can happen
+  if (buf[0] == '\0') {
+    hwid.emplace_back(NOHWID);
+    return hwid;
+  }
+
+  hwid.emplace_back(G_SHA1(buf));
+  return hwid;
+}
+
+int ETJump::OperatingSystem::getOS() {
+    #if defined(__arm64__)
+  return Constants::OS_MACOS_AARCH64;
+    #elif defined(__x86_64__)
+  return Constants::OS_MACOS_X86_64;
+    #else
+  return Constants::OS_DEFAULT;
+    #endif
+}
+
+  #else
 
 std::string ETJump::OperatingSystem::getHwid() {
   char buf[512];
@@ -47,4 +88,5 @@ std::string ETJump::OperatingSystem::getHwid() {
   return G_SHA1(buf);
 }
 
+  #endif
 #endif

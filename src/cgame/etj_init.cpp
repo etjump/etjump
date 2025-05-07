@@ -34,7 +34,14 @@
 #include "etj_event_loop.h"
 #include "etj_awaited_command_handler.h"
 #include "etj_player_events_handler.h"
-#include "etj_client_authentication.h"
+#include "etj_client_commands_handler.h"
+
+#ifdef NEW_AUTH
+  #include "etj_client_auth.h"
+#else
+  #include "etj_client_authentication.h"
+#endif
+
 #include "etj_operating_system.h"
 #include "etj_draw_leaves_handler.h"
 #include "etj_console_alpha.h"
@@ -71,7 +78,13 @@ namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
 std::shared_ptr<EntityEventsHandler> entityEventsHandler;
+
+#ifdef NEW_AUTH
+std::unique_ptr<ClientAuth> auth;
+#else
 std::shared_ptr<ClientAuthentication> authentication;
+#endif
+
 std::shared_ptr<OperatingSystem> operatingSystem;
 std::vector<std::shared_ptr<IRenderable>> renderables;
 std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
@@ -209,12 +222,17 @@ void init() {
       std::make_shared<ClientCommandsHandler>(trap_AddCommand);
   entityEventsHandler = std::make_shared<EntityEventsHandler>();
   operatingSystem = std::make_shared<OperatingSystem>();
+
+#ifdef NEW_AUTH
+  auth = std::make_unique<ClientAuth>();
+#else
   authentication = std::make_shared<ClientAuthentication>(
       [](const std::string &command) {
         trap_SendClientCommand(command.c_str());
       },
       [](const std::string &message) { CG_Printf(message.c_str()); },
       [] { return OperatingSystem::getHwid(); }, ETJump::serverCommandsHandler);
+#endif
 
   playerEventsHandler = std::make_shared<PlayerEventsHandler>();
   awaitedCommandHandler = std::make_shared<AwaitedCommandHandler>(
@@ -380,7 +398,13 @@ void shutdown() {
   }
 
   ETJump::operatingSystem = nullptr;
+
+#ifdef NEW_AUTH
+  auth = nullptr;
+#else
   ETJump::authentication = nullptr;
+#endif
+
   ETJump::renderables.clear();
   ETJump::cvarShadows.clear();
   ETJump::cvarUpdateHandler = nullptr;

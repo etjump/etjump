@@ -193,8 +193,9 @@ std::string TimeStampDifferenceToString(int diff) {
   }
 }
 
-bool ValidGuid(std::string guid) {
-  const unsigned GUID_SIZE = 40;
+// this is really just a SHA-1 validation...
+bool ValidGuid(const std::string &guid) {
+  constexpr unsigned GUID_SIZE = 40;
   if (guid.size() != GUID_SIZE) {
     return false;
   }

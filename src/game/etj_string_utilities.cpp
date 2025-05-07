@@ -262,6 +262,16 @@ void ETJump::StringUtil::replaceAll(std::string &input, const std::string &from,
   }
 }
 
+void ETJump::StringUtil::replaceAll(std::wstring &input,
+                                    const std::wstring &from,
+                                    const std::wstring &to) {
+  size_t startPost = 0;
+  while ((startPost = input.find(from, startPost)) != std::wstring::npos) {
+    input.replace(startPost, from.length(), to);
+    startPost += to.length();
+  }
+}
+
 void ETJump::StringUtil::stringSubstitute(std::string &input, char character,
                                           const std::string &replacement,
                                           size_t numChars) {

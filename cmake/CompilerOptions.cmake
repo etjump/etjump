@@ -118,4 +118,8 @@ function(create_compiler_opts target)
 		${arg_DEFINE})
 
 	target_compile_features(${target} INTERFACE cxx_std_17)
+
+	if (NEW_AUTH)
+		add_compile_definitions(${target} INTERFACE NEW_AUTH)
+	endif ()
 endfunction()
