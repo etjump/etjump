@@ -32,6 +32,7 @@ project(etjump VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" HOME
 set(CMAKE_CXX_STANDARD 17)
 
 option(BUILD_TESTS "Enable tests building (ON by default)" ON)
+option(NEW_AUTH "Enable new authentication system (WIP, non-functional)" OFF)
 
 # provide individual options too in case a compiler only supports some sanitizers
 option(USE_SANITIZERS "Enable address, leak and undefined behavior sanitizers on supported compilers" OFF)
@@ -142,3 +143,7 @@ if (BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(tests)
 endif()
+
+if (NEW_AUTH)
+	message(STATUS "Enabling new authentication system -- done")
+endif ()

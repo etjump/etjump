@@ -28,9 +28,27 @@
 
 namespace ETJump {
 namespace Constants {
+inline constexpr int OS_DEFAULT = 0;              // unknown
+inline constexpr int OS_WIN_X86 = 1 << 0;         // Windows x86
+inline constexpr int OS_LINUX_X86 = 1 << 1;       // Linux x86
+inline constexpr int OS_LINUX_X86_64 = 1 << 2;    // Linux x86_64
+inline constexpr int OS_MACOS_X86_64 = 1 << 3;    // macOS x86_64
+inline constexpr int OS_ANDROID_AARCH64 = 1 << 4; // Android aarch64
+inline constexpr int OS_LINUX_ARMV7 = 1 << 5;     // Raspberry Pi arm
+inline constexpr int OS_LINUX_ARMV8_64 = 1 << 6;  // Raspberry Pi aarch64
+inline constexpr int OS_MACOS_AARCH64 = 1 << 7;   // macOS aarch64
+inline constexpr int OS_WIN_X86_64 = 1 << 8;      // Windows x86_64
+inline constexpr int OS_ANDROID_X86 = 1 << 9;     // Android x86
+inline constexpr int OS_ANDROID_X86_64 = 1 << 10; // Android x86_64
+
 namespace Authentication {
 const std::string GUID_REQUEST = "guid_request";
+
+#ifdef NEW_AUTH
+inline constexpr char AUTHENTICATE[] = "auth";
+#else
 const std::string AUTHENTICATE = "authenticate";
+#endif
 } // namespace Authentication
 } // namespace Constants
 

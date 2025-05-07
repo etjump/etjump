@@ -134,11 +134,16 @@ void Session::ReadSessionData(int clientNum) {
 }
 
 void Session::OnGuidReceived(gentity_t *ent) {
+#ifdef NEW_AUTH
+  G_Printf("%s: [NEW_AUTH] TODO:\n- read/write from/to userdb\n- handle admin "
+           "system\n- store nickname to userdb\n",
+           __func__);
+#else
   const int clientNum = ClientNum(ent);
-
   GetUserAndLevelData(clientNum);
   WriteSessionData(clientNum);
   ClientNameChanged(ent);
+#endif
 
   if (g_save.integer) {
     ETJump::saveSystem->loadPositionsFromDatabase(ent);
@@ -146,12 +151,71 @@ void Session::OnGuidReceived(gentity_t *ent) {
 }
 
 bool Session::GuidReceived(gentity_t *ent) {
-  int argc = trap_Argc();
-  int clientNum = ClientNum(ent);
+  const int argc = trap_Argc();
+  const int clientNum = ClientNum(ent);
   char guidBuf[MAX_CVAR_VALUE_STRING];
-  char hwidBuf[MAX_CVAR_VALUE_STRING];
   const std::string cleanName = ETJump::sanitize(ent->client->pers.netname);
+  const std::string spoofAttempt = ETJump::stringFormat(
+      "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
+      clientNum, cleanName, ClientIPAddr(ent));
 
+#ifdef NEW_AUTH
+  // TODO: this should probably be refactored to smaller functions
+  //  in fact, this entire function should be something like
+  //  'authResponseReceived', since it deals with a lot more than just GUID
+
+  // auth response is 'auth <GUID> <OS> <HWID>'
+  // OS isn't used for anything now,
+  // but it likely will be used with new database schema,
+  // and/or to detect OS-specific HWID parse failures
+  constexpr int NUM_EXPECTED_ARGS = 4;
+
+  if (argc != NUM_EXPECTED_ARGS) {
+    Printer::logAdminLn(spoofAttempt);
+    return false;
+  }
+
+  char osBuf[8]{};
+  trap_Argv(2, osBuf, sizeof(osBuf));
+  const int OS = Q_atoi(osBuf);
+
+  char hwidBuf[MAX_TOKEN_CHARS]{};
+
+  trap_Argv(1, guidBuf, sizeof(guidBuf));
+  trap_Argv(3, hwidBuf, sizeof(hwidBuf));
+
+  bool hwidValid = true;
+  std::vector<std::string> hwid = ETJump::StringUtil::split(hwidBuf, ",");
+  std::vector<std::string> hwidHashed{};
+  hwidHashed.reserve(hwid.size());
+
+  // go through each component and make sure they are valid
+  for (const auto &component : hwid) {
+    if (!ValidGuid(component)) {
+      hwidValid = false;
+      break;
+    }
+
+    hwidHashed.emplace_back(G_SHA1(component));
+  }
+
+  if (!hwidValid || !ValidGuid(guidBuf)) {
+    Printer::logAdminLn(spoofAttempt);
+    return false;
+  }
+
+  clients_[clientNum].guid = G_SHA1(guidBuf);
+  clients_[clientNum].hwid = ETJump::StringUtil::join(hwidHashed, ",");
+
+  G_DPrintf("%s: %d GUID: %s OS: %i HWID: %s\n", __func__, clientNum,
+            clients_[clientNum].guid.c_str(), OS,
+            clients_[clientNum].hwid.c_str());
+  G_Printf("%s [NEW_AUTH] TODO:\n- handle ban checks from database\n",
+           __func__);
+
+  // TODO: check bans from database
+
+#else
   // Client sends 'AUTHENTICATE guid hwid'
   constexpr int ARGC = 3;
   if (argc != ARGC) {
@@ -160,6 +224,8 @@ bool Session::GuidReceived(gentity_t *ent) {
         clientNum, cleanName, ClientIPAddr(ent)));
     return false;
   }
+
+  char hwidBuf[MAX_CVAR_VALUE_STRING]{};
 
   trap_Argv(1, guidBuf, sizeof(guidBuf));
   trap_Argv(2, hwidBuf, sizeof(hwidBuf));
@@ -187,6 +253,7 @@ bool Session::GuidReceived(gentity_t *ent) {
     trap_DropClient(clientNum, "You are banned.", 0);
     return false;
   }
+#endif
 
   OnGuidReceived(ent);
 
