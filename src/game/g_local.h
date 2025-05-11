@@ -2867,8 +2867,6 @@ qboolean G_isIPMuted(const char *ip);
 void G_ClearIPMutes();
 qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime);
 // g_admin.c
-const char *G_SHA1(const char *str);
-const char *G_SHA1(const std::string &str);
 char *Q_SayConcatArgs(int start);
 void DecolorString(char *in, char *out);
 int Q_SayArgc();

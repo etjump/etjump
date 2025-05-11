@@ -100,7 +100,6 @@ add_library(cgame MODULE
 	"../game/bg_classes.cpp"
 	"../game/bg_misc.cpp"
 	"../game/bg_pmove.cpp"
-	"../game/bg_sha1.cpp"
 	"../game/bg_slidemove.cpp"
 	"../game/bg_sscript.cpp"
 	"../game/bg_stats.cpp"

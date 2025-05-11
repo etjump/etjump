@@ -32,6 +32,7 @@
   #include <unistd.h>
   #include <fstream>
   #include "../game/etj_string_utilities.h"
+  #include "../game/etj_crypto.h"
 
   #ifdef NEW_AUTH
     #include <array>
@@ -40,8 +41,6 @@
 
     #include "../game/etj_shared.h"
   #endif
-
-const char *G_SHA1(const std::string &str);
 
 ETJump::OperatingSystem::OperatingSystem() = default;
 
@@ -119,7 +118,7 @@ std::string ETJump::OperatingSystem::getMACAddress() {
   const std::string result = stringFormat(
       "%02X-%02X-%02X-%02X-%02X-%02X", mac_address[0], mac_address[1],
       mac_address[2], mac_address[3], mac_address[4], mac_address[5]);
-  return G_SHA1(result);
+  return Crypto::sha1(result);
 }
 
 std::string ETJump::OperatingSystem::getCPUInfo() {
@@ -188,7 +187,7 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
 
   const std::string cpuID = stringFormat("%s %u %u %s %u", vendor, cpuFamily,
                                          model, vendorExt, stepping);
-  return G_SHA1(cpuID);
+  return Crypto::sha1(cpuID);
 }
 
 std::string ETJump::OperatingSystem::getMachineID() {
@@ -205,7 +204,7 @@ std::string ETJump::OperatingSystem::getMachineID() {
     return NOHWID;
   }
 
-  return G_SHA1(id);
+  return Crypto::sha1(id);
 }
 
 std::string ETJump::OperatingSystem::getDiskInfo() {
@@ -272,7 +271,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   }
 
   diskID = trim(diskID);
-  return G_SHA1(diskID);
+  return Crypto::sha1(diskID);
 }
 
 int ETJump::OperatingSystem::getOS() {
@@ -344,7 +343,7 @@ std::string ETJump::OperatingSystem::getHwid() {
                        mac_address[1], mac_address[2], mac_address[3],
                        mac_address[4], mac_address[5]);
 
-  return G_SHA1(hwid);
+  return Crypto::sha1(hwid);
 }
   #endif
 #endif

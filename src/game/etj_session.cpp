@@ -31,6 +31,7 @@
 #include "etj_string_utilities.h"
 #include "etj_levels.h"
 #include "etj_save_system.h"
+#include "etj_crypto.h"
 
 Session::Session(std::shared_ptr<IAuthentication> database)
     : database_(database) {
@@ -196,7 +197,7 @@ bool Session::GuidReceived(gentity_t *ent) {
       break;
     }
 
-    hwidHashed.emplace_back(G_SHA1(component));
+    hwidHashed.emplace_back(ETJump::Crypto::sha1(component));
   }
 
   if (!hwidValid || !ValidGuid(guidBuf)) {
@@ -204,7 +205,7 @@ bool Session::GuidReceived(gentity_t *ent) {
     return false;
   }
 
-  clients_[clientNum].guid = G_SHA1(guidBuf);
+  clients_[clientNum].guid = ETJump::Crypto::sha1(guidBuf);
   clients_[clientNum].hwid = ETJump::StringUtil::join(hwidHashed, ",");
 
   G_DPrintf("%s: %d GUID: %s OS: %i HWID: %s\n", __func__, clientNum,
@@ -237,8 +238,8 @@ bool Session::GuidReceived(gentity_t *ent) {
     return false;
   }
 
-  clients_[clientNum].guid = G_SHA1(guidBuf);
-  clients_[clientNum].hwid = G_SHA1(hwidBuf);
+  clients_[clientNum].guid = ETJump::Crypto::sha1(guidBuf);
+  clients_[clientNum].hwid = ETJump::Crypto::sha1(hwidBuf);
 
   G_DPrintf("GuidReceived: %d GUID: %s HWID: %s\n", clientNum,
             clients_[clientNum].guid.c_str(), clients_[clientNum].hwid.c_str());

@@ -4156,8 +4156,6 @@ void CG_DrawCHS(void);
 void CG_InfoCHS_f(void);
 
 void CG_BannerPrint(const char *str);
-const char *G_SHA1(const char *str);
-const char *G_SHA1(const std::string &str);
 
 //
 // drawable.cpp
