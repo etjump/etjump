@@ -99,6 +99,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/version_headers.h.in"
 
 add_subdirectory(deps/json)
 add_subdirectory(deps/sha-1)
+add_subdirectory(deps/PicoSHA2)
 add_subdirectory(deps/sqlite)
 add_subdirectory(deps/sqlite_modern_cpp)
 add_subdirectory(deps/gtest)
@@ -110,6 +111,7 @@ add_subdirectory(deps/fmt EXCLUDE_FROM_ALL)
 
 target_link_libraries(libjson PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsha1 PRIVATE cxx_compiler_opts_w0)
+target_link_libraries(picosha2 INTERFACE cxx_compiler_opts_w0)
 target_link_libraries(libuuid4 PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsqlite PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(fmt PRIVATE cxx_compiler_opts_w0)
@@ -122,8 +124,19 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 set(BUNDLED_TARGETS_FOLDER Bundled)
 set(PACKING_TARGETS_FOLDER Package)
 
-set_target_properties(gmock gmock_main gtest gtest_main libjson libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt
-                      PROPERTIES FOLDER ${BUNDLED_TARGETS_FOLDER})
+set_target_properties(
+		gmock
+		gmock_main
+		gtest
+		gtest_main
+		libjson
+		libsha1
+		picosha2
+		libsqlite
+		libsqlite_modern_cpp
+		libuuid4
+		fmt
+		PROPERTIES FOLDER ${BUNDLED_TARGETS_FOLDER})
 
 add_subdirectory(src/cgame)
 add_subdirectory(src/game)
