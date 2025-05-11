@@ -25,14 +25,13 @@
 #ifdef __APPLE__
 
   #include "etj_operating_system.h"
+  #include "../game/etj_crypto.h"
 
   #include <IOKit/IOKitLib.h>
 
   #ifdef NEW_AUTH
     #include "../game/etj_shared.h"
   #endif
-
-const char *G_SHA1(const std::string &str);
 
 ETJump::OperatingSystem::OperatingSystem() = default;
 
@@ -59,7 +58,7 @@ std::vector<std::string> ETJump::OperatingSystem::getHwid() {
     return hwid;
   }
 
-  hwid.emplace_back(G_SHA1(buf));
+  hwid.emplace_back(Crypto::sha1(buf));
   return hwid;
 }
 
@@ -85,7 +84,7 @@ std::string ETJump::OperatingSystem::getHwid() {
   CFStringGetCString(uuidCf, buf, sizeof(buf), kCFStringEncodingMacRoman);
   CFRelease(uuidCf);
 
-  return G_SHA1(buf);
+  return Crypto::sha1(buf);
 }
 
   #endif

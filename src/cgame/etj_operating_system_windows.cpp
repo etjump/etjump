@@ -28,6 +28,7 @@
   #include <sddl.h>
   #include "etj_operating_system.h"
   #include "etj_client_authentication.h"
+  #include "../game/etj_crypto.h"
 
   #include <iostream>
 
@@ -43,7 +44,6 @@
     #include "../game/etj_string_utilities.h"
   #endif
 
-const char *G_SHA1(const std::string &str);
 void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer,
                                     int bufsize);
 
@@ -149,7 +149,7 @@ std::string ETJump::OperatingSystem::getMACAddress() {
     return NOHWID;
   }
 
-  return G_SHA1(macAddress);
+  return Crypto::sha1(macAddress);
 }
 
 std::string ETJump::OperatingSystem::getCPUInfo() {
@@ -217,7 +217,7 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
 
   const std::string cpuID = stringFormat("%s %u %u %s %u", vendor, cpuFamily,
                                          model, vendorExt, stepping);
-  return G_SHA1(cpuID);
+  return Crypto::sha1(cpuID);
 }
 
 // largely based on Microsoft's documentation examples
@@ -389,7 +389,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   WideCharToMultiByte(CP_UTF8, 0, serial.c_str(), -1, &result[0], size, nullptr,
                       nullptr);
 
-  return G_SHA1(result);
+  return Crypto::sha1(result);
 }
 
     #define CLOSEHANDLE(x)                                                     \
@@ -444,17 +444,17 @@ std::string ETJump::OperatingSystem::getCurrentUserSID() {
   LOCALFREE(stringSID);
   LOCALFREE(pTokenUser);
   CLOSEHANDLE(hToken);
-  return G_SHA1(result);
+  return Crypto::sha1(result);
 }
 
 std::string ETJump::OperatingSystem::getSystemUUID() {
   const auto uuid = getWMIProperty(L"Win32_ComputerSystemProduct", L"UUID");
-  return G_SHA1(uuid);
+  return Crypto::sha1(uuid);
 }
 
 std::string ETJump::OperatingSystem::getMBSerial() {
   const auto mbSerial = getWMIProperty(L"Win32_BaseBoard", L"SerialNumber");
-  return G_SHA1(mbSerial);
+  return Crypto::sha1(mbSerial);
 }
 
 std::string
@@ -587,7 +587,7 @@ std::string ETJump::OperatingSystem::getHwid() {
   }
 
   hardwareId += std::to_string(vsn);
-  return G_SHA1(hardwareId);
+  return Crypto::sha1(hardwareId);
 }
 
   #endif

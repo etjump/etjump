@@ -27,6 +27,7 @@
   #include "cg_local.h"
   #include "etj_client_commands_handler.h"
   #include "etj_operating_system.h"
+  #include "../game/etj_crypto.h"
 
   #include "../game/etj_shared.h"
   #include "../game/etj_file.h"
@@ -59,7 +60,7 @@ void ClientAuth::sendAuthResponse(int os, const std::string &guid,
                                   const std::vector<std::string> &hwid) {
   const std::string authMsg =
       stringFormat("%s %s %i %s", Constants::Authentication::AUTHENTICATE,
-                   hash(guid), os, StringUtil::join(hwid, ","));
+                   Crypto::sha1(guid), os, StringUtil::join(hwid, ","));
   trap_SendClientCommand(authMsg.c_str());
 }
 

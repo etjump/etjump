@@ -26,6 +26,7 @@
 #include "../game/etj_file.h"
 #include "../game/etj_shared.h"
 #include "../game/etj_string_utilities.h"
+#include "../game/etj_crypto.h"
 #include <uuid4.h>
 
 ETJump::ClientAuthentication::ClientAuthentication(
@@ -52,8 +53,8 @@ void ETJump::ClientAuthentication::login() {
   }
   auto hwid = getHwid();
   auto authenticate =
-      ETJump::stringFormat("%s %s %s", Constants::Authentication::AUTHENTICATE,
-                           ETJump::hash(guid), hwid);
+      stringFormat("%s %s %s", Constants::Authentication::AUTHENTICATE,
+                   Crypto::sha1(guid), hwid);
   _sendClientCommand(authenticate);
 }
 
