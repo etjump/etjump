@@ -91,6 +91,14 @@ void CustomMapVotes::loadCustomvotes(const bool init) {
       return;
     }
 
+    if (!isValidVoteString(customMapVotes_[curr].type)) {
+      logger->error(
+          "Failed to parse custom vote - name '%s' contains invalid characters",
+          customMapVotes_[curr].type);
+      customMapVotes_.pop_back();
+      continue;
+    }
+
     customMapVotes_[curr].type = sanitize(customMapVotes_[curr].type, true);
 
     if (customMapVotes_[curr].type.empty()) {

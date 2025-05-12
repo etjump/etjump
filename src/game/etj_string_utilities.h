@@ -103,7 +103,12 @@ void stringSubstitute(std::string &input, char character,
 
 bool startsWith(const std::string &str, const std::string &prefix);
 bool endsWith(const std::string &str, const std::string &suffix);
-bool contains(const std::string &str, const std::string &text);
+
+template <typename T>
+bool contains(const std::string &str, const T &text) {
+  return str.find(text) != std::string::npos;
+}
+
 // case-insensitive string comparison, optionally with sanitized strings
 bool iEqual(const std::string &str1, const std::string &str2,
             bool sanitized = false);

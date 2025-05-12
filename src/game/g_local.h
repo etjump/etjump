@@ -1853,6 +1853,10 @@ void Cmd_Team2_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_SetWeapons_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_SetClass_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 
+namespace ETJump {
+bool isValidVoteString(const std::string &str);
+}
+
 //
 // g_main.c
 //

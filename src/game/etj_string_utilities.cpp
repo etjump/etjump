@@ -301,11 +301,6 @@ bool ETJump::StringUtil::endsWith(const std::string &str,
          0;
 }
 
-bool ETJump::StringUtil::contains(const std::string &str,
-                                  const std::string &text) {
-  return str.find(text) != std::string::npos;
-}
-
 bool ETJump::StringUtil::iEqual(const std::string &str1,
                                 const std::string &str2, bool sanitized) {
   if (sanitized) {

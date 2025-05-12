@@ -2585,6 +2585,13 @@ void setCvString(char *voteMsg, char *voteArg) {
   Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString),
               voteStringFormat, voteMsg, voteArg);
 }
+
+bool isValidVoteString(const std::string &str) {
+  return std::none_of(
+      tokenDelimiters.cbegin(), tokenDelimiters.cend(),
+      [&](const char token) { return StringUtil::contains(str, token); });
+}
+
 } // namespace ETJump
 
 /*
@@ -2606,7 +2613,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   trap_Argv(1, arg1, sizeof(arg1));
   trap_Argv(2, arg2, sizeof(arg2));
 
-  if (strchr(arg1, ';') || strchr(arg2, ';')) {
+  if (!ETJump::isValidVoteString(arg1) || !ETJump::isValidVoteString(arg2)) {
     Printer::popup(clientNum, "Invalid vote string.");
     return;
   }

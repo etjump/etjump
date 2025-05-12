@@ -310,6 +310,9 @@ inline constexpr int MAX_BINARY_MESSAGE = 32768; // max length of binary message
 
 inline constexpr int MAX_VA_STRING = 32000;
 
+// delimiter characters for command tokenization
+constexpr std::array<char, 3> tokenDelimiters = {';', '\n', '\r'};
+
 typedef enum {
   MESSAGE_EMPTY = 0,
   MESSAGE_WAITING,          // rate/packet limited
