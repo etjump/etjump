@@ -84,6 +84,8 @@ std::vector<std::string> ETJump::OperatingSystem::getHwid() {
   hwid.emplace_back(getSystemUUID());
   hwid.emplace_back(getMBSerial());
 
+  assert(hwid.size() == Constants::Authentication::HWID_SIZE_WIN);
+
   return hwid;
 }
 
@@ -149,7 +151,7 @@ std::string ETJump::OperatingSystem::getMACAddress() {
     return NOHWID;
   }
 
-  return Crypto::sha1(macAddress);
+  return Crypto::sha2(macAddress);
 }
 
 std::string ETJump::OperatingSystem::getCPUInfo() {
@@ -217,7 +219,7 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
 
   const std::string cpuID = stringFormat("%s %u %u %s %u", vendor, cpuFamily,
                                          model, vendorExt, stepping);
-  return Crypto::sha1(cpuID);
+  return Crypto::sha2(cpuID);
 }
 
 // largely based on Microsoft's documentation examples
@@ -389,7 +391,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   WideCharToMultiByte(CP_UTF8, 0, serial.c_str(), -1, &result[0], size, nullptr,
                       nullptr);
 
-  return Crypto::sha1(result);
+  return Crypto::sha2(result);
 }
 
     #define CLOSEHANDLE(x)                                                     \
@@ -444,17 +446,17 @@ std::string ETJump::OperatingSystem::getCurrentUserSID() {
   LOCALFREE(stringSID);
   LOCALFREE(pTokenUser);
   CLOSEHANDLE(hToken);
-  return Crypto::sha1(result);
+  return Crypto::sha2(result);
 }
 
 std::string ETJump::OperatingSystem::getSystemUUID() {
   const auto uuid = getWMIProperty(L"Win32_ComputerSystemProduct", L"UUID");
-  return Crypto::sha1(uuid);
+  return Crypto::sha2(uuid);
 }
 
 std::string ETJump::OperatingSystem::getMBSerial() {
   const auto mbSerial = getWMIProperty(L"Win32_BaseBoard", L"SerialNumber");
-  return Crypto::sha1(mbSerial);
+  return Crypto::sha2(mbSerial);
 }
 
 std::string

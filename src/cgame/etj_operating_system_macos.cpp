@@ -58,7 +58,10 @@ std::vector<std::string> ETJump::OperatingSystem::getHwid() {
     return hwid;
   }
 
-  hwid.emplace_back(Crypto::sha1(buf));
+  hwid.emplace_back(Crypto::sha2(buf));
+
+  assert(hwid.size() == Constants::Authentication::HWID_SIZE_MAC);
+
   return hwid;
 }
 

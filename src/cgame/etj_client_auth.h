@@ -35,15 +35,25 @@ public:
   ~ClientAuth();
 
 private:
+  enum class GUIDVersion {
+    GUID_V1 = 1,
+    GUID_V2 = 2,
+  };
+
   void login();
   void sendAuthResponse(int os, const std::string &guid,
                         const std::vector<std::string> &hwid);
 
   int getOS();
-  std::string getGuid();
+
+  // if version is V1 and no GUID file is found, returns an empty string
+  std::string getGuid(GUIDVersion version);
+  std::string getGuidFileName(GUIDVersion version);
   std::vector<std::string> getHwid();
 
-  void saveGuid(const std::string &guid);
+  std::string createGuid();
+  void saveGuid(const std::string &contents);
+  void migrateGuid();
 };
 } // namespace ETJump
 #endif

@@ -32,6 +32,7 @@
 #include "etj_levels.h"
 #include "etj_save_system.h"
 #include "etj_crypto.h"
+#include "etj_shared.h"
 
 Session::Session(std::shared_ptr<IAuthentication> database)
     : database_(database) {
@@ -135,16 +136,10 @@ void Session::ReadSessionData(int clientNum) {
 }
 
 void Session::OnGuidReceived(gentity_t *ent) {
-#ifdef NEW_AUTH
-  G_Printf("%s: [NEW_AUTH] TODO:\n- read/write from/to userdb\n- handle admin "
-           "system\n- store nickname to userdb\n",
-           __func__);
-#else
   const int clientNum = ClientNum(ent);
   GetUserAndLevelData(clientNum);
   WriteSessionData(clientNum);
   ClientNameChanged(ent);
-#endif
 
   if (g_save.integer) {
     ETJump::saveSystem->loadPositionsFromDatabase(ent);
@@ -154,87 +149,27 @@ void Session::OnGuidReceived(gentity_t *ent) {
 bool Session::GuidReceived(gentity_t *ent) {
   const int argc = trap_Argc();
   const int clientNum = ClientNum(ent);
-  char guidBuf[MAX_CVAR_VALUE_STRING];
   const std::string cleanName = ETJump::sanitize(ent->client->pers.netname);
   const std::string spoofAttempt = ETJump::stringFormat(
       "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
       clientNum, cleanName, ClientIPAddr(ent));
 
-#ifdef NEW_AUTH
-  // TODO: this should probably be refactored to smaller functions
-  //  in fact, this entire function should be something like
-  //  'authResponseReceived', since it deals with a lot more than just GUID
-
-  // auth response is 'auth <GUID> <OS> <HWID>'
-  // OS isn't used for anything now,
-  // but it likely will be used with new database schema,
-  // and/or to detect OS-specific HWID parse failures
-  constexpr int NUM_EXPECTED_ARGS = 4;
-
-  if (argc != NUM_EXPECTED_ARGS) {
-    Printer::logAdminLn(spoofAttempt);
-    return false;
-  }
-
-  char osBuf[8]{};
-  trap_Argv(2, osBuf, sizeof(osBuf));
-  const int OS = Q_atoi(osBuf);
-
-  char hwidBuf[MAX_TOKEN_CHARS]{};
-
-  trap_Argv(1, guidBuf, sizeof(guidBuf));
-  trap_Argv(3, hwidBuf, sizeof(hwidBuf));
-
-  bool hwidValid = true;
-  std::vector<std::string> hwid = ETJump::StringUtil::split(hwidBuf, ",");
-  std::vector<std::string> hwidHashed{};
-  hwidHashed.reserve(hwid.size());
-
-  // go through each component and make sure they are valid
-  for (const auto &component : hwid) {
-    if (!ValidGuid(component)) {
-      hwidValid = false;
-      break;
-    }
-
-    hwidHashed.emplace_back(ETJump::Crypto::sha1(component));
-  }
-
-  if (!hwidValid || !ValidGuid(guidBuf)) {
-    Printer::logAdminLn(spoofAttempt);
-    return false;
-  }
-
-  clients_[clientNum].guid = ETJump::Crypto::sha1(guidBuf);
-  clients_[clientNum].hwid = ETJump::StringUtil::join(hwidHashed, ",");
-
-  G_DPrintf("%s: %d GUID: %s OS: %i HWID: %s\n", __func__, clientNum,
-            clients_[clientNum].guid.c_str(), OS,
-            clients_[clientNum].hwid.c_str());
-  G_Printf("%s [NEW_AUTH] TODO:\n- handle ban checks from database\n",
-           __func__);
-
-  // TODO: check bans from database
-
-#else
   // Client sends 'AUTHENTICATE guid hwid'
   constexpr int ARGC = 3;
   if (argc != ARGC) {
-    Printer::logAdminLn(ETJump::stringFormat(
-        "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
-        clientNum, cleanName, ClientIPAddr(ent)));
+    Printer::logAdminLn(spoofAttempt);
     return false;
   }
 
+  char guidBuf[MAX_CVAR_VALUE_STRING]{};
   char hwidBuf[MAX_CVAR_VALUE_STRING]{};
 
   trap_Argv(1, guidBuf, sizeof(guidBuf));
   trap_Argv(2, hwidBuf, sizeof(hwidBuf));
 
-  if (!ValidGuid(guidBuf) || !ValidGuid(hwidBuf)) {
-    Printer::logAdminLn(ETJump::stringFormat(
-        "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
-        clientNum, cleanName, ClientIPAddr(ent)));
+  if (!ETJump::Crypto::isValidSHA1(guidBuf) ||
+      !ETJump::Crypto::isValidSHA1(hwidBuf)) {
+    Printer::logAdminLn(spoofAttempt);
     return false;
   }
 
@@ -254,12 +189,185 @@ bool Session::GuidReceived(gentity_t *ent) {
     trap_DropClient(clientNum, "You are banned.", 0);
     return false;
   }
-#endif
 
   OnGuidReceived(ent);
 
   return true;
 }
+
+#ifdef NEW_AUTH
+bool Session::authenticate(gentity_t *ent) {
+  const int argc = trap_Argc();
+  const int clientNum = ClientNum(ent);
+  const std::string cleanName = ETJump::sanitize(ent->client->pers.netname);
+  const std::string spoofAttempt = ETJump::stringFormat(
+      "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
+      clientNum, cleanName, ClientIPAddr(ent));
+
+  // auth response is 'auth <GUID> <OS> <HWIDs>'
+  // the amount of HWIDs is dependent on OS
+  char osBuf[8]{};
+  trap_Argv(2, osBuf, sizeof(osBuf));
+  const int OS = Q_atoi(osBuf);
+
+  int numHWIDs = 0;
+
+  switch (OS) {
+    case ETJump::Constants::OS_WIN_X86:
+    case ETJump::Constants::OS_WIN_X86_64:
+      numHWIDs = ETJump::Constants::Authentication::HWID_SIZE_WIN;
+      break;
+    case ETJump::Constants::OS_LINUX_X86:
+    case ETJump::Constants::OS_LINUX_X86_64:
+      numHWIDs = ETJump::Constants::Authentication::HWID_SIZE_LINUX;
+      break;
+    case ETJump::Constants::OS_MACOS_X86_64:
+    case ETJump::Constants::OS_MACOS_AARCH64:
+      numHWIDs = ETJump::Constants::Authentication::HWID_SIZE_MAC;
+      break;
+    default:
+      break;
+  }
+
+  const int NUM_EXPECTED_ARGS = 3 + numHWIDs;
+
+  if (argc != NUM_EXPECTED_ARGS) {
+    Printer::logAdminLn(spoofAttempt);
+    return false;
+  }
+
+  std::vector<std::string> hwid{};
+  hwid.reserve(numHWIDs);
+  bool hwidValid = true;
+
+  char guidBuf[MAX_CVAR_VALUE_STRING]{};
+  char hwidBuf[MAX_CVAR_VALUE_STRING]{};
+
+  for (int i = 0; i < numHWIDs; i++) {
+    trap_Argv(3 + i, hwidBuf, sizeof(hwidBuf));
+
+    if (!ETJump::Crypto::isValidSHA2(hwidBuf)) {
+      hwidValid = false;
+      break;
+    }
+
+    hwid.emplace_back(ETJump::Crypto::sha2(hwidBuf));
+  }
+
+  trap_Argv(1, guidBuf, sizeof(guidBuf));
+
+  if (!hwidValid || !ETJump::Crypto::isValidSHA2(guidBuf)) {
+    Printer::logAdminLn(spoofAttempt);
+    return false;
+  }
+
+  clients_[clientNum].guid = ETJump::Crypto::sha2(guidBuf);
+  // dunno about the format here yet, for now it's just space delimited
+  // might be better if this is a std::vector<std::string> in the future?
+  clients_[clientNum].hwid = ETJump::StringUtil::join(hwid, " ");
+
+  G_DPrintf("%s: %d GUID: %s OS: %i HWID: %s\n", __func__, clientNum,
+            clients_[clientNum].guid.c_str(), OS,
+            clients_[clientNum].hwid.c_str());
+  G_Printf("^3%s: [NEW_AUTH] TODO:\n  ^7- handle ban checks from database\n",
+           __func__);
+
+  // TODO: check bans from database
+
+  return onAuthenticate(ent);
+}
+
+bool Session::onAuthenticate(gentity_t *ent) {
+  const int clientNum = ClientNum(ent);
+
+  // this is where we would check for user info in database
+  // since the user isn't found, send a migration request
+  if (pendingMigrations.find(clientNum) == pendingMigrations.cend()) {
+    G_Printf("^3%s: [NEW_AUTH] ^7Client %i %s with GUID %s not found in the "
+             "database, sending migration request\n",
+             __func__, clientNum,
+             ETJump::sanitize(ent->client->pers.netname).c_str(),
+             clients_[clientNum].guid.c_str());
+    pendingMigrations[clientNum] = clients_[clientNum].guid;
+    Printer::command(clientNum,
+                     ETJump::Constants::Authentication::GUID_MIGRATE_REQUEST);
+    return false;
+  }
+
+  G_Printf("^3%s: [NEW_AUTH] TODO:\n  ^7- handle user database\n  - handle "
+           "admin system\n",
+           __func__);
+  return true;
+}
+
+// 'guid_migrate <oldGuid>'
+bool Session::migrateGuid(gentity_t *ent) {
+  const int argc = trap_Argc();
+  constexpr int NUM_EXPECTED_ARGS = 2;
+  const std::string spoofAttempt = ETJump::stringFormat(
+      "authentication: Potential GUID migration spoof attempt by %i %s (%s)",
+      ClientNum(ent), ETJump::sanitize(ent->client->pers.netname),
+      ClientIPAddr(ent));
+
+  if (argc != NUM_EXPECTED_ARGS) {
+    Printer::logAdminLn(spoofAttempt);
+    return false;
+  }
+
+  char buf[MAX_TOKEN_CHARS]{};
+  trap_Argv(1, buf, sizeof(buf));
+
+  if (!ETJump::Crypto::isValidSHA1(buf)) {
+    Printer::logAdminLn(spoofAttempt);
+    return false;
+  }
+
+  // set temporarily so we can migrate
+  clients_[ClientNum(ent)].guid = ETJump::Crypto::sha1(buf);
+
+  return onMigrateGuid(ent);
+}
+
+bool Session::onMigrateGuid(gentity_t *ent) {
+  const int clientNum = ClientNum(ent);
+
+  // here we should save both old and new GUID to the database
+  const std::string oldGuid = clients_[clientNum].guid;
+  clients_[clientNum].guid = pendingMigrations[clientNum];
+
+  // store to database...
+
+  // migration successful
+  G_Printf("^3%s: [NEW_AUTH] ^7Client %i %s migration successful\n  Old GUID: "
+           "%s\n  New GUID: %s\n",
+           __func__, clientNum,
+           ETJump::sanitize(ent->client->pers.netname).c_str(), oldGuid.c_str(),
+           clients_[clientNum].guid.c_str());
+
+  // FIXME: this is ugly but likely not the final call chain,
+  //  this just avoids infinite loop by calling 'onAuthenticate' first,
+  //  before the pending migration is erased
+  const bool ret = onAuthenticate(ent);
+  pendingMigrations.erase(clientNum);
+  return ret;
+}
+
+// FIXME: I don't like this function name,
+//  it's ambiguous as it also authenticates the user
+void Session::removePendingMigration(gentity_t *ent) {
+  const int clientNum = ClientNum(ent);
+  G_Printf("^3%s: [NEW_AUTH] ^7Client %i %s migration failed, using new "
+           "identity with GUID %s\n",
+           __func__, clientNum,
+           ETJump::sanitize(ent->client->pers.netname).c_str(),
+           clients_[clientNum].guid.c_str());
+
+  // we have already parsed everything on initial auth request,
+  // so we can just perform on-auth stuff now
+  onAuthenticate(ent);
+  pendingMigrations.erase(clientNum);
+}
+#endif
 
 void Session::GetUserAndLevelData(int clientNum) {
   gentity_t *ent = g_entities + clientNum;
