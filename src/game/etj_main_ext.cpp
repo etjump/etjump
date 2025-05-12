@@ -54,8 +54,13 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
 
     G_DPrintf("Requesting guid from %d\n", clientNum);
 
+#ifdef NEW_AUTH
+    trap_SendServerCommand(clientNum,
+                           ETJump::Constants::Authentication::GUID_REQUEST);
+#else
     trap_SendServerCommand(
         clientNum, ETJump::Constants::Authentication::GUID_REQUEST.c_str());
+#endif
   } else {
     ETJump::session->ReadSessionData(clientNum);
     game.timerunV2->clientConnect(clientNum, ETJump::session->GetId(clientNum));
@@ -276,13 +281,39 @@ qboolean OnClientCommand(gentity_t *ent) {
 
   auto argv = GetArgs();
   auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
+  const int clientNum = ClientNum(ent);
 
+#ifdef NEW_AUTH
   if (command == ETJump::Constants::Authentication::AUTHENTICATE) {
-    ETJump::session->GuidReceived(ent);
-    game.timerunV2->clientConnect(ClientNum(ent),
-                                  ETJump::session->GetId(ClientNum(ent)));
+    if (ETJump::session->authenticate(ent)) {
+      game.timerunV2->clientConnect(clientNum,
+                                    ETJump::session->GetId(clientNum));
+    }
+
     return qtrue;
   }
+
+  if (command == ETJump::Constants::Authentication::GUID_MIGRATE) {
+    if (ETJump::session->migrateGuid(ent)) {
+      game.timerunV2->clientConnect(clientNum,
+                                    ETJump::session->GetId(clientNum));
+    }
+    return qtrue;
+  }
+
+  if (command == ETJump::Constants::Authentication::GUID_MIGRATE_FAIL) {
+    ETJump::session->removePendingMigration(ent);
+    return qtrue;
+  }
+
+#else
+  if (command == ETJump::Constants::Authentication::AUTHENTICATE) {
+    ETJump::session->GuidReceived(ent);
+    game.timerunV2->clientConnect(clientNum, ETJump::session->GetId(clientNum));
+
+    return qtrue;
+  }
+#endif
 
   return qfalse;
 }

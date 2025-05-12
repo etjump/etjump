@@ -27,6 +27,8 @@
 #include <string>
 #include <vector>
 #include <bitset>
+#include <unordered_map>
+
 #include "etj_local.h"
 #include "etj_levels.h"
 #include "etj_database.h"
@@ -56,6 +58,15 @@ public:
   void GetUserAndLevelData(int clientNum);
   bool GuidReceived(gentity_t *ent);
   void OnGuidReceived(gentity_t *ent);
+
+#ifdef NEW_AUTH
+  bool authenticate(gentity_t *ent);
+  bool onAuthenticate(gentity_t *ent);
+  bool migrateGuid(gentity_t *ent);
+  bool onMigrateGuid(gentity_t *ent);
+  void removePendingMigration(gentity_t *ent);
+#endif
+
   void PrintGreeting(gentity_t *ent);
   void OnClientDisconnect(int clientNum);
   std::string Guid(gentity_t *ent) const;
@@ -88,4 +99,9 @@ private:
   void UpdateLastSeen(int clientNum);
   Client clients_[MAX_CLIENTS];
   std::string message_;
+
+#ifdef NEW_AUTH
+  // clientNum, GUID
+  std::unordered_map<int, std::string> pendingMigrations;
+#endif
 };

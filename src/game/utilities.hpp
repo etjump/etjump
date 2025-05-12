@@ -37,6 +37,4 @@ std::string ValueForKey(gentity_t *ent, const std::string &key);
 std::string ValueForKey(int clientNum, const std::string &key);
 std::string TimeStampToString(int timeStamp);
 std::string TimeStampDifferenceToString(int diff);
-
-bool ValidGuid(const std::string &guid);
 #endif // g_utilities_h__

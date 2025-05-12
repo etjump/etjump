@@ -28,6 +28,7 @@
 
 namespace ETJump {
 namespace Constants {
+// these match the values that 'g_oss' uses
 inline constexpr int OS_DEFAULT = 0;              // unknown
 inline constexpr int OS_WIN_X86 = 1 << 0;         // Windows x86
 inline constexpr int OS_LINUX_X86 = 1 << 1;       // Linux x86
@@ -42,11 +43,21 @@ inline constexpr int OS_ANDROID_X86 = 1 << 9;     // Android x86
 inline constexpr int OS_ANDROID_X86_64 = 1 << 10; // Android x86_64
 
 namespace Authentication {
-const std::string GUID_REQUEST = "guid_request";
-
 #ifdef NEW_AUTH
+inline constexpr char GUID_REQUEST[] = "guid_request";
+inline constexpr char GUID_MIGRATE_REQUEST[] = "guid_migrate_request";
+
+inline constexpr char GUID_MIGRATE[] = "guid_migrate";
+inline constexpr char GUID_MIGRATE_FAIL[] = "guid_migrate_fail";
+
 inline constexpr char AUTHENTICATE[] = "auth";
+
+// not a big fan of this tbh but whatever, works
+inline constexpr size_t HWID_SIZE_WIN = 6;
+inline constexpr size_t HWID_SIZE_LINUX = 4;
+inline constexpr size_t HWID_SIZE_MAC = 1;
 #else
+const std::string GUID_REQUEST = "guid_request";
 const std::string AUTHENTICATE = "authenticate";
 #endif
 } // namespace Authentication

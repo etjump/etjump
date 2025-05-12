@@ -3554,6 +3554,9 @@ void trap_SendConsoleCommand(const char *text);
 void trap_AddCommand(const char *cmdName);
 
 // send a string to the server over the network
+// note: a single token in the command must not exceed 256 chars,
+// as that breaks on both ETL and ETe
+// TODO: we should assert this in debug
 void trap_SendClientCommand(const char *s);
 
 // force a screen update, only used during gamestate load

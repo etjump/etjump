@@ -34,6 +34,7 @@ extern "C" {
 namespace ETJump {
 class Crypto {
 public:
+  // returned hash is always uppercased
   static std::string sha1(const std::string &str) {
     SHA1Context sha{};
 
@@ -50,10 +51,37 @@ public:
                         sha.Message_Digest[3], sha.Message_Digest[4]);
   }
 
+  // returned hash is always uppercased
   static std::string sha2(const std::string &str) {
     std::string hash_hex_str;
     picosha2::hash256_hex_string(str, hash_hex_str);
-    return hash_hex_str;
+    return StringUtil::toUpperCase(hash_hex_str);
+  }
+
+  static bool isValidSHA1(const std::string &hash) {
+    return isValidHash(hash, SHA1_LEN);
+  }
+
+  static bool isValidSHA2(const std::string &hash) {
+    return isValidHash(hash, SHA2_LEN);
+  }
+
+private:
+  static constexpr size_t SHA1_LEN = 40;
+  static constexpr size_t SHA2_LEN = 64;
+
+  static bool isValidHash(const std::string &hash, const size_t len) {
+    if (hash.length() != len) {
+      return false;
+    }
+
+    for (const auto &c : hash) {
+      if (c < '0' || c > 'F') {
+        return false;
+      }
+    }
+
+    return true;
   }
 };
 } // namespace ETJump

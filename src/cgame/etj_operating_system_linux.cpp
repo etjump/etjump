@@ -55,6 +55,8 @@ std::vector<std::string> ETJump::OperatingSystem::getHwid() {
   hwid.emplace_back(getDiskInfo());
   hwid.emplace_back(getMachineID());
 
+  assert(hwid.size() == Constants::Authentication::HWID_SIZE_LINUX);
+
   return hwid;
 }
 
@@ -118,7 +120,7 @@ std::string ETJump::OperatingSystem::getMACAddress() {
   const std::string result = stringFormat(
       "%02X-%02X-%02X-%02X-%02X-%02X", mac_address[0], mac_address[1],
       mac_address[2], mac_address[3], mac_address[4], mac_address[5]);
-  return Crypto::sha1(result);
+  return Crypto::sha2(result);
 }
 
 std::string ETJump::OperatingSystem::getCPUInfo() {
@@ -187,7 +189,7 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
 
   const std::string cpuID = stringFormat("%s %u %u %s %u", vendor, cpuFamily,
                                          model, vendorExt, stepping);
-  return Crypto::sha1(cpuID);
+  return Crypto::sha2(cpuID);
 }
 
 std::string ETJump::OperatingSystem::getMachineID() {
@@ -204,7 +206,7 @@ std::string ETJump::OperatingSystem::getMachineID() {
     return NOHWID;
   }
 
-  return Crypto::sha1(id);
+  return Crypto::sha2(id);
 }
 
 std::string ETJump::OperatingSystem::getDiskInfo() {
@@ -271,7 +273,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   }
 
   diskID = trim(diskID);
-  return Crypto::sha1(diskID);
+  return Crypto::sha2(diskID);
 }
 
 int ETJump::OperatingSystem::getOS() {

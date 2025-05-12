@@ -193,21 +193,6 @@ std::string TimeStampDifferenceToString(int diff) {
   }
 }
 
-// this is really just a SHA-1 validation...
-bool ValidGuid(const std::string &guid) {
-  constexpr unsigned GUID_SIZE = 40;
-  if (guid.size() != GUID_SIZE) {
-    return false;
-  }
-
-  for (size_t i = 0; i < guid.size(); i++) {
-    if (guid[i] < '0' || guid[i] > 'F') {
-      return false;
-    }
-  }
-  return true;
-}
-
 const char *EscapeString(const char *in) {
   string str = in;
   ETJump::StringUtil::replaceAll(str, "=", "\x19=");
