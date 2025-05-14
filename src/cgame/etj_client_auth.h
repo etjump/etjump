@@ -35,25 +35,23 @@ public:
   ~ClientAuth();
 
 private:
+  static constexpr char GUID_FILE_OLD[] = "etguid.dat";
+  static constexpr char AUTH_FILE[] = "auth/auth.dat";
+
   enum class GUIDVersion {
     GUID_V1 = 1,
     GUID_V2 = 2,
   };
 
-  void login();
-  void sendAuthResponse(int os, const std::string &guid,
-                        const std::vector<std::string> &hwid);
+  void guidResponse();
+  void migrationResponse();
 
-  int getOS();
-
-  // if version is V1 and no GUID file is found, returns an empty string
   std::string getGuid(GUIDVersion version);
-  std::string getGuidFileName(GUIDVersion version);
+  int getOS();
   std::vector<std::string> getHwid();
 
-  std::string createGuid();
-  void saveGuid(const std::string &contents);
-  void migrateGuid();
+  void createAuthFile();
+  void migrateOldGuid();
 };
 } // namespace ETJump
 #endif

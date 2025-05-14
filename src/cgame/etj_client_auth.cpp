@@ -31,27 +31,30 @@
 
   #include "../game/etj_shared.h"
   #include "../game/etj_file.h"
+  #include "../game/etj_filesystem.h"
   #include "../game/etj_string_utilities.h"
+  #include "../game/etj_json_utilities.h"
 
-  #include <iostream>
   #include <uuid4.h>
 
 namespace ETJump {
-inline constexpr char GUID_FILE_V1[] = "etguid.dat";
-inline constexpr char GUID_FILE_V2[] = "auth/guid.dat";
-
-inline constexpr char GUID_PREFIX_V1[] = "[V1]";
-inline constexpr char GUID_PREFIX_V2[] = "[V2]";
-inline constexpr size_t GUID_PREFIX_LEN = 4;
-
 ClientAuth::ClientAuth() {
   serverCommandsHandler->subscribe(
       Constants::Authentication::GUID_REQUEST,
-      [&](const std::vector<std::string> &) { login(); });
+      [&](const std::vector<std::string> &) { guidResponse(); });
 
   serverCommandsHandler->subscribe(
       Constants::Authentication::GUID_MIGRATE_REQUEST,
-      [&](const std::vector<std::string> &) { migrateGuid(); });
+      [&](const std::vector<std::string> &) { migrationResponse(); });
+
+  if (!FileSystem::exists(AUTH_FILE)) {
+    createAuthFile();
+  }
+
+  if (FileSystem::exists(GUID_FILE_OLD) &&
+      getGuid(GUIDVersion::GUID_V1).empty()) {
+    migrateOldGuid();
+  }
 }
 
 ClientAuth::~ClientAuth() {
@@ -60,85 +63,15 @@ ClientAuth::~ClientAuth() {
       Constants::Authentication::GUID_MIGRATE_REQUEST);
 }
 
-void ClientAuth::login() {
-  const int os = getOS();
+void ClientAuth::guidResponse() {
   const std::string guid = getGuid(GUIDVersion::GUID_V2);
+  const int os = getOS();
   const std::vector<std::string> hwid = getHwid();
 
-  sendAuthResponse(os, guid, hwid);
-}
-
-void ClientAuth::sendAuthResponse(int os, const std::string &guid,
-                                  const std::vector<std::string> &hwid) {
   const std::string authMsg =
       stringFormat("%s %s %i %s", Constants::Authentication::AUTHENTICATE,
                    Crypto::sha2(guid), os, StringUtil::join(hwid, " "));
   trap_SendClientCommand(authMsg.c_str());
-}
-
-int ClientAuth::getOS() { return OperatingSystem::getOS(); }
-
-std::string ClientAuth::getGuid(const GUIDVersion version) {
-  std::vector<char> contents;
-
-  try {
-    const File guidFile(getGuidFileName(version));
-    contents = guidFile.read();
-  } catch (const File::FileIOException &) {
-    return version == GUIDVersion::GUID_V2 ? createGuid() : "";
-  }
-
-  // never create old GUID files anymore
-  if (version == GUIDVersion::GUID_V1) {
-    return {contents.begin(), contents.end()};
-  }
-
-  const auto guids =
-      StringUtil::split({contents.cbegin(), contents.cend()}, "\n");
-
-  for (const auto &guid : guids) {
-    if (StringUtil::startsWith(guid, GUID_PREFIX_V2)) {
-      return guid.substr(GUID_PREFIX_LEN, guid.length() - GUID_PREFIX_LEN);
-    }
-  }
-
-  return createGuid();
-}
-
-std::vector<std::string> ClientAuth::getHwid() {
-  return OperatingSystem::getHwid();
-}
-
-void ClientAuth::saveGuid(const std::string &contents) {
-  try {
-    const File guidFile(GUID_FILE_V2, File::Mode::Write);
-    guidFile.write(contents);
-  } catch (const File::FileIOException &e) {
-    CG_Printf(S_COLOR_YELLOW
-              "WARNING: failed to save GUID: %s\nUsing temporary GUID.\n",
-              e.what());
-  }
-}
-
-std::string ClientAuth::createGuid() {
-  std::string contents;
-  const std::string oldGuid = getGuid(GUIDVersion::GUID_V1);
-
-  if (oldGuid.empty()) {
-    contents += std::string(GUID_PREFIX_V1) + "NOGUID\n";
-  } else {
-    contents += GUID_PREFIX_V1 + oldGuid + '\n';
-  }
-
-  char buf[UUID4_LEN]{};
-  uuid4_init();
-  uuid4_generate(buf);
-  const std::string guid = StringUtil::toUpperCase(buf);
-
-  contents += GUID_PREFIX_V2 + guid;
-  saveGuid(contents);
-
-  return guid;
 }
 
 /*
@@ -152,17 +85,10 @@ std::string ClientAuth::createGuid() {
  *  To mitigate this, a client should be able to use a command to perform
  *  a migration on-demand, so migration can be done after the client
  *  has already visited a server once.
- *
- *  TODO: Additionally, we should probably migrate the old GUID value into
- *   the new GUID file in the above scenario, right now if the above happens,
- *   the old GUID in the new file will just stay as '[V1]NOGUID' even if
- *   the old file is later added.
  */
-void ClientAuth::migrateGuid() {
+void ClientAuth::migrationResponse() {
   const std::string oldGuid = getGuid(GUIDVersion::GUID_V1);
 
-  // TODO: check if new GUID file contains the old GUID
-  //  and migrate using that if found
   if (oldGuid.empty()) {
     trap_SendClientCommand(Constants::Authentication::GUID_MIGRATE_FAIL);
   } else {
@@ -171,8 +97,84 @@ void ClientAuth::migrateGuid() {
   }
 }
 
-std::string ClientAuth::getGuidFileName(const GUIDVersion version) {
-  return version == GUIDVersion::GUID_V2 ? GUID_FILE_V2 : GUID_FILE_V1;
+int ClientAuth::getOS() { return OperatingSystem::getOS(); }
+
+std::vector<std::string> ClientAuth::getHwid() {
+  return OperatingSystem::getHwid();
+}
+
+std::string ClientAuth::getGuid(const GUIDVersion version) {
+  Json::Value root;
+  std::string err;
+
+  if (!JsonUtils::readFile(AUTH_FILE, root, &err)) {
+    CG_Printf("Unable to get GUID: %s\n", err.c_str());
+
+    // we're not using a temporary GUID if we're trying to get old GUID
+    if (version == GUIDVersion::GUID_V2) {
+      CG_Printf("Using temporary GUID.\n");
+    }
+
+    return "";
+  }
+
+  std::string guid = version == GUIDVersion::GUID_V2
+                         ? root["GUID"]["v2"].asString()
+                         : root["GUID"]["v1"].asString();
+  return guid;
+}
+
+void ClientAuth::createAuthFile() {
+  Json::Value root;
+  Json::Value guidArray;
+
+  char buf[UUID4_LEN]{};
+  uuid4_init();
+  uuid4_generate(buf);
+
+  // we don't know if the old GUID exists yet, so leave this empty
+  guidArray["v1"] = "";
+  guidArray["v2"] = StringUtil::toUpperCase(buf);
+
+  root["GUID"] = guidArray;
+
+  std::string err;
+
+  if (!JsonUtils::writeFile(AUTH_FILE, root, &err)) {
+    CG_Printf("%s\nUsing temporary GUID.\n", err.c_str());
+  }
+}
+
+void ClientAuth::migrateOldGuid() {
+  std::vector<char> contents{};
+  const std::string failMsg = "Unable to migrate old GUID to a new file:\n%s\n";
+
+  try {
+    const File guidFile(GUID_FILE_OLD);
+    contents = guidFile.read();
+  } catch (const File::FileIOException &e) {
+    CG_Printf(failMsg.c_str(), e.what());
+    return;
+  }
+
+  if (contents.empty()) {
+    CG_Printf(failMsg.c_str(), "Empty GUID file.");
+    return;
+  }
+
+  Json::Value root;
+  std::string err;
+
+  if (!JsonUtils::readFile(AUTH_FILE, root, &err)) {
+    CG_Printf(failMsg.c_str(), err.c_str());
+    return;
+  }
+
+  root["GUID"]["v1"] = std::string(contents.begin(), contents.end());
+
+  if (!JsonUtils::writeFile(AUTH_FILE, root, &err)) {
+    CG_Printf(failMsg.c_str(), err.c_str());
+  }
 }
 } // namespace ETJump
 #endif
