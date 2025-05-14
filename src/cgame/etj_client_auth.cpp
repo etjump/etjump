@@ -47,6 +47,16 @@ ClientAuth::ClientAuth() {
       Constants::Authentication::GUID_MIGRATE_REQUEST,
       [&](const std::vector<std::string> &) { migrationResponse(); });
 
+  consoleCommandsHandler->subscribe(
+      "migrateGuid", [&](const std::vector<std::string> &args) {
+        if (!args.empty() && (args[0] == "-f" || args[0] == "--force")) {
+          manualMigration(
+              Constants::Authentication::MigrationType::MANUAL_FORCE);
+        } else {
+          manualMigration(Constants::Authentication::MigrationType::MANUAL);
+        }
+      });
+
   if (!FileSystem::exists(AUTH_FILE)) {
     createAuthFile();
   }
@@ -74,26 +84,60 @@ void ClientAuth::guidResponse() {
   trap_SendClientCommand(authMsg.c_str());
 }
 
-/*
- * TODO: we might want to have a way to perform this manually.
- *  Consider the following scenario: a user has reinstalled ET, and has their
- *  'etguid.dat' backed up. However, they forget to put the file into etjump
- *  directory before connecting to a server, so a migration attempt will fail.
- *  The server now has their new GUID in the database, and future connections
- *  will authenticate using the new GUID, meaning it's now impossible to
- *  restore identity using the old GUID without manual intervention from server.
- *  To mitigate this, a client should be able to use a command to perform
- *  a migration on-demand, so migration can be done after the client
- *  has already visited a server once.
- */
 void ClientAuth::migrationResponse() {
   const std::string oldGuid = getGuid(GUIDVersion::GUID_V1);
 
   if (oldGuid.empty()) {
     trap_SendClientCommand(Constants::Authentication::GUID_MIGRATE_FAIL);
   } else {
-    trap_SendClientCommand(va("%s %s", Constants::Authentication::GUID_MIGRATE,
-                              Crypto::sha1(oldGuid).c_str()));
+    trap_SendClientCommand(
+        va("%s %s %i", Constants::Authentication::GUID_MIGRATE,
+           Crypto::sha1(oldGuid).c_str(),
+           static_cast<int>(Constants::Authentication::MigrationType::AUTO)));
+  }
+}
+
+void ClientAuth::manualMigration(
+    const Constants::Authentication::MigrationType type) {
+  if (!FileSystem::exists(GUID_FILE_OLD)) {
+    CG_Printf("Old GUID file not found. Make sure ^3'%s' ^7is present in "
+              "^3'etjump' ^7directory.\n",
+              GUID_FILE_OLD);
+    return;
+  }
+
+  // user manually deleted their auth file on runtime...
+  if (!FileSystem::exists(AUTH_FILE)) {
+    CG_Printf(
+        "Authentication file ^3'etjump/%s' ^7not found. Make sure the file "
+        "exists, or reconnect to create a new one.\n",
+        AUTH_FILE);
+    return;
+  }
+
+  std::string oldGuid = getGuid(GUIDVersion::GUID_V1);
+
+  // normally the GUID shouldn't be empty here since we auto-migrate on init,
+  // but it can happen in two scenarios:
+  // 1. the old GUID wasn't present on init, but the user later dropped in
+  //    the file to 'etjump' directory during runtime
+  // 2. the user manually edited the auth file and erased the old GUID string
+  if (!oldGuid.empty()) {
+    trap_SendClientCommand(
+        va("%s %s %i", Constants::Authentication::GUID_MIGRATE,
+           Crypto::sha1(oldGuid).c_str(), static_cast<int>(type)));
+  } else {
+    migrateOldGuid();
+    oldGuid = getGuid(GUIDVersion::GUID_V1);
+
+    // parsing failed
+    if (oldGuid.empty()) {
+      CG_Printf("Failed to perform GUID migration.\n");
+    } else {
+      trap_SendClientCommand(
+          va("%s %s %i", Constants::Authentication::GUID_MIGRATE,
+             Crypto::sha1(oldGuid).c_str(), static_cast<int>(type)));
+    }
   }
 }
 

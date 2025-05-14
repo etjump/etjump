@@ -28,6 +28,8 @@
   #include <vector>
   #include <string>
 
+  #include "../game/etj_shared.h"
+
 namespace ETJump {
 class ClientAuth {
 public:
@@ -43,15 +45,16 @@ private:
     GUID_V2 = 2,
   };
 
-  void guidResponse();
-  void migrationResponse();
+  static void guidResponse();
+  static void migrationResponse();
+  static void manualMigration(Constants::Authentication::MigrationType type);
 
-  std::string getGuid(GUIDVersion version);
-  int getOS();
-  std::vector<std::string> getHwid();
+  static std::string getGuid(GUIDVersion version);
+  static int getOS();
+  static std::vector<std::string> getHwid();
 
-  void createAuthFile();
-  void migrateOldGuid();
+  static void createAuthFile();
+  static void migrateOldGuid();
 };
 } // namespace ETJump
 #endif
