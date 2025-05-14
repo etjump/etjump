@@ -44,6 +44,14 @@ inline constexpr int OS_ANDROID_X86_64 = 1 << 10; // Android x86_64
 
 namespace Authentication {
 #ifdef NEW_AUTH
+enum class MigrationType {
+  AUTO = 0,
+  MANUAL = 1,
+  // forces the server to perform migration again even if
+  // the user database contains old GUID for the client
+  MANUAL_FORCE = 2,
+};
+
 inline constexpr char GUID_REQUEST[] = "guid_request";
 inline constexpr char GUID_MIGRATE_REQUEST[] = "guid_migrate_request";
 

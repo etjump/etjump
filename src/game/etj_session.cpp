@@ -300,30 +300,51 @@ bool Session::onAuthenticate(gentity_t *ent) {
   return true;
 }
 
-// 'guid_migrate <oldGuid>'
+// 'guid_migrate <oldGuid> <manual>'
 bool Session::migrateGuid(gentity_t *ent) {
   const int argc = trap_Argc();
-  constexpr int NUM_EXPECTED_ARGS = 2;
+  constexpr int NUM_EXPECTED_ARGS = 3;
+  const int clientNum = ClientNum(ent);
+  const std::string cleanName = ETJump::sanitize(ent->client->pers.netname);
   const std::string spoofAttempt = ETJump::stringFormat(
       "authentication: Potential GUID migration spoof attempt by %i %s (%s)",
-      ClientNum(ent), ETJump::sanitize(ent->client->pers.netname),
-      ClientIPAddr(ent));
+      clientNum, cleanName.c_str(), ClientIPAddr(ent));
 
   if (argc != NUM_EXPECTED_ARGS) {
     Printer::logAdminLn(spoofAttempt);
     return false;
   }
 
-  char buf[MAX_TOKEN_CHARS]{};
-  trap_Argv(1, buf, sizeof(buf));
+  char guidBuf[MAX_TOKEN_CHARS]{};
+  trap_Argv(1, guidBuf, sizeof(guidBuf));
 
-  if (!ETJump::Crypto::isValidSHA1(buf)) {
+  if (!ETJump::Crypto::isValidSHA1(guidBuf)) {
     Printer::logAdminLn(spoofAttempt);
     return false;
   }
 
-  // set temporarily so we can migrate
-  clients_[ClientNum(ent)].guid = ETJump::Crypto::sha1(buf);
+  char typeBuf[2]{};
+  trap_Argv(2, typeBuf, sizeof(typeBuf));
+  const auto migrationType =
+      static_cast<ETJump::Constants::Authentication::MigrationType>(
+          Q_atoi(typeBuf));
+
+  // for manual migrations, add a pending migration for our current guid
+  if (migrationType != ETJump::Constants::Authentication::MigrationType::AUTO) {
+    if (migrationType !=
+        ETJump::Constants::Authentication::MigrationType::MANUAL_FORCE) {
+      // TODO: check if migration needs to happen at all
+      //  (are both GUIDs present in the database already?)
+      //  this can be bypassed by the client with 'migrateGuid -f'
+    }
+
+    pendingMigrations[clientNum] = clients_[clientNum].guid;
+    G_Printf(
+        "^3%s: [NEW AUTH] ^7Performing manual migration for client %i %s\n",
+        __func__, clientNum, cleanName.c_str());
+  }
+
+  clients_[ClientNum(ent)].guid = ETJump::Crypto::sha1(guidBuf);
 
   return onMigrateGuid(ent);
 }
