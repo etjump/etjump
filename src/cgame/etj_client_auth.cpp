@@ -38,6 +38,8 @@
   #include <uuid4.h>
 
 namespace ETJump {
+inline constexpr char MIGRATE_CMD[] = "migrateGuid";
+
 ClientAuth::ClientAuth() {
   serverCommandsHandler->subscribe(
       Constants::Authentication::GUID_REQUEST,
@@ -48,7 +50,7 @@ ClientAuth::ClientAuth() {
       [&](const std::vector<std::string> &) { migrationResponse(); });
 
   consoleCommandsHandler->subscribe(
-      "migrateGuid", [&](const std::vector<std::string> &args) {
+      MIGRATE_CMD, [&](const std::vector<std::string> &args) {
         if (!args.empty() && (args[0] == "-f" || args[0] == "--force")) {
           manualMigration(
               Constants::Authentication::MigrationType::MANUAL_FORCE);
@@ -71,6 +73,7 @@ ClientAuth::~ClientAuth() {
   serverCommandsHandler->unsubscribe(Constants::Authentication::GUID_REQUEST);
   serverCommandsHandler->unsubscribe(
       Constants::Authentication::GUID_MIGRATE_REQUEST);
+  consoleCommandsHandler->unsubscribe(MIGRATE_CMD);
 }
 
 void ClientAuth::guidResponse() {
