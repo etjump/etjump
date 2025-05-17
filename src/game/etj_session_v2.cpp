@@ -22,42 +22,25 @@
  * SOFTWARE.
  */
 
-#pragma once
+#ifdef NEW_AUTH
 
-#include <memory>
+  #include "etj_session_v2.h"
 
 namespace ETJump {
-class TimerunV2;
-class RockTheVote;
-class Tokens;
-class ChatReplay;
-class Motd;
-class CustomMapVotes;
-class MapStatistics;
+SessionV2::SessionV2(
+    std::unique_ptr<UserRepository> userRepository, std::unique_ptr<Log> log,
+    std::unique_ptr<SynchronizationContext> synchronizationContext)
+    : repository(std::move(userRepository)), logger(std::move(log)),
+      sc(std::move(synchronizationContext)) {
+  sc->startWorkerThreads(1);
+}
 
-#ifdef NEW_AUTH
-class SessionV2;
-#endif
+SessionV2::~SessionV2() {
+  repository = nullptr;
+  logger = nullptr;
+  sc->stopWorkerThreads();
+  sc = nullptr;
+}
 } // namespace ETJump
 
-class Levels;
-class Commands;
-
-struct Game {
-  Game() = default;
-
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<ETJump::MapStatistics> mapStatistics;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
-
-  std::unique_ptr<ETJump::CustomMapVotes> customMapVotes;
-  std::unique_ptr<ETJump::Motd> motd;
-  std::unique_ptr<ETJump::Tokens> tokens;
-  std::unique_ptr<ETJump::ChatReplay> chatReplay;
-
-  #ifdef NEW_AUTH
-  std::unique_ptr<ETJump::SessionV2> sessionV2;
-  #endif
-};
+#endif

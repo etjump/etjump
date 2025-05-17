@@ -24,40 +24,58 @@
 
 #pragma once
 
-#include <memory>
-
-namespace ETJump {
-class TimerunV2;
-class RockTheVote;
-class Tokens;
-class ChatReplay;
-class Motd;
-class CustomMapVotes;
-class MapStatistics;
-
 #ifdef NEW_AUTH
-class SessionV2;
-#endif
-} // namespace ETJump
-
-class Levels;
-class Commands;
-
-struct Game {
-  Game() = default;
-
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<ETJump::MapStatistics> mapStatistics;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
-
-  std::unique_ptr<ETJump::CustomMapVotes> customMapVotes;
-  std::unique_ptr<ETJump::Motd> motd;
-  std::unique_ptr<ETJump::Tokens> tokens;
-  std::unique_ptr<ETJump::ChatReplay> chatReplay;
-
-  #ifdef NEW_AUTH
-  std::unique_ptr<ETJump::SessionV2> sessionV2;
-  #endif
+namespace ETJump::UserModels {
+struct User {
+  int id;
+  std::string name;
+  std::string guid;
+  std::string ipv4;
+  std::string ipv6;
+  int level;
+  int64_t lastSeen;
+  std::string title;
+  std::string commands;
+  std::string greeting;
 };
+
+struct Name {
+  std::string name;
+  std::string cleanName;
+  int userID;
+};
+
+struct UserHWID {
+  int userID;
+  int platform;
+  std::string hwid;
+};
+
+struct Ban {
+  int banID;
+  std::string name;
+  std::string bannedBy;
+  std::string banDate;
+  int64_t expires;
+  std::string reason;
+  int parentBanID;
+  std::string guid;
+  std::string ipv4;
+  std::string ipv6;
+  std::string legacyGUID;
+  std::string legacyHWID;
+};
+
+struct HWIDBan {
+  int banID;
+  int platform;
+  std::string hwid;
+};
+
+struct LegacyAuth {
+  int userID;
+  std::string guid;
+  std::string hwid;
+};
+} // namespace ETJump::UserModels
+#endif

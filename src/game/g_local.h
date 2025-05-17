@@ -2089,6 +2089,9 @@ extern vmCvar_t g_blockedMaps;
 
 extern vmCvar_t g_adminLog;
 extern vmCvar_t g_userConfig;
+#ifdef NEW_AUTH
+extern vmCvar_t g_userDatabaseV2;
+#endif
 extern vmCvar_t g_levelConfig;
 
 extern vmCvar_t g_bannerLocation;
