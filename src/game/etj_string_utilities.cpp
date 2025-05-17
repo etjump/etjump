@@ -86,34 +86,24 @@ std::string ETJump::getBestMatch(const std::vector<std::string> &words,
   return smallest->first;
 }
 
-static void SanitizeConstString(const char *in, char *out, const bool toLower,
-                                const bool removeEscapeChars) {
-  while (*in) {
-    if (*in == 27 || *in == '^') {
-      in++; // skip color code
-      if (*in) {
-        in++;
-      }
+std::string ETJump::sanitize(const std::string &text, const bool toLower,
+                             const bool removeControlChars) {
+  std::string out;
+
+  for (size_t i = 0; i < text.length(); ++i) {
+    if (StringUtil::isColorString(text, i)) {
+      i++;
       continue;
     }
 
-    if (removeEscapeChars && *in < 32) {
-      in++;
+    if (removeControlChars && text[i] < 32) {
       continue;
     }
 
-    *out++ = toLower ? static_cast<char>(tolower(*in++)) : *in++;
+    out += toLower ? static_cast<char>(std::tolower(text[i])) : text[i];
   }
 
-  *out = 0;
-}
-
-std::string ETJump::sanitize(const std::string &text, const bool toLower,
-                             const bool removeEscapeChars) {
-  const size_t len = text.length();
-  std::vector<char> out(len + 1);
-  SanitizeConstString(text.c_str(), out.data(), toLower, removeEscapeChars);
-  return {out.data()};
+  return out;
 }
 
 std::string ETJump::getValue(const char *value,
@@ -377,19 +367,18 @@ void ETJump::StringUtil::removeLeadingChars(std::string &str,
   }
 }
 
+bool ETJump::StringUtil::isColorString(const std::string &str,
+                                       const size_t idx) {
+  return str[idx] == '^' &&
+         static_cast<size_t>(str[idx + 1]) != std::string::npos &&
+         str[idx + 1] != '^';
+}
+
 std::string ETJump::StringUtil::truncate(const std::string &str,
                                          const size_t len) {
-  // TODO: check for stripped string length here too, once sanitize() is fixed
-  //  https://github.com/etjump/etjump/issues/1684
-  if (str.empty()) {
+  if (str.empty() || str.length() <= len || sanitize(str).length() <= len) {
     return str;
   }
-
-  const auto isColorString = [&](const std::string &s, const size_t idx) {
-    return s[idx] == '^' &&
-           static_cast<size_t>(s[idx + 1]) != std::string::npos &&
-           s[idx + 1] != '^';
-  };
 
   size_t outLen = len;
   size_t idx = 0;

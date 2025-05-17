@@ -317,3 +317,31 @@ TEST_F(StringUtilitiesTests, truncate_MultipleCarets) {
   ASSERT_EQ(StringUtil::truncate(in, 7), "^^1test^^");
   ASSERT_EQ(StringUtil::truncate(in, 9), "^^1test^^^2te");
 }
+
+TEST_F(StringUtilitiesTests, sanitize_basicSanitize) {
+  ASSERT_EQ(sanitize("^1test ^2test"), "test test");
+  ASSERT_EQ(sanitize("test TEST"), "test TEST");
+  ASSERT_EQ(sanitize("test^1 TEST"), "test TEST");
+  ASSERT_EQ(sanitize("test test^1"), "test test");
+}
+
+TEST_F(StringUtilitiesTests, sanitize_lowercasesCorrectly) {
+  ASSERT_EQ(sanitize("^1TEST ^2test", true), "test test");
+  ASSERT_EQ(sanitize("Test TEST", true), "test test");
+  ASSERT_EQ(sanitize("TEST^1 teST", true), "test test");
+  ASSERT_EQ(sanitize("TEST TeSt^1", true), "test test");
+}
+
+TEST_F(StringUtilitiesTests, sanitize_handlesControlCharacters) {
+  const std::string in = "^1te\x19=st ^2TEST";
+
+  ASSERT_EQ(sanitize(in), "te=st TEST");
+  ASSERT_EQ(sanitize(in, true, false), "te\x19=st test");
+}
+
+TEST_F(StringUtilitiesTests, sanitize_multipleCarets) {
+  const std::string in = "^^1test ^^^2TEST";
+
+  ASSERT_EQ(sanitize(in), "^test ^^TEST");
+  ASSERT_EQ(sanitize(in, true), "^test ^^test");
+}
