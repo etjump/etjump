@@ -2370,7 +2370,7 @@ bool RockTheVote(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-// ensures custom vote command options are not just color codes
+// ensures custom vote command options are valid
 bool validateCustomVoteCommand(const std::string &cmdName, const int &clientNum,
                                const ETJump::CommandParser::Command &command) {
   bool commandOk = true;
@@ -2380,6 +2380,14 @@ bool validateCustomVoteCommand(const std::string &cmdName, const int &clientNum,
       Printer::chat(clientNum,
                     ETJump::stringFormat("^3%s: ^7'%s' cannot be empty.",
                                          cmdName, op.first));
+      commandOk = false;
+    }
+
+    if (op.first == "name" && !ETJump::isValidVoteString(op.second.text)) {
+      Printer::chat(
+          clientNum,
+          ETJump::stringFormat("^3%s: ^7%s '%s' contains invalid characters.",
+                               cmdName, op.first, op.second.text));
       commandOk = false;
     }
   }
