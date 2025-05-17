@@ -42,6 +42,10 @@
 #include "etj_filesystem.h"
 #include "etj_printer.h"
 
+#ifdef NEW_AUTH
+#include "etj_session_v2.h"
+#endif
+
 Game game;
 
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
@@ -182,6 +186,24 @@ void OnGameInit() {
                   g_userConfig.string);
     }
   }
+
+  #ifdef NEW_AUTH
+  try {
+    game.sessionV2 = std::make_unique<ETJump::SessionV2>(
+        std::make_unique<ETJump::UserRepository>(
+            std::make_unique<ETJump::DatabaseV2>(
+                "usersv2",
+                ETJump::FileSystem::Path::getPath(g_userDatabaseV2.string)),
+            std::make_unique<ETJump::DatabaseV2>(
+                "usersv1",
+                ETJump::FileSystem::Path::getPath(g_userConfig.string))),
+        std::make_unique<ETJump::Log>("usersv2"),
+        std::make_unique<ETJump::SynchronizationContext>());
+  } catch (const std::exception &e) {
+    // we really shouldn't let servers run at all if userdb is kaput
+    G_Error("Failed to initialize user database: %s\n", e.what());
+  }
+  #endif
 
   game.timerunV2 = std::make_shared<ETJump::TimerunV2>(
       level.rawmapname,

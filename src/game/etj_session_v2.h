@@ -24,40 +24,26 @@
 
 #pragma once
 
-#include <memory>
+#ifdef NEW_AUTH
+  #include <memory>
+
+  #include "etj_user_repository.h"
+  #include "etj_log.h"
+  #include "etj_synchronization_context.h"
 
 namespace ETJump {
-class TimerunV2;
-class RockTheVote;
-class Tokens;
-class ChatReplay;
-class Motd;
-class CustomMapVotes;
-class MapStatistics;
+class SessionV2 {
+public:
+  SessionV2(std::unique_ptr<UserRepository> userRepository,
+            std::unique_ptr<Log> log,
+            std::unique_ptr<SynchronizationContext> synchronizationContext);
+  ~SessionV2();
 
-#ifdef NEW_AUTH
-class SessionV2;
-#endif
+private:
+  std::unique_ptr<UserRepository> repository;
+  std::unique_ptr<Log> logger;
+  std::unique_ptr<SynchronizationContext> sc;
+};
 } // namespace ETJump
 
-class Levels;
-class Commands;
-
-struct Game {
-  Game() = default;
-
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<ETJump::MapStatistics> mapStatistics;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
-
-  std::unique_ptr<ETJump::CustomMapVotes> customMapVotes;
-  std::unique_ptr<ETJump::Motd> motd;
-  std::unique_ptr<ETJump::Tokens> tokens;
-  std::unique_ptr<ETJump::ChatReplay> chatReplay;
-
-  #ifdef NEW_AUTH
-  std::unique_ptr<ETJump::SessionV2> sessionV2;
-  #endif
-};
+#endif

@@ -80,6 +80,7 @@ add_library(qagame MODULE
 	"etj_savepos_command_handler.cpp"
 	"etj_savepos_shared.cpp"
 	"etj_session.cpp"
+	"etj_session_v2.cpp"
 	"etj_syscall_ext_shared.cpp"
 	"etj_synchronization_context.cpp"
 	"etj_string_utilities.cpp"
@@ -94,6 +95,7 @@ add_library(qagame MODULE
 	"etj_tokens.cpp"
 	"etj_trigger_teleport_client.cpp"
 	"etj_user.cpp"
+	"etj_user_repository.cpp"
 	"etj_utilities.cpp"
 	${GAME_HEADERS}
 )

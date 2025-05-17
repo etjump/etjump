@@ -37,7 +37,7 @@ namespace ETJump {
 std::shared_ptr<DeathrunSystem> deathrunSystem;
 std::shared_ptr<SaveSystem> saveSystem;
 std::shared_ptr<Database> database;
-std::shared_ptr<Session> session;
+std::shared_ptr<Session> session; // TODO: replace with v2
 std::shared_ptr<ProgressionTrackers> progressionTrackers;
 std::unique_ptr<SyscallExt> syscallExt;
 } // namespace ETJump
@@ -205,7 +205,10 @@ vmCvar_t g_allowSpeclock;
 
 // ETJump admin system
 
-vmCvar_t g_userConfig;
+vmCvar_t g_userConfig; // TODO: rename this?
+#ifdef NEW_AUTH
+vmCvar_t g_userDatabaseV2;
+#endif
 vmCvar_t g_levelConfig;
 vmCvar_t g_adminLog;
 
@@ -463,6 +466,9 @@ cvarTable_t gameCvarTable[] = {
 
     {&g_adminLog, "g_adminLog", "adminsystem.log", CVAR_ARCHIVE},
     {&g_userConfig, "g_userConfig", "users.db", CVAR_ARCHIVE},
+#ifdef NEW_AUTH
+    {&g_userDatabaseV2, "g_userDatabaseV2", "users.v2.db", CVAR_ARCHIVE},
+  #endif
     {&g_levelConfig, "g_levelConfig", "levels.cfg", CVAR_ARCHIVE},
 
     // BannerPrint location

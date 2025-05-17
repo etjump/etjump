@@ -24,40 +24,36 @@
 
 #pragma once
 
-#include <memory>
+#ifdef NEW_AUTH
+  #include "etj_database_v2.h"
+  #include "etj_user_models.h"
+
+  #include <memory>
 
 namespace ETJump {
-class TimerunV2;
-class RockTheVote;
-class Tokens;
-class ChatReplay;
-class Motd;
-class CustomMapVotes;
-class MapStatistics;
+class UserRepository {
+public:
+  UserRepository(std::unique_ptr<DatabaseV2> database,
+                 std::unique_ptr<DatabaseV2> oldDatabase);
+  ~UserRepository();
 
-#ifdef NEW_AUTH
-class SessionV2;
-#endif
-} // namespace ETJump
+  void insertUser(const UserModels::User &user) const;
+  void insertName(const UserModels::Name &name) const;
+  void insertBan(const UserModels::Ban &ban) const;
 
-class Levels;
-class Commands;
+private:
+  void migrate() const;
+  void migrateUsers() const;
+  void migrateNames() const;
+  void migrateBans() const;
 
-struct Game {
-  Game() = default;
+  void insertLegacyAuth(const UserModels::LegacyAuth &auth) const;
 
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<ETJump::MapStatistics> mapStatistics;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
+  bool oldTableHasData(const std::string &table) const;
+  static std::vector<std::string> createInitialMigration();
 
-  std::unique_ptr<ETJump::CustomMapVotes> customMapVotes;
-  std::unique_ptr<ETJump::Motd> motd;
-  std::unique_ptr<ETJump::Tokens> tokens;
-  std::unique_ptr<ETJump::ChatReplay> chatReplay;
-
-  #ifdef NEW_AUTH
-  std::unique_ptr<ETJump::SessionV2> sessionV2;
-  #endif
+  std::unique_ptr<DatabaseV2> db;
+  std::unique_ptr<DatabaseV2> oldDb;
 };
+} // namespace ETJump
+#endif
