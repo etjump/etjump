@@ -34,7 +34,7 @@ std::string hash(const std::string &input);
 std::string getBestMatch(const std::vector<std::string> &words,
                          const std::string &current);
 std::string sanitize(const std::string &text, bool toLower = false,
-                     bool removeEscapeChars = true);
+                     bool removeControlChars = true);
 // returns the value if it's specified, else the default value
 std::string getValue(const char *value, const std::string &defaultValue = "");
 std::string getValue(const std::string &value,
@@ -123,6 +123,10 @@ void removeTrailingChars(std::string &str, char charToRemove);
 
 // if input contains only chars to remove, result is empty string
 void removeLeadingChars(std::string &str, char charToRemove);
+
+// true if the character in the given index is a color string
+// std::string version of Q_IsColorString macro from q_shared.h
+bool isColorString(const std::string &str, size_t idx);
 
 // truncates a string, preserving any color codes in the string
 // color codes are excluded from the truncation length, so this can be used
