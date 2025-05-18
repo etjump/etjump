@@ -37,6 +37,9 @@ ETJump::File::File(std::string path, const Mode mode)
     : _path(std::move(path)), _handle(INVALID_FILE_HANDLE), _mode(mode) {
   fsMode_t fsMode;
   switch (_mode) {
+    case Mode::Read:
+      fsMode = FS_READ;
+      break;
     case Mode::Write:
       fsMode = FS_WRITE;
       break;
@@ -47,14 +50,21 @@ ETJump::File::File(std::string path, const Mode mode)
       fsMode = FS_APPEND_SYNC;
       break;
     default:
-      fsMode = FS_READ;
-      break;
+      Com_Error(ERR_FATAL, "%s: bad mode %i for file '%s'\n", __func__,
+                static_cast<int>(mode), _path.c_str());
   }
 
   _length = trap_FS_FOpenFile(_path.c_str(), &_handle, fsMode);
 
-  if (_length == FILE_NOT_FOUND) {
-    throw FileIOException(_path);
+  // FS API is the best, isn't it
+  if (mode == Mode::Read) {
+    if (_length <= FILE_NOT_FOUND) {
+      throw FileIOException(_path);
+    }
+  } else {
+    if (_length < FILE_NOT_FOUND) {
+      throw FileIOException(_path);
+    }
   }
 }
 

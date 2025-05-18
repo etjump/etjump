@@ -42,7 +42,7 @@ public:
   typedef int FileHandle;
   enum class Mode { Read, Write, Append, AppendSync };
 
-  static constexpr int FILE_NOT_FOUND = -1;
+  static constexpr int FILE_NOT_FOUND = 0;
   static constexpr int INVALID_FILE_HANDLE = 0;
   static constexpr int READ_ALL_BYTES = -1;
 

@@ -68,7 +68,7 @@ bool FileSystem::remove(const std::string &path) {
 
 bool FileSystem::exists(const std::string &path) {
   const int length = trap_FS_FOpenFile(path.c_str(), nullptr, FS_READ);
-  return length != File::FILE_NOT_FOUND;
+  return length > File::FILE_NOT_FOUND;
 }
 
 bool FileSystem::safeCopy(const std::string &src, const std::string &dst) {
