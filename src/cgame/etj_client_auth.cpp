@@ -43,7 +43,7 @@ inline constexpr char MIGRATE_CMD[] = "migrateGuid";
 ClientAuth::ClientAuth() {
   serverCommandsHandler->subscribe(
       Constants::Authentication::AUTH_REQUEST,
-      [&](const std::vector<std::string> &) { guidResponse(); });
+      [&](const std::vector<std::string> &) { authResponse(); });
 
   serverCommandsHandler->subscribe(
       Constants::Authentication::GUID_MIGRATE_REQUEST,
@@ -80,7 +80,7 @@ ClientAuth::~ClientAuth() {
   consoleCommandsHandler->unsubscribe(MIGRATE_CMD);
 }
 
-void ClientAuth::guidResponse() {
+void ClientAuth::authResponse() {
   if (cg.demoPlayback) {
     return;
   }

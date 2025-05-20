@@ -45,7 +45,7 @@ private:
     GUID_V2 = 2,
   };
 
-  static void guidResponse();
+  static void authResponse();
   static void migrationResponse();
   static void manualMigration(Constants::Authentication::MigrationType type);
 
