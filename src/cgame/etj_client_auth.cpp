@@ -51,6 +51,10 @@ ClientAuth::ClientAuth() {
 
   consoleCommandsHandler->subscribe(
       MIGRATE_CMD, [&](const std::vector<std::string> &args) {
+        if (cg.demoPlayback) {
+          return;
+        }
+
         if (!args.empty() && (args[0] == "-f" || args[0] == "--force")) {
           manualMigration(
               Constants::Authentication::MigrationType::MANUAL_FORCE);
@@ -77,6 +81,10 @@ ClientAuth::~ClientAuth() {
 }
 
 void ClientAuth::guidResponse() {
+  if (cg.demoPlayback) {
+    return;
+  }
+
   const std::string guid = getGuid(GUIDVersion::GUID_V2);
   const int os = getOS();
   const std::vector<std::string> hwid = getHwid();
@@ -88,6 +96,10 @@ void ClientAuth::guidResponse() {
 }
 
 void ClientAuth::migrationResponse() {
+  if (cg.demoPlayback) {
+    return;
+  }
+
   const std::string oldGuid = getGuid(GUIDVersion::GUID_V1);
 
   if (oldGuid.empty()) {
