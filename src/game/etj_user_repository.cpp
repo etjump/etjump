@@ -126,6 +126,263 @@ void UserRepository::insertBan(const UserModels::Ban &ban) const {
           << ban.legacyGUID << ban.legacyHWID;
 }
 
+void UserRepository::addNewUser(const UserModels::User &userParams) const {
+  db->sql << R"(
+    insert into users (
+      name,
+      guid,
+      ipv4,
+      ipv6,
+      level,
+      last_seen,
+      title,
+      commands,
+      greeting
+    ) values (
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?
+    );
+  )" << userParams.name
+          << userParams.guid << userParams.ipv4 << userParams.ipv6
+          << userParams.level << userParams.lastSeen << userParams.title
+          << userParams.commands << userParams.greeting;
+}
+
+// returns empty user if the GUID is not found in the database
+UserModels::User UserRepository::getUserData(const std::string &guid) const {
+  UserModels::User user{};
+
+  db->sql << R"(
+    select
+      *
+    from users
+    where
+      guid=?;
+  )" << guid >>
+      [&user](const int id, const std::string &name, const std::string &dbGuid,
+              const std::string &ipv4, const std::string &ipv6, const int level,
+              const int64_t lastSeen, const std::string &title,
+              const std::string &commands, const std::string &greeting) {
+        // since we're fetching data by GUID, ensure it's not empty,
+        // which is true while user is migrating from old GUID
+        if (!dbGuid.empty()) {
+          user.id = id;
+          user.name = name;
+          user.guid = dbGuid;
+          user.ipv4 = ipv4;
+          user.ipv6 = ipv6;
+          user.level = level;
+          user.lastSeen = lastSeen;
+          user.title = title;
+          user.commands = commands;
+          user.greeting = greeting;
+        }
+      };
+
+  return user;
+}
+
+UserModels::User UserRepository::getUserData(const int userID) const {
+  UserModels::User user{};
+
+  db->sql << R"(
+    select
+      *
+    from users
+    where
+      id=?;
+  )" << userID >>
+      [&user](const int id, const std::string &name, const std::string &dbGuid,
+              const std::string &ipv4, const std::string &ipv6, const int level,
+              const int64_t lastSeen, const std::string &title,
+              const std::string &commands, const std::string &greeting) {
+        user.id = id;
+        user.name = name;
+        user.guid = dbGuid;
+        user.ipv4 = ipv4;
+        user.ipv6 = ipv6;
+        user.level = level;
+        user.lastSeen = lastSeen;
+        user.title = title;
+        user.commands = commands;
+        user.greeting = greeting;
+      };
+
+  return user;
+}
+
+// returns 0 if no user is found with the given GUID
+int UserRepository::getUserID(const std::string &guid) const {
+  int userID = 0;
+
+  db->sql << R"(
+    select
+      id
+    from users where
+      guid=?;
+  )" << guid >>
+      userID;
+
+  return userID;
+}
+
+UserModels::LegacyAuth
+UserRepository::getLegacyAuthData(const std::string &oldGuid) const {
+  UserModels::LegacyAuth legacyAuth{};
+
+  db->sql << R"(
+    select
+      *
+    from legacy_auth
+    where
+      guid=?;
+  )" << oldGuid >>
+      [&legacyAuth](const int user_id, const std::string &guid,
+                    const std::string &hwid) {
+        legacyAuth.userID = user_id;
+        legacyAuth.guid = guid;
+        legacyAuth.hwid = hwid;
+      };
+
+  return legacyAuth;
+}
+
+void UserRepository::migrateGuid(const int oldID,
+                                 const std::string &newGUID) const {
+  int count = 0;
+  db->sql << R"(select count(*) from users where guid=?;)" << newGUID >> count;
+
+  // if we're migrating manually, we need to delete the existing entry
+  if (count != 0) {
+    int userID = 0;
+
+    db->sql << R"(
+      select
+        id
+      from users
+      where
+        guid=?;
+    )" << newGUID >>
+        userID;
+
+    if (userID == oldID) {
+      throw std::runtime_error(
+          "Current GUID is already associated with your current user ID");
+    }
+
+    // TODO: this should probably also erase timerun records for the user?
+    db->sql << "delete from users where id=?;" << userID;
+    db->sql << "delete from users_hwid where user_id=?;" << userID;
+  }
+
+  db->sql << R"(
+    update
+      users
+    set
+      guid=?
+    where
+      id=?;
+    )" << newGUID
+          << oldID;
+}
+
+std::vector<UserModels::UserHWID>
+UserRepository::getHWIDsForUser(const int userID) const {
+  std::vector<UserModels::UserHWID> userHwids{};
+
+  db->sql << R"(
+    select
+      user_id,
+      platform,
+      hwid
+    from users_hwid
+    where
+      user_id=?;
+  )" << userID >>
+      [&userHwids](const int id, const int platform, const std::string &hwid) {
+        UserModels::UserHWID userHwid{};
+        userHwid.userID = id;
+        userHwid.platform = platform;
+        userHwid.hwid = hwid;
+
+        userHwids.emplace_back(userHwid);
+      };
+
+  return userHwids;
+}
+
+std::vector<UserModels::UserHWID>
+UserRepository::getHWIDsForUsersPlatform(const int userID,
+                                         const int userPlatform) const {
+  std::vector<UserModels::UserHWID> userHwids{};
+
+  db->sql << R"(
+    select
+      user_id,
+      platform,
+      hwid
+    from users_hwid
+    where
+      user_id=? and
+      platform=?;
+  )" << userID
+          << userPlatform >>
+      [&userHwids](const int id, const int platform, const std::string &hwid) {
+        UserModels::UserHWID userHwid{};
+        userHwid.userID = id;
+        userHwid.platform = platform;
+        userHwid.hwid = hwid;
+
+        userHwids.emplace_back(userHwid);
+      };
+
+  return userHwids;
+}
+
+void UserRepository::addHwid(const UserModels::UserHWID &params) const {
+  db->sql << R"(
+    insert into users_hwid (
+      user_id,
+      platform,
+      hwid
+    ) values (
+      ?,
+      ?,
+      ?
+    );
+  )" << params.userID
+          << params.platform << params.hwid;
+}
+
+void UserRepository::updateIPv4(const int userID, const std::string &ip) const {
+  db->sql << R"(
+    update
+      users
+    set
+      ipv4=?
+    where
+      id=?;
+  )" << ip << userID;
+}
+
+void UserRepository::updateIPv6(const int userID, const std::string &ip) const {
+  db->sql << R"(
+    update
+      users
+    set
+      ipv6=?
+    where
+      id=?;
+  )" << ip << userID;
+}
+
 void UserRepository::migrate() const {
   db->addMigration("initial", createInitialMigration());
   db->applyMigrations();

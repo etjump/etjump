@@ -100,4 +100,10 @@ void getOriginOrBmodelCenter(const gentity_t *ent, float dst[3]);
  * Copies the target clients stance (crouch/prone/stand)
  */
 void copyStanceFromClient(gentity_t *self, const gentity_t *target);
+
+/**
+ * Strips a port from an IP address.
+ * Handles both IPv4 and IPv6 addresses.
+ */
+std::string stripIPAddressPort(const std::string &address);
 } // namespace Utilities

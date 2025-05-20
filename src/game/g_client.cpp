@@ -3,6 +3,7 @@
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
 #include "etj_rtv.h"
+#include "etj_session_v2.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -1942,9 +1943,13 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
 
   trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
 
-  // Zero: has to be here because else it'll reset the ip we'll
-  // set a bit later
+// Zero: has to be here because else it'll reset the ip we'll
+// set a bit later
+#ifdef NEW_AUTH
+  game.sessionV2->onClientConnect(clientNum, firstTime);
+#else
   OnClientConnect(clientNum, firstTime, isBot);
+#endif
 
   // IP filtering
   // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=500
@@ -1965,6 +1970,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
 
   // If we try to pass NULL to Q_strncpyz server will crash
   // This allows users to crash the server with custom clients.
+  // FIXME: IPv6 support
   temp = GetParsedIP(value);
   if (!temp) {
     return "Malformed userinfo.";

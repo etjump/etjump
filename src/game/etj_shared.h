@@ -52,7 +52,7 @@ enum class MigrationType {
   MANUAL_FORCE = 2,
 };
 
-inline constexpr char GUID_REQUEST[] = "guid_request";
+inline constexpr char AUTH_REQUEST[] = "auth_request";
 inline constexpr char GUID_MIGRATE_REQUEST[] = "guid_migrate_request";
 
 inline constexpr char GUID_MIGRATE[] = "guid_migrate";

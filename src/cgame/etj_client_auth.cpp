@@ -42,7 +42,7 @@ inline constexpr char MIGRATE_CMD[] = "migrateGuid";
 
 ClientAuth::ClientAuth() {
   serverCommandsHandler->subscribe(
-      Constants::Authentication::GUID_REQUEST,
+      Constants::Authentication::AUTH_REQUEST,
       [&](const std::vector<std::string> &) { guidResponse(); });
 
   serverCommandsHandler->subscribe(
@@ -70,7 +70,7 @@ ClientAuth::ClientAuth() {
 }
 
 ClientAuth::~ClientAuth() {
-  serverCommandsHandler->unsubscribe(Constants::Authentication::GUID_REQUEST);
+  serverCommandsHandler->unsubscribe(Constants::Authentication::AUTH_REQUEST);
   serverCommandsHandler->unsubscribe(
       Constants::Authentication::GUID_MIGRATE_REQUEST);
   consoleCommandsHandler->unsubscribe(MIGRATE_CMD);
@@ -118,6 +118,9 @@ void ClientAuth::manualMigration(
     return;
   }
 
+  // TODO: this should probably parse 'etguid.dat' again,
+  //  so the user doesn't need to manually edit 'auth.dat'
+  //  if they are performing a forced re-migration
   std::string oldGuid = getGuid(GUIDVersion::GUID_V1);
 
   // normally the GUID shouldn't be empty here since we auto-migrate on init,

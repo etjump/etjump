@@ -43,11 +43,12 @@
 #include "etj_printer.h"
 
 #ifdef NEW_AUTH
-#include "etj_session_v2.h"
+  #include "etj_session_v2.h"
 #endif
 
 Game game;
 
+#ifndef NEW_AUTH
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   // Do not do g_entities + clientNum here, entity is not initialized
   // yet
@@ -57,14 +58,8 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     ETJump::session->Init(clientNum);
 
     G_DPrintf("Requesting guid from %d\n", clientNum);
-
-#ifdef NEW_AUTH
-    trap_SendServerCommand(clientNum,
-                           ETJump::Constants::Authentication::GUID_REQUEST);
-#else
     trap_SendServerCommand(
         clientNum, ETJump::Constants::Authentication::GUID_REQUEST.c_str());
-#endif
   } else {
     ETJump::session->ReadSessionData(clientNum);
     game.timerunV2->clientConnect(clientNum, ETJump::session->GetId(clientNum));
@@ -77,6 +72,7 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     trap_DropClient(clientNum, "You are banned.", 0);
   }
 }
+#endif
 
 void OnClientBegin(gentity_t *ent) {
   G_DPrintf("OnClientBegin called by %d\n", ClientNum(ent));
@@ -88,11 +84,16 @@ void OnClientBegin(gentity_t *ent) {
 }
 
 void OnClientDisconnect(gentity_t *ent) {
-  G_DPrintf("OnClientDisconnect called by %d\n", ClientNum(ent));
+  const int clientNum = ClientNum(ent);
 
-  ETJump::session->OnClientDisconnect(ClientNum(ent));
+#ifdef NEW_AUTH
+  game.sessionV2->onClientDisconnect(clientNum);
+#else
+  G_DPrintf("OnClientDisconnect called by %d\n", clientNum);
+  ETJump::session->OnClientDisconnect(clientNum);
+#endif
   ETJump::Log::processMessages();
-  game.timerunV2->clientDisconnect(ClientNum(ent));
+  game.timerunV2->clientDisconnect(clientNum);
 }
 
 void WriteSessionData() {
@@ -141,6 +142,11 @@ bool checkCheatCvars(gclient_s *client, int flags) {
 
 void RunFrame(int levelTime) {
   game.mapStatistics->runFrame(levelTime);
+
+#ifdef NEW_AUTH
+  game.sessionV2->runFrame();
+#endif
+
   game.timerunV2->runFrame();
 
   if (game.rtv->checkAutoRtv()) {
@@ -187,7 +193,7 @@ void OnGameInit() {
     }
   }
 
-  #ifdef NEW_AUTH
+#ifdef NEW_AUTH
   try {
     game.sessionV2 = std::make_unique<ETJump::SessionV2>(
         std::make_unique<ETJump::UserRepository>(
@@ -203,7 +209,7 @@ void OnGameInit() {
     // we really shouldn't let servers run at all if userdb is kaput
     G_Error("Failed to initialize user database: %s\n", e.what());
   }
-  #endif
+#endif
 
   game.timerunV2 = std::make_shared<ETJump::TimerunV2>(
       level.rawmapname,
@@ -237,7 +243,12 @@ void OnGameInit() {
 }
 
 void OnGameShutdown() {
+#ifdef NEW_AUTH
+  game.sessionV2->writeSessionData();
+#else
   WriteSessionData();
+
+#endif
   //    ETJump::database->ExecuteQueuedOperations();
   // these may be null, e.g. when G_Alloc or stack unwinding fails
   // after engine calls longjmp on errors
@@ -270,6 +281,10 @@ void OnGameShutdown() {
   game.timerunV2 = nullptr;
   game.rtv = nullptr;
   game.chatReplay = nullptr;
+
+#ifdef NEW_AUTH
+  game.sessionV2 = nullptr;
+#endif
 
   ETJump::Log::processMessages();
 }
@@ -307,24 +322,29 @@ qboolean OnClientCommand(gentity_t *ent) {
 
 #ifdef NEW_AUTH
   if (command == ETJump::Constants::Authentication::AUTHENTICATE) {
-    if (ETJump::session->authenticate(ent)) {
-      game.timerunV2->clientConnect(clientNum,
-                                    ETJump::session->GetId(clientNum));
+    if (!game.sessionV2->authenticate(ent)) {
+      trap_DropClient(clientNum,
+                      "Failed to authenticate with the server - malformed "
+                      "authentication response.\n",
+                      0);
     }
 
     return qtrue;
   }
 
   if (command == ETJump::Constants::Authentication::GUID_MIGRATE) {
-    if (ETJump::session->migrateGuid(ent)) {
-      game.timerunV2->clientConnect(clientNum,
-                                    ETJump::session->GetId(clientNum));
+    if (!game.sessionV2->migrateGuid(ent)) {
+      trap_DropClient(clientNum,
+                      "Failed to authenticate with the server - malformed GUID "
+                      "migration response.\n",
+                      0);
     }
+
     return qtrue;
   }
 
   if (command == ETJump::Constants::Authentication::GUID_MIGRATE_FAIL) {
-    ETJump::session->removePendingMigration(ent);
+    game.sessionV2->addNewUser(ent);
     return qtrue;
   }
 

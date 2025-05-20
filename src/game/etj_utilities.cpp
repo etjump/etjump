@@ -235,3 +235,22 @@ void Utilities::copyStanceFromClient(gentity_t *self, const gentity_t *target) {
     self->client->ps.pm_flags &= ~PMF_DUCKED;
   }
 }
+
+std::string Utilities::stripIPAddressPort(const std::string &address) {
+  if (address.empty()) {
+    return "";
+  }
+
+  // only IPv4 addresses contain dots
+  if (address.find('.') != std::string::npos) {
+    return address.substr(0, address.find(':'));
+  }
+
+  // IPv6 addresses are enclosed in square brackets if port is attached
+  if (address[0] == '[') {
+    return address.substr(1, address.find(']') - 1);
+  }
+
+  // no port attached, return the original string
+  return address;
+}

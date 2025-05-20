@@ -26,10 +26,12 @@
 
 #ifdef NEW_AUTH
   #include <memory>
+  #include <bitset>
 
   #include "etj_user_repository.h"
   #include "etj_log.h"
   #include "etj_synchronization_context.h"
+  #include "q_shared.h"
 
 namespace ETJump {
 class SessionV2 {
@@ -39,7 +41,41 @@ public:
             std::unique_ptr<SynchronizationContext> synchronizationContext);
   ~SessionV2();
 
+  void runFrame() const;
+
+  void initClientSession(int clientNum);
+  void resetClient(int clientNum);
+  void onClientConnect(int clientNum, bool firstTime);
+  void onClientDisconnect(int clientNum);
+
+  bool authenticate(gentity_t *ent);
+  bool migrateGuid(gentity_t *ent) const;
+  void addNewUser(gentity_t *ent) const;
+
+  void readSessionData(int clientNum);
+  void writeSessionData() const;
+
 private:
+  static constexpr int MAX_COMMANDS = 256;
+  static constexpr char SESSION_FILE[] = "session/client_%02i.json";
+
+  struct Client {
+    std::string guid;
+    int platform;
+    std::vector<std::string> hwid{};
+    std::bitset<MAX_COMMANDS> permissions{};
+    std::string ipv4;
+    std::string ipv6;
+    int64_t sessionStartTime{};
+  };
+
+  void updateHWID(int clientNum, int userID) const;
+  void updateLastKnownIP(int clientNum, int userID) const;
+
+  // TODO: this could maybe be a map or a vector rather than an array,
+  //  we don't actually need 64 copies of 'Client' like, ever
+  std::array<Client, MAX_CLIENTS> clients{};
+
   std::unique_ptr<UserRepository> repository;
   std::unique_ptr<Log> logger;
   std::unique_ptr<SynchronizationContext> sc;

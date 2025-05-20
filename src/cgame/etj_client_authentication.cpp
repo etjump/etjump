@@ -22,12 +22,14 @@
  * SOFTWARE.
  */
 
-#include "etj_client_authentication.h"
-#include "../game/etj_file.h"
-#include "../game/etj_shared.h"
-#include "../game/etj_string_utilities.h"
-#include "../game/etj_crypto.h"
-#include <uuid4.h>
+#ifndef NEW_AUTH
+
+  #include "etj_client_authentication.h"
+  #include "../game/etj_file.h"
+  #include "../game/etj_shared.h"
+  #include "../game/etj_string_utilities.h"
+  #include "../game/etj_crypto.h"
+  #include <uuid4.h>
 
 ETJump::ClientAuthentication::ClientAuthentication(
     std::function<void(const std::string &)> sendClientCommand,
@@ -89,3 +91,4 @@ ETJump::ClientAuthentication::saveGuid(const std::string &guid) const {
                        " Using temporary guid."};
   }
 }
+#endif

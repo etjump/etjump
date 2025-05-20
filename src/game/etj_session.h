@@ -99,9 +99,4 @@ private:
   void UpdateLastSeen(int clientNum);
   Client clients_[MAX_CLIENTS];
   std::string message_;
-
-#ifdef NEW_AUTH
-  // clientNum, GUID
-  std::unordered_map<int, std::string> pendingMigrations;
-#endif
 };

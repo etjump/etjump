@@ -24,39 +24,33 @@
 
 #pragma once
 
-#ifndef NEW_AUTH
-
-  #include <string>
-  #include <functional>
-  #include "etj_client_commands_handler.h"
+#ifdef NEW_AUTH
 
 namespace ETJump {
-class ClientAuthentication {
+// a successful result will have userID > 0
+class AuthenticationResult final : public SynchronizationContext::ResultBase {
 public:
-  struct OperationResult {
-    bool success;
-    std::string message;
-  };
+  AuthenticationResult(const int userID, const bool isBanned)
+      : userID(userID), isBanned(isBanned) {}
 
-  explicit ClientAuthentication(
-      std::function<void(const std::string &)> sendClientCommand,
-      std::function<void(const std::string &)> print,
-      std::function<std::string()> getHwid,
-      std::shared_ptr<ClientCommandsHandler> serverCommandsHandler);
-  ~ClientAuthentication();
+  int userID;
+  bool isBanned;
+};
 
-  void login();
+class GuidMigrationResult final : public SynchronizationContext::ResultBase {
+public:
+  GuidMigrationResult(const int userID, std::string message)
+      : userID(userID), message(std::move(message)) {}
 
-private:
-  std::function<void(const std::string &)> _sendClientCommand;
-  std::function<void(const std::string &)> _print;
-  std::function<std::string()> _getHwid;
-  std::shared_ptr<ClientCommandsHandler> _serverCommandsHandler;
-  const std::string GUID_FILE;
-  std::string getGuid();
-  std::string getHwid();
-  std::string createGuid() const;
-  OperationResult saveGuid(const std::string &guid) const;
+  int userID;
+  std::string message;
+};
+
+class AddUserResult final : public SynchronizationContext::ResultBase {
+public:
+  explicit AddUserResult(std::string message) : message(std::move(message)) {}
+
+  std::string message;
 };
 } // namespace ETJump
 

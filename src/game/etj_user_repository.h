@@ -41,6 +41,22 @@ public:
   void insertName(const UserModels::Name &name) const;
   void insertBan(const UserModels::Ban &ban) const;
 
+  void addNewUser(const UserModels::User &userParams) const;
+
+  UserModels::User getUserData(const std::string &guid) const;
+  UserModels::User getUserData(int userID) const;
+  int getUserID(const std::string &guid) const;
+  UserModels::LegacyAuth getLegacyAuthData(const std::string &oldGuid) const;
+  void migrateGuid(int oldID, const std::string &newGUID) const;
+
+  std::vector<UserModels::UserHWID> getHWIDsForUser(int userID) const;
+  std::vector<UserModels::UserHWID>
+  getHWIDsForUsersPlatform(int userID, int userPlatform) const;
+  void addHwid(const UserModels::UserHWID &params) const;
+
+  void updateIPv4(int userID, const std::string &ip) const;
+  void updateIPv6(int userID, const std::string &ip) const;
+
 private:
   void migrate() const;
   void migrateUsers() const;
