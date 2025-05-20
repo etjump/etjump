@@ -90,6 +90,7 @@ void SessionV2::onClientConnect(const int clientNum, const bool firstTime) {
 
   if (firstTime) {
     initClientSession(clientNum);
+    checkIPBan(clientNum);
 
     G_DPrintf("Requesting authentication from %i\n", clientNum);
     Printer::command(clientNum, Constants::Authentication::AUTH_REQUEST);
@@ -97,8 +98,6 @@ void SessionV2::onClientConnect(const int clientNum, const bool firstTime) {
     readSessionData(clientNum);
     // TODO: timerun client connect
   }
-
-  // TODO: check for banned IP
 }
 
 void SessionV2::onClientDisconnect(const int clientNum) {
@@ -188,7 +187,7 @@ bool SessionV2::authenticate(gentity_t *ent) {
 
   sc->postTask(
       [this, clientNum] {
-        // TODO: check for IP/HWID bans (we already have the data at this point)
+        // TODO: check for HWID ban (we already have the data at this point)
 
         const auto user = repository->getUserData(clients[clientNum].guid);
 
@@ -494,6 +493,53 @@ void SessionV2::writeSessionData() const {
                     err);
     }
   }
+}
+
+void SessionV2::checkIPBan(const int clientNum) const {
+  sc->postTask(
+      [this, clientNum] {
+        const std::vector<UserModels::BannedIPAddresses> bannedIPs =
+            repository->getBannedIPAddresses();
+
+        if (bannedIPs.empty()) {
+          return std::make_unique<IPBanResult>(false, "");
+        }
+
+        // we check for both IP addresses as we ban both last known
+        // IP address (old bans won't have any IPv6 addresses though)
+        for (const auto &ban : bannedIPs) {
+          if (!ban.ipv4.empty() && ban.ipv4 == clients[clientNum].ipv4) {
+            return std::make_unique<IPBanResult>(true, ban.ipv4);
+          }
+
+          if (!ban.ipv6.empty() && ban.ipv6 == clients[clientNum].ipv6) {
+            return std::make_unique<IPBanResult>(true, ban.ipv6);
+          }
+        }
+
+        return std::make_unique<IPBanResult>(false, "");
+      },
+      [clientNum](
+          std::unique_ptr<SynchronizationContext::ResultBase> ipBanResult) {
+        const auto result = dynamic_cast<IPBanResult *>(ipBanResult.get());
+
+        if (result == nullptr) {
+          throw std::runtime_error("IPBanResult is null.");
+        }
+
+        if (result->isBanned) {
+          const std::string cleanName =
+              sanitize(g_entities[clientNum].client->pers.netname);
+          Printer::logAdminLn(
+              stringFormat("authentication: Rejected connection from IP banned "
+                           "client %i %s (%s)",
+                           clientNum, cleanName, result->ip));
+          trap_DropClient(clientNum, "You are banned.", 0);
+        }
+      },
+      [this](const std::exception &e) {
+        logger->error("Failed to check IPBanResult: %s", e.what());
+      });
 }
 } // namespace ETJump
 

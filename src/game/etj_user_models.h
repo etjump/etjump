@@ -77,5 +77,10 @@ struct LegacyAuth {
   std::string guid;
   std::string hwid;
 };
+
+struct BannedIPAddresses {
+  std::string ipv4;
+  std::string ipv6;
+};
 } // namespace ETJump::UserModels
 #endif

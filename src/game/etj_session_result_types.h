@@ -52,6 +52,15 @@ public:
 
   std::string message;
 };
+
+class IPBanResult final : public SynchronizationContext::ResultBase {
+public:
+  IPBanResult(const bool isBanned, std::string ip)
+      : isBanned(isBanned), ip(std::move(ip)) {}
+
+  bool isBanned;
+  std::string ip;
+};
 } // namespace ETJump
 
 #endif

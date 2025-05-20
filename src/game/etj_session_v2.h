@@ -72,6 +72,8 @@ private:
   void updateHWID(int clientNum, int userID) const;
   void updateLastKnownIP(int clientNum, int userID) const;
 
+  void checkIPBan(int clientNum) const;
+
   // TODO: this could maybe be a map or a vector rather than an array,
   //  we don't actually need 64 copies of 'Client' like, ever
   std::array<Client, MAX_CLIENTS> clients{};

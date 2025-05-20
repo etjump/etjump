@@ -383,6 +383,27 @@ void UserRepository::updateIPv6(const int userID, const std::string &ip) const {
   )" << ip << userID;
 }
 
+std::vector<UserModels::BannedIPAddresses>
+UserRepository::getBannedIPAddresses() const {
+  std::vector<UserModels::BannedIPAddresses> bannedIPAddresses{};
+
+  db->sql << R"(
+    select
+      ipv4,
+      ipv6
+    from bans;
+  )" >>
+      [&bannedIPAddresses](const std::string &ipv4, const std::string &ipv6) {
+        UserModels::BannedIPAddresses bannedIP{};
+        bannedIP.ipv4 = ipv4;
+        bannedIP.ipv6 = ipv6;
+
+        bannedIPAddresses.emplace_back(bannedIP);
+      };
+
+  return bannedIPAddresses;
+}
+
 void UserRepository::migrate() const {
   db->addMigration("initial", createInitialMigration());
   db->applyMigrations();

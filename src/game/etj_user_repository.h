@@ -57,6 +57,8 @@ public:
   void updateIPv4(int userID, const std::string &ip) const;
   void updateIPv6(int userID, const std::string &ip) const;
 
+  std::vector<UserModels::BannedIPAddresses> getBannedIPAddresses() const;
+
 private:
   void migrate() const;
   void migrateUsers() const;
