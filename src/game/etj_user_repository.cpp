@@ -259,7 +259,8 @@ void UserRepository::migrateGuid(const int oldID,
   int count = 0;
   db->sql << R"(select count(*) from users where guid=?;)" << newGUID >> count;
 
-  // if we're migrating manually, we need to delete the existing entry
+  // if the current GUID is associated with a wrong entry, we need to delete it
+  // this can happen if the user swaps their old GUID to another one
   if (count != 0) {
     int userID = 0;
 
