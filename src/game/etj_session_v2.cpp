@@ -279,8 +279,11 @@ bool SessionV2::migrateGuid(gentity_t *ent) const {
         const auto legacyAuth = repository->getLegacyAuthData(oldGuid);
         const auto user = repository->getUserData(legacyAuth.userID);
 
+        // this can happen if the user tries to authenticate using
+        // an old GUID that has never been registered on the server,
+        // and is also visiting for the first time (new GUID not in the db)
         if (user.id == 0) {
-          throw std::runtime_error("Old GUID not found in the database.");
+          return std::make_unique<GuidMigrationResult>(user.id, false, "");
         }
 
         if (isBanned(clientNum, user.id, oldGuid)) {
@@ -308,7 +311,7 @@ bool SessionV2::migrateGuid(gentity_t *ent) const {
         return std::make_unique<GuidMigrationResult>(
             user.id, false, "Successfully migrated old GUID.\n");
       },
-      [this, clientNum](
+      [this, clientNum, ent](
           std::unique_ptr<SynchronizationContext::ResultBase> legacyAuthData) {
         const auto result =
             dynamic_cast<GuidMigrationResult *>(legacyAuthData.get());
@@ -320,6 +323,10 @@ bool SessionV2::migrateGuid(gentity_t *ent) const {
         if (result->isBanned) {
           dropBannedClient(clientNum);
           return;
+        }
+
+        if (result->userID == 0) {
+          addNewUser(ent);
         }
 
         Printer::console(clientNum, result->message);
