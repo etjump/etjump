@@ -73,6 +73,9 @@ private:
   void updateLastKnownIP(int clientNum, int userID) const;
 
   void checkIPBan(int clientNum) const;
+  bool isBanned(int clientNum, int userID,
+                const std::string &legacyGuid = "") const;
+  void dropBannedClient(int clientNum) const;
 
   // TODO: this could maybe be a map or a vector rather than an array,
   //  we don't actually need 64 copies of 'Client' like, ever

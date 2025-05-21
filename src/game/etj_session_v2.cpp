@@ -187,8 +187,6 @@ bool SessionV2::authenticate(gentity_t *ent) {
 
   sc->postTask(
       [this, clientNum] {
-        // TODO: check for HWID ban (we already have the data at this point)
-
         const auto user = repository->getUserData(clients[clientNum].guid);
 
         if (user.guid.empty()) {
@@ -196,7 +194,11 @@ bool SessionV2::authenticate(gentity_t *ent) {
           return std::make_unique<AuthenticationResult>(user.id, false);
         }
 
-        // TODO: check for GUID ban
+        // check after user data is successfully fetched so we have valid GUID
+        if (isBanned(clientNum, user.id)) {
+          return std::make_unique<AuthenticationResult>(0, true);
+        }
+
         updateHWID(clientNum, user.id);
         updateLastKnownIP(clientNum, user.id);
 
@@ -212,14 +214,7 @@ bool SessionV2::authenticate(gentity_t *ent) {
         }
 
         if (result->isBanned) {
-          Printer::logAdminLn(
-              stringFormat("%s: Banned player %s tried to connect with GUID "
-                           "'%s' and HWID '%s'",
-                           func, cleanName, clients[clientNum].guid,
-                           StringUtil::join(clients[clientNum].hwid, ",")));
-          Printer::popupAll(stringFormat("Banned player %s ^7tried to connect.",
-                                         ent->client->pers.netname));
-          trap_DropClient(clientNum, "You are banned.", 0);
+          dropBannedClient(clientNum);
           return;
         }
 
@@ -288,7 +283,9 @@ bool SessionV2::migrateGuid(gentity_t *ent) const {
           throw std::runtime_error("Old GUID not found in the database.");
         }
 
-        // TODO: check for GUID/legacy HWID ban
+        if (isBanned(clientNum, user.id, oldGuid)) {
+          return std::make_unique<GuidMigrationResult>(user.id, true, "");
+        }
 
         // forced manual migration overrides the GUID in the database,
         // otherwise we only perform migration if the GUID in database is empty
@@ -296,9 +293,10 @@ bool SessionV2::migrateGuid(gentity_t *ent) const {
                 Constants::Authentication::MigrationType::MANUAL_FORCE &&
             !user.guid.empty()) {
           return std::make_unique<GuidMigrationResult>(
-              user.id, "Already authenticated with new GUID. You may force a "
-                       "migration with 'migrateGuid -f'.\nNote that this will "
-                       "delete the data associated with your current GUID.\n");
+              user.id, false,
+              "Already authenticated with new GUID. You may force a migration "
+              "with 'migrateGuid -f'.\nNote that this will delete the data "
+              "associated with your current GUID.\n");
         }
 
         repository->migrateGuid(user.id, clients[clientNum].guid);
@@ -308,15 +306,20 @@ bool SessionV2::migrateGuid(gentity_t *ent) const {
         updateLastKnownIP(clientNum, user.id);
 
         return std::make_unique<GuidMigrationResult>(
-            user.id, "Successfully migrated old GUID.\n");
+            user.id, false, "Successfully migrated old GUID.\n");
       },
-      [clientNum](
+      [this, clientNum](
           std::unique_ptr<SynchronizationContext::ResultBase> legacyAuthData) {
         const auto result =
             dynamic_cast<GuidMigrationResult *>(legacyAuthData.get());
 
         if (result == nullptr) {
           throw std::runtime_error("GuidMigrationResults is null.");
+        }
+
+        if (result->isBanned) {
+          dropBannedClient(clientNum);
+          return;
         }
 
         Printer::console(clientNum, result->message);
@@ -540,6 +543,69 @@ void SessionV2::checkIPBan(const int clientNum) const {
       [this](const std::exception &e) {
         logger->error("Failed to check IPBanResult: %s", e.what());
       });
+}
+
+// NOTE: this performs database operations, don't call this on the main thread!
+bool SessionV2::isBanned(const int clientNum, const int userID,
+                         const std::string &legacyGuid) const {
+  const auto bans = repository->getBanData();
+  const std::string userHwid = StringUtil::join(clients[clientNum].hwid, ",");
+
+  UserModels::LegacyAuth legacyAuth{};
+  std::vector<std::string> legacyAuthHWIDs{};
+
+  if (!legacyGuid.empty()) {
+    legacyAuth = repository->getLegacyAuthData(legacyGuid);
+
+    if (legacyAuth.userID == userID) {
+      legacyAuthHWIDs = StringUtil::split(legacyAuth.hwid, ",");
+    }
+  }
+
+  for (const auto &ban : bans) {
+    if (clients[clientNum].guid == ban.guid) {
+      return true;
+    }
+
+    for (const auto &hwid : ban.hwids) {
+      // TODO: this should not be a boolean operation
+      //  https://github.com/etjump/etjump/issues/1559
+      if (userHwid == hwid) {
+        return true;
+      }
+    }
+
+    if (!legacyGuid.empty() && legacyGuid == ban.legacyGUID) {
+      return true;
+    }
+
+    // if we have legacy auth data, we can check for legacy hwid bans
+    if (legacyAuth.userID == userID) {
+      // legacy data may have multiple HWIDs, but bans only ever
+      // stored the HWID at the time of the ban, so check all of them
+      for (const auto &hwid : legacyAuthHWIDs) {
+        if (hwid == ban.legacyHWID) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+void SessionV2::dropBannedClient(const int clientNum) const {
+  const std::string cleanName =
+      sanitize(g_entities[clientNum].client->pers.netname);
+
+  Printer::logAdminLn(
+      stringFormat("authentication: Banned player %s tried to connect with "
+                   "GUID '%s' and HWID '%s'",
+                   cleanName, clients[clientNum].guid,
+                   StringUtil::join(clients[clientNum].hwid, ",")));
+  Printer::popupAll(stringFormat("Banned player %s ^7tried to connect.",
+                                 g_entities[clientNum].client->pers.netname));
+  trap_DropClient(clientNum, "You are banned.", 0);
 }
 } // namespace ETJump
 

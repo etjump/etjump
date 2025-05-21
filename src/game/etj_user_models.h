@@ -82,5 +82,15 @@ struct BannedIPAddresses {
   std::string ipv4;
   std::string ipv6;
 };
+
+// NOTE: does not contain IP addresses as IP bans can be checked
+// without identifying the client first
+struct BanData {
+  int banID;
+  std::string guid;
+  std::vector<std::string> hwids;
+  std::string legacyGUID;
+  std::string legacyHWID;
+};
 } // namespace ETJump::UserModels
 #endif

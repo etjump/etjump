@@ -39,10 +39,12 @@ public:
 
 class GuidMigrationResult final : public SynchronizationContext::ResultBase {
 public:
-  GuidMigrationResult(const int userID, std::string message)
-      : userID(userID), message(std::move(message)) {}
+  GuidMigrationResult(const int userID, const bool isBanned,
+                      std::string message)
+      : userID(userID), isBanned(isBanned), message(std::move(message)) {}
 
   int userID;
+  bool isBanned;
   std::string message;
 };
 

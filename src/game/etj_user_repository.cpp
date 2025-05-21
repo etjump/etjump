@@ -404,6 +404,51 @@ UserRepository::getBannedIPAddresses() const {
   return bannedIPAddresses;
 }
 
+std::vector<UserModels::BanData> UserRepository::getBanData() const {
+  std::unordered_map<int, UserModels::BanData> banMap{};
+
+  db->sql << R"(
+    select
+      bans.id,
+      bans.guid,
+      bans.legacy_guid,
+      bans.legacy_hwid,
+      hwid_bans.hwid
+    from bans
+    left join
+      hwid_bans
+    on hwid_bans.ban_id == bans.id;
+  )" >>
+      [&banMap](const int id, const std::string &guid,
+                const std::string &legacyGuid, const std::string &legacyHwid,
+                const std::string &hwid) {
+        const auto [it, inserted] = banMap.try_emplace(id);
+        auto &ban = it->second;
+
+        // because one ban can have multiple HWID entries
+        // (or none in case of old bans), only insert other data once
+        if (inserted) {
+          ban.banID = id;
+          ban.guid = guid;
+          ban.legacyGUID = legacyGuid;
+          ban.legacyHWID = legacyHwid;
+        }
+
+        if (!hwid.empty()) {
+          ban.hwids.emplace_back(hwid);
+        }
+      };
+
+  std::vector<UserModels::BanData> bans{};
+  bans.reserve(banMap.size());
+
+  for (const auto &ban : banMap) {
+    bans.emplace_back(ban.second);
+  }
+
+  return bans;
+}
+
 void UserRepository::migrate() const {
   db->addMigration("initial", createInitialMigration());
   db->applyMigrations();
