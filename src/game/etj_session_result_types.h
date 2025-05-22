@@ -50,8 +50,10 @@ public:
 
 class AddUserResult final : public SynchronizationContext::ResultBase {
 public:
-  explicit AddUserResult(std::string message) : message(std::move(message)) {}
+  AddUserResult(const int userID, std::string message)
+      : userID(userID), message(std::move(message)) {}
 
+  int userID;
   std::string message;
 };
 

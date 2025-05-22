@@ -180,8 +180,6 @@ bool SessionV2::authenticate(gentity_t *ent) {
   G_DPrintf("%s: %d GUID: %s OS: %i HWID: %s\n", __func__, clientNum,
             clients[clientNum].guid.c_str(), clients[clientNum].platform,
             StringUtil::join(clients[clientNum].hwid, ",").c_str());
-  G_Printf("^3%s: [NEW_AUTH] TODO:\n  ^7- handle ban checks from database\n",
-           __func__);
 
   const std::string func = __func__;
 
@@ -327,10 +325,10 @@ bool SessionV2::migrateGuid(gentity_t *ent) const {
 
         if (result->userID == 0) {
           addNewUser(ent);
+        } else {
+          Printer::console(clientNum, result->message);
+          game.timerunV2->clientConnect(clientNum, result->userID);
         }
-
-        Printer::console(clientNum, result->message);
-        game.timerunV2->clientConnect(clientNum, result->userID);
       },
       [this, clientNum, cleanName](const std::runtime_error &e) {
         Printer::console(
@@ -371,9 +369,10 @@ void SessionV2::addNewUser(gentity_t *ent) const {
         updateHWID(clientNum, userID);
         updateLastKnownIP(clientNum, userID);
 
-        return std::make_unique<AddUserResult>("Successfully added new user.");
+        return std::make_unique<AddUserResult>(userID,
+                                               "Successfully added new user.");
       },
-      [this](
+      [this, clientNum](
           std::unique_ptr<SynchronizationContext::ResultBase> addUserResult) {
         const auto result = dynamic_cast<AddUserResult *>(addUserResult.get());
 
@@ -382,6 +381,7 @@ void SessionV2::addNewUser(gentity_t *ent) const {
         }
 
         logger->info(result->message);
+        game.timerunV2->clientConnect(clientNum, result->userID);
       },
       [this](const std::runtime_error &e) {
         logger->error("Failed to add new user: %s", e.what());
