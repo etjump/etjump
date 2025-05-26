@@ -7,7 +7,6 @@
  */
 
 #include "g_local.h"
-#include "etj_utilities.h"
 #include "etj_entity_utilities.h"
 
 /*
@@ -4404,7 +4403,7 @@ void use_invisible_user(gentity_t *ent, gentity_t *other,
   }
 
   vec3_t noiseOrigin;
-  Utilities::getOriginOrBmodelCenter(ent, noiseOrigin);
+  ETJump::EntityUtilities::getOriginOrBmodelCenter(ent, noiseOrigin);
 
   if (other->client && ent->spawnflags & startOff) {
     //----(SA)	play 'off' sound

@@ -24,7 +24,7 @@
 
 #include "g_local.h"
 #include "etj_missilepad.h"
-#include "etj_utilities.h"
+#include "etj_entity_utilities.h"
 
 namespace ETJump {
 void Missilepad::touch(gentity_t *self, gentity_t *other) {
@@ -42,19 +42,19 @@ void Missilepad::touch(gentity_t *self, gentity_t *other) {
 
   if (self->noise_index) {
     vec3_t noiseOrigin;
-    Utilities::getOriginOrBmodelCenter(self, noiseOrigin);
-  
+    EntityUtilities::getOriginOrBmodelCenter(self, noiseOrigin);
+
     const auto te =
         soundEvent(noiseOrigin, EV_GENERAL_SOUND_VOLUME, self->noise_index);
     te->s.onFireStart = self->s.onFireStart;
   }
 }
 
-void Missilepad::use(gentity_t *ent) {
-  if (ent->r.linked) {
-    trap_UnlinkEntity(ent);
+void Missilepad::use(gentity_t *self) {
+  if (self->r.linked) {
+    trap_UnlinkEntity(self);
   } else {
-    trap_LinkEntity(ent);
+    trap_LinkEntity(self);
   }
 }
 
@@ -64,8 +64,8 @@ void Missilepad::spawn(gentity_t *ent) {
   VectorCopy(ent->s.origin, ent->s.pos.trBase);
   VectorCopy(ent->s.origin, ent->r.currentOrigin);
 
-  ent->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator) {
-    Missilepad::use(ent);
+  ent->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
+    use(self);
   };
 
   if (ent->spawnflags & static_cast<int>(Spawnflags::StartInvis)) {
@@ -86,8 +86,8 @@ void Missilepad::spawn(gentity_t *ent) {
 
   G_SpawnFloat("scale", "1.0", &ent->speed);
 
-  ent->touch = [](gentity_t *ent, gentity_t *activator, trace_t *trace) {
-    Missilepad::touch(ent, activator);
+  ent->touch = [](gentity_t *self, gentity_t *activator, trace_t *trace) {
+    touch(self, activator);
   };
 }
 } // namespace ETJump

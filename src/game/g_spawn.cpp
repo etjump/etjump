@@ -19,6 +19,7 @@
 #include "etj_trigger_teleport_client.h"
 #include "etj_target_ft_setrules.h"
 #include "etj_target_spawn_relay.h"
+#include "etj_portalgun.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -443,7 +444,6 @@ void SP_target_savereset(gentity_t *self);
 void SP_target_increase_ident(gentity_t *self);
 void SP_target_save(gentity_t *self);
 // Feen: PGM
-void SP_weapon_portalgun(gentity_t *self);
 void SP_target_remove_portals(gentity_t *self);
 void SP_target_portal_relay(gentity_t *self);
 void SP_target_ftrelay(gentity_t *self);
@@ -691,7 +691,7 @@ spawn_t spawns[] = {
     {"etjump203_target_relay", SP_target_fireonce},
     {"func_fakebrush", SP_func_fakebrush},
     {"target_savereset", SP_target_savereset},
-    {"weapon_portalgun", SP_weapon_portalgun}, // Feen: PGM
+    {"weapon_portalgun", ETJump::Portalgun::spawn}, // Feen: PGM
     {"target_increase_ident", SP_target_increase_ident},
     {"target_save", SP_target_save},
     {"target_remove_portals", SP_target_remove_portals},
@@ -1282,9 +1282,9 @@ void SP_worldspawn(void) {
   val = Q_atoi(s);
   if (val) {
     if (val == 1) {
-      level.portalTeam = 1;
+      level.portalTeam = PORTAL_TEAM_FT;
     } else {
-      level.portalTeam = 2;
+      level.portalTeam = PORTAL_TEAM_ALL;
     }
   }
   G_Printf("Portal team is set to %d.\n", val);
