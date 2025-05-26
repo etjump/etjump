@@ -121,10 +121,10 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
   portal->surfaceFlags =
       SURF_PORTALGATE; // Let's try this for detection in Pmove....
   portal->touch = [](gentity_t *self, gentity_t *other, trace_t *trace) {
-    Portal::touch(self, other);
+    touch(self, other);
   };
 
-  portal->think = Portal::think;
+  portal->think = think;
   portal->nextthink =
       level.time + 100; //.1 sec til next think - mainly used for bbox dbug
 
@@ -134,9 +134,6 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
   portal->s.pos.trType = TR_STATIONARY;
   portal->s.otherEntityNum =
       ent->s.clientNum; // HACK: Using this for render checks.....
-
-  // Set portal team to shooters team. Anyone with same team can use the portal
-  portal->portalTeam = ent->client->sess.portalTeam;
 
   // Set angle of entity based on normal of plane....
   vectoangles(tr.plane.normal,
@@ -192,15 +189,17 @@ void Portal::touch(const gentity_t *self, gentity_t *other) {
     }
   } else if (level.portalTeam == PORTAL_TEAM_FT) {
     // People in the same ft can share
-    // FIXME: this doesn't work, wtf was the idea here??????
-    if (self->portalTeam != other->client->sess.portalTeam) {
-      return;
+    fireteamData_t *ftSelf{};
+    fireteamData_t *ftOther{};
+
+    // only check this for portals which are not our own
+    if (self->r.ownerNum != other->s.number) {
+      if (!G_IsOnFireteam(ClientNum(other), &ftSelf) ||
+          !G_IsOnFireteam(self->r.ownerNum, &ftOther) || ftSelf != ftOther) {
+        return;
+      }
     }
   }
-  //    else if (level.portalTeam == 2)
-  //    {
-  //        // Everyone can use eachothers portals
-  //    }
 
   if (other->client->ps.pm_type == PM_DEAD) {
     return;
@@ -246,9 +245,6 @@ void Portal::touch(const gentity_t *self, gentity_t *other) {
 }
 
 void Portalgun::spawn(gentity_t *ent) {
-  // FIXME: remove
-  G_SpawnInt("portal_team", "0", &ent->portalTeam);
-
   gitem_t *item = BG_FindItemForWeapon(WP_PORTAL_GUN);
 
   char *noise{};
@@ -301,13 +297,6 @@ void Portalgun::touch(gentity_t *self, gentity_t *other, trace_t *trace) {
       other->client->sess.runSpawnflags &
           static_cast<int>(TimerunSpawnflags::NoPortalgunPickup)) {
     return;
-  }
-
-  // if portal team value is higher than 0 let's set users pteam value
-  // to that of the entity.
-  // FIXME: remove this, also this would bypass the check below lol
-  if (self->portalTeam > PORTAL_TEAM_NONE) {
-    other->client->sess.portalTeam = self->portalTeam;
   }
 
   // check if player already had the weapon

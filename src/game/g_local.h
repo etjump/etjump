@@ -602,7 +602,6 @@ struct gentity_s {
   gentity_t *linkedPortal;
 
   int lastPortalTime; // Last time we teleported using portal
-  int portalTeam;
 
   int runIndex;
   char runName[MAX_TIMERUN_NAME_LENGTH];
@@ -822,7 +821,6 @@ typedef struct {
 
   qboolean versionOK;
 
-  int portalTeam;
   char ip[MAX_IP_LEN + 1];
   qboolean motdPrinted;
 
