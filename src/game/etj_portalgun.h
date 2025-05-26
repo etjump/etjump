@@ -27,23 +27,29 @@
 #include "g_local.h"
 
 namespace ETJump {
-class EntityUtilities {
-  static void drawRailBox(const gentity_t *ent,
-                          const std::vector<float> &color);
-
+class Portal {
 public:
-  static bool isPlayer(gentity_t *ent);
-  static void checkForRailBox(gentity_t *ent);
-  static bool playerIsSolid(int self, int other);
+  enum class Type {
+    PORTAL_BLUE = 1,
+    PORTAL_RED = 2,
+  };
 
-  // 'threshold' indicates the number of entities that must be free
-  static bool entitiesFree(int threshold);
+  static void spawn(gentity_t *ent, float scale, Type type, const trace_t &tr,
+                    vec3_t tEndPos, const vec3_t tPortalAngles);
+  static void think(gentity_t *self);
+  static void touch(const gentity_t *self, gentity_t *other);
+};
 
-  // sets 'value' to corresponding cursorhint from 'hint'
-  // if 'hint' isn't found in hintStrings, no modification is performed
-  static void setCursorhintFromString(int &value, const std::string &hint);
+class Portalgun {
+public:
+  static void spawn(gentity_t *ent);
+  static void touch(gentity_t *self, gentity_t *other, trace_t *trace);
 
-  // sets 'origin' to the entity's origin, or the center of it's absmins/maxs
-  static void getOriginOrBmodelCenter(const gentity_t *ent, vec3_t origin);
+  static void fire(gentity_t *ent, Portal::Type type, vec3_t forward,
+                   vec3_t right, vec3_t up, vec3_t muzzleEffect);
+
+private:
+  static void portalgunTrace(gentity_t *ent, trace_t *tr, vec3_t start,
+                             vec3_t end);
 };
 } // namespace ETJump

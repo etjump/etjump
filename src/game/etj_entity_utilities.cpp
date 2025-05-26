@@ -48,7 +48,7 @@ void EntityUtilities::checkForRailBox(gentity_t *ent) {
   }
 }
 
-void EntityUtilities::drawRailBox(gentity_t *ent,
+void EntityUtilities::drawRailBox(const gentity_t *ent,
                                   const std::vector<float> &color) {
   vec3_t b1;
   vec3_t b2;
@@ -135,4 +135,14 @@ void EntityUtilities::setCursorhintFromString(int &value,
   }
 }
 
+void EntityUtilities::getOriginOrBmodelCenter(const gentity_t *ent,
+                                              vec3_t origin) {
+  if (!VectorCompare(ent->r.currentOrigin, vec3_origin)) {
+    VectorCopy(ent->r.currentOrigin, origin);
+  } else {
+    origin[0] = (ent->r.absmax[0] + ent->r.absmin[0]) / 2;
+    origin[1] = (ent->r.absmax[1] + ent->r.absmin[1]) / 2;
+    origin[2] = (ent->r.absmax[2] + ent->r.absmin[2]) / 2;
+  }
+}
 } // namespace ETJump

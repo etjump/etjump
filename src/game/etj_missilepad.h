@@ -26,7 +26,7 @@
 
 namespace ETJump {
 class Missilepad {
-  static void use(gentity_t *ent);
+  static void use(gentity_t *self);
   static void touch(gentity_t *self, gentity_t *other);
 
 public:

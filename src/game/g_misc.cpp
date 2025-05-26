@@ -352,14 +352,7 @@ void DirectTeleport(gentity_t *player, const vec3_t origin, vec3_t angles) {
   }
 }
 
-/*
-=================================================================================
-
-Portal Gun Mod: Teleport Method
-
-=================================================================================
-*/
-
+// TODO: relocate
 void PortalTeleport(gentity_t *player, vec3_t origin, vec3_t angles) {
   // Feen: Extra little boost coming out of a portal...
   static constexpr float PORTAL_NUDGE = 50.0f;
@@ -450,104 +443,6 @@ void PortalTeleport(gentity_t *player, vec3_t origin, vec3_t angles) {
     trap_LinkEntity(player);
   }
 }
-
-void weapon_portalgun_touch(gentity_t *self, gentity_t *other, trace_t *trace) {
-
-  qboolean alreadyHave = qfalse;
-
-  if (!other->client) {
-    return;
-  }
-
-  // ETJump: disable portalgun pickup
-  if (other->client->sess.timerunActive &&
-      (other->client->sess.runSpawnflags &
-       static_cast<int>(ETJump::TimerunSpawnflags::NoPortalgunPickup))) {
-    return;
-  }
-
-  // If portal team value is higher than 0 let's set users pteam value
-  // to that of the entity.
-  if (self->portalTeam > 0) {
-    other->client->sess.portalTeam = self->portalTeam;
-  }
-
-  // check if player already had the weapon
-  alreadyHave = COM_BitCheck(other->client->ps.weapons, self->item->giTag);
-
-  if (alreadyHave) {
-    return;
-  }
-
-  // Forcing pickup through same function as target_give uses
-  Touch_Item_Give(self, other, trace);
-}
-
-// Just to fix a bug...
-void weapon_portal_think(gentity_t *self) { return; }
-
-/*
-Portal team
-
-if portalTeam is set to higher value than 0, let's set the users portal team to
-whatever value it is. People with the same portal team value can use eachothers
-portals. Clear portal team on death, team switch etc.
-*/
-void SP_weapon_portalgun(gentity_t *ent) {
-  gitem_t *item;
-
-  G_SpawnInt("portal_team", "0", &ent->portalTeam);
-
-  item = BG_FindItemForWeapon(WP_PORTAL_GUN);
-
-  char *noise{};
-
-  if (G_SpawnString("noise", "", &noise)) {
-    ent->noise_index = G_SoundIndex(noise);
-  }
-
-  ent->s.eType = ET_ITEM;
-  ent->s.modelindex = item - bg_itemlist; // store item number in modelindex
-  ent->s.otherEntityNum2 = 1;             // DHM - Nerve :: this is taking
-                              // modelindex2's place for a dropped item
-
-  ent->classname = item->classname;
-  ent->item = item;
-  VectorSet(ent->r.mins, -ITEM_RADIUS, -ITEM_RADIUS,
-            0); //----(SA)	so items sit on the ground
-  VectorSet(ent->r.maxs, ITEM_RADIUS, ITEM_RADIUS,
-            2 * ITEM_RADIUS); //----(SA)	so items sit on the ground
-  ent->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
-
-  ent->clipmask =
-      CONTENTS_SOLID | CONTENTS_MISSILECLIP; // NERVE - SMF - fix for items
-                                             // falling through grates
-
-  ent->touch = weapon_portalgun_touch;
-
-  ent->think = weapon_portal_think;
-  ent->nextthink = level.time + 100;
-
-  if (ent->spawnflags & 2) // spin
-  {
-    ent->s.eFlags |= EF_SPINNING;
-  }
-
-  if (ent->spawnflags & 4) {
-    ent->s.eFlags |= EF_BOBBING; // bobbing
-  }
-
-  G_SetOrigin(ent, ent->s.origin);
-  G_SetAngle(ent, ent->s.angles);
-
-  trap_LinkEntity(ent);
-}
-
-/*
-
-END PGM STUFF...
-
-*/
 
 /*QUAKED misc_teleporter_dest (1 0 0) (-32 -32 -24) (32 32 -16)
 Point teleporters at these.
