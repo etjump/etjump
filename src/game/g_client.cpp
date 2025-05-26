@@ -2109,7 +2109,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   client->sess.clientMapProgression = 0;
   ent->client->sess.muted = qfalse;
   ent->client->pers.race.isRouteMaker = qfalse;
-  client->sess.portalTeam = 0;
+  client->sess.portalTeam = PORTAL_TEAM_NONE;
   client->sess.saveLimit = level.limitedSaves;
 
   // count current clients and rank for scoreboard

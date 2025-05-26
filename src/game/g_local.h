@@ -164,6 +164,11 @@ inline constexpr int EXPLOSIVE_USESHADER = 4;
 inline constexpr int EXPLOSIVE_LOWGRAV = 8;
 inline constexpr int EXPLOSIVE_TANK = 32;
 
+// portalteam
+inline constexpr int PORTAL_TEAM_NONE = 0;
+inline constexpr int PORTAL_TEAM_FT = 1;
+inline constexpr int PORTAL_TEAM_ALL = 2;
+
 //============================================================================
 
 typedef struct gentity_s gentity_t;
@@ -2874,17 +2879,6 @@ char *Q_SayConcatArgs(int start);
 void DecolorString(char *in, char *out);
 int Q_SayArgc();
 qboolean Q_SayArgv(int n, char *buffer, int bufferLength);
-
-// Feen: PGM
-
-void Portal_Think(gentity_t *self);
-void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace);
-
-// g_weapon.c
-void Weapon_Portal_Fire(
-    gentity_t *ent, int portalNum); // TODO add switch for different portals....
-
-// Feen: END PGM
 
 void Use_target_remove_powerups(gentity_t *ent, gentity_t *other,
                                 gentity_t *activator);
