@@ -2139,9 +2139,8 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
         color[1] = 0.0f;
         color[2] = 0.0f;
       }
-      CG_RailTrail(&cgs.clientinfo[es->otherEntityNum2], es->origin2,
-                   es->pos.trBase, es->dmgFlags,
-                   color); //----(SA)	added'type' field
+
+      CG_RailTrail(es->origin2, es->pos.trBase, es->dmgFlags, color);
     } break;
 
     //
@@ -2764,8 +2763,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
         return;
       }
 
-      CG_RailTrail(&cgs.clientinfo[es->otherEntityNum2], es->origin2,
-                   es->pos.trBase, es->dmgFlags,
+      CG_RailTrail(es->origin2, es->pos.trBase, es->dmgFlags,
                    tv(es->angles[0], es->angles[1], es->angles[2]));
       break;
     default:

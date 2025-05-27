@@ -589,12 +589,26 @@ static void CG_TouchTriggerPrediction() {
                             ETJump::EntityUtilsShared::PORTAL_SIZE;
         ETJump::EntityUtilsShared::setPortalBBox(
             mins, maxs, cent->currentState.angles, scale);
+
+        VectorAdd(cent->lerpOrigin, mins, mins);
+        VectorAdd(cent->lerpOrigin, maxs, maxs);
+
+        // TODO: this is kinda annoying as railtrails fade as they approach
+        //  the end of their lifetime, we should probably add a version
+        //  that does not fade at all since it's more pleasant on eyes
+        if (etj_portalDebug.integer &&
+            cg.time > cent->lastRailboxTime + cg_railTrailTime.integer) {
+          CG_RailTrail(mins, maxs, true,
+                       ent->eType == ET_PORTAL_BLUE ? tv(0, 0, 1)
+                                                    : tv(1, 0, 0));
+          cent->lastRailboxTime = cg.time;
+        }
       } else {
         trap_R_ModelBounds(cmodel, mins, maxs);
-      }
 
-      VectorAdd(cent->lerpOrigin, mins, mins);
-      VectorAdd(cent->lerpOrigin, maxs, maxs);
+        VectorAdd(cent->lerpOrigin, mins, mins);
+        VectorAdd(cent->lerpOrigin, maxs, maxs);
+      }
 
 #ifdef VISIBLE_TRIGGERS
       if (ent->eType == ET_TRIGGER_MULTIPLE ||

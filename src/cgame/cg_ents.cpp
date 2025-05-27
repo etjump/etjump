@@ -377,8 +377,6 @@ static void CG_EntityEffects(centity_t *cent) {
   // jpw
 }
 
-void CG_RailTrail2(clientInfo_t *ci, vec3_t start, vec3_t end);
-
 /*
 ==================
 CG_General

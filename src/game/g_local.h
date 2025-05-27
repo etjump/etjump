@@ -2095,7 +2095,6 @@ extern vmCvar_t g_banner5;
 extern vmCvar_t g_banners;
 
 // Feen: PGM
-extern vmCvar_t g_portalDebug;
 extern vmCvar_t g_portalMode;
 
 extern vmCvar_t g_maxConnsPerIP;

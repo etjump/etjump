@@ -358,6 +358,11 @@ typedef struct centity_s {
   // Gordon: tagconnect cleanup..
   int tagParent;
   char tagName[MAX_QPATH];
+
+  // last time we drew a railbox for debugging
+  // we don't want to add a new railbox each frame,
+  // otherwise we just fill up localents array in few frames
+  int lastRailboxTime;
 } centity_t;
 
 //======================================================================
@@ -2455,10 +2460,9 @@ extern vmCvar_t etj_popupPosX;
 extern vmCvar_t etj_popupPosY;
 
 // Feen: PGM client cvars
-extern vmCvar_t
-    etj_viewPlayerPortals; // Enable/Disable viewing other player portals
-// TODO: May add cvars to allow players to override portal colors
-//		when etj_viewPlayerPortals is set to 0 (disabled)
+// Enable/Disable viewing other player portals
+extern vmCvar_t etj_viewPlayerPortals;
+extern vmCvar_t etj_portalDebug;
 
 extern vmCvar_t etj_expandedMapAlpha;
 
@@ -3161,10 +3165,9 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
                int fleshEntityNum, int otherEntNum2, float waterfraction,
                int seed);
 
-void CG_RailTrail(clientInfo_t *ci, const vec3_t start, const vec3_t end,
-                  int type, const vec3_t color); //----(SA)	added 'type'
-void CG_RailTrail2(clientInfo_t *ci, const vec3_t start, const vec3_t end,
-                   const vec3_t color);
+void CG_RailTrail(const vec3_t start, const vec3_t end, bool box,
+                  const vec3_t color);
+void CG_RailTrail2(const vec3_t start, const vec3_t end, const vec3_t color);
 void CG_GrappleTrail(centity_t *ent, const weaponInfo_t *wi);
 void CG_AddViewWeapon(playerState_t *ps);
 void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
