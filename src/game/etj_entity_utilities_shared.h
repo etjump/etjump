@@ -45,5 +45,12 @@ public:
 
   static void setViewAngles(playerState_t *ps, entityState_t *es,
                             usercmd_t *cmd, const vec3_t angle);
+
+  static void portalTeleport(playerState_t *ps, entityState_t *player,
+                             const entityState_t *portal, usercmd_t *cmd,
+                             int time);
+
+  static void setPortalBBox(vec3_t mins, vec3_t maxs, const vec3_t angles,
+                            float scale);
 };
 } // namespace ETJump
