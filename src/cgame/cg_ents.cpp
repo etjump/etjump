@@ -8,7 +8,6 @@
 #include <algorithm>
 
 #include "cg_local.h"
-#include "../game/etj_entity_utilities_shared.h"
 
 /*
 ======================
@@ -2377,9 +2376,11 @@ static void CG_PortalGate(const centity_t *cent) {
   vec3_t verts[4];
   vec3_t pushedOrigin, angleInverse;
   vec3_t axis[3];
-  const float radius = !cent->currentState.onFireStart
-                           ? ETJump::EntityUtilsShared::PORTAL_SIZE
-                           : static_cast<float>(cent->currentState.onFireStart);
+  const float radius =
+      !cent->currentState.onFireStart
+          ? ETJump::PORTAL_DRAW_RADIUS
+          : static_cast<float>(cent->currentState.onFireStart) *
+                ETJump::PORTAL_DRAW_SCALAR;
 
   // not our portal
   if (!etj_viewPlayerPortals.integer &&

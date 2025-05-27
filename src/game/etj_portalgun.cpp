@@ -38,8 +38,7 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
                    const trace_t &tr, vec3_t end, const vec3_t angles) {
   gentity_t *portal = G_Spawn();
   portal->classname = "portal_gate";
-  portal->s.onFireStart =
-      static_cast<int>(EntityUtilsShared::PORTAL_SIZE * scale);
+  portal->s.onFireStart = static_cast<int>(PORTAL_BBOX_RADIUS * 2 * scale);
 
   // Assign ent to player as well as the portal type..
   if (type == Type::PORTAL_BLUE) {
@@ -331,8 +330,7 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
     VectorSubtract(be_position, normalScaled, tr_end);
 
     if (brushEnt->count > 0) {
-      scale =
-          static_cast<float>(brushEnt->count) / EntityUtilsShared::PORTAL_SIZE;
+      scale = static_cast<float>(brushEnt->count) / (PORTAL_BBOX_RADIUS * 2);
     }
   } else {
     VectorCopy(tr.endpos, tr_end);
@@ -352,7 +350,7 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
 
     if (otherPortal) {
       const float otherScale = static_cast<float>(otherPortal->s.onFireStart) /
-                               EntityUtilsShared::PORTAL_SIZE;
+                               (PORTAL_BBOX_RADIUS * 2);
       const float min_dist =
           MIN_PORTALS_DIST * scale + MIN_PORTALS_DIST * otherScale;
 

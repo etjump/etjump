@@ -586,7 +586,7 @@ static void CG_TouchTriggerPrediction() {
         // 'onFireStart' contains the portal size, which might be adjusted
         // by 'func_portaltarget', so derive scale from that
         const float scale = static_cast<float>(cent->currentState.onFireStart) /
-                            ETJump::EntityUtilsShared::PORTAL_SIZE;
+                            (ETJump::PORTAL_BBOX_RADIUS * 2);
         ETJump::EntityUtilsShared::setPortalBBox(
             mins, maxs, cent->currentState.angles, scale);
 
