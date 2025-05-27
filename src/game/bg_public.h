@@ -710,7 +710,7 @@ typedef enum {
 
   // (SA) for Wolf
   PW_INVULNERABLE,
-  PW_FIRE,          //----(SA)
+  PW_PORTALPREDICT, // used for portal prediction, was PW_FIRE
   PW_PUSHERPREDICT, // used for pusher prediction, was PW_ELECTRIC
   PW_BREATHER,      //----(SA)
   PW_NOFATIGUE,     //----(SA)
@@ -2877,6 +2877,11 @@ enum class PlayerStance {
   Crouch = 1,
   Prone = 2,
 };
+
+// portalteam
+inline constexpr int PORTAL_TEAM_NONE = 0;
+inline constexpr int PORTAL_TEAM_FT = 1;
+inline constexpr int PORTAL_TEAM_ALL = 2;
 } // namespace ETJump
 
 inline constexpr int JUMP_VELOCITY = 270;

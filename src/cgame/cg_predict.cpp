@@ -80,6 +80,11 @@ void CG_BuildSolidList(void) {
       cg_numTriggerEntities++;
     }
 
+    if (ent->eType == ET_PORTAL_BLUE || ent->eType == ET_PORTAL_RED) {
+      cg_triggerEntities[cg_numTriggerEntities] = cent;
+      cg_numTriggerEntities++;
+    }
+
     if (cent->nextState.solid) {
       /*			if(cg_fastSolids.integer)
          { // Gordon: "optimization" (disabling until i
@@ -482,6 +487,29 @@ void CG_AddDirtBulletParticles(vec3_t origin, vec3_t dir, int speed,
                                float width, float height, float alpha,
                                qhandle_t shader);
 
+namespace ETJump {
+static bool canUsePortal(const entityState_t *es) {
+  // we can always use our own portals,
+  // and can use anyone's portals if 'portalteam' is set to 2
+  if (cg.snap->ps.clientNum == es->otherEntityNum ||
+      es->teamNum == PORTAL_TEAM_ALL) {
+    return true;
+  }
+
+  if (es->teamNum == PORTAL_TEAM_NONE) {
+    return false;
+  }
+
+  if (es->teamNum == PORTAL_TEAM_FT) {
+    if (!CG_IsOnSameFireteam(cg.snap->ps.clientNum, es->otherEntityNum)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+} // namespace ETJump
+
 /*
 =========================
 CG_TouchTriggerPrediction
@@ -520,20 +548,24 @@ static void CG_TouchTriggerPrediction() {
       continue;
     }
 
-    if (ent->solid != SOLID_BMODEL) {
-      continue;
-    }
+    // portals don't have bmodels
+    if (ent->eType != ET_PORTAL_BLUE && ent->eType != ET_PORTAL_RED) {
+      if (ent->solid != SOLID_BMODEL) {
+        continue;
+      }
 
-    // Gordon: er, this lookup was wrong...
-    cmodel = cgs.inlineDrawModel[ent->modelindex];
-    if (!cmodel) {
-      continue;
+      // Gordon: er, this lookup was wrong...
+      cmodel = cgs.inlineDrawModel[ent->modelindex];
+      if (!cmodel) {
+        continue;
+      }
     }
 
     if (ent->eType == ET_CONSTRUCTIBLE || ent->eType == ET_OID_TRIGGER ||
         ent->eType == ET_PUSH_TRIGGER ||
         ent->eType == ET_VELOCITY_PUSH_TRIGGER ||
-        ent->eType == ET_TELEPORT_TRIGGER_CLIENT
+        ent->eType == ET_TELEPORT_TRIGGER_CLIENT ||
+        ent->eType == ET_PORTAL_BLUE || ent->eType == ET_PORTAL_RED
 #ifdef VISIBLE_TRIGGERS
         || ent->eType == ET_TRIGGER_MULTIPLE ||
         ent->eType == ET_TRIGGER_FLAGONLY ||
@@ -546,7 +578,20 @@ static void CG_TouchTriggerPrediction() {
         continue;
       }
 
-      trap_R_ModelBounds(cmodel, mins, maxs);
+      // portals have a pre-defined bounding box, which we can calculate here
+      // rather than transmitting it over network, since we need
+      // origin2/angles2 to store the destination and don't really have any
+      // fields which we could use to transmit mins/maxs
+      if (ent->eType == ET_PORTAL_BLUE || ent->eType == ET_PORTAL_RED) {
+        // 'onFireStart' contains the portal size, which might be adjusted
+        // by 'func_portaltarget', so derive scale from that
+        const float scale = static_cast<float>(cent->currentState.onFireStart) /
+                            ETJump::EntityUtilsShared::PORTAL_SIZE;
+        ETJump::EntityUtilsShared::setPortalBBox(
+            mins, maxs, cent->currentState.angles, scale);
+      } else {
+        trap_R_ModelBounds(cmodel, mins, maxs);
+      }
 
       VectorAdd(cent->lerpOrigin, mins, mins);
       VectorAdd(cent->lerpOrigin, maxs, maxs);
@@ -560,7 +605,8 @@ static void CG_TouchTriggerPrediction() {
       {
         if (ent->eType != ET_PUSH_TRIGGER &&
             ent->eType != ET_VELOCITY_PUSH_TRIGGER &&
-            ent->eType != ET_TELEPORT_TRIGGER_CLIENT) {
+            ent->eType != ET_TELEPORT_TRIGGER_CLIENT &&
+            ent->eType != ET_PORTAL_BLUE && ent->eType != ET_PORTAL_RED) {
           // expand the bbox a bit
           VectorSet(mins, mins[0] - 48, mins[1] - 48, mins[2] - 48);
           VectorSet(maxs, maxs[0] + 48, maxs[1] + 48, maxs[2] + 48);
@@ -619,9 +665,23 @@ static void CG_TouchTriggerPrediction() {
           ETJump::EntityUtilsShared::touchPusher(&cg.predictedPlayerState,
                                                  cg.physicsTime, ent);
         }
-      }
+      } else if (ent->eType == ET_PORTAL_BLUE || ent->eType == ET_PORTAL_RED) {
+        // don't try to teleport if we only have one portal
+        if (VectorCompare(ent->origin2, vec3_origin) &&
+            VectorCompare(ent->angles2, vec3_origin)) {
+          continue;
+        }
 
-      continue;
+        if (!ETJump::canUsePortal(ent)) {
+          continue;
+        }
+
+        entityState_t *playerEs =
+            &cg_entities[cg.snap->ps.clientNum].currentState;
+        ETJump::EntityUtilsShared::portalTeleport(&cg.predictedPlayerState,
+                                                  playerEs, ent, &cg_pmove.cmd,
+                                                  cg.physicsTime);
+      }
     }
   }
 }
@@ -763,9 +823,9 @@ int CG_PredictionOk(playerState_t *ps1, playerState_t *ps2) {
   for (i = 0; i < MAX_STATS; i++) {
     if (ps2->stats[i] != ps1->stats[i]) {
       if (cg_showmiss.integer & 8) {
-        CG_Printf(
-            "CG_PredictionOk info: return 19 - MAX_STATS[%i] ps1: %i ps2: %i\n",
-            i, ps1->stats[i], ps2->stats[i]);
+        CG_Printf("CG_PredictionOk info: return 19 - MAX_STATS[%i] ps1: %i "
+                  "ps2: %i\n",
+                  i, ps1->stats[i], ps2->stats[i]);
       }
       return 19;
     }
@@ -841,11 +901,11 @@ each frame.
 
 OPTIMIZE: don't re-simulate unless the newly arrived snapshot playerState_t
 differs from the predicted one.  Would require saving all intermediate
-playerState_t during prediction. (this is "dead reckoning" and would definately
-be nice to have in there (SA))
+playerState_t during prediction. (this is "dead reckoning" and would
+definately be nice to have in there (SA))
 
-We detect prediction errors and allow them to be decayed off over several frames
-to ease the jerk.
+We detect prediction errors and allow them to be decayed off over several
+frames to ease the jerk.
 =================
 */
 
@@ -1130,7 +1190,8 @@ void CG_PredictPlayerState() {
             break;
           }
 
-          // this one is almost exact, so we'll copy it in as the starting point
+          // this one is almost exact, so we'll copy it in as the starting
+          // point
           *cg_pmove.ps = cg.backupStates[i];
           // advance the head
           cg.backupStateTop = (i + 1) % MAX_BACKUP_STATES;
@@ -1182,9 +1243,10 @@ void CG_PredictPlayerState() {
     // only 1 out of those 2 commands will be run
     // this will mean that in most situations, the check below would happen
     // on 2nd user command which is not run, and the prediction error
-    // is not registered, causing more jittery game when miss prediction happens
-    // since there might be many user commands for same playerstate commandTime
-    // (as explained above) need to make sure it is only checked once per frame
+    // is not registered, causing more jittery game when miss prediction
+    // happens since there might be many user commands for same playerstate
+    // commandTime (as explained above) need to make sure it is only checked
+    // once per frame
     if (cg.predictedPlayerState.commandTime == oldPlayerState.commandTime &&
         predictError) {
       vec3_t delta;

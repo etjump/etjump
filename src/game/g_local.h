@@ -164,11 +164,6 @@ inline constexpr int EXPLOSIVE_USESHADER = 4;
 inline constexpr int EXPLOSIVE_LOWGRAV = 8;
 inline constexpr int EXPLOSIVE_TANK = 32;
 
-// portalteam
-inline constexpr int PORTAL_TEAM_NONE = 0;
-inline constexpr int PORTAL_TEAM_FT = 1;
-inline constexpr int PORTAL_TEAM_ALL = 2;
-
 //============================================================================
 
 typedef struct gentity_s gentity_t;
@@ -600,8 +595,6 @@ struct gentity_s {
   // Zero - other portal so we know where to go
   // when someone goes in a team portal
   gentity_t *linkedPortal;
-
-  int lastPortalTime; // Last time we teleported using portal
 
   int runIndex;
   char runName[MAX_TIMERUN_NAME_LENGTH];
@@ -1740,8 +1733,6 @@ void InitTrigger(gentity_t *self);
 // this is only used by tank exiting and some weird spectator door teleport
 void TeleportPlayer(gentity_t *player, const vec3_t origin, vec3_t angles);
 void DirectTeleport(gentity_t *player, const vec3_t origin, vec3_t angles);
-void PortalTeleport(gentity_t *player, vec3_t origin,
-                    vec3_t angles); // Feen: PGM
 void mg42_fire(gentity_t *other);
 void mg42_stopusing(gentity_t *self);
 void aagun_fire(gentity_t *other);

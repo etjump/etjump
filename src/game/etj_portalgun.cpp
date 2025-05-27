@@ -24,6 +24,7 @@
 
 #include "etj_portalgun.h"
 #include "etj_entity_utilities.h"
+#include "etj_entity_utilities_shared.h"
 
 namespace ETJump {
 // max range where you can place next portal gate
@@ -32,15 +33,13 @@ inline constexpr float MAX_PORTAL_RANGE = 2 << 16;
 inline constexpr float MIN_ANGLES_DIFF = 100.0f;
 // min distance between two portal center points, used to avoid overlapping
 inline constexpr float MIN_PORTALS_DIST = 75.0f / 2;
-// cooldown between portal touch events (ms)
-inline constexpr int PORTAL_TOUCH_COOLDOWN = 100;
 
 void Portal::spawn(gentity_t *ent, const float scale, const Type type,
-                   const trace_t &tr, vec3_t tEndPos,
-                   const vec3_t tPortalAngles) {
+                   const trace_t &tr, vec3_t end, const vec3_t angles) {
   gentity_t *portal = G_Spawn();
   portal->classname = "portal_gate";
-  portal->s.onFireStart = static_cast<int>(48.0f * scale);
+  portal->s.onFireStart =
+      static_cast<int>(EntityUtilsShared::PORTAL_SIZE * scale);
 
   // Assign ent to player as well as the portal type..
   if (type == Type::PORTAL_BLUE) {
@@ -66,54 +65,13 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
   }
 
   // Set origin (obviously)
-  G_SetOrigin(portal, tEndPos);
+  G_SetOrigin(portal, end);
 
-  VectorCopy(tEndPos, portal->s.origin);
-  VectorCopy(tEndPos, portal->r.currentOrigin);
+  VectorCopy(end, portal->s.origin);
+  VectorCopy(end, portal->r.currentOrigin);
 
-  float P_DEPTH, P_HEIGHT, P_WIDTH;
-
-  // Bounding box
-  // //Horizontal portal (floor/ceiling)
-  if ((tPortalAngles[PITCH] >= -135 && tPortalAngles[PITCH] <= -45) ||
-      (tPortalAngles[PITCH] >= -315 &&
-       tPortalAngles[PITCH] <= -225)) // Horizontal portal (floor/ceiling)
-  {
-    P_DEPTH = P_WIDTH = 30.0f * scale;
-    P_HEIGHT = 15.0f;
-
-    VectorSet(portal->r.mins, -P_DEPTH, -P_WIDTH,
-              -P_HEIGHT); //(P_DEPTH, P_WIDTH, P_HEIGHT)
-    VectorSet(portal->r.maxs, P_DEPTH, P_WIDTH, P_HEIGHT);
-  } else if (tPortalAngles[PITCH] == -0) // Vertical Portals (On walls)
-  {
-    P_DEPTH = 5.0f;
-    P_HEIGHT = P_WIDTH = 30.0f * scale;
-
-    if ((tPortalAngles[YAW] >= 45 && tPortalAngles[YAW] <= 135) ||
-        (tPortalAngles[YAW] >= 225 && tPortalAngles[YAW] <= 315)) {
-
-      VectorSet(portal->r.mins, -P_HEIGHT, -P_DEPTH,
-                -P_WIDTH); //(P_HEIGHT, P_DEPTH, P_WIDTH)
-      VectorSet(portal->r.maxs, P_HEIGHT, P_DEPTH, P_WIDTH);
-
-    } else {
-
-      VectorSet(portal->r.mins, -P_DEPTH, -P_HEIGHT,
-                -P_WIDTH); //(P_HEIGHT, P_WIDTH, P_DEPTH)
-      VectorSet(portal->r.maxs, P_DEPTH, P_HEIGHT, P_WIDTH);
-    }
-  } else // Slanted (not quite vertical) portals get the largest bbox...
-  {
-    P_DEPTH = P_WIDTH = 30.0f * scale;
-    P_HEIGHT = 15.0f;
-
-    VectorSet(portal->r.mins, -P_DEPTH, -P_WIDTH,
-              -P_HEIGHT); //(P_DEPTH, P_WIDTH, P_HEIGHT)
-    VectorSet(portal->r.maxs, P_DEPTH, P_WIDTH, P_HEIGHT);
-  }
-
-  // end new bbox code
+  EntityUtilsShared::setPortalBBox(portal->r.mins, portal->r.maxs, angles,
+                                   scale);
 
   portal->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
   portal->clipmask =
@@ -125,8 +83,8 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
   };
 
   portal->think = think;
-  portal->nextthink =
-      level.time + 100; //.1 sec til next think - mainly used for bbox dbug
+  // we need fast thinks to update dest origin/angles for clients
+  portal->nextthink = level.time + level.frameTime;
 
   portal->r.ownerNum = ent->s.number;
   portal->parent = ent;
@@ -140,10 +98,31 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
               portal->s.angles); // NOTE: RE-Enable angles...
   vectoangles(tr.plane.normal, portal->r.currentAngles);
 
+  // rather than using the shared cvar, we can simply set 'portalteam'
+  // value to an entitystate field that we can check on client
+  portal->s.teamNum = level.portalTeam;
+
   trap_LinkEntity(portal);
 }
 
 void Portal::think(gentity_t *self) {
+  // setup for prediction
+  // we must do this here because 'linkedPortal' will be nullptr initially,
+  // before a second portal is shot, so we need to make sure
+  // origin/angles get regular updates on client
+  if (self->linkedPortal) {
+    VectorCopy(self->s.origin, self->linkedPortal->s.origin2);
+    VectorCopy(self->s.angles, self->linkedPortal->s.angles2);
+
+    // force destination to be in PVS by setting SVF_PORTAL flag,
+    // so entities are loaded in instantly when we teleport
+    // TODO: filter other players portals?
+    self->r.svFlags |= SVF_PORTAL;
+  }
+
+  // TODO: this should probably be moved to client side,
+  //  we calculate the bbox on client anyway for prediction
+  //  so we can just draw it there without creating a temp entity
   if (g_portalDebug.integer) {
     vec3_t b1{};
     vec3_t b2{};
@@ -163,16 +142,15 @@ void Portal::think(gentity_t *self) {
       bboxEnt->s.angles[1] = 0.0f;
       bboxEnt->s.angles[2] = 1.0f;
     }
-
-    self->nextthink = level.time + 500;
-  } else {
-    self->nextthink = level.time + 1000;
   }
+
+  // we should think *every* frame to ensure up-to-date positons
+  self->nextthink = level.time + level.frameTime;
 }
 
-void Portal::touch(const gentity_t *self, gentity_t *other) {
+void Portal::touch(gentity_t *self, gentity_t *other) {
   // TODO: Add ability to teleport missiles...
-  gentity_t *dest = nullptr;
+  const gentity_t *dest = nullptr;
 
   // If this is not a player, then don't teleport it.
   // //NOTE: We'll probably want items to be
@@ -181,33 +159,27 @@ void Portal::touch(const gentity_t *self, gentity_t *other) {
     return;
   }
 
-  if (level.portalTeam == PORTAL_TEAM_NONE) {
-    // Default behaviour
-    // If not the owner of this portal, ignore...
-    if (self->r.ownerNum != other->s.number) {
+  if (other->client->ps.pm_type == PM_DEAD) {
+    return;
+  }
+
+  // if this isn't our portal, and 'portalteam' isn't set to 2,
+  // determine if we can use this portal at all
+  if (self->r.ownerNum != other->s.number &&
+      level.portalTeam != PORTAL_TEAM_ALL) {
+    if (level.portalTeam == PORTAL_TEAM_NONE) {
       return;
     }
-  } else if (level.portalTeam == PORTAL_TEAM_FT) {
-    // People in the same ft can share
-    fireteamData_t *ftSelf{};
-    fireteamData_t *ftOther{};
 
-    // only check this for portals which are not our own
-    if (self->r.ownerNum != other->s.number) {
+    if (level.portalTeam == PORTAL_TEAM_FT) {
+      fireteamData_t *ftSelf{};
+      fireteamData_t *ftOther{};
+
       if (!G_IsOnFireteam(ClientNum(other), &ftSelf) ||
           !G_IsOnFireteam(self->r.ownerNum, &ftOther) || ftSelf != ftOther) {
         return;
       }
     }
-  }
-
-  if (other->client->ps.pm_type == PM_DEAD) {
-    return;
-  }
-
-  // Check last time we portal'd
-  if (other->lastPortalTime + PORTAL_TOUCH_COOLDOWN > level.time) {
-    return;
   }
 
   if (level.portalTeam == PORTAL_TEAM_NONE) {
@@ -224,7 +196,8 @@ void Portal::touch(const gentity_t *self, gentity_t *other) {
       }
 
     } else {
-      // Not quite sure what the hell we hit here...
+      G_Printf(S_COLOR_RED "ERROR: invalid portal entity hit, this is a bug! "
+                           "Please report this to the developers.\n");
       return;
     }
   } else if (level.portalTeam == PORTAL_TEAM_FT ||
@@ -235,13 +208,11 @@ void Portal::touch(const gentity_t *self, gentity_t *other) {
   }
 
   if (!dest) {
-    // G_Printf ("Couldn't find portal gate destination...\n");
     return;
   }
 
-  other->lastPortalTime = level.time;
-
-  PortalTeleport(other, dest->s.origin, dest->s.angles);
+  EntityUtilsShared::portalTeleport(&other->client->ps, &other->s, &self->s,
+                                    &other->client->pers.cmd, level.time);
 }
 
 void Portalgun::spawn(gentity_t *ent) {
@@ -384,7 +355,8 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
     VectorSubtract(be_position, normalScaled, tr_end);
 
     if (brushEnt->count > 0) {
-      scale = static_cast<float>(brushEnt->count) / 48.0f;
+      scale =
+          static_cast<float>(brushEnt->count) / EntityUtilsShared::PORTAL_SIZE;
     }
   } else {
     VectorCopy(tr.endpos, tr_end);
@@ -394,7 +366,7 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
 
   // check that portals aren't overlapping..
   if ((ent->portalBlue) || (ent->portalRed)) {
-    gentity_t *otherPortal = nullptr;
+    const gentity_t *otherPortal = nullptr;
 
     if (type == Portal::Type::PORTAL_BLUE && ent->portalRed) {
       otherPortal = ent->portalRed;
@@ -403,8 +375,8 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
     }
 
     if (otherPortal) {
-      const float otherScale =
-          static_cast<float>(otherPortal->s.onFireStart) / 48.0f;
+      const float otherScale = static_cast<float>(otherPortal->s.onFireStart) /
+                               EntityUtilsShared::PORTAL_SIZE;
       const float min_dist =
           MIN_PORTALS_DIST * scale + MIN_PORTALS_DIST * otherScale;
 
