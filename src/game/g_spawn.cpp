@@ -1282,9 +1282,9 @@ void SP_worldspawn(void) {
   val = Q_atoi(s);
   if (val) {
     if (val == 1) {
-      level.portalTeam = PORTAL_TEAM_FT;
+      level.portalTeam = ETJump::PORTAL_TEAM_FT;
     } else {
-      level.portalTeam = PORTAL_TEAM_ALL;
+      level.portalTeam = ETJump::PORTAL_TEAM_ALL;
     }
   }
   G_Printf("Portal team is set to %d.\n", val);

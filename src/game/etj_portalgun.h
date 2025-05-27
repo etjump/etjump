@@ -35,9 +35,9 @@ public:
   };
 
   static void spawn(gentity_t *ent, float scale, Type type, const trace_t &tr,
-                    vec3_t tEndPos, const vec3_t tPortalAngles);
+                    vec3_t end, const vec3_t angles);
   static void think(gentity_t *self);
-  static void touch(const gentity_t *self, gentity_t *other);
+  static void touch(gentity_t *self, gentity_t *other);
 };
 
 class Portalgun {

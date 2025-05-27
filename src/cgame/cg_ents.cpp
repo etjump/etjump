@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "../game/etj_entity_utilities_shared.h"
 
 /*
 ======================
@@ -2373,13 +2374,13 @@ void CG_CalcEntityLerpPositions(centity_t *cent) {
 }
 
 // Feen: PGM - Drawing the portals....
-static void CG_PortalGate(centity_t *cent) {
+static void CG_PortalGate(const centity_t *cent) {
   polyVert_t polyVerts[4];
   vec3_t verts[4];
   vec3_t pushedOrigin, angleInverse;
   vec3_t axis[3];
   const float radius = !cent->currentState.onFireStart
-                           ? 48.0f
+                           ? ETJump::EntityUtilsShared::PORTAL_SIZE
                            : static_cast<float>(cent->currentState.onFireStart);
 
   // not our portal

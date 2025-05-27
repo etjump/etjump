@@ -1791,12 +1791,12 @@ void ClientEndFrame(gentity_t *ent) {
   // OSP -- range changed for MV
   for (i = 0; i < PW_NUM_POWERUPS; i++) {
     // etjump: repurposed powerups
-    if (i == PW_PUSHERPREDICT) {
+    if (i == PW_PUSHERPREDICT || i == PW_PORTALPREDICT) {
       continue;
     }
 
     // these aren't dependant on level.time
-    if (i == PW_FIRE || i == PW_BREATHER || i == PW_NOFATIGUE ||
+    if (i == PW_BREATHER || i == PW_NOFATIGUE ||
         ent->client->ps.powerups[i] == 0 // OSP
         || i == PW_OPS_CLASS_1 || i == PW_OPS_CLASS_2 || i == PW_OPS_CLASS_3 ||
         i == PW_OPS_DISGUISED || i == PW_ADRENALINE) {
