@@ -1,0 +1,16 @@
+// ETJump arena file for steel_factory.bsp
+// Modifications:
+// - removed extra closing bracket
+
+{
+	map			"steel_factory"
+	longname		"^'S^wteel ^'F^wactory"
+	type 	"wolfmp wolfsw"
+	timelimit 0
+	axisRespawnTime 1
+	alliedRespawnTime 1
+	briefing "^1 2011 (c)**^0Map made by^7:**^0Sh^7uTT^0eR**^9~2011-12-25~"
+	axiswintext	"Axis team wins!"
+	alliedwintext "Allied team wins!"	
+}
+

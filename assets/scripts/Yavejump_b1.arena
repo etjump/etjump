@@ -1,0 +1,16 @@
+// ETJump arena file for Yavejump_b1.bsp
+// Modifications:
+// - removed extra closing bracket
+
+{
+	map			"Yavejump_b1"
+	longname		"^cY^9ave^cJ^zump^7_b1"
+	type 	"wolfmp wolfsw"
+	timelimit 0
+	axisRespawnTime 1
+	alliedRespawnTime 1
+	briefing "Mapped By  ^7Ya^5v^7e**^>>Allies:*-Fun rooms, Fun ice and noob gamma jump.**^1>Axis:*-Gamma jumps more or less hard.**HaVe fUn!"
+	axiswintext	"Axis team wins!"
+	alliedwintext "Allied team wins!"	
+}
+

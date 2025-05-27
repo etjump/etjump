@@ -1,0 +1,17 @@
+// ETJump arena file for enasni1_3.bsp
+// Modifications:
+// - fixed missing quote at the end of 'briefing' text
+
+{
+	map			"enasni1_3"
+	longname		"Fuck you!"
+	type			"wolfmp wolfsw wolflms"
+	timelimit		999
+	axisRespawnTime		1
+	alliedRespawnTime	1
+	briefing		"04.01.2012**You will fail jumping this shit."
+	axiswintext		"Axis team wins!"
+	alliedwintext		"Allied team wins!"
+	mapposition_x		256
+	mapposition_y		256
+}

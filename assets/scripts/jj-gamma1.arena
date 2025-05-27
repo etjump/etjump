@@ -1,0 +1,11 @@
+// ETJump arena file for jj-gamma1.bsp
+// Modifications:
+// - fixed incorrect newline on 'briefing' text
+
+{
+	map			"jj-Gamma1"
+	longname		"^7jj^>-^9Gamma^>1"
+	type			"wolfmp wolfsw wolflms"
+	briefing		"^0Map by ^7SoH^>|^9whirl^>. ^0special thanks to   ^7soH|d3v!l*^3allies ^0no playable  "
+}
+
