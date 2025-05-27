@@ -246,7 +246,7 @@ void EntityUtilsShared::setPortalBBox(vec3_t mins, vec3_t maxs,
   // vertical portal (on walls)
   if (angles[PITCH] == -0) {
     depth = PORTAL_BBOX_VERT_DEPTH;
-    height = width = PORTAL_BBOX_WIDTH * scale;
+    height = width = PORTAL_BBOX_RADIUS * scale;
 
     if ((angles[YAW] >= 45 && angles[YAW] <= 135) ||
         (angles[YAW] >= 225 && angles[YAW] <= 315)) {
@@ -257,8 +257,8 @@ void EntityUtilsShared::setPortalBBox(vec3_t mins, vec3_t maxs,
       VectorSet(maxs, depth, height, width);
     }
   } else { // horizontal (including sloped surfaces)
-    depth = width = PORTAL_BBOX_WIDTH * scale;
-    height = PORTAL_BBOX_HEIGHT;
+    depth = width = PORTAL_BBOX_RADIUS * scale;
+    height = PORTAL_BBOX_HOR_DEPTH;
 
     VectorSet(mins, -depth, -width, -height);
     VectorSet(maxs, depth, width, height);
