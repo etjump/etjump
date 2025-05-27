@@ -120,30 +120,6 @@ void Portal::think(gentity_t *self) {
     self->r.svFlags |= SVF_PORTAL;
   }
 
-  // TODO: this should probably be moved to client side,
-  //  we calculate the bbox on client anyway for prediction
-  //  so we can just draw it there without creating a temp entity
-  if (g_portalDebug.integer) {
-    vec3_t b1{};
-    vec3_t b2{};
-
-    VectorCopy(self->r.currentOrigin, b1);
-    VectorCopy(self->r.currentOrigin, b2);
-    VectorAdd(b1, self->r.mins, b1);
-    VectorAdd(b2, self->r.maxs, b2);
-
-    gentity_t *bboxEnt = G_TempEntity(b1, EV_RAILTRAIL);
-    VectorCopy(b2, bboxEnt->s.origin2);
-    bboxEnt->s.dmgFlags = 1; // CG_RailTrail type. Indicates bounding box draw
-
-    // blue bbox on primary portal (railtrails are red by default)
-    if (self->s.eType == ET_PORTAL_BLUE) {
-      bboxEnt->s.angles[0] = 0.0f;
-      bboxEnt->s.angles[1] = 0.0f;
-      bboxEnt->s.angles[2] = 1.0f;
-    }
-  }
-
   // we should think *every* frame to ensure up-to-date positons
   self->nextthink = level.time + level.frameTime;
 }
