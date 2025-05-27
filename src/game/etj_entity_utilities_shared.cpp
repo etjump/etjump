@@ -168,4 +168,100 @@ void EntityUtilsShared::setViewAngles(playerState_t *ps, entityState_t *es,
   VectorCopy(angle, es->angles);
   VectorCopy(es->angles, ps->viewangles);
 }
+
+void EntityUtilsShared::portalTeleport(playerState_t *ps, entityState_t *player,
+                                       const entityState_t *portal,
+                                       usercmd_t *cmd, const int time) {
+  if (ps->powerups[PW_PORTALPREDICT] + PORTAL_TOUCH_COOLDOWN > time) {
+    return;
+  }
+
+  ps->powerups[PW_PORTALPREDICT] = time;
+
+  // Feen: Extra little boost coming out of a portal...
+  static constexpr float PORTAL_NUDGE = 50.0f;
+  const vec_t velocityLength = VectorLength(ps->velocity);
+
+  vec3_t dstOrigin;
+  vec3_t dstAngles;
+
+  VectorCopy(portal->origin2, dstOrigin);
+  VectorCopy(portal->angles2, dstAngles);
+
+  // spit the player out
+  AngleVectors(dstAngles, ps->velocity, nullptr, nullptr);
+
+  // new origin method
+  VectorMA(dstOrigin, 32.0f, ps->velocity, ps->origin);
+
+  // Scale new vector back to old velocity
+  VectorScale(ps->velocity, velocityLength + PORTAL_NUDGE, ps->velocity);
+
+  // toggle the teleport bit so the client knows to not lerp
+  ps->eFlags ^= EF_TELEPORT_BIT;
+
+  // Adjust view angles so portals don't have you looking straight up or
+  // down...
+  if ((dstAngles[PITCH] >= -105 && dstAngles[PITCH] <= -75) ||
+      (dstAngles[PITCH] >= -285 && dstAngles[PITCH] <= -255)) {
+    // if the portal is in the ceiling, we need to offset the player more
+    // so that their head doesn't get stuck inside the ceiling
+    if (dstAngles[PITCH] >= -285 && dstAngles[PITCH] <= -255) {
+      ps->origin[2] -= 32.0f;
+    }
+  } else {
+    vec3_t viewAngles;
+
+    viewAngles[PITCH] = ps->viewangles[PITCH];
+    viewAngles[YAW] = dstAngles[YAW];
+    viewAngles[ROLL] = dstAngles[ROLL];
+
+    setViewAngles(ps, player, cmd, viewAngles);
+  }
+
+  // prevent crashland when landing on portals
+  BG_AddPredictableEventToPlayerstate(EV_PORTAL_TELEPORT, 0, ps);
+
+  // save results of pmove
+  BG_PlayerStateToEntityState(ps, player, qtrue);
+
+// linking is server side only
+#ifdef GAMEDLL
+  // use the precise origin for linking
+  gentity_t *ent = &g_entities[ps->clientNum];
+  VectorCopy(ps->origin, ent->r.currentOrigin);
+
+  if (ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
+    trap_LinkEntity(ent);
+  }
+#endif
+}
+
+void EntityUtilsShared::setPortalBBox(vec3_t mins, vec3_t maxs,
+                                      const vec3_t angles, const float scale) {
+  float width;
+  float height;
+  float depth;
+
+  // vertical portal (on walls)
+  if (angles[PITCH] == -0) {
+    depth = PORTAL_BBOX_VERT_DEPTH;
+    height = width = PORTAL_BBOX_WIDTH * scale;
+
+    if ((angles[YAW] >= 45 && angles[YAW] <= 135) ||
+        (angles[YAW] >= 225 && angles[YAW] <= 315)) {
+      VectorSet(mins, -height, -depth, -width);
+      VectorSet(maxs, height, depth, width);
+    } else {
+      VectorSet(mins, -depth, -height, -width);
+      VectorSet(maxs, depth, height, width);
+    }
+  } else { // horizontal (including sloped surfaces)
+    depth = width = PORTAL_BBOX_WIDTH * scale;
+    height = PORTAL_BBOX_HEIGHT;
+
+    VectorSet(mins, -depth, -width, -height);
+    VectorSet(maxs, depth, width, height);
+  }
+}
 } // namespace ETJump

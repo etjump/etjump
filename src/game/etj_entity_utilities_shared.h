@@ -45,5 +45,20 @@ public:
 
   static void setViewAngles(playerState_t *ps, entityState_t *es,
                             usercmd_t *cmd, const vec3_t angle);
+
+  static void portalTeleport(playerState_t *ps, entityState_t *player,
+                             const entityState_t *portal, usercmd_t *cmd,
+                             int time);
+
+  static void setPortalBBox(vec3_t mins, vec3_t maxs, const vec3_t angles,
+                            float scale);
+
+  // cooldown between portal touch events (ms)
+  static constexpr int PORTAL_TOUCH_COOLDOWN = 100;
+
+  static constexpr float PORTAL_SIZE = 48.0f;
+  static constexpr float PORTAL_BBOX_WIDTH = 30.0f; // origin -> sides
+  static constexpr float PORTAL_BBOX_HEIGHT = 15.0f;
+  static constexpr float PORTAL_BBOX_VERT_DEPTH = 5.0f;
 };
 } // namespace ETJump
