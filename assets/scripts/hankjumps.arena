@@ -1,0 +1,16 @@
+// ETJump arena file for hankjumps.bsp
+// Modifications:
+// - removed erronous non-integer timelimit
+
+{
+	map			"hankjumps"
+	longname		"^fCpt.Hank's jumps ^11 ^22 ^33 ^44 ^55"
+	type			"wolfmp wolfsw"
+	axisRespawnTime		1
+	alliedRespawnTime	1
+
+	briefing		"Designed by ^7someone**The Good old days!**Fuck all you wannabe's**^1Oldschoolers ^0do better. "
+	axiswintext		"You Can't Win"
+	alliedwintext		"You Can't Win"
+}
+
