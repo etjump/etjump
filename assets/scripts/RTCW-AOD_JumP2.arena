@@ -1,0 +1,12 @@
+// ETJump arena file for RTCW-AOD_JumP2.bsp
+// Modifications:
+// - removed quotes around timelimit & respawn times
+
+{
+	map					"RTCW-AOD_JumP2"
+	longname			"^3A^0O^1D^0_^2Jump^72"
+	type				"wolfmp wolfsw"
+	timelimit			50
+	axisRespawnTime		3
+	alliedRespawnTime	3
+}

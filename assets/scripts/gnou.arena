@@ -1,0 +1,15 @@
+// ETJump arena file for gnou.bsp
+// Modifications:
+// - fixed incorrect newline on 'briefing' text
+
+{
+	map			"gnou"
+	longname		"^zGnu_preview"
+	type			"wolfmp wolfsw wolflms"
+	timelimit               60
+        axisRespawnTime         1
+        alliedRespawnTime       1
+        briefing		"^Gnu_preview^>.*Created by ^GnOu^>."                                                                                                                          
+	mapposition_x	800
+	mapposition_y	176
+}
