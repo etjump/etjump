@@ -55,7 +55,7 @@ menuDef {
 #else
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(3), "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         CACHEDSLIDER        (SETTINGS_ITEM_POS(3), "Menu sensitivity:", 0.2, SETTINGS_ITEM_H, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
-        YESNO               (SETTINGS_ITEM_POS(4), "Use quiet exec", 0.2, SETTINGS_ITEM_H, "etj_useExecQuiet", "Use 'execq' when executing map and team-specific autoexec configs\netj_useExecQuiet")
+        COMBO_BIT           (SETTINGS_COMBO_POS(4), "Use quiet exec", 0.2, SETTINGS_ITEM_H, "etj_useExecQuiet", cvarFloatList { "Map autoexec" 1 "Team autoexec" 2 }, none, "Use 'execq' when executing autoexec configs\netj_useExecQuiet")
 #endif
 
 

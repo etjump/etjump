@@ -4021,9 +4021,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   // map-specific autoexec
   const auto mapConfig = va("autoexec_%s", cgs.rawmapname);
   if (ETJump::configFileExists(mapConfig)) {
-    ETJump::execFile(mapConfig);
+    ETJump::execFile(mapConfig, ETJump::ExecFileType::MAP_AUTOEXEC);
   } else if (ETJump::configFileExists("autoexec_default")) {
-    ETJump::execFile("autoexec_default");
+    ETJump::execFile("autoexec_default", ETJump::ExecFileType::MAP_AUTOEXEC);
   }
 
   if (!Q_stricmp(cgs.rawmapname, "solstice") ||

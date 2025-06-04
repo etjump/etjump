@@ -201,10 +201,10 @@ bool ETJump::configFileExists(const std::string &filename) {
   return fileExists;
 }
 
-void ETJump::execFile(const std::string &filename) {
-  const std::string cmd = etj_useExecQuiet.integer
-                              ? stringFormat("execq \"%s.cfg\"\n", filename)
-                              : stringFormat("exec \"%s.cfg\"\n", filename);
+void ETJump::execFile(const std::string &filename, ExecFileType type) {
+  const bool quiet = static_cast<int>(type) & etj_useExecQuiet.integer;
+  const std::string cmd = quiet ? stringFormat("execq \"%s.cfg\"\n", filename)
+                                : stringFormat("exec \"%s.cfg\"\n", filename);
   trap_SendConsoleCommand(cmd.c_str());
 }
 
