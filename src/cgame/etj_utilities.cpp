@@ -202,7 +202,10 @@ bool ETJump::configFileExists(const std::string &filename) {
 }
 
 void ETJump::execFile(const std::string &filename) {
-  trap_SendConsoleCommand(va("exec \"%s.cfg\"\n", filename.c_str()));
+  const std::string cmd = etj_useExecQuiet.integer
+                              ? stringFormat("execq \"%s.cfg\"\n", filename)
+                              : stringFormat("exec \"%s.cfg\"\n", filename);
+  trap_SendConsoleCommand(cmd.c_str());
 }
 
 bool ETJump::isValidClientNum(const int clientNum) {

@@ -2773,6 +2773,8 @@ extern vmCvar_t etj_onDemoPlaybackStart;
 
 extern vmCvar_t etj_HUD_noLerp;
 
+extern vmCvar_t etj_useExecQuiet;
+
 //
 // cg_main.c
 //
