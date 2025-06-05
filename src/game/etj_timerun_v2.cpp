@@ -452,10 +452,7 @@ public:
   std::string message;
 };
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
-void ETJump::TimerunV2::addSeason(Timerun::AddSeasonParams season) {
+void ETJump::TimerunV2::addSeason(const Timerun::AddSeasonParams &season) {
   _sc->postTask(
       [this, season]() {
         try {
@@ -488,10 +485,7 @@ public:
   std::string message;
 };
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
-void ETJump::TimerunV2::editSeason(Timerun::EditSeasonParams params) {
+void ETJump::TimerunV2::editSeason(const Timerun::EditSeasonParams &params) {
   _sc->postTask(
       [this, params]() {
         try {
@@ -585,10 +579,8 @@ std::string rankToString(int rank) {
   }
 }
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
-void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
+void ETJump::TimerunV2::printRecords(
+    const Timerun::PrintRecordsParams &params) {
   _sc->postTask(
       [this, params] {
         auto records = _repository->getRecords(params);
@@ -796,12 +788,9 @@ public:
   std::vector<int> checkpoints;
 };
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTBEGIN(performance-unnecessary-value-param)
-void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
-                                        std::string runName, int rank) {
-  // NOLINTEND(performance-unnecessary-value-param)
+void ETJump::TimerunV2::loadCheckpoints(int clientNum,
+                                        const std::string &mapName,
+                                        const std::string &runName, int rank) {
   _sc->postTask(
       [this, clientNum, mapName, runName, rank] {
         std::string matchedRun;
@@ -955,10 +944,8 @@ std::string ETJump::TimerunV2::getRankingsStringFor(
   return message;
 }
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
-void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
+void ETJump::TimerunV2::printRankings(
+    const Timerun::PrintRankingsParams &params) {
   _sc->postTask(
       [this, params] {
         std::string message;
@@ -1026,9 +1013,6 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
       });
 }
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
 void ETJump::TimerunV2::printSeasons(int clientNum) {
   _sc->postTask(
       [this] {
