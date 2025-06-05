@@ -2773,6 +2773,8 @@ extern vmCvar_t etj_onDemoPlaybackStart;
 
 extern vmCvar_t etj_HUD_noLerp;
 
+extern vmCvar_t etj_useExecQuiet;
+
 //
 // cg_main.c
 //
@@ -4240,6 +4242,12 @@ enum class HUDLerpFlags {
   CGAZ = 1 << 1,
   SNAPHUD = 1 << 2,
   STRAFE_QUALITY = 1 << 3,
+};
+
+enum class ExecFileType {
+  NONE = 0,
+  MAP_AUTOEXEC = 1 << 0,
+  TEAM_AUTOEXEC = 1 << 1,
 };
 } // namespace ETJump
 

@@ -681,6 +681,8 @@ vmCvar_t etj_onDemoPlaybackStart;
 
 vmCvar_t etj_HUD_noLerp;
 
+vmCvar_t etj_useExecQuiet;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1278,6 +1280,7 @@ cvarTable_t cvarTable[] = {
     {&etj_onDemoPlaybackStart, "etj_onDemoPlaybackStart", "", CVAR_ARCHIVE},
 
     {&etj_HUD_noLerp, "etj_HUD_noLerp", "0", CVAR_ARCHIVE},
+    {&etj_useExecQuiet, "etj_useExecQuiet", "0", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -4018,9 +4021,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   // map-specific autoexec
   const auto mapConfig = va("autoexec_%s", cgs.rawmapname);
   if (ETJump::configFileExists(mapConfig)) {
-    ETJump::execFile(mapConfig);
+    ETJump::execFile(mapConfig, ETJump::ExecFileType::MAP_AUTOEXEC);
   } else if (ETJump::configFileExists("autoexec_default")) {
-    ETJump::execFile("autoexec_default");
+    ETJump::execFile("autoexec_default", ETJump::ExecFileType::MAP_AUTOEXEC);
   }
 
   if (!Q_stricmp(cgs.rawmapname, "solstice") ||

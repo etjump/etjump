@@ -273,7 +273,7 @@ void CG_Respawn(qboolean revived) {
     const auto teamConfig = va(
         "autoexec_%s", BG_TeamnameForNumber(cgs.clientinfo[cg.clientNum].team));
     if (ETJump::configFileExists(teamConfig)) {
-      ETJump::execFile(teamConfig);
+      ETJump::execFile(teamConfig, ETJump::ExecFileType::TEAM_AUTOEXEC);
     }
 
     oldTeam = cgs.clientinfo[cg.clientNum].team;
