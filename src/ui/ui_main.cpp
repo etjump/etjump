@@ -7168,7 +7168,7 @@ void _UI_KeyEvent(int key, qboolean down) {
 
       // forward char events to regular key handling,
       // so we don't do out-of-bounds array access in engine
-      // 2.60b and ETL don't check for key array bounds when reading bind buffer
+      // 2.60b doesn't check for key array bounds when reading bind buffer
       if (key & K_CHAR_FLAG) {
         Menu_HandleKey(menu, key, down);
         return;
