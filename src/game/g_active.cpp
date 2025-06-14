@@ -1470,9 +1470,12 @@ void ClientThink(int clientNum) {
 }
 
 void G_RunClient(gentity_t *ent) {
-  // Gordon: special case for uniform grabbing
+  // handle uniform grabbing and shoving
   if (ent->client->pers.cmd.buttons & BUTTON_ACTIVATE) {
     Cmd_Activate2_f(ent);
+    ent->client->activateHeld = true;
+  } else {
+    ent->client->activateHeld = false;
   }
 
   if (ent->health <= 0 && ent->client->ps.pm_flags & PMF_LIMBO) {

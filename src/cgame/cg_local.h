@@ -1700,6 +1700,8 @@ typedef struct {
 
   sfxHandle_t sndMedicCall[2];
 
+  sfxHandle_t shoveSound;
+
   qhandle_t ccStamps[2];
   qhandle_t ccFilterPics[10];
   qhandle_t ccFilterBackOn;
@@ -1845,6 +1847,7 @@ typedef struct {
   qhandle_t stopwatchIconGreen;
   qhandle_t stopwatchIconRed;
   qhandle_t idleIcon;
+  qhandle_t shoveIcon;
 
 } cgMedia_t;
 
@@ -2169,7 +2172,8 @@ enum class FTMenuPos {
 enum class FTMenuRulesPos {
   FT_RULES_RESET = 0,
   FT_RULES_SAVELIMIT = 1,
-  FT_RULES_NOGHOST = 2
+  FT_RULES_NOGHOST = 2,
+  FT_RULES_SHOVE = 3,
 };
 
 //==============================================================================
@@ -2622,6 +2626,10 @@ extern vmCvar_t etj_proneIndicatorY;
 extern vmCvar_t etj_drawNoclipIndicator;
 extern vmCvar_t etj_noclipIndicatorX;
 extern vmCvar_t etj_noclipIndicatorY;
+
+extern vmCvar_t etj_drawShoveIndicator;
+extern vmCvar_t etj_shoveIndicatorX;
+extern vmCvar_t etj_shoveIndicatorY;
 
 // Cvar unlocks
 extern vmCvar_t etj_viewlog;

@@ -528,6 +528,9 @@ vmCvar_t etj_proneIndicatorY;
 vmCvar_t etj_drawNoclipIndicator;
 vmCvar_t etj_noclipIndicatorX;
 vmCvar_t etj_noclipIndicatorY;
+vmCvar_t etj_drawShoveIndicator;
+vmCvar_t etj_shoveIndicatorX;
+vmCvar_t etj_shoveIndicatorY;
 
 // Cvar unlocks
 vmCvar_t etj_viewlog;
@@ -1129,8 +1132,12 @@ cvarTable_t cvarTable[] = {
     {&etj_proneIndicatorY, "etj_proneIndicatorY", "338", CVAR_ARCHIVE},
 
     {&etj_drawNoclipIndicator, "etj_drawNoclipIndicator", "3", CVAR_ARCHIVE},
-    {&etj_noclipIndicatorX, "etj_noclipIndicatorX", "615", CVAR_ARCHIVE},
-    {&etj_noclipIndicatorY, "etj_noclipIndicatorY", "313", CVAR_ARCHIVE},
+    {&etj_noclipIndicatorX, "etj_noclipIndicatorX", "595", CVAR_ARCHIVE},
+    {&etj_noclipIndicatorY, "etj_noclipIndicatorY", "363", CVAR_ARCHIVE},
+
+    {&etj_drawShoveIndicator, "etj_drawShoveIndicator", "3", CVAR_ARCHIVE},
+    {&etj_shoveIndicatorX, "etj_shoveIndicatorX", "595", CVAR_ARCHIVE},
+    {&etj_shoveIndicatorY, "etj_shoveIndicatorY", "338", CVAR_ARCHIVE},
 
     {&etj_uphillSteps, "etj_uphillSteps", "1", CVAR_ARCHIVE},
     {&etj_fixedCushionSteps, "etj_fixedCushionSteps", "0", CVAR_ARCHIVE},
@@ -2149,6 +2156,9 @@ static void CG_RegisterSounds(void) {
   trap_S_RegisterSound("sound/weapons/artillery/artillery_fly_3.wav", qfalse);
   trap_S_RegisterSound("sound/weapons/airstrike/airstrike_plane.wav", qfalse);
 
+  cgs.media.shoveSound =
+      trap_S_RegisterSound("sound/weapons/impact/flesh1.wav", qfalse);
+
   if (cg_buildScript.integer) {
     CG_PrecacheFXSounds();
   }
@@ -3116,6 +3126,7 @@ static void CG_RegisterGraphics(void) {
       trap_R_RegisterShader("gfx/2d/stopwatch_green");
   cgs.media.stopwatchIconRed = trap_R_RegisterShader("gfx/2d/stopwatch_red");
   cgs.media.idleIcon = trap_R_RegisterShader("gfx/2d/idle");
+  cgs.media.shoveIcon = trap_R_RegisterShader("gfx/2d/shoveicon");
 
   CG_LoadingString(" - game media done");
 }
