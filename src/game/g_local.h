@@ -596,9 +596,6 @@ struct gentity_s {
   // when someone goes in a team portal
   gentity_t *linkedPortal;
 
-  int lastPortalTime; // Last time we teleported using portal
-  int portalTeam;
-
   int runIndex;
   char runName[MAX_TIMERUN_NAME_LENGTH];
   int checkpointIndex;
@@ -817,7 +814,6 @@ typedef struct {
 
   qboolean versionOK;
 
-  int portalTeam;
   char ip[MAX_IP_LEN + 1];
   qboolean motdPrinted;
 
@@ -1737,8 +1733,6 @@ void InitTrigger(gentity_t *self);
 // this is only used by tank exiting and some weird spectator door teleport
 void TeleportPlayer(gentity_t *player, const vec3_t origin, vec3_t angles);
 void DirectTeleport(gentity_t *player, const vec3_t origin, vec3_t angles);
-void PortalTeleport(gentity_t *player, vec3_t origin,
-                    vec3_t angles); // Feen: PGM
 void mg42_fire(gentity_t *other);
 void mg42_stopusing(gentity_t *self);
 void aagun_fire(gentity_t *other);
@@ -2101,7 +2095,6 @@ extern vmCvar_t g_banner5;
 extern vmCvar_t g_banners;
 
 // Feen: PGM
-extern vmCvar_t g_portalDebug;
 extern vmCvar_t g_portalMode;
 
 extern vmCvar_t g_maxConnsPerIP;
@@ -2872,17 +2865,6 @@ char *Q_SayConcatArgs(int start);
 void DecolorString(char *in, char *out);
 int Q_SayArgc();
 qboolean Q_SayArgv(int n, char *buffer, int bufferLength);
-
-// Feen: PGM
-
-void Portal_Think(gentity_t *self);
-void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace);
-
-// g_weapon.c
-void Weapon_Portal_Fire(
-    gentity_t *ent, int portalNum); // TODO add switch for different portals....
-
-// Feen: END PGM
 
 void Use_target_remove_powerups(gentity_t *ent, gentity_t *other,
                                 gentity_t *activator);

@@ -376,8 +376,6 @@ static void CG_EntityEffects(centity_t *cent) {
   // jpw
 }
 
-void CG_RailTrail2(clientInfo_t *ci, vec3_t start, vec3_t end);
-
 /*
 ==================
 CG_General
@@ -2373,14 +2371,16 @@ void CG_CalcEntityLerpPositions(centity_t *cent) {
 }
 
 // Feen: PGM - Drawing the portals....
-static void CG_PortalGate(centity_t *cent) {
+static void CG_PortalGate(const centity_t *cent) {
   polyVert_t polyVerts[4];
   vec3_t verts[4];
   vec3_t pushedOrigin, angleInverse;
   vec3_t axis[3];
-  const float radius = !cent->currentState.onFireStart
-                           ? 48.0f
-                           : static_cast<float>(cent->currentState.onFireStart);
+  const float radius =
+      !cent->currentState.onFireStart
+          ? ETJump::PORTAL_DRAW_RADIUS
+          : static_cast<float>(cent->currentState.onFireStart) *
+                ETJump::PORTAL_DRAW_SCALAR;
 
   // not our portal
   if (!etj_viewPlayerPortals.integer &&

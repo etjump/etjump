@@ -220,7 +220,6 @@ vmCvar_t g_banner5;
 vmCvar_t g_banners;
 
 // Feen: PGM
-vmCvar_t g_portalDebug; // View Portal BBoxes
 vmCvar_t
     g_portalMode; // Defines portal mode.
                   // 0 = Freestyle, 1 = Standard,  2 = team (possible future)
@@ -479,7 +478,6 @@ cvarTable_t gameCvarTable[] = {
     {&g_banners, "g_banners", "1", CVAR_ARCHIVE},
 
     // Feen: PGM
-    {&g_portalDebug, "g_portalDebug", "0", CVAR_CHEAT | CVAR_ARCHIVE},
     {&g_portalMode, "g_portalMode", "1",
      CVAR_ARCHIVE}, // 0 - freestyle, 1 - restricted
 
