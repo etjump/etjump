@@ -1,0 +1,18 @@
+// ETJump arena file for the_piramide.bsp
+// Modifications:
+// - removed extra closing bracket
+
+{
+	map			"the_piramide"
+	longname		"^zDashur"
+	type 	"wolfmp wolfsw"
+	timelimit 0
+	axisRespawnTime 1
+	alliedRespawnTime 1
+	briefing "Mapped By  ^7Ya^5v^7e^5'***^0Escape the pyramid or die trying*** ***^zT^7hx To***^8V^9asili***^7A^zn^7d***^7F^9ear"
+	axiswintext	"Axis team wins!"
+	alliedwintext "Allied team wins!"
+	mapposition_x 465		
+	mapposition_y 430		
+}
+

@@ -1,0 +1,17 @@
+// ETJump arena file for ocho.bsp
+// Modifications:
+// - fixed incorrect newline on 'briefing' text
+
+{
+	map			"ocho"
+	longname		"^0Ocho"
+	type 	"wolfmp wolfsw"
+	timelimit 0
+	axisRespawnTime 1
+	alliedRespawnTime 1
+	briefing "ochoochoochoochoochoocho*ochoochoochoochoochoocho*ochoocho        ochoocho*ochoocho ^5Y^7ave^5.^0  ochoocho*ochoocho          ochoocho*ochoocho        ochoocho*ochoocho        ochoocho*ochoocho        ochoocho*ochoocho        ochoocho*ochoocho        ochoocho*ochoochoochoochoochoocho*ochoochoochoochoochoocho*ochoocho        ochoocho*ochoocho  ^712/2011  ochoocho*ochooch o        ochoocho*ochoocho        ochoocho*ochoocho        ochoocho*ochoocho        ochoocho*ochoocho        ochoocho*ochoocho        ochoocho*ochoochoochoochoochoocho*ochoochoochoochoochoocho"
+	axiswintext	"Ocho"
+	alliedwintext   "ocho"
+	mapposition_x	888
+	mapposition_y	888
+}
