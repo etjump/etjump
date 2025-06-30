@@ -1833,8 +1833,7 @@ void Weapon_Engineer(gentity_t *ent) {
           }
 
           if (traceEnt->health >= 250) {
-            // traceEnt->health = 255;
-            trap_SendServerCommand(clientNum, "cp \"Landmine armed...\" 1");
+            Printer::centerPriority(clientNum, "Landmine armed...", 1, false);
           } else {
             return;
           }
@@ -1872,7 +1871,7 @@ void Weapon_Engineer(gentity_t *ent) {
           G_PrintClientSpammyCenterPrint(clientNum, "Defusing landmine");
 
           if (traceEnt->health >= 250) {
-            trap_SendServerCommand(clientNum, "cp \"Landmine defused...\" 1");
+            Printer::centerPriority(clientNum, "Landmine defused...", 1, false);
 
             Add_Ammo(ent, WP_LANDMINE, 1, qfalse);
 
@@ -2034,9 +2033,9 @@ void Weapon_Engineer(gentity_t *ent) {
         // bani
         if (friendlyObj && !enemyObj) {
           G_FreeEntity(traceEnt);
-          trap_SendServerCommand(
-              clientNum,
-              "cp \"You cannot arm dynamite near a friendly objective!\" 1");
+          Printer::centerPriority(
+              clientNum, "You cannot arm dynamite near a friendly objective!",
+              1, false);
           return;
         }
 
@@ -2062,9 +2061,9 @@ void Weapon_Engineer(gentity_t *ent) {
 
         // Gordon: moved down here to prevent two prints
         // when dynamite IS near objective
-        trap_SendServerCommand(
-            clientNum,
-            "cp \"Dynamite is now armed with a 30 second timer!\" 1");
+        Printer::centerPriority(clientNum,
+                                "Dynamite is now armed with a 30 second timer!",
+                                1, false);
 
         // check if player is in trigger objective field
         // NERVE - SMF - made this the actual bounding box of dynamite

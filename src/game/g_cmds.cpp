@@ -4672,7 +4672,8 @@ void Cmd_Class_f(gentity_t *ent) {
                       ETJump::stringFormat("You will spawn as an %s %s",
                                            ETJump::getPlayerTeamName(
                                                ent->client->sess.sessionTeam),
-                                           loadout.description));
+                                           loadout.description),
+                      false);
       break;
     }
   }
