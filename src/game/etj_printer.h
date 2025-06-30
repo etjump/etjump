@@ -29,12 +29,14 @@
 
 struct gentity_s;
 struct gclient_s;
-typedef gentity_s gentity_t;
-typedef gclient_s gclient_t;
+
+using gentity_t = gentity_s;
+using gclient_t = gclient_s;
 
 class Printer {
 public:
   static constexpr int CONSOLE_CLIENT_NUMBER = -1;
+  static constexpr int ALL_CLIENTS = -1;
 
   /**
    * Prints the message to server console and log. Will
@@ -114,21 +116,53 @@ public:
   static void popupAll(const std::string &message);
 
   /**
-   * Sends a center print message to target client. If client num is -1
-   * sends to console.
+   * Sends a center print message to target client.
+   * If client num is -1, sends to all clients.
+   * If log is true, the client will log the message to console,
+   * if 'etj_logCenterPrint' is set
    * If pointer in overloads is nullptr, prints to console.
    * @param clientNum
    * @param message
    */
-  static void center(int clientNum, const std::string &message);
-  static void center(gentity_t *ent, const std::string &message);
-  static void center(gclient_t *client, const std::string &message);
+  static void center(int clientNum, const std::string &message,
+                     bool log = true);
+  static void center(gentity_t *ent, const std::string &message,
+                     bool log = true);
+  static void center(gclient_t *client, const std::string &message,
+                     bool log = true);
 
   /**
-   * Broadcasts a left banner message to all clients
+   * Broadcasts a center print message to all clients
    * @param message The message
    */
-  static void centerAll(const std::string &message);
+  static void centerAll(const std::string &message, bool log = true);
+
+  /**
+   * Sends a center print message to target client with priority.
+   * If client num is -1, sends to all clients.
+   * If log is true, the client will log the message to console,
+   * if 'etj_logCenterPrint' is set
+   * If pointer in overloads is nullptr, prints to console.
+   * @param clientNum
+   * @param message
+   * @param priority
+   * @param log
+   */
+  static void centerPriority(int clientNum, const std::string &message,
+                             int priority, bool log = true);
+  static void centerPriority(gentity_t *ent, const std::string &message,
+                             int priority, bool log = true);
+  static void centerPriority(gclient_t *client, const std::string &message,
+                             int priority, bool log = true);
+
+  /**
+   * Broadcasts a center print message to all clients with priority
+   * @param message The message
+   * @param priority
+   * @param log
+   */
+  static void centerPriorityAll(const std::string &message, int priority,
+                                bool log = true);
 
   /**
    * Sends a banner message to the client. If client num is -1 sends to console.

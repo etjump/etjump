@@ -2324,13 +2324,12 @@ static void CG_ServerCommand(void) {
     return;
   }
 
-  if (!Q_stricmp(cmd, "cp")) {
-    // NERVE - SMF
-    int args = trap_Argc();
-    char *s;
+  const bool cpNoLog = !Q_stricmp(cmd, "cpnl");
+  if (!Q_stricmp(cmd, "cp") || cpNoLog) {
+    const int args = trap_Argc();
 
     if (args >= 3) {
-      s = CG_TranslateString(CG_Argv(1));
+      char *s = CG_TranslateString(CG_Argv(1));
 
       if (args == 4) {
         s = va("%s%s", CG_Argv(3), s);
@@ -2343,11 +2342,11 @@ static void CG_ServerCommand(void) {
                   CG_LocalizeServerCommand(CG_Argv(1)));
       }
       CG_PriorityCenterPrint(s, SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
-                             SMALLCHAR_WIDTH, Q_atoi(CG_Argv(2)));
+                             SMALLCHAR_WIDTH, Q_atoi(CG_Argv(2)), !cpNoLog);
     } else {
       CG_CenterPrint(CG_LocalizeServerCommand(CG_Argv(1)),
-                     SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
-                     SMALLCHAR_WIDTH); //----(SA)	modified
+                     SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20), SMALLCHAR_WIDTH,
+                     !cpNoLog);
     }
     return;
   }

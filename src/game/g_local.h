@@ -2586,6 +2586,8 @@ bool canSetFtTeamjumpMode(int clientNum, const gentity_t *ent);
 void setFireteamTeamjumpMode(fireteamData_t *ft, bool teamjumpMode);
 } // namespace ETJump
 
+// center prints sent through this are never logged
+// on client, if 'etj_logCenterPrint' is set
 void G_PrintClientSpammyCenterPrint(int entityNum, const char *text);
 
 void aagun_fire(gentity_t *other);
