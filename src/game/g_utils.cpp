@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 
+#include "etj_printer.h"
 #include "g_local.h"
 #include "etj_string_utilities.h"
 
@@ -1224,7 +1225,7 @@ void G_PrintClientSpammyCenterPrint(int entityNum, const char *text) {
     return;
   }
 
-  trap_SendServerCommand(entityNum, va("cp \"%s\" 1", text));
+  Printer::centerPriority(entityNum, text, 1, false);
   g_entities[entityNum].client->lastSpammyCentrePrintTime = level.time;
 }
 
