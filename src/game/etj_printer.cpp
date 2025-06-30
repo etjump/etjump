@@ -22,8 +22,6 @@
  * SOFTWARE.
  */
 
-#include <utility>
-
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "g_local.h"
@@ -81,7 +79,7 @@ void Printer::consoleAll(const std::string &message) {
   const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
 
   for (const auto &split : splits) {
-    trap_SendServerCommand(-1, va("print \"%s\"", split.c_str()));
+    trap_SendServerCommand(ALL_CLIENTS, va("print \"%s\"", split.c_str()));
 
     if (g_dedicated.integer) {
       G_Printf("%s", split.c_str());
@@ -134,30 +132,65 @@ void Printer::popup(gclient_t *client, const std::string &message) {
 }
 
 void Printer::popupAll(const std::string &message) {
-  trap_SendServerCommand(-1, va("cpm \"%s\n\"", message.c_str()));
+  trap_SendServerCommand(ALL_CLIENTS, va("cpm \"%s\n\"", message.c_str()));
 
   if (g_dedicated.integer) {
     G_Printf("%s\n", message.c_str());
   }
 }
 
-void Printer::center(int clientNum, const std::string &message) {
-  trap_SendServerCommand(clientNum,
-                         ETJump::stringFormat("cp \"%s\n\"", message).c_str());
+void Printer::center(int clientNum, const std::string &message, bool log) {
+  const std::string cmd = log ? "cp" : "cpnl";
+  trap_SendServerCommand(
+      clientNum, ETJump::stringFormat("%s \"%s\n\"", cmd, message).c_str());
 }
 
-void Printer::center(gentity_t *ent, const std::string &message) {
+void Printer::center(gentity_t *ent, const std::string &message, bool log) {
   const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
-  center(clientNum, message);
+  center(clientNum, message, log);
 }
 
-void Printer::center(gclient_t *client, const std::string &message) {
+void Printer::center(gclient_t *client, const std::string &message, bool log) {
   const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
-  center(clientNum, message);
+  center(clientNum, message, log);
 }
 
-void Printer::centerAll(const std::string &message) {
-  trap_SendServerCommand(-1, va("cp \"%s\n\"", message.c_str()));
+void Printer::centerAll(const std::string &message, bool log) {
+  const std::string cmd = log ? "cp" : "cpnl";
+  trap_SendServerCommand(
+      ALL_CLIENTS, ETJump::stringFormat("%s \"%s\n\"", cmd, message).c_str());
+
+  if (g_dedicated.integer) {
+    G_Printf("%s\n", message.c_str());
+  }
+}
+
+void Printer::centerPriority(int clientNum, const std::string &message,
+                             const int priority, bool log) {
+  const std::string cmd = log ? "cp" : "cpnl";
+  trap_SendServerCommand(
+      clientNum,
+      ETJump::stringFormat("%s \"%s\" %i", cmd, message, priority).c_str());
+}
+
+void Printer::centerPriority(gentity_t *ent, const std::string &message,
+                             const int priority, bool log) {
+  const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
+  centerPriority(clientNum, message, priority, log);
+}
+
+void Printer::centerPriority(gclient_t *client, const std::string &message,
+                             const int priority, bool log) {
+  const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
+  centerPriority(clientNum, message, priority, log);
+}
+
+void Printer::centerPriorityAll(const std::string &message, const int priority,
+                                bool log) {
+  const std::string cmd = log ? "cp" : "cpnl";
+  trap_SendServerCommand(
+      ALL_CLIENTS,
+      ETJump::stringFormat("%s \"%s\" %i", cmd, message, priority).c_str());
 
   if (g_dedicated.integer) {
     G_Printf("%s\n", message.c_str());
@@ -183,7 +216,7 @@ void Printer::banner(gclient_t *client, const std::string &message) {
 }
 
 void Printer::bannerAll(const std::string &message) {
-  trap_SendServerCommand(-1, va("bp \"%s\n\"", message.c_str()));
+  trap_SendServerCommand(ALL_CLIENTS, va("bp \"%s\n\"", message.c_str()));
 
   if (g_dedicated.integer) {
     G_Printf("%s\n", message.c_str());
@@ -202,5 +235,5 @@ void Printer::command(const std::vector<int> &clientNums,
 }
 
 void Printer::commandAll(const std::string &command) {
-  trap_SendServerCommand(-1, command.c_str());
+  trap_SendServerCommand(ALL_CLIENTS, command.c_str());
 }
