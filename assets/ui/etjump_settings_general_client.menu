@@ -52,7 +52,7 @@ menuDef {
 #ifdef VET
         MULTI               (SETTINGS_ITEM_POS(3), "Rendering primitives:", 0.2, SETTINGS_ITEM_H, "r_primitives", cvarFloatList { "Auto" 0 "Multiple glArrayElement" 1 "Single glDrawElements" 2 }, "Sets rendering primitives mode (ET 2.60b only)\nSetting this to 'Single glDrawElements' is recommended on modern systems for best performance\nr_primitives")
 #else
-        COMBO_BIT           (SETTINGS_COMBO_POS(3), "Use quiet exec", 0.2, SETTINGS_ITEM_H, "etj_useExecQuiet", cvarFloatList { "Map autoexec" 1 "Team autoexec" 2 }, none, "Use 'execq' when executing autoexec configs\netj_useExecQuiet")
+        COMBO_BIT           (SETTINGS_COMBO_POS(3), "Use quiet exec:", 0.2, SETTINGS_ITEM_H, "etj_useExecQuiet", cvarFloatList { "Map autoexec" 1 "Team autoexec" 2 }, none, "Use 'execq' when executing autoexec configs\netj_useExecQuiet")
 #endif
 
 
