@@ -7849,6 +7849,8 @@ vmCvar_t ui_currentChangelog;
 vmCvar_t etj_demoQueueCurrent;
 vmCvar_t etj_demoQueueDir;
 
+vmCvar_t etj_noMenuFlashing;
+
 cvarTable_t cvarTable[] = {
 
     {&ui_glCustom, "ui_glCustom", "4",
@@ -8086,6 +8088,8 @@ cvarTable_t cvarTable[] = {
 
     {&etj_demoQueueCurrent, "etj_demoQueueCurrent", "", CVAR_TEMP | CVAR_ROM},
     {&etj_demoQueueDir, "etj_demoQueueDir", "demoqueue", CVAR_ARCHIVE},
+
+    {&etj_noMenuFlashing, "etj_noMenuFlashing", "0", CVAR_ARCHIVE | CVAR_LATCH},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

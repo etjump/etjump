@@ -130,6 +130,8 @@ extern vmCvar_t ui_currentChangelog;
 extern vmCvar_t etj_demoQueueCurrent;
 extern vmCvar_t etj_demoQueueDir;
 
+extern vmCvar_t etj_noMenuFlashing;
+
 inline constexpr int MAX_EDIT_LINE = 256;
 
 inline constexpr int MAX_MENUDEPTH = 8;

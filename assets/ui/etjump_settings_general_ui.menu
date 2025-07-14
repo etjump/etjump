@@ -3,7 +3,7 @@
 #include "ui/menumacros.h"
 #include "ui/menumacros_ext.h"
 
-#define MENU_NAME "etjump_settings_general_client"
+#define MENU_NAME "etjump_settings_general_ui"
 #define GROUP_NAME "group_etjump_settings_general"
 
 #define NUM_SUBMENUS 4
@@ -40,20 +40,15 @@ menuDef {
     WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
 
     SIDEBUTTON          (1, "GAMEPLAY", close MENU_NAME; open etjump_settings_general_gameplay)
-    SIDEBUTTON_ACTIVE   (2, "CLIENT", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (2, "CLIENT", close MENU_NAME; open etjump_settings_general_client)
     SIDEBUTTON          (3, "CONSOLE", close MENU_NAME; open etjump_settings_general_console)
-    SIDEBUTTON          (4, "UI", close MENU_NAME; open etjump_settings_general_ui)
+    SIDEBUTTON_ACTIVE   (4, "UI", close MENU_NAME; open MENU_NAME)
 
-    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CLIENT")
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "USER INTERFACE")
 
-        MULTI               (SETTINGS_ITEM_POS(1), "Max FPS:", 0.2, SETTINGS_ITEM_H, "com_maxfps", cvarFloatList { "43" 43 "76" 76 "125" 125 "250" 250 "333" 333 }, "Sets the FPS limit\ncom_maxfps")
-        MULTI               (SETTINGS_ITEM_POS(2), "Memory limit:", 0.2, SETTINGS_ITEM_H, "com_hunkmegs", cvarFloatList { "56MB" 56 "64MB" 64 "128MB" 128 "256MB" 256 "512MB" 512 }, "How much memory the client is allowed to use (restart required)\ncom_hunkmegs")
-
-#ifdef VET
-        MULTI               (SETTINGS_ITEM_POS(3), "Rendering primitives:", 0.2, SETTINGS_ITEM_H, "r_primitives", cvarFloatList { "Auto" 0 "Multiple glArrayElement" 1 "Single glDrawElements" 2 }, "Sets rendering primitives mode (ET 2.60b only)\nSetting this to 'Single glDrawElements' is recommended on modern systems for best performance\nr_primitives")
-#else
-        COMBO_BIT           (SETTINGS_COMBO_POS(3), "Use quiet exec", 0.2, SETTINGS_ITEM_H, "etj_useExecQuiet", cvarFloatList { "Map autoexec" 1 "Team autoexec" 2 }, none, "Use 'execq' when executing autoexec configs\netj_useExecQuiet")
-#endif
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(1), "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        CACHEDSLIDER        (SETTINGS_ITEM_POS(1), "Menu sensitivity:", 0.2, SETTINGS_ITEM_H, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
+        YESNO               (SETTINGS_ITEM_POS(2), "Disable menu flashing:", 0.2, SETTINGS_ITEM_H, etj_noMenuFlashing, "Disables the lightning effect from the menu background shader\n(vid_restart required)\netj_noMenuFlashing")
 
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
