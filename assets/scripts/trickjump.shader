@@ -936,3 +936,28 @@ gfx/2d/colorpicker_mask
 		rgbGen vertex
 	}
 }
+
+// menu background shader without the lightning effect
+ui/assets/et_clouds_noflash
+{
+	nopicmip
+	{
+		map textures/skies_sd/wurzburg_clouds.tga
+		rgbGen identityLighting
+		tcMod scale 0.65 0.75
+		tcMod scroll 0.0025 -0.002
+	}
+	{
+		map textures/skies_sd/wurzburg_clouds.tga
+		blendFunc GL_DST_COLOR GL_ONE
+		rgbGen identityLighting
+		tcMod scale 1.35 0.96
+		tcMod scroll 0.055 -0.04
+	}
+	{
+		clampmap ui/assets/background_mask.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen identity
+		tcMod stretch sin 1.1 0.1 0 0.0125
+	}
+}

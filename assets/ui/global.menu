@@ -47,6 +47,13 @@ menuDef {
 	fullScreen	0
 	rect		0 0 640 480
 	visible		0
+
+  onOpen {
+      conditionalscript etj_noMenuFlashing 3
+        ( "hide clouds ; show clouds_noflash" )
+        ( "show clouds ; hide clouds_noflash" )
+        "1"
+  }
 						
 	itemDef {
 		name		"colour"
@@ -62,6 +69,15 @@ menuDef {
 		rect		0 0 640 480
 		style		WINDOW_STYLE_SHADER
 		background	"ui/assets/et_clouds"
+		visible		1
+		decoration
+	}
+
+	itemDef {
+		name		"clouds_noflash"
+		rect		0 0 640 480
+		style		WINDOW_STYLE_SHADER
+		background	"ui/assets/et_clouds_noflash"
 		visible		1
 		decoration
 	}
