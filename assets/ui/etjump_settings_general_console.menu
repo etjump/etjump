@@ -6,7 +6,7 @@
 #define MENU_NAME "etjump_settings_general_console"
 #define GROUP_NAME "group_etjump_settings_general"
 
-#define NUM_SUBMENUS 3
+#define NUM_SUBMENUS 4
 #define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
 
 menuDef {
@@ -42,6 +42,7 @@ menuDef {
     SIDEBUTTON          (1, "GAMEPLAY", close MENU_NAME; open etjump_settings_general_gameplay)
     SIDEBUTTON          (2, "CLIENT", close MENU_NAME; open etjump_settings_general_client)
     SIDEBUTTON_ACTIVE   (3, "CONSOLE", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (4, "UI", close MENU_NAME; open etjump_settings_general_ui)
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CONSOLE")
 

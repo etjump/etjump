@@ -84,6 +84,7 @@
 	loadMenu { "ui/etjump_settings_general_gameplay.menu" }
 	loadMenu { "ui/etjump_settings_general_client.menu" }
 	loadMenu { "ui/etjump_settings_general_console.menu" }
+	loadMenu { "ui/etjump_settings_general_ui.menu" }
 
 	loadMenu { "ui/etjump_settings_graphics_visuals.menu" }
 	loadMenu { "ui/etjump_settings_graphics_players.menu" }
