@@ -131,6 +131,7 @@ extern vmCvar_t etj_demoQueueCurrent;
 extern vmCvar_t etj_demoQueueDir;
 
 extern vmCvar_t etj_noMenuFlashing;
+extern vmCvar_t etj_drawQuickConnectMenu;
 
 extern vmCvar_t g_portalPredict;
 
@@ -797,6 +798,8 @@ void trap_GetHunkData(int *hunkused, int *hunkexpected);
 char *trap_TranslateString(const char *string); // NERVE - SMF - localization
 
 namespace ETJump {
+inline constexpr int MAX_QUICKCONNECT_SERVERS = 5;
+
 class SyscallExt;
 extern std::unique_ptr<SyscallExt> syscallExt;
 
@@ -808,6 +811,9 @@ void resetCustomvotes();
 void toggleSettingsMenu();
 
 class DemoQueue;
+class QuickConnect;
+
 extern std::unique_ptr<DemoQueue> demoQueue;
+extern std::unique_ptr<QuickConnect> quickConnect;
 } // namespace ETJump
 #endif

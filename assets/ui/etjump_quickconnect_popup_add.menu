@@ -1,0 +1,171 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_quickconnect_popup_add"
+#define GROUP_NAME "etjump_quickconnect_popup"
+
+#define SUBWINDOW_WIDTH     300
+#define SUBWINDOW_HEIGHT    78 + 14
+#define SUBWINDOW_X         0.5 * (WINDOW_WIDTH - SUBWINDOW_WIDTH)
+#define SUBWINDOW_Y         0.5 * (WINDOW_HEIGHT - SUBWINDOW_HEIGHT)
+
+menuDef {
+    name        MENU_NAME
+    visible     0
+    fullscreen  0
+    rect        0 0 640 480
+    style       WINDOW_STYLE_FILLED
+    popup
+
+    fadeClamp   0.5
+    fadeAmount  0.075
+
+    onOpen {
+        setEditFocus "efServer IP:" ;
+        setitemcolor emptyIPLabel forecolor 0.6 0 0 0 ;
+        setitemcolor background backcolor 0 0 0 0 ;
+        fadein background ;
+        clearcvar ui_quickconnect_ip ;
+        clearcvar ui_quickconnect_password ;
+        clearcvar ui_quickconnect_customname
+    }
+
+    onESC {
+        close MENU_NAME ;
+        open main
+    }
+
+    itemDef {
+        name        "background"
+        rect        0 0 640 480
+        style       WINDOW_STYLE_FILLED
+        background  "ui/assets/fadebox.tga"
+        backcolor   0 0 0 0
+        visible     1
+        decoration
+    }
+
+    SUBWINDOWBLACK( SUBWINDOW_X, SUBWINDOW_Y, SUBWINDOW_WIDTH, SUBWINDOW_HEIGHT, "ADD QUICK CONNECT SERVER" )
+
+        // error label
+        itemDef {
+            name          "emptyIPLabel"
+            group         GROUP_NAME
+            rect          $evalfloat(SUBWINDOW_X + 6) $evalfloat( SUBWINDOW_Y + 16 + 10 + (12 * 2) + 4 )
+                          $evalfloat(SUBWINDOW_WIDTH - 8) $evalfloat(10)
+            type          ITEM_TYPE_TEXT
+            text          "^1Please provide an IP address."
+            textfont      UI_FONT_COURBD_21
+            textstyle     ITEM_TEXTSTYLE_SHADOWED
+            textscale     .2
+            textaligny    8
+            forecolor     0.6 0 0 0.6
+            visible       1
+            decoration
+        }
+
+        // server IP textbox
+        itemDef {
+            name            "efbackServer IP:"
+            group           GROUP_NAME
+            rect            $evalfloat((SUBWINDOW_X + 6) + 84 + 4) $evalfloat(SUBWINDOW_Y + 16)
+                            $evalfloat(SUBWINDOW_WIDTH - 12 - 84 - 4) $evalfloat(10)
+            style           WINDOW_STYLE_FILLED
+            backcolor       .5 .5 .5 .2
+            visible         1
+            decoration
+        }
+
+        // server IP label
+        itemDef {
+            name            "efServer IP:"
+            group           GROUP_NAME
+            rect            $evalfloat(SUBWINDOW_X + 6) $evalfloat(SUBWINDOW_Y + 16)
+                            $evalfloat(SUBWINDOW_WIDTH - 8) $evalfloat(10)
+            type            ITEM_TYPE_EDITFIELD
+            text            "Server IP:   " // padded with whitespace to align the input field start
+            textfont        UI_FONT_COURBD_21
+            textstyle       ITEM_TEXTSTYLE_SHADOWED
+            textscale       0.2
+            textaligny      8
+            forecolor       .6 .6 .6 1
+            tooltip         "IP address or domain name of the server to add"
+            cvar            ui_quickconnect_ip
+            maxChars        SETTINGS_EF_MAXCHARS // need to allow more than max IP length to support domain names
+            maxPaintChars   30
+            visible         1
+        }
+
+        // password textbox
+        itemDef {
+            name            "efbackPassword:"
+            group           GROUP_NAME
+            rect            $evalfloat((SUBWINDOW_X + 6) + 84 + 4) $evalfloat(SUBWINDOW_Y + 16 + 12)
+                            $evalfloat(SUBWINDOW_WIDTH - 12 - 84 - 4) $evalfloat(10)
+            style           WINDOW_STYLE_FILLED
+            backcolor       .5 .5 .5 .2
+            visible         1
+            decoration
+        }
+
+        // password label
+        itemDef {
+            name            "efPassword:"
+            group           GROUP_NAME
+            rect            $evalfloat(SUBWINDOW_X + 6) $evalfloat(SUBWINDOW_Y + 16 + 12)
+                            $evalfloat(SUBWINDOW_WIDTH - 8) $evalfloat(10)
+            type            ITEM_TYPE_EDITFIELD
+            text            "Password:    " // padded with whitespace to align the input field start
+            textfont        UI_FONT_COURBD_21
+            textstyle       ITEM_TEXTSTYLE_SHADOWED
+            textscale       0.2
+            textaligny      8
+            forecolor       .6 .6 .6 1
+            tooltip         "Password used to connect to the server, if required"
+            cvar            ui_quickconnect_password
+            maxChars        SETTINGS_EF_MAXCHARS
+            maxPaintChars   30
+            visible         1
+        }
+
+        // custom name textbox
+        itemDef {
+            name            "efbackDisplay name:"
+            group           GROUP_NAME
+            rect            $evalfloat((SUBWINDOW_X + 6) + 84 + 4) $evalfloat(SUBWINDOW_Y + 16 + (12 * 2))
+                            $evalfloat(SUBWINDOW_WIDTH - 12 - 84 - 4) $evalfloat(10)
+            style           WINDOW_STYLE_FILLED
+            backcolor       .5 .5 .5 .2
+            visible         1
+            decoration
+        }
+
+        // custom name label
+        itemDef {
+            name            "efDisplay name:"
+            group           GROUP_NAME
+            rect            $evalfloat(SUBWINDOW_X + 6) $evalfloat(SUBWINDOW_Y + 16 + (12 * 2))
+                            $evalfloat(SUBWINDOW_WIDTH - 8) $evalfloat(10)
+            type            ITEM_TYPE_EDITFIELD
+            text            "Display name:"
+            textfont        UI_FONT_COURBD_21
+            textstyle       ITEM_TEXTSTYLE_SHADOWED
+            textscale       0.2
+            textaligny      8
+            forecolor       .6 .6 .6 1
+            tooltip         "Custom display name to use, leave blank to use the servers host name"
+            cvar            ui_quickconnect_customname
+            maxChars        SETTINGS_EF_MAXCHARS
+            maxPaintChars   30
+            visible         1
+        }
+
+        BUTTON( SUBWINDOW_X + 6, SUBWINDOW_Y + SUBWINDOW_HEIGHT - 24, 0.5 * (SUBWINDOW_WIDTH - 18), 18, "BACK", .3, 14, close MENU_NAME; open main )
+        BUTTON( SUBWINDOW_X + 6 + 0.5 * (SUBWINDOW_WIDTH - 18) + 6, SUBWINDOW_Y + SUBWINDOW_HEIGHT - 24, 0.5 * (SUBWINDOW_WIDTH - 18), 18, "ADD", .3, 14,
+            conditionalscript ui_quickconnect_ip 1
+                ( "clearFocus" )
+                ( "setitemcolor emptyIPLabel forecolor 0.6 0 0 0.6 ; abort" )
+            uiScript quickConnectAddServer ; close MENU_NAME ; open main )
+}

@@ -14,6 +14,7 @@ USER INTERFACE MAIN
 #include "ui_local.h"
 #include "etj_colorpicker.h"
 #include "etj_demo_queue.h"
+#include "etj_quick_connect.h"
 
 #include "../cgame/etj_cvar_parser.h"
 #include "../game/etj_string_utilities.h"
@@ -675,6 +676,7 @@ namespace ETJump {
 std::unique_ptr<ColorPicker> colorPicker;
 std::unique_ptr<SyscallExt> syscallExt;
 std::unique_ptr<DemoQueue> demoQueue;
+std::unique_ptr<QuickConnect> quickConnect;
 
 static void initColorPicker() {
   colorPicker = std::make_unique<ColorPicker>();
@@ -854,6 +856,17 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
 static void initDemoQueueHandler() {
   demoQueue = std::make_unique<DemoQueue>();
 }
+
+// NOTE: this must be called after 'UI_LoadMenus'!
+static void initQuickConnect() {
+  assert(Menu_Count() > 0);
+
+  quickConnect = std::make_unique<QuickConnect>();
+
+  uiInfo.uiDC.quickConnectListIsFull = [p = quickConnect.get()] {
+    return p->isFull();
+  };
+}
 } // namespace ETJump
 
 /*
@@ -925,6 +938,8 @@ void _UI_Refresh(int realtime) {
     UI_BuildServerStatus(qfalse);
     // refresh find player list
     UI_BuildFindPlayerList(qfalse);
+
+    ETJump::quickConnect->refreshServers(false);
   }
 
   // draw cursor
@@ -955,6 +970,7 @@ void _UI_Shutdown(void) {
   ETJump::colorPicker = nullptr;
   ETJump::syscallExt = nullptr;
   ETJump::demoQueue = nullptr;
+  ETJump::quickConnect = nullptr;
 
   Shutdown_Display();
 }
@@ -1252,6 +1268,16 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
 
   if (cstate.connState <= CA_DISCONNECTED) {
     trap_PC_AddGlobalDefine("FUI");
+  }
+
+  // for aligning UI elements on the right side of the screen
+  trap_PC_AddGlobalDefine(va("WINDOW_WIDTH_WIDE %i", uiInfo.uiDC.screenWidth));
+
+  // to make it simple to toggle the quick connect menu on/off,
+  // this just ifdefs the menudefs away, without having to call
+  // 'hide' on every single element on the menu in order to not display it
+  if (etj_drawQuickConnectMenu.integer) {
+    trap_PC_AddGlobalDefine("DRAW_QUICK_CONNECT");
   }
 
   if (uiInfo.vetClient) {
@@ -5004,6 +5030,116 @@ void UI_RunMenuScript(const char **args) {
       return;
     }
 
+    if (!Q_stricmp(name, "quickConnectRefresh")) {
+      ETJump::quickConnect->refreshServers(true);
+      return;
+    }
+
+    if (!Q_stricmp(name, "quickConnectAddServer")) {
+      char buf[MAX_CVAR_VALUE_STRING];
+
+      trap_Cvar_VariableStringBuffer("ui_quickconnect_ip", buf, sizeof(buf));
+      const std::string address = buf;
+
+      trap_Cvar_VariableStringBuffer("ui_quickconnect_password", buf,
+                                     sizeof(buf));
+      const std::string password = buf;
+
+      trap_Cvar_VariableStringBuffer("ui_quickconnect_customname", buf,
+                                     sizeof(buf));
+      const std::string customName = buf;
+
+      ETJump::quickConnect->addServer(address, password, customName);
+      return;
+    }
+
+    if (!Q_stricmp(name, "quickConnectToServer")) {
+      if (String_Parse(args, &name2)) {
+        // menu variables are 1-indexed
+        std::string command =
+            ETJump::quickConnect->buildConnectCommand(Q_atoi(name2) - 1);
+
+        if (!command.empty()) {
+          trap_Cmd_ExecuteText(EXEC_APPEND, command.c_str());
+        }
+      } else {
+        Com_Printf(S_COLOR_YELLOW "%s: '%s' called with no arguments!\n",
+                   __func__, name);
+      }
+
+      return;
+    }
+
+    if (!Q_stricmp(name, "quickConnectSetEditData")) {
+      if (String_Parse(args, &name2)) {
+        // menu variables are 1-indexed
+        const int index = Q_atoi(name2) - 1;
+        ETJump::quickConnect->setEditData(index);
+      } else {
+        Com_Printf(S_COLOR_YELLOW "%s: '%s' called with no arguments!\n",
+                   __func__, name);
+      }
+
+      return;
+    }
+
+    if (!Q_stricmp(name, "quickConnectEditServer")) {
+      ETJump::quickConnect->editServer();
+      return;
+    }
+
+    if (!Q_stricmp(name, "quickConnectDeleteServer")) {
+      ETJump::quickConnect->deleteServer();
+      return;
+    }
+
+    if (!Q_stricmp(name, "setupQuickConnectMenuButtons")) {
+      menu = Menus_FindByName("main");
+
+      if (!menu) {
+        Com_Printf(
+            S_COLOR_RED
+            "%s: failure while executing '%s' - unable to find 'main.menu'!\n",
+            __func__, name);
+        return;
+      }
+
+      const auto toggleButtonState = [&menu](const int index,
+                                             const qboolean show) {
+        // menu entries are 1-indexed
+        const char *connectBtn =
+            va("btnQuickConnectServer%iConnect", index + 1);
+        const char *editBtn = va("btnQuickConnectServer%iEdit", index + 1);
+        const char *deleteBtn = va("btnQuickConnectServer%iDelete", index + 1);
+
+        Menu_ShowItemByName(menu, connectBtn, show);
+        Menu_ShowItemByName(menu, editBtn, show);
+        Menu_ShowItemByName(menu, deleteBtn, show);
+      };
+
+      // hide everything by default
+      for (int i = 0; i < ETJump::MAX_QUICKCONNECT_SERVERS; i++) {
+        toggleButtonState(i, qfalse);
+      }
+
+      const int count = ETJump::quickConnect->getServerCount();
+
+      if (count == 0) {
+        // make sure the label is visible, e.g. if we deleted the last server
+        Menu_ShowItemByName(menu, "lblQuickConnectNoServers", qtrue);
+        return;
+      }
+
+      // hide the "No servers added" since we have servers saved
+      Menu_ShowItemByName(menu, "lblQuickConnectNoServers", qfalse);
+
+      for (int i = 0; i < count; i++) {
+        toggleButtonState(i, qtrue);
+      }
+
+      return;
+    }
+
     Com_Printf("^3WARNING: unknown UI script %s\n", name);
   }
 }
@@ -7103,6 +7239,8 @@ void _UI_Init(int legacyClient, int clientVersion) {
 
   UI_LoadMenus(DEFAULT_MENU_FILE, qfalse);
 
+  ETJump::initQuickConnect();
+
   Menus_CloseAll();
 
   trap_LAN_LoadCachedServers();
@@ -7850,6 +7988,7 @@ vmCvar_t etj_demoQueueCurrent;
 vmCvar_t etj_demoQueueDir;
 
 vmCvar_t etj_noMenuFlashing;
+vmCvar_t etj_drawQuickConnectMenu;
 
 vmCvar_t g_portalPredict;
 
@@ -8095,6 +8234,9 @@ cvarTable_t cvarTable[] = {
     {&etj_noMenuFlashing, "etj_noMenuFlashing", "0", CVAR_ARCHIVE | CVAR_LATCH},
 
     {&g_portalPredict, "g_portalPredict", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
+
+    {&etj_drawQuickConnectMenu, "etj_drawQuickConnectMenu", "1",
+     CVAR_ARCHIVE | CVAR_LATCH},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

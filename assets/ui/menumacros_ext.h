@@ -491,3 +491,85 @@
       setitemcolor "cachedslider"##CACHEDSLIDER_TEXT forecolor .6 .6 .6 1 ;    \
     }                                                                          \
   }
+
+// subwindow that looks like a main window, with big title bar & gradient
+#define SUBWINDOWBIG( SUBWINDOWBIG_X, SUBWINDOWBIG_Y, SUBWINDOWBIG_W,          \
+                      SUBWINDOWBIG_H, SUBWINDOWBIG_TEXT,                       \
+                      GRADIENT_START_OFFSET )                                  \
+  itemDef {                                                                    \
+    name        "subwindowbig"##SUBWINDOWBIG_TEXT                              \
+    group       GROUP_NAME                                                     \
+    rect        $evalfloat(SUBWINDOWBIG_X) $evalfloat(SUBWINDOWBIG_Y)          \
+                $evalfloat(SUBWINDOWBIG_W) $evalfloat(SUBWINDOWBIG_H)          \
+    style       WINDOW_STYLE_FILLED                                            \
+    backcolor   0 0 0 .2                                                       \
+    border      WINDOW_BORDER_FULL                                             \
+    bordercolor .5 .5 .5 .5                                                    \
+    visible     1                                                              \
+    decoration                                                                 \
+  }                                                                            \
+                                                                               \
+  itemDef {                                                                    \
+    name        "subwindowbigtitlebar"#SUBWINDOWBIG_TEXT                       \
+    group       GROUP_NAME                                                     \
+    rect        2 2 GRADIENT_START_OFFSET 24                                   \
+    style       WINDOW_STYLE_FILLED                                            \
+    backcolor   .16 .2 .17 .8                                                  \
+    visible     1                                                              \
+    decoration                                                                 \
+  }                                                                            \
+                                                                               \
+  itemDef {                                                                    \
+    name        "subwindowbigtitlebargradient"#SUBWINDOWBIG_TEXT               \
+    group       GROUP_NAME                                                     \
+    rect        $evalint(GRADIENT_START_OFFSET + 2)                            \
+                2                                                              \
+                $evalint(SUBWINDOWBIG_W - (GRADIENT_START_OFFSET + 4))         \
+                24                                                             \
+    style       WINDOW_STYLE_GRADIENT                                          \
+    backcolor   .16 .2 .17 .8                                                  \
+    visible     1                                                              \
+    decoration                                                                 \
+  }                                                                            \
+                                                                               \
+  itemDef {                                                                    \
+    name        "subwindowbigtitle"##SUBWINDOWBIG_TEXT                         \
+    group       GROUP_NAME                                                     \
+    rect        $evalfloat((SUBWINDOWBIG_X) + 2)                               \
+                $evalfloat((SUBWINDOWBIG_Y) + 2)                               \
+                $evalfloat((SUBWINDOWBIG_W) - 4)                               \
+                24                                                             \
+    text        SUBWINDOWBIG_TEXT                                              \
+    textfont    UI_FONT_ARIBLK_27                                              \
+    textscale   .4                                                             \
+    textalignx  3                                                              \
+    textaligny  20                                                             \
+    forecolor   .6 .6 .6 1                                                     \
+    border      WINDOW_BORDER_FULL                                             \
+    bordercolor .1 .1 .1 .2                                                    \
+    visible     1                                                              \
+    decoration                                                                 \
+  }
+
+#define NAMEDLABEL( NAMEDLABEL_NAME, NAMEDLABEL_X, NAMEDLABEL_Y, NAMEDLABEL_W, \
+                    NAMEDLABEL_H,NAMEDLABEL_TEXT, NAMEDLABEL_TEXT_SCALE,       \
+                    NAMEDLABEL_TEXT_ALIGN, NAMEDLABEL_TEXT_ALIGN_X,            \
+                    NAMEDLABEL_TEXT_ALIGN_Y )                                  \
+  itemDef {                                                                    \
+    name        NAMEDLABEL_NAME                                                \
+    group       GROUP_NAME                                                     \
+    rect        $evalfloat(NAMEDLABEL_X) $evalfloat(NAMEDLABEL_Y)              \
+                $evalfloat(NAMEDLABEL_W) $evalfloat(NAMEDLABEL_H)	             \
+    type        ITEM_TYPE_TEXT                                                 \
+    text        NAMEDLABEL_TEXT                                                \
+    textfont    UI_FONT_COURBD_21                                              \
+    textstyle   ITEM_TEXTSTYLE_SHADOWED                                        \
+    textscale   NAMEDLABEL_TEXT_SCALE                                          \
+    textalign   NAMEDLABEL_TEXT_ALIGN                                          \
+    textalignx  $evalfloat(NAMEDLABEL_TEXT_ALIGN_X)                            \
+    textaligny  $evalfloat(NAMEDLABEL_TEXT_ALIGN_Y)                            \
+    forecolor   .6 .6 .6 1                                                     \
+    visible     1                                                              \
+    decoration                                                                 \
+    autowrapped                                                                \
+  }

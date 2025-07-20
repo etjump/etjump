@@ -49,6 +49,7 @@ menuDef {
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(1), "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         CACHEDSLIDER        (SETTINGS_ITEM_POS(1), "Menu sensitivity:", 0.2, SETTINGS_ITEM_H, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
         YESNO               (SETTINGS_ITEM_POS(2), "Disable menu flashing:", 0.2, SETTINGS_ITEM_H, etj_noMenuFlashing, "Disables the lightning effect from the menu background shader\n(vid_restart required)\netj_noMenuFlashing")
+        YESNO               (SETTINGS_ITEM_POS(3), "Draw quick connect menu:", 0.2, SETTINGS_ITEM_H, etj_drawQuickConnectMenu, "Draw quick connect menu in the main menu\n(vid_restart required)\netj_drawQuickConnectMenu")
 
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
