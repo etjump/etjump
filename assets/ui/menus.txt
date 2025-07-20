@@ -124,4 +124,9 @@
 
 	loadMenu { "ui/etjump_settings_popup_writeconfig.menu" }
 	loadMenu { "ui/etjump_settings_popup_colorpicker.menu" }
+
+  loadMenu { "ui/etjump_quickconnect_popup_add.menu" }
+  loadMenu { "ui/etjump_quickconnect_popup_edit.menu" }
+  loadMenu { "ui/etjump_quickconnect_popup_full.menu" }
+  loadMenu { "ui/etjump_quickconnect_popup_delete.menu" }
 }
