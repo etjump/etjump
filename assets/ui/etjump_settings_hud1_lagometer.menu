@@ -40,7 +40,7 @@ menuDef {
     WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
 
     SIDEBUTTON          (1, "CROSSHAIR", close MENU_NAME; open etjump_settings_hud1_crosshair)
-    SIDEBUTTON          (2, "KEYS", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (2, "KEYS", close MENU_NAME; open etjump_settings_hud1_keys)
     SIDEBUTTON          (3, "SPEED 1", close MENU_NAME; open etjump_settings_hud1_speed1)
     SIDEBUTTON          (4, "SPEED 2", close MENU_NAME; open etjump_settings_hud1_speed2)
     SIDEBUTTON          (5, "MAX SPEED", close MENU_NAME; open etjump_settings_hud1_maxspeed)
@@ -49,7 +49,7 @@ menuDef {
     SIDEBUTTON          (8, "POPUPS", close MENU_NAME; open etjump_settings_hud1_popups)
     SIDEBUTTON          (9, "FIRETEAM", close MENU_NAME; open etjump_settings_hud1_fireteam)
     SIDEBUTTON          (10, "SPECTATOR INFO", close MENU_NAME; open etjump_settings_hud1_specinfo)
-    SIDEBUTTON_ACTIVE   (11, "LAGOMETER", close MENU_NAME; open etjump_settings_hud1_lagometer)
+    SIDEBUTTON_ACTIVE   (11, "LAGOMETER", close MENU_NAME; open MENU_NAME)
     SIDEBUTTON          (12, "SCOREBOARD", close MENU_NAME; open etjump_settings_hud1_scoreboard)
     SIDEBUTTON          (13, "MISC", close MENU_NAME; open etjump_settings_hud1_misc)
 
