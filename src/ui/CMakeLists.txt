@@ -3,6 +3,7 @@ file(GLOB UI_HEADERS "*.h" "*.hpp")
 add_library(ui MODULE
 	"etj_colorpicker.cpp"
 	"etj_demo_queue.cpp"
+	"etj_quick_connect.cpp"
 	"ui_atoms.cpp"
 	"ui_gameinfo.cpp"
 	"ui_loadpanel.cpp"
@@ -17,12 +18,13 @@ add_library(ui MODULE
 	"../cgame/etj_utilities.cpp"
 	"../game/etj_file.cpp"
 	"../game/etj_filesystem.cpp"
+	"../game/etj_json_utilities.cpp"
 	"../game/etj_string_utilities.cpp"
 	"../game/etj_syscall_ext_shared.cpp"
 	${UI_HEADERS}
 )
 target_compile_definitions(ui PRIVATE UIDLL)
-target_link_libraries(ui PRIVATE cxx_compiler_opts libsha1 fmt::fmt)
+target_link_libraries(ui PRIVATE cxx_compiler_opts libjson libsha1 fmt::fmt)
 set_target_properties(ui PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"
