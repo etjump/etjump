@@ -2,6 +2,8 @@
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_entity_utilities.h"
+#include "etj_local.h"
+#include "etj_fireteam_countdown.h"
 
 // Gordon
 // What we need....
@@ -360,6 +362,8 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update,
         break;
       }
     }
+
+    game.fireteamCountdown->removeCountdown(entityNum);
   } else {
     return;
   }

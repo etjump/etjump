@@ -40,6 +40,7 @@
 #include "etj_chat_replay.h"
 #include "etj_filesystem.h"
 #include "etj_savepos_command_handler.h"
+#include "etj_fireteam_countdown.h"
 
 typedef std::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<std::function<bool(gentity_t *ent, Arguments argv)>, char>
@@ -489,6 +490,45 @@ static bool loadPos(gentity_t *ent, Arguments argv) {
 
   ETJump::SavePosHandler::execSaveposCommand(
       ent, ETJump::Container::skipFirstN(*argv, 1));
+  return true;
+}
+
+static bool addFtCountdown(gentity_t *ent, Arguments args) {
+  if (!ent || !ent->client) {
+    return false;
+  }
+
+  if (args->size() < 2) {
+    Printer::console(
+        ent, "Malformed 'countdown' command - no duration specified!\n");
+    return false;
+  }
+
+  if (ent->client->sess.muted) {
+    Printer::console(ent, "You are muted.\n");
+    return false;
+  }
+
+  const int clientNum = ClientNum(ent);
+
+  // sanity check
+  if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
+    Printer::console(ent,
+                     "Malformed 'countdown' command - invalid clientNum!\n");
+    return false;
+  }
+
+  fireteamData_t *ft = nullptr;
+
+  if (!G_IsOnFireteam(clientNum, &ft)) {
+    return false;
+  }
+
+  // max 10s countdown, minimum 1s
+  // if the client side cvar is <= 0, the default value (3s) will be used
+  const auto seconds =
+      static_cast<int8_t>(std::clamp(Q_atoi(args->at(1).c_str()), 1, 10));
+  game.fireteamCountdown->addCountdown(clientNum, seconds);
   return true;
 }
 } // namespace ClientCommands
@@ -2648,6 +2688,7 @@ Commands::Commands() {
   commands_["requestnumcustomvotes"] = ClientCommands::sendNumCustomvotes;
   commands_["requestcustomvoteinfo"] = ClientCommands::sendCustomvoteInfo;
   commands_["loadpos"] = ClientCommands::loadPos;
+  commands_["ftcountdown"] = ClientCommands::addFtCountdown;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {

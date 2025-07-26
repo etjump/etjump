@@ -422,6 +422,7 @@ vmCvar_t etj_HUD_fireteam;
 vmCvar_t etj_fireteamPosX;
 vmCvar_t etj_fireteamPosY;
 vmCvar_t etj_fireteamAlpha;
+vmCvar_t etj_fireteamCountdownLength;
 
 vmCvar_t etj_logBanner;
 vmCvar_t etj_weaponVolume;
@@ -1002,6 +1003,8 @@ cvarTable_t cvarTable[] = {
     {&etj_fireteamPosX, "etj_fireteamPosX", "0", CVAR_ARCHIVE},
     {&etj_fireteamPosY, "etj_fireteamPosY", "0", CVAR_ARCHIVE},
     {&etj_fireteamAlpha, "etj_fireteamAlpha", "1.0", CVAR_ARCHIVE},
+    {&etj_fireteamCountdownLength, "etj_fireteamCountdownLength", "3",
+     CVAR_ARCHIVE},
 
     {&etj_logBanner, "etj_logBanner", "1", CVAR_ARCHIVE},
     {&etj_weaponVolume, "etj_weaponVolume", "1.0", CVAR_ARCHIVE},

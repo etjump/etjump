@@ -24,35 +24,25 @@
 
 #pragma once
 
-#include <memory>
+#include <cstdint>
+#include <unordered_map>
 
 namespace ETJump {
-class TimerunV2;
-class RockTheVote;
-class Tokens;
-class ChatReplay;
-class Motd;
-class CustomMapVotes;
-class MapStatistics;
-class FireteamCountdown;
-} // namespace ETJump
+class FireteamCountdown {
+public:
+  void runFrame();
+  void addCountdown(int clientNum, int8_t seconds);
+  // called on client disconnect and on leaving fireteam
+  void removeCountdown(int clientNum);
 
-class Levels;
-class Commands;
-class Timerun;
+private:
+  struct CountdownCommand {
+    int32_t nextMessageTime;
+    int8_t seconds;
+  };
 
-struct Game {
-  Game() = default;
+  std::unordered_map<int, CountdownCommand> countdownCommands;
 
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<ETJump::MapStatistics> mapStatistics;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
-
-  std::unique_ptr<ETJump::CustomMapVotes> customMapVotes;
-  std::unique_ptr<ETJump::Motd> motd;
-  std::unique_ptr<ETJump::Tokens> tokens;
-  std::unique_ptr<ETJump::ChatReplay> chatReplay;
-  std::unique_ptr<ETJump::FireteamCountdown> fireteamCountdown;
+  void sendCountdownMessage(int clientNum);
 };
+} // namespace ETJump

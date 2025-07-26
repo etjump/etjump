@@ -41,6 +41,7 @@
 #include "etj_chat_replay.h"
 #include "etj_filesystem.h"
 #include "etj_printer.h"
+#include "etj_fireteam_countdown.h"
 
 Game game;
 
@@ -79,11 +80,13 @@ void OnClientBegin(gentity_t *ent) {
 }
 
 void OnClientDisconnect(gentity_t *ent) {
-  G_DPrintf("OnClientDisconnect called by %d\n", ClientNum(ent));
+  const int clientNum = ClientNum(ent);
+  G_DPrintf("OnClientDisconnect called by %d\n", clientNum);
 
-  ETJump::session->OnClientDisconnect(ClientNum(ent));
+  ETJump::session->OnClientDisconnect(clientNum);
   ETJump::Log::processMessages();
-  game.timerunV2->clientDisconnect(ClientNum(ent));
+  game.timerunV2->clientDisconnect(clientNum);
+  game.fireteamCountdown->removeCountdown(clientNum);
 }
 
 void WriteSessionData() {
@@ -138,6 +141,8 @@ void RunFrame(int levelTime) {
     game.rtv->callAutoRtv();
   }
 
+  game.fireteamCountdown->runFrame();
+
   ETJump::Log::processMessages();
 }
 
@@ -155,6 +160,8 @@ void OnGameInit() {
 
   game.chatReplay = std::make_unique<ETJump::ChatReplay>(
       std::make_unique<ETJump::Log>("chat-replay"));
+
+  game.fireteamCountdown = std::make_unique<ETJump::FireteamCountdown>();
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
@@ -243,6 +250,7 @@ void OnGameShutdown() {
   game.timerunV2 = nullptr;
   game.rtv = nullptr;
   game.chatReplay = nullptr;
+  game.fireteamCountdown = nullptr;
 
   ETJump::Log::processMessages();
 }

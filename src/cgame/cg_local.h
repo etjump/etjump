@@ -2146,7 +2146,8 @@ enum class FTMenuOptions {
   FT_WARN = 4,
   FT_RULES = 5,
   FT_TJMODE = 6,
-  FT_MAX_OPTIONS = 7,
+  FT_COUNTDOWN_START = 7,
+  FT_MAX_OPTIONS = 8,
 };
 
 enum class FTMenuMode {
@@ -2512,6 +2513,7 @@ extern vmCvar_t etj_HUD_fireteam;
 extern vmCvar_t etj_fireteamPosX;
 extern vmCvar_t etj_fireteamPosY;
 extern vmCvar_t etj_fireteamAlpha;
+extern vmCvar_t etj_fireteamCountdownLength;
 
 // TODO: this is a bitflag option for etj_logBanner, move it elsewhere
 //  or just get rid of it entirely (why is this a bitflag to begin with???)

@@ -362,6 +362,28 @@ void init() {
     trickjumpLines->toggleMarker(false);
   }
 
+  // Rather than just queuing chat messages on client side, we send this
+  // off to the server to handle. This way we don't need to worry about
+  // the countdown getting interrupted by flood protection.
+  // TODO: this should be elsewhere, this whole init stuff should be
+  // refactored at some point, it's all very messy
+  consoleCommandsHandler->subscribe(
+      "countdown", [](const std::vector<std::string> &args) {
+        if (!CG_IsOnFireteam(cg.clientNum)) {
+          CG_Printf("You must be in a fireteam to use ^3'countdown'\n");
+          return;
+        }
+
+        if (args.empty()) {
+          const int sec = etj_fireteamCountdownLength.integer > 0
+                              ? etj_fireteamCountdownLength.integer
+                              : 3;
+          trap_SendClientCommand(va("ftcountdown %i", sec));
+        } else {
+          trap_SendClientCommand(va("ftcountdown %i", Q_atoi(args[0].c_str())));
+        }
+      });
+
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
                                      " init... " S_COLOR_GREEN "DONE\n");
