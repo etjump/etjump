@@ -1841,6 +1841,8 @@ void G_SendScore(gentity_t *client);
 //
 // g_cmds.c
 //
+void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
+           char *chatText);
 void G_SayTo(
     gentity_t *ent, gentity_t *other, int mode, int color, const char *name,
     const char *message, qboolean localize,
