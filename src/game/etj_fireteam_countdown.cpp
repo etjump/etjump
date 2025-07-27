@@ -51,11 +51,6 @@ void FireteamCountdown::runFrame() {
 
 void FireteamCountdown::addCountdown(const int clientNum,
                                      const int8_t seconds) {
-  // erase any pending countdowns for this client
-  if (countdownCommands.find(clientNum) != countdownCommands.cend()) {
-    countdownCommands.erase(clientNum);
-  }
-
   countdownCommands[clientNum].seconds = seconds;
   countdownCommands[clientNum].nextMessageTime = level.time + level.frameTime;
 }
