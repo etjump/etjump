@@ -66,7 +66,7 @@ menuDef {
         CVARINTLABEL        (SETTINGS_ITEM_POS(17), "etj_autoSpecDelay", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(17), "Auto spectate delay:", 0.2, SETTINGS_ITEM_H, etj_autoSpecDelay 10000 1000 30000 1000, "How long to stay idle for before automatically following next player\netj_autoSpecDelay")
         CVARINTLABEL        (SETTINGS_ITEM_POS(18), "etj_fireteamCountdownLength", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(18), "Fireteam countdown length:", 0.2, SETTINGS_ITEM_H, etj_fireteamCountdownLength 3 1 10 1, "Default countdown length when using 'countdown' command without arguments\netj_fireteamCountdownLength")
+        SLIDER              (SETTINGS_ITEM_POS(18), "Fireteam countdown length:", 0.2, SETTINGS_ITEM_H, etj_fireteamCountdownLength 3 1 10 1, "Default countdown length when using 'fireteam countdown' command without arguments\netj_fireteamCountdownLength")
 
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
