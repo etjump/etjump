@@ -1013,7 +1013,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
               case FTMenuOptions::FT_COUNTDOWN_START:
-                trap_SendConsoleCommand("countdown\n");
+                trap_SendConsoleCommand("fireteam countdown\n");
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
               default:
@@ -1060,7 +1060,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
               case FTMenuOptions::FT_COUNTDOWN_START:
-                trap_SendConsoleCommand("countdown\n");
+                trap_SendConsoleCommand("fireteam countdown\n");
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
               default:

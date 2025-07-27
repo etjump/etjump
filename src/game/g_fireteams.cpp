@@ -52,7 +52,7 @@
 
 #define G_ClientPrintAndReturn(entityNum, text)                                \
   trap_SendServerCommand(entityNum, "cpm \"" text "\"\n");                     \
-  return;
+  return
 
 // Utility functions
 fireteamData_t *G_FindFreeFireteam() {
@@ -998,6 +998,46 @@ void setupTeamJumpMode(const int &clientNum) {
 
   G_UpdateFireteamConfigString(ft);
 }
+
+static void startFireteamCountdown(gentity_t *ent) {
+  const int argc = trap_Argc();
+
+  // the client should always produce a countdown command with duration,
+  // even if it's not manually specified
+  if (argc < 3) {
+    Printer::console(
+        ent, "Malformed 'countdown' command - no duration specified!\n");
+    return;
+  }
+
+  if (ent->client->sess.muted) {
+    Printer::console(ent, "You are muted.\n");
+    return;
+  }
+
+  const int clientNum = ClientNum(ent);
+
+  // sanity check
+  if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
+    Printer::console(ent,
+                     "Malformed 'countdown' command - invalid clientNum!\n");
+    return;
+  }
+
+  fireteamData_t *ft = nullptr;
+
+  if (!G_IsOnFireteam(clientNum, &ft)) {
+    Printer::console(ent, "You are not in a fireteam.\n");
+    return;
+  }
+
+  // max 10s countdown, minimum 1s
+  // if the client side cvar is <= 0, the default value (3s) will be used
+  char buf[8];
+  trap_Argv(2, buf, sizeof(buf));
+  const auto seconds = static_cast<int8_t>(std::clamp(Q_atoi(buf), 1, 10));
+  game.fireteamCountdown->addCountdown(clientNum, seconds);
+}
 } // namespace ETJump
 
 // Checks if given command buffer matches a valid client on the server
@@ -1021,12 +1061,13 @@ bool validClientForFireteam(gentity_t *ent, int *targetNum, char *numbuffer) {
 // Command handler
 void Cmd_FireTeam_MP_f(gentity_t *ent) {
   char command[MAX_NAME_LENGTH]; // more than enough to hold the commands
-  auto selfNum = ClientNum(ent);
+  const int selfNum = ClientNum(ent);
   int targetNum = -1;
 
   if (trap_Argc() < 2) {
-    G_ClientPrintAndReturn(selfNum,
-                           "usage: fireteam <create|leave|apply|invite|rules>");
+    G_ClientPrintAndReturn(
+        selfNum,
+        "usage: fireteam <create|leave|apply|invite|rules|teamjump|countdown>");
   }
 
   trap_Argv(1, command, sizeof(command));
@@ -1125,5 +1166,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     ETJump::setupTeamJumpMode(selfNum);
   } else if (!Q_stricmp(command, "race")) {
     G_FireteamRace(selfNum);
+  } else if (!Q_stricmp(command, "countdown")) {
+    ETJump::startFireteamCountdown(ent);
   }
 }
