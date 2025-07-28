@@ -7851,6 +7851,8 @@ vmCvar_t etj_demoQueueDir;
 
 vmCvar_t etj_noMenuFlashing;
 
+vmCvar_t g_portalPredict;
+
 cvarTable_t cvarTable[] = {
 
     {&ui_glCustom, "ui_glCustom", "4",
@@ -8060,6 +8062,7 @@ cvarTable_t cvarTable[] = {
     {NULL, "vote_allow_randommap", "1", CVAR_ARCHIVE},
     {NULL, "vote_allow_rtv", "1", CVAR_ARCHIVE},
     {NULL, "vote_allow_autoRtv", "1", CVAR_ARCHIVE},
+    {NULL, "vote_allow_portalPredict", "1", CVAR_ARCHIVE},
     {NULL, "vote_limit", "5", CVAR_ARCHIVE},
     {NULL, "vote_percent", "50", CVAR_ARCHIVE},
     // OSP
@@ -8090,6 +8093,8 @@ cvarTable_t cvarTable[] = {
     {&etj_demoQueueDir, "etj_demoQueueDir", "demoqueue", CVAR_ARCHIVE},
 
     {&etj_noMenuFlashing, "etj_noMenuFlashing", "0", CVAR_ARCHIVE | CVAR_LATCH},
+
+    {&g_portalPredict, "g_portalPredict", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

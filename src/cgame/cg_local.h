@@ -2463,6 +2463,7 @@ extern vmCvar_t etj_popupPosY;
 // Enable/Disable viewing other player portals
 extern vmCvar_t etj_viewPlayerPortals;
 extern vmCvar_t etj_portalDebug;
+extern vmCvar_t etj_portalPredict;
 
 extern vmCvar_t etj_expandedMapAlpha;
 

@@ -113,10 +113,14 @@ void Portal::think(gentity_t *self) {
     VectorCopy(self->s.origin, self->linkedPortal->s.origin2);
     VectorCopy(self->s.angles, self->linkedPortal->s.angles2);
 
-    // force destination to be in PVS by setting SVF_PORTAL flag,
+    // add/remove destination to PVS via SVF_PORTAL flag,
     // so entities are loaded in instantly when we teleport
-    // TODO: filter other players portals?
-    self->r.svFlags |= SVF_PORTAL;
+    // and prediction works if enabled
+    if (g_portalPredict.integer) {
+      self->r.svFlags |= SVF_PORTAL;
+    } else {
+      self->r.svFlags &= ~SVF_PORTAL;
+    }
   }
 
   // we should think *every* frame to ensure up-to-date positons

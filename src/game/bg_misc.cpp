@@ -4720,6 +4720,7 @@ const voteType_t voteToggles[] = {
     {"vote_allow_randommap", CV_SVF_RANDOMMAP},
     {"vote_allow_rtv", CV_SVF_RTV},
     {"vote_allow_autoRtv", CV_SVF_AUTORTV},
+    {"vote_allow_portalPredict", CV_SVF_PORTALPREDICT},
 };
 
 const char *BG_TeamnameForNumber(team_t teamNum) {

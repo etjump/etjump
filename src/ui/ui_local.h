@@ -132,6 +132,8 @@ extern vmCvar_t etj_demoQueueDir;
 
 extern vmCvar_t etj_noMenuFlashing;
 
+extern vmCvar_t g_portalPredict;
+
 inline constexpr int MAX_EDIT_LINE = 256;
 
 inline constexpr int MAX_MENUDEPTH = 8;
