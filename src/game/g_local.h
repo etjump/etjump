@@ -1453,6 +1453,7 @@ typedef struct {
   bool noFTNoGhost;
   bool noFTSaveLimit;
   bool noFTTeamjumpMode;
+  bool portalPredict;
 
   int portalEnabled; // Feen: PGM - Enabled/Disabled by map key
   qboolean portalSurfaces;

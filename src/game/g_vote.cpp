@@ -656,6 +656,12 @@ int G_PortalPredict_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       return G_INVALID;
     }
 
+    if (level.portalPredict) {
+      Printer::popup(
+          ent, "Portalgun teleport prediction cannot be changed in this map.");
+      return G_INVALID;
+    }
+
     const int val = Q_atoi(arg2);
 
     // a bit convoluted but this ensures that the toggle works correctly

@@ -681,7 +681,8 @@ static void CG_TouchTriggerPrediction() {
         }
       } else if (ent->eType == ET_PORTAL_BLUE || ent->eType == ET_PORTAL_RED) {
         // if prediction is disabled, don't handle teleports on client
-        if (!etj_portalPredict.integer) {
+        if (!etj_portalPredict.integer &&
+            !(shared.integer & BG_LEVEL_PORTAL_PREDICT)) {
           continue;
         }
 
