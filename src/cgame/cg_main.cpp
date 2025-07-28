@@ -370,6 +370,7 @@ vmCvar_t etj_popupPosY;
 // Feen: PGM client cvars
 vmCvar_t etj_viewPlayerPortals; // Enable/Disable viewing other player portals
 vmCvar_t etj_portalDebug;
+vmCvar_t etj_portalPredict;
 
 vmCvar_t etj_expandedMapAlpha;
 
@@ -954,6 +955,7 @@ cvarTable_t cvarTable[] = {
     {&etj_viewPlayerPortals, "etj_viewPlayerPortals", "1",
      CVAR_ARCHIVE}, // Feen: PGM - View other player portals
     {&etj_portalDebug, "etj_portalDebug", "0", CVAR_ARCHIVE | CVAR_CHEAT},
+    {&etj_portalPredict, "", "0", 0},
 
     {&etj_expandedMapAlpha, "etj_expandedMapAlpha", "0.7", CVAR_ARCHIVE},
 

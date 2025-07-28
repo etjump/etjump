@@ -680,6 +680,11 @@ static void CG_TouchTriggerPrediction() {
                                                  cg.physicsTime, ent);
         }
       } else if (ent->eType == ET_PORTAL_BLUE || ent->eType == ET_PORTAL_RED) {
+        // if prediction is disabled, don't handle teleports on client
+        if (!etj_portalPredict.integer) {
+          continue;
+        }
+
         // don't try to teleport if we only have one portal
         if (VectorCompare(ent->origin2, vec3_origin) &&
             VectorCompare(ent->angles2, vec3_origin)) {

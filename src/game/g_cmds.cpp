@@ -2580,6 +2580,9 @@ void setCvString(char *voteMsg, char *voteArg) {
       voteString = stringFormat("%s", getMinutesString(voteArgInt));
       Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
     }
+  } else if (func == G_PortalPredict_v) {
+    voteString = stringFormat("%s", Q_atoi(voteArg) ? "ON" : "OFF", voteMsg);
+    Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
   }
 
   Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString),

@@ -131,6 +131,8 @@ void CG_ParseServerinfo(void) {
 
   etj_spectatorVote.integer = Q_atoi(Info_ValueForKey(info, "g_spectatorVote"));
 
+  etj_portalPredict.integer = Q_atoi(Info_ValueForKey(info, "g_portalPredict"));
+
   cgs.minclients = Q_atoi(Info_ValueForKey(
       info, "g_minGameClients")); // NERVE - SMF -- OSP:
                                   // overloaded for ready counts
