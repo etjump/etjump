@@ -1154,6 +1154,19 @@ static void initNoFTTeamjumpMode() {
   G_Printf("Fireteam teamjump mode %s be toggled by players.\n",
            level.noFTTeamjumpMode ? "cannot" : "can");
 }
+
+static void initPortalPredict() {
+  int value = 0;
+  G_SpawnInt("portalpredict", "0", &value);
+
+  level.portalPredict = value;
+  level.portalPredict ? shared.integer |= BG_LEVEL_PORTAL_PREDICT
+                      : shared.integer &= ~BG_LEVEL_PORTAL_PREDICT;
+
+  trap_Cvar_Set("shared", va("%d", shared.integer));
+  G_Printf("Predicted portal teleports are %sforced.\n",
+           level.portalPredict ? "" : "not ");
+}
 } // namespace ETJump
 
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
@@ -1301,6 +1314,7 @@ void SP_worldspawn(void) {
   ETJump::initNoFTNoGhost();
   ETJump::initNoFTSaveLimit();
   ETJump::initNoFTTeamjumpMode();
+  ETJump::initPortalPredict();
 
   level.mapcoordsValid = qfalse;
   if (G_SpawnVector2D("mapcoordsmins", "-128 128",

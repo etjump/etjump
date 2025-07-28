@@ -2820,6 +2820,8 @@ inline constexpr int BG_LEVEL_NO_DROP = 1 << 6;
 inline constexpr int BG_LEVEL_NO_WALLBUG = 1 << 7;
 // Noclip is disabled
 inline constexpr int BG_LEVEL_NO_NOCLIP = 1 << 8;
+// portalgun prediction is force-enabled
+inline constexpr int BG_LEVEL_PORTAL_PREDICT = 1 << 9;
 
 namespace ETJump {
 inline constexpr char CUSTOMVOTE_TYPE[] = "type";

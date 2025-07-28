@@ -116,7 +116,7 @@ void Portal::think(gentity_t *self) {
     // add/remove destination to PVS via SVF_PORTAL flag,
     // so entities are loaded in instantly when we teleport
     // and prediction works if enabled
-    if (g_portalPredict.integer) {
+    if (g_portalPredict.integer || level.portalPredict) {
       self->r.svFlags |= SVF_PORTAL;
     } else {
       self->r.svFlags &= ~SVF_PORTAL;
