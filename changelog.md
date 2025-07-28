@@ -25,7 +25,7 @@
     * `leader_only_message` - message to print to activator if `spawnflag 1` is set and the activator is not the fireteam leader, `%s` will be substituted with the fireteam leaders name
 * added `etj_logCenterPrint` cvar to log center prints to console [#1627](https://github.com/etjump/etjump/pull/1627)
   * consecutive, identical messages are not logged multiple times - same message will be logged only if it has already disappeared from screen, as controlled by `cg_centertime` cvar
-  * save messges are not logged
+  * several spammy prints (e.g. dynamite arming) and save messges are not logged
 * console no longer prints a warning when trying to vsay current class as a spectator [#1648](https://github.com/etjump/etjump/pull/1648)
 * spectators can now use the fireteam general vsay menu [#1649](https://github.com/etjump/etjump/pull/1649)
 * fully removed location grid system from the mod - team/ft chats no longer display coordinates on chat [#1651](https://github.com/etjump/etjump/pull/1651)
@@ -67,6 +67,29 @@
 * fixed a long standing issue where client's backed up saves from a session would sometimes disappear when reconnecting to a server [#1681](https://github.com/etjump/etjump/pull/1681)
 * fixed a potential crash when invalid vote argument was given [#1682](https://github.com/etjump/etjump/pull/1682)
 * fixed a potential crash with `players` command [#1685](https://github.com/etjump/etjump/pull/1685)
+* fixed unknown command `uiChatMenuOpen` console print when disconnecting from a server via in-game menu [#1691](https://github.com/etjump/etjump/pull/1691)
+* added `etj_useExecQuiet` cvar to execute map/team-specific autoexec configs using `execq` command [1695](https://github.com/etjump/etjump/pull/1695)
+  * `execq` is supported by ET: Legacy & ETe, and executes a config "quietly" (no info print to console)
+  * bitflag cvar:
+    * 1 - enable for map autoexecs
+    * 2 - enable for team autoexecs
+* added `etj_noMenuFlashing` cvar to disable the lightning effect on the menu background shader [#1699](https://github.com/etjump/etjump/pull/1699)
+* added option to enable client side predicted portalgun teleports [#1689](https://github.com/etjump/etjump/pull/1689)
+  * disabled by default due to the potential for PVS-related visual bugs
+  * can be enabled via `g_portalPredict` server cvar (votable by clients)
+    * voting can be disabled with `vote_allow_portalPredict`
+  * worldspawn key `portalpredict` forcibly enables portal prediction for a map regardless of the cvar value
+* fixed `portalteam 1` not working correctly and acting like `portalteam 2` [#1689](https://github.com/etjump/etjump/pull/1689)
+* fixed `func_portaltarget` producing incorrectly sized portals when `portalsize` key was used [#1689](https://github.com/etjump/etjump/pull/1689)
+* deprecated `g_portalDebug` server cvar in favor of `etj_portalDebug` client cvar [#1689](https://github.com/etjump/etjump/pull/1689)
+* fixed `KEYS` menu button in `LAGOMETER` settings menu not working [#1702](https://github.com/etjump/etjump/pull/1702)
+* added `fireteam countdown` command to perform a countdown in fireteam chat [#1703](https://github.com/etjump/etjump/pull/1703)
+  * `fireteam countdown [seconds]`, if `seconds` isn't given, value is taken from `etj_fireteamCountdownLength` cvar value
+  * length is capped to 1-10s
+* added "Quick connect" window to main menu [#1701](https://github.com/etjump/etjump/pull/1701)
+  * can store up to 5 servers for 1-click connecting to a server
+  * servers are stored in `quickconnect.dat` file
+  * can be disabled with `etj_drawQuickConnectMenu` cvar
 
 # ETJump 3.3.4
 
