@@ -1791,7 +1791,6 @@ void reinforce(gentity_t *ent);                  // JPW NERVE
 qboolean AddWeaponToPlayer(gclient_t *client, weapon_t weapon, int ammo,
                            int ammoclip, qboolean setcurrent);
 void ResetPlayerAmmo(gclient_t *client, gentity_t *ent);
-void ClearPortals(gentity_t *ent);
 //
 // g_character.c
 //

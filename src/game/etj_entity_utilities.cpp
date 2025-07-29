@@ -145,4 +145,27 @@ void EntityUtilities::getOriginOrBmodelCenter(const gentity_t *ent,
     origin[2] = (ent->r.absmax[2] + ent->r.absmin[2]) / 2;
   }
 }
+
+bool EntityUtilities::clearPortals(gentity_t *ent) {
+  bool removed = false;
+
+  // Clear portalgun portals
+  if (ent->portalBlue) {
+    G_FreeEntity(ent->portalBlue);
+    ent->portalBlue = nullptr;
+    removed = true;
+  }
+
+  if (ent->portalRed) {
+    G_FreeEntity(ent->portalRed);
+    ent->portalRed = nullptr;
+    removed = true;
+  }
+
+  if (ent->client) {
+    ent->client->numPortals = 0;
+  }
+
+  return removed;
+}
 } // namespace ETJump

@@ -25,6 +25,7 @@
 #include <stdexcept>
 
 #include "etj_utilities.h"
+#include "etj_entity_utilities.h"
 #include "etj_save_system.h"
 #include "etj_map_statistics.h"
 #include "etj_timerun_v2.h"
@@ -79,7 +80,7 @@ void Utilities::startRun(int clientNum) {
     selectValidWeapon(player);
   }
 
-  ClearPortals(player);
+  ETJump::EntityUtilities::clearPortals(player);
 }
 
 void Utilities::stopRun(int clientNum) {
