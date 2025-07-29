@@ -2,6 +2,7 @@
 
 #include "g_local.h"
 #include "etj_string_utilities.h"
+#include "etj_printer.h"
 
 typedef struct teamgame_s {
   float last_flag_capture;
@@ -435,7 +436,7 @@ void Team_DroppedFlagThink(gentity_t *ent) {
                            "axis_object_returned");
     }
 
-    trap_SendServerCommand(-1, "cp \"Axis have returned the objective!\" 2");
+    Printer::centerPriorityAll("Axis have returned the objective!", 2);
   } else if (ent->item->giTag == PW_BLUEFLAG) {
     G_Script_ScriptEvent(&g_entities[ent->s.otherEntityNum], "trigger",
                          "returned");
@@ -448,9 +449,7 @@ void Team_DroppedFlagThink(gentity_t *ent) {
                            "allied_object_returned");
     }
 
-    //		trap_SendServerCommand(-1, "cp \"Allies have returned
-    // the
-    // objective!\" 2");
+    Printer::centerPriorityAll("Allies have returned the objective!", 2);
   }
   // Reset Flag will delete this entity
 }
