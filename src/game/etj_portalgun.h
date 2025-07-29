@@ -49,6 +49,8 @@ public:
                    vec3_t right, vec3_t up, vec3_t muzzleEffect);
 
 private:
+  static bool portalsOverlap(gentity_t *ent, Portal::Type type, float scale,
+                             vec3_t portalAngles, vec3_t endPos);
   static void portalgunTrace(gentity_t *ent, trace_t *tr, vec3_t start,
                              vec3_t end);
 };

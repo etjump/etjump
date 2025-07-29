@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+#include <algorithm>
+
 #include "etj_portalgun.h"
 #include "etj_entity_utilities.h"
 #include "etj_entity_utilities_shared.h"
@@ -342,27 +344,8 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
 
   VectorMA(tr_end, 5, tr.plane.normal, t_endpos);
 
-  // check that portals aren't overlapping..
-  if ((ent->portalBlue) || (ent->portalRed)) {
-    const gentity_t *otherPortal = nullptr;
-
-    if (type == Portal::Type::PORTAL_BLUE && ent->portalRed) {
-      otherPortal = ent->portalRed;
-    } else if (type == Portal::Type::PORTAL_RED && ent->portalBlue) {
-      otherPortal = ent->portalBlue;
-    }
-
-    if (otherPortal) {
-      const float otherScale = static_cast<float>(otherPortal->s.onFireStart) /
-                               (PORTAL_BBOX_RADIUS * 2);
-      const float min_dist =
-          MIN_PORTALS_DIST * scale + MIN_PORTALS_DIST * otherScale;
-
-      if (Distance(t_portalAngles, otherPortal->s.angles) < MIN_ANGLES_DIFF &&
-          Distance(tr_end, otherPortal->s.origin) < min_dist) {
-        return;
-      }
-    }
+  if (portalsOverlap(ent, type, scale, t_portalAngles, t_endpos)) {
+    return;
   }
 
   // Free any previous instances of each portal if any
@@ -393,6 +376,90 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
   ent->client->numPortals++;
 
   Portal::spawn(ent, scale, type, tr, t_endpos, t_portalAngles);
+}
+
+bool Portalgun::portalsOverlap(gentity_t *ent, Portal::Type type,
+                               const float scale, vec3_t portalAngles,
+                               vec3_t endPos) {
+  std::vector<const gentity_t *> otherPortals;
+  // * 2 for 2 portals per client
+  otherPortals.reserve(level.numConnectedClients * 2L);
+  fireteamData_t *ft = nullptr;
+
+  // we can never overlap our own portals
+  if (type == Portal::Type::PORTAL_BLUE && ent->portalRed) {
+    otherPortals.push_back(ent->portalRed);
+  } else if (type == Portal::Type::PORTAL_RED && ent->portalBlue) {
+    otherPortals.push_back(ent->portalBlue);
+  }
+
+  switch (level.portalTeam) {
+    case PORTAL_TEAM_FT:
+      if (!G_IsOnFireteam(ClientNum(ent), &ft)) {
+        break;
+      }
+
+      for (const char clientNum : ft->joinOrder) {
+        if (clientNum == -1) {
+          break;
+        }
+
+        // skip our portals since they are already added
+        if (clientNum == ClientNum(ent)) {
+          continue;
+        }
+
+        const auto *ftMember = static_cast<gentity_t *>(g_entities + clientNum);
+
+        // we don't care about the portal type here
+        // since these aren't our portals, so we can't ever overlap them
+        if (ftMember->portalBlue) {
+          otherPortals.push_back(ftMember->portalBlue);
+        }
+
+        if (ftMember->portalRed) {
+          otherPortals.push_back(ftMember->portalRed);
+        }
+      }
+
+      break;
+    case PORTAL_TEAM_ALL:
+      for (int i = 0; i < level.numConnectedClients; i++) {
+        auto *const other =
+            static_cast<gentity_t *>(g_entities + level.sortedClients[i]);
+
+        // skip our portals
+        if (other == ent) {
+          continue;
+        }
+
+        if (other->portalBlue) {
+          otherPortals.push_back(other->portalBlue);
+        }
+
+        if (other->portalRed) {
+          otherPortals.push_back(other->portalRed);
+        }
+      }
+
+      break;
+    default:
+      break;
+  }
+
+  return std::any_of(
+      otherPortals.cbegin(), otherPortals.cend(),
+      [scale, portalAngles, endPos](const gentity_t *otherPortal) {
+        const float otherScale =
+            static_cast<float>(otherPortal->s.onFireStart) /
+            (PORTAL_BBOX_RADIUS * 2);
+        const float min_dist =
+            (MIN_PORTALS_DIST * scale) + (MIN_PORTALS_DIST * otherScale);
+
+        return (Distance(portalAngles, otherPortal->s.angles) <
+                    MIN_ANGLES_DIFF &&
+                Distance(endPos, otherPortal->s.origin) < min_dist);
+      });
 }
 
 void Portalgun::portalgunTrace(gentity_t *ent, trace_t *tr, vec3_t start,

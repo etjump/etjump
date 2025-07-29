@@ -45,5 +45,8 @@ public:
 
   // sets 'origin' to the entity's origin, or the center of it's absmins/maxs
   static void getOriginOrBmodelCenter(const gentity_t *ent, vec3_t origin);
+
+  // returns true if any portals were removed
+  static bool clearPortals(gentity_t *ent);
 };
 } // namespace ETJump

@@ -317,6 +317,14 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
         }
       }
 
+      if (level.portalTeam == ETJump::PORTAL_TEAM_FT &&
+          ETJump::EntityUtilities::clearPortals(otherEnt)) {
+        Printer::center(otherEnt, "Your portal gun portals have been reset.");
+        Printer::console(otherEnt,
+                         "Your portals have been reset due to ^3'portalteam' "
+                         "^7setting of the current map.\n");
+      }
+
       G_UpdateFireteamConfigString(ft);
 
       return;

@@ -3,6 +3,7 @@
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
 #include "etj_rtv.h"
+#include "etj_entity_utilities.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -2667,23 +2668,6 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   client->sess.velocityScale = 1;
 }
 
-void ClearPortals(gentity_t *ent) {
-  // Clear portalgun portals
-  if (ent->portalBlue) {
-    G_FreeEntity(ent->portalBlue);
-    ent->portalBlue = nullptr;
-  }
-
-  if (ent->portalRed) {
-    G_FreeEntity(ent->portalRed);
-    ent->portalRed = nullptr;
-  }
-
-  if (ent->client) {
-    ent->client->numPortals = 0;
-  }
-}
-
 /*
 ===========
 ClientDisconnect
@@ -2863,7 +2847,7 @@ void ClientDisconnect(int clientNum) {
 
   ETJump::saveSystem->savePositionsToDatabase(ent);
 
-  ClearPortals(ent);
+  ETJump::EntityUtilities::clearPortals(ent);
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,
