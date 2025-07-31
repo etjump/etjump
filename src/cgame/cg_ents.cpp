@@ -9,6 +9,7 @@
 
 #include "cg_local.h"
 #include "etj_utilities.h"
+#include "../game/etj_portalgun_shared.h"
 
 /*
 ======================

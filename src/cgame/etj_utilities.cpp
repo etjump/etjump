@@ -31,9 +31,10 @@
 
 #include "etj_utilities.h"
 #include "etj_event_loop.h"
-#include "../game/etj_string_utilities.h"
 #include "cg_local.h"
 #include "etj_demo_compatibility.h"
+#include "../game/etj_string_utilities.h"
+#include "../game/etj_portalgun_shared.h"
 
 namespace ETJump {
 extern std::shared_ptr<EventLoop> eventLoop;

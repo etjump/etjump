@@ -23,6 +23,7 @@
  */
 
 #include "etj_entity_utilities_shared.h"
+#include "etj_portalgun_shared.h"
 
 // Entity helper functions used by both games (client side predicted entities)
 
