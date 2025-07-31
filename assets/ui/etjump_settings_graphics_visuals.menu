@@ -46,7 +46,7 @@ menuDef {
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "VISUALS")
 
         YESNO               (SETTINGS_ITEM_POS(1), "Hor+ FOV:", 0.2, SETTINGS_ITEM_H, "etj_realFov", "Use hor+ FOV calculation instead of vert-\netj_realFov")
-        MULTI               (SETTINGS_ITEM_POS(2), "Draw other players' portals:", 0.2, SETTINGS_ITEM_H, "etj_viewPlayerPortals", cvarFloatList { "No" 0 "Yes" 1 "Only when spectating" 2 }, "Draw other players' portalgun portals\netj_viewPlayerPortals")
+        YESNO               (SETTINGS_ITEM_POS(2), "Draw non-interactable portals", 0.2, SETTINGS_ITEM_H, "etj_viewPlayerPortals", "Draw other player's portals even if they cannot be interacted with\netj_viewPlayerPortals")
         MULTI               (SETTINGS_ITEM_POS(3), "Explosion screenshake:", 0.2, SETTINGS_ITEM_H, "etj_explosivesShake", cvarFloatList { "No" 0 "From others" 1 "From own" 2 "Yes" 3 }, "Shake screen from explosions\netj_explosivesShake")
         YESNO               (SETTINGS_ITEM_POS(4), "Draw tokens:", 0.2, SETTINGS_ITEM_H, "etj_drawTokens", "Draw collectible tokens placed by server admins\netj_drawTokens")
 

@@ -1300,6 +1300,8 @@ void SP_worldspawn(void) {
       level.portalTeam = ETJump::PORTAL_TEAM_ALL;
     }
   }
+
+  trap_Cvar_Set("g_portaLTeam", s);
   G_Printf("Portal team is set to %d.\n", val);
 
   ETJump::initNoSave();

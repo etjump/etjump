@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "etj_player_events_handler.h"
 #include "../game/etj_string_utilities.h"
+#include "etj_utilities.h"
 
 extern void CG_StartShakeCamera(float param, entityState_t *es);
 extern void CG_Tracer(vec3_t source, vec3_t dest, int sparks);
@@ -2751,20 +2752,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       CG_ResetTransitionEffects();
       break;
     case EV_PORTAL_TRAIL:
-      // not our portal trail
-      if (!etj_viewPlayerPortals.integer &&
-          es->otherEntityNum2 != cg.clientNum) {
-        return;
-      }
-      // not our portal trail, not spectating
-      if (etj_viewPlayerPortals.integer == 2 &&
-          cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR &&
-          es->otherEntityNum2 != cg.clientNum) {
-        return;
+      if (!ETJump::skipPortalDraw(cg.snap->ps.clientNum, es->otherEntityNum)) {
+        CG_RailTrail(es->origin2, es->pos.trBase, es->dmgFlags,
+                     tv(es->angles[0], es->angles[1], es->angles[2]));
       }
 
-      CG_RailTrail(es->origin2, es->pos.trBase, es->dmgFlags,
-                   tv(es->angles[0], es->angles[1], es->angles[2]));
       break;
     default:
       break;
