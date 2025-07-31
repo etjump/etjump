@@ -274,4 +274,22 @@ void ETJump::resetTempTraceIgnoredClients() {
   std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
 }
 
+bool ETJump::skipPortalDraw(const int selfNum, const int otherNum) {
+  if (selfNum == otherNum) {
+    return false;
+  }
+
+  if (etj_portalTeam.integer == PORTAL_TEAM_ALL ||
+      etj_viewPlayerPortals.integer) {
+    return false;
+  }
+
+  if (etj_portalTeam.integer == PORTAL_TEAM_FT &&
+      CG_IsOnSameFireteam(selfNum, otherNum)) {
+    return false;
+  }
+
+  return true;
+}
+
 #endif

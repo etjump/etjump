@@ -2465,6 +2465,7 @@ extern vmCvar_t etj_popupPosY;
 extern vmCvar_t etj_viewPlayerPortals;
 extern vmCvar_t etj_portalDebug;
 extern vmCvar_t etj_portalPredict;
+extern vmCvar_t etj_portalTeam;
 
 extern vmCvar_t etj_expandedMapAlpha;
 

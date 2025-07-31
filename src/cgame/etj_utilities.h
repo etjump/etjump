@@ -86,5 +86,7 @@ void tempTraceIgnoreClient(int clientNum);
 
 void resetTempTraceIgnoredClients();
 
+bool skipPortalDraw(int selfNum, int otherNum);
+
 #endif
 } // namespace ETJump

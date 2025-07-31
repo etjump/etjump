@@ -225,6 +225,7 @@ vmCvar_t g_banners;
 // 0 = Freestyle, 1 = Standard,  2 = team (possible future)
 vmCvar_t g_portalMode;
 vmCvar_t g_portalPredict;
+vmCvar_t g_portalTeam;
 
 // Bugfixes
 vmCvar_t g_maxConnsPerIP;
@@ -485,6 +486,7 @@ cvarTable_t gameCvarTable[] = {
     // 0 - freestyle, 1 - restricted
     {&g_portalMode, "g_portalMode", "1", CVAR_ARCHIVE},
     {&g_portalPredict, "g_portalPredict", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
+    {&g_portalTeam, "g_portalTeam", "0", CVAR_ROM | CVAR_SERVERINFO},
 
     {&g_maxConnsPerIP, "g_maxConnsPerIP", "2", CVAR_ARCHIVE},
     {&g_mute, "g_mute", "0", CVAR_ARCHIVE},

@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 
 /*
 ======================
@@ -2382,15 +2383,8 @@ static void CG_PortalGate(const centity_t *cent) {
           : static_cast<float>(cent->currentState.onFireStart) *
                 ETJump::PORTAL_DRAW_SCALAR;
 
-  // not our portal
-  if (!etj_viewPlayerPortals.integer &&
-      cent->currentState.otherEntityNum != cg.clientNum) {
-    return;
-  }
-  // not our portal, not spectating
-  if (etj_viewPlayerPortals.integer == 2 &&
-      cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR &&
-      cent->currentState.otherEntityNum != cg.clientNum) {
+  if (ETJump::skipPortalDraw(cg.snap->ps.clientNum,
+                             cent->currentState.otherEntityNum)) {
     return;
   }
 
