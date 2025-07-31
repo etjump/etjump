@@ -9,6 +9,7 @@
 #include "cg_local.h"
 #include "etj_utilities.h"
 #include "../game/etj_entity_utilities_shared.h"
+#include "../game/etj_portalgun_shared.h"
 
 /*static*/ pmove_t cg_pmove;
 
@@ -600,9 +601,22 @@ static void CG_TouchTriggerPrediction() {
                                     cent->currentState.otherEntityNum) &&
             etj_portalDebug.integer &&
             cg.time > cent->lastRailboxTime + cg_railTrailTime.integer) {
-          CG_RailTrail(mins, maxs, true,
-                       ent->eType == ET_PORTAL_BLUE ? tv(0, 0, 1)
-                                                    : tv(1, 0, 0));
+
+          vec3_t boxColor{};
+
+          if (cg.snap->ps.clientNum == cent->currentState.otherEntityNum) {
+            VectorCopy(cent->currentState.eType == ET_PORTAL_BLUE
+                           ? ETJump::portalBlueTrail
+                           : ETJump::portalRedTrail,
+                       boxColor);
+          } else {
+            VectorCopy(cent->currentState.eType == ET_PORTAL_BLUE
+                           ? ETJump::portalGreenTrail
+                           : ETJump::portalYellowTrail,
+                       boxColor);
+          }
+
+          CG_RailTrail(mins, maxs, true, boxColor);
           cent->lastRailboxTime = cg.time;
         }
       } else {

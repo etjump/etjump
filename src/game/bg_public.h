@@ -2879,27 +2879,6 @@ enum class PlayerStance {
   Crouch = 1,
   Prone = 2,
 };
-
-// portalteam
-inline constexpr int PORTAL_TEAM_NONE = 0;
-inline constexpr int PORTAL_TEAM_FT = 1;
-inline constexpr int PORTAL_TEAM_ALL = 2;
-
-// cooldown between portal touch events (ms)
-inline constexpr int PORTAL_TOUCH_COOLDOWN = 100;
-
-// radius of portal bbox
-inline constexpr float PORTAL_BBOX_RADIUS = 30.0f;
-// depth for horizontal portals
-inline constexpr float PORTAL_BBOX_HOR_DEPTH = 15.0f;
-// depth for vertical portals
-inline constexpr float PORTAL_BBOX_VERT_DEPTH = 5.0f;
-
-// radius for portal shader drawing
-inline constexpr float PORTAL_DRAW_RADIUS = 48.0f;
-// scalar for drawing the portal shader proportional to the portal size
-inline constexpr float PORTAL_DRAW_SCALAR =
-    PORTAL_DRAW_RADIUS / (PORTAL_BBOX_RADIUS * 2);
 } // namespace ETJump
 
 inline constexpr int JUMP_VELOCITY = 270;

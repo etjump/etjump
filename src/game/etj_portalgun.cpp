@@ -27,6 +27,7 @@
 #include "etj_portalgun.h"
 #include "etj_entity_utilities.h"
 #include "etj_entity_utilities_shared.h"
+#include "etj_portalgun_shared.h"
 
 namespace ETJump {
 // max range where you can place next portal gate
@@ -276,9 +277,6 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
   // BBox info
   vec3_t t_portalAngles; // Could be used for all angles conversions...
 
-  constexpr vec3_t blueTrail = {0.0f, 0.0f, 1.0f};
-  constexpr vec3_t redTrail = {1.0f, 0.0f, 0.0f};
-
   // NOTE: NEW trace setup.... pulled from flamethrower
   // NOTE: Need this for +attack2 call...
   AngleVectors(ent->client->ps.viewangles, forward, right, up);
@@ -364,8 +362,9 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
   // close enough for the barrel on most cases, realistically we should
   // grab the starting point from the weapon tags
   gentity_t *tent = G_TempEntity(muzzleEffect, EV_PORTAL_TRAIL);
-  type == Portal::Type::PORTAL_BLUE ? VectorCopy(blueTrail, tent->s.angles)
-                                    : VectorCopy(redTrail, tent->s.angles);
+  type == Portal::Type::PORTAL_BLUE
+      ? VectorCopy(portalBlueTrail, tent->s.angles)
+      : VectorCopy(portalRedTrail, tent->s.angles);
 
   SnapVectorTowards(tr_end, start);
   VectorCopy(tr_end, tent->s.origin2);

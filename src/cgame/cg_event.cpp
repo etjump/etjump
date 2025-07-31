@@ -7,6 +7,7 @@
 #include "etj_player_events_handler.h"
 #include "../game/etj_string_utilities.h"
 #include "etj_utilities.h"
+#include "../game/etj_portalgun_shared.h"
 
 extern void CG_StartShakeCamera(float param, entityState_t *es);
 extern void CG_Tracer(vec3_t source, vec3_t dest, int sparks);
@@ -2752,9 +2753,17 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       CG_ResetTransitionEffects();
       break;
     case EV_PORTAL_TRAIL:
-      if (!ETJump::skipPortalDraw(cg.snap->ps.clientNum, es->otherEntityNum)) {
+      if (ETJump::skipPortalDraw(cg.snap->ps.clientNum, es->otherEntityNum)) {
+        break;
+      }
+
+      if (cg.snap->ps.clientNum == es->otherEntityNum2) {
+        CG_RailTrail(es->origin2, es->pos.trBase, es->dmgFlags, es->angles);
+      } else {
         CG_RailTrail(es->origin2, es->pos.trBase, es->dmgFlags,
-                     tv(es->angles[0], es->angles[1], es->angles[2]));
+                     VectorCompare(es->angles, ETJump::portalBlueTrail)
+                         ? ETJump::portalGreenTrail
+                         : ETJump::portalYellowTrail);
       }
 
       break;

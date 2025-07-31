@@ -4,6 +4,7 @@
 #include "etj_entity_utilities.h"
 #include "etj_local.h"
 #include "etj_fireteam_countdown.h"
+#include "etj_portalgun_shared.h"
 
 // Gordon
 // What we need....

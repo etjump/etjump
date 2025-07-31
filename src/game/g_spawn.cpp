@@ -20,6 +20,7 @@
 #include "etj_target_ft_setrules.h"
 #include "etj_target_spawn_relay.h"
 #include "etj_portalgun.h"
+#include "etj_portalgun_shared.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
