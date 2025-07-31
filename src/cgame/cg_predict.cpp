@@ -596,7 +596,9 @@ static void CG_TouchTriggerPrediction() {
         // TODO: this is kinda annoying as railtrails fade as they approach
         //  the end of their lifetime, we should probably add a version
         //  that does not fade at all since it's more pleasant on eyes
-        if (etj_portalDebug.integer &&
+        if (!ETJump::skipPortalDraw(cg.snap->ps.clientNum,
+                                    cent->currentState.otherEntityNum) &&
+            etj_portalDebug.integer &&
             cg.time > cent->lastRailboxTime + cg_railTrailTime.integer) {
           CG_RailTrail(mins, maxs, true,
                        ent->eType == ET_PORTAL_BLUE ? tv(0, 0, 1)
