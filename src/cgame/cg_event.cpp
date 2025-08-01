@@ -2753,7 +2753,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       CG_ResetTransitionEffects();
       break;
     case EV_PORTAL_TRAIL:
-      if (ETJump::skipPortalDraw(cg.snap->ps.clientNum, es->otherEntityNum)) {
+      if (ETJump::skipPortalDraw(cg.snap->ps.clientNum, es->otherEntityNum2)) {
         break;
       }
 
