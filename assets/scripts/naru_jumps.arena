@@ -1,0 +1,17 @@
+// ETJump arena file for naru_jumps.bsp
+// Modifications:
+// - fixed missing quote at the end of 'briefing' text
+
+{
+	map			"naru_jumps"
+	longname		"^7narutowan^>_jumps" 
+	type			"wolfmp wolfsw wolflms"
+	timelimit		30
+	axisRespawnTime	1
+	alliedRespawnTime	1
+	briefing		"^_Axis Part :**^0Hard gammas**^_Allies part :**^0... >.***^0Mapped by ^7narutowan^>."
+	axiswintext		"Great Jump"
+	alliedwintext	"Good Job"
+	mapposition_x	300
+	mapposition_y	350
+}
