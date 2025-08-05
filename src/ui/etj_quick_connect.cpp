@@ -75,7 +75,7 @@ bool QuickConnect::parseServers() {
       continue;
     }
 
-    servers.push_back(server);
+    servers.push_back(std::move(server));
   }
 
   return true;
@@ -242,7 +242,7 @@ void QuickConnect::updateLabels() {
 
 void QuickConnect::buildLabelString(const int index) {
   // for safety
-  if (index < 0 || index > MAX_QUICKCONNECT_SERVERS) {
+  if (index < 0 || index >= MAX_QUICKCONNECT_SERVERS) {
     uiInfo.uiDC.Print(
         S_COLOR_RED
         "%s: Unable to build quick connect label - index '%i' out of range!\n",
@@ -433,7 +433,7 @@ void QuickConnect::deleteServer() {
 
 void QuickConnect::setEditData(const int index) {
   // for safety
-  if (index < 0 || index > MAX_QUICKCONNECT_SERVERS) {
+  if (index < 0 || index >= MAX_QUICKCONNECT_SERVERS) {
     uiInfo.uiDC.Print(S_COLOR_RED "%s: Unable to set quick connect edit data - "
                                   "index '%i' out of range!\n",
                       __func__, index);
@@ -465,7 +465,7 @@ int QuickConnect::getServerCount() const {
 
 std::string QuickConnect::buildConnectCommand(const int index) const {
   // for safety
-  if (index < 0 || index > MAX_QUICKCONNECT_SERVERS) {
+  if (index < 0 || index >= MAX_QUICKCONNECT_SERVERS) {
     uiInfo.uiDC.Print(S_COLOR_RED "%s: Unable to build quick connect command - "
                                   "index '%i' out of range!\n",
                       __func__, index);
