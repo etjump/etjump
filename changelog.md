@@ -90,6 +90,19 @@
   * can store up to 5 servers for 1-click connecting to a server
   * servers are stored in `quickconnect.dat` file
   * can be disabled with `etj_drawQuickConnectMenu` cvar
+* fixed missing centerprint when an Allied objective was auto-returned due to timeout [#1704](https://github.com/etjump/etjump/pull/1704)
+* portalgun portals can no longer be overlapped in some scenarios if `portalteam` is enabled [#1705](https://github.com/etjump/etjump/pull/1705)
+  * `portalteam 1` - fireteam members cannot overlap portals
+  * `portalteam 2` - nobody can overlap portals
+  * when joining a fireteam with `portalteam 1`, your portals are reset to prevent potential overlapping
+* adjusted behavior of `etj_viewPlayerPortals` to filter out usable/unusable portals instead [#1706](https://github.com/etjump/etjump/pull/1706)
+  * 0 - only draw portals you're able to use
+  * 1 - draw all portals
+  * a portal is considered usable in the following scenarios:
+    * the portal is yours
+    * `portalteam` is set to 1 and the portal is yours or from a fireteam member
+    * `portalteam` is set to 2 (anyone can use anyone's portals)
+* portalgun trails and debug bboxes are now correctly colored green/yellow for other's portals [#1707](https://github.com/etjump/etjump/pull/1707)
 
 # ETJump 3.3.4
 
