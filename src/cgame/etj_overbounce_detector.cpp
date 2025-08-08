@@ -24,6 +24,7 @@
 
 #include "etj_overbounce_detector.h"
 #include "etj_overbounce_shared.h"
+#include "etj_utilities.h"
 
 namespace ETJump {
 bool OverbounceDetector::beforeRender() {
@@ -34,7 +35,7 @@ bool OverbounceDetector::beforeRender() {
   belowOverbounce = jumpOverbounce = fallOverbounce = stickyOverbounce = false;
 
   ps = getValidPlayerState();
-  traceContents = checkExtraTrace(ETJump::OB_DETECTOR);
+  traceContents = checkExtraTrace(ETJump::OB_DETECTOR) | CONTENTS_BODY;
   pmoveSec = static_cast<float>(cgs.pmove_msec) / 1000.0f;
   gravity = ps->gravity;
   zVel = ps->velocity[2];
@@ -56,8 +57,7 @@ bool OverbounceDetector::beforeRender() {
     VectorCopy(start, end);
     end[2] -= Overbounce::MAX_TRACE_DIST;
 
-    CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-             traceContents);
+    overbounceTrace(trace, start, end);
 
     if (trace.fraction != 1.0 && trace.plane.type == 2) {
       // something was hit and it's a floor
@@ -76,8 +76,7 @@ bool OverbounceDetector::beforeRender() {
   VectorCopy(cg.refdef.vieworg, start);
   VectorMA(start, Overbounce::MAX_TRACE_DIST, cg.refdef.viewaxis[0], end);
 
-  CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-           traceContents);
+  overbounceTrace(trace, start, end);
 
   if (trace.fraction != 1.0 && trace.plane.type == 2) {
     // something was hit and it's a floor
@@ -144,6 +143,25 @@ void OverbounceDetector::render() const {
     CG_DrawStringExt(static_cast<int>(x - 20), etj_OBY.integer, "S", colorWhite,
                      qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
   }
+}
+
+void OverbounceDetector::overbounceTrace(trace_t &tr, const vec3_t tr_start,
+                                         const vec3_t tr_end) {
+  CG_Trace(&tr, tr_start, nullptr, nullptr, tr_end, ps->clientNum,
+           traceContents);
+
+  if (cg_ghostPlayers.integer != 1 || tr.entityNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  while (tr.entityNum < MAX_CLIENTS &&
+         !ETJump::playerIsSolid(ps->clientNum, tr.entityNum)) {
+    tempTraceIgnoreClient(tr.entityNum);
+    CG_Trace(&tr, tr_start, nullptr, nullptr, tr_end, ps->clientNum,
+             traceContents);
+  }
+
+  resetTempTraceIgnoredClients();
 }
 
 bool OverbounceDetector::canSkipDraw() {
