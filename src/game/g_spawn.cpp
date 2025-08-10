@@ -961,7 +961,7 @@ as we cannot call this outside of init, since 'trap_GetEntityToken'
 won't return valid data after 'SV_InitGameVM' has run.
 ====================
 */
-qboolean G_ParseSpawnVars(void) {
+static bool G_ParseSpawnVars() {
   char keyname[MAX_TOKEN_CHARS];
   char com_token[MAX_TOKEN_CHARS];
 
@@ -971,18 +971,17 @@ qboolean G_ParseSpawnVars(void) {
   // parse the opening brace
   if (!trap_GetEntityToken(com_token, sizeof(com_token))) {
     // end of spawn string
-    return qfalse;
+    return false;
   }
   if (com_token[0] != '{') {
-    G_Error("G_ParseSpawnVars: found %s when expecting {", com_token);
+    G_Error("%s: found %s when expecting {", __func__, com_token);
   }
 
   // go through all the key / value pairs
-  while (1) {
+  while (true) {
     // parse key
     if (!trap_GetEntityToken(keyname, sizeof(keyname))) {
-      G_Error("G_ParseSpawnVars: EOF without closing "
-              "brace");
+      G_Error("%s: EOF without closing brace", __func__);
     }
 
     if (keyname[0] == '}') {
@@ -991,17 +990,18 @@ qboolean G_ParseSpawnVars(void) {
 
     // parse value
     if (!trap_GetEntityToken(com_token, sizeof(com_token))) {
-      G_Error("G_ParseSpawnVars: EOF without closing "
-              "brace");
+      G_Error("%s: EOF without closing brace", __func__);
     }
 
     if (com_token[0] == '}') {
-      G_Error("G_ParseSpawnVars: closing brace without "
-              "data");
+      G_Error("%s: closing brace without data", __func__);
     }
+
     if (level.numSpawnVars == MAX_SPAWN_VARS) {
-      G_Error("G_ParseSpawnVars: MAX_SPAWN_VARS");
+      G_Error("%s: MAX_SPAWN_VARS (%i) reached, too many keys in an entity",
+              __func__, MAX_SPAWN_VARS);
     }
+
     level.spawnVars[level.numSpawnVars][0] = G_AddSpawnVarToken(keyname);
     level.spawnVars[level.numSpawnVars][1] = G_AddSpawnVarToken(com_token);
 
@@ -1012,7 +1012,7 @@ qboolean G_ParseSpawnVars(void) {
     ETJump::EntityUtilities::storeParsedEntity();
   }
 
-  return qtrue;
+  return true;
 }
 
 namespace ETJump {
