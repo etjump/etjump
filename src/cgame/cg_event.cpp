@@ -1795,37 +1795,27 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
     case EV_STEP_12:
     case EV_STEP_16: // smooth out step up transitions
     {
-      float oldStep;
-      int delta;
-      int step;
-
       if (clientNum != cg.predictedPlayerState.clientNum) {
         break;
       }
-      // if we are interpolating, we don't need to smooth steps
-      if (cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW) ||
-          cg_nopredict.integer
-#ifdef ALLOW_GSYNC
-          || cgs.synchronousClients
-#endif // ALLOW_GSYNC
-      ) {
-        break;
-      }
+
       // check for stepping up before a previous step is completed
-      delta = cg.time - cg.stepTime;
+      float oldStep = 0.0f;
+      const int delta = cg.time - cg.stepTime;
+
       if (delta < STEP_TIME) {
         oldStep =
             cg.stepChange * (static_cast<float>(STEP_TIME - delta)) / STEP_TIME;
-      } else {
-        oldStep = 0;
       }
 
       // add this amount
-      step = 4 * (event - EV_STEP_4 + 1);
+      const int step = 4 * (event - EV_STEP_4 + 1);
       cg.stepChange = oldStep + static_cast<float>(step);
+
       if (cg.stepChange > MAX_STEP_CHANGE) {
         cg.stepChange = MAX_STEP_CHANGE;
       }
+
       cg.stepTime = cg.time;
       break;
     }
