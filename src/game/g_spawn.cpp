@@ -4,7 +4,6 @@
  * desc:
  *
  */
-#include "etj_entity_utilities.h"
 
 #include <sstream>
 #include <string>
@@ -21,6 +20,7 @@
 #include "etj_target_spawn_relay.h"
 #include "etj_portalgun.h"
 #include "etj_portalgun_shared.h"
+#include "etj_entity_utilities.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -954,6 +954,11 @@ Parses a brace bounded set of key / value pairs out of the
 level's entity strings into level.spawnVars[]
 
 This does not actually spawn an entity.
+
+In developer mode, this also stores all parsed entities to
+'EntityUtilities::parsedEntities' in order for 'dumpEntities' command to work,
+as we cannot call this outside of init, since 'trap_GetEntityToken'
+won't return valid data after 'SV_InitGameVM' has run.
 ====================
 */
 qboolean G_ParseSpawnVars(void) {
@@ -999,7 +1004,12 @@ qboolean G_ParseSpawnVars(void) {
     }
     level.spawnVars[level.numSpawnVars][0] = G_AddSpawnVarToken(keyname);
     level.spawnVars[level.numSpawnVars][1] = G_AddSpawnVarToken(com_token);
+
     level.numSpawnVars++;
+  }
+
+  if (g_developer.integer) {
+    ETJump::EntityUtilities::storeParsedEntity();
   }
 
   return qtrue;
