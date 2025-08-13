@@ -26,6 +26,8 @@
 #include "etj_string_utilities.h"
 
 namespace ETJump {
+std::vector<std::string> EntityUtilities::parsedEntities;
+
 bool EntityUtilities::isPlayer(gentity_t *ent) {
   auto cnum = ClientNum(ent);
   return cnum >= 0 && cnum < MAX_CLIENTS;
@@ -167,5 +169,22 @@ bool EntityUtilities::clearPortals(gentity_t *ent) {
   }
 
   return removed;
+}
+
+void EntityUtilities::storeParsedEntity() {
+  assert(level.spawning);
+
+  std::string entity;
+
+  for (int i = 0; i < level.numSpawnVars; i++) {
+    entity += ETJump::stringFormat("\"%s\" \"%s\"\n", level.spawnVars[i][0],
+                                   level.spawnVars[i][1]);
+  }
+
+  parsedEntities.push_back("{\n" + entity + "}\n");
+}
+
+const std::vector<std::string> &EntityUtilities::getParsedEntities() {
+  return parsedEntities;
 }
 } // namespace ETJump

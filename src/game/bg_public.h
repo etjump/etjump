@@ -2793,6 +2793,11 @@ static constexpr Manual commandManuals[] = {
      "Loads position from a given savepos file. If 'name' isn't specified, "
      "loads 'savepos/default.dat'.\n"
      "Cheats must be enabled to use this command."},
+
+    {"dumpEntities", "/dumpEntities [(optional) filename]",
+     "Dumps entities from the current map into a file. If 'filename' isn't "
+     "specified, defaults to '<mapname>.ent'.\nYou must be in developer mode "
+     "to use this command."},
 };
 
 typedef struct {

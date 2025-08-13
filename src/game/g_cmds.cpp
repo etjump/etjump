@@ -12,6 +12,7 @@
 #include "etj_session.h"
 #include "etj_commands.h"
 #include "etj_map_statistics.h"
+#include "etj_file.h"
 
 namespace ETJump {
 enum class VotingTypes {
@@ -1088,6 +1089,35 @@ void clearSaves(gentity_t *ent) {
   auto clientNum = ClientNum(ent);
   saveSystem->resetSavedPositions(ent);
   Printer::center(clientNum, "^7Your saves were removed.\n");
+}
+
+static void dumpEntities(gentity_t *ent) {
+  const auto &entities = EntityUtilities::getParsedEntities();
+
+  // check if the vector is empty too in order to avoid dumping an empty
+  // file if the user tires to dump without reloading the map
+  // the vector is never empty if the map was loaded with 'developer 1'
+  // because worldspawn is an entity (and you need a spawnpoint to load the map)
+  if (!g_developer.integer || entities.empty()) {
+    Printer::console(
+        ent, "You must be in developer mode to dump entities.\nSet "
+             "^3'developer 1' ^7and reload the map to dump entities.\n");
+    return;
+  }
+
+  std::string arg = ConcatArgs(1);
+  const std::string filename =
+      !arg.empty() ? arg + ".ent" : stringFormat("%s.ent", level.rawmapname);
+
+  File out(filename, File::Mode::Write);
+  std::string contents;
+
+  for (const auto &entity : entities) {
+    contents += entity;
+  }
+
+  out.write(contents);
+  Printer::console(ent, stringFormat("Dumped entities to ^3'%s'\n", filename));
 }
 } // namespace ETJump
 
@@ -4837,6 +4867,7 @@ static const command_t noIntermissionCommands[] = {
     {"tracker_print", qtrue, ETJump::printTracker},
     {"tracker_set", qtrue, ETJump::setTracker},
     {"clearsaves", qtrue, ETJump::clearSaves},
+    {"dumpEntities", qtrue, ETJump::dumpEntities},
 };
 
 qboolean ClientIsFlooding(gentity_t *ent) {

@@ -31,6 +31,9 @@ class EntityUtilities {
   static void drawRailBox(const gentity_t *ent,
                           const std::vector<float> &color);
 
+  // always empty if 'developer' is not set
+  static std::vector<std::string> parsedEntities;
+
 public:
   static bool isPlayer(gentity_t *ent);
   static void checkForRailBox(gentity_t *ent);
@@ -48,5 +51,10 @@ public:
 
   // returns true if any portals were removed
   static bool clearPortals(gentity_t *ent);
+
+  // this must be called only via 'G_ParseSpawnVars' during init,
+  // otherwise spawnVars are invalid
+  static void storeParsedEntity();
+  static const std::vector<std::string> &getParsedEntities();
 };
 } // namespace ETJump
