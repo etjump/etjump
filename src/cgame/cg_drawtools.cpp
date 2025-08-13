@@ -375,7 +375,7 @@ fill color
 constexpr int BAR_BORDERSIZE = 2;
 constexpr int BAR_BORDERSIZE_SMALL = 1;
 
-void CG_FilledBar(float x, float y, float w, float h, float *startColor,
+void CG_FilledBar(float x, float y, float w, float h, const float *startColor,
                   const float *endColor, const float *bgColor, float frac,
                   int flags) {
   // colorAtPos is the lerped color if necessary
@@ -1693,13 +1693,13 @@ void DrawString(float x, float y, float scalex, float scaley,
         float yadj = scaley * glyph->top;
         if (style == ITEM_TEXTSTYLE_SHADOWED) {
           constexpr float ofs = 2.5f;
-          colorBlack[3] = newColor[3];
-          trap_R_SetColor(colorBlack);
+          const vec4_t shadowColor = {0, 0, 0, newColor[3]};
+
+          trap_R_SetColor(shadowColor);
           CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex) + ofs * scalex,
                                 y - yadj + ofs * scaley, glyph->imageWidth,
                                 glyph->imageHeight, scalex, scaley, glyph->s,
                                 glyph->t, glyph->s2, glyph->t2, glyph->glyph);
-          colorBlack[3] = 1.0;
           trap_R_SetColor(newColor);
         }
 

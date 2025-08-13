@@ -313,9 +313,9 @@ void UI_LoadArenas(void);
 mapInfo *UI_FindMapInfoByMapname(const char *name);
 void UI_ReadableSize(char *buf, int bufsize, int value);
 void UI_PrintTime(char *buf, int bufsize, int time);
-void Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color,
-                    const char *text, float adjust, int limit, int style,
-                    fontInfo_t *font);
+void Text_Paint_Ext(float x, float y, float scalex, float scaley,
+                    const vec4_t color, const char *text, float adjust,
+                    int limit, int style, fontInfo_t *font);
 extern void UI_RegisterCvars(void);
 extern void UI_UpdateCvars(void);
 extern void UI_DrawConnectScreen(qboolean overlay);

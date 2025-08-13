@@ -124,7 +124,7 @@ CG_DrawPlayerWeaponIcon
 ==============
 */
 void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted,
-                             int align, vec4_t *refcolor) {
+                             int align, const vec4_t *refcolor) {
   int size;
   int realweap; // DHM - Nerve
   qhandle_t icon;

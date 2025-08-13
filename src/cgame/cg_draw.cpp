@@ -140,8 +140,9 @@ void CG_Text_PaintChar(float x, float y, float width, float height, float scale,
 }
 
 void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
-                               vec4_t color, const char *text, float adjust,
-                               int limit, int style, fontInfo_t *font) {
+                               const vec4_t color, const char *text,
+                               float adjust, int limit, int style,
+                               fontInfo_t *font) {
   x -= CG_Text_Width_Ext(text, scalex, limit, font) * 0.5f;
 
   CG_Text_Paint_Ext(x, y, scalex, scaley, color, text, adjust, limit, style,
@@ -149,7 +150,7 @@ void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
 }
 
 void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
-                               vec4_t color, const std::string &text,
+                               const vec4_t color, const std::string &text,
                                float adjust, int limit, int style,
                                fontInfo_t *font) {
   x -= CG_Text_Width_Ext(text, scalex, limit, font) * 0.5f;
@@ -159,7 +160,7 @@ void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
 }
 
 void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
-                                    float scaley, vec4_t color,
+                                    float scaley, const vec4_t color,
                                     const char *text, float adjust, int limit,
                                     int style, fontInfo_t *font) {
   x -= CG_Text_Width_Ext(text, scalex, limit, font);
@@ -169,7 +170,7 @@ void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
 }
 
 void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
-                                    float scaley, vec4_t color,
+                                    float scaley, const vec4_t color,
                                     const std::string &text, float adjust,
                                     int limit, int style, fontInfo_t *font) {
   x -= CG_Text_Width_Ext(text, scalex, limit, font);
@@ -179,8 +180,8 @@ void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
 }
 
 void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
-                       vec4_t color, const char *text, float adjust, int limit,
-                       int style, fontInfo_t *font) {
+                       const vec4_t color, const char *text, float adjust,
+                       int limit, int style, fontInfo_t *font) {
   int len, count;
   vec4_t newColor;
   glyphInfo_t *glyph;
@@ -214,13 +215,13 @@ void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
         float yadj = scaley * glyph->top;
         if (style == ITEM_TEXTSTYLE_SHADOWED) {
           constexpr float ofs = 2.5f;
-          colorBlack[3] = newColor[3];
-          trap_R_SetColor(colorBlack);
+          const vec4_t shadowColor = {0, 0, 0, newColor[3]};
+
+          trap_R_SetColor(shadowColor);
           CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex) + ofs * scalex,
                                 y - yadj + ofs * scaley, glyph->imageWidth,
                                 glyph->imageHeight, scalex, scaley, glyph->s,
                                 glyph->t, glyph->s2, glyph->t2, glyph->glyph);
-          colorBlack[3] = 1.0;
           trap_R_SetColor(newColor);
         }
         CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex), y - yadj,
@@ -232,18 +233,18 @@ void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
         count++;
       }
     }
-    trap_R_SetColor(NULL);
+    trap_R_SetColor(nullptr);
   }
 }
 
 void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
-                       vec4_t color, const std::string &text, float adjust,
-                       int limit, int style, fontInfo_t *font) {
+                       const vec4_t color, const std::string &text,
+                       float adjust, int limit, int style, fontInfo_t *font) {
   CG_Text_Paint_Ext(x, y, scalex, scaley, color, text.c_str(), adjust, limit,
                     style, font);
 }
 
-void CG_Text_Paint(float x, float y, float scale, vec4_t color,
+void CG_Text_Paint(float x, float y, float scale, const vec4_t color,
                    const char *text, float adjust, int limit, int style) {
   fontInfo_t *font = &cgDC.Assets.fonts[activeFont];
 
@@ -4058,7 +4059,7 @@ static void CG_DrawPlayerStats(void) {
   int i;
   const char *str;
   float w;
-  vec_t *clr;
+  const vec_t *clr = nullptr;
 
   if (etj_HUD_playerHealth.integer) {
     str = va("%i", cg.snap->ps.stats[STAT_HEALTH]);

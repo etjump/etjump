@@ -429,35 +429,42 @@ inline constexpr int BIGCHAR_HEIGHT = 16;
 inline constexpr int GIANTCHAR_WIDTH = 32;
 inline constexpr int GIANTCHAR_HEIGHT = 48;
 
-extern vec4_t colorBlack;
-extern vec4_t colorRed;
-extern vec4_t colorGreen;
-extern vec4_t colorBlue;
-extern vec4_t colorYellow;
-extern vec4_t colorOrange;
-extern vec4_t colorMagenta;
-extern vec4_t colorCyan;
-extern vec4_t colorWhite;
-extern vec4_t colorLtGrey;
-extern vec4_t colorMdGrey;
-extern vec4_t colorDkGrey;
-extern vec4_t colorMdRed;
-extern vec4_t colorMdGreen;
-extern vec4_t colorDkGreen;
-extern vec4_t colorMdCyan;
-extern vec4_t colorMdYellow;
-extern vec4_t colorMdOrange;
-extern vec4_t colorMdBlue;
+inline constexpr vec4_t colorBlack = {0, 0, 0, 1};
+inline constexpr vec4_t colorRed = {1, 0, 0, 1};
+inline constexpr vec4_t colorGreen = {0, 1, 0, 1};
+inline constexpr vec4_t colorBlue = {0, 0, 1, 1};
+inline constexpr vec4_t colorYellow = {1, 1, 0, 1};
+inline constexpr vec4_t colorOrange = {1, 0.5, 0, 1};
+inline constexpr vec4_t colorMagenta = {1, 0, 1, 1};
+inline constexpr vec4_t colorCyan = {0, 1, 1, 1};
+inline constexpr vec4_t colorWhite = {1, 1, 1, 1};
+inline constexpr vec4_t colorLtGrey = {0.75, 0.75, 0.75, 1};
+inline constexpr vec4_t colorMdGrey = {0.5, 0.5, 0.5, 1};
+inline constexpr vec4_t colorDkGrey = {0.25, 0.25, 0.25, 1};
+inline constexpr vec4_t colorMdRed = {0.5, 0, 0, 1};
+inline constexpr vec4_t colorMdGreen = {0, 0.5, 0, 1};
+inline constexpr vec4_t colorDkGreen = {0.f, 0.20f, 0.f, 1.f};
+inline constexpr vec4_t colorMdCyan = {0, 0.5, 0.5, 1};
+inline constexpr vec4_t colorMdYellow = {0.5, 0.5, 0, 1};
+inline constexpr vec4_t colorMdOrange = {0.5, 0.25, 0, 1};
+inline constexpr vec4_t colorMdBlue = {0, 0, 0.5, 1};
 
-extern vec4_t clrBrown;
-extern vec4_t clrBrownDk;
-extern vec4_t clrBrownLine;
-extern vec4_t clrBrownText;
-extern vec4_t clrBrownTextDk;
-extern vec4_t clrBrownTextDk2;
-extern vec4_t clrBrownTextLt;
-extern vec4_t clrBrownTextLt2;
-extern vec4_t clrBrownLineFull;
+inline constexpr vec4_t clrBrown = {0.68f, 0.68f, 0.56f, 1.f};
+inline constexpr vec4_t clrBrownDk = {0.58f * 0.75f, 0.58f * 0.75f,
+                                      0.46f * 0.75f, 1.f};
+inline constexpr vec4_t clrBrownLine = {0.0525f, 0.05f, 0.025f, 0.2f};
+inline constexpr vec4_t clrBrownLineFull = {0.0525f, 0.05f, 0.025f, 1.f};
+
+inline constexpr vec4_t clrBrownTextLt2 = {
+    108.f * 1.8f / 255.f, 88.f * 1.8f / 255.f, 62.f * 1.8f / 255.f, 1.f};
+inline constexpr vec4_t clrBrownTextLt = {
+    108.f * 1.3f / 255.f, 88.f * 1.3f / 255.f, 62.f * 1.3f / 255.f, 1.f};
+inline constexpr vec4_t clrBrownText = {108 / 255.f, 88 / 255.f, 62 / 255.f,
+                                        1.f};
+inline constexpr vec4_t clrBrownTextDk = {20 / 255.f, 2 / 255.f, 0 / 255.f,
+                                          1.f};
+inline constexpr vec4_t clrBrownTextDk2 = {
+    108.f * 0.75f / 255.f, 88.f * 0.75f / 255.f, 62.f * 0.75f / 255.f, 1.f};
 
 inline constexpr int GAME_INIT_FRAMES = 6;
 inline constexpr int FRAMETIME = 100; // msec
