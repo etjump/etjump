@@ -66,7 +66,7 @@ std::string ETJump::composeShader(const char *name, ShaderStages stages) {
   return composeShader(name, {""}, stages);
 }
 
-static std::unordered_map<std::string, vec4_t *> validColorNames = {
+static std::unordered_map<std::string, const vec4_t *> validColorNames = {
     {"white", &colorWhite},       {"red", &colorRed},
     {"green", &colorGreen},       {"blue", &colorBlue},
     {"yellow", &colorYellow},     {"magenta", &colorMagenta},

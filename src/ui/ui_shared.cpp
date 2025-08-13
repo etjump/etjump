@@ -317,10 +317,10 @@ LerpColor
     lerp and clamp each component of <a> and <b> into <c> by the fraction <t>
 =================
 */
-void LerpColor(vec4_t a, vec4_t b, vec4_t c, float t) {
-  int i;
-  for (i = 0; i < 4; i++) {
+void LerpColor(const vec4_t a, const vec4_t b, vec4_t c, float t) {
+  for (int i = 0; i < 4; i++) {
     c[i] = a[i] + t * (b[i] - a[i]);
+
     if (c[i] < 0) {
       c[i] = 0;
     } else if (c[i] > 1.0) {

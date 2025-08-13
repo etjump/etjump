@@ -2874,7 +2874,7 @@ void CG_DrawRotatedPic(float x, float y, float width, float height,
                        qhandle_t hShader, float angle); // NERVE - SMF
 void CG_DrawChar(int x, int y, int width, int height, int ch,
                  qboolean isShadow);
-void CG_FilledBar(float x, float y, float w, float h, float *startColor,
+void CG_FilledBar(float x, float y, float w, float h, const float *startColor,
                   const float *endColor, const float *bgColor, float frac,
                   int flags);
 // JOSEPH 10-26-99
@@ -2969,27 +2969,28 @@ void CG_DrawActive(stereoFrame_t stereoView);
 void CG_CheckForCursorHints(void);
 void CG_DrawTeamBackground(int x, int y, int w, int h, float alpha, int team);
 void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
-                       vec4_t color, const char *text, float adjust, int limit,
-                       int style, fontInfo_t *font);
-void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
-                       vec4_t color, const std::string &text, float adjust,
+                       const vec4_t color, const char *text, float adjust,
                        int limit, int style, fontInfo_t *font);
+void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
+                       const vec4_t color, const std::string &text,
+                       float adjust, int limit, int style, fontInfo_t *font);
 void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
-                               vec4_t color, const char *text, float adjust,
-                               int limit, int style, fontInfo_t *font);
+                               const vec4_t color, const char *text,
+                               float adjust, int limit, int style,
+                               fontInfo_t *font);
 void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
-                               vec4_t color, const std::string &text,
+                               const vec4_t color, const std::string &text,
                                float adjust, int limit, int style,
                                fontInfo_t *font);
 void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
-                                    float scaley, vec4_t color,
+                                    float scaley, const vec4_t color,
                                     const char *text, float adjust, int limit,
                                     int style, fontInfo_t *font);
 void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
-                                    float scaley, vec4_t color,
+                                    float scaley, const vec4_t color,
                                     const std::string &text, float adjust,
                                     int limit, int style, fontInfo_t *font);
-void CG_Text_Paint(float x, float y, float scale, vec4_t color,
+void CG_Text_Paint(float x, float y, float scale, const vec4_t color,
                    const char *text, float adjust, int limit, int style);
 void CG_Text_SetActiveFont(int font);
 int CG_Text_Width_Ext(const char *text, float scale, int limit,
@@ -3021,7 +3022,7 @@ void CG_DrawCursorhint(rectDef_t *rect);
 void CG_DrawWeapStability(rectDef_t *rect);
 void CG_DrawWeapHeat(rectDef_t *rect, int align);
 void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted,
-                             int align, vec4_t *refcolor);
+                             int align, const vec4_t *refcolor);
 int CG_CalculateReinfTime(qboolean menu);
 float CG_CalculateReinfTime_Float(qboolean menu);
 void CG_Fade(int r, int g, int b, int a, int time, int duration);

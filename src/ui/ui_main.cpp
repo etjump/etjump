@@ -441,9 +441,9 @@ void Text_PaintChar(float x, float y, float w, float h, float scale, float s,
   trap_R_DrawStretchPic(x, y, w, h, s, t, s2, t2, hShader);
 }
 
-void Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color,
-                    const char *text, float adjust, int limit, int style,
-                    fontInfo_t *font) {
+void Text_Paint_Ext(float x, float y, float scalex, float scaley,
+                    const vec4_t color, const char *text, float adjust,
+                    int limit, int style, fontInfo_t *font) {
   int len, count;
   vec4_t newColor;
   glyphInfo_t *glyph;
@@ -487,16 +487,14 @@ void Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color,
         float yadj = scaley * glyph->top;
         if (style == ITEM_TEXTSTYLE_SHADOWED) {
           constexpr float ofs = 2.5f;
-          colorBlack[3] = newColor[3];
+          const vec4_t shadowColor = {0, 0, 0, newColor[3]};
 
-          trap_R_SetColor(colorBlack);
+          trap_R_SetColor(shadowColor);
           Text_PaintCharExt(x + (glyph->pitch * scalex) + ofs * scalex,
                             y - yadj + ofs * scaley, glyph->imageWidth,
                             glyph->imageHeight, scalex, scaley, glyph->s,
                             glyph->t, glyph->s2, glyph->t2, glyph->glyph);
           trap_R_SetColor(newColor);
-
-          colorBlack[3] = 1.0;
         }
         Text_PaintCharExt(x + (glyph->pitch * scalex), y - yadj,
                           glyph->imageWidth, glyph->imageHeight, scalex, scaley,
@@ -512,8 +510,8 @@ void Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color,
   }
 }
 
-void Text_Paint(float x, float y, float scale, vec4_t color, const char *text,
-                float adjust, int limit, int style) {
+static void Text_Paint(float x, float y, float scale, const vec4_t color,
+                       const char *text, float adjust, int limit, int style) {
   fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
 
   Text_Paint_Ext(x, y, scale, scale, color, text, adjust, limit, style, font);
@@ -562,13 +560,14 @@ void Text_PaintWithCursor(float x, float y, float scale, vec4_t color,
         yadj = useScale * glyph->top;
         if (style == ITEM_TEXTSTYLE_SHADOWED) {
           constexpr float ofs = 2.5f;
-          colorBlack[3] = newColor[3];
-          trap_R_SetColor(colorBlack);
+          const vec4_t shadowColor = {0, 0, 0, newColor[3]};
+
+          trap_R_SetColor(shadowColor);
           Text_PaintChar(x + (glyph->pitch * useScale) + ofs * useScale,
                          y - yadj + ofs * useScale, glyph->imageWidth,
                          glyph->imageHeight, useScale, glyph->s, glyph->t,
                          glyph->s2, glyph->t2, glyph->glyph);
-          colorBlack[3] = 1.0;
+
           trap_R_SetColor(newColor);
         }
         Text_PaintChar(x + (glyph->pitch * useScale), y - yadj,
