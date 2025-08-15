@@ -77,9 +77,6 @@ static void UI_ParseGameInfo(const char *teamFile);
 itemDef_t *Menu_FindItemByName(menuDef_t *menu, const char *p);
 void Menu_ShowItemByName(menuDef_t *menu, const char *p, qboolean bShow);
 
-// TTimo
-static char translated_yes[4], translated_no[4];
-
 typedef struct {
   const char *name;
   int items;
@@ -1196,9 +1193,6 @@ qboolean UI_ParseMenu(const char *menuFile) {
 
 qboolean Load_Menu(int handle) {
   pc_token_t token;
-#ifdef LOCALIZATION_SUPPORT
-  int cl_language; // NERVE - SMF
-#endif             // LOCALIZATION_SUPPORT
 
   if (!trap_PC_ReadToken(handle, &token)) {
     return qfalse;
@@ -1220,37 +1214,6 @@ qboolean Load_Menu(int handle) {
     if (token.string[0] == '}') {
       return qtrue;
     }
-
-#ifdef LOCALIZATION_SUPPORT
-    // NERVE - SMF - localization crap
-    cl_language = Q_atoi(UI_Cvar_VariableString("cl_language"));
-
-    if (cl_language) {
-      const char *s = NULL; // TTimo: init
-      const char *filename;
-      char out[256];
-      //			char filename[256];
-
-      COM_StripFilename(token.string, out);
-
-      filename = COM_SkipPath(token.string);
-
-      if (cl_language == 1) {
-        s = va("%s%s", out, "french/");
-      } else if (cl_language == 2) {
-        s = va("%s%s", out, "german/");
-      } else if (cl_language == 3) {
-        s = va("%s%s", out, "italian/");
-      } else if (cl_language == 4) {
-        s = va("%s%s", out, "spanish/");
-      }
-
-      if (UI_ParseMenu(va("%s%s", s, filename))) {
-        continue;
-      }
-    }
-    // -NERVE
-#endif // LOCALIZATION_SUPPORT
 
     UI_ParseMenu(token.string);
   }
@@ -2042,11 +2005,9 @@ static int UI_OwnerDrawWidth(int ownerDraw, float scale) {
       break;
     case UI_KEYBINDSTATUS:
       if (Display_KeyBindPending()) {
-        s = trap_TranslateString("Waiting for new key..."
-                                 "Press ESCAPE to cancel");
+        s = "Waiting for new key... Press ESCAPE to cancel";
       } else {
-        s = trap_TranslateString("Press ENTER or CLICK to change, "
-                                 "Press BACKSPACE to clear");
+        s = "Press ENTER or CLICK to change, Press BACKSPACE to clear";
       }
       break;
     case UI_SERVERREFRESHDATE:
@@ -2241,15 +2202,11 @@ static void UI_DrawServerRefreshDate(rectDef_t *rect, float scale, vec4_t color,
     serverCount = trap_LAN_GetServerCount(ui_netSource.integer);
     if (serverCount >= 0) {
       Text_Paint(rect->x, rect->y, scale, newColor,
-                 va(trap_TranslateString("Getting info for %d servers "
-                                         "(ESC to cancel)"),
-                    serverCount),
+                 va("Getting info for %d servers (ESC to cancel)", serverCount),
                  0, 0, textStyle);
     } else {
       Text_Paint(rect->x, rect->y, scale, newColor,
-                 trap_TranslateString("Waiting for response "
-                                      "from Master Server"),
-                 0, 0, textStyle);
+                 "Waiting for response from Master Server", 0, 0, textStyle);
     }
   } else {
     char buff[64];
@@ -2257,9 +2214,8 @@ static void UI_DrawServerRefreshDate(rectDef_t *rect, float scale, vec4_t color,
                UI_Cvar_VariableString(
                    va("ui_lastServerRefresh_%i", ui_netSource.integer)),
                64);
-    Text_Paint(rect->x, rect->y, scale, color,
-               va(trap_TranslateString("Refresh Time: %s"), buff), 0, 0,
-               textStyle);
+    Text_Paint(rect->x, rect->y, scale, color, va("Refresh Time: %s", buff), 0,
+               0, textStyle);
   }
 }
 
@@ -2335,15 +2291,13 @@ static void UI_DrawKeyBindStatus(rectDef_t *rect, float scale, vec4_t color,
                                  int textStyle, float text_x, float text_y) {
   // int ofs = 0; // TTimo: unused
   if (Display_KeyBindPending()) {
-    Text_Paint(
-        rect->x + text_x, rect->y + text_y, scale, color,
-        trap_TranslateString("Waiting for new key... Press ESCAPE to cancel"),
-        0, 0, textStyle);
+    Text_Paint(rect->x + text_x, rect->y + text_y, scale, color,
+               "Waiting for new key... Press ESCAPE to cancel", 0, 0,
+               textStyle);
   } else {
     Text_Paint(rect->x + text_x, rect->y + text_y, scale, color,
-               trap_TranslateString("Press ENTER or CLICK to change, "
-                                    "Press BACKSPACE to clear"),
-               0, 0, textStyle);
+               "Press ENTER or CLICK to change, Press BACKSPACE to clear", 0, 0,
+               textStyle);
   }
 }
 
@@ -4050,14 +4004,13 @@ void UI_RunMenuScript(const char **args) {
           res = trap_LAN_AddServer(AS_FAVORITES, serverName, addr);
           if (res == 0) {
             // server already in the list
-            Com_Printf(trap_TranslateString("Favorite already in list\n"));
+            Com_Printf("Favorite already in list\n");
           } else if (res == -1) {
             // list full
-            Com_Printf(trap_TranslateString("Favorite list full\n"));
+            Com_Printf("Favorite list full\n");
           } else {
             // successfully added
-            Com_Printf(trap_TranslateString("Added favorite server %s\n"),
-                       addr);
+            Com_Printf("Added favorite server %s\n", addr);
           }
         }
       }
@@ -4094,14 +4047,13 @@ void UI_RunMenuScript(const char **args) {
           res = trap_LAN_AddServer(AS_FAVORITES, serverName, addr);
           if (res == 0) {
             // server already in the list
-            Com_Printf(trap_TranslateString("Favorite already in list\n"));
+            Com_Printf("Favorite already in list\n");
           } else if (res == -1) {
             // list full
-            Com_Printf(trap_TranslateString("Favorite list full\n"));
+            Com_Printf("Favorite list full\n");
           } else {
             // successfully added
-            Com_Printf(trap_TranslateString("Added favorite server %s\n"),
-                       addr);
+            Com_Printf("Added favorite server %s\n", addr);
           }
         }
       }
@@ -4123,13 +4075,13 @@ void UI_RunMenuScript(const char **args) {
         res = trap_LAN_AddServer(AS_FAVORITES, serverName, addr);
         if (res == 0) {
           // server already in the list
-          Com_Printf(trap_TranslateString("Favorite already in list\n"));
+          Com_Printf("Favorite already in list\n");
         } else if (res == -1) {
           // list full
-          Com_Printf(trap_TranslateString("Favorite list full\n"));
+          Com_Printf("Favorite list full\n");
         } else {
           // successfully added
-          Com_Printf(trap_TranslateString("Added favorite server %s\n"), addr);
+          Com_Printf("Added favorite server %s\n", addr);
         }
       }
       return;
@@ -7182,7 +7134,6 @@ void _UI_Init(int legacyClient, int clientVersion) {
   uiInfo.uiDC.stopCinematic = &UI_StopCinematic;
   uiInfo.uiDC.drawCinematic = &UI_DrawCinematic;
   uiInfo.uiDC.runCinematicFrame = &UI_RunCinematicFrame;
-  uiInfo.uiDC.translateString = &trap_TranslateString; // NERVE - SMF
   uiInfo.uiDC.checkAutoUpdate = &trap_CheckAutoUpdate; // DHM - Nerve
   uiInfo.uiDC.getAutoUpdate = &trap_GetAutoUpdate;     // DHM - Nerve
 
@@ -7276,11 +7227,6 @@ void _UI_Init(int legacyClient, int clientVersion) {
   // ETJump: default to objective
   trap_Cvar_Set("ui_netGameType", "2");
   trap_Cvar_Update(&ui_netGameType);
-
-  // init Yes/No once for cl_language -> server browser (punkbuster)
-  Q_strncpyz(translated_yes, DC->translateString("Yes"),
-             sizeof(translated_yes));
-  Q_strncpyz(translated_no, DC->translateString("NO"), sizeof(translated_no));
 
   UI_RegisterConsoleCommands();
 
@@ -7602,7 +7548,7 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
 
         if (!Q_stricmpn(buf, "Invalid password", 16)) {
           // NERVE - SMF
-          trap_Cvar_Set("com_errorMessage", trap_TranslateString(buf));
+          trap_Cvar_Set("com_errorMessage", buf);
           Menus_ActivateByName("popupPassword", qtrue);
 
         } else if (strlen(buf) > 5 && !Q_stricmpn(buf, "ET://", 5)) { // fretn
@@ -7634,7 +7580,7 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
           }
 
           // NERVE - SMF
-          trap_Cvar_Set("com_errorMessage", trap_TranslateString(buf));
+          trap_Cvar_Set("com_errorMessage", buf);
 
           // hacky, wanted to have the printout of missing files
           // text printing limitations force us to keep it all
@@ -7644,10 +7590,10 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
             char *missing_files = UI_Cvar_VariableString("com_missingFiles");
 
             if (missing_files[0]) {
-              trap_Cvar_Set(
-                  "com_errorMessage",
-                  va("%s\n\n%s\n%s", UI_Cvar_VariableString("com_errorMessage"),
-                     trap_TranslateString(MISSING_FILES_MSG), missing_files));
+              trap_Cvar_Set("com_errorMessage",
+                            va("%s\n\n%s\n%s",
+                               UI_Cvar_VariableString("com_errorMessage"),
+                               MISSING_FILES_MSG, missing_files));
             }
           }
 

@@ -795,8 +795,6 @@ void trap_GetAutoUpdate(void);                      // DHM - Nerve
 void trap_openURL(const char *url); // TTimo
 void trap_GetHunkData(int *hunkused, int *hunkexpected);
 
-char *trap_TranslateString(const char *string); // NERVE - SMF - localization
-
 namespace ETJump {
 inline constexpr int MAX_QUICKCONNECT_SERVERS = 5;
 
