@@ -26,8 +26,6 @@
 
 inline constexpr char CONFIG_NAME[] = "etconfig.cfg";
 
-// #define LOCALIZATION_SUPPORT
-
 #define MOD_CHECK_ETLEGACY(isETLegacy, versionNum, outputValue)                \
   outputValue = ((isETLegacy) ? true : false);                                 \
   if (outputValue) {                                                           \

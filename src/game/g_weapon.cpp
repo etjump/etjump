@@ -11,6 +11,7 @@
 #include "etj_printer.h"
 #include "etj_entity_utilities.h"
 #include "etj_portalgun.h"
+#include "etj_string_utilities.h"
 
 vec3_t forward, right, up;
 vec3_t muzzleEffect;
@@ -566,13 +567,12 @@ qboolean ReviveEntity(gentity_t *ent, gentity_t *traceEnt) {
   trap_LinkEntity(ent);
 
   // DHM - Nerve :: Let the person being revived know about it
-  trap_SendServerCommand(
-      traceEnt - g_entities,
-      va("cp \"You have been revived by [lof]%s[lon] [lof]%s!\n\"",
-         ent->client->sess.sessionTeam == TEAM_ALLIES
-             ? rankNames_Allies[ent->client->sess.rank]
-             : rankNames_Axis[ent->client->sess.rank],
-         ent->client->pers.netname));
+  Printer::center(traceEnt, ETJump::stringFormat(
+                                "You have been revived by %s %s!",
+                                ent->client->sess.sessionTeam == TEAM_ALLIES
+                                    ? rankNames_Allies[ent->client->sess.rank]
+                                    : rankNames_Axis[ent->client->sess.rank],
+                                ent->client->pers.netname));
   traceEnt->props_frame_state = ent->s.number;
 
   // DHM - Nerve :: Mark that the medicine was indeed dispensed
@@ -2513,8 +2513,7 @@ qboolean weapon_checkAirStrike(gentity_t *ent) {
     if (level.numActiveAirstrikes[0] > 6 ||
         !G_AvailableAirstrikes(ent->parent)) {
       G_SayTo(ent->parent, ent->parent, 2, COLOR_YELLOW,
-              "HQ: ", "All available planes are already en-route.", qtrue,
-              qfalse);
+              "HQ: ", "All available planes are already en-route.", qfalse);
 
       G_GlobalClientEvent(EV_AIRSTRIKEMESSAGE, 0, ent->parent - g_entities);
 
@@ -2539,8 +2538,7 @@ qboolean weapon_checkAirStrike(gentity_t *ent) {
     if (level.numActiveAirstrikes[1] > 6 ||
         !G_AvailableAirstrikes(ent->parent)) {
       G_SayTo(ent->parent, ent->parent, 2, COLOR_YELLOW,
-              "HQ: ", "All available planes are already en-route.", qtrue,
-              qfalse);
+              "HQ: ", "All available planes are already en-route.", qfalse);
 
       G_GlobalClientEvent(EV_AIRSTRIKEMESSAGE, 0, ent->parent - g_entities);
 
@@ -2602,7 +2600,7 @@ void weapon_callAirStrike(gentity_t *ent) {
                           // trenchtoast foggie prollem
   {
     G_SayTo(ent->parent, ent->parent, 2, COLOR_YELLOW,
-            "Pilot: ", "Aborting, can't see target.", qtrue, qfalse);
+            "Pilot: ", "Aborting, can't see target.", qfalse);
 
     G_GlobalClientEvent(EV_AIRSTRIKEMESSAGE, 1, ent->parent - g_entities);
 
@@ -2858,7 +2856,7 @@ void Weapon_Artillery(gentity_t *ent) {
   if (ent->client->sess.sessionTeam == TEAM_AXIS) {
     if (!G_AvailableAirstrikes(ent)) {
       G_SayTo(ent, ent, 2, COLOR_YELLOW,
-              "Fire Mission: ", "Insufficient fire support.", qtrue, qfalse);
+              "Fire Mission: ", "Insufficient fire support.", qfalse);
       ent->active = qfalse;
 
       G_GlobalClientEvent(EV_ARTYMESSAGE, 0, ent - g_entities);
@@ -2874,7 +2872,7 @@ void Weapon_Artillery(gentity_t *ent) {
   } else {
     if (!G_AvailableAirstrikes(ent)) {
       G_SayTo(ent, ent, 2, COLOR_YELLOW,
-              "Fire Mission: ", "Insufficient fire support.", qtrue, qfalse);
+              "Fire Mission: ", "Insufficient fire support.", qfalse);
       ent->active = qfalse;
 
       G_GlobalClientEvent(EV_ARTYMESSAGE, 0, ent - g_entities);
@@ -2910,7 +2908,7 @@ void Weapon_Artillery(gentity_t *ent) {
       (!(trace.surfaceFlags & SURF_NOIMPACT))) // JPW NERVE was SURF_SKY)) ) {
   {
     G_SayTo(ent, ent, 2, COLOR_YELLOW,
-            "Fire Mission: ", "Aborting, can't see target.", qtrue, qfalse);
+            "Fire Mission: ", "Aborting, can't see target.", qfalse);
 
     G_GlobalClientEvent(EV_ARTYMESSAGE, 1, ent - g_entities);
 
@@ -2930,7 +2928,7 @@ void Weapon_Artillery(gentity_t *ent) {
   G_AddAirstrikeToCounters(ent);
 
   G_SayTo(ent, ent, 2, COLOR_YELLOW, "Fire Mission: ", "Firing for effect!",
-          qtrue, qfalse);
+          qfalse);
 
   G_GlobalClientEvent(EV_ARTYMESSAGE, 2, ent - g_entities);
 

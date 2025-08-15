@@ -4,7 +4,7 @@
 #include "../game/etj_syscall_ext_shared.h"
 
 static intptr_t(QDECL *syscall)(intptr_t arg,
-                                ...) = (intptr_t(QDECL *)(intptr_t, ...))-1;
+                                ...) = (intptr_t(QDECL *)(intptr_t, ...)) - 1;
 
 #if defined(__MACOS__)
   #ifndef __GNUC__
@@ -756,11 +756,6 @@ void trap_Key_SetBinding(int keynum, const char *binding) {
 void trap_Key_KeynumToStringBuf(int keynum, char *buf, int buflen) {
   SystemCall(CG_KEY_KEYNUMTOSTRINGBUF, keynum, buf, buflen);
 }
-
-void trap_TranslateString(const char *string, char *buf) {
-  SystemCall(CG_TRANSLATE_STRING, string, buf);
-}
-// -NERVE - SMF
 
 // Media register functions
 #ifdef _DEBUG

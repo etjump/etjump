@@ -1606,22 +1606,6 @@ void UI_DrawProportionalString(int x, int y, const char *str, int style,
                              cgs.media.charsetProp);
 }
 
-char *CG_TranslateString(const char *string) {
-  static char staticbuf[2][MAX_VA_STRING];
-  static int bufcount = 0;
-  char *buf;
-
-  // some code expects this to return a copy always, even
-  // if none is needed for translation, so always supply
-  // another buffer
-
-  buf = staticbuf[bufcount++ % 2];
-
-  trap_TranslateString(string, buf);
-
-  return buf;
-}
-
 namespace ETJump {
 int DrawStringWidth(const char *text, float scalex) {
   return CG_Text_Width_Ext(text, scalex, 0, &cgs.media.limboFont2);
