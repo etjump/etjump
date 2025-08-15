@@ -175,6 +175,10 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.noSpecCountInVoteCs = true;
     compatibilityStrings.emplace_back(
         "Vote tally not differentiating players from spectators");
+
+    flags.stripLocalizationMarkers = true;
+    compatibilityStrings.emplace_back(
+        "Stripping localization markers from server commands manually");
   }
 }
 

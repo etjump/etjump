@@ -70,6 +70,7 @@ public:
     bool adjustItemlistIndex = false;
     bool predictedJumpSpeeds = false;
     bool noSpecCountInVoteCs = false;
+    bool stripLocalizationMarkers = false;
   };
 
   // everything in here will be set to false unless we're on demo playback

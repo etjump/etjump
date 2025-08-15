@@ -746,11 +746,6 @@ void trap_Key_KeynumToStringBuf(int keynum, char *buf, int buflen) {
   SystemCall(CG_KEY_KEYNUMTOSTRINGBUF, keynum, buf, buflen);
 }
 
-void trap_TranslateString(const char *string, char *buf) {
-  SystemCall(CG_TRANSLATE_STRING, string, buf);
-}
-// -NERVE - SMF
-
 // Media register functions
 #ifdef _DEBUG
   #define DEBUG_REGISTERPROFILE_INIT int dbgTime = trap_Milliseconds();
