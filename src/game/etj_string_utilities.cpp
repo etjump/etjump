@@ -395,3 +395,8 @@ std::string ETJump::StringUtil::truncate(const std::string &str,
   std::string out = str.substr(0, outLen);
   return out;
 }
+
+void ETJump::StringUtil::stripLocalizationMarkers(std::string &str) {
+  ETJump::StringUtil::replaceAll(str, "[lon]", "");
+  ETJump::StringUtil::replaceAll(str, "[lof]", "");
+}
