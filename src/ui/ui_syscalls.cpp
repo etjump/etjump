@@ -5,7 +5,7 @@
 // syscalls.asm is included instead when building a qvm
 
 static intptr_t(QDECL *syscall)(intptr_t arg,
-                                ...) = (intptr_t(QDECL *)(intptr_t, ...))-1;
+                                ...) = (intptr_t(QDECL *)(intptr_t, ...)) - 1;
 
 #if defined(__MACOS__)
   #ifndef __GNUC__
@@ -473,22 +473,6 @@ qboolean trap_VerifyCDKey(const char *key, const char *chksum) {
 qboolean trap_GetLimboString(int index, char *buf) {
   return SystemCall(UI_CL_GETLIMBOSTRING, index, buf) ? qtrue : qfalse;
 }
-
-char *trap_TranslateString(const char *string) {
-  static char staticbuf[2][MAX_VA_STRING];
-  static int bufcount = 0;
-  char *buf;
-
-  buf = staticbuf[bufcount++ % 2];
-
-#ifdef LOCALIZATION_SUPPORT
-  SystemCall(UI_CL_TRANSLATE_STRING, string, buf);
-#else
-  Q_strncpyz(buf, string, MAX_VA_STRING);
-#endif // LOCALIZATION_SUPPORT
-  return buf;
-}
-// -NERVE - SMF
 
 // DHM - Nerve
 void trap_CheckAutoUpdate(void) { SystemCall(UI_CHECKAUTOUPDATE); }

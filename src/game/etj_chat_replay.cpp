@@ -38,12 +38,11 @@ ChatReplay::ChatReplay(std::unique_ptr<Log> log) : logger(std::move(log)) {
 
 void ChatReplay::createChatMessage(const int clientNum, const std::string &name,
                                    const std::string &message,
-                                   const bool localize, const bool encoded) {
+                                   const bool encoded) {
   ChatMessage msg{};
 
   msg.clientNum = clientNum;
   msg.name = name;
-  msg.localize = localize;
   msg.encoded = encoded;
   msg.message = sanitize(message, false, false);
   msg.expired = false;
@@ -136,9 +135,8 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
 
 std::string ChatReplay::parseChatMessage(const ChatMessage &msg) {
   const char *cmd = msg.encoded ? "enc_chat" : "chat";
-  return stringFormat("%s \"^7%s%c%c%s\" %i %i 1", cmd, msg.name,
-                      Q_COLOR_ESCAPE, COLOR_LTGREY, msg.message, msg.clientNum,
-                      msg.localize);
+  return stringFormat("%s \"^7%s%c%c%s\" %i 0 1", cmd, msg.name, Q_COLOR_ESCAPE,
+                      COLOR_LTGREY, msg.message, msg.clientNum);
 }
 
 void ChatReplay::readChatsFromFile() {
@@ -157,8 +155,6 @@ void ChatReplay::readChatsFromFile() {
         JsonUtils::parseValue(msg.name, message["name"], &errors, "name") &&
         JsonUtils::parseValue(msg.message, message["message"], &errors,
                               "message") &&
-        JsonUtils::parseValue(msg.localize, message["localize"], &errors,
-                              "localize") &&
         JsonUtils::parseValue(msg.encoded, message["encoded"], &errors,
                               "encoded") &&
         JsonUtils::parseValue(msg.timestamp, message["timestamp"], &errors,
@@ -186,7 +182,6 @@ void ChatReplay::writeChatsToFile() {
     chat["clientNum"] = msg.clientNum;
     chat["name"] = msg.name;
     chat["message"] = msg.message;
-    chat["localize"] = msg.localize;
     chat["encoded"] = msg.encoded;
     chat["timestamp"] = msg.timestamp;
 
