@@ -152,6 +152,10 @@ void DemoCompatibility::setupCompatibilityFlags() {
   if (!isCompatible({3, 4, 0})) {
     flags.serverSideDlights = true;
     compatibilityStrings.emplace_back("- Using fully server-side dlights");
+
+    flags.stripLocalizationMarkers = true;
+    compatibilityStrings.emplace_back(
+        "- Stripping localization markers from server commands manually");
   }
 }
 

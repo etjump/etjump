@@ -10,6 +10,7 @@
 #include "etj_init.h"
 #include "etj_client_commands_handler.h"
 #include "etj_client_rtv_handler.h"
+#include "etj_demo_compatibility.h"
 
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_syscall_ext_shared.h"
@@ -2255,36 +2256,51 @@ static void CG_ServerCommand(void) {
   }
 
   if (!Q_stricmp(cmd, "cpm")) {
-    CG_AddPMItem(PM_MESSAGE, CG_Argv(1), cgs.media.voiceChatShader);
+    std::string s = CG_Argv(1);
+
+    if (!ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
+    }
+
+    CG_AddPMItem(PM_MESSAGE, s.c_str(), cgs.media.voiceChatShader);
     return;
   }
 
   // Banner Printing
   if (!Q_stricmp(cmd, "bp")) {
-    CG_BannerPrint(CG_Argv(1));
+    std::string s = CG_Argv(1);
+
+    if (!ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
+    }
+
+    CG_BannerPrint(s.c_str());
     return;
   }
 
   const bool cpNoLog = !Q_stricmp(cmd, "cpnl");
   if (!Q_stricmp(cmd, "cp") || cpNoLog) {
     const int args = trap_Argc();
+    std::string s = CG_Argv(1);
+
+    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
+    }
 
     if (args >= 3) {
-      const char *s = CG_Argv(1);
-
       if (args == 4) {
-        s = va("%s%s", CG_Argv(3), s);
+        s = ETJump::stringFormat("%s%s", CG_Argv(3), s);
       }
 
       // OSP - for client logging
       if (cg_printObjectiveInfo.integer > 0 &&
           (args == 4 || Q_atoi(CG_Argv(2)) > 1)) {
-        CG_Printf("[cgnotify]*** ^3INFO: ^5%s\n", CG_Argv(1));
+        CG_Printf("[cgnotify]*** ^3INFO: ^5%s\n", s.c_str());
       }
-      CG_PriorityCenterPrint(s, SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
+      CG_PriorityCenterPrint(s.c_str(), SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
                              SMALLCHAR_WIDTH, Q_atoi(CG_Argv(2)), !cpNoLog);
     } else {
-      CG_CenterPrint(CG_Argv(1), SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
+      CG_CenterPrint(s.c_str(), SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
                      SMALLCHAR_WIDTH, !cpNoLog);
     }
     return;
@@ -2301,7 +2317,13 @@ static void CG_ServerCommand(void) {
   }
 
   if (!Q_stricmp(cmd, "print")) {
-    CG_Printf("[cgnotify]%s", CG_Argv(1));
+    std::string s = CG_Argv(1);
+
+    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
+    }
+
+    CG_Printf("[cgnotify]%s", s.c_str());
     return;
   }
 
@@ -2328,20 +2350,25 @@ static void CG_ServerCommand(void) {
       msgType |= REPLAY_MSG;
     }
 
-    const char *s = CG_Argv(2);
+    std::string s = CG_Argv(2);
 
-    if (s[0] == '\0') { // server sends empty clientNum
+    if (s.empty()) { // server sends empty clientNum
       msgType |= SERVER_MSG;
     }
 
-    const int clientNum = Q_atoi(s);
+    const int clientNum = Q_atoi(s.c_str());
 
     if (cg_teamChatsOnly.integer) {
       return;
     }
 
     s = CG_Argv(1);
-    Q_strncpyz(text, s, MAX_SAY_TEXT);
+
+    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
+    }
+
+    Q_strncpyz(text, s.c_str(), MAX_SAY_TEXT);
 
     if (enc) {
       CG_DecodeQP(text);
@@ -2356,16 +2383,21 @@ static void CG_ServerCommand(void) {
       s = ETJump::addChatModifications(text, clientNum, msgType);
     }
 
-    CG_AddToTeamChat(s, clientNum, msgType);
-    CG_Printf("%s\n", s);
+    CG_AddToTeamChat(s.c_str(), clientNum, msgType);
+    CG_Printf("%s\n", s.c_str());
 
     return;
   }
 
   enc = !Q_stricmp(cmd, "enc_tchat") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "tchat") || enc) {
-    const char *s = CG_Argv(1);
-    Q_strncpyz(text, s, MAX_SAY_TEXT);
+    std::string s = CG_Argv(1);
+
+    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
+    }
+
+    Q_strncpyz(text, s.c_str(), MAX_SAY_TEXT);
 
     if (enc) {
       CG_DecodeQP(text);
@@ -2374,7 +2406,7 @@ static void CG_ServerCommand(void) {
     CG_RemoveChatEscapeChar(text);
 
     s = ETJump::addChatModifications(text, Q_atoi(CG_Argv(2)), false);
-    Q_strncpyz(text, s, MAX_SAY_TEXT);
+    Q_strncpyz(text, s.c_str(), MAX_SAY_TEXT);
 
     ETJump::fixLinesEndingWithCaret(text, MAX_SAY_TEXT);
     CG_AddToTeamChat(text, Q_atoi(CG_Argv(2)), 0);
