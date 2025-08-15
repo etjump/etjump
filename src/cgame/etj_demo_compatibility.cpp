@@ -156,6 +156,10 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.setAttack2FiringFlag = true;
     compatibilityStrings.emplace_back(
         "- Faking EF_FIRING state for '+attack2' shooting");
+
+    flags.stripLocalizationMarkers = true;
+    compatibilityStrings.emplace_back(
+        "- Stripping localization markers from server commands manually");
   }
 }
 
