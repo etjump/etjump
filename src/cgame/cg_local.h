@@ -2958,13 +2958,6 @@ void CG_DrawSides_NoScale(float x, float y, float w, float h, float size);
 void CG_DrawTopBottom(float x, float y, float w, float h, float size);
 void CG_DrawTopBottom_NoScale(float x, float y, float w, float h, float size);
 
-// NERVE - SMF - localization functions
-void CG_InitTranslation();
-char *CG_TranslateString(const char *string);
-void CG_SaveTransTable();
-void CG_ReloadTranslation();
-// -NERVE - SMF
-
 //
 // cg_draw.c, cg_newDraw.c
 //
@@ -3501,7 +3494,6 @@ void CG_ChargeTimesChanged(void);
 void CG_LoadVoiceChats();         // NERVE - SMF
 void CG_PlayBufferedVoiceChats(); // NERVE - SMF
 void CG_AddToNotify(const char *str);
-const char *CG_LocalizeServerCommand(const char *buf);
 void CG_wstatsParse_cmd(void);
 void CG_wtopshotsParse_cmd(qboolean doBest);
 void CG_parseWeaponStats_cmd(void(txt_dump)(const char *));
@@ -3815,9 +3807,6 @@ void trap_Key_SetBinding(int keynum, const char *binding);
 void trap_Key_KeynumToStringBuf(int keynum, char *buf, int buflen);
 // -NERVE - SMF
 
-void trap_TranslateString(const char *string,
-                          char *buf); // NERVE - SMF - localization
-
 int trap_CIN_PlayCinematic(const char *arg0, int xpos, int ypos, int width,
                            int height, int bits);
 e_status trap_CIN_StopCinematic(int handle);
@@ -3935,10 +3924,9 @@ qboolean CG_FireteamHasClass(int classnum, qboolean selectedonly);
 const char *CG_BuildSelectedFirteamString(void);
 
 // OSP
-#define Pri(x) CG_Printf("[cgnotify]%s", CG_LocalizeServerCommand(x))
+#define Pri(x) CG_Printf("[cgnotify]%s", x)
 #define CPri(x)                                                                \
-  CG_CenterPrint(CG_LocalizeServerCommand(x),                                  \
-                 SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.2), SMALLCHAR_WIDTH);
+  CG_CenterPrint(x, SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.2), SMALLCHAR_WIDTH);
 
 // cg_multiview.c
 void CG_mvDelete_f(void);

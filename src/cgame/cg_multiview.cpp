@@ -642,8 +642,8 @@ void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h,
   CG_DrawStringExt(b_x + 1, b_y + b_h - (fh * 2 + 1 + 2), ci->name, colorWhite,
                    qfalse, qtrue, fw, fh, 0);
   CG_DrawStringExt(b_x + 1, b_y + b_h - (fh + 2),
-                   va("%s^7%d", CG_TranslateString(p_class), ci->health),
-                   colorWhite, qfalse, qtrue, fw, fh, 0);
+                   va("%s^7%d", p_class, ci->health), colorWhite, qfalse, qtrue,
+                   fw, fh, 0);
 
   p_class = va("%d^1/^7%d", ci->ammoclip, ci->ammo);
   x = CG_DrawStrlen(p_class);

@@ -403,3 +403,8 @@ void ETJump::StringUtil::stripExtension(std::string &str) {
     str.erase(pos);
   }
 }
+
+void ETJump::StringUtil::stripLocalizationMarkers(std::string &str) {
+  ETJump::StringUtil::replaceAll(str, "[lon]", "");
+  ETJump::StringUtil::replaceAll(str, "[lof]", "");
+}
