@@ -4973,10 +4973,8 @@ void Item_YesNo_Paint(itemDef_t *item) {
   if (item->text) {
     Item_Text_Paint(item);
     DC->drawText(item->textRect.x + item->textRect.w + 8, item->textRect.y,
-                 item->textscale, newColor,
-                 (value != 0) ? DC->translateString("Yes")
-                              : DC->translateString("No"),
-                 0, 0, item->textStyle);
+                 item->textscale, newColor, (value != 0) ? "Yes" : "No", 0, 0,
+                 item->textStyle);
   } else {
     DC->drawText(item->textRect.x, item->textRect.y, item->textscale, newColor,
                  (value != 0) ? "Yes" : "No", 0, 0, item->textStyle);
@@ -5211,7 +5209,7 @@ char *BindingFromName(const char *cvar) {
     if (b2 != -1) {
       DC->keynumToStringBuf(b2, g_nameBind2, 32);
       Q_strupr(g_nameBind2);
-      Q_strcat(g_nameBind1, 32, DC->translateString(" or "));
+      Q_strcat(g_nameBind1, 32, " or ");
       Q_strcat(g_nameBind1, 32, g_nameBind2);
     }
   } else {
@@ -8747,7 +8745,7 @@ qboolean PC_String_Parse_Trans(int handle, const char **out) {
     return qfalse;
   }
 
-  *(out) = String_Alloc(DC->translateString(token.string));
+  *(out) = String_Alloc(token.string);
   return qtrue;
 }
 

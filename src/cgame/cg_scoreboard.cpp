@@ -31,8 +31,7 @@ void CG_DrawHeader(float x, float y, float fade) {
   vec4_t textColor = {0.6f, 0.6f, 0.6f, 0};
   textColor[3] = fade;
 
-  header = va(CG_TranslateString(
-      va("^7%s", Info_ValueForKey(configString, "sv_hostname"))));
+  header = va("^7%s", Info_ValueForKey(configString, "sv_hostname"));
 
   y += ALT_SCOREBOARD_VERTICAL_DELTA;
   CG_Text_Paint_Ext(SCREEN_CENTER_X -
@@ -40,10 +39,8 @@ void CG_DrawHeader(float x, float y, float fade) {
                     y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
 
   y += ALT_SCOREBOARD_VERTICAL_DELTA;
-  header =
-      cgs.cheats
-          ? va(CG_TranslateString(va("^7%s%s", cgs.rawmapname, " ^9(cheats)")))
-          : va(CG_TranslateString(va("^7%s", cgs.rawmapname)));
+  header = cgs.cheats ? va("^7%s%s", cgs.rawmapname, " ^9(cheats)")
+                      : va("^7%s", cgs.rawmapname);
   CG_Text_Paint_Ext(SCREEN_CENTER_X -
                         CG_Text_Width_Ext(header, 0.25f, 0, font) / 2,
                     y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
@@ -78,11 +75,11 @@ static void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score,
 
   if (ci->team == TEAM_SPECTATOR) {
     if (score->ping == -1) {
-      CG_DrawMiniString(tempX, y, CG_TranslateString("^3CONNECTING"), fade);
+      CG_DrawMiniString(tempX, y, "^3CONNECTING", fade);
     } else if (ci->clientNum == score->followedClient) {
-      CG_DrawMiniString(tempX, y, CG_TranslateString("^3SPECTATOR"), fade);
+      CG_DrawMiniString(tempX, y, "^3SPECTATOR", fade);
     } else {
-      CG_DrawMiniString(tempX, y, CG_TranslateString("^3>"), fade);
+      CG_DrawMiniString(tempX, y, "^3>", fade);
       tempX += 19;
       CG_DrawStringExt(tempX, y, cgs.clientinfo[score->followedClient].name,
                        textColor, qfalse, qfalse, MINICHAR_WIDTH,
@@ -113,19 +110,19 @@ void CG_DrawPlayers(float x, float y, float fade) {
   tempY += 3 * ALT_SCOREBOARD_VERTICAL_DELTA;
   specStartX = tempX + 320;
 
-  CG_DrawSmallString(tempX, tempY, CG_TranslateString("PLAYING"), fade);
+  CG_DrawSmallString(tempX, tempY, "PLAYING", fade);
   tempX = specStartX;
-  CG_DrawSmallString(tempX, tempY, CG_TranslateString("SPECTATING"), fade);
+  CG_DrawSmallString(tempX, tempY, "SPECTATING", fade);
   tempX = x + ALT_SCOREBOARD_HORIZONTAL_DELTA;
   tempY += ALT_SCOREBOARD_VERTICAL_DELTA + 5;
-  CG_DrawMiniString(tempX, tempY, CG_TranslateString("Player"), fade);
-  CG_DrawMiniString(specStartX, tempY, CG_TranslateString("Player"), fade);
+  CG_DrawMiniString(tempX, tempY, "Player", fade);
+  CG_DrawMiniString(specStartX, tempY, "Player", fade);
   tempX += ALT_SCOREBOARD_PLAYER_WIDTH;
-  CG_DrawMiniString(tempX, tempY, CG_TranslateString("FPS"), fade);
+  CG_DrawMiniString(tempX, tempY, "FPS", fade);
   tempX += ALT_SCOREBOARD_FPS_WIDTH;
-  CG_DrawMiniString(tempX, tempY, CG_TranslateString("Ping"), fade);
+  CG_DrawMiniString(tempX, tempY, "Ping", fade);
   tempX += ALT_SCOREBOARD_PING_WIDTH;
-  CG_DrawMiniString(tempX, tempY, CG_TranslateString("Info"), fade);
+  CG_DrawMiniString(tempX, tempY, "Info", fade);
   tempX += ALT_SCOREBOARD_INFO_WIDTH;
 
   // Spec info
@@ -207,15 +204,14 @@ void CG_DrawHeader2(float x, float y, float fade) {
   // Draw the server hostname
   std::string ipAddress =
       ETJump::stringFormat("^7%s", cg.ipAddr[0] ? cg.ipAddr : "localhost");
-  header = va(CG_TranslateString(
-      va("^7%s", Info_ValueForKey(configString, "sv_hostname"))));
+  header = va("^7%s", Info_ValueForKey(configString, "sv_hostname"));
   CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0,
                     font);
   CG_Text_Paint_Ext(tempX + 1, tempY + 10, 0.15f, 0.15f, textColor, ipAddress,
                     0, 0, 0, font);
 
   // Draw the current map name
-  header = va(CG_TranslateString(va("^7%s", cgs.rawmapname)));
+  header = va("^7%s", cgs.rawmapname);
   tempX = x + ALT_SCOREBOARD_WIDTH - 20;
   CG_Text_Paint_RightAligned_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header,
                                  0, 0, 0, font);
@@ -225,7 +221,7 @@ void CG_DrawHeader2(float x, float y, float fade) {
   }
 
   // Draw the "jumping" text
-  header = va(CG_TranslateString("^7Jumping"));
+  header = "^7Jumping";
   tempX = x + (teamScoreboardWidth / 2) -
           (CG_Text_Width_Ext(header, 0.25, 0, font) / 2);
   tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH +
@@ -234,7 +230,7 @@ void CG_DrawHeader2(float x, float y, float fade) {
                     font);
 
   // Draw the "spectating" text
-  header = CG_TranslateString("^7Spectating");
+  header = "^7Spectating";
   tempX += teamScoreboardWidth;
   tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH +
           (THIRD_SCOREBOARD_SUBHEADER_HEIGHT / 2) + 4;
@@ -242,7 +238,7 @@ void CG_DrawHeader2(float x, float y, float fade) {
                     font);
 
   // Draw the header for the player list
-  header = CG_TranslateString("^7Player");
+  header = "^7Player";
   tempX = x + THIRD_SCOREBOARD_DIVIDER_WIDTH;
   tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT  // Servername
           + THIRD_SCOREBOARD_DIVIDER_WIDTH    // divider
@@ -252,11 +248,11 @@ void CG_DrawHeader2(float x, float y, float fade) {
   CG_DrawMiniString(tempX, tempY, header, fade);
 
   tempX += THIRD_SCOREBOARD_PLAYER_WIDTH;
-  CG_DrawMiniString(tempX, tempY, CG_TranslateString("FPS"), fade);
+  CG_DrawMiniString(tempX, tempY, "FPS", fade);
   tempX += THIRD_SCOREBOARD_FPS_WIDTH;
-  CG_DrawMiniString(tempX, tempY, CG_TranslateString("Ping"), fade);
+  CG_DrawMiniString(tempX, tempY, "Ping", fade);
   tempX += THIRD_SCOREBOARD_PING_WIDTH;
-  CG_DrawMiniString(tempX, tempY, CG_TranslateString("Info"), fade);
+  CG_DrawMiniString(tempX, tempY, "Info", fade);
   tempX += THIRD_SCOREBOARD_INFO_WIDTH;
 
   tempX = x + ALT_SCOREBOARD_WIDTH / 2 + THIRD_SCOREBOARD_DIVIDER_WIDTH + 2;
@@ -265,7 +261,7 @@ void CG_DrawHeader2(float x, float y, float fade) {
           + THIRD_SCOREBOARD_SUBHEADER_HEIGHT // Jumping, spectating
           + THIRD_SCOREBOARD_DIVIDER_WIDTH    // divider
           + 4; // Random value to make this be in the middle of the bar
-  CG_DrawMiniString(tempX, tempY, CG_TranslateString("Player"), fade);
+  CG_DrawMiniString(tempX, tempY, "Player", fade);
 }
 
 static void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score,
@@ -301,11 +297,11 @@ static void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score,
 
   if (ci->team == TEAM_SPECTATOR) {
     if (score->ping == -1) {
-      CG_DrawMiniString(tempX, y, CG_TranslateString("^3CONNECTING"), fade);
+      CG_DrawMiniString(tempX, y, "^3CONNECTING", fade);
     } else if (ci->clientNum == score->followedClient) {
-      CG_DrawMiniString(tempX, y, CG_TranslateString("^3SPECTATOR"), fade);
+      CG_DrawMiniString(tempX, y, "^3SPECTATOR", fade);
     } else {
-      CG_DrawMiniString(tempX, y, CG_TranslateString("^3>"), fade);
+      CG_DrawMiniString(tempX, y, "^3>", fade);
       tempX += 14;
       CG_DrawStringExt(tempX, y, cgs.clientinfo[score->followedClient].name,
                        textColor, qfalse, qfalse, MINICHAR_WIDTH,
@@ -1086,10 +1082,10 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade) {
       x += INFO::PLAYER_WIDTH;
 
       if (score->ping == -1) {
-        s = CG_TranslateString("^3CONNECTING");
+        s = "^3CONNECTING";
         ETJump::DrawSmallString(x + 13, y + 12, s, fade);
       } else if (ci->clientNum == score->followedClient) {
-        s = CG_TranslateString("^3SPECTATOR");
+        s = "^3SPECTATOR";
         ETJump::DrawSmallString(x + 13, y + 12, s, fade);
       } else {
         s = va("%s%s", "^3> ^7", cgs.clientinfo[score->followedClient].name);
@@ -1170,14 +1166,11 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade,
     CG_DrawRect_FixedBorder(x, y, width, INFO::TEAM_HEIGHT, 1, hcolor);
 
     if (team == TEAM_AXIS) {
-      text = va("%s (%d %s)", CG_TranslateString("AXIS"), cg.teamPlayers[team],
-                cg.teamPlayers[team] == 1 ? CG_TranslateString("PLAYER")
-                                          : CG_TranslateString("PLAYERS"));
+      text = va("%s (%d %s)", "AXIS", cg.teamPlayers[team],
+                cg.teamPlayers[team] == 1 ? "PLAYER" : "PLAYERS");
     } else {
-      text =
-          va("%s (%d %s)", CG_TranslateString("ALLIES"), cg.teamPlayers[team],
-             cg.teamPlayers[team] == 1 ? CG_TranslateString("PLAYER")
-                                       : CG_TranslateString("PLAYERS"));
+      text = va("%s (%d %s)", "ALLIES", cg.teamPlayers[team],
+                cg.teamPlayers[team] == 1 ? "PLAYER" : "PLAYERS");
     }
 
     textWidth = CG_Text_Width_Ext(text, 0.22f, 0, boldFont);
@@ -1194,20 +1187,19 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade,
     int tempx = x;
 
     // draw player info headings
-    ETJump::DrawSmallString(tempx + 5, y + 12, CG_TranslateString("Name"),
-                            fade);
+    ETJump::DrawSmallString(tempx + 5, y + 12, "Name", fade);
     tempx += INFO::PLAYER_WIDTH;
 
-    ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("FPS"), fade);
+    ETJump::DrawSmallString(tempx, y + 12, "FPS", fade);
     tempx += INFO::FPS_WIDTH;
 
-    ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("Pmove"), fade);
+    ETJump::DrawSmallString(tempx, y + 12, "Pmove", fade);
     tempx += INFO::PMOVE_WIDTH;
 
-    ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("CGaz"), fade);
+    ETJump::DrawSmallString(tempx, y + 12, "CGaz", fade);
     tempx += INFO::CGAZ_WIDTH;
 
-    ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("Ping"), fade);
+    ETJump::DrawSmallString(tempx, y + 12, "Ping", fade);
 
     y += INFO::LINE_HEIGHT;
   }

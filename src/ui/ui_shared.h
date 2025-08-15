@@ -522,10 +522,9 @@ typedef struct {
   void (*feederSelection)(float feederID, int index);
   qboolean (*feederSelectionClick)(itemDef_t *item);
   void (*feederAddItem)(float feederID, const char *name,
-                        int index);             // NERVE - SMF
-  char *(*translateString)(const char *string); // NERVE - SMF
-  void (*checkAutoUpdate)();                    // DHM - Nerve
-  void (*getAutoUpdate)();                      // DHM - Nerve
+                        int index); // NERVE - SMF
+  void (*checkAutoUpdate)();        // DHM - Nerve
+  void (*getAutoUpdate)();          // DHM - Nerve
 
   void (*keynumToStringBuf)(int keynum, char *buf, int buflen);
   void (*getBindingBuf)(int keynum, char *buf, int buflen);
