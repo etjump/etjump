@@ -30,11 +30,21 @@
 namespace ETJump {
 class SpectatorInfo : public IRenderable {
   CvarValue::Scale scale{};
+  int32_t textStyle{};
+  float sizeX{};
+  float sizeY{};
+  float rowHeight{};
+  std::vector<std::pair<int32_t, bool>> spectators;
+
+  static constexpr vec4_t inactiveColor = {1.0f, 1.0f, 1.0f, 0.33f};
 
   static bool canSkipDraw();
   void startListeners();
 
-  void setScale();
+  void setTextSize(const vmCvar_t &cvar);
+  void setRowHeight();
+  void setTextStyle(const vmCvar_t &cvar);
+  static float getTextOffset(const char *name, float fontWidth);
 
 public:
   SpectatorInfo();

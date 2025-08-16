@@ -443,6 +443,7 @@ vmCvar_t etj_spectatorInfoX;
 vmCvar_t etj_spectatorInfoY;
 vmCvar_t etj_spectatorInfoScale;
 vmCvar_t etj_spectatorInfoShadow;
+vmCvar_t etj_spectatorInfoMaxClients;
 
 vmCvar_t etj_drawRunTimer;
 vmCvar_t etj_runTimerX;
@@ -1025,6 +1026,8 @@ cvarTable_t cvarTable[] = {
     {&etj_spectatorInfoY, "etj_spectatorInfoY", "30", CVAR_ARCHIVE},
     {&etj_spectatorInfoScale, "etj_spectatorInfoScale", "1.0", CVAR_ARCHIVE},
     {&etj_spectatorInfoShadow, "etj_spectatorInfoShadow", "1", CVAR_ARCHIVE},
+    {&etj_spectatorInfoMaxClients, "etj_spectatorInfoMaxClients", "-1",
+     CVAR_ARCHIVE},
     {&etj_drawRunTimer, "etj_drawRunTimer", "1", CVAR_ARCHIVE},
     {&etj_runTimerX, "etj_runTimerX", "320", CVAR_ARCHIVE},
     {&etj_runTimerY, "etj_runTimerY", "360", CVAR_ARCHIVE},
