@@ -2541,6 +2541,7 @@ extern vmCvar_t etj_spectatorInfoX;
 extern vmCvar_t etj_spectatorInfoY;
 extern vmCvar_t etj_spectatorInfoScale;
 extern vmCvar_t etj_spectatorInfoShadow;
+extern vmCvar_t etj_spectatorInfoMaxClients;
 
 extern vmCvar_t etj_drawRunTimer;
 extern vmCvar_t etj_runTimerX;
