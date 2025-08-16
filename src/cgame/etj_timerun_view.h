@@ -33,7 +33,7 @@ namespace ETJump {
 class TimerunView : public Drawable {
 public:
   explicit TimerunView(std::shared_ptr<Timerun> timerun);
-  ~TimerunView() override;
+  ~TimerunView() override = default;
 
   void draw() override;
 
@@ -42,7 +42,7 @@ private:
   // e.g. if player is running => return player's run,
   // else if player is running, and we're speccing the player
   // => return that player's run
-  const Timerun::PlayerTimerunInformation *currentRun() const;
+  [[nodiscard]] const Timerun::PlayerTimerunInformation *currentRun() const;
 
   static std::string getTimerString(int msec);
 
@@ -54,8 +54,18 @@ private:
   static float getTimerAlpha(bool running, bool autoHide, int fadeStart,
                              int duration);
 
-  void setCheckpointSize();
-  void setCheckpointPopupSize();
+  void setCheckpointSize(const vmCvar_t &cvar);
+  void setCheckpointPopupSize(const vmCvar_t &cvar);
+  void drawCheckpoints(float x, float y, int timeVar,
+                       const Timerun::PlayerTimerunInformation &run);
+
+  static int32_t
+  getCheckpointComparisonTime(int currentTime, int currentCPIndex,
+                              const Timerun::PlayerTimerunInformation &run);
+  static int32_t
+  getRelativeCheckpointTimer(int currentTime, int comparisonTime,
+                             int currentCPIndex,
+                             const Timerun::PlayerTimerunInformation &run);
 
   vec4_t inactiveTimerColor{};
   std::shared_ptr<Timerun> _timerun;
@@ -63,14 +73,12 @@ private:
   vec4_t colorDefault = {1.0f, 1.0f, 1.0f, 1.0f};
   vec4_t colorSuccess = {0.627f, 0.941f, 0.349f, 1.0f};
   vec4_t colorFail = {0.976f, 0.262f, 0.262f, 1.0f};
-  static const int animationTime = 300;
-  static const int fadeHold = 5000; // 5s pause before fade starts
-  static const int fadeTime = 2000; // 2s fade
+
+  fontInfo_t *font;
+  bool autoHide;
 
   CvarValue::Size checkpointSize{};
   CvarValue::Size popupSize{};
-
-  static const int popupFadeTime = 100;
 
   int demoSvFps{};
 
