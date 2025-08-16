@@ -65,6 +65,7 @@ menuDef {
         SLIDER              (SETTINGS_ITEM_POS(5), "Spec list scale:", 0.2, SETTINGS_ITEM_H, etj_spectatorInfoScale 1.0 0 5 0.1, "Scale of spectator list\netj_spectatorInfoSize")
         CVARINTLABEL        (SETTINGS_ITEM_POS(6), "etj_spectatorInfoMaxClients", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(6), "Max clients:", 0.2, SETTINGS_ITEM_H, etj_spectatorInfoMaxClients -1 -1 63 1, "Maximum number of clients to draw on the list, -1 for unlimited\netj_spectatorInfoMaxClients")
+        YESNO               (SETTINGS_ITEM_POS(7), "Bottom-up direction:", 0.2, SETTINGS_ITEM_H, "etj_spectatorInfoDirection", "Draw the list in bottom-up direction\netj_spectatorInfoDirection")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

@@ -123,9 +123,19 @@ void SpectatorInfo::render() const {
 
   const auto drawRow = [this, x, &y](const char *name, const vec4_t color) {
     const float offset = getTextOffset(name, sizeX);
-    y += rowHeight;
 
-    DrawString(x - offset, y, sizeX, sizeY, color, qfalse, name, 0, textStyle);
+    if (static_cast<DrawDirection>(etj_spectatorInfoDirection.integer) ==
+        DrawDirection::DOWN) {
+      y += rowHeight;
+      DrawString(x - offset, y, sizeX, sizeY, color, qfalse, name, 0,
+                 textStyle);
+    } else {
+      // if we're drawing bottom-up, draw first before changing the y pos,
+      // because 'DrawString' draws from the bottom left vertex
+      DrawString(x - offset, y, sizeX, sizeY, color, qfalse, name, 0,
+                 textStyle);
+      y -= rowHeight;
+    }
   };
 
   const size_t max =

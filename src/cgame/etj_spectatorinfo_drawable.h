@@ -36,6 +36,11 @@ class SpectatorInfo : public IRenderable {
   float rowHeight{};
   std::vector<std::pair<int32_t, bool>> spectators;
 
+  enum class DrawDirection {
+    DOWN = 0,
+    UP = 1,
+  };
+
   static constexpr vec4_t inactiveColor = {1.0f, 1.0f, 1.0f, 0.33f};
 
   static bool canSkipDraw();
