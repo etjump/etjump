@@ -2082,6 +2082,14 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       {
         break;
       }
+
+      // NOTE: only for other players,
+      // 'CG_AddPlayerWeapon' handles this for first person view
+      if (ETJump::demoCompatibility->flags.setAttack2FiringFlag &&
+          cg.snap->ps.clientNum != cent->currentState.clientNum) {
+        cent->currentState.eFlags |= EF_FIRING;
+      }
+
       CG_FireWeapon(cent);
       if (event == EV_FIRE_WEAPONB) // akimbo firing
       {
@@ -2091,6 +2099,13 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       }
       break;
     case EV_FIRE_WEAPON_LASTSHOT:
+      // NOTE: only for other players,
+      // 'CG_AddPlayerWeapon' handles this for first person view
+      if (ETJump::demoCompatibility->flags.setAttack2FiringFlag &&
+          cg.snap->ps.clientNum != cent->currentState.clientNum) {
+        cent->currentState.eFlags |= EF_FIRING;
+      }
+
       CG_FireWeapon(cent);
       break;
 

@@ -6,8 +6,10 @@
  */
 
 #include "cg_local.h"
-#include "../game/etj_string_utilities.h"
+#include "etj_demo_compatibility.h"
 #include "etj_utilities.h"
+
+#include "../game/etj_string_utilities.h"
 
 vec3_t ejectBrassCasingOrigin;
 
@@ -2220,7 +2222,6 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
   weapon_t weaponNum;
   weaponInfo_t *weapon;
   centity_t *nonPredictedCent;
-  qboolean firing; // Ridah
   qboolean akimboFire = qfalse;
   qboolean drawpart;
   qboolean isPlayer;
@@ -2394,8 +2395,24 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
     }
   }
 
-  // Ridah
-  firing = ((cent->currentState.eFlags & EF_FIRING) != 0) ? qtrue : qfalse;
+  bool firing = cent->currentState.eFlags & EF_FIRING;
+
+  // NOTE: only for first person view,
+  // 'CG_EntityEvent' handles this for other players
+  if (ETJump::demoCompatibility->flags.setAttack2FiringFlag && ps && !firing) {
+    // need to override this from 'CG_EDV_RunInput' setup,
+    // otherwise we don't get correct ammo counts in 'PM_WeaponAmmoAvailable'
+    cg_pmove.noWeapClips = qfalse;
+
+    firing = ETJump::canFireWeapon(ps) &&
+             !(ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_TALK) &&
+             (ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_ATTACK ||
+              ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_ATTACK2);
+
+    // ...and reset for safety, not sure if this is required
+    // as it's just going to be overridden next frame anyway
+    cg_pmove.noWeapClips = qtrue;
+  }
 
   if (ps && !cg.renderingThirdPerson &&
       cg.predictedPlayerState.weapon == WP_MORTAR_SET &&
