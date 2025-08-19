@@ -152,6 +152,10 @@ void DemoCompatibility::setupCompatibilityFlags() {
   if (!isCompatible({3, 4, 0})) {
     flags.serverSideDlights = true;
     compatibilityStrings.emplace_back("- Using fully server-side dlights");
+
+    flags.setAttack2FiringFlag = true;
+    compatibilityStrings.emplace_back(
+        "- Faking EF_FIRING state for '+attack2' shooting");
   }
 }
 

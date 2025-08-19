@@ -563,6 +563,10 @@ void PM_UpdateViewAngles(playerState_t *ps, pmoveExt_t *pmext, usercmd_t *cmd,
 void Pmove(pmove_t *pmove);
 void PmoveSingle(pmove_t *pmove);
 
+namespace ETJump {
+bool canFireWeapon(const playerState_t *ps);
+}
+
 inline constexpr int8_t CMDSCALE_DEFAULT = 127;
 inline constexpr int8_t CMDSCALE_WALK = 64;
 
