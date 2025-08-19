@@ -5920,7 +5920,8 @@ void PmoveSingle(pmove_t *pmove) {
               pm->ps->weaponstate == WEAPON_FIRING) {
 
             // all clear, fire!
-            if (pm->cmd.buttons & BUTTON_ATTACK &&
+            if ((pm->cmd.buttons & BUTTON_ATTACK ||
+                 pm->cmd.wbuttons & WBUTTON_ATTACK2) &&
                 !(pm->cmd.buttons & BUTTON_TALK)) {
               pm->ps->eFlags |= EF_FIRING;
             }
