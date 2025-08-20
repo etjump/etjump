@@ -103,6 +103,13 @@
     * `portalteam` is set to 1 and the portal is yours or from a fireteam member
     * `portalteam` is set to 2 (anyone can use anyone's portals)
 * portalgun trails and debug bboxes are now correctly colored green/yellow for other's portals [#1707](https://github.com/etjump/etjump/pull/1707)
+* overbounce detector now correctly shows overbounces on top of other solid players [#1710](https://github.com/etjump/etjump/pull/1710)
+* stepup view transitions are now interpolated on spec/demo playback [#1712](https://github.com/etjump/etjump/pull/1712)
+* added `dumpEntities` command to dump entities from the current map to a file [#1713](https://github.com/etjump/etjump/pull/1713)
+  * `dumpEntities [optional name]`, if name isn't given, defaults to current map name
+  * requires `developer 1`
+* fixed potential crash when hitting the 16th checkpoint of a timerun and checkpoint drawing was enabled [#1717](https://github.com/etjump/etjump/pull/1717)
+* fixed firing with `+attack2` not setting the players firing state correctly, causing issues such as flamethrower flames not drawing when fired [#1719](https://github.com/etjump/etjump/pull/1719)
 
 # ETJump 3.3.4
 
