@@ -686,9 +686,6 @@ int G_PortalPredict_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                 val == 0 ? "0" : "1");
   } else {
     trap_Cvar_Set("g_portalPredict", level.voteInfo.vote_value);
-    Printer::popupAll(stringFormat(
-        "Predicted portalgun teleports are now ^3%s^7!",
-        Q_atoi(level.voteInfo.vote_value) ? "enabled" : "disabled"));
   }
 
   return G_OK;

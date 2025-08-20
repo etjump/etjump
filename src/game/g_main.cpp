@@ -485,7 +485,8 @@ cvarTable_t gameCvarTable[] = {
     // Feen: PGM
     // 0 - freestyle, 1 - restricted
     {&g_portalMode, "g_portalMode", "1", CVAR_ARCHIVE},
-    {&g_portalPredict, "g_portalPredict", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
+    {&g_portalPredict, "g_portalPredict", "0", CVAR_ARCHIVE | CVAR_SERVERINFO,
+     0, qtrue},
     {&g_portalTeam, "g_portalTeam", "0", CVAR_ROM | CVAR_SERVERINFO},
 
     {&g_maxConnsPerIP, "g_maxConnsPerIP", "2", CVAR_ARCHIVE},
