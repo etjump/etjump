@@ -1107,7 +1107,7 @@ static void dumpEntities(gentity_t *ent) {
 
   std::string arg = ConcatArgs(1);
   const std::string filename =
-      !arg.empty() ? arg + ".ent" : stringFormat("%s.ent", level.rawmapname);
+      stringFormat("maps/%s.ent", arg.empty() ? level.rawmapname : arg);
 
   File out(filename, File::Mode::Write);
   std::string contents;
