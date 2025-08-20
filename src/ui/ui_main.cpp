@@ -4013,6 +4013,9 @@ void UI_RunMenuScript(const char **args) {
                     va("%i", Q_atoi(Info_ValueForKey(info, "timelimit"))));
       trap_Cvar_Set("ui_voteAutoRtv",
                     va("%i", Q_atoi(Info_ValueForKey(info, "g_autoRtv"))));
+      trap_Cvar_Set(
+          "ui_votePortalPredict",
+          va("%i", Q_atoi(Info_ValueForKey(info, "g_portalPredict"))));
 
       return;
     }
@@ -5136,6 +5139,18 @@ void UI_RunMenuScript(const char **args) {
       for (int i = 0; i < count; i++) {
         toggleButtonState(i, qtrue);
       }
+
+      return;
+    }
+
+    if (!Q_stricmp(name, "votePortalPredict")) {
+      const auto value =
+          static_cast<int32_t>(trap_Cvar_VariableValue("ui_votePortalPredict"));
+
+      // the cvar is the current value of 'g_portalPredict',
+      // so we wanna vote the opposing value here to toggle the setting
+      trap_Cmd_ExecuteText(
+          EXEC_APPEND, va("callvote portalpredict %i\n", value == 0 ? 1 : 0));
 
       return;
     }
