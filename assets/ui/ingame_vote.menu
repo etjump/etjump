@@ -25,7 +25,7 @@ menuDef {
 	onOpen {
 		uiScript voteInitToggles
 
-    conditionalScript g_portalPredict 0
+    conditionalScript ui_VotePortalPredict 0
       ( "hide bttn_vote_portalpredict_on ; show bttn_vote_portalpredict_off" )
       ( "hide bttn_vote_portalpredict_off ; show bttn_vote_portalpredict_on" )
 	}
@@ -81,8 +81,8 @@ menuDef {
 	NAMEDBUTTONEXT        ( "bttnextAutoRtv", ITEM_POS_QUARTER_3(4), "OK", .25, 12, uiScript voteAutoRtv; uiScript closeingame, voteFlag CV_SVF_AUTORTV )
 	NAMEDBUTTONEXT        ( "bttnextAutoRtvOff", ITEM_POS_QUARTER_4(4), "OFF", .25, 12, exec "cmd callvote autoRtv 0"; uiScript closeingame, voteFlag CV_SVF_AUTORTV )
 
-	NAMEDBUTTONEXT        ( "bttn_vote_portalpredict_on", ITEM_POS(5), "PREDICTED PORTALS ON", .25, 12, exec "cmd callvote portalPredict 1"; uiScript closeingame, voteFlag CV_SVF_PORTALPREDICT )
-	NAMEDBUTTONEXT        ( "bttn_vote_portalpredict_off", ITEM_POS(5), "PREDICTED PORTALS OFF", .25, 12, exec "cmd callvote portalPredict 0"; uiScript closeingame, voteFlag CV_SVF_PORTALPREDICT )
+	NAMEDBUTTONEXT        ( "bttn_vote_portalpredict_on", ITEM_POS(5), "PREDICTED PORTALS ON", .25, 12, uiScript votePortalPredict; uiScript closeingame, voteFlag CV_SVF_PORTALPREDICT )
+	NAMEDBUTTONEXT        ( "bttn_vote_portalpredict_off", ITEM_POS(5), "PREDICTED PORTALS OFF", .25, 12, uiScript votePortalPredict; uiScript closeingame, voteFlag CV_SVF_PORTALPREDICT )
 
 	BUTTON                ( ITEM_POS(6), "BACK", .25, 12, close ingame_vote ; open ingame_main )
 }
