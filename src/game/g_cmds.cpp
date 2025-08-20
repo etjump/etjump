@@ -1109,15 +1109,21 @@ static void dumpEntities(gentity_t *ent) {
   const std::string filename =
       stringFormat("maps/%s.ent", arg.empty() ? level.rawmapname : arg);
 
-  File out(filename, File::Mode::Write);
-  std::string contents;
+  try {
+    File out(filename, File::Mode::Write);
+    std::string contents;
 
-  for (const auto &entity : entities) {
-    contents += entity;
+    for (const auto &entity : entities) {
+      contents += entity;
+    }
+
+    out.write(contents);
+    Printer::console(ent,
+                     stringFormat("Dumped entities to ^3'%s'\n", filename));
+  } catch (const File::FileIOException &e) {
+    Printer::console(ent,
+                     stringFormat("Failed to write file ^3'%s'\n", e.what()));
   }
-
-  out.write(contents);
-  Printer::console(ent, stringFormat("Dumped entities to ^3'%s'\n", filename));
 }
 } // namespace ETJump
 
