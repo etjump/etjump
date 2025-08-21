@@ -2012,6 +2012,36 @@ static void PM_GroundTraceMissed(void) {
   // PM_CheckPortal();
 }
 
+namespace ETJump {
+// this is rather verbose but I wanted to make this easy to read,
+// rather than making it as concise as possible
+static bool disableOverbounce(const trace_t &trace) {
+  const bool onPlayer = trace.entityNum >= 0 && trace.entityNum < MAX_CLIENTS;
+
+  if (onPlayer) {
+    if (pm->shared & BG_LEVEL_BODY_OB_NEVER) {
+      return true;
+    }
+
+    if (pm->shared & BG_LEVEL_BODY_OB_ALWAYS) {
+      return false;
+    }
+  }
+
+  if (pm->shared & BG_LEVEL_NO_OVERBOUNCE) {
+    if (!(trace.surfaceFlags & SURF_OVERBOUNCE)) {
+      return true;
+    }
+  } else {
+    if (trace.surfaceFlags & SURF_OVERBOUNCE) {
+      return true;
+    }
+  }
+
+  return false;
+}
+} // namespace ETJump
+
 /*
 =============
 PM_GroundTrace
@@ -2111,17 +2141,9 @@ static void PM_GroundTrace(void) {
 
     PM_CrashLand();
 
-    // Disable overbounce?
-    if (pm->shared & BG_LEVEL_NO_OVERBOUNCE) {
-      if (!((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)) {
-        PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal,
-                        pm->ps->velocity, OVERCLIP);
-      }
-    } else {
-      if (((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)) {
-        PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal,
-                        pm->ps->velocity, OVERCLIP);
-      }
+    if (ETJump::disableOverbounce(trace)) {
+      PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal,
+                      pm->ps->velocity, OVERCLIP);
     }
 
     // don't do landing time if we were just going down a slope
@@ -2136,24 +2158,15 @@ static void PM_GroundTrace(void) {
 
   pm->ps->groundEntityNum = trace.entityNum;
 
-  // Disable overbounce?
-  if (pm->shared & BG_LEVEL_NO_OVERBOUNCE) {
-    if (trace.plane.normal[2] == 1 &&
-        !((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)) {
-      pm->ps->velocity[2] = 0;
-      if (trace.plane.type == 2 && pm->waterlevel < 2) {
-        auto offset = pm->ps->origin[2] - trace.endpos[2];
-        pm->ps->origin[2] -= offset;
-      }
-    }
-  } else {
-    if (trace.plane.normal[2] == 1 &&
-        ((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)) {
-      pm->ps->velocity[2] = 0;
-      if (trace.plane.type == 2 && pm->waterlevel < 2) {
-        auto offset = pm->ps->origin[2] - trace.endpos[2];
-        pm->ps->origin[2] -= offset;
-      }
+  // prevent sticky overbounces
+  if (ETJump::disableOverbounce(trace) && trace.plane.normal[2] == 1) {
+    pm->ps->velocity[2] = 0;
+
+    // axial surfaces only
+    // FIXME: remove??? we're checking for plane.normal[2] == 1 already
+    if (trace.plane.type == 2 && pm->waterlevel < 2) {
+      const auto offset = pm->ps->origin[2] - trace.endpos[2];
+      pm->ps->origin[2] -= offset;
     }
   }
 

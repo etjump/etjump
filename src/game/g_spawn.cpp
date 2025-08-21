@@ -1178,6 +1178,32 @@ static void initPortalPredict() {
   G_Printf("Predicted portal teleports are %sforced.\n",
            level.portalPredict ? "" : "not ");
 }
+
+static void initBodyOverbounce() {
+  int32_t value = 0;
+  G_SpawnInt("overbounce_players", "0", &value);
+
+  level.bodyOverbounce = value;
+
+  shared.integer &= ~BG_LEVEL_BODY_OB_ALWAYS;
+  shared.integer &= ~BG_LEVEL_BODY_OB_NEVER;
+
+  if (level.bodyOverbounce == 1) {
+    shared.integer |= BG_LEVEL_BODY_OB_ALWAYS;
+  } else if (level.bodyOverbounce == 2) {
+    shared.integer |= BG_LEVEL_BODY_OB_NEVER;
+  }
+
+  trap_Cvar_Set("shared", va("%d", shared.integer));
+
+  if (!level.bodyOverbounce) {
+    G_Printf("Overbounces on top of players are controlled by 'nooverbounce' "
+             "key.\n");
+  } else {
+    G_Printf("Overbounces on top of players are %s allowed.\n",
+             level.bodyOverbounce == 1 ? "always" : "never");
+  }
+}
 } // namespace ETJump
 
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
@@ -1328,6 +1354,7 @@ void SP_worldspawn(void) {
   ETJump::initNoFTSaveLimit();
   ETJump::initNoFTTeamjumpMode();
   ETJump::initPortalPredict();
+  ETJump::initBodyOverbounce();
 
   level.mapcoordsValid = qfalse;
   if (G_SpawnVector2D("mapcoordsmins", "-128 128",

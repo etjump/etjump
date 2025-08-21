@@ -68,11 +68,29 @@ bool Overbounce::isOverbounce(float zVel, float startHeight, float endHeight,
   return false;
 }
 
-bool Overbounce::surfaceAllowsOverbounce(trace_t *trace) {
-  if (cgs.shared & BG_LEVEL_NO_OVERBOUNCE) {
-    return ((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
-  } else {
-    return (trace->surfaceFlags & SURF_OVERBOUNCE) == 0;
+bool Overbounce::surfaceAllowsOverbounce(const trace_t *trace) {
+  const bool onPlayer = trace->entityNum >= 0 && trace->entityNum < MAX_CLIENTS;
+
+  if (onPlayer) {
+    if (cgs.shared & BG_LEVEL_BODY_OB_NEVER) {
+      return false;
+    }
+
+    if (cgs.shared & BG_LEVEL_BODY_OB_ALWAYS) {
+      return true;
+    }
   }
+
+  if (cgs.shared & BG_LEVEL_NO_OVERBOUNCE) {
+    if (!(trace->surfaceFlags & SURF_OVERBOUNCE)) {
+      return false;
+    }
+  } else {
+    if (trace->surfaceFlags & SURF_OVERBOUNCE) {
+      return false;
+    }
+  }
+
+  return true;
 }
 } // namespace ETJump
