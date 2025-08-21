@@ -2831,6 +2831,10 @@ inline constexpr int BG_LEVEL_NO_WALLBUG = 1 << 7;
 inline constexpr int BG_LEVEL_NO_NOCLIP = 1 << 8;
 // portalgun prediction is force-enabled
 inline constexpr int BG_LEVEL_PORTAL_PREDICT = 1 << 9;
+// overbounces are always allowed on CONTENTS_BODY
+inline constexpr int32_t BG_LEVEL_BODY_OB_ALWAYS = 1 << 10;
+// overbounces are never allowed on CONTENTS_BODY
+inline constexpr int32_t BG_LEVEL_BODY_OB_NEVER = 1 << 11;
 
 namespace ETJump {
 inline constexpr char CUSTOMVOTE_TYPE[] = "type";
