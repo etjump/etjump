@@ -2783,6 +2783,8 @@ extern vmCvar_t etj_HUD_noLerp;
 
 extern vmCvar_t etj_useExecQuiet;
 
+extern vmCvar_t etj_hideFlamethrowerEffects;
+
 //
 // cg_main.c
 //
@@ -4256,6 +4258,11 @@ enum class ExecFileType {
   NONE = 0,
   MAP_AUTOEXEC = 1 << 0,
   TEAM_AUTOEXEC = 1 << 1,
+};
+
+enum class HideFlamethrowerFlags {
+  HIDE_SELF = 1 << 0,
+  HIDE_OTHERS = 1 << 1,
 };
 } // namespace ETJump
 
