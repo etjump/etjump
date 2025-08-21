@@ -54,6 +54,7 @@ menuDef {
         SLIDER              (SETTINGS_ITEM_POS(4), "Gun Z:", 0.2, SETTINGS_ITEM_H, cg_gunZ 0 -30 30 0.5, "Sets Z position of gun\ncg_gunz")
         YESNO               (SETTINGS_ITEM_POS(5), "Gun sway:", 0.2, SETTINGS_ITEM_H, "etj_gunSway", "Enable gun sway/bobbing\netj_gunSway")
         MULTI               (SETTINGS_ITEM_POS(6), "Muzzleflash:", 0.2, SETTINGS_ITEM_H, "etj_muzzleFlash", cvarFloatList { "Off" 0 "On" 1 "Only for others" 2 "Only for self" 3 }, "Enable muzzleflash\netj_muzzleFlash")
+        COMBO_BIT           (SETTINGS_COMBO_POS(7), "Hide flamethrower effects:", 0.2, SETTINGS_ITEM_H, "etj_hideFlamethrowerEffects", cvarFloatList { "Hide own effects" 1 "Hide others' effects" 2 }, none, "Hide effects produces by flamethrower\netj_hideFlamethrower")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
