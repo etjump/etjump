@@ -2882,10 +2882,20 @@ const char *EscapeString(const char *in);
 const char *interpolateNametags(const char *text, const int color);
 const char *findAndReplaceNametags(const char *text, const char *name);
 
-// Returns clientnum from ent
-int ClientNum(gentity_t *ent);
-// Returns clientnum from client
-int ClientNum(gclient_t *client);
+// returns an entity number for gentity_t or gclient_t pointer
+template <typename T>
+int32_t ClientNum(const T *p) {
+  if constexpr (std::is_same_v<T, gentity_t>) {
+    return static_cast<int32_t>(p - g_entities);
+  }
+
+  if constexpr (std::is_same_v<T, gclient_t>) {
+    return static_cast<int32_t>(p - level.clients);
+  }
+
+  static_assert(std::is_same_v<T, gentity_t> || std::is_same_v<T, gclient_t>,
+                "Unsupported pointer type");
+}
 
 // mainext.cpp
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
