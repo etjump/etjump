@@ -43,6 +43,9 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
   portal->classname = "portal_gate";
   portal->s.onFireStart = static_cast<int>(PORTAL_BBOX_RADIUS * 2 * scale);
 
+  // save the spawn timestamp so client can animate the spawning
+  portal->s.effect1Time = level.time;
+
   // Assign ent to player as well as the portal type..
   if (type == Type::PORTAL_BLUE) {
     portal->s.eType = ET_PORTAL_BLUE; // Portal 1

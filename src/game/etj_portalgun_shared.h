@@ -53,4 +53,6 @@ inline constexpr float PORTAL_DRAW_RADIUS = 48.0f;
 // scalar for drawing the portal shader proportional to the portal size
 inline constexpr float PORTAL_DRAW_SCALAR =
     PORTAL_DRAW_RADIUS / (PORTAL_BBOX_RADIUS * 2);
+// animation duration for portal spawning
+inline constexpr int32_t PORTAL_SPAWN_ANIM_DURATION = 200;
 } // namespace ETJump
