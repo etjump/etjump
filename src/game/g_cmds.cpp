@@ -37,31 +37,30 @@ Sends current scoreboard information
 */
 void G_SendScore(gentity_t *ent) {
   char entry[128];
-  int i;
   gclient_t *cl;
   int numSorted;
-  int team, size, count;
-  char buffer[1024];
+  int size, count;
+  char buffer[MAX_STRING_CHARS];
   char startbuffer[32];
 
   // send the latest information on all clients
   numSorted = level.numConnectedClients;
-  if (numSorted > 64) {
-    numSorted = 64;
+  if (numSorted > MAX_CLIENTS) {
+    numSorted = MAX_CLIENTS;
   }
 
-  i = 0;
-  // Gordon: team doesnt actually mean team, ignore...
-  for (team = 0; team < 2; team++) {
+  for (int32_t i = 0; i < NUM_SCORESTRINGS; i++) {
     *buffer = '\0';
     *startbuffer = '\0';
-    if (team == 0) {
+
+    // first scorestring contains team scores
+    if (i == 0) {
       Q_strncpyz(startbuffer,
                  va("sc0 %i %i", level.teamScores[TEAM_AXIS],
                     level.teamScores[TEAM_ALLIES]),
-                 32);
+                 sizeof(startbuffer));
     } else {
-      Q_strncpyz(startbuffer, "sc1", 32);
+      Q_strncpyz(startbuffer, "sc1", sizeof(startbuffer));
     }
     size = strlen(startbuffer) + 1;
     count = 0;
@@ -94,20 +93,19 @@ void G_SendScore(gentity_t *ent) {
                   g_entities[level.sortedClients[i]].s.powerups, playerClass,
                   cl->ps.clientNum);
 
-      if (size + strlen(entry) > 1000) {
+      if (size + strlen(entry) > MAX_SCORESTRING_LEN) {
         break;
       }
       size += strlen(entry);
 
-      Q_strcat(buffer, 1024, entry);
-      if (++count >= 32) {
-        i++; // we need to redo this client in
-             // the next buffer (if we can)
+      Q_strcat(buffer, sizeof(buffer), entry);
+      if (++count >= MAX_CLIENTS / 2) {
+        i++; // we need to redo this client in the next buffer (if we can)
         break;
       }
     }
 
-    if (count > 0 || team == 0) {
+    if (count > 0 || i == 0) {
       trap_SendServerCommand(ent - g_entities,
                              va("%s %i%s", startbuffer, count, buffer));
     }

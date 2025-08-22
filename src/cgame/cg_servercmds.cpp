@@ -23,14 +23,12 @@ CG_ParseScores
 
 =================
 */
-// Gordon: NOTE: team doesnt actually signify team, think i was on drugs that
-// day.....
-static void CG_ParseScore(team_t team) {
+static void CG_ParseScore(bool hasTeamScores) {
   int i, j, powerups;
   int numScores;
   int offset;
 
-  if (team == TEAM_AXIS) {
+  if (hasTeamScores) {
     cg.numScores = 0;
 
     cg.teamScores[0] = Q_atoi(CG_Argv(1));
@@ -46,13 +44,19 @@ static void CG_ParseScore(team_t team) {
   for (j = 0; j < numScores; j++) {
     i = cg.numScores;
 
-    cg.scores[i].client = Q_atoi(CG_Argv(offset + 0 + (j * 7)));
-    cg.scores[i].score = Q_atoi(CG_Argv(offset + 1 + (j * 7)));
-    cg.scores[i].ping = Q_atoi(CG_Argv(offset + 2 + (j * 7)));
-    cg.scores[i].time = Q_atoi(CG_Argv(offset + 3 + (j * 7)));
-    powerups = Q_atoi(CG_Argv(offset + 4 + (j * 7)));
-    cg.scores[i].playerClass = Q_atoi(CG_Argv(offset + 5 + (j * 7)));
-    cg.scores[i].followedClient = Q_atoi(CG_Argv(offset + 6 + (j * 7)));
+    cg.scores[i].client =
+        Q_atoi(CG_Argv(offset + 0 + (j * NUM_SCORESTRING_FIELDS)));
+    cg.scores[i].score =
+        Q_atoi(CG_Argv(offset + 1 + (j * NUM_SCORESTRING_FIELDS)));
+    cg.scores[i].ping =
+        Q_atoi(CG_Argv(offset + 2 + (j * NUM_SCORESTRING_FIELDS)));
+    cg.scores[i].time =
+        Q_atoi(CG_Argv(offset + 3 + (j * NUM_SCORESTRING_FIELDS)));
+    powerups = Q_atoi(CG_Argv(offset + 4 + (j * NUM_SCORESTRING_FIELDS)));
+    cg.scores[i].playerClass =
+        Q_atoi(CG_Argv(offset + 5 + (j * NUM_SCORESTRING_FIELDS)));
+    cg.scores[i].followedClient =
+        Q_atoi(CG_Argv(offset + 6 + (j * NUM_SCORESTRING_FIELDS)));
 
     if (cg.scores[i].client < 0 || cg.scores[i].client >= MAX_CLIENTS) {
       cg.scores[i].client = 0;
@@ -2260,11 +2264,13 @@ static void CG_ServerCommand(void) {
     return;
   }
   if (!strcmp(cmd, "sc0")) {
-    CG_ParseScore(TEAM_AXIS);
+    CG_ParseScore(true);
     ETJump::SpectatorInfoData::updateSpectatorData(std::nullopt);
     return;
-  } else if (!strcmp(cmd, "sc1")) {
-    CG_ParseScore(TEAM_ALLIES);
+  }
+
+  if (!strcmp(cmd, "sc1")) {
+    CG_ParseScore(false);
     ETJump::SpectatorInfoData::updateSpectatorData(std::nullopt);
     return;
   }
