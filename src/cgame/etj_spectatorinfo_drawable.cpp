@@ -23,6 +23,7 @@
  */
 
 #include "etj_spectatorinfo_drawable.h"
+#include "etj_spectatorinfo_data.h"
 #include "etj_cvar_update_handler.h"
 
 namespace ETJump {
@@ -88,31 +89,6 @@ bool SpectatorInfo::beforeRender() {
     return false;
   }
 
-  spectators.clear();
-  spectators.reserve(cg.numScores);
-
-  for (int32_t i = 0; i < cg.numScores; i++) {
-    const int32_t clientNum = cg.scores[i].client;
-
-    if (cg.snap->ps.clientNum == clientNum) {
-      continue;
-    }
-
-    if (cgs.clientinfo[clientNum].team != TEAM_SPECTATOR) {
-      continue;
-    }
-
-    if (cg.scores[i].followedClient == cg.snap->ps.clientNum) {
-      spectators.emplace_back(clientNum,
-                              cgs.clientinfo[clientNum].clientIsInactive);
-    }
-  }
-
-  // sort so that active clients are at the beginning, so we can easily
-  // prioritize them while drawing the list
-  std::sort(spectators.begin(), spectators.end(),
-            [](const auto &a, const auto &b) { return a.second < b.second; });
-
   return true;
 }
 
@@ -131,32 +107,46 @@ void SpectatorInfo::render() const {
                  textStyle);
     } else {
       // if we're drawing bottom-up, draw first before changing the y pos,
-      // because 'DrawString' draws from the bottom left vertex
+      // because 'DrawString' draws from the bottom left corner
       DrawString(x - offset, y, sizeX, sizeY, color, qfalse, name, 0,
                  textStyle);
       y -= rowHeight;
     }
   };
 
-  const size_t max =
-      etj_spectatorInfoMaxClients.integer < 0
-          ? spectators.size()
-          : std::min(static_cast<size_t>(etj_spectatorInfoMaxClients.integer),
-                     spectators.size());
+  const size_t totalClients = SpectatorInfoData::activeSpectators.size() +
+                              SpectatorInfoData::inactiveSpectators.size();
+  const size_t max = etj_spectatorInfoMaxClients.integer < 0
+                         ? totalClients
+                         : std::min(etj_spectatorInfoMaxClients.integer,
+                                    static_cast<int32_t>(totalClients));
 
   // simple case, draw all spectators
-  if (spectators.size() <= max) {
-    for (const auto &client : spectators) {
-      drawRow(cgs.clientinfo[client.first].name,
-              client.second ? inactiveColor : colorWhite);
-    }
-  } else {
-    for (size_t i = 0; i < max; i++) {
-      drawRow(cgs.clientinfo[spectators[i].first].name,
-              spectators[i].second ? inactiveColor : colorWhite);
+  if (totalClients <= max) {
+    for (const auto &client : SpectatorInfoData::activeSpectators) {
+      drawRow(cgs.clientinfo[client].name, colorWhite);
     }
 
-    const auto remaining = static_cast<int>(spectators.size() - max);
+    for (const auto &client : SpectatorInfoData::inactiveSpectators) {
+      drawRow(cgs.clientinfo[client].name, inactiveColor);
+    }
+  } else {
+    const size_t activeDrawCount =
+        std::min(SpectatorInfoData::activeSpectators.size(), max);
+    const size_t inactiveDrawCount =
+        activeDrawCount >= max ? 0 : max - activeDrawCount;
+
+    for (size_t i = 0; i < activeDrawCount; i++) {
+      drawRow(cgs.clientinfo[SpectatorInfoData::activeSpectators[i]].name,
+              colorWhite);
+    }
+
+    for (size_t i = 0; i < inactiveDrawCount; i++) {
+      drawRow(cgs.clientinfo[SpectatorInfoData::inactiveSpectators[i]].name,
+              inactiveColor);
+    }
+
+    const auto remaining = static_cast<int>(totalClients - max);
     drawRow(
         va("(%s hidden)", getPluralizedString(remaining, "spectator").c_str()),
         colorMdGrey);
