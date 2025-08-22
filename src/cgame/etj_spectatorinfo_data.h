@@ -24,36 +24,24 @@
 
 #pragma once
 
-#include "etj_irenderable.h"
-#include "etj_cvar_parser.h"
+#include <cstdint>
+#include <optional>
+#include <vector>
+
+#include "cg_local.h"
 
 namespace ETJump {
-class SpectatorInfo : public IRenderable {
-  CvarValue::Scale scale{};
-  int32_t textStyle{};
-  float sizeX{};
-  float sizeY{};
-  float rowHeight{};
-
-  enum class DrawDirection {
-    DOWN = 0,
-    UP = 1,
-  };
-
-  static constexpr vec4_t inactiveColor = {1.0f, 1.0f, 1.0f, 0.33f};
-
-  static bool canSkipDraw();
-  void startListeners();
-
-  void setTextSize(const vmCvar_t &cvar);
-  void setRowHeight();
-  void setTextStyle(const vmCvar_t &cvar);
-  static float getTextOffset(const char *name, float fontWidth);
-
+class SpectatorInfoData {
 public:
-  SpectatorInfo();
+  static std::vector<int32_t> activeSpectators;
+  static std::vector<int32_t> inactiveSpectators;
 
-  bool beforeRender() override;
-  void render() const override;
+  // If 'clientNum' has value, then this is a 'CS_PLAYERS' update.
+  // This handles removing client from the lists if they disconnected.
+  static void updateSpectatorData(std::optional<int32_t> clientNum);
+
+private:
+  static void removeClientFromList(std::vector<int32_t> &v, int32_t clientNum);
+  static bool skipClient(const score_t &score);
 };
 } // namespace ETJump

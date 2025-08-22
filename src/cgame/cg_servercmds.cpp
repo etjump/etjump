@@ -10,6 +10,7 @@
 #include "etj_init.h"
 #include "etj_client_commands_handler.h"
 #include "etj_client_rtv_handler.h"
+#include "etj_spectatorinfo_data.h"
 
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_syscall_ext_shared.h"
@@ -710,6 +711,7 @@ static void CG_ConfigStringModified(void) {
     }
   } else if (num >= CS_PLAYERS && num < CS_PLAYERS + MAX_CLIENTS) {
     CG_NewClientInfo(num - CS_PLAYERS);
+    ETJump::SpectatorInfoData::updateSpectatorData(num - CS_PLAYERS);
   } else if (num >= CS_DLIGHTS && num < CS_DLIGHTS + MAX_DLIGHT_CONFIGSTRINGS) {
     CG_SetupDlightstyles();
   } else if (num == CS_SHADERSTATE) {
@@ -2259,9 +2261,11 @@ static void CG_ServerCommand(void) {
   }
   if (!strcmp(cmd, "sc0")) {
     CG_ParseScore(TEAM_AXIS);
+    ETJump::SpectatorInfoData::updateSpectatorData(std::nullopt);
     return;
   } else if (!strcmp(cmd, "sc1")) {
     CG_ParseScore(TEAM_ALLIES);
+    ETJump::SpectatorInfoData::updateSpectatorData(std::nullopt);
     return;
   }
 
