@@ -152,5 +152,7 @@ void sortStrings(T &v, const bool noCase) {
         }
       });
 }
+
+void stripLocalizationMarkers(std::string &str);
 } // namespace StringUtil
 } // namespace ETJump

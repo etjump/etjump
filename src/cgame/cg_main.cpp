@@ -1649,8 +1649,7 @@ int CG_findClientNum(char *s) {
     }
   }
 
-  CG_Printf("[cgnotify]%s ^3%s^7 %s.\n", CG_TranslateString("User"), s,
-            CG_TranslateString("is not on the server"));
+  CG_Printf("[cgnotify]User ^3%s^7 is not on the server.\n", s);
   return (-1);
 }
 
@@ -3722,7 +3721,6 @@ void CG_LoadHudMenu() {
   cgDC.getBindingBuf = &trap_Key_GetBindingBuf; // NERVE - SMF
   cgDC.getKeysForBinding = &trap_Key_KeysForBinding;
   cgDC.keynumToStringBuf = &trap_Key_KeynumToStringBuf; // NERVE - SMF
-  cgDC.translateString = &CG_TranslateString;           // NERVE - SMF
   // cgDC.executeText = &trap_Cmd_ExecuteText;
   cgDC.Error = &Com_Error;
   cgDC.Print = &Com_Printf;
