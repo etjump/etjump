@@ -110,6 +110,21 @@
   * requires `developer 1`
 * fixed potential crash when hitting the 16th checkpoint of a timerun and checkpoint drawing was enabled [#1717](https://github.com/etjump/etjump/pull/1717)
 * fixed firing with `+attack2` not setting the players firing state correctly, causing issues such as flamethrower flames not drawing when fired [#1719](https://github.com/etjump/etjump/pull/1719)
+* improvements to spectator info list [#1718](https://github.com/etjump/etjump/pull/1718)
+  * number of spectators drawn can now be limited with `etj_spectatorInfoMaxClients`, -1 for unlimited (default)
+    * if the number of spectators exceeds the limit, a hint will be displayed for the number of hidden spectators
+  * active clients are now always drawn before inactive clients
+  * spectator list can be drawn in bottom-up direction with `etj_spectatorInfoDirection 1`
+* added `overbounce_players` worldspawn key to control overbounces performed on top of other clients [#1725](https://github.com/etjump/etjump/pull/1725)
+  * 0 = no change, controlled by `nooverbounce` key (default)
+  * 1 = overbounces from top of players are always allowed
+  * 2 = overbounces from top of players are never allowed
+* added `etj_hideFlamethrowerEffects` to hide the visual effects of flamethrower [#1726](https://github.com/etjump/etjump/pull/1726)
+  * if enabled, hides flames, flame stream while firing and dlights
+  * bitflag value
+    * 1 = hide for self
+    * 2 = hide for others
+* added a short animation when portalgun portals are spawned [#1727](https://github.com/etjump/etjump/pull/1727)
 
 # ETJump 3.3.4
 
