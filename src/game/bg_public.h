@@ -331,6 +331,13 @@ inline constexpr gametype_t ETJUMP_GAMETYPE = 2;
 
 typedef enum { GENDER_MALE, GENDER_FEMALE, GENDER_NEUTER } gender_t;
 
+// 'sc0', 'sc1'
+inline constexpr int32_t NUM_SCORESTRINGS = 2;
+inline constexpr int32_t MAX_SCORESTRING_LEN = 1000;
+
+// for client side parsing
+inline constexpr int32_t NUM_SCORESTRING_FIELDS = 7;
+
 /*
 ===================================================================================
 
