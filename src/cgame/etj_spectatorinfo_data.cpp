@@ -41,16 +41,16 @@ void SpectatorInfoData::updateSpectatorData(std::optional<int32_t> clientNum) {
       removeClientFromList(activeSpectators, cnum);
       removeClientFromList(inactiveSpectators, cnum);
     }
-
-    return;
   }
 
   for (int32_t i = 0; i < cg.numScores; i++) {
-    if (skipClient(cg.scores[i])) {
+    if (cg.scores[i].client == cg.snap->ps.clientNum) {
       continue;
     }
 
-    if (cg.scores[i].followedClient != cg.snap->ps.clientNum) {
+    // remove any clients that aren't spectating us
+    if (cg.scores[i].followedClient != cg.snap->ps.clientNum ||
+        cgs.clientinfo[cg.scores[i].client].team != TEAM_SPECTATOR) {
       removeClientFromList(activeSpectators, cg.scores[i].client);
       removeClientFromList(inactiveSpectators, cg.scores[i].client);
       continue;
@@ -81,15 +81,8 @@ void SpectatorInfoData::removeClientFromList(std::vector<int32_t> &v,
   v.erase(std::remove(v.begin(), v.end(), clientNum), v.end());
 }
 
-bool SpectatorInfoData::skipClient(const score_t &score) {
-  if (score.client == cg.snap->ps.clientNum) {
-    return true;
-  }
-
-  if (score.team != TEAM_SPECTATOR) {
-    return true;
-  }
-
-  return false;
+void SpectatorInfoData::clearData() {
+  activeSpectators.clear();
+  inactiveSpectators.clear();
 }
 } // namespace ETJump
