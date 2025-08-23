@@ -1032,7 +1032,7 @@ void ClientThink_real(gentity_t *ent) {
     return;
   }
 
-  ETJump::InactivityTimer::checkClientInactivity(ent);
+  ETJump::InactivityTimer::updateClientInactivityStatus(ent);
 
   if (!(ent->r.svFlags & SVF_BOT) &&
       level.time - client->pers.lastCCPulseTime > 2000) {

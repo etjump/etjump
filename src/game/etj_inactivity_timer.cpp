@@ -25,15 +25,15 @@
 #include "etj_inactivity_timer.h"
 
 namespace ETJump {
-void InactivityTimer::checkClientInactivity(gentity_t *ent) {
+void InactivityTimer::updateClientInactivityStatus(const gentity_t *ent) {
   if (ent->client->pers.cmd.buttons & BUTTON_ANY) {
-    ent->client->inactive = false;
+    ent->client->sess.inactive = false;
     ent->client->sess.clientLastActive = level.time;
     UpdateClientConfigString(*ent);
-  } else if (!ent->client->inactive &&
-             level.time >= ent->client->sess.clientLastActive +
-                               1000 * clientInactivityTimer) {
-    ent->client->inactive = true;
+  } else if (!ent->client->sess.inactive &&
+             level.time >=
+                 ent->client->sess.clientLastActive + CLIENT_INACTIVITY_TIMER) {
+    ent->client->sess.inactive = true;
     UpdateClientConfigString(*ent);
   }
 }

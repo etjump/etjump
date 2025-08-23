@@ -37,7 +37,7 @@ void G_WriteClientSessionData(gclient_t *client, qboolean restart) {
          client->sess.playerWeapon2,
          client->sess.latchPlayerType,   // DHM - Nerve
          client->sess.latchPlayerWeapon, // DHM - Nerve
-         client->sess.latchPlayerWeapon2, client->sess.clientLastActive,
+         client->sess.latchPlayerWeapon2, client->sess.inactive ? 1 : 0,
 
          // OSP
          client->sess.coach_team, client->sess.deaths, client->sess.game_points,
@@ -175,7 +175,7 @@ void G_ReadSessionData(gclient_t *client) {
       &client->sess.playerWeapon2,
       &client->sess.latchPlayerType,   // DHM - Nerve
       &client->sess.latchPlayerWeapon, // DHM - Nerve
-      &client->sess.latchPlayerWeapon2, &client->sess.clientLastActive,
+      &client->sess.latchPlayerWeapon2, &client->sess.inactive,
 
       // OSP
       &client->sess.coach_team, &client->sess.deaths, &client->sess.game_points,

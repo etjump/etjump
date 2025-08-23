@@ -1717,7 +1717,7 @@ const char *GetParsedIP(const char *ipadd) {
 }
 
 namespace ETJump {
-bool UpdateClientConfigString(gentity_t &gent) {
+bool UpdateClientConfigString(const gentity_t &gent) {
   if (!gent.client) {
     return false;
   }
@@ -1756,7 +1756,7 @@ bool UpdateClientConfigString(gentity_t &gent) {
          gent.client->pers.hideMe > 0 ? gent.client->pers.hideMe : 0,
          gent.client->sess.specLocked ? 1 : 0,
          gent.client->sess.timerunActive ? 1 : 0,
-         gent.client->pers.snaphud ? 1 : 0, gent.client->inactive ? 1 : 0);
+         gent.client->pers.snaphud ? 1 : 0, gent.client->sess.inactive ? 1 : 0);
 
   trap_GetConfigstring(CS_PLAYERS + ClientNum(&gent), oldcs, sizeof(oldcs));
 
@@ -2050,7 +2050,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     client->sess.loadedPosBeforeInactivity = qtrue;
     client->sess.motdPrinted = qfalse;
     client->sess.timerunActive = qfalse;
-    client->inactive = false;
+    client->sess.inactive = false;
     client->sess.clientLastActive = level.time;
   } else {
     client->sess.gotoAllowed = qtrue; // Feen: TEMP FIX! - Also added these two

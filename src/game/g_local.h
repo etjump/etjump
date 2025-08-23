@@ -828,6 +828,9 @@ typedef struct {
   int deathrunFlags;
 
   float velocityScale;
+
+  // level.time >= clientLastActive + CLIENT_INACTIVITY_TIMER
+  bool inactive;
   int clientLastActive;
 
   int weaponsOnSpawn[MAX_WEAPONS /
@@ -1082,8 +1085,6 @@ struct gclient_s {
   int respawnTime;            // can respawn when time > this, force after
                               // g_forcerespwan
   int inactivityTime;         // kick players when time > this
-  bool inactive;              // level.time >= clientLastActive
-                              // + 1000 * clientInactivityTimer
   qboolean inactivityWarning; // qtrue if the five seoond warning has
                               // been given
   int rewardTime; // clear the EF_AWARD_IMPRESSIVE, etc when time > this
@@ -1875,7 +1876,7 @@ void ClientDisconnect(int clientNum);
 void ClientBegin(int clientNum);
 void ClientCommand(int clientNum);
 namespace ETJump {
-bool UpdateClientConfigString(gentity_t &gent);
+bool UpdateClientConfigString(const gentity_t &gent);
 }
 
 //
