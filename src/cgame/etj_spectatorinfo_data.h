@@ -39,9 +39,9 @@ public:
   // If 'clientNum' has value, then this is a 'CS_PLAYERS' update.
   // This handles removing client from the lists if they disconnected.
   static void updateSpectatorData(std::optional<int32_t> clientNum);
+  static void clearData();
 
 private:
   static void removeClientFromList(std::vector<int32_t> &v, int32_t clientNum);
-  static bool skipClient(const score_t &score);
 };
 } // namespace ETJump

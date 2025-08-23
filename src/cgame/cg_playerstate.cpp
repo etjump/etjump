@@ -7,6 +7,7 @@
 
 #include "cg_local.h"
 #include "etj_utilities.h"
+#include "etj_spectatorinfo_data.h"
 
 /*
 ==============
@@ -274,6 +275,12 @@ void CG_Respawn(qboolean revived) {
         "autoexec_%s", BG_TeamnameForNumber(cgs.clientinfo[cg.clientNum].team));
     if (ETJump::configFileExists(teamConfig)) {
       ETJump::execFile(teamConfig, ETJump::ExecFileType::TEAM_AUTOEXEC);
+    }
+
+    // clear spectatorinfo lists on team switch, so we don't carry over
+    // the data from the client we just spectated, if switching from spec
+    if (oldTeam == TEAM_SPECTATOR) {
+      ETJump::SpectatorInfoData::clearData();
     }
 
     oldTeam = cgs.clientinfo[cg.clientNum].team;
