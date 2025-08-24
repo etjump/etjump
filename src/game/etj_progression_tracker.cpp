@@ -100,10 +100,11 @@ int ETJump::ProgressionTrackers::registerTracker(ProgressionTrackerKeys keys) {
 
 void ETJump::ProgressionTrackers::useTracker(
     gentity_t *ent, gentity_t *activator, const ProgressionTracker &tracker) {
-  int oldValues[MAX_PROGRESSION_TRACKERS];
+  std::array<int32_t, MAX_PROGRESSION_TRACKERS> oldValues{};
 
-  if (g_debugTrackers.integer > 0) {
-    memcpy(oldValues, activator->client->sess.progression, sizeof(oldValues));
+  if (g_debugTrackers.integer) {
+    memcpy(oldValues.data(), activator->client->sess.progression,
+           sizeof(oldValues));
   }
 
   auto idx = 0;
@@ -210,18 +211,18 @@ void ETJump::ProgressionTrackers::useTracker(
       }
     }
 
-    printTrackerChanges(activator, oldValues);
+    if (g_debugTrackers.integer) {
+      printTrackerChanges(activator, oldValues);
+    }
   }
 }
 
-void ETJump::ProgressionTrackers::printTrackerChanges(gentity_t *activator,
-                                                      int *oldValues) {
-  if (g_debugTrackers.integer <= 0) {
-    return;
-  }
+void ETJump::ProgressionTrackers::printTrackerChanges(
+    const gentity_t *activator,
+    const std::array<int32_t, MAX_PROGRESSION_TRACKERS> &oldValues) {
   const auto clientNum = ClientNum(activator);
 
-  for (int i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
+  for (int i = 0; i < oldValues.size(); i++) {
     if (oldValues[i] != activator->client->sess.progression[i]) {
       const std::string &trackerChangeMsg = stringFormat(
           "^7Tracker change - index: ^3%i ^7value: ^2%i ^7from: ^9%i^7\n",

@@ -4918,13 +4918,13 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
             "activator\n");
   }
 
-  const auto progression = activator->client->sess.progression;
+  auto *const progression = activator->client->sess.progression;
 
   // keep track of old values for debug print
-  int oldValues[MAX_PROGRESSION_TRACKERS];
+  std::array<int32_t, MAX_PROGRESSION_TRACKERS> oldValues{};
 
-  if (g_debugTrackers.integer > 0) {
-    memcpy(oldValues, progression, sizeof(oldValues));
+  if (g_debugTrackers.integer) {
+    memcpy(oldValues.data(), progression, sizeof(oldValues));
   }
 
   const char *pString, *token;
@@ -5001,7 +5001,9 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
         ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
   }
 
-  ETJump::ProgressionTrackers::printTrackerChanges(activator, oldValues);
+  if (g_debugTrackers.integer) {
+    ETJump::ProgressionTrackers::printTrackerChanges(activator, oldValues);
+  }
 
   return qtrue;
 }

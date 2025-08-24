@@ -51,7 +51,9 @@ public:
   };
 
   static ETJump::ProgressionTrackers::ProgressionTrackerKeys ParseTrackerKeys();
-  static void printTrackerChanges(gentity_t *activator, int *oldValues);
+  static void printTrackerChanges(
+      const gentity_t *activator,
+      const std::array<int32_t, MAX_PROGRESSION_TRACKERS> &oldValues);
 
   struct ProgressionTracker {
     ProgressionTracker() {
