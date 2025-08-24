@@ -88,8 +88,16 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
   };
 
   portal->think = think;
-  // we need fast thinks to update dest origin/angles for clients
-  portal->nextthink = level.time + level.frameTime;
+
+  // think once immediately, and also force the linked portal to think
+  // this is so that we have valid origin2/angles2 set immediately
+  // when we spawn the portal, otherwise there will be a single server
+  // frame where the portal destination is at 0 0 0
+  think(portal);
+
+  if (portal->linkedPortal) {
+    portal->linkedPortal->think(portal->linkedPortal);
+  }
 
   portal->r.ownerNum = ent->s.number;
   portal->parent = ent;
