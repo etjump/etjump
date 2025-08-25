@@ -1351,7 +1351,7 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
 }
 
 void UI_Load() {
-  char lastName[1024];
+  char lastName[1024]{};
   menuDef_t *menu = Menu_GetFocused();
   const char *menuSet = UI_Cvar_VariableString("ui_menuFiles");
   if (menu && menu->window.name) {
