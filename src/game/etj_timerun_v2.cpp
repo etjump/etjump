@@ -768,6 +768,24 @@ void ETJump::TimerunV2::printRecords(
                 message += "\n" + ownRecordString;
               }
 
+              // display the total amount of records if querying records
+              // for a single run, and they don't fit on a single page
+              const auto numRecords = static_cast<int32_t>(rkvp.second.size());
+
+              if (params.run.hasValue() && numRecords > params.pageSize) {
+                const int32_t start =
+                    (page * params.pageSize) - params.pageSize + 1;
+                const int32_t end =
+                    std::min(start + params.pageSize - 1, numRecords);
+
+                message += stringFormat(
+                    "\n ^7Showing ^2%i-%i ^7of ^2%i ^7total records\n", start,
+                    end, numRecords);
+
+              } else {
+                message += '\n';
+              }
+
               if (processedRecords.size() > 1 &&
                   skvp.first != std::prev(processedRecords.end())->first) {
                 message += "\n";
