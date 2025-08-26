@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <cstddef>
 #include <utility>
 #include <chrono>
 
@@ -669,21 +670,27 @@ void ETJump::TimerunV2::printRecords(
               int ownTime = ownRecords[season->id][mapName].count(runName) > 0
                                 ? ownRecords[season->id][mapName][runName]
                                 : rank1Time;
+
+              const auto numPages = static_cast<int32_t>(
+                  std::ceil(static_cast<float>(rkvp.second.size()) /
+                            static_cast<float>(params.pageSize)));
+              // cap the page paramater so we don't print empty pages
+              const int32_t page = std::min(params.page, numPages);
+
               // clang-format off
               message += "^g-------------------------------------------------------------\n";
               // clang-format on
               message += stringFormat(" ^2Run: ^7%s\n\n", rkvp.first);
 
-              const int rankWidth = 4;
-              const int timeWidth = 10;
-              const int diffWidth = 11;
+              constexpr int rankWidth = 4;
+              constexpr int timeWidth = 10;
+              constexpr int diffWidth = 11;
 
               message += "^g Rank Time       Difference  Player\n";
               std::string ownRecordString;
               for (const auto &r : rkvp.second) {
-                auto isOnVisiblePage =
-                    rank > (params.page - 1) * params.pageSize &&
-                    rank <= (params.page) * params.pageSize;
+                auto isOnVisiblePage = rank > (page - 1) * params.pageSize &&
+                                       rank <= (page)*params.pageSize;
                 auto isOwnRecord = r->userId == params.userId;
 
                 if (isOnVisiblePage || isOwnRecord) {

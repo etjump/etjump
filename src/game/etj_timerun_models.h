@@ -31,6 +31,12 @@
 
 namespace ETJump {
 namespace Timerun {
+
+inline constexpr int32_t DEFAULT_PAGE_SIZE_ALL_RUNS = 3;
+inline constexpr int32_t DEFAULT_PAGE_SIZE_SINGLE_RUN = 20;
+inline constexpr int32_t MAX_PAGE_SIZE_SINGLE_RUN = 100;
+inline constexpr int32_t MAX_PAGE_SIZE_ALL_RUNS = 10;
+
 struct Season {
   int id;
   std::string name;
