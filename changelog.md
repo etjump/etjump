@@ -1,6 +1,9 @@
 # ETJump 3.4.0
 
-* `records` output no longer shows duplicate rank strings for tied times [#1603](https://github.com/etjump/etjump/pull/1603)
+* improvements to `records` output [#1603](https://github.com/etjump/etjump/pull/1603) [#1739](https://github.com/etjump/etjump/pull/1739)
+  * duplicate rank strings are no longer shown for tied times
+  * `page` parameter is now correctly capped - it's no longer possible to request a page without any records on it
+  * the total amount of records on a run is now displayed if the number of records is higher than the page size
 * added `tracker_not_eq_any` and `tracker_not_eq_all` keys to `target/trigger_tracker` [#1614](https://github.com/etjump/etjump/pull/1614)
   * this allows mappers to pick desired behavior for "not equal" trackers - either all values or one of the values
   * old `tracker_not_eq` is now deprecated and functionality is provided by `tracker_not_eq_any`
@@ -104,7 +107,6 @@
     * `portalteam` is set to 2 (anyone can use anyone's portals)
 * portalgun trails and debug bboxes are now correctly colored green/yellow for other's portals [#1707](https://github.com/etjump/etjump/pull/1707)
 * overbounce detector now correctly shows overbounces on top of other solid players [#1710](https://github.com/etjump/etjump/pull/1710)
-* stepup view transitions are now interpolated on spec/demo playback [#1712](https://github.com/etjump/etjump/pull/1712)
 * added `dumpEntities` command to dump entities from the current map to a file [#1713](https://github.com/etjump/etjump/pull/1713)
   * `dumpEntities [optional name]`, if name isn't given, defaults to current map name
   * requires `developer 1`
@@ -125,6 +127,7 @@
     * 1 = hide for self
     * 2 = hide for others
 * added a short animation when portalgun portals are spawned [#1727](https://github.com/etjump/etjump/pull/1727)
+* bundled fixed `.arena` files for certain maps with the mod pk3 [#1690](https://github.com/etjump/etjump/pull/1690)
 
 # ETJump 3.3.4
 
@@ -620,7 +623,7 @@
 * fixed double footsteps and prediction errors on `surfaceparm nodamage` [#1166](https://github.com/etjump/etjump/pull/1166)
 * fixed rtv menu not drawing if client connected after rtv had already been called previously during the map, or an rtv vote was active while connecting [#1167](https://github.com/etjump/etjump/pull/1167)
 * timeruns which don't reset on team change are now reset if a client goes to spec, only allies <-> axis switches don't interrupt [#1168](https://github.com/etjump/etjump/pull/1168)
-* fixed (globa)accum indices 8 and 9 working unreliably [#1170](https://github.com/etjump/etjump/pull/1170)
+* fixed (global)accum indices 8 and 9 working unreliably [#1170](https://github.com/etjump/etjump/pull/1170)
 * fixed potential div by 0 in accum and playanim script functions [#1173](https://github.com/etjump/etjump/pull/1173)
 * updated `g_oss` value to reflect correct macOS support - only x86_64 is supported [#1177](https://github.com/etjump/etjump/pull/1177)
 * using `setoffset` now requires `/kill` like `noclip` before a timerun can be started [#1178](https://github.com/etjump/etjump/pull/1178)
