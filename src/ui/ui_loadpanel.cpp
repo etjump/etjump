@@ -344,22 +344,17 @@ void UI_LoadPanel_RenderLoadingText(panel_button_t *button) {
     if (!trap_Cvar_VariableValue("ui_connecting")) {
       switch (cstate.connState) {
         case CA_CONNECTING:
-          s = va(trap_TranslateString("Awaiting "
-                                      "connection...%i"),
-                 cstate.connectPacketCount);
+          s = va("Awaiting connection...%i", cstate.connectPacketCount);
           break;
         case CA_CHALLENGING:
-          s = va(trap_TranslateString("Awaiting "
-                                      "challenge...%i"),
-                 cstate.connectPacketCount);
+          s = va("Awaiting challenge...%i", cstate.connectPacketCount);
           break;
         case CA_DISCONNECTED:
         case CA_CONNECTED:
           if (*downloadName || cstate.connState == CA_DISCONNECTED) {
             s = UI_DownloadInfo(downloadName);
           } else {
-            s = trap_TranslateString("Awaiting "
-                                     "gamestate...");
+            s = "Awaiting gamestate...";
           }
           break;
         case CA_LOADING:
