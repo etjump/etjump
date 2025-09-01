@@ -931,8 +931,7 @@ void CheckForEvents(gentity_t *ent) {
   }
 }
 
-inline constexpr int TIMERUN_HIGH_PING_LIMIT = 400;
-inline constexpr int MAX_TIMERUN_LAG_TIME = 300;
+inline constexpr int32_t MAX_TIMERUN_LAG_TIME = 600;
 
 /*
 ==============
@@ -1111,17 +1110,11 @@ void ClientThink_real(gentity_t *ent) {
 
   // Stop lagging through triggers in timeruns
   if (client->sess.timerunActive) {
-    if (client->ps.ping > TIMERUN_HIGH_PING_LIMIT) {
-      client->numLagFrames++;
-
-      if (client->numLagFrames * level.frameTime >= MAX_TIMERUN_LAG_TIME) {
-        Printer::center(clientNum,
-                        "^3WARNING: ^7Timerun stopped due to high ping!");
-        InterruptRun(ent);
-        client->numLagFrames = 0;
-      }
-    } else {
-      client->numLagFrames = 0;
+    if (ucmd->serverTime - client->ps.commandTime > MAX_TIMERUN_LAG_TIME) {
+      Printer::center(
+          clientNum,
+          "^3WARNING: ^7Timerun stopped due to high command time delta!");
+      InterruptRun(ent);
     }
 
     if (client->pers.maxFPS > 0 && client->pers.maxFPS < 25) {

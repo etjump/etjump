@@ -1191,8 +1191,6 @@ struct gclient_s {
   bool forceRename;
 
   int lastRevivePushTime;
-
-  int numLagFrames; // for tracking high ping on timeruns to counter lag abuse
 };
 
 typedef struct {
