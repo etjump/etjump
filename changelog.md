@@ -128,6 +128,8 @@
     * 2 = hide for others
 * added a short animation when portalgun portals are spawned [#1727](https://github.com/etjump/etjump/pull/1727)
 * bundled fixed `.arena` files for certain maps with the mod pk3 [#1690](https://github.com/etjump/etjump/pull/1690)
+* reworked timerun high ping interrupt to work based off command time delta rather than ping [#1741](https://github.com/etjump/etjump/pull/1741)
+  * timeruns are now interrupted if the delta between consecutive user commands is 600ms
 
 # ETJump 3.3.4
 
