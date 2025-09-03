@@ -1528,7 +1528,7 @@ typedef struct headAnimation_s {
 inline constexpr int ANIM_TOGGLEBIT = 1 << (ANIM_BITS - 1);
 
 // Gordon: renamed these to team_axis/allies, it really was awful....
-enum team_t : int8_t {
+enum team_t : int32_t {
   TEAM_FREE,
   TEAM_AXIS,
   TEAM_ALLIES,
