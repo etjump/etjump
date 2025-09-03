@@ -1079,11 +1079,10 @@ void team_wolf_objective_use(gentity_t *self, gentity_t *other,
                              gentity_t *activator) {
   char cs[MAX_STRING_CHARS];
 
-  // Gordon 256 is a disabled flag
-  if ((self->count2 & ~256) == TEAM_AXIS) {
-    self->count2 = (self->count2 & 256) + TEAM_ALLIES;
-  } else if ((self->count2 & ~256) == TEAM_ALLIES) {
-    self->count2 = (self->count2 & 256) + TEAM_AXIS;
+  if ((self->count2 & ~SPAWN_DISABLED) == TEAM_AXIS) {
+    self->count2 = (self->count2 & SPAWN_DISABLED) + TEAM_ALLIES;
+  } else if ((self->count2 & ~SPAWN_DISABLED) == TEAM_ALLIES) {
+    self->count2 = (self->count2 & SPAWN_DISABLED) + TEAM_AXIS;
   }
 
   // And update configstring
