@@ -3291,6 +3291,8 @@ STATIC
 ===============================================================================
 */
 
+inline constexpr int32_t FUNC_STATIC_PAIN_HEALTH = 9999;
+
 /*
 ==============
 Use_Static
@@ -3318,6 +3320,9 @@ void Static_Pain(gentity_t *ent, gentity_t *attacker, int damage,
     // default behavior
     nextActivation = ent->wait + ent->delay + rand() % 1000 + 500;
   }
+
+  // restore health so the static never dies under normal gameplay
+  ent->health = FUNC_STATIC_PAIN_HEALTH;
 
   if (ent->spawnflags & 4) {
     if (level.time > nextActivation) {
@@ -3434,7 +3439,7 @@ void SP_func_static(gentity_t *ent) {
 
     ent->isProp = qtrue;
 
-    ent->health = 9999;
+    ent->health = FUNC_STATIC_PAIN_HEALTH;
 
     if (!(ent->count)) {
       ent->count = 4;
