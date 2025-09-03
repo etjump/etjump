@@ -1527,7 +1527,6 @@ typedef struct headAnimation_s {
 // changes so a restart of the same anim can be detected
 inline constexpr int ANIM_TOGGLEBIT = 1 << (ANIM_BITS - 1);
 
-// Gordon: renamed these to team_axis/allies, it really was awful....
 enum team_t : int32_t {
   TEAM_FREE,
   TEAM_AXIS,
@@ -1536,6 +1535,10 @@ enum team_t : int32_t {
 
   TEAM_NUM_TEAMS
 };
+
+// set by the server along with the team number for spawns,
+// to indicate that a spawn is currently disabled
+inline constexpr int32_t SPAWN_DISABLED = 1 << 8;
 
 // OSP - weapon stat info: mapping between MOD_ and WP_ types (FIXME for new ET
 // weapons)

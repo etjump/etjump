@@ -1148,7 +1148,7 @@ int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
     // rain - added parens around ambiguity
     if (((cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR) &&
          (cg.spawnTeams[i] != team)) ||
-        ((cg.spawnTeams[i] & 256) && !changetime)) {
+        ((cg.spawnTeams[i] & SPAWN_DISABLED) && !changetime)) {
 
       continue;
     }
@@ -1541,7 +1541,7 @@ qboolean CG_CommandCentreSpawnPointClick(void) {
       continue;
     }
 
-    if (cg.spawnTeams[i] & 256) {
+    if (cg.spawnTeams[i] & SPAWN_DISABLED) {
       continue;
     }
 
