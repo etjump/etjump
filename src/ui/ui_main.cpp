@@ -830,8 +830,16 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
 
       if (width > maxW) {
         if (lastWhitespace != 0) {
-          fmtLines.emplace_back(tmp.substr(0, lastWhitespace));
-          line.erase(0, lastWhitespace + 1); // consume the whitespace too
+          // we have a line with single word that is over max width,
+          // just split at the line end
+          if (lastWhitespace < indent) {
+            fmtLines.emplace_back(tmp.substr(0, i));
+            line.erase(0, i);
+          } else {
+            fmtLines.emplace_back(tmp.substr(0, lastWhitespace));
+            line.erase(0, lastWhitespace + 1); // consume the whitespace too
+          }
+
           lastWhitespace = 0;
         } else {
           // this should never happen, but it protects against an infinite loop
