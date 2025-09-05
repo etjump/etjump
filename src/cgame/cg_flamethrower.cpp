@@ -1114,7 +1114,16 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
   if (alpha > 2.0) {
     alpha = 2.0;
   }
+
   VectorScale(lightOrg, 1.0 / lightFlameCount, lightOrg);
+
+  // skip adding dlights if the origin is underwater
+  // this prevents dlights from appearing when '+attack' is held underwater,
+  // as the code doesn't recognize that we are not actually firing otherwise
+  if (CG_PointContents(lightOrg, -1) & MASK_WATER) {
+    return;
+  }
+
   // if it's only a nozzle, make it blue
   if (fHead->ignitionOnly) {
     if (lightSize > 80) {
@@ -1305,6 +1314,14 @@ void CG_UpdateFlamethrowerSounds(void) {
   // draw each of the headFlameChunk's
   f = headFlameChunks;
   while (f) {
+    // no sounds if the chunk is underwater (this mainly gets rid of the idle
+    // blow sound of the weapon, as chunks don't really end up underwater)
+    if (CG_PointContents(f->org, -1) & MASK_WATER) {
+      centFlameInfo[f->ownerCent].lastSoundUpdate = cg.time;
+      f = f->nextHead;
+      continue;
+    }
+
     // update this entity?
     if (centFlameInfo[f->ownerCent].lastSoundUpdate != cg.time) {
       // blow/ignition sound
