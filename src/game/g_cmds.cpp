@@ -13,6 +13,7 @@
 #include "etj_commands.h"
 #include "etj_map_statistics.h"
 #include "etj_file.h"
+#include "etj_inactivity_timer.h"
 
 namespace ETJump {
 enum class VotingTypes {
@@ -2095,6 +2096,13 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
                                        localize, encoded);
   }
 
+  // remove inactivity flag as using BUTTON_TALK won't clear it,
+  // and we can't monitor that as that would cause clients
+  // to never go inactive if the console is open
+  if (ent->client->sess.inactive) {
+    ETJump::InactivityTimer::clearClientInactivity(ent);
+  }
+
   if (target) {
     if (!COM_BitCheck(target->client->sess.ignoreClients, clientNum)) {
       G_SayTo(ent, target, mode, color, escapedName, printText, localize,
@@ -2362,6 +2370,10 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
 
     trap_Argv(id, vsay.id, sizeof(vsay.id));
     Q_strncpyz(vsay.custom, ConcatArgs(cust), sizeof(vsay.custom));
+  }
+
+  if (ent->client->sess.inactive) {
+    ETJump::InactivityTimer::clearClientInactivity(ent);
   }
 
   G_Voice(ent, nullptr, mode, &vsay, voiceonly);
@@ -4527,6 +4539,10 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
     if (ent) {
       Printer::chat(selfNum, va("^7Private message to %s^7: ^3%s",
                                 other->client->pers.netname, msg));
+
+      if (ent->client->sess.inactive) {
+        ETJump::InactivityTimer::clearClientInactivity(ent);
+      }
     }
   } else {
     Printer::console(selfNum,
