@@ -968,7 +968,7 @@ void printTracker(gentity_t *ent) {
 
   if (trap_Argc() < 2) {
     printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", 1,
-                                   ent->client->sess.progression[0]);
+                                   ent->client->pers.progression[0]);
     Printer::console(clientNum, printTrackerMsg);
     return;
   }
@@ -978,7 +978,7 @@ void printTracker(gentity_t *ent) {
   if (!Q_stricmp("all", buffer)) {
     for (i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
       printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", i + 1,
-                                     ent->client->sess.progression[i]);
+                                     ent->client->pers.progression[i]);
       Printer::console(clientNum, printTrackerMsg);
     }
   } else {
@@ -990,7 +990,7 @@ void printTracker(gentity_t *ent) {
 
       if (checkTrackerIndex(clientNum, idx, buffer, false)) {
         printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", idx,
-                                       ent->client->sess.progression[idx - 1]);
+                                       ent->client->pers.progression[idx - 1]);
         Printer::console(clientNum, printTrackerMsg);
       }
     }
@@ -1035,7 +1035,7 @@ void setTracker(gentity_t *ent) {
 
     if (checkTrackerValue(clientNum, bufferValue)) {
       for (i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
-        ent->client->sess.progression[i] = value;
+        ent->client->pers.progression[i] = value;
       }
 
       setTrackerMsg = stringFormat("^7Set tracker value on all "
@@ -1049,7 +1049,7 @@ void setTracker(gentity_t *ent) {
     if (trap_Argc() == 2) {
       noIndex = true;
       if (checkTrackerIndex(clientNum, idx, bufferIndex, noIndex)) {
-        ent->client->sess.progression[0] = idx; // No index specified, use it
+        ent->client->pers.progression[0] = idx; // No index specified, use it
                                                 // for value on index 1
         setTrackerMsg = stringFormat("^7Tracker set - index: ^31 "
                                      "^7value: ^2%i\n",
@@ -1074,7 +1074,7 @@ void setTracker(gentity_t *ent) {
 
       if (checkTrackerValue(clientNum, bufferValue)) {
         value = Q_atoi(bufferValue);
-        ent->client->sess.progression[idx - 1] = value;
+        ent->client->pers.progression[idx - 1] = value;
         setTrackerMsg = stringFormat("^7Tracker set - index: ^3%i "
                                      "^7value: ^2%i\n",
                                      idx, value);

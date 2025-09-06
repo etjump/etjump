@@ -104,7 +104,7 @@ void ETJump::ProgressionTrackers::useTracker(
   std::array<int32_t, MAX_PROGRESSION_TRACKERS> oldValues{};
 
   if (g_debugTrackers.integer) {
-    memcpy(oldValues.data(), activator->client->sess.progression,
+    memcpy(oldValues.data(), activator->client->pers.progression,
            sizeof(oldValues));
   }
 
@@ -112,7 +112,7 @@ void ETJump::ProgressionTrackers::useTracker(
 
   for (auto &v : tracker.set) {
     if (v >= 0) {
-      activator->client->sess.progression[idx] = v;
+      activator->client->pers.progression[idx] = v;
     }
 
     ++idx;
@@ -121,7 +121,7 @@ void ETJump::ProgressionTrackers::useTracker(
   idx = 0;
   for (auto &v : tracker.increment) {
     if (v != 0) {
-      activator->client->sess.progression[idx] += v;
+      activator->client->pers.progression[idx] += v;
     }
     ++idx;
   }
@@ -129,7 +129,7 @@ void ETJump::ProgressionTrackers::useTracker(
   idx = 0;
   for (auto &v : tracker.bitSet) {
     if (v >= 0) {
-      activator->client->sess.progression[idx] |= (1 << v);
+      activator->client->pers.progression[idx] |= (1 << v);
     }
     ++idx;
   }
@@ -137,7 +137,7 @@ void ETJump::ProgressionTrackers::useTracker(
   idx = 0;
   for (auto &v : tracker.bitReset) {
     if (v >= 0) {
-      activator->client->sess.progression[idx] &= ~(1 << v);
+      activator->client->pers.progression[idx] &= ~(1 << v);
     }
     ++idx;
   }
@@ -153,7 +153,7 @@ void ETJump::ProgressionTrackers::useTracker(
   //  this assumes, but there's nothing stopping mappers from doing that for
   //  any other keys besides 'tracker_not_eq_any' and 'tracker_not_eq_all'.
   for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
-    const int clientTracker = activator->client->sess.progression[idx];
+    const int clientTracker = activator->client->pers.progression[idx];
 
     if ((tracker.equal[idx] != ProgressionTrackerValueNotSet &&
          tracker.equal[idx] != clientTracker) ||
@@ -183,7 +183,7 @@ void ETJump::ProgressionTrackers::useTracker(
   if (activate) {
     for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
       const auto clientBits =
-          std::bitset<32>(activator->client->sess.progression[idx]);
+          std::bitset<32>(activator->client->pers.progression[idx]);
 
       if (tracker.bitIsSet[idx] != ProgressionTrackerValueNotSet &&
           !clientBits.test(tracker.bitIsSet[idx])) {
@@ -204,11 +204,11 @@ void ETJump::ProgressionTrackers::useTracker(
 
     for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
       if (tracker.setIf[idx] >= 0) {
-        activator->client->sess.progression[idx] = tracker.setIf[idx];
+        activator->client->pers.progression[idx] = tracker.setIf[idx];
       }
 
       if (tracker.incrementIf[idx] != 0) {
-        activator->client->sess.progression[idx] += tracker.incrementIf[idx];
+        activator->client->pers.progression[idx] += tracker.incrementIf[idx];
       }
     }
 
@@ -224,10 +224,10 @@ void ETJump::ProgressionTrackers::printTrackerChanges(
   const auto clientNum = ClientNum(activator);
 
   for (int i = 0; i < oldValues.size(); i++) {
-    if (oldValues[i] != activator->client->sess.progression[i]) {
+    if (oldValues[i] != activator->client->pers.progression[i]) {
       const std::string &trackerChangeMsg = stringFormat(
           "^7Tracker change - index: ^3%i ^7value: ^2%i ^7from: ^9%i^7\n",
-          i + 1, activator->client->sess.progression[i], oldValues[i]);
+          i + 1, activator->client->pers.progression[i], oldValues[i]);
       Printer::popup(clientNum, trackerChangeMsg);
     }
   }
@@ -331,8 +331,8 @@ ETJump::ProgressionTrackers::ParseTrackerKeys() {
 
 void ETJump::ProgressionTrackers::saveClientProgression(const gentity_t *ent) {
   const std::string guid = session->Guid(ent);
-  std::copy(std::begin(ent->client->sess.progression),
-            std::end(ent->client->sess.progression),
+  std::copy(std::begin(ent->client->pers.progression),
+            std::end(ent->client->pers.progression),
             savedProgression[guid].begin());
 }
 
@@ -341,7 +341,7 @@ void ETJump::ProgressionTrackers::restoreClientProgression(
   const std::string guid = session->Guid(ent);
 
   if (savedProgression.find(guid) != savedProgression.cend()) {
-    std::memcpy(ent->client->sess.progression, savedProgression[guid].data(),
-                sizeof(ent->client->sess.progression));
+    std::memcpy(ent->client->pers.progression, savedProgression[guid].data(),
+                sizeof(ent->client->pers.progression));
   }
 }
