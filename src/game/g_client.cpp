@@ -2045,9 +2045,6 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     client->last8BallTime = 0;
     client->lastVoteTime = 0;
     client->cheatDetected = qfalse;
-    // Client has loaded position after inactivity putspec
-    // -> don't do anything anymore
-    client->sess.loadedPosBeforeInactivity = qtrue;
     client->sess.motdPrinted = qfalse;
     client->sess.timerunActive = qfalse;
     client->sess.inactive = false;
@@ -2379,6 +2376,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     persistant[i] = client->ps.persistant[i];
   }
 
+  const ETJump::InactivityPos savedInactivityPos = client->inactivityPos;
+
   {
     qboolean set = client->maxlivescalced;
 
@@ -2398,6 +2397,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   for (i = 0; i < MAX_PERSISTANT; i++) {
     client->ps.persistant[i] = persistant[i];
   }
+
+  client->inactivityPos = savedInactivityPos;
 
   // increment the spawncount so the client will detect the respawn
   client->ps.persistant[PERS_SPAWN_COUNT]++;
@@ -2655,14 +2656,6 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   if (!revived && client->sess.sessionTeam == TEAM_SPECTATOR &&
       level.spawnRelayEntities.spectatorRelay) {
     G_UseEntity(level.spawnRelayEntities.spectatorRelay, nullptr, ent);
-  }
-
-  // FIXME: doesn't load pos????
-  if (!client->sess.loadedPosBeforeInactivity &&
-      client->sess.sessionTeam == client->sess.teamBeforeInactivitySpec) {
-    VectorCopy(client->sess.posBeforeInactivity, client->ps.origin);
-    VectorCopy(client->sess.posBeforeInactivity, ent->r.currentOrigin);
-    client->sess.loadedPosBeforeInactivity = qtrue;
   }
 
   client->sess.velocityScale = 1;
