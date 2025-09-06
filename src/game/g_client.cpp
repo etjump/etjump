@@ -4,6 +4,7 @@
 #include "etj_printer.h"
 #include "etj_rtv.h"
 #include "etj_entity_utilities.h"
+#include "etj_progression_tracker.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -2839,6 +2840,7 @@ void ClientDisconnect(int clientNum) {
   // OSP
 
   ETJump::saveSystem->savePositionsToDatabase(ent);
+  ETJump::progressionTrackers->saveClientProgression(ent);
 
   ETJump::EntityUtilities::clearPortals(ent);
 }

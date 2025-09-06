@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <array>
+#include <unordered_map>
 
 #include "etj_progression_tracker_parser.h"
 
@@ -101,10 +102,15 @@ public:
   void useTargetTracker(gentity_t *ent, gentity_t *other, gentity_t *activator);
   void useTriggerTracker(gentity_t *ent, gentity_t *activator);
 
+  void saveClientProgression(const gentity_t *ent);
+  void restoreClientProgression(const gentity_t *ent);
+
 private:
   void useTracker(gentity_t *ent, gentity_t *activator,
                   const ProgressionTracker &tracker);
 
   std::vector<ProgressionTracker> _progressionTrackers;
+  std::unordered_map<std::string, std::array<int32_t, MAX_PROGRESSION_TRACKERS>>
+      savedProgression;
 };
 } // namespace ETJump
