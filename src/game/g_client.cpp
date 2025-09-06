@@ -2064,10 +2064,8 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
                // and read
                //             properly in G_ReadSessionData()
   }
+
   ent->client->sess.receivedTimerunStates = qfalse;
-  for (i = 0; i < MAX_PROGRESSION_TRACKERS; ++i) {
-    ent->client->sess.progression[i] = 0;
-  }
 
   // read or initialize the session data
   if (firstTime) {
