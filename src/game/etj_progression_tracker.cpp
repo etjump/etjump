@@ -28,6 +28,7 @@
 #include "g_local.h"
 
 #include "etj_progression_tracker.h"
+#include "etj_session.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 
@@ -326,4 +327,21 @@ ETJump::ProgressionTrackers::ParseTrackerKeys() {
   G_SpawnString("tracker_bit_reset", VALUE_NOT_SET, &keys.bitReset);
 
   return keys;
+}
+
+void ETJump::ProgressionTrackers::saveClientProgression(const gentity_t *ent) {
+  const std::string guid = session->Guid(ent);
+  std::copy(std::begin(ent->client->sess.progression),
+            std::end(ent->client->sess.progression),
+            savedProgression[guid].begin());
+}
+
+void ETJump::ProgressionTrackers::restoreClientProgression(
+    const gentity_t *ent) {
+  const std::string guid = session->Guid(ent);
+
+  if (savedProgression.find(guid) != savedProgression.cend()) {
+    std::memcpy(ent->client->sess.progression, savedProgression[guid].data(),
+                sizeof(ent->client->sess.progression));
+  }
 }
