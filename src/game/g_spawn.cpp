@@ -21,6 +21,7 @@
 #include "etj_portalgun.h"
 #include "etj_portalgun_shared.h"
 #include "etj_entity_utilities.h"
+#include "etj_progression_tracker.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -458,8 +459,6 @@ void SP_target_interrupt_timerun(gentity_t *self);
 void SP_target_activate_if_velocity(gentity_t *self);
 // Scale velocity
 void SP_target_scale_velocity(gentity_t *self);
-void SP_target_tracker(gentity_t *self);
-void SP_trigger_tracker(gentity_t *self);
 void SP_target_set_health(gentity_t *self);
 void SP_target_deathrun_start(gentity_t *self);
 void SP_target_deathrun_checkpoint(gentity_t *self);
@@ -713,8 +712,8 @@ spawn_t spawns[] = {
     {"target_interrupt_timerun", SP_target_interrupt_timerun},
     {"target_activate_if_velocity", SP_target_activate_if_velocity},
     {"target_scale_velocity", SP_target_scale_velocity},
-    {"trigger_tracker", SP_trigger_tracker},
-    {"target_tracker", SP_target_tracker},
+    {"trigger_tracker", ETJump::ProgressionTrackers::triggerTrackerSpawn},
+    {"target_tracker", ETJump::ProgressionTrackers::targetTrackerSpawn},
     {"target_set_health", SP_target_set_health},
     {"target_deathrun_start", SP_target_deathrun_start},
     {"target_deathrun_checkpoint", SP_target_deathrun_checkpoint},

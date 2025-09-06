@@ -28,6 +28,7 @@
 #include <array>
 #include <unordered_map>
 
+#include "g_local.h"
 #include "etj_progression_tracker_parser.h"
 
 namespace ETJump {
@@ -51,7 +52,10 @@ public:
     char *bitReset;
   };
 
-  static ETJump::ProgressionTrackers::ProgressionTrackerKeys ParseTrackerKeys();
+  static void targetTrackerSpawn(gentity_t *self);
+  static void triggerTrackerSpawn(gentity_t *self);
+
+  static ProgressionTrackerKeys ParseTrackerKeys();
   static void printTrackerChanges(
       const gentity_t *activator,
       const std::array<int32_t, MAX_PROGRESSION_TRACKERS> &oldValues);
