@@ -58,7 +58,7 @@ public:
   void OnGuidReceived(gentity_t *ent);
   void PrintGreeting(gentity_t *ent);
   void OnClientDisconnect(int clientNum);
-  std::string Guid(gentity_t *ent) const;
+  std::string Guid(const gentity_t *ent) const;
   std::bitset<256> Permissions(gentity_t *ent) const;
   int GetLevel(gentity_t *ent) const;
   int GetId(gentity_t *ent) const;

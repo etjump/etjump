@@ -4918,7 +4918,7 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
             "activator\n");
   }
 
-  auto *const progression = activator->client->sess.progression;
+  auto *const progression = activator->client->pers.progression;
 
   // keep track of old values for debug print
   std::array<int32_t, MAX_PROGRESSION_TRACKERS> oldValues{};

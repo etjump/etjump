@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstring>
 
 #include "g_local.h"
 #include "etj_target_init.h"
@@ -117,9 +118,8 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   }
 
   if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepTracker))) {
-    for (auto &tracker : activator->client->sess.progression) {
-      tracker = 0;
-    }
+    std::memset(activator->client->pers.progression, 0,
+                sizeof(activator->client->pers.progression));
   }
 
   if (self->spawnflags & static_cast<int>(SpawnFlags::RemoveStartingWeapons) &&

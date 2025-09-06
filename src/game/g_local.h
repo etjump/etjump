@@ -823,8 +823,6 @@ typedef struct {
   qboolean receivedTimerunStates;
   bool timerunCheatsNotified;
 
-  // new implementation of progression
-  int progression[MAX_PROGRESSION_TRACKERS];
   int deathrunFlags;
 
   float velocityScale;
@@ -1002,6 +1000,9 @@ typedef struct {
   bool autoSprintAux;
 
   bool jumpDelayBug;
+
+  // target/trigger_tracker progression value
+  int32_t progression[MAX_PROGRESSION_TRACKERS];
 } clientPersistant_t;
 
 typedef struct {
