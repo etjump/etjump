@@ -804,12 +804,6 @@ typedef struct {
   int lastListmapsTime;
   int lastMostPlayedListTime;
 
-  // Position of user before inactivity
-  vec3_t posBeforeInactivity;
-  // Did the client join back to team already (after inactivity)?
-  qboolean loadedPosBeforeInactivity;
-  team_t teamBeforeInactivitySpec;
-
   qboolean firstTime;
 
   qboolean versionOK;
@@ -887,6 +881,12 @@ struct votingInfo_t {
                    // allow yet, notification will be sent
 
   int lastRtvMapVoted; // used for re-votes, the last map number we voted on
+};
+
+struct InactivityPos {
+  vec3_t savedPos;
+  vec3_t savedAngles;
+  team_t team; // TEAM_FREE if the position is invalid
 };
 
 inline constexpr int MAX_TOKENS_PER_DIFFICULTY = 32;
@@ -1191,6 +1191,8 @@ struct gclient_s {
   bool forceRename;
 
   int lastRevivePushTime;
+
+  ETJump::InactivityPos inactivityPos;
 };
 
 typedef struct {
