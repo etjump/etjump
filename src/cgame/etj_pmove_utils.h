@@ -60,9 +60,9 @@ public:
   // updates lastUpdateTime if the frame is not skipped
   bool skipUpdate(int &lastUpdateTime, std::optional<HUDLerpFlags> flag) const;
 
-  const pmove_t *getPmove() const;
-  const usercmd_t *getUserCmd() const;
-  int8_t getUserCmdScale() const;
+  [[nodiscard]] const pmove_t *getPmove() const;
+  [[nodiscard]] const usercmd_t *getUserCmd() const;
+  [[nodiscard]] int8_t getUserCmdScale() const;
 
 private:
   void initCvars();
@@ -74,7 +74,7 @@ private:
   pmove_t pm{};
   pmoveExt_t pmext{};
   usercmd_t cmd{};
-  playerState_t *ps = &cg.predictedPlayerState;
+  playerState_t ps{};
 
   // a lot of drawables need this so make it accessible here since
   // we need to calculate it here to set up usercmd anyway
