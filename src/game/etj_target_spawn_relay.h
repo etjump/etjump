@@ -36,6 +36,9 @@ public:
 
   static void spawn(gentity_t *ent);
   static void validateSpawnRelayEntities();
+  // handles invalidating the pointers to the spawn relay entities,
+  // if they are deleted by the game by some means
+  static void invalidateSpawnRelayPointers(const gentity_t *ent);
 
 private:
   static void use(gentity_t *self, gentity_t *activator);
