@@ -1,3 +1,18 @@
+# ETJump 3.4.1
+
+* fixed an old bug where disabled spawnpoints were always drawn on the map regardless of whether the spawn was active or not [#1743](https://github.com/etjump/etjump/pull/1743)
+* `func_static` entities with `PAIN` spawnflag now restore their health when taking damage, making them effectively unkillable under normal gameplay circumstances [#1744](https://github.com/etjump/etjump/pull/1744)
+* fixed UI changelog parsing entering an infinite loop when encountering a word which was longer that the maximum width of the entire row [#1745](https://github.com/etjump/etjump/pull/1745)
+  * this caused the game to hang when viewing ETJump 2.3.0 and 3.1.0 changelogs - these are now viewable in-game again
+* fixes to flamethrower interactions with water [#1746](https://github.com/etjump/etjump/pull/1746)
+  * flamethrower no longer produces dlights when trying to fire it underwater
+  * flamethrower no longer plays an idle sound while underwater, as the flame is shut off anyway
+* fixed chatting not clearing inactivity status from clients [#1747](https://github.com/etjump/etjump/pull/1747)
+* moving a player to spectators due to `g_inactivity` now stores the players position, and spawns the player back to that position when re-joining the team the player was at the time of the inactivity drop [#1748](https://github.com/etjump/etjump/pull/1748)
+* map progression tracked by `target/trigger_tracker` entities is now saved and restored if a client disconnects and reconnects during a map [#1749](https://github.com/etjump/etjump/pull/1749)
+* fixed crash when `target_spawn_relay` was deleted from the map on runtime [#1752](https://github.com/etjump/etjump/pull/1752)
+* fixed some HUD elements breaking spec/demo playback view by altering the data received from the server [#1753](https://github.com/etjump/etjump/pull/1753)
+
 # ETJump 3.4.0
 
 * improvements to `records` output [#1603](https://github.com/etjump/etjump/pull/1603) [#1739](https://github.com/etjump/etjump/pull/1739)
