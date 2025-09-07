@@ -143,4 +143,24 @@ void TargetSpawnRelay::validateSpawnRelayEntities() {
   spawnRelayEntities.erase(spawnRelayEntities.begin(),
                            spawnRelayEntities.end());
 }
+
+void TargetSpawnRelay::invalidateSpawnRelayPointers(const gentity_t *ent) {
+  if (!ent->team) {
+    level.spawnRelayEntities.alliesRelay = nullptr;
+    level.spawnRelayEntities.axisRelay = nullptr;
+    level.spawnRelayEntities.spectatorRelay = nullptr;
+  } else {
+    const auto teams = StringUtil::split(ent->team, ",");
+
+    for (const auto &team : teams) {
+      if (StringUtil::iEqual(team, "allies")) {
+        level.spawnRelayEntities.alliesRelay = nullptr;
+      } else if (StringUtil::iEqual(team, "axis")) {
+        level.spawnRelayEntities.axisRelay = nullptr;
+      } else if (StringUtil::iEqual(team, "spectator")) {
+        level.spawnRelayEntities.spectatorRelay = nullptr;
+      }
+    }
+  }
+}
 } // namespace ETJump

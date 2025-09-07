@@ -11,6 +11,7 @@
 #include "etj_save_system.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
+#include "etj_target_spawn_relay.h"
 
 //==========================================================
 
@@ -842,11 +843,15 @@ void G_KillEnts(const char *target, gentity_t *ignore, gentity_t *killer,
       continue;
     }
 
+    if (!(Q_stricmp(targ->classname, "target_spawn_relay"))) {
+      ETJump::TargetSpawnRelay::invalidateSpawnRelayPointers(targ);
+    }
+
     trap_UnlinkEntity(targ);
     targ->nextthink = level.time + FRAMETIME;
 
-    targ->use = NULL;
-    targ->touch = NULL;
+    targ->use = nullptr;
+    targ->touch = nullptr;
     targ->think = G_FreeEntity;
   }
 }
