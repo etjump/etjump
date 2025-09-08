@@ -281,7 +281,7 @@ bool ETJump::skipPortalDraw(const int selfNum, const int otherNum) {
   }
 
   if (etj_portalTeam.integer == PORTAL_TEAM_ALL ||
-      etj_viewPlayerPortals.integer) {
+      (etj_viewPlayerPortals.integer && !cgs.clientinfo[otherNum].hideMe)) {
     return false;
   }
 
