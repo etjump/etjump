@@ -4941,7 +4941,7 @@ void UI_RunMenuScript(const char **args) {
       char buf[MAX_CVAR_VALUE_STRING];
 
       trap_Cvar_VariableStringBuffer("ui_writeconfig_name", buf, sizeof(buf));
-      trap_Cmd_ExecuteText(EXEC_NOW, va("writeconfig %s\n", buf));
+      trap_Cmd_ExecuteText(EXEC_APPEND, va("writeconfig %s\n", buf));
 
       return;
     }
