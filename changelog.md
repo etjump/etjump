@@ -12,6 +12,8 @@
 * map progression tracked by `target/trigger_tracker` entities is now saved and restored if a client disconnects and reconnects during a map [#1749](https://github.com/etjump/etjump/pull/1749)
 * fixed crash when `target_spawn_relay` was deleted from the map on runtime [#1752](https://github.com/etjump/etjump/pull/1752)
 * fixed some HUD elements breaking spec/demo playback view by altering the data received from the server [#1753](https://github.com/etjump/etjump/pull/1753)
+* `etj_hideMe` now hides players' portals from other players, unless those players are able to use your portals [#1756](https://github.com/etjump/etjump/pull/1756)
+* fixed teleportation events getting interpolated if the player triggered multiple teleportation events during the same frame [#1758](https://github.com/etjump/etjump/pull/1758)
 
 # ETJump 3.4.0
 
@@ -141,6 +143,7 @@
   * bitflag value
     * 1 = hide for self
     * 2 = hide for others
+* scoreboard inactivity now correctly works if the server is using `sv_level/serverTimeReset` [#1731](https://github.com/etjump/etjump/pull/1731) [#1734](https://github.com/etjump/etjump/pull/1734)
 * added a short animation when portalgun portals are spawned [#1727](https://github.com/etjump/etjump/pull/1727)
 * bundled fixed `.arena` files for certain maps with the mod pk3 [#1690](https://github.com/etjump/etjump/pull/1690)
 * reworked timerun high ping interrupt to work based off command time delta rather than ping [#1741](https://github.com/etjump/etjump/pull/1741)
