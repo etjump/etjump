@@ -1019,6 +1019,8 @@ void ClientThink_real(gentity_t *ent) {
     client->wantsscore = qfalse;
   }
 
+  ent->client->teleportBitFlipped = false;
+
   //
   // check for exiting intermission
   //

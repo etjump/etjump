@@ -1278,6 +1278,9 @@ typedef struct {
   bool jumpDelayBug;
 
   bool chatMenuOpen;
+
+  // to prevent teleport bit getting flipped multiple times per frame
+  bool teleportBitFlipped;
 } cg_t;
 
 inline constexpr int NUM_FUNNEL_SPRITES = 21;

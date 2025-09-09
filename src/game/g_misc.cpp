@@ -83,7 +83,10 @@ void TeleportPlayer(gentity_t *player, const vec3_t origin, vec3_t angles) {
   player->client->ps.origin[2] += 1;
 
   // toggle the teleport bit so the client knows to not lerp
-  player->client->ps.eFlags ^= EF_TELEPORT_BIT;
+  if (!player->client->teleportBitFlipped) {
+    player->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    player->client->teleportBitFlipped = true;
+  }
 
   // set angles
   SetClientViewAngle(player, angles);
@@ -317,7 +320,10 @@ void teleportPlayer(gentity_t *self, gentity_t *other, const vec3_t origin,
   }
 
   // toggle the teleport bit so the client knows to not lerp
-  self->client->ps.eFlags ^= EF_TELEPORT_BIT;
+  if (!self->client->teleportBitFlipped) {
+    self->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    self->client->teleportBitFlipped = true;
+  }
 
   SetClientViewAngle(self, teleAngles);
   BG_PlayerStateToEntityState(&self->client->ps, &self->s, qtrue);
@@ -336,7 +342,10 @@ void DirectTeleport(gentity_t *player, const vec3_t origin, vec3_t angles) {
   VectorCopy(origin, player->client->ps.origin);
 
   // toggle the teleport bit so the client knows to not lerp
-  player->client->ps.eFlags ^= EF_TELEPORT_BIT;
+  if (!player->client->teleportBitFlipped) {
+    player->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    player->client->teleportBitFlipped = true;
+  }
 
   // set angles
   SetClientViewAngle(player, angles);

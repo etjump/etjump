@@ -1194,6 +1194,9 @@ struct gclient_s {
   int lastRevivePushTime;
 
   ETJump::InactivityPos inactivityPos;
+
+  // to prevent teleport bit getting flipped multiple times per frame
+  bool teleportBitFlipped;
 };
 
 typedef struct {

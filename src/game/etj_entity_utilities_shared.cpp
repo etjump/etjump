@@ -93,7 +93,8 @@ void EntityUtilsShared::setPushVelocity(const playerState_t *ps,
 void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
                                        entityState_t *teleporter,
                                        usercmd_t *cmd, const vec3_t origin,
-                                       vec3_t angles) {
+                                       vec3_t angles,
+                                       bool &teleportBitFlipped) {
   // bits 8-31 contain the spawnflags
   const int spawnflags = (teleporter->constantLight >> 8) & 0xffffff;
 
@@ -136,7 +137,10 @@ void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
   }
 
   // toggle the teleport bit so the client knows to not lerp
-  ps->eFlags ^= EF_TELEPORT_BIT;
+  if (!teleportBitFlipped) {
+    ps->eFlags ^= EF_TELEPORT_BIT;
+    teleportBitFlipped = true;
+  }
 
   // set angles
   setViewAngles(ps, player, cmd, angles);
@@ -172,7 +176,8 @@ void EntityUtilsShared::setViewAngles(playerState_t *ps, entityState_t *es,
 
 void EntityUtilsShared::portalTeleport(playerState_t *ps, entityState_t *player,
                                        const entityState_t *portal,
-                                       usercmd_t *cmd, const int time) {
+                                       usercmd_t *cmd, const int time,
+                                       bool &teleportBitFlipped) {
   if (ps->powerups[PW_PORTALPREDICT] + PORTAL_TOUCH_COOLDOWN > time) {
     return;
   }
@@ -199,7 +204,10 @@ void EntityUtilsShared::portalTeleport(playerState_t *ps, entityState_t *player,
   VectorScale(ps->velocity, velocityLength + PORTAL_NUDGE, ps->velocity);
 
   // toggle the teleport bit so the client knows to not lerp
-  ps->eFlags ^= EF_TELEPORT_BIT;
+  if (!teleportBitFlipped) {
+    ps->eFlags ^= EF_TELEPORT_BIT;
+    teleportBitFlipped = true;
+  }
 
   // Adjust view angles so portals don't have you looking straight up or
   // down...

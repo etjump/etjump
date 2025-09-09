@@ -205,7 +205,8 @@ void Portal::touch(gentity_t *self, gentity_t *other) {
   }
 
   EntityUtilsShared::portalTeleport(&other->client->ps, &other->s, &self->s,
-                                    &other->client->pers.cmd, level.time);
+                                    &other->client->pers.cmd, level.time,
+                                    other->client->teleportBitFlipped);
 }
 
 void Portalgun::spawn(gentity_t *ent) {

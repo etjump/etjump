@@ -540,6 +540,8 @@ static void CG_TouchTriggerPrediction() {
     return;
   }
 
+  cg.teleportBitFlipped = false;
+
   for (i = 0; i < cg_numTriggerEntities; i++) {
     cent = cg_triggerEntities[i];
     ent = &cent->currentState;
@@ -690,7 +692,7 @@ static void CG_TouchTriggerPrediction() {
               &cg_entities[cg.snap->ps.clientNum].currentState;
           ETJump::EntityUtilsShared::teleportPlayer(
               &cg.predictedPlayerState, playerEs, ent, &cg_pmove.cmd,
-              ent->origin2, ent->angles2);
+              ent->origin2, ent->angles2, cg.teleportBitFlipped);
         } else {
           ETJump::EntityUtilsShared::touchPusher(&cg.predictedPlayerState,
                                                  cg.physicsTime, ent);
@@ -714,9 +716,9 @@ static void CG_TouchTriggerPrediction() {
 
         entityState_t *playerEs =
             &cg_entities[cg.snap->ps.clientNum].currentState;
-        ETJump::EntityUtilsShared::portalTeleport(&cg.predictedPlayerState,
-                                                  playerEs, ent, &cg_pmove.cmd,
-                                                  cg.physicsTime);
+        ETJump::EntityUtilsShared::portalTeleport(
+            &cg.predictedPlayerState, playerEs, ent, &cg_pmove.cmd,
+            cg.physicsTime, cg.teleportBitFlipped);
       }
     }
   }
