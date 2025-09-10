@@ -1,10 +1,12 @@
 extern "C" {
 #include "sha1.h"
 }
-#ifdef CGAMEDLL
+#ifdef GAMEDLL
+  #include "g_local.h"
+#elif CGAMEDLL
   #include "../cgame/cg_local.h"
-#else
-  #include "../game/g_local.h"
+#elif UIDLL
+  #include "../ui/ui_local.h"
 #endif
 
 const char *G_SHA1(const char *string) {

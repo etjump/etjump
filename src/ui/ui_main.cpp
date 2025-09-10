@@ -15,6 +15,7 @@ USER INTERFACE MAIN
 #include "etj_colorpicker.h"
 #include "etj_demo_queue.h"
 #include "etj_quick_connect.h"
+#include "etj_menu_integrity_checker.h"
 
 #include "../cgame/etj_cvar_parser.h"
 #include "../game/etj_string_utilities.h"
@@ -936,6 +937,8 @@ void _UI_Refresh(int realtime) {
     UI_FillRect(-10, -10, SCREEN_WIDTH + 10, 490, colorBlack);
   }
 
+  uiInfo.uiDC.mainOrIngameMainMenuOpen = false;
+
   if (Menu_Count() > 0) {
     // paint all the menus
     Menu_PaintAll();
@@ -947,6 +950,10 @@ void _UI_Refresh(int realtime) {
     UI_BuildFindPlayerList(qfalse);
 
     ETJump::quickConnect->refreshServers(false);
+
+    if (!uiInfo.integrityCheckOk && uiInfo.uiDC.mainOrIngameMainMenuOpen) {
+      ETJump::MenuIntegrityChecker::printIntegrityWatermark();
+    }
   }
 
   // draw cursor
@@ -1152,7 +1159,6 @@ qboolean Asset_Parse(int handle) {
 
 void UI_Report() { String_Report(); }
 
-void QDECL Com_DPrintf(const char *fmt, ...);
 qboolean UI_ParseMenu(const char *menuFile) {
   int handle;
   pc_token_t token;
@@ -7260,6 +7266,14 @@ void _UI_Init(int legacyClient, int clientVersion) {
   UI_ParseGameInfo("gameinfo.txt");
 
   UI_LoadMenus(DEFAULT_MENU_FILE, qfalse);
+
+  Com_DPrintf("Performing menu integrity check\n");
+
+  uiInfo.integrityCheckOk = ETJump::MenuIntegrityChecker::checkIntegrity();
+
+  if (!uiInfo.integrityCheckOk) {
+    ETJump::MenuIntegrityChecker::printIntegrityViolation();
+  }
 
   ETJump::initQuickConnect();
 

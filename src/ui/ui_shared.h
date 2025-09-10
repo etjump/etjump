@@ -587,6 +587,8 @@ typedef struct {
   std::function<bool()> RGBSlidersAreNormalized;
 
   std::function<bool()> quickConnectListIsFull;
+
+  bool mainOrIngameMainMenuOpen;
 } displayContextDef_t;
 
 const char *String_Alloc(const char *p);
