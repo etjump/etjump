@@ -6581,6 +6581,11 @@ void Menu_Paint(menuDef_t *menu, qboolean forcePaint) {
     menu->window.flags |= WINDOW_FORCED;
   }
 
+  if (!(Q_stricmp(menu->window.name, "main")) ||
+      !(Q_stricmp(menu->window.name, "ingame_main"))) {
+    DC->mainOrIngameMainMenuOpen = true;
+  }
+
   // draw the background if necessary
   if (menu->fullScreen) {
     // implies a background shader

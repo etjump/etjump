@@ -615,6 +615,8 @@ typedef struct {
   int changelogLineIndex;
 
   bool demoPlayback;
+
+  bool integrityCheckOk;
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;
@@ -796,6 +798,10 @@ void trap_openURL(const char *url); // TTimo
 void trap_GetHunkData(int *hunkused, int *hunkexpected);
 
 char *trap_TranslateString(const char *string); // NERVE - SMF - localization
+
+void QDECL Com_DPrintf(const char *fmt, ...);
+
+const char *G_SHA1(const char *str);
 
 namespace ETJump {
 inline constexpr int MAX_QUICKCONNECT_SERVERS = 5;
