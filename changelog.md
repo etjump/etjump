@@ -14,6 +14,10 @@
 * fixed some HUD elements breaking spec/demo playback view by altering the data received from the server [#1753](https://github.com/etjump/etjump/pull/1753)
 * `etj_hideMe` now hides players' portals from other players, unless those players are able to use your portals [#1756](https://github.com/etjump/etjump/pull/1756)
 * fixed teleportation events getting interpolated if the player triggered multiple teleportation events during the same frame [#1758](https://github.com/etjump/etjump/pull/1758)
+* added integrity checks to UI - the mod now warns the user if they are running custom menu files [#1759](https://github.com/etjump/etjump/pull/1759)
+* fixed exploits with projectiles on timerun start [#1760](https://github.com/etjump/etjump/pull/1760)
+  * projectiles are now correctly removed on timerun start again - this was accidentally broken in ETJump 3.3.1
+  * fixed a frame-perfect exploit that allowed players to spawn a projectile on the same frame as a timerun started
 
 # ETJump 3.4.0
 
