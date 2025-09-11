@@ -121,7 +121,7 @@ void MenuIntegrityChecker::printIntegrityViolation() {
   msg = "^1The following paks contain potentially unwanted files:\n\n";
 
   for (const auto &pak : badPaks) {
-    msg += "^1- etjump/" + pak + "\n";
+    msg += "^1- " + uiInfo.fsGame + "/" + pak + "\n";
   }
 
   msg += "\n^1Consider removing these files in order to restore menu integrity "
@@ -132,7 +132,8 @@ void MenuIntegrityChecker::printIntegrityViolation() {
 
 std::vector<std::string> MenuIntegrityChecker::getBadPaks() {
   // see if we can find the offending packs
-  const auto files = ETJump::FileSystem::getFileList("../etjump", ".pk3", true);
+  const auto files =
+      ETJump::FileSystem::getFileList("../" + uiInfo.fsGame, ".pk3", true);
   const auto pk3name =
       std::string(GAME_NAME) + "-" + std::string(GAME_VERSION) + ".pk3";
   const auto it = std::find(files.cbegin(), files.cend(), pk3name);

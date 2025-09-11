@@ -7145,6 +7145,10 @@ void _UI_Init(int legacyClient, int clientVersion) {
 
   ETJump::detectClientEngine(legacyClient, clientVersion);
 
+  char buf[MAX_CVAR_VALUE_STRING]{};
+  trap_Cvar_VariableStringBuffer("fs_game", buf, sizeof(buf));
+  uiInfo.fsGame = buf;
+
   // UI_Load();
   uiInfo.uiDC.registerShaderNoMip = &trap_R_RegisterShaderNoMip;
   uiInfo.uiDC.setColor = &UI_SetColor;
