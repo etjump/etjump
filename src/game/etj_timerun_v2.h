@@ -115,6 +115,8 @@ public:
   void printSeasons(int clientNum);
   void deleteSeason(int clientNum, const std::string &name);
 
+  [[nodiscard]] int32_t getRunStartTime(int32_t clientNum) const;
+
   static void removeDisallowedWeapons(gentity_t *ent);
   static void removePlayerProjectiles(gentity_t *ent);
 

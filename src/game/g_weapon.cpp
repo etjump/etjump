@@ -11,6 +11,8 @@
 #include "etj_printer.h"
 #include "etj_entity_utilities.h"
 #include "etj_portalgun.h"
+#include "etj_local.h"
+#include "etj_timerun_v2.h"
 
 vec3_t forward, right, up;
 vec3_t muzzleEffect;
@@ -4295,6 +4297,16 @@ void FireWeapon(gentity_t *ent) {
     }
   }
 
+  // because client thinks are processed before 'G_RunFrame', it's possible
+  // that the player spawns a projectile on the same frame as a timerun starts,
+  // which causes it to not be deleted by the run start
+  // if we started a run this frame, don't let the projectiles spawn
+  const auto timerunStartThisFrame = [](const gentity_t *ent) {
+    return ent->client->sess.timerunActive &&
+           game.timerunV2->getRunStartTime(ClientNum(ent)) ==
+               ent->client->ps.commandTime;
+  };
+
   // fire the specific weapon
   switch (ent->s.weapon) {
     case WP_KNIFE:
@@ -4309,6 +4321,10 @@ void FireWeapon(gentity_t *ent) {
       break;
 
     case WP_SMOKE_MARKER:
+      if (timerunStartThisFrame(ent)) {
+        break;
+      }
+
       if (level.time - ent->client->ps.classWeaponTime >
           level.lieutenantChargeTime[ent->client->sess.sessionTeam - 1]) {
         ent->client->ps.classWeaponTime =
@@ -4441,6 +4457,10 @@ void FireWeapon(gentity_t *ent) {
                   qtrue);
       break;
     case WP_PANZERFAUST:
+      if (timerunStartThisFrame(ent)) {
+        break;
+      }
+
       if (level.time - ent->client->ps.classWeaponTime >
           level.soldierChargeTime[ent->client->sess.sessionTeam - 1]) {
         ent->client->ps.classWeaponTime =
@@ -4465,6 +4485,10 @@ void FireWeapon(gentity_t *ent) {
       break;
     case WP_GPG40:
     case WP_M7:
+      if (timerunStartThisFrame(ent)) {
+        break;
+      }
+
       if (level.time - ent->client->ps.classWeaponTime >
           level.engineerChargeTime[ent->client->sess.sessionTeam - 1]) {
         ent->client->ps.classWeaponTime =
@@ -4477,6 +4501,10 @@ void FireWeapon(gentity_t *ent) {
       weapon_gpg40_fire(ent, ent->s.weapon);
       break;
     case WP_MORTAR_SET:
+      if (timerunStartThisFrame(ent)) {
+        break;
+      }
+
       if (level.time - ent->client->ps.classWeaponTime >
           level.soldierChargeTime[ent->client->sess.sessionTeam - 1]) {
         ent->client->ps.classWeaponTime =
@@ -4500,6 +4528,10 @@ void FireWeapon(gentity_t *ent) {
     case WP_LANDMINE:
     case WP_SATCHEL:
     case WP_SMOKE_BOMB:
+      if (timerunStartThisFrame(ent)) {
+        break;
+      }
+
       if (ent->s.weapon == WP_SMOKE_BOMB || ent->s.weapon == WP_SATCHEL) {
         if (level.time - ent->client->ps.classWeaponTime >
             level.covertopsChargeTime[ent->client->sess.sessionTeam - 1]) {
@@ -4578,6 +4610,10 @@ void FireWeapon(gentity_t *ent) {
 
     // Feen: PGM
     case WP_PORTAL_GUN:
+      if (timerunStartThisFrame(ent)) {
+        break;
+      }
+
       ETJump::Portalgun::fire(ent,
                               ent->client->wbuttons & WBUTTON_ATTACK2
                                   ? ETJump::Portal::Type::PORTAL_RED

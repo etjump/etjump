@@ -1172,6 +1172,10 @@ void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
       });
 }
 
+int32_t ETJump::TimerunV2::getRunStartTime(const int32_t clientNum) const {
+  return _players[clientNum]->startTime.valueOr(0);
+}
+
 void ETJump::TimerunV2::startNotify(Player *player) const {
   auto previousRecord =
       player->getRecord(defaultSeasonId, player->activeRunName);
