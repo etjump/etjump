@@ -617,6 +617,7 @@ typedef struct {
   bool demoPlayback;
 
   bool integrityCheckOk;
+  std::string fsGame;
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;
