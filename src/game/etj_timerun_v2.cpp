@@ -1613,9 +1613,11 @@ void ETJump::TimerunV2::removeDisallowedWeapons(gentity_t *ent) {
 
 void ETJump::TimerunV2::removePlayerProjectiles(gentity_t *ent) {
   for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; i++) {
-    if (ent->s.eType == ET_MISSILE) {
-      if (ent->parent && ent->parent->s.number == ClientNum(ent)) {
-        G_FreeEntity(ent);
+    gentity_t *e = &g_entities[i];
+
+    if (e->s.eType == ET_MISSILE) {
+      if (e->parent && e->parent->s.number == ClientNum(ent)) {
+        G_FreeEntity(e);
       }
     }
   }
