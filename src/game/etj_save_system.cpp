@@ -727,6 +727,13 @@ void SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent,
   const auto validSave = getValidTeamQuickDeploySave(ent, team);
 
   if (validSave) {
+    if (!g_cheats.integer && ent->client->sess.timerunActive &&
+        (ent->client->sess.runSpawnflags &
+             static_cast<int>(TimerunSpawnflags::NoSave) ||
+         !validSave->isTimerunSave)) {
+      InterruptRun(ent);
+    }
+
     restoreStanceFromSave(ent, validSave);
     teleportPlayer(ent, validSave);
     validSave->isValid = false;
