@@ -18,6 +18,7 @@
 * fixed exploits with projectiles on timerun start [#1760](https://github.com/etjump/etjump/pull/1760)
   * projectiles are now correctly removed on timerun start again - this was accidentally broken in ETJump 3.3.1
   * fixed a frame-perfect exploit that allowed players to spawn a projectile on the same frame as a timerun started
+* fixed `etj_autoLoad` bypassing checks for save slot timerun state, which allowed loading to positions that were not saved during a timerun [#1766](https://github.com/etjump/etjump/pull/1766)
 
 # ETJump 3.4.0
 
