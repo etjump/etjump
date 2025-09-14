@@ -596,9 +596,6 @@ struct gentity_s {
   // when someone goes in a team portal
   gentity_t *linkedPortal;
 
-  int lastPortalTime; // Last time we teleported using portal
-  int portalTeam;
-
   int runIndex;
   char runName[MAX_TIMERUN_NAME_LENGTH];
   int checkpointIndex;
@@ -807,17 +804,10 @@ typedef struct {
   int lastListmapsTime;
   int lastMostPlayedListTime;
 
-  // Position of user before inactivity
-  vec3_t posBeforeInactivity;
-  // Did the client join back to team already (after inactivity)?
-  qboolean loadedPosBeforeInactivity;
-  team_t teamBeforeInactivitySpec;
-
   qboolean firstTime;
 
   qboolean versionOK;
 
-  int portalTeam;
   char ip[MAX_IP_LEN + 1];
   qboolean motdPrinted;
 
@@ -827,11 +817,12 @@ typedef struct {
   qboolean receivedTimerunStates;
   bool timerunCheatsNotified;
 
-  // new implementation of progression
-  int progression[MAX_PROGRESSION_TRACKERS];
   int deathrunFlags;
 
   float velocityScale;
+
+  // level.time >= clientLastActive + CLIENT_INACTIVITY_TIMER
+  bool inactive;
   int clientLastActive;
 
   int weaponsOnSpawn[MAX_WEAPONS /
@@ -888,6 +879,12 @@ struct votingInfo_t {
                    // allow yet, notification will be sent
 
   int lastRtvMapVoted; // used for re-votes, the last map number we voted on
+};
+
+struct InactivityPos {
+  vec3_t savedPos;
+  vec3_t savedAngles;
+  team_t team; // TEAM_FREE if the position is invalid
 };
 
 inline constexpr int MAX_TOKENS_PER_DIFFICULTY = 32;
@@ -1003,6 +1000,9 @@ typedef struct {
   bool autoSprintAux;
 
   bool jumpDelayBug;
+
+  // target/trigger_tracker progression value
+  int32_t progression[MAX_PROGRESSION_TRACKERS];
 } clientPersistant_t;
 
 typedef struct {
@@ -1086,8 +1086,6 @@ struct gclient_s {
   int respawnTime;            // can respawn when time > this, force after
                               // g_forcerespwan
   int inactivityTime;         // kick players when time > this
-  bool inactive;              // level.time >= clientLastActive
-                              // + 1000 * clientInactivityTimer
   qboolean inactivityWarning; // qtrue if the five seoond warning has
                               // been given
   int rewardTime; // clear the EF_AWARD_IMPRESSIVE, etc when time > this
@@ -1195,7 +1193,10 @@ struct gclient_s {
 
   int lastRevivePushTime;
 
-  int numLagFrames; // for tracking high ping on timeruns to counter lag abuse
+  ETJump::InactivityPos inactivityPos;
+
+  // to prevent teleport bit getting flipped multiple times per frame
+  bool teleportBitFlipped;
 };
 
 typedef struct {
@@ -1457,6 +1458,8 @@ typedef struct {
   bool noFTNoGhost;
   bool noFTSaveLimit;
   bool noFTTeamjumpMode;
+  bool portalPredict;
+  int32_t bodyOverbounce;
 
   int portalEnabled; // Feen: PGM - Enabled/Disabled by map key
   qboolean portalSurfaces;
@@ -1737,8 +1740,6 @@ void InitTrigger(gentity_t *self);
 // this is only used by tank exiting and some weird spectator door teleport
 void TeleportPlayer(gentity_t *player, const vec3_t origin, vec3_t angles);
 void DirectTeleport(gentity_t *player, const vec3_t origin, vec3_t angles);
-void PortalTeleport(gentity_t *player, vec3_t origin,
-                    vec3_t angles); // Feen: PGM
 void mg42_fire(gentity_t *other);
 void mg42_stopusing(gentity_t *self);
 void aagun_fire(gentity_t *other);
@@ -1796,7 +1797,6 @@ void reinforce(gentity_t *ent);                  // JPW NERVE
 qboolean AddWeaponToPlayer(gclient_t *client, weapon_t weapon, int ammo,
                            int ammoclip, qboolean setcurrent);
 void ResetPlayerAmmo(gclient_t *client, gentity_t *ent);
-void ClearPortals(gentity_t *ent);
 //
 // g_character.c
 //
@@ -1841,6 +1841,8 @@ void G_SendScore(gentity_t *client);
 //
 // g_cmds.c
 //
+void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
+           char *chatText);
 void G_SayTo(
     gentity_t *ent, gentity_t *other, int mode, int color, const char *name,
     const char *message, qboolean localize,
@@ -1878,7 +1880,7 @@ void ClientDisconnect(int clientNum);
 void ClientBegin(int clientNum);
 void ClientCommand(int clientNum);
 namespace ETJump {
-bool UpdateClientConfigString(gentity_t &gent);
+bool UpdateClientConfigString(const gentity_t &gent);
 }
 
 //
@@ -2061,6 +2063,7 @@ extern vmCvar_t vote_allow_matchreset;
 extern vmCvar_t vote_allow_randommap;
 extern vmCvar_t vote_allow_rtv;
 extern vmCvar_t vote_allow_autoRtv;
+extern vmCvar_t vote_allow_portalPredict;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
 
@@ -2104,8 +2107,8 @@ extern vmCvar_t g_banner5;
 extern vmCvar_t g_banners;
 
 // Feen: PGM
-extern vmCvar_t g_portalDebug;
 extern vmCvar_t g_portalMode;
+extern vmCvar_t g_portalPredict;
 
 extern vmCvar_t g_maxConnsPerIP;
 extern vmCvar_t g_mute;
@@ -2589,6 +2592,8 @@ bool canSetFtTeamjumpMode(int clientNum, const gentity_t *ent);
 void setFireteamTeamjumpMode(fireteamData_t *ft, bool teamjumpMode);
 } // namespace ETJump
 
+// center prints sent through this are never logged
+// on client, if 'etj_logCenterPrint' is set
 void G_PrintClientSpammyCenterPrint(int entityNum, const char *text);
 
 void aagun_fire(gentity_t *other);
@@ -2796,6 +2801,8 @@ namespace ETJump {
 int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                     char *arg2);
 int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2);
+int G_PortalPredict_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
+                      char *arg2);
 } // namespace ETJump
 
 void G_LinkDebris(void);
@@ -2875,17 +2882,6 @@ void DecolorString(char *in, char *out);
 int Q_SayArgc();
 qboolean Q_SayArgv(int n, char *buffer, int bufferLength);
 
-// Feen: PGM
-
-void Portal_Think(gentity_t *self);
-void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace);
-
-// g_weapon.c
-void Weapon_Portal_Fire(
-    gentity_t *ent, int portalNum); // TODO add switch for different portals....
-
-// Feen: END PGM
-
 void Use_target_remove_powerups(gentity_t *ent, gentity_t *other,
                                 gentity_t *activator);
 
@@ -2894,10 +2890,20 @@ const char *EscapeString(const char *in);
 const char *interpolateNametags(const char *text, const int color);
 const char *findAndReplaceNametags(const char *text, const char *name);
 
-// Returns clientnum from ent
-int ClientNum(gentity_t *ent);
-// Returns clientnum from client
-int ClientNum(gclient_t *client);
+// returns an entity number for gentity_t or gclient_t pointer
+template <typename T>
+int32_t ClientNum(const T *p) {
+  if constexpr (std::is_same_v<T, gentity_t>) {
+    return static_cast<int32_t>(p - g_entities);
+  }
+
+  if constexpr (std::is_same_v<T, gclient_t>) {
+    return static_cast<int32_t>(p - level.clients);
+  }
+
+  static_assert(std::is_same_v<T, gentity_t> || std::is_same_v<T, gclient_t>,
+                "Unsupported pointer type");
+}
 
 // mainext.cpp
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);

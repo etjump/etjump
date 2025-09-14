@@ -57,6 +57,9 @@ static const vote_reference_t aVoteInfo[] = {
      " ^7\n Initiates Rock The Vote"},
     {0x1ff, "autoRtv", ETJump::G_AutoRtv_v, "Auto RTV",
      " ^7\n Votes to set an interval for automatic Rock The Vote"},
+    {0x1ff, "portalPredict", ETJump::G_PortalPredict_v,
+     "Predicted portal teleports",
+     " ^7\n Votes to enable or disable predicted portalgun teleports"},
     {0, nullptr, nullptr, nullptr}};
 
 void G_cpmPrintf(gentity_t *ent, const char *fmt, ...) {
@@ -636,6 +639,53 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
                          nextVoteTime, minutesStr));
       }
     }
+  }
+
+  return G_OK;
+}
+
+int G_PortalPredict_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
+                      char *arg2) {
+  if (arg) {
+    if (!vote_allow_portalPredict.integer) {
+      G_voteDisableMessage(ent, arg);
+      return G_INVALID;
+    }
+
+    if (G_voteDescription(ent, static_cast<int>(dwVoteIndex), true)) {
+      return G_INVALID;
+    }
+
+    if (level.portalPredict) {
+      Printer::popup(
+          ent, "Portalgun teleport prediction cannot be changed in this map.");
+      return G_INVALID;
+    }
+
+    const int val = Q_atoi(arg2);
+
+    // a bit convoluted but this ensures that the toggle works correctly
+    // if a server admin sets this to a value other than 0/1, or someone
+    // votes this with a weird number
+    if (val == 0) {
+      if (!g_portalPredict.integer) {
+        Printer::popup(ent,
+                       "Predicted portalgun teleports are already disabled.");
+        return G_INVALID;
+      }
+    } else {
+      if (g_portalPredict.integer) {
+        Printer::popup(ent,
+                       "Predicted portalgun teleports are already enabled.");
+        return G_INVALID;
+      }
+    }
+
+    // ensure the vote value is only ever 1 or 0
+    Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING,
+                val == 0 ? "0" : "1");
+  } else {
+    trap_Cvar_Set("g_portalPredict", level.voteInfo.vote_value);
   }
 
   return G_OK;

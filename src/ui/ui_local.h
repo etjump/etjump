@@ -130,6 +130,11 @@ extern vmCvar_t ui_currentChangelog;
 extern vmCvar_t etj_demoQueueCurrent;
 extern vmCvar_t etj_demoQueueDir;
 
+extern vmCvar_t etj_noMenuFlashing;
+extern vmCvar_t etj_drawQuickConnectMenu;
+
+extern vmCvar_t g_portalPredict;
+
 inline constexpr int MAX_EDIT_LINE = 256;
 
 inline constexpr int MAX_MENUDEPTH = 8;
@@ -308,9 +313,9 @@ void UI_LoadArenas(void);
 mapInfo *UI_FindMapInfoByMapname(const char *name);
 void UI_ReadableSize(char *buf, int bufsize, int value);
 void UI_PrintTime(char *buf, int bufsize, int time);
-void Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color,
-                    const char *text, float adjust, int limit, int style,
-                    fontInfo_t *font);
+void Text_Paint_Ext(float x, float y, float scalex, float scaley,
+                    const vec4_t color, const char *text, float adjust,
+                    int limit, int style, fontInfo_t *font);
 extern void UI_RegisterCvars(void);
 extern void UI_UpdateCvars(void);
 extern void UI_DrawConnectScreen(qboolean overlay);
@@ -610,6 +615,9 @@ typedef struct {
   int changelogLineIndex;
 
   bool demoPlayback;
+
+  bool integrityCheckOk;
+  std::string fsGame;
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;
@@ -792,7 +800,13 @@ void trap_GetHunkData(int *hunkused, int *hunkexpected);
 
 char *trap_TranslateString(const char *string); // NERVE - SMF - localization
 
+void QDECL Com_DPrintf(const char *fmt, ...);
+
+const char *G_SHA1(const char *str);
+
 namespace ETJump {
+inline constexpr int MAX_QUICKCONNECT_SERVERS = 5;
+
 class SyscallExt;
 extern std::unique_ptr<SyscallExt> syscallExt;
 
@@ -804,6 +818,9 @@ void resetCustomvotes();
 void toggleSettingsMenu();
 
 class DemoQueue;
+class QuickConnect;
+
 extern std::unique_ptr<DemoQueue> demoQueue;
+extern std::unique_ptr<QuickConnect> quickConnect;
 } // namespace ETJump
 #endif

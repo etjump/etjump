@@ -3,6 +3,8 @@
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
 #include "etj_rtv.h"
+#include "etj_entity_utilities.h"
+#include "etj_progression_tracker.h"
 #include "etj_session_v2.h"
 
 // g_client.c -- client functions that don't happen every frame
@@ -1717,7 +1719,7 @@ const char *GetParsedIP(const char *ipadd) {
 }
 
 namespace ETJump {
-bool UpdateClientConfigString(gentity_t &gent) {
+bool UpdateClientConfigString(const gentity_t &gent) {
   if (!gent.client) {
     return false;
   }
@@ -1756,7 +1758,7 @@ bool UpdateClientConfigString(gentity_t &gent) {
          gent.client->pers.hideMe > 0 ? gent.client->pers.hideMe : 0,
          gent.client->sess.specLocked ? 1 : 0,
          gent.client->sess.timerunActive ? 1 : 0,
-         gent.client->pers.snaphud ? 1 : 0, gent.client->inactive ? 1 : 0);
+         gent.client->pers.snaphud ? 1 : 0, gent.client->sess.inactive ? 1 : 0);
 
   trap_GetConfigstring(CS_PLAYERS + ClientNum(&gent), oldcs, sizeof(oldcs));
 
@@ -2050,12 +2052,9 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     client->last8BallTime = 0;
     client->lastVoteTime = 0;
     client->cheatDetected = qfalse;
-    // Client has loaded position after inactivity putspec
-    // -> don't do anything anymore
-    client->sess.loadedPosBeforeInactivity = qtrue;
     client->sess.motdPrinted = qfalse;
     client->sess.timerunActive = qfalse;
-    client->inactive = false;
+    client->sess.inactive = false;
     client->sess.clientLastActive = level.time;
   } else {
     client->sess.gotoAllowed = qtrue; // Feen: TEMP FIX! - Also added these two
@@ -2068,10 +2067,8 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
                // and read
                //             properly in G_ReadSessionData()
   }
+
   ent->client->sess.receivedTimerunStates = qfalse;
-  for (i = 0; i < MAX_PROGRESSION_TRACKERS; ++i) {
-    ent->client->sess.progression[i] = 0;
-  }
 
   // read or initialize the session data
   if (firstTime) {
@@ -2115,7 +2112,6 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   client->sess.clientMapProgression = 0;
   ent->client->sess.muted = qfalse;
   ent->client->pers.race.isRouteMaker = qfalse;
-  client->sess.portalTeam = 0;
   client->sess.saveLimit = level.limitedSaves;
 
   // count current clients and rank for scoreboard
@@ -2385,6 +2381,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     persistant[i] = client->ps.persistant[i];
   }
 
+  const ETJump::InactivityPos savedInactivityPos = client->inactivityPos;
+
   {
     qboolean set = client->maxlivescalced;
 
@@ -2404,6 +2402,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   for (i = 0; i < MAX_PERSISTANT; i++) {
     client->ps.persistant[i] = persistant[i];
   }
+
+  client->inactivityPos = savedInactivityPos;
 
   // increment the spawncount so the client will detect the respawn
   client->ps.persistant[PERS_SPAWN_COUNT]++;
@@ -2663,32 +2663,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     G_UseEntity(level.spawnRelayEntities.spectatorRelay, nullptr, ent);
   }
 
-  // FIXME: doesn't load pos????
-  if (!client->sess.loadedPosBeforeInactivity &&
-      client->sess.sessionTeam == client->sess.teamBeforeInactivitySpec) {
-    VectorCopy(client->sess.posBeforeInactivity, client->ps.origin);
-    VectorCopy(client->sess.posBeforeInactivity, ent->r.currentOrigin);
-    client->sess.loadedPosBeforeInactivity = qtrue;
-  }
-
   client->sess.velocityScale = 1;
-}
-
-void ClearPortals(gentity_t *ent) {
-  // Clear portalgun portals
-  if (ent->portalBlue) {
-    G_FreeEntity(ent->portalBlue);
-    ent->portalBlue = nullptr;
-  }
-
-  if (ent->portalRed) {
-    G_FreeEntity(ent->portalRed);
-    ent->portalRed = nullptr;
-  }
-
-  if (ent->client) {
-    ent->client->numPortals = 0;
-  }
 }
 
 /*
@@ -2869,8 +2844,9 @@ void ClientDisconnect(int clientNum) {
   // OSP
 
   ETJump::saveSystem->savePositionsToDatabase(ent);
+  ETJump::progressionTrackers->saveClientProgression(ent);
 
-  ClearPortals(ent);
+  ETJump::EntityUtilities::clearPortals(ent);
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,

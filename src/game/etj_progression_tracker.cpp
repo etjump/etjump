@@ -22,36 +22,29 @@
  * SOFTWARE.
  */
 
-#include <memory>
-#include "etj_progression_tracker_parser.h"
-
-#include "g_local.h"
+#include <bitset>
 
 #include "etj_progression_tracker.h"
+#include "etj_session.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 
-#include <iostream>
-#include <bitset>
+namespace ETJump {
+const char *ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET =
+    "-1";
 
-const char
-    *ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET =
-        "-1";
+ProgressionTrackers::ProgressionTrackers() { _progressionTrackers.clear(); }
 
-ETJump::ProgressionTrackers::ProgressionTrackers() {
-  _progressionTrackers.clear();
-}
+ProgressionTrackers::~ProgressionTrackers() {}
 
-ETJump::ProgressionTrackers::~ProgressionTrackers() {}
-
-void ETJump::ProgressionTrackers::printParserErrors(
+void ProgressionTrackers::printParserErrors(
     const std::vector<std::string> &errors, const std::string &text) {
   auto buffer = "Tracker parse error on line: " + text + "\n";
-  buffer += ETJump::StringUtil::join(errors, "\n");
+  buffer += StringUtil::join(errors, "\n");
   G_Error(buffer.c_str());
 }
 
-void ETJump::ProgressionTrackers::updateTracker(
+void ProgressionTrackers::updateTracker(
     std::vector<ProgressionTrackerParser::IndexValuePair> pairs,
     int tracker[MAX_PROGRESSION_TRACKERS]) {
   for (const auto &pair : pairs) {
@@ -67,8 +60,8 @@ void ETJump::ProgressionTrackers::updateTracker(
   }
 }
 
-std::vector<ETJump::ProgressionTrackerParser::IndexValuePair>
-ETJump::ProgressionTrackers::parseKey(const std::string &key) {
+std::vector<ProgressionTrackerParser::IndexValuePair>
+ProgressionTrackers::parseKey(const std::string &key) {
   auto parser = ProgressionTrackerParser(key);
   auto errors = parser.getErrors();
   if (errors.size()) {
@@ -77,7 +70,7 @@ ETJump::ProgressionTrackers::parseKey(const std::string &key) {
   return parser.getParsedPairs();
 }
 
-int ETJump::ProgressionTrackers::registerTracker(ProgressionTrackerKeys keys) {
+int ProgressionTrackers::registerTracker(ProgressionTrackerKeys keys) {
   auto progressionTracker = ProgressionTracker();
 
   updateTracker(parseKey(keys.equal), progressionTracker.equal);
@@ -98,19 +91,20 @@ int ETJump::ProgressionTrackers::registerTracker(ProgressionTrackerKeys keys) {
   return _progressionTrackers.size() - 1;
 }
 
-void ETJump::ProgressionTrackers::useTracker(
-    gentity_t *ent, gentity_t *activator, const ProgressionTracker &tracker) {
-  int oldValues[MAX_PROGRESSION_TRACKERS];
+void ProgressionTrackers::useTracker(gentity_t *ent, gentity_t *activator,
+                                     const ProgressionTracker &tracker) {
+  std::array<int32_t, MAX_PROGRESSION_TRACKERS> oldValues{};
 
-  if (g_debugTrackers.integer > 0) {
-    memcpy(oldValues, activator->client->sess.progression, sizeof(oldValues));
+  if (g_debugTrackers.integer) {
+    memcpy(oldValues.data(), activator->client->pers.progression,
+           sizeof(oldValues));
   }
 
   auto idx = 0;
 
   for (auto &v : tracker.set) {
     if (v >= 0) {
-      activator->client->sess.progression[idx] = v;
+      activator->client->pers.progression[idx] = v;
     }
 
     ++idx;
@@ -119,7 +113,7 @@ void ETJump::ProgressionTrackers::useTracker(
   idx = 0;
   for (auto &v : tracker.increment) {
     if (v != 0) {
-      activator->client->sess.progression[idx] += v;
+      activator->client->pers.progression[idx] += v;
     }
     ++idx;
   }
@@ -127,7 +121,7 @@ void ETJump::ProgressionTrackers::useTracker(
   idx = 0;
   for (auto &v : tracker.bitSet) {
     if (v >= 0) {
-      activator->client->sess.progression[idx] |= (1 << v);
+      activator->client->pers.progression[idx] |= (1 << v);
     }
     ++idx;
   }
@@ -135,7 +129,7 @@ void ETJump::ProgressionTrackers::useTracker(
   idx = 0;
   for (auto &v : tracker.bitReset) {
     if (v >= 0) {
-      activator->client->sess.progression[idx] &= ~(1 << v);
+      activator->client->pers.progression[idx] &= ~(1 << v);
     }
     ++idx;
   }
@@ -151,7 +145,7 @@ void ETJump::ProgressionTrackers::useTracker(
   //  this assumes, but there's nothing stopping mappers from doing that for
   //  any other keys besides 'tracker_not_eq_any' and 'tracker_not_eq_all'.
   for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
-    const int clientTracker = activator->client->sess.progression[idx];
+    const int clientTracker = activator->client->pers.progression[idx];
 
     if ((tracker.equal[idx] != ProgressionTrackerValueNotSet &&
          tracker.equal[idx] != clientTracker) ||
@@ -181,7 +175,7 @@ void ETJump::ProgressionTrackers::useTracker(
   if (activate) {
     for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
       const auto clientBits =
-          std::bitset<32>(activator->client->sess.progression[idx]);
+          std::bitset<32>(activator->client->pers.progression[idx]);
 
       if (tracker.bitIsSet[idx] != ProgressionTrackerValueNotSet &&
           !clientBits.test(tracker.bitIsSet[idx])) {
@@ -202,37 +196,37 @@ void ETJump::ProgressionTrackers::useTracker(
 
     for (idx = 0; idx < MAX_PROGRESSION_TRACKERS; ++idx) {
       if (tracker.setIf[idx] >= 0) {
-        activator->client->sess.progression[idx] = tracker.setIf[idx];
+        activator->client->pers.progression[idx] = tracker.setIf[idx];
       }
 
       if (tracker.incrementIf[idx] != 0) {
-        activator->client->sess.progression[idx] += tracker.incrementIf[idx];
+        activator->client->pers.progression[idx] += tracker.incrementIf[idx];
       }
     }
 
-    printTrackerChanges(activator, oldValues);
+    if (g_debugTrackers.integer) {
+      printTrackerChanges(activator, oldValues);
+    }
   }
 }
 
-void ETJump::ProgressionTrackers::printTrackerChanges(gentity_t *activator,
-                                                      int *oldValues) {
-  if (g_debugTrackers.integer <= 0) {
-    return;
-  }
+void ProgressionTrackers::printTrackerChanges(
+    const gentity_t *activator,
+    const std::array<int32_t, MAX_PROGRESSION_TRACKERS> &oldValues) {
   const auto clientNum = ClientNum(activator);
 
-  for (int i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
-    if (oldValues[i] != activator->client->sess.progression[i]) {
+  for (int i = 0; i < oldValues.size(); i++) {
+    if (oldValues[i] != activator->client->pers.progression[i]) {
       const std::string &trackerChangeMsg = stringFormat(
           "^7Tracker change - index: ^3%i ^7value: ^2%i ^7from: ^9%i^7\n",
-          i + 1, activator->client->sess.progression[i], oldValues[i]);
+          i + 1, activator->client->pers.progression[i], oldValues[i]);
       Printer::popup(clientNum, trackerChangeMsg);
     }
   }
 }
 
-void ETJump::ProgressionTrackers::useTriggerTracker(gentity_t *ent,
-                                                    gentity_t *activator) {
+void ProgressionTrackers::useTriggerTracker(gentity_t *ent,
+                                            gentity_t *activator) {
   const auto &tracker = _progressionTrackers[ent->key];
 
   if (!activator || !activator->client) {
@@ -242,9 +236,8 @@ void ETJump::ProgressionTrackers::useTriggerTracker(gentity_t *ent,
   useTracker(ent, activator, tracker);
 }
 
-void ETJump::ProgressionTrackers::useTargetTracker(gentity_t *ent,
-                                                   gentity_t *other,
-                                                   gentity_t *activator) {
+void ProgressionTrackers::useTargetTracker(gentity_t *ent, gentity_t *other,
+                                           gentity_t *activator) {
   const auto &tracker = _progressionTrackers[ent->key];
 
   if (!activator || !activator->client) {
@@ -254,10 +247,10 @@ void ETJump::ProgressionTrackers::useTargetTracker(gentity_t *ent,
   useTracker(ent, activator, tracker);
 }
 
-void SP_target_tracker(gentity_t *self) {
-  const auto keys = ETJump::ProgressionTrackers::ParseTrackerKeys();
+void ProgressionTrackers::targetTrackerSpawn(gentity_t *self) {
+  const auto keys = ProgressionTrackers::ParseTrackerKeys();
   const char *defaultValue =
-      ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET;
+      ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET;
 
   if (Q_stricmp(keys.notEqualAny, defaultValue) &&
       Q_stricmp(keys.notEqualAll, defaultValue)) {
@@ -266,20 +259,20 @@ void SP_target_tracker(gentity_t *self) {
             __func__);
   }
 
-  self->key = ETJump::progressionTrackers->registerTracker(keys);
+  self->key = progressionTrackers->registerTracker(keys);
   self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator) {
-    ETJump::progressionTrackers->useTargetTracker(ent, other, activator);
+    progressionTrackers->useTargetTracker(ent, other, activator);
   };
 }
 
-void SP_trigger_tracker(gentity_t *self) {
+void ProgressionTrackers::triggerTrackerSpawn(gentity_t *self) {
   InitTrigger(self);
   // just make it same type as trigger multiple for now
   self->s.eType = ET_TRIGGER_MULTIPLE;
 
-  const auto keys = ETJump::ProgressionTrackers::ParseTrackerKeys();
+  const auto keys = ProgressionTrackers::ParseTrackerKeys();
   const char *defaultValue =
-      ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET;
+      ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET;
 
   if (Q_stricmp(keys.notEqualAny, defaultValue) &&
       Q_stricmp(keys.notEqualAll, defaultValue)) {
@@ -288,21 +281,21 @@ void SP_trigger_tracker(gentity_t *self) {
             __func__);
   }
 
-  self->key = ETJump::progressionTrackers->registerTracker(keys);
+  self->key = progressionTrackers->registerTracker(keys);
   self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator) {
-    ETJump::progressionTrackers->useTriggerTracker(ent, activator);
+    progressionTrackers->useTriggerTracker(ent, activator);
   };
   self->touch = [](gentity_t *ent, gentity_t *activator, trace_t *trace) {
-    ETJump::progressionTrackers->useTriggerTracker(ent, activator);
+    progressionTrackers->useTriggerTracker(ent, activator);
   };
 }
 
-ETJump::ProgressionTrackers::ProgressionTrackerKeys
-ETJump::ProgressionTrackers::ParseTrackerKeys() {
-  ETJump::ProgressionTrackers::ProgressionTrackerKeys keys{};
+ProgressionTrackers::ProgressionTrackerKeys
+ProgressionTrackers::ParseTrackerKeys() {
+  ProgressionTrackers::ProgressionTrackerKeys keys{};
 
   const char *VALUE_NOT_SET =
-      ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET;
+      ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET;
 
   G_SpawnString("tracker_eq", VALUE_NOT_SET, &keys.equal);
 
@@ -326,3 +319,21 @@ ETJump::ProgressionTrackers::ParseTrackerKeys() {
 
   return keys;
 }
+
+void ProgressionTrackers::saveClientProgression(const gentity_t *ent) {
+  const std::string guid = session->Guid(ent);
+  std::copy(std::begin(ent->client->pers.progression),
+            std::end(ent->client->pers.progression),
+            savedProgression[guid].begin());
+}
+
+void ProgressionTrackers::restoreClientProgression(const gentity_t *ent) {
+  const std::string guid = session->Guid(ent);
+
+  if (savedProgression.find(guid) != savedProgression.cend()) {
+    std::memcpy(ent->client->pers.progression, savedProgression[guid].data(),
+                sizeof(ent->client->pers.progression));
+  }
+}
+
+} // namespace ETJump

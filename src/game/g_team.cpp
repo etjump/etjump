@@ -2,6 +2,7 @@
 
 #include "g_local.h"
 #include "etj_string_utilities.h"
+#include "etj_printer.h"
 
 typedef struct teamgame_s {
   float last_flag_capture;
@@ -435,7 +436,7 @@ void Team_DroppedFlagThink(gentity_t *ent) {
                            "axis_object_returned");
     }
 
-    trap_SendServerCommand(-1, "cp \"Axis have returned the objective!\" 2");
+    Printer::centerPriorityAll("Axis have returned the objective!", 2);
   } else if (ent->item->giTag == PW_BLUEFLAG) {
     G_Script_ScriptEvent(&g_entities[ent->s.otherEntityNum], "trigger",
                          "returned");
@@ -448,9 +449,7 @@ void Team_DroppedFlagThink(gentity_t *ent) {
                            "allied_object_returned");
     }
 
-    //		trap_SendServerCommand(-1, "cp \"Allies have returned
-    // the
-    // objective!\" 2");
+    Printer::centerPriorityAll("Allies have returned the objective!", 2);
   }
   // Reset Flag will delete this entity
 }
@@ -1080,11 +1079,10 @@ void team_wolf_objective_use(gentity_t *self, gentity_t *other,
                              gentity_t *activator) {
   char cs[MAX_STRING_CHARS];
 
-  // Gordon 256 is a disabled flag
-  if ((self->count2 & ~256) == TEAM_AXIS) {
-    self->count2 = (self->count2 & 256) + TEAM_ALLIES;
-  } else if ((self->count2 & ~256) == TEAM_ALLIES) {
-    self->count2 = (self->count2 & 256) + TEAM_AXIS;
+  if ((self->count2 & ~SPAWN_DISABLED) == TEAM_AXIS) {
+    self->count2 = (self->count2 & SPAWN_DISABLED) + TEAM_ALLIES;
+  } else if ((self->count2 & ~SPAWN_DISABLED) == TEAM_ALLIES) {
+    self->count2 = (self->count2 & SPAWN_DISABLED) + TEAM_AXIS;
   }
 
   // And update configstring

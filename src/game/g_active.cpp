@@ -578,16 +578,19 @@ qboolean ClientInactivityTimer(gclient_t *client) {
       client->inactivityWarning = qfalse;
       client->inactivityTime = level.time + 60 * 1000;
 
-      VectorCopy(client->ps.origin, client->sess.posBeforeInactivity);
-      client->sess.loadedPosBeforeInactivity = qfalse;
-      client->sess.teamBeforeInactivitySpec = client->sess.sessionTeam;
-      G_LogPrintf("%f %f %f\n", client->sess.posBeforeInactivity[0],
-                  client->sess.posBeforeInactivity[1],
-                  client->sess.posBeforeInactivity[2]);
-      AP(va("cpm \"%s ^7was removed from teams due to "
-            "inactivity! (%s) \n\"",
-            client->pers.netname,
-            ETJump::getSecondsString(g_inactivity.integer).c_str()));
+      VectorCopy(client->ps.origin, client->inactivityPos.savedPos);
+      VectorCopy(client->ps.viewangles, client->inactivityPos.savedAngles);
+      client->inactivityPos.team = client->sess.sessionTeam;
+
+      G_LogPrintf("Inactivity: %i %i %s %s\n", ClientNum(client),
+                  client->sess.sessionTeam, vtosf(client->ps.origin),
+                  vtosf(client->ps.viewangles));
+
+      Printer::popupAll(ETJump::stringFormat(
+          "%s ^7was removed from teams due to inactivity! (%s)\n",
+          client->pers.netname,
+          ETJump::getSecondsString(g_inactivity.integer)));
+
       SetTeam(g_entities + (client - level.clients), "s", qtrue,
               static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
 
@@ -931,8 +934,7 @@ void CheckForEvents(gentity_t *ent) {
   }
 }
 
-// void ClientDamage( gentity_t *clent, int entnum, int enemynum, int id );
-// // NERVE - SMF
+inline constexpr int32_t MAX_TIMERUN_LAG_TIME = 600;
 
 /*
 ==============
@@ -1017,6 +1019,8 @@ void ClientThink_real(gentity_t *ent) {
     client->wantsscore = qfalse;
   }
 
+  ent->client->teleportBitFlipped = false;
+
   //
   // check for exiting intermission
   //
@@ -1032,7 +1036,7 @@ void ClientThink_real(gentity_t *ent) {
     return;
   }
 
-  ETJump::InactivityTimer::checkClientInactivity(ent);
+  ETJump::InactivityTimer::updateClientInactivityStatus(ent);
 
   if (!(ent->r.svFlags & SVF_BOT) &&
       level.time - client->pers.lastCCPulseTime > 2000) {
@@ -1111,18 +1115,11 @@ void ClientThink_real(gentity_t *ent) {
 
   // Stop lagging through triggers in timeruns
   if (client->sess.timerunActive) {
-    if (client->ps.ping > 400) {
-      client->numLagFrames++;
-
-      // allow 100ms of sustained lag
-      if (client->numLagFrames * level.frameTime >= FRAMETIME) {
-        Printer::center(clientNum,
-                        "^3WARNING: ^7Timerun stopped due to high ping!");
-        InterruptRun(ent);
-        client->numLagFrames = 0;
-      }
-    } else {
-      client->numLagFrames = 0;
+    if (ucmd->serverTime - client->ps.commandTime > MAX_TIMERUN_LAG_TIME) {
+      Printer::center(
+          clientNum,
+          "^3WARNING: ^7Timerun stopped due to high command time delta!");
+      InterruptRun(ent);
     }
 
     if (client->pers.maxFPS > 0 && client->pers.maxFPS < 25) {
@@ -1512,15 +1509,22 @@ void SpectatorClientEndFrame(gentity_t *ent) {
 
     if (do_respawn) {
       reinforce(ent);
-      if (ent->client->pers.autoLoad) {
-        // need to do this here as reinforce will override any value set in
-        // clientspawn (ClientSpawn gets called twice, and we only want to
-        // call this once --> first call sets the origin, second call resets
-        // the origin (since we're no longer setting the origin
-        // as we already set it))
+
+      // need to do this here as reinforce will override any value set in
+      // clientspawn (ClientSpawn gets called twice, and we only want to
+      // call this once --> first call sets the origin, second call resets
+      // the origin (since we're no longer setting the origin
+      // as we already set it))
+      if (ent->client->inactivityPos.team != TEAM_FREE &&
+          ent->client->sess.sessionTeam == ent->client->inactivityPos.team) {
+        ent->client->inactivityPos.team = TEAM_FREE;
+        DirectTeleport(ent, ent->client->inactivityPos.savedPos,
+                       ent->client->inactivityPos.savedAngles);
+      } else if (ent->client->pers.autoLoad) {
         ETJump::saveSystem->loadOnceTeamQuickDeployPosition(
             ent, ent->client->sess.sessionTeam);
       }
+
       return;
     }
 
@@ -1791,12 +1795,12 @@ void ClientEndFrame(gentity_t *ent) {
   // OSP -- range changed for MV
   for (i = 0; i < PW_NUM_POWERUPS; i++) {
     // etjump: repurposed powerups
-    if (i == PW_PUSHERPREDICT) {
+    if (i == PW_PUSHERPREDICT || i == PW_PORTALPREDICT) {
       continue;
     }
 
     // these aren't dependant on level.time
-    if (i == PW_FIRE || i == PW_BREATHER || i == PW_NOFATIGUE ||
+    if (i == PW_BREATHER || i == PW_NOFATIGUE ||
         ent->client->ps.powerups[i] == 0 // OSP
         || i == PW_OPS_CLASS_1 || i == PW_OPS_CLASS_2 || i == PW_OPS_CLASS_3 ||
         i == PW_OPS_DISGUISED || i == PW_ADRENALINE) {

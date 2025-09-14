@@ -62,7 +62,7 @@ void PmoveUtils::setPmoveStatus() {
 }
 
 void PmoveUtils::setupUserCmd() {
-  uCmdScale = ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_WALKING << 8
+  uCmdScale = ps.stats[STAT_USERCMD_BUTTONS] & BUTTON_WALKING << 8
                   ? CMDSCALE_WALK
                   : CMDSCALE_DEFAULT;
 
@@ -73,22 +73,22 @@ void PmoveUtils::setupUserCmd() {
   }
 
   cmd.forwardmove = static_cast<signed char>(
-      uCmdScale * (!!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD) -
-                   !!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD)));
+      uCmdScale * (!!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD) -
+                   !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD)));
   cmd.rightmove = static_cast<signed char>(
-      uCmdScale * (!!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT) -
-                   !!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT)));
+      uCmdScale * (!!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT) -
+                   !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_LEFT)));
   cmd.upmove = static_cast<signed char>(
-      uCmdScale * (!!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP) -
-                   !!(ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN)));
+      uCmdScale * (!!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_UP) -
+                   !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_DOWN)));
 
   // store buttons too, so we get correct scale when sprint is held
-  cmd.buttons = ps->stats[STAT_USERCMD_BUTTONS] >> 8;
-  cmd.wbuttons = ps->stats[STAT_USERCMD_BUTTONS] & 0xff;
+  cmd.buttons = ps.stats[STAT_USERCMD_BUTTONS] >> 8;
+  cmd.wbuttons = ps.stats[STAT_USERCMD_BUTTONS] & 0xff;
 
   // generate correct angles
   for (int i = 0; i < 3; i++) {
-    cmd.angles[i] = ANGLE2SHORT(ps->viewangles[i]) - ps->delta_angles[i];
+    cmd.angles[i] = ANGLE2SHORT(ps.viewangles[i]) - ps.delta_angles[i];
   }
 
   cmd.serverTime = cg.snap->serverTime;
@@ -101,7 +101,7 @@ void PmoveUtils::setupPmove() {
     return;
   }
 
-  pm.ps = ps;
+  pm.ps = &ps;
   pm.pmext = &pmext;
   pm.character =
       CG_CharacterForClientinfo(&cgs.clientinfo[cg.snap->ps.clientNum],
@@ -120,6 +120,7 @@ void PmoveUtils::runPmove() {
   // this should never be called before client prediction has run at least once
   assert(cg.validPPS);
 
+  ps = cg.predictedPlayerState;
   setupUserCmd();
   setupPmove();
 
@@ -133,10 +134,10 @@ void PmoveUtils::runPmove() {
 
 float PmoveUtils::getSprintScale() const {
   // based on PM_CmdScale from bg_pmove.cpp
-  return ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_SPRINT << 8 &&
+  return ps.stats[STAT_USERCMD_BUTTONS] & BUTTON_SPRINT << 8 &&
                  cg.pmext.sprintTime > 50
-             ? ps->sprintSpeedScale
-             : ps->runSpeedScale;
+             ? ps.sprintSpeedScale
+             : ps.runSpeedScale;
 }
 
 float PmoveUtils::getWishspeed(vec3_t wishvel, const float scale,
@@ -180,7 +181,7 @@ float PmoveUtils::getWishspeed(vec3_t wishvel, const float scale,
 
 void PmoveUtils::updateWishvel(vec3_t wishvel, vec3_t forward, vec3_t right,
                                vec3_t up, const usercmd_t &ucmd) const {
-  AngleVectors(ps->viewangles, forward, right, up);
+  AngleVectors(ps.viewangles, forward, right, up);
 
   // project moves down to flat plane
   forward[2] = 0;
@@ -218,7 +219,7 @@ bool PmoveUtils::skipUpdate(int &lastUpdateTime,
 
   const int frameTime = cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback
                             ? cg.time
-                            : ps->commandTime;
+                            : ps.commandTime;
   const int now = frameTime - frameTime % pm.pmove_msec;
 
   // never skip updates if lerping is requested

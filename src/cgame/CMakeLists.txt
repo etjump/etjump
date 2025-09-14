@@ -86,6 +86,7 @@ add_library(cgame MODULE
 	"etj_savepos.cpp"
 	"etj_snaphud.cpp"
 	"etj_speed_drawable.cpp"
+	"etj_spectatorinfo_data.cpp"
 	"etj_spectatorinfo_drawable.cpp"
 	"etj_strafe_quality_drawable.cpp"
 	"etj_upper_right_drawable.cpp"

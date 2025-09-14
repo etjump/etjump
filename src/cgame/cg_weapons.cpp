@@ -6,8 +6,10 @@
  */
 
 #include "cg_local.h"
-#include "../game/etj_string_utilities.h"
+#include "etj_demo_compatibility.h"
 #include "etj_utilities.h"
+
+#include "../game/etj_string_utilities.h"
 
 vec3_t ejectBrassCasingOrigin;
 
@@ -851,13 +853,10 @@ CG_RailTrail
     SA: re-inserted this as a debug mechanism for bullets
 ==========================
 */
-void CG_RailTrail2(clientInfo_t *ci, const vec3_t start, const vec3_t end,
-                   const vec3_t color) {
-  localEntity_t *le;
-  refEntity_t *re;
+void CG_RailTrail2(const vec3_t start, const vec3_t end, const vec3_t color) {
 
-  le = CG_AllocLocalEntity();
-  re = &le->refEntity;
+  localEntity_t *le = CG_AllocLocalEntity();
+  refEntity_t *re = &le->refEntity;
 
   le->leType = LE_FADE_RGB;
   le->startTime = cg.time;
@@ -885,18 +884,15 @@ CG_RailTrail
     modified so we could draw boxes for debugging as well
 ==============
 */
-void CG_RailTrail(clientInfo_t *ci, const vec3_t start, const vec3_t end,
-                  int type, const vec3_t color) //----(SA)	added 'type'
-{
+void CG_RailTrail(const vec3_t start, const vec3_t end, const bool box,
+                  const vec3_t color) {
   vec3_t diff, v1, v2, v3, v4, v5, v6;
 
-  if (!type) // just a line
-  {
-    CG_RailTrail2(ci, start, end, color);
+  // just a line
+  if (!box) {
+    CG_RailTrail2(start, end, color);
     return;
   }
-
-  // type '1' (box)
 
   VectorSubtract(start, end, diff);
 
@@ -906,9 +902,9 @@ void CG_RailTrail(clientInfo_t *ci, const vec3_t start, const vec3_t end,
   v1[0] -= diff[0];
   v2[1] -= diff[1];
   v3[2] -= diff[2];
-  CG_RailTrail2(ci, start, v1, color);
-  CG_RailTrail2(ci, start, v2, color);
-  CG_RailTrail2(ci, start, v3, color);
+  CG_RailTrail2(start, v1, color);
+  CG_RailTrail2(start, v2, color);
+  CG_RailTrail2(start, v3, color);
 
   VectorCopy(end, v4);
   VectorCopy(end, v5);
@@ -916,17 +912,17 @@ void CG_RailTrail(clientInfo_t *ci, const vec3_t start, const vec3_t end,
   v4[0] += diff[0];
   v5[1] += diff[1];
   v6[2] += diff[2];
-  CG_RailTrail2(ci, end, v4, color);
-  CG_RailTrail2(ci, end, v5, color);
-  CG_RailTrail2(ci, end, v6, color);
+  CG_RailTrail2(end, v4, color);
+  CG_RailTrail2(end, v5, color);
+  CG_RailTrail2(end, v6, color);
 
-  CG_RailTrail2(ci, v2, v6, color);
-  CG_RailTrail2(ci, v6, v1, color);
-  CG_RailTrail2(ci, v1, v5, color);
+  CG_RailTrail2(v2, v6, color);
+  CG_RailTrail2(v6, v1, color);
+  CG_RailTrail2(v1, v5, color);
 
-  CG_RailTrail2(ci, v2, v4, color);
-  CG_RailTrail2(ci, v4, v3, color);
-  CG_RailTrail2(ci, v3, v5, color);
+  CG_RailTrail2(v2, v4, color);
+  CG_RailTrail2(v4, v3, color);
+  CG_RailTrail2(v3, v5, color);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2226,7 +2222,6 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
   weapon_t weaponNum;
   weaponInfo_t *weapon;
   centity_t *nonPredictedCent;
-  qboolean firing; // Ridah
   qboolean akimboFire = qfalse;
   qboolean drawpart;
   qboolean isPlayer;
@@ -2400,8 +2395,24 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
     }
   }
 
-  // Ridah
-  firing = ((cent->currentState.eFlags & EF_FIRING) != 0) ? qtrue : qfalse;
+  bool firing = cent->currentState.eFlags & EF_FIRING;
+
+  // NOTE: only for first person view,
+  // 'CG_EntityEvent' handles this for other players
+  if (ETJump::demoCompatibility->flags.setAttack2FiringFlag && ps && !firing) {
+    // need to override this from 'CG_EDV_RunInput' setup,
+    // otherwise we don't get correct ammo counts in 'PM_WeaponAmmoAvailable'
+    cg_pmove.noWeapClips = qfalse;
+
+    firing = ETJump::canFireWeapon(ps) &&
+             !(ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_TALK) &&
+             (ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_ATTACK ||
+              ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_ATTACK2);
+
+    // ...and reset for safety, not sure if this is required
+    // as it's just going to be overridden next frame anyway
+    cg_pmove.noWeapClips = qtrue;
+  }
 
   if (ps && !cg.renderingThirdPerson &&
       cg.predictedPlayerState.weapon == WP_MORTAR_SET &&

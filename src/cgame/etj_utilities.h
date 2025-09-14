@@ -28,6 +28,10 @@
 
 #include "../game/q_shared.h"
 
+#ifdef CGAMEDLL
+  #include "cg_local.h"
+#endif
+
 namespace ETJump {
 typedef std::initializer_list<const char *> ShaderStage;
 typedef std::initializer_list<ShaderStage> ShaderStages;
@@ -61,7 +65,7 @@ void executeTimeout(int handle);
 bool configFileExists(const std::string &filename);
 
 // executes a cfg file with given name, omit .cfg extension
-void execFile(const std::string &filename);
+void execFile(const std::string &filename, ExecFileType type);
 
 // returns true if clientNum is a valid number for client
 bool isValidClientNum(int clientNum);
@@ -81,6 +85,8 @@ bool playerIsNoclipping(int clientNum);
 void tempTraceIgnoreClient(int clientNum);
 
 void resetTempTraceIgnoredClients();
+
+bool skipPortalDraw(int selfNum, int otherNum);
 
 #endif
 } // namespace ETJump

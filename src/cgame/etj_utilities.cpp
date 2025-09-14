@@ -31,9 +31,10 @@
 
 #include "etj_utilities.h"
 #include "etj_event_loop.h"
-#include "../game/etj_string_utilities.h"
 #include "cg_local.h"
 #include "etj_demo_compatibility.h"
+#include "../game/etj_string_utilities.h"
+#include "../game/etj_portalgun_shared.h"
 
 namespace ETJump {
 extern std::shared_ptr<EventLoop> eventLoop;
@@ -65,7 +66,7 @@ std::string ETJump::composeShader(const char *name, ShaderStages stages) {
   return composeShader(name, {""}, stages);
 }
 
-static std::unordered_map<std::string, vec4_t *> validColorNames = {
+static std::unordered_map<std::string, const vec4_t *> validColorNames = {
     {"white", &colorWhite},       {"red", &colorRed},
     {"green", &colorGreen},       {"blue", &colorBlue},
     {"yellow", &colorYellow},     {"magenta", &colorMagenta},
@@ -201,8 +202,11 @@ bool ETJump::configFileExists(const std::string &filename) {
   return fileExists;
 }
 
-void ETJump::execFile(const std::string &filename) {
-  trap_SendConsoleCommand(va("exec \"%s.cfg\"\n", filename.c_str()));
+void ETJump::execFile(const std::string &filename, ExecFileType type) {
+  const bool quiet = static_cast<int>(type) & etj_useExecQuiet.integer;
+  const std::string cmd = quiet ? stringFormat("execq \"%s.cfg\"\n", filename)
+                                : stringFormat("exec \"%s.cfg\"\n", filename);
+  trap_SendConsoleCommand(cmd.c_str());
 }
 
 bool ETJump::isValidClientNum(const int clientNum) {
@@ -269,6 +273,24 @@ void ETJump::tempTraceIgnoreClient(int clientNum) {
 
 void ETJump::resetTempTraceIgnoredClients() {
   std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
+}
+
+bool ETJump::skipPortalDraw(const int selfNum, const int otherNum) {
+  if (selfNum == otherNum) {
+    return false;
+  }
+
+  if (etj_portalTeam.integer == PORTAL_TEAM_ALL ||
+      (etj_viewPlayerPortals.integer && !cgs.clientinfo[otherNum].hideMe)) {
+    return false;
+  }
+
+  if (etj_portalTeam.integer == PORTAL_TEAM_FT &&
+      CG_IsOnSameFireteam(selfNum, otherNum)) {
+    return false;
+  }
+
+  return true;
 }
 
 #endif

@@ -6,7 +6,7 @@
 #define MENU_NAME "etjump_settings_general_client"
 #define GROUP_NAME "group_etjump_settings_general"
 
-#define NUM_SUBMENUS 3
+#define NUM_SUBMENUS 4
 #define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
 
 menuDef {
@@ -42,6 +42,7 @@ menuDef {
     SIDEBUTTON          (1, "GAMEPLAY", close MENU_NAME; open etjump_settings_general_gameplay)
     SIDEBUTTON_ACTIVE   (2, "CLIENT", close MENU_NAME; open MENU_NAME)
     SIDEBUTTON          (3, "CONSOLE", close MENU_NAME; open etjump_settings_general_console)
+    SIDEBUTTON          (4, "UI", close MENU_NAME; open etjump_settings_general_ui)
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CLIENT")
 
@@ -50,11 +51,8 @@ menuDef {
 
 #ifdef VET
         MULTI               (SETTINGS_ITEM_POS(3), "Rendering primitives:", 0.2, SETTINGS_ITEM_H, "r_primitives", cvarFloatList { "Auto" 0 "Multiple glArrayElement" 1 "Single glDrawElements" 2 }, "Sets rendering primitives mode (ET 2.60b only)\nSetting this to 'Single glDrawElements' is recommended on modern systems for best performance\nr_primitives")
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS(4), "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        CACHEDSLIDER        (SETTINGS_ITEM_POS(4), "Menu sensitivity:", 0.2, SETTINGS_ITEM_H, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
 #else
-        CVARFLOATLABEL      (SETTINGS_ITEM_POS(3), "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        CACHEDSLIDER        (SETTINGS_ITEM_POS(3), "Menu sensitivity:", 0.2, SETTINGS_ITEM_H, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
+        COMBO_BIT           (SETTINGS_COMBO_POS(3), "Use quiet exec:", 0.2, SETTINGS_ITEM_H, "etj_useExecQuiet", cvarFloatList { "Map autoexec" 1 "Team autoexec" 2 }, none, "Use 'execq' when executing autoexec configs\netj_useExecQuiet")
 #endif
 
 

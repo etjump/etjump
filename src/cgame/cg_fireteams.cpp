@@ -271,6 +271,16 @@ const char *ftOnMenuRulesListAlphaChars[] = {
     nullptr,
 };
 
+const char *ftOnCommonList[] = {
+    "Start countdown",
+    nullptr,
+};
+
+const char *ftOnCommonListAlphaChars[] = {
+    "C",
+    nullptr,
+};
+
 const char *ftLeaderMenuList[] = {
     "Disband", "Leave", "Invite",           "Kick",
     "Warn",    "Rules", "%s teamjump mode", nullptr,
@@ -713,6 +723,27 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
             y += button->rect.h;
           }
         }
+
+        // FIXME: I hate this...
+        for (i = 0; ftOnCommonList[i]; i++) {
+          const char *str = nullptr;
+
+          if (cg_quickMessageAlt.integer) {
+            str = va(
+                "%i. %s",
+                (i + 1 + static_cast<int>(FTMenuOptions::FT_COUNTDOWN_START)) %
+                    10,
+                ftOnCommonList[i]);
+          } else {
+            str = va("%s. %s", ftOnCommonListAlphaChars[i], ftOnCommonList[i]);
+          }
+
+          CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
+                            button->font->scaley, button->font->colour, str, 0,
+                            0, button->font->style, button->font->font);
+
+          y += button->rect.h;
+        }
       }
       break;
 
@@ -965,22 +996,31 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
         return qtrue;
       } else {
         if (!CG_IsFireTeamLeader(cg.clientNum)) {
-          if (i >= 2) {
+          if (i >= static_cast<int>(FTMenuOptions::FT_INVITE) &&
+              i != static_cast<int>(FTMenuOptions::FT_COUNTDOWN_START)) {
             break;
           }
 
-          if (i == 0 && !CG_CountPlayersNF()) {
+          if (i == static_cast<int>(FTMenuOptions::FT_DISBAND_PROPOSE) &&
+              !CG_CountPlayersNF()) {
             break;
           }
 
           if (doaction) {
-            if (i == 1) {
-              trap_SendConsoleCommand("fireteam leave\n");
-              CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-            } else {
-              cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_PROPOSE);
-              cgs.ftMenuModeEx = 0;
-              cgs.ftMenuPos = i;
+            switch (static_cast<FTMenuOptions>(i)) {
+              case FTMenuOptions::FT_CREATE_LEAVE:
+                trap_SendConsoleCommand("fireteam leave\n");
+                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                break;
+              case FTMenuOptions::FT_COUNTDOWN_START:
+                trap_SendConsoleCommand("fireteam countdown\n");
+                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                break;
+              default:
+                cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_PROPOSE);
+                cgs.ftMenuModeEx = 0;
+                cgs.ftMenuPos = i;
+                break;
             }
           }
 
@@ -1002,22 +1042,32 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           }
 
           if (doaction) {
-            if (i == static_cast<int>(FTMenuOptions::FT_DISBAND_PROPOSE)) {
-              trap_SendConsoleCommand("fireteam disband\n");
-              CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-            } else if (i == static_cast<int>(FTMenuOptions::FT_CREATE_LEAVE)) {
-              trap_SendConsoleCommand("fireteam leave\n");
-              CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-            } else if (i == static_cast<int>(FTMenuOptions::FT_TJMODE)) {
-              trap_SendConsoleCommand(va(
-                  "fireteam teamjump %i",
-                  cgs.clientinfo[cg.clientNum].fireteamData->teamJumpMode ? 0
-                                                                          : 1));
-              CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-            } else {
-              cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_ADMIN);
-              cgs.ftMenuModeEx = 0;
-              cgs.ftMenuPos = i;
+            switch (static_cast<FTMenuOptions>(i)) {
+              case FTMenuOptions::FT_DISBAND_PROPOSE:
+                trap_SendConsoleCommand("fireteam disband\n");
+                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                break;
+              case FTMenuOptions::FT_CREATE_LEAVE:
+                trap_SendConsoleCommand("fireteam leave\n");
+                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                break;
+              case FTMenuOptions::FT_TJMODE:
+                trap_SendConsoleCommand(
+                    va("fireteam teamjump %i",
+                       cgs.clientinfo[cg.clientNum].fireteamData->teamJumpMode
+                           ? 0
+                           : 1));
+                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                break;
+              case FTMenuOptions::FT_COUNTDOWN_START:
+                trap_SendConsoleCommand("fireteam countdown\n");
+                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                break;
+              default:
+                cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_ADMIN);
+                cgs.ftMenuModeEx = 0;
+                cgs.ftMenuPos = i;
+                break;
             }
           }
 

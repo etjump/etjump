@@ -4720,6 +4720,7 @@ const voteType_t voteToggles[] = {
     {"vote_allow_randommap", CV_SVF_RANDOMMAP},
     {"vote_allow_rtv", CV_SVF_RTV},
     {"vote_allow_autoRtv", CV_SVF_AUTORTV},
+    {"vote_allow_portalPredict", CV_SVF_PORTALPREDICT},
 };
 
 const char *BG_TeamnameForNumber(team_t teamNum) {
@@ -4937,7 +4938,7 @@ int BG_cleanName(const char *pszIn, char *pszOut, unsigned int dwMaxLength,
 // Only used locally
 typedef struct {
   const char *colorname;
-  vec4_t *color;
+  const vec4_t *color;
 } colorTable_t;
 
 // Colors for crosshairs

@@ -32,6 +32,7 @@ class OverbounceDetector : public IRenderable {
   bool beforeRender() override;
   void render() const override;
   static bool canSkipDraw();
+  void overbounceTrace(trace_t &tr, const vec3_t tr_start, const vec3_t tr_end);
 
   playerState_t *ps;
   float x;

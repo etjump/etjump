@@ -358,6 +358,11 @@ typedef struct centity_s {
   // Gordon: tagconnect cleanup..
   int tagParent;
   char tagName[MAX_QPATH];
+
+  // last time we drew a railbox for debugging
+  // we don't want to add a new railbox each frame,
+  // otherwise we just fill up localents array in few frames
+  int lastRailboxTime;
 } centity_t;
 
 //======================================================================
@@ -1273,6 +1278,9 @@ typedef struct {
   bool jumpDelayBug;
 
   bool chatMenuOpen;
+
+  // to prevent teleport bit getting flipped multiple times per frame
+  bool teleportBitFlipped;
 } cg_t;
 
 inline constexpr int NUM_FUNNEL_SPRITES = 21;
@@ -2146,7 +2154,8 @@ enum class FTMenuOptions {
   FT_WARN = 4,
   FT_RULES = 5,
   FT_TJMODE = 6,
-  FT_MAX_OPTIONS = 7,
+  FT_COUNTDOWN_START = 7,
+  FT_MAX_OPTIONS = 8,
 };
 
 enum class FTMenuMode {
@@ -2455,10 +2464,11 @@ extern vmCvar_t etj_popupPosX;
 extern vmCvar_t etj_popupPosY;
 
 // Feen: PGM client cvars
-extern vmCvar_t
-    etj_viewPlayerPortals; // Enable/Disable viewing other player portals
-// TODO: May add cvars to allow players to override portal colors
-//		when etj_viewPlayerPortals is set to 0 (disabled)
+// Enable/Disable viewing other player portals
+extern vmCvar_t etj_viewPlayerPortals;
+extern vmCvar_t etj_portalDebug;
+extern vmCvar_t etj_portalPredict;
+extern vmCvar_t etj_portalTeam;
 
 extern vmCvar_t etj_expandedMapAlpha;
 
@@ -2512,6 +2522,7 @@ extern vmCvar_t etj_HUD_fireteam;
 extern vmCvar_t etj_fireteamPosX;
 extern vmCvar_t etj_fireteamPosY;
 extern vmCvar_t etj_fireteamAlpha;
+extern vmCvar_t etj_fireteamCountdownLength;
 
 // TODO: this is a bitflag option for etj_logBanner, move it elsewhere
 //  or just get rid of it entirely (why is this a bitflag to begin with???)
@@ -2533,6 +2544,8 @@ extern vmCvar_t etj_spectatorInfoX;
 extern vmCvar_t etj_spectatorInfoY;
 extern vmCvar_t etj_spectatorInfoScale;
 extern vmCvar_t etj_spectatorInfoShadow;
+extern vmCvar_t etj_spectatorInfoMaxClients;
+extern vmCvar_t etj_spectatorInfoDirection;
 
 extern vmCvar_t etj_drawRunTimer;
 extern vmCvar_t etj_runTimerX;
@@ -2773,6 +2786,10 @@ extern vmCvar_t etj_onDemoPlaybackStart;
 
 extern vmCvar_t etj_HUD_noLerp;
 
+extern vmCvar_t etj_useExecQuiet;
+
+extern vmCvar_t etj_hideFlamethrowerEffects;
+
 //
 // cg_main.c
 //
@@ -2864,7 +2881,7 @@ void CG_DrawRotatedPic(float x, float y, float width, float height,
                        qhandle_t hShader, float angle); // NERVE - SMF
 void CG_DrawChar(int x, int y, int width, int height, int ch,
                  qboolean isShadow);
-void CG_FilledBar(float x, float y, float w, float h, float *startColor,
+void CG_FilledBar(float x, float y, float w, float h, const float *startColor,
                   const float *endColor, const float *bgColor, float frac,
                   int flags);
 // JOSEPH 10-26-99
@@ -2959,27 +2976,28 @@ void CG_DrawActive(stereoFrame_t stereoView);
 void CG_CheckForCursorHints(void);
 void CG_DrawTeamBackground(int x, int y, int w, int h, float alpha, int team);
 void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
-                       vec4_t color, const char *text, float adjust, int limit,
-                       int style, fontInfo_t *font);
-void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
-                       vec4_t color, const std::string &text, float adjust,
+                       const vec4_t color, const char *text, float adjust,
                        int limit, int style, fontInfo_t *font);
+void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
+                       const vec4_t color, const std::string &text,
+                       float adjust, int limit, int style, fontInfo_t *font);
 void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
-                               vec4_t color, const char *text, float adjust,
-                               int limit, int style, fontInfo_t *font);
+                               const vec4_t color, const char *text,
+                               float adjust, int limit, int style,
+                               fontInfo_t *font);
 void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
-                               vec4_t color, const std::string &text,
+                               const vec4_t color, const std::string &text,
                                float adjust, int limit, int style,
                                fontInfo_t *font);
 void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
-                                    float scaley, vec4_t color,
+                                    float scaley, const vec4_t color,
                                     const char *text, float adjust, int limit,
                                     int style, fontInfo_t *font);
 void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
-                                    float scaley, vec4_t color,
+                                    float scaley, const vec4_t color,
                                     const std::string &text, float adjust,
                                     int limit, int style, fontInfo_t *font);
-void CG_Text_Paint(float x, float y, float scale, vec4_t color,
+void CG_Text_Paint(float x, float y, float scale, const vec4_t color,
                    const char *text, float adjust, int limit, int style);
 void CG_Text_SetActiveFont(int font);
 int CG_Text_Width_Ext(const char *text, float scale, int limit,
@@ -3011,7 +3029,7 @@ void CG_DrawCursorhint(rectDef_t *rect);
 void CG_DrawWeapStability(rectDef_t *rect);
 void CG_DrawWeapHeat(rectDef_t *rect, int align);
 void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted,
-                             int align, vec4_t *refcolor);
+                             int align, const vec4_t *refcolor);
 int CG_CalculateReinfTime(qboolean menu);
 float CG_CalculateReinfTime_Float(qboolean menu);
 void CG_Fade(int r, int g, int b, int a, int time, int duration);
@@ -3159,10 +3177,9 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
                int fleshEntityNum, int otherEntNum2, float waterfraction,
                int seed);
 
-void CG_RailTrail(clientInfo_t *ci, const vec3_t start, const vec3_t end,
-                  int type, const vec3_t color); //----(SA)	added 'type'
-void CG_RailTrail2(clientInfo_t *ci, const vec3_t start, const vec3_t end,
-                   const vec3_t color);
+void CG_RailTrail(const vec3_t start, const vec3_t end, bool box,
+                  const vec3_t color);
+void CG_RailTrail2(const vec3_t start, const vec3_t end, const vec3_t color);
 void CG_GrappleTrail(centity_t *ent, const weaponInfo_t *wi);
 void CG_AddViewWeapon(playerState_t *ps);
 void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
@@ -4242,6 +4259,17 @@ enum class HUDLerpFlags {
   CGAZ = 1 << 1,
   SNAPHUD = 1 << 2,
   STRAFE_QUALITY = 1 << 3,
+};
+
+enum class ExecFileType {
+  NONE = 0,
+  MAP_AUTOEXEC = 1 << 0,
+  TEAM_AUTOEXEC = 1 << 1,
+};
+
+enum class HideFlamethrowerFlags {
+  HIDE_SELF = 1 << 0,
+  HIDE_OTHERS = 1 << 1,
 };
 } // namespace ETJump
 

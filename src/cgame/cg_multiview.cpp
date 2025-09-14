@@ -606,7 +606,7 @@ void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h,
   centity_t *cent = &cg_entities[pID];
   clientInfo_t *ci = &cgs.clientinfo[pID];
   const char *p_class = "?";
-  vec4_t *noSelectBorder = &colorDkGrey;
+  const vec4_t *noSelectBorder = &colorDkGrey;
 
   // Overlays for zoomed views
   if (ci->health > 0) {

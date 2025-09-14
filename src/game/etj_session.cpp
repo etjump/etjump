@@ -31,6 +31,7 @@
 #include "etj_string_utilities.h"
 #include "etj_levels.h"
 #include "etj_save_system.h"
+#include "etj_progression_tracker.h"
 #include "etj_crypto.h"
 #include "etj_shared.h"
 
@@ -104,7 +105,7 @@ void Session::WriteSessionData(int clientNum) {
   trap_Cvar_Set(va("etjumpsession%i", clientNum), sessionData);
 }
 
-std::string Session::Guid(gentity_t *ent) const {
+std::string Session::Guid(const gentity_t *ent) const {
   return clients_[ClientNum(ent)].guid;
 }
 
@@ -144,6 +145,8 @@ void Session::OnGuidReceived(gentity_t *ent) {
   if (g_save.integer) {
     ETJump::saveSystem->loadPositionsFromDatabase(ent);
   }
+
+  ETJump::progressionTrackers->restoreClientProgression(ent);
 }
 
 bool Session::GuidReceived(gentity_t *ent) {

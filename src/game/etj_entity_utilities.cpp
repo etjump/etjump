@@ -26,6 +26,8 @@
 #include "etj_string_utilities.h"
 
 namespace ETJump {
+std::vector<std::string> EntityUtilities::parsedEntities;
+
 bool EntityUtilities::isPlayer(gentity_t *ent) {
   auto cnum = ClientNum(ent);
   return cnum >= 0 && cnum < MAX_CLIENTS;
@@ -48,7 +50,7 @@ void EntityUtilities::checkForRailBox(gentity_t *ent) {
   }
 }
 
-void EntityUtilities::drawRailBox(gentity_t *ent,
+void EntityUtilities::drawRailBox(const gentity_t *ent,
                                   const std::vector<float> &color) {
   vec3_t b1;
   vec3_t b2;
@@ -135,4 +137,54 @@ void EntityUtilities::setCursorhintFromString(int &value,
   }
 }
 
+void EntityUtilities::getOriginOrBmodelCenter(const gentity_t *ent,
+                                              vec3_t origin) {
+  if (!VectorCompare(ent->r.currentOrigin, vec3_origin)) {
+    VectorCopy(ent->r.currentOrigin, origin);
+  } else {
+    origin[0] = (ent->r.absmax[0] + ent->r.absmin[0]) / 2;
+    origin[1] = (ent->r.absmax[1] + ent->r.absmin[1]) / 2;
+    origin[2] = (ent->r.absmax[2] + ent->r.absmin[2]) / 2;
+  }
+}
+
+bool EntityUtilities::clearPortals(gentity_t *ent) {
+  bool removed = false;
+
+  // Clear portalgun portals
+  if (ent->portalBlue) {
+    G_FreeEntity(ent->portalBlue);
+    ent->portalBlue = nullptr;
+    removed = true;
+  }
+
+  if (ent->portalRed) {
+    G_FreeEntity(ent->portalRed);
+    ent->portalRed = nullptr;
+    removed = true;
+  }
+
+  if (ent->client) {
+    ent->client->numPortals = 0;
+  }
+
+  return removed;
+}
+
+void EntityUtilities::storeParsedEntity() {
+  assert(level.spawning);
+
+  std::string entity;
+
+  for (int i = 0; i < level.numSpawnVars; i++) {
+    entity += ETJump::stringFormat("\"%s\" \"%s\"\n", level.spawnVars[i][0],
+                                   level.spawnVars[i][1]);
+  }
+
+  parsedEntities.push_back("{\n" + entity + "}\n");
+}
+
+const std::vector<std::string> &EntityUtilities::getParsedEntities() {
+  return parsedEntities;
+}
 } // namespace ETJump

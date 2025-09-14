@@ -13,13 +13,9 @@ G_ParseAnimationFiles
   Read in all the configuration and script files for this model.
 =====================
 */
-static qboolean G_ParseAnimationFiles(bg_character_t *character,
-                                      const char *animationGroup,
-                                      const char *animationScript) {
-  char filename[MAX_QPATH];
-  fileHandle_t f;
-  int len;
-
+static bool G_ParseAnimationFiles(bg_character_t *character,
+                                  const char *animationGroup,
+                                  const char *animationScript) {
   // set the name of the animationGroup and animationScript in the
   // animModelInfo structure
   Q_strncpyz(character->animModelInfo->animationGroup, animationGroup,
@@ -30,14 +26,18 @@ static qboolean G_ParseAnimationFiles(bg_character_t *character,
   BG_R_RegisterAnimationGroup(animationGroup, character->animModelInfo);
 
   // load the script file
-  len = trap_FS_FOpenFile(animationScript, &f, FS_READ);
+  fileHandle_t f = 0;
+  const int32_t len = trap_FS_FOpenFile(animationScript, &f, FS_READ);
+
   if (len <= 0) {
     return qfalse;
   }
+
   if (len >= static_cast<int>(sizeof(text)) - 1) {
-    G_Printf("File %s is too long\n", filename);
+    G_Printf("File %s is too long\n", animationScript);
     return qfalse;
   }
+
   trap_FS_Read(text, len, f);
   text[len] = 0;
   trap_FS_FCloseFile(f);

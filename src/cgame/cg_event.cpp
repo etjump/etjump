@@ -6,6 +6,8 @@
 #include <algorithm>
 #include "etj_player_events_handler.h"
 #include "../game/etj_string_utilities.h"
+#include "etj_utilities.h"
+#include "../game/etj_portalgun_shared.h"
 
 extern void CG_StartShakeCamera(float param, entityState_t *es);
 extern void CG_Tracer(vec3_t source, vec3_t dest, int sparks);
@@ -2080,6 +2082,14 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       {
         break;
       }
+
+      // NOTE: only for other players,
+      // 'CG_AddPlayerWeapon' handles this for first person view
+      if (ETJump::demoCompatibility->flags.setAttack2FiringFlag &&
+          cg.snap->ps.clientNum != cent->currentState.clientNum) {
+        cent->currentState.eFlags |= EF_FIRING;
+      }
+
       CG_FireWeapon(cent);
       if (event == EV_FIRE_WEAPONB) // akimbo firing
       {
@@ -2089,6 +2099,13 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       }
       break;
     case EV_FIRE_WEAPON_LASTSHOT:
+      // NOTE: only for other players,
+      // 'CG_AddPlayerWeapon' handles this for first person view
+      if (ETJump::demoCompatibility->flags.setAttack2FiringFlag &&
+          cg.snap->ps.clientNum != cent->currentState.clientNum) {
+        cent->currentState.eFlags |= EF_FIRING;
+      }
+
       CG_FireWeapon(cent);
       break;
 
@@ -2139,9 +2156,8 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
         color[1] = 0.0f;
         color[2] = 0.0f;
       }
-      CG_RailTrail(&cgs.clientinfo[es->otherEntityNum2], es->origin2,
-                   es->pos.trBase, es->dmgFlags,
-                   color); //----(SA)	added'type' field
+
+      CG_RailTrail(es->origin2, es->pos.trBase, es->dmgFlags, color);
     } break;
 
     //
@@ -2752,21 +2768,19 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       CG_ResetTransitionEffects();
       break;
     case EV_PORTAL_TRAIL:
-      // not our portal trail
-      if (!etj_viewPlayerPortals.integer &&
-          es->otherEntityNum2 != cg.clientNum) {
-        return;
-      }
-      // not our portal trail, not spectating
-      if (etj_viewPlayerPortals.integer == 2 &&
-          cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR &&
-          es->otherEntityNum2 != cg.clientNum) {
-        return;
+      if (ETJump::skipPortalDraw(cg.snap->ps.clientNum, es->otherEntityNum2)) {
+        break;
       }
 
-      CG_RailTrail(&cgs.clientinfo[es->otherEntityNum2], es->origin2,
-                   es->pos.trBase, es->dmgFlags,
-                   tv(es->angles[0], es->angles[1], es->angles[2]));
+      if (cg.snap->ps.clientNum == es->otherEntityNum2) {
+        CG_RailTrail(es->origin2, es->pos.trBase, es->dmgFlags, es->angles);
+      } else {
+        CG_RailTrail(es->origin2, es->pos.trBase, es->dmgFlags,
+                     VectorCompare(es->angles, ETJump::portalBlueTrail)
+                         ? ETJump::portalGreenTrail
+                         : ETJump::portalYellowTrail);
+      }
+
       break;
     default:
       break;

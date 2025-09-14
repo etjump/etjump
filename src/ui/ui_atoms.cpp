@@ -234,6 +234,14 @@ qboolean UI_ConsoleCommand(const int realTime) {
     return qtrue;
   }
 
+  // catch this commnand here and do nothing, otherwise we get
+  // 'Unknown command "uiChatMenuOpen"' when we use in-game menu
+  // button to disconnect from a server as '_UI_KeyEvent' sends this,
+  // but cgame isn't loaded anymore to handle the command
+  if (!Q_stricmp(cmd, "uiChatMenuOpen")) {
+    return qtrue;
+  }
+
   return qfalse;
 }
 

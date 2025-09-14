@@ -369,6 +369,9 @@ vmCvar_t etj_popupPosY;
 
 // Feen: PGM client cvars
 vmCvar_t etj_viewPlayerPortals; // Enable/Disable viewing other player portals
+vmCvar_t etj_portalDebug;
+vmCvar_t etj_portalPredict;
+vmCvar_t etj_portalTeam;
 
 vmCvar_t etj_expandedMapAlpha;
 
@@ -422,6 +425,7 @@ vmCvar_t etj_HUD_fireteam;
 vmCvar_t etj_fireteamPosX;
 vmCvar_t etj_fireteamPosY;
 vmCvar_t etj_fireteamAlpha;
+vmCvar_t etj_fireteamCountdownLength;
 
 vmCvar_t etj_logBanner;
 vmCvar_t etj_weaponVolume;
@@ -439,6 +443,8 @@ vmCvar_t etj_spectatorInfoX;
 vmCvar_t etj_spectatorInfoY;
 vmCvar_t etj_spectatorInfoScale;
 vmCvar_t etj_spectatorInfoShadow;
+vmCvar_t etj_spectatorInfoMaxClients;
+vmCvar_t etj_spectatorInfoDirection;
 
 vmCvar_t etj_drawRunTimer;
 vmCvar_t etj_runTimerX;
@@ -680,6 +686,10 @@ vmCvar_t etj_logCenterPrint;
 vmCvar_t etj_onDemoPlaybackStart;
 
 vmCvar_t etj_HUD_noLerp;
+
+vmCvar_t etj_useExecQuiet;
+
+vmCvar_t etj_hideFlamethrowerEffects;
 
 typedef struct {
   vmCvar_t *vmCvar;
@@ -948,8 +958,11 @@ cvarTable_t cvarTable[] = {
     {&etj_popupPosX, "etj_popupPosX", "0", CVAR_ARCHIVE},
     {&etj_popupPosY, "etj_popupPosY", "0", CVAR_ARCHIVE},
 
-    {&etj_viewPlayerPortals, "etj_viewPlayerPortals", "1",
+    {&etj_viewPlayerPortals, "etj_viewPlayerPortals", "0",
      CVAR_ARCHIVE}, // Feen: PGM - View other player portals
+    {&etj_portalDebug, "etj_portalDebug", "0", CVAR_ARCHIVE | CVAR_CHEAT},
+    {&etj_portalPredict, "", "0", 0},
+    {&etj_portalTeam, "", "0", 0},
 
     {&etj_expandedMapAlpha, "etj_expandedMapAlpha", "0.7", CVAR_ARCHIVE},
 
@@ -1000,6 +1013,8 @@ cvarTable_t cvarTable[] = {
     {&etj_fireteamPosX, "etj_fireteamPosX", "0", CVAR_ARCHIVE},
     {&etj_fireteamPosY, "etj_fireteamPosY", "0", CVAR_ARCHIVE},
     {&etj_fireteamAlpha, "etj_fireteamAlpha", "1.0", CVAR_ARCHIVE},
+    {&etj_fireteamCountdownLength, "etj_fireteamCountdownLength", "3",
+     CVAR_ARCHIVE},
 
     {&etj_logBanner, "etj_logBanner", "1", CVAR_ARCHIVE},
     {&etj_weaponVolume, "etj_weaponVolume", "1.0", CVAR_ARCHIVE},
@@ -1014,6 +1029,10 @@ cvarTable_t cvarTable[] = {
     {&etj_spectatorInfoY, "etj_spectatorInfoY", "30", CVAR_ARCHIVE},
     {&etj_spectatorInfoScale, "etj_spectatorInfoScale", "1.0", CVAR_ARCHIVE},
     {&etj_spectatorInfoShadow, "etj_spectatorInfoShadow", "1", CVAR_ARCHIVE},
+    {&etj_spectatorInfoMaxClients, "etj_spectatorInfoMaxClients", "-1",
+     CVAR_ARCHIVE},
+    {&etj_spectatorInfoDirection, "etj_spectatorInfoDirection", "0",
+     CVAR_ARCHIVE},
     {&etj_drawRunTimer, "etj_drawRunTimer", "1", CVAR_ARCHIVE},
     {&etj_runTimerX, "etj_runTimerX", "320", CVAR_ARCHIVE},
     {&etj_runTimerY, "etj_runTimerY", "360", CVAR_ARCHIVE},
@@ -1278,6 +1297,10 @@ cvarTable_t cvarTable[] = {
     {&etj_onDemoPlaybackStart, "etj_onDemoPlaybackStart", "", CVAR_ARCHIVE},
 
     {&etj_HUD_noLerp, "etj_HUD_noLerp", "0", CVAR_ARCHIVE},
+    {&etj_useExecQuiet, "etj_useExecQuiet", "0", CVAR_ARCHIVE},
+
+    {&etj_hideFlamethrowerEffects, "etj_hideFlamethrowerEffects", "0",
+     CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -4018,9 +4041,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   // map-specific autoexec
   const auto mapConfig = va("autoexec_%s", cgs.rawmapname);
   if (ETJump::configFileExists(mapConfig)) {
-    ETJump::execFile(mapConfig);
+    ETJump::execFile(mapConfig, ETJump::ExecFileType::MAP_AUTOEXEC);
   } else if (ETJump::configFileExists("autoexec_default")) {
-    ETJump::execFile("autoexec_default");
+    ETJump::execFile("autoexec_default", ETJump::ExecFileType::MAP_AUTOEXEC);
   }
 
   if (!Q_stricmp(cgs.rawmapname, "solstice") ||

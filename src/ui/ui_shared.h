@@ -466,11 +466,11 @@ typedef struct {
   void (*drawHandlePic)(float x, float y, float w, float h, qhandle_t asset);
   void (*drawStretchPic)(float x, float y, float w, float h, float s1, float t1,
                          float s2, float t2, qhandle_t hShader);
-  void (*drawText)(float x, float y, float scale, vec4_t color,
+  void (*drawText)(float x, float y, float scale, const vec4_t color,
                    const char *text, float adjust, int limit, int style);
   void (*drawTextExt)(float x, float y, float scalex, float scaley,
-                      vec4_t color, const char *text, float adjust, int limit,
-                      int style, fontInfo_t *font);
+                      const vec4_t color, const char *text, float adjust,
+                      int limit, int style, fontInfo_t *font);
   int (*textWidth)(const char *text, float scale, int limit);
   int (*textWidthExt)(const char *text, float scale, int limit,
                       fontInfo_t *font);
@@ -585,6 +585,10 @@ typedef struct {
       colorPickerDragFunc;
   std::function<void()> toggleRGBSliderValues;
   std::function<bool()> RGBSlidersAreNormalized;
+
+  std::function<bool()> quickConnectListIsFull;
+
+  bool mainOrIngameMainMenuOpen;
 } displayContextDef_t;
 
 const char *String_Alloc(const char *p);
@@ -641,7 +645,7 @@ menuDef_t *Menus_FindByName(const char *p);
 void Menus_ShowByName(const char *p);
 void Menus_CloseByName(const char *p);
 void Display_HandleKey(int key, qboolean down, int x, int y);
-void LerpColor(vec4_t a, vec4_t b, vec4_t c, float t);
+void LerpColor(const vec4_t a, const vec4_t b, vec4_t c, float t);
 void Menus_CloseAll();
 void Menu_Paint(menuDef_t *menu, qboolean forcePaint);
 void Menu_SetFeederSelection(menuDef_t *menu, int feeder, int index,

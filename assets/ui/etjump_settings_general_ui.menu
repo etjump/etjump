@@ -1,0 +1,62 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_settings_general_ui"
+#define GROUP_NAME "group_etjump_settings_general"
+
+#define NUM_SUBMENUS 4
+#define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
+
+menuDef {
+    name MENU_NAME
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+    centered
+
+    onOpen {
+        conditionalscript uiCheckBackground 2
+            ( BACKGROUND_ON )
+            ( BACKGROUND_OFF )
+    }
+
+    onESC {
+        close MENU_NAME; open etjump
+    }
+
+    WINDOW("ETJUMP SETTINGS", 90)
+
+    MAINBUTTON_ACTIVE   (1, "GENERAL", close MENU_NAME; open MENU_NAME)
+    MAINBUTTON          (2, "GRAPHICS", close MENU_NAME; open etjump_settings_graphics_visuals)
+    MAINBUTTON          (3, "BASIC HUD", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    MAINBUTTON          (4, "ADV HUD", close MENU_NAME; open etjump_settings_hud2_cgaz)
+    MAINBUTTON          (5, "AUDIO", close MENU_NAME; open etjump_settings_audio)
+    MAINBUTTON          (6, "TIMERUNS", close MENU_NAME; open etjump_settings_timeruns_runtimer)
+    MAINBUTTON          (7, "DEMOS", close MENU_NAME; open etjump_settings_demos_autodemo)
+
+    WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
+
+    SIDEBUTTON          (1, "GAMEPLAY", close MENU_NAME; open etjump_settings_general_gameplay)
+    SIDEBUTTON          (2, "CLIENT", close MENU_NAME; open etjump_settings_general_client)
+    SIDEBUTTON          (3, "CONSOLE", close MENU_NAME; open etjump_settings_general_console)
+    SIDEBUTTON_ACTIVE   (4, "UI", close MENU_NAME; open MENU_NAME)
+
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "USER INTERFACE")
+
+        CVARFLOATLABEL      (SETTINGS_ITEM_POS(1), "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        CACHEDSLIDER        (SETTINGS_ITEM_POS(1), "Menu sensitivity:", 0.2, SETTINGS_ITEM_H, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
+        YESNO               (SETTINGS_ITEM_POS(2), "Disable menu flashing:", 0.2, SETTINGS_ITEM_H, etj_noMenuFlashing, "Disables the lightning effect from the menu background shader\n(vid_restart required)\netj_noMenuFlashing")
+        YESNO               (SETTINGS_ITEM_POS(3), "Draw quick connect menu:", 0.2, SETTINGS_ITEM_H, etj_drawQuickConnectMenu, "Draw quick connect menu in the main menu\n(vid_restart required)\netj_drawQuickConnectMenu")
+
+
+    LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
+    LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
+
+#ifndef FUI
+    LOWERBUTTON(3, "TOGGLE BACKGROUND", conditionalscript uiToggleBackground 2 ( BACKGROUND_OFF ) ( BACKGROUND_ON ) )
+#endif
+
+}

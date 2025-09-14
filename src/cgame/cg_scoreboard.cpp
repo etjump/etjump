@@ -49,8 +49,8 @@ void CG_DrawHeader(float x, float y, float fade) {
                     y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
 }
 
-void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score,
-                                     vec4_t color, float fade) {
+static void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score,
+                                            const vec4_t color, float fade) {
   clientInfo_t *ci = &cgs.clientinfo[score->client];
   vec4_t textColor;
   float tempX = x;
@@ -268,8 +268,8 @@ void CG_DrawHeader2(float x, float y, float fade) {
   CG_DrawMiniString(tempX, tempY, CG_TranslateString("Player"), fade);
 }
 
-void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score,
-                                       vec4_t color, float fade) {
+static void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score,
+                                              const vec4_t color, float fade) {
   clientInfo_t *ci = &cgs.clientinfo[score->client];
   vec4_t textColor;
   float tempX = x;

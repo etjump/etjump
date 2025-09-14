@@ -1,0 +1,18 @@
+// ETJump arena file for tmf_b2.bsp
+// Modifications:
+// - removed extra closing bracket
+
+{
+	map			"tmf_b2"
+	longname		"^9tm^8f^z_B2 Fixed"
+	type 	"wolfmp wolfsw"
+	timelimit 0
+	axisRespawnTime 1
+	alliedRespawnTime 1
+	briefing "Mapped By  ^8F^9eaR**Allies : easy Jumps***Axis : hard Jumps****Good Luck * Have A try xD"
+	axiswintext	"Axis team wins!"
+	alliedwintext "Allied team wins!"
+	mapposition_x 465		
+	mapposition_y 430		
+}
+

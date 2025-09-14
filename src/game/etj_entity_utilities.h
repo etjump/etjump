@@ -28,7 +28,11 @@
 
 namespace ETJump {
 class EntityUtilities {
-  static void drawRailBox(gentity_t *ent, const std::vector<float> &color);
+  static void drawRailBox(const gentity_t *ent,
+                          const std::vector<float> &color);
+
+  // always empty if 'developer' is not set
+  static std::vector<std::string> parsedEntities;
 
 public:
   static bool isPlayer(gentity_t *ent);
@@ -41,5 +45,16 @@ public:
   // sets 'value' to corresponding cursorhint from 'hint'
   // if 'hint' isn't found in hintStrings, no modification is performed
   static void setCursorhintFromString(int &value, const std::string &hint);
+
+  // sets 'origin' to the entity's origin, or the center of it's absmins/maxs
+  static void getOriginOrBmodelCenter(const gentity_t *ent, vec3_t origin);
+
+  // returns true if any portals were removed
+  static bool clearPortals(gentity_t *ent);
+
+  // this must be called only via 'G_ParseSpawnVars' during init,
+  // otherwise spawnVars are invalid
+  static void storeParsedEntity();
+  static const std::vector<std::string> &getParsedEntities();
 };
 } // namespace ETJump

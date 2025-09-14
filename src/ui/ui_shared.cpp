@@ -317,10 +317,10 @@ LerpColor
     lerp and clamp each component of <a> and <b> into <c> by the fraction <t>
 =================
 */
-void LerpColor(vec4_t a, vec4_t b, vec4_t c, float t) {
-  int i;
-  for (i = 0; i < 4; i++) {
+void LerpColor(const vec4_t a, const vec4_t b, vec4_t c, float t) {
+  for (int i = 0; i < 4; i++) {
     c[i] = a[i] + t * (b[i] - a[i]);
+
     if (c[i] < 0) {
       c[i] = 0;
     } else if (c[i] > 1.0) {
@@ -1575,6 +1575,9 @@ void Script_ConditionalScript(itemDef_t *item, qboolean *bAbort,
           const char *script =
               DC->RGBSlidersAreNormalized() ? script1 : script2;
           Item_RunScript(item, bAbort, script);
+        } else if (!Q_stricmp(cvar, "quickConnectServersFull")) {
+          Item_RunScript(item, bAbort,
+                         DC->quickConnectListIsFull() ? script1 : script2);
         }
 
         break;
@@ -6576,6 +6579,11 @@ void Menu_Paint(menuDef_t *menu, qboolean forcePaint) {
 
   if (forcePaint) {
     menu->window.flags |= WINDOW_FORCED;
+  }
+
+  if (!(Q_stricmp(menu->window.name, "main")) ||
+      !(Q_stricmp(menu->window.name, "ingame_main"))) {
+    DC->mainOrIngameMainMenuOpen = true;
   }
 
   // draw the background if necessary

@@ -6,7 +6,7 @@
 #define MENU_NAME "etjump_settings_general_gameplay"
 #define GROUP_NAME "group_etjump_settings_general"
 
-#define NUM_SUBMENUS 3
+#define NUM_SUBMENUS 4
 #define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
 
 menuDef {
@@ -42,6 +42,7 @@ menuDef {
     SIDEBUTTON_ACTIVE   (1, "GAMEPLAY", close MENU_NAME; open MENU_NAME)
     SIDEBUTTON          (2, "CLIENT", close MENU_NAME; open etjump_settings_general_client)
     SIDEBUTTON          (3, "CONSOLE", close MENU_NAME; open etjump_settings_general_console)
+    SIDEBUTTON          (4, "UI", close MENU_NAME; open etjump_settings_general_ui)
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "GAMEPLAY")
 
@@ -64,6 +65,8 @@ menuDef {
         YESNO               (SETTINGS_ITEM_POS(16), "Auto spectate:", 0.2, SETTINGS_ITEM_H, "etj_autoSpec", "Automatically spectate next player when idling in free spec or if the followed player is idle\netj_autoSpec")
         CVARINTLABEL        (SETTINGS_ITEM_POS(17), "etj_autoSpecDelay", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(17), "Auto spectate delay:", 0.2, SETTINGS_ITEM_H, etj_autoSpecDelay 10000 1000 30000 1000, "How long to stay idle for before automatically following next player\netj_autoSpecDelay")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(18), "etj_fireteamCountdownLength", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(18), "Fireteam countdown length:", 0.2, SETTINGS_ITEM_H, etj_fireteamCountdownLength 3 1 10 1, "Default countdown length when using 'fireteam countdown' command without arguments\netj_fireteamCountdownLength")
 
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)

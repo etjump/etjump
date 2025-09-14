@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 # read version from VERSION.txt
 file(READ "${CMAKE_SOURCE_DIR}/VERSION.txt" version_content)

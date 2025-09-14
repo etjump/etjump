@@ -331,6 +331,13 @@ inline constexpr gametype_t ETJUMP_GAMETYPE = 2;
 
 typedef enum { GENDER_MALE, GENDER_FEMALE, GENDER_NEUTER } gender_t;
 
+// 'sc0', 'sc1'
+inline constexpr int32_t NUM_SCORESTRINGS = 2;
+inline constexpr int32_t MAX_SCORESTRING_LEN = 1000;
+
+// for client side parsing
+inline constexpr int32_t NUM_SCORESTRING_FIELDS = 7;
+
 /*
 ===================================================================================
 
@@ -563,6 +570,10 @@ void PM_UpdateViewAngles(playerState_t *ps, pmoveExt_t *pmext, usercmd_t *cmd,
 void Pmove(pmove_t *pmove);
 void PmoveSingle(pmove_t *pmove);
 
+namespace ETJump {
+bool canFireWeapon(const playerState_t *ps);
+}
+
 inline constexpr int8_t CMDSCALE_DEFAULT = 127;
 inline constexpr int8_t CMDSCALE_WALK = 64;
 
@@ -640,61 +651,61 @@ typedef enum {
 // entityState_t->eFlags
 
 // clang-format off
-inline constexpr uint32_t EF_DEAD = 0x00000001;                    // don't draw a foe marker over players with EF_DEAD
-inline constexpr uint32_t EF_NONSOLID_BMODEL = 0x00000002;         // bmodel is visible, but not solid
-inline constexpr uint32_t EF_FORCE_END_FRAME = EF_NONSOLID_BMODEL; // force client to end of current animation (after loading a savegame)
-inline constexpr uint32_t EF_TELEPORT_BIT = 0x00000004;            // toggled every time the origin abruptly changes
-inline constexpr uint32_t EF_READY = 0x00000008;                   // player is ready
+inline constexpr int32_t EF_DEAD = 0x00000001;                    // don't draw a foe marker over players with EF_DEAD
+inline constexpr int32_t EF_NONSOLID_BMODEL = 0x00000002;         // bmodel is visible, but not solid
+inline constexpr int32_t EF_FORCE_END_FRAME = EF_NONSOLID_BMODEL; // force client to end of current animation (after loading a savegame)
+inline constexpr int32_t EF_TELEPORT_BIT = 0x00000004;            // toggled every time the origin abruptly changes
+inline constexpr int32_t EF_READY = 0x00000008;                   // player is ready
 
-inline constexpr uint32_t EF_CROUCHING = 0x00000010;    // player is crouching
-inline constexpr uint32_t EF_MG42_ACTIVE = 0x00000020;  // currently using an MG42
-inline constexpr uint32_t EF_NODRAW = 0x00000040;       // may have an event, but no model (unspawned items)
-inline constexpr uint32_t EF_FIRING = 0x00000080;       // for lightning gun
-inline constexpr uint32_t EF_INHERITSHADER = EF_FIRING; // some ents will never use EF_FIRING, hijack it for "USESHADER"
+inline constexpr int32_t EF_CROUCHING = 0x00000010;    // player is crouching
+inline constexpr int32_t EF_MG42_ACTIVE = 0x00000020;  // currently using an MG42
+inline constexpr int32_t EF_NODRAW = 0x00000040;       // may have an event, but no model (unspawned items)
+inline constexpr int32_t EF_FIRING = 0x00000080;       // for lightning gun
+inline constexpr int32_t EF_INHERITSHADER = EF_FIRING; // some ents will never use EF_FIRING, hijack it for "USESHADER"
 
-inline constexpr uint32_t EF_SPINNING = 0x00000100;     // (SA) added for level editor control of spinning pickup items
-inline constexpr uint32_t EF_BREATH = EF_SPINNING;      // Characters will not have EF_SPINNING set, hijack for drawing character breath
-inline constexpr uint32_t EF_TALK = 0x00000200;         // draw a talk balloon
-inline constexpr uint32_t EF_CONNECTION = 0x00000400;   // draw a connection trouble sprite
-inline constexpr uint32_t EF_SMOKINGBLACK = 0x00000800; // JPW NERVE -- like EF_SMOKING only darker & bigger
+inline constexpr int32_t EF_SPINNING = 0x00000100;     // (SA) added for level editor control of spinning pickup items
+inline constexpr int32_t EF_BREATH = EF_SPINNING;      // Characters will not have EF_SPINNING set, hijack for drawing character breath
+inline constexpr int32_t EF_TALK = 0x00000200;         // draw a talk balloon
+inline constexpr int32_t EF_CONNECTION = 0x00000400;   // draw a connection trouble sprite
+inline constexpr int32_t EF_SMOKINGBLACK = 0x00000800; // JPW NERVE -- like EF_SMOKING only darker & bigger
 
-inline constexpr uint32_t EF_HEADSHOT = 0x00001000;                        // last hit to player was head shot (Gordon: NOTE: not last hit, but has BEEN shot in the head since respawn)
-inline constexpr uint32_t EF_SMOKING = 0x00002000;                         // DHM - Nerve :: ET_GENERAL ents will emit smoke if set
+inline constexpr int32_t EF_HEADSHOT = 0x00001000;                        // last hit to player was head shot (Gordon: NOTE: not last hit, but has BEEN shot in the head since respawn)
+inline constexpr int32_t EF_SMOKING = 0x00002000;                         // DHM - Nerve :: ET_GENERAL ents will emit smoke if set
                                                                            // JPW switched to this after my code change
-inline constexpr uint32_t EF_OVERHEATING = (EF_SMOKING | EF_SMOKINGBLACK); // ydnar: light smoke/steam effect
-inline constexpr uint32_t EF_VOTED = 0x00004000;                           // already cast a vote;
-inline constexpr uint32_t EF_TAGCONNECT = 0x00008000;                      // connected to another entity via tag;
-inline constexpr uint32_t EF_MOUNTEDTANK = EF_TAGCONNECT;                  // Gordon: duplicated for clarity
+inline constexpr int32_t EF_OVERHEATING = (EF_SMOKING | EF_SMOKINGBLACK); // ydnar: light smoke/steam effect
+inline constexpr int32_t EF_VOTED = 0x00004000;                           // already cast a vote;
+inline constexpr int32_t EF_TAGCONNECT = 0x00008000;                      // connected to another entity via tag;
+inline constexpr int32_t EF_MOUNTEDTANK = EF_TAGCONNECT;                  // Gordon: duplicated for clarity
 
-inline constexpr uint32_t EF_SPARE5 = 0x00010000;      // Gordon: freed
-inline constexpr uint32_t EF_PATH_LINK = 0x00020000;   // Gordon: linking trains together
-inline constexpr uint32_t EF_ZOOMING = 0x00040000;     // client is zooming;
-inline constexpr uint32_t EF_PRONE = 0x00080000;       // player is prone
+inline constexpr int32_t EF_SPARE5 = 0x00010000;      // Gordon: freed
+inline constexpr int32_t EF_PATH_LINK = 0x00020000;   // Gordon: linking trains together
+inline constexpr int32_t EF_ZOOMING = 0x00040000;     // client is zooming;
+inline constexpr int32_t EF_PRONE = 0x00080000;       // player is prone
 
-inline constexpr uint32_t EF_PRONE_MOVING = 0x00100000;   // player is prone and moving
-inline constexpr uint32_t EF_VIEWING_CAMERA = 0x00200000; // player is viewing a camera
-inline constexpr uint32_t EF_AAGUN_ACTIVE = 0x00400000;   // Gordon: player is manning an AA gun
-inline constexpr uint32_t EF_SPARE0 = 0x00800000;         // Gordon: freed
+inline constexpr int32_t EF_PRONE_MOVING = 0x00100000;   // player is prone and moving
+inline constexpr int32_t EF_VIEWING_CAMERA = 0x00200000; // player is viewing a camera
+inline constexpr int32_t EF_AAGUN_ACTIVE = 0x00400000;   // Gordon: player is manning an AA gun
+inline constexpr int32_t EF_SPARE0 = 0x00800000;         // Gordon: freed
 
 // !! NOTE: only place flags that don't need to go to the client beyond 0x00800000
-inline constexpr uint32_t EF_SPARE1 = 0x01000000;        // Gordon: freed
-inline constexpr uint32_t EF_SPARE2 = 0x02000000;        // Gordon: freed
-inline constexpr uint32_t EF_BOUNCE = 0x04000000;        // for missiles
-inline constexpr uint32_t EF_BOUNCE_HALF = 0x08000000;   // for missiles
+inline constexpr int32_t EF_SPARE1 = 0x01000000;        // Gordon: freed
+inline constexpr int32_t EF_SPARE2 = 0x02000000;        // Gordon: freed
+inline constexpr int32_t EF_BOUNCE = 0x04000000;        // for missiles
+inline constexpr int32_t EF_BOUNCE_HALF = 0x08000000;   // for missiles
 
-inline constexpr uint32_t EF_MOVER_STOP = 0x10000000;    // will push otherwise	// (SA) moved down to make space for one more client flag
-inline constexpr uint32_t EF_MOVER_BLOCKED = 0x20000000; // mover was blocked dont lerp on the client
+inline constexpr int32_t EF_MOVER_STOP = 0x10000000;    // will push otherwise	// (SA) moved down to make space for one more client flag
+inline constexpr int32_t EF_MOVER_BLOCKED = 0x20000000; // mover was blocked dont lerp on the client
                                                          // xkan, moved down to make space for client flag
-inline constexpr uint32_t EF_BOBBING = EF_SPARE0;        // controls bobbing for pickup items (using existed one because eFlags are transmited as 24 bit)
-inline constexpr uint32_t EF_SPARE3 = 0x40000000;        // unused
-inline constexpr uint32_t EF_SPARE4 = 0x80000000;        // unused
+inline constexpr int32_t EF_BOBBING = EF_SPARE0;        // controls bobbing for pickup items (using existed one because eFlags are transmited as 24 bit)
+inline constexpr int32_t EF_SPARE3 = 0x40000000;        // unused
+inline constexpr int32_t EF_SPARE4 = 0x80000000;        // unused
 
 // etjump: flags that can be used for player effects that need prediction
-inline constexpr uint32_t EF_PLAYER_UNUSED1 = EF_NONSOLID_BMODEL; // used only on entities
-inline constexpr uint32_t EF_PLAYER_UNUSED2 = EF_SMOKING;         // player never gets this flag, only ent/weapon
-inline constexpr uint32_t EF_PLAYER_UNUSED3 = EF_SMOKINGBLACK;    // player never gets this flag, only ent/weapon
-inline constexpr uint32_t EF_PLAYER_UNUSED4 = EF_PATH_LINK;       // used only on entities
-inline constexpr uint32_t EF_PLAYER_UNUSED5 = EF_SPARE0;          // used only on entities
+inline constexpr int32_t EF_PLAYER_UNUSED1 = EF_NONSOLID_BMODEL; // used only on entities
+inline constexpr int32_t EF_PLAYER_UNUSED2 = EF_SMOKING;         // player never gets this flag, only ent/weapon
+inline constexpr int32_t EF_PLAYER_UNUSED3 = EF_SMOKINGBLACK;    // player never gets this flag, only ent/weapon
+inline constexpr int32_t EF_PLAYER_UNUSED4 = EF_PATH_LINK;       // used only on entities
+inline constexpr int32_t EF_PLAYER_UNUSED5 = EF_SPARE0;          // used only on entities
 // clang-format on
 
 #define BG_PlayerMounted(eFlags)                                               \
@@ -710,7 +721,7 @@ typedef enum {
 
   // (SA) for Wolf
   PW_INVULNERABLE,
-  PW_FIRE,          //----(SA)
+  PW_PORTALPREDICT, // used for portal prediction, was PW_FIRE
   PW_PUSHERPREDICT, // used for pusher prediction, was PW_ELECTRIC
   PW_BREATHER,      //----(SA)
   PW_NOFATIGUE,     //----(SA)
@@ -1516,8 +1527,7 @@ typedef struct headAnimation_s {
 // changes so a restart of the same anim can be detected
 inline constexpr int ANIM_TOGGLEBIT = 1 << (ANIM_BITS - 1);
 
-// Gordon: renamed these to team_axis/allies, it really was awful....
-enum team_t : int8_t {
+enum team_t : int32_t {
   TEAM_FREE,
   TEAM_AXIS,
   TEAM_ALLIES,
@@ -1525,6 +1535,10 @@ enum team_t : int8_t {
 
   TEAM_NUM_TEAMS
 };
+
+// set by the server along with the team number for spawns,
+// to indicate that a spawn is currently disabled
+inline constexpr int32_t SPAWN_DISABLED = 1 << 8;
 
 // OSP - weapon stat info: mapping between MOD_ and WP_ types (FIXME for new ET
 // weapons)
@@ -1738,21 +1752,21 @@ bool BG_WeaponHasAmmo(playerState_t *ps, int weap);
 
 // content masks
 
-inline constexpr uint32_t MASK_SOLID = CONTENTS_SOLID;
+inline constexpr int32_t MASK_SOLID = CONTENTS_SOLID;
 
-inline constexpr uint32_t MASK_PLAYERSOLID =
+inline constexpr int32_t MASK_PLAYERSOLID =
     CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_BODY;
-inline constexpr uint32_t MASK_DEADSOLID = CONTENTS_SOLID | CONTENTS_PLAYERCLIP;
-inline constexpr uint32_t MASK_WATER =
+inline constexpr int32_t MASK_DEADSOLID = CONTENTS_SOLID | CONTENTS_PLAYERCLIP;
+inline constexpr int32_t MASK_WATER =
     CONTENTS_WATER | CONTENTS_LAVA | CONTENTS_SLIME;
-inline constexpr uint32_t MASK_OPAQUE = CONTENTS_SOLID | CONTENTS_LAVA;
-inline constexpr uint32_t MASK_SHOT =
+inline constexpr int32_t MASK_OPAQUE = CONTENTS_SOLID | CONTENTS_LAVA;
+inline constexpr int32_t MASK_SHOT =
     CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE;
-inline constexpr uint32_t MASK_MISSILESHOT = MASK_SHOT | CONTENTS_MISSILECLIP;
+inline constexpr int32_t MASK_MISSILESHOT = MASK_SHOT | CONTENTS_MISSILECLIP;
 
 // portalgun trace hits solid objects, players and portalclips
 // corpses are ignored, and players only block portals if they are solid
-inline constexpr uint32_t MASK_PORTAL =
+inline constexpr int32_t MASK_PORTAL =
     CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_PORTALCLIP;
 
 //
@@ -2793,6 +2807,11 @@ static constexpr Manual commandManuals[] = {
      "Loads position from a given savepos file. If 'name' isn't specified, "
      "loads 'savepos/default.dat'.\n"
      "Cheats must be enabled to use this command."},
+
+    {"dumpEntities", "/dumpEntities [(optional) filename]",
+     "Dumps entities from the current map into a file. If 'filename' isn't "
+     "specified, defaults to '<mapname>.ent'.\nYou must be in developer mode "
+     "to use this command."},
 };
 
 typedef struct {
@@ -2820,6 +2839,12 @@ inline constexpr int BG_LEVEL_NO_DROP = 1 << 6;
 inline constexpr int BG_LEVEL_NO_WALLBUG = 1 << 7;
 // Noclip is disabled
 inline constexpr int BG_LEVEL_NO_NOCLIP = 1 << 8;
+// portalgun prediction is force-enabled
+inline constexpr int BG_LEVEL_PORTAL_PREDICT = 1 << 9;
+// overbounces are always allowed on CONTENTS_BODY
+inline constexpr int32_t BG_LEVEL_BODY_OB_ALWAYS = 1 << 10;
+// overbounces are never allowed on CONTENTS_BODY
+inline constexpr int32_t BG_LEVEL_BODY_OB_NEVER = 1 << 11;
 
 namespace ETJump {
 inline constexpr char CUSTOMVOTE_TYPE[] = "type";

@@ -302,15 +302,18 @@ bool Records(gentity_t *ent, Arguments argv) {
   // use exact map search if user did not specify the map
   params.exactMap = exactMap;
   params.run = std::move(run);
-  params.page = optPage.hasValue() ? optPage.value().integer : 1;
+  params.page = optPage.hasValue() ? std::max(optPage.value().integer, 1) : 1;
   if (!params.run.hasValue()) {
     params.pageSize = optPageSize.hasValue()
-                          ? std::clamp(optPageSize.value().integer, 1, 10)
-                          : 3;
+                          ? std::clamp(optPageSize.value().integer, 1,
+                                       ETJump::Timerun::MAX_PAGE_SIZE_ALL_RUNS)
+                          : ETJump::Timerun::DEFAULT_PAGE_SIZE_ALL_RUNS;
   } else {
-    params.pageSize = optPageSize.hasValue()
-                          ? std::clamp(optPageSize.value().integer, 1, 100)
-                          : 20;
+    params.pageSize =
+        optPageSize.hasValue()
+            ? std::clamp(optPageSize.value().integer, 1,
+                         ETJump::Timerun::MAX_PAGE_SIZE_SINGLE_RUN)
+            : ETJump::Timerun::DEFAULT_PAGE_SIZE_SINGLE_RUN;
   }
   params.userId = ETJump::session->GetId(ent);
 

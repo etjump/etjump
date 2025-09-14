@@ -60,6 +60,8 @@ public:
     bool adjustEvVelocityPushTrigger = false;
     bool adjustEvFakebrushAndClientTeleporter = false;
     bool serverSideDlights = false;
+    bool setAttack2FiringFlag = false;
+    bool adjustItemlistIndex = false;
   };
 
   // everything in here will be set to false unless we're on demo playback

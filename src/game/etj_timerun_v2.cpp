@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <cstddef>
 #include <utility>
 #include <chrono>
 
@@ -452,10 +453,7 @@ public:
   std::string message;
 };
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
-void ETJump::TimerunV2::addSeason(Timerun::AddSeasonParams season) {
+void ETJump::TimerunV2::addSeason(const Timerun::AddSeasonParams &season) {
   _sc->postTask(
       [this, season]() {
         try {
@@ -488,10 +486,7 @@ public:
   std::string message;
 };
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
-void ETJump::TimerunV2::editSeason(Timerun::EditSeasonParams params) {
+void ETJump::TimerunV2::editSeason(const Timerun::EditSeasonParams &params) {
   _sc->postTask(
       [this, params]() {
         try {
@@ -585,10 +580,8 @@ std::string rankToString(int rank) {
   }
 }
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
-void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
+void ETJump::TimerunV2::printRecords(
+    const Timerun::PrintRecordsParams &params) {
   _sc->postTask(
       [this, params] {
         auto records = _repository->getRecords(params);
@@ -677,21 +670,27 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
               int ownTime = ownRecords[season->id][mapName].count(runName) > 0
                                 ? ownRecords[season->id][mapName][runName]
                                 : rank1Time;
+
+              const auto numPages = static_cast<int32_t>(
+                  std::ceil(static_cast<float>(rkvp.second.size()) /
+                            static_cast<float>(params.pageSize)));
+              // cap the page paramater so we don't print empty pages
+              const int32_t page = std::min(params.page, numPages);
+
               // clang-format off
               message += "^g-------------------------------------------------------------\n";
               // clang-format on
               message += stringFormat(" ^2Run: ^7%s\n\n", rkvp.first);
 
-              const int rankWidth = 4;
-              const int timeWidth = 10;
-              const int diffWidth = 11;
+              constexpr int rankWidth = 4;
+              constexpr int timeWidth = 10;
+              constexpr int diffWidth = 11;
 
               message += "^g Rank Time       Difference  Player\n";
               std::string ownRecordString;
               for (const auto &r : rkvp.second) {
-                auto isOnVisiblePage =
-                    rank > (params.page - 1) * params.pageSize &&
-                    rank <= (params.page) * params.pageSize;
+                auto isOnVisiblePage = rank > (page - 1) * params.pageSize &&
+                                       rank <= (page)*params.pageSize;
                 auto isOwnRecord = r->userId == params.userId;
 
                 if (isOnVisiblePage || isOwnRecord) {
@@ -769,6 +768,24 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
                 message += "\n" + ownRecordString;
               }
 
+              // display the total amount of records if querying records
+              // for a single run, and they don't fit on a single page
+              const auto numRecords = static_cast<int32_t>(rkvp.second.size());
+
+              if (params.run.hasValue() && numRecords > params.pageSize) {
+                const int32_t start =
+                    (page * params.pageSize) - params.pageSize + 1;
+                const int32_t end =
+                    std::min(start + params.pageSize - 1, numRecords);
+
+                message += stringFormat(
+                    "\n ^7Showing ^2%i-%i ^7of ^2%i ^7total records\n", start,
+                    end, numRecords);
+
+              } else {
+                message += '\n';
+              }
+
               if (processedRecords.size() > 1 &&
                   skvp.first != std::prev(processedRecords.end())->first) {
                 message += "\n";
@@ -796,12 +813,9 @@ public:
   std::vector<int> checkpoints;
 };
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTBEGIN(performance-unnecessary-value-param)
-void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
-                                        std::string runName, int rank) {
-  // NOLINTEND(performance-unnecessary-value-param)
+void ETJump::TimerunV2::loadCheckpoints(int clientNum,
+                                        const std::string &mapName,
+                                        const std::string &runName, int rank) {
   _sc->postTask(
       [this, clientNum, mapName, runName, rank] {
         std::string matchedRun;
@@ -955,10 +969,8 @@ std::string ETJump::TimerunV2::getRankingsStringFor(
   return message;
 }
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
-void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
+void ETJump::TimerunV2::printRankings(
+    const Timerun::PrintRankingsParams &params) {
   _sc->postTask(
       [this, params] {
         std::string message;
@@ -1026,9 +1038,6 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
       });
 }
 
-// do not pass by ref! postTask runs asynchronously and passing by
-// ref will lead to undefined behavior
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
 void ETJump::TimerunV2::printSeasons(int clientNum) {
   _sc->postTask(
       [this] {
@@ -1161,6 +1170,10 @@ void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
         Printer::console(
             clientNum, stringFormat("Unable to delete season: %s\n", e.what()));
       });
+}
+
+int32_t ETJump::TimerunV2::getRunStartTime(const int32_t clientNum) const {
+  return _players[clientNum]->startTime.valueOr(0);
 }
 
 void ETJump::TimerunV2::startNotify(Player *player) const {
@@ -1604,9 +1617,11 @@ void ETJump::TimerunV2::removeDisallowedWeapons(gentity_t *ent) {
 
 void ETJump::TimerunV2::removePlayerProjectiles(gentity_t *ent) {
   for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; i++) {
-    if (ent->s.eType == ET_MISSILE) {
-      if (ent->parent && ent->parent->s.number == ClientNum(ent)) {
-        G_FreeEntity(ent);
+    gentity_t *e = &g_entities[i];
+
+    if (e->s.eType == ET_MISSILE) {
+      if (e->parent && e->parent->s.number == ClientNum(ent)) {
+        G_FreeEntity(e);
       }
     }
   }

@@ -34,9 +34,9 @@ void TriggerTeleportClient::touch(gentity_t *self, gentity_t *other) {
     return;
   }
 
-  EntityUtilsShared::teleportPlayer(&other->client->ps, &other->s, &self->s,
-                                    &other->client->pers.cmd, self->s.origin2,
-                                    self->s.angles2);
+  EntityUtilsShared::teleportPlayer(
+      &other->client->ps, &other->s, &self->s, &other->client->pers.cmd,
+      self->s.origin2, self->s.angles2, other->client->teleportBitFlipped);
 }
 
 void TriggerTeleportClient::think(gentity_t *self) {

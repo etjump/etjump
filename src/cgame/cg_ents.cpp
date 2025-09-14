@@ -8,6 +8,8 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "etj_utilities.h"
+#include "../game/etj_portalgun_shared.h"
 
 /*
 ======================
@@ -375,8 +377,6 @@ static void CG_EntityEffects(centity_t *cent) {
   }
   // jpw
 }
-
-void CG_RailTrail2(clientInfo_t *ci, vec3_t start, vec3_t end);
 
 /*
 ==================
@@ -2373,24 +2373,14 @@ void CG_CalcEntityLerpPositions(centity_t *cent) {
 }
 
 // Feen: PGM - Drawing the portals....
-static void CG_PortalGate(centity_t *cent) {
+static void CG_PortalGate(const centity_t *cent) {
   polyVert_t polyVerts[4];
   vec3_t verts[4];
   vec3_t pushedOrigin, angleInverse;
   vec3_t axis[3];
-  const float radius = !cent->currentState.onFireStart
-                           ? 48.0f
-                           : static_cast<float>(cent->currentState.onFireStart);
 
-  // not our portal
-  if (!etj_viewPlayerPortals.integer &&
-      cent->currentState.otherEntityNum != cg.clientNum) {
-    return;
-  }
-  // not our portal, not spectating
-  if (etj_viewPlayerPortals.integer == 2 &&
-      cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR &&
-      cent->currentState.otherEntityNum != cg.clientNum) {
+  if (ETJump::skipPortalDraw(cg.snap->ps.clientNum,
+                             cent->currentState.otherEntityNum)) {
     return;
   }
 
@@ -2401,6 +2391,24 @@ static void CG_PortalGate(centity_t *cent) {
   /* push the origin out a bit */
   VectorMA(cent->currentState.origin, (-5.0f + 1.0f) /*(-12.0f + 1)*/, axis[0],
            pushedOrigin);
+
+  float radius = !cent->currentState.onFireStart
+                     ? ETJump::PORTAL_DRAW_RADIUS
+                     : static_cast<float>(cent->currentState.onFireStart) *
+                           ETJump::PORTAL_DRAW_SCALAR;
+
+  if (cent->currentState.effect1Time &&
+      cent->currentState.effect1Time + ETJump::PORTAL_SPAWN_ANIM_DURATION >=
+          cg.time) {
+    const auto elapsedTime =
+        static_cast<float>(cg.time - cent->currentState.effect1Time);
+    float progress = std::clamp(
+        elapsedTime / ETJump::PORTAL_SPAWN_ANIM_DURATION, 0.0f, 1.0f);
+
+    // ease-out the growth
+    progress = 1.0f - std::pow(1.0f - progress, 2.0f);
+    radius *= progress;
+  }
 
   /* create the full polygon */
   for (int i = 0; i < 3; i++) {

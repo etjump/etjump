@@ -1,0 +1,53 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_quickconnect_popup_delete"
+#define GROUP_NAME "etjump_quickconnect_popup"
+
+#define SUBWINDOW_WIDTH     210
+#define SUBWINDOW_HEIGHT    72
+#define SUBWINDOW_X         0.5 * (WINDOW_WIDTH - SUBWINDOW_WIDTH)
+#define SUBWINDOW_Y         0.5 * (WINDOW_HEIGHT - SUBWINDOW_HEIGHT)
+
+menuDef {
+    name        MENU_NAME
+    visible     0
+    fullscreen  0
+    rect        0 0 640 480
+    style       WINDOW_STYLE_FILLED
+    popup
+
+    fadeClamp   0.5
+    fadeAmount  0.075
+
+    onOpen {
+        setitemcolor background backcolor 0 0 0 0 ;
+        fadein background ;
+    }
+
+    onESC {
+        close MENU_NAME ;
+        open main
+    }
+
+    itemDef {
+        name        "background"
+        rect        0 0 640 480
+        style       WINDOW_STYLE_FILLED
+        background  "ui/assets/fadebox.tga"
+        backcolor   0 0 0 0
+        visible     1
+        decoration
+    }
+
+    SUBWINDOWBLACK( SUBWINDOW_X, SUBWINDOW_Y, SUBWINDOW_WIDTH, SUBWINDOW_HEIGHT, "DELETE QUICK CONNECT SERVER" )
+
+        LABEL( SUBWINDOW_X + 4, SUBWINDOW_Y + 20, (SUBWINDOW_WIDTH) - 8, 10, "Are you sure you want to delete this server?", .2, ITEM_ALIGN_CENTER, .5 * ((SUBWINDOW_WIDTH) - 8), 8 )
+        BUTTON( SUBWINDOW_X + 6, SUBWINDOW_Y + SUBWINDOW_HEIGHT - 24, (SUBWINDOW_WIDTH - 18) / 2, 18, "BACK", .3, 14, close MENU_NAME ; open main )
+        BUTTON( SUBWINDOW_X + SUBWINDOW_WIDTH - 6 - ((SUBWINDOW_WIDTH - 18) / 2), SUBWINDOW_Y + SUBWINDOW_HEIGHT - 24, (SUBWINDOW_WIDTH - 18) / 2, 18, "DELETE", .3, 14,
+                uiScript quickConnectDeleteServer ;
+                close MENU_NAME ;
+                open main )
+}

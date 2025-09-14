@@ -139,8 +139,8 @@ inline constexpr int FLAME_BLUE_LIFE =
 int rotatingFlames = qtrue;
 
 namespace ETJump {
-void flamechunkTrace(trace_t *trace, vec3_t start, vec3_t end,
-                     const int skipNumber, const int mask) {
+static void flamechunkTrace(trace_t *trace, vec3_t start, vec3_t end,
+                            const int skipNumber, const int mask) {
   CG_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, skipNumber, mask);
 
   // a flamechunk might be spawned by an entity in the map (props_flamethrower)
@@ -160,6 +160,22 @@ void flamechunkTrace(trace_t *trace, vec3_t start, vec3_t end,
   }
 
   resetTempTraceIgnoredClients();
+}
+
+static bool drawFlamethrowerEffect(const flameChunk_t *f) {
+  if (f->ownerCent == cg.snap->ps.clientNum) {
+    if (etj_hideFlamethrowerEffects.integer &
+        static_cast<int>(ETJump::HideFlamethrowerFlags::HIDE_SELF)) {
+      return false;
+    }
+  } else {
+    if (etj_hideFlamethrowerEffects.integer &
+        static_cast<int>(ETJump::HideFlamethrowerFlags::HIDE_OTHERS)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 } // namespace ETJump
 
@@ -746,6 +762,10 @@ void CG_AddFlameSpriteToScene(flameChunk_t *f, float lifeFrac, float alpha) {
     return; // we dont want to see this
   }
 
+  if (!ETJump::drawFlamethrowerEffect(f)) {
+    return;
+  }
+
   radius = (f->size / 2.0);
   if (radius < 6) {
     radius = 6;
@@ -869,7 +889,6 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
   int headTimeStart;
   float vdist, bdot;
   flameChunk_t *lastBlowChunk = nullptr;
-  qboolean isClientFlame;
   int shader;
   flameChunk_t *lastBlueChunk = nullptr;
   qboolean skip = qfalse, droppedTrail;
@@ -879,9 +898,9 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
   float lightFlameCount;
   float lastFuelAlpha;
 
-  isClientFlame = (fHead == centFlameInfo[fHead->ownerCent].lastFlameChunk)
-                      ? qtrue
-                      : qfalse;
+  // is this our flame?
+  const bool isClientFlame =
+      fHead == centFlameInfo[fHead->ownerCent].lastFlameChunk;
 
   if ((cg_entities[fHead->ownerCent].currentState.eFlags & EF_FIRING) &&
       (centFlameInfo[fHead->ownerCent].lastFlameChunk == fHead)) {
@@ -1015,19 +1034,21 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
 
           if (!fskip) {
             lastFuelAlpha = alpha;
-
             VectorScale(whiteColor, alpha, c);
-
             droppedTrail = qtrue;
 
-            fuelTrailHead = CG_AddTrailJunc(
-                fuelTrailHead, nullptr,
-                /* rain - zinx's trail fix */ cgs.media.flamethrowerFireStream,
-                cg.time, (f->ignitionOnly ? STYPE_STRETCH : STYPE_REPEAT),
-                f->org, 1, alpha, alpha,
-                (f->size / 2 < f->sizeMax / 4 ? f->size / 2 : f->sizeMax / 4),
-                FLAME_MAX_SIZE, TJFL_NOCULL | TJFL_FIXDISTORT | TJFL_CROSSOVER,
-                c, c, 0.5, 1.5);
+            if (ETJump::drawFlamethrowerEffect(f)) {
+              fuelTrailHead = CG_AddTrailJunc(
+                  fuelTrailHead, nullptr,
+                  /* rain - zinx's trail fix */
+                  cgs.media.flamethrowerFireStream, cg.time,
+                  (f->ignitionOnly ? STYPE_STRETCH : STYPE_REPEAT), f->org, 1,
+                  alpha, alpha,
+                  (f->size / 2 < f->sizeMax / 4 ? f->size / 2 : f->sizeMax / 4),
+                  FLAME_MAX_SIZE,
+                  TJFL_NOCULL | TJFL_FIXDISTORT | TJFL_CROSSOVER, c, c, 0.5,
+                  1.5);
+            }
           }
         }
       }
@@ -1093,14 +1114,23 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
   if (alpha > 2.0) {
     alpha = 2.0;
   }
+
   VectorScale(lightOrg, 1.0 / lightFlameCount, lightOrg);
+
+  // skip adding dlights if the origin is underwater
+  // this prevents dlights from appearing when '+attack' is held underwater,
+  // as the code doesn't recognize that we are not actually firing otherwise
+  if (CG_PointContents(lightOrg, -1) & MASK_WATER) {
+    return;
+  }
+
   // if it's only a nozzle, make it blue
   if (fHead->ignitionOnly) {
     if (lightSize > 80) {
       lightSize = 80;
     }
     trap_R_AddLightToScene(lightOrg, 80, alpha, 0.2, 0.21, 0.5, 0, 0);
-  } else if (isClientFlame || (fHead->ownerCent == cg.snap->ps.clientNum)) {
+  } else if (ETJump::drawFlamethrowerEffect(fHead)) {
     trap_R_AddLightToScene(lightOrg, 320, alpha, 1.000000, 0.603922, 0.207843,
                            0, 0);
   }
@@ -1284,6 +1314,14 @@ void CG_UpdateFlamethrowerSounds(void) {
   // draw each of the headFlameChunk's
   f = headFlameChunks;
   while (f) {
+    // no sounds if the chunk is underwater (this mainly gets rid of the idle
+    // blow sound of the weapon, as chunks don't really end up underwater)
+    if (CG_PointContents(f->org, -1) & MASK_WATER) {
+      centFlameInfo[f->ownerCent].lastSoundUpdate = cg.time;
+      f = f->nextHead;
+      continue;
+    }
+
     // update this entity?
     if (centFlameInfo[f->ownerCent].lastSoundUpdate != cg.time) {
       // blow/ignition sound

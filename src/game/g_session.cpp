@@ -17,13 +17,26 @@ G_WriteClientSessionData
 Called on game shutdown
 ================
 */
-void G_WriteClientSessionData(gclient_t *client, qboolean restart) {
+static void G_WriteClientSessionData(gclient_t *client, qboolean restart,
+                                     bool levelTimeReset) {
   const char *s;
   auto clientNum = ClientNum(client);
 
   // OSP -- stats reset check
   if (level.fResetStats) {
     G_deleteStats(clientNum);
+  }
+
+  int32_t clientLastActive = client->sess.clientLastActive;
+
+  // If we're using level time reset, we need to subtract the level end time
+  // from the clients current last active time, so that any idle time
+  // at the end of the level carries over to the next map.
+  // This will in most scenarios result in negative timestamp,
+  // which is the expected behavior, as the inactivity is determined by
+  // level.time >= client->sess.clientLastActive + CLIENT_INACTIVITY_TIMER
+  if (levelTimeReset) {
+    clientLastActive -= level.time;
   }
 
   s = va("%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i "
@@ -37,7 +50,7 @@ void G_WriteClientSessionData(gclient_t *client, qboolean restart) {
          client->sess.playerWeapon2,
          client->sess.latchPlayerType,   // DHM - Nerve
          client->sess.latchPlayerWeapon, // DHM - Nerve
-         client->sess.latchPlayerWeapon2, client->sess.clientLastActive,
+         client->sess.latchPlayerWeapon2, clientLastActive,
 
          // OSP
          client->sess.coach_team, client->sess.deaths, client->sess.game_points,
@@ -262,7 +275,8 @@ void G_InitSessionData(gclient_t *client, char *userinfo) {
   G_deleteStats(client - level.clients);
   // OSP
 
-  G_WriteClientSessionData(client, qfalse);
+  // we don't care about levelTimeReset here, since this is an initial connect
+  G_WriteClientSessionData(client, qfalse, false);
 }
 
 /*
@@ -383,9 +397,19 @@ void G_WriteSessionData(qboolean restart) {
     }
   }
 
+  // Check if we're using server time reset here, so we can offset client
+  // inactivity timer from the level end time.
+  // We must check this here rather than on level init,
+  // because these are not 'CVAR_LATCH', so they might be changed mid map.
+  // 'sv_levelTimeReset' = ETe, 'sv_serverTimeReset' = ET: Legacy
+  const bool levelTimeReset =
+      trap_Cvar_VariableIntegerValue("sv_levelTimeReset") ||
+      trap_Cvar_VariableIntegerValue("sv_serverTimeReset");
+
   for (i = 0; i < level.numConnectedClients; i++) {
     if (level.clients[level.sortedClients[i]].pers.connected == CON_CONNECTED) {
-      G_WriteClientSessionData(&level.clients[level.sortedClients[i]], restart);
+      G_WriteClientSessionData(&level.clients[level.sortedClients[i]], restart,
+                               levelTimeReset);
       // For slow connecters and a short warmup
     } else if (level.fResetStats) {
       G_deleteStats(level.sortedClients[i]);

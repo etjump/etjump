@@ -34,6 +34,7 @@ class ChatReplay;
 class Motd;
 class CustomMapVotes;
 class MapStatistics;
+class FireteamCountdown;
 
 #ifdef NEW_AUTH
 class SessionV2;
@@ -56,6 +57,7 @@ struct Game {
   std::unique_ptr<ETJump::Motd> motd;
   std::unique_ptr<ETJump::Tokens> tokens;
   std::unique_ptr<ETJump::ChatReplay> chatReplay;
+  std::unique_ptr<ETJump::FireteamCountdown> fireteamCountdown;
 
   #ifdef NEW_AUTH
   std::unique_ptr<ETJump::SessionV2> sessionV2;

@@ -113,6 +113,10 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.adjustEvTokens = true;
     compatibilityStrings.emplace_back(
         "- Adjusted event indices for ET_TOKEN_ entities");
+
+    flags.adjustItemlistIndex = true;
+    compatibilityStrings.emplace_back(
+        "- Adjusted item indices for removal of duplicate 'weapon_medic_heal'");
   }
 
   if (!isCompatible({2, 3, 0})) {
@@ -152,6 +156,10 @@ void DemoCompatibility::setupCompatibilityFlags() {
   if (!isCompatible({3, 4, 0})) {
     flags.serverSideDlights = true;
     compatibilityStrings.emplace_back("- Using fully server-side dlights");
+
+    flags.setAttack2FiringFlag = true;
+    compatibilityStrings.emplace_back(
+        "- Faking EF_FIRING state for '+attack2' shooting");
   }
 }
 

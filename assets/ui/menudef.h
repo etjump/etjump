@@ -409,6 +409,7 @@
 // there's no actual cvar associated with this flag, but we turn this off
 // if there are no custom votes defined on the server
 #define CV_SVF_CUSTOMVOTE		32
+#define CV_SVF_PORTALPREDICT		64
 
 // referee level
 #define RL_NONE					0

@@ -41,6 +41,7 @@
 #include "etj_chat_replay.h"
 #include "etj_filesystem.h"
 #include "etj_printer.h"
+#include "etj_fireteam_countdown.h"
 
 #ifdef NEW_AUTH
   #include "etj_session_v2.h"
@@ -94,6 +95,7 @@ void OnClientDisconnect(gentity_t *ent) {
 #endif
   ETJump::Log::processMessages();
   game.timerunV2->clientDisconnect(clientNum);
+  game.fireteamCountdown->removeCountdown(clientNum);
 }
 
 void WriteSessionData() {
@@ -153,6 +155,8 @@ void RunFrame(int levelTime) {
     game.rtv->callAutoRtv();
   }
 
+  game.fireteamCountdown->runFrame();
+
   ETJump::Log::processMessages();
 }
 
@@ -170,6 +174,8 @@ void OnGameInit() {
 
   game.chatReplay = std::make_unique<ETJump::ChatReplay>(
       std::make_unique<ETJump::Log>("chat-replay"));
+
+  game.fireteamCountdown = std::make_unique<ETJump::FireteamCountdown>();
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
@@ -281,6 +287,7 @@ void OnGameShutdown() {
   game.timerunV2 = nullptr;
   game.rtv = nullptr;
   game.chatReplay = nullptr;
+  game.fireteamCountdown = nullptr;
 
 #ifdef NEW_AUTH
   game.sessionV2 = nullptr;

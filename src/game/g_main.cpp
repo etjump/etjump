@@ -164,6 +164,7 @@ vmCvar_t vote_allow_matchreset;
 vmCvar_t vote_allow_randommap;
 vmCvar_t vote_allow_rtv;
 vmCvar_t vote_allow_autoRtv;
+vmCvar_t vote_allow_portalPredict;
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
 
@@ -223,10 +224,11 @@ vmCvar_t g_banner5;
 vmCvar_t g_banners;
 
 // Feen: PGM
-vmCvar_t g_portalDebug; // View Portal BBoxes
-vmCvar_t
-    g_portalMode; // Defines portal mode.
-                  // 0 = Freestyle, 1 = Standard,  2 = team (possible future)
+// Defines portal mode.
+// 0 = Freestyle, 1 = Standard,  2 = team (possible future)
+vmCvar_t g_portalMode;
+vmCvar_t g_portalPredict;
+vmCvar_t g_portalTeam;
 
 // Bugfixes
 vmCvar_t g_maxConnsPerIP;
@@ -422,6 +424,8 @@ cvarTable_t gameCvarTable[] = {
     {&vote_allow_randommap, "vote_allow_randommap", "1", 0, 0, qfalse, qfalse},
     {&vote_allow_rtv, "vote_allow_rtv", "1", 0, 0, qfalse, qfalse},
     {&vote_allow_autoRtv, "vote_allow_autoRtv", "1", 0, 0, qfalse, qfalse},
+    {&vote_allow_portalPredict, "vote_allow_portalPredict", "1", 0, 0, qfalse,
+     qfalse},
     {&vote_limit, "vote_limit", "5", 0, 0, qfalse, qfalse},
     {&vote_percent, "vote_percent", "50", 0, 0, qfalse, qfalse},
 
@@ -485,9 +489,11 @@ cvarTable_t gameCvarTable[] = {
     {&g_banners, "g_banners", "1", CVAR_ARCHIVE},
 
     // Feen: PGM
-    {&g_portalDebug, "g_portalDebug", "0", CVAR_CHEAT | CVAR_ARCHIVE},
-    {&g_portalMode, "g_portalMode", "1",
-     CVAR_ARCHIVE}, // 0 - freestyle, 1 - restricted
+    // 0 - freestyle, 1 - restricted
+    {&g_portalMode, "g_portalMode", "1", CVAR_ARCHIVE},
+    {&g_portalPredict, "g_portalPredict", "0", CVAR_ARCHIVE | CVAR_SERVERINFO,
+     0, qtrue},
+    {&g_portalTeam, "g_portalTeam", "0", CVAR_ROM | CVAR_SERVERINFO},
 
     {&g_maxConnsPerIP, "g_maxConnsPerIP", "2", CVAR_ARCHIVE},
     {&g_mute, "g_mute", "0", CVAR_ARCHIVE},
@@ -1539,6 +1545,7 @@ void G_UpdateCvars(void) {
                    cv->vmCvar == &vote_allow_randommap ||
                    cv->vmCvar == &vote_allow_rtv ||
                    cv->vmCvar == &vote_allow_autoRtv ||
+                   cv->vmCvar == &vote_allow_portalPredict ||
                    cv->vmCvar == &g_enableVote) {
           fVoteFlags = qtrue;
         } else if (cv->vmCvar == &g_allowSpeclock) {

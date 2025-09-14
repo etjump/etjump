@@ -1,3 +1,7 @@
 * text=auto
 
-*.sh text eol=ln
+*.sh text eol=lf
+
+# enforce lf line endings for menu files, so Windows menu integrity checks
+# won't fail due to different line endings, when the mod is packaged on Linux
+*.menu text eol=lf

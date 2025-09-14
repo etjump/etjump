@@ -83,7 +83,10 @@ void TeleportPlayer(gentity_t *player, const vec3_t origin, vec3_t angles) {
   player->client->ps.origin[2] += 1;
 
   // toggle the teleport bit so the client knows to not lerp
-  player->client->ps.eFlags ^= EF_TELEPORT_BIT;
+  if (!player->client->teleportBitFlipped) {
+    player->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    player->client->teleportBitFlipped = true;
+  }
 
   // set angles
   SetClientViewAngle(player, angles);
@@ -317,7 +320,10 @@ void teleportPlayer(gentity_t *self, gentity_t *other, const vec3_t origin,
   }
 
   // toggle the teleport bit so the client knows to not lerp
-  self->client->ps.eFlags ^= EF_TELEPORT_BIT;
+  if (!self->client->teleportBitFlipped) {
+    self->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    self->client->teleportBitFlipped = true;
+  }
 
   SetClientViewAngle(self, teleAngles);
   BG_PlayerStateToEntityState(&self->client->ps, &self->s, qtrue);
@@ -336,7 +342,10 @@ void DirectTeleport(gentity_t *player, const vec3_t origin, vec3_t angles) {
   VectorCopy(origin, player->client->ps.origin);
 
   // toggle the teleport bit so the client knows to not lerp
-  player->client->ps.eFlags ^= EF_TELEPORT_BIT;
+  if (!player->client->teleportBitFlipped) {
+    player->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    player->client->teleportBitFlipped = true;
+  }
 
   // set angles
   SetClientViewAngle(player, angles);
@@ -351,203 +360,6 @@ void DirectTeleport(gentity_t *player, const vec3_t origin, vec3_t angles) {
     trap_LinkEntity(player);
   }
 }
-
-/*
-=================================================================================
-
-Portal Gun Mod: Teleport Method
-
-=================================================================================
-*/
-
-void PortalTeleport(gentity_t *player, vec3_t origin, vec3_t angles) {
-  // Feen: Extra little boost coming out of a portal...
-  static constexpr float PORTAL_NUDGE = 50.0f;
-  const vec_t velocityLength = VectorLength(player->client->ps.velocity);
-
-  // VectorCopy ( origin, player->client->ps.origin ); //Changed to...
-  // VectorMA(origin, 32.0f, angles, player->client->ps.origin); moved
-  // down....
-
-  // player->client->ps.origin[2] += 1;
-
-  // spit the player out
-  AngleVectors(angles, player->client->ps.velocity, NULL, NULL);
-
-  // new origin method
-  VectorMA(origin, 32.0f, player->client->ps.velocity,
-           player->client->ps.origin);
-
-  // Scale new vector back to old velocity
-  VectorScale(player->client->ps.velocity, velocityLength + PORTAL_NUDGE,
-              player->client->ps.velocity);
-
-  // toggle the teleport bit so the client knows to not lerp
-  player->client->ps.eFlags ^= EF_TELEPORT_BIT;
-
-  // set view angles
-
-  // Adjust view angles so portals don't have you looking straight up or
-  // down...
-  if ((angles[PITCH] >= -105 && angles[PITCH] <= -75) ||
-      (angles[PITCH] >= -285 && angles[PITCH] <= -255)) {
-
-    // NOTE: The concensus at this point is that we leave the
-    // viewangles
-    //		alone when going through portals with vertical
-    // angles.
-
-    // NOTE: Re-enable to change orientation for vertical
-    // portals....
-    /*
-    vec3_t t_viewAngles;
-
-    //This block will only prevent the 'vertical' view
-    //angle from changing.....
-    t_viewAngles[PITCH] = 0.0f;
-    t_viewAngles[YAW]   = angles[YAW];
-    t_viewAngles[ROLL]  = angles[ROLL];
-
-    SetClientViewAngle( player, t_viewAngles );
-    */
-
-    // Otherwise, don't change the view angles at all....
-
-    // HACK: Fixes bug where players would get stuck in ceiling
-    //		when coming through portal on ceiling....
-    //       Essentially, the player origin is pushed out from
-    //		the portal origin even more..
-
-    if (angles[PITCH] >= -285 && angles[PITCH] <= -255) // portal on the ceiling
-    {
-      player->client->ps.origin[2] -= 32.0f; // Bleh.....
-    }
-  } else {
-
-    // SetClientViewAngle( player, angles ); //Not going to
-    // modify PITCH of the viewangles at all anymore...
-
-    vec3_t t_viewAngles;
-
-    t_viewAngles[PITCH] = player->client->ps.viewangles[PITCH];
-    t_viewAngles[YAW] = angles[YAW];
-    t_viewAngles[ROLL] = angles[ROLL];
-
-    SetClientViewAngle(player, t_viewAngles);
-  }
-
-  // Feen: Added new event to prevent crashland
-  G_AddEvent(player, EV_PORTAL_TELEPORT, 0);
-  // Com_Printf("PGM: PortalTeleport occured..\n"); //Debug
-
-  // save results of pmove
-  BG_PlayerStateToEntityState(&player->client->ps, &player->s, qtrue);
-
-  // use the precise origin for linking
-  VectorCopy(player->client->ps.origin, player->r.currentOrigin);
-
-  if (player->client->sess.sessionTeam != TEAM_SPECTATOR) {
-    trap_LinkEntity(player);
-  }
-}
-
-void weapon_portalgun_touch(gentity_t *self, gentity_t *other, trace_t *trace) {
-
-  qboolean alreadyHave = qfalse;
-
-  if (!other->client) {
-    return;
-  }
-
-  // ETJump: disable portalgun pickup
-  if (other->client->sess.timerunActive &&
-      (other->client->sess.runSpawnflags &
-       static_cast<int>(ETJump::TimerunSpawnflags::NoPortalgunPickup))) {
-    return;
-  }
-
-  // If portal team value is higher than 0 let's set users pteam value
-  // to that of the entity.
-  if (self->portalTeam > 0) {
-    other->client->sess.portalTeam = self->portalTeam;
-  }
-
-  // check if player already had the weapon
-  alreadyHave = COM_BitCheck(other->client->ps.weapons, self->item->giTag);
-
-  if (alreadyHave) {
-    return;
-  }
-
-  // Forcing pickup through same function as target_give uses
-  Touch_Item_Give(self, other, trace);
-}
-
-// Just to fix a bug...
-void weapon_portal_think(gentity_t *self) { return; }
-
-/*
-Portal team
-
-if portalTeam is set to higher value than 0, let's set the users portal team to
-whatever value it is. People with the same portal team value can use eachothers
-portals. Clear portal team on death, team switch etc.
-*/
-void SP_weapon_portalgun(gentity_t *ent) {
-  gitem_t *item;
-
-  G_SpawnInt("portal_team", "0", &ent->portalTeam);
-
-  item = BG_FindItemForWeapon(WP_PORTAL_GUN);
-
-  char *noise{};
-
-  if (G_SpawnString("noise", "", &noise)) {
-    ent->noise_index = G_SoundIndex(noise);
-  }
-
-  ent->s.eType = ET_ITEM;
-  ent->s.modelindex = item - bg_itemlist; // store item number in modelindex
-  ent->s.otherEntityNum2 = 1;             // DHM - Nerve :: this is taking
-                              // modelindex2's place for a dropped item
-
-  ent->classname = item->classname;
-  ent->item = item;
-  VectorSet(ent->r.mins, -ITEM_RADIUS, -ITEM_RADIUS,
-            0); //----(SA)	so items sit on the ground
-  VectorSet(ent->r.maxs, ITEM_RADIUS, ITEM_RADIUS,
-            2 * ITEM_RADIUS); //----(SA)	so items sit on the ground
-  ent->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
-
-  ent->clipmask =
-      CONTENTS_SOLID | CONTENTS_MISSILECLIP; // NERVE - SMF - fix for items
-                                             // falling through grates
-
-  ent->touch = weapon_portalgun_touch;
-
-  ent->think = weapon_portal_think;
-  ent->nextthink = level.time + 100;
-
-  if (ent->spawnflags & 2) // spin
-  {
-    ent->s.eFlags |= EF_SPINNING;
-  }
-
-  if (ent->spawnflags & 4) {
-    ent->s.eFlags |= EF_BOBBING; // bobbing
-  }
-
-  G_SetOrigin(ent, ent->s.origin);
-  G_SetAngle(ent, ent->s.angles);
-
-  trap_LinkEntity(ent);
-}
-
-/*
-
-END PGM STUFF...
-
-*/
 
 /*QUAKED misc_teleporter_dest (1 0 0) (-32 -32 -24) (32 32 -16)
 Point teleporters at these.

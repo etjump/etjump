@@ -104,16 +104,18 @@ public:
   void checkpoint(const std::string &runName, int clientNum,
                   int checkpointIndex, int currentTimeMs) const;
   void stopTimer(const std::string &runName, int clientNum, int currentTimeMs);
-  void addSeason(Timerun::AddSeasonParams season);
-  void editSeason(Timerun::EditSeasonParams params);
+  void addSeason(const Timerun::AddSeasonParams &season);
+  void editSeason(const Timerun::EditSeasonParams &params);
   void interrupt(int clientNum);
   void connectNotify(int clientNum);
-  void printRecords(Timerun::PrintRecordsParams params);
-  void loadCheckpoints(int clientNum, std::string mapName, std::string runName,
-                       int rank);
-  void printRankings(Timerun::PrintRankingsParams params);
+  void printRecords(const Timerun::PrintRecordsParams &params);
+  void loadCheckpoints(int clientNum, const std::string &mapName,
+                       const std::string &runName, int rank);
+  void printRankings(const Timerun::PrintRankingsParams &params);
   void printSeasons(int clientNum);
   void deleteSeason(int clientNum, const std::string &name);
+
+  [[nodiscard]] int32_t getRunStartTime(int32_t clientNum) const;
 
   static void removeDisallowedWeapons(gentity_t *ent);
   static void removePlayerProjectiles(gentity_t *ent);

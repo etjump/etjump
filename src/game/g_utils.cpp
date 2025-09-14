@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 
+#include "etj_printer.h"
 #include "g_local.h"
 #include "etj_string_utilities.h"
 
@@ -1224,7 +1225,7 @@ void G_PrintClientSpammyCenterPrint(int entityNum, const char *text) {
     return;
   }
 
-  trap_SendServerCommand(entityNum, va("cp \"%s\" 1", text));
+  Printer::centerPriority(entityNum, text, 1, false);
   g_entities[entityNum].client->lastSpammyCentrePrintTime = level.time;
 }
 
@@ -1517,12 +1518,6 @@ int FindClientByName(char *name) {
   }
 
   return -1;
-}
-
-int ClientNum(gentity_t *ent) { return static_cast<int>(ent - g_entities); }
-
-int ClientNum(gclient_t *client) {
-  return static_cast<int>(client - level.clients);
 }
 
 const char *ClientIPAddr(gentity_t *ent) {

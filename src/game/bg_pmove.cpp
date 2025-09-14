@@ -2012,6 +2012,36 @@ static void PM_GroundTraceMissed(void) {
   // PM_CheckPortal();
 }
 
+namespace ETJump {
+// this is rather verbose but I wanted to make this easy to read,
+// rather than making it as concise as possible
+static bool disableOverbounce(const trace_t &trace) {
+  const bool onPlayer = trace.entityNum >= 0 && trace.entityNum < MAX_CLIENTS;
+
+  if (onPlayer) {
+    if (pm->shared & BG_LEVEL_BODY_OB_NEVER) {
+      return true;
+    }
+
+    if (pm->shared & BG_LEVEL_BODY_OB_ALWAYS) {
+      return false;
+    }
+  }
+
+  if (pm->shared & BG_LEVEL_NO_OVERBOUNCE) {
+    if (!(trace.surfaceFlags & SURF_OVERBOUNCE)) {
+      return true;
+    }
+  } else {
+    if (trace.surfaceFlags & SURF_OVERBOUNCE) {
+      return true;
+    }
+  }
+
+  return false;
+}
+} // namespace ETJump
+
 /*
 =============
 PM_GroundTrace
@@ -2111,17 +2141,9 @@ static void PM_GroundTrace(void) {
 
     PM_CrashLand();
 
-    // Disable overbounce?
-    if (pm->shared & BG_LEVEL_NO_OVERBOUNCE) {
-      if (!((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)) {
-        PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal,
-                        pm->ps->velocity, OVERCLIP);
-      }
-    } else {
-      if (((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)) {
-        PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal,
-                        pm->ps->velocity, OVERCLIP);
-      }
+    if (ETJump::disableOverbounce(trace)) {
+      PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal,
+                      pm->ps->velocity, OVERCLIP);
     }
 
     // don't do landing time if we were just going down a slope
@@ -2136,24 +2158,15 @@ static void PM_GroundTrace(void) {
 
   pm->ps->groundEntityNum = trace.entityNum;
 
-  // Disable overbounce?
-  if (pm->shared & BG_LEVEL_NO_OVERBOUNCE) {
-    if (trace.plane.normal[2] == 1 &&
-        !((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)) {
-      pm->ps->velocity[2] = 0;
-      if (trace.plane.type == 2 && pm->waterlevel < 2) {
-        auto offset = pm->ps->origin[2] - trace.endpos[2];
-        pm->ps->origin[2] -= offset;
-      }
-    }
-  } else {
-    if (trace.plane.normal[2] == 1 &&
-        ((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)) {
-      pm->ps->velocity[2] = 0;
-      if (trace.plane.type == 2 && pm->waterlevel < 2) {
-        auto offset = pm->ps->origin[2] - trace.endpos[2];
-        pm->ps->origin[2] -= offset;
-      }
+  // prevent sticky overbounces
+  if (ETJump::disableOverbounce(trace) && trace.plane.normal[2] == 1) {
+    pm->ps->velocity[2] = 0;
+
+    // axial surfaces only
+    // FIXME: remove??? we're checking for plane.normal[2] == 1 already
+    if (trace.plane.type == 2 && pm->waterlevel < 2) {
+      const auto offset = pm->ps->origin[2] - trace.endpos[2];
+      pm->ps->origin[2] -= offset;
     }
   }
 
@@ -3292,27 +3305,25 @@ PM_WeaponAmmoAvailable
     accounts for clips being used/not used
 ==============
 */
-int PM_WeaponAmmoAvailable(int inWp) {
-  auto wp = static_cast<weapon_t>(inWp);
-  int takeweapon;
+static int PM_WeaponAmmoAvailable(const playerState_t *ps) {
+  const auto wp = static_cast<weapon_t>(ps->weapon);
 
   if (pm->noWeapClips) {
-    return pm->ps->ammo[BG_FindAmmoForWeapon(wp)];
-  } else {
-    // return pm->ps->ammoclip[BG_FindClipForWeapon( wp )];
-    takeweapon = BG_FindClipForWeapon(wp);
-
-    if (BG_IsAkimboWeapon(wp)) {
-      if (!BG_AkimboFireSequence(
-              wp, pm->ps->ammoclip[BG_FindClipForWeapon(wp)],
-              pm->ps->ammoclip[BG_FindClipForWeapon(
-                  static_cast<weapon_t>(BG_AkimboSidearm(wp)))])) {
-        takeweapon = BG_AkimboSidearm(wp);
-      }
-    }
-
-    return pm->ps->ammoclip[takeweapon];
+    return ps->ammo[BG_FindAmmoForWeapon(wp)];
   }
+
+  int32_t takeweapon = BG_FindClipForWeapon(wp);
+
+  if (BG_IsAkimboWeapon(wp)) {
+    if (!BG_AkimboFireSequence(
+            wp, pm->ps->ammoclip[BG_FindClipForWeapon(wp)],
+            ps->ammoclip[BG_FindClipForWeapon(
+                static_cast<weapon_t>(BG_AkimboSidearm(wp)))])) {
+      takeweapon = BG_AkimboSidearm(wp);
+    }
+  }
+
+  return ps->ammoclip[takeweapon];
 }
 
 /*
@@ -3626,6 +3637,31 @@ static bool mountedFire() {
         pm->ps->weaponTime = MG42_HEAT_RECOVERY;
       }
     }
+  }
+
+  return true;
+}
+
+bool canFireWeapon(const playerState_t *ps) {
+  if (!ps) {
+    return false;
+  }
+
+  if (ps->pm_flags & PMF_RESPAWNED ||
+      ps->pm_type == (PM_INTERMISSION | PM_NOCLIP)) {
+    return false;
+  }
+
+  if (ps->eFlags & EF_ZOOMING || ps->leanf != 0) {
+    return false;
+  }
+
+  if (ps->weaponstate != WEAPON_READY && ps->weaponstate != WEAPON_FIRING) {
+    return false;
+  }
+
+  if (!PM_WeaponAmmoAvailable(ps)) {
+    return false;
   }
 
   return true;
@@ -4314,7 +4350,7 @@ static void PM_Weapon(void) {
     case WP_GRENADE_PINEAPPLE:
     case WP_SMOKE_BOMB:
       if (!delayedFire) {
-        if (PM_WeaponAmmoAvailable(pm->ps->weapon)) {
+        if (PM_WeaponAmmoAvailable(pm->ps)) {
           if (pm->ps->weapon == WP_DYNAMITE) {
             pm->ps->grenadeTimeLeft = 50;
           } else {
@@ -4334,7 +4370,7 @@ static void PM_Weapon(void) {
       break;
     case WP_LANDMINE:
       if (!delayedFire) {
-        if (PM_WeaponAmmoAvailable(pm->ps->weapon)) {
+        if (PM_WeaponAmmoAvailable(pm->ps)) {
           if (pm->ps->eFlags & EF_PRONE) {
             BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo,
                                ANIM_ET_FIREWEAPON2PRONE, qfalse, qtrue);
@@ -4350,7 +4386,7 @@ static void PM_Weapon(void) {
     case WP_TRIPMINE:
     case WP_SATCHEL:
       if (!delayedFire) {
-        if (PM_WeaponAmmoAvailable(pm->ps->weapon)) {
+        if (PM_WeaponAmmoAvailable(pm->ps)) {
           PM_StartWeaponAnim(PM_AttackAnimForWeapon(pm->ps->weapon));
         }
 
@@ -4393,7 +4429,7 @@ static void PM_Weapon(void) {
     int ammoAvailable;
     qboolean reloading, playswitchsound = qtrue;
 
-    ammoAvailable = PM_WeaponAmmoAvailable(pm->ps->weapon);
+    ammoAvailable = PM_WeaponAmmoAvailable(pm->ps);
 
     if (ammoNeeded > ammoAvailable) {
       // you have ammo for this, just not in the clip
@@ -4500,7 +4536,7 @@ static void PM_Weapon(void) {
   }
 
   // take an ammo away if not infinite
-  if (PM_WeaponAmmoAvailable(pm->ps->weapon) != -1) {
+  if (PM_WeaponAmmoAvailable(pm->ps) != -1) {
     // Rafael - check for being mounted on mg42
     if (!(pm->ps->persistant[PERS_HWEAPON_USE]) &&
         !(pm->ps->eFlags & EF_MOUNTEDTANK)) {
@@ -5907,27 +5943,9 @@ void PmoveSingle(pmove_t *pmove) {
     }
   }
 
-  if (!(pm->ps->pm_flags & PMF_RESPAWNED) &&
-      (pm->ps->pm_type != PM_INTERMISSION) && (pm->ps->pm_type != PM_NOCLIP)) {
-    // check for ammo
-    if (PM_WeaponAmmoAvailable(pm->ps->weapon)) {
-      // check if zooming
-      // DHM - Nerve :: Let's use the same flag we just
-      // checked above, Ok?
-      if (!(pm->ps->eFlags & EF_ZOOMING)) {
-        if (!pm->ps->leanf) {
-          if (pm->ps->weaponstate == WEAPON_READY ||
-              pm->ps->weaponstate == WEAPON_FIRING) {
-
-            // all clear, fire!
-            if (pm->cmd.buttons & BUTTON_ATTACK &&
-                !(pm->cmd.buttons & BUTTON_TALK)) {
-              pm->ps->eFlags |= EF_FIRING;
-            }
-          }
-        }
-      }
-    }
+  if (ETJump::canFireWeapon(pm->ps) && !(pm->cmd.buttons & BUTTON_TALK) &&
+      (pm->cmd.buttons & BUTTON_ATTACK || pm->cmd.wbuttons & WBUTTON_ATTACK2)) {
+    pm->ps->eFlags |= EF_FIRING;
   }
 
   if (pm->ps->pm_flags & PMF_RESPAWNED) {

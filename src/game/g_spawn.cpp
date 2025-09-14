@@ -4,7 +4,6 @@
  * desc:
  *
  */
-#include "etj_entity_utilities.h"
 
 #include <sstream>
 #include <string>
@@ -19,6 +18,10 @@
 #include "etj_trigger_teleport_client.h"
 #include "etj_target_ft_setrules.h"
 #include "etj_target_spawn_relay.h"
+#include "etj_portalgun.h"
+#include "etj_portalgun_shared.h"
+#include "etj_entity_utilities.h"
+#include "etj_progression_tracker.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -443,7 +446,6 @@ void SP_target_savereset(gentity_t *self);
 void SP_target_increase_ident(gentity_t *self);
 void SP_target_save(gentity_t *self);
 // Feen: PGM
-void SP_weapon_portalgun(gentity_t *self);
 void SP_target_remove_portals(gentity_t *self);
 void SP_target_portal_relay(gentity_t *self);
 void SP_target_ftrelay(gentity_t *self);
@@ -457,8 +459,6 @@ void SP_target_interrupt_timerun(gentity_t *self);
 void SP_target_activate_if_velocity(gentity_t *self);
 // Scale velocity
 void SP_target_scale_velocity(gentity_t *self);
-void SP_target_tracker(gentity_t *self);
-void SP_trigger_tracker(gentity_t *self);
 void SP_target_set_health(gentity_t *self);
 void SP_target_deathrun_start(gentity_t *self);
 void SP_target_deathrun_checkpoint(gentity_t *self);
@@ -691,7 +691,7 @@ spawn_t spawns[] = {
     {"etjump203_target_relay", SP_target_fireonce},
     {"func_fakebrush", SP_func_fakebrush},
     {"target_savereset", SP_target_savereset},
-    {"weapon_portalgun", SP_weapon_portalgun}, // Feen: PGM
+    {"weapon_portalgun", ETJump::Portalgun::spawn}, // Feen: PGM
     {"target_increase_ident", SP_target_increase_ident},
     {"target_save", SP_target_save},
     {"target_remove_portals", SP_target_remove_portals},
@@ -712,8 +712,8 @@ spawn_t spawns[] = {
     {"target_interrupt_timerun", SP_target_interrupt_timerun},
     {"target_activate_if_velocity", SP_target_activate_if_velocity},
     {"target_scale_velocity", SP_target_scale_velocity},
-    {"trigger_tracker", SP_trigger_tracker},
-    {"target_tracker", SP_target_tracker},
+    {"trigger_tracker", ETJump::ProgressionTrackers::triggerTrackerSpawn},
+    {"target_tracker", ETJump::ProgressionTrackers::targetTrackerSpawn},
     {"target_set_health", SP_target_set_health},
     {"target_deathrun_start", SP_target_deathrun_start},
     {"target_deathrun_checkpoint", SP_target_deathrun_checkpoint},
@@ -953,9 +953,14 @@ Parses a brace bounded set of key / value pairs out of the
 level's entity strings into level.spawnVars[]
 
 This does not actually spawn an entity.
+
+In developer mode, this also stores all parsed entities to
+'EntityUtilities::parsedEntities' in order for 'dumpEntities' command to work,
+as we cannot call this outside of init, since 'trap_GetEntityToken'
+won't return valid data after 'SV_InitGameVM' has run.
 ====================
 */
-qboolean G_ParseSpawnVars(void) {
+static bool G_ParseSpawnVars() {
   char keyname[MAX_TOKEN_CHARS];
   char com_token[MAX_TOKEN_CHARS];
 
@@ -965,18 +970,17 @@ qboolean G_ParseSpawnVars(void) {
   // parse the opening brace
   if (!trap_GetEntityToken(com_token, sizeof(com_token))) {
     // end of spawn string
-    return qfalse;
+    return false;
   }
   if (com_token[0] != '{') {
-    G_Error("G_ParseSpawnVars: found %s when expecting {", com_token);
+    G_Error("%s: found %s when expecting {", __func__, com_token);
   }
 
   // go through all the key / value pairs
-  while (1) {
+  while (true) {
     // parse key
     if (!trap_GetEntityToken(keyname, sizeof(keyname))) {
-      G_Error("G_ParseSpawnVars: EOF without closing "
-              "brace");
+      G_Error("%s: EOF without closing brace", __func__);
     }
 
     if (keyname[0] == '}') {
@@ -985,23 +989,29 @@ qboolean G_ParseSpawnVars(void) {
 
     // parse value
     if (!trap_GetEntityToken(com_token, sizeof(com_token))) {
-      G_Error("G_ParseSpawnVars: EOF without closing "
-              "brace");
+      G_Error("%s: EOF without closing brace", __func__);
     }
 
     if (com_token[0] == '}') {
-      G_Error("G_ParseSpawnVars: closing brace without "
-              "data");
+      G_Error("%s: closing brace without data", __func__);
     }
+
     if (level.numSpawnVars == MAX_SPAWN_VARS) {
-      G_Error("G_ParseSpawnVars: MAX_SPAWN_VARS");
+      G_Error("%s: MAX_SPAWN_VARS (%i) reached, too many keys in an entity",
+              __func__, MAX_SPAWN_VARS);
     }
+
     level.spawnVars[level.numSpawnVars][0] = G_AddSpawnVarToken(keyname);
     level.spawnVars[level.numSpawnVars][1] = G_AddSpawnVarToken(com_token);
+
     level.numSpawnVars++;
   }
 
-  return qtrue;
+  if (g_developer.integer) {
+    ETJump::EntityUtilities::storeParsedEntity();
+  }
+
+  return true;
 }
 
 namespace ETJump {
@@ -1154,6 +1164,45 @@ static void initNoFTTeamjumpMode() {
   G_Printf("Fireteam teamjump mode %s be toggled by players.\n",
            level.noFTTeamjumpMode ? "cannot" : "can");
 }
+
+static void initPortalPredict() {
+  int value = 0;
+  G_SpawnInt("portalpredict", "0", &value);
+
+  level.portalPredict = value;
+  level.portalPredict ? shared.integer |= BG_LEVEL_PORTAL_PREDICT
+                      : shared.integer &= ~BG_LEVEL_PORTAL_PREDICT;
+
+  trap_Cvar_Set("shared", va("%d", shared.integer));
+  G_Printf("Predicted portal teleports are %sforced.\n",
+           level.portalPredict ? "" : "not ");
+}
+
+static void initBodyOverbounce() {
+  int32_t value = 0;
+  G_SpawnInt("overbounce_players", "0", &value);
+
+  level.bodyOverbounce = value;
+
+  shared.integer &= ~BG_LEVEL_BODY_OB_ALWAYS;
+  shared.integer &= ~BG_LEVEL_BODY_OB_NEVER;
+
+  if (level.bodyOverbounce == 1) {
+    shared.integer |= BG_LEVEL_BODY_OB_ALWAYS;
+  } else if (level.bodyOverbounce == 2) {
+    shared.integer |= BG_LEVEL_BODY_OB_NEVER;
+  }
+
+  trap_Cvar_Set("shared", va("%d", shared.integer));
+
+  if (!level.bodyOverbounce) {
+    G_Printf("Overbounces on top of players are controlled by 'nooverbounce' "
+             "key.\n");
+  } else {
+    G_Printf("Overbounces on top of players are %s allowed.\n",
+             level.bodyOverbounce == 1 ? "always" : "never");
+  }
+}
 } // namespace ETJump
 
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
@@ -1282,11 +1331,13 @@ void SP_worldspawn(void) {
   val = Q_atoi(s);
   if (val) {
     if (val == 1) {
-      level.portalTeam = 1;
+      level.portalTeam = ETJump::PORTAL_TEAM_FT;
     } else {
-      level.portalTeam = 2;
+      level.portalTeam = ETJump::PORTAL_TEAM_ALL;
     }
   }
+
+  trap_Cvar_Set("g_portaLTeam", s);
   G_Printf("Portal team is set to %d.\n", val);
 
   ETJump::initNoSave();
@@ -1301,6 +1352,8 @@ void SP_worldspawn(void) {
   ETJump::initNoFTNoGhost();
   ETJump::initNoFTSaveLimit();
   ETJump::initNoFTTeamjumpMode();
+  ETJump::initPortalPredict();
+  ETJump::initBodyOverbounce();
 
   level.mapcoordsValid = qfalse;
   if (G_SpawnVector2D("mapcoordsmins", "-128 128",

@@ -1,6 +1,31 @@
+# ETJump 3.4.1
+
+* fixed an old bug where disabled spawnpoints were always drawn on the map regardless of whether the spawn was active or not [#1743](https://github.com/etjump/etjump/pull/1743)
+* `func_static` entities with `PAIN` spawnflag now restore their health when taking damage, making them effectively unkillable under normal gameplay circumstances [#1744](https://github.com/etjump/etjump/pull/1744)
+* fixed UI changelog parsing entering an infinite loop when encountering a word which was longer that the maximum width of the entire row [#1745](https://github.com/etjump/etjump/pull/1745)
+  * this caused the game to hang when viewing ETJump 2.3.0 and 3.1.0 changelogs - these are now viewable in-game again
+* fixes to flamethrower interactions with water [#1746](https://github.com/etjump/etjump/pull/1746)
+  * flamethrower no longer produces dlights when trying to fire it underwater
+  * flamethrower no longer plays an idle sound while underwater, as the flame is shut off anyway
+* fixed chatting not clearing inactivity status from clients [#1747](https://github.com/etjump/etjump/pull/1747)
+* moving a player to spectators due to `g_inactivity` now stores the players position, and spawns the player back to that position when re-joining the team the player was at the time of the inactivity drop [#1748](https://github.com/etjump/etjump/pull/1748)
+* map progression tracked by `target/trigger_tracker` entities is now saved and restored if a client disconnects and reconnects during a map [#1749](https://github.com/etjump/etjump/pull/1749)
+* fixed crash when `target_spawn_relay` was deleted from the map on runtime [#1752](https://github.com/etjump/etjump/pull/1752)
+* fixed some HUD elements breaking spec/demo playback view by altering the data received from the server [#1753](https://github.com/etjump/etjump/pull/1753)
+* `etj_hideMe` now hides players' portals from other players, unless those players are able to use your portals [#1756](https://github.com/etjump/etjump/pull/1756)
+* fixed teleportation events getting interpolated if the player triggered multiple teleportation events during the same frame [#1758](https://github.com/etjump/etjump/pull/1758)
+* added integrity checks to UI - the mod now warns the user if they are running custom menu files [#1759](https://github.com/etjump/etjump/pull/1759)
+* fixed exploits with projectiles on timerun start [#1760](https://github.com/etjump/etjump/pull/1760)
+  * projectiles are now correctly removed on timerun start again - this was accidentally broken in ETJump 3.3.1
+  * fixed a frame-perfect exploit that allowed players to spawn a projectile on the same frame as a timerun started
+* fixed `etj_autoLoad` bypassing checks for save slot timerun state, which allowed loading to positions that were not saved during a timerun [#1766](https://github.com/etjump/etjump/pull/1766)
+
 # ETJump 3.4.0
 
-* `records` output no longer shows duplicate rank strings for tied times [#1603](https://github.com/etjump/etjump/pull/1603)
+* improvements to `records` output [#1603](https://github.com/etjump/etjump/pull/1603) [#1739](https://github.com/etjump/etjump/pull/1739)
+  * duplicate rank strings are no longer shown for tied times
+  * `page` parameter is now correctly capped - it's no longer possible to request a page without any records on it
+  * the total amount of records on a run is now displayed if the number of records is higher than the page size
 * added `tracker_not_eq_any` and `tracker_not_eq_all` keys to `target/trigger_tracker` [#1614](https://github.com/etjump/etjump/pull/1614)
   * this allows mappers to pick desired behavior for "not equal" trackers - either all values or one of the values
   * old `tracker_not_eq` is now deprecated and functionality is provided by `tracker_not_eq_any`
@@ -25,7 +50,7 @@
     * `leader_only_message` - message to print to activator if `spawnflag 1` is set and the activator is not the fireteam leader, `%s` will be substituted with the fireteam leaders name
 * added `etj_logCenterPrint` cvar to log center prints to console [#1627](https://github.com/etjump/etjump/pull/1627)
   * consecutive, identical messages are not logged multiple times - same message will be logged only if it has already disappeared from screen, as controlled by `cg_centertime` cvar
-  * save messges are not logged
+  * several spammy prints (e.g. dynamite arming) and save messges are not logged
 * console no longer prints a warning when trying to vsay current class as a spectator [#1648](https://github.com/etjump/etjump/pull/1648)
 * spectators can now use the fireteam general vsay menu [#1649](https://github.com/etjump/etjump/pull/1649)
 * fully removed location grid system from the mod - team/ft chats no longer display coordinates on chat [#1651](https://github.com/etjump/etjump/pull/1651)
@@ -67,6 +92,67 @@
 * fixed a long standing issue where client's backed up saves from a session would sometimes disappear when reconnecting to a server [#1681](https://github.com/etjump/etjump/pull/1681)
 * fixed a potential crash when invalid vote argument was given [#1682](https://github.com/etjump/etjump/pull/1682)
 * fixed a potential crash with `players` command [#1685](https://github.com/etjump/etjump/pull/1685)
+* fixed unknown command `uiChatMenuOpen` console print when disconnecting from a server via in-game menu [#1691](https://github.com/etjump/etjump/pull/1691)
+* added `etj_useExecQuiet` cvar to execute map/team-specific autoexec configs using `execq` command [1695](https://github.com/etjump/etjump/pull/1695)
+  * `execq` is supported by ET: Legacy & ETe, and executes a config "quietly" (no info print to console)
+  * bitflag cvar:
+    * 1 - enable for map autoexecs
+    * 2 - enable for team autoexecs
+* added `etj_noMenuFlashing` cvar to disable the lightning effect on the menu background shader [#1699](https://github.com/etjump/etjump/pull/1699)
+* added option to enable client side predicted portalgun teleports [#1689](https://github.com/etjump/etjump/pull/1689)
+  * disabled by default due to the potential for PVS-related visual bugs
+  * can be enabled via `g_portalPredict` server cvar (votable by clients)
+    * voting can be disabled with `vote_allow_portalPredict`
+  * worldspawn key `portalpredict` forcibly enables portal prediction for a map regardless of the cvar value
+* fixed `portalteam 1` not working correctly and acting like `portalteam 2` [#1689](https://github.com/etjump/etjump/pull/1689)
+* fixed `func_portaltarget` producing incorrectly sized portals when `portalsize` key was used [#1689](https://github.com/etjump/etjump/pull/1689)
+* deprecated `g_portalDebug` server cvar in favor of `etj_portalDebug` client cvar [#1689](https://github.com/etjump/etjump/pull/1689)
+* fixed `KEYS` menu button in `LAGOMETER` settings menu not working [#1702](https://github.com/etjump/etjump/pull/1702)
+* added `fireteam countdown` command to perform a countdown in fireteam chat [#1703](https://github.com/etjump/etjump/pull/1703)
+  * `fireteam countdown [seconds]`, if `seconds` isn't given, value is taken from `etj_fireteamCountdownLength` cvar value
+  * length is capped to 1-10s
+* added "Quick connect" window to main menu [#1701](https://github.com/etjump/etjump/pull/1701)
+  * can store up to 5 servers for 1-click connecting to a server
+  * servers are stored in `quickconnect.dat` file
+  * can be disabled with `etj_drawQuickConnectMenu` cvar
+* fixed missing centerprint when an Allied objective was auto-returned due to timeout [#1704](https://github.com/etjump/etjump/pull/1704)
+* portalgun portals can no longer be overlapped in some scenarios if `portalteam` is enabled [#1705](https://github.com/etjump/etjump/pull/1705)
+  * `portalteam 1` - fireteam members cannot overlap portals
+  * `portalteam 2` - nobody can overlap portals
+  * when joining a fireteam with `portalteam 1`, your portals are reset to prevent potential overlapping
+* adjusted behavior of `etj_viewPlayerPortals` to filter out usable/unusable portals instead [#1706](https://github.com/etjump/etjump/pull/1706)
+  * 0 - only draw portals you're able to use
+  * 1 - draw all portals
+  * a portal is considered usable in the following scenarios:
+    * the portal is yours
+    * `portalteam` is set to 1 and the portal is yours or from a fireteam member
+    * `portalteam` is set to 2 (anyone can use anyone's portals)
+* portalgun trails and debug bboxes are now correctly colored green/yellow for other's portals [#1707](https://github.com/etjump/etjump/pull/1707)
+* overbounce detector now correctly shows overbounces on top of other solid players [#1710](https://github.com/etjump/etjump/pull/1710)
+* added `dumpEntities` command to dump entities from the current map to a file [#1713](https://github.com/etjump/etjump/pull/1713)
+  * `dumpEntities [optional name]`, if name isn't given, defaults to current map name
+  * requires `developer 1`
+* fixed potential crash when hitting the 16th checkpoint of a timerun and checkpoint drawing was enabled [#1717](https://github.com/etjump/etjump/pull/1717)
+* fixed firing with `+attack2` not setting the players firing state correctly, causing issues such as flamethrower flames not drawing when fired [#1719](https://github.com/etjump/etjump/pull/1719)
+* improvements to spectator info list [#1718](https://github.com/etjump/etjump/pull/1718)
+  * number of spectators drawn can now be limited with `etj_spectatorInfoMaxClients`, -1 for unlimited (default)
+    * if the number of spectators exceeds the limit, a hint will be displayed for the number of hidden spectators
+  * active clients are now always drawn before inactive clients
+  * spectator list can be drawn in bottom-up direction with `etj_spectatorInfoDirection 1`
+* added `overbounce_players` worldspawn key to control overbounces performed on top of other clients [#1725](https://github.com/etjump/etjump/pull/1725)
+  * 0 = no change, controlled by `nooverbounce` key (default)
+  * 1 = overbounces from top of players are always allowed
+  * 2 = overbounces from top of players are never allowed
+* added `etj_hideFlamethrowerEffects` to hide the visual effects of flamethrower [#1726](https://github.com/etjump/etjump/pull/1726)
+  * if enabled, hides flames, flame stream while firing and dlights
+  * bitflag value
+    * 1 = hide for self
+    * 2 = hide for others
+* scoreboard inactivity now correctly works if the server is using `sv_level/serverTimeReset` [#1731](https://github.com/etjump/etjump/pull/1731) [#1734](https://github.com/etjump/etjump/pull/1734)
+* added a short animation when portalgun portals are spawned [#1727](https://github.com/etjump/etjump/pull/1727)
+* bundled fixed `.arena` files for certain maps with the mod pk3 [#1690](https://github.com/etjump/etjump/pull/1690)
+* reworked timerun high ping interrupt to work based off command time delta rather than ping [#1741](https://github.com/etjump/etjump/pull/1741)
+  * timeruns are now interrupted if the delta between consecutive user commands is 600ms
 
 # ETJump 3.3.4
 
@@ -562,7 +648,7 @@
 * fixed double footsteps and prediction errors on `surfaceparm nodamage` [#1166](https://github.com/etjump/etjump/pull/1166)
 * fixed rtv menu not drawing if client connected after rtv had already been called previously during the map, or an rtv vote was active while connecting [#1167](https://github.com/etjump/etjump/pull/1167)
 * timeruns which don't reset on team change are now reset if a client goes to spec, only allies <-> axis switches don't interrupt [#1168](https://github.com/etjump/etjump/pull/1168)
-* fixed (globa)accum indices 8 and 9 working unreliably [#1170](https://github.com/etjump/etjump/pull/1170)
+* fixed (global)accum indices 8 and 9 working unreliably [#1170](https://github.com/etjump/etjump/pull/1170)
 * fixed potential div by 0 in accum and playanim script functions [#1173](https://github.com/etjump/etjump/pull/1173)
 * updated `g_oss` value to reflect correct macOS support - only x86_64 is supported [#1177](https://github.com/etjump/etjump/pull/1177)
 * using `setoffset` now requires `/kill` like `noclip` before a timerun can be started [#1178](https://github.com/etjump/etjump/pull/1178)

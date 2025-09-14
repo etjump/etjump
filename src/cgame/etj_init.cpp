@@ -738,6 +738,30 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
     }
   }
 
+  if (command == "fireteam") {
+    const int argc = trap_Argc();
+
+    if (argc < 2) {
+      return qfalse;
+    }
+
+    // 'fireteam' commands are normally handled by the server,
+    // but if we're using 'fireteam countdown', catch it here and make sure
+    // the duration is sent with the command if it's not manually specified
+    if (!Q_stricmp(CG_Argv(1), "countdown")) {
+      if (argc < 3) {
+        const int sec = etj_fireteamCountdownLength.integer > 0
+                            ? etj_fireteamCountdownLength.integer
+                            : 3;
+        trap_SendClientCommand(va("fireteam countdown %i", sec));
+      } else {
+        trap_SendClientCommand(va("fireteam countdown %i", Q_atoi(CG_Argv(2))));
+      }
+
+      return qtrue;
+    }
+  }
+
   return qfalse;
 }
 

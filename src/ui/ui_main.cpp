@@ -14,6 +14,8 @@ USER INTERFACE MAIN
 #include "ui_local.h"
 #include "etj_colorpicker.h"
 #include "etj_demo_queue.h"
+#include "etj_quick_connect.h"
+#include "etj_menu_integrity_checker.h"
 
 #include "../cgame/etj_cvar_parser.h"
 #include "../game/etj_string_utilities.h"
@@ -440,9 +442,9 @@ void Text_PaintChar(float x, float y, float w, float h, float scale, float s,
   trap_R_DrawStretchPic(x, y, w, h, s, t, s2, t2, hShader);
 }
 
-void Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color,
-                    const char *text, float adjust, int limit, int style,
-                    fontInfo_t *font) {
+void Text_Paint_Ext(float x, float y, float scalex, float scaley,
+                    const vec4_t color, const char *text, float adjust,
+                    int limit, int style, fontInfo_t *font) {
   int len, count;
   vec4_t newColor;
   glyphInfo_t *glyph;
@@ -486,16 +488,14 @@ void Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color,
         float yadj = scaley * glyph->top;
         if (style == ITEM_TEXTSTYLE_SHADOWED) {
           constexpr float ofs = 2.5f;
-          colorBlack[3] = newColor[3];
+          const vec4_t shadowColor = {0, 0, 0, newColor[3]};
 
-          trap_R_SetColor(colorBlack);
+          trap_R_SetColor(shadowColor);
           Text_PaintCharExt(x + (glyph->pitch * scalex) + ofs * scalex,
                             y - yadj + ofs * scaley, glyph->imageWidth,
                             glyph->imageHeight, scalex, scaley, glyph->s,
                             glyph->t, glyph->s2, glyph->t2, glyph->glyph);
           trap_R_SetColor(newColor);
-
-          colorBlack[3] = 1.0;
         }
         Text_PaintCharExt(x + (glyph->pitch * scalex), y - yadj,
                           glyph->imageWidth, glyph->imageHeight, scalex, scaley,
@@ -511,8 +511,8 @@ void Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color,
   }
 }
 
-void Text_Paint(float x, float y, float scale, vec4_t color, const char *text,
-                float adjust, int limit, int style) {
+static void Text_Paint(float x, float y, float scale, const vec4_t color,
+                       const char *text, float adjust, int limit, int style) {
   fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
 
   Text_Paint_Ext(x, y, scale, scale, color, text, adjust, limit, style, font);
@@ -561,13 +561,14 @@ void Text_PaintWithCursor(float x, float y, float scale, vec4_t color,
         yadj = useScale * glyph->top;
         if (style == ITEM_TEXTSTYLE_SHADOWED) {
           constexpr float ofs = 2.5f;
-          colorBlack[3] = newColor[3];
-          trap_R_SetColor(colorBlack);
+          const vec4_t shadowColor = {0, 0, 0, newColor[3]};
+
+          trap_R_SetColor(shadowColor);
           Text_PaintChar(x + (glyph->pitch * useScale) + ofs * useScale,
                          y - yadj + ofs * useScale, glyph->imageWidth,
                          glyph->imageHeight, useScale, glyph->s, glyph->t,
                          glyph->s2, glyph->t2, glyph->glyph);
-          colorBlack[3] = 1.0;
+
           trap_R_SetColor(newColor);
         }
         Text_PaintChar(x + (glyph->pitch * useScale), y - yadj,
@@ -675,6 +676,7 @@ namespace ETJump {
 std::unique_ptr<ColorPicker> colorPicker;
 std::unique_ptr<SyscallExt> syscallExt;
 std::unique_ptr<DemoQueue> demoQueue;
+std::unique_ptr<QuickConnect> quickConnect;
 
 static void initColorPicker() {
   colorPicker = std::make_unique<ColorPicker>();
@@ -829,8 +831,16 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
 
       if (width > maxW) {
         if (lastWhitespace != 0) {
-          fmtLines.emplace_back(tmp.substr(0, lastWhitespace));
-          line.erase(0, lastWhitespace + 1); // consume the whitespace too
+          // we have a line with single word that is over max width,
+          // just split at the line end
+          if (lastWhitespace < indent) {
+            fmtLines.emplace_back(tmp.substr(0, i));
+            line.erase(0, i);
+          } else {
+            fmtLines.emplace_back(tmp.substr(0, lastWhitespace));
+            line.erase(0, lastWhitespace + 1); // consume the whitespace too
+          }
+
           lastWhitespace = 0;
         } else {
           // this should never happen, but it protects against an infinite loop
@@ -853,6 +863,17 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
 
 static void initDemoQueueHandler() {
   demoQueue = std::make_unique<DemoQueue>();
+}
+
+// NOTE: this must be called after 'UI_LoadMenus'!
+static void initQuickConnect() {
+  assert(Menu_Count() > 0);
+
+  quickConnect = std::make_unique<QuickConnect>();
+
+  uiInfo.uiDC.quickConnectListIsFull = [p = quickConnect.get()] {
+    return p->isFull();
+  };
 }
 } // namespace ETJump
 
@@ -916,6 +937,8 @@ void _UI_Refresh(int realtime) {
     UI_FillRect(-10, -10, SCREEN_WIDTH + 10, 490, colorBlack);
   }
 
+  uiInfo.uiDC.mainOrIngameMainMenuOpen = false;
+
   if (Menu_Count() > 0) {
     // paint all the menus
     Menu_PaintAll();
@@ -925,6 +948,12 @@ void _UI_Refresh(int realtime) {
     UI_BuildServerStatus(qfalse);
     // refresh find player list
     UI_BuildFindPlayerList(qfalse);
+
+    ETJump::quickConnect->refreshServers(false);
+
+    if (!uiInfo.integrityCheckOk && uiInfo.uiDC.mainOrIngameMainMenuOpen) {
+      ETJump::MenuIntegrityChecker::printIntegrityWatermark();
+    }
   }
 
   // draw cursor
@@ -955,6 +984,7 @@ void _UI_Shutdown(void) {
   ETJump::colorPicker = nullptr;
   ETJump::syscallExt = nullptr;
   ETJump::demoQueue = nullptr;
+  ETJump::quickConnect = nullptr;
 
   Shutdown_Display();
 }
@@ -1129,7 +1159,6 @@ qboolean Asset_Parse(int handle) {
 
 void UI_Report() { String_Report(); }
 
-void QDECL Com_DPrintf(const char *fmt, ...);
 qboolean UI_ParseMenu(const char *menuFile) {
   int handle;
   pc_token_t token;
@@ -1254,6 +1283,16 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
     trap_PC_AddGlobalDefine("FUI");
   }
 
+  // for aligning UI elements on the right side of the screen
+  trap_PC_AddGlobalDefine(va("WINDOW_WIDTH_WIDE %i", uiInfo.uiDC.screenWidth));
+
+  // to make it simple to toggle the quick connect menu on/off,
+  // this just ifdefs the menudefs away, without having to call
+  // 'hide' on every single element on the menu in order to not display it
+  if (etj_drawQuickConnectMenu.integer) {
+    trap_PC_AddGlobalDefine("DRAW_QUICK_CONNECT");
+  }
+
   if (uiInfo.vetClient) {
     trap_PC_AddGlobalDefine("VET");
   }
@@ -1326,7 +1365,7 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
 }
 
 void UI_Load() {
-  char lastName[1024];
+  char lastName[1024]{};
   menuDef_t *menu = Menu_GetFocused();
   const char *menuSet = UI_Cvar_VariableString("ui_menuFiles");
   if (menu && menu->window.name) {
@@ -3987,6 +4026,9 @@ void UI_RunMenuScript(const char **args) {
                     va("%i", Q_atoi(Info_ValueForKey(info, "timelimit"))));
       trap_Cvar_Set("ui_voteAutoRtv",
                     va("%i", Q_atoi(Info_ValueForKey(info, "g_autoRtv"))));
+      trap_Cvar_Set(
+          "ui_votePortalPredict",
+          va("%i", Q_atoi(Info_ValueForKey(info, "g_portalPredict"))));
 
       return;
     }
@@ -4905,7 +4947,7 @@ void UI_RunMenuScript(const char **args) {
       char buf[MAX_CVAR_VALUE_STRING];
 
       trap_Cvar_VariableStringBuffer("ui_writeconfig_name", buf, sizeof(buf));
-      trap_Cmd_ExecuteText(EXEC_NOW, va("writeconfig %s\n", buf));
+      trap_Cmd_ExecuteText(EXEC_APPEND, va("writeconfig %s\n", buf));
 
       return;
     }
@@ -5000,6 +5042,128 @@ void UI_RunMenuScript(const char **args) {
           item->textscale, font);
 
       Menu_SetFeederSelection(nullptr, FEEDER_CHANGELOG, 0, nullptr);
+
+      return;
+    }
+
+    if (!Q_stricmp(name, "quickConnectRefresh")) {
+      ETJump::quickConnect->refreshServers(true);
+      return;
+    }
+
+    if (!Q_stricmp(name, "quickConnectAddServer")) {
+      char buf[MAX_CVAR_VALUE_STRING];
+
+      trap_Cvar_VariableStringBuffer("ui_quickconnect_ip", buf, sizeof(buf));
+      const std::string address = buf;
+
+      trap_Cvar_VariableStringBuffer("ui_quickconnect_password", buf,
+                                     sizeof(buf));
+      const std::string password = buf;
+
+      trap_Cvar_VariableStringBuffer("ui_quickconnect_customname", buf,
+                                     sizeof(buf));
+      const std::string customName = buf;
+
+      ETJump::quickConnect->addServer(address, password, customName);
+      return;
+    }
+
+    if (!Q_stricmp(name, "quickConnectToServer")) {
+      if (String_Parse(args, &name2)) {
+        // menu variables are 1-indexed
+        std::string command =
+            ETJump::quickConnect->buildConnectCommand(Q_atoi(name2) - 1);
+
+        if (!command.empty()) {
+          trap_Cmd_ExecuteText(EXEC_APPEND, command.c_str());
+        }
+      } else {
+        Com_Printf(S_COLOR_YELLOW "%s: '%s' called with no arguments!\n",
+                   __func__, name);
+      }
+
+      return;
+    }
+
+    if (!Q_stricmp(name, "quickConnectSetEditData")) {
+      if (String_Parse(args, &name2)) {
+        // menu variables are 1-indexed
+        const int index = Q_atoi(name2) - 1;
+        ETJump::quickConnect->setEditData(index);
+      } else {
+        Com_Printf(S_COLOR_YELLOW "%s: '%s' called with no arguments!\n",
+                   __func__, name);
+      }
+
+      return;
+    }
+
+    if (!Q_stricmp(name, "quickConnectEditServer")) {
+      ETJump::quickConnect->editServer();
+      return;
+    }
+
+    if (!Q_stricmp(name, "quickConnectDeleteServer")) {
+      ETJump::quickConnect->deleteServer();
+      return;
+    }
+
+    if (!Q_stricmp(name, "setupQuickConnectMenuButtons")) {
+      menu = Menus_FindByName("main");
+
+      if (!menu) {
+        Com_Printf(
+            S_COLOR_RED
+            "%s: failure while executing '%s' - unable to find 'main.menu'!\n",
+            __func__, name);
+        return;
+      }
+
+      const auto toggleButtonState = [&menu](const int index,
+                                             const qboolean show) {
+        // menu entries are 1-indexed
+        const char *connectBtn =
+            va("btnQuickConnectServer%iConnect", index + 1);
+        const char *editBtn = va("btnQuickConnectServer%iEdit", index + 1);
+        const char *deleteBtn = va("btnQuickConnectServer%iDelete", index + 1);
+
+        Menu_ShowItemByName(menu, connectBtn, show);
+        Menu_ShowItemByName(menu, editBtn, show);
+        Menu_ShowItemByName(menu, deleteBtn, show);
+      };
+
+      // hide everything by default
+      for (int i = 0; i < ETJump::MAX_QUICKCONNECT_SERVERS; i++) {
+        toggleButtonState(i, qfalse);
+      }
+
+      const int count = ETJump::quickConnect->getServerCount();
+
+      if (count == 0) {
+        // make sure the label is visible, e.g. if we deleted the last server
+        Menu_ShowItemByName(menu, "lblQuickConnectNoServers", qtrue);
+        return;
+      }
+
+      // hide the "No servers added" since we have servers saved
+      Menu_ShowItemByName(menu, "lblQuickConnectNoServers", qfalse);
+
+      for (int i = 0; i < count; i++) {
+        toggleButtonState(i, qtrue);
+      }
+
+      return;
+    }
+
+    if (!Q_stricmp(name, "votePortalPredict")) {
+      const auto value =
+          static_cast<int32_t>(trap_Cvar_VariableValue("ui_votePortalPredict"));
+
+      // the cvar is the current value of 'g_portalPredict',
+      // so we wanna vote the opposing value here to toggle the setting
+      trap_Cmd_ExecuteText(
+          EXEC_APPEND, va("callvote portalpredict %i\n", value == 0 ? 1 : 0));
 
       return;
     }
@@ -6981,6 +7145,10 @@ void _UI_Init(int legacyClient, int clientVersion) {
 
   ETJump::detectClientEngine(legacyClient, clientVersion);
 
+  char buf[MAX_CVAR_VALUE_STRING]{};
+  trap_Cvar_VariableStringBuffer("fs_game", buf, sizeof(buf));
+  uiInfo.fsGame = buf;
+
   // UI_Load();
   uiInfo.uiDC.registerShaderNoMip = &trap_R_RegisterShaderNoMip;
   uiInfo.uiDC.setColor = &UI_SetColor;
@@ -7103,6 +7271,16 @@ void _UI_Init(int legacyClient, int clientVersion) {
 
   UI_LoadMenus(DEFAULT_MENU_FILE, qfalse);
 
+  Com_DPrintf("Performing menu integrity check\n");
+
+  uiInfo.integrityCheckOk = ETJump::MenuIntegrityChecker::checkIntegrity();
+
+  if (!uiInfo.integrityCheckOk) {
+    ETJump::MenuIntegrityChecker::printIntegrityViolation();
+  }
+
+  ETJump::initQuickConnect();
+
   Menus_CloseAll();
 
   trap_LAN_LoadCachedServers();
@@ -7168,7 +7346,7 @@ void _UI_KeyEvent(int key, qboolean down) {
 
       // forward char events to regular key handling,
       // so we don't do out-of-bounds array access in engine
-      // 2.60b and ETL don't check for key array bounds when reading bind buffer
+      // 2.60b doesn't check for key array bounds when reading bind buffer
       if (key & K_CHAR_FLAG) {
         Menu_HandleKey(menu, key, down);
         return;
@@ -7849,6 +8027,11 @@ vmCvar_t ui_currentChangelog;
 vmCvar_t etj_demoQueueCurrent;
 vmCvar_t etj_demoQueueDir;
 
+vmCvar_t etj_noMenuFlashing;
+vmCvar_t etj_drawQuickConnectMenu;
+
+vmCvar_t g_portalPredict;
+
 cvarTable_t cvarTable[] = {
 
     {&ui_glCustom, "ui_glCustom", "4",
@@ -8058,6 +8241,7 @@ cvarTable_t cvarTable[] = {
     {NULL, "vote_allow_randommap", "1", CVAR_ARCHIVE},
     {NULL, "vote_allow_rtv", "1", CVAR_ARCHIVE},
     {NULL, "vote_allow_autoRtv", "1", CVAR_ARCHIVE},
+    {NULL, "vote_allow_portalPredict", "1", CVAR_ARCHIVE},
     {NULL, "vote_limit", "5", CVAR_ARCHIVE},
     {NULL, "vote_percent", "50", CVAR_ARCHIVE},
     // OSP
@@ -8086,6 +8270,13 @@ cvarTable_t cvarTable[] = {
 
     {&etj_demoQueueCurrent, "etj_demoQueueCurrent", "", CVAR_TEMP | CVAR_ROM},
     {&etj_demoQueueDir, "etj_demoQueueDir", "demoqueue", CVAR_ARCHIVE},
+
+    {&etj_noMenuFlashing, "etj_noMenuFlashing", "0", CVAR_ARCHIVE | CVAR_LATCH},
+
+    {&g_portalPredict, "g_portalPredict", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
+
+    {&etj_drawQuickConnectMenu, "etj_drawQuickConnectMenu", "1",
+     CVAR_ARCHIVE | CVAR_LATCH},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

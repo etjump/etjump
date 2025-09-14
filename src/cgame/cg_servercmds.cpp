@@ -10,6 +10,7 @@
 #include "etj_init.h"
 #include "etj_client_commands_handler.h"
 #include "etj_client_rtv_handler.h"
+#include "etj_spectatorinfo_data.h"
 
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_syscall_ext_shared.h"
@@ -22,14 +23,12 @@ CG_ParseScores
 
 =================
 */
-// Gordon: NOTE: team doesnt actually signify team, think i was on drugs that
-// day.....
-static void CG_ParseScore(team_t team) {
+static void CG_ParseScore(bool hasTeamScores) {
   int i, j, powerups;
   int numScores;
   int offset;
 
-  if (team == TEAM_AXIS) {
+  if (hasTeamScores) {
     cg.numScores = 0;
 
     cg.teamScores[0] = Q_atoi(CG_Argv(1));
@@ -45,13 +44,19 @@ static void CG_ParseScore(team_t team) {
   for (j = 0; j < numScores; j++) {
     i = cg.numScores;
 
-    cg.scores[i].client = Q_atoi(CG_Argv(offset + 0 + (j * 7)));
-    cg.scores[i].score = Q_atoi(CG_Argv(offset + 1 + (j * 7)));
-    cg.scores[i].ping = Q_atoi(CG_Argv(offset + 2 + (j * 7)));
-    cg.scores[i].time = Q_atoi(CG_Argv(offset + 3 + (j * 7)));
-    powerups = Q_atoi(CG_Argv(offset + 4 + (j * 7)));
-    cg.scores[i].playerClass = Q_atoi(CG_Argv(offset + 5 + (j * 7)));
-    cg.scores[i].followedClient = Q_atoi(CG_Argv(offset + 6 + (j * 7)));
+    cg.scores[i].client =
+        Q_atoi(CG_Argv(offset + 0 + (j * NUM_SCORESTRING_FIELDS)));
+    cg.scores[i].score =
+        Q_atoi(CG_Argv(offset + 1 + (j * NUM_SCORESTRING_FIELDS)));
+    cg.scores[i].ping =
+        Q_atoi(CG_Argv(offset + 2 + (j * NUM_SCORESTRING_FIELDS)));
+    cg.scores[i].time =
+        Q_atoi(CG_Argv(offset + 3 + (j * NUM_SCORESTRING_FIELDS)));
+    powerups = Q_atoi(CG_Argv(offset + 4 + (j * NUM_SCORESTRING_FIELDS)));
+    cg.scores[i].playerClass =
+        Q_atoi(CG_Argv(offset + 5 + (j * NUM_SCORESTRING_FIELDS)));
+    cg.scores[i].followedClient =
+        Q_atoi(CG_Argv(offset + 6 + (j * NUM_SCORESTRING_FIELDS)));
 
     if (cg.scores[i].client < 0 || cg.scores[i].client >= MAX_CLIENTS) {
       cg.scores[i].client = 0;
@@ -130,6 +135,9 @@ void CG_ParseServerinfo(void) {
   cg_ghostPlayers.integer = Q_atoi(Info_ValueForKey(info, "g_ghostPlayers"));
 
   etj_spectatorVote.integer = Q_atoi(Info_ValueForKey(info, "g_spectatorVote"));
+
+  etj_portalPredict.integer = Q_atoi(Info_ValueForKey(info, "g_portalPredict"));
+  etj_portalTeam.integer = Q_atoi(Info_ValueForKey(info, "g_portalTeam"));
 
   cgs.minclients = Q_atoi(Info_ValueForKey(
       info, "g_minGameClients")); // NERVE - SMF -- OSP:
@@ -707,6 +715,7 @@ static void CG_ConfigStringModified(void) {
     }
   } else if (num >= CS_PLAYERS && num < CS_PLAYERS + MAX_CLIENTS) {
     CG_NewClientInfo(num - CS_PLAYERS);
+    ETJump::SpectatorInfoData::updateSpectatorData(num - CS_PLAYERS);
   } else if (num >= CS_DLIGHTS && num < CS_DLIGHTS + MAX_DLIGHT_CONFIGSTRINGS) {
     CG_SetupDlightstyles();
   } else if (num == CS_SHADERSTATE) {
@@ -2255,10 +2264,14 @@ static void CG_ServerCommand(void) {
     return;
   }
   if (!strcmp(cmd, "sc0")) {
-    CG_ParseScore(TEAM_AXIS);
+    CG_ParseScore(true);
+    ETJump::SpectatorInfoData::updateSpectatorData(std::nullopt);
     return;
-  } else if (!strcmp(cmd, "sc1")) {
-    CG_ParseScore(TEAM_ALLIES);
+  }
+
+  if (!strcmp(cmd, "sc1")) {
+    CG_ParseScore(false);
+    ETJump::SpectatorInfoData::updateSpectatorData(std::nullopt);
     return;
   }
 
@@ -2324,13 +2337,12 @@ static void CG_ServerCommand(void) {
     return;
   }
 
-  if (!Q_stricmp(cmd, "cp")) {
-    // NERVE - SMF
-    int args = trap_Argc();
-    char *s;
+  const bool cpNoLog = !Q_stricmp(cmd, "cpnl");
+  if (!Q_stricmp(cmd, "cp") || cpNoLog) {
+    const int args = trap_Argc();
 
     if (args >= 3) {
-      s = CG_TranslateString(CG_Argv(1));
+      char *s = CG_TranslateString(CG_Argv(1));
 
       if (args == 4) {
         s = va("%s%s", CG_Argv(3), s);
@@ -2343,11 +2355,11 @@ static void CG_ServerCommand(void) {
                   CG_LocalizeServerCommand(CG_Argv(1)));
       }
       CG_PriorityCenterPrint(s, SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
-                             SMALLCHAR_WIDTH, Q_atoi(CG_Argv(2)));
+                             SMALLCHAR_WIDTH, Q_atoi(CG_Argv(2)), !cpNoLog);
     } else {
       CG_CenterPrint(CG_LocalizeServerCommand(CG_Argv(1)),
-                     SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
-                     SMALLCHAR_WIDTH); //----(SA)	modified
+                     SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20), SMALLCHAR_WIDTH,
+                     !cpNoLog);
     }
     return;
   }

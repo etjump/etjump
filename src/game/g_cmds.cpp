@@ -12,6 +12,8 @@
 #include "etj_session.h"
 #include "etj_commands.h"
 #include "etj_map_statistics.h"
+#include "etj_file.h"
+#include "etj_inactivity_timer.h"
 
 namespace ETJump {
 enum class VotingTypes {
@@ -36,31 +38,30 @@ Sends current scoreboard information
 */
 void G_SendScore(gentity_t *ent) {
   char entry[128];
-  int i;
   gclient_t *cl;
   int numSorted;
-  int team, size, count;
-  char buffer[1024];
+  int size, count;
+  char buffer[MAX_STRING_CHARS];
   char startbuffer[32];
 
   // send the latest information on all clients
   numSorted = level.numConnectedClients;
-  if (numSorted > 64) {
-    numSorted = 64;
+  if (numSorted > MAX_CLIENTS) {
+    numSorted = MAX_CLIENTS;
   }
 
-  i = 0;
-  // Gordon: team doesnt actually mean team, ignore...
-  for (team = 0; team < 2; team++) {
+  for (int32_t i = 0; i < NUM_SCORESTRINGS; i++) {
     *buffer = '\0';
     *startbuffer = '\0';
-    if (team == 0) {
+
+    // first scorestring contains team scores
+    if (i == 0) {
       Q_strncpyz(startbuffer,
                  va("sc0 %i %i", level.teamScores[TEAM_AXIS],
                     level.teamScores[TEAM_ALLIES]),
-                 32);
+                 sizeof(startbuffer));
     } else {
-      Q_strncpyz(startbuffer, "sc1", 32);
+      Q_strncpyz(startbuffer, "sc1", sizeof(startbuffer));
     }
     size = strlen(startbuffer) + 1;
     count = 0;
@@ -93,20 +94,19 @@ void G_SendScore(gentity_t *ent) {
                   g_entities[level.sortedClients[i]].s.powerups, playerClass,
                   cl->ps.clientNum);
 
-      if (size + strlen(entry) > 1000) {
+      if (size + strlen(entry) > MAX_SCORESTRING_LEN) {
         break;
       }
       size += strlen(entry);
 
-      Q_strcat(buffer, 1024, entry);
-      if (++count >= 32) {
-        i++; // we need to redo this client in
-             // the next buffer (if we can)
+      Q_strcat(buffer, sizeof(buffer), entry);
+      if (++count >= MAX_CLIENTS / 2) {
+        i++; // we need to redo this client in the next buffer (if we can)
         break;
       }
     }
 
-    if (count > 0 || team == 0) {
+    if (count > 0 || i == 0) {
       trap_SendServerCommand(ent - g_entities,
                              va("%s %i%s", startbuffer, count, buffer));
     }
@@ -968,7 +968,7 @@ void printTracker(gentity_t *ent) {
 
   if (trap_Argc() < 2) {
     printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", 1,
-                                   ent->client->sess.progression[0]);
+                                   ent->client->pers.progression[0]);
     Printer::console(clientNum, printTrackerMsg);
     return;
   }
@@ -978,7 +978,7 @@ void printTracker(gentity_t *ent) {
   if (!Q_stricmp("all", buffer)) {
     for (i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
       printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", i + 1,
-                                     ent->client->sess.progression[i]);
+                                     ent->client->pers.progression[i]);
       Printer::console(clientNum, printTrackerMsg);
     }
   } else {
@@ -990,7 +990,7 @@ void printTracker(gentity_t *ent) {
 
       if (checkTrackerIndex(clientNum, idx, buffer, false)) {
         printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", idx,
-                                       ent->client->sess.progression[idx - 1]);
+                                       ent->client->pers.progression[idx - 1]);
         Printer::console(clientNum, printTrackerMsg);
       }
     }
@@ -1035,7 +1035,7 @@ void setTracker(gentity_t *ent) {
 
     if (checkTrackerValue(clientNum, bufferValue)) {
       for (i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
-        ent->client->sess.progression[i] = value;
+        ent->client->pers.progression[i] = value;
       }
 
       setTrackerMsg = stringFormat("^7Set tracker value on all "
@@ -1049,7 +1049,7 @@ void setTracker(gentity_t *ent) {
     if (trap_Argc() == 2) {
       noIndex = true;
       if (checkTrackerIndex(clientNum, idx, bufferIndex, noIndex)) {
-        ent->client->sess.progression[0] = idx; // No index specified, use it
+        ent->client->pers.progression[0] = idx; // No index specified, use it
                                                 // for value on index 1
         setTrackerMsg = stringFormat("^7Tracker set - index: ^31 "
                                      "^7value: ^2%i\n",
@@ -1074,7 +1074,7 @@ void setTracker(gentity_t *ent) {
 
       if (checkTrackerValue(clientNum, bufferValue)) {
         value = Q_atoi(bufferValue);
-        ent->client->sess.progression[idx - 1] = value;
+        ent->client->pers.progression[idx - 1] = value;
         setTrackerMsg = stringFormat("^7Tracker set - index: ^3%i "
                                      "^7value: ^2%i\n",
                                      idx, value);
@@ -1088,6 +1088,41 @@ void clearSaves(gentity_t *ent) {
   auto clientNum = ClientNum(ent);
   saveSystem->resetSavedPositions(ent);
   Printer::center(clientNum, "^7Your saves were removed.\n");
+}
+
+static void dumpEntities(gentity_t *ent) {
+  const auto &entities = EntityUtilities::getParsedEntities();
+
+  // check if the vector is empty too in order to avoid dumping an empty
+  // file if the user tires to dump without reloading the map
+  // the vector is never empty if the map was loaded with 'developer 1'
+  // because worldspawn is an entity (and you need a spawnpoint to load the map)
+  if (!g_developer.integer || entities.empty()) {
+    Printer::console(
+        ent, "You must be in developer mode to dump entities.\nSet "
+             "^3'developer 1' ^7and reload the map to dump entities.\n");
+    return;
+  }
+
+  std::string arg = ConcatArgs(1);
+  const std::string filename =
+      stringFormat("maps/%s.ent", arg.empty() ? level.rawmapname : arg);
+
+  try {
+    File out(filename, File::Mode::Write);
+    std::string contents;
+
+    for (const auto &entity : entities) {
+      contents += entity;
+    }
+
+    out.write(contents);
+    Printer::console(ent,
+                     stringFormat("Dumped entities to ^3'%s'\n", filename));
+  } catch (const File::FileIOException &e) {
+    Printer::console(ent,
+                     stringFormat("Failed to write file ^3'%s'\n", e.what()));
+  }
 }
 } // namespace ETJump
 
@@ -2061,6 +2096,13 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
                                        localize, encoded);
   }
 
+  // remove inactivity flag as using BUTTON_TALK won't clear it,
+  // and we can't monitor that as that would cause clients
+  // to never go inactive if the console is open
+  if (ent->client->sess.inactive) {
+    ETJump::InactivityTimer::clearClientInactivity(ent);
+  }
+
   if (target) {
     if (!COM_BitCheck(target->client->sess.ignoreClients, clientNum)) {
       G_SayTo(ent, target, mode, color, escapedName, printText, localize,
@@ -2330,6 +2372,10 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
     Q_strncpyz(vsay.custom, ConcatArgs(cust), sizeof(vsay.custom));
   }
 
+  if (ent->client->sess.inactive) {
+    ETJump::InactivityTimer::clearClientInactivity(ent);
+  }
+
   G_Voice(ent, nullptr, mode, &vsay, voiceonly);
 }
 
@@ -2580,6 +2626,9 @@ void setCvString(char *voteMsg, char *voteArg) {
       voteString = stringFormat("%s", getMinutesString(voteArgInt));
       Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
     }
+  } else if (func == G_PortalPredict_v) {
+    voteString = stringFormat("%s", Q_atoi(voteArg) ? "ON" : "OFF", voteMsg);
+    Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
   }
 
   Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString),
@@ -4490,6 +4539,10 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
     if (ent) {
       Printer::chat(selfNum, va("^7Private message to %s^7: ^3%s",
                                 other->client->pers.netname, msg));
+
+      if (ent->client->sess.inactive) {
+        ETJump::InactivityTimer::clearClientInactivity(ent);
+      }
     }
   } else {
     Printer::console(selfNum,
@@ -4672,7 +4725,8 @@ void Cmd_Class_f(gentity_t *ent) {
                       ETJump::stringFormat("You will spawn as an %s %s",
                                            ETJump::getPlayerTeamName(
                                                ent->client->sess.sessionTeam),
-                                           loadout.description));
+                                           loadout.description),
+                      false);
       break;
     }
   }
@@ -4833,6 +4887,7 @@ static const command_t noIntermissionCommands[] = {
     {"tracker_print", qtrue, ETJump::printTracker},
     {"tracker_set", qtrue, ETJump::setTracker},
     {"clearsaves", qtrue, ETJump::clearSaves},
+    {"dumpEntities", qtrue, ETJump::dumpEntities},
 };
 
 qboolean ClientIsFlooding(gentity_t *ent) {

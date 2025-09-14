@@ -190,6 +190,8 @@ scons.signatures.dblite
 
 .vs
 .idea
+.cache
 out
 cmake-build*/
 checks.json
+compile_commands.json

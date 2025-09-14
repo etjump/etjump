@@ -25,6 +25,7 @@
 #include <stdexcept>
 
 #include "etj_utilities.h"
+#include "etj_entity_utilities.h"
 #include "etj_save_system.h"
 #include "etj_map_statistics.h"
 #include "etj_timerun_v2.h"
@@ -79,7 +80,7 @@ void Utilities::startRun(int clientNum) {
     selectValidWeapon(player);
   }
 
-  ClearPortals(player);
+  ETJump::EntityUtilities::clearPortals(player);
 }
 
 void Utilities::stopRun(int clientNum) {
@@ -202,17 +203,6 @@ std::vector<std::string> Utilities::getMaps() {
   }
 
   return maps;
-}
-
-void Utilities::getOriginOrBmodelCenter(const gentity_t *ent, float dst[3]) {
-  // ^ vec3_t is not used to avoid including g_local.h
-  if (!VectorCompare(ent->r.currentOrigin, vec3_origin)) {
-    VectorCopy(ent->r.currentOrigin, dst);
-  } else {
-    dst[0] = (ent->r.absmax[0] + ent->r.absmin[0]) / 2;
-    dst[1] = (ent->r.absmax[1] + ent->r.absmin[1]) / 2;
-    dst[2] = (ent->r.absmax[2] + ent->r.absmin[2]) / 2;
-  }
 }
 
 void Utilities::copyStanceFromClient(gentity_t *self, const gentity_t *target) {

@@ -12,6 +12,7 @@
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_progression_tracker.h"
+#include "etj_target_spawn_relay.h"
 
 /*
 Contains the code to handle the various commands available with an event script.
@@ -3550,6 +3551,10 @@ qboolean G_ScriptAction_RemoveEntity(gentity_t *ent, char *params) {
     level.numRemovedBModels++;
   }
 
+  if (!Q_stricmp(ent->classname, "target_spawn_relay")) {
+    ETJump::TargetSpawnRelay::invalidateSpawnRelayPointers(ent);
+  }
+
   ent->think = G_FreeEntity;
   ent->nextthink = level.time + FRAMETIME;
 
@@ -4827,6 +4832,12 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
           ETJump::StringUtil::join(pass[i].second, ", ");
       G_Printf("%s: deleted entity %i [^z%s^7], matched params: ^3'%s'\n",
                __func__, i, g_entities[i].classname, paramsMatched.c_str());
+
+      if (ETJump::StringUtil::iEqual(g_entities[i].classname,
+                                     "target_spawn_relay")) {
+        ETJump::TargetSpawnRelay::invalidateSpawnRelayPointers(&g_entities[i]);
+      }
+
       G_FreeEntity(&g_entities[i]);
     }
   }
@@ -4918,13 +4929,13 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
             "activator\n");
   }
 
-  const auto progression = activator->client->sess.progression;
+  auto *const progression = activator->client->pers.progression;
 
   // keep track of old values for debug print
-  int oldValues[MAX_PROGRESSION_TRACKERS];
+  std::array<int32_t, MAX_PROGRESSION_TRACKERS> oldValues{};
 
-  if (g_debugTrackers.integer > 0) {
-    memcpy(oldValues, progression, sizeof(oldValues));
+  if (g_debugTrackers.integer) {
+    memcpy(oldValues.data(), progression, sizeof(oldValues));
   }
 
   const char *pString, *token;
@@ -5001,7 +5012,9 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
         ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
   }
 
-  ETJump::ProgressionTrackers::printTrackerChanges(activator, oldValues);
+  if (g_debugTrackers.integer) {
+    ETJump::ProgressionTrackers::printTrackerChanges(activator, oldValues);
+  }
 
   return qtrue;
 }

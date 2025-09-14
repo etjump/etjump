@@ -27,10 +27,11 @@
 #include "g_local.h"
 
 namespace ETJump {
-constexpr int clientInactivityTimer = 180; // in seconds
+inline constexpr int CLIENT_INACTIVITY_TIMER = 180 * 1000; // in ms
 
 class InactivityTimer {
 public:
-  static void checkClientInactivity(gentity_t *ent);
+  static void updateClientInactivityStatus(const gentity_t *ent);
+  static void clearClientInactivity(const gentity_t *ent);
 };
 } // namespace ETJump
