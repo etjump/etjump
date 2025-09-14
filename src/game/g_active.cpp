@@ -587,7 +587,7 @@ qboolean ClientInactivityTimer(gclient_t *client) {
                   vtosf(client->ps.viewangles));
 
       Printer::popupAll(ETJump::stringFormat(
-          "%s ^7was removed from teams due to inactivity! (%s)\n",
+          "%s ^7was removed from teams due to inactivity! (%s)",
           client->pers.netname,
           ETJump::getSecondsString(g_inactivity.integer)));
 
