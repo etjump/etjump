@@ -22,10 +22,7 @@
  * SOFTWARE.
  */
 
-#include <string>
-
 #include "etj_demo_compatibility.h"
-#include "cg_local.h"
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
