@@ -86,7 +86,7 @@ std::string ETJump::getBestMatch(const std::vector<std::string> &words,
   return smallest->first;
 }
 
-std::string ETJump::sanitize(const std::string &text, const bool toLower,
+std::string ETJump::sanitize(const std::string_view text, const bool toLower,
                              const bool removeControlChars) {
   std::string out;
 
@@ -291,8 +291,8 @@ bool ETJump::StringUtil::endsWith(const std::string &str,
          0;
 }
 
-bool ETJump::StringUtil::iEqual(const std::string &str1,
-                                const std::string &str2, bool sanitized) {
+bool ETJump::StringUtil::iEqual(const std::string_view str1,
+                                const std::string_view str2, bool sanitized) {
   if (sanitized) {
     return sanitize(str1, true) == sanitize(str2, true);
   }
@@ -367,7 +367,7 @@ void ETJump::StringUtil::removeLeadingChars(std::string &str,
   }
 }
 
-bool ETJump::StringUtil::isColorString(const std::string &str,
+bool ETJump::StringUtil::isColorString(const std::string_view str,
                                        const size_t idx) {
   return str[idx] == '^' &&
          static_cast<size_t>(str[idx + 1]) != std::string::npos &&

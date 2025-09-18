@@ -1989,8 +1989,8 @@ typedef struct {
   // locally derived information from gamestate
   //
   qhandle_t gameModels[MAX_MODELS];
-  char gameShaderNames[MAX_CS_SHADERS][MAX_QPATH];
-  qhandle_t gameShaders[MAX_CS_SHADERS];
+  char gameShaderNames[MAX_SHADER_INDEX][MAX_QPATH];
+  qhandle_t gameShaders[MAX_SHADER_INDEX];
   qhandle_t gameModelSkins[MAX_MODELS];
   bg_character_t *gameCharacters[MAX_CHARACTERS];
   sfxHandle_t gameSounds[MAX_SOUNDS];
@@ -3489,7 +3489,7 @@ void CG_ParseSpawns(void);
 void CG_ParseServerVersionInfo(const char *pszVersionInfo);
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
 void CG_SetConfigValues(void);
-void CG_ShaderStateChanged(void);
+void CG_ShaderStateChanged(const std::string &state = "");
 void CG_ChargeTimesChanged(void);
 void CG_LoadVoiceChats();         // NERVE - SMF
 void CG_PlayBufferedVoiceChats(); // NERVE - SMF

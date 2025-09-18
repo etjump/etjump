@@ -2911,11 +2911,13 @@ static void CG_RegisterGraphics(void) {
     if (!shaderName[0]) {
       break;
     }
-    cgs.gameShaders[i] = shaderName[0] == '*'
-                             ? trap_R_RegisterShader(shaderName + 1)
-                             : trap_R_RegisterShaderNoMip(shaderName);
-    Q_strncpyz(cgs.gameShaderNames[i],
-               shaderName[0] == '*' ? shaderName + 1 : shaderName, MAX_QPATH);
+
+    ETJump::registerGameShader(i, shaderName);
+
+    // we might have more, send a request for them
+    if (i == MAX_CS_SHADERS - 1) {
+      trap_SendClientCommand("getShaderIndexExt");
+    }
   }
 
   for (i = 1; i < MAX_CHARACTERS; i++) {
@@ -3991,6 +3993,12 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   CG_LoadingString("");
 
   CG_ShaderStateChanged();
+
+  // request extended state if the configstrings are full,
+  // so we get the state of extended shaders on init too
+  if (std::strlen(CG_ConfigString(CS_SHADERS + MAX_CS_SHADERS - 1))) {
+    trap_SendClientCommand("getShaderStateExt");
+  }
 
   CG_ChargeTimesChanged();
 
