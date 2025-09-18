@@ -24,9 +24,14 @@
 
 #pragma once
 
-#include <vector>
+#include "cg_local.h"
 
 namespace ETJump {
+// 2.3.0 (+ RC4) ET_VELOCITY_PUSH_TRIGGER eType number
+inline constexpr int32_t COMPAT_ET_VELOCITY_PUSH_TRIGGER_NUM = 9;
+// old array index of removed 'weapon_medic_heal' item
+inline constexpr int32_t COMPAT_WEAPON_MEDIC_HEAL_INDEX = 56;
+
 class DemoCompatibility {
   struct Version {
     int major;
@@ -41,10 +46,10 @@ class DemoCompatibility {
   void setupCompatibilityFlags();
 
   // returns true if the demo version is newer or same as 'minimum'
-  bool isCompatible(const Version &minimum) const;
+  [[nodiscard]] bool isCompatible(const Version &minimum) const;
 
   // returns true if 'version' is the exact same as demo version
-  bool isExactVersion(const Version &version) const;
+  [[nodiscard]] bool isExactVersion(const Version &version) const;
 
   Version demoVersion{};
 
@@ -68,11 +73,11 @@ public:
   CompatibilityFlags flags{};
 
   // stores the strings to print for compatibility info
-  std::vector<std::string> compatibilityStrings{};
+  std::vector<std::string> compatibilityStrings;
 
   // performs event number adjustments for events that are added freestanding
   // by setting event num to ET_EVENTS + event due to additional entity types
-  int adjustedEventNum(int event) const;
+  [[nodiscard]] int adjustedEventNum(int event) const;
 
   void printDemoInformation() const;
 
