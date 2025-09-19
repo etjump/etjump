@@ -72,7 +72,7 @@ public:
    * @param message The message to be sent
    */
   static void console(int clientNum, const std::string &message);
-  static void console(gentity_t *ent, const std::string &message);
+  static void console(const gentity_t *ent, const std::string &message);
   static void console(gclient_t *client, const std::string &message);
 
   /**
@@ -90,7 +90,7 @@ public:
    * @param message The message to be sent
    */
   static void chat(int clientNum, const std::string &message);
-  static void chat(gentity_t *ent, const std::string &message);
+  static void chat(const gentity_t *ent, const std::string &message);
   static void chat(gclient_t *client, const std::string &message);
 
   /**

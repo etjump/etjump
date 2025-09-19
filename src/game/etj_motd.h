@@ -56,6 +56,6 @@ public:
 
   void initialize();
   void generateMotdFile();
-  void printMotd(gentity_t *ent) const;
+  void printMotd(const gentity_t *ent) const;
 };
 } // namespace ETJump

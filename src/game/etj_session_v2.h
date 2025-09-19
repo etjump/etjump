@@ -47,6 +47,7 @@ public:
   void resetClient(int clientNum);
   void onClientConnect(int clientNum, bool firstTime);
   void onClientDisconnect(int clientNum);
+  void onClientBegin(const gentity_t *ent);
 
   bool authenticate(gentity_t *ent);
   bool migrateGuid(gentity_t *ent) const;

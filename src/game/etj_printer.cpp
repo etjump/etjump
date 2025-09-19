@@ -65,7 +65,7 @@ void Printer::console(int clientNum, const std::string &message) {
   }
 }
 
-void Printer::console(gentity_t *ent, const std::string &message) {
+void Printer::console(const gentity_t *ent, const std::string &message) {
   const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
   console(clientNum, message);
 }
@@ -95,7 +95,7 @@ void Printer::chat(int clientNum, const std::string &message) {
   }
 }
 
-void Printer::chat(gentity_t *ent, const std::string &message) {
+void Printer::chat(const gentity_t *ent, const std::string &message) {
   const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
   chat(clientNum, message);
 }

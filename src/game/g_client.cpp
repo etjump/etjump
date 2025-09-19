@@ -2204,7 +2204,12 @@ void ClientBegin(int clientNum) {
   // No surface determined yet.
   ent->surfaceFlags = 0;
 
+#ifdef NEW_AUTH
+  game.sessionV2->onClientBegin(ent);
+#else
   OnClientBegin(ent);
+#endif
+
   if (level.hasTimerun) {
     trap_SendServerCommand(clientNum, "hasTimerun 1");
   } else {

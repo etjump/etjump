@@ -33,6 +33,7 @@
   #include "etj_game.h"
   #include "etj_local.h"
   #include "etj_timerun_v2.h"
+  #include "etj_motd.h"
   #include "etj_json_utilities.h"
 
 namespace ETJump {
@@ -91,9 +92,6 @@ void SessionV2::onClientConnect(const int clientNum, const bool firstTime) {
   if (firstTime) {
     initClientSession(clientNum);
     checkIPBan(clientNum);
-
-    G_DPrintf("Requesting authentication from %i\n", clientNum);
-    Printer::command(clientNum, Constants::Authentication::AUTH_REQUEST);
   } else {
     readSessionData(clientNum);
     // TODO: timerun client connect
@@ -107,6 +105,24 @@ void SessionV2::onClientDisconnect(const int clientNum) {
   // TODO: this is probably unnecessary and could be removed,
   //  there will only ever be max 64 of these files anyway
   FileSystem::remove(stringFormat(SESSION_FILE, clientNum));
+}
+
+void SessionV2::onClientBegin(const gentity_t *ent) {
+  const int32_t clientNum = ClientNum(ent);
+
+  G_DPrintf("%s called by %i\n", __func__, clientNum);
+
+  if (clients[clientNum].guid.empty()) {
+    G_DPrintf("Requesting authentication from %i\n", clientNum);
+    Printer::command(clientNum, Constants::Authentication::AUTH_REQUEST);
+  }
+
+  if (!ent->client->sess.motdPrinted) {
+    game.motd->printMotd(ent);
+    ent->client->sess.motdPrinted = qtrue;
+  }
+
+  ETJump::Log::processMessages();
 }
 
 bool SessionV2::authenticate(gentity_t *ent) {

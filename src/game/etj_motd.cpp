@@ -74,7 +74,7 @@ void Motd::initialize() {
   }
 }
 
-void Motd::printMotd(gentity_t *ent) const {
+void Motd::printMotd(const gentity_t *ent) const {
   if (!initialized) {
     return;
   }
