@@ -550,7 +550,7 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
       map=?
       %s
     collate nocase
-    order by season_id, map, run, time asc
+    order by season_id, map, run, time asc, record_date asc
   )",
                                          seasonPlaceholders, runPlaceholder);
 
