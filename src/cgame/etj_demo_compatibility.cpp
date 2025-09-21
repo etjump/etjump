@@ -126,6 +126,12 @@ void DemoCompatibility::setupCompatibilityFlags() {
         "- Adjusted event indices for ET_VELOCITY_PUSH_TRIGGER");
   }
 
+  if (!isCompatible({2, 5, 0})) {
+    flags.predictedJumpSpeeds = true;
+    compatibilityStrings.emplace_back(
+        "- Using predicted speeds for jump speeds display");
+  }
+
   if (!isCompatible({3, 2, 0})) {
     flags.serverSideCoronas = true;
     compatibilityStrings.emplace_back("- Using fully server-side coronas");

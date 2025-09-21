@@ -26,6 +26,7 @@
 #include "etj_utilities.h"
 #include "etj_client_commands_handler.h"
 #include "etj_player_events_handler.h"
+#include "etj_demo_compatibility.h"
 
 namespace ETJump {
 JumpSpeeds::JumpSpeeds(EntityEventsHandler *entityEventsHandler)
@@ -163,7 +164,12 @@ void JumpSpeeds::updateJumpSpeeds() {
 
   team = ps->persistant[PERS_TEAM];
   baseColorStr = etj_jumpSpeedsColor.string;
-  jumpSpeeds.emplace_back(ps->persistant[PERS_JUMP_SPEED], baseColorStr);
+
+  if (demoCompatibility->flags.predictedJumpSpeeds) {
+    jumpSpeeds.emplace_back(VectorLength2(ps->velocity), baseColorStr);
+  } else {
+    jumpSpeeds.emplace_back(ps->persistant[PERS_JUMP_SPEED], baseColorStr);
+  }
 
   // we only want to keep last 10 jumps, so remove first value if we go
   // over that
