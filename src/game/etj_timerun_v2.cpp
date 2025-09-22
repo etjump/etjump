@@ -727,13 +727,8 @@ void ETJump::TimerunV2::printRecords(
 
                   auto millisString = millisToString(r->time);
 
-                  std::string diffString;
-
-                  if (ownRecord || rank == 1 && ownTime == r->time) {
-                    diffString = "";
-                  } else {
-                    diffString = diffToString(ownTime, r->time);
-                  }
+                  const std::string diffString =
+                      ownRecord ? "" : diffToString(ownTime, r->time);
 
                   auto playerNameString =
                       ownRecord ? r->playerName + " ^g(You)" : r->playerName;
