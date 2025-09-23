@@ -190,6 +190,14 @@ void CG_SetInitialSnapshot(snapshot_t *snap) {
   }
   // OSP
 
+  // request extended shaders if needed
+  if (cg.requestExtShaders) {
+    trap_SendClientCommand("getExtShaderIndex");
+
+    // for safety
+    cg.requestExtShaders = false;
+  }
+
 #if __MACOS__
   #ifdef GAMERANGER
   // LBO 12/13/04. Add support for GameRanger team voice IDs

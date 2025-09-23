@@ -1109,6 +1109,14 @@ inline constexpr int MAX_CS_SKINS = 64;
 inline constexpr int MAX_CSSTRINGS = 32;
 
 inline constexpr int MAX_CS_SHADERS = 32;
+
+// shader index for some entities is transmitted in es->modelindex2,
+// which is 9 bits, so we can reasonably support up to 512 shader indices
+// with our extended shader index handler
+inline constexpr int32_t MAX_SHADER_INDEX = 512;
+inline constexpr int32_t EXT_SHADER_SET_COUNT =
+    (MAX_SHADER_INDEX - MAX_CS_SHADERS) / MAX_CS_SHADERS;
+
 inline constexpr int MAX_SERVER_TAGS = 256;
 inline constexpr int MAX_TAG_FILES = 64;
 

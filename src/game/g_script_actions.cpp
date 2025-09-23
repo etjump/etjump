@@ -13,6 +13,7 @@
 #include "etj_string_utilities.h"
 #include "etj_progression_tracker.h"
 #include "etj_target_spawn_relay.h"
+#include "etj_remapshader_handler.h"
 
 /*
 Contains the code to handle the various commands available with an event script.
@@ -283,7 +284,6 @@ qboolean G_ScriptAction_ChangeModel(gentity_t *ent, char *params) {
 
 qboolean G_ScriptAction_ShaderRemap(gentity_t *ent, char *params) {
   const char *pString, *token;
-  float f = level.time * 0.001;
   char oldShader[256];
   char newShader[256];
 
@@ -303,14 +303,12 @@ qboolean G_ScriptAction_ShaderRemap(gentity_t *ent, char *params) {
   }
   Q_strncpyz(newShader, token, 256);
 
-  AddRemap(oldShader, newShader, f);
-  //	trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
-
+  ETJump::remapShaderHandler->addRemap(oldShader, newShader);
   return qtrue;
 }
 
 qboolean G_ScriptAction_ShaderRemapFlush(gentity_t *ent, char *params) {
-  trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
+  ETJump::remapShaderHandler->updateShaderState();
   return qtrue;
 }
 
