@@ -1281,6 +1281,8 @@ typedef struct {
 
   // to prevent teleport bit getting flipped multiple times per frame
   bool teleportBitFlipped;
+
+  bool requestExtShaders;
 } cg_t;
 
 inline constexpr int NUM_FUNNEL_SPRITES = 21;

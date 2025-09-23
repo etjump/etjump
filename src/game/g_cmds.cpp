@@ -4936,18 +4936,17 @@ void ClientCommand(int clientNum) {
     return;
   }
 
-  // these are sent before the client has finished connecting, during CG_Init
-  if (!Q_stricmp(cmd, "getShaderIndexExt")) {
+  if (ent->client->pers.connected != CON_CONNECTED) {
+    return;
+  }
+
+  if (!Q_stricmp(cmd, "getExtShaderIndex")) {
     ETJump::shaderIndexHandler->sendShadersExt(clientNum);
     return;
   }
 
-  if (!Q_stricmp(cmd, "getShaderStateExt")) {
+  if (!Q_stricmp(cmd, "getExtShaderState")) {
     ETJump::remapShaderHandler->sendCurrentShaderStateExt();
-    return;
-  }
-
-  if (ent->client->pers.connected != CON_CONNECTED) {
     return;
   }
 

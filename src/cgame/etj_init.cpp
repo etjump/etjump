@@ -524,6 +524,8 @@ qboolean CG_ServerCommandExt(const char *cmd) {
                                  shaderKvp[1].c_str());
     }
 
+    // request state once we've gotten the shaders
+    trap_SendClientCommand("getExtShaderState");
     return qtrue;
   }
 
