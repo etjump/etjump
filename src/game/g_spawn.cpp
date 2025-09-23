@@ -22,6 +22,7 @@
 #include "etj_portalgun_shared.h"
 #include "etj_entity_utilities.h"
 #include "etj_progression_tracker.h"
+#include "etj_target_random.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -185,6 +186,9 @@ field_t fields[] = {
     {"noghost", FOFS(damage), F_INT},
     {"teamjumpmode", FOFS(health), F_INT},
     {"leader_only_message", FOFS(message), F_LSTRING},
+
+    {"chance", FOFS(count), F_INT},
+    {"total", FOFS(count2), F_INT},
 
     {nullptr}};
 
@@ -724,6 +728,7 @@ spawn_t spawns[] = {
     {"trigger_teleport_client", ETJump::TriggerTeleportClient::spawn},
     {"target_ft_setrules", ETJump::TargetFtSetRules::spawn},
     {"target_spawn_relay", ETJump::TargetSpawnRelay::spawn},
+    {"target_random", ETJump::TargetRandom::spawn},
     {nullptr, nullptr},
 };
 
