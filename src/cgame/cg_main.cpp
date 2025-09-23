@@ -2914,9 +2914,9 @@ static void CG_RegisterGraphics(void) {
 
     ETJump::registerGameShader(i, shaderName);
 
-    // we might have more, send a request for them
+    // we might have more, send a request for them once we're connected
     if (i == MAX_CS_SHADERS - 1) {
-      trap_SendClientCommand("getShaderIndexExt");
+      cg.requestExtShaders = true;
     }
   }
 
@@ -3993,12 +3993,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   CG_LoadingString("");
 
   CG_ShaderStateChanged();
-
-  // request extended state if the configstrings are full,
-  // so we get the state of extended shaders on init too
-  if (std::strlen(CG_ConfigString(CS_SHADERS + MAX_CS_SHADERS - 1))) {
-    trap_SendClientCommand("getShaderStateExt");
-  }
 
   CG_ChargeTimesChanged();
 
