@@ -198,7 +198,7 @@ bool Rankings(gentity_t *ent, Arguments argv) {
   ETJump::Timerun::PrintRankingsParams params{
       ClientNum(ent), userId, std::move(season), page, pageSize};
 
-  game.timerunV2->printRankings(std::move(params));
+  game.timerunV2->printRankings(params);
   return true;
 }
 
@@ -317,7 +317,7 @@ bool Records(gentity_t *ent, Arguments argv) {
   }
   params.userId = ETJump::session->GetId(ent);
 
-  game.timerunV2->printRecords(std::move(params));
+  game.timerunV2->printRecords(params);
 
   return true;
 }
@@ -2287,7 +2287,7 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
   params.endTime = end;
   params.name = name;
 
-  game.timerunV2->addSeason(std::move(params));
+  game.timerunV2->addSeason(params);
 
   return true;
 }
