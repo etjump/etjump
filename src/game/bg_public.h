@@ -1257,7 +1257,7 @@ static constexpr std::array<const char *, EV_MAX_EVENTS + 1> eventnames = {
     "EV_PORTAL_TELEPORT",
     "EV_LOAD_TELEPORT",
     "EV_UPHILLSTEP",
-    "EV_SAVE",
+    "EV_PORTAL_TRAIL",
     "EV_CUSHIONFALLSTEP",
     "EV_MAX_EVENTS",
 };
