@@ -411,7 +411,8 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
     // if we're touching portalgun, don't mess around with
     // weapon switching/dropping
     if (ent->item->giTag == WP_PORTAL_GUN) {
-      COM_BitSet(other->client->ps.weapons, ent->item->giTag);
+      const auto wp = static_cast<weapon_t>(ent->item->giTag);
+      AddWeaponToPlayer(other->client, wp, 0, 1, qfalse);
       return -1;
     }
 

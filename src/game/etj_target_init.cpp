@@ -80,7 +80,8 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
 
     if (keepPortalgun &&
         !COM_BitCheck(activator->client->ps.weapons, WP_PORTAL_GUN)) {
-      COM_BitSet(activator->client->ps.weapons, WP_PORTAL_GUN);
+      AddWeaponToPlayer(activator->client, static_cast<weapon_t>(WP_PORTAL_GUN),
+                        0, 1, qfalse);
     }
 
     // remove any disallowed weapons we might have restored if timerun is active
@@ -106,6 +107,8 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
     }
 
     COM_BitClear(activator->client->ps.weapons, WP_PORTAL_GUN);
+    activator->client->ps.ammo[WP_PORTAL_GUN] = 0;
+    activator->client->ps.ammoclip[WP_PORTAL_GUN] = 0;
   }
 
   if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepHoldable))) {

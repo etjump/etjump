@@ -1488,7 +1488,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
 
       if (!g_portalMode.integer && level.portalEnabled &&
           !client->sess.timerunActive) {
-        AddWeaponToPlayer(client, WP_PORTAL_GUN, 1, 0, qfalse);
+        AddWeaponToPlayer(client, WP_PORTAL_GUN, 0, 1, qfalse);
       }
     } else {
       // Knifeonly block
