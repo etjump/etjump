@@ -3332,8 +3332,9 @@ PM_WeaponClipEmpty
     accounts for clips being used/not used
 ==============
 */
-int PM_WeaponClipEmpty(int inWp) {
-  auto wp = static_cast<weapon_t>(inWp);
+static int PM_WeaponClipEmpty(int inWp) {
+  const auto wp = static_cast<weapon_t>(inWp);
+
   if (pm->noWeapClips) {
     if (!(pm->ps->ammo[BG_FindAmmoForWeapon(wp)])) {
       return 1;
