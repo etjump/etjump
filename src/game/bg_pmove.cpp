@@ -1312,67 +1312,6 @@ static void PM_FlyMove(void) {
   PM_StepSlideMove(qfalse);
 }
 
-// Feen: PGM PM_CheckPortal
-//		Checks for whether or not the player is touching
-//		or will be touching a portal in the near future
-//		this is an extra trace implemented to take care
-//		of the damned PM_CrashLand issues we're having....
-
-void PM_CheckPortal(void) {
-  vec3_t spot;
-  vec3_t straightdown;
-  trace_t trace;
-  vec3_t newOrigin; // Let's do a broader trace..
-
-  static constexpr float TRACE_PORTAL_DIST = 64.0f;
-
-  if (pm->ps->pm_time) {
-    return;
-  }
-
-  if (pm->ps->pm_flags & PM_DEAD) {
-    return;
-  }
-
-  straightdown[0] = 0;
-  straightdown[1] = 0;
-  straightdown[2] = pm->forward[2];
-  VectorNormalize(straightdown);
-
-  VectorMA(pm->ps->origin, 32.0f, straightdown,
-           newOrigin);       // About at the head...
-  VectorClear(straightdown); // May not need this..
-
-  // check for portal below us
-  straightdown[0] = 0;
-  straightdown[1] = 0;
-  straightdown[2] = -pm->forward[2];
-  VectorNormalize(straightdown);
-
-  VectorMA(pm->ps->origin, TRACE_PORTAL_DIST, straightdown, spot);
-  pm->trace(&trace, newOrigin /*pm->ps->origin*/, pm->ps->mins, pm->ps->maxs,
-            spot, pm->ps->clientNum, (CONTENTS_TRIGGER | CONTENTS_SOLID));
-  // trap_Trace( &trace, pm->ps->origin, pm->mins, pm->maxs, spot,
-  // pm->ps->clientNum, CONTENTS_TRIGGER );
-
-  if (trace.fraction < 1) {
-
-#if GAMEDLL
-    if (trace.surfaceFlags & SURF_PORTALGATE) {
-      // Com_Printf("PGM: Well, we detected a
-      // portal...\n");	//Debug..
-      pml.previous_teleport = qtrue;
-      PM_AddEvent(EV_PORTAL_TELEPORT);
-    } else {
-      // Com_Printf("PGM: Iunno what we found....\n");
-    }
-
-#endif // GAMEDLL
-  }
-}
-
-// Feen: PGM End PM_CheckPortal
-
 /*
 ===================
 PM_AirMove
@@ -1880,20 +1819,6 @@ static void PM_CrashLand(void) {
     return;
   }
 
-  // Feen: PGM Test
-  if (pml.previous_teleport == qtrue) // If we teleported on the last frame just
-                                      // leave... (damn crunch sound..)
-  {
-    Com_Printf("PGM: Crash land aborted. pml.previous_teleport\n");
-    return;
-  }
-  // NOTE: We're just gonna have to do a trace i guess. This ^
-  // eliminated the
-  // problem 		half of the time, but it's still not quite good
-  // enough...
-
-  // End PGM Test
-
   // Aciz: moved fall damage and stepsound handling into
   // PM_CheckFallDamage to avoid very messy code when checking whether
   // nofalldamage is enabled/disabled.
@@ -2007,9 +1932,6 @@ static void PM_GroundTraceMissed(void) {
   } // if (pm->ps->groundEntityNum != -1)...
   pm->groundPlane = qfalse;
   pm->walking = qfalse;
-
-  // Feen: PGM Test
-  // PM_CheckPortal();
 }
 
 namespace ETJump {
@@ -2135,9 +2057,6 @@ static void PM_GroundTrace(void) {
     if (pm->debugLevel) {
       Com_Printf("%i:Land\n", c_pmove);
     }
-
-    // Feen:
-    PM_CheckPortal();
 
     PM_CrashLand();
 
