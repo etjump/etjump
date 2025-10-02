@@ -4569,7 +4569,7 @@ static void PM_Weapon(void) {
     } else {
       PM_AddEvent(EV_FIRE_WEAPONB);
     }
-  } else {
+  } else if (pm->ps->weapon != WP_BINOCULARS || pm->ps->eFlags & EF_ZOOMING) {
     if (PM_WeaponClipEmpty(pm->ps->weapon)) {
       PM_AddEvent(EV_FIRE_WEAPON_LASTSHOT);
     } else {
