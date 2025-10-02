@@ -242,7 +242,9 @@ void SP_corona() {
 
   float scale;
   CG_SpawnFloat("scale", "1", &scale);
-  corona->currentState.density = static_cast<int>(scale * 255);
+  // es->density is networked as uint10_t, so use only the lower 10 bits here
+  // to match the the actual value with server-side coronas
+  corona->currentState.density = static_cast<int>(scale * 255) & 0x3FF;
 }
 
 void SP_trigger_objective_info(void) {
