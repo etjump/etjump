@@ -57,6 +57,8 @@ public:
   std::array<char[MAX_CVAR_VALUE_STRING], MAX_QUICKCONNECT_SERVERS>
       serverLabels{};
 
+  bool initialRefreshDone;
+
 private:
   struct QuickConnectServer {
     std::string serverName;
