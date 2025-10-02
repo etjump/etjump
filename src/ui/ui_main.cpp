@@ -949,7 +949,12 @@ void _UI_Refresh(int realtime) {
     // refresh find player list
     UI_BuildFindPlayerList(qfalse);
 
-    ETJump::quickConnect->refreshServers(false);
+    if (!ETJump::quickConnect->initialRefreshDone) {
+      ETJump::quickConnect->initialRefreshDone = true;
+      ETJump::quickConnect->refreshServers(true);
+    } else {
+      ETJump::quickConnect->refreshServers(false);
+    }
 
     if (!uiInfo.integrityCheckOk && uiInfo.uiDC.mainOrIngameMainMenuOpen) {
       ETJump::MenuIntegrityChecker::printIntegrityWatermark();
