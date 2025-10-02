@@ -842,7 +842,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
   client->ps.weapons[0] = 0;
   client->ps.weapons[1] = 0;
 
-  AddWeaponToPlayer(client, WP_KNIFE, 1, 0, qtrue);
+  AddWeaponToPlayer(client, WP_KNIFE, 0, 1, qtrue);
 
   client->ps.weaponstate = WEAPON_READY;
 
