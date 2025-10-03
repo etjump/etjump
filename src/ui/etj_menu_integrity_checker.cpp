@@ -115,10 +115,15 @@ void MenuIntegrityChecker::printIntegrityViolation() {
   const auto badPaks = getBadPaks();
 
   if (badPaks.empty()) {
+    msg = "^1Make sure '" + uiInfo.fsGame +
+          "' directory does not contain any '.menu' files outside of pk3 files "
+          "(usually inside 'ui' directory).\n";
+    msg += "^1If any are present, try removing them to restore menu integrity "
+           "and remove this warning.\n\n";
+    uiInfo.uiDC.Print(msg.c_str());
     return;
   }
 
-  msg.clear();
   msg = "^1The following paks may contain potentially unwanted files:\n\n";
 
   for (const auto &pak : badPaks) {
