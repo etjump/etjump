@@ -54,9 +54,18 @@ public:
                  opt<float> max = opt<float>()) {
     const bool clamp = min.hasValue() && max.hasValue();
 
-    // user set the string empty, return sane default values
+    const auto isEmptyStr = [](const std::string_view str) {
+      if (str.empty()) {
+        return true;
+      }
+
+      return std::all_of(str.cbegin(), str.cend(),
+                         [](const char c) { return std::isspace(c); });
+    };
+
+    // user set the string empty or entirely whitespace, return sane defaults
     // we can't unfortunately get the real default value for a vmCvar_t easily
-    if (std::strlen(cvar.string) == 0) {
+    if (isEmptyStr(cvar.string)) {
       if (clamp) {
         return T{min.value(), min.value()};
       }
@@ -64,7 +73,13 @@ public:
       return T{1.0f, 1.0f};
     }
 
-    const auto scaleComponents = StringUtil::split(cvar.string, " ");
+    auto scaleComponents = StringUtil::split(cvar.string, " ");
+
+    // remove any whitespace, if user inputs a string like "  2   3  "
+    scaleComponents.erase(
+        std::remove_if(scaleComponents.begin(), scaleComponents.end(),
+                       [](const std::string_view s) { return s.empty(); }),
+        scaleComponents.end());
 
     // single component = uniform scaling
     if (scaleComponents.size() == 1) {
