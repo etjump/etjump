@@ -611,6 +611,7 @@ vmCvar_t etj_jumpSpeedsShowDiff;
 vmCvar_t etj_jumpSpeedsFasterColor;
 vmCvar_t etj_jumpSpeedsSlowerColor;
 vmCvar_t etj_jumpSpeedsMinSpeed;
+vmCvar_t etj_jumpSpeedsTextSize;
 
 // Strafe quality
 vmCvar_t etj_drawStrafeQuality;
@@ -1207,6 +1208,8 @@ cvarTable_t cvarTable[] = {
     {&etj_jumpSpeedsSlowerColor, "etj_jumpSpeedsSlowerColor", "1.0 0.0 0.0 1.0",
      CVAR_ARCHIVE},
     {&etj_jumpSpeedsMinSpeed, "etj_jumpSpeedsMinSpeed", "0", CVAR_ARCHIVE},
+    {&etj_jumpSpeedsTextSize, "etj_jumpSpeedsTextSize", "2", CVAR_ARCHIVE},
+
     // Strafe quality
     {&etj_drawStrafeQuality, "etj_drawStrafeQuality", "0", CVAR_ARCHIVE},
     {&etj_strafeQualityX, "etj_strafeQualityX", "0", CVAR_ARCHIVE},
