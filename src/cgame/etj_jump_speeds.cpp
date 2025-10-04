@@ -26,11 +26,29 @@
 #include "etj_utilities.h"
 #include "etj_client_commands_handler.h"
 #include "etj_player_events_handler.h"
+#include "etj_entity_events_handler.h"
+#include "etj_cvar_update_handler.h"
 #include "etj_demo_compatibility.h"
 
 namespace ETJump {
+inline constexpr float BASE_OFFSET_X = 30.0f;
+inline constexpr float BASE_OFFSET_Y = 12.0f;
+inline constexpr float HOR_FIRSTJUMP_OFFSET = 5.0f;
+inline constexpr float DEFAULT_TEXT_SIZE = 0.2f;
+
 JumpSpeeds::JumpSpeeds(EntityEventsHandler *entityEventsHandler)
     : _entityEventsHandler{entityEventsHandler} {
+  startListeners();
+  adjustSize(etj_upmoveMeterTextSize);
+}
+
+JumpSpeeds::~JumpSpeeds() {
+  consoleCommandsHandler->unsubscribe("resetJumpSpeeds");
+  serverCommandsHandler->unsubscribe("resetJumpSpeeds");
+  _entityEventsHandler->unsubscribe(EV_JUMP);
+}
+
+void JumpSpeeds::startListeners() {
   serverCommandsHandler->subscribe(
       "resetJumpSpeeds",
       [&](const std::vector<std::string> &args) { queueJumpSpeedsReset(); });
@@ -42,12 +60,10 @@ JumpSpeeds::JumpSpeeds(EntityEventsHandler *entityEventsHandler)
   playerEventsHandler->subscribe(
       "respawn",
       [&](const std::vector<std::string> &args) { queueJumpSpeedsReset(); });
-}
 
-JumpSpeeds::~JumpSpeeds() {
-  consoleCommandsHandler->unsubscribe("resetJumpSpeeds");
-  serverCommandsHandler->unsubscribe("resetJumpSpeeds");
-  _entityEventsHandler->unsubscribe(EV_JUMP);
+  cvarUpdateHandler->subscribe(
+      &etj_jumpSpeedsTextSize,
+      [this](const vmCvar_t *cvar) { adjustSize(*cvar); });
 }
 
 bool JumpSpeeds::beforeRender() {
@@ -57,11 +73,26 @@ bool JumpSpeeds::beforeRender() {
   return true;
 }
 
+// FIXME: this is dumb, a lot of this can be precalculated
+// or doesn't need to be recalculated each frame, refactor later
 void JumpSpeeds::render() const {
   float x1 = 6 + etj_jumpSpeedsX.value;
-  float x2 = 6 + 30 + etj_jumpSpeedsX.value;
-  float y1 = 240 + etj_jumpSpeedsY.value;
+  float x2 = 6 + (BASE_OFFSET_X * (size.x / DEFAULT_TEXT_SIZE)) +
+             etj_jumpSpeedsX.value;
+
+  // This is a bit dumb, but because the text drawing starts from the bottom
+  // left of the glyph rather than top left, adjusting the size will grow
+  // the text also slightly upwards. This wasn't an issue before since the
+  // size was hardcoded, but now that it can be adjusted, calculate an offset
+  // relative to the default text size so that the size adjustment works as
+  // expected (grows right/down, shrinks left/up), without having to change
+  // the base starting position, in order to not break peoples configs.
+  float y1 = SCREEN_CENTER_Y + etj_jumpSpeedsY.value;
+  y1 -= static_cast<float>(
+      CG_Text_Height_Ext(label, DEFAULT_TEXT_SIZE, 0, &cgs.media.limboFont2) -
+      CG_Text_Height_Ext(label, size.y, 0, &cgs.media.limboFont2));
   float y2 = y1;
+
   auto textStyle = etj_jumpSpeedsShadow.integer ? ITEM_TEXTSTYLE_SHADOWED
                                                 : ITEM_TEXTSTYLE_NORMAL;
   vec4_t color;
@@ -69,19 +100,25 @@ void JumpSpeeds::render() const {
                     static_cast<int>(jumpSpeedStyle::Horizontal);
   int numJumps = static_cast<int>(jumpSpeeds.size());
 
+  const float offsetX = BASE_OFFSET_X * (size.x / DEFAULT_TEXT_SIZE);
+  const float offsetY = BASE_OFFSET_Y * (size.y / DEFAULT_TEXT_SIZE);
+
   x1 = ETJump_AdjustPosition(x1);
   x2 = ETJump_AdjustPosition(x2);
   if (!(etj_jumpSpeedsStyle.integer &
         static_cast<int>(jumpSpeedStyle::NoLabel))) {
     parseColorString(baseColorStr, color);
-    DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, "Jump Speeds:", 0, textStyle);
+    DrawString(x1, y1, size.x, size.y, color, qfalse, label.c_str(), 0,
+               textStyle);
 
     // adjust x or y depending on style chosen
     if (horizontal) {
-      x1 += static_cast<float>(DrawStringWidth("Jump Speeds: ", 0.2f)) + 5;
+      x1 += static_cast<float>(
+                DrawStringWidth(std::string(label + " ").c_str(), size.x)) +
+            (HOR_FIRSTJUMP_OFFSET * (size.x / DEFAULT_TEXT_SIZE));
     } else {
-      y1 += 12;
-      y2 += 12;
+      y1 += offsetY;
+      y2 += offsetY;
     }
   }
 
@@ -91,27 +128,27 @@ void JumpSpeeds::render() const {
       auto jumpSpeed = std::to_string(jumpSpeeds[i].first);
 
       if (horizontal) {
-        DrawString(x1, y1, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse,
+        DrawString(x1, y1, size.x, size.y, jumpSpeedsColors[i], qfalse,
                    jumpSpeed.c_str(), 0, textStyle);
-        x1 += 30;
+        x1 += offsetX;
       } else {
         // max 5 jumps - first column
         if (numJumps <= 5) {
-          DrawString(x1, y1, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse,
+          DrawString(x1, y1, size.x, size.y, jumpSpeedsColors[i], qfalse,
                      jumpSpeed.c_str(), 0, textStyle);
-          y1 += 12;
+          y1 += offsetY;
         } else {
           // second column
           if (i < numJumps - 5) {
-            DrawString(x2, y2, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse,
+            DrawString(x2, y2, size.x, size.y, jumpSpeedsColors[i], qfalse,
                        jumpSpeed.c_str(), 0, textStyle);
-            y2 += 12;
+            y2 += offsetY;
           }
           // first column
           else {
-            DrawString(x1, y1, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse,
+            DrawString(x1, y1, size.x, size.y, jumpSpeedsColors[i], qfalse,
                        jumpSpeed.c_str(), 0, textStyle);
-            y1 += 12;
+            y1 += offsetY;
           }
         }
       }
@@ -121,21 +158,21 @@ void JumpSpeeds::render() const {
       auto jumpSpeed = std::to_string(jumpSpeeds[i].first);
 
       if (horizontal) {
-        DrawString(x1, y1, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse,
+        DrawString(x1, y1, size.x, size.y, jumpSpeedsColors[i], qfalse,
                    jumpSpeed.c_str(), 0, textStyle);
-        x1 += 30;
+        x1 += offsetX;
       } else {
         // first column
         if (i < 5) {
-          DrawString(x1, y1, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse,
+          DrawString(x1, y1, size.x, size.y, jumpSpeedsColors[i], qfalse,
                      jumpSpeed.c_str(), 0, textStyle);
-          y1 += 12;
+          y1 += offsetY;
         }
         // second column
         else {
-          DrawString(x2, y2, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse,
+          DrawString(x2, y2, size.x, size.y, jumpSpeedsColors[i], qfalse,
                      jumpSpeed.c_str(), 0, textStyle);
-          y2 += 12;
+          y2 += offsetY;
         }
       }
     }
@@ -212,6 +249,12 @@ void JumpSpeeds::colorStrToVec() {
   for (std::size_t i = 0; i < jumpSpeeds.size(); i++) {
     parseColorString(jumpSpeeds[i].second, jumpSpeedsColors[i]);
   }
+}
+
+void JumpSpeeds::adjustSize(const vmCvar_t &cvar) {
+  size = CvarValueParser::parse<CvarValue::Size>(cvar, 0.1f, 10.0f);
+  size.x *= 0.1f;
+  size.y *= 0.1f;
 }
 
 bool JumpSpeeds::canSkipDraw() const {

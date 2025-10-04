@@ -26,7 +26,7 @@
 
 #include "cg_local.h"
 #include "etj_irenderable.h"
-#include "etj_entity_events_handler.h"
+#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class JumpSpeeds : public IRenderable {
@@ -49,13 +49,18 @@ private:
   std::string slowerColorStr = etj_jumpSpeedsSlowerColor.string;
   bool resetQueued = false;
   int team = 0;
+  std::string label = "Jump Speeds:";
 
   enum class jumpSpeedStyle { Horizontal = 1, NoLabel = 2, Reversed = 4 };
 
+  CvarValue::Size size{};
+
+  void startListeners();
   void updateJumpSpeeds();
   void queueJumpSpeedsReset();
   void adjustColors();
   void colorStrToVec();
-  bool canSkipDraw() const;
+  void adjustSize(const vmCvar_t &cvar);
+  [[nodiscard]] bool canSkipDraw() const;
 };
 } // namespace ETJump
