@@ -11,6 +11,7 @@
 #include "etj_client_commands_handler.h"
 #include "etj_client_rtv_handler.h"
 #include "etj_spectatorinfo_data.h"
+#include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_syscall_ext_shared.h"
@@ -530,16 +531,23 @@ void CG_SetConfigValues(void) {
 /*
 =====================
 CG_ShaderStateChanged
+
+TODO: optimize this, it currently remaps every shader that is part of the
+state sent in, even if the shader state hasn't changed.
+We should keep a local copy of the state, and compare the incoming state
+update against that, and remap only the parts that have been changed.
 =====================
 */
-void CG_ShaderStateChanged(void) {
+void CG_ShaderStateChanged(const std::string &state) {
   char originalShader[MAX_QPATH];
   char newShader[MAX_QPATH];
-  char timeOffset[16];
-  const char *o;
-  const char *n, *t;
+  char timeOffset[16]{};
+  const char *o = nullptr;
+  const char *n = nullptr;
+  const char *t = nullptr;
 
-  o = CG_ConfigString(CS_SHADERSTATE);
+  o = state.empty() ? CG_ConfigString(CS_SHADERSTATE) : state.c_str();
+
   while (o && *o) {
     n = strstr(o, "=");
     if (n && *n) {
@@ -691,11 +699,7 @@ static void CG_ConfigStringModified(void) {
       }
     }
   } else if (num >= CS_SHADERS && num < CS_SHADERS + MAX_CS_SHADERS) {
-    cgs.gameShaders[num - CS_SHADERS] = str[0] == '*'
-                                            ? trap_R_RegisterShader(str + 1)
-                                            : trap_R_RegisterShaderNoMip(str);
-    Q_strncpyz(cgs.gameShaderNames[num - CS_SHADERS],
-               str[0] == '*' ? str + 1 : str, MAX_QPATH);
+    ETJump::registerGameShader(num - CS_SHADERS, str);
   } else if (num >= CS_SKINS && num < CS_SKINS + MAX_CS_SKINS) {
     cgs.gameModelSkins[num - CS_SKINS] = trap_R_RegisterSkin(str);
   } else if (num >= CS_CHARACTERS && num < CS_CHARACTERS + MAX_CHARACTERS) {

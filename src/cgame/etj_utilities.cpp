@@ -293,4 +293,11 @@ bool ETJump::skipPortalDraw(const int selfNum, const int otherNum) {
   return true;
 }
 
+void ETJump::registerGameShader(const int32_t index, const char *shader) {
+  cgs.gameShaders[index] = shader[0] == '*'
+                               ? trap_R_RegisterShader(shader + 1)
+                               : trap_R_RegisterShaderNoMip(shader);
+  Q_strncpyz(cgs.gameShaderNames[index], shader[0] == '*' ? shader + 1 : shader,
+             MAX_QPATH);
+}
 #endif

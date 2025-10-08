@@ -14,6 +14,8 @@
 #include "etj_map_statistics.h"
 #include "etj_file.h"
 #include "etj_inactivity_timer.h"
+#include "etj_remapshader_handler.h"
+#include "etj_shader_index_handler.h"
 
 namespace ETJump {
 enum class VotingTypes {
@@ -4935,6 +4937,16 @@ void ClientCommand(int clientNum) {
   }
 
   if (ent->client->pers.connected != CON_CONNECTED) {
+    return;
+  }
+
+  if (!Q_stricmp(cmd, "getExtShaderIndex")) {
+    ETJump::shaderIndexHandler->sendShadersExt(clientNum);
+    return;
+  }
+
+  if (!Q_stricmp(cmd, "getExtShaderState")) {
+    ETJump::remapShaderHandler->sendCurrentShaderStateExt();
     return;
   }
 

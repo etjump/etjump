@@ -2914,11 +2914,13 @@ static void CG_RegisterGraphics(void) {
     if (!shaderName[0]) {
       break;
     }
-    cgs.gameShaders[i] = shaderName[0] == '*'
-                             ? trap_R_RegisterShader(shaderName + 1)
-                             : trap_R_RegisterShaderNoMip(shaderName);
-    Q_strncpyz(cgs.gameShaderNames[i],
-               shaderName[0] == '*' ? shaderName + 1 : shaderName, MAX_QPATH);
+
+    ETJump::registerGameShader(i, shaderName);
+
+    // we might have more, send a request for them once we're connected
+    if (i == MAX_CS_SHADERS - 1) {
+      cg.requestExtShaders = true;
+    }
   }
 
   for (i = 1; i < MAX_CHARACTERS; i++) {
