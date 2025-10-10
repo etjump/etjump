@@ -27,18 +27,23 @@
 #include <vector>
 #include <string>
 
+#include "g_local.h"
+
 namespace ETJump {
 class RockTheVote {
   bool isRtvVote;
   // holds the map names and their vote counts for rtv
-  std::vector<std::pair<std::string, int>> rtvMaps;
+
+  std::vector<RtvMapVoteInfo> rtvMaps;
   bool anyonePlayedSinceLastVote;
 
 public:
   RockTheVote();
   ~RockTheVote() = default;
 
-  std::vector<std::pair<std::string, int>> *getRtvMaps();
+  std::vector<RtvMapVoteInfo> *getRtvMaps();
+  int getTotalVotesForMap(int mapIndex);
+
   void clearRtvMaps();
 
   std::vector<std::string> getMostVotedMaps();

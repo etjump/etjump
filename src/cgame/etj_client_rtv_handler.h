@@ -26,10 +26,12 @@
 #include <vector>
 #include <string>
 
+#include "cg_local.h"
+
 namespace ETJump {
 class ClientRtvHandler {
-  std::vector<std::pair<std::string, int>> rtvMaps;
-  int rtvVoteYes;
+  std::vector<RtvMapVoteInfo> rtvMaps;
+  RtvVoteCountInfo rtvVoteYes;
   bool isRtvVote;
 
 public:
@@ -40,10 +42,11 @@ public:
 
   void setRtvConfigStrings(const char *cs);
   void countRtvVotes();
-  int getRtvYesVotes() const;
+  int getTotalVotesForMap(int mapIndex);
+  RtvVoteCountInfo getRtvYesVotes() const;
   bool rtvVoteActive() const;
   void setRtvVoteStatus();
   static void resetRtvEventHandler();
-  const std::vector<std::pair<std::string, int>> *getRtvMaps();
+  const std::vector<RtvMapVoteInfo> *getRtvMaps();
 };
 } // namespace ETJump

@@ -2560,6 +2560,18 @@ typedef struct {
 extern const voteType_t voteToggles[];
 extern int numVotesAvailable;
 
+namespace ETJump {
+struct RtvVoteCountInfo {
+  int playerCount;
+  int spectatorCount;
+};
+
+struct RtvMapVoteInfo {
+  std::string mapName;
+  RtvVoteCountInfo voteCountInfo;
+};
+}
+
 // Tracemap
 #ifdef CGAMEDLL
 void CG_GenerateTracemap(void);

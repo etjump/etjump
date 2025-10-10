@@ -562,8 +562,8 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     rtvMaps->resize(maxMaps);
 
     for (size_t i = 0; i < maxMaps; ++i, ++it) {
-      (*rtvMaps)[i].first = *it;
-      cs += stringFormat("%s\\0%s", (*rtvMaps)[i].first,
+      (*rtvMaps)[i].mapName = *it;
+      cs += stringFormat("%s\\0%s", (*rtvMaps)[i].mapName,
                          i == maxMaps - 1 ? "" : "\\");
     }
 
