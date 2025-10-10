@@ -512,8 +512,12 @@ void CG_SetConfigValues(void) {
   // (no update will be sent because the string will be the same.)
 
   cgs.voteTime = Q_atoi(CG_ConfigString(CS_VOTE_TIME));
-  cgs.voteYes = Q_atoi(CG_ConfigString(CS_VOTE_YES));
-  cgs.voteNo = Q_atoi(CG_ConfigString(CS_VOTE_NO));
+  cgs.voteYes = Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_YES), "tot"));
+  cgs.voteYesSpectators =
+      Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_YES), "spe"));
+  cgs.voteNo = Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_NO), "tot"));
+  cgs.voteNoSpectators =
+      Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_NO), "spe"));
   Q_strncpyz(cgs.voteString, CG_ConfigString(CS_VOTE_STRING),
              sizeof(cgs.voteString));
 
@@ -659,15 +663,19 @@ static void CG_ConfigStringModified(void) {
   } else if (num == CS_VOTE_YES) {
     // CS_VOTE_YES might be processed before CS_VOTE_STRING, so on initial
     // 'callvote rtv' command, the check for rtvVoteActive might return false
-    if (rtvHandler->rtvVoteActive() || strlen(str) > 1) {
+    // therefore also check if strlen > 13 (rtvMaps 'str' len should always be
+    // higher)
+    if (rtvHandler->rtvVoteActive() || strlen(str) > 13) {
       rtvHandler->setRtvConfigStrings(str);
       rtvHandler->countRtvVotes();
     } else {
-      cgs.voteYes = Q_atoi(str);
+      cgs.voteYes = Q_atoi(Info_ValueForKey(str, "tot"));
+      cgs.voteYesSpectators = Q_atoi(Info_ValueForKey(str, "spe"));
     }
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_NO) {
-    cgs.voteNo = Q_atoi(str);
+    cgs.voteNo = Q_atoi(Info_ValueForKey(str, "tot"));
+    cgs.voteNoSpectators = Q_atoi(Info_ValueForKey(str, "spe"));
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_STRING) {
     Q_strncpyz(cgs.voteString, str, sizeof(cgs.voteString));

@@ -1232,7 +1232,9 @@ typedef struct voteInfo_s {
   char voteString[MAX_STRING_CHARS];
   int voteTime; // level.time vote was called
   int voteYes;
+  int voteYesSpectators;
   int voteNo;
+  int voteNoSpectators;
   int numVotingClients; // set by CalculateRanks
   int numVotingTeamClients[2];
   int (*vote_fn)(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
