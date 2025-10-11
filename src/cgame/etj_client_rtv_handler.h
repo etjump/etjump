@@ -37,7 +37,6 @@ struct RtvMapVoteInfo {
   RtvVoteCountInfo voteCountInfo;
 };
 
-
 class ClientRtvHandler {
   std::vector<RtvMapVoteInfo> rtvMaps;
   RtvVoteCountInfo rtvVoteYes;

@@ -2891,7 +2891,7 @@ void CheckVote() {
   const auto voter =
       isAutoRtvVote ? nullptr : g_entities + level.voteInfo.voter_cn;
 
-   if (!isAutoRtvVote &&
+  if (!isAutoRtvVote &&
       level.voteInfo.voter_team != voter->client->sess.sessionTeam) {
     Printer::popupAll("^7Vote canceled: caller switched team.");
     G_LogPrintf("Vote canceled: %s (caller %s switched teams)\n",

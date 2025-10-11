@@ -43,7 +43,7 @@ std::vector<std::string> RockTheVote::getMostVotedMaps() {
   int previousVoteCount = 0;
   int voteCount;
 
-for (size_t i = 0; i < rtvMaps.size(); ++i) {
+  for (size_t i = 0; i < rtvMaps.size(); ++i) {
     const auto &map = rtvMaps[i];
     voteCount = getTotalVotesForMap(i);
     if (voteCount == 0) {
@@ -83,18 +83,15 @@ void RockTheVote::setRtvConfigstrings() {
   std::string newcs;
 
   for (size_t i = 0; i < maxMaps; ++i) {
-    newcs += stringFormat("%s\\%i,%i%s", rtvMaps[i].mapName, 
-        rtvMaps[i].voteCountInfo.playerCount, 
-        rtvMaps[i].voteCountInfo.spectatorCount,
-        i == maxMaps - 1 ? "" : "\\");
+    newcs += stringFormat(
+        "%s\\%i,%i%s", rtvMaps[i].mapName, rtvMaps[i].voteCountInfo.playerCount,
+        rtvMaps[i].voteCountInfo.spectatorCount, i == maxMaps - 1 ? "" : "\\");
   }
 
   trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
 }
 
-std::vector<RtvMapVoteInfo> *RockTheVote::getRtvMaps() {
-  return &rtvMaps;
-}
+std::vector<RtvMapVoteInfo> *RockTheVote::getRtvMaps() { return &rtvMaps; }
 
 int RockTheVote::getTotalVotesForMap(int mapIndex) {
   return rtvMaps[mapIndex].voteCountInfo.playerCount +

@@ -2255,14 +2255,15 @@ static void CG_DrawVote() {
         line_b = ETJump::stringFormat(
             "Change map(%s):%i(%i), Keep current map(%s):%i(%i)%s", str1,
             rtvYesVotes.playerCount + rtvYesVotes.spectatorCount,
-            rtvYesVotes.spectatorCount,
-            str2, cgs.voteNo, cgs.voteNoSpectators, canVote ? "" : " (Spectators can't vote)");
+            rtvYesVotes.spectatorCount, str2, cgs.voteNo, cgs.voteNoSpectators,
+            canVote ? "" : " (Spectators can't vote)");
       } else {
         line_a =
             ETJump::stringFormat("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
-        line_b = ETJump::stringFormat("Change map:%i(%i), Keep current map:%i(%i)",
-                                      rtvYesVotes.playerCount + rtvYesVotes.spectatorCount,
-                                      rtvYesVotes.spectatorCount, cgs.voteNo, cgs.voteNoSpectators);
+        line_b = ETJump::stringFormat(
+            "Change map:%i(%i), Keep current map:%i(%i)",
+            rtvYesVotes.playerCount + rtvYesVotes.spectatorCount,
+            rtvYesVotes.spectatorCount, cgs.voteNo, cgs.voteNoSpectators);
 
         x_b = 13;
 
@@ -2293,7 +2294,7 @@ static void CG_DrawVote() {
         line_b = ETJump::stringFormat(
             "YES:%i(%i), NO:%i(%i)%s", cgs.voteYes, cgs.voteYesSpectators,
             cgs.voteNo, cgs.voteNoSpectators,
-                                 canVote ? "" : " (Spectators can't vote)");
+            canVote ? "" : " (Spectators can't vote)");
       } else {
         line_a =
             ETJump::stringFormat("(%i) YOU VOTED ON: %s", sec, cgs.voteString);

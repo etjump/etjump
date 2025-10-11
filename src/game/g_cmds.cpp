@@ -467,7 +467,6 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
         level.voteInfo.voteNoSpectators++;
       }
       level.voteInfo.voteNo++;
-      
       client->pers.votingInfo.isVotedYes = false;
       break;
     case VotingTypes::RevoteYes:
@@ -488,8 +487,8 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
       level.voteInfo.voteNo++;
       if (isRtvVote) {
         if (client->pers.teamInfo)
-          (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].voteCountInfo
-              .playerCount--;
+          (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
+              .voteCountInfo.playerCount--;
       }
       break;
     case VotingTypes::VoteRtv:
@@ -498,7 +497,7 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
       } else {
         (*rtvMaps)[mapNum].voteCountInfo.playerCount++;
       }
-      
+
       ent->client->pers.votingInfo.lastRtvMapVoted = mapNum;
       client->pers.votingInfo.isVotedYes = true;
       if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
@@ -550,15 +549,13 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
   if (isRtvVote) {
     game.rtv->setRtvConfigstrings();
   } else {
-    std::string newcs =
-        stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
-                     level.voteInfo.voteYesSpectators);
+    std::string newcs = stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
+                                     level.voteInfo.voteYesSpectators);
     trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
   }
 
-  std::string newcs =
-      stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
-                   level.voteInfo.voteNoSpectators);
+  std::string newcs = stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
+                                   level.voteInfo.voteNoSpectators);
   trap_SetConfigstring(CS_VOTE_NO, newcs.c_str());
 }
 } // namespace ETJump
@@ -2781,14 +2778,17 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   if (game.rtv->rtvVoteActive()) {
     game.rtv->setRtvConfigstrings();
   } else {
-    std::string newcs = ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
-                                     level.voteInfo.voteYesSpectators);
+    std::string newcs =
+        ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
+                             level.voteInfo.voteYesSpectators);
     trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
+    // trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
   }
   std::string newcs =
       ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
                            level.voteInfo.voteNoSpectators);
   trap_SetConfigstring(CS_VOTE_NO, newcs.c_str());
+  // trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
 }
 
 static const char *yesMsgs[] = {"yes", "y", "1"};

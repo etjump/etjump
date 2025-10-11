@@ -45,7 +45,7 @@ void ClientRtvHandler::initialize() {
 
 void ClientRtvHandler::setRtvConfigStrings(const char *cs) {
   char key[MAX_QPATH]; // these are map names so MAX_QPATH is sufficient
-  char value[6];       // can't exceed "MAX_CLIENTS,MAX_CLIENTS" + null terminator
+  char value[6]; // can't exceed "MAX_CLIENTS,MAX_CLIENTS" + null terminator
 
   rtvMaps.clear();
 

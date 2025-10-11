@@ -41,7 +41,7 @@ struct RtvMapVoteInfo {
 class RockTheVote {
   bool isRtvVote;
   // holds the map names and their vote counts for rtv
-  
+
   std::vector<RtvMapVoteInfo> rtvMaps;
   bool anyonePlayedSinceLastVote;
 

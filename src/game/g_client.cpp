@@ -2835,7 +2835,7 @@ void ClientDisconnect(int clientNum) {
         } else {
           std::string newcs =
               ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
-                           level.voteInfo.voteYesSpectators);
+                                   level.voteInfo.voteYesSpectators);
           trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
         }
       } else {
@@ -2845,7 +2845,7 @@ void ClientDisconnect(int clientNum) {
         }
         std::string newcs =
             ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
-                         level.voteInfo.voteNoSpectators);
+                                 level.voteInfo.voteNoSpectators);
         trap_SetConfigstring(CS_VOTE_NO, newcs.c_str());
       }
     }
