@@ -28,7 +28,7 @@
 namespace ETJump {
 ClientRtvHandler::ClientRtvHandler() {
   rtvMaps.clear();
-  rtvVoteYes = {0, 0};
+  rtvVoteYes = 0;
   isRtvVote = false;
 }
 
@@ -45,7 +45,7 @@ void ClientRtvHandler::initialize() {
 
 void ClientRtvHandler::setRtvConfigStrings(const char *cs) {
   char key[MAX_QPATH]; // these are map names so MAX_QPATH is sufficient
-  char value[6];       // can't exceed "MAX_CLIENTS,MAX_CLIENTS" + null terminator
+  char value[3];       // can't exceed MAX_CLIENTS + null terminator
 
   rtvMaps.clear();
 
@@ -56,43 +56,23 @@ void ClientRtvHandler::setRtvConfigStrings(const char *cs) {
       break;
     }
 
-    // Parse "playerCount,spectatorCount"
-    int playerCount = 0;
-    int spectatorCount = 0;
-    char *comma = strchr(value, ',');
-    if (comma) {
-      *comma = '\0';
-      playerCount = Q_atoi(value);
-      spectatorCount = Q_atoi(comma + 1);
-    } else {
-      // fallback: treat all as player votes if no comma
-      playerCount = Q_atoi(value);
-    }
-
-    rtvMaps.emplace_back(
-        RtvMapVoteInfo{key, RtvVoteCountInfo{playerCount, spectatorCount}});
+    rtvMaps.emplace_back(key, Q_atoi(value));
   }
-}
-
-int ClientRtvHandler::getTotalVotesForMap(int mapIndex) {
-  return rtvMaps[mapIndex].voteCountInfo.playerCount +
-         rtvMaps[mapIndex].voteCountInfo.spectatorCount;
 }
 
 void ClientRtvHandler::countRtvVotes() {
-  rtvVoteYes = {0, 0};
+  rtvVoteYes = 0;
 
-  for (size_t i = 0; i < rtvMaps.size(); ++i) {
-    rtvVoteYes.playerCount += rtvMaps[i].voteCountInfo.playerCount;
-    rtvVoteYes.spectatorCount += rtvMaps[i].voteCountInfo.spectatorCount;
+  for (const auto &votes : rtvMaps) {
+    rtvVoteYes += votes.second;
   }
 }
 
-const std::vector<RtvMapVoteInfo> *ClientRtvHandler::getRtvMaps() {
+const std::vector<std::pair<std::string, int>> *ClientRtvHandler::getRtvMaps() {
   return &rtvMaps;
 }
 
-RtvVoteCountInfo ClientRtvHandler::getRtvYesVotes() const { return rtvVoteYes; }
+int ClientRtvHandler::getRtvYesVotes() const { return rtvVoteYes; }
 
 void ClientRtvHandler::setRtvVoteStatus() {
   isRtvVote = !Q_stricmpn(cgs.voteString, "Rock The Vote", 13);

@@ -28,30 +28,17 @@
 #include <string>
 
 namespace ETJump {
-struct RtvVoteCountInfo {
-  int playerCount;
-  int spectatorCount;
-};
-
-struct RtvMapVoteInfo {
-  std::string mapName;
-  RtvVoteCountInfo voteCountInfo;
-};
-
 class RockTheVote {
   bool isRtvVote;
   // holds the map names and their vote counts for rtv
-  
-  std::vector<RtvMapVoteInfo> rtvMaps;
+  std::vector<std::pair<std::string, int>> rtvMaps;
   bool anyonePlayedSinceLastVote;
 
 public:
   RockTheVote();
   ~RockTheVote() = default;
 
-  std::vector<RtvMapVoteInfo> *getRtvMaps();
-  int getTotalVotesForMap(int mapIndex);
-
+  std::vector<std::pair<std::string, int>> *getRtvMaps();
   void clearRtvMaps();
 
   std::vector<std::string> getMostVotedMaps();

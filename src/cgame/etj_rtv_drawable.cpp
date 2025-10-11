@@ -148,10 +148,9 @@ void RtvDrawable::drawMenuText(panel_button_t *button) {
     // last entry is current map, so we need 'No' vote count for that
     if (i == arrSize - 1) {
       const char *noCs = CG_ConfigString(CS_VOTE_NO);
-      str += stringFormat(": %i", Q_atoi(noCs));
+      str += stringFormat(" (%i)", Q_atoi(noCs));
     } else {
-      str += stringFormat(": %i(%i)", rtvHandler->getTotalVotesForMap(i),
-                          (*rtvMaps)[i].voteCountInfo.spectatorCount);
+      str += stringFormat(" (%i)", (*rtvMaps)[i].second);
     }
 
     CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
@@ -211,7 +210,7 @@ bool RtvDrawable::beforeRender() {
   std::fill_n(rtvMenuStrings.begin(), rtvMenuStrings.size() - 1, "");
 
   for (size_t i = 0; i < rtvMaps->size(); i++) {
-    rtvMenuStrings[i] = (*rtvMaps)[i].mapName.c_str();
+    rtvMenuStrings[i] = (*rtvMaps)[i].first.c_str();
   }
 
   return true;

@@ -2818,35 +2818,17 @@ void ClientDisconnect(int clientNum) {
     } else if (ent->client->ps.eFlags & EF_VOTED) {
       if (ent->client->pers.votingInfo.isVotedYes) {
         level.voteInfo.voteYes--;
-        if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
-          level.voteInfo.voteYesSpectators--;
-        }
 
         if (game.rtv->rtvVoteActive()) {
           auto rtvMaps = game.rtv->getRtvMaps();
-          if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
-            (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
-                .voteCountInfo.spectatorCount--;
-          } else {
-            (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
-                .voteCountInfo.playerCount--;
-          }
+          (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].second--;
           game.rtv->setRtvConfigstrings();
         } else {
-          std::string newcs =
-              ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
-                           level.voteInfo.voteYesSpectators);
-          trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
+          trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
         }
       } else {
         level.voteInfo.voteNo--;
-        if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
-          level.voteInfo.voteNoSpectators--;
-        }
-        std::string newcs =
-            ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
-                         level.voteInfo.voteNoSpectators);
-        trap_SetConfigstring(CS_VOTE_NO, newcs.c_str());
+        trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
       }
     }
   }

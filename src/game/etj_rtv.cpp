@@ -43,19 +43,19 @@ std::vector<std::string> RockTheVote::getMostVotedMaps() {
   int previousVoteCount = 0;
   int voteCount;
 
-for (size_t i = 0; i < rtvMaps.size(); ++i) {
-    const auto &map = rtvMaps[i];
-    voteCount = getTotalVotesForMap(i);
-    if (voteCount == 0) {
+  for (const auto &map : rtvMaps) {
+    if (map.second == 0) {
       continue;
     }
 
+    voteCount = map.second;
+
     if (voteCount > previousVoteCount) {
       mostVotedMaps.clear();
-      mostVotedMaps.push_back(map.mapName);
-      previousVoteCount = voteCount;
+      mostVotedMaps.push_back(map.first);
+      previousVoteCount = map.second;
     } else if (voteCount == previousVoteCount) {
-      mostVotedMaps.push_back((map.mapName));
+      mostVotedMaps.push_back((map.first));
     }
   }
 
@@ -83,22 +83,15 @@ void RockTheVote::setRtvConfigstrings() {
   std::string newcs;
 
   for (size_t i = 0; i < maxMaps; ++i) {
-    newcs += stringFormat("%s\\%i,%i%s", rtvMaps[i].mapName, 
-        rtvMaps[i].voteCountInfo.playerCount, 
-        rtvMaps[i].voteCountInfo.spectatorCount,
-        i == maxMaps - 1 ? "" : "\\");
+    newcs += stringFormat("%s\\%i%s", rtvMaps[i].first, rtvMaps[i].second,
+                          i == maxMaps - 1 ? "" : "\\");
   }
 
   trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
 }
 
-std::vector<RtvMapVoteInfo> *RockTheVote::getRtvMaps() {
+std::vector<std::pair<std::string, int>> *RockTheVote::getRtvMaps() {
   return &rtvMaps;
-}
-
-int RockTheVote::getTotalVotesForMap(int mapIndex) {
-  return rtvMaps[mapIndex].voteCountInfo.playerCount +
-         rtvMaps[mapIndex].voteCountInfo.spectatorCount;
 }
 
 void RockTheVote::clearRtvMaps() { rtvMaps.clear(); }
@@ -192,9 +185,7 @@ void RockTheVote::callAutoRtv() {
              sizeof(level.voteInfo.voteString));
 
   level.voteInfo.voteYes = 0;
-  level.voteInfo.voteYesSpectators = 0;
   level.voteInfo.voteNo = 0;
-  level.voteInfo.voteNoSpectators = 0;
   level.voteInfo.voteTime = level.time;
   level.voteInfo.voter_cn = -1;
   level.voteInfo.voter_team = TEAM_FREE;

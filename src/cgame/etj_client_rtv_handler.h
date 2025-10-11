@@ -27,20 +27,9 @@
 #include <string>
 
 namespace ETJump {
-struct RtvVoteCountInfo {
-  int playerCount;
-  int spectatorCount;
-};
-
-struct RtvMapVoteInfo {
-  std::string mapName;
-  RtvVoteCountInfo voteCountInfo;
-};
-
-
 class ClientRtvHandler {
-  std::vector<RtvMapVoteInfo> rtvMaps;
-  RtvVoteCountInfo rtvVoteYes;
+  std::vector<std::pair<std::string, int>> rtvMaps;
+  int rtvVoteYes;
   bool isRtvVote;
 
 public:
@@ -51,11 +40,10 @@ public:
 
   void setRtvConfigStrings(const char *cs);
   void countRtvVotes();
-  int getTotalVotesForMap(int mapIndex);
-  RtvVoteCountInfo getRtvYesVotes() const;
+  int getRtvYesVotes() const;
   bool rtvVoteActive() const;
   void setRtvVoteStatus();
   static void resetRtvEventHandler();
-  const std::vector<RtvMapVoteInfo> *getRtvMaps();
+  const std::vector<std::pair<std::string, int>> *getRtvMaps();
 };
 } // namespace ETJump
