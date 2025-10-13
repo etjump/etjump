@@ -2898,7 +2898,9 @@ void CheckVote() {
                 level.voteInfo.voteString, voter->client->pers.netname);
 
     level.voteInfo.voteYes = 0;
+    level.voteInfo.voteYesSpectators = 0;
     level.voteInfo.voteNo = level.numConnectedClients;
+    level.voteInfo.voteNoSpectators = 0;
   } else if (level.voteInfo.voteYes > requiredClients) {
     Printer::popupAll("^5Vote passed!");
     G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
