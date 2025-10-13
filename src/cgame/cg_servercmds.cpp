@@ -655,7 +655,9 @@ static void CG_ConfigStringModified(void) {
   } else if (num == CS_VOTE_YES) {
     // CS_VOTE_YES might be processed before CS_VOTE_STRING, so on initial
     // 'callvote rtv' command, the check for rtvVoteActive might return false
-    if (rtvHandler->rtvVoteActive()) {
+    // therefore also check if strlen > 13 (rtvMaps 'str' len should always be
+    // higher)
+    if (rtvHandler->rtvVoteActive() || strlen(str) > 13) {
       rtvHandler->setRtvConfigStrings(str);
       rtvHandler->countRtvVotes();
     } else {

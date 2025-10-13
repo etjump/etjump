@@ -456,21 +456,21 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
 
   switch (vote) {
     case VotingTypes::VoteYes:
-      if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
         level.voteInfo.voteYesSpectators++;
       }
       level.voteInfo.voteYes++;
       client->pers.votingInfo.isVotedYes = true;
       break;
     case VotingTypes::VoteNo:
-      if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
         level.voteInfo.voteNoSpectators++;
       }
       level.voteInfo.voteNo++;
       client->pers.votingInfo.isVotedYes = false;
       break;
     case VotingTypes::RevoteYes:
-      if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
         level.voteInfo.voteYesSpectators++;
         level.voteInfo.voteNoSpectators--;
       }
@@ -479,7 +479,7 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
       client->pers.votingInfo.isVotedYes = true;
       break;
     case VotingTypes::RevoteNo:
-      if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
         level.voteInfo.voteYesSpectators--;
         level.voteInfo.voteNoSpectators++;
       }
@@ -492,7 +492,7 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
       }
       break;
     case VotingTypes::VoteRtv:
-      if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
         (*rtvMaps)[mapNum].voteCountInfo.spectatorCount++;
       } else {
         (*rtvMaps)[mapNum].voteCountInfo.playerCount++;
@@ -500,7 +500,7 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
 
       ent->client->pers.votingInfo.lastRtvMapVoted = mapNum;
       client->pers.votingInfo.isVotedYes = true;
-      if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
         level.voteInfo.voteYesSpectators++;
       }
       level.voteInfo.voteYes++;
@@ -509,7 +509,7 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
       // only reduce the map vote count if we've already voted yes
       // as this gets called on 'vote no' -> 're-vote yes' scenarios too
       if (client->pers.votingInfo.isVotedYes) {
-        if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+        if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
           (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
               .voteCountInfo.spectatorCount--;
         } else {
@@ -517,7 +517,7 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
               .voteCountInfo.playerCount--;
         }
       } else {
-        if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+        if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
           level.voteInfo.voteYesSpectators++;
           level.voteInfo.voteNoSpectators--;
         }
@@ -525,7 +525,7 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
         level.voteInfo.voteNo--;
       }
 
-      if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
         (*rtvMaps)[mapNum].voteCountInfo.spectatorCount++;
       } else {
         (*rtvMaps)[mapNum].voteCountInfo.playerCount++;
@@ -2735,7 +2735,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     level.voteInfo.voteYes = 0;
   } else {
     level.voteInfo.voteYes = 1;
-    if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+    if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
       level.voteInfo.voteYesSpectators = 1;
     }
     trap_SendServerCommand(clientNum, "voted yes");
@@ -2782,13 +2782,11 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
         ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
                              level.voteInfo.voteYesSpectators);
     trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
-    // trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
   }
   std::string newcs =
       ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
                            level.voteInfo.voteNoSpectators);
   trap_SetConfigstring(CS_VOTE_NO, newcs.c_str());
-  // trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
 }
 
 static const char *yesMsgs[] = {"yes", "y", "1"};

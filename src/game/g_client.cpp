@@ -2818,13 +2818,13 @@ void ClientDisconnect(int clientNum) {
     } else if (ent->client->ps.eFlags & EF_VOTED) {
       if (ent->client->pers.votingInfo.isVotedYes) {
         level.voteInfo.voteYes--;
-        if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+        if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
           level.voteInfo.voteYesSpectators--;
         }
 
         if (game.rtv->rtvVoteActive()) {
           auto rtvMaps = game.rtv->getRtvMaps();
-          if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+          if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
             (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
                 .voteCountInfo.spectatorCount--;
           } else {
@@ -2840,7 +2840,7 @@ void ClientDisconnect(int clientNum) {
         }
       } else {
         level.voteInfo.voteNo--;
-        if (ent->client->sess.sessionTeam == team_t(TEAM_SPECTATOR)) {
+        if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
           level.voteInfo.voteNoSpectators--;
         }
         std::string newcs =
