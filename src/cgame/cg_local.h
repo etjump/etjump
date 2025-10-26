@@ -2784,6 +2784,7 @@ extern vmCvar_t etj_autoSprint;
 extern vmCvar_t etj_logCenterPrint;
 
 extern vmCvar_t etj_onDemoPlaybackStart;
+extern vmCvar_t etj_onDemoPlaybackEnd;
 
 extern vmCvar_t etj_HUD_noLerp;
 
