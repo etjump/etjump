@@ -685,6 +685,7 @@ vmCvar_t etj_autoSprint;
 vmCvar_t etj_logCenterPrint;
 
 vmCvar_t etj_onDemoPlaybackStart;
+vmCvar_t etj_onDemoPlaybackEnd;
 
 vmCvar_t etj_HUD_noLerp;
 
@@ -1298,6 +1299,7 @@ cvarTable_t cvarTable[] = {
     {&etj_logCenterPrint, "etj_logCenterPrint", "0", CVAR_ARCHIVE},
 
     {&etj_onDemoPlaybackStart, "etj_onDemoPlaybackStart", "", CVAR_ARCHIVE},
+    {&etj_onDemoPlaybackEnd, "etj_onDemoPlaybackEnd", "", CVAR_ARCHIVE},
 
     {&etj_HUD_noLerp, "etj_HUD_noLerp", "0", CVAR_ARCHIVE},
     {&etj_useExecQuiet, "etj_useExecQuiet", "0", CVAR_ARCHIVE},
@@ -4078,6 +4080,10 @@ void CG_Shutdown(void) {
   // like closing files or archiving session data
 
   CG_EventHandling(CGAME_EVENT_NONE, qtrue);
+
+  if (cg.demoPlayback && etj_onDemoPlaybackEnd.string[0] != '\0') {
+    trap_SendConsoleCommand(etj_onDemoPlaybackEnd.string);
+  }
 
   ETJump::shutdown();
 
