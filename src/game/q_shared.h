@@ -107,8 +107,6 @@ inline constexpr char CONFIG_NAME[] = "etconfig.cfg";
 
 #endif
 
-#include "etj_syscalls.h"
-
 #ifdef _WIN32
 
   // #pragma intrinsic( memset, memcpy )

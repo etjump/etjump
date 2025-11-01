@@ -3,32 +3,21 @@
 #include "cg_local.h"
 #include "../game/etj_syscall_ext_shared.h"
 
-static intptr_t(QDECL *syscall)(intptr_t arg,
-                                ...) = (intptr_t(QDECL *)(intptr_t, ...))-1;
+intptr_t(QDECL *vmSyscall)(intptr_t arg,
+                           ...) = (intptr_t(QDECL *)(intptr_t, ...)) - 1;
 
-#if defined(__MACOS__)
-  #ifndef __GNUC__
-    #pragma export on
-  #endif
+#if defined(__MACOS__) && !defined(__GNUC__)
+  #pragma export on
 #endif
 
 extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
                                                                ...)) {
-  syscall = syscallptr;
+  vmSyscall = syscallptr;
 }
 
-#if defined(__MACOS__)
-  #ifndef __GNUC__
-    #pragma export off
-  #endif
+#if defined(__MACOS__) && !defined(__GNUC__)
+  #pragma export off
 #endif
-
-template <typename T, typename... Types>
-static intptr_t ExpandSyscall(T syscallArg, Types... args) {
-  // we have to do C-style casting here to support all types
-  // of arguments passed onto syscalls
-  return syscall((intptr_t)syscallArg, (intptr_t)args...);
-}
 
 inline int PASSFLOAT(const float &f) noexcept {
   floatint_t fi;
