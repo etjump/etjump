@@ -19,6 +19,7 @@
 
 #include "../game/q_shared.h"
 #include "../game/bg_public.h"
+#include "../game/etj_syscalls.h"
 #include "../ui/ui_shared.h"
 
 #include "tr_types.h"

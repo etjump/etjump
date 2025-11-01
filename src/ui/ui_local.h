@@ -12,6 +12,7 @@
 #include "../game/bg_public.h"
 #include "ui_shared.h"
 #include "../game/etj_custom_map_votes.h"
+#include "../game/etj_syscalls.h"
 
 extern vmCvar_t ui_ffa_fraglimit;
 extern vmCvar_t ui_ffa_timelimit;
