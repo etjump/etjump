@@ -65,6 +65,7 @@ void ClientRtvHandler::setRtvConfigStrings(const char *cs) {
       spectatorCount = Q_atoi(comma + 1);
     } else {
       // fallback: treat all as player votes if no comma
+      // this happens on old demos, where we don't have players/specs separated
       playerCount = Q_atoi(value);
     }
 

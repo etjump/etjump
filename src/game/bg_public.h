@@ -1834,21 +1834,51 @@ static constexpr std::array<const char *, HINT_NUM_HINTS + 1> hintStrings = {
     "",          // HINT_NONE
     "HINT_NONE", // actually HINT_FORCENONE, but since this is being specified
                  // in the ent, the designer actually means HINT_FORCENONE
-    "HINT_PLAYER", "HINT_ACTIVATE", "HINT_DOOR", "HINT_DOOR_ROTATING",
-    "HINT_DOOR_LOCKED", "HINT_DOOR_ROTATING_LOCKED", "HINT_MG42",
-    "HINT_BREAKABLE", "HINT_BREAKABLE_BIG", "HINT_CHAIR", "HINT_ALARM",
-    "HINT_HEALTH", "HINT_TREASURE", "HINT_KNIFE", "HINT_LADDER", "HINT_BUTTON",
-    "HINT_WATER", "HINT_CAUTION", "HINT_DANGER", "HINT_SECRET", "HINT_QUESTION",
-    "HINT_EXCLAMATION", "HINT_CLIPBOARD", "HINT_WEAPON", "HINT_AMMO",
-    "HINT_ARMOR", "HINT_POWERUP", "HINT_HOLDABLE", "HINT_INVENTORY",
-    "HINT_SCENARIC", "HINT_EXIT", "HINT_NOEXIT", "HINT_PLYR_FRIEND",
-    "HINT_PLYR_NEUTRAL", "HINT_PLYR_ENEMY", "HINT_PLYR_UNKNOWN",
+    "HINT_PLAYER",
+    "HINT_ACTIVATE",
+    "HINT_DOOR",
+    "HINT_DOOR_ROTATING",
+    "HINT_DOOR_LOCKED",
+    "HINT_DOOR_ROTATING_LOCKED",
+    "HINT_MG42",
+    "HINT_BREAKABLE",
+    "HINT_BREAKABLE_BIG",
+    "HINT_CHAIR",
+    "HINT_ALARM",
+    "HINT_HEALTH",
+    "HINT_TREASURE",
+    "HINT_KNIFE",
+    "HINT_LADDER",
+    "HINT_BUTTON",
+    "HINT_WATER",
+    "HINT_CAUTION",
+    "HINT_DANGER",
+    "HINT_SECRET",
+    "HINT_QUESTION",
+    "HINT_EXCLAMATION",
+    "HINT_CLIPBOARD",
+    "HINT_WEAPON",
+    "HINT_AMMO",
+    "HINT_ARMOR",
+    "HINT_POWERUP",
+    "HINT_HOLDABLE",
+    "HINT_INVENTORY",
+    "HINT_SCENARIC",
+    "HINT_EXIT",
+    "HINT_NOEXIT",
+    "HINT_PLYR_FRIEND",
+    "HINT_PLYR_NEUTRAL",
+    "HINT_PLYR_ENEMY",
+    "HINT_PLYR_UNKNOWN",
     "HINT_BUILD",    // DHM - Nerve
     "HINT_DISARM",   // DHM - Nerve
     "HINT_REVIVE",   // DHM - Nerve
     "HINT_DYNAMITE", // DHM - Nerve
 
-    "HINT_CONSTRUCTIBLE", "HINT_UNIFORM", "HINT_LANDMINE", "HINT_TANK",
+    "HINT_CONSTRUCTIBLE",
+    "HINT_UNIFORM",
+    "HINT_LANDMINE",
+    "HINT_TANK",
     "HINT_SATCHELCHARGE",
     // START Mad Doc - TDF
     "HINT_LOCKPICK",
@@ -2562,6 +2592,8 @@ extern int numVotesAvailable;
 
 namespace ETJump {
 struct RtvVoteCountInfo {
+  // this includes spectators on old demos, where we don't have info
+  // on player/spectator vote counts separately
   int playerCount;
   int spectatorCount;
 };
@@ -2570,7 +2602,7 @@ struct RtvMapVoteInfo {
   std::string mapName;
   RtvVoteCountInfo voteCountInfo;
 };
-}
+} // namespace ETJump
 
 // Tracemap
 #ifdef CGAMEDLL

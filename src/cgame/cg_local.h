@@ -3509,6 +3509,12 @@ void CG_parseBestShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *));
 void CG_parseTopShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *));
 void CG_scores_cmd(void);
 
+namespace ETJump {
+// parses 'CS_VOTE_YES/NO' on init to get initial vote tally,
+// in case there's a vote active during 'CG_Init'
+void initVoteTally();
+} // namespace ETJump
+
 //
 // cg_playerstate.c
 //

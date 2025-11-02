@@ -4045,6 +4045,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   ETJump::init();
 
+  // note: after 'init', so we have valid demo compatibility pointer
+  ETJump::initVoteTally();
+
   // map-specific autoexec
   const auto mapConfig = va("autoexec_%s", cgs.rawmapname);
   if (ETJump::configFileExists(mapConfig)) {

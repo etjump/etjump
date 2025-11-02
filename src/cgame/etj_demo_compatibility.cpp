@@ -164,6 +164,12 @@ void DemoCompatibility::setupCompatibilityFlags() {
     compatibilityStrings.emplace_back(
         "- Faking EF_FIRING state for '+attack2' shooting");
   }
+
+  if (!isCompatible({3, 5, 0})) {
+    flags.noSpecCountInVoteCs = true;
+    compatibilityStrings.emplace_back(
+        "- Vote tally not differentiating players from spectators");
+  }
 }
 
 int DemoCompatibility::adjustedEventNum(const int event) const {
