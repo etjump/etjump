@@ -451,58 +451,72 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter) {
 // Updates voting stats
 namespace ETJump {
 void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
-  auto client = ent->client;
+  auto *client = ent->client;
   const int clientNum = ClientNum(ent);
   const bool isRtvVote = game.rtv->rtvVoteActive();
-  auto rtvMaps = game.rtv->getRtvMaps();
+  auto *rtvMaps = game.rtv->getRtvMaps();
 
   switch (vote) {
     case VotingTypes::VoteYes:
-      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+      if (client->sess.sessionTeam == TEAM_SPECTATOR) {
         level.voteInfo.voteYesSpectators++;
       }
       level.voteInfo.voteYes++;
       client->pers.votingInfo.isVotedYes = true;
       break;
     case VotingTypes::VoteNo:
-      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+      if (client->sess.sessionTeam == TEAM_SPECTATOR) {
         level.voteInfo.voteNoSpectators++;
       }
       level.voteInfo.voteNo++;
       client->pers.votingInfo.isVotedYes = false;
       break;
     case VotingTypes::RevoteYes:
-      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+      if (client->sess.sessionTeam == TEAM_SPECTATOR) {
         level.voteInfo.voteYesSpectators++;
+      }
+
+      if (client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
         level.voteInfo.voteNoSpectators--;
       }
+
       level.voteInfo.voteYes++;
       level.voteInfo.voteNo--;
       client->pers.votingInfo.isVotedYes = true;
       break;
     case VotingTypes::RevoteNo:
-      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
-        level.voteInfo.voteYesSpectators--;
+      if (isRtvVote) {
+        if (client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
+          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted]
+              .voteCountInfo.spectatorCount--;
+        } else {
+          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted]
+              .voteCountInfo.playerCount--;
+        }
+      }
+
+      if (client->sess.sessionTeam == TEAM_SPECTATOR) {
         level.voteInfo.voteNoSpectators++;
       }
+
+      if (client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
+        level.voteInfo.voteYesSpectators--;
+      }
+
       level.voteInfo.voteYes--;
       level.voteInfo.voteNo++;
-      if (isRtvVote) {
-        if (client->pers.teamInfo)
-          (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
-              .voteCountInfo.playerCount--;
-      }
+      client->pers.votingInfo.isVotedYes = false;
       break;
     case VotingTypes::VoteRtv:
-      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+      if (client->sess.sessionTeam == TEAM_SPECTATOR) {
         (*rtvMaps)[mapNum].voteCountInfo.spectatorCount++;
       } else {
         (*rtvMaps)[mapNum].voteCountInfo.playerCount++;
       }
 
-      ent->client->pers.votingInfo.lastRtvMapVoted = mapNum;
+      client->pers.votingInfo.lastRtvMapVoted = mapNum;
       client->pers.votingInfo.isVotedYes = true;
-      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+      if (client->sess.sessionTeam == TEAM_SPECTATOR) {
         level.voteInfo.voteYesSpectators++;
       }
       level.voteInfo.voteYes++;
@@ -511,34 +525,39 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
       // only reduce the map vote count if we've already voted yes
       // as this gets called on 'vote no' -> 're-vote yes' scenarios too
       if (client->pers.votingInfo.isVotedYes) {
-        if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
-          (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
+        if (client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
+          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted]
               .voteCountInfo.spectatorCount--;
         } else {
-          (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
+          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted]
               .voteCountInfo.playerCount--;
         }
       } else {
-        if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+        if (client->sess.sessionTeam == TEAM_SPECTATOR) {
           level.voteInfo.voteYesSpectators++;
+        }
+
+        if (client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
           level.voteInfo.voteNoSpectators--;
         }
+
         level.voteInfo.voteYes++;
         level.voteInfo.voteNo--;
       }
 
-      if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+      if (client->sess.sessionTeam == TEAM_SPECTATOR) {
         (*rtvMaps)[mapNum].voteCountInfo.spectatorCount++;
       } else {
         (*rtvMaps)[mapNum].voteCountInfo.playerCount++;
       }
-      ent->client->pers.votingInfo.lastRtvMapVoted = mapNum;
+      client->pers.votingInfo.lastRtvMapVoted = mapNum;
       client->pers.votingInfo.isVotedYes = true;
       break;
   }
 
   client->pers.votingInfo.time = level.time;
   client->pers.votingInfo.attempts++;
+  client->pers.votingInfo.lastTeamVotedOn = client->sess.sessionTeam;
 
   if (client->pers.votingInfo.isVotedYes) {
     trap_SendServerCommand(clientNum, "voted yes");

@@ -880,6 +880,10 @@ struct votingInfo_t {
                    // allow yet, notification will be sent
 
   int lastRtvMapVoted; // used for re-votes, the last map number we voted on
+
+  // which team we were on when we last voted,
+  // 'TEAM_FREE' by default when a client hasn't voted yet
+  team_t lastTeamVotedOn;
 };
 
 struct InactivityPos {
