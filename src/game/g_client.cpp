@@ -2815,38 +2815,42 @@ void ClientDisconnect(int clientNum) {
       resetVote();
       level.voteInfo.voteYes = 0;
       level.voteInfo.voteNo = level.numConnectedClients;
+      level.voteInfo.voteNoSpectators = 0;
     } else if (ent->client->ps.eFlags & EF_VOTED) {
       if (ent->client->pers.votingInfo.isVotedYes) {
         level.voteInfo.voteYes--;
-        if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+
+        if (ent->client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
           level.voteInfo.voteYesSpectators--;
         }
 
         if (game.rtv->rtvVoteActive()) {
-          auto rtvMaps = game.rtv->getRtvMaps();
-          if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+          auto *rtvMaps = game.rtv->getRtvMaps();
+
+          if (ent->client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
             (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
                 .voteCountInfo.spectatorCount--;
           } else {
             (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
                 .voteCountInfo.playerCount--;
           }
+
           game.rtv->setRtvConfigstrings();
         } else {
-          std::string newcs =
-              ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
-                                   level.voteInfo.voteYesSpectators);
-          trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
+          trap_SetConfigstring(CS_VOTE_YES,
+                               va("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
+                                  level.voteInfo.voteYesSpectators));
         }
       } else {
         level.voteInfo.voteNo--;
-        if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+
+        if (ent->client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
           level.voteInfo.voteNoSpectators--;
         }
-        std::string newcs =
-            ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
-                                 level.voteInfo.voteNoSpectators);
-        trap_SetConfigstring(CS_VOTE_NO, newcs.c_str());
+
+        trap_SetConfigstring(CS_VOTE_NO,
+                             va("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
+                                level.voteInfo.voteNoSpectators));
       }
     }
   }
