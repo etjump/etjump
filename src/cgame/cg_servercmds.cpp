@@ -12,6 +12,7 @@
 #include "etj_client_rtv_handler.h"
 #include "etj_spectatorinfo_data.h"
 #include "etj_utilities.h"
+#include "etj_demo_compatibility.h"
 
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_syscall_ext_shared.h"
@@ -504,20 +505,7 @@ void CG_SetConfigValues(void) {
       Q_atoi(CG_ConfigString(CS_INTERMISSION_START_TIME));
   cg.warmup = Q_atoi(CG_ConfigString(CS_WARMUP));
 
-  // rain - set all of this crap in cgs - it won't be set if it doesn't
-  // change, otherwise.  consider:
-  // vote was called 5 minutes ago for 'Match Reset'.  you connect.
-  // you're sent that value for CS_VOTE_STRING, but ignore it, so
-  // you have nothing to use if another 'Match Reset' vote is called
-  // (no update will be sent because the string will be the same.)
-
   cgs.voteTime = Q_atoi(CG_ConfigString(CS_VOTE_TIME));
-  cgs.voteYes = Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_YES), "tot"));
-  cgs.voteYesSpectators =
-      Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_YES), "spe"));
-  cgs.voteNo = Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_NO), "tot"));
-  cgs.voteNoSpectators =
-      Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_NO), "spe"));
   Q_strncpyz(cgs.voteString, CG_ConfigString(CS_VOTE_STRING),
              sizeof(cgs.voteString));
 
@@ -622,6 +610,20 @@ static void CG_ConfigStringModified(void) {
   // look up the individual string that was modified
   str = CG_ConfigString(num);
 
+  const auto setVoteCounts = [&str, &num] {
+    if (ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+      num == CS_VOTE_YES ? cgs.voteYes = Q_atoi(str) : cgs.voteNo = Q_atoi(str);
+    } else {
+      if (num == CS_VOTE_YES) {
+        cgs.voteYes = Q_atoi(Info_ValueForKey(str, "tot"));
+        cgs.voteYesSpectators = Q_atoi(Info_ValueForKey(str, "spe"));
+      } else {
+        cgs.voteNo = Q_atoi(Info_ValueForKey(str, "tot"));
+        cgs.voteNoSpectators = Q_atoi(Info_ValueForKey(str, "spe"));
+      }
+    }
+  };
+
   // do something with it if necessary
   if (num == CS_MUSIC) {
     CG_StartMusic();
@@ -669,13 +671,11 @@ static void CG_ConfigStringModified(void) {
       rtvHandler->setRtvConfigStrings(str);
       rtvHandler->countRtvVotes();
     } else {
-      cgs.voteYes = Q_atoi(Info_ValueForKey(str, "tot"));
-      cgs.voteYesSpectators = Q_atoi(Info_ValueForKey(str, "spe"));
+      setVoteCounts();
     }
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_NO) {
-    cgs.voteNo = Q_atoi(Info_ValueForKey(str, "tot"));
-    cgs.voteNoSpectators = Q_atoi(Info_ValueForKey(str, "spe"));
+    setVoteCounts();
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_STRING) {
     Q_strncpyz(cgs.voteString, str, sizeof(cgs.voteString));
@@ -2247,6 +2247,20 @@ static void fixLinesEndingWithCaret(char *text, int size) {
   text[size - 3] = '^';
   text[size - 2] = '2';
   text[size - 1] = 0;
+}
+
+void initVoteTally() {
+  if (ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+    cgs.voteYes = Q_atoi(CG_ConfigString(CS_VOTE_YES));
+    cgs.voteNo = Q_atoi(CG_ConfigString(CS_VOTE_NO));
+  } else {
+    cgs.voteYes = Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_YES), "tot"));
+    cgs.voteYesSpectators =
+        Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_YES), "spe"));
+    cgs.voteNo = Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_NO), "tot"));
+    cgs.voteNoSpectators =
+        Q_atoi(Info_ValueForKey(CG_ConfigString(CS_VOTE_NO), "spe"));
+  }
 }
 } // namespace ETJump
 
