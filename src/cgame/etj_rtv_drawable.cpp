@@ -147,8 +147,7 @@ void RtvDrawable::drawMenuText(panel_button_t *button) {
 
     // last entry is current map, so we need 'No' vote count for that
     if (i == arrSize - 1) {
-      const char *noCs = CG_ConfigString(CS_VOTE_NO);
-      str += stringFormat(": %i", Q_atoi(noCs));
+      str += stringFormat(": %i(%i)", cgs.voteNo, cgs.voteNoSpectators);
     } else {
       str += stringFormat(": %i(%i)", rtvHandler->getTotalVotesForMap(i),
                           (*rtvMaps)[i].voteCountInfo.spectatorCount);
