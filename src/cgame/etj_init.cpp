@@ -65,6 +65,8 @@
 #include "etj_player_bbox.h"
 #include "etj_pmove_utils.h"
 #include "etj_savepos.h"
+#include "etj_custom_command_menu.h"
+#include "etj_custom_command_menu_drawable.h"
 #include "../game/etj_syscall_ext_shared.h"
 
 namespace ETJump {
@@ -94,6 +96,7 @@ std::shared_ptr<PlayerBBox> playerBBox;
 std::unique_ptr<SavePos> savePos;
 std::unique_ptr<SyscallExt> syscallExt;
 std::unique_ptr<PmoveUtils> pmoveUtils;
+std::unique_ptr<CustomCommandMenu> customCommandMenu;
 } // namespace ETJump
 
 static bool isInitialized{false};
@@ -175,7 +178,8 @@ void initDrawKeys(KeySetSystem *keySetSystem) {
   const char *keySetNames[]{
       "keyset",  // Keyset 1 (original)
       "keyset2", // Aciz: Keyset 2 (DeFRaG style keys)
-      "keyset3", "keyset4",
+      "keyset3",
+      "keyset4",
       // + add more
   };
   for (const auto &keySetName : keySetNames) {
@@ -245,6 +249,8 @@ void init() {
 
   playerBBox = std::make_shared<PlayerBBox>();
 
+  customCommandMenu = std::make_unique<CustomCommandMenu>();
+
   // initialize renderables
   // Overbounce watcher
   ETJump::renderables.push_back(
@@ -274,6 +280,8 @@ void init() {
   ETJump::renderables.push_back(std::make_shared<UpmoveMeter>());
 
   ETJump::renderables.push_back(std::make_shared<RtvDrawable>());
+
+  ETJump::renderables.push_back(std::make_shared<CustomCommandMenuDrawable>());
 
   ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
   ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();
