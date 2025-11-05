@@ -129,7 +129,12 @@ getOptCommand(const std::string &commandPrefix,
     CG_AddToTeamChat(
         stringFormat("^3%s: ^7check console for help.", commandPrefix).c_str(),
         TEAM_SPECTATOR);
-    Com_Printf(def.help().c_str());
+    const auto splits = wrapWords(def.help(), '\n', MAX_STRING_CHARS - 1);
+
+    for (const auto &s : splits) {
+      CG_Printf("%s", s.c_str());
+    }
+
     return std::nullopt;
   }
 

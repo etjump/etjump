@@ -14,6 +14,7 @@
 #include "etj_demo_compatibility.h"
 #include "etj_utilities.h"
 #include "etj_rtv_drawable.h"
+#include "etj_custom_command_menu_drawable.h"
 
 #include "../game/etj_syscalls.h"
 
@@ -701,6 +702,10 @@ vmCvar_t etj_useExecQuiet;
 
 vmCvar_t etj_hideFlamethrowerEffects;
 
+vmCvar_t etj_ccMenu_filename;
+vmCvar_t etj_ccMenu_rememberPage;
+vmCvar_t etj_ccMenu_autoClose;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1320,6 +1325,11 @@ cvarTable_t cvarTable[] = {
 
     {&etj_hideFlamethrowerEffects, "etj_hideFlamethrowerEffects", "0",
      CVAR_ARCHIVE},
+
+    {&etj_ccMenu_filename, "etj_ccMenu_filename", "custom_commands",
+     CVAR_ARCHIVE},
+    {&etj_ccMenu_rememberPage, "etj_ccMenu_rememberPage", "0", CVAR_ARCHIVE},
+    {&etj_ccMenu_autoClose, "etj_ccMenu_autoClose", "1", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -4123,6 +4133,10 @@ qboolean CG_CheckExecKey(int key) {
 
   if (cg.showRtvMenu) {
     return ETJump::RtvDrawable::checkExecKey(key, qfalse);
+  }
+
+  if (cg.showCustomCommandMenu) {
+    return ETJump::CustomCommandMenuDrawable::checkExecKey(key, qfalse);
   }
 
   return qfalse;

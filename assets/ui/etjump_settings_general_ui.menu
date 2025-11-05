@@ -53,6 +53,9 @@ menuDef {
         SLIDER              (SETTINGS_ITEM_POS(3), "Cursor size:", 0.2, SETTINGS_ITEM_H, etj_cursorSize 32 8 128 2, "Sets the size of the mouse cursor\netj_cursorSize")
         YESNO               (SETTINGS_ITEM_POS(4), "Disable menu flashing:", 0.2, SETTINGS_ITEM_H, etj_noMenuFlashing, "Disables the lightning effect from the menu background shader\n(vid_restart required)\netj_noMenuFlashing")
         YESNO               (SETTINGS_ITEM_POS(5), "Draw quick connect menu:", 0.2, SETTINGS_ITEM_H, etj_drawQuickConnectMenu, "Draw quick connect menu in the main menu\n(vid_restart required)\netj_drawQuickConnectMenu")
+        EDITFIELD_EXT       (SETTINGS_EF_POS(6), "Custom command file:", 0.2, SETTINGS_ITEM_H, "etj_ccMenu_filename", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "File to load custom commands from, without file extension\nThis must be a .dat file\netj_ccMenu_filename")
+        YESNO               (SETTINGS_ITEM_POS(7), "Remember custom command menu page:", 0.2, SETTINGS_ITEM_H, etj_ccMenu_rememberPage, "Remember the last opened page when opening the custom command menu\netj_ccMenu_rememberPage")
+        YESNO               (SETTINGS_ITEM_POS(8), "Auto close custom command menu:", 0.2, SETTINGS_ITEM_H, etj_ccMenu_autoClose, "Automatically close custom command menu after a command is executed\netj_ccMenu_autoClose")
 
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)

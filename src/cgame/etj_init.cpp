@@ -68,6 +68,9 @@
 #include "etj_savepos.h"
 #include "etj_chs_data.h"
 #include "etj_chs_drawable.h"
+#include "etj_custom_command_menu.h"
+#include "etj_custom_command_menu_drawable.h"
+
 #include "etj_servercommands.h"
 #include "etj_consolecommands.h"
 
@@ -102,6 +105,7 @@ std::unique_ptr<SavePos> savePos;
 std::unique_ptr<SyscallExt> syscallExt;
 std::unique_ptr<PmoveUtils> pmoveUtils;
 std::shared_ptr<CHSDataHandler> chsDataHandler;
+std::unique_ptr<CustomCommandMenu> customCommandMenu;
 
 void delayedInit() {
   // force original cvars to match the shadow values, as ETe and ETL
@@ -240,6 +244,7 @@ static void initRenderables() {
   renderables.emplace_back(std::make_shared<UpperRight>());
   renderables.emplace_back(std::make_shared<UpmoveMeter>());
   renderables.emplace_back(std::make_shared<RtvDrawable>());
+  renderables.emplace_back(std::make_shared<CustomCommandMenuDrawable>());
 
   // FIXME: this is dumb, the init should be handled in the constructor
   const auto keySetSystem = std::make_shared<KeySetSystem>(etj_drawKeys);
@@ -341,6 +346,9 @@ void init() {
   rtvHandler->initialize();
 
   playerBBox = std::make_shared<PlayerBBox>();
+
+  customCommandMenu = std::make_unique<CustomCommandMenu>(
+      cvarUpdateHandler, consoleCommandsHandler);
 
   consoleAlphaHandler = std::make_shared<ConsoleAlphaHandler>();
   drawLeavesHandler = std::make_shared<DrawLeavesHandler>();
