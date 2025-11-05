@@ -1274,6 +1274,7 @@ typedef struct {
   int weapAltB2;
 
   bool showRtvMenu;
+  bool showCustomCommandMenu;
 
   bool jumpDelayBug;
 
@@ -2802,6 +2803,10 @@ extern vmCvar_t etj_useExecQuiet;
 
 extern vmCvar_t etj_hideFlamethrowerEffects;
 
+extern vmCvar_t etj_ccMenu_filename;
+extern vmCvar_t etj_ccMenu_rememberPage;
+extern vmCvar_t etj_ccMenu_autoClose;
+
 //
 // cg_main.c
 //
@@ -4209,6 +4214,7 @@ class SavePos;
 class SyscallExt;
 class TrickjumpLines;
 class CHSDataHandler;
+class CustomCommandMenu;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4230,6 +4236,7 @@ extern std::unique_ptr<SyscallExt> syscallExt;
 extern std::unique_ptr<PmoveUtils> pmoveUtils;
 extern std::shared_ptr<TrickjumpLines> trickjumpLines;
 extern std::shared_ptr<CHSDataHandler> chsDataHandler;
+extern std::unique_ptr<CustomCommandMenu> customCommandMenu;
 
 inline constexpr int32_t MAX_CHS_INFO = 8;
 

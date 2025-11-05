@@ -158,5 +158,9 @@ void sortStrings(T &v, const bool noCase) {
 }
 
 void stripLocalizationMarkers(std::string &str);
+
+// escapes color codes in a string that contains carets,
+// which are not meant to be used as color codes
+void escapeColorCodes(std::string &str, char escapeColor);
 } // namespace StringUtil
 } // namespace ETJump

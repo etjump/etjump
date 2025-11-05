@@ -408,3 +408,13 @@ void ETJump::StringUtil::stripLocalizationMarkers(std::string &str) {
   ETJump::StringUtil::replaceAll(str, "[lon]", "");
   ETJump::StringUtil::replaceAll(str, "[lof]", "");
 }
+
+void ETJump::StringUtil::escapeColorCodes(std::string &str, char escapeColor) {
+  for (size_t i = 0; i < str.length(); i++) {
+    if (isColorString(str, i) && str.length() > i + 2) {
+      str.insert(i + 1, "^");
+      str.insert(i + 2, 1, escapeColor);
+      i += 2;
+    }
+  }
+}

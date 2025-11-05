@@ -176,9 +176,9 @@ public:
 
     explicit Option(std::string name) : name(std::move(name)) {}
 
-    std::string name{};
+    std::string name;
     bool boolean{};
-    std::string text{};
+    std::string text;
     int integer{};
     double decimal{};
     Date date{};
@@ -190,14 +190,16 @@ public:
     std::vector<std::string> extraArgs;
     bool helpRequested{};
 
-    std::optional<Option> getOptional(const std::string &name) {
+    [[nodiscard]] std::optional<Option>
+    getOptional(const std::string &name) const {
       if (options.count(name) == 0) {
-        return {};
+        return std::nullopt;
       }
-      return {options[name]};
+
+      return options.at(name);
     };
 
-    std::string getErrorMessage() const {
+    [[nodiscard]] std::string getErrorMessage() const {
       return StringUtil::join(errors, "\n");
     }
   };

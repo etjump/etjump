@@ -55,6 +55,8 @@ add_library(cgame MODULE
 	"etj_consolecommands.cpp"
 	"etj_crosshair.cpp"
 	"etj_crosshair_drawer.cpp"
+	"etj_custom_command_menu.cpp"
+	"etj_custom_command_menu_drawable.cpp"
 	"etj_cvar_master_drawer.cpp"
 	"etj_cvar_shadow.cpp"
 	"etj_cvar_update_handler.cpp"

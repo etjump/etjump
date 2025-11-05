@@ -50,6 +50,7 @@ public:
       if (err) {
         *err =
             stringFormat("Failed to parse TOML file '%s': %s", file, e.what());
+        StringUtil::escapeColorCodes(*err, '7');
       }
 
       return false;
@@ -88,6 +89,15 @@ public:
     }
 
     return true;
+  }
+
+  // TOML exception error messages often contain strings such as '^--',
+  // which get incorrectly displayed in console. This function gives
+  // back an escaped version of the error string.
+  static std::string getError(const char *exception) {
+    std::string err = exception;
+    StringUtil::escapeColorCodes(err, '7');
+    return err;
   }
 };
 } // namespace ETJump
