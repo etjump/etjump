@@ -369,9 +369,7 @@ void ETJump::StringUtil::removeLeadingChars(std::string &str,
 
 bool ETJump::StringUtil::isColorString(const std::string_view str,
                                        const size_t idx) {
-  return str[idx] == '^' &&
-         static_cast<size_t>(str[idx + 1]) != std::string::npos &&
-         str[idx + 1] != '^';
+  return str[idx] == '^' && str.length() > idx + 1 && str[idx + 1] != '^';
 }
 
 std::string ETJump::StringUtil::truncate(const std::string &str,

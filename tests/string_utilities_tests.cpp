@@ -345,3 +345,8 @@ TEST_F(StringUtilitiesTests, sanitize_multipleCarets) {
   ASSERT_EQ(sanitize(in), "^test ^^TEST");
   ASSERT_EQ(sanitize(in, true), "^test ^^test");
 }
+
+TEST_F(StringUtilitiesTests, sanitize_handlesEndingCarets) {
+  ASSERT_EQ(sanitize("test test^"), "test test^");
+  ASSERT_EQ(sanitize("test test^^"), "test test^^");
+}
