@@ -44,6 +44,7 @@ class DemoCompatibility {
                        const std::string &delimiter);
 
   void setupCompatibilityFlags();
+  void printCompatibilityInfo();
 
   // returns true if the demo version is newer or same as 'minimum'
   [[nodiscard]] bool isCompatible(const Version &minimum) const;
