@@ -3281,7 +3281,10 @@ static void UI_LoadDemos() {
     FileSystemObjectInfo objectInfo;
     objectInfo.type = FileSystemObjectType::Item;
     objectInfo.name = demo;
-    objectInfo.displayName = ETJump::sanitize(objectInfo.name, false);
+    objectInfo.displayName = demo;
+    ETJump::StringUtil::stripExtension(objectInfo.displayName);
+    objectInfo.displayName =
+        ETJump::sanitize(objectInfo.displayName) + "^*." + ext;
     files.emplace_back(objectInfo);
   }
 
