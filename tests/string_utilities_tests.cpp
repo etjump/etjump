@@ -350,3 +350,31 @@ TEST_F(StringUtilitiesTests, sanitize_handlesEndingCarets) {
   ASSERT_EQ(sanitize("test test^"), "test test^");
   ASSERT_EQ(sanitize("test test^^"), "test test^^");
 }
+
+TEST_F(StringUtilitiesTests, stripExtension_stripsCorrectly) {
+  std::string in = "test.dat";
+  StringUtil::stripExtension(in);
+
+  ASSERT_EQ(in, "test");
+}
+
+TEST_F(StringUtilitiesTests, stripExtension_handlesEmptyString) {
+  std::string in = "";
+  StringUtil::stripExtension(in);
+
+  ASSERT_EQ(in, "");
+}
+
+TEST_F(StringUtilitiesTests, stripExtension_stripsOnlyLastExt) {
+  std::string in = "test.dat.dat";
+  StringUtil::stripExtension(in);
+
+  ASSERT_EQ(in, "test.dat");
+}
+
+TEST_F(StringUtilitiesTests, stripExtension_noExtIsUnmodified) {
+  std::string in = "test";
+  StringUtil::stripExtension(in);
+
+  ASSERT_EQ(in, "test");
+}

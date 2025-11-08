@@ -395,3 +395,11 @@ std::string ETJump::StringUtil::truncate(const std::string &str,
   std::string out = str.substr(0, outLen);
   return out;
 }
+
+void ETJump::StringUtil::stripExtension(std::string &str) {
+  const auto pos = str.rfind('.');
+
+  if (pos != std::string::npos) {
+    str.erase(pos);
+  }
+}
