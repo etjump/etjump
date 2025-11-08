@@ -3,9 +3,9 @@ name: "Coverity Scan"
 
 on:
   schedule:
-    - cron: '0 10 * * SUN'
+    - cron: "0 10 * * SUN"
   workflow_dispatch:
-  
+
 jobs:
   coverity:
     runs-on: ubuntu-latest
