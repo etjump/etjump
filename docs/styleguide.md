@@ -21,7 +21,6 @@ git clang-format -i <file1> <file2> ... <fileN>
 ## Assets formatting
 
 * Use tabs for indentation when working on assets, such as shaders or menu files.
-* Tab width should be set to **4** spaces.
 * Braces should always be put on separate lines when working with shaders.
 * *Never run `clang-format` on assets!*
 
@@ -34,6 +33,14 @@ We include changelog in the in-game menus. The [changelog.md](../changelog.md) f
   * Multi-level lists like this are fine.
   * When indenting multi-level lists, use __2__ spaces instead of tabs.
 * Markdown links are fine - the parser strips these out completely.
+
+## Other files
+
+We recognize it might be annoying to install bunch of auxiliary tools to simply format things, therefore you may consider installing and using these optional.
+
+* YAML and JSON files should be formatted with [prettier](https://prettier.io/).
+  * `.editorconfig` provides all the required settings for these
+* Shell scripts should be formatted with [shfmt](https://github.com/patrickvane/shfmt).
 
 ## Coding conventions
 
