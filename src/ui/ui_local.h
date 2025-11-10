@@ -799,8 +799,6 @@ void trap_GetAutoUpdate(void);                      // DHM - Nerve
 void trap_openURL(const char *url); // TTimo
 void trap_GetHunkData(int *hunkused, int *hunkexpected);
 
-char *trap_TranslateString(const char *string); // NERVE - SMF - localization
-
 void QDECL Com_DPrintf(const char *fmt, ...);
 
 const char *G_SHA1(const char *str);

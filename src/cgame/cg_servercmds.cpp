@@ -311,7 +311,7 @@ void CG_ParseSpawns(void) {
   }
 
   // first index is for autopicking
-  Q_strncpyz(cg.spawnPoints[0], CG_TranslateString("Auto Pick"), MAX_SPAWNDESC);
+  Q_strncpyz(cg.spawnPoints[0], "Auto Pick", MAX_SPAWNDESC);
 
   cg.spawnCount = Q_atoi(s) + 1;
 
@@ -324,7 +324,7 @@ void CG_ParseSpawns(void) {
       return;
     }
 
-    Q_strncpyz(cg.spawnPoints[i], CG_TranslateString(s), MAX_SPAWNDESC);
+    Q_strncpyz(cg.spawnPoints[i], s, MAX_SPAWNDESC);
 
     s = Info_ValueForKey(info, "x");
     if (!s || !strlen(s)) {
@@ -1488,16 +1488,13 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color,
 
       if (mode == SAY_TEAM) {
         Com_sprintf(vchat.message, sizeof(vchat.message), "%s(%s^7)^3: %c%c%s",
-                    msgTime, ci->name, Q_COLOR_ESCAPE, color,
-                    CG_TranslateString(chat));
+                    msgTime, ci->name, Q_COLOR_ESCAPE, color, chat);
       } else if (mode == SAY_BUDDY) {
         Com_sprintf(vchat.message, sizeof(vchat.message), "%s<%s^7>^3: %c%c%s",
-                    msgTime, ci->name, Q_COLOR_ESCAPE, color,
-                    CG_TranslateString(chat));
+                    msgTime, ci->name, Q_COLOR_ESCAPE, color, chat);
       } else {
         Com_sprintf(vchat.message, sizeof(vchat.message), "%s%s^3: %c%c%s",
-                    msgTime, ci->name, Q_COLOR_ESCAPE, color,
-                    CG_TranslateString(chat));
+                    msgTime, ci->name, Q_COLOR_ESCAPE, color, chat);
       }
       CG_AddBufferedVoiceChat(&vchat);
     }
@@ -1603,62 +1600,6 @@ static void CG_RemoveChatEscapeChar(char *text) {
   }
   text[l] = '\0';
 }
-
-/*
-=================
-CG_LocalizeServerCommand
-
-NERVE - SMF - localize string sent from server
-
-- localization is ON by default.
-- use [lof] in string to turn OFF
-- use [lon] in string to turn back ON
-=================
-*/
-const char *CG_LocalizeServerCommand(const char *buf) {
-  static char token[MAX_TOKEN_CHARS];
-  char temp[MAX_TOKEN_CHARS];
-  qboolean togloc = qtrue;
-  const char *s;
-  int i, prev;
-
-  memset(token, 0, sizeof(token));
-  s = buf;
-  prev = 0;
-
-  for (i = 0; *s; i++, s++) {
-    if (*s == '[' && (!Q_strncmp(s, "[lon]", 5) || !Q_strncmp(s, "[lof]", 5))) {
-      if (togloc) {
-        memset(temp, 0, sizeof(temp));
-        strncpy(temp, buf + prev, i - prev);
-        Q_strcat(token, sizeof(token), CG_TranslateString(temp));
-      } else {
-        strncat(token, buf + prev, i - prev);
-      }
-
-      if (s[3] == 'n') {
-        togloc = qtrue;
-      } else {
-        togloc = qfalse;
-      }
-
-      i += 5;
-      s += 5;
-      prev = i;
-    }
-  }
-
-  if (togloc) {
-    memset(temp, 0, sizeof(temp));
-    strncpy(temp, buf + prev, i - prev);
-    Q_strcat(token, sizeof(token), CG_TranslateString(temp));
-  } else {
-    strncat(token, buf + prev, i - prev);
-  }
-
-  return token;
-}
-// -NERVE - SMF
 
 // OSP
 void CG_wstatsParse_cmd(void) {
@@ -2113,8 +2054,7 @@ void CG_dumpStats(void) {
   qtime_t ct;
   qboolean fDoScores = qfalse;
   const char *info = CG_ConfigString(CS_SERVERINFO);
-  char *s = va("^3>>> %s: ^2%s\n\n", CG_TranslateString("Map"),
-               Info_ValueForKey(info, "mapname"));
+  char *s = va("^3>>> %s: ^2%s\n\n", "Map", Info_ValueForKey(info, "mapname"));
 
   trap_RealTime(&ct);
   // /me holds breath (using circular va() buffer)
@@ -2133,8 +2073,7 @@ void CG_dumpStats(void) {
   CG_printFile(s);
   CG_parseWeaponStats_cmd(CG_printFile);
   if (cgs.dumpStatsFile == 0) {
-    CG_Printf("[cgnotify]\n^3>>> %s: %s\n\n",
-              CG_TranslateString("Could not create logfile"),
+    CG_Printf("[cgnotify]\n^3>>> %s: %s\n\n", "Could not create logfile",
               cgs.dumpStatsFileName);
   }
 
@@ -2352,40 +2291,52 @@ static void CG_ServerCommand(void) {
   }
 
   if (!Q_stricmp(cmd, "cpm")) {
-    CG_AddPMItem(PM_MESSAGE, CG_LocalizeServerCommand(CG_Argv(1)),
-                 cgs.media.voiceChatShader);
+    std::string s = CG_Argv(1);
+
+    if (!ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
+    }
+
+    CG_AddPMItem(PM_MESSAGE, s.c_str(), cgs.media.voiceChatShader);
     return;
   }
 
   // Banner Printing
   if (!Q_stricmp(cmd, "bp")) {
-    CG_BannerPrint(CG_LocalizeServerCommand(CG_Argv(1)));
+    std::string s = CG_Argv(1);
+
+    if (!ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
+    }
+
+    CG_BannerPrint(s.c_str());
     return;
   }
 
   const bool cpNoLog = !Q_stricmp(cmd, "cpnl");
   if (!Q_stricmp(cmd, "cp") || cpNoLog) {
     const int args = trap_Argc();
+    std::string s = CG_Argv(1);
+
+    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
+    }
 
     if (args >= 3) {
-      char *s = CG_TranslateString(CG_Argv(1));
-
       if (args == 4) {
-        s = va("%s%s", CG_Argv(3), s);
+        s = ETJump::stringFormat("%s%s", CG_Argv(3), s);
       }
 
       // OSP - for client logging
       if (cg_printObjectiveInfo.integer > 0 &&
           (args == 4 || Q_atoi(CG_Argv(2)) > 1)) {
-        CG_Printf("[cgnotify]*** ^3INFO: ^5%s\n",
-                  CG_LocalizeServerCommand(CG_Argv(1)));
+        CG_Printf("[cgnotify]*** ^3INFO: ^5%s\n", s.c_str());
       }
-      CG_PriorityCenterPrint(s, SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
+      CG_PriorityCenterPrint(s.c_str(), SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
                              SMALLCHAR_WIDTH, Q_atoi(CG_Argv(2)), !cpNoLog);
     } else {
-      CG_CenterPrint(CG_LocalizeServerCommand(CG_Argv(1)),
-                     SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20), SMALLCHAR_WIDTH,
-                     !cpNoLog);
+      CG_CenterPrint(s.c_str(), SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
+                     SMALLCHAR_WIDTH, !cpNoLog);
     }
     return;
   }
@@ -2401,7 +2352,13 @@ static void CG_ServerCommand(void) {
   }
 
   if (!Q_stricmp(cmd, "print")) {
-    CG_Printf("[cgnotify]%s", CG_LocalizeServerCommand(CG_Argv(1)));
+    std::string s = CG_Argv(1);
+
+    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
+    }
+
+    CG_Printf("[cgnotify]%s", s.c_str());
     return;
   }
 
@@ -2428,25 +2385,25 @@ static void CG_ServerCommand(void) {
       msgType |= REPLAY_MSG;
     }
 
-    const char *s = CG_Argv(2);
+    std::string s = CG_Argv(2);
 
-    if (s[0] == '\0') { // server sends empty clientNum
+    if (s.empty()) { // server sends empty clientNum
       msgType |= SERVER_MSG;
     }
 
-    const int clientNum = Q_atoi(s);
+    const int clientNum = Q_atoi(s.c_str());
 
     if (cg_teamChatsOnly.integer) {
       return;
     }
 
-    if (Q_atoi(CG_Argv(3))) {
-      s = CG_LocalizeServerCommand(CG_Argv(1));
-    } else {
-      s = CG_Argv(1);
+    s = CG_Argv(1);
+
+    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
     }
 
-    Q_strncpyz(text, s, MAX_SAY_TEXT);
+    Q_strncpyz(text, s.c_str(), MAX_SAY_TEXT);
 
     if (enc) {
       CG_DecodeQP(text);
@@ -2461,23 +2418,22 @@ static void CG_ServerCommand(void) {
       s = ETJump::addChatModifications(text, clientNum, msgType);
     }
 
-    CG_AddToTeamChat(s, clientNum, msgType);
-    CG_Printf("%s\n", s);
+    CG_AddToTeamChat(s.c_str(), clientNum, msgType);
+    CG_Printf("%s\n", s.c_str());
 
     return;
   }
 
   enc = !Q_stricmp(cmd, "enc_tchat") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "tchat") || enc) {
-    const char *s;
+    std::string s = CG_Argv(1);
 
-    if (Q_atoi(CG_Argv(3))) {
-      s = CG_LocalizeServerCommand(CG_Argv(1));
-    } else {
-      s = CG_Argv(1);
+    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+      ETJump::StringUtil::stripLocalizationMarkers(s);
     }
 
-    Q_strncpyz(text, s, MAX_SAY_TEXT);
+    Q_strncpyz(text, s.c_str(), MAX_SAY_TEXT);
+
     if (enc) {
       CG_DecodeQP(text);
     }
@@ -2485,7 +2441,7 @@ static void CG_ServerCommand(void) {
     CG_RemoveChatEscapeChar(text);
 
     s = ETJump::addChatModifications(text, Q_atoi(CG_Argv(2)), false);
-    Q_strncpyz(text, s, MAX_SAY_TEXT);
+    Q_strncpyz(text, s.c_str(), MAX_SAY_TEXT);
 
     ETJump::fixLinesEndingWithCaret(text, MAX_SAY_TEXT);
     CG_AddToTeamChat(text, Q_atoi(CG_Argv(2)), 0);
@@ -2826,7 +2782,7 @@ static void CG_ServerCommand(void) {
   if (!Q_stricmp(cmd, "spawnserver")) {
     // print message informing player the server is restarting
     // with a new map
-    CG_PriorityCenterPrint(va("%s", CG_TranslateString("^3Server Restarting")),
+    CG_PriorityCenterPrint("^3Server Restarting",
                            SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.25),
                            SMALLCHAR_WIDTH, 999999);
 
@@ -2875,8 +2831,8 @@ static void CG_ServerCommand(void) {
       saveMsg += '\n' + remainingSavesStr;
     }
 
-    CG_CenterPrint(CG_LocalizeServerCommand(saveMsg.c_str()),
-                   SCREEN_HEIGHT - SCREEN_HEIGHT * 0.2, SMALLCHAR_WIDTH, false);
+    CG_CenterPrint(saveMsg.c_str(), SCREEN_HEIGHT - SCREEN_HEIGHT * 0.2,
+                   SMALLCHAR_WIDTH, false);
     return;
   }
 

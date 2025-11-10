@@ -1470,9 +1470,9 @@ void G_UpdateCvars(void) {
         cv->modificationCount = cv->vmCvar->modificationCount;
 
         if (cv->trackChange && !(cv->cvarFlags & CVAR_LATCH)) {
-          trap_SendServerCommand(
-              -1, va("cpm \"Server:[lof] ^3%s [lon]^7changed to[lof] ^3%s\n\"",
-                     cv->cvarName, cv->vmCvar->string));
+          Printer::popupAll(
+              ETJump::stringFormat("Server: ^3%s ^7changed to ^3%s",
+                                   cv->cvarName, cv->vmCvar->string));
         }
 
         if (cv->teamShader) {
