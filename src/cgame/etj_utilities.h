@@ -88,5 +88,6 @@ void resetTempTraceIgnoredClients();
 
 bool skipPortalDraw(int selfNum, int otherNum);
 
+void registerGameShader(int32_t index, const char *shader);
 #endif
 } // namespace ETJump

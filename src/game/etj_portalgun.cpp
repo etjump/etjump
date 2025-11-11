@@ -81,8 +81,6 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
   portal->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
   portal->clipmask =
       CONTENTS_SOLID | CONTENTS_MISSILECLIP; // NOTE: _TELE just a test...
-  portal->surfaceFlags =
-      SURF_PORTALGATE; // Let's try this for detection in Pmove....
   portal->touch = [](gentity_t *self, gentity_t *other, trace_t *trace) {
     touch(self, other);
   };

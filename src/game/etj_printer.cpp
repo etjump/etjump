@@ -70,7 +70,7 @@ void Printer::console(const gentity_t *ent, const std::string &message) {
   console(clientNum, message);
 }
 
-void Printer::console(gclient_t *client, const std::string &message) {
+void Printer::console(const gclient_t *client, const std::string &message) {
   const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
   console(clientNum, message);
 }
@@ -100,7 +100,7 @@ void Printer::chat(const gentity_t *ent, const std::string &message) {
   chat(clientNum, message);
 }
 
-void Printer::chat(gclient_t *client, const std::string &message) {
+void Printer::chat(const gclient_t *client, const std::string &message) {
   const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
   chat(clientNum, message);
 }
@@ -121,12 +121,12 @@ void Printer::popup(int clientNum, const std::string &message) {
   }
 }
 
-void Printer::popup(gentity_t *ent, const std::string &message) {
+void Printer::popup(const gentity_t *ent, const std::string &message) {
   const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
   popup(clientNum, message);
 }
 
-void Printer::popup(gclient_t *client, const std::string &message) {
+void Printer::popup(const gclient_t *client, const std::string &message) {
   const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
   popup(clientNum, message);
 }
@@ -145,12 +145,14 @@ void Printer::center(int clientNum, const std::string &message, bool log) {
       clientNum, ETJump::stringFormat("%s \"%s\n\"", cmd, message).c_str());
 }
 
-void Printer::center(gentity_t *ent, const std::string &message, bool log) {
+void Printer::center(const gentity_t *ent, const std::string &message,
+                     bool log) {
   const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
   center(clientNum, message, log);
 }
 
-void Printer::center(gclient_t *client, const std::string &message, bool log) {
+void Printer::center(const gclient_t *client, const std::string &message,
+                     bool log) {
   const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
   center(clientNum, message, log);
 }
@@ -173,14 +175,15 @@ void Printer::centerPriority(int clientNum, const std::string &message,
       ETJump::stringFormat("%s \"%s\" %i", cmd, message, priority).c_str());
 }
 
-void Printer::centerPriority(gentity_t *ent, const std::string &message,
+void Printer::centerPriority(const gentity_t *ent, const std::string &message,
                              const int priority, bool log) {
   const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
   centerPriority(clientNum, message, priority, log);
 }
 
-void Printer::centerPriority(gclient_t *client, const std::string &message,
-                             const int priority, bool log) {
+void Printer::centerPriority(const gclient_t *client,
+                             const std::string &message, const int priority,
+                             bool log) {
   const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
   centerPriority(clientNum, message, priority, log);
 }
@@ -205,12 +208,12 @@ void Printer::banner(int clientNum, const std::string &message) {
   }
 }
 
-void Printer::banner(gentity_t *ent, const std::string &message) {
+void Printer::banner(const gentity_t *ent, const std::string &message) {
   const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
   banner(clientNum, message);
 }
 
-void Printer::banner(gclient_t *client, const std::string &message) {
+void Printer::banner(const gclient_t *client, const std::string &message) {
   const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
   banner(clientNum, message);
 }

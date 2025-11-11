@@ -402,7 +402,7 @@ void G_TouchTriggers(gentity_t *ent) {
     if (hit->touch) {
       hit->touch(hit, ent, &trace);
       // update mins/maxs after portal trigger
-      if (hit->surfaceFlags == SURF_PORTALGATE) {
+      if (hit->s.eType == ET_PORTAL_BLUE || hit->s.eType == ET_PORTAL_RED) {
         VectorAdd(ent->client->ps.origin, ent->r.mins, mins);
         VectorAdd(ent->client->ps.origin, ent->r.maxs, maxs);
       }
@@ -587,7 +587,7 @@ qboolean ClientInactivityTimer(gclient_t *client) {
                   vtosf(client->ps.viewangles));
 
       Printer::popupAll(ETJump::stringFormat(
-          "%s ^7was removed from teams due to inactivity! (%s)\n",
+          "%s ^7was removed from teams due to inactivity! (%s)",
           client->pers.netname,
           ETJump::getSecondsString(g_inactivity.integer)));
 

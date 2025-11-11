@@ -843,13 +843,13 @@ void SetWolfSpawnWeapons(gclient_t *client) {
   client->ps.weapons[0] = 0;
   client->ps.weapons[1] = 0;
 
-  AddWeaponToPlayer(client, WP_KNIFE, 1, 0, qtrue);
+  AddWeaponToPlayer(client, WP_KNIFE, 0, 1, qtrue);
 
   client->ps.weaponstate = WEAPON_READY;
 
   // Zero: CTF: if CTF give no other weapons than knife
   if (g_weapons.integer) {
-    if (AddWeaponToPlayer(client, WP_BINOCULARS, 1, 0, qfalse)) {
+    if (AddWeaponToPlayer(client, WP_BINOCULARS, 0, 1, qfalse)) {
       client->ps.stats[STAT_KEYS] |= (1 << INV_BINOCS);
     }
     // Engineer gets dynamite
@@ -1489,7 +1489,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
 
       if (!g_portalMode.integer && level.portalEnabled &&
           !client->sess.timerunActive) {
-        AddWeaponToPlayer(client, WP_PORTAL_GUN, 1, 0, qfalse);
+        AddWeaponToPlayer(client, WP_PORTAL_GUN, 0, 1, qfalse);
       }
     } else {
       // Knifeonly block
@@ -2826,20 +2826,42 @@ void ClientDisconnect(int clientNum) {
       resetVote();
       level.voteInfo.voteYes = 0;
       level.voteInfo.voteNo = level.numConnectedClients;
+      level.voteInfo.voteNoSpectators = 0;
     } else if (ent->client->ps.eFlags & EF_VOTED) {
       if (ent->client->pers.votingInfo.isVotedYes) {
         level.voteInfo.voteYes--;
 
+        if (ent->client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
+          level.voteInfo.voteYesSpectators--;
+        }
+
         if (game.rtv->rtvVoteActive()) {
-          auto rtvMaps = game.rtv->getRtvMaps();
-          (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].second--;
+          auto *rtvMaps = game.rtv->getRtvMaps();
+
+          if (ent->client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
+            (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
+                .voteCountInfo.spectatorCount--;
+          } else {
+            (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
+                .voteCountInfo.playerCount--;
+          }
+
           game.rtv->setRtvConfigstrings();
         } else {
-          trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+          trap_SetConfigstring(CS_VOTE_YES,
+                               va("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
+                                  level.voteInfo.voteYesSpectators));
         }
       } else {
         level.voteInfo.voteNo--;
-        trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
+
+        if (ent->client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
+          level.voteInfo.voteNoSpectators--;
+        }
+
+        trap_SetConfigstring(CS_VOTE_NO,
+                             va("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
+                                level.voteInfo.voteNoSpectators));
       }
     }
   }

@@ -23,30 +23,22 @@
  */
 
 #pragma once
-#include <vector>
-#include <string>
 
-#include "cg_local.h"
+#include <map>
+
+#include "g_local.h"
 
 namespace ETJump {
-class ClientRtvHandler {
-  std::vector<RtvMapVoteInfo> rtvMaps;
-  RtvVoteCountInfo rtvVoteYes;
-  bool isRtvVote;
-
+class ShaderIndexHandler {
 public:
-  ClientRtvHandler();
-  ~ClientRtvHandler() = default;
+  int32_t getShaderIndexExt(std::string_view name);
+  void sendShadersExt(int32_t clientNum) const;
 
-  void initialize();
+private:
+  // we keep these separated to sets of 32,
+  // to keep the shader state strings reasonable in length
+  std::array<std::map<int32_t, std::string>, EXT_SHADER_SET_COUNT> shaderSets;
 
-  void setRtvConfigStrings(const char *cs);
-  void countRtvVotes();
-  int getTotalVotesForMap(int mapIndex);
-  RtvVoteCountInfo getRtvYesVotes() const;
-  bool rtvVoteActive() const;
-  void setRtvVoteStatus();
-  static void resetRtvEventHandler();
-  const std::vector<RtvMapVoteInfo> *getRtvMaps();
+  std::string buildShaderString();
 };
 } // namespace ETJump

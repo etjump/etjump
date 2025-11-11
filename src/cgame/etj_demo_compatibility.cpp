@@ -22,10 +22,7 @@
  * SOFTWARE.
  */
 
-#include <string>
-
 #include "etj_demo_compatibility.h"
-#include "cg_local.h"
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
@@ -129,6 +126,12 @@ void DemoCompatibility::setupCompatibilityFlags() {
         "- Adjusted event indices for ET_VELOCITY_PUSH_TRIGGER");
   }
 
+  if (!isCompatible({2, 5, 0})) {
+    flags.predictedJumpSpeeds = true;
+    compatibilityStrings.emplace_back(
+        "- Using predicted speeds for jump speeds display");
+  }
+
   if (!isCompatible({3, 2, 0})) {
     flags.serverSideCoronas = true;
     compatibilityStrings.emplace_back("- Using fully server-side coronas");
@@ -160,6 +163,12 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.setAttack2FiringFlag = true;
     compatibilityStrings.emplace_back(
         "- Faking EF_FIRING state for '+attack2' shooting");
+  }
+
+  if (!isCompatible({3, 5, 0})) {
+    flags.noSpecCountInVoteCs = true;
+    compatibilityStrings.emplace_back(
+        "- Vote tally not differentiating players from spectators");
   }
 }
 

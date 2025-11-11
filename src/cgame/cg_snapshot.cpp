@@ -190,6 +190,14 @@ void CG_SetInitialSnapshot(snapshot_t *snap) {
   }
   // OSP
 
+  // request extended shaders if needed
+  if (cg.requestExtShaders) {
+    trap_SendClientCommand("getExtShaderIndex");
+
+    // for safety
+    cg.requestExtShaders = false;
+  }
+
 #if __MACOS__
   #ifdef GAMERANGER
   // LBO 12/13/04. Add support for GameRanger team voice IDs
@@ -431,20 +439,21 @@ static snapshot_t *CG_ReadNextSnapshot(void) {
           if (ETJump::demoCompatibility->flags.adjustEntityTypes) {
             // ET_VELOCITY_PUSH_TRIGGER = 9 in 2.3.0,
             // so we should remap it to the current position
-            if (es->eType == 9) {
+            if (es->eType == ETJump::COMPAT_ET_VELOCITY_PUSH_TRIGGER_NUM) {
               es->eType = ET_VELOCITY_PUSH_TRIGGER;
             }
 
             // shifting back all eTypes in demo,
             // so it would match the current enum order
-            else if (es->eType > 9) {
+            else if (es->eType > ETJump::COMPAT_ET_VELOCITY_PUSH_TRIGGER_NUM) {
               --es->eType;
             }
           }
 
           // adjust itemlist index for removal of duplicate 'weapon_medic_heal'
           if (ETJump::demoCompatibility->flags.adjustItemlistIndex &&
-              es->eType == ET_ITEM && es->modelindex > 56) {
+              es->eType == ET_ITEM &&
+              es->modelindex > ETJump::COMPAT_WEAPON_MEDIC_HEAL_INDEX) {
             es->modelindex--;
           }
         }

@@ -534,6 +534,39 @@ qboolean CG_ServerCommandExt(const char *cmd) {
     return qtrue;
   }
 
+  if (command == "extShaderIndex") {
+    for (int32_t i = 1; i < trap_Argc(); i++) {
+      const auto shaderKvp = ETJump::StringUtil::split(CG_Argv(i), "|");
+
+      // sanity check, shouldn't happen,
+      // but just skip if the command is somehow malformed
+      if (shaderKvp.size() != 2) {
+        continue;
+      }
+
+      ETJump::registerGameShader(Q_atoi(shaderKvp[0].c_str()),
+                                 shaderKvp[1].c_str());
+    }
+
+    // request state once we've gotten the shaders
+    trap_SendClientCommand("getExtShaderState");
+    return qtrue;
+  }
+
+  if (command == "extShaderState") {
+    std::string state;
+
+    // start from 1, skipping the command prefix
+    // because of the timeoffset formatting, there might be whitespace
+    // in the state string, so go through all args just in case
+    for (int32_t i = 1; i < trap_Argc(); i++) {
+      state += CG_Argv(i);
+    }
+
+    CG_ShaderStateChanged(state);
+    return qtrue;
+  }
+
   return qfalse;
 }
 

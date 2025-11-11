@@ -562,14 +562,16 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     rtvMaps->resize(maxMaps);
 
     for (size_t i = 0; i < maxMaps; ++i, ++it) {
-      (*rtvMaps)[i].first = *it;
-      cs += stringFormat("%s\\0%s", (*rtvMaps)[i].first,
+      (*rtvMaps)[i].mapName = *it;
+      cs += stringFormat("%s\\0%s", (*rtvMaps)[i].mapName,
                          i == maxMaps - 1 ? "" : "\\");
     }
 
-    const char *mapTypeDesc = CustomMapTypeExists(arg2);
-    // array size is set in Cmd_CallVote_f
-    Q_strncpyz(arg2, mapTypeDesc ? mapTypeDesc : "", MAX_STRING_TOKENS);
+    if (arg2[0] != '\0') {
+      const char *mapTypeDesc = CustomMapTypeExists(arg2);
+      // array size is set in Cmd_CallVote_f
+      Q_strncpyz(arg2, mapTypeDesc ? mapTypeDesc : "", MAX_STRING_TOKENS);
+    }
 
     // this will never overflow as MAX_QPATH is 64 and rtv supports max 9 maps
     trap_SetConfigstring(CS_VOTE_YES, cs.c_str());

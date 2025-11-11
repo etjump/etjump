@@ -11,6 +11,7 @@
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
+#include "etj_syscalls.h"
 
 //==================================================================
 
@@ -879,6 +880,10 @@ struct votingInfo_t {
                    // allow yet, notification will be sent
 
   int lastRtvMapVoted; // used for re-votes, the last map number we voted on
+
+  // which team we were on when we last voted,
+  // 'TEAM_FREE' by default when a client hasn't voted yet
+  team_t lastTeamVotedOn;
 };
 
 struct InactivityPos {
@@ -1231,7 +1236,9 @@ typedef struct voteInfo_s {
   char voteString[MAX_STRING_CHARS];
   int voteTime; // level.time vote was called
   int voteYes;
+  int voteYesSpectators;
   int voteNo;
+  int voteNoSpectators;
   int numVotingClients; // set by CalculateRanks
   int numVotingTeamClients[2];
   int (*vote_fn)(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
@@ -1587,7 +1594,7 @@ int G_FindConfigstringIndex(const char *name, int start, int max,
 int G_ModelIndex(const char *name);
 int G_SoundIndex(const char *name);
 int G_SkinIndex(const char *name);
-int G_ShaderIndex(char *name);
+int G_ShaderIndex(const char *name);
 int G_CharacterIndex(const char *name);
 int G_StringIndex(const char *string);
 qboolean G_AllowTeamsAllowed(gentity_t *ent, gentity_t *activator);
@@ -1619,8 +1626,6 @@ void G_TouchTriggers(gentity_t *ent);
 void G_AddPredictableEvent(gentity_t *ent, int event, int eventParm);
 void G_AddEvent(gentity_t *ent, int event, int eventParm);
 void G_SetOrigin(gentity_t *ent, vec3_t origin);
-void AddRemap(const char *oldShader, const char *newShader, float timeOffset);
-const char *BuildShaderStateConfig();
 void G_SetAngle(gentity_t *ent, vec3_t angle);
 
 qboolean infront(gentity_t *self, gentity_t *other);
@@ -1631,9 +1636,9 @@ void G_SetEntState(gentity_t *ent, entState_t state);
 
 team_t G_GetTeamFromEntity(gentity_t *ent);
 const char *ClientIPAddr(gentity_t *ent);
+
 namespace ETJump {
 gentity_t *soundEvent(vec3_t origin, entity_event_t eventType, int soundIndex);
-void initRemappedShaders();
 } // namespace ETJump
 
 //
@@ -2995,6 +3000,12 @@ extern std::shared_ptr<ProgressionTrackers> progressionTrackers;
 
 class SyscallExt;
 extern std::unique_ptr<SyscallExt> syscallExt;
+
+class ShaderIndexHandler;
+extern std::unique_ptr<ShaderIndexHandler> shaderIndexHandler;
+
+class RemapShaderHandler;
+extern std::unique_ptr<RemapShaderHandler> remapShaderHandler;
 
 struct GameLogicException : public std::exception {
 private:

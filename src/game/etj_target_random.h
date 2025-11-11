@@ -23,30 +23,16 @@
  */
 
 #pragma once
-#include <vector>
-#include <string>
 
-#include "cg_local.h"
+#include "g_local.h"
 
 namespace ETJump {
-class ClientRtvHandler {
-  std::vector<RtvMapVoteInfo> rtvMaps;
-  RtvVoteCountInfo rtvVoteYes;
-  bool isRtvVote;
-
+class TargetRandom {
 public:
-  ClientRtvHandler();
-  ~ClientRtvHandler() = default;
+  static void spawn(gentity_t *ent);
+  static void use(gentity_t *self, gentity_t *activator);
 
-  void initialize();
-
-  void setRtvConfigStrings(const char *cs);
-  void countRtvVotes();
-  int getTotalVotesForMap(int mapIndex);
-  RtvVoteCountInfo getRtvYesVotes() const;
-  bool rtvVoteActive() const;
-  void setRtvVoteStatus();
-  static void resetRtvEventHandler();
-  const std::vector<RtvMapVoteInfo> *getRtvMaps();
+private:
+  static constexpr int32_t SF_EXACT_NUMBER = 1 << 0;
 };
-} // namespace ETJump
+}; // namespace ETJump

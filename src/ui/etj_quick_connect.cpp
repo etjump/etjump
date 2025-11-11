@@ -28,7 +28,7 @@
 #include "../game/etj_filesystem.h"
 
 namespace ETJump {
-QuickConnect::QuickConnect() : selectedServer(-1) {
+QuickConnect::QuickConnect() : initialRefreshDone(false), selectedServer(-1) {
   servers.reserve(MAX_QUICKCONNECT_SERVERS);
 
   if (parseServers()) {

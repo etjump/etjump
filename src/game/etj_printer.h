@@ -73,7 +73,7 @@ public:
    */
   static void console(int clientNum, const std::string &message);
   static void console(const gentity_t *ent, const std::string &message);
-  static void console(gclient_t *client, const std::string &message);
+  static void console(const gclient_t *client, const std::string &message);
 
   /**
    * Sends a console message to everyone in the server and to server
@@ -91,7 +91,7 @@ public:
    */
   static void chat(int clientNum, const std::string &message);
   static void chat(const gentity_t *ent, const std::string &message);
-  static void chat(gclient_t *client, const std::string &message);
+  static void chat(const gclient_t *client, const std::string &message);
 
   /**
    * Sends a chat message to everyone in server and to server console.
@@ -106,8 +106,8 @@ public:
    * @param message The message to be sent
    */
   static void popup(int clientNum, const std::string &message);
-  static void popup(gentity_t *ent, const std::string &message);
-  static void popup(gclient_t *client, const std::string &message);
+  static void popup(const gentity_t *ent, const std::string &message);
+  static void popup(const gclient_t *client, const std::string &message);
 
   /**
    * Sends a popup message to everyone in server and to server console.
@@ -126,9 +126,9 @@ public:
    */
   static void center(int clientNum, const std::string &message,
                      bool log = true);
-  static void center(gentity_t *ent, const std::string &message,
+  static void center(const gentity_t *ent, const std::string &message,
                      bool log = true);
-  static void center(gclient_t *client, const std::string &message,
+  static void center(const gclient_t *client, const std::string &message,
                      bool log = true);
 
   /**
@@ -150,10 +150,11 @@ public:
    */
   static void centerPriority(int clientNum, const std::string &message,
                              int priority, bool log = true);
-  static void centerPriority(gentity_t *ent, const std::string &message,
+  static void centerPriority(const gentity_t *ent, const std::string &message,
                              int priority, bool log = true);
-  static void centerPriority(gclient_t *client, const std::string &message,
-                             int priority, bool log = true);
+  static void centerPriority(const gclient_t *client,
+                             const std::string &message, int priority,
+                             bool log = true);
 
   /**
    * Broadcasts a center print message to all clients with priority
@@ -171,8 +172,8 @@ public:
    * @param message The message to be sent
    */
   static void banner(int clientNum, const std::string &message);
-  static void banner(gentity_t *ent, const std::string &message);
-  static void banner(gclient_t *client, const std::string &message);
+  static void banner(const gentity_t *ent, const std::string &message);
+  static void banner(const gclient_t *client, const std::string &message);
 
   /**
    * Sends a banner print message to all clients.

@@ -23,30 +23,34 @@
  */
 
 #pragma once
-#include <vector>
-#include <string>
 
-#include "cg_local.h"
+#include "g_local.h"
 
 namespace ETJump {
-class ClientRtvHandler {
-  std::vector<RtvMapVoteInfo> rtvMaps;
-  RtvVoteCountInfo rtvVoteYes;
-  bool isRtvVote;
 
+// 128 in VET for 32 shaders, upped to 2048 for our extended 512 shaders
+inline constexpr int32_t MAX_SHADER_REMAPS = 2048;
+
+class RemapShaderHandler {
 public:
-  ClientRtvHandler();
-  ~ClientRtvHandler() = default;
+  void addRemap(std::string_view oldShader, std::string_view newShader);
+  void updateShaderState();
 
-  void initialize();
+  // so clients get the state of extended shaders on init
+  void sendCurrentShaderStateExt();
 
-  void setRtvConfigStrings(const char *cs);
-  void countRtvVotes();
-  int getTotalVotesForMap(int mapIndex);
-  RtvVoteCountInfo getRtvYesVotes() const;
-  bool rtvVoteActive() const;
-  void setRtvVoteStatus();
-  static void resetRtvEventHandler();
-  const std::vector<RtvMapVoteInfo> *getRtvMaps();
+private:
+  struct ShaderRemap {
+    std::string oldShader;
+    std::string newShader;
+    float timeOffset{};
+  };
+
+  std::array<ShaderRemap, MAX_SHADER_REMAPS> shaderRemaps{};
+  std::array<std::string, EXT_SHADER_SET_COUNT> extShaderStates{};
+  int32_t remapCount{};
+
+  std::string buildShaderStateConfig(int32_t index);
+  void sendExtShaderState(int32_t index);
 };
 } // namespace ETJump

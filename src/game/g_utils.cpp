@@ -10,63 +10,8 @@
 #include "etj_printer.h"
 #include "g_local.h"
 #include "etj_string_utilities.h"
-
-typedef struct {
-  char oldShader[MAX_QPATH];
-  char newShader[MAX_QPATH];
-  float timeOffset;
-} shaderRemap_t;
-
-inline constexpr int MAX_SHADER_REMAPS = 128;
-
-int remapCount = 0;
-shaderRemap_t remappedShaders[MAX_SHADER_REMAPS];
-
-void ETJump::initRemappedShaders() {
-  remapCount = 0;
-  memset(remappedShaders, 0, sizeof remappedShaders);
-}
-
-void AddRemap(const char *oldShader, const char *newShader, float timeOffset) {
-  int i;
-
-  for (i = 0; i < remapCount; i++) {
-    if (Q_stricmp(oldShader, remappedShaders[i].oldShader) == 0) {
-      // found it, just update this one
-      Q_strncpyz(remappedShaders[i].newShader, newShader,
-                 sizeof(remappedShaders[i].newShader));
-      remappedShaders[i].timeOffset = timeOffset;
-      return;
-    }
-  }
-  if (remapCount < MAX_SHADER_REMAPS) {
-    Q_strncpyz(remappedShaders[remapCount].newShader, newShader,
-               sizeof(remappedShaders[remapCount].newShader));
-    Q_strncpyz(remappedShaders[remapCount].oldShader, oldShader,
-               sizeof(remappedShaders[remapCount].oldShader));
-    remappedShaders[remapCount].timeOffset = timeOffset;
-    remapCount++;
-  }
-}
-
-const char *BuildShaderStateConfig() {
-  static char buff[MAX_STRING_CHARS * 4];
-  char out[(MAX_QPATH * 2) + 5];
-  int i;
-
-  memset(buff, 0, MAX_STRING_CHARS);
-  for (i = 0; i < remapCount; i++) {
-    int i1, i2;
-
-    i1 = G_ShaderIndex(remappedShaders[i].oldShader);
-    i2 = G_ShaderIndex(remappedShaders[i].newShader);
-
-    Com_sprintf(out, (MAX_QPATH * 2) + 5, "%i=%i:%5.2f@", i1, i2,
-                remappedShaders[i].timeOffset);
-    Q_strcat(buff, sizeof(buff), out);
-  }
-  return buff;
-}
+#include "etj_remapshader_handler.h"
+#include "etj_shader_index_handler.h"
 
 /*
 =========================================================================
@@ -118,6 +63,13 @@ int G_FindConfigstringIndex(const char *name, int start, int max,
   }
 
   if (i == max) {
+    // try extended shader index if we're overflowing CS_SHADERS
+    // this will eventually error if we overflow the extended index too,
+    // so we can just return this
+    if (start == CS_SHADERS) {
+      return ETJump::shaderIndexHandler->getShaderIndexExt(name);
+    }
+
     const auto it = csStrings.find(start);
     std::string err;
 
@@ -149,7 +101,7 @@ int G_SkinIndex(const char *name) {
   return G_FindConfigstringIndex(name, CS_SKINS, MAX_CS_SKINS, qtrue);
 }
 
-int G_ShaderIndex(char *name) {
+int G_ShaderIndex(const char *name) {
   return G_FindConfigstringIndex(name, CS_SHADERS, MAX_CS_SHADERS, qtrue);
 }
 
@@ -460,9 +412,9 @@ void G_UseTargets(gentity_t *ent, gentity_t *activator) {
   }
 
   if (ent->targetShaderName && ent->targetShaderNewName) {
-    float f = static_cast<float>(level.time) * 0.001f;
-    AddRemap(ent->targetShaderName, ent->targetShaderNewName, f);
-    trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
+    ETJump::remapShaderHandler->addRemap(ent->targetShaderName,
+                                         ent->targetShaderNewName);
+    ETJump::remapShaderHandler->updateShaderState();
   }
 
   if (!ent->target) {

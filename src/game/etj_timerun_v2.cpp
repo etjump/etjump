@@ -667,7 +667,11 @@ void ETJump::TimerunV2::printRecords(
               const auto &runName = rkvp.first;
               int rank = 1;
               int rank1Time = !rkvp.second.empty() ? rkvp.second[0]->time : 0;
-              int ownTime = ownRecords[season->id][mapName].count(runName) > 0
+              const bool haveOwnTime =
+                  ownRecords[season->id][mapName].count(runName) > 0;
+              // FIXME: this is a terribly named variable,
+              // it's not necessarily our own time...
+              int ownTime = haveOwnTime
                                 ? ownRecords[season->id][mapName][runName]
                                 : rank1Time;
 
@@ -727,13 +731,10 @@ void ETJump::TimerunV2::printRecords(
 
                   auto millisString = millisToString(r->time);
 
-                  std::string diffString;
-
-                  if (ownRecord || rank == 1 && ownTime == r->time) {
-                    diffString = "";
-                  } else {
-                    diffString = diffToString(ownTime, r->time);
-                  }
+                  const std::string diffString =
+                      ownRecord || !haveOwnTime && rank == 1
+                          ? ""
+                          : diffToString(ownTime, r->time);
 
                   auto playerNameString =
                       ownRecord ? r->playerName + " ^g(You)" : r->playerName;

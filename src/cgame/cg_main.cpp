@@ -611,6 +611,7 @@ vmCvar_t etj_jumpSpeedsShowDiff;
 vmCvar_t etj_jumpSpeedsFasterColor;
 vmCvar_t etj_jumpSpeedsSlowerColor;
 vmCvar_t etj_jumpSpeedsMinSpeed;
+vmCvar_t etj_jumpSpeedsTextSize;
 
 // Strafe quality
 vmCvar_t etj_drawStrafeQuality;
@@ -684,6 +685,7 @@ vmCvar_t etj_autoSprint;
 vmCvar_t etj_logCenterPrint;
 
 vmCvar_t etj_onDemoPlaybackStart;
+vmCvar_t etj_onDemoPlaybackEnd;
 
 vmCvar_t etj_HUD_noLerp;
 
@@ -1207,6 +1209,8 @@ cvarTable_t cvarTable[] = {
     {&etj_jumpSpeedsSlowerColor, "etj_jumpSpeedsSlowerColor", "1.0 0.0 0.0 1.0",
      CVAR_ARCHIVE},
     {&etj_jumpSpeedsMinSpeed, "etj_jumpSpeedsMinSpeed", "0", CVAR_ARCHIVE},
+    {&etj_jumpSpeedsTextSize, "etj_jumpSpeedsTextSize", "2", CVAR_ARCHIVE},
+
     // Strafe quality
     {&etj_drawStrafeQuality, "etj_drawStrafeQuality", "0", CVAR_ARCHIVE},
     {&etj_strafeQualityX, "etj_strafeQualityX", "0", CVAR_ARCHIVE},
@@ -1295,6 +1299,7 @@ cvarTable_t cvarTable[] = {
     {&etj_logCenterPrint, "etj_logCenterPrint", "0", CVAR_ARCHIVE},
 
     {&etj_onDemoPlaybackStart, "etj_onDemoPlaybackStart", "", CVAR_ARCHIVE},
+    {&etj_onDemoPlaybackEnd, "etj_onDemoPlaybackEnd", "", CVAR_ARCHIVE},
 
     {&etj_HUD_noLerp, "etj_HUD_noLerp", "0", CVAR_ARCHIVE},
     {&etj_useExecQuiet, "etj_useExecQuiet", "0", CVAR_ARCHIVE},
@@ -2911,11 +2916,13 @@ static void CG_RegisterGraphics(void) {
     if (!shaderName[0]) {
       break;
     }
-    cgs.gameShaders[i] = shaderName[0] == '*'
-                             ? trap_R_RegisterShader(shaderName + 1)
-                             : trap_R_RegisterShaderNoMip(shaderName);
-    Q_strncpyz(cgs.gameShaderNames[i],
-               shaderName[0] == '*' ? shaderName + 1 : shaderName, MAX_QPATH);
+
+    ETJump::registerGameShader(i, shaderName);
+
+    // we might have more, send a request for them once we're connected
+    if (i == MAX_CS_SHADERS - 1) {
+      cg.requestExtShaders = true;
+    }
   }
 
   for (i = 1; i < MAX_CHARACTERS; i++) {
@@ -4038,6 +4045,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   ETJump::init();
 
+  // note: after 'init', so we have valid demo compatibility pointer
+  ETJump::initVoteTally();
+
   // map-specific autoexec
   const auto mapConfig = va("autoexec_%s", cgs.rawmapname);
   if (ETJump::configFileExists(mapConfig)) {
@@ -4073,6 +4083,10 @@ void CG_Shutdown(void) {
   // like closing files or archiving session data
 
   CG_EventHandling(CGAME_EVENT_NONE, qtrue);
+
+  if (cg.demoPlayback && etj_onDemoPlaybackEnd.string[0] != '\0') {
+    trap_SendConsoleCommand(etj_onDemoPlaybackEnd.string);
+  }
 
   ETJump::shutdown();
 

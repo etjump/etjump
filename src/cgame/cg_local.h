@@ -19,6 +19,7 @@
 
 #include "../game/q_shared.h"
 #include "../game/bg_public.h"
+#include "../game/etj_syscalls.h"
 #include "../ui/ui_shared.h"
 
 #include "tr_types.h"
@@ -1281,6 +1282,8 @@ typedef struct {
 
   // to prevent teleport bit getting flipped multiple times per frame
   bool teleportBitFlipped;
+
+  bool requestExtShaders;
 } cg_t;
 
 inline constexpr int NUM_FUNNEL_SPRITES = 21;
@@ -1970,7 +1973,9 @@ typedef struct {
 
   int voteTime;
   int voteYes;
+  int voteYesSpectators;
   int voteNo;
+  int voteNoSpectators;
   qboolean voteModified; // beep whenever changed
   char voteString[MAX_STRING_TOKENS];
   bool votedYes;
@@ -1989,8 +1994,8 @@ typedef struct {
   // locally derived information from gamestate
   //
   qhandle_t gameModels[MAX_MODELS];
-  char gameShaderNames[MAX_CS_SHADERS][MAX_QPATH];
-  qhandle_t gameShaders[MAX_CS_SHADERS];
+  char gameShaderNames[MAX_SHADER_INDEX][MAX_QPATH];
+  qhandle_t gameShaders[MAX_SHADER_INDEX];
   qhandle_t gameModelSkins[MAX_MODELS];
   bg_character_t *gameCharacters[MAX_CHARACTERS];
   sfxHandle_t gameSounds[MAX_SOUNDS];
@@ -2712,6 +2717,7 @@ extern vmCvar_t etj_jumpSpeedsShowDiff;
 extern vmCvar_t etj_jumpSpeedsFasterColor;
 extern vmCvar_t etj_jumpSpeedsSlowerColor;
 extern vmCvar_t etj_jumpSpeedsMinSpeed;
+extern vmCvar_t etj_jumpSpeedsTextSize;
 
 // Strafe quality
 extern vmCvar_t etj_drawStrafeQuality;
@@ -2783,6 +2789,7 @@ extern vmCvar_t etj_autoSprint;
 extern vmCvar_t etj_logCenterPrint;
 
 extern vmCvar_t etj_onDemoPlaybackStart;
+extern vmCvar_t etj_onDemoPlaybackEnd;
 
 extern vmCvar_t etj_HUD_noLerp;
 
@@ -3489,7 +3496,7 @@ void CG_ParseSpawns(void);
 void CG_ParseServerVersionInfo(const char *pszVersionInfo);
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
 void CG_SetConfigValues(void);
-void CG_ShaderStateChanged(void);
+void CG_ShaderStateChanged(const std::string &state = "");
 void CG_ChargeTimesChanged(void);
 void CG_LoadVoiceChats();         // NERVE - SMF
 void CG_PlayBufferedVoiceChats(); // NERVE - SMF
@@ -3501,6 +3508,12 @@ void CG_parseWeaponStats_cmd(void(txt_dump)(const char *));
 void CG_parseBestShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *));
 void CG_parseTopShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *));
 void CG_scores_cmd(void);
+
+namespace ETJump {
+// parses 'CS_VOTE_YES/NO' on init to get initial vote tally,
+// in case there's a vote active during 'CG_Init'
+void initVoteTally();
+} // namespace ETJump
 
 //
 // cg_playerstate.c

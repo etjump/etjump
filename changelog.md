@@ -1,3 +1,18 @@
+# ETJump 3.4.2
+
+* fixed inactivity drop prints containing an excess newline [#1769](https://github.com/etjump/etjump/pull/1769)
+* improved menu integrity check print [#1770](https://github.com/etjump/etjump/pull/1770) [#1786](https://github.com/etjump/etjump/pull/1786)
+  * clarified text to indicate that modified files are not supported by the currently loaded mod version
+  * added a warning about loose `.menu` files if integrity check fails, but not offending pk3 files are present
+* tied records are now sorted from oldest to newest [#1775](https://github.com/etjump/etjump/pull/1775)
+* demos recorded prior to ETJump 2.5.0 now show estimated speeds for jump speeds display [#1776](https://github.com/etjump/etjump/pull/1776)
+* fixed diff time not displaying for #1 record on a run if your own records was tied with it [#1777](https://github.com/etjump/etjump/pull/1777)
+* fixed `scale` on client sided coronas behaving differently compared to server side coronas [#1783](https://github.com/etjump/etjump/pull/1783)
+* quick connect menu is now automatically refreshed upon startup [#1785](https://github.com/etjump/etjump/pull/1785)
+* fixed cvars expecting a size/scale value breaking if the value set started with whitespace, or contained excess whitespace between X and Y values, when using non-uniform size/scale [#1788](https://github.com/etjump/etjump/pull/1788)
+* added `etj_jumpSpeedsTextSize` cvar to set the text size for jump speeds display [#1787](https://github.com/etjump/etjump/pull/1787)
+  * valid range is `0.1 - 10.0`, default `2`
+
 # ETJump 3.4.1
 
 * fixed an old bug where disabled spawnpoints were always drawn on the map regardless of whether the spawn was active or not [#1743](https://github.com/etjump/etjump/pull/1743)

@@ -32,7 +32,7 @@
 namespace ETJump {
 std::string getBestMatch(const std::vector<std::string> &words,
                          const std::string &current);
-std::string sanitize(const std::string &text, bool toLower = false,
+std::string sanitize(std::string_view text, bool toLower = false,
                      bool removeControlChars = true);
 // returns the value if it's specified, else the default value
 std::string getValue(const char *value, const std::string &defaultValue = "");
@@ -112,7 +112,7 @@ bool contains(const std::string &str, const T &text) {
 }
 
 // case-insensitive string comparison, optionally with sanitized strings
-bool iEqual(const std::string &str1, const std::string &str2,
+bool iEqual(std::string_view str1, std::string_view str2,
             bool sanitized = false);
 // Counts the extra padding needed when using format specifiers like
 // %-20s with text that contains ET color codes
@@ -133,7 +133,7 @@ void removeLeadingChars(std::string &str, char charToRemove);
 
 // true if the character in the given index is a color string
 // std::string version of Q_IsColorString macro from q_shared.h
-bool isColorString(const std::string &str, size_t idx);
+bool isColorString(std::string_view str, size_t idx);
 
 // truncates a string, preserving any color codes in the string
 // color codes are excluded from the truncation length, so this can be used
