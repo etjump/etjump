@@ -204,10 +204,10 @@ void OnGameInit() {
     game.sessionV2 = std::make_unique<ETJump::SessionV2>(
         std::make_unique<ETJump::UserRepository>(
             std::make_unique<ETJump::DatabaseV2>(
-                "usersv2",
+                "sessionv2",
                 ETJump::FileSystem::Path::getPath(g_userDatabaseV2.string)),
             std::make_unique<ETJump::DatabaseV2>(
-                "usersv1",
+                "sessionv1",
                 ETJump::FileSystem::Path::getPath(g_userConfig.string))),
         std::make_unique<ETJump::Log>("usersv2"),
         std::make_unique<ETJump::SynchronizationContext>());
