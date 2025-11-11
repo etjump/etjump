@@ -500,7 +500,7 @@ void SessionV2::updateLastKnownIP(const int clientNum, const int userID) const {
 
 void SessionV2::updateLastSeen(const int32_t clientNum) {
   if (clients[clientNum].user == nullptr) {
-    logger->error("%s: user %i is null.", clientNum, __func__);
+    logger->error("%s: clientNum %i has a null 'user'.", __func__, clientNum);
     return;
   }
 
