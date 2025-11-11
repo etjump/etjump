@@ -161,13 +161,17 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
 
         if (firstTime) {
           printGreeting(clientNum);
-          Printer::popup(
-              clientNum,
-              stringFormat("^5Your last visit was on %s.",
-                           Time::fromInt(r->user.lastSeen).toDateTimeString()));
+
+          if (r->user.lastSeen > 0) {
+            Printer::popup(
+                clientNum,
+                stringFormat(
+                    "^5Your last visit was on %s.",
+                    Time::fromInt(r->user.lastSeen).toDateTimeString()));
+          }
         }
 
-        game.timerunV2->clientConnect(clientNum, clients[clientNum].user->id);
+        game.timerunV2->clientConnect(clientNum, r->user.id);
       },
       [this, clientNum, func](const std::runtime_error &e) {
         logger->error("%s failed: %s", func, e.what());
