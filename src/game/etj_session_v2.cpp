@@ -84,6 +84,7 @@ void SessionV2::resetClient(const int clientNum) {
   clients[clientNum].ipv4.clear();
   clients[clientNum].ipv6.clear();
   clients[clientNum].sessionStartTime = 0;
+  clients[clientNum].user = nullptr;
 }
 
 void SessionV2::onClientConnect(const int clientNum, const bool firstTime) {
@@ -123,6 +124,53 @@ void SessionV2::onClientBegin(const gentity_t *ent) {
   }
 
   ETJump::Log::processMessages();
+}
+
+void SessionV2::onAuthSuccess(const int32_t clientNum) {
+  const gentity_t *ent = g_entities + clientNum;
+  const std::string guid = clients[clientNum].guid;
+  const bool firstTime = ent->client->sess.firstTime;
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this, clientNum, guid] {
+        const auto user = repository->getUserData(clients[clientNum].guid);
+
+        // this should never happen, because we have authenticated already
+        if (user.id == 0) {
+          throw std::runtime_error(
+              stringFormat("Failed to get user data for GUID %s", guid));
+        }
+
+        return std::make_unique<GetUserDataResult>(user);
+      },
+      [this, clientNum, firstTime](
+          std::unique_ptr<SynchronizationContext::ResultBase> userData) {
+        auto *const r = dynamic_cast<GetUserDataResult *>(userData.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("GetUserDataResult is null.");
+        }
+
+        clients[clientNum].user = std::make_unique<UserV2>();
+        clients[clientNum].user->id = r->user.id;
+        clients[clientNum].user->greeting = r->user.greeting;
+        clients[clientNum].user->title = r->user.title;
+        clients[clientNum].user->lastSeen = r->user.lastSeen;
+
+        if (firstTime) {
+          printGreeting(clientNum);
+          Printer::popup(
+              clientNum,
+              stringFormat("^5Your last visit was on %s.",
+                           Time::fromInt(r->user.lastSeen).toDateTimeString()));
+        }
+
+        game.timerunV2->clientConnect(clientNum, clients[clientNum].user->id);
+      },
+      [this, clientNum, func](const std::runtime_error &e) {
+        logger->error("%s failed: %s", func, e.what());
+      });
 }
 
 bool SessionV2::authenticate(gentity_t *ent) {
@@ -243,7 +291,7 @@ bool SessionV2::authenticate(gentity_t *ent) {
           Printer::command(clientNum,
                            Constants::Authentication::GUID_MIGRATE_REQUEST);
         } else {
-          game.timerunV2->clientConnect(clientNum, result->userID);
+          onAuthSuccess(clientNum);
         }
       },
       [this, clientNum, cleanName](const std::runtime_error &e) {
@@ -258,7 +306,7 @@ bool SessionV2::authenticate(gentity_t *ent) {
   return true;
 }
 
-bool SessionV2::migrateGuid(gentity_t *ent) const {
+bool SessionV2::migrateGuid(gentity_t *ent) {
   const int argc = trap_Argc();
   constexpr int NUM_EXPECTED_ARGS = 3;
   const int clientNum = ClientNum(ent);
@@ -343,7 +391,7 @@ bool SessionV2::migrateGuid(gentity_t *ent) const {
           addNewUser(ent);
         } else {
           Printer::console(clientNum, result->message);
-          game.timerunV2->clientConnect(clientNum, result->userID);
+          onAuthSuccess(clientNum);
         }
       },
       [this, clientNum, cleanName](const std::runtime_error &e) {
@@ -356,30 +404,31 @@ bool SessionV2::migrateGuid(gentity_t *ent) const {
   return true;
 }
 
-void SessionV2::addNewUser(gentity_t *ent) const {
+void SessionV2::addNewUser(gentity_t *ent) {
   const int clientNum = ClientNum(ent);
   const std::string name = ent->client->pers.netname;
+  const std::string guid = clients[clientNum].guid;
+  const std::string ipv4 = clients[clientNum].ipv4;
+  const std::string ipv6 = clients[clientNum].ipv6;
 
   sc->postTask(
-      [this, clientNum, name] {
-        const Client client = clients[clientNum];
-
+      [this, clientNum, name, guid, ipv4, ipv6] {
         UserModels::User user{};
         user.name = name;
-        user.guid = client.guid;
-        user.ipv4 = client.ipv4;
-        user.ipv6 = client.ipv6;
+        user.guid = guid;
+        user.ipv4 = ipv4;
+        user.ipv6 = ipv6;
 
         repository->addNewUser(user);
 
         // now that the user is in the db, we have a valid ID,
         // so we can store the HWIDs for the current user ID
-        const int userID = repository->getUserID(client.guid);
+        const int userID = repository->getUserID(guid);
 
         // TODO: remove the entry from DB if this fails?
         if (userID == 0) {
-          throw std::runtime_error(stringFormat(
-              "Failed to get user id for GUID '%s'.", client.guid));
+          throw std::runtime_error(
+              stringFormat("Failed to get user id for GUID '%s'.", guid));
         }
 
         updateHWID(clientNum, userID);
@@ -397,7 +446,7 @@ void SessionV2::addNewUser(gentity_t *ent) const {
         }
 
         logger->info(result->message);
-        game.timerunV2->clientConnect(clientNum, result->userID);
+        onAuthSuccess(clientNum);
       },
       [this](const std::runtime_error &e) {
         logger->error("Failed to add new user: %s", e.what());
@@ -629,6 +678,21 @@ void SessionV2::dropBannedClient(const int clientNum) const {
   Printer::popupAll(stringFormat("Banned player %s ^7tried to connect.",
                                  g_entities[clientNum].client->pers.netname));
   trap_DropClient(clientNum, "You are banned.", 0);
+}
+
+void SessionV2::printGreeting(const int32_t clientNum) const {
+  const gentity_t *ent = g_entities + clientNum;
+
+  // print custom greeting if the client has one
+  if (!clients[clientNum].user->greeting.empty()) {
+    std::string greeting = clients[clientNum].user->greeting;
+    clients[clientNum].user->formatGreeting(ent, greeting);
+    Printer::chatAll(greeting);
+  } else {
+    // see if the clients admin level has a greeting associated with it
+    G_Printf("^3%s: [NEW_AUTH] TODO:\n  ^7- print level-specific greeting\n",
+             __func__);
+  }
 }
 } // namespace ETJump
 

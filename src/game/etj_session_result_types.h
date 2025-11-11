@@ -25,6 +25,8 @@
 #pragma once
 
 #ifdef NEW_AUTH
+  #include "etj_synchronization_context.h"
+  #include "etj_user_models.h"
 
 namespace ETJump {
 // a successful result will have userID > 0
@@ -64,6 +66,13 @@ public:
 
   bool isBanned;
   std::string ip;
+};
+
+class GetUserDataResult final : public SynchronizationContext::ResultBase {
+public:
+  explicit GetUserDataResult(UserModels::User user) : user(std::move(user)) {}
+
+  UserModels::User user;
 };
 } // namespace ETJump
 

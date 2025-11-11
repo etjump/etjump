@@ -164,7 +164,7 @@ struct Time {
                         date.abbrevMonths[this->date.mon - 1], this->date.year);
   }
 
-  static Time fromInt(int input) {
+  static Time fromInt(int64_t input) {
     time_t value = input;
     tm *t = std::gmtime(&value);
 
