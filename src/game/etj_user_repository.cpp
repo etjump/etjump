@@ -384,6 +384,19 @@ void UserRepository::updateIPv6(const int userID, const std::string &ip) const {
   )" << ip << userID;
 }
 
+void UserRepository::updateLastSeen(const int32_t userID,
+                                    const int64_t time) const {
+  db->sql << R"(
+    update
+      users
+    set
+      last_seen=?
+    where
+      id=?;
+  )" << time
+          << userID;
+}
+
 std::vector<UserModels::BannedIPAddresses>
 UserRepository::getBannedIPAddresses() const {
   std::vector<UserModels::BannedIPAddresses> bannedIPAddresses{};

@@ -74,6 +74,14 @@ public:
 
   UserModels::User user;
 };
+
+class UpdateLastSeenResult final : public SynchronizationContext::ResultBase {
+public:
+  explicit UpdateLastSeenResult(std::string message)
+      : message(std::move(message)) {}
+
+  std::string message;
+};
 } // namespace ETJump
 
 #endif

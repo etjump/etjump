@@ -101,6 +101,7 @@ void SessionV2::onClientConnect(const int clientNum, const bool firstTime) {
 
 void SessionV2::onClientDisconnect(const int clientNum) {
   G_DPrintf("%s called for %i\n", __func__, clientNum);
+  updateLastSeen(clientNum);
   resetClient(clientNum);
 
   // TODO: this is probably unnecessary and could be removed,
@@ -495,6 +496,42 @@ void SessionV2::updateLastKnownIP(const int clientNum, const int userID) const {
   } else {
     repository->updateIPv6(userID, clients[clientNum].ipv6);
   }
+}
+
+void SessionV2::updateLastSeen(const int32_t clientNum) {
+  if (clients[clientNum].user == nullptr) {
+    logger->error("%s: user %i is null.", clientNum, __func__);
+    return;
+  }
+
+  time_t t = 0;
+  t = std::time(&t);
+
+  // capture this in the lambdas, as we reset the client right after calling
+  // this, so the id might not be valid if we try to use it directly
+  const int32_t id = clients[clientNum].user->id;
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this, clientNum, id, t] {
+        repository->updateLastSeen(id, t);
+        return std::make_unique<UpdateLastSeenResult>(
+            stringFormat("Updated last seen timestamp for user %i", id));
+      },
+      [this, id](std::unique_ptr<SynchronizationContext::ResultBase>
+                     updateLastSeenResult) {
+        auto *const r =
+            dynamic_cast<UpdateLastSeenResult *>(updateLastSeenResult.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("UpdateLastSeenResult is null.");
+        }
+
+        logger->info(r->message);
+      },
+      [this, id, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
 }
 
 void SessionV2::readSessionData(const int clientNum) {

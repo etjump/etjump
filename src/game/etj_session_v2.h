@@ -49,7 +49,6 @@ public:
   void onClientConnect(int clientNum, bool firstTime);
   void onClientDisconnect(int clientNum);
   void onClientBegin(const gentity_t *ent);
-  void onAuthSuccess(int32_t clientNum);
 
   bool authenticate(gentity_t *ent);
   bool migrateGuid(gentity_t *ent);
@@ -73,8 +72,11 @@ private:
     std::unique_ptr<UserV2> user;
   };
 
+  void onAuthSuccess(int32_t clientNum);
+
   void updateHWID(int clientNum, int userID) const;
   void updateLastKnownIP(int clientNum, int userID) const;
+  void updateLastSeen(int32_t clientNum);
 
   void checkIPBan(int clientNum) const;
   bool isBanned(int clientNum, int userID,
