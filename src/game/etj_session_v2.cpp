@@ -84,6 +84,7 @@ void SessionV2::resetClient(const int clientNum) {
   clients[clientNum].ipv4.clear();
   clients[clientNum].ipv6.clear();
   clients[clientNum].sessionStartTime = 0;
+  clients[clientNum].permissions.reset();
 
   clients[clientNum].user = nullptr;
   clients[clientNum].level = nullptr;
@@ -160,6 +161,7 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
         clients[clientNum].user->greeting = r->user.greeting;
         clients[clientNum].user->title = r->user.title;
         clients[clientNum].user->lastSeen = r->user.lastSeen;
+        clients[clientNum].user->commands = r->user.commands;
 
         const auto *const level = game.levels->GetLevel(r->user.level);
         clients[clientNum].level = std::make_unique<Levels::Level>(
@@ -177,6 +179,7 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
           }
         }
 
+        parsePermissions(clientNum);
         game.timerunV2->clientConnect(clientNum, r->user.id);
       },
       [this, clientNum, func](const std::runtime_error &e) {
@@ -542,6 +545,43 @@ void SessionV2::updateLastSeen(const int32_t clientNum) {
       [this, id, func](const std::runtime_error &e) {
         logger->error("%s: %s", func, e.what());
       });
+}
+
+void SessionV2::parsePermissions(const int32_t clientNum) {
+  clients[clientNum].permissions.reset();
+  // any per-user commands will override the commands defined by the level
+  std::string commands =
+      clients[clientNum].level->commands + clients[clientNum].user->commands;
+  bool allow = true;
+
+  for (size_t i = 0; i < commands.length(); i++) {
+    char c = commands.at(i);
+
+    if (allow) {
+      if (c == '*') {
+        // allow all commands
+        clients[clientNum].permissions.set();
+      } else if (c == '+') {
+        // ignore '+'
+        continue;
+      } else if (c == '-') {
+        allow = false;
+      } else {
+        clients[clientNum].permissions.set(c, true);
+      }
+    } else {
+      if (c == '*') {
+        // ignore '*' if 'allow' is false
+        continue;
+      }
+
+      if (c == '+') {
+        allow = true;
+      } else {
+        clients[clientNum].permissions.set(c, false);
+      }
+    }
+  }
 }
 
 void SessionV2::readSessionData(const int clientNum) {

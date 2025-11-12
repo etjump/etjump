@@ -35,6 +35,7 @@ public:
   int32_t id;
   std::string greeting;
   std::string title;
+  std::string commands;
   int64_t lastSeen;
 
   void formatGreeting(const gentity_t *ent, std::string &greeting) const;

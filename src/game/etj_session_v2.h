@@ -55,6 +55,8 @@ public:
   bool migrateGuid(gentity_t *ent);
   void addNewUser(gentity_t *ent);
 
+  void parsePermissions(int32_t clientNum);
+
   void readSessionData(int clientNum);
   void writeSessionData() const;
 
