@@ -97,8 +97,9 @@ void SessionV2::onClientConnect(const int clientNum, const bool firstTime) {
     initClientSession(clientNum);
     checkIPBan(clientNum);
   } else {
-    readSessionData(clientNum);
-    // TODO: timerun client connect
+    if (readSessionData(clientNum)) {
+      onAuthSuccess(clientNum);
+    }
   }
 }
 
@@ -584,7 +585,7 @@ void SessionV2::parsePermissions(const int32_t clientNum) {
   }
 }
 
-void SessionV2::readSessionData(const int clientNum) {
+bool SessionV2::readSessionData(const int clientNum) {
   Json::Value root;
   std::string err;
 
@@ -600,13 +601,13 @@ void SessionV2::readSessionData(const int clientNum) {
   // if we can't read the data for some reason, send authentication request
   if (!JsonUtils::readFile(stringFormat(SESSION_FILE, clientNum), root, &err)) {
     parsingFailed();
-    return;
+    return false;
   }
 
   if (!JsonUtils::parseValue(clients[clientNum].guid, root["guid"], &err,
                              "guid")) {
     parsingFailed();
-    return;
+    return false;
   }
 
   const Json::Value hwid = root["hwid"];
@@ -616,7 +617,7 @@ void SessionV2::readSessionData(const int clientNum) {
 
     if (!JsonUtils::parseValue(value, root["hwid"][i], &err, "hwid")) {
       parsingFailed();
-      return;
+      return false;
     }
 
     clients[clientNum].hwid.emplace_back(std::move(value));
@@ -627,6 +628,8 @@ void SessionV2::readSessionData(const int clientNum) {
                              "sessionStartTime")) {
     parsingFailed();
   }
+
+  return true;
 }
 
 // TODO: do we want to write other fields of the Client struct here too?

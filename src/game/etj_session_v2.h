@@ -57,7 +57,7 @@ public:
 
   void parsePermissions(int32_t clientNum);
 
-  void readSessionData(int clientNum);
+  bool readSessionData(int clientNum);
   void writeSessionData() const;
 
 private:
