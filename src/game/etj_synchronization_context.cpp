@@ -101,10 +101,10 @@ void ETJump::SynchronizationContext::worker() {
     try {
       auto result = operation->task();
 
-      operation->result = opt<std::unique_ptr<ResultBase>>(std::move(result));
+      operation->result = std::unique_ptr<ResultBase>(std::move(result));
       operation->status = Operation::Status::Complete;
     } catch (const std::runtime_error &e) {
-      operation->error = opt<std::runtime_error>(e);
+      operation->error = e;
       operation->status = Operation::Status::Error;
     }
 

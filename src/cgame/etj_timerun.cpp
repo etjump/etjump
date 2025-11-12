@@ -75,7 +75,7 @@ void Timerun::onStart(const TimerunCommands::Start *start) {
   _playersTimerunInformation[clientNum].startTime = start->startTime;
   _playersTimerunInformation[clientNum].runName = start->runName;
   _playersTimerunInformation[clientNum].previousRecord =
-      start->previousRecord.valueOr(-1);
+      start->previousRecord.value_or(-1);
   _playersTimerunInformation[clientNum].running = true;
   _playersTimerunInformation[clientNum].checkpoints =
       start->currentRunCheckpoints;
@@ -89,7 +89,7 @@ void Timerun::onStart(const TimerunCommands::Start *start) {
   _playerEventsHandler->check(
       "timerun:start", {std::to_string(start->clientNum), start->runName,
                         std::to_string(start->startTime),
-                        std::to_string(start->previousRecord.valueOr(-1))});
+                        std::to_string(start->previousRecord.value_or(-1))});
 }
 
 void Timerun::printMessage(const std::string &message, int shader) {
@@ -100,9 +100,9 @@ void Timerun::onRecord(const TimerunCommands::Record *record) {
   std::string message = createCompletionMessage(
       cgs.clientinfo[record->clientNum], record->runName,
       record->completionTime, record->previousRecordTime);
-  int shader = !record->previousRecordTime.hasValue()
-                   ? cgs.media.stopwatchIcon
-                   : cgs.media.stopwatchIconGreen;
+  const qhandle_t shader = !record->previousRecordTime.has_value()
+                               ? cgs.media.stopwatchIcon
+                               : cgs.media.stopwatchIconGreen;
   printMessage(message, shader);
 
   _playerEventsHandler->check(
@@ -131,7 +131,7 @@ void Timerun::parseServerCommand(const std::vector<std::string> &args) {
 
   if (args[1] == "start" || args[1] == "saveposstart") {
     auto startOpt = TimerunCommands::Start::deserialize(args);
-    if (!startOpt.hasValue()) {
+    if (!startOpt.has_value()) {
       return;
     }
     const auto start = &startOpt.value();
@@ -141,7 +141,7 @@ void Timerun::parseServerCommand(const std::vector<std::string> &args) {
   }
   if (args[1] == "checkpoint") {
     auto checkpointOpt = TimerunCommands::Checkpoint::deserialize(args);
-    if (!checkpointOpt.hasValue()) {
+    if (!checkpointOpt.has_value()) {
       return;
     }
 
@@ -152,7 +152,7 @@ void Timerun::parseServerCommand(const std::vector<std::string> &args) {
   }
   if (args[1] == "stop") {
     auto stopOpt = TimerunCommands::Stop::deserialize(args);
-    if (!stopOpt.hasValue()) {
+    if (!stopOpt.has_value()) {
       return;
     }
 
@@ -163,7 +163,7 @@ void Timerun::parseServerCommand(const std::vector<std::string> &args) {
 
   if (args[1] == "interrupt") {
     auto interruptOpt = TimerunCommands::Interrupt::deserialize(args);
-    if (!interruptOpt.hasValue()) {
+    if (!interruptOpt.has_value()) {
       return;
     }
 
@@ -174,7 +174,7 @@ void Timerun::parseServerCommand(const std::vector<std::string> &args) {
 
   if (args[1] == "record") {
     auto recordOpt = TimerunCommands::Record::deserialize(args);
-    if (!recordOpt.hasValue()) {
+    if (!recordOpt.has_value()) {
       return;
     }
 
@@ -185,7 +185,7 @@ void Timerun::parseServerCommand(const std::vector<std::string> &args) {
 
   if (args[1] == "completion") {
     auto completionOpt = TimerunCommands::Completion::deserialize(args);
-    if (!completionOpt.hasValue()) {
+    if (!completionOpt.has_value()) {
       return;
     }
 
@@ -202,12 +202,12 @@ Timerun::getTimerunInformationFor(int clientNum) {
 std::string Timerun::createCompletionMessage(const clientInfo_t &player,
                                              const std::string &runName,
                                              int completionTime,
-                                             opt<int> previousTime) {
+                                             std::optional<int> previousTime) {
   std::string who{(player.clientNum == _clientNum) ? "You" : player.name};
   std::string timeFinished{millisToString(completionTime)};
   std::string timeDifference{""};
 
-  if (previousTime.hasValue()) {
+  if (previousTime.has_value()) {
     timeDifference =
         +"^7(" + diffToString(completionTime, previousTime.value()) + "^7)";
   }

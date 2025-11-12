@@ -55,8 +55,8 @@ public:
                                                 const std::string &run) const;
   void insertRecord(const Timerun::Record &record);
   void updateRecord(const Timerun::Record &record);
-  opt<Timerun::Record> getTopRecord(int seasonId, const std::string &map,
-                                    const std::string &run);
+  std::optional<Timerun::Record>
+  getTopRecord(int seasonId, const std::string &map, const std::string &run);
   std::vector<Timerun::Record> getTopRecords(const std::vector<int> &seasonIds,
                                              const std::string &map,
                                              const std::string &run) const;
@@ -70,8 +70,8 @@ public:
   getRecords(const Timerun::PrintRecordsParams &params);
   std::vector<Timerun::Season> getSeasonsForName(const std::string &name,
                                                  bool exact);
-  opt<Timerun::Record> getRecord(const std::string &map, const std::string &run,
-                                 int rank);
+  std::optional<Timerun::Record> getRecord(const std::string &map,
+                                           const std::string &run, int rank);
   std::vector<Timerun::Season> getSeasons();
   void deleteSeason(const std::string &name);
 
