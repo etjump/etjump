@@ -24,6 +24,7 @@
 
 #pragma once
 #include <map>
+#include <optional>
 #include <string>
 
 #include "etj_synchronization_context.h"
@@ -41,7 +42,7 @@ struct Season {
   int id;
   std::string name;
   Time startTime;
-  opt<Time> endTime;
+  std::optional<Time> endTime;
 };
 
 struct Record {
@@ -65,22 +66,22 @@ struct AddSeasonParams {
   int clientNum;
   std::string name;
   Time startTime;
-  opt<Time> endTime;
+  std::optional<Time> endTime;
 };
 
 struct EditSeasonParams {
   int clientNum;
   std::string name;
-  opt<Time> startTime;
-  opt<Time> endTime;
+  std::optional<Time> startTime;
+  std::optional<Time> endTime;
 };
 
 struct PrintRecordsParams {
   int clientNum{};
-  opt<std::string> season;
+  std::optional<std::string> season;
   std::string map;
   bool exactMap{};
-  opt<std::string> run;
+  std::optional<std::string> run;
   int page{};
   int pageSize{};
   int userId{};
@@ -89,7 +90,7 @@ struct PrintRecordsParams {
 struct PrintRankingsParams {
   int clientNum{};
   int userId{};
-  opt<std::string> season;
+  std::optional<std::string> season;
   int page{};
   int pageSize{};
 };

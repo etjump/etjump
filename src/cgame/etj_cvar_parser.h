@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <optional>
+
 #if defined(CGAMEDLL)
   #include "cg_local.h"
 #elif defined(UIDLL)
@@ -50,9 +52,9 @@ public:
 class CvarValueParser {
 public:
   template <typename T>
-  static T parse(const vmCvar_t &cvar, opt<float> min = opt<float>(),
-                 opt<float> max = opt<float>()) {
-    const bool clamp = min.hasValue() && max.hasValue();
+  static T parse(const vmCvar_t &cvar, std::optional<float> min = std::nullopt,
+                 std::optional<float> max = std::nullopt) {
+    const bool clamp = min.has_value() && max.has_value();
 
     const auto isEmptyStr = [](const std::string_view str) {
       if (str.empty()) {

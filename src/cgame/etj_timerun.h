@@ -25,6 +25,7 @@
 #pragma once
 #include <array>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -92,7 +93,7 @@ private:
   std::string createCompletionMessage(const clientInfo_t &player,
                                       const std::string &runName,
                                       int completionTime,
-                                      ETJump::opt<int> previousTime);
+                                      std::optional<int> previousTime);
 
   std::array<PlayerTimerunInformation, MAX_CLIENTS> _playersTimerunInformation;
   std::shared_ptr<PlayerEventsHandler> _playerEventsHandler;

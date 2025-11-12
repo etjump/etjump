@@ -208,7 +208,7 @@ void ETJump::TimerunV2::updateSeasonStates() {
       _upcomingSeasons.push_back(season);
     }
     // active seasons
-    else if (!season.endTime.hasValue() ||
+    else if (!season.endTime.has_value() ||
              season.endTime.value() > currentTime) {
       _activeSeasons.push_back(season);
     }
@@ -334,8 +334,8 @@ ETJump::TimerunV2::Player *ETJump::TimerunV2::setupPlayerData(
 
   player->running = true;
   player->name = playerName;
-  player->startTime = opt<int>(currentTimeMs);
-  player->completionTime = opt<int>();
+  player->startTime = currentTimeMs;
+  player->completionTime = std::nullopt;
   player->activeRunName = runName;
   player->runHasCheckpoints =
       level.checkpointsCount[indexForRunname(runName)] != 0;
@@ -430,7 +430,7 @@ void ETJump::TimerunV2::stopTimer(const std::string &runName, int clientNum,
   }
 
   auto millis = currentTimeMs - player->startTime.value();
-  player->completionTime = opt<int>(millis);
+  player->completionTime = millis;
 
   if (!g_cheats.integer && !isDebugging(clientNum)) {
     checkRecord(player);
@@ -773,7 +773,7 @@ void ETJump::TimerunV2::printRecords(
               // for a single run, and they don't fit on a single page
               const auto numRecords = static_cast<int32_t>(rkvp.second.size());
 
-              if (params.run.hasValue() && numRecords > params.pageSize) {
+              if (params.run.has_value() && numRecords > params.pageSize) {
                 const int32_t start =
                     (page * params.pageSize) - params.pageSize + 1;
                 const int32_t end =
@@ -865,7 +865,7 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum,
 
         const auto record = _repository->getRecord(mapName, matchedRun, rank);
 
-        if (!record.hasValue()) {
+        if (!record.has_value()) {
           throw std::runtime_error(stringFormat(
               "^7Could not find a record on map ^3`%s` ^7for run ^3`%s` ^7for "
               "rank ^3`%d`",
@@ -975,7 +975,7 @@ void ETJump::TimerunV2::printRankings(
   _sc->postTask(
       [this, params] {
         std::string message;
-        if (params.season.hasValue()) {
+        if (params.season.has_value()) {
           auto matchingSeasons =
               _repository->getSeasonsForName(params.season.value(), false);
 
@@ -1073,7 +1073,7 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
 
             message += stringFormat(
                 formatString, s.name, s.startTime.toAbbrevMonthDateString(),
-                s.endTime.hasValue()
+                s.endTime.has_value()
                     ? s.endTime.value().toAbbrevMonthDateString()
                     : "*");
           }
@@ -1092,7 +1092,7 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
 
             message += stringFormat(
                 formatString, s.name, s.startTime.toAbbrevMonthDateString(),
-                s.endTime.hasValue()
+                s.endTime.has_value()
                     ? s.endTime.value().toAbbrevMonthDateString()
                     : "*");
           }
@@ -1111,7 +1111,7 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
 
             message += stringFormat(
                 formatString, s.name, s.startTime.toAbbrevMonthDateString(),
-                s.endTime.hasValue()
+                s.endTime.has_value()
                     ? s.endTime.value().toAbbrevMonthDateString()
                     : "*");
           }
@@ -1174,7 +1174,7 @@ void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
 }
 
 int32_t ETJump::TimerunV2::getRunStartTime(const int32_t clientNum) const {
-  return _players[clientNum]->startTime.valueOr(0);
+  return _players[clientNum]->startTime.value_or(0);
 }
 
 void ETJump::TimerunV2::startNotify(Player *player) const {
@@ -1246,7 +1246,7 @@ public:
   struct NewRecord {
     ETJump::Timerun::Record record;
     std::string seasonName;
-    ETJump::opt<int> previousTime;
+    std::optional<int> previousTime;
   };
 
   CheckRecordResult() : clientNum(-1) {}
@@ -1257,14 +1257,14 @@ public:
   std::map<int, NewRecord> newOwnRecordsPerSeason{};
 
   // our previous overall record
-  ETJump::opt<ETJump::Timerun::Record> playerPreviousOverallRecord;
+  std::optional<ETJump::Timerun::Record> playerPreviousOverallRecord;
   // our previous seasonal record
-  ETJump::opt<ETJump::Timerun::Record> playerPreviousSeasonalRecord;
+  std::optional<ETJump::Timerun::Record> playerPreviousSeasonalRecord;
 
   // previous overall record
-  ETJump::opt<ETJump::Timerun::Record> previousOverallRecord;
+  std::optional<ETJump::Timerun::Record> previousOverallRecord;
   // previous seasonal record
-  ETJump::opt<ETJump::Timerun::Record> previousSeasonalRecord;
+  std::optional<ETJump::Timerun::Record> previousSeasonalRecord;
 };
 
 void ETJump::TimerunV2::checkRecord(Player *player) {
@@ -1372,9 +1372,11 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
             }
           }
 
-          record.previousTime = playerTopRecordForSeason.count(seasonId) > 0
-                                    ? playerTopRecordForSeason[seasonId]->time
-                                    : opt<int>();
+          record.previousTime =
+              playerTopRecordForSeason.count(seasonId) > 0
+                  ? std::make_optional<int>(
+                        playerTopRecordForSeason[seasonId]->time)
+                  : std::nullopt;
           record.record = playerNewTopRecordForSeason[seasonId];
 
           result->newOwnRecordsPerSeason[seasonId] = record;
@@ -1431,7 +1433,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
         int previousTopRecordTime;
 
         const int playerPreviousRecord =
-            checkRecordResult->playerPreviousOverallRecord.hasValue()
+            checkRecordResult->playerPreviousOverallRecord.has_value()
                 ? checkRecordResult->playerPreviousOverallRecord.value().time
                 : 0;
 
@@ -1441,7 +1443,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
               checkRecordResult->newOwnRecordsPerSeason[defaultSeasonId];
 
           previousTopRecordTime =
-              checkRecordResult->previousOverallRecord.hasValue()
+              checkRecordResult->previousOverallRecord.has_value()
                   ? checkRecordResult->previousOverallRecord.value().time
                   : 0;
 
@@ -1459,7 +1461,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
           }
           Printer::commandAll(
               TimerunCommands::Record(clientNum, record.record.time,
-                                      record.previousTime.valueOr(
+                                      record.previousTime.value_or(
                                           TimerunCommands::NO_PREVIOUS_RECORD),
                                       record.record.run)
                   .serialize());
@@ -1473,7 +1475,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
                   ->newOwnRecordsPerSeason[_mostRelevantSeason->id];
 
           previousTopRecordTime =
-              checkRecordResult->previousSeasonalRecord.hasValue()
+              checkRecordResult->previousSeasonalRecord.has_value()
                   ? checkRecordResult->previousSeasonalRecord.value().time
                   : 0;
 
@@ -1494,7 +1496,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
           if (completionTime < playerPreviousRecord) {
             Printer::commandAll(TimerunCommands::Record(
                                     clientNum, record.record.time,
-                                    record.previousTime.valueOr(
+                                    record.previousTime.value_or(
                                         TimerunCommands::NO_PREVIOUS_RECORD),
                                     record.record.run)
                                     .serialize());
@@ -1510,7 +1512,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
             continue;
           }
 
-          if (record.second.previousTime.hasValue()) {
+          if (record.second.previousTime.has_value()) {
             diffString = "^7(" +
                          diffToString(record.second.record.time,
                                       record.second.previousTime.value()) +
@@ -1550,20 +1552,24 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
             Printer::commandAll(
                 TimerunCommands::Completion(
                     clientNum, completionTime,
-                    checkRecordResult->playerPreviousOverallRecord.hasValue()
-                        ? checkRecordResult->playerPreviousOverallRecord.value()
-                              .time
-                        : opt<int>(),
+                    checkRecordResult->playerPreviousOverallRecord.has_value()
+                        ? std::make_optional<int>(
+                              checkRecordResult->playerPreviousOverallRecord
+                                  .value()
+                                  .time)
+                        : std::nullopt,
                     activeRunName)
                     .serialize());
           } else {
             Printer::commandAll(
                 TimerunCommands::Record(
                     clientNum, completionTime,
-                    checkRecordResult->playerPreviousOverallRecord.hasValue()
-                        ? checkRecordResult->playerPreviousOverallRecord.value()
-                              .time
-                        : opt<int>(),
+                    checkRecordResult->playerPreviousOverallRecord.has_value()
+                        ? std::make_optional<int>(
+                              checkRecordResult->playerPreviousOverallRecord
+                                  .value()
+                                  .time)
+                        : std::nullopt,
                     activeRunName)
                     .serialize());
           }

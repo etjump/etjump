@@ -119,7 +119,7 @@ ETJump::TimerunRepository::addSeason(Timerun::AddSeasonParams params) {
         "Cannot add season `%s` as it already exists.", params.name));
   }
 
-  if (params.endTime.hasValue()) {
+  if (params.endTime.has_value()) {
     if (params.startTime >= params.endTime.value()) {
       throw std::runtime_error("Start time cannot be after end time");
     }
@@ -137,7 +137,7 @@ ETJump::TimerunRepository::addSeason(Timerun::AddSeasonParams params) {
                     );
                   )";
 
-  if (params.endTime.hasValue())
+  if (params.endTime.has_value())
     _database->sql << insert << params.name
                    << params.startTime.toDateTimeString()
                    << (*params.endTime).toDateTimeString();
@@ -246,10 +246,11 @@ void ETJump::TimerunRepository::updateRecord(const Timerun::Record &record) {
                  << record.map << record.run << record.userId;
 }
 
-ETJump::opt<ETJump::Timerun::Record>
+std::optional<ETJump::Timerun::Record>
 ETJump::TimerunRepository::getTopRecord(int seasonId, const std::string &map,
                                         const std::string &run) {
-  opt<Timerun::Record> record;
+  std::optional<Timerun::Record> record;
+
   _database->sql << R"(
     select
       season_id,
@@ -273,7 +274,7 @@ ETJump::TimerunRepository::getTopRecord(int seasonId, const std::string &map,
       [&record](int seasonId, std::string map, std::string runName, int userId,
                 int time, std::string checkpointsString, std::string recordDate,
                 std::string playerName, std::string metadataString) {
-        record = opt<Timerun::Record>(getRecordFromStandardQueryResult(
+        record = Timerun::Record(getRecordFromStandardQueryResult(
             seasonId, map, runName, userId, time, checkpointsString, recordDate,
             playerName, metadataString));
       };
@@ -333,7 +334,7 @@ void ETJump::TimerunRepository::editSeason(
     const Timerun::EditSeasonParams &params) {
   int seasonId = -1;
   Time startTime;
-  ETJump::opt<Time> endTime;
+  std::optional<Time> endTime;
 
   _database->sql << R"(
     select
@@ -348,7 +349,7 @@ void ETJump::TimerunRepository::editSeason(
         seasonId = sid;
         startTime = Time::fromString(s);
         if (e) {
-          endTime = ETJump::opt<ETJump::Time>(Time::fromString(*e));
+          endTime = ETJump::Time(Time::fromString(*e));
         }
       };
 
@@ -362,22 +363,22 @@ void ETJump::TimerunRepository::editSeason(
   bool anythingToUpdate = false;
 
   Time newStartTime = startTime;
-  opt<Time> newEndTime = endTime;
+  std::optional<Time> newEndTime = endTime;
 
-  if (params.startTime.hasValue()) {
+  if (params.startTime.has_value()) {
     newStartTime = params.startTime.value();
     anythingToUpdate = true;
     updatedFields.emplace_back("start_time");
     updatedParams.push_back(params.startTime.value().toDateTimeString());
   }
-  if (params.endTime.hasValue()) {
+  if (params.endTime.has_value()) {
     newEndTime = params.endTime;
     anythingToUpdate = true;
     updatedFields.emplace_back("end_time");
     updatedParams.push_back(params.endTime.value().toDateTimeString());
   }
 
-  if (newEndTime.hasValue() && newEndTime.value() < newStartTime) {
+  if (newEndTime.has_value() && newEndTime.value() < newStartTime) {
     throw std::runtime_error("End time cannot be before start time.");
   }
 
@@ -472,10 +473,9 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords() {
 
 std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
     const Timerun::PrintRecordsParams &params) {
-  const auto season =
-      params.season.hasValue() ? params.season.value() : "Default";
+  const auto season = params.season.value_or("Default");
   const std::string &map = params.map;
-  const std::string &run = params.run.hasValue() ? params.run.value() : "";
+  const std::string &run = params.run.value_or("");
   const bool runSpecified = !run.empty();
 
   const auto seasons = getSeasonsForName(season, false);
@@ -595,7 +595,8 @@ ETJump::TimerunRepository::getSeasonsForName(const std::string &name,
                             std::unique_ptr<std::string> endTime) {
     seasons.push_back(Timerun::Season{
         id, name, Time::fromString(startTime),
-        (endTime ? opt<Time>(Time::fromString(*endTime)) : opt<Time>())});
+        (endTime ? std::make_optional<Time>(Time::fromString(*endTime))
+                 : std::nullopt)});
   };
 
   if (exact) {
@@ -629,10 +630,10 @@ ETJump::TimerunRepository::getSeasonsForName(const std::string &name,
   return seasons;
 }
 
-ETJump::opt<ETJump::Timerun::Record>
+std::optional<ETJump::Timerun::Record>
 ETJump::TimerunRepository::getRecord(const std::string &map,
                                      const std::string &run, int rank) {
-  opt<Timerun::Record> record;
+  std::optional<Timerun::Record> record;
 
   _database->sql << R"(
     select *
@@ -679,9 +680,9 @@ std::vector<ETJump::Timerun::Season> ETJump::TimerunRepository::getSeasons() {
       [this, &seasons](int id, std::string name, std::string startTimeStr,
                        std::string endTimeStr) {
         auto startTime = Time::fromString(startTimeStr);
-        opt<Time> endTime;
+        std::optional<Time> endTime;
         if (endTimeStr.length() != 0) {
-          endTime = opt<Time>(Time::fromString(endTimeStr));
+          endTime = Time::fromString(endTimeStr);
         }
 
         seasons.push_back(Timerun::Season{id, name, startTime, endTime});

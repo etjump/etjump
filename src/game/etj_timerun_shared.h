@@ -24,41 +24,39 @@
 
 #pragma once
 #include <array>
+#include <optional>
 #include <string>
+#include <vector>
 
-#include "etj_shared.h"
-#include "etj_string_utilities.h"
-#include "etj_utilities.h"
 #include "q_shared.h"
 
-namespace ETJump {
-namespace TimerunCommands {
+namespace ETJump::TimerunCommands {
 constexpr int INVALID_CLIENT_NUM = -1;
 const int NO_PREVIOUS_RECORD = -1;
 
 int parseClientNum(const std::string &arg);
-opt<int> parseTime(const std::string &arg);
-opt<int> parseInteger(const std::string &arg);
+std::optional<int> parseTime(const std::string &arg);
+std::optional<int> parseInteger(const std::string &arg);
 
 class Start {
 public:
   Start() = default;
   Start(int clientNum, int startTime, const std::string &runName,
-        const opt<int> &previousRecord, bool runHasCheckpoints,
+        const std::optional<int> &previousRecord, bool runHasCheckpoints,
         std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
         std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
 
   int clientNum{};
   int startTime{};
-  std::string runName{};
-  opt<int> previousRecord{};
+  std::string runName;
+  std::optional<int> previousRecord;
   bool runHasCheckpoints = false;
   std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
   std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints{};
 
-  std::string serialize();
+  [[nodiscard]] std::string serialize() const;
 
-  static opt<Start> deserialize(const std::vector<std::string> &args);
+  static std::optional<Start> deserialize(const std::vector<std::string> &args);
 };
 
 // this uses deserialize() from Start class for simplicity
@@ -66,19 +64,19 @@ class SavePosStart {
 public:
   SavePosStart() = default;
   SavePosStart(int clientNum, int startTime, std::string runName,
-               const opt<int> &previousRecord, bool runHasCheckpoints,
+               const std::optional<int> &previousRecord, bool runHasCheckpoints,
                std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
                std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
 
   int clientNum{};
   int startTime{};
-  std::string runName{};
-  opt<int> previousRecord{};
+  std::string runName;
+  std::optional<int> previousRecord;
   bool runHasCheckpoints = false;
   std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
   std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints{};
 
-  std::string serialize();
+  [[nodiscard]] std::string serialize() const;
 };
 
 class Checkpoint {
@@ -86,21 +84,22 @@ public:
   Checkpoint() = default;
 
   Checkpoint(const int clientNum, const int checkpointNum,
-             const int checkpointTime, const std::string &runName,
+             const int checkpointTime, std::string runName,
              const int checkpointIndex)
       : clientNum(clientNum), checkpointNum(checkpointNum),
-        checkpointTime(checkpointTime), runName(runName),
+        checkpointTime(checkpointTime), runName(std::move(runName)),
         checkpointIndex(checkpointIndex) {}
 
   int clientNum{};
   int checkpointNum{}; // sequential counter, how many checkpoints we've hit
   int checkpointTime{};
-  std::string runName{};
+  std::string runName;
   int checkpointIndex{}; // index for Player.checkpointIndexesHit
 
-  std::string serialize() const;
+  [[nodiscard]] std::string serialize() const;
 
-  static opt<Checkpoint> deserialize(const std::vector<std::string> &args);
+  static std::optional<Checkpoint>
+  deserialize(const std::vector<std::string> &args);
 };
 
 class Interrupt {
@@ -111,63 +110,66 @@ public:
 
   int clientNum{};
 
-  std::string serialize();
+  [[nodiscard]] std::string serialize() const;
 
-  static opt<Interrupt> deserialize(const std::vector<std::string> &args);
+  static std::optional<Interrupt>
+  deserialize(const std::vector<std::string> &args);
 };
 
 class Completion {
 public:
   Completion() = default;
 
-  Completion(int clientNum, int completionTime, opt<int> previousRecordTime,
-             const std::string &runName)
+  Completion(int clientNum, int completionTime,
+             std::optional<int> previousRecordTime, std::string runName)
       : clientNum(clientNum), completionTime(completionTime),
-        previousRecordTime(previousRecordTime), runName(runName) {}
+        previousRecordTime(previousRecordTime), runName(std::move(runName)) {}
 
   int clientNum{};
   int completionTime{};
-  opt<int> previousRecordTime{};
-  std::string runName{};
+  std::optional<int> previousRecordTime;
+  std::string runName;
 
-  std::string serialize();
+  [[nodiscard]] std::string serialize() const;
 
-  static opt<Completion> deserialize(const std::vector<std::string> &args);
+  static std::optional<Completion>
+  deserialize(const std::vector<std::string> &args);
 };
 
 class Record {
 public:
   Record() = default;
 
-  Record(int clientNum, int completionTime, opt<int> previousRecordTime,
-         const std::string &runName)
+  Record(int clientNum, int completionTime,
+         std::optional<int> previousRecordTime, std::string runName)
       : clientNum(clientNum), completionTime(completionTime),
-        previousRecordTime(previousRecordTime), runName(runName) {}
+        previousRecordTime(previousRecordTime), runName(std::move(runName)) {}
 
   int clientNum{};
   int completionTime{};
-  opt<int> previousRecordTime{};
-  std::string runName{};
+  std::optional<int> previousRecordTime;
+  std::string runName;
 
-  std::string serialize();
+  [[nodiscard]] std::string serialize() const;
 
-  static opt<Record> deserialize(const std::vector<std::string> &args);
+  static std::optional<Record>
+  deserialize(const std::vector<std::string> &args);
 };
 
 class Stop {
 public:
   Stop() = default;
 
-  Stop(int clientNum, int time, const std::string &runName)
-      : clientNum(clientNum), completionTime(time), runName(runName) {}
+  Stop(int clientNum, int time, std::string runName)
+      : clientNum(clientNum), completionTime(time),
+        runName(std::move(runName)) {}
 
   int clientNum{};
   int completionTime{};
-  std::string runName{};
+  std::string runName;
 
-  std::string serialize();
+  [[nodiscard]] std::string serialize() const;
 
-  static opt<Stop> deserialize(const std::vector<std::string> &args);
+  static std::optional<Stop> deserialize(const std::vector<std::string> &args);
 };
-} // namespace TimerunCommands
-} // namespace ETJump
+} // namespace ETJump::TimerunCommands

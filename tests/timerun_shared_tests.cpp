@@ -52,7 +52,7 @@ TEST_F(TimerunSharedTests, Start_ShouldDeserialize) {
 }
 
 TEST_F(TimerunSharedTests, Start_ShouldSerialize_IfNoPreviousRecord) {
-  auto start = TimerunCommands::Start(1, 2, "3", opt<int>(), 1,
+  auto start = TimerunCommands::Start(1, 2, "3", std::nullopt, true,
                                       CreateDefaultCheckpoints(),
                                       CreateDefaultCurrentCheckpoints());
 
@@ -75,7 +75,7 @@ TEST_F(TimerunSharedTests, Start_ShouldDeserialize_IfNoPreviousRecord) {
                                "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1"};
   auto deserialized = TimerunCommands::Start::deserialize(args);
 
-  ASSERT_FALSE(deserialized.value().previousRecord.hasValue());
+  ASSERT_FALSE(deserialized.value().previousRecord.has_value());
 }
 
 TEST_F(TimerunSharedTests, Checkpoint_ShouldSerialize) {

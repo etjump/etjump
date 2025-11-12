@@ -261,7 +261,7 @@ void ETJump::CommandParser::expectOptionOrExtraArgs() {
 
 void ETJump::CommandParser::processPositionalArguments() {
   for (const auto &optDef : _def.options) {
-    if (optDef.second.position.hasValue()) {
+    if (optDef.second.position.has_value()) {
       if (_cmd.options.count(optDef.second.name) > 0) {
         continue;
       }
@@ -338,7 +338,7 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse() {
 std::string ETJump::CommandParser::formatCommandHelpString(
     const std::string &name, const std::string &shortname,
     OptionDefinition::Type optionType, const std::string &description,
-    bool required, opt<int> position) {
+    bool required, std::optional<int> position) {
   // console line width varies a bit depending on engine and resolution,
   // but this should be fine for most scenarios
   const size_t maxLineLen = 120;
@@ -346,8 +346,8 @@ std::string ETJump::CommandParser::formatCommandHelpString(
 
   const std::string &opTypeStr = OptionDefinition::typeToString(optionType);
   const std::string &positionStr = stringFormat(
-      "%s",
-      position.hasValue() ? stringFormat(" (pos: %d) ", position.value()) : "");
+      "%s", position.has_value() ? stringFormat(" (pos: %d) ", position.value())
+                                 : "");
   const std::string &requiredStr =
       stringFormat("%s", required ? " [required] " : "");
 
