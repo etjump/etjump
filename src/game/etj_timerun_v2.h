@@ -28,12 +28,9 @@
 #include <map>
 #include <utility>
 
-#include "etj_command_parser.h"
-#include "etj_database_v2.h"
 #include "etj_log.h"
 #include "etj_synchronization_context.h"
 #include "etj_timerun_models.h"
-#include "etj_utilities.h"
 #include "g_local.h"
 #include "etj_savepos_shared.h"
 
@@ -42,7 +39,7 @@ class TimerunRepository;
 
 class TimerunV2 {
 public:
-  const int defaultSeasonId = 1;
+  static constexpr int defaultSeasonId = 1;
 
   TimerunV2(std::string currentMap,
             std::unique_ptr<TimerunRepository> repository,
@@ -51,28 +48,26 @@ public:
 
   struct Player {
     Player(int clientNum, int userId, const std::vector<Timerun::Record> &runs)
-        : clientNum(clientNum), userId(userId), records(runs), running(false),
-          startTime(opt<int>()), completionTime(opt<int>()),
-          runHasCheckpoints(false), nextCheckpointIdx(0) {}
+        : clientNum(clientNum), userId(userId), records(runs) {}
 
     int clientNum;
     int userId;
     std::vector<Timerun::Record> records;
     bool running{};
     std::string name;
-    opt<int> startTime;
-    opt<int> completionTime;
+    std::optional<int> startTime;
+    std::optional<int> completionTime;
     std::string activeRunName;
-    bool runHasCheckpoints;
-    int nextCheckpointIdx;
+    bool runHasCheckpoints{};
+    int nextCheckpointIdx{};
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointTimes{};
     std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
     // /loadcheckpoints stores checkpoints here
     std::map<std::string, std::array<int, MAX_TIMERUN_CHECKPOINTS>>
-        overriddenCheckpoints{};
+        overriddenCheckpoints;
 
-    const Timerun::Record *getRecord(int seasonId,
-                                     const std::string &runName) const;
+    [[nodiscard]] const Timerun::Record *
+    getRecord(int seasonId, const std::string &runName) const;
   };
 
   struct Ranking {
@@ -133,9 +128,10 @@ private:
    * returns nullptr if player object is unavailable,
    * or if the player is already running
    */
-  Player *setupPlayerData(int clientNum, const std::string &runName,
-                          const std::string &playerName,
-                          int currentTimeMs) const;
+  [[nodiscard]] Player *setupPlayerData(int clientNum,
+                                        const std::string &runName,
+                                        const std::string &playerName,
+                                        int currentTimeMs) const;
 
   static std::array<int, MAX_TIMERUN_CHECKPOINTS>
   toCheckpointsArray(const std::vector<int> *vector);
@@ -154,7 +150,7 @@ private:
   std::unique_ptr<TimerunRepository> _repository;
   std::unique_ptr<Log> _logger;
   std::unique_ptr<SynchronizationContext> _sc;
-  std::array<std::unique_ptr<Player>, 64> _players;
+  std::array<std::unique_ptr<Player>, MAX_CLIENTS> _players;
 
   std::vector<int> _activeSeasonsIds;
   std::vector<Timerun::Season> _activeSeasons;

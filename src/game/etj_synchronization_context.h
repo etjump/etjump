@@ -27,6 +27,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <queue>
 #include <stdexcept>
 #include <condition_variable>
@@ -61,15 +62,14 @@ private:
     TaskFn task;
     CallbackFn callback;
     ErrorFn errorCallback;
-    opt<std::unique_ptr<ResultBase>> result;
-    opt<std::runtime_error> error;
+    std::optional<std::unique_ptr<ResultBase>> result;
+    std::optional<std::runtime_error> error;
 
     Operation() = delete;
 
     explicit Operation(TaskFn task, CallbackFn callback, ErrorFn errorCallback)
         : status(Status::Incomplete), task(task), callback(callback),
-          errorCallback(errorCallback),
-          result(opt<std::unique_ptr<ResultBase>>()),
+          errorCallback(errorCallback), result(std::unique_ptr<ResultBase>()),
           error(std::runtime_error("")) {}
   };
 

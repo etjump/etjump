@@ -22,9 +22,11 @@
  * SOFTWARE.
  */
 
-#include "etj_timerun_shared.h"
+#include <stdexcept>
 
+#include "etj_timerun_shared.h"
 #include "etj_container_utilities.h"
+#include "etj_string_utilities.h"
 
 namespace ETJump {
 int TimerunCommands::parseClientNum(const std::string &arg) {
@@ -41,69 +43,69 @@ int TimerunCommands::parseClientNum(const std::string &arg) {
   }
 }
 
-opt<int> TimerunCommands::parseTime(const std::string &arg) {
+std::optional<int> TimerunCommands::parseTime(const std::string &arg) {
   try {
     const auto time = std::stoi(arg);
 
     if (time < 0) {
-      return {};
+      return std::nullopt;
     }
 
     return time;
   } catch (const std::logic_error &) {
-    return {};
+    return std::nullopt;
   }
 }
 
-opt<int> TimerunCommands::parseInteger(const std::string &arg) {
+std::optional<int> TimerunCommands::parseInteger(const std::string &arg) {
   try {
     return std::stoi(arg);
   } catch (const std::logic_error &) {
-    return {};
+    return std::nullopt;
   }
 }
 
 TimerunCommands::Start::Start(
     int clientNum, int startTime, const std::string &runName,
-    const opt<int> &previousRecord, bool runHasCheckpoints,
+    const std::optional<int> &previousRecord, bool runHasCheckpoints,
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
     std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints)
     : clientNum(clientNum), startTime(startTime), runName(runName),
       previousRecord(previousRecord), runHasCheckpoints(runHasCheckpoints),
       checkpoints(checkpoints), currentRunCheckpoints(currentRunCheckpoints) {}
 
-std::string TimerunCommands::Start::serialize() {
+std::string TimerunCommands::Start::serialize() const {
   return stringFormat("timerun start %d %d \"%s\" %d %d \"%s\" \"%s\"",
                       clientNum, startTime, runName,
-                      previousRecord.hasValue() ? previousRecord.value() : -1,
-                      runHasCheckpoints, StringUtil::join(checkpoints, ","),
+                      previousRecord.value_or(-1), runHasCheckpoints,
+                      StringUtil::join(checkpoints, ","),
                       StringUtil::join(currentRunCheckpoints, ","));
 }
 
-opt<TimerunCommands::Start>
+std::optional<TimerunCommands::Start>
 TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
   const int numExpectedFields = 9;
 
   if (args.size() < numExpectedFields) {
-    return {};
+    return std::nullopt;
   }
 
   if (args[0] != "timerun") {
-    return {};
+    return std::nullopt;
   }
 
   if (args[1] != "start" && args[1] != "saveposstart") {
-    return {};
+    return std::nullopt;
   }
 
   Start start;
 
   start.clientNum = parseClientNum(args[2]);
   if (start.clientNum == INVALID_CLIENT_NUM) {
-    return {};
+    return std::nullopt;
   }
 
-  opt<int> startTime;
+  std::optional<int> startTime;
 
   // savepos parses startTime as an int instead of time,
   // because it needs to support negative startTime
@@ -113,8 +115,8 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
     startTime = parseTime((args[3]));
   }
 
-  if (!startTime.hasValue()) {
-    return {};
+  if (!startTime.has_value()) {
+    return std::nullopt;
   }
 
   start.startTime = startTime.value();
@@ -126,8 +128,9 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
   start.runHasCheckpoints = std::stoi(args[6]);
 
   unsigned idx = 0;
-  for (const auto &v : Container::map(StringUtil::split(args[7], ","),
-                                      [](auto c) { return std::stoi(c); })) {
+  for (const auto &v :
+       Container::map(StringUtil::split(args[7], ","),
+                      [](const auto &c) { return std::stoi(c); })) {
     if (idx >= start.checkpoints.size()) {
       break;
     }
@@ -138,8 +141,9 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
   }
 
   idx = 0;
-  for (const auto &v : Container::map(StringUtil::split(args[8], ","),
-                                      [](auto c) { return std::stoi(c); })) {
+  for (const auto &v :
+       Container::map(StringUtil::split(args[8], ","),
+                      [](const auto &c) { return std::stoi(c); })) {
     if (idx >= start.currentRunCheckpoints.size()) {
       break;
     }
@@ -154,18 +158,18 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
 
 TimerunCommands::SavePosStart::SavePosStart(
     int clientNum, int startTime, std::string runName,
-    const opt<int> &previousRecord, bool runHasCheckpoints,
+    const std::optional<int> &previousRecord, bool runHasCheckpoints,
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
     std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints)
     : clientNum(clientNum), startTime(startTime), runName(std::move(runName)),
       previousRecord(previousRecord), runHasCheckpoints(runHasCheckpoints),
       checkpoints(checkpoints), currentRunCheckpoints(currentRunCheckpoints) {}
 
-std::string TimerunCommands::SavePosStart::serialize() {
+std::string TimerunCommands::SavePosStart::serialize() const {
   return stringFormat("timerun saveposstart %d %d \"%s\" %d %d \"%s\" \"%s\"",
                       clientNum, startTime, runName,
-                      previousRecord.hasValue() ? previousRecord.value() : -1,
-                      runHasCheckpoints, StringUtil::join(checkpoints, ","),
+                      previousRecord.value_or(-1), runHasCheckpoints,
+                      StringUtil::join(checkpoints, ","),
                       StringUtil::join(currentRunCheckpoints, ","));
 }
 
@@ -174,40 +178,40 @@ std::string TimerunCommands::Checkpoint::serialize() const {
                       checkpointNum, checkpointTime, runName, checkpointIndex);
 }
 
-opt<TimerunCommands::Checkpoint>
+std::optional<TimerunCommands::Checkpoint>
 TimerunCommands::Checkpoint::deserialize(const std::vector<std::string> &args) {
-  auto empty = opt<Checkpoint>();
   constexpr int expectedFields = 6;
 
   if (args.size() < expectedFields) {
-    return empty;
+    return std::nullopt;
   }
 
   if (args[0] != "timerun") {
-    return empty;
+    return std::nullopt;
   }
 
   if (args[1] != "checkpoint") {
-    return empty;
+    return std::nullopt;
   }
 
   Checkpoint cp;
 
   cp.clientNum = parseClientNum(args[2]);
   if (cp.clientNum == INVALID_CLIENT_NUM) {
-    return empty;
+    return std::nullopt;
   }
 
   auto cpn = parseInteger(args[3]);
-  if (!cpn.hasValue()) {
-    return empty;
+  if (!cpn.has_value()) {
+    return std::nullopt;
   }
   cp.checkpointNum = cpn.value();
 
   auto time = parseTime(args[4]);
-  if (!time.hasValue()) {
-    return empty;
+  if (!time.has_value()) {
+    return std::nullopt;
   }
+
   cp.checkpointTime = time.value();
   cp.runName = args[5];
 
@@ -218,8 +222,8 @@ TimerunCommands::Checkpoint::deserialize(const std::vector<std::string> &args) {
   // ETJump 3.3.0 onwards, the checkpoint index we've hit is part of the command
   auto cpi = parseInteger(args[6]);
 
-  if (!cpi.hasValue()) {
-    return empty;
+  if (!cpi.has_value()) {
+    return std::nullopt;
   }
 
   cp.checkpointIndex = cpi.value();
@@ -227,50 +231,48 @@ TimerunCommands::Checkpoint::deserialize(const std::vector<std::string> &args) {
   return cp;
 }
 
-std::string TimerunCommands::Interrupt::serialize() {
+std::string TimerunCommands::Interrupt::serialize() const {
   return stringFormat("timerun interrupt %d", clientNum);
 }
 
-opt<TimerunCommands::Interrupt>
+std::optional<TimerunCommands::Interrupt>
 TimerunCommands::Interrupt::deserialize(const std::vector<std::string> &args) {
-  auto empty = opt<Interrupt>();
-
   if (args[0] != "timerun" || args[1] != "interrupt") {
-    return empty;
+    return std::nullopt;
   }
 
   Interrupt interrupt{};
   interrupt.clientNum = parseClientNum(args[2]);
   if (interrupt.clientNum == INVALID_CLIENT_NUM) {
-    return empty;
+    return std::nullopt;
   }
 
   return interrupt;
 }
 
-std::string TimerunCommands::Completion::serialize() {
+std::string TimerunCommands::Completion::serialize() const {
   return stringFormat("timerun completion %d %d %d \"%s\"", clientNum,
                       completionTime,
-                      previousRecordTime.valueOr(NO_PREVIOUS_RECORD), runName);
+                      previousRecordTime.value_or(NO_PREVIOUS_RECORD), runName);
 }
 
-opt<TimerunCommands::Completion>
+std::optional<TimerunCommands::Completion>
 TimerunCommands::Completion::deserialize(const std::vector<std::string> &args) {
-  auto empty = opt<Completion>();
-
   if (args[0] != "timerun" || args[1] != "completion") {
-    return empty;
+    return std::nullopt;
   }
 
   Completion completion{};
   completion.clientNum = parseClientNum(args[2]);
+
   if (completion.clientNum == INVALID_CLIENT_NUM) {
-    return empty;
+    return std::nullopt;
   }
 
   auto completionTime = parseTime(args[3]);
-  if (!completionTime.hasValue()) {
-    return empty;
+
+  if (!completionTime.has_value()) {
+    return std::nullopt;
   }
 
   completion.completionTime = completionTime.value();
@@ -282,29 +284,27 @@ TimerunCommands::Completion::deserialize(const std::vector<std::string> &args) {
   return completion;
 }
 
-std::string TimerunCommands::Record::serialize() {
+std::string TimerunCommands::Record::serialize() const {
   return stringFormat("timerun record %d %d %d \"%s\"", clientNum,
                       completionTime,
-                      previousRecordTime.valueOr(NO_PREVIOUS_RECORD), runName);
+                      previousRecordTime.value_or(NO_PREVIOUS_RECORD), runName);
 }
 
-opt<TimerunCommands::Record>
+std::optional<TimerunCommands::Record>
 TimerunCommands::Record::deserialize(const std::vector<std::string> &args) {
-  auto empty = opt<Record>();
-
   if (args[0] != "timerun" || args[1] != "record") {
-    return empty;
+    return std::nullopt;
   }
 
   Record record{};
   record.clientNum = parseClientNum(args[2]);
   if (record.clientNum == INVALID_CLIENT_NUM) {
-    return empty;
+    return std::nullopt;
   }
 
   auto completionTime = parseTime(args[3]);
-  if (!completionTime.hasValue()) {
-    return empty;
+  if (!completionTime.has_value()) {
+    return std::nullopt;
   }
 
   record.completionTime = completionTime.value();
@@ -316,28 +316,26 @@ TimerunCommands::Record::deserialize(const std::vector<std::string> &args) {
   return record;
 }
 
-std::string TimerunCommands::Stop::serialize() {
+std::string TimerunCommands::Stop::serialize() const {
   return stringFormat("timerun stop %d %d \"%s\"", clientNum, completionTime,
                       runName);
 }
 
-opt<TimerunCommands::Stop>
+std::optional<TimerunCommands::Stop>
 TimerunCommands::Stop::deserialize(const std::vector<std::string> &args) {
-  auto empty = opt<Stop>();
-
   if (args[0] != "timerun" || args[1] != "stop") {
-    return empty;
+    return std::nullopt;
   }
 
   Stop stop{};
   stop.clientNum = parseClientNum(args[2]);
   if (stop.clientNum == INVALID_CLIENT_NUM) {
-    return empty;
+    return std::nullopt;
   }
 
   auto completionTime = parseTime(args[3]);
-  if (!completionTime.hasValue()) {
-    return empty;
+  if (!completionTime.has_value()) {
+    return std::nullopt;
   }
 
   stop.completionTime = completionTime.value();
