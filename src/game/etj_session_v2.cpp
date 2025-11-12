@@ -84,7 +84,9 @@ void SessionV2::resetClient(const int clientNum) {
   clients[clientNum].ipv4.clear();
   clients[clientNum].ipv6.clear();
   clients[clientNum].sessionStartTime = 0;
+
   clients[clientNum].user = nullptr;
+  clients[clientNum].level = nullptr;
 }
 
 void SessionV2::onClientConnect(const int clientNum, const bool firstTime) {
@@ -158,6 +160,10 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
         clients[clientNum].user->greeting = r->user.greeting;
         clients[clientNum].user->title = r->user.title;
         clients[clientNum].user->lastSeen = r->user.lastSeen;
+
+        const auto *const level = game.levels->GetLevel(r->user.level);
+        clients[clientNum].level = std::make_unique<Levels::Level>(
+            level->level, level->name, level->greeting, level->commands);
 
         if (firstTime) {
           printGreeting(clientNum);
@@ -731,8 +737,20 @@ void SessionV2::printGreeting(const int32_t clientNum) const {
     Printer::chatAll(greeting);
   } else {
     // see if the clients admin level has a greeting associated with it
-    G_Printf("^3%s: [NEW_AUTH] TODO:\n  ^7- print level-specific greeting\n",
-             __func__);
+    if (!clients[clientNum].level) {
+      logger->error("No level associated with user %i",
+                    clients[clientNum].user->id);
+      return;
+    }
+
+    if (clients[clientNum].level->greeting.empty()) {
+      return;
+    }
+
+    std::string greeting = clients[clientNum].level->greeting;
+    // TODO: might wanna move this away from 'User'?
+    clients[clientNum].user->formatGreeting(ent, greeting);
+    Printer::chatAll(greeting);
   }
 }
 } // namespace ETJump

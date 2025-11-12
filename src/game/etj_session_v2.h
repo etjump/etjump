@@ -30,6 +30,7 @@
 
   #include "etj_user_repository.h"
   #include "etj_user_v2.h"
+  #include "etj_levels.h"
   #include "etj_log.h"
   #include "etj_synchronization_context.h"
   #include "q_shared.h"
@@ -70,6 +71,7 @@ private:
     std::string ipv6;
     int64_t sessionStartTime{};
     std::unique_ptr<UserV2> user;
+    std::unique_ptr<Levels::Level> level;
   };
 
   void onAuthSuccess(int32_t clientNum);
