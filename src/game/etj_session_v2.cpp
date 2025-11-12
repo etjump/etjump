@@ -627,6 +627,7 @@ bool SessionV2::readSessionData(const int clientNum) {
                              root["sessionStartTime"], &err,
                              "sessionStartTime")) {
     parsingFailed();
+    return false;
   }
 
   return true;
