@@ -59,6 +59,9 @@ public:
 
   void updateLastSeen(int32_t userID, int64_t time) const;
 
+  // false if the name already stored for the user
+  [[nodiscard]] bool addNewName(const UserModels::Name &name) const;
+
   std::vector<UserModels::BannedIPAddresses> getBannedIPAddresses() const;
   std::vector<UserModels::BanData> getBanData() const;
 

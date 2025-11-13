@@ -397,6 +397,23 @@ void UserRepository::updateLastSeen(const int32_t userID,
           << userID;
 }
 
+bool UserRepository::addNewName(const UserModels::Name &name) const {
+  db->sql << R"(
+    insert or ignore into names (
+      name,
+      clean_name,
+      user_id
+    ) values (
+      ?,
+      ?,
+      ?
+    );
+  )" << name.name
+          << name.cleanName << name.userID;
+
+  return db->sql.rows_modified() > 0;
+}
+
 std::vector<UserModels::BannedIPAddresses>
 UserRepository::getBannedIPAddresses() const {
   std::vector<UserModels::BannedIPAddresses> bannedIPAddresses{};
@@ -672,6 +689,7 @@ std::vector<std::string> UserRepository::createInitialMigration() {
       clean_name text not null,
       user_id integer not null,
       foreign key (user_id) references users(id)
+      unique (name, clean_name, user_id)
     );
   )";
 

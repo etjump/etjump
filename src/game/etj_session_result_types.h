@@ -82,6 +82,14 @@ public:
 
   std::string message;
 };
+
+class AddNewNameResult final : public SynchronizationContext::ResultBase {
+public:
+  explicit AddNewNameResult(std::string message)
+      : message(std::move(message)) {}
+
+  std::string message;
+};
 } // namespace ETJump
 
 #endif

@@ -1878,7 +1878,11 @@ void ClientUserinfoChanged(int clientNum) {
   if (client->pers.connected == CON_CONNECTED) {
     if (strcmp(oldname, client->pers.netname) != 0) {
 
+#ifdef NEW_AUTH
+      game.sessionV2->storeNewName(ent);
+#else
       ClientNameChanged(ent);
+#endif
 
       trap_SendServerCommand(-1, va("print \"[lof]%s" S_COLOR_WHITE
                                     " [lon]renamed to[lof] %s\n\"",

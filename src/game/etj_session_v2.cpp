@@ -172,6 +172,7 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
 
         if (firstTime) {
           printGreeting(clientNum);
+          storeNewName(g_entities + clientNum);
 
           if (r->user.lastSeen > 0) {
             Printer::popup(
@@ -619,6 +620,46 @@ int32_t SessionV2::getLevel(const gentity_t *ent) const {
 
 int64_t SessionV2::getSessionStartTime(const int32_t clientNum) const {
   return clients[clientNum].sessionStartTime;
+}
+
+void SessionV2::storeNewName(const gentity_t *ent) const {
+  const int32_t clientNum = ClientNum(ent);
+  const int32_t id = clients[clientNum].user->id;
+  const std::string clientName = ent->client->pers.netname;
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this, id, clientName] {
+        UserModels::Name name{};
+        name.name = clientName;
+        name.cleanName = sanitize(clientName, true);
+        name.userID = id;
+
+        std::string message;
+
+        if (repository->addNewName(name)) {
+          message = stringFormat("Added new nickname '%s' for user %i",
+                                 name.name, name.userID);
+        }
+
+        return std::make_unique<AddNewNameResult>(message);
+      },
+      [this](std::unique_ptr<SynchronizationContext::ResultBase>
+                 addNewNameResult) {
+        auto *const r =
+            dynamic_cast<AddNewNameResult *>(addNewNameResult.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("AddNewNameResult is null");
+        }
+
+        if (!r->message.empty()) {
+          logger->info(r->message);
+        }
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
 }
 
 bool SessionV2::readSessionData(const int clientNum) {

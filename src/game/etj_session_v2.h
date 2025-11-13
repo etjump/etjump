@@ -66,6 +66,8 @@ public:
 
   [[nodiscard]] int64_t getSessionStartTime(int32_t clientNum) const;
 
+  void storeNewName(const gentity_t *ent) const;
+
   bool readSessionData(int clientNum);
   void writeSessionData() const;
 
