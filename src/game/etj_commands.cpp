@@ -197,7 +197,11 @@ bool Rankings(gentity_t *ent, Arguments argv) {
 
   pageSize = std::clamp(pageSize, 1, 100);
 
+#ifdef NEW_AUTH
+  const int32_t userId = game.sessionV2->getID(ClientNum(ent));
+#else
   auto userId = ETJump::session->GetId(ent);
+#endif
 
   ETJump::Timerun::PrintRankingsParams params{
       ClientNum(ent), userId, std::move(season), page, pageSize};
@@ -319,7 +323,12 @@ bool Records(gentity_t *ent, Arguments argv) {
                          ETJump::Timerun::MAX_PAGE_SIZE_SINGLE_RUN)
             : ETJump::Timerun::DEFAULT_PAGE_SIZE_SINGLE_RUN;
   }
+
+#ifdef NEW_AUTH
+  params.userId = game.sessionV2->getID(ClientNum(ent));
+#else
   params.userId = ETJump::session->GetId(ent);
+#endif
 
   game.timerunV2->printRecords(params);
 
@@ -1421,11 +1430,20 @@ bool ListPlayers(gentity_t *ent, Arguments argv) {
   for (int i = 0; i < level.numConnectedClients; i++) {
     const int clientNum = level.sortedClients[i];
     gentity_t *player = g_entities + clientNum;
+
+#ifdef NEW_AUTH
+    const int32_t id = game.sessionV2->getID(clientNum);
+#else
     const int id = ETJump::session->GetId(player);
+#endif
 
     msg += ETJump::stringFormat("^7%-2d %-9s %-6d %-s\n", clientNum,
                                 id == -1 ? "-" : std::to_string(id),
+#ifdef NEW_AUTH
+                                game.sessionV2->getLevel(player),
+#else
                                 ETJump::session->GetLevel(player),
+#endif
                                 player->client->pers.netname);
   }
 

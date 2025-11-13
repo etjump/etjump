@@ -61,6 +61,9 @@ public:
   std::bitset<MAX_COMMANDS> getPermissions(const gentity_t *ent) const;
   bool hasPermission(const gentity_t *ent, char flag) const;
 
+  [[nodiscard]] int32_t getID(int32_t clientNum) const;
+  [[nodiscard]] int32_t getLevel(const gentity_t *ent) const;
+
   [[nodiscard]] int64_t getSessionStartTime(int32_t clientNum) const;
 
   bool readSessionData(int clientNum);

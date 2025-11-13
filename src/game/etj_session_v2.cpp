@@ -601,6 +601,22 @@ bool SessionV2::hasPermission(const gentity_t *ent, const char flag) const {
   return clients[ClientNum(ent)].permissions[flag];
 }
 
+int32_t SessionV2::getID(const int32_t clientNum) const {
+  if (!clients[clientNum].user) {
+    return -1;
+  }
+
+  return clients[clientNum].user->id;
+}
+
+int32_t SessionV2::getLevel(const gentity_t *ent) const {
+  if (!clients[ClientNum(ent)].level) {
+    return -1;
+  }
+
+  return clients[ClientNum(ent)].level->level;
+}
+
 int64_t SessionV2::getSessionStartTime(const int32_t clientNum) const {
   return clients[clientNum].sessionStartTime;
 }
