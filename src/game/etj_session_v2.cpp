@@ -601,6 +601,10 @@ bool SessionV2::hasPermission(const gentity_t *ent, const char flag) const {
   return clients[ClientNum(ent)].permissions[flag];
 }
 
+int64_t SessionV2::getSessionStartTime(const int32_t clientNum) const {
+  return clients[clientNum].sessionStartTime;
+}
+
 bool SessionV2::readSessionData(const int clientNum) {
   Json::Value root;
   std::string err;

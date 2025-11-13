@@ -29,6 +29,10 @@
 #include "etj_time_utilities.h"
 #include "etj_session.h"
 
+#ifdef NEW_AUTH
+  #include "etj_session_v2.h"
+#endif
+
 namespace ETJump {
 
 ChatReplay::ChatReplay(std::unique_ptr<Log> log) : logger(std::move(log)) {
@@ -48,11 +52,14 @@ void ChatReplay::createChatMessage(const int clientNum, const std::string &name,
   msg.message = sanitize(message, false, false);
   msg.expired = false;
 
-  time_t t;
+  time_t t = 0;
   t = std::time(&t);
 
-  // FIXME: 32-bit time
+#ifdef NEW_AUTH
+  msg.timestamp = t;
+#else
   msg.timestamp = static_cast<int>(t);
+#endif
 
   storeChatMessage(msg);
 }
@@ -84,12 +91,17 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
 
   // if messages are set to expire, mark any chats that are too old
   if (g_chatReplayMaxMessageAge.integer > 0) {
+
+#ifdef NEW_AUTH
+    int64_t sessStartTime = game.sessionV2->getSessionStartTime(clientNum);
+    sessStartTime -=
+        static_cast<int64_t>(g_chatReplayMaxMessageAge.integer) * 60;
+#else
     int sessStartTime = session->getSessionStartTime(clientNum);
-
-    // FIXME: 32-bit time
     sessStartTime -= g_chatReplayMaxMessageAge.integer * 60;
-    const Time maxAge = Time::fromInt(sessStartTime);
+#endif
 
+    const Time maxAge = Time::fromInt(sessStartTime);
     bool allExpired = true;
 
     for (auto &msg : chatReplayBuffer) {
@@ -128,8 +140,13 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
     }
 
     std::string message = parseChatMessage(msg);
-    // FIXME: 32-bit time
+
+#ifdef NEW_AUTH
+    message += " " + std::to_string(now - msg.timestamp);
+#else
     message += " " + std::to_string(static_cast<int>(now - msg.timestamp));
+#endif
+
     trap_SendServerCommand(clientNum, message.c_str());
   }
 }

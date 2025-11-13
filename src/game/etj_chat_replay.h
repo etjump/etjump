@@ -38,7 +38,12 @@ class ChatReplay {
 
     // true if timestamp is older than current time - g_chatReplayMaxMessageAge
     bool expired;
+
+#ifdef NEW_AUTH
+    int64_t timestamp;
+#else
     int timestamp;
+#endif
   };
 
   static constexpr int MAX_CHAT_REPLAY_BUFFER = 10;
