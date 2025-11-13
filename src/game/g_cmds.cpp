@@ -17,6 +17,10 @@
 #include "etj_remapshader_handler.h"
 #include "etj_shader_index_handler.h"
 
+#ifdef NEW_AUTH
+  #include "etj_session_v2.h"
+#endif
+
 namespace ETJump {
 enum class VotingTypes {
   VoteYes,
@@ -2178,7 +2182,11 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
     other = &g_entities[level.sortedClients[j]];
 
     if (mode == SAY_ADMIN &&
+#ifdef NEW_AUTH
+        !game.sessionV2->hasPermission(other, CommandFlags::ADMINCHAT)) {
+#else
         !ETJump::session->HasPermission(other, CommandFlags::ADMINCHAT)) {
+#endif
       continue;
     }
 
@@ -5106,7 +5114,11 @@ void ClientCommand(int clientNum) {
   if (!Q_stricmp(cmd, "say_admin") || !Q_stricmp(cmd, "ma") || enc) {
     if (!g_adminChat.integer) {
       Printer::chat(clientNum, "Adminchat is disabled on this server.");
+#ifdef NEW_AUTH
+    } else if (!game.sessionV2->hasPermission(ent, CommandFlags::ADMINCHAT)) {
+#else
     } else if (!ETJump::session->HasPermission(ent, CommandFlags::ADMINCHAT)) {
+#endif
       Printer::chat(
           clientNum,
           "You don't have permission to use adminchat on this server.");

@@ -37,6 +37,8 @@
   #include "etj_json_utilities.h"
 
 namespace ETJump {
+inline constexpr char SESSION_FILE[] = "session/client_%02i.json";
+
 SessionV2::SessionV2(
     std::unique_ptr<UserRepository> userRepository, std::unique_ptr<Log> log,
     std::unique_ptr<SynchronizationContext> synchronizationContext)
@@ -583,6 +585,20 @@ void SessionV2::parsePermissions(const int32_t clientNum) {
       }
     }
   }
+}
+
+std::bitset<MAX_COMMANDS>
+SessionV2::getPermissions(const gentity_t *ent) const {
+  // null 'ent' means console, give all permissions
+  if (!ent) {
+    return std::bitset<MAX_COMMANDS>().set();
+  }
+
+  return clients[ClientNum(ent)].permissions;
+}
+
+bool SessionV2::hasPermission(const gentity_t *ent, const char flag) const {
+  return clients[ClientNum(ent)].permissions[flag];
 }
 
 bool SessionV2::readSessionData(const int clientNum) {

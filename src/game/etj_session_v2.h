@@ -36,6 +36,8 @@
   #include "q_shared.h"
 
 namespace ETJump {
+inline constexpr int32_t MAX_COMMANDS = 256;
+
 class SessionV2 {
 public:
   SessionV2(std::unique_ptr<UserRepository> userRepository,
@@ -56,14 +58,13 @@ public:
   void addNewUser(gentity_t *ent);
 
   void parsePermissions(int32_t clientNum);
+  std::bitset<MAX_COMMANDS> getPermissions(const gentity_t *ent) const;
+  bool hasPermission(const gentity_t *ent, char flag) const;
 
   bool readSessionData(int clientNum);
   void writeSessionData() const;
 
 private:
-  static constexpr int MAX_COMMANDS = 256;
-  static constexpr char SESSION_FILE[] = "session/client_%02i.json";
-
   struct Client {
     std::string guid;
     int platform;

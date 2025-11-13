@@ -41,6 +41,10 @@
 #include "etj_filesystem.h"
 #include "etj_savepos_command_handler.h"
 
+#ifdef NEW_AUTH
+  #include "etj_session_v2.h"
+#endif
+
 typedef std::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<std::function<bool(gentity_t *ent, Arguments argv)>, char>
     AdminCommandPair;
@@ -2675,7 +2679,13 @@ bool Commands::List(gentity_t *ent) {
   Printer::chat(clienNum, "^3help: ^gcheck console for more information.");
 
   int i = 1;
+
+#ifdef NEW_AUTH
+  const auto perm = game.sessionV2->getPermissions(ent);
+#else
   std::bitset<256> perm = ETJump::session->Permissions(ent);
+#endif
+
   for (; it != end; it++) {
     if (!perm[it->second.second]) {
       continue;
@@ -2694,8 +2704,12 @@ bool Commands::List(gentity_t *ent) {
     helpMsg += "\n";
   }
 
-  // Let client know if they have access to silent commands
+// Let client know if they have access to silent commands
+#ifdef NEW_AUTH
+  if (ent && game.sessionV2->hasPermission(ent, '/')) {
+#else
   if (ent && ETJump::session->HasPermission(ent, '/')) {
+#endif
     helpMsg += "\n^gUse admin commands silently with ^3/!command\n";
   }
 
@@ -2711,7 +2725,11 @@ bool Commands::AdminCommand(gentity_t *ent) {
     arg = SayArgv(1);
     skip = 1;
   } else {
+#ifdef NEW_AUTH
+    if (ent && !game.sessionV2->hasPermission(ent, '/')) {
+#else
     if (ent && !ETJump::session->HasPermission(ent, '/')) {
+#endif
       return false;
     }
   }
@@ -2737,7 +2755,13 @@ bool Commands::AdminCommand(gentity_t *ent) {
   if (it == adminCommands_.end()) {
     return false;
   }
+
+#ifdef NEW_AUTH
+  const auto permissions = game.sessionV2->getPermissions(ent);
+#else
   std::bitset<256> permissions = ETJump::session->Permissions(ent);
+#endif
+
   std::vector<ConstAdminCommandIterator> foundCommands;
   while (it != adminCommands_.end() &&
          it->first.compare(0, command.length(), command) == 0) {
