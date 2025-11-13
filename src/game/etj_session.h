@@ -58,15 +58,6 @@ public:
   void GetUserAndLevelData(int clientNum);
   bool GuidReceived(gentity_t *ent);
   void OnGuidReceived(gentity_t *ent);
-
-#ifdef NEW_AUTH
-  bool authenticate(gentity_t *ent);
-  bool onAuthenticate(gentity_t *ent);
-  bool migrateGuid(gentity_t *ent);
-  bool onMigrateGuid(gentity_t *ent);
-  void removePendingMigration(gentity_t *ent);
-#endif
-
   void PrintGreeting(gentity_t *ent);
   void OnClientDisconnect(int clientNum);
   std::string Guid(const gentity_t *ent) const;
