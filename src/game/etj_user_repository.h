@@ -62,7 +62,7 @@ public:
   // false if the name already stored for the user
   [[nodiscard]] bool addNewName(const UserModels::Name &name) const;
 
-  std::vector<std::string> getUserNames(int32_t userID);
+  [[nodiscard]] std::vector<std::string> getUserNames(int32_t userID) const;
 
   std::vector<UserModels::BannedIPAddresses> getBannedIPAddresses() const;
   std::vector<UserModels::BanData> getBanData() const;

@@ -414,7 +414,7 @@ bool UserRepository::addNewName(const UserModels::Name &name) const {
   return db->sql.rows_modified() > 0;
 }
 
-std::vector<std::string> UserRepository::getUserNames(const int32_t userID) {
+std::vector<std::string> UserRepository::getUserNames(const int32_t userID) const {
   std::vector<std::string> usernames;
 
   db->sql << R"(
@@ -422,7 +422,7 @@ std::vector<std::string> UserRepository::getUserNames(const int32_t userID) {
       name
     from names
     where
-      user_id=?
+      user_id=?;
     )" << userID >>
       [&usernames](const std::string &name) { usernames.emplace_back(name); };
 
