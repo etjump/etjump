@@ -161,6 +161,7 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
 
         clients[clientNum].user = std::make_unique<UserV2>();
         clients[clientNum].user->id = r->user.id;
+        clients[clientNum].user->name = r->user.name;
         clients[clientNum].user->greeting = r->user.greeting;
         clients[clientNum].user->title = r->user.title;
         clients[clientNum].user->lastSeen = r->user.lastSeen;
@@ -618,6 +619,14 @@ int32_t SessionV2::getLevel(const gentity_t *ent) const {
   return clients[ClientNum(ent)].level->level;
 }
 
+const UserV2 *SessionV2::getUser(const int32_t clientNum) const {
+  return clients[clientNum].user.get();
+}
+
+const Levels::Level *SessionV2::getLevel(const int32_t clientNum) const {
+  return clients[clientNum].level.get();
+}
+
 int64_t SessionV2::getSessionStartTime(const int32_t clientNum) const {
   return clients[clientNum].sessionStartTime;
 }
@@ -656,6 +665,50 @@ void SessionV2::storeNewName(const gentity_t *ent) const {
         if (!r->message.empty()) {
           logger->info(r->message);
         }
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
+}
+
+void SessionV2::listUsernames(const int32_t clientNum, const int32_t id) {
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this, id, clientNum] {
+        const auto usernames = repository->getUserNames(id);
+        return std::make_unique<GetUserNamesResult>(usernames);
+      },
+      [this, clientNum, id](std::unique_ptr<SynchronizationContext::ResultBase>
+                                getUserNamesResult) {
+        auto *const r =
+            dynamic_cast<GetUserNamesResult *>(getUserNamesResult.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("GetUserNamesResult is null.");
+        }
+
+        if (r->usernames.empty()) {
+          Printer::chat(
+              clientNum,
+              stringFormat(
+                  "^3listusernames: ^7couldn't find any names with id ^3%i",
+                  id));
+          return;
+        }
+
+        Printer::chat(clientNum,
+                      "^3listusernames: ^7check console for more information.");
+
+        std::string msg =
+            stringFormat("Found ^3%i ^7usernames for ID ^3%i^7:\n",
+                         static_cast<int32_t>(r->usernames.size()), id);
+
+        for (const auto &name : r->usernames) {
+          msg += name + "\n";
+        }
+
+        Printer::console(clientNum, msg);
       },
       [this, func](const std::runtime_error &e) {
         logger->error("%s: %s", func, e.what());

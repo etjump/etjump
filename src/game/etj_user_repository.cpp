@@ -414,6 +414,21 @@ bool UserRepository::addNewName(const UserModels::Name &name) const {
   return db->sql.rows_modified() > 0;
 }
 
+std::vector<std::string> UserRepository::getUserNames(const int32_t userID) {
+  std::vector<std::string> usernames;
+
+  db->sql << R"(
+    select
+      name
+    from names
+    where
+      user_id=?
+    )" << userID >>
+      [&usernames](const std::string &name) { usernames.emplace_back(name); };
+
+  return usernames;
+}
+
 std::vector<UserModels::BannedIPAddresses>
 UserRepository::getBannedIPAddresses() const {
   std::vector<UserModels::BannedIPAddresses> bannedIPAddresses{};

@@ -571,11 +571,31 @@ const unsigned GREETING = 0x00020;
 
 bool Admintest(gentity_t *ent, Arguments argv) {
   if (!ent) {
+    // TODO: remove? this is kinda useless
     Printer::chatAll("^3admintest: ^7console is a level ? user.");
     return true;
   }
 
+#ifdef NEW_AUTH
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const user = game.sessionV2->getUser(clientNum);
+  const auto *const level = game.sessionV2->getLevel(clientNum);
+
+  if (!user || !level) {
+    Printer::chat(clientNum,
+                  "^3admintest: ^7failed to get user and/or level. This is a "
+                  "bug, please report this to the developers.");
+    return true;
+  }
+
+  Printer::chatAll(
+      ETJump::stringFormat("^3admintest: ^7%s^7 is a level ^3%i ^7user (%s^7).",
+                           ent->client->pers.netname, level->level,
+                           !user->title.empty() ? user->title : level->name));
+#else
   ETJump::session->PrintAdmintest(ent);
+#endif
   return true;
 }
 
@@ -1149,7 +1169,12 @@ bool ListUserNames(gentity_t *ent, Arguments argv) {
     return false;
   }
 
+#ifdef NEW_AUTH
+  game.sessionV2->listUsernames(
+      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER, id);
+#else
   ETJump::database->ListUserNames(ent, id);
+#endif
   return true;
 }
 
@@ -1171,7 +1196,33 @@ bool Finger(gentity_t *ent, Arguments argv) {
     return false;
   }
 
+#ifdef NEW_AUTH
+  const int32_t clientNum = ClientNum(target);
+
+  const auto *const user = game.sessionV2->getUser(clientNum);
+  const auto *const level = game.sessionV2->getLevel(clientNum);
+
+  // we don't have valid user or level if '!finger' is used
+  // on a client that hasn't fully connected yet (or if there's a bug ":D")
+  if (!user || !level) {
+    Printer::chat(
+        ent, "^3finger: ^7please wait until the user has finished connecting.");
+    return true;
+  }
+
+  Printer::chat(ent, "^3finger: ^7check console for more information.");
+  Printer::console(ent, ETJump::stringFormat(
+                            "^7Name: %s\n"
+                            "^7Original name: %s\n"
+                            "^7ID: %i\n"
+                            "^7Level: %i\n"
+                            "^7Title: %s\n",
+                            target->client->pers.netname, user->name, user->id,
+                            level->level,
+                            !user->title.empty() ? user->title : level->name));
+#else
   ETJump::session->PrintFinger(ent, target);
+#endif
   return true;
 }
 

@@ -90,6 +90,14 @@ public:
 
   std::string message;
 };
+
+class GetUserNamesResult final : public SynchronizationContext::ResultBase {
+public:
+  explicit GetUserNamesResult(std::vector<std::string> usernames)
+      : usernames(std::move(usernames)) {}
+
+  std::vector<std::string> usernames;
+};
 } // namespace ETJump
 
 #endif

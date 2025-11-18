@@ -33,6 +33,7 @@ namespace ETJump {
 class UserV2 {
 public:
   int32_t id;
+  std::string name; // original name in the user database (not netname!)
   std::string greeting;
   std::string title;
   std::string commands;

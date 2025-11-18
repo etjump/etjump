@@ -64,9 +64,15 @@ public:
   [[nodiscard]] int32_t getID(int32_t clientNum) const;
   [[nodiscard]] int32_t getLevel(const gentity_t *ent) const;
 
+  [[nodiscard]] const UserV2 *getUser(int32_t clientNum) const;
+  [[nodiscard]] const Levels::Level *getLevel(int32_t clientNum) const;
+
   [[nodiscard]] int64_t getSessionStartTime(int32_t clientNum) const;
 
   void storeNewName(const gentity_t *ent) const;
+
+  // admin command functions
+  void listUsernames(int32_t clientNum, int32_t id);
 
   bool readSessionData(int clientNum);
   void writeSessionData() const;
