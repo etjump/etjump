@@ -727,16 +727,16 @@ void SessionV2::listUsers(const gentity_t *ent, const int32_t page) {
       });
 }
 
-void SessionV2::listUsernames(const int32_t clientNum, const int32_t id) {
+void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) {
   const std::string func = __func__;
 
   sc->postTask(
-      [this, id, clientNum] {
+      [this, id] {
         const auto usernames = repository->getUserNames(id);
         return std::make_unique<GetUserNamesResult>(usernames);
       },
-      [this, clientNum, id](std::unique_ptr<SynchronizationContext::ResultBase>
-                                getUserNamesResult) {
+      [this, ent, id](std::unique_ptr<SynchronizationContext::ResultBase>
+                          getUserNamesResult) {
         auto *const r =
             dynamic_cast<GetUserNamesResult *>(getUserNamesResult.get());
 
@@ -746,14 +746,14 @@ void SessionV2::listUsernames(const int32_t clientNum, const int32_t id) {
 
         if (r->usernames.empty()) {
           Printer::chat(
-              clientNum,
+              ent,
               stringFormat(
                   "^3listusernames: ^7couldn't find any names with id ^3%i",
                   id));
           return;
         }
 
-        Printer::chat(clientNum,
+        Printer::chat(ent,
                       "^3listusernames: ^7check console for more information.");
 
         std::string msg =
@@ -761,10 +761,10 @@ void SessionV2::listUsernames(const int32_t clientNum, const int32_t id) {
                          static_cast<int32_t>(r->usernames.size()), id);
 
         for (const auto &name : r->usernames) {
-          msg += name + "\n";
+          msg += name + "\n^7";
         }
 
-        Printer::console(clientNum, msg);
+        Printer::console(ent, msg);
       },
       [this, func](const std::runtime_error &e) {
         logger->error("%s: %s", func, e.what());

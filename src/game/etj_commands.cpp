@@ -1170,8 +1170,7 @@ bool ListUserNames(gentity_t *ent, Arguments argv) {
   }
 
 #ifdef NEW_AUTH
-  game.sessionV2->listUsernames(
-      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER, id);
+  game.sessionV2->listUsernames(ent, id);
 #else
   ETJump::database->ListUserNames(ent, id);
 #endif
