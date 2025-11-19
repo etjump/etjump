@@ -814,6 +814,77 @@ void SessionV2::findUser(const gentity_t *ent, const std::string &name) const {
       });
 }
 
+void SessionV2::userInfo(const gentity_t *ent, const int32_t id) const {
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this, id] {
+        const UserModels::User user = repository->getUserData(id);
+
+        // if this user hasn't migrated from old GUID yet,
+        // grab legacy auth data as well so we can display the old GUID
+        std::optional<UserModels::LegacyAuth> legacyAuth;
+
+        if (user.guid.empty()) {
+          legacyAuth = repository->getLegacyAuthData(id);
+        }
+
+        return std::make_unique<GetUserDataResult>(user, legacyAuth);
+      },
+      [this, ent, id](std::unique_ptr<SynchronizationContext::ResultBase>
+                          getUserDataResult) {
+        auto *const r =
+            dynamic_cast<GetUserDataResult *>(getUserDataResult.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("GetUserDataResult is null.");
+        }
+
+        if (r->user.id == 0) {
+
+          Printer::chat(ent, "^3userinfo: ^7no user found with id ^3" +
+                                 std::to_string(id));
+          return;
+        }
+
+        Printer::chat(ent, "^3userinfo: ^7check console for more information.");
+
+        std::string guid = r->user.guid;
+
+        if (guid.empty() && r->legacyAuth.has_value()) {
+          guid = !r->legacyAuth.value().guid.empty()
+                     ? r->legacyAuth.value().guid
+                     : "N/A";
+        }
+
+        const std::string ipv4 = !r->user.ipv4.empty() ? r->user.ipv4 : "N/A";
+        const std::string ipv6 = !r->user.ipv6.empty() ? r->user.ipv6 : "N/A";
+        const std::string lastSeen =
+            r->user.lastSeen > 0
+                ? Time::fromInt(r->user.lastSeen).toDateTimeString()
+                : "N/A";
+
+        std::string msg = stringFormat(
+            "^5ID: ^7%d\n"
+            "^5GUID: ^7%s\n"
+            "^5Last IPv4: ^7%s\n"
+            "^5Last IPv6: ^7%s\n"
+            "^5Level: ^7%d\n"
+            "^5Last seen:^7 %s\n"
+            "^5Name: ^7%s\n"
+            "^5Title: ^7%s\n"
+            "^5Commands: ^7%s\n"
+            "^5Greeting: ^7%s\n",
+            r->user.id, guid, ipv4, ipv6, r->user.level, lastSeen, r->user.name,
+            r->user.title, r->user.commands, r->user.greeting);
+
+        Printer::console(ent, msg);
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
+}
+
 bool SessionV2::readSessionData(const int clientNum) {
   Json::Value root;
   std::string err;

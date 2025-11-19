@@ -25,6 +25,8 @@
 #pragma once
 
 #ifdef NEW_AUTH
+  #include <optional>
+
   #include "etj_synchronization_context.h"
   #include "etj_user_models.h"
 
@@ -70,9 +72,13 @@ public:
 
 class GetUserDataResult final : public SynchronizationContext::ResultBase {
 public:
-  explicit GetUserDataResult(UserModels::User user) : user(std::move(user)) {}
+  explicit GetUserDataResult(
+      UserModels::User user,
+      std::optional<UserModels::LegacyAuth> legacyAuth = std::nullopt)
+      : user(std::move(user)), legacyAuth(std::move(legacyAuth)) {}
 
   UserModels::User user;
+  std::optional<UserModels::LegacyAuth> legacyAuth;
 };
 
 class UpdateLastSeenResult final : public SynchronizationContext::ResultBase {

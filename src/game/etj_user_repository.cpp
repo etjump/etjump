@@ -254,6 +254,27 @@ UserRepository::getLegacyAuthData(const std::string &oldGuid) const {
   return legacyAuth;
 }
 
+UserModels::LegacyAuth
+UserRepository::getLegacyAuthData(const int32_t userID) const {
+  UserModels::LegacyAuth legacyAuth{};
+
+  db->sql << R"(
+    select
+      *
+    from legacy_auth
+    where
+      user_id=?;
+  )" << userID >>
+      [&legacyAuth](const int user_id, const std::string &guid,
+                    const std::string &hwid) {
+        legacyAuth.userID = user_id;
+        legacyAuth.guid = guid;
+        legacyAuth.hwid = hwid;
+      };
+
+  return legacyAuth;
+}
+
 void UserRepository::migrateGuid(const int oldID,
                                  const std::string &newGUID) const {
   int count = 0;

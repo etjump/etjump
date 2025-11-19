@@ -2243,7 +2243,11 @@ bool UserInfo(gentity_t *ent, Arguments argv) {
     return false;
   }
 
+#ifdef NEW_AUTH
+  game.sessionV2->userInfo(ent, id);
+#else
   ETJump::database->UserInfo(ent, id);
+#endif
 
   return true;
 }

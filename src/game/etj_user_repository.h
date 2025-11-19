@@ -47,6 +47,7 @@ public:
   UserModels::User getUserData(int userID) const;
   int getUserID(const std::string &guid) const;
   UserModels::LegacyAuth getLegacyAuthData(const std::string &oldGuid) const;
+  [[nodiscard]] UserModels::LegacyAuth getLegacyAuthData(int32_t userID) const;
   void migrateGuid(int oldID, const std::string &newGUID) const;
 
   std::vector<UserModels::UserHWID> getHWIDsForUser(int userID) const;

@@ -75,6 +75,7 @@ public:
   void listUsers(const gentity_t *ent, int32_t page) const;
   void listUsernames(const gentity_t *ent, int32_t id) const;
   void findUser(const gentity_t *ent, const std::string &name) const;
+  void userInfo(const gentity_t *ent, int32_t id) const;
 
   bool readSessionData(int clientNum);
   void writeSessionData() const;
