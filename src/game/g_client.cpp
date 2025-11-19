@@ -1936,7 +1936,6 @@ restarts.
 */
 const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   const char *value;
-  const char *temp = NULL;
   gclient_t *client;
   char userinfo[MAX_INFO_STRING];
   gentity_t *ent;
@@ -1967,23 +1966,15 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     return "You are banned from this server.";
   }
 
-  // if(IsBanned(ip))
-  //{
-  //     C_CPMAll(va("^5Banned player ^7%s ^5tried to connect.",
-  //     ent->client->ps.clientNum)); return "You are banned from this
-  //     server.";
-  // }
-
   // If we try to pass NULL to Q_strncpyz server will crash
   // This allows users to crash the server with custom clients.
-  // FIXME: IPv6 support
-  temp = GetParsedIP(value);
-  if (!temp) {
+  const std::string parsedIP = Utilities::stripIPAddressPort(value);
+  if (parsedIP.empty()) {
     return "Malformed userinfo.";
   }
 
   /* ETPub fakeplayers DoS fix */
-  Q_strncpyz(ip, temp, sizeof(ip));
+  Q_strncpyz(ip, parsedIP.c_str(), sizeof(ip));
   for (i = 0; i < level.numConnectedClients; i++) {
     clientNum2 = level.sortedClients[i];
     if (clientNum == clientNum2) {

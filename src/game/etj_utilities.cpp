@@ -233,14 +233,28 @@ std::string Utilities::stripIPAddressPort(const std::string &address) {
 
   // only IPv4 addresses contain dots
   if (address.find('.') != std::string::npos) {
-    return address.substr(0, address.find(':'));
+    const auto colonPos = address.find(':');
+
+    if (colonPos != std::string::npos) {
+      return address.substr(0, colonPos);
+    }
+
+    // no port attached (IPv4)
+    return address;
   }
 
-  // IPv6 addresses are enclosed in square brackets if port is attached
+  // IPv6 addresses should be enclosed in square brackets if a port is attached
   if (address[0] == '[') {
-    return address.substr(1, address.find(']') - 1);
+    const auto closingBracketPos = address.find(']');
+
+    if (closingBracketPos != std::string::npos) {
+      return address.substr(1, closingBracketPos - 1);
+    }
+
+    // malformed address
+    return "";
   }
 
-  // no port attached, return the original string
+  // no port attached (IPv6 or 'localhost')
   return address;
 }
