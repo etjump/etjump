@@ -531,19 +531,29 @@ void PrintManual(gentity_t *ent, const std::string &command) {
   }
 }
 
-bool IsTargetHigherLevel(gentity_t *ent, gentity_t *target,
+static bool IsTargetHigherLevel(gentity_t *ent, gentity_t *target,
                          bool equalIsHigher) {
   if (!ent) {
     return false;
   }
 
   if (equalIsHigher) {
+#ifdef NEW_AUTH
+    return game.sessionV2->getLevel(ent) <= game.sessionV2->getLevel(target);
+#else
     return ETJump::session->GetLevel(ent) <= ETJump::session->GetLevel(target);
+#endif
   }
 
+#ifdef NEW_AUTH
+  return game.sessionV2->getLevel(ent) < game.sessionV2->getLevel(target);
+#else
   return ETJump::session->GetLevel(ent) < ETJump::session->GetLevel(target);
+#endif
 }
 
+// FIXME: 'GetLevelById' fetches from database, this needs to be reworked
+// (used in '!setlevel' as it can target offline users)
 bool IsTargetHigherLevel(gentity_t *ent, unsigned id, bool equalIsHigher) {
   if (equalIsHigher) {
     return ETJump::session->GetLevel(ent) <= ETJump::session->GetLevelById(id);
