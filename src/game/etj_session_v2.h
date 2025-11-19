@@ -53,9 +53,9 @@ public:
   void onClientDisconnect(int clientNum);
   void onClientBegin(const gentity_t *ent);
 
-  bool authenticate(gentity_t *ent);
-  bool migrateGuid(gentity_t *ent);
-  void addNewUser(gentity_t *ent);
+  bool authenticate(const gentity_t *ent);
+  bool migrateGuid(const gentity_t *ent);
+  void addNewUser(int32_t clientNum);
 
   void parsePermissions(int32_t clientNum);
   std::bitset<MAX_COMMANDS> getPermissions(const gentity_t *ent) const;

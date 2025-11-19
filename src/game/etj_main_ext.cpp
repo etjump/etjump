@@ -351,7 +351,7 @@ qboolean OnClientCommand(gentity_t *ent) {
   }
 
   if (command == ETJump::Constants::Authentication::GUID_MIGRATE_FAIL) {
-    game.sessionV2->addNewUser(ent);
+    game.sessionV2->addNewUser(ClientNum(ent));
     return qtrue;
   }
 

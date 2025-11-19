@@ -199,7 +199,7 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
       });
 }
 
-bool SessionV2::authenticate(gentity_t *ent) {
+bool SessionV2::authenticate(const gentity_t *ent) {
   const int argc = trap_Argc();
   const int clientNum = ClientNum(ent);
   const std::string cleanName = sanitize(ent->client->pers.netname);
@@ -292,7 +292,7 @@ bool SessionV2::authenticate(gentity_t *ent) {
 
         return std::make_unique<AuthenticationResult>(user.id, false);
       },
-      [this, clientNum, cleanName, ent,
+      [this, clientNum, cleanName,
        func](std::unique_ptr<SynchronizationContext::ResultBase> userData) {
         const auto result =
             dynamic_cast<AuthenticationResult *>(userData.get());
@@ -332,7 +332,7 @@ bool SessionV2::authenticate(gentity_t *ent) {
   return true;
 }
 
-bool SessionV2::migrateGuid(gentity_t *ent) {
+bool SessionV2::migrateGuid(const gentity_t *ent) {
   const int argc = trap_Argc();
   constexpr int NUM_EXPECTED_ARGS = 3;
   const int clientNum = ClientNum(ent);
@@ -399,7 +399,7 @@ bool SessionV2::migrateGuid(gentity_t *ent) {
         return std::make_unique<GuidMigrationResult>(
             user.id, false, "Successfully migrated old GUID.\n");
       },
-      [this, clientNum, ent](
+      [this, clientNum](
           std::unique_ptr<SynchronizationContext::ResultBase> legacyAuthData) {
         const auto result =
             dynamic_cast<GuidMigrationResult *>(legacyAuthData.get());
@@ -414,7 +414,7 @@ bool SessionV2::migrateGuid(gentity_t *ent) {
         }
 
         if (result->userID == 0) {
-          addNewUser(ent);
+          addNewUser(clientNum);
         } else {
           Printer::console(clientNum, result->message);
           onAuthSuccess(clientNum);
@@ -430,9 +430,8 @@ bool SessionV2::migrateGuid(gentity_t *ent) {
   return true;
 }
 
-void SessionV2::addNewUser(gentity_t *ent) {
-  const int clientNum = ClientNum(ent);
-  const std::string name = ent->client->pers.netname;
+void SessionV2::addNewUser(const int32_t clientNum) {
+  const std::string name = (g_entities + clientNum)->client->pers.netname;
   const std::string guid = clients[clientNum].guid;
   const std::string ipv4 = clients[clientNum].ipv4;
   const std::string ipv6 = clients[clientNum].ipv6;
@@ -679,6 +678,8 @@ void SessionV2::storeNewName(const gentity_t *ent) const {
 }
 
 void SessionV2::listUsers(const gentity_t *ent, const int32_t page) const {
+  const int32_t clientNum =
+      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
   const std::string func = __func__;
 
   sc->postTask(
@@ -686,7 +687,7 @@ void SessionV2::listUsers(const gentity_t *ent, const int32_t page) const {
         const auto users = repository->getUsers();
         return std::make_unique<GetUsersResult>(users);
       },
-      [this, ent, page](
+      [this, clientNum, page](
           std::unique_ptr<SynchronizationContext::ResultBase> getUsersResult) {
         auto *const r = dynamic_cast<GetUsersResult *>(getUsersResult.get());
 
@@ -699,11 +700,11 @@ void SessionV2::listUsers(const gentity_t *ent, const int32_t page) const {
         const uint32_t pages = (size / USERS_PER_PAGE) + 1;
 
         if (page < 1 || page > pages) {
-          Printer::chat(ent, "^3listusers: ^7invalid page.");
+          Printer::chat(clientNum, "^3listusers: ^7invalid page.");
           return;
         }
 
-        Printer::chat(ent,
+        Printer::chat(clientNum,
                       "^3listusers: ^7check console for more information.");
 
         time_t t = std::time(&t);
@@ -726,7 +727,7 @@ void SessionV2::listUsers(const gentity_t *ent, const int32_t page) const {
               r->users[i].name);
         }
 
-        Printer::console(ent, msg);
+        Printer::console(clientNum, msg);
       },
       [this, func](const std::runtime_error &e) {
         logger->error("%s: %s", func, e.what());
@@ -734,6 +735,8 @@ void SessionV2::listUsers(const gentity_t *ent, const int32_t page) const {
 }
 
 void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) const {
+  const int32_t clientNum =
+      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
   const std::string func = __func__;
 
   sc->postTask(
@@ -741,8 +744,8 @@ void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) const {
         const auto usernames = repository->getUserNames(id);
         return std::make_unique<GetUserNamesResult>(usernames);
       },
-      [this, ent, id](std::unique_ptr<SynchronizationContext::ResultBase>
-                          getUserNamesResult) {
+      [this, clientNum, id](std::unique_ptr<SynchronizationContext::ResultBase>
+                                getUserNamesResult) {
         auto *const r =
             dynamic_cast<GetUserNamesResult *>(getUserNamesResult.get());
 
@@ -752,14 +755,14 @@ void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) const {
 
         if (r->usernames.empty()) {
           Printer::chat(
-              ent,
+              clientNum,
               stringFormat(
                   "^3listusernames: ^7couldn't find any names with id ^3%i",
                   id));
           return;
         }
 
-        Printer::chat(ent,
+        Printer::chat(clientNum,
                       "^3listusernames: ^7check console for more information.");
 
         std::string msg =
@@ -770,7 +773,7 @@ void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) const {
           msg += name + "\n^7";
         }
 
-        Printer::console(ent, msg);
+        Printer::console(clientNum, msg);
       },
       [this, func](const std::runtime_error &e) {
         logger->error("%s: %s", func, e.what());
@@ -778,17 +781,20 @@ void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) const {
 }
 
 void SessionV2::findUser(const gentity_t *ent, const std::string &name) const {
-  const std::string func = __func__;
   // query is case-insensitive, so we just need to strip color codes
   const std::string cleanName = sanitize(name);
+  const int32_t clientNum =
+      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func = __func__;
 
   sc->postTask(
       [this, cleanName] {
         const auto users = repository->getUsersByName(cleanName);
         return std::make_unique<GetUsersByNameResult>(users);
       },
-      [this, ent, cleanName](std::unique_ptr<SynchronizationContext::ResultBase>
-                                 getUsersByNameResult) {
+      [this, clientNum,
+       cleanName](std::unique_ptr<SynchronizationContext::ResultBase>
+                      getUsersByNameResult) {
         auto *const r =
             dynamic_cast<GetUsersByNameResult *>(getUsersByNameResult.get());
 
@@ -798,13 +804,14 @@ void SessionV2::findUser(const gentity_t *ent, const std::string &name) const {
 
         if (r->users.empty()) {
           Printer::chat(
-              ent,
+              clientNum,
               stringFormat("^3finduser: ^7no users found with name ^3'%s'^7.",
                            cleanName));
           return;
         }
 
-        Printer::chat(ent, "^3finduser: ^7check console for more information.");
+        Printer::chat(clientNum,
+                      "^3finduser: ^7check console for more information.");
         std::string msg = stringFormat("Listing users matching the name ^3'%s' "
                                        "^7(max 20 results)\n\nID       Name\n",
                                        cleanName);
@@ -813,7 +820,7 @@ void SessionV2::findUser(const gentity_t *ent, const std::string &name) const {
           msg += ETJump::stringFormat("%-8d %-36s^7\n", id, name);
         }
 
-        Printer::console(ent, msg);
+        Printer::console(clientNum, msg);
       },
       [this, func](const std::runtime_error &e) {
         logger->error("%s: %s", func, e.what());
@@ -821,6 +828,8 @@ void SessionV2::findUser(const gentity_t *ent, const std::string &name) const {
 }
 
 void SessionV2::userInfo(const gentity_t *ent, const int32_t id) const {
+  const int32_t clientNum =
+      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
   const std::string func = __func__;
 
   sc->postTask(
@@ -837,8 +846,8 @@ void SessionV2::userInfo(const gentity_t *ent, const int32_t id) const {
 
         return std::make_unique<GetUserDataResult>(user, legacyAuth);
       },
-      [this, ent, id](std::unique_ptr<SynchronizationContext::ResultBase>
-                          getUserDataResult) {
+      [this, clientNum, id](std::unique_ptr<SynchronizationContext::ResultBase>
+                                getUserDataResult) {
         auto *const r =
             dynamic_cast<GetUserDataResult *>(getUserDataResult.get());
 
@@ -848,12 +857,13 @@ void SessionV2::userInfo(const gentity_t *ent, const int32_t id) const {
 
         if (r->user.id == 0) {
 
-          Printer::chat(ent, "^3userinfo: ^7no user found with id ^3" +
-                                 std::to_string(id));
+          Printer::chat(clientNum, "^3userinfo: ^7no user found with id ^3" +
+                                       std::to_string(id));
           return;
         }
 
-        Printer::chat(ent, "^3userinfo: ^7check console for more information.");
+        Printer::chat(clientNum,
+                      "^3userinfo: ^7check console for more information.");
 
         std::string guid = r->user.guid;
 
@@ -884,7 +894,7 @@ void SessionV2::userInfo(const gentity_t *ent, const int32_t id) const {
             r->user.id, guid, ipv4, ipv6, r->user.level, lastSeen, r->user.name,
             r->user.title, r->user.commands, r->user.greeting);
 
-        Printer::console(ent, msg);
+        Printer::console(clientNum, msg);
       },
       [this, func](const std::runtime_error &e) {
         logger->error("%s: %s", func, e.what());

@@ -1472,7 +1472,7 @@ int FindClientByName(char *name) {
   return -1;
 }
 
-const char *ClientIPAddr(gentity_t *ent) {
+const char *ClientIPAddr(const gentity_t *ent) {
   char userinfo[MAX_INFO_STRING] = "\0";
   char *ip = NULL;
 

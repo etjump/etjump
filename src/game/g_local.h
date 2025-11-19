@@ -1635,7 +1635,7 @@ void G_ProcessTagConnect(gentity_t *ent, qboolean clearAngles);
 void G_SetEntState(gentity_t *ent, entState_t state);
 
 team_t G_GetTeamFromEntity(gentity_t *ent);
-const char *ClientIPAddr(gentity_t *ent);
+const char *ClientIPAddr(const gentity_t *ent);
 
 namespace ETJump {
 gentity_t *soundEvent(vec3_t origin, entity_event_t eventType, int soundIndex);
