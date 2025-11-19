@@ -152,7 +152,7 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
 
         return std::make_unique<GetUserDataResult>(user);
       },
-      [this, clientNum, firstTime](
+      [this, clientNum, ent, firstTime](
           std::unique_ptr<SynchronizationContext::ResultBase> userData) {
         auto *const r = dynamic_cast<GetUserDataResult *>(userData.get());
 
@@ -174,7 +174,7 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
 
         if (firstTime) {
           printGreeting(clientNum);
-          storeNewName(g_entities + clientNum);
+          storeNewName(ent);
 
           if (r->user.lastSeen > 0) {
             Printer::popup(
@@ -182,6 +182,12 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
                 stringFormat(
                     "^5Your last visit was on %s.",
                     Time::fromInt(r->user.lastSeen).toDateTimeString()));
+          }
+
+          // mutes expire once map changes, so it only makes sense to check
+          // this if the client is connecting for the first time
+          if (isMuted(clientNum)) {
+            ent->client->sess.muted = qtrue;
           }
         }
 
@@ -883,6 +889,42 @@ void SessionV2::userInfo(const gentity_t *ent, const int32_t id) const {
       [this, func](const std::runtime_error &e) {
         logger->error("%s: %s", func, e.what());
       });
+}
+
+void SessionV2::addMute(const int32_t clientNum) {
+  if (clients[clientNum].guid.empty()) {
+    logger->error("Unable to add mute for client %i - empty GUID!", clientNum);
+    return;
+  }
+
+  if (std::find(mutedClients.cbegin(), mutedClients.cend(),
+                clients[clientNum].guid) == mutedClients.cend()) {
+    mutedClients.emplace_back(clients[clientNum].guid);
+    logger->info("Added mute for client %i with GUID %s", clientNum,
+                 clients[clientNum].guid);
+  }
+}
+
+void SessionV2::removeMute(const int32_t clientNum) {
+  if (clients[clientNum].guid.empty()) {
+    logger->error("Unable to remove mute from client %i - empty GUID!",
+                  clientNum);
+    return;
+  }
+
+  const auto it = std::find(mutedClients.cbegin(), mutedClients.cend(),
+                            clients[clientNum].guid);
+
+  if (it != mutedClients.cend()) {
+    mutedClients.erase(it);
+    logger->info("Removed mute from client %i with GUID %s", clientNum,
+                 clients[clientNum].guid);
+  }
+}
+
+bool SessionV2::isMuted(const int32_t clientNum) const {
+  return std::find(mutedClients.cbegin(), mutedClients.cend(),
+                   clients[clientNum].guid) != mutedClients.cend();
 }
 
 bool SessionV2::readSessionData(const int clientNum) {

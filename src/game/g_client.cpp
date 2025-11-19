@@ -2112,11 +2112,13 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   // count current clients and rank for scoreboard
   CalculateRanks();
 
+#ifndef NEW_AUTH
   // Let's see if user is muted
   value = Info_ValueForKey(userinfo, "ip");
   if (G_isIPMuted(value)) {
     ent->client->sess.muted = qtrue;
   }
+#endif
 
   return nullptr;
 }

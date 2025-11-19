@@ -71,6 +71,10 @@ public:
 
   void storeNewName(const gentity_t *ent) const;
 
+  void addMute(int32_t clientNum);
+  void removeMute(int32_t clientNum);
+  [[nodiscard]] bool isMuted(int32_t clientNum) const;
+
   // admin command functions
   void listUsers(const gentity_t *ent, int32_t page) const;
   void listUsernames(const gentity_t *ent, int32_t id) const;
@@ -109,6 +113,8 @@ private:
   // TODO: this could maybe be a map or a vector rather than an array,
   //  we don't actually need 64 copies of 'Client' like, ever
   std::array<Client, MAX_CLIENTS> clients{};
+
+  std::vector<std::string> mutedClients;
 
   std::unique_ptr<UserRepository> repository;
   std::unique_ptr<Log> logger;

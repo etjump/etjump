@@ -1630,6 +1630,9 @@ bool MostPlayed(gentity_t *ent, Arguments argv) {
 void MutePlayer(gentity_t *target) {
   target->client->sess.muted = qtrue;
 
+#ifdef NEW_AUTH
+  game.sessionV2->addMute(ClientNum(target));
+#else
   char userinfo[MAX_INFO_STRING] = "\0";
   char *ip = NULL;
 
@@ -1637,6 +1640,7 @@ void MutePlayer(gentity_t *target) {
   ip = Info_ValueForKey(userinfo, "ip");
 
   G_AddIpMute(ip);
+#endif
 }
 
 bool Mute(gentity_t *ent, Arguments argv) {
@@ -2217,12 +2221,16 @@ bool Unmute(gentity_t *ent, Arguments argv) {
 
   target->client->sess.muted = qfalse;
 
+#ifdef NEW_AUTH
+  game.sessionV2->removeMute(ClientNum(target));
+#else
   char *ip = NULL;
   char userinfo[MAX_INFO_STRING] = "\0";
   trap_GetUserinfo(ClientNum(target), userinfo, sizeof(userinfo));
   ip = Info_ValueForKey(userinfo, "ip");
 
   G_RemoveIPMute(ip);
+#endif
 
   Printer::center(target, "^5You've been unmuted.");
   Printer::chatAll(target->client->pers.netname +
