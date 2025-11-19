@@ -532,7 +532,7 @@ void PrintManual(gentity_t *ent, const std::string &command) {
 }
 
 static bool IsTargetHigherLevel(gentity_t *ent, gentity_t *target,
-                         bool equalIsHigher) {
+                                bool equalIsHigher) {
   if (!ent) {
     return false;
   }
@@ -1013,7 +1013,11 @@ bool EditLevel(gentity_t *ent, Arguments argv) {
   for (int i = 0; i < level.numConnectedClients; i++) {
     int num = level.sortedClients[i];
 
+#ifdef NEW_AUTH
+    game.sessionV2->parsePermissions(num);
+#else
     ETJump::session->ParsePermissions(num);
+#endif
   }
 
   Printer::chat(ent, va("^3editlevel: ^7updated level %d.", adminLevel));
