@@ -1454,7 +1454,11 @@ bool ListUsers(gentity_t *ent, Arguments argv) {
     }
   }
 
+#ifdef NEW_AUTH
+  game.sessionV2->listUsers(ent, page);
+#else
   ETJump::database->ListUsers(ent, page);
+#endif
   return true;
 }
 

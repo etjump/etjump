@@ -34,6 +34,7 @@
   #include "etj_local.h"
   #include "etj_timerun_v2.h"
   #include "etj_motd.h"
+  #include "utilities.hpp"
   #include "etj_json_utilities.h"
 
 namespace ETJump {
@@ -665,6 +666,61 @@ void SessionV2::storeNewName(const gentity_t *ent) const {
         if (!r->message.empty()) {
           logger->info(r->message);
         }
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
+}
+
+void SessionV2::listUsers(const gentity_t *ent, const int32_t page) {
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this] {
+        const auto users = repository->getUsers();
+        return std::make_unique<GetUsersResult>(users);
+      },
+      [this, ent, page](
+          std::unique_ptr<SynchronizationContext::ResultBase> getUsersResult) {
+        auto *const r = dynamic_cast<GetUsersResult *>(getUsersResult.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("GetUsersResult is null.");
+        }
+
+        constexpr int32_t USERS_PER_PAGE = 20;
+        const auto size = static_cast<uint32_t>(r->users.size());
+        const uint32_t pages = (size / USERS_PER_PAGE) + 1;
+
+        if (page < 1 || page > pages) {
+          Printer::chat(ent, "^3listusers: ^7invalid page.");
+          return;
+        }
+
+        Printer::chat(ent,
+                      "^3listusers: ^7check console for more information.");
+
+        time_t t = std::time(&t);
+        const uint32_t start = (page - 1) * USERS_PER_PAGE;
+        const uint32_t end = std::min(start + USERS_PER_PAGE, size);
+
+        std::string msg =
+            stringFormat("Listing page ^3%i ^7of ^3%i\n", page, pages);
+        msg += stringFormat("^7%-6s %-10s %-15s %-36s\n", "ID", "Level",
+                            "Last seen", "Name");
+
+        for (uint32_t i = start; i < end; i++) {
+          msg += ETJump::stringFormat(
+              "^7%-6i %-10i %-15s %-36s\n", r->users[i].id, r->users[i].level,
+              r->users[i].lastSeen > 0
+                  ? TimeStampDifferenceToString(
+                        static_cast<int32_t>(t - r->users[i].lastSeen)) +
+                        " ago"
+                  : "N/A",
+              r->users[i].name);
+        }
+
+        Printer::console(ent, msg);
       },
       [this, func](const std::runtime_error &e) {
         logger->error("%s: %s", func, e.what());

@@ -91,6 +91,14 @@ public:
   std::string message;
 };
 
+class GetUsersResult final : public SynchronizationContext::ResultBase {
+public:
+  explicit GetUsersResult(std::vector<UserModels::User> users)
+      : users(std::move(users)) {}
+
+  std::vector<UserModels::User> users;
+};
+
 class GetUserNamesResult final : public SynchronizationContext::ResultBase {
 public:
   explicit GetUserNamesResult(std::vector<std::string> usernames)

@@ -72,6 +72,7 @@ public:
   void storeNewName(const gentity_t *ent) const;
 
   // admin command functions
+  void listUsers(const gentity_t *ent, int32_t page);
   void listUsernames(int32_t clientNum, int32_t id);
 
   bool readSessionData(int clientNum);

@@ -414,7 +414,40 @@ bool UserRepository::addNewName(const UserModels::Name &name) const {
   return db->sql.rows_modified() > 0;
 }
 
-std::vector<std::string> UserRepository::getUserNames(const int32_t userID) const {
+std::vector<UserModels::User> UserRepository::getUsers() const {
+  std::vector<UserModels::User> users;
+
+  db->sql << R"(
+    select
+      *
+    from users;
+    )" >>
+      [&users](const int32_t id, const std::string &name,
+               const std::string &guid, const std::string &ipv4,
+               const std::string &ipv6, const int32_t level,
+               const int64_t lastSeen, const std::string &title,
+               const std::string &commands, const std::string &greeting) {
+        UserModels::User user{};
+
+        user.id = id;
+        user.name = name;
+        user.guid = guid;
+        user.ipv4 = ipv4;
+        user.ipv6 = ipv6;
+        user.level = level;
+        user.lastSeen = lastSeen;
+        user.title = title;
+        user.commands = commands;
+        user.greeting = greeting;
+
+        users.emplace_back(user);
+      };
+
+  return users;
+}
+
+std::vector<std::string>
+UserRepository::getUserNames(const int32_t userID) const {
   std::vector<std::string> usernames;
 
   db->sql << R"(
