@@ -63,6 +63,8 @@ public:
   [[nodiscard]] bool addNewName(const UserModels::Name &name) const;
 
   [[nodiscard]] std::vector<UserModels::User> getUsers() const;
+  [[nodiscard]] std::vector<std::pair<int32_t, std::string>>
+  getUsersByName(const std::string &name) const;
   [[nodiscard]] std::vector<std::string> getUserNames(int32_t userID) const;
 
   std::vector<UserModels::BannedIPAddresses> getBannedIPAddresses() const;

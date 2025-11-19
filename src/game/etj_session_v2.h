@@ -72,8 +72,9 @@ public:
   void storeNewName(const gentity_t *ent) const;
 
   // admin command functions
-  void listUsers(const gentity_t *ent, int32_t page);
-  void listUsernames(const gentity_t *ent, int32_t id);
+  void listUsers(const gentity_t *ent, int32_t page) const;
+  void listUsernames(const gentity_t *ent, int32_t id) const;
+  void findUser(const gentity_t *ent, const std::string &name) const;
 
   bool readSessionData(int clientNum);
   void writeSessionData() const;

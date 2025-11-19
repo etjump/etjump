@@ -672,7 +672,7 @@ void SessionV2::storeNewName(const gentity_t *ent) const {
       });
 }
 
-void SessionV2::listUsers(const gentity_t *ent, const int32_t page) {
+void SessionV2::listUsers(const gentity_t *ent, const int32_t page) const {
   const std::string func = __func__;
 
   sc->postTask(
@@ -727,7 +727,7 @@ void SessionV2::listUsers(const gentity_t *ent, const int32_t page) {
       });
 }
 
-void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) {
+void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) const {
   const std::string func = __func__;
 
   sc->postTask(
@@ -762,6 +762,49 @@ void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) {
 
         for (const auto &name : r->usernames) {
           msg += name + "\n^7";
+        }
+
+        Printer::console(ent, msg);
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
+}
+
+void SessionV2::findUser(const gentity_t *ent, const std::string &name) const {
+  const std::string func = __func__;
+  // query is case-insensitive, so we just need to strip color codes
+  const std::string cleanName = sanitize(name);
+
+  sc->postTask(
+      [this, cleanName] {
+        const auto users = repository->getUsersByName(cleanName);
+        return std::make_unique<GetUsersByNameResult>(users);
+      },
+      [this, ent, cleanName](std::unique_ptr<SynchronizationContext::ResultBase>
+                                 getUsersByNameResult) {
+        auto *const r =
+            dynamic_cast<GetUsersByNameResult *>(getUsersByNameResult.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("GetUsersByNameResult is null.");
+        }
+
+        if (r->users.empty()) {
+          Printer::chat(
+              ent,
+              stringFormat("^3finduser: ^7no users found with name ^3'%s'^7.",
+                           cleanName));
+          return;
+        }
+
+        Printer::chat(ent, "^3finduser: ^7check console for more information.");
+        std::string msg = stringFormat("Listing users matching the name ^3'%s' "
+                                       "^7(max 20 results)\n\nID       Name\n",
+                                       cleanName);
+
+        for (const auto &[id, name] : r->users) {
+          msg += ETJump::stringFormat("%-8d %-36s^7\n", id, name);
         }
 
         Printer::console(ent, msg);

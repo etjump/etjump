@@ -446,6 +446,31 @@ std::vector<UserModels::User> UserRepository::getUsers() const {
   return users;
 }
 
+// TODO: make this configurable in the admin command?
+inline constexpr int8_t MAX_USERS_FROM_NAME_QUERY = 20;
+
+std::vector<std::pair<int32_t, std::string>>
+UserRepository::getUsersByName(const std::string &cleanName) const {
+  std::vector<std::pair<int32_t, std::string>> users;
+  users.reserve(MAX_USERS_FROM_NAME_QUERY);
+
+  db->sql << R"(
+    select
+      name,
+      user_id
+    from names
+    where
+      clean_name like '%' || ? || '%'
+    limit ?;
+  )" << cleanName
+          << MAX_USERS_FROM_NAME_QUERY >>
+      [&users](const std::string &name, const int32_t user_id) {
+        users.emplace_back(user_id, name);
+      };
+
+  return users;
+}
+
 std::vector<std::string>
 UserRepository::getUserNames(const int32_t userID) const {
   std::vector<std::string> usernames;

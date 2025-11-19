@@ -1095,7 +1095,11 @@ bool FindUser(gentity_t *ent, Arguments argv) {
     return false;
   }
 
+#ifdef NEW_AUTH
+  game.sessionV2->findUser(ent, argv->at(1));
+#else
   ETJump::database->FindUser(ent, argv->at(1));
+#endif
 
   return true;
 }

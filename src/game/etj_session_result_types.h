@@ -106,6 +106,15 @@ public:
 
   std::vector<std::string> usernames;
 };
+
+class GetUsersByNameResult final : public SynchronizationContext::ResultBase {
+public:
+  explicit GetUsersByNameResult(
+      std::vector<std::pair<int32_t, std::string>> users)
+      : users(std::move(users)) {}
+
+  std::vector<std::pair<int32_t, std::string>> users;
+};
 } // namespace ETJump
 
 #endif
