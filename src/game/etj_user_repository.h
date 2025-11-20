@@ -75,6 +75,7 @@ public:
 
   std::vector<UserModels::BannedIPAddresses> getBannedIPAddresses() const;
   std::vector<UserModels::BanData> getBanData() const;
+  [[nodiscard]] std::vector<UserModels::Ban> getBans() const;
 
 private:
   void migrate() const;

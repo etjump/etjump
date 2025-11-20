@@ -81,6 +81,7 @@ public:
   void findUser(const gentity_t *ent, const std::string &name) const;
   void userInfo(const gentity_t *ent, int32_t id) const;
   void editUser(const gentity_t *ent, const UserModels::EditUserParams &params);
+  void listBans(const gentity_t *ent, int32_t page) const;
 
   bool readSessionData(int clientNum);
   void writeSessionData() const;

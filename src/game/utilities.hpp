@@ -35,7 +35,7 @@ gentity_t *PlayerGentityFromString(const std::string &name, std::string &err,
 
 std::string ValueForKey(gentity_t *ent, const std::string &key);
 std::string ValueForKey(int clientNum, const std::string &key);
-std::string TimeStampToString(int timeStamp);
+std::string TimeStampToString(int64_t timeStamp);
 // TODO: this should be part of 'Time' struct (needs 'operator-' implementation)
 std::string TimeStampDifferenceToString(int diff);
 #endif // g_utilities_h__

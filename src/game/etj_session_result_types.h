@@ -134,6 +134,14 @@ public:
   // This is so that we can update the in-memory user data
   int32_t clientNum;
 };
+
+class GetBansResult final : public SynchronizationContext::ResultBase {
+public:
+  explicit GetBansResult(std::vector<UserModels::Ban> bans)
+      : bans(std::move(bans)) {}
+
+  std::vector<UserModels::Ban> bans;
+};
 } // namespace ETJump
 
 #endif

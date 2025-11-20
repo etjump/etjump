@@ -155,7 +155,7 @@ string ValueForKey(int clientNum, const std::string &key) {
   return value;
 }
 
-string TimeStampToString(int t) {
+string TimeStampToString(int64_t t) {
   char buf[MAX_TOKEN_CHARS];
   struct tm *lt = NULL;
   time_t toConvert = t;

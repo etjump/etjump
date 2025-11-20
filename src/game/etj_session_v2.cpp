@@ -946,6 +946,71 @@ void SessionV2::editUser(const gentity_t *ent,
       });
 }
 
+void SessionV2::listBans(const gentity_t *ent, const int32_t page) const {
+  const int32_t clientNum =
+      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this] {
+        // this returns a lot of unneeded data for now, but in the future
+        // we probably want to use it for better output
+        const auto bans = repository->getBans();
+        return std::make_unique<GetBansResult>(bans);
+      },
+      [this, clientNum, page](
+          std::unique_ptr<SynchronizationContext::ResultBase> getBansResult) {
+        auto *const r = dynamic_cast<GetBansResult *>(getBansResult.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("GetBanResult is null.");
+        }
+
+        if (r->bans.empty()) {
+          Printer::chat(clientNum,
+                        "^3listbans: ^7no bans found in the database.");
+          return;
+        }
+
+        constexpr int32_t BANS_PER_PAGE = 3;
+        const auto size = static_cast<uint32_t>(r->bans.size());
+        const uint32_t pages = (size / BANS_PER_PAGE) + 1;
+
+        if (page < 1 || page > pages) {
+          Printer::chat(clientNum, "^3listbans: ^7invalid page.");
+          return;
+        }
+
+        const uint32_t start = (page - 1) * BANS_PER_PAGE;
+        const uint32_t end = std::min(start + BANS_PER_PAGE, size);
+
+        Printer::chat(clientNum,
+                      "^3listbans: ^7check console for more information.");
+
+        std::string msg =
+            stringFormat("^7Showing page ^3%i ^7of ^3%i\n", page, pages);
+
+        // FIXME: this formatting is terrible, but it cannot really be fixed
+        // properly because we run out of space on a single line.
+        // We should display a bit less information here, and have a separate
+        // '!baninfo <id>' command to display more detailed information
+        // about a specific ban.
+        for (uint32_t i = start; i < end; i++) {
+          msg += stringFormat(
+              "^7%-3i %s ^7%s %s ^7%s %s\n", r->bans[i].banID, r->bans[i].name,
+              r->bans[i].banDate, r->bans[i].bannedBy,
+              r->bans[i].expires > 0 ? TimeStampToString(r->bans[i].expires)
+                                     : "Never",
+              r->bans[i].reason);
+        }
+
+        Printer::console(clientNum, msg);
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
+}
+
 void SessionV2::addMute(const int32_t clientNum) {
   if (clients[clientNum].guid.empty()) {
     logger->error("Unable to add mute for client %i - empty GUID!", clientNum);

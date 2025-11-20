@@ -1424,10 +1424,15 @@ bool ListBans(gentity_t *ent, Arguments argv) {
     }
   }
 
-  if (page < 1)
+  if (page < 1) {
     page = 1;
+  }
 
+#ifdef NEW_AUTH
+  game.sessionV2->listBans(ent, page);
+#else
   ETJump::database->ListBans(ent, page);
+#endif
 
   return true;
 }
