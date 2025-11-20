@@ -168,9 +168,7 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
         clients[clientNum].user->lastSeen = r->user.lastSeen;
         clients[clientNum].user->commands = r->user.commands;
 
-        const auto *const level = game.levels->GetLevel(r->user.level);
-        clients[clientNum].level = std::make_unique<Levels::Level>(
-            level->level, level->name, level->greeting, level->commands);
+        clients[clientNum].level = game.levels->GetLevel(r->user.level);
 
         if (firstTime) {
           printGreeting(clientNum);
@@ -630,7 +628,7 @@ const UserV2 *SessionV2::getUser(const int32_t clientNum) const {
 }
 
 const Levels::Level *SessionV2::getLevel(const int32_t clientNum) const {
-  return clients[clientNum].level.get();
+  return clients[clientNum].level;
 }
 
 int64_t SessionV2::getSessionStartTime(const int32_t clientNum) const {
