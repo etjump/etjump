@@ -203,7 +203,7 @@ bool SessionV2::authenticate(const gentity_t *ent) {
   const std::string cleanName = sanitize(ent->client->pers.netname);
   const std::string spoofAttempt = stringFormat(
       "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
-      clientNum, cleanName, ClientIPAddr(ent));
+      clientNum, cleanName, getIP(clientNum));
 
   // auth response is 'auth <GUID> <OS> <HWIDs>'
   // the amount of HWIDs is dependent on OS
@@ -326,7 +326,7 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
   const std::string cleanName = sanitize(ent->client->pers.netname);
   const std::string spoofAttempt = stringFormat(
       "authentication: Potential GUID migration spoof attempt by %i %s (%s)",
-      clientNum, cleanName.c_str(), ClientIPAddr(ent));
+      clientNum, cleanName.c_str(), getIP(clientNum));
 
   // client sends 'guid_migrate <oldGuid> <migrationType>'
   if (argc != NUM_EXPECTED_ARGS) {
@@ -1056,6 +1056,18 @@ void SessionV2::writeSessionData() const {
                     err);
     }
   }
+}
+
+std::string SessionV2::getIP(const int32_t clientNum) const {
+  if (!clients[clientNum].ipv4.empty()) {
+    return clients[clientNum].ipv4;
+  }
+
+  if (!clients[clientNum].ipv6.empty()) {
+    return clients[clientNum].ipv6;
+  }
+
+  return "Unknown IP";
 }
 
 void SessionV2::checkIPBan(const int clientNum) const {

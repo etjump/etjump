@@ -104,6 +104,7 @@ private:
   void updateLastKnownIP(int clientNum, int userID) const;
   void updateLastSeen(int32_t clientNum);
 
+  std::string getIP(int32_t clientNum) const;
   void checkIPBan(int clientNum) const;
   bool isBanned(int clientNum, int userID,
                 const std::string &legacyGuid = "") const;

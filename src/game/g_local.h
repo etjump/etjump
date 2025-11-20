@@ -1635,6 +1635,7 @@ void G_ProcessTagConnect(gentity_t *ent, qboolean clearAngles);
 void G_SetEntState(gentity_t *ent, entState_t state);
 
 team_t G_GetTeamFromEntity(gentity_t *ent);
+// TODO: remove, this is only used in old auth and doesn't support IPv6
 const char *ClientIPAddr(const gentity_t *ent);
 
 namespace ETJump {
