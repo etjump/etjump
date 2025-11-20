@@ -901,6 +901,61 @@ void SessionV2::userInfo(const gentity_t *ent, const int32_t id) const {
       });
 }
 
+void SessionV2::editUser(const gentity_t *ent,
+                         const UserModels::EditUserParams &params) {
+  const int32_t clientNum =
+      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this, params] {
+        if (!repository->userExists(params.id)) {
+          return std::make_unique<EditUserResult>(
+              stringFormat("^3edituser: ^7no user found with id ^3%i",
+                           params.id),
+              EditUserResult::CLIENT_NOT_CONNECTED);
+        }
+
+        repository->editUser(params);
+
+        return std::make_unique<EditUserResult>(
+            stringFormat("^3edituser: ^7successfully updated user ^3%i",
+                         params.id),
+            clientNumFromID(params.id));
+      },
+      [this, clientNum, params](
+          std::unique_ptr<SynchronizationContext::ResultBase> editUserResult) {
+        auto *const r = dynamic_cast<EditUserResult *>(editUserResult.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("EditUserResult is null.");
+        }
+
+        Printer::chat(clientNum, r->message);
+
+        // update the client's in-memory data
+        // TODO: revisit this once '!setlevel' is implemented,
+        // there might be some functionality overlap with that
+        if (r->clientNum != EditUserResult::CLIENT_NOT_CONNECTED) {
+          if (params.commands.has_value()) {
+            clients[r->clientNum].user->commands = params.commands.value();
+            parsePermissions(r->clientNum);
+          }
+
+          if (params.greeting.has_value()) {
+            clients[r->clientNum].user->greeting = params.greeting.value();
+          }
+
+          if (params.title.has_value()) {
+            clients[r->clientNum].user->title = params.title.value();
+          }
+        }
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
+}
+
 void SessionV2::addMute(const int32_t clientNum) {
   if (clients[clientNum].guid.empty()) {
     logger->error("Unable to add mute for client %i - empty GUID!", clientNum);
@@ -1148,6 +1203,16 @@ void SessionV2::printGreeting(const int32_t clientNum) const {
     clients[clientNum].user->formatGreeting(ent, greeting);
     Printer::chatAll(greeting);
   }
+}
+
+int32_t SessionV2::clientNumFromID(const int32_t id) const {
+  for (int32_t i = 0; i < static_cast<int32_t>(clients.size()); i++) {
+    if (clients[i].user && clients[i].user->id == id) {
+      return i;
+    }
+  }
+
+  return EditUserResult::CLIENT_NOT_CONNECTED;
 }
 } // namespace ETJump
 

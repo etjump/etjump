@@ -43,6 +43,8 @@ public:
 
   void addNewUser(const UserModels::User &userParams) const;
 
+  [[nodiscard]] bool userExists(int32_t userID) const;
+
   UserModels::User getUserData(const std::string &guid) const;
   UserModels::User getUserData(int userID) const;
   int getUserID(const std::string &guid) const;
@@ -62,6 +64,9 @@ public:
 
   // false if the name already stored for the user
   [[nodiscard]] bool addNewName(const UserModels::Name &name) const;
+
+  // NOTE: does not report errors for invalid user ID!
+  void editUser(const UserModels::EditUserParams &params) const;
 
   [[nodiscard]] std::vector<UserModels::User> getUsers() const;
   [[nodiscard]] std::vector<std::pair<int32_t, std::string>>

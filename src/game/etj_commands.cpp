@@ -1036,10 +1036,17 @@ bool EditUser(gentity_t *ent, Arguments argv) {
     return false;
   }
 
+  // We can't really do this here, as we no longer hold all users in memory.
+  // This means we're doing the command parsing before we verify that the
+  // given ID is valid, which is of course a slight inefficiency, but I'd
+  // rather not move all this logic away from here for now and handle parsing
+  // elsewhere, where we could do a threaded task for the database access.
+#ifndef NEW_AUTH
   if (!ETJump::database->UserExists(id)) {
     Printer::chat(ent, "^3edituser: ^7user does not exist.");
     return false;
   }
+#endif
 
   int updated = 0;
   int open = 0;
@@ -1098,9 +1105,29 @@ bool EditUser(gentity_t *ent, Arguments argv) {
   greeting = ETJump::trimEnd(greeting);
   title = ETJump::trimEnd(title);
 
+#ifdef NEW_AUTH
+  ETJump::UserModels::EditUserParams params{};
+  params.id = static_cast<int32_t>(id);
+
+  if (updated & Updated::TITLE) {
+    params.title = title;
+  }
+
+  if (updated & Updated::COMMANDS) {
+    params.commands = commands;
+  }
+
+  if (updated & Updated::GREETING) {
+    params.greeting = greeting;
+  }
+
+  game.sessionV2->editUser(ent, params);
+  return true;
+#else
   Printer::chat(ent, va("^3edituser: ^7updating user %d", id));
   return ETJump::database->UpdateUser(ent, id, commands, greeting, title,
                                       updated);
+#endif
 }
 
 bool FindUser(gentity_t *ent, Arguments argv) {

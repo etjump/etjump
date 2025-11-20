@@ -80,6 +80,7 @@ public:
   void listUsernames(const gentity_t *ent, int32_t id) const;
   void findUser(const gentity_t *ent, const std::string &name) const;
   void userInfo(const gentity_t *ent, int32_t id) const;
+  void editUser(const gentity_t *ent, const UserModels::EditUserParams &params);
 
   bool readSessionData(int clientNum);
   void writeSessionData() const;
@@ -109,6 +110,9 @@ private:
   void dropBannedClient(int clientNum) const;
 
   void printGreeting(int32_t clientNum) const;
+
+  // -1 if the user is not connected
+  [[nodiscard]] int32_t clientNumFromID(int32_t id) const;
 
   // TODO: this could maybe be a map or a vector rather than an array,
   //  we don't actually need 64 copies of 'Client' like, ever

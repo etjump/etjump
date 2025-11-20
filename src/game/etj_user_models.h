@@ -92,5 +92,12 @@ struct BanData {
   std::string legacyGUID;
   std::string legacyHWID;
 };
+
+struct EditUserParams {
+  int32_t id;
+  std::optional<std::string> title;
+  std::optional<std::string> commands;
+  std::optional<std::string> greeting;
+};
 } // namespace ETJump::UserModels
 #endif

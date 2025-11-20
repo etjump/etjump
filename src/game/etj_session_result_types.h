@@ -121,6 +121,19 @@ public:
 
   std::vector<std::pair<int32_t, std::string>> users;
 };
+
+class EditUserResult final : public SynchronizationContext::ResultBase {
+public:
+  EditUserResult(std::string message, int32_t clientNum)
+      : message(std::move(message)), clientNum(clientNum) {}
+
+  static constexpr int32_t CLIENT_NOT_CONNECTED = -1;
+
+  std::string message;
+  // clientNum of the edited user, if they are currently connected.
+  // This is so that we can update the in-memory user data
+  int32_t clientNum;
+};
 } // namespace ETJump
 
 #endif

@@ -155,6 +155,21 @@ void UserRepository::addNewUser(const UserModels::User &userParams) const {
           << userParams.commands << userParams.greeting;
 }
 
+bool UserRepository::userExists(const int32_t userID) const {
+  int32_t count = 0;
+
+  db->sql << R"(
+    select
+      count(*)
+    from users
+    where
+      id=?;
+  )" << userID >>
+      count;
+
+  return count > 0;
+}
+
 // returns empty user if the GUID is not found in the database
 UserModels::User UserRepository::getUserData(const std::string &guid) const {
   UserModels::User user{};
@@ -433,6 +448,54 @@ bool UserRepository::addNewName(const UserModels::Name &name) const {
           << name.cleanName << name.userID;
 
   return db->sql.rows_modified() > 0;
+}
+
+void UserRepository::editUser(const UserModels::EditUserParams &params) const {
+  std::vector<std::string> updateColumns;
+  std::vector<std::string> updateValues;
+
+  if (params.title.has_value()) {
+    updateColumns.emplace_back("title");
+    updateValues.emplace_back(params.title.value());
+  }
+
+  if (params.commands.has_value()) {
+    updateColumns.emplace_back("commands");
+    updateValues.emplace_back(params.commands.value());
+  }
+
+  if (params.greeting.has_value()) {
+    updateColumns.emplace_back("greeting");
+    updateValues.emplace_back(params.greeting.value());
+  }
+
+  // This should never happen, as '!edituser' should not be a valid command
+  // if none of the parameters are edited, this is just here for safety.
+  if (updateColumns.empty()) {
+    return;
+  }
+
+  const auto updateFieldsStr = StringUtil::join(
+      Container::map(updateColumns, [](const auto &s) { return s + "=?"; }),
+      ", ");
+
+  const std::string query = stringFormat(R"(
+    update
+      users
+    set
+      %s
+    where
+      id=?;
+  )",
+                                         updateFieldsStr);
+
+  auto q = db->sql << query;
+
+  for (const auto &value : updateValues) {
+    q << value;
+  }
+
+  q << params.id;
 }
 
 std::vector<UserModels::User> UserRepository::getUsers() const {
