@@ -105,10 +105,10 @@ private:
   void updateLastKnownIP(int clientNum, int userID) const;
   void updateLastSeen(int32_t clientNum);
 
-  std::string getIP(int32_t clientNum) const;
+  [[nodiscard]] std::string getIP(int32_t clientNum) const;
   void checkIPBan(int clientNum) const;
-  bool isBanned(int clientNum, int userID,
-                const std::string &legacyGuid = "") const;
+  [[nodiscard]] bool isBanned(int clientNum, int userID,
+                              const std::string &legacyGuid = "") const;
   void dropBannedClient(int clientNum) const;
 
   void printGreeting(int32_t clientNum) const;

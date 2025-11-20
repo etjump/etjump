@@ -45,15 +45,17 @@ public:
 
   [[nodiscard]] bool userExists(int32_t userID) const;
 
-  UserModels::User getUserData(const std::string &guid) const;
-  UserModels::User getUserData(int userID) const;
-  int getUserID(const std::string &guid) const;
-  UserModels::LegacyAuth getLegacyAuthData(const std::string &oldGuid) const;
+  [[nodiscard]] UserModels::User getUserData(const std::string &guid) const;
+  [[nodiscard]] UserModels::User getUserData(int userID) const;
+  [[nodiscard]] int getUserID(const std::string &guid) const;
+  [[nodiscard]] UserModels::LegacyAuth
+  getLegacyAuthData(const std::string &oldGuid) const;
   [[nodiscard]] UserModels::LegacyAuth getLegacyAuthData(int32_t userID) const;
   void migrateGuid(int oldID, const std::string &newGUID) const;
 
-  std::vector<UserModels::UserHWID> getHWIDsForUser(int userID) const;
-  std::vector<UserModels::UserHWID>
+  [[nodiscard]] std::vector<UserModels::UserHWID>
+  getHWIDsForUser(int userID) const;
+  [[nodiscard]] std::vector<UserModels::UserHWID>
   getHWIDsForUsersPlatform(int userID, int userPlatform) const;
   void addHwid(const UserModels::UserHWID &params) const;
 
@@ -73,8 +75,9 @@ public:
   getUsersByName(const std::string &name) const;
   [[nodiscard]] std::vector<std::string> getUserNames(int32_t userID) const;
 
-  std::vector<UserModels::BannedIPAddresses> getBannedIPAddresses() const;
-  std::vector<UserModels::BanData> getBanData() const;
+  [[nodiscard]] std::vector<UserModels::BannedIPAddresses>
+  getBannedIPAddresses() const;
+  [[nodiscard]] std::vector<UserModels::BanData> getBanData() const;
   [[nodiscard]] std::vector<UserModels::Ban> getBans() const;
 
 private:
@@ -85,7 +88,7 @@ private:
 
   void insertLegacyAuth(const UserModels::LegacyAuth &auth) const;
 
-  bool oldTableHasData(const std::string &table) const;
+  [[nodiscard]] bool oldTableHasData(const std::string &table) const;
   static std::vector<std::string> createInitialMigration();
 
   std::unique_ptr<DatabaseV2> db;

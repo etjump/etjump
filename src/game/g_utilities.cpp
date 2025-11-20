@@ -155,12 +155,12 @@ string ValueForKey(int clientNum, const std::string &key) {
   return value;
 }
 
-string TimeStampToString(int64_t t) {
+string TimeStampToString(int64_t timeStamp) {
   char buf[MAX_TOKEN_CHARS];
-  struct tm *lt = NULL;
-  time_t toConvert = t;
+  struct tm *lt = nullptr;
+  time_t toConvert = timeStamp;
   lt = localtime(&toConvert);
-  if (t > 0) {
+  if (timeStamp > 0) {
     // day / month / year
     strftime(buf, sizeof(buf), "%d/%m/%y %H:%M:%S", lt);
   } else {

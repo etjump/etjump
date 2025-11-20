@@ -641,32 +641,33 @@ std::vector<UserModels::Ban> UserRepository::getBans() const {
   std::vector<UserModels::Ban> bans;
 
   db->sql << R"(
-  select
-    *
-  from bans;
-)" >> [&bans](const int32_t banID, const std::string &name,
+    select
+      *
+    from bans;
+  )" >>
+      [&bans](const int32_t banID, const std::string &name,
               const std::string &bannedBy, const std::string &banDate,
               const int64_t expires, const std::string &reason,
               const int32_t parentBanID, const std::string &guid,
               const std::string &ipv4, const std::string &ipv6,
               const std::string &legacyGUID, const std::string &legacyHWID) {
-    UserModels::Ban ban{};
+        UserModels::Ban ban{};
 
-    ban.banID = banID;
-    ban.name = name;
-    ban.bannedBy = bannedBy;
-    ban.banDate = banDate;
-    ban.expires = expires;
-    ban.reason = reason;
-    ban.parentBanID = parentBanID;
-    ban.guid = guid;
-    ban.ipv4 = ipv4;
-    ban.ipv6 = ipv6;
-    ban.legacyGUID = legacyGUID;
-    ban.legacyHWID = legacyHWID;
+        ban.banID = banID;
+        ban.name = name;
+        ban.bannedBy = bannedBy;
+        ban.banDate = banDate;
+        ban.expires = expires;
+        ban.reason = reason;
+        ban.parentBanID = parentBanID;
+        ban.guid = guid;
+        ban.ipv4 = ipv4;
+        ban.ipv6 = ipv6;
+        ban.legacyGUID = legacyGUID;
+        ban.legacyHWID = legacyHWID;
 
-    bans.emplace_back(ban);
-  };
+        bans.emplace_back(ban);
+      };
 
   return bans;
 }
