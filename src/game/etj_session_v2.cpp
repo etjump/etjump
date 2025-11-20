@@ -265,10 +265,6 @@ bool SessionV2::authenticate(const gentity_t *ent) {
   clients[clientNum].guid = Crypto::sha2(guidBuf);
   clients[clientNum].hwid = hwid;
 
-  G_DPrintf("%s: %d GUID: %s OS: %i HWID: %s\n", __func__, clientNum,
-            clients[clientNum].guid.c_str(), clients[clientNum].platform,
-            StringUtil::join(clients[clientNum].hwid, ",").c_str());
-
   const std::string func = __func__;
 
   sc->postTask(
@@ -305,12 +301,9 @@ bool SessionV2::authenticate(const gentity_t *ent) {
         }
 
         if (result->userID == 0) {
-          Printer::console(
-              Printer::CONSOLE_CLIENT_NUMBER,
-              stringFormat("^3%s: [NEW_AUTH] ^7Client %i %s with GUID %s not "
-                           "found in the database, sending migration request\n",
-                           func, clientNum, cleanName,
-                           clients[clientNum].guid));
+          logger->info("Client %i %s with GUID %s not found in the database, "
+                       "sending migration request",
+                       clientNum, cleanName, clients[clientNum].guid);
 
           Printer::command(clientNum,
                            Constants::Authentication::GUID_MIGRATE_REQUEST);
@@ -322,10 +315,6 @@ bool SessionV2::authenticate(const gentity_t *ent) {
         logger->error("Failed to get data for user %i %s - %s", clientNum,
                       cleanName, e.what());
       });
-
-  G_Printf("^3%s: [NEW_AUTH] TODO:\n  ^7- handle user database\n  - handle "
-           "admin system\n",
-           __func__);
 
   return true;
 }
@@ -397,7 +386,7 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
         return std::make_unique<GuidMigrationResult>(
             user.id, false, "Successfully migrated old GUID.\n");
       },
-      [this, clientNum](
+      [this, clientNum, cleanName](
           std::unique_ptr<SynchronizationContext::ResultBase> legacyAuthData) {
         const auto result =
             dynamic_cast<GuidMigrationResult *>(legacyAuthData.get());
@@ -414,6 +403,9 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
         if (result->userID == 0) {
           addNewUser(clientNum);
         } else {
+          logger->info(
+              "GUID migration successfully performed for client %i %s.",
+              clientNum, cleanName);
           Printer::console(clientNum, result->message);
           onAuthSuccess(clientNum);
         }
@@ -457,8 +449,8 @@ void SessionV2::addNewUser(const int32_t clientNum) {
         updateHWID(clientNum, userID);
         updateLastKnownIP(clientNum, userID);
 
-        return std::make_unique<AddUserResult>(userID,
-                                               "Successfully added new user.");
+        return std::make_unique<AddUserResult>(
+            userID, "Successfully added new user to the database.");
       },
       [this, clientNum](
           std::unique_ptr<SynchronizationContext::ResultBase> addUserResult) {
