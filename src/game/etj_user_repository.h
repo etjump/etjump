@@ -70,6 +70,8 @@ public:
   // NOTE: does not report errors for invalid user ID!
   void editUser(const UserModels::EditUserParams &params) const;
 
+  void setLevel(int32_t userID, int32_t level) const;
+
   [[nodiscard]] std::vector<UserModels::User> getUsers() const;
   [[nodiscard]] std::vector<std::pair<int32_t, std::string>>
   getUsersByName(const std::string &name) const;

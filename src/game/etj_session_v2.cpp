@@ -903,7 +903,7 @@ void SessionV2::editUser(const gentity_t *ent,
           return std::make_unique<EditUserResult>(
               stringFormat("^3edituser: ^7no user found with id ^3%i",
                            params.id),
-              EditUserResult::CLIENT_NOT_CONNECTED);
+              CLIENT_NOT_CONNECTED);
         }
 
         repository->editUser(params);
@@ -924,9 +924,7 @@ void SessionV2::editUser(const gentity_t *ent,
         Printer::chat(clientNum, r->message);
 
         // update the client's in-memory data
-        // TODO: revisit this once '!setlevel' is implemented,
-        // there might be some functionality overlap with that
-        if (r->clientNum != EditUserResult::CLIENT_NOT_CONNECTED) {
+        if (r->clientNum != CLIENT_NOT_CONNECTED) {
           if (params.commands.has_value()) {
             clients[r->clientNum].user->commands = params.commands.value();
             parsePermissions(r->clientNum);
@@ -1005,6 +1003,138 @@ void SessionV2::listBans(const gentity_t *ent, const int32_t page) const {
         }
 
         Printer::console(clientNum, msg);
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
+}
+
+/*
+ * When this function gets called via '!setlevel' command,
+ * the following checks should have already been done:
+ * - 'params.level' is a valid number
+ * - 'params.level' is a valid level that exists
+ * - if 'params.id' is set, it's a valid number
+ * - if 'params.targetClientNum' is set, it's a valid client
+ * - if executing this as a client (not console),
+ *   'params.level' isn't higher than your current level
+ */
+void SessionV2::setLevel(const gentity_t *ent,
+                         const UserModels::SetLevelParams &params) {
+  const int32_t clientNum =
+      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this, clientNum, params] {
+        int32_t targetUserLevel = 0;
+        int32_t targetClientNum = CLIENT_NOT_CONNECTED;
+
+        // if 'id' is set, ensure it's a valid user
+        if (params.id.has_value()) {
+          // if the user is connected, we don't need to check the database
+          targetClientNum = clientNumFromID(params.id.value());
+
+          if (targetClientNum == CLIENT_NOT_CONNECTED) {
+            const auto targetUser = repository->getUserData(params.id.value());
+
+            if (targetUser.id == 0) {
+              return std::make_unique<SetLevelResult>(stringFormat(
+                  "^3setlevel: user with id ^3%i ^7does not exist.",
+                  params.id.value()));
+            }
+
+            targetUserLevel = targetUser.level;
+          } else {
+            targetUserLevel = clients[targetClientNum].level->level;
+          }
+        } else if (params.targetClientNum.has_value()) {
+          targetClientNum = params.targetClientNum.value();
+          targetUserLevel = clients[targetClientNum].level->level;
+        } else {
+          // shouldn't happen, 'id' or 'targetClientNum' should always be set
+          return std::make_unique<SetLevelResult>(
+              "^3setlevel: ^7no valid target found. This is a bug, please "
+              "report this to the developers.");
+        }
+
+        if (params.level == targetUserLevel) {
+          return std::make_unique<SetLevelResult>(stringFormat(
+              "^3setlevel: ^7targeted user is already a level ^3%i ^7user.",
+              params.level));
+        }
+
+        // server can set any level to anyone
+        if (clientNum != Printer::CONSOLE_CLIENT_NUMBER) {
+          if (targetUserLevel > clients[clientNum].level->level) {
+            return (std::make_unique<SetLevelResult>(
+                "^3setlevel: ^7you can't set the level of a fellow admin."));
+          }
+        }
+
+        if (params.id.has_value()) {
+          repository->setLevel(params.id.value(), params.level);
+          std::optional<std::string> messageOther;
+
+          // if the targeted user is online, update their in-memory
+          // level and permissions, and send a message to them
+          if (targetClientNum != CLIENT_NOT_CONNECTED) {
+            clients[targetClientNum].level =
+                game.levels->GetLevel(params.level);
+            parsePermissions(targetClientNum);
+
+            messageOther = stringFormat(
+                "^3setlevel: ^7you are now a level ^3%i ^7user (%s^7).",
+                params.level, clients[targetClientNum].level->name);
+          }
+
+          return std::make_unique<SetLevelResult>(
+              stringFormat("^3setlevel: ^7user with id ^3%i ^7is now a level "
+                           "^3%i ^7user.",
+                           params.id.value(), params.level),
+              messageOther.has_value() ? messageOther : std::nullopt);
+        }
+
+        repository->setLevel(clients[targetClientNum].user->id, params.level);
+
+        clients[targetClientNum].level = game.levels->GetLevel(params.level);
+        parsePermissions(targetClientNum);
+
+        return std::make_unique<SetLevelResult>(
+            stringFormat("^3setlevel: ^7%s^7 is now a level ^3%i ^7user.",
+                         (g_entities + targetClientNum)->client->pers.netname,
+                         params.level),
+            stringFormat(
+                "^3setlevel: ^7you are now a level ^3%i ^7user (%s^7).",
+                params.level, clients[targetClientNum].level->name));
+      },
+      [this, clientNum, params, func](
+          std::unique_ptr<SynchronizationContext::ResultBase> setLevelResult) {
+        const auto *const r =
+            dynamic_cast<SetLevelResult *>(setLevelResult.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("SetLevelResult is null.");
+        }
+
+        Printer::chat(clientNum, r->messageSelf);
+
+        if (r->messageOther.has_value()) {
+          // this shouldn't happen, but let's not crash the server in case
+          // there's a logic bug somewhere in the task, as it is quite complex
+          if (!params.id.has_value() && !params.targetClientNum.has_value()) {
+            logger->error("%s: callback reached with no valid 'id' or "
+                          "'targetClientNum'!",
+                          func);
+          } else {
+            // NOTE: don't use .value_or() here!
+            // either 'params.targetClientNum' or 'params.id' is always null
+            Printer::chat(params.targetClientNum.has_value()
+                              ? params.targetClientNum.value()
+                              : clientNumFromID(params.id.value()),
+                          r->messageOther.value());
+          }
+        }
       },
       [this, func](const std::runtime_error &e) {
         logger->error("%s: %s", func, e.what());
@@ -1279,7 +1409,7 @@ int32_t SessionV2::clientNumFromID(const int32_t id) const {
     }
   }
 
-  return EditUserResult::CLIENT_NOT_CONNECTED;
+  return CLIENT_NOT_CONNECTED;
 }
 } // namespace ETJump
 

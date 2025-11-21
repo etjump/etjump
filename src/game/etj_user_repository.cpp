@@ -498,6 +498,18 @@ void UserRepository::editUser(const UserModels::EditUserParams &params) const {
   q << params.id;
 }
 
+void UserRepository::setLevel(const int32_t userID, const int32_t level) const {
+  db->sql << R"(
+    update
+      users
+    set
+      level=?
+    where
+      id=?
+  )" << level
+          << userID;
+}
+
 std::vector<UserModels::User> UserRepository::getUsers() const {
   std::vector<UserModels::User> users;
 

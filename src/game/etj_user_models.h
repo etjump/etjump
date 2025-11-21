@@ -25,6 +25,10 @@
 #pragma once
 
 #ifdef NEW_AUTH
+  #include <string>
+  #include <vector>
+  #include <optional>
+
 namespace ETJump::UserModels {
 struct User {
   int id;
@@ -94,10 +98,16 @@ struct BanData {
 };
 
 struct EditUserParams {
-  int32_t id;
+  int32_t id{};
   std::optional<std::string> title;
   std::optional<std::string> commands;
   std::optional<std::string> greeting;
+};
+
+struct SetLevelParams {
+  int32_t level{};
+  std::optional<int32_t> id;
+  std::optional<int32_t> targetClientNum;
 };
 } // namespace ETJump::UserModels
 #endif

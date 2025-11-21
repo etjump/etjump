@@ -1868,6 +1868,68 @@ bool SetLevel(gentity_t *ent, Arguments argv) {
   // !setlevel <player> <level>
   // !setlevel -id id level
 
+#ifdef NEW_AUTH
+  if (argv->size() < 3) {
+    PrintManual(ent, "setlevel");
+    return false;
+  }
+
+  gentity_t *target = nullptr;
+  uint32_t id = 0;
+
+  if (argv->size() == 3) {
+    std::string err;
+    target = PlayerGentityFromString(argv->at(1), err);
+
+    if (!target) {
+      Printer::chat(ent, err);
+      return false;
+    }
+  } else {
+    if (!ETJump::StringUtil::iEqual(argv->at(1), "-id")) {
+      PrintManual(ent, "setlevel");
+      return false;
+    }
+
+    if (!ToUnsigned(argv->at(2), id)) {
+      Printer::chat(ent, "^3setlevel: ^7invalid id " + argv->at(2));
+      return false;
+    }
+  }
+
+  int32_t level = 0;
+  int32_t levelArg = (argv->size() == 3) ? 2 : 3;
+
+  if (!ToInt(argv->at(levelArg), level)) {
+    Printer::chat(ent, "^3setlevel: ^7invalid level " + argv->at(levelArg));
+    return false;
+  }
+
+  if (!game.levels->LevelExists(level)) {
+    Printer::chat(ent, "^3setlevel: ^7level does not exist.");
+    return false;
+  }
+
+  if (ent && level > game.sessionV2->getLevel(ent)) {
+    Printer::chat(ent, "^3setlevel: ^7you're not allowed to setlevel higher "
+                       "than your own level.");
+    return false;
+  }
+
+  ETJump::UserModels::SetLevelParams params{};
+
+  params.level = level;
+
+  if (target) {
+    params.targetClientNum = ClientNum(target);
+  }
+
+  if (id > 0) {
+    params.id = id;
+  }
+
+  game.sessionV2->setLevel(ent, params);
+#else
   if (argv->size() == 3) {
     std::string err;
     gentity_t *target = PlayerGentityFromString(argv->at(1), err);
@@ -1912,7 +1974,6 @@ bool SetLevel(gentity_t *ent, Arguments argv) {
                           target->client->pers.netname, level));
     Printer::chat(target,
                   va("^3setlevel: ^7you are now a level %d user.", level));
-
     return true;
   }
 
@@ -1965,6 +2026,7 @@ bool SetLevel(gentity_t *ent, Arguments argv) {
         va("^3setlevel: ^7user with id %d is now a level %d user.", id, level));
   }
 
+#endif
   return true;
 }
 

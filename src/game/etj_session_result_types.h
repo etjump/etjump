@@ -31,6 +31,8 @@
   #include "etj_user_models.h"
 
 namespace ETJump {
+inline constexpr int32_t CLIENT_NOT_CONNECTED = -1;
+
 // a successful result will have userID > 0
 class AuthenticationResult final : public SynchronizationContext::ResultBase {
 public:
@@ -127,8 +129,6 @@ public:
   EditUserResult(std::string message, int32_t clientNum)
       : message(std::move(message)), clientNum(clientNum) {}
 
-  static constexpr int32_t CLIENT_NOT_CONNECTED = -1;
-
   std::string message;
   // clientNum of the edited user, if they are currently connected.
   // This is so that we can update the in-memory user data
@@ -142,6 +142,19 @@ public:
 
   std::vector<UserModels::Ban> bans;
 };
+
+class SetLevelResult final : public SynchronizationContext::ResultBase {
+public:
+  explicit SetLevelResult(
+      std::string messageSelf,
+      std::optional<std::string> messageOther = std::nullopt)
+      : messageSelf(std::move(messageSelf)),
+        messageOther(std::move(messageOther)) {}
+
+  std::string messageSelf;
+  std::optional<std::string> messageOther;
+};
+
 } // namespace ETJump
 
 #endif
