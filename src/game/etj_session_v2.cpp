@@ -1413,9 +1413,11 @@ void SessionV2::printGreeting(const int32_t clientNum) const {
 }
 
 int32_t SessionV2::clientNumFromID(const int32_t id) const {
-  for (int32_t i = 0; i < static_cast<int32_t>(clients.size()); i++) {
-    if (clients[i].user && clients[i].user->id == id) {
-      return i;
+  for (int32_t i = 0; i < level.numConnectedClients; i++) {
+    const int32_t clientNum = level.sortedClients[i];
+
+    if (clients[clientNum].user && clients[clientNum].user->id == id) {
+      return clientNum;
     }
   }
 
