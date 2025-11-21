@@ -1053,9 +1053,19 @@ void SessionV2::setLevel(const gentity_t *ent,
           targetUserLevel = clients[targetClientNum].level->level;
         } else {
           // shouldn't happen, 'id' or 'targetClientNum' should always be set
-          return std::make_unique<SetLevelResult>(
+          Printer::chat(
+              clientNum,
               "^3setlevel: ^7no valid target found. This is a bug, please "
               "report this to the developers.");
+          throw std::runtime_error(stringFormat(
+              "called by client %i with no valid target! (id: %s "
+              "targetClientNum: %s)",
+              clientNum,
+              params.id.has_value() ? std::to_string(params.id.value())
+                                    : "null",
+              params.targetClientNum.has_value()
+                  ? std::to_string(params.targetClientNum.value())
+                  : "null"));
         }
 
         if (params.level == targetUserLevel) {
