@@ -819,6 +819,26 @@ bool DeleteLevel(gentity_t *ent, Arguments argv) {
     return false;
   }
 
+  // calling 'game.levels->Delete()' here isn't really compatible
+  // with the new session handling as we need to be able to dereference
+  // the level pointer at a later time, so instead we explicitly
+  // check jf the level exists here, and call delete later when it's safe
+#ifdef NEW_AUTH
+  if (level == 0) {
+    Printer::chat(ent,
+                  "^3deletelevel: ^7you may not delete the default level.");
+    return false;
+  }
+
+  if (!game.levels->LevelExists(level)) {
+    Printer::chat(ent,
+                  ETJump::stringFormat(
+                      "^3deletelevel: ^7level ^3%i ^7doesn't exist.", level));
+    return false;
+  }
+
+  game.sessionV2->deleteLevel(ent, level);
+#else
   if (!game.levels->Delete(level)) {
     Printer::chat(ent, "^3deletelevel: ^7couldn't find level.");
     return false;
@@ -829,6 +849,8 @@ bool DeleteLevel(gentity_t *ent, Arguments argv) {
   Printer::chat(ent, "^3deletelevel: ^7deleted level. Set " +
                          ETJump::getPluralizedString(usersWithLevel, "user") +
                          " to level 0.");
+#endif
+
   return true;
 }
 

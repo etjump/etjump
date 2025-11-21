@@ -510,6 +510,19 @@ void UserRepository::setLevel(const int32_t userID, const int32_t level) const {
           << userID;
 }
 
+int32_t UserRepository::deleteLevel(const int32_t level) const {
+  db->sql << R"(
+    update
+      users
+    set
+      level=0
+    where
+      level=?
+  )" << level;
+
+  return db->sql.rows_modified();
+}
+
 std::vector<UserModels::User> UserRepository::getUsers() const {
   std::vector<UserModels::User> users;
 

@@ -155,6 +155,18 @@ public:
   std::optional<std::string> messageOther;
 };
 
+class DeleteLevelResult final : public SynchronizationContext::ResultBase {
+public:
+  DeleteLevelResult(int32_t numAffectedClients,
+                    std::vector<int32_t> connectedClients)
+      : numAffectedClients(numAffectedClients),
+        connectedClients(std::move(connectedClients)) {}
+
+  int32_t numAffectedClients;
+  // clientNums of any connected players who's level was deleted
+  std::vector<int32_t> connectedClients;
+};
+
 } // namespace ETJump
 
 #endif

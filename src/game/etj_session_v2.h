@@ -83,6 +83,7 @@ public:
   void editUser(const gentity_t *ent, const UserModels::EditUserParams &params);
   void listBans(const gentity_t *ent, int32_t page) const;
   void setLevel(const gentity_t *ent, const UserModels::SetLevelParams &params);
+  void deleteLevel(const gentity_t *ent, int32_t deletedLevel);
 
   bool readSessionData(int clientNum);
   void writeSessionData() const;

@@ -1151,6 +1151,77 @@ void SessionV2::setLevel(const gentity_t *ent,
       });
 }
 
+void SessionV2::deleteLevel(const gentity_t *ent, const int32_t deletedLevel) {
+  const int32_t clientNum =
+      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this, clientNum, deletedLevel] {
+        std::vector<int32_t> connectedClients;
+        connectedClients.reserve(level.numConnectedClients);
+
+        // store any connected clients who's level is getting deleted
+        for (int32_t i = 0; i < level.numConnectedClients; i++) {
+          const int32_t cnum = level.sortedClients[i];
+
+          if (clients[cnum].level &&
+              clients[cnum].level->level == deletedLevel) {
+            connectedClients.emplace_back(cnum);
+          }
+        }
+
+        // this should never fail, we've already checked that the level exists
+        if (!game.levels->Delete(deletedLevel)) {
+          Printer::chat(
+              clientNum,
+              stringFormat("^3deletelevel: ^7level ^3%i ^7doesn't exist. This "
+                           "is a bug, please report this to the developers.",
+                           deletedLevel));
+          throw std::runtime_error(stringFormat(
+              "client %i tried to delete level %i that doesn't exist, but the "
+              "level was already verified to exist earlier!",
+              clientNum, deletedLevel));
+        }
+
+        const int32_t affectedUsers = repository->deleteLevel(deletedLevel);
+
+        return std::make_unique<DeleteLevelResult>(affectedUsers,
+                                                   connectedClients);
+      },
+      [this, clientNum,
+       deletedLevel](std::unique_ptr<SynchronizationContext::ResultBase>
+                         deleteLevelResult) {
+        const auto *const r =
+            dynamic_cast<DeleteLevelResult *>(deleteLevelResult.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("DeleteLevelResult is null.");
+        }
+
+        Printer::chat(clientNum,
+                      stringFormat("^3deletelevel: ^7level ^3%i ^7was deleted. "
+                                   "^3%i ^7%s been set to level 0.",
+                                   deletedLevel, r->numAffectedClients,
+                                   r->numAffectedClients == 1 ? "user has"
+                                                              : "users have"));
+
+        for (const auto &cl : r->connectedClients) {
+          clients[cl].level = game.levels->GetLevel(0);
+          parsePermissions(cl);
+
+          Printer::chat(
+              cl, stringFormat(
+                      "^3deletelevel: ^7your previous level ^3%i ^7has "
+                      "been deleted. You are now a level ^30 ^7user (%s^7).",
+                      deletedLevel, clients[cl].level->name));
+        }
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
+}
+
 void SessionV2::addMute(const int32_t clientNum) {
   if (clients[clientNum].guid.empty()) {
     logger->error("Unable to add mute for client %i - empty GUID!", clientNum);

@@ -71,6 +71,8 @@ public:
   void editUser(const UserModels::EditUserParams &params) const;
 
   void setLevel(int32_t userID, int32_t level) const;
+  // returns the number of users who's level was deleted
+  [[nodiscard]] int32_t deleteLevel(int32_t level) const;
 
   [[nodiscard]] std::vector<UserModels::User> getUsers() const;
   [[nodiscard]] std::vector<std::pair<int32_t, std::string>>
