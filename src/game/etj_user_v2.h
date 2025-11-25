@@ -27,19 +27,14 @@
 #ifdef NEW_AUTH
   #include <string>
 
-  #include "g_local.h"
-
 namespace ETJump {
-class UserV2 {
-public:
+struct UserV2 {
   int32_t id;
   std::string name; // original name in the user database (not netname!)
   std::string greeting;
   std::string title;
   std::string commands;
   int64_t lastSeen;
-
-  void formatGreeting(const gentity_t *ent, std::string &greeting) const;
 };
 } // namespace ETJump
 #endif

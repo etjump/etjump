@@ -1461,9 +1461,7 @@ void SessionV2::printGreeting(const int32_t clientNum) const {
 
   // print custom greeting if the client has one
   if (!clients[clientNum].user->greeting.empty()) {
-    std::string greeting = clients[clientNum].user->greeting;
-    clients[clientNum].user->formatGreeting(ent, greeting);
-    Printer::chatAll(greeting);
+    Printer::chatAll(formatGreeting(ent, clients[clientNum].user->greeting));
   } else {
     // see if the clients admin level has a greeting associated with it
     if (!clients[clientNum].level) {
@@ -1476,11 +1474,27 @@ void SessionV2::printGreeting(const int32_t clientNum) const {
       return;
     }
 
-    std::string greeting = clients[clientNum].level->greeting;
-    // TODO: might wanna move this away from 'User'?
-    clients[clientNum].user->formatGreeting(ent, greeting);
-    Printer::chatAll(greeting);
+    Printer::chatAll(formatGreeting(ent, clients[clientNum].level->greeting));
   }
+}
+
+std::string SessionV2::formatGreeting(const gentity_t *ent,
+                                      const std::string &greeting) const {
+  std::string s = greeting;
+  StringUtil::replaceAll(s, "[n]", ent->client->pers.netname);
+  const auto lastSeen = clients[ClientNum(ent)].user->lastSeen;
+
+  const std::string lastSeenStr =
+      lastSeen > 0 ? Time::fromInt(lastSeen).toDateTimeString() : "never";
+  StringUtil::replaceAll(s, "[t]", lastSeenStr);
+
+  time_t t = 0;
+  t = std::time(&t);
+  StringUtil::replaceAll(
+      s, "[d]",
+      TimeStampDifferenceToString(static_cast<int32_t>(t - lastSeen)));
+
+  return s;
 }
 
 int32_t SessionV2::clientNumFromID(const int32_t id) const {

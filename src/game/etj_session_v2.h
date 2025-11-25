@@ -114,6 +114,8 @@ private:
   void dropBannedClient(int clientNum) const;
 
   void printGreeting(int32_t clientNum) const;
+  std::string formatGreeting(const gentity_t *ent,
+                             const std::string &greeting) const;
 
   // -1 if the user is not connected
   [[nodiscard]] int32_t clientNumFromID(int32_t id) const;

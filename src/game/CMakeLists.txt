@@ -101,7 +101,6 @@ add_library(qagame MODULE
 	"etj_trigger_teleport_client.cpp"
 	"etj_user.cpp"
 	"etj_user_repository.cpp"
-	"etj_user_v2.cpp"
 	"etj_utilities.cpp"
 	${GAME_HEADERS}
 )
