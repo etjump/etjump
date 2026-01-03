@@ -8568,7 +8568,10 @@ void Menu_PaintAll() {
     vec4_t v = {1, 1, 1, 1};
     DC->textFont(UI_FONT_COURBD_21);
     DC->drawText(5, 10, .2, v, va("fps: %.2f", DC->FPS), 0, 0, 0);
-    DC->drawText(5, 20, .2, v, va("mouse: %i %i", DC->cursorx, DC->cursory), 0,
+    DC->drawText(5, 20, .2, v,
+                 va("mouse (virt): %i %i", DC->cursorx, DC->cursory), 0, 0, 0);
+    DC->drawText(5, 30, .2, v,
+                 va("mouse (real): %i %i", DC->realCursorX, DC->realCursorY), 0,
                  0, 0);
   }
 }
@@ -8601,6 +8604,67 @@ void scaleMenuSensitivity(int x, int y, float *mdx, float *mdy) {
   mouseMenuBuffer[1] += etj_menuSensitivity.value * y;
   mouseMenuBuffer[0] = modff(mouseMenuBuffer[0], mdx);
   mouseMenuBuffer[1] = modff(mouseMenuBuffer[1], mdy);
+}
+
+void computeCursorPosition(int dx, int dy) {
+  float mdx{};
+  float mdy{};
+
+  ETJump::scaleMenuSensitivity(dx, dy, &mdx, &mdy);
+  dx = static_cast<int>(mdx);
+  dy = static_cast<int>(mdy);
+
+  DC->realCursorX += dx;
+  DC->realCursorX = std::clamp(DC->realCursorX, 0, DC->glconfig.vidWidth);
+
+  DC->realCursorY += dy;
+  DC->realCursorY = std::clamp(DC->realCursorY, 0, DC->glconfig.vidHeight);
+
+  const float sx = static_cast<float>(DC->screenWidth) /
+                   static_cast<float>(DC->glconfig.vidWidth);
+  const float sy = static_cast<float>(DC->screenHeight) /
+                   static_cast<float>(DC->glconfig.vidHeight);
+
+  DC->cursorx =
+      std::clamp(static_cast<int32_t>(static_cast<float>(DC->realCursorX) * sx),
+                 0, DC->screenWidth);
+  DC->cursory =
+      std::clamp(static_cast<int32_t>(static_cast<float>(DC->realCursorY) * sy),
+                 0, DC->screenHeight);
+}
+
+void drawCursor(float w, float h, const qhandle_t shader) {
+  float s0{};
+  float s1{};
+  float t0{};
+  float t1{};
+
+  // flip about vertical
+  if (w < 0) {
+    w = -w;
+    s0 = 1;
+    s1 = 0;
+  } else {
+    s0 = 0;
+    s1 = 1;
+  }
+
+  // flip about horizontal
+  if (h < 0) {
+    h = -h;
+    t0 = 1;
+    t1 = 0;
+  } else {
+    t0 = 0;
+    t1 = 1;
+  }
+
+  w *= DC->xscale;
+  h *= DC->yscale;
+
+  trap_R_DrawStretchPic(static_cast<float>(DC->realCursorX),
+                        static_cast<float>(DC->realCursorY), w, h, s0, t0, s1,
+                        t1, shader);
 }
 
 // this is kinda terrible, but it ensures simple-ish expansion

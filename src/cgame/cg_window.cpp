@@ -338,9 +338,7 @@ void CG_windowDraw(void) {
 
   // Mouse cursor lays on top of everything
   if (cg.mvTotalClients > 0 && cg.time < cgs.cursorUpdate && fAllowMV) {
-    // CG_DrawPic(cgs.cursorX - CURSOR_OFFSETX, cgs.cursorY -
-    // CURSOR_OFFSETY, 32, 32, cgs.media.cursor);
-    CG_DrawPic(cgDC.cursorx, cgDC.cursory, 32, 32, cgs.media.cursorIcon);
+    cgDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE, cgs.media.cursorIcon);
   }
 
   if (fCleanup) {
