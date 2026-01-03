@@ -966,8 +966,8 @@ void _UI_Refresh(int realtime) {
     uiClientState_t cstate;
     trap_GetClientState(&cstate);
     if (cstate.connState <= CA_DISCONNECTED || cstate.connState >= CA_ACTIVE) {
-      UI_DrawHandlePic(uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory, 32, 32,
-                       uiInfo.uiDC.Assets.cursor);
+      uiInfo.uiDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE,
+                             uiInfo.uiDC.Assets.cursor);
     }
   }
 }
@@ -7116,6 +7116,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
   uiInfo.uiDC.setColor = &UI_SetColor;
   uiInfo.uiDC.drawHandlePic = &UI_DrawHandlePic;
   uiInfo.uiDC.drawStretchPic = &trap_R_DrawStretchPic;
+  uiInfo.uiDC.drawCursor = &ETJump::drawCursor;
   uiInfo.uiDC.drawText = &Text_Paint;
   uiInfo.uiDC.drawTextExt = &Text_Paint_Ext;
   uiInfo.uiDC.textWidth = &Text_Width;
@@ -7367,25 +7368,7 @@ UI_MouseEvent
 =================
 */
 void _UI_MouseEvent(int dx, int dy) {
-  float mdx, mdy;
-  ETJump::scaleMenuSensitivity(dx, dy, &mdx, &mdy);
-  dx = static_cast<int>(mdx);
-  dy = static_cast<int>(mdy);
-
-  // update mouse screen position
-  uiInfo.uiDC.cursorx += dx;
-  if (uiInfo.uiDC.cursorx < 0) {
-    uiInfo.uiDC.cursorx = 0;
-  } else if (uiInfo.uiDC.cursorx > SCREEN_WIDTH) {
-    uiInfo.uiDC.cursorx = SCREEN_WIDTH;
-  }
-
-  uiInfo.uiDC.cursory += dy;
-  if (uiInfo.uiDC.cursory < 0) {
-    uiInfo.uiDC.cursory = 0;
-  } else if (uiInfo.uiDC.cursory > SCREEN_HEIGHT) {
-    uiInfo.uiDC.cursory = SCREEN_HEIGHT;
-  }
+  ETJump::computeCursorPosition(dx, dy);
 
   if (Menu_Count() > 0) {
     Display_MouseMove(nullptr, uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory);
@@ -7569,6 +7552,14 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
 
   menutype = menu; //----(SA)	added
 
+  // FIXME: this is a dumb hack, we should just not draw the cursor at all,
+  // so that the next time UI is brought back, the cursor isn't at the bottom
+  // right of the screen, but rather remembers the last position it was in
+  const auto hideCursor = [] {
+    uiInfo.uiDC.realCursorX = uiInfo.uiDC.glconfig.vidWidth;
+    uiInfo.uiDC.realCursorY = uiInfo.uiDC.glconfig.vidHeight;
+  };
+
   switch (menu) {
     case UIMENU_NONE:
       trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_UI);
@@ -7687,48 +7678,42 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
 
     // NERVE - SMF
     case UIMENU_WM_QUICKMESSAGE:
-      uiInfo.uiDC.cursorx = 640;
-      uiInfo.uiDC.cursory = 480;
+      hideCursor();
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_quickmessage");
       return;
 
     case UIMENU_WM_QUICKMESSAGEALT:
-      uiInfo.uiDC.cursorx = 640;
-      uiInfo.uiDC.cursory = 480;
+      hideCursor();
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_quickmessageAlt");
       return;
 
     case UIMENU_WM_FTQUICKMESSAGE:
-      uiInfo.uiDC.cursorx = 640;
-      uiInfo.uiDC.cursory = 480;
+      hideCursor();
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_ftquickmessage");
       return;
 
     case UIMENU_WM_FTQUICKMESSAGEALT:
-      uiInfo.uiDC.cursorx = 640;
-      uiInfo.uiDC.cursory = 480;
+      hideCursor();
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_ftquickmessageAlt");
       return;
 
     case UIMENU_WM_TAPOUT:
-      uiInfo.uiDC.cursorx = 640;
-      uiInfo.uiDC.cursory = 480;
+      hideCursor();
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("tapoutmsg");
       return;
 
     case UIMENU_WM_TAPOUT_LMS:
-      uiInfo.uiDC.cursorx = 640;
-      uiInfo.uiDC.cursory = 480;
+      hideCursor();
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("tapoutmsglms");

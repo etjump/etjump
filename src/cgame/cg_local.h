@@ -2021,6 +2021,8 @@ typedef struct {
 
   int cursorX;
   int cursorY;
+  int32_t realCursorX; // real X coordinate as per resolution
+  int32_t realCursorY; // real Y coordinate as per resolution
   int eventHandling;
   qboolean mouseCaptured;
   qboolean sizingHud;

@@ -4401,16 +4401,9 @@ static void CG_Draw2D() {
     CG_DrawCHS();
   } else {
     if (cgs.eventHandling != CGAME_EVENT_NONE) {
-      //			qboolean old =
-      // cg.showGameView;
-
-      //			cg.showGameView =
-      // qfalse;
       // draw cursor
-      trap_R_SetColor(NULL);
-      CG_DrawPic(cgDC.cursorx - 14, cgDC.cursory - 14, 32, 32,
-                 cgs.media.cursorIcon);
-      //			cg.showGameView = old;
+      trap_R_SetColor(nullptr);
+      cgDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE, cgs.media.cursorIcon);
     }
   }
 
