@@ -270,6 +270,9 @@ inline constexpr int SND_NO_ATTENUATION = 0x020;
 inline constexpr int32_t MAX_QINT = 0x7fffffff;
 inline constexpr int32_t MIN_QINT = -MAX_QINT - 1;
 
+// engine limit
+inline constexpr int MAX_IMAGE_SIZE = 2048;
+
 // angle indexes
 inline constexpr int PITCH = 0; // up / down
 inline constexpr int YAW = 1;   // left / right
