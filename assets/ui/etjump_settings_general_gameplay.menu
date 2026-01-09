@@ -48,7 +48,7 @@ menuDef {
 
         YESNO               (SETTINGS_ITEM_POS(1), "Fixed physics:", 0.2, SETTINGS_ITEM_H, "pmove_fixed", "Enable fixed 125 FPS movement physics\npmove_fixed")
         YESNO               (SETTINGS_ITEM_POS(2), "Unlimited stamina:", 0.2, SETTINGS_ITEM_H, "etj_nofatigue", "Enable unlimited stamina\netj_nofatigue")
-        YESNO               (SETTINGS_ITEM_POS(3), "Smooth angles:", 0.2, SETTINGS_ITEM_H, "etj_smoothAngles", "Update client view every frame with 'pmove_fixed 1'\netj_smoothAngles")
+        YESNO               (SETTINGS_ITEM_POS(3), "Smooth angles:", 0.2, SETTINGS_ITEM_H, "etj_smoothAngles", "Update client view every frame with 'pmove_fixed 1'\nNo effect if server is running with 'g_synchronousClients 1'\netj_smoothAngles")
         YESNO               (SETTINGS_ITEM_POS(4), "Load view angles:", 0.2, SETTINGS_ITEM_H, "etj_loadviewangles", "Load view angles when loading position\netj_loadviewangles")
         YESNO               (SETTINGS_ITEM_POS(5), "Auto sprint:", 0.2, SETTINGS_ITEM_H, "etj_autoSprint", "Automatically enables sprint without holding '+sprint'\nHolding '+sprint' enables running instead of sprinting\netj_autoSprint")
         YESNO               (SETTINGS_ITEM_POS(6), "Auto load:", 0.2, SETTINGS_ITEM_H, "etj_autoLoad", "Automatically load to latest saved position when joining team\netj_autoLoad")
@@ -58,7 +58,7 @@ menuDef {
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(10), "etj_noclipScale", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         CACHEDSLIDER        (SETTINGS_ITEM_POS(10), "Noclip scale:", 0.2, SETTINGS_ITEM_H, etj_noclipScale 1 0 10 0.2, "Scales the speed of noclip\netj_noclipScale")
         MULTI               (SETTINGS_ITEM_POS(11), "Auto weapon pickup:", 0.2, SETTINGS_ITEM_H, "etj_touchPickupWeapons", cvarFloatList { "No" 0 "Own + Spawned" 1 "All" 2 }, "Automatically pickup weapons when touching them\netj_touchPickupWeapons")
-        YESNO               (SETTINGS_ITEM_POS(12), "Optimized prediction:", 0.2, SETTINGS_ITEM_H, "etj_optimizePrediction", "Enable optimized playerstate prediction to improve client side prediction performance\netj_optimizePrediction")
+        YESNO               (SETTINGS_ITEM_POS(12), "Optimized prediction:", 0.2, SETTINGS_ITEM_H, "etj_optimizePrediction", "Enable optimized playerstate prediction to improve client side prediction performance\nNo effect if server is running with 'g_synchronousClients 1'\netj_optimizePrediction")
         YESNO               (SETTINGS_ITEM_POS(13), "No panzer autoswitch:", 0.2, SETTINGS_ITEM_H, "etj_noPanzerAutoswitch", "Disable automatic weapon switching after firing a panzerfaust\netj_noPanzerAutoswitch")
         YESNO               (SETTINGS_ITEM_POS(14), "Portalgun auto binds:", 0.2, SETTINGS_ITEM_H, "etj_autoPortalBinds", "Automatically set 'weapalt' bindings to '+attack2' and back when switching to/from portalgun\netj_autoPortalBinds")
         COMBO_BIT           (SETTINGS_COMBO_POS(15), "Auto switch weapons:", 0.2, SETTINGS_ITEM_H, "cg_autoswitch", cvarFloatList { "Enabled" 1 "If replacing current" 2 "No portalgun autoswitch" 4 }, none, "Automatically switch weapon when picking up a new one\ncg_autoswitch")

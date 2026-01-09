@@ -304,11 +304,7 @@ static void CG_TransitionSnapshot(void) {
     // any reason, then the client events and view changes will
     // be issued now
     if (cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW) ||
-        cg_nopredict.integer
-#ifdef ALLOW_GSYNC
-        || cgs.synchronousClients
-#endif // ALLOW_GSYNC
-    ) {
+        cg_nopredict.integer || cgs.synchronousClients) {
       CG_TransitionPlayerState(ps, ops);
     }
   }

@@ -1363,7 +1363,7 @@ int CG_CalcViewValues() {
       VectorCopy(ps->origin, cg.refdef_current->vieworg);
 
       if (etj_smoothAngles.integer && cg_pmove.pmove_fixed &&
-          !(ps->pm_flags & PMF_FOLLOW)) {
+          !(ps->pm_flags & PMF_FOLLOW) && !cgs.synchronousClients) {
         ETJump::updateRefdefAngles(ps);
       } else {
         VectorCopy(ps->viewangles, cg.refdefViewAngles);

@@ -100,6 +100,7 @@ vmCvar_t g_debugDamage;
 vmCvar_t g_debugAlloc;
 vmCvar_t g_debugBullets; //----(SA)	added
 vmCvar_t g_motd;
+vmCvar_t g_synchronousClients;
 vmCvar_t g_warmup;
 
 // NERVE - SMF
@@ -338,6 +339,9 @@ cvarTable_t gameCvarTable[] = {
     // change anytime vars
     {&g_timelimit, "timelimit", "0",
      CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue},
+
+    {&g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0,
+     qtrue},
 
     {&g_warmup, "g_warmup", "60", CVAR_ARCHIVE, 0, qtrue},
     {&g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue},
@@ -1442,10 +1446,10 @@ void G_RegisterCvars(void) {
     trap_Cvar_Set("match_readypercent", "1");
   }
 
-  if (pmove_msec.integer < 8) {
-    trap_Cvar_Set("pmove_msec", "8");
-  } else if (pmove_msec.integer > 33) {
-    trap_Cvar_Set("pmove_msec", "33");
+  if (pmove_msec.integer < PMOVE_MSEC_MIN) {
+    trap_Cvar_Set("pmove_msec", std::to_string(PMOVE_MSEC_MIN).c_str());
+  } else if (pmove_msec.integer > PMOVE_MSEC_MAX) {
+    trap_Cvar_Set("pmove_msec", std::to_string(PMOVE_MSEC_MAX).c_str());
   }
 }
 
@@ -1457,10 +1461,10 @@ G_UpdateCvars
 void G_UpdateCvars(void) {
   int i;
   cvarTable_t *cv;
-  qboolean fToggles = qfalse;
-  qboolean fVoteFlags = qfalse;
-  qboolean remapped = qfalse;
-  qboolean chargetimechanged = qfalse;
+  bool fToggles = false;
+  bool fVoteFlags = false;
+  bool remapped = false;
+  bool chargetimechanged = false;
 
   for (i = 0, cv = gameCvarTable; i < gameCvarTableSize; i++, cv++) {
     if (cv->vmCvar) {
@@ -1476,7 +1480,7 @@ void G_UpdateCvars(void) {
         }
 
         if (cv->teamShader) {
-          remapped = qtrue;
+          remapped = true;
         }
 
         if (cv->vmCvar == &g_filtercams) {
@@ -1488,31 +1492,31 @@ void G_UpdateCvars(void) {
               g_soldierChargeTime.integer * level.soldierChargeTimeModifier[0];
           level.soldierChargeTime[1] =
               g_soldierChargeTime.integer * level.soldierChargeTimeModifier[1];
-          chargetimechanged = qtrue;
+          chargetimechanged = true;
         } else if (cv->vmCvar == &g_medicChargeTime) {
           level.medicChargeTime[0] =
               g_medicChargeTime.integer * level.medicChargeTimeModifier[0];
           level.medicChargeTime[1] =
               g_medicChargeTime.integer * level.medicChargeTimeModifier[1];
-          chargetimechanged = qtrue;
+          chargetimechanged = true;
         } else if (cv->vmCvar == &g_engineerChargeTime) {
           level.engineerChargeTime[0] = g_engineerChargeTime.integer *
                                         level.engineerChargeTimeModifier[0];
           level.engineerChargeTime[1] = g_engineerChargeTime.integer *
                                         level.engineerChargeTimeModifier[1];
-          chargetimechanged = qtrue;
+          chargetimechanged = true;
         } else if (cv->vmCvar == &g_LTChargeTime) {
           level.lieutenantChargeTime[0] =
               g_LTChargeTime.integer * level.lieutenantChargeTimeModifier[0];
           level.lieutenantChargeTime[1] =
               g_LTChargeTime.integer * level.lieutenantChargeTimeModifier[1];
-          chargetimechanged = qtrue;
+          chargetimechanged = true;
         } else if (cv->vmCvar == &g_covertopsChargeTime) {
           level.covertopsChargeTime[0] = g_covertopsChargeTime.integer *
                                          level.covertopsChargeTimeModifier[0];
           level.covertopsChargeTime[1] = g_covertopsChargeTime.integer *
                                          level.covertopsChargeTimeModifier[1];
-          chargetimechanged = qtrue;
+          chargetimechanged = true;
         } else if (cv->vmCvar == &match_readypercent) {
           if (match_readypercent.integer < 1) {
             trap_Cvar_Set(cv->cvarName, "1");
@@ -1527,11 +1531,13 @@ void G_UpdateCvars(void) {
             trap_SetConfigstring(CS_WARMUP, va("%i", level.warmupTime));
           }
         } else if (cv->vmCvar == &pmove_msec) {
-          if (pmove_msec.integer < 8) {
-            trap_Cvar_Set(cv->cvarName, "8");
-          } else if (pmove_msec.integer > 33) {
-            trap_Cvar_Set(cv->cvarName, "33");
+          if (pmove_msec.integer < PMOVE_MSEC_MIN) {
+            trap_Cvar_Set(cv->cvarName, std::to_string(PMOVE_MSEC_MIN).c_str());
+          } else if (pmove_msec.integer > PMOVE_MSEC_MAX) {
+            trap_Cvar_Set(cv->cvarName, std::to_string(PMOVE_MSEC_MAX).c_str());
           }
+        } else if (cv->vmCvar == &g_synchronousClients) {
+          ETJump::validateServerConfig();
         } else if (cv->vmCvar == &sv_fps) {
           if (sv_fps.integer < 10) {
             trap_Cvar_Set(cv->cvarName, "10");
@@ -1540,6 +1546,7 @@ void G_UpdateCvars(void) {
           }
 
           level.frameTime = 1000 / sv_fps.integer;
+          ETJump::validateServerConfig();
         } else if (cv->vmCvar == &vote_allow_map ||
                    cv->vmCvar == &vote_allow_matchreset ||
                    cv->vmCvar == &vote_allow_randommap ||
@@ -1547,7 +1554,7 @@ void G_UpdateCvars(void) {
                    cv->vmCvar == &vote_allow_autoRtv ||
                    cv->vmCvar == &vote_allow_portalPredict ||
                    cv->vmCvar == &g_enableVote) {
-          fVoteFlags = qtrue;
+          fVoteFlags = true;
         } else if (cv->vmCvar == &g_allowSpeclock) {
           if (!g_allowSpeclock.integer) {
             for (int i = 0; i < level.numConnectedClients; i++) {
@@ -1562,8 +1569,7 @@ void G_UpdateCvars(void) {
             }
           }
         } else {
-          fToggles =
-              (G_checkServerToggle(cv->vmCvar) || fToggles) ? qtrue : qfalse;
+          fToggles = G_checkServerToggle(cv->vmCvar);
         }
       }
     }

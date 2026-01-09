@@ -989,11 +989,7 @@ void CG_PredictPlayerState() {
   }
 
   // non-predicting local movement will grab the latest angles
-  if (cg_nopredict.integer
-#ifdef ALLOW_GSYNC
-      || cgs.synchronousClients
-#endif // ALLOW_GSYNC
-  ) {
+  if (cg_nopredict.integer || cgs.synchronousClients) {
     cg_pmove.ps = &cg.predictedPlayerState;
     cg_pmove.pmext = &cg.pmext;
 
