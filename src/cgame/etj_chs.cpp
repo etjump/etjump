@@ -35,17 +35,8 @@
 inline constexpr float CHSCHAR_SIZEX = 0.2;
 inline constexpr float CHSCHAR_SIZEY = 0.2;
 
-static playerState_t *CG_CHS_GetPlayerState(void) {
-  if (cg.snap->ps.clientNum != cg.clientNum) {
-    return &cg.snap->ps;
-  } else {
-    // return predictedPlayerState if not spectating
-    return &cg.predictedPlayerState;
-  }
-}
-
 static void CG_CHS_ViewTrace(trace_t *trace, int traceContents) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   vec3_t start, end;
 
   VectorCopy(cg.refdef.vieworg, start);
@@ -55,12 +46,12 @@ static void CG_CHS_ViewTrace(trace_t *trace, int traceContents) {
 }
 
 static void CG_CHS_Speed(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f", VectorLength(ps->velocity));
 }
 
 static void CG_CHS_Health(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%d", ps->stats[STAT_HEALTH]);
 }
 
@@ -77,7 +68,7 @@ static void CG_CHS_Ammo(char *buf, int size) {
 }
 
 static void CG_CHS_Distance_XY(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   trace_t trace;
 
   int traceContents = ETJump::checkExtraTrace(ETJump::CHS_10_11);
@@ -94,7 +85,7 @@ static void CG_CHS_Distance_XY(char *buf, int size) {
 }
 
 static void CG_CHS_Distance_Z(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   trace_t trace;
 
   int traceContents = ETJump::checkExtraTrace(ETJump::CHS_10_11);
@@ -110,7 +101,7 @@ static void CG_CHS_Distance_Z(char *buf, int size) {
 }
 
 static void CG_CHS_Distance_XYZ(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   trace_t trace;
   vec3_t origin;
   vec3_t originOffset{0, 0, 24};
@@ -145,7 +136,7 @@ static void CG_CHS_Distance_ViewXYZ(char *buf, int size) {
 }
 
 static void CG_CHS_Distance_XY_Z_XYZ(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   trace_t trace;
   vec3_t origin;
   vec3_t originOffset{0, 0, 24};
@@ -169,7 +160,7 @@ static void CG_CHS_Distance_XY_Z_XYZ(char *buf, int size) {
 }
 
 static void CG_CHS_Distance_XY_Z_ViewXYZ(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   trace_t trace;
   vec3_t origin;
   vec3_t originOffset{0, 0, 24};
@@ -211,52 +202,52 @@ static void CG_CHS_Look_XYZ(char *buf, int size) {
 }
 
 static void CG_CHS_Speed_X(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f", ps->velocity[0]);
 }
 
 static void CG_CHS_Speed_Y(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f", ps->velocity[1]);
 }
 
 static void CG_CHS_Speed_Z(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f", ps->velocity[2]);
 }
 
 static void CG_CHS_Speed_XY(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f",
               sqrt(SQR(ps->velocity[0]) + SQR(ps->velocity[1])));
 }
 
 static void CG_CHS_Speed_XYZ(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f", VectorLength(ps->velocity));
 }
 
 static void CG_CHS_Speed_Forward(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f",
               DotProduct(ps->velocity, cg.refdef.viewaxis[0]));
 }
 
 static void CG_CHS_Speed_Sideways(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f",
               DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
 }
 
 static void CG_CHS_Speed_Forward_Sideways(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f %.0f",
               DotProduct(ps->velocity, cg.refdef.viewaxis[0]),
               DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
 }
 
 static void CG_CHS_Speed_XY_Forward_Sideways(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f %.0f %.0f",
               sqrt(SQR(ps->velocity[0]) + SQR(ps->velocity[1])),
               DotProduct(ps->velocity, cg.refdef.viewaxis[0]),
@@ -264,32 +255,32 @@ static void CG_CHS_Speed_XY_Forward_Sideways(char *buf, int size) {
 }
 
 static void CG_CHS_Pitch(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.2f", ps->viewangles[PITCH]);
 }
 
 static void CG_CHS_Yaw(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.2f", ps->viewangles[YAW]);
 }
 
 static void CG_CHS_Roll(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.2f", ps->viewangles[ROLL]);
 }
 
 static void CG_CHS_Position_X(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f", ps->origin[0]);
 }
 
 static void CG_CHS_Position_Y(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f", ps->origin[1]);
 }
 
 static void CG_CHS_Position_Z(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   int offset = etj_CHSUseFeet.integer ? 24 : 0;
   Com_sprintf(buf, size, "%.0f", (ps->origin[2] - offset));
 }
@@ -307,20 +298,20 @@ static void CG_CHS_ViewPosition_Z(char *buf, int size) {
 }
 
 static void CG_CHS_Pitch_Yaw(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.2f %.2f", ps->viewangles[PITCH],
               ps->viewangles[YAW]);
 }
 
 static void CG_CHS_Player_XYZ(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   int offset = etj_CHSUseFeet.integer ? 24 : 0;
   Com_sprintf(buf, size, "%.0f %.0f %.0f", ps->origin[0], ps->origin[1],
               (ps->origin[2] - offset));
 }
 
 static void CG_CHS_Player_XYZ_Pitch_Yaw(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   int offset = etj_CHSUseFeet.integer ? 24 : 0;
   Com_sprintf(buf, size, "%.0f %.0f %.0f %.2f %.2f", ps->origin[0],
               ps->origin[1], (ps->origin[2] - offset), ps->viewangles[PITCH],
@@ -328,14 +319,14 @@ static void CG_CHS_Player_XYZ_Pitch_Yaw(char *buf, int size) {
 }
 
 static void CG_CHS_ViewPosition_XYZ_Pitch_Yaw(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f %.0f %.0f %.2f %.2f", cg.refdef.vieworg[0],
               cg.refdef.vieworg[1], cg.refdef.vieworg[2], ps->viewangles[PITCH],
               ps->viewangles[YAW]);
 }
 
 static void CG_CHS_Position_XYZ(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   int offset = etj_CHSUseFeet.integer ? 24 : 0;
   Com_sprintf(buf, size, "%.0f %.0f %.0f", ps->origin[0], ps->origin[1],
               (ps->origin[2] - offset));
@@ -347,13 +338,13 @@ static void CG_CHS_ViewPosition_XYZ(char *buf, int size) {
 }
 
 static void CG_CHS_Angles_XYZ(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.2f %.2f %.2f", ps->viewangles[PITCH],
               ps->viewangles[YAW], ps->viewangles[ROLL]);
 }
 
 static void CG_CHS_Velocity_XYZ(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%.0f %.0f %.0f", ps->velocity[0], ps->velocity[1],
               ps->velocity[2]);
 }
@@ -382,7 +373,7 @@ static void CG_CHS_PlaneAngleZ(char *buf, int size) {
 }
 
 static void CG_CHS_LastJumpSpeed(char *buf, int size) {
-  playerState_t *ps = CG_CHS_GetPlayerState();
+  playerState_t *ps = ETJump::getValidPlayerState();
   Com_sprintf(buf, size, "%d", ps->persistant[PERS_JUMP_SPEED]);
 }
 

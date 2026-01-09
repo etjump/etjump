@@ -121,7 +121,7 @@ void PmoveUtils::runPmove() {
   // this should never be called before client prediction has run at least once
   assert(cg.validPPS);
 
-  ps = cg.predictedPlayerState;
+  ps = *getValidPlayerState();
   setupUserCmd();
   setupPmove();
 

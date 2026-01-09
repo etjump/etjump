@@ -76,7 +76,7 @@ class UpmoveMeter : public IRenderable {
 
   int lastUpdateTime{};
   const pmove_t *pm{};
-  const playerState_t *ps = &cg.predictedPlayerState;
+  const playerState_t *ps{};
 
   void startListeners();
   void parseAllColors();

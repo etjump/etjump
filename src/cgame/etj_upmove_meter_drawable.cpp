@@ -107,6 +107,8 @@ void UpmoveMeter::resetUpmoveMeter() {
 }
 
 bool UpmoveMeter::beforeRender() {
+  ps = getValidPlayerState();
+
   // update team before checking if we should draw or not,
   // since we don't draw for spectators
   if (team_ != ps->persistant[PERS_TEAM]) {

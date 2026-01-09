@@ -229,6 +229,8 @@ void Snaphud::UpdateMaxSnapZones() {
 }
 
 bool Snaphud::beforeRender() {
+  ps = getValidPlayerState();
+
   if (canSkipDraw()) {
     return false;
   }
