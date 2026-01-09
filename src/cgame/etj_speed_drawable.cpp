@@ -79,6 +79,7 @@ bool DrawSpeed::beforeRender() {
 
   playing = cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback;
 
+  ps = getValidPlayerState();
   pm = pmoveUtils->getPmove();
 
   // store the old last update time so we can re-check it accel coloring

@@ -928,10 +928,11 @@ void runFrameEnd() {
 }
 
 playerState_t *getValidPlayerState() {
-  return (cg.snap->ps.clientNum != cg.clientNum || cg.demoPlayback)
-             // spectating/demo playback
+  return (cg.snap->ps.clientNum != cg.clientNum || cg.demoPlayback ||
+          cgs.synchronousClients)
+             // lerp between snapshots
              ? &cg.snap->ps
-             // playing
+             // predict between snapshots
              : &cg.predictedPlayerState;
 }
 } // namespace ETJump

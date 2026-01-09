@@ -95,7 +95,8 @@ void PmoveUtils::setupUserCmd() {
 }
 
 void PmoveUtils::setupPmove() {
-  if (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback) {
+  if (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback &&
+      !cgs.synchronousClients) {
     pm = cg_pmove;
     pm.pmext = &cg.pmext;
     return;
@@ -120,12 +121,13 @@ void PmoveUtils::runPmove() {
   // this should never be called before client prediction has run at least once
   assert(cg.validPPS);
 
-  ps = cg.predictedPlayerState;
+  ps = *getValidPlayerState();
   setupUserCmd();
   setupPmove();
 
   // if not spectating/in demo playback, we have everything we need
-  if (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback) {
+  if (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback &&
+      !cgs.synchronousClients) {
     return;
   }
 

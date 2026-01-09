@@ -269,6 +269,14 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
   if (!canActivate(activator)) {
     return;
   }
+
+  if (!level.serverConfigValid) {
+    Printer::center(
+        activator,
+        "^3WARNING: ^7Timerun was not started. Invalid server configuration!");
+    return;
+  }
+
   const int clientNum = ClientNum(activator);
   auto client = activator->client;
   const float speed = VectorLength(client->ps.velocity);
@@ -279,10 +287,11 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
 
   client->sess.runSpawnflags = self->spawnflags;
 
-  // check for pmove_fixed 0
-  if (!client->sess.runSpawnflags ||
-      client->sess.runSpawnflags &
-          static_cast<int>(TimerunSpawnflags::ResetNoPmove)) {
+  // check for pmove_fixed 0, if 'g_synchronousCLients' is disabled
+  if (!g_synchronousClients.integer &&
+      (!client->sess.runSpawnflags ||
+       client->sess.runSpawnflags &
+           static_cast<int>(TimerunSpawnflags::ResetNoPmove))) {
     if (!client->pers.pmoveFixed) {
       Printer::center(
           clientNum,
