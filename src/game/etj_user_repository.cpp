@@ -671,7 +671,8 @@ std::vector<UserModels::Ban> UserRepository::getBans() const {
   db->sql << R"(
     select
       *
-    from bans;
+    from bans
+    order by ban_date desc;
   )" >>
       [&bans](const int32_t banID, const std::string &name,
               const std::string &bannedBy, const std::string &banDate,
