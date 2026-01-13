@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <optional>
 #include <string>
 #include <map>
 #include <ostream>
@@ -65,12 +66,12 @@ public:
       return "";
     }
 
-    std::string shortName{};
-    std::string name{};
-    std::string description{};
+    std::string shortName;
+    std::string name;
+    std::string description;
     Type type{Type::Token};
     bool required{true};
-    opt<int> position;
+    std::optional<int> position;
 
     static OptionDefinition create(const std::string &name,
                                    const std::string &shortName,
@@ -89,9 +90,9 @@ public:
   };
 
   struct CommandDefinition {
-    std::string name{};
-    std::string description{};
-    std::map<std::string, OptionDefinition> options{};
+    std::string name;
+    std::string description;
+    std::map<std::string, OptionDefinition> options;
 
     std::string help() const {
       auto optionsToStrings = Container::map(options, [](const auto &pair) {
@@ -140,7 +141,7 @@ public:
                                  OptionDefinition::Type type, bool required,
                                  int position) {
       for (const auto &o : this->options) {
-        if (o.second.position.hasValue() &&
+        if (o.second.position.has_value() &&
             o.second.position.value() == position) {
           throw std::runtime_error(
               stringFormat("`%s` already has argument `%s` configured to "
@@ -189,7 +190,7 @@ public:
     std::vector<std::string> extraArgs;
     bool helpRequested{};
 
-    opt<Option> getOptional(const std::string &name) {
+    std::optional<Option> getOptional(const std::string &name) {
       if (options.count(name) == 0) {
         return {};
       }
@@ -238,6 +239,7 @@ private:
                                              const std::string &shortname,
                                              OptionDefinition::Type optionType,
                                              const std::string &description,
-                                             bool required, opt<int> position);
+                                             bool required,
+                                             std::optional<int> position);
 };
 } // namespace ETJump

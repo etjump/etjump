@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -188,7 +188,8 @@ void initDrawKeys(KeySetSystem *keySetSystem) {
   const char *keySetNames[]{
       "keyset",  // Keyset 1 (original)
       "keyset2", // Aciz: Keyset 2 (DeFRaG style keys)
-      "keyset3", "keyset4",
+      "keyset3",
+      "keyset4",
       // + add more
   };
   for (const auto &keySetName : keySetNames) {

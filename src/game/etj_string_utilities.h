@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -141,6 +141,10 @@ bool isColorString(std::string_view str, size_t idx);
 // e.g. truncate("^1foo^2bar", 3) -> "^1foo"
 std::string truncate(const std::string &str, size_t len);
 
+// removes a file extension from the string
+// if string contains no file extenstion, no modification is made
+void stripExtension(std::string &str);
+
 // sorts strings either with case sensitivity or insensitivity
 // identical strings are kept in order
 template <typename T>
@@ -154,5 +158,7 @@ void sortStrings(T &v, const bool noCase) {
         }
       });
 }
+
+void stripLocalizationMarkers(std::string &str);
 } // namespace StringUtil
 } // namespace ETJump

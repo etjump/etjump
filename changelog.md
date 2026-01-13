@@ -1,3 +1,20 @@
+# ETJump 3.5.0
+
+* added `target_random` entity for generating per-client random numbers [#1771](https://github.com/etjump/etjump/pull/1771)
+  * takes two keys, `chance` & `total` and generates a random number in the range of `1 - total`, if the generated number is less or equal to `chance`, fires targets
+  * `spawnflag 1` to change the behavior such that the generated random number must match `chance`
+* increased the number of unique remappable shaders from `32` to `511` [#1772](https://github.com/etjump/etjump/pull/1772)
+* added `etj_onDemoPlaybackEnd` cvar to execute a command when demo playback ends [#1794](https://github.com/etjump/etjump/pull/1794)
+  * this combined with `etj_onDemoPlaybackStart` allows for example creating a separate set of keybinds/scripts that are automatically loaded/unloaded on demo playback start/end
+* vote UI now separates votes given out by spectators, to help out ambiguity on why a passes/fails when spectators can vote [#1793](https://github.com/etjump/etjump/pull/1793)
+* fixed rank 1 times displaying a `+00:00.000` diff if a player had no record on a run [#1802](https://github.com/etjump/etjump/pull/1802)
+* fixed replay menu displaying demo names incorrectly if the last character of the filename was `^` [#1806](https://github.com/etjump/etjump/pull/1806)
+* demo compatibility settings are no longer automatically printed when playback starts [#1804](https://github.com/etjump/etjump/pull/1804)
+  * active compatibility settings can be printed with `printDemoCompatInfo` command
+* improved smoothness of in-game mouse cursor - the cursor now operates on real screen pixels rather than virtual grid pixels [#1809](https://github.com/etjump/etjump/pull/1809)
+  * this greatly increases the accuracy of the cursor, especially on small movememnts, as your movement "resolution" is now higher
+  * as a side effect, the overall mouse sensitivity in menus is now lower, as the mouse movement deltas per frame are no longer scaled to virtual grid
+
 # ETJump 3.4.2
 
 * fixed inactivity drop prints containing an excess newline [#1769](https://github.com/etjump/etjump/pull/1769)

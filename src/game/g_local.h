@@ -1849,10 +1849,8 @@ void G_SendScore(gentity_t *client);
 //
 void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
            char *chatText);
-void G_SayTo(
-    gentity_t *ent, gentity_t *other, int mode, int color, const char *name,
-    const char *message, qboolean localize,
-    qboolean encoded); // JPW NERVE removed static declaration so it would link
+void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
+             const char *name, const char *message, qboolean encoded);
 void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_Follow_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded);

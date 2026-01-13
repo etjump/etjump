@@ -303,30 +303,30 @@ int ClientNumberFromString(gentity_t *to, char *s) {
   if (fIsNumber) {
     idnum = Q_atoi(s);
     if (idnum < 0 || idnum >= level.maxclients) {
-      CPx(to - g_entities, va("print \"Bad client slot: [lof]%i\n\"", idnum));
+      Printer::console(to,
+                       ETJump::stringFormat("Bad client slot: %i\n", idnum));
       return -1;
     }
 
     cl = &level.clients[idnum];
     if (cl->pers.connected != CON_CONNECTED) {
-      CPx(to - g_entities, va("print \"Client[lof] %i "
-                              "[lon]is not active\n\"",
-                              idnum));
+      Printer::console(
+          to, ETJump::stringFormat("Client %i is not active\n", idnum));
       return -1;
     }
     return (idnum);
   }
 
   if (partialMatchs > 1) {
-    CPx(to - g_entities, "print \"Several partial matches\n\"");
+    Printer::console(to, "Several partial matches\n");
     return -1;
   }
   if (partialMatchs == 1) {
     return partialMatchId;
   }
 
-  CPx(to - g_entities,
-      va("print \"User [lof]%s [lon]is not on the server\n\"", s));
+  Printer::console(to,
+                   ETJump::stringFormat("User %s is not on the server\n", s));
   return (-1);
 }
 
@@ -2054,8 +2054,7 @@ G_Say
 ==================
 */
 void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
-             const char *name, const char *message, qboolean localize,
-             qboolean encoded) {
+             const char *name, const char *message, qboolean encoded) {
   const char *cmd;
   auto clientNum = ClientNum(ent);
   auto otherClientNum = ClientNum(other);
@@ -2093,8 +2092,8 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
   }
 
   trap_SendServerCommand(otherClientNum,
-                         va("%s \"%s%c%c%s\" %i %i", cmd, name, Q_COLOR_ESCAPE,
-                            color, message, clientNum, localize));
+                         va("%s \"%s%c%c%s\" %i", cmd, name, Q_COLOR_ESCAPE,
+                            color, message, clientNum));
 }
 
 void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
@@ -2106,7 +2105,6 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   // don't let text be too long for malicious reasons
   char text[MAX_CHAT_TEXT];
   const char *escapedName = nullptr;
-  qboolean localize = qfalse;
   const char *printText = nullptr;
   const int clientNum = ClientNum(ent);
 
@@ -2118,16 +2116,12 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
       color = COLOR_GREEN;
       break;
     case SAY_TEAM:
-      localize = qtrue;
       G_LogPrintf("sayteam: %s: %s\n", ent->client->pers.netname, chatText);
-      Com_sprintf(name, sizeof(name),
-                  "[lof](%s^7): ", ent->client->pers.netname);
+      Com_sprintf(name, sizeof(name), "(%s^7): ", ent->client->pers.netname);
       color = COLOR_CYAN;
       break;
     case SAY_BUDDY:
-      localize = qtrue;
-      Com_sprintf(name, sizeof(name),
-                  "[lof](%s^7): ", ent->client->pers.netname);
+      Com_sprintf(name, sizeof(name), "(%s^7): ", ent->client->pers.netname);
       color = COLOR_YELLOW;
       break;
     case SAY_ADMIN:
@@ -2159,7 +2153,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
 
   if (mode == SAY_ALL) {
     game.chatReplay->createChatMessage(clientNum, escapedName, printText,
-                                       localize, encoded);
+                                       encoded);
   }
 
   // remove inactivity flag as using BUTTON_TALK won't clear it,
@@ -2171,8 +2165,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
 
   if (target) {
     if (!COM_BitCheck(target->client->sess.ignoreClients, clientNum)) {
-      G_SayTo(ent, target, mode, color, escapedName, printText, localize,
-              encoded);
+      G_SayTo(ent, target, mode, color, escapedName, printText, encoded);
     }
     return;
   }
@@ -2191,8 +2184,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
     }
 
     if (!COM_BitCheck(other->client->sess.ignoreClients, clientNum)) {
-      G_SayTo(ent, other, mode, color, escapedName, printText, localize,
-              encoded);
+      G_SayTo(ent, other, mode, color, escapedName, printText, encoded);
     }
   }
 

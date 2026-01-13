@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,8 @@
  */
 
 #pragma once
+
+#include <optional>
 
 #if defined(CGAMEDLL)
   #include "cg_local.h"
@@ -50,9 +52,9 @@ public:
 class CvarValueParser {
 public:
   template <typename T>
-  static T parse(const vmCvar_t &cvar, opt<float> min = opt<float>(),
-                 opt<float> max = opt<float>()) {
-    const bool clamp = min.hasValue() && max.hasValue();
+  static T parse(const vmCvar_t &cvar, std::optional<float> min = std::nullopt,
+                 std::optional<float> max = std::nullopt) {
+    const bool clamp = min.has_value() && max.has_value();
 
     const auto isEmptyStr = [](const std::string_view str) {
       if (str.empty()) {

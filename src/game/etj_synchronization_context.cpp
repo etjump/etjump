@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -101,10 +101,10 @@ void ETJump::SynchronizationContext::worker() {
     try {
       auto result = operation->task();
 
-      operation->result = opt<std::unique_ptr<ResultBase>>(std::move(result));
+      operation->result = std::unique_ptr<ResultBase>(std::move(result));
       operation->status = Operation::Status::Complete;
     } catch (const std::runtime_error &e) {
-      operation->error = opt<std::runtime_error>(e);
+      operation->error = e;
       operation->status = Operation::Status::Error;
     }
 

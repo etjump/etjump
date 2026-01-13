@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,7 @@ class DemoCompatibility {
                        const std::string &delimiter);
 
   void setupCompatibilityFlags();
+  void printCompatibilityInfo();
 
   // returns true if the demo version is newer or same as 'minimum'
   [[nodiscard]] bool isCompatible(const Version &minimum) const;
@@ -69,6 +70,7 @@ public:
     bool adjustItemlistIndex = false;
     bool predictedJumpSpeeds = false;
     bool noSpecCountInVoteCs = false;
+    bool stripLocalizationMarkers = false;
   };
 
   // everything in here will be set to false unless we're on demo playback

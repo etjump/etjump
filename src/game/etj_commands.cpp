@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,7 +62,7 @@ typedef std::map<std::string,
                            char>>::iterator AdminCommandIterator;
 
 namespace ETJump {
-opt<CommandParser::Command>
+std::optional<CommandParser::Command>
 getOptCommand(const std::string &commandPrefix, int clientNum,
               const CommandParser::CommandDefinition &def, Arguments args) {
   auto command = ETJump::CommandParser(def, *args).parse();
@@ -72,7 +72,7 @@ getOptCommand(const std::string &commandPrefix, int clientNum,
         clientNum,
         ETJump::stringFormat("^3%s: ^7check console for help.", commandPrefix));
     Printer::console(clientNum, def.help());
-    return {};
+    return std::nullopt;
   }
 
   if (!command.errors.empty()) {
@@ -83,10 +83,10 @@ getOptCommand(const std::string &commandPrefix, int clientNum,
             commandPrefix));
     Printer::console(clientNum, command.getErrorMessage() + "\n");
 
-    return {};
+    return std::nullopt;
   }
 
-  return {std::move(command)};
+  return std::move(command);
 }
 } // namespace ETJump
 
@@ -173,7 +173,7 @@ bool Rankings(gentity_t *ent, Arguments argv) {
                      false),
       &args);
 
-  if (!optCommand.hasValue()) {
+  if (!optCommand.has_value()) {
     return true;
   }
 
@@ -190,10 +190,10 @@ bool Rankings(gentity_t *ent, Arguments argv) {
   }
 
   if (season.empty()) {
-    season = optSeason.hasValue() ? optSeason.value().text : "Default";
+    season = optSeason.has_value() ? optSeason.value().text : "Default";
   }
-  auto page = optPage.hasValue() ? optPage.value().integer - 1 : 0;
-  auto pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
+  auto page = optPage.has_value() ? optPage.value().integer - 1 : 0;
+  auto pageSize = optPageSize.has_value() ? optPageSize.value().integer : 20;
 
   pageSize = std::clamp(pageSize, 1, 100);
 
@@ -262,7 +262,7 @@ bool Records(gentity_t *ent, Arguments argv) {
                      false),
       &args);
 
-  if (!optCommand.hasValue()) {
+  if (!optCommand.has_value()) {
     return true;
   }
 
@@ -276,7 +276,7 @@ bool Records(gentity_t *ent, Arguments argv) {
 
   std::string season;
   std::string map;
-  ETJump::opt<std::string> run;
+  std::optional<std::string> run;
 
   if (command.extraArgs.size() >= 3) {
     season = command.extraArgs[0];
@@ -290,17 +290,19 @@ bool Records(gentity_t *ent, Arguments argv) {
   }
 
   if (season.empty()) {
-    season = optSeason.hasValue() ? optSeason.value().text : "Default";
+    season = optSeason.has_value() ? optSeason.value().text : "Default";
   }
   bool exactMap{};
   if (map.empty()) {
-    map = optMap.hasValue() ? optMap.value().text : level.rawmapname;
-    exactMap = !optMap.hasValue();
+    map = optMap.has_value() ? optMap.value().text : level.rawmapname;
+    exactMap = !optMap.has_value();
   } else {
     exactMap = false;
   }
-  if (!run.hasValue()) {
-    run = optRun.hasValue() ? optRun.value().text : ETJump::opt<std::string>();
+  if (!run.has_value()) {
+    run = optRun.has_value()
+              ? std::make_optional<std::string>(optRun.value().text)
+              : std::nullopt;
   }
 
   ETJump::Timerun::PrintRecordsParams params;
@@ -310,15 +312,15 @@ bool Records(gentity_t *ent, Arguments argv) {
   // use exact map search if user did not specify the map
   params.exactMap = exactMap;
   params.run = std::move(run);
-  params.page = optPage.hasValue() ? std::max(optPage.value().integer, 1) : 1;
-  if (!params.run.hasValue()) {
-    params.pageSize = optPageSize.hasValue()
+  params.page = optPage.has_value() ? std::max(optPage.value().integer, 1) : 1;
+  if (!params.run.has_value()) {
+    params.pageSize = optPageSize.has_value()
                           ? std::clamp(optPageSize.value().integer, 1,
                                        ETJump::Timerun::MAX_PAGE_SIZE_ALL_RUNS)
                           : ETJump::Timerun::DEFAULT_PAGE_SIZE_ALL_RUNS;
   } else {
     params.pageSize =
-        optPageSize.hasValue()
+        optPageSize.has_value()
             ? std::clamp(optPageSize.value().integer, 1,
                          ETJump::Timerun::MAX_PAGE_SIZE_SINGLE_RUN)
             : ETJump::Timerun::DEFAULT_PAGE_SIZE_SINGLE_RUN;
@@ -362,13 +364,13 @@ bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
                      false, 1),
       &args);
 
-  if (!optCommand.hasValue()) {
+  if (!optCommand.has_value()) {
     return true;
   }
 
   const auto &runName = optCommand.value().options.at("run").text;
   auto optRank = optCommand.value().getOptional("rank");
-  auto rank = optRank.hasValue() ? optRank.value().integer : 1;
+  auto rank = optRank.has_value() ? optRank.value().integer : 1;
 
   game.timerunV2->loadCheckpoints(ClientNum(ent), level.rawmapname, runName,
                                   rank);
@@ -2480,7 +2482,7 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
                      false));
   auto optCommand = getOptCommand("add-season", clientNum, def, argv);
 
-  if (!optCommand.hasValue()) {
+  if (!optCommand.has_value()) {
     return true;
   }
 
@@ -2489,11 +2491,11 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
   const auto &name = command.options.at("name").text;
   auto start = command.options.at("start-date").date;
   auto end = command.options.count("end-date-exclusive") > 0
-                 ? ETJump::opt<ETJump::Time>(ETJump::Time::fromDate(
+                 ? std::make_optional<ETJump::Time>(ETJump::Time::fromDate(
                        command.options.at("end-date-exclusive").date))
-                 : ETJump::opt<ETJump::Time>();
+                 : std::nullopt;
 
-  if (end.hasValue()) {
+  if (end.has_value()) {
     if ((*end).date < start) {
       Printer::chat(clientNum,
                     ETJump::stringFormat(
@@ -2535,7 +2537,7 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
 
   auto optCommand = getOptCommand("edit-season", clientNum, def, argv);
 
-  if (!optCommand.hasValue()) {
+  if (!optCommand.has_value()) {
     return true;
   }
 
@@ -2545,14 +2547,14 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
   auto start = command.getOptional("start-date");
   auto end = command.getOptional("end-date");
 
-  const auto &startTime = start.hasValue()
-                              ? ETJump::opt<ETJump::Time>(
+  const auto &startTime = start.has_value()
+                              ? std::make_optional<ETJump::Time>(
                                     ETJump::Time::fromDate(start.value().date))
-                              : ETJump::opt<ETJump::Time>();
-  const auto &endTime =
-      end.hasValue()
-          ? ETJump::opt<ETJump::Time>(ETJump::Time::fromDate(end.value().date))
-          : ETJump::opt<ETJump::Time>();
+                              : std::nullopt;
+  const auto &endTime = end.has_value()
+                            ? std::make_optional<ETJump::Time>(
+                                  ETJump::Time::fromDate(end.value().date))
+                            : std::nullopt;
 
   game.timerunV2->editSeason({clientNum, name, startTime, endTime});
 
@@ -2571,7 +2573,7 @@ bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
                      true));
 
   auto optCommand = getOptCommand("delete-season", clientNum, def, argv);
-  if (!optCommand.hasValue()) {
+  if (!optCommand.has_value()) {
     return true;
   }
 
@@ -2638,7 +2640,7 @@ bool addCustomVote(gentity_t *ent, Arguments argv) {
   const auto optCommand =
       ETJump::getOptCommand("add-customvote", clientNum, def, argv);
 
-  if (!optCommand.hasValue()) {
+  if (!optCommand.has_value()) {
     return false;
   }
 
@@ -2669,7 +2671,7 @@ bool deleteCustomVote(gentity_t *ent, Arguments argv) {
   const auto optCommand =
       ETJump::getOptCommand("delete-customvote", clientNum, def, argv);
 
-  if (!optCommand.hasValue()) {
+  if (!optCommand.has_value()) {
     return false;
   }
 
@@ -2705,7 +2707,7 @@ bool editCustomVote(gentity_t *ent, Arguments argv) {
   const auto optCommand =
       ETJump::getOptCommand("edit-customvote", clientNum, def, argv);
 
-  if (!optCommand.hasValue()) {
+  if (!optCommand.has_value()) {
     return false;
   }
 
@@ -2717,13 +2719,13 @@ bool editCustomVote(gentity_t *ent, Arguments argv) {
   const auto optAddMaps = command.getOptional("add-maps");
   const auto optRemoveMaps = command.getOptional("remove-maps");
 
-  const std::string &name = optName.hasValue() ? optName.value().text : "";
+  const std::string &name = optName.has_value() ? optName.value().text : "";
   const std::string &fullName =
-      optFullName.hasValue() ? optFullName.value().text : "";
+      optFullName.has_value() ? optFullName.value().text : "";
   const std::string &addMaps =
-      optAddMaps.hasValue() ? optAddMaps.value().text : "";
+      optAddMaps.has_value() ? optAddMaps.value().text : "";
   const std::string &removeMaps =
-      optRemoveMaps.hasValue() ? optRemoveMaps.value().text : "";
+      optRemoveMaps.has_value() ? optRemoveMaps.value().text : "";
 
   if (!validateCustomVoteCommand(def.name, clientNum, command)) {
     return false;

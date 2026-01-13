@@ -61,7 +61,9 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
     case CG_MOUSE_EVENT:
       cgDC.cursorx = cgs.cursorX;
       cgDC.cursory = cgs.cursorY;
-      CG_MouseEvent(arg0, arg1);
+      cgDC.realCursorX = cgs.realCursorX;
+      cgDC.realCursorY = cgs.realCursorY;
+      CG_MouseEvent(static_cast<int32_t>(arg0), static_cast<int32_t>(arg1));
       return 0;
     case CG_EVENT_HANDLING:
       CG_EventHandling(arg0, qtrue);
@@ -1654,8 +1656,7 @@ int CG_findClientNum(char *s) {
     }
   }
 
-  CG_Printf("[cgnotify]%s ^3%s^7 %s.\n", CG_TranslateString("User"), s,
-            CG_TranslateString("is not on the server"));
+  CG_Printf("[cgnotify]User ^3%s^7 is not on the server.\n", s);
   return (-1);
 }
 
@@ -3689,6 +3690,7 @@ void CG_LoadHudMenu() {
   cgDC.setColor = &trap_R_SetColor;
   cgDC.drawHandlePic = &CG_DrawPic;
   cgDC.drawStretchPic = &trap_R_DrawStretchPic;
+  cgDC.drawCursor = &ETJump::drawCursor;
   cgDC.drawText = &CG_Text_Paint;
   cgDC.drawTextExt = &CG_Text_Paint_Ext;
   cgDC.textWidth = &CG_Text_Width;
@@ -3729,7 +3731,6 @@ void CG_LoadHudMenu() {
   cgDC.getBindingBuf = &trap_Key_GetBindingBuf; // NERVE - SMF
   cgDC.getKeysForBinding = &trap_Key_KeysForBinding;
   cgDC.keynumToStringBuf = &trap_Key_KeynumToStringBuf; // NERVE - SMF
-  cgDC.translateString = &CG_TranslateString;           // NERVE - SMF
   // cgDC.executeText = &trap_Cmd_ExecuteText;
   cgDC.Error = &Com_Error;
   cgDC.Print = &Com_Printf;
@@ -3753,6 +3754,8 @@ void CG_LoadHudMenu() {
       ceil(cgs.glconfig.vidWidth * 480.0 / cgs.glconfig.vidHeight));
   cgDC.screenWidth = width > 640 ? width : 640;
   cgDC.screenHeight = 480;
+
+  cgDC.glconfig = cgs.glconfig;
 
   Init_Display(&cgDC);
 

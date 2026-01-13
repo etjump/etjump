@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,63 +70,4 @@ const std::string AUTHENTICATE = "authenticate";
 #endif
 } // namespace Authentication
 } // namespace Constants
-
-template <typename T>
-class opt {
-public:
-  opt() : _hasValue(false) {}
-
-  // we want this to be implicit
-  // e.g. opt<int> x = 5;
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  opt(T val) : _hasValue(true), _value(std::move(val)) {}
-
-  bool hasValue() const { return _hasValue; }
-
-  const T &valueOr(const T &defaultValue) const {
-    if (!_hasValue) {
-      return defaultValue;
-    }
-    return _value;
-  }
-
-  T valueOr(T defaultValue) {
-    if (!_hasValue) {
-      return defaultValue;
-    }
-    return _value;
-  }
-
-  T &operator*() {
-    if (!_hasValue) {
-      throw std::runtime_error("Optional value is not set");
-    }
-    return _value;
-  }
-
-  const T &operator*() const {
-    if (!_hasValue) {
-      throw std::runtime_error("Optional value is not set");
-    }
-    return _value;
-  }
-
-  T &value() {
-    if (!_hasValue) {
-      throw std::runtime_error("Optional value is not set");
-    }
-    return _value;
-  }
-
-  const T &value() const {
-    if (!_hasValue) {
-      throw std::runtime_error("Optional value is not set");
-    }
-    return _value;
-  }
-
-private:
-  bool _hasValue;
-  T _value;
-};
 } // namespace ETJump

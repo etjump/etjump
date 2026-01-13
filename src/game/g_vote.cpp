@@ -195,9 +195,8 @@ qboolean G_voteDescription(gentity_t *ent, int cmd, bool argCountCheck = true) {
   return (qfalse);
 }
 
-// Localize disable message info.
-void G_voteDisableMessage(gentity_t *ent, const char *cmd) {
-  G_cpmPrintf(ent, "Sorry, [lof]^3%s^7 [lon]voting has been disabled.", cmd);
+static void G_voteDisableMessage(gentity_t *ent, const char *cmd) {
+  G_cpmPrintf(ent, "Sorry, ^3%s^7 voting has been disabled.", cmd);
 }
 
 // Player ID message stub.
@@ -205,9 +204,8 @@ void G_playersMessage(gentity_t *ent) {
   G_cpmPrintf(ent, "Use the ^3players^7 command to find a valid player ID.");
 }
 
-// Localize current parameter setting.
-void G_voteCurrentSetting(gentity_t *ent, const char *cmd,
-                          const char *setting) {
+static void G_voteCurrentSetting(gentity_t *ent, const char *cmd,
+                                 const char *setting) {
   G_cpmPrintf(ent, "^2%s^7 is currently ^3%s", cmd, setting);
 }
 
@@ -404,8 +402,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
     trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
     if (!g_dedicated.integer && ent) {
-      G_cpmPrintf(
-          ent, "Sorry, [lof]^3%s^7 [lon]voting is disabled on localhost.", arg);
+      G_cpmPrintf(ent, "Sorry, ^3%s^7 voting is disabled on localhost.", arg);
       return (G_INVALID);
     }
     if (vote_allow_map.integer <= 0 && ent) {
@@ -530,8 +527,8 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                     arg);
       } else {
         Printer::popup(clientNum,
-                       stringFormat("Sorry, calling [lof]^3%s^7[lon] with less "
-                                    "than 3 valid maps on %s is not possible.",
+                       stringFormat("Sorry, calling ^3%s^7 with less than 3 "
+                                    "valid maps on %s is not possible.",
                                     arg, arg2[0] ? "a list" : "the server"));
       }
       return G_INVALID;

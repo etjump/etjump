@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
 #pragma once
 #include <array>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -92,7 +93,7 @@ private:
   std::string createCompletionMessage(const clientInfo_t &player,
                                       const std::string &runName,
                                       int completionTime,
-                                      ETJump::opt<int> previousTime);
+                                      std::optional<int> previousTime);
 
   std::array<PlayerTimerunInformation, MAX_CLIENTS> _playersTimerunInformation;
   std::shared_ptr<PlayerEventsHandler> _playerEventsHandler;

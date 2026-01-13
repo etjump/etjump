@@ -1884,9 +1884,8 @@ void ClientUserinfoChanged(int clientNum) {
       ClientNameChanged(ent);
 #endif
 
-      trap_SendServerCommand(-1, va("print \"[lof]%s" S_COLOR_WHITE
-                                    " [lon]renamed to[lof] %s\n\"",
-                                    oldname, client->pers.netname));
+      Printer::consoleAll(ETJump::stringFormat("%s ^7renamed to %s\n", oldname,
+                                               client->pers.netname));
 
       G_NameChanged(ent);
     }
@@ -2185,9 +2184,8 @@ void ClientBegin(int clientNum) {
   }
 
   if (client->sess.sessionTeam != TEAM_SPECTATOR) {
-    trap_SendServerCommand(-1, va("print \"[lof]%s" S_COLOR_WHITE
-                                  " [lon]entered the game\n\"",
-                                  client->pers.netname));
+    Printer::consoleAll(
+        ETJump::stringFormat("%s ^7entered the game\n", client->pers.netname));
   }
 
   client->pers.nofatigue =

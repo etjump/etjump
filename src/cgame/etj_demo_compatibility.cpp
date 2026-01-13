@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,14 +23,21 @@
  */
 
 #include "etj_demo_compatibility.h"
+#include "etj_client_commands_handler.h"
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
 DemoCompatibility::DemoCompatibility() {
-  if (cg.demoPlayback) {
-    parseDemoVersion();
-    setupCompatibilityFlags();
+  if (!cg.demoPlayback) {
+    return;
   }
+
+  parseDemoVersion();
+  setupCompatibilityFlags();
+
+  consoleCommandsHandler->subscribe(
+      "printDemoCompatInfo",
+      [this](const std::vector<std::string> &) { printCompatibilityInfo(); });
 }
 
 void DemoCompatibility::parseDemoVersion() {
@@ -101,7 +108,7 @@ void DemoCompatibility::fillVersionInfo(Version &version,
       !Q_stricmpn(versionStr.c_str(), "etjump-2_3_0-RC4", 17)) {
     flags.adjustEntityTypes = true;
     compatibilityStrings.emplace_back(
-        "- Adjusted entity type order for ET_VELOCITY_PUSH_TRIGGER");
+        "Adjusted entity type order for ET_VELOCITY_PUSH_TRIGGER");
   }
 }
 
@@ -109,66 +116,82 @@ void DemoCompatibility::setupCompatibilityFlags() {
   if (!isCompatible({2, 0, 6})) {
     flags.adjustEvTokens = true;
     compatibilityStrings.emplace_back(
-        "- Adjusted event indices for ET_TOKEN_ entities");
+        "Adjusted event indices for ET_TOKEN_ entities");
 
     flags.adjustItemlistIndex = true;
     compatibilityStrings.emplace_back(
-        "- Adjusted item indices for removal of duplicate 'weapon_medic_heal'");
+        "Adjusted item indices for removal of duplicate 'weapon_medic_heal'");
   }
 
   if (!isCompatible({2, 3, 0})) {
     flags.adjustEvGeneralClientSoundVolume = true;
     compatibilityStrings.emplace_back(
-        "- Adjusted event indices for EV_GENERAL_CLIENT_SOUND_VOLUME");
+        "Adjusted event indices for EV_GENERAL_CLIENT_SOUND_VOLUME");
 
     flags.adjustEvVelocityPushTrigger = true;
     compatibilityStrings.emplace_back(
-        "- Adjusted event indices for ET_VELOCITY_PUSH_TRIGGER");
+        "Adjusted event indices for ET_VELOCITY_PUSH_TRIGGER");
   }
 
   if (!isCompatible({2, 5, 0})) {
     flags.predictedJumpSpeeds = true;
     compatibilityStrings.emplace_back(
-        "- Using predicted speeds for jump speeds display");
+        "Using predicted speeds for jump speeds display");
   }
 
   if (!isCompatible({3, 2, 0})) {
     flags.serverSideCoronas = true;
-    compatibilityStrings.emplace_back("- Using fully server-side coronas");
+    compatibilityStrings.emplace_back("Using fully server-side coronas");
 
     flags.svFpsUnavailable = true;
     compatibilityStrings.emplace_back(
-        "- Unable to determine sv_fps, assuming default");
+        "Unable to determine sv_fps, assuming default");
   } else if (!isCompatible({3, 3, 0})) {
     flags.svFpsInSysteminfo = true;
     compatibilityStrings.emplace_back(
-        "- Using systeminfo string to determine sv_fps");
+        "Using systeminfo string to determine sv_fps");
   }
 
   if (!isCompatible({3, 3, 0})) {
     flags.noSavePosTimerunInfo = true;
     compatibilityStrings.emplace_back(
-        "- Timerun state unavailable for 'savepos'");
+        "Timerun state unavailable for 'savepos'");
 
     flags.adjustEvFakebrushAndClientTeleporter = true;
-    compatibilityStrings.emplace_back(
-        "- Adjusted event indices for ET_FAKEBRUSH and "
-        "ET_TELEPORT_TRIGGER_CLIENT");
+    compatibilityStrings.emplace_back("Adjusted event indices for ET_FAKEBRUSH "
+                                      "and ET_TELEPORT_TRIGGER_CLIENT");
   }
 
   if (!isCompatible({3, 4, 0})) {
     flags.serverSideDlights = true;
-    compatibilityStrings.emplace_back("- Using fully server-side dlights");
+    compatibilityStrings.emplace_back("Using fully server-side dlights");
 
     flags.setAttack2FiringFlag = true;
     compatibilityStrings.emplace_back(
-        "- Faking EF_FIRING state for '+attack2' shooting");
+        "Faking EF_FIRING state for '+attack2' shooting");
   }
 
   if (!isCompatible({3, 5, 0})) {
     flags.noSpecCountInVoteCs = true;
     compatibilityStrings.emplace_back(
-        "- Vote tally not differentiating players from spectators");
+        "Vote tally not differentiating players from spectators");
+
+    flags.stripLocalizationMarkers = true;
+    compatibilityStrings.emplace_back(
+        "Stripping localization markers from server commands manually");
+  }
+}
+
+void DemoCompatibility::printCompatibilityInfo() {
+  if (compatibilityStrings.empty()) {
+    CG_Printf("No compatibility settings active.\n");
+    return;
+  }
+
+  CG_Printf("Active compatibility settings:\n");
+
+  for (const auto &str : compatibilityStrings) {
+    CG_Printf("- %s\n", str.c_str());
   }
 }
 
@@ -246,14 +269,6 @@ void DemoCompatibility::printDemoInformation() const {
             "%s\n ^7Map: %s\n ^7Server: %s\n",
             demoVersion.major, demoVersion.minor, demoVersion.patch, player,
             cgs.rawmapname, server);
-
-  if (!compatibilityStrings.empty()) {
-    CG_Printf("\nActive compatibility settings:\n");
-
-    for (const auto &str : compatibilityStrings) {
-      CG_Printf("%s\n", str.c_str());
-    }
-  }
 
   CG_Printf("^g========================================\n\n");
 }

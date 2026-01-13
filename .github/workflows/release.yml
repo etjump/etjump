@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
   Windows:
@@ -21,28 +21,28 @@ jobs:
 
           - arch: x64
             platform: x64
-    
+
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        ref: master
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: master
 
-    - name: Configure CMake
-      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -G "Visual Studio 17 2022" -A ${{ matrix.platform }}
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -G "Visual Studio 17 2022" -A ${{ matrix.platform }}
 
-    - name: Build
-      run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{ matrix.config }}
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest -C ${{ matrix.config }}
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: etjump-artifacts-win-${{ matrix.arch }}
-        path: ${{ github.workspace }}/build/etjump
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: etjump-artifacts-win-${{ matrix.arch }}
+          path: ${{ github.workspace }}/build/etjump
 
   Linux:
     name: Linux ${{ matrix.arch }}
@@ -54,37 +54,37 @@ jobs:
         config: [Release]
 
     steps:
-    - name: Install dependencies
-      if: matrix.arch == 'x86'
-      run: |
-        sudo apt-get update
-        sudo apt-get install gcc-multilib g++-multilib    
+      - name: Install dependencies
+        if: matrix.arch == 'x86'
+        run: |
+          sudo apt-get update
+          sudo apt-get install gcc-multilib g++-multilib
 
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        ref: master
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: master
 
-    - name: Configure CMake
-      run: |
-        if [ ${{ matrix.arch }} == "x86" ]; then
-          cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-cross-x86-linux.cmake
-        else
-          cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }}
-        fi
+      - name: Configure CMake
+        run: |
+          if [ ${{ matrix.arch }} == "x86" ]; then
+            cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-cross-x86-linux.cmake
+          else
+            cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+          fi
 
-    - name: Build
-      run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{ matrix.config }}
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest -C ${{ matrix.config }}
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: etjump-artifacts-linux-${{ matrix.arch }}
-        path: ${{ github.workspace }}/build/etjump
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: etjump-artifacts-linux-${{ matrix.arch }}
+          path: ${{ github.workspace }}/build/etjump
 
   macOS:
     name: macOS ${{ matrix.arch }}
@@ -98,91 +98,91 @@ jobs:
           - osx-target: "10.13"
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Configure CMake
-      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.osx-target }}
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.osx-target }}
 
-    - name: Build
-      run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
 
-    - name: Test
-      working-directory: ${{ github.workspace }}/build
-      run: ctest -C ${{ matrix.config }}  
+      - name: Test
+        working-directory: ${{ github.workspace }}/build
+        run: ctest -C ${{ matrix.config }}
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: etjump-artifacts-macos-${{ matrix.arch }}
-        path: ${{ github.workspace }}/build/etjump
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: etjump-artifacts-macos-${{ matrix.arch }}
+          path: ${{ github.workspace }}/build/etjump
 
   macOS-universal:
-    name: macOS Universal Binary
+    name: macOS Universal Binaries
     runs-on: macos-14
     needs: [macOS]
     steps:
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: etjump-artifacts-macos-*
-        path: artifacts
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: etjump-artifacts-macos-*
+          path: artifacts
 
-    - name: Create universal binary
-      run: |
-        mkdir -p build-universal
-        cp -R artifacts/etjump-artifacts-macos-arm64/* build-universal
-        lipo -create artifacts/etjump-artifacts-macos-x86_64/cgame_mac \
-                     artifacts/etjump-artifacts-macos-arm64/cgame_mac \
-              -output build-universal/cgame_mac
-        lipo -create artifacts/etjump-artifacts-macos-x86_64/ui_mac \
-                     artifacts/etjump-artifacts-macos-arm64/ui_mac \
-              -output build-universal/ui_mac
-        lipo -create artifacts/etjump-artifacts-macos-x86_64/qagame_mac \
-                     artifacts/etjump-artifacts-macos-arm64/qagame_mac \
-              -output build-universal/qagame_mac
+      - name: Create universal binaries
+        run: |
+          mkdir -p build-universal
+          cp -R artifacts/etjump-artifacts-macos-arm64/* build-universal
+          lipo -create artifacts/etjump-artifacts-macos-x86_64/cgame_mac \
+                       artifacts/etjump-artifacts-macos-arm64/cgame_mac \
+                -output build-universal/cgame_mac
+          lipo -create artifacts/etjump-artifacts-macos-x86_64/ui_mac \
+                       artifacts/etjump-artifacts-macos-arm64/ui_mac \
+                -output build-universal/ui_mac
+          lipo -create artifacts/etjump-artifacts-macos-x86_64/qagame_mac \
+                       artifacts/etjump-artifacts-macos-arm64/qagame_mac \
+                -output build-universal/qagame_mac
 
-    - name: Upload universal artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: etjump-artifacts-macos-universal
-        path: ${{ github.workspace }}/build-universal
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: etjump-artifacts-macos-universal
+          path: ${{ github.workspace }}/build-universal
 
-    # cleanup the individual builds so package doesn't download them
-    - name: Cleanup
-      uses: geekyeggo/delete-artifact@v5
-      with:
-        name: |
-          etjump-artifacts-macos-arm64
-          etjump-artifacts-macos-x86_64
+      # cleanup the individual builds so package doesn't download them
+      - name: Cleanup
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            etjump-artifacts-macos-arm64
+            etjump-artifacts-macos-x86_64
 
   package:
     runs-on: ubuntu-22.04
     needs: [Windows, Linux, macOS-universal]
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        ref: master
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: master
 
-    - name: Download artifacts
-      uses: actions/download-artifact@v4
-      with: 
-        pattern: etjump-artifacts-*
-        merge-multiple: true
-        path: ${{ github.workspace }}/build/etjump
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: etjump-artifacts-*
+          merge-multiple: true
+          path: ${{ github.workspace }}/build/etjump
 
-    - name: Pack release zip
-      working-directory: ${{ github.workspace }}/build
-      run: |
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
-        make mod_release
+      - name: Pack release zip
+        working-directory: ${{ github.workspace }}/build
+        run: |
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+          make mod_release
 
-    - name: Upload release 
-      uses: softprops/action-gh-release@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        name: ETJump ${{ github.ref_name }}
-        files: ${{ github.workspace }}/build/*.zip
-        draft: true
+      - name: Upload release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: ETJump ${{ github.ref_name }}
+          files: ${{ github.workspace }}/build/*.zip
+          draft: true

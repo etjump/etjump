@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -382,4 +382,17 @@ std::string ETJump::StringUtil::truncate(const std::string &str,
 
   std::string out = str.substr(0, outLen);
   return out;
+}
+
+void ETJump::StringUtil::stripExtension(std::string &str) {
+  const auto pos = str.rfind('.');
+
+  if (pos != std::string::npos) {
+    str.erase(pos);
+  }
+}
+
+void ETJump::StringUtil::stripLocalizationMarkers(std::string &str) {
+  ETJump::StringUtil::replaceAll(str, "[lon]", "");
+  ETJump::StringUtil::replaceAll(str, "[lof]", "");
 }

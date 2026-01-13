@@ -673,7 +673,6 @@ static void CG_DrawDisconnect(void) {
   float x, y;
   int cmdNum;
   usercmd_t cmd;
-  const char *s;
   int w; // bk010215 - FIXME char message[1024];
 
   if (etj_drawConnectionIssues.integer == 0) {
@@ -701,7 +700,7 @@ static void CG_DrawDisconnect(void) {
   }
 
   // also add text in center of screen
-  s = CG_TranslateString("Connection Interrupted"); // bk 010215 - FIXME
+  const char *s = "Connection Interrupted";
   w = ETJump::DrawStringWidth(s, 0.3f);
   ETJump::DrawBigString(SCREEN_CENTER_X - w / 2, 100, s, 1.0F);
 
@@ -2144,18 +2143,12 @@ CG_DrawSpectator
 =================
 */
 static void CG_DrawSpectator(void) {
-  const char *s;
-
   if (ETJump::showingScores()) {
     return;
   }
 
-  if (cgs.demoCam.renderingFreeCam) {
-    s = CG_TranslateString("FREECAM");
-  } else {
-    s = CG_TranslateString("SPECTATOR");
-  }
-  auto textWidth = ETJump::DrawStringWidth(s, 0.3f);
+  const char *s = cgs.demoCam.renderingFreeCam ? "FREECAM" : "SPECTATOR";
+  const auto textWidth = ETJump::DrawStringWidth(s, 0.3f);
   ETJump::DrawBigString(SCREEN_CENTER_X - textWidth / 2, 440 + 10, s, 0.95f);
 }
 
@@ -2543,14 +2536,12 @@ static void CG_DrawSpectatorMessage(void) {
   str = ETJump::stringFormat("Press %s to follow next player", str2);
   ETJump::DrawString(8, 172 + 12, 0.23f, 0.25f, colorWhite, qtrue, str.c_str(),
                      0, ITEM_TEXTSTYLE_SHADOWED);
-
 #ifdef MV_SUPPORT
   str2 = BindingFromName("mvactivate");
-  str = va(CG_TranslateString("- Press %s to %s multiview mode"), str2,
-           ((cg.mvTotalClients > 0) ? "disable" : "activate"));
-  CG_DrawStringExt(0, 408 - 2 * TINYCHAR_HEIGHT, str, colorWhite, qtrue, qtrue,
-                   TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-  y += TINYCHAR_HEIGHT;
+  str = ETJump::stringFormat("- Press %s to %s multiview mode", str2,
+                             cg.mvTotalClients > 0 ? "disable" : "activate");
+  ETJump::DrawString(8, 190 + 12, 0.23f, 0.25f, colorWhite, qtrue, str.c_str(),
+                     0, ITEM_TEXTSTYLE_SHADOWED);
 #endif
 }
 
@@ -2741,8 +2732,8 @@ static void CG_DrawWarmup(void) {
         cgs.gamestate == GS_WAITING_FOR_PLAYERS) {
       cw = 10;
 
-      s1 = va(CG_TranslateString("^3WARMUP:^7 Waiting on ^2%i^7 %s"),
-              cgs.minclients, cgs.minclients == 1 ? "player" : "players");
+      s1 = va("^3WARMUP:^7 Waiting on ^2%i^7 %s", cgs.minclients,
+              cgs.minclients == 1 ? "player" : "players");
       w = CG_DrawStrlen(s1);
       CG_DrawStringExt(SCREEN_CENTER_X - w * 12 / 2, 188, s1, colorWhite,
                        qfalse, qtrue, 12, 18, 0);
@@ -2756,11 +2747,9 @@ static void CG_DrawWarmup(void) {
         if (!Q_stricmp(str1, "(?"
                              "?"
                              "?)")) {
-          s2 = CG_TranslateString("Type ^3\\ready^* in the "
-                                  "console to start");
+          s2 = "Type ^3\\ready^* in the console to start";
         } else {
           s2 = va("Press ^3%s^* to start", str1);
-          s2 = CG_TranslateString(s2);
         }
         w = CG_DrawStrlen(s2);
         CG_DrawStringExt(SCREEN_CENTER_X - w * cw / 2, 208, s2, colorWhite,
@@ -2777,7 +2766,7 @@ static void CG_DrawWarmup(void) {
     sec = 0;
   }
 
-  s = va("%s %i", CG_TranslateString("(WARMUP) Match begins in:"), sec + 1);
+  s = va("(WARMUP) Match begins in: %i", sec + 1);
 
   w = CG_DrawStrlen(s);
   CG_DrawStringExt(SCREEN_CENTER_X - w * 6, 120, s, colorYellow, qfalse, qtrue,
@@ -3046,9 +3035,7 @@ void CG_ObjectivePrint(const char *str, int charWidth) {
     return;
   }
 
-  s = CG_TranslateString(str);
-
-  Q_strncpyz(cg.oidPrint, s, sizeof(cg.oidPrint));
+  Q_strncpyz(cg.oidPrint, str, sizeof(cg.oidPrint));
 
   // NERVE - SMF - turn spaces into newlines, if we've run over the
   // linewidth
@@ -4414,16 +4401,9 @@ static void CG_Draw2D() {
     CG_DrawCHS();
   } else {
     if (cgs.eventHandling != CGAME_EVENT_NONE) {
-      //			qboolean old =
-      // cg.showGameView;
-
-      //			cg.showGameView =
-      // qfalse;
       // draw cursor
-      trap_R_SetColor(NULL);
-      CG_DrawPic(cgDC.cursorx - 14, cgDC.cursory - 14, 32, 32,
-                 cgs.media.cursorIcon);
-      //			cg.showGameView = old;
+      trap_R_SetColor(nullptr);
+      cgDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE, cgs.media.cursorIcon);
     }
   }
 

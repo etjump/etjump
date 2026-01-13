@@ -127,6 +127,8 @@ inline constexpr float SLIDER_HEIGHT = 10.0f;
 inline constexpr float SLIDER_THUMB_WIDTH = 12.0f;
 inline constexpr float SLIDER_THUMB_HEIGHT = 12.0f;
 
+inline constexpr float CURSOR_SIZE = 32.0f;
+
 inline constexpr int NUM_CROSSHAIRS = 17;
 
 // y offset applied to each line of autowrapped text, along with text height
@@ -466,6 +468,7 @@ typedef struct {
   void (*drawHandlePic)(float x, float y, float w, float h, qhandle_t asset);
   void (*drawStretchPic)(float x, float y, float w, float h, float s1, float t1,
                          float s2, float t2, qhandle_t hShader);
+  void (*drawCursor)(float w, float h, const qhandle_t shader);
   void (*drawText)(float x, float y, float scale, const vec4_t color,
                    const char *text, float adjust, int limit, int style);
   void (*drawTextExt)(float x, float y, float scalex, float scaley,
@@ -522,10 +525,9 @@ typedef struct {
   void (*feederSelection)(float feederID, int index);
   qboolean (*feederSelectionClick)(itemDef_t *item);
   void (*feederAddItem)(float feederID, const char *name,
-                        int index);             // NERVE - SMF
-  char *(*translateString)(const char *string); // NERVE - SMF
-  void (*checkAutoUpdate)();                    // DHM - Nerve
-  void (*getAutoUpdate)();                      // DHM - Nerve
+                        int index); // NERVE - SMF
+  void (*checkAutoUpdate)();        // DHM - Nerve
+  void (*getAutoUpdate)();          // DHM - Nerve
 
   void (*keynumToStringBuf)(int keynum, char *buf, int buflen);
   void (*getBindingBuf)(int keynum, char *buf, int buflen);
@@ -564,6 +566,8 @@ typedef struct {
   int frameTime;
   int cursorx;
   int cursory;
+  int32_t realCursorX; // real X coordinate as per resolution
+  int32_t realCursorY; // real Y coordinate as per resolution
   qboolean debug;
 
   cachedAssets_t Assets;
@@ -623,6 +627,8 @@ qboolean PC_Char_Parse(int handle, char *out); // NERVE - SMF
 namespace ETJump {
 bool PC_hasFloat(int handle);
 void scaleMenuSensitivity(int x, int y, float *mdx, float *mdy);
+void computeCursorPosition(int dx, int dy);
+void drawCursor(float w, float h, qhandle_t shader);
 qhandle_t shaderForCrosshair(int crosshairNum, bool isAltShader);
 } // namespace ETJump
 

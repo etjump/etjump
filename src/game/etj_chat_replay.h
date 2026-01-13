@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 ETJump team <zero@etjump.com>
+ * Copyright (c) 2026 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,6 @@ class ChatReplay {
     int clientNum;
     std::string name;
     std::string message;
-    bool localize;
     bool encoded;
 
     // true if timestamp is older than current time - g_chatReplayMaxMessageAge
@@ -63,8 +62,7 @@ public:
   ~ChatReplay() = default;
 
   void createChatMessage(int clientNum, const std::string &name,
-                         const std::string &message, bool localize,
-                         bool encoded);
+                         const std::string &message, bool encoded);
 
   void sendChatMessages(gentity_t *ent);
 

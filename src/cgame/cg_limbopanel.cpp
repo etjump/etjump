@@ -2504,7 +2504,7 @@ qboolean CG_LimboPanel_Draw(void) {
   BG_PanelButtonsRender(limboPanelButtonsLayout);
 
   trap_R_SetColor(NULL);
-  CG_DrawPic(cgDC.cursorx, cgDC.cursory, 32, 32, cgs.media.cursorIcon);
+  cgDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE, cgs.media.cursorIcon);
 
   if (cgs.ccRequestedObjective != -1) {
     if (cg.time - cgs.ccLastObjectiveRequestTime > 1000) {

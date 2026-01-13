@@ -550,24 +550,12 @@ void CG_MouseEvent(int x, int y) {
     case CGAME_EVENT_FIRETEAMMSG:
     case CGAME_EVENT_RTV:
       if (!cgs.demoCam.renderingFreeCam) {
-        float mdx, mdy;
-        ETJump::scaleMenuSensitivity(x, y, &mdx, &mdy);
-        x = static_cast<int>(mdx);
-        y = static_cast<int>(mdy);
+        ETJump::computeCursorPosition(x, y);
 
-        cgs.cursorX += x;
-        if (cgs.cursorX < 0) {
-          cgs.cursorX = 0;
-        } else if (cgs.cursorX > SCREEN_WIDTH) {
-          cgs.cursorX = SCREEN_WIDTH;
-        }
-
-        cgs.cursorY += y;
-        if (cgs.cursorY < 0) {
-          cgs.cursorY = 0;
-        } else if (cgs.cursorY > 480) {
-          cgs.cursorY = 480;
-        }
+        cgs.cursorX = cgDC.cursorx;
+        cgs.cursorY = cgDC.cursory;
+        cgs.realCursorX = cgDC.realCursorX;
+        cgs.realCursorY = cgDC.realCursorY;
 
         if (cgs.eventHandling == CGAME_EVENT_SPEAKEREDITOR) {
           CG_SpeakerEditorMouseMove_Handling(x, y);
