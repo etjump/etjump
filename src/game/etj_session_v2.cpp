@@ -970,7 +970,7 @@ void SessionV2::listBans(const gentity_t *ent, const int32_t page) const {
           return;
         }
 
-        constexpr int32_t BANS_PER_PAGE = 3;
+        constexpr int32_t BANS_PER_PAGE = 10;
         const auto size = static_cast<uint32_t>(r->bans.size());
         const uint32_t pages = (size / BANS_PER_PAGE) + 1;
 
@@ -997,8 +997,9 @@ void SessionV2::listBans(const gentity_t *ent, const int32_t page) const {
           msg += stringFormat(
               "^7%-3i %s ^7%s %s ^7%s %s\n", r->bans[i].banID, r->bans[i].name,
               r->bans[i].banDate, r->bans[i].bannedBy,
-              r->bans[i].expires > 0 ? TimeStampToString(r->bans[i].expires)
-                                     : "Never",
+              r->bans[i].expires > 0
+                  ? Time::fromInt(r->bans[i].expires).toDateTimeString()
+                  : "Never",
               r->bans[i].reason);
         }
 
