@@ -300,4 +300,16 @@ void ETJump::registerGameShader(const int32_t index, const char *shader) {
   Q_strncpyz(cgs.gameShaderNames[index], shader[0] == '*' ? shader + 1 : shader,
              MAX_QPATH);
 }
+
+void ETJump::centerCursor() {
+  cgDC.cursorx = SCREEN_CENTER_X;
+  cgDC.cursory = SCREEN_CENTER_Y;
+  cgDC.realCursorX = cgDC.glconfig.vidWidth / 2;
+  cgDC.realCursorY = cgDC.glconfig.vidHeight / 2;
+
+  cgs.cursorX = cgDC.cursorx;
+  cgs.cursorY = cgDC.cursory;
+  cgs.realCursorX = cgDC.realCursorX;
+  cgs.realCursorY = cgDC.realCursorY;
+}
 #endif

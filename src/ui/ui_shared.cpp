@@ -1193,6 +1193,9 @@ void Menus_CloseAll() {
     Menus[i].window.flags &=
         ~(WINDOW_HASFOCUS | WINDOW_VISIBLE | WINDOW_MOUSEOVER);
   }
+
+  DC->realCursorX = DC->glconfig.vidWidth / 2;
+  DC->realCursorY = DC->glconfig.vidHeight / 2;
 }
 
 void Script_Show(itemDef_t *item, qboolean *bAbort, const char **args) {
@@ -8632,6 +8635,10 @@ void computeCursorPosition(int dx, int dy) {
 }
 
 void drawCursor(float w, float h, const qhandle_t shader) {
+  if (!DC->cursorVisible) {
+    return;
+  }
+
   float s0{};
   float s1{};
   float t0{};

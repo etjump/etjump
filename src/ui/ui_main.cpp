@@ -7552,13 +7552,8 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
 
   menutype = menu; //----(SA)	added
 
-  // FIXME: this is a dumb hack, we should just not draw the cursor at all,
-  // so that the next time UI is brought back, the cursor isn't at the bottom
-  // right of the screen, but rather remembers the last position it was in
-  const auto hideCursor = [] {
-    uiInfo.uiDC.realCursorX = uiInfo.uiDC.glconfig.vidWidth;
-    uiInfo.uiDC.realCursorY = uiInfo.uiDC.glconfig.vidHeight;
-  };
+  // assume cursor is visible by default
+  uiInfo.uiDC.cursorVisible = true;
 
   switch (menu) {
     case UIMENU_NONE:
@@ -7678,42 +7673,42 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
 
     // NERVE - SMF
     case UIMENU_WM_QUICKMESSAGE:
-      hideCursor();
+      uiInfo.uiDC.cursorVisible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_quickmessage");
       return;
 
     case UIMENU_WM_QUICKMESSAGEALT:
-      hideCursor();
+      uiInfo.uiDC.cursorVisible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_quickmessageAlt");
       return;
 
     case UIMENU_WM_FTQUICKMESSAGE:
-      hideCursor();
+      uiInfo.uiDC.cursorVisible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_ftquickmessage");
       return;
 
     case UIMENU_WM_FTQUICKMESSAGEALT:
-      hideCursor();
+      uiInfo.uiDC.cursorVisible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_ftquickmessageAlt");
       return;
 
     case UIMENU_WM_TAPOUT:
-      hideCursor();
+      uiInfo.uiDC.cursorVisible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("tapoutmsg");
       return;
 
     case UIMENU_WM_TAPOUT_LMS:
-      hideCursor();
+      uiInfo.uiDC.cursorVisible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("tapoutmsglms");
@@ -7731,6 +7726,13 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
       // trap_Cvar_Set( "cl_paused", "1" );
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_OpenByName("ingame_messagemode");
+
+      // special case for chat, we don't really want the cursor to be
+      // in the middle of the screen, it would be annoying to have the cursor
+      // constantly pop-up in the middle of the screen e.g. when spectating
+      // someone and chatting - set to top-left instead
+      uiInfo.uiDC.realCursorX = 0;
+      uiInfo.uiDC.realCursorY = 0;
       return;
 
     case UIMENU_INGAME_FT_SAVELIMIT:

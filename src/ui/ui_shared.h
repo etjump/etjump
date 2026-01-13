@@ -568,6 +568,7 @@ typedef struct {
   int cursory;
   int32_t realCursorX; // real X coordinate as per resolution
   int32_t realCursorY; // real Y coordinate as per resolution
+  bool cursorVisible;
   qboolean debug;
 
   cachedAssets_t Assets;
