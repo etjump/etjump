@@ -22,12 +22,15 @@
  * THE SOFTWARE.
  */
 
+#include "etj_time_utilities.h"
 #ifdef NEW_AUTH
 
   #include "etj_user_repository.h"
   #include "etj_crypto.h"
 
 namespace ETJump {
+using std::string;
+
 UserRepository::UserRepository(std::unique_ptr<DatabaseV2> database,
                                std::unique_ptr<DatabaseV2> oldDatabase)
     : db(std::move(database)), oldDb(std::move(oldDatabase)) {
@@ -839,7 +842,10 @@ void UserRepository::migrateBans() const {
         ban.banID = id;
         ban.name = name;
         ban.bannedBy = bannedBy;
-        ban.banDate = banDate;
+        // old bans use a custom datetime format, we want to convert it to
+        // ISO-8601, so SQLite can sort by date automatically
+        ban.banDate =
+            Time::fromString(banDate, "%d/%m/%y %H:%M:%S").toDateTimeString();
         ban.expires = expires;
         ban.reason = reason;
         ban.ipv4 = ip;
