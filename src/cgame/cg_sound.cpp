@@ -1821,7 +1821,7 @@ void CG_SpeakerEditorDraw(void) {
 
     // render cursor
     trap_R_SetColor(NULL);
-    cgDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE, cgs.media.cursorIcon);
+    cgDC.cursor.draw();
   }
 }
 

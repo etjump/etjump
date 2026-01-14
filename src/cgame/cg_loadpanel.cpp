@@ -248,7 +248,7 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh) {
   BG_PanelButtonsRender(loadpanelButtonsLayout);
 
   if (interactive) {
-    DC->drawCursor(CURSOR_SIZE, CURSOR_SIZE, DC->Assets.cursor);
+    DC->cursor.draw();
   }
 
   DC->getConfigString(CS_SERVERINFO, buffer, sizeof(buffer));

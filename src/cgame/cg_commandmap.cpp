@@ -644,8 +644,8 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
           BG_RectContainsPoint(
               x + mEnt->transformed[0] - (CONST_ICON_NORMAL_SIZE * 0.5f),
               y + mEnt->transformed[1] - (CONST_ICON_NORMAL_SIZE * 0.5f),
-              CONST_ICON_NORMAL_SIZE, CONST_ICON_NORMAL_SIZE, cgDC.cursorx,
-              cgDC.cursory)) {
+              CONST_ICON_NORMAL_SIZE, CONST_ICON_NORMAL_SIZE, cgDC.cursor.virtX,
+              cgDC.cursor.virtY)) {
         float w;
 
         icon_extends[0] = CONST_ICON_EXPANDED_SIZE;
@@ -1227,7 +1227,7 @@ int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
                 BG_RectContainsPoint(point[0] - FLAGSIZE_NORMAL * 0.5f,
                                      point[1] - FLAGSIZE_NORMAL * 0.5f,
                                      FLAGSIZE_NORMAL, FLAGSIZE_NORMAL,
-                                     cgDC.cursorx, cgDC.cursory))) {
+                                     cgDC.cursor.virtX, cgDC.cursor.virtY))) {
       if (draw) {
         float size = FLAGSIZE_EXPANDED;
         if (scissor) {
@@ -1460,8 +1460,8 @@ mapEntityData_t *CG_ScanForCommandCentreEntity(void) {
       }
     }
 
-    rngSquared = Square(CC_2D_X + mEnt->transformed[0] - cgDC.cursorx) +
-                 Square(CC_2D_Y + mEnt->transformed[1] - cgDC.cursory);
+    rngSquared = Square(CC_2D_X + mEnt->transformed[0] - cgDC.cursor.virtX) +
+                 Square(CC_2D_Y + mEnt->transformed[1] - cgDC.cursor.virtY);
 
     if (i == 0 || rngSquared < rangeSquared) {
       rangeSquared = rngSquared;
@@ -1517,7 +1517,8 @@ qboolean CG_CommandCentreLayersClick(void) {
   y = CC_2D_Y + CC_2D_H - 32;
 
   for (i = 0; i < cgs.ccLayers; i++) {
-    if (BG_RectContainsPoint(x, y, 32, 32, cgDC.cursorx, cgDC.cursory)) {
+    if (BG_RectContainsPoint(x, y, 32, 32, cgDC.cursor.virtX,
+                             cgDC.cursor.virtY)) {
       cgs.ccSelectedLayer = i;
       return qtrue;
     }
@@ -1556,7 +1557,8 @@ qboolean CG_CommandCentreSpawnPointClick(void) {
 
     if (BG_RectContainsPoint(point[0] - FLAGSIZE_NORMAL * 0.5f,
                              point[1] - FLAGSIZE_NORMAL * 0.5f, FLAGSIZE_NORMAL,
-                             FLAGSIZE_NORMAL, cgDC.cursorx, cgDC.cursory)) {
+                             FLAGSIZE_NORMAL, cgDC.cursor.virtX,
+                             cgDC.cursor.virtY)) {
       trap_SendConsoleCommand(va("setspawnpt %i\n", i));
       cg.selectedSpawnPoint = i;
       cgs.ccRequestedObjective = -1;

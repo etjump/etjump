@@ -552,10 +552,10 @@ void CG_MouseEvent(int x, int y) {
       if (!cgs.demoCam.renderingFreeCam) {
         ETJump::computeCursorPosition(x, y);
 
-        cgs.cursorX = cgDC.cursorx;
-        cgs.cursorY = cgDC.cursory;
-        cgs.realCursorX = cgDC.realCursorX;
-        cgs.realCursorY = cgDC.realCursorY;
+        cgs.cursorX = cgDC.cursor.virtX;
+        cgs.cursorY = cgDC.cursor.virtY;
+        cgs.realCursorX = cgDC.cursor.realX;
+        cgs.realCursorY = cgDC.cursor.realY;
 
         if (cgs.eventHandling == CGAME_EVENT_SPEAKEREDITOR) {
           CG_SpeakerEditorMouseMove_Handling(x, y);
@@ -646,7 +646,7 @@ void CG_EventHandling(int type, qboolean fForced) {
   }
 
   // assume we want cursor visible
-  cgDC.cursorVisible = true;
+  cgDC.cursor.visible = true;
 
   switch (type) {
     // OSP - Demo support
@@ -715,12 +715,12 @@ void CG_EventHandling(int type, qboolean fForced) {
     cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
     cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
     cg.showFireteamMenu = qtrue;
-    cgDC.cursorVisible = false;
+    cgDC.cursor.visible = false;
     trap_Cvar_Set("cl_bypassmouseinput", "1");
     trap_Key_SetCatcher(KEYCATCH_CGAME);
   } else if (type == CGAME_EVENT_RTV) {
     cg.showRtvMenu = true;
-    cgDC.cursorVisible = false;
+    cgDC.cursor.visible = false;
     trap_Cvar_Set("cl_bypassmouseinput", "1");
     trap_Key_SetCatcher(KEYCATCH_CGAME);
   } else {

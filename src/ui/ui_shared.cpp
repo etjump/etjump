@@ -9,6 +9,8 @@
 #include "ui_shared.h"
 #include "ui_local.h" // For CS settings/retrieval
 
+#include "../cgame/etj_cvar_parser.h"
+
 #include "../game/etj_string_utilities.h"
 
 inline constexpr int SCROLL_TIME_START = 500;
@@ -1194,8 +1196,10 @@ void Menus_CloseAll() {
         ~(WINDOW_HASFOCUS | WINDOW_VISIBLE | WINDOW_MOUSEOVER);
   }
 
-  DC->realCursorX = DC->glconfig.vidWidth / 2;
-  DC->realCursorY = DC->glconfig.vidHeight / 2;
+  DC->cursor.virtX = static_cast<int16_t>(SCREEN_CENTER_X);
+  DC->cursor.virtY = static_cast<int16_t>(SCREEN_CENTER_Y);
+  DC->cursor.realX = static_cast<int16_t>(DC->glconfig.vidWidth / 2);
+  DC->cursor.realY = static_cast<int16_t>(DC->glconfig.vidHeight / 2);
 }
 
 void Script_Show(itemDef_t *item, qboolean *bAbort, const char **args) {
@@ -2289,18 +2293,18 @@ int Item_ListBox_ThumbDrawPosition(itemDef_t *item) {
     if (item->window.flags & WINDOW_HORIZONTAL) {
       min = item->window.rect.x + SCROLLBAR_SIZE + 1;
       max = item->window.rect.x + item->window.rect.w - 2 * SCROLLBAR_SIZE - 1;
-      if (DC->cursorx >= min + SCROLLBAR_SIZE / 2 &&
-          DC->cursorx <= max + SCROLLBAR_SIZE / 2) {
-        return DC->cursorx - SCROLLBAR_SIZE / 2;
+      if (DC->cursor.virtX >= min + SCROLLBAR_SIZE / 2 &&
+          DC->cursor.virtX <= max + SCROLLBAR_SIZE / 2) {
+        return DC->cursor.virtX - SCROLLBAR_SIZE / 2;
       } else {
         return Item_ListBox_ThumbPosition(item);
       }
     } else {
       min = item->window.rect.y + SCROLLBAR_SIZE + 1;
       max = item->window.rect.y + item->window.rect.h - 2 * SCROLLBAR_SIZE - 1;
-      if (DC->cursory >= min + SCROLLBAR_SIZE / 2 &&
-          DC->cursory <= max + SCROLLBAR_SIZE / 2) {
-        return DC->cursory - SCROLLBAR_SIZE / 2;
+      if (DC->cursor.virtY >= min + SCROLLBAR_SIZE / 2 &&
+          DC->cursor.virtY <= max + SCROLLBAR_SIZE / 2) {
+        return DC->cursor.virtY - SCROLLBAR_SIZE / 2;
       } else {
         return Item_ListBox_ThumbPosition(item);
       }
@@ -2606,9 +2610,9 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down,
   int count = DC->feederCount(item->special);
   int max, viewmax;
 
-  if (force ||
-      (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) &&
-       item->window.flags & WINDOW_HASFOCUS)) {
+  if (force || (Rect_ContainsPoint(&item->window.rect, DC->cursor.virtX,
+                                   DC->cursor.virtY) &&
+                item->window.flags & WINDOW_HASFOCUS)) {
     max = Item_ListBox_MaxScroll(item);
     if (item->window.flags & WINDOW_HORIZONTAL) {
       viewmax = (item->window.rect.w / listPtr->elementWidth);
@@ -2705,7 +2709,7 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down,
     }
     // mouse hit
     if (key == K_MOUSE1 || key == K_MOUSE2) {
-      Item_ListBox_MouseEnter(item, DC->cursorx, DC->cursory, qtrue);
+      Item_ListBox_MouseEnter(item, DC->cursor.virtX, DC->cursor.virtY, qtrue);
 
       if (item->window.flags & WINDOW_LB_LEFTARROW) {
         listPtr->startPos--;
@@ -2761,8 +2765,8 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down,
           menuDef_t *menu = Menus_FindByName(listPtr->contextMenu);
 
           if (menu) {
-            menu->window.rect.x = DC->cursorx;
-            menu->window.rect.y = DC->cursory;
+            menu->window.rect.x = DC->cursor.virtX;
+            menu->window.rect.y = DC->cursor.virtY;
 
             Menu_UpdatePosition(menu);
             Menus_ActivateByName(listPtr->contextMenu, qtrue);
@@ -2832,7 +2836,8 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down,
 }
 
 qboolean Item_CheckBox_HandleKey(itemDef_t *item, int key) {
-  if (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) &&
+  if (Rect_ContainsPoint(&item->window.rect, DC->cursor.virtX,
+                         DC->cursor.virtY) &&
       item->window.flags & WINDOW_HASFOCUS && item->cvar) {
     if (key == K_MOUSE1 || key == K_ENTER || key == K_MOUSE2 ||
         key == K_MOUSE3) {
@@ -2856,7 +2861,8 @@ qboolean Item_CheckBox_HandleKey(itemDef_t *item, int key) {
 }
 
 qboolean Item_YesNo_HandleKey(itemDef_t *item, int key) {
-  if (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) &&
+  if (Rect_ContainsPoint(&item->window.rect, DC->cursor.virtX,
+                         DC->cursor.virtY) &&
       item->window.flags & WINDOW_HASFOCUS && item->cvar) {
     if (key == K_MOUSE1 || key == K_ENTER || key == K_MOUSE2 ||
         key == K_MOUSE3) {
@@ -2977,7 +2983,8 @@ const char *Item_Multi_Setting(itemDef_t *item) {
 qboolean Item_Multi_HandleKey(itemDef_t *item, int key) {
   multiDef_t *multiPtr = (multiDef_t *)item->typeData;
   if (multiPtr) {
-    if (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) &&
+    if (Rect_ContainsPoint(&item->window.rect, DC->cursor.virtX,
+                           DC->cursor.virtY) &&
         item->window.flags & WINDOW_HASFOCUS && item->cvar) {
       if (key == K_MOUSE1 || key == K_ENTER || key == K_MOUSE2 ||
           key == K_MOUSE3) {
@@ -3027,7 +3034,7 @@ static float getComboThumbPosition(const itemDef_t *item,
 
   // we're dragging the thumb, use cursor position for smooth dragging
   if (itemCapture == item && item->window.flags & WINDOW_LB_THUMB) {
-    pos = std::clamp(static_cast<float>(DC->cursory), posMin, posMax);
+    pos = std::clamp(static_cast<float>(DC->cursor.virtY), posMin, posMax);
   } else if (item->comboData.startPos == 0) {
     pos = posMin;
   } else {
@@ -3091,7 +3098,7 @@ static void comboAutoScroll(void *funcPtr) {
 
 static void comboDragThumb(void *funcPtr) {
   const auto si = static_cast<scrollInfo_t *>(funcPtr);
-  const auto cursorY = static_cast<float>(DC->cursory);
+  const auto cursorY = static_cast<float>(DC->cursor.virtY);
 
   if (cursorY == si->yStart) {
     return;
@@ -3132,8 +3139,8 @@ static void comboStartCapture(itemDef_t *item, int key, bool autoScroll) {
     scrollInfo.adjustValue = SCROLL_TIME_START;
     captureFunc = &comboAutoScroll;
   } else {
-    scrollInfo.xStart = static_cast<float>(DC->cursorx);
-    scrollInfo.yStart = static_cast<float>(DC->cursory);
+    scrollInfo.xStart = static_cast<float>(DC->cursor.virtX);
+    scrollInfo.yStart = static_cast<float>(DC->cursor.virtY);
     captureFunc = &comboDragThumb;
   }
 
@@ -3206,8 +3213,9 @@ static bool comboHandleKey(itemDef_t *item, int key) {
         ~(WINDOW_LB_LEFTARROW | WINDOW_LB_RIGHTARROW | WINDOW_LB_THUMB |
           WINDOW_LB_PGUP | WINDOW_LB_PGDN | WINDOW_LB_SOMEWHERE);
 
-    item->window.flags |= comboMouseOverScrollbar(
-        item, static_cast<float>(DC->cursorx), static_cast<float>(DC->cursory));
+    item->window.flags |=
+        comboMouseOverScrollbar(item, static_cast<float>(DC->cursor.virtX),
+                                static_cast<float>(DC->cursor.virtY));
 
     int8_t dir = 0;
     uint8_t amount = SCROLL_SMALL;
@@ -3296,8 +3304,8 @@ static bool comboHandleKey(itemDef_t *item, int key) {
 
 static void colorPickerDragWrapper(void *p) {
   const auto si = static_cast<scrollInfo_t *>(p);
-  DC->colorPickerDragFunc(itemCapture, static_cast<float>(DC->cursorx),
-                          static_cast<float>(DC->cursory), si->scrollKey);
+  DC->colorPickerDragFunc(itemCapture, static_cast<float>(DC->cursor.virtX),
+                          static_cast<float>(DC->cursor.virtY), si->scrollKey);
 }
 
 // this is mostly useless setup, but we need to do this here to
@@ -3534,7 +3542,7 @@ static void Scroll_ListBox_ThumbFunc(void *p) {
 
   listBoxDef_t *listPtr = (listBoxDef_t *)si->item->typeData;
   if (si->item->window.flags & WINDOW_HORIZONTAL) {
-    if (DC->cursorx == si->xStart) {
+    if (DC->cursor.virtX == si->xStart) {
       return;
     }
     r.x = si->item->window.rect.x + SCROLLBAR_SIZE + 1;
@@ -3544,16 +3552,16 @@ static void Scroll_ListBox_ThumbFunc(void *p) {
     r.w = si->item->window.rect.w - (SCROLLBAR_SIZE * 2) - 2;
     max = Item_ListBox_MaxScroll(si->item);
     //
-    pos =
-        (DC->cursorx - r.x - SCROLLBAR_SIZE / 2) * max / (r.w - SCROLLBAR_SIZE);
+    pos = (DC->cursor.virtX - r.x - SCROLLBAR_SIZE / 2) * max /
+          (r.w - SCROLLBAR_SIZE);
     if (pos < 0) {
       pos = 0;
     } else if (pos > max) {
       pos = max;
     }
     listPtr->startPos = pos;
-    si->xStart = DC->cursorx;
-  } else if (DC->cursory != si->yStart) {
+    si->xStart = DC->cursor.virtX;
+  } else if (DC->cursor.virtY != si->yStart) {
 
     r.x =
         si->item->window.rect.x + si->item->window.rect.w - SCROLLBAR_SIZE - 1;
@@ -3562,15 +3570,15 @@ static void Scroll_ListBox_ThumbFunc(void *p) {
     r.w = SCROLLBAR_SIZE;
     max = Item_ListBox_MaxScroll(si->item);
     //
-    pos =
-        (DC->cursory - r.y - SCROLLBAR_SIZE / 2) * max / (r.h - SCROLLBAR_SIZE);
+    pos = (DC->cursor.virtY - r.y - SCROLLBAR_SIZE / 2) * max /
+          (r.h - SCROLLBAR_SIZE);
     if (pos < 0) {
       pos = 0;
     } else if (pos > max) {
       pos = max;
     }
     listPtr->startPos = pos;
-    si->yStart = DC->cursory;
+    si->yStart = DC->cursor.virtY;
   }
 
   if (DC->realTime > si->nextScrollTime) {
@@ -3602,7 +3610,7 @@ static void Scroll_Slider_ThumbFunc(void *p) {
     x = si->item->window.rect.x;
   }
 
-  auto cursorx = static_cast<float>(DC->cursorx);
+  auto cursorx = static_cast<float>(DC->cursor.virtX);
 
   if (cursorx < x) {
     cursorx = x;
@@ -3649,8 +3657,8 @@ static void Scroll_Slider_ThumbFunc(void *p) {
 
 void Item_StartCapture(itemDef_t *item, int key) {
   int flags;
-  const auto cursorX = static_cast<float>(DC->cursorx);
-  const auto cursorY = static_cast<float>(DC->cursory);
+  const auto cursorX = static_cast<float>(DC->cursor.virtX);
+  const auto cursorY = static_cast<float>(DC->cursor.virtY);
 
   switch (item->type) {
     case ITEM_TYPE_EDITFIELD:
@@ -3716,8 +3724,8 @@ void Item_StartCapture(itemDef_t *item, int key) {
 }
 
 qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
-  const auto cursorX = static_cast<float>(DC->cursorx);
-  const auto cursorY = static_cast<float>(DC->cursory);
+  const auto cursorX = static_cast<float>(DC->cursor.virtX);
+  const auto cursorY = static_cast<float>(DC->cursor.virtY);
 
   if (!(item->window.flags & WINDOW_HASFOCUS) &&
       (!item->cvar && !item->colorSliderData.colorVar) &&
@@ -3888,8 +3896,8 @@ itemDef_t *Menu_SetPrevCursorItem(menuDef_t *menu) {
     }
     // -NERVE - SMF
 
-    if (Item_SetFocus(menu->items[menu->cursorItem], DC->cursorx,
-                      DC->cursory)) {
+    if (Item_SetFocus(menu->items[menu->cursorItem], DC->cursor.virtX,
+                      DC->cursor.virtY)) {
       Menu_HandleMouseMove(menu,
                            menu->items[menu->cursorItem]->window.rect.x + 1,
                            menu->items[menu->cursorItem]->window.rect.y + 1);
@@ -3931,8 +3939,8 @@ itemDef_t *Menu_SetNextCursorItem(menuDef_t *menu) {
       }
     }
 
-    if (Item_SetFocus(menu->items[menu->cursorItem], DC->cursorx,
-                      DC->cursory)) {
+    if (Item_SetFocus(menu->items[menu->cursorItem], DC->cursor.virtX,
+                      DC->cursor.virtY)) {
       Menu_HandleMouseMove(menu,
                            menu->items[menu->cursorItem]->window.rect.x + 1,
                            menu->items[menu->cursorItem]->window.rect.y + 1);
@@ -4050,20 +4058,11 @@ void Menus_HandleOOBClick(menuDef_t *menu, int key, qboolean down) {
     }
 
     for (i = 0; i < menuCount; i++) {
-      if (Menu_OverActiveItem(&Menus[i], DC->cursorx, DC->cursory)) {
-        //				Menu_RunCloseScript(menu);
-        //// NERVE - SMF - why do we close the
-        /// calling menu instead of just
-        // removing the focus?
-        // menu->window.flags &=
-        // ~(WINDOW_HASFOCUS | WINDOW_VISIBLE |
-        // WINDOW_MOUSEOVER);
-
+      if (Menu_OverActiveItem(&Menus[i], DC->cursor.virtX, DC->cursor.virtY)) {
         menu->window.flags &= ~(WINDOW_HASFOCUS | WINDOW_MOUSEOVER);
         Menus[i].window.flags |= (WINDOW_HASFOCUS | WINDOW_VISIBLE);
 
-        //				Menus_Activate(&Menus[i]);
-        Menu_HandleMouseMove(&Menus[i], DC->cursorx, DC->cursory);
+        Menu_HandleMouseMove(&Menus[i], DC->cursor.virtX, DC->cursor.virtY);
         Menu_HandleKey(&Menus[i], key, down);
       }
     }
@@ -4092,8 +4091,8 @@ static rectDef_t *Item_CorrectedTextRect(itemDef_t *item) {
 void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
   int i;
   itemDef_t *item = nullptr;
-  const auto cursorX = static_cast<float>(DC->cursorx);
-  const auto cursorY = static_cast<float>(DC->cursory);
+  const auto cursorX = static_cast<float>(DC->cursor.virtX);
+  const auto cursorY = static_cast<float>(DC->cursor.virtY);
 
   // NERVE - SMF - fix for focus not resetting on unhidden buttons
   Menu_HandleMouseMove(menu, cursorX, cursorY);
@@ -4134,7 +4133,7 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
       if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3) {
         g_editingField = qfalse;
         g_editItem = nullptr;
-        Display_MouseMove(nullptr, DC->cursorx, DC->cursory);
+        Display_MouseMove(nullptr, DC->cursor.virtX, DC->cursor.virtY);
       } else if (key == K_TAB || key == K_UPARROW || key == K_DOWNARROW) {
         return;
       }
@@ -5318,7 +5317,8 @@ qboolean Item_Bind_HandleKey(itemDef_t *item, int key, qboolean down) {
   int id;
   int i;
 
-  if (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) &&
+  if (Rect_ContainsPoint(&item->window.rect, DC->cursor.virtX,
+                         DC->cursor.virtY) &&
       !g_waitingForKey) {
     if (down && (key == K_MOUSE1 || key == K_ENTER)) {
       g_waitingForKey = qtrue;
@@ -5753,8 +5753,8 @@ static void comboPaint(itemDef_t *item) {
     }
 
     if (!Menus_CaptureFuncActive() &&
-        Rect_ContainsPoint(&textRect, static_cast<float>(DC->cursorx),
-                           static_cast<float>(DC->cursory))) {
+        Rect_ContainsPoint(&textRect, static_cast<float>(DC->cursor.virtX),
+                           static_cast<float>(DC->cursor.virtY))) {
       Vector4Copy(item->window.foreColor, color);
       item->cursorPos = i + startPos;
     } else if (!isBitflag &&
@@ -8570,10 +8570,11 @@ void Menu_PaintAll() {
     DC->textFont(UI_FONT_COURBD_21);
     DC->drawText(5, 10, .2, v, va("fps: %.2f", DC->FPS), 0, 0, 0);
     DC->drawText(5, 20, .2, v,
-                 va("mouse (virt): %i %i", DC->cursorx, DC->cursory), 0, 0, 0);
+                 va("mouse (virt): %i %i", DC->cursor.virtX, DC->cursor.virtY),
+                 0, 0, 0);
     DC->drawText(5, 30, .2, v,
-                 va("mouse (real): %i %i", DC->realCursorX, DC->realCursorY), 0,
-                 0, 0);
+                 va("mouse (real): %i %i", DC->cursor.realX, DC->cursor.realY),
+                 0, 0, 0);
   }
 }
 
@@ -8598,6 +8599,14 @@ void *Display_CaptureItem(int x, int y) {
 }
 
 namespace ETJump {
+void registerCursors() {
+  DC->cursor.defaultShader = trap_R_RegisterShaderNoMip("ui/assets/3_cursor3");
+  DC->cursor.notwaitaBlack =
+      trap_R_RegisterShaderNoMip("ui/assets/cursors/notwaita_black/left_ptr");
+  DC->cursor.notwaitaWhite =
+      trap_R_RegisterShaderNoMip("ui/assets/cursors/notwaita_white/left_ptr");
+}
+
 void scaleMenuSensitivity(int x, int y, float *mdx, float *mdy) {
   static std::array<float, 2> mouseMenuBuffer = {0.0f, 0.0f};
 
@@ -8615,61 +8624,62 @@ void computeCursorPosition(int dx, int dy) {
   dx = static_cast<int>(mdx);
   dy = static_cast<int>(mdy);
 
-  DC->realCursorX += dx;
-  DC->realCursorX = std::clamp(DC->realCursorX, 0, DC->glconfig.vidWidth);
+  DC->cursor.realX += static_cast<int16_t>(dx);
+  DC->cursor.realX = std::clamp(DC->cursor.realX, int16_t{0},
+                                static_cast<int16_t>(DC->glconfig.vidWidth));
 
-  DC->realCursorY += dy;
-  DC->realCursorY = std::clamp(DC->realCursorY, 0, DC->glconfig.vidHeight);
+  DC->cursor.realY += static_cast<int16_t>(dy);
+  DC->cursor.realY = std::clamp(DC->cursor.realY, int16_t{0},
+                                static_cast<int16_t>(DC->glconfig.vidHeight));
 
   const float sx = static_cast<float>(DC->screenWidth) /
                    static_cast<float>(DC->glconfig.vidWidth);
   const float sy = static_cast<float>(DC->screenHeight) /
                    static_cast<float>(DC->glconfig.vidHeight);
 
-  DC->cursorx =
-      std::clamp(static_cast<int32_t>(static_cast<float>(DC->realCursorX) * sx),
-                 0, DC->screenWidth);
-  DC->cursory =
-      std::clamp(static_cast<int32_t>(static_cast<float>(DC->realCursorY) * sy),
-                 0, DC->screenHeight);
+  DC->cursor.virtX = std::clamp(
+      static_cast<int16_t>(static_cast<float>(DC->cursor.realX) * sx),
+      int16_t{0}, static_cast<int16_t>(DC->screenWidth));
+  DC->cursor.virtY = std::clamp(
+      static_cast<int16_t>(static_cast<float>(DC->cursor.realY) * sy),
+      int16_t{0}, static_cast<int16_t>(DC->screenHeight));
 }
 
-void drawCursor(float w, float h, const qhandle_t shader) {
-  if (!DC->cursorVisible) {
+static qhandle_t getCursorShader() {
+  switch (etj_altCursor.integer) {
+    case CURSOR_NOTWAITA_BLACK:
+      return DC->cursor.notwaitaBlack;
+      break;
+    case CURSOR_NOTWAITA_WHITE:
+      return DC->cursor.notwaitaWhite;
+      break;
+    default:
+      return DC->cursor.defaultShader;
+      break;
+  }
+}
+
+void drawCursor() {
+  if (!DC->cursor.visible) {
     return;
   }
 
-  float s0{};
-  float s1{};
-  float t0{};
-  float t1{};
+  // because size is clamped, we don't need to care about flipping
+  // texture coordinates, since the size is never negative
+  const float s0 = 0;
+  const float s1 = 1;
+  const float t0 = 0;
+  const float t1 = 1;
 
-  // flip about vertical
-  if (w < 0) {
-    w = -w;
-    s0 = 1;
-    s1 = 0;
-  } else {
-    s0 = 0;
-    s1 = 1;
-  }
+  auto size = ETJump::CvarValueParser::parse<ETJump::CvarValue::Size>(
+      etj_cursorSize, 8, 128);
+  size.x *= DC->xscale;
+  size.y *= DC->yscale;
 
-  // flip about horizontal
-  if (h < 0) {
-    h = -h;
-    t0 = 1;
-    t1 = 0;
-  } else {
-    t0 = 0;
-    t1 = 1;
-  }
-
-  w *= DC->xscale;
-  h *= DC->yscale;
-
-  trap_R_DrawStretchPic(static_cast<float>(DC->realCursorX),
-                        static_cast<float>(DC->realCursorY), w, h, s0, t0, s1,
-                        t1, shader);
+  const qhandle_t shader = getCursorShader();
+  trap_R_DrawStretchPic(static_cast<float>(DC->cursor.realX),
+                        static_cast<float>(DC->cursor.realY), size.x, size.y,
+                        s0, t0, s1, t1, shader);
 }
 
 // this is kinda terrible, but it ensures simple-ish expansion
@@ -8852,8 +8862,8 @@ qboolean BG_RectContainsPoint(float x, float y, float w, float h, float px,
 }
 
 qboolean BG_CursorInRect(rectDef_t *rect) {
-  return BG_RectContainsPoint(rect->x, rect->y, rect->w, rect->h, DC->cursorx,
-                              DC->cursory);
+  return BG_RectContainsPoint(rect->x, rect->y, rect->w, rect->h,
+                              DC->cursor.virtX, DC->cursor.virtY);
 }
 
 // applies SCREEN_OFFSET_X to rect->x to compare cursor position
@@ -8861,8 +8871,8 @@ qboolean BG_CursorInRect(rectDef_t *rect) {
 // widescreen corrected panel with the original rect
 qboolean BG_CursorInRectWide(rectDef_t *rect) {
   return BG_RectContainsPoint(rect->x + SCREEN_OFFSET_X, rect->y, rect->w,
-                              rect->h, static_cast<float>(DC->cursorx),
-                              static_cast<float>(DC->cursory));
+                              rect->h, static_cast<float>(DC->cursor.virtX),
+                              static_cast<float>(DC->cursor.virtY));
 }
 
 void BG_PanelButton_RenderEdit(panel_button_t *button) {

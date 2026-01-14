@@ -410,12 +410,34 @@ typedef struct {
   // END - TAT 9/16/2002
 } menuDef_t;
 
+namespace ETJump {
+inline constexpr int32_t CURSOR_NOTWAITA_BLACK = 1;
+inline constexpr int32_t CURSOR_NOTWAITA_WHITE = 2;
+
+struct Cursor {
+  // for overriding default cursor shader via .menu file
+  const char *cursorStr;
+
+  qhandle_t defaultShader;
+  qhandle_t notwaitaBlack;
+  qhandle_t notwaitaWhite;
+
+  int16_t virtX; // virtual grid X pos
+  int16_t virtY; // virtual grid Y pos
+  int16_t realX; // real pixel X pos
+  int16_t realY; // real pixel Y pos
+
+  bool visible;
+
+  std::function<void()> registerShaders;
+  std::function<void()> draw;
+};
+} // namespace ETJump
+
 typedef struct {
   const char *fontStr;
-  const char *cursorStr;
   const char *gradientStr;
   fontInfo_t fonts[6];
-  qhandle_t cursor;
   qhandle_t gradientBar;
   qhandle_t scrollBarArrowUp;
   qhandle_t scrollBarArrowDown;
@@ -468,7 +490,6 @@ typedef struct {
   void (*drawHandlePic)(float x, float y, float w, float h, qhandle_t asset);
   void (*drawStretchPic)(float x, float y, float w, float h, float s1, float t1,
                          float s2, float t2, qhandle_t hShader);
-  void (*drawCursor)(float w, float h, const qhandle_t shader);
   void (*drawText)(float x, float y, float scale, const vec4_t color,
                    const char *text, float adjust, int limit, int style);
   void (*drawTextExt)(float x, float y, float scalex, float scaley,
@@ -564,11 +585,7 @@ typedef struct {
 
   int realTime;
   int frameTime;
-  int cursorx;
-  int cursory;
-  int32_t realCursorX; // real X coordinate as per resolution
-  int32_t realCursorY; // real Y coordinate as per resolution
-  bool cursorVisible;
+
   qboolean debug;
 
   cachedAssets_t Assets;
@@ -576,7 +593,6 @@ typedef struct {
   glconfig_t glconfig;
   qhandle_t whiteShader;
   qhandle_t gradientImage;
-  qhandle_t cursor;
   float FPS;
 
   std::function<const char *(int)> getColorSliderString;
@@ -594,6 +610,8 @@ typedef struct {
   std::function<bool()> quickConnectListIsFull;
 
   bool mainOrIngameMainMenuOpen;
+
+  ETJump::Cursor cursor;
 } displayContextDef_t;
 
 const char *String_Alloc(const char *p);
@@ -627,9 +645,10 @@ qboolean PC_Char_Parse(int handle, char *out); // NERVE - SMF
 
 namespace ETJump {
 bool PC_hasFloat(int handle);
+void registerCursors();
 void scaleMenuSensitivity(int x, int y, float *mdx, float *mdy);
 void computeCursorPosition(int dx, int dy);
-void drawCursor(float w, float h, qhandle_t shader);
+void drawCursor();
 qhandle_t shaderForCrosshair(int crosshairNum, bool isAltShader);
 } // namespace ETJump
 

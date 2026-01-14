@@ -1818,8 +1818,6 @@ typedef struct {
   qhandle_t limboSpectator;
   qhandle_t limboRadioBroadcast;
 
-  qhandle_t cursorIcon;
-
   qhandle_t hudPowerIcon;
   qhandle_t hudSprintIcon;
   qhandle_t hudHealthIcon;
@@ -2019,10 +2017,11 @@ typedef struct {
   int notifyPos;
   int notifyLastPos;
 
-  int cursorX;
-  int cursorY;
-  int32_t realCursorX; // real X coordinate as per resolution
-  int32_t realCursorY; // real Y coordinate as per resolution
+  int16_t cursorX;     // virtual grid X coordinate
+  int16_t cursorY;     // virtual grid Y coordinate
+  int16_t realCursorX; // real X coordinate as per resolution
+  int16_t realCursorY; // real Y coordinate as per resolution
+
   int eventHandling;
   qboolean mouseCaptured;
   qboolean sizingHud;
@@ -2761,6 +2760,8 @@ extern vmCvar_t etj_optimizePrediction;
 // END unlagged - optimized prediction
 
 extern vmCvar_t etj_menuSensitivity;
+extern vmCvar_t etj_cursorSize;
+extern vmCvar_t etj_altCursor;
 
 extern vmCvar_t etj_crosshairThickness;
 extern vmCvar_t etj_crosshairOutline;

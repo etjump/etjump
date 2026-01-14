@@ -59,10 +59,10 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
       CG_KeyEvent(arg0, arg1 ? qtrue : qfalse);
       return 0;
     case CG_MOUSE_EVENT:
-      cgDC.cursorx = cgs.cursorX;
-      cgDC.cursory = cgs.cursorY;
-      cgDC.realCursorX = cgs.realCursorX;
-      cgDC.realCursorY = cgs.realCursorY;
+      cgDC.cursor.virtX = cgs.cursorX;
+      cgDC.cursor.virtY = cgs.cursorY;
+      cgDC.cursor.realX = cgs.realCursorX;
+      cgDC.cursor.realY = cgs.realCursorY;
       CG_MouseEvent(static_cast<int32_t>(arg0), static_cast<int32_t>(arg1));
       return 0;
     case CG_EVENT_HANDLING:
@@ -655,6 +655,8 @@ vmCvar_t etj_optimizePrediction;
 // END unlagged - optimized prediction
 
 vmCvar_t etj_menuSensitivity;
+vmCvar_t etj_cursorSize;
+vmCvar_t etj_altCursor;
 
 vmCvar_t etj_crosshairThickness;
 vmCvar_t etj_crosshairOutline;
@@ -1263,6 +1265,8 @@ cvarTable_t cvarTable[] = {
     // END unlagged - optimized prediction
 
     {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
+    {&etj_cursorSize, "etj_cursorSize", "32", CVAR_ARCHIVE},
+    {&etj_altCursor, "etj_altCursor", "0", CVAR_ARCHIVE},
 
     {&etj_crosshairThickness, "etj_crosshairThickness", "1.0", CVAR_ARCHIVE},
     {&etj_crosshairOutline, "etj_crosshairOutline", "1", CVAR_ARCHIVE},
@@ -2256,6 +2260,8 @@ static void CG_RegisterGraphics(void) {
   trap_R_RemapShader("textures/fueldump/terrain1_2", "my_terrain1_2", "0");
 #endif
 
+  cgDC.cursor.registerShaders();
+
   for (i = 0; i < 11; i++) {
     cgs.media.numberShaders[i] = trap_R_RegisterShader(sb_nums[i]);
   }
@@ -3105,8 +3111,6 @@ static void CG_RegisterGraphics(void) {
   cgs.media.limboRadioBroadcast =
       trap_R_RegisterShaderNoMip("ui/assets/radio_tower");
 
-  cgs.media.cursorIcon = trap_R_RegisterShaderNoMip("ui/assets/3_cursor3");
-
   cgs.media.hudDamagedStates[0] =
       trap_R_RegisterSkin("models/players/hud/damagedskins/blood01.skin");
   cgs.media.hudDamagedStates[1] =
@@ -3347,11 +3351,13 @@ qboolean CG_Asset_Parse(int handle) {
       continue;
     }
 
+    // only overrides default cursor
     if (Q_stricmp(token.string, "cursor") == 0) {
-      if (!PC_String_Parse(handle, &cgDC.Assets.cursorStr)) {
+      if (!PC_String_Parse(handle, &cgDC.cursor.cursorStr)) {
         return qfalse;
       }
-      cgDC.Assets.cursor = trap_R_RegisterShaderNoMip(cgDC.Assets.cursorStr);
+      cgDC.cursor.defaultShader =
+          trap_R_RegisterShaderNoMip(cgDC.cursor.cursorStr);
       continue;
     }
 
@@ -3690,7 +3696,6 @@ void CG_LoadHudMenu() {
   cgDC.setColor = &trap_R_SetColor;
   cgDC.drawHandlePic = &CG_DrawPic;
   cgDC.drawStretchPic = &trap_R_DrawStretchPic;
-  cgDC.drawCursor = &ETJump::drawCursor;
   cgDC.drawText = &CG_Text_Paint;
   cgDC.drawTextExt = &CG_Text_Paint_Ext;
   cgDC.textWidth = &CG_Text_Width;
@@ -3756,6 +3761,9 @@ void CG_LoadHudMenu() {
   cgDC.screenHeight = 480;
 
   cgDC.glconfig = cgs.glconfig;
+
+  cgDC.cursor.registerShaders = &ETJump::registerCursors;
+  cgDC.cursor.draw = &ETJump::drawCursor;
 
   Init_Display(&cgDC);
 
