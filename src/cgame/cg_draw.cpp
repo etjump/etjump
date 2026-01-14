@@ -4403,7 +4403,7 @@ static void CG_Draw2D() {
     if (cgs.eventHandling != CGAME_EVENT_NONE) {
       // draw cursor
       trap_R_SetColor(nullptr);
-      cgDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE, cgs.media.cursorIcon);
+      cgDC.cursor.draw();
     }
   }
 
