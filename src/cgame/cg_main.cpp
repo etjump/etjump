@@ -308,6 +308,8 @@ vmCvar_t etj_CGaz2NoVelocityDir;
 vmCvar_t etj_CGaz1DrawSnapZone;
 vmCvar_t etj_CGaz2WishDirFixedSpeed;
 vmCvar_t etj_CGaz2WishDirUniformLength;
+vmCvar_t etj_CGaz1DrawMidLine;
+vmCvar_t etj_CGaz1MidlineColor;
 
 vmCvar_t etj_drawOB;
 // Aciz: movable drawOB
@@ -910,6 +912,9 @@ cvarTable_t cvarTable[] = {
     {&etj_CGaz2WishDirFixedSpeed, "etj_CGaz2WishDirFixedSpeed", "0",
      CVAR_ARCHIVE},
     {&etj_CGaz2WishDirUniformLength, "etj_CGaz2WishDirUniformLength", "0",
+     CVAR_ARCHIVE},
+    {&etj_CGaz1DrawMidLine, "etj_CGaz1DrawMidLine", "0", CVAR_ARCHIVE},
+    {&etj_CGaz1MidlineColor, "etj_CGaz1MidlineColor", "1.0 0.5 0.0 0.75",
      CVAR_ARCHIVE},
 
     {&cl_yawspeed, "cl_yawspeed", "0", CVAR_ARCHIVE},
