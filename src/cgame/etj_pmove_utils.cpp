@@ -66,7 +66,8 @@ void PmoveUtils::setupUserCmd() {
                   ? CMDSCALE_WALK
                   : CMDSCALE_DEFAULT;
 
-  if (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback) {
+  if (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback &&
+      !cgs.synchronousClients) {
     const int cmdNum = trap_GetCurrentCmdNumber();
     trap_GetUserCmd(cmdNum, &cmd);
     return;
