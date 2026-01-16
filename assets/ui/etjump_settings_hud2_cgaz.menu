@@ -50,7 +50,7 @@ menuDef {
     SIDEBUTTON          (9, "UPMOVE METER", close MENU_NAME; open etjump_settings_hud2_upmove)
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CGAZ")
-    
+
         COMBO_BIT           (SETTINGS_COMBO_POS(1), "Draw CGaz HUD:", 0.2, SETTINGS_ITEM_H, "etj_drawCGaz", cvarFloatList { "CGaz 1" 1 "CGaz 2" 2 }, none, "Draw CGaz HUD(s)\netj_drawCGaz")
         COMBO               (SETTINGS_COMBO_POS(2), "CGaz 1 color 1:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1Color1", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets no accel zone color of CGaz 1\netj_CGaz1Color1")
         COMBO               (SETTINGS_COMBO_POS(3), "CGaz 1 color 2:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1Color2", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets min angle color of CGaz 1\netj_CGaz1Color2")
@@ -74,6 +74,8 @@ menuDef {
         YESNO               (SETTINGS_ITEM_POS(17), "Uniform wishdir length:", 0.2, SETTINGS_ITEM_H, "etj_CGaz2WishDirUniformLength", "Use uniform length for wishdir line drawing (CGaz 2 only)\netj_CGaz2WishDirUniformLength")
         CVARINTLABEL        (SETTINGS_ITEM_POS(18), "etj_CGaz2WishDirFixedSpeed", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(18), "CGaz fixed wishdir speed:", 0.2, SETTINGS_ITEM_H, etj_CGaz2WishDirFixedSpeed 0 0 6500 50, "Fixed speed value to use for drawing CGaz 2 wishdir, 0 to use default\netj_CGaz2WishDirFixedSpeed")
+        YESNO               (SETTINGS_ITEM_POS(19), "Draw midline:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1DrawMidline", "Draw the middle point in-between min and max angles on CGaz 1\netj_CGaz1DrawMidline")
+        COMBO               (SETTINGS_COMBO_POS(20), "Midline color:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1MidlineColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets midline color of CGaz 1\netj_CGaz1MidlineColor")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

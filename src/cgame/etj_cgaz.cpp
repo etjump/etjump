@@ -50,6 +50,8 @@ CGaz::CGaz() {
   parseColorString(etj_CGaz1Color3.string, CGaz1Colors[2]);
   parseColorString(etj_CGaz1Color4.string, CGaz1Colors[3]);
 
+  parseColorString(etj_CGaz1MidlineColor.string, CGaz1MidlineColor);
+
   // CGaz 2
   parseColorString(etj_CGaz2Color1.string, CGaz2Colors[0]);
   parseColorString(etj_CGaz2Color2.string, CGaz2Colors[1]);
@@ -59,25 +61,30 @@ CGaz::CGaz() {
 
 void CGaz::startListeners() {
   // CGaz 1
-  cvarUpdateHandler->subscribe(&etj_CGaz1Color1, [&](const vmCvar_t *cvar) {
-    parseColorString(etj_CGaz1Color1.string, CGaz1Colors[0]);
+  cvarUpdateHandler->subscribe(&etj_CGaz1Color1, [this](const vmCvar_t *cvar) {
+    parseColorString(cvar->string, CGaz1Colors[0]);
   });
-  cvarUpdateHandler->subscribe(&etj_CGaz1Color2, [&](const vmCvar_t *cvar) {
-    parseColorString(etj_CGaz1Color2.string, CGaz1Colors[1]);
+  cvarUpdateHandler->subscribe(&etj_CGaz1Color2, [this](const vmCvar_t *cvar) {
+    parseColorString(cvar->string, CGaz1Colors[1]);
   });
-  cvarUpdateHandler->subscribe(&etj_CGaz1Color3, [&](const vmCvar_t *cvar) {
-    parseColorString(etj_CGaz1Color3.string, CGaz1Colors[2]);
+  cvarUpdateHandler->subscribe(&etj_CGaz1Color3, [this](const vmCvar_t *cvar) {
+    parseColorString(cvar->string, CGaz1Colors[2]);
   });
-  cvarUpdateHandler->subscribe(&etj_CGaz1Color4, [&](const vmCvar_t *cvar) {
-    parseColorString(etj_CGaz1Color4.string, CGaz1Colors[3]);
+  cvarUpdateHandler->subscribe(&etj_CGaz1Color4, [this](const vmCvar_t *cvar) {
+    parseColorString(cvar->string, CGaz1Colors[3]);
   });
 
+  cvarUpdateHandler->subscribe(
+      &etj_CGaz1MidlineColor, [this](const vmCvar_t *cvar) {
+        parseColorString(cvar->string, CGaz1MidlineColor);
+      });
+
   // CGaz 2
-  cvarUpdateHandler->subscribe(&etj_CGaz2Color1, [&](const vmCvar_t *cvar) {
-    parseColorString(etj_CGaz2Color1.string, CGaz2Colors[0]);
+  cvarUpdateHandler->subscribe(&etj_CGaz2Color1, [this](const vmCvar_t *cvar) {
+    parseColorString(cvar->string, CGaz2Colors[0]);
   });
-  cvarUpdateHandler->subscribe(&etj_CGaz2Color2, [&](const vmCvar_t *cvar) {
-    parseColorString(etj_CGaz2Color2.string, CGaz2Colors[1]);
+  cvarUpdateHandler->subscribe(&etj_CGaz2Color2, [this](const vmCvar_t *cvar) {
+    parseColorString(cvar->string, CGaz2Colors[1]);
   });
 }
 
@@ -304,6 +311,18 @@ void CGaz::render() const {
     // Max angle
     CG_FillAngleYaw(+zone3, +zone4, yaw, y, h, fov, CGaz1Colors[3]);
     CG_FillAngleYaw(-zone4, -zone3, yaw, y, h, fov, CGaz1Colors[3]);
+
+    if (etj_CGaz1DrawMidLine.integer) {
+      const float midLineStart = zone2 + ((zone3 - zone2) / 2);
+      // make it an average width between min/max angle lines
+      const float midlineEnd =
+          midLineStart + (((zone2 - zone1) + (zone4 - zone3)) / 2);
+
+      CG_FillAngleYaw(+midLineStart, +midlineEnd, yaw, y, h, fov,
+                      CGaz1MidlineColor);
+      CG_FillAngleYaw(-midLineStart, -midlineEnd, yaw, y, h, fov,
+                      CGaz1MidlineColor);
+    }
   }
 
   // Dzikie Weze's 2D-CGaz
