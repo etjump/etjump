@@ -42,29 +42,38 @@ TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
     : _timerun(std::move(timerun)), font(&cgs.media.limboFont1),
       autoHide(etj_runTimerAutoHide.integer) {
   parseColorString(etj_runTimerInactiveColor.string, inactiveTimerColor);
+  setRuntimerSize(etj_runtimerSize);
   setCheckpointSize(etj_checkpointsSize);
   setCheckpointPopupSize(etj_checkpointsPopupSize);
 
   cvarUpdateHandler->subscribe(
-      &etj_runTimerInactiveColor, [&](const vmCvar_t *cvar) {
+      &etj_runTimerInactiveColor, [this](const vmCvar_t *cvar) {
         parseColorString(cvar->string, inactiveTimerColor);
       });
 
-  cvarUpdateHandler->subscribe(&etj_checkpointsSize, [&](const vmCvar_t *cvar) {
-    setCheckpointSize(*cvar);
+  cvarUpdateHandler->subscribe(&etj_runtimerSize, [this](const vmCvar_t *cvar) {
+    setRuntimerSize(*cvar);
   });
 
   cvarUpdateHandler->subscribe(
+      &etj_checkpointsSize,
+      [this](const vmCvar_t *cvar) { setCheckpointSize(*cvar); });
+
+  cvarUpdateHandler->subscribe(
       &etj_checkpointsPopupSize,
-      [&](const vmCvar_t *cvar) { setCheckpointPopupSize(*cvar); });
+      [this](const vmCvar_t *cvar) { setCheckpointPopupSize(*cvar); });
 
   cvarUpdateHandler->subscribe(
       &etj_runTimerAutoHide,
-      [&](const vmCvar_t *cvar) { autoHide = cvar->integer; });
+      [this](const vmCvar_t *cvar) { autoHide = cvar->integer; });
 
   if (cg.demoPlayback) {
     demoSvFps = getSvFps();
   }
+}
+
+void TimerunView::setRuntimerSize(const vmCvar_t &cvar) {
+  runtimerSize = CvarValueParser::parse<CvarValue::Size>(cvar, 0, 10);
 }
 
 void TimerunView::setCheckpointSize(const vmCvar_t &cvar) {
@@ -165,7 +174,7 @@ void TimerunView::draw() {
   const std::string text = getTimerString(millis);
 
   auto x = etj_runTimerX.value;
-  auto y = etj_runTimerY.value;
+  const auto y = etj_runTimerY.value;
   ETJump_AdjustPosition(&x);
 
   (*color)[3] =
@@ -174,7 +183,8 @@ void TimerunView::draw() {
     return;
   }
 
-  CG_Text_Paint_Centred_Ext(x, y, 0.3f, 0.3f, *color, text, 0, 0, style, font);
+  CG_Text_Paint_Centred_Ext(x, y, runtimerSize.x * 0.1f, runtimerSize.y * 0.1f,
+                            *color, text, 0, 0, style, font);
 
   if (run->runHasCheckpoints &&
       (etj_drawCheckpoints.integer || etj_checkpointsPopup.integer)) {
@@ -391,13 +401,14 @@ void TimerunView::pastRecordAnimation(vec4_t *color, const char *text,
 
   const auto step = static_cast<float>(timerTime - record) /
                     static_cast<float>(ANIMATION_TIME);
-  const auto scale = 0.3f + 0.25f * step;
+  const auto scalex = (runtimerSize.x * 0.1f) + (0.25f * step);
+  const auto scaley = (runtimerSize.y * 0.1f) + (0.25f * step);
 
   const auto originalTextHeight =
-      CG_Text_Height_Ext(text, 0.3f, 0, &cgs.media.limboFont1);
+      CG_Text_Height_Ext(text, runtimerSize.y * 0.1f, 0, &cgs.media.limboFont1);
   const auto textHeight =
       static_cast<float>(
-          CG_Text_Height_Ext(text, scale, 0, &cgs.media.limboFont1) -
+          CG_Text_Height_Ext(text, scaley, 0, &cgs.media.limboFont1) -
           originalTextHeight) *
       0.5f;
 
@@ -406,7 +417,7 @@ void TimerunView::pastRecordAnimation(vec4_t *color, const char *text,
 
   ETJump_LerpColors(color, &toColor, &inColor, step);
 
-  CG_Text_Paint_Centred_Ext(x, y + textHeight, scale, scale, inColor, text, 0,
+  CG_Text_Paint_Centred_Ext(x, y + textHeight, scalex, scaley, inColor, text, 0,
                             0, 0, &cgs.media.limboFont1);
 }
 
