@@ -451,6 +451,7 @@ vmCvar_t etj_spectatorInfoDirection;
 vmCvar_t etj_drawRunTimer;
 vmCvar_t etj_runTimerX;
 vmCvar_t etj_runTimerY;
+vmCvar_t etj_runtimerSize;
 vmCvar_t etj_runTimerShadow;
 vmCvar_t etj_runTimerAutoHide;
 vmCvar_t etj_runTimerInactiveColor;
@@ -1040,6 +1041,7 @@ cvarTable_t cvarTable[] = {
     {&etj_drawRunTimer, "etj_drawRunTimer", "1", CVAR_ARCHIVE},
     {&etj_runTimerX, "etj_runTimerX", "320", CVAR_ARCHIVE},
     {&etj_runTimerY, "etj_runTimerY", "360", CVAR_ARCHIVE},
+    {&etj_runtimerSize, "etj_runtimerSize", "3", CVAR_ARCHIVE},
     {&etj_runTimerShadow, "etj_runTimerShadow", "0", CVAR_ARCHIVE},
     {&etj_runTimerAutoHide, "etj_runTimerAutoHide", "1", CVAR_ARCHIVE},
     {&etj_runTimerInactiveColor, "etj_runTimerInactiveColor", "mdgrey",
