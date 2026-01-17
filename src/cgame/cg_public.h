@@ -44,6 +44,7 @@ typedef enum cgameEvent_e {
   CGAME_EVENT_DEMO = 4, // OSP
   CGAME_EVENT_FIRETEAMMSG = 5,
   CGAME_EVENT_RTV = 6,
+  CGAME_EVENT_CUSTOM_COMMAND = 7,
 } cgameEvent_t;
 
 /*

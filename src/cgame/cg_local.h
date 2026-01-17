@@ -1275,6 +1275,7 @@ typedef struct {
   int weapAltB2;
 
   bool showRtvMenu;
+  bool showCustomCommandMenu;
 
   bool jumpDelayBug;
 
@@ -2799,6 +2800,8 @@ extern vmCvar_t etj_useExecQuiet;
 
 extern vmCvar_t etj_hideFlamethrowerEffects;
 
+extern vmCvar_t etj_ccMenu_rememberPage;
+
 //
 // cg_main.c
 //
@@ -4209,6 +4212,7 @@ class AccelColor;
 class PlayerBBox;
 class SavePos;
 class SyscallExt;
+class CustomCommandMenu;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4226,6 +4230,7 @@ extern std::shared_ptr<PlayerBBox> playerBBox;
 extern std::unique_ptr<SavePos> savePos;
 extern std::unique_ptr<SyscallExt> syscallExt;
 extern std::unique_ptr<PmoveUtils> pmoveUtils;
+extern std::unique_ptr<CustomCommandMenu> customCommandMenu;
 
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume, int soundTime);
