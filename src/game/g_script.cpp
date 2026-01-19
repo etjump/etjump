@@ -82,11 +82,6 @@ qboolean G_ScriptAction_ObjectiveStatus(gentity_t *ent, char *params);
 qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params);
 qboolean G_ScriptAction_SetPosition(gentity_t *ent, char *params);
 qboolean G_ScriptAction_SetAutoSpawn(gentity_t *ent, char *params);
-qboolean G_ScriptAction_SetPlayerAutoSpawn(gentity_t *ent,
-                                           char *params);             // ETJump
-qboolean G_ScriptAction_SetPlayerSpawn(gentity_t *ent, char *params); // ETJump
-qboolean G_ScriptAction_DamagePlayer(gentity_t *ent, char *params);   // ETJump
-qboolean G_ScriptAction_KillPlayer(gentity_t *ent, char *params);     // ETJump
 qboolean G_ScriptAction_SetMainObjective(gentity_t *ent, char *params);
 qboolean G_ScriptAction_SpawnRubble(gentity_t *ent, char *params);
 qboolean G_ScriptAction_AllowTankExit(gentity_t *ent, char *params);
@@ -120,14 +115,22 @@ qboolean G_ScriptAction_ConstructibleDuration(gentity_t *ent, char *params);
 
 // bani
 qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params);
-qboolean G_ScriptAction_Create(gentity_t *ent, char *params);
-qboolean G_ScriptAction_Delete(gentity_t *ent, char *params);
 
-qboolean G_ScriptAction_UseTarget(gentity_t *ent, char *params);
-qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params);
+namespace ETJump::ScriptActions {
+qboolean setPlayerAutoSpawn(gentity_t *ent, char *params);
+qboolean setPlayerSpawn(gentity_t *ent, char *params);
 
-qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params);
-qboolean G_ScriptAction_ChangeSkin(gentity_t *ent, char *params);
+qboolean damagePlayer(gentity_t *ent, char *params);
+qboolean killPlayer(gentity_t *ent, char *params);
+
+qboolean create(gentity_t *ent, char *params);
+qboolean deleteAction(gentity_t *ent, char *params);
+
+qboolean useTarget(gentity_t *ent, char *params);
+qboolean wmAnnouncePrivate(gentity_t *ent, char *params);
+qboolean tracker(gentity_t *ent, char *params);
+qboolean changeSkin(gentity_t *ent, char *params);
+} // namespace ETJump::ScriptActions
 
 // these are the actions that each event can call
 g_script_stack_action_t gScriptActions[] = {
@@ -148,8 +151,6 @@ g_script_stack_action_t gScriptActions[] = {
     {"attachtotag", G_ScriptAction_TagConnect},
     {"halt", G_ScriptAction_Halt},
     {"stopsound", G_ScriptAction_StopSound},
-    //	{"startcam",
-    // G_ScriptAction_StartCam},
     {"entityscriptname", G_ScriptAction_EntityScriptName},
     {"aiscriptname", G_ScriptAction_AIScriptName},
     {"wm_axis_respawntime", G_ScriptAction_AxisRespawntime},
@@ -204,13 +205,6 @@ g_script_stack_action_t gScriptActions[] = {
     {"setdebuglevel", G_ScriptAction_SetDebugLevel},
     {"setposition", G_ScriptAction_SetPosition},
     {"setautospawn", G_ScriptAction_SetAutoSpawn},
-    {"setplayerautospawn", G_ScriptAction_SetPlayerAutoSpawn},
-    {"setplayerspawn", G_ScriptAction_SetPlayerSpawn},
-    {"damageplayer", G_ScriptAction_DamagePlayer},
-    {"killplayer", G_ScriptAction_KillPlayer},
-
-    {"create", G_ScriptAction_Create},
-    {"delete", G_ScriptAction_Delete},
 
     // Gordon: going for longest silly script command ever here :) (sets a model
     // for a brush to one stolen from a func_brushmodel
@@ -242,10 +236,18 @@ g_script_stack_action_t gScriptActions[] = {
     {"constructible_weaponclass", G_ScriptAction_ConstructibleWeaponclass},
     {"constructible_duration", G_ScriptAction_ConstructibleDuration},
 
-    {"usetarget", G_ScriptAction_UseTarget},
-    {"wm_announce_private", G_ScriptAction_Announce_Private},
-    {"tracker", G_ScriptAction_Tracker},
-    {"changeskin", G_ScriptAction_ChangeSkin},
+    {"setplayerautospawn", ETJump::ScriptActions::setPlayerAutoSpawn},
+    {"setplayerspawn", ETJump::ScriptActions::setPlayerSpawn},
+    {"damageplayer", ETJump::ScriptActions::damagePlayer},
+    {"killplayer", ETJump::ScriptActions::killPlayer},
+
+    {"create", ETJump::ScriptActions::create},
+    {"delete", ETJump::ScriptActions::deleteAction},
+
+    {"usetarget", ETJump::ScriptActions::useTarget},
+    {"wm_announce_private", ETJump::ScriptActions::wmAnnouncePrivate},
+    {"tracker", ETJump::ScriptActions::tracker},
+    {"changeskin", ETJump::ScriptActions::changeSkin},
     {nullptr, nullptr}};
 
 qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event,
