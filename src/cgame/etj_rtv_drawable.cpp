@@ -22,11 +22,14 @@
  * SOFTWARE.
  */
 
-#include "etj_rtv_drawable.h"
-#include "etj_client_rtv_handler.h"
-#include "cg_local.h"
-#include "../game/etj_string_utilities.h"
 #include <array>
+
+#include "etj_rtv_drawable.h"
+
+#include "etj_client_rtv_handler.h"
+#include "etj_utilities.h"
+
+#include "../game/etj_string_utilities.h"
 
 namespace ETJump {
 std::vector<panel_button_t> rtvButtonsLayout;

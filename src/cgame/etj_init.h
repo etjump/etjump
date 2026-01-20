@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 /**
  * Extended CG_ServerCommand function. Checks whether server
  * sent command matches to any defined here. If no match is found
@@ -38,6 +40,15 @@ qboolean CG_displaybyname();
 qboolean CG_displaybynumber();
 
 namespace ETJump {
+inline constexpr int32_t CGAME_INIT_DELAY_FRAMES = 10;
+
 void init();
 void shutdown();
+
+void initTimeruns();
+
+// performs one-time actions slightly delayed from actual cgame init,
+// to work around issues that certain actions have when they are performed
+// on the same frame as the module is initialized
+void delayedInit();
 } // namespace ETJump

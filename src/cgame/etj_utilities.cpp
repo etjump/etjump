@@ -33,15 +33,15 @@
 #include "etj_event_loop.h"
 #include "cg_local.h"
 #include "etj_demo_compatibility.h"
+#include "etj_player_events_handler.h"
+#include "etj_cvar_shadow.h"
+#include "etj_pmove_utils.h"
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_portalgun_shared.h"
 
 namespace ETJump {
-extern std::shared_ptr<EventLoop> eventLoop;
-}
-
-std::string ETJump::composeShader(const char *name, ShaderStage general,
-                                  ShaderStages stages) {
+std::string composeShader(const char *name, ShaderStage general,
+                          ShaderStages stages) {
   std::string shader;
   // shader name
   shader = shader + name + " {\n";
@@ -62,7 +62,7 @@ std::string ETJump::composeShader(const char *name, ShaderStage general,
   return shader;
 }
 
-std::string ETJump::composeShader(const char *name, ShaderStages stages) {
+std::string composeShader(const char *name, ShaderStages stages) {
   return composeShader(name, {""}, stages);
 }
 
@@ -143,10 +143,10 @@ const std::basic_regex<char> digitRegex = std::regex(digitRegexStr);
 const std::basic_regex<char> hexedRegex = std::regex(hexedRegexStr);
 const std::basic_regex<char> hashdRegex = std::regex(hashdRegexStr);
 
-void ETJump::parseColorString(const std::string &colorString, vec4_t &color) {
+void parseColorString(const std::string &colorString, vec4_t &color) {
   Vector4Set(color, 0.0f, 0.0f, 0.0f, 1.0); // set defaults
 
-  std::string token{ETJump::StringUtil::toLowerCase(ETJump::trim(colorString))};
+  std::string token{StringUtil::toLowerCase(trim(colorString))};
 
   if (std::regex_match(token, alphaRegex)) {
     parseNamedColorString(token, color);
@@ -164,29 +164,27 @@ void ETJump::parseColorString(const std::string &colorString, vec4_t &color) {
 
 #ifdef CGAMEDLL
 
-int ETJump::setTimeout(std::function<void()> fun, int delay) {
+int setTimeout(std::function<void()> fun, int delay) {
   return eventLoop->schedule(fun, delay);
 }
 
-bool ETJump::clearTimeout(int handle) { return eventLoop->unschedule(handle); }
+bool clearTimeout(int handle) { return eventLoop->unschedule(handle); }
 
-int ETJump::setInterval(std::function<void()> fun, int delay) {
+int setInterval(std::function<void()> fun, int delay) {
   return eventLoop->schedulePersistent(fun, delay);
 }
 
-bool ETJump::clearInterval(int handle) { return eventLoop->unschedule(handle); }
+bool clearInterval(int handle) { return eventLoop->unschedule(handle); }
 
-int ETJump::setImmediate(std::function<void()> fun) {
+int setImmediate(std::function<void()> fun) {
   return eventLoop->schedule(fun, 0, TaskPriorities::Immediate);
 }
 
-bool ETJump::clearImmediate(int handle) {
-  return eventLoop->unschedule(handle);
-}
+bool clearImmediate(int handle) { return eventLoop->unschedule(handle); }
 
-void ETJump::executeTimeout(int handle) { eventLoop->execute(handle); }
+void executeTimeout(int handle) { eventLoop->execute(handle); }
 
-bool ETJump::configFileExists(const std::string &filename) {
+bool configFileExists(const std::string &filename) {
   bool fileExists = true;
   int len;
   fileHandle_t f;
@@ -202,23 +200,23 @@ bool ETJump::configFileExists(const std::string &filename) {
   return fileExists;
 }
 
-void ETJump::execFile(const std::string &filename, ExecFileType type) {
+void execFile(const std::string &filename, ExecFileType type) {
   const bool quiet = static_cast<int>(type) & etj_useExecQuiet.integer;
   const std::string cmd = quiet ? stringFormat("execq \"%s.cfg\"\n", filename)
                                 : stringFormat("exec \"%s.cfg\"\n", filename);
   trap_SendConsoleCommand(cmd.c_str());
 }
 
-bool ETJump::isValidClientNum(const int clientNum) {
+bool isValidClientNum(const int clientNum) {
   return clientNum >= 0 && clientNum < MAX_CLIENTS;
 }
 
-bool ETJump::isPlaying(const int clientNum) {
+bool isPlaying(const int clientNum) {
   return (cgs.clientinfo[clientNum].team == TEAM_ALLIES ||
           cgs.clientinfo[clientNum].team == TEAM_AXIS);
 }
 
-int ETJump::getSvFps() {
+int getSvFps() {
   if (!cg.demoPlayback) {
     return cgs.sv_fps;
   }
@@ -238,7 +236,7 @@ int ETJump::getSvFps() {
   return fps;
 }
 
-bool ETJump::playerIsSolid(const int self, const int other) {
+bool playerIsSolid(const int self, const int other) {
   if (cg_ghostPlayers.integer == 1) {
     if (self == other) {
       return false;
@@ -258,12 +256,12 @@ bool ETJump::playerIsSolid(const int self, const int other) {
   return true;
 }
 
-bool ETJump::playerIsNoclipping(const int clientNum) {
+bool playerIsNoclipping(const int clientNum) {
   return cg_entities[clientNum].currentState.density &
          static_cast<int>(PlayerDensityFlags::Noclip);
 }
 
-void ETJump::tempTraceIgnoreClient(int clientNum) {
+void tempTraceIgnoreClient(int clientNum) {
   if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
     return;
   }
@@ -271,11 +269,11 @@ void ETJump::tempTraceIgnoreClient(int clientNum) {
   tempTraceIgnoredClients[clientNum] = true;
 }
 
-void ETJump::resetTempTraceIgnoredClients() {
+void resetTempTraceIgnoredClients() {
   std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
 }
 
-bool ETJump::skipPortalDraw(const int selfNum, const int otherNum) {
+bool skipPortalDraw(const int selfNum, const int otherNum) {
   if (selfNum == otherNum) {
     return false;
   }
@@ -293,7 +291,7 @@ bool ETJump::skipPortalDraw(const int selfNum, const int otherNum) {
   return true;
 }
 
-void ETJump::registerGameShader(const int32_t index, const char *shader) {
+void registerGameShader(const int32_t index, const char *shader) {
   cgs.gameShaders[index] = shader[0] == '*'
                                ? trap_R_RegisterShader(shader + 1)
                                : trap_R_RegisterShaderNoMip(shader);
@@ -301,7 +299,7 @@ void ETJump::registerGameShader(const int32_t index, const char *shader) {
              MAX_QPATH);
 }
 
-void ETJump::centerCursor() {
+void centerCursor() {
   cgDC.cursor.virtX = SCREEN_CENTER_X;
   cgDC.cursor.virtY = SCREEN_CENTER_Y;
   cgDC.cursor.realX = cgDC.glconfig.vidWidth / 2;
@@ -312,4 +310,65 @@ void ETJump::centerCursor() {
   cgs.realCursorX = cgDC.cursor.realX;
   cgs.realCursorY = cgDC.cursor.realY;
 }
+
+void addLoopingSound(const vec3_t origin, const vec3_t velocity,
+                     const sfxHandle_t sfx, const int32_t volume,
+                     const int32_t soundTime) {
+  if (etj_loopedSounds.integer > 0) {
+    trap_S_AddLoopingSound(origin, velocity, sfx, volume, soundTime);
+  }
+}
+
+void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
+                         const sfxHandle_t sfx, const int32_t range,
+                         const int32_t volume, const int32_t soundTime) {
+  if (etj_loopedSounds.integer > 0) {
+    trap_S_AddRealLoopingSound(origin, velocity, sfx, range, volume, soundTime);
+  }
+}
+
+bool hideMeCheck(const int32_t entityNum) {
+  if (entityNum >= MAX_CLIENTS || entityNum == cg.clientNum) {
+    return false;
+  }
+
+  return cgs.clientinfo[entityNum].hideMe;
+}
+
+int32_t getExtraTraceContents(const int32_t value) {
+  if (etj_extraTrace.integer & 1 << value) {
+    return CONTENTS_SOLID | CONTENTS_PLAYERCLIP;
+  }
+
+  return CONTENTS_SOLID;
+}
+
+int32_t weapnumForClient() {
+  if (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback) {
+    return cg.snap->ps.weapon;
+  }
+
+  return cg.weaponSelect;
+}
+
+bool showingScores() {
+  return (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time);
+}
+
+void onPlayerRespawn(bool revived) {
+  playerEventsHandler->check("respawn", {revived ? "1" : "0"});
+}
+
+playerState_t *getValidPlayerState() {
+  return (cg.snap->ps.clientNum != cg.clientNum || cg.demoPlayback)
+             // spectating/demo playback
+             ? &cg.snap->ps
+             // playing
+             : &cg.predictedPlayerState;
+}
+
+void resetTransitionEffects() {
+  cg.damageTime = cg.duckTime = cg.landTime = cg.stepTime = 0;
+}
 #endif
+} // namespace ETJump

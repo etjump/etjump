@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 
 static mapEntityData_t mapEntities[MAX_GENTITIES];
 static int mapEntityCount = 0;

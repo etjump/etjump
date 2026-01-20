@@ -910,9 +910,6 @@ void CG_AddToNotify(const char *str) {
   }
 }
 
-namespace ETJump {
-extern void initTimer();
-}
 /*
 ===============
 CG_MapRestart
@@ -1047,7 +1044,7 @@ static void CG_MapRestart(void) {
 
   trap_Cvar_Set("cg_thirdPerson", "0");
 
-  ETJump::initTimer();
+  ETJump::initTimeruns();
 }
 // NERVE - SMF
 

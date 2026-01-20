@@ -2765,7 +2765,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       trap_SendConsoleCommand("resetJumpSpeeds\n");
       trap_SendConsoleCommand("resetStrafeQuality\n");
       trap_SendConsoleCommand("resetUpmoveMeter\n");
-      CG_ResetTransitionEffects();
+      ETJump::resetTransitionEffects();
       break;
     case EV_PORTAL_TRAIL:
       if (ETJump::skipPortalDraw(cg.snap->ps.clientNum, es->otherEntityNum2)) {

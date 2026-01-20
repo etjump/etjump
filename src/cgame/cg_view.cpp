@@ -4,11 +4,10 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "etj_init.h"
 #include "etj_pmove_utils.h"
-
-//========================
-extern pmove_t cg_pmove;
-//========================
+#include "etj_event_loop.h"
+#include "etj_utilities.h"
 
 /*
 =============================================================================
@@ -1872,6 +1871,75 @@ qboolean CG_CullPointAndRadius(const vec3_t pt, vec_t radius) {
 
 //=========================================================================
 
+namespace ETJump {
+static void runFrameEnd() {
+  awaitedCommandHandler->runFrame();
+  eventLoop->run();
+
+  if (cg.clientFrame >= CGAME_INIT_DELAY_FRAMES) {
+    delayedInit();
+  }
+
+  if (etj_autoPortalBinds.integer) {
+    // confusingly cg.weaponSelect gets set to followed clients weapon,
+    // so we need to do this only if we're not in spec
+    if (isPlaying(cg.clientNum) && cg.weaponSelect == WP_PORTAL_GUN &&
+        !cg.portalgunBindingsAdjusted) {
+      cgDC.getKeysForBinding("weapalt", &cg.weapAltB1, &cg.weapAltB2);
+
+      if (cg.weapAltB1 != -1) {
+        trap_Key_SetBinding(cg.weapAltB1, "+attack2");
+        cg.portalgunBindingsAdjusted = true;
+      }
+
+      if (cg.weapAltB2 != -1) {
+        trap_Key_SetBinding(cg.weapAltB2, "+attack2");
+        cg.portalgunBindingsAdjusted = true;
+      }
+      // since you never spawn with a portalgun,
+      // binds should reset at the very beginning of a level too
+    } else if (((cg.weaponSelect != WP_PORTAL_GUN ||
+                 !isPlaying(cg.clientNum)) &&
+                cg.portalgunBindingsAdjusted) ||
+               cg.clientFrame < CGAME_INIT_DELAY_FRAMES) {
+      cgDC.getKeysForBinding("+attack2", &cg.weapAltB1, &cg.weapAltB2);
+
+      if (cg.weapAltB1 != -1) {
+        trap_Key_SetBinding(cg.weapAltB1, "weapalt");
+        cg.portalgunBindingsAdjusted = false;
+      }
+
+      if (cg.weapAltB2 != -1) {
+        trap_Key_SetBinding(cg.weapAltB2, "weapalt");
+        cg.portalgunBindingsAdjusted = false;
+      }
+    }
+  }
+
+  // handle autospec feature
+  if (!cg.demoPlayback && etj_autoSpec.integer) {
+    constexpr int minAutoSpecDelay = 1000; // 1s
+    static int lastActivity = -minAutoSpecDelay;
+
+    const auto *const ps = getValidPlayerState();
+    const usercmd_t *cmd = pmoveUtils->getUserCmd();
+    const auto team = cgs.clientinfo[cg.clientNum].team;
+    const bool moving = cmd->forwardmove || cmd->rightmove || cmd->upmove;
+    const bool following = ps->pm_flags & PMF_FOLLOW;
+
+    if (team != TEAM_SPECTATOR || (!following && moving) ||
+        (following && moving)) {
+      lastActivity = cg.time;
+    } else if (cg.time - lastActivity >=
+               std::max(etj_autoSpecDelay.integer, minAutoSpecDelay)) {
+      // it's time to follow the next player
+      trap_SendClientCommand("follownext");
+      lastActivity = cg.time;
+    }
+  }
+}
+} // namespace ETJump
+
 // #define DEBUGTIME_ENABLED
 #ifdef DEBUGTIME_ENABLED
   #define DEBUGTIME                                                            \
@@ -1902,8 +1970,6 @@ Generates and draws a game scene and status information at the given time.
 // static int lightningtime = 0;
 // static int lightningsequencetime = 0;
 // static int lightningsequencecounter = 0;
-
-qboolean CG_CalcMuzzlePoint(int entityNum, vec3_t muzzle);
 
 void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
                         qboolean demoPlayback) {
