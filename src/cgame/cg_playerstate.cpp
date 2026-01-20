@@ -268,7 +268,7 @@ void CG_Respawn(qboolean revived) {
   cg.proneMovingTime = 0;
 
   // clear transition effects here, otherwise they carry over on team switch
-  CG_ResetTransitionEffects();
+  ETJump::resetTransitionEffects();
 
   if (!revived && cgs.clientinfo[cg.clientNum].team != oldTeam) {
     const auto teamConfig = va(
@@ -509,7 +509,7 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops) {
 
     // make sure we don't get any unwanted transition effects
     *ops = *ps;
-    CG_ResetTransitionEffects();
+    ETJump::resetTransitionEffects();
 
     // DHM - Nerve :: After Limbo, make sure and do a CG_Respawn
     if (ps->clientNum == cg.clientNum) {

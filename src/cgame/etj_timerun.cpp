@@ -230,4 +230,16 @@ int Timerun::getNumCheckpointsHit(
   }
   return numCheckpointsHit;
 }
+
+void Timerun::execCmdOnRunStart() {
+  if (etj_onRunStart.string[0]) {
+    trap_SendConsoleCommand(va("%s\n", etj_onRunStart.string));
+  }
+}
+
+void Timerun::execCmdOnRunEnd() {
+  if (etj_onRunEnd.string[0]) {
+    trap_SendConsoleCommand(va("%s\n", etj_onRunEnd.string));
+  }
+}
 } // namespace ETJump

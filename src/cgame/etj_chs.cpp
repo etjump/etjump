@@ -80,7 +80,7 @@ static void CG_CHS_Distance_XY(char *buf, int size) {
   playerState_t *ps = CG_CHS_GetPlayerState();
   trace_t trace;
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::CHS_10_11);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::CHS_10_11);
 
   CG_CHS_ViewTrace(&trace, traceContents);
 
@@ -97,7 +97,7 @@ static void CG_CHS_Distance_Z(char *buf, int size) {
   playerState_t *ps = CG_CHS_GetPlayerState();
   trace_t trace;
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::CHS_10_11);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::CHS_10_11);
 
   CG_CHS_ViewTrace(&trace, traceContents);
   int offset = etj_CHSUseFeet.integer ? 24 : 0;
@@ -115,7 +115,7 @@ static void CG_CHS_Distance_XYZ(char *buf, int size) {
   vec3_t origin;
   vec3_t originOffset{0, 0, 24};
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::CHS_12);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::CHS_12);
 
   CG_CHS_ViewTrace(&trace, traceContents);
 
@@ -133,7 +133,7 @@ static void CG_CHS_Distance_XYZ(char *buf, int size) {
 static void CG_CHS_Distance_ViewXYZ(char *buf, int size) {
   trace_t trace;
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::CHS_13_15);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::CHS_13_15);
 
   CG_CHS_ViewTrace(&trace, traceContents);
 
@@ -150,7 +150,7 @@ static void CG_CHS_Distance_XY_Z_XYZ(char *buf, int size) {
   vec3_t origin;
   vec3_t originOffset{0, 0, 24};
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::CHS_13_15);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::CHS_13_15);
 
   CG_CHS_ViewTrace(&trace, traceContents);
 
@@ -174,7 +174,7 @@ static void CG_CHS_Distance_XY_Z_ViewXYZ(char *buf, int size) {
   vec3_t origin;
   vec3_t originOffset{0, 0, 24};
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::CHS_13_15);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::CHS_13_15);
 
   CG_CHS_ViewTrace(&trace, traceContents);
 
@@ -196,7 +196,7 @@ static void CG_CHS_Distance_XY_Z_ViewXYZ(char *buf, int size) {
 static void CG_CHS_Look_XYZ(char *buf, int size) {
   trace_t trace;
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::CHS_16);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::CHS_16);
 
   CG_CHS_ViewTrace(&trace, traceContents);
 
@@ -367,7 +367,7 @@ static void CG_CHS_LastJumpPosition_XYZ(char *buf, int size) {
 static void CG_CHS_PlaneAngleZ(char *buf, int size) {
   trace_t trace;
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::CHS_53);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::CHS_53);
 
   CG_CHS_ViewTrace(&trace, traceContents);
 

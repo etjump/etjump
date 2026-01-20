@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include "etj_areaindicator_drawable.h"
+#include "etj_utilities.h"
 
 namespace ETJump {
 AreaIndicator::AreaIndicator() {

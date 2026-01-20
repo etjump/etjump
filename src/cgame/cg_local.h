@@ -4231,18 +4231,6 @@ extern std::unique_ptr<SavePos> savePos;
 extern std::unique_ptr<SyscallExt> syscallExt;
 extern std::unique_ptr<PmoveUtils> pmoveUtils;
 
-void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
-                         sfxHandle_t sfx, int range, int volume, int soundTime);
-void addLoopingSound(const vec3_t origin, const vec3_t velocity,
-                     sfxHandle_t sfx, int volume, int soundTime);
-bool hideMeCheck(int entityNum);
-int checkExtraTrace(int value);
-int weapnumForClient();
-void onPlayerRespawn(qboolean revived);
-void runFrameEnd();
-playerState_t *getValidPlayerState();
-bool showingScores();
-
 enum extraTraceOptions {
   OB_DETECTOR,
   SLICK_DETECTOR,
@@ -4282,7 +4270,6 @@ enum class HideFlamethrowerFlags {
 
 qboolean CG_ConsoleCommandExt(const char *cmd);
 void CG_DrawActiveFrameExt();
-void CG_ResetTransitionEffects();
 
 extern displayContextDef_t *DC;
 

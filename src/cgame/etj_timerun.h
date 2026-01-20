@@ -87,6 +87,9 @@ public:
   static int getNumCheckpointsHit(
       const std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
 
+  void execCmdOnRunStart();
+  void execCmdOnRunEnd();
+
 private:
   int _clientNum;
 

@@ -27,8 +27,9 @@
 
 #include "cg_local.h"
 
-#include "etj_trickjump_lines.h"
 #include "etj_init.h"
+
+#include "etj_trickjump_lines.h"
 #include "etj_timerun.h"
 #include "etj_timerun_view.h"
 #include "etj_event_loop.h"
@@ -96,81 +97,102 @@ std::unique_ptr<SyscallExt> syscallExt;
 std::unique_ptr<PmoveUtils> pmoveUtils;
 } // namespace ETJump
 
-static bool isInitialized{false};
+// FIXME: move
 static int nextNearest = 0;
 
 namespace ETJump {
-void addLoopingSound(const vec3_t origin, const vec3_t velocity,
-                     sfxHandle_t sfx, int volume, int soundTime) {
-  if (etj_loopedSounds.integer > 0) {
-    trap_S_AddLoopingSound(origin, velocity, sfx, volume, soundTime);
-  }
-}
-
-void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
-                         sfxHandle_t sfx, int range, int volume,
-                         int soundTime) {
-  if (etj_loopedSounds.integer > 0) {
-    trap_S_AddRealLoopingSound(origin, velocity, sfx, range, volume, soundTime);
-  }
-}
-
-// General purpose etj_hideMe check for cgame events
-bool hideMeCheck(int entityNum) {
-  if (entityNum < MAX_CLIENTS) {
-    // entity is a player
-    if (cgs.clientinfo[entityNum].hideMe && entityNum != cg.clientNum) {
-      // player is hidden and it is not ourselves
-      return true;
+void delayedInit() {
+  // force original cvars to match the shadow values, as ETe and ETL
+  // reset cheat cvars to original values after the 'CG_INIT' VMCall
+  if (!cg.shadowCvarsSet) {
+    for (auto &cvarShadow : cvarShadows) {
+      cvarShadow->forceCvarSet();
     }
-  }
-  return false;
-}
 
-// Get correct trace contents depending on etj_extraTrace value
-int checkExtraTrace(int value) {
-  if (etj_extraTrace.integer & 1 << value) {
-    return CONTENTS_SOLID | CONTENTS_PLAYERCLIP;
+    cg.shadowCvarsSet = true;
   }
 
-  return CONTENTS_SOLID;
-}
-
-int weapnumForClient() {
-  if (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback) {
-    return cg.snap->ps.weapon;
+  // NOTE: anything below this will not execute during demo playback!
+  if (cg.demoPlayback) {
+    return;
   }
 
-  return cg.weaponSelect;
-}
+  if (!cg.chatReplayReceived) {
+    if (etj_chatReplay.integer) {
+      trap_SendConsoleCommand("getchatreplay");
+    }
 
-void initTimer() {
-  if (timerun) {
-    timerunView->removeFromDrawables();
-    timerun = nullptr;
-    timerunView = nullptr;
+    // keep this separate from the cvar check, so client doesn't immediately
+    // receive chat replay in the middle of a map when toggling this,
+    // as the replay would just be whatever is currently in chat
+    cg.chatReplayReceived = true;
   }
-  timerun = std::make_shared<Timerun>(cg.clientNum, playerEventsHandler);
-  timerunView = std::make_shared<TimerunView>(timerun);
-}
 
-void execCmdOnRunStart() {
-  if (etj_onRunStart.string[0]) {
-    trap_SendConsoleCommand(va("%s\n", etj_onRunStart.string));
+  // populate map vote menu
+  if (!cg.maplistRequested) {
+    trap_SendClientCommand("requestmaplist");
+    cg.maplistRequested = true;
+  }
+
+  if (!cg.numCustomvotesRequested) {
+    cg.numCustomvotes = -1;
+    cg.numCustomvoteInfosRequested = 0;
+
+    trap_SendClientCommand("requestnumcustomvotes");
+    cg.numCustomvotesRequested = true;
+  }
+
+  // space out customvote info requests a bit, otherwise we get a
+  // big lag spike if the server has lots of data to send
+  if (cg.customvoteInfoRequested && cg.numCustomvotes > 0 &&
+      cg.clientFrame >=
+          CGAME_INIT_DELAY_FRAMES + (cg.numCustomvoteInfosRequested * 25) &&
+      cg.numCustomvoteInfosRequested < cg.numCustomvotes) {
+    trap_SendClientCommand(
+        va("requestcustomvoteinfo %i", cg.numCustomvoteInfosRequested));
+    cg.numCustomvoteInfosRequested++;
   }
 }
 
-void execCmdOnRunEnd() {
-  if (etj_onRunEnd.string[0]) {
-    trap_SendConsoleCommand(va("%s\n", etj_onRunEnd.string));
-  }
+static void initMainHandlers() {
+  serverCommandsHandler = std::make_shared<ClientCommandsHandler>(nullptr);
+  consoleCommandsHandler =
+      std::make_shared<ClientCommandsHandler>(trap_AddCommand);
+  entityEventsHandler = std::make_shared<EntityEventsHandler>();
+  playerEventsHandler = std::make_shared<PlayerEventsHandler>();
+
+  awaitedCommandHandler = std::make_shared<AwaitedCommandHandler>(
+      consoleCommandsHandler, trap_SendConsoleCommand,
+      [](const char *text) { Com_Printf(text); });
 }
 
-void onPlayerRespawn(qboolean revived) {
-  playerEventsHandler->check("respawn", {revived ? "1" : "0"});
+static void initOperatingSystem() {
+  operatingSystem = std::make_shared<OperatingSystem>();
+
+  auto minimize = [](const std::vector<std::string> &args) {
+    OperatingSystem::minimize();
+  };
+
+  consoleCommandsHandler->subscribe("min", minimize);
+  consoleCommandsHandler->subscribe("minimize", minimize);
 }
 
-void initDrawKeys(KeySetSystem *keySetSystem) {
+static void initAuthentication() {
+  authentication = std::make_shared<ClientAuthentication>(
+      [](const std::string &command) {
+        trap_SendClientCommand(command.c_str());
+      },
+      [](const std::string &message) { CG_Printf(message.c_str()); },
+      [] { return OperatingSystem::getHwid(); }, serverCommandsHandler);
+}
+
+static void initSyscallExtensions() {
+  syscallExt = std::make_unique<SyscallExt>();
+  syscallExt->setupExtensions();
+  SyscallExt::trap_CmdBackup_Ext();
+}
+
+static void initDrawKeys(const std::shared_ptr<KeySetSystem> &keySetSystem) {
   // key set themes
   const char *keySetNames[]{
       "keyset",  // Keyset 1 (original)
@@ -185,107 +207,45 @@ void initDrawKeys(KeySetSystem *keySetSystem) {
   keySetSystem->addKeyBindSet("keyset5");
 }
 
-bool showingScores() {
-  return (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time);
-}
+static void initRenderables() {
+  assert(pmoveUtils != nullptr && accelColor != nullptr);
 
-void init() {
-
-  CG_Printf(S_COLOR_LTGREY GAME_HEADER);
-  CG_Printf(S_COLOR_LTGREY "____________________________\n");
-
-  CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
-                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
-                                     " init...\n");
-
-  isInitialized = false;
-
-  // NOTE: client server commands handlers must be created before other
-  // modules as other modules use them to subscribe to commands.
-  // Generally all modules should get these as constructor params but
-  // they're still being used in the C code
-  // => make sure they're created first
-  serverCommandsHandler = std::make_shared<ClientCommandsHandler>(nullptr);
-  consoleCommandsHandler =
-      std::make_shared<ClientCommandsHandler>(trap_AddCommand);
-  entityEventsHandler = std::make_shared<EntityEventsHandler>();
-  operatingSystem = std::make_shared<OperatingSystem>();
-  authentication = std::make_shared<ClientAuthentication>(
-      [](const std::string &command) {
-        trap_SendClientCommand(command.c_str());
-      },
-      [](const std::string &message) { CG_Printf(message.c_str()); },
-      [] { return OperatingSystem::getHwid(); }, ETJump::serverCommandsHandler);
-
-  playerEventsHandler = std::make_shared<PlayerEventsHandler>();
-  awaitedCommandHandler = std::make_shared<AwaitedCommandHandler>(
-      consoleCommandsHandler, trap_SendConsoleCommand,
-      [](const char *text) { Com_Printf(text); });
-  eventLoop = std::make_shared<ETJump::EventLoop>();
-
-  ////////////////////////////////////////////////////////////////
-  // TODO: move these to own client commands handler
-  ////////////////////////////////////////////////////////////////
-  auto minimize = [](const std::vector<std::string> &args) {
-    OperatingSystem::minimize();
-  };
-
-  consoleCommandsHandler->subscribe("min", minimize);
-  consoleCommandsHandler->subscribe("minimize", minimize);
-  ////////////////////////////////////////////////////////////////
-
-  rtvHandler = std::make_shared<ClientRtvHandler>();
-  rtvHandler->initialize();
-
-  demoCompatibility = std::make_unique<DemoCompatibility>();
-
-  // must be initialized before accelColor & renderables!
-  pmoveUtils = std::make_unique<PmoveUtils>();
-
-  accelColor = std::make_shared<AccelColor>();
-
-  playerBBox = std::make_shared<PlayerBBox>();
-
-  // initialize renderables
-  // Overbounce watcher
-  ETJump::renderables.push_back(
+  renderables.emplace_back(
       std::make_shared<OverbounceWatcher>(consoleCommandsHandler.get()));
-  ETJump::renderables.push_back(std::make_shared<OverbounceDetector>());
-  // Display max speed from previous load session
-  ETJump::renderables.push_back(
-      std::make_shared<DisplayMaxSpeed>(ETJump::entityEventsHandler.get()));
-  ETJump::renderables.push_back(std::make_shared<DrawSpeed>());
-  ETJump::renderables.push_back(std::make_shared<AccelMeter>());
-  ETJump::renderables.push_back(std::make_shared<StrafeQuality>());
-  ETJump::renderables.push_back(
-      std::make_shared<JumpSpeeds>(ETJump::entityEventsHandler.get()));
-  ETJump::renderables.push_back(std::make_shared<QuickFollowDrawer>());
-  ETJump::renderables.push_back(std::make_shared<SpectatorInfo>());
-  ETJump::renderables.push_back(std::make_shared<AreaIndicator>());
+  renderables.emplace_back(std::make_shared<OverbounceDetector>());
+  renderables.emplace_back(
+      std::make_shared<DisplayMaxSpeed>(entityEventsHandler.get()));
+  renderables.emplace_back(std::make_shared<DrawSpeed>());
+  renderables.emplace_back(std::make_shared<AccelMeter>());
+  renderables.emplace_back(std::make_shared<StrafeQuality>());
+  renderables.emplace_back(
+      std::make_shared<JumpSpeeds>(entityEventsHandler.get()));
+  renderables.emplace_back(std::make_shared<QuickFollowDrawer>());
+  renderables.emplace_back(std::make_shared<SpectatorInfo>());
+  renderables.emplace_back(std::make_shared<AreaIndicator>());
 
   if (etj_CGazOnTop.integer) {
-    ETJump::renderables.push_back(std::make_shared<Snaphud>());
-    ETJump::renderables.push_back(std::make_shared<CGaz>());
+    renderables.emplace_back(std::make_shared<Snaphud>());
+    renderables.emplace_back(std::make_shared<CGaz>());
   } else {
-    ETJump::renderables.push_back(std::make_shared<CGaz>());
-    ETJump::renderables.push_back(std::make_shared<Snaphud>());
+    renderables.emplace_back(std::make_shared<CGaz>());
+    renderables.emplace_back(std::make_shared<Snaphud>());
   }
 
-  ETJump::renderables.push_back(std::make_shared<UpperRight>());
-  ETJump::renderables.push_back(std::make_shared<UpmoveMeter>());
+  renderables.emplace_back(std::make_shared<UpperRight>());
+  renderables.emplace_back(std::make_shared<UpmoveMeter>());
+  renderables.emplace_back(std::make_shared<RtvDrawable>());
 
-  ETJump::renderables.push_back(std::make_shared<RtvDrawable>());
+  // FIXME: this is dumb, the init should be handled in the constructor
+  const auto keySetSystem = std::make_shared<KeySetSystem>(etj_drawKeys);
+  renderables.push_back(keySetSystem);
+  initDrawKeys(keySetSystem);
 
-  ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
-  ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();
-  auto keySetSystem = new ETJump::KeySetSystem(etj_drawKeys);
-  ETJump::renderables.push_back(
-      std::shared_ptr<ETJump::IRenderable>(keySetSystem));
-  ETJump::initDrawKeys(keySetSystem);
-  ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
+  renderables.emplace_back(std::make_shared<Crosshair>());
+}
 
-  ETJump::renderables.push_back(std::make_shared<Crosshair>());
-
+static void initCvarUnlockers() {
+  // TODO: move to the class
   const std::vector<std::pair<const vmCvar_t *, const std::string>> cvars{
       {&etj_drawFoliage, "r_drawfoliage"},
       {&etj_showTris, "r_showtris"},
@@ -304,44 +264,54 @@ void init() {
       {&etj_flareSize, "r_flareSize"},
   };
 
-  for (auto &shadow : cvars) {
-    ETJump::cvarShadows.push_back(
-        std::make_shared<CvarShadow>(shadow.first, shadow.second));
+  for (const auto &cvar : cvars) {
+    cvarShadows.emplace_back(
+        std::make_shared<CvarShadow>(cvar.first, cvar.second));
+  }
+}
+
+void initTimeruns() {
+  if (timerun) {
+    timerunView->removeFromDrawables();
+    timerun = nullptr;
+    timerunView = nullptr;
   }
 
-  playerEventsHandler->subscribe("timerun:start", [](auto a) {
-    auto clientNum = std::stoi(a[0]);
-    if (clientNum == cg.clientNum) {
-      execCmdOnRunStart();
-    }
-  });
-  playerEventsHandler->subscribe("timerun:stop", [](auto a) {
-    auto clientNum = std::stoi(a[0]);
-    if (clientNum == cg.clientNum) {
-      execCmdOnRunEnd();
-    }
-  });
-  playerEventsHandler->subscribe("timerun:interrupt", [](auto a) {
-    auto clientNum = std::stoi(a[0]);
-    if (clientNum == cg.clientNum) {
-      execCmdOnRunEnd();
-    }
-  });
+  timerun = std::make_shared<Timerun>(cg.clientNum, playerEventsHandler);
+  timerunView = std::make_shared<TimerunView>(timerun);
 
-  ETJump_ClearDrawables();
-  initTimer();
   // restores timerun after vid_restart (if required)
   trap_SendClientCommand("timerun_status");
 
-  // must be called after 'initTimer' so the pointer is valid!
-  savePos = std::make_unique<SavePos>(timerun);
+  playerEventsHandler->subscribe("timerun:start", [](const auto &a) {
+    if (a.empty()) {
+      return;
+    }
 
-  std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
+    const auto clientNum = Q_atoi(a[0].c_str());
 
-  syscallExt = std::make_unique<SyscallExt>();
-  syscallExt->setupExtensions();
-  SyscallExt::trap_CmdBackup_Ext();
+    if (clientNum == cg.clientNum) {
+      timerun->execCmdOnRunStart();
+    }
+  });
 
+  const auto runEnd = [](const auto &a) {
+    if (a.empty()) {
+      return;
+    }
+
+    const auto clientNum = Q_atoi(a[0].c_str());
+
+    if (clientNum == cg.clientNum) {
+      timerun->execCmdOnRunEnd();
+    }
+  };
+
+  playerEventsHandler->subscribe("timerun:stop", runEnd);
+  playerEventsHandler->subscribe("timerun:interrupt", runEnd);
+}
+
+static void initTrickjumpLines() {
   trickjumpLines = std::make_shared<TrickjumpLines>();
 
   // Check if load TJL on connection is enable
@@ -362,12 +332,60 @@ void init() {
   } else {
     trickjumpLines->toggleMarker(false);
   }
+}
+
+void init() {
+  CG_Printf(S_COLOR_LTGREY GAME_HEADER);
+  CG_Printf(S_COLOR_LTGREY "____________________________\n");
+
+  CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
+                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
+                                     " init...\n");
+
+  // NOTE: client and server commands handlers must be created before other
+  // modules as other modules use them to subscribe to commands.
+  // Generally all modules should get these as constructor params but
+  // they're still being used in the C code
+  // => make sure they're created first
+  initMainHandlers();
+
+  initOperatingSystem();
+  initAuthentication();
+  initSyscallExtensions();
+  initCvarUnlockers();
+
+  eventLoop = std::make_shared<EventLoop>();
+
+  demoCompatibility = std::make_unique<DemoCompatibility>();
+
+  rtvHandler = std::make_shared<ClientRtvHandler>();
+  rtvHandler->initialize();
+
+  playerBBox = std::make_shared<PlayerBBox>();
+
+  consoleAlphaHandler = std::make_shared<ConsoleAlphaHandler>();
+  drawLeavesHandler = std::make_shared<DrawLeavesHandler>();
+  autoDemoRecorder = std::make_shared<AutoDemoRecorder>();
+
+  // must be initialized before accelColor & renderables!
+  pmoveUtils = std::make_unique<PmoveUtils>();
+  accelColor = std::make_shared<AccelColor>();
+  initRenderables();
+
+  // FIXME: remove this 'Drawable' class and move this to 'IRenderable'
+  ETJump_ClearDrawables();
+  initTimeruns();
+
+  initTrickjumpLines();
+
+  assert(timerun != nullptr);
+  savePos = std::make_unique<SavePos>(timerun);
+
+  std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
                                      " init... " S_COLOR_GREEN "DONE\n");
-
-  isInitialized = true;
 }
 
 void shutdown() {
@@ -375,34 +393,34 @@ void shutdown() {
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
                                      " shutdown...\n");
 
-  if (ETJump::consoleCommandsHandler) {
-    ETJump::consoleCommandsHandler->unsubscribe("min");
-    ETJump::consoleCommandsHandler->unsubscribe("minimize");
+  if (consoleCommandsHandler) {
+    consoleCommandsHandler->unsubscribe("min");
+    consoleCommandsHandler->unsubscribe("minimize");
   }
 
-  ETJump::operatingSystem = nullptr;
-  ETJump::authentication = nullptr;
-  ETJump::renderables.clear();
-  ETJump::cvarShadows.clear();
-  ETJump::cvarUpdateHandler = nullptr;
+  operatingSystem = nullptr;
+  authentication = nullptr;
+  renderables.clear();
+  cvarShadows.clear();
+  cvarUpdateHandler = nullptr;
 
   // clear dynamic shaders in reverse order
-  ETJump::drawLeavesHandler = nullptr;
-  ETJump::consoleAlphaHandler = nullptr;
-  if (ETJump::eventLoop) {
-    ETJump::eventLoop->shutdown();
-    ETJump::eventLoop = nullptr;
-  }
-  ETJump::consoleCommandsHandler = nullptr;
-  ETJump::serverCommandsHandler = nullptr;
-  ETJump::playerEventsHandler = nullptr;
-  ETJump::entityEventsHandler = nullptr;
+  drawLeavesHandler = nullptr;
+  consoleAlphaHandler = nullptr;
 
-  ETJump::savePos = nullptr;
+  if (eventLoop) {
+    eventLoop->shutdown();
+    eventLoop = nullptr;
+  }
+
+  consoleCommandsHandler = nullptr;
+  serverCommandsHandler = nullptr;
+  playerEventsHandler = nullptr;
+  entityEventsHandler = nullptr;
+
+  savePos = nullptr;
 
   syscallExt = nullptr;
-
-  isInitialized = false;
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
@@ -818,124 +836,6 @@ void CG_DrawActiveFrameExt() {
   }
 }
 
-namespace ETJump {
-void runFrameEnd() {
-  awaitedCommandHandler->runFrame();
-  eventLoop->run();
-
-  // force original cvars to match the shadow values
-  // we need to delay this a bit from initial cgame load because ETe and ETL
-  // reset cheat cvars to original values after cgame VMCall is done
-  if (cg.clientFrame >= 10 && !cg.shadowCvarsSet) {
-    for (auto &cvarShadow : cvarShadows) {
-      cvarShadow->forceCvarSet();
-    }
-    cg.shadowCvarsSet = true;
-  }
-
-  if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.chatReplayReceived) {
-    if (etj_chatReplay.integer) {
-      trap_SendConsoleCommand("getchatreplay");
-    }
-
-    // keep this separate from the cvar check, so client doesn't immediately
-    // receive chat replay in the middle of a map when toggling this,
-    // as the replay would just be whatever is currently in chat
-    cg.chatReplayReceived = true;
-  }
-
-  if (etj_autoPortalBinds.integer) {
-    // confusingly cg.weaponSelect gets set to followed clients weapon,
-    // so we need to do this only if we're not in spec
-    if (isPlaying(cg.clientNum) && cg.weaponSelect == WP_PORTAL_GUN &&
-        !cg.portalgunBindingsAdjusted) {
-      cgDC.getKeysForBinding("weapalt", &cg.weapAltB1, &cg.weapAltB2);
-
-      if (cg.weapAltB1 != -1) {
-        trap_Key_SetBinding(cg.weapAltB1, "+attack2");
-        cg.portalgunBindingsAdjusted = true;
-      }
-
-      if (cg.weapAltB2 != -1) {
-        trap_Key_SetBinding(cg.weapAltB2, "+attack2");
-        cg.portalgunBindingsAdjusted = true;
-      }
-      // since you never spawn with a portalgun,
-      // binds should reset at the very beginning of a level too
-    } else if (((cg.weaponSelect != WP_PORTAL_GUN ||
-                 !isPlaying(cg.clientNum)) &&
-                cg.portalgunBindingsAdjusted) ||
-               cg.clientFrame < 10) {
-      cgDC.getKeysForBinding("+attack2", &cg.weapAltB1, &cg.weapAltB2);
-
-      if (cg.weapAltB1 != -1) {
-        trap_Key_SetBinding(cg.weapAltB1, "weapalt");
-        cg.portalgunBindingsAdjusted = false;
-      }
-
-      if (cg.weapAltB2 != -1) {
-        trap_Key_SetBinding(cg.weapAltB2, "weapalt");
-        cg.portalgunBindingsAdjusted = false;
-      }
-    }
-  }
-
-  // handle autospec feature
-  if (!cg.demoPlayback && etj_autoSpec.integer) {
-    constexpr int minAutoSpecDelay = 1000; // 1s
-    static int lastActivity = -minAutoSpecDelay;
-
-    const auto ps = getValidPlayerState();
-    const usercmd_t *cmd = pmoveUtils->getUserCmd();
-    const auto team = cgs.clientinfo[cg.clientNum].team;
-    const bool moving = cmd->forwardmove || cmd->rightmove || cmd->upmove;
-    const bool following = ps->pm_flags & PMF_FOLLOW;
-
-    if (team != TEAM_SPECTATOR || (!following && moving) ||
-        (following && moving)) {
-      lastActivity = cg.time;
-    } else if (cg.time - lastActivity >=
-               std::max(etj_autoSpecDelay.integer, minAutoSpecDelay)) {
-      // it's time to follow the next player
-      trap_SendClientCommand("follownext");
-      lastActivity = cg.time;
-    }
-  }
-
-  // populate map vote menu
-  if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.maplistRequested) {
-    trap_SendClientCommand("requestmaplist");
-    cg.maplistRequested = true;
-  }
-
-  if (!cg.demoPlayback && cg.clientFrame >= 10 && !cg.numCustomvotesRequested) {
-    cg.numCustomvotes = -1;
-    cg.numCustomvoteInfosRequested = 0;
-
-    trap_SendClientCommand("requestnumcustomvotes");
-    cg.numCustomvotesRequested = true;
-  }
-
-  // space out customvote info requests a bit, otherwise we get a
-  // big lag spike if the server has lots of data to send
-  if (!cg.demoPlayback && cg.customvoteInfoRequested && cg.numCustomvotes > 0 &&
-      cg.clientFrame >= 10 + (cg.numCustomvoteInfosRequested * 25) &&
-      cg.numCustomvoteInfosRequested < cg.numCustomvotes) {
-    trap_SendClientCommand(
-        va("requestcustomvoteinfo %i", cg.numCustomvoteInfosRequested));
-    cg.numCustomvoteInfosRequested++;
-  }
-}
-
-playerState_t *getValidPlayerState() {
-  return (cg.snap->ps.clientNum != cg.clientNum || cg.demoPlayback)
-             // spectating/demo playback
-             ? &cg.snap->ps
-             // playing
-             : &cg.predictedPlayerState;
-}
-} // namespace ETJump
-
 qboolean CG_displaybyname() {
   const auto argc = trap_Argc();
   if (argc > 1) {
@@ -963,8 +863,4 @@ qboolean CG_displaybynumber() {
               "/tjl_listroute to get number. \n");
     return qfalse;
   }
-}
-
-void CG_ResetTransitionEffects() {
-  cg.damageTime = cg.duckTime = cg.landTime = cg.stepTime = 0;
 }

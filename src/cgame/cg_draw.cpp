@@ -2634,7 +2634,7 @@ static void CG_DrawSlick(void) {
     return;
   }
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::SLICK_DETECTOR);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::SLICK_DETECTOR);
 
   playerState_t *ps = ETJump::getValidPlayerState();
 
@@ -2665,7 +2665,7 @@ static void CG_DrawJumpDelay(void) {
     return;
   }
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::NJD_DETECTOR);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::NJD_DETECTOR);
 
   playerState_t *ps = ETJump::getValidPlayerState();
 
