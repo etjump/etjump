@@ -83,6 +83,7 @@ add_library(cgame MODULE
 	"etj_quick_follow_drawable.cpp"
 	"etj_rtv_drawable.cpp"
 	"etj_savepos.cpp"
+	"etj_servercommands.cpp"
 	"etj_snaphud.cpp"
 	"etj_speed_drawable.cpp"
 	"etj_spectatorinfo_data.cpp"

@@ -34,15 +34,17 @@
 
 #include "cg_local.h"
 
+namespace ETJump {
 static const char *EnumStrings[] = {"mapper", "loaded", "recorded"};
 const char *getTextForEnum(int enumVal) { return EnumStrings[enumVal]; }
 
-TrickjumpLines::TrickjumpLines()
-    : _nextRecording(1), _nextAddTime(0), _currentRouteToRender(-1) {
-  this->_recording = false;
-  this->_jumpRelease = true;
+TrickjumpLines::TrickjumpLines(
+    const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler)
+    : _recording(false), _enableLine(false), _enableMarker(false),
+      _jumpRelease(true), _debugVerbose(false), _nextRecording(1),
+      _nextAddTime(0), _currentRouteToRender(-1), _currentRotation({}),
+      serverCommandsHandler(serverCommandsHandler) {
   this->_currentRotation.init();
-  this->_debugVerbose = false;
 
   // Create a map of possible color for TJL.
   colorMap.insert(std::pair<std::string, std::vector<unsigned char>>(
@@ -65,9 +67,42 @@ TrickjumpLines::TrickjumpLines()
       "orange", {128, 128, 0, 255}));
   colorMap.insert(std::pair<std::string, std::vector<unsigned char>>(
       "speed", {0, 0, 0, 0}));
+
+  registerCommands();
 }
 
-TrickjumpLines::~TrickjumpLines() {}
+TrickjumpLines::~TrickjumpLines() {
+  serverCommandsHandler->unsubscribe("tjl_displaybyname");
+  serverCommandsHandler->unsubscribe("tjl_displaybynumber");
+}
+
+void TrickjumpLines::registerCommands() {
+  serverCommandsHandler->subscribe(
+      "tjl_displaybyname",
+      [this](const auto &args) {
+        displayByName(args.empty() ? nullptr : args[0].c_str());
+      },
+      false);
+
+  serverCommandsHandler->subscribe(
+      "tjl_displaybynumber",
+      [this](const auto &args) {
+        if (args.empty()) {
+          CG_Printf("You need to pass the route number by argument. Use "
+                    "command /tjl_listroute to get number. \n");
+          return;
+        }
+
+        const int32_t num = Q_atoi(args[0]);
+
+        if (num < 0 || num > countRoute()) {
+          return;
+        }
+
+        setCurrentRouteToRender(num);
+      },
+      false);
+}
 
 // Create simple function to return cvar.
 bool TrickjumpLines::isEnableLine() { return this->_enableLine; }
@@ -1168,3 +1203,4 @@ void TrickjumpLines::toggleMarker(bool state) {
   setEnableMarker(state);
   return;
 }
+} // namespace ETJump

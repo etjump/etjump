@@ -370,5 +370,14 @@ playerState_t *getValidPlayerState() {
 void resetTransitionEffects() {
   cg.damageTime = cg.duckTime = cg.landTime = cg.stepTime = 0;
 }
+
+void resetCustomvoteInfo() {
+  cg.numCustomvotesRequested = false;
+  cg.customvoteInfoRequested = false;
+  cg.numCustomvotes = -1;
+  cg.numCustomvoteInfosRequested = 0;
+
+  trap_SendConsoleCommand("uiResetCustomvotes\n");
+}
 #endif
 } // namespace ETJump
