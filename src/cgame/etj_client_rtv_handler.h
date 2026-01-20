@@ -34,8 +34,11 @@ class ClientRtvHandler {
   RtvVoteCountInfo rtvVoteYes;
   bool isRtvVote;
 
+  std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+
 public:
-  ClientRtvHandler();
+  explicit ClientRtvHandler(
+      const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler);
   ~ClientRtvHandler() = default;
 
   void initialize();

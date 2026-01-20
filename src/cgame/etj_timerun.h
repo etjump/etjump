@@ -23,6 +23,7 @@
  */
 
 #pragma once
+
 #include <array>
 #include <memory>
 #include <optional>
@@ -47,8 +48,6 @@ class PlayerEventsHandler;
 
 class Timerun {
 public:
-  Timerun();
-
   struct PlayerTimerunInformation {
     PlayerTimerunInformation() {
       previousRecordCheckpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
@@ -71,10 +70,11 @@ public:
     std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
   };
 
-  explicit Timerun(int clientNum,
-                   std::shared_ptr<PlayerEventsHandler> playerEventsHandler)
-      : _clientNum(clientNum), _playerEventsHandler(playerEventsHandler) {}
+  Timerun(int32_t clientNum,
+          const std::shared_ptr<PlayerEventsHandler> &playerEventsHandler,
+          const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler);
 
+  void registerListeners();
   void onStop(const TimerunCommands::Stop *stop);
   void onInterrupt(const TimerunCommands::Interrupt *interrupt);
   void onCheckpoint(const TimerunCommands::Checkpoint *cp);
@@ -91,14 +91,15 @@ public:
   void execCmdOnRunEnd();
 
 private:
-  int _clientNum;
+  int clientNum;
 
   std::string createCompletionMessage(const clientInfo_t &player,
                                       const std::string &runName,
                                       int completionTime,
                                       std::optional<int> previousTime);
 
-  std::array<PlayerTimerunInformation, MAX_CLIENTS> _playersTimerunInformation;
-  std::shared_ptr<PlayerEventsHandler> _playerEventsHandler;
+  std::array<PlayerTimerunInformation, MAX_CLIENTS> playersTimerunInformation;
+  std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
+  std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 };
 } // namespace ETJump

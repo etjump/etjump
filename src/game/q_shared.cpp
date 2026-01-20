@@ -748,8 +748,14 @@ float Q_atof(const char *str) {
   return (std::isfinite(f) ? f : 0);
 }
 
-int Q_atoi(const char *str) {
-  return static_cast<int>(std::strtol(str, nullptr, 10));
+int32_t Q_atoi(const char *str) {
+  return static_cast<int32_t>(std::strtol(str, nullptr, 10));
+}
+
+int32_t Q_atoi(const std::string &str) { return Q_atoi(str.c_str()); }
+
+int32_t Q_atoi(std::string_view str) {
+  return Q_atoi(std::string{str}.c_str());
 }
 
 /*

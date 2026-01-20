@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2026 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,24 +24,6 @@
 
 #pragma once
 
-#include <cstdint>
-
-qboolean CG_ConsoleCommandExt(const char *cmd);
-void CG_DrawActiveFrameExt();
-
-qboolean CG_displaybyname();
-qboolean CG_displaybynumber();
-
-namespace ETJump {
-inline constexpr int32_t CGAME_INIT_DELAY_FRAMES = 10;
-
-void init();
-void shutdown();
-
-void initTimeruns();
-
-// performs one-time actions slightly delayed from actual cgame init,
-// to work around issues that certain actions have when they are performed
-// on the same frame as the module is initialized
-void delayedInit();
-} // namespace ETJump
+namespace ETJump::ServerCommands {
+void registerCommands();
+} // namespace ETJump::ServerCommands

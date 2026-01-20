@@ -22,19 +22,21 @@
  * SOFTWARE.
  */
 
-#ifndef TRICKJUMP_LINES_HPP
-#define TRICKJUMP_LINES_HPP
+#pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <array>
-#include "etj_rotation_matrix.h"
 #include <map>
 
+#include "etj_client_commands_handler.h"
+#include "etj_rotation_matrix.h"
+
+namespace ETJump {
 enum routeStatus { map, load, record };
 
 class TrickjumpLines {
-
 public:
   static const unsigned LINE_WIDTH = 8;
 
@@ -62,7 +64,8 @@ public:
     std::string filename;
   };
 
-  TrickjumpLines();
+  explicit TrickjumpLines(
+      const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler);
   ~TrickjumpLines();
 
   /**
@@ -142,6 +145,8 @@ private:
   void hsv2rgb(vec3_t &hsv, vec3_t &rgb);
   void computeColorForNode(float max, float min, float speed, vec3_t &color);
 
+  void registerCommands();
+
   // Private variable
   bool _recording;
   bool _enableLine;
@@ -157,6 +162,8 @@ private:
   int _currentRouteToRender;
   RotationMatrix _currentRotation;
 
+  std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+
   // Private inline function.
   float euclideanDist(const vec3_t a, const vec3_t b) {
     float sum = 0;
@@ -166,4 +173,4 @@ private:
     return std::sqrt(sum);
   }
 };
-#endif
+} // namespace ETJump

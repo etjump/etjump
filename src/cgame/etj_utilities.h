@@ -114,5 +114,7 @@ void onPlayerRespawn(bool revived);
 playerState_t *getValidPlayerState();
 
 void resetTransitionEffects();
+
+void resetCustomvoteInfo();
 #endif
 } // namespace ETJump

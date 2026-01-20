@@ -66,6 +66,8 @@
 #include "etj_player_bbox.h"
 #include "etj_pmove_utils.h"
 #include "etj_savepos.h"
+#include "etj_servercommands.h"
+
 #include "../game/etj_syscall_ext_shared.h"
 
 namespace ETJump {
@@ -277,42 +279,16 @@ void initTimeruns() {
     timerunView = nullptr;
   }
 
-  timerun = std::make_shared<Timerun>(cg.clientNum, playerEventsHandler);
+  timerun = std::make_shared<Timerun>(cg.clientNum, playerEventsHandler,
+                                      serverCommandsHandler);
   timerunView = std::make_shared<TimerunView>(timerun);
 
   // restores timerun after vid_restart (if required)
   trap_SendClientCommand("timerun_status");
-
-  playerEventsHandler->subscribe("timerun:start", [](const auto &a) {
-    if (a.empty()) {
-      return;
-    }
-
-    const auto clientNum = Q_atoi(a[0].c_str());
-
-    if (clientNum == cg.clientNum) {
-      timerun->execCmdOnRunStart();
-    }
-  });
-
-  const auto runEnd = [](const auto &a) {
-    if (a.empty()) {
-      return;
-    }
-
-    const auto clientNum = Q_atoi(a[0].c_str());
-
-    if (clientNum == cg.clientNum) {
-      timerun->execCmdOnRunEnd();
-    }
-  };
-
-  playerEventsHandler->subscribe("timerun:stop", runEnd);
-  playerEventsHandler->subscribe("timerun:interrupt", runEnd);
 }
 
 static void initTrickjumpLines() {
-  trickjumpLines = std::make_shared<TrickjumpLines>();
+  trickjumpLines = std::make_shared<TrickjumpLines>(serverCommandsHandler);
 
   // Check if load TJL on connection is enable
   if (etj_tjlAlwaysLoadTJL.integer == 1) {
@@ -358,7 +334,7 @@ void init() {
 
   demoCompatibility = std::make_unique<DemoCompatibility>();
 
-  rtvHandler = std::make_shared<ClientRtvHandler>();
+  rtvHandler = std::make_shared<ClientRtvHandler>(serverCommandsHandler);
   rtvHandler->initialize();
 
   playerBBox = std::make_shared<PlayerBBox>();
@@ -382,6 +358,8 @@ void init() {
   savePos = std::make_unique<SavePos>(timerun);
 
   std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
+
+  ServerCommands::registerCommands();
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
@@ -426,144 +404,7 @@ void shutdown() {
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
                                      " shutdown... " S_COLOR_GREEN "DONE\n");
 }
-
-// FIXME: this should probably be somewhere else
-void resetCustomvoteInfo() {
-  cg.numCustomvotesRequested = false;
-  cg.customvoteInfoRequested = false;
-  cg.numCustomvotes = -1;
-  cg.numCustomvoteInfosRequested = 0;
-
-  trap_SendConsoleCommand("uiResetCustomvotes\n");
-}
 } // namespace ETJump
-
-/**
- * Extended CG_ServerCommand function. Checks whether server
- * sent command matches to any defined here. If no match is found
- * returns false
- * @return qboolean Whether a match was found or not
- */
-qboolean CG_ServerCommandExt(const char *cmd) {
-  const std::string command = cmd != nullptr ? cmd : "";
-
-  if (command == "timerun") {
-    char arg[MAX_TOKEN_CHARS]{};
-    std::vector<std::string> args;
-
-    for (int i = 0, len = trap_Argc(); i < len; ++i) {
-      trap_Argv(i, arg, sizeof(arg));
-
-      args.push_back(arg);
-    }
-
-    ETJump::timerun->parseServerCommand(args);
-    return qtrue;
-  }
-
-  if (command == "tjl_displaybyname") {
-    return CG_displaybyname();
-  }
-
-  if (command == "tjl_displaybynumber") {
-    return CG_displaybynumber();
-  }
-
-  // TODO: The client will always request map list after cgame is initialized,
-  //  thus making '!listmaps' command sort of redundant. The command itself
-  //  should probably stay (the output formatting is nice and all),
-  //  but now that we're always receiving a full map list from server,
-  //  we could use a local cache for map list instead of requesting it again.
-  if (command == "maplist") {
-    std::string uiCommand = "uiParseMaplist";
-
-    // start iterating from 1 to skip the command string
-    for (int i = 1, len = trap_Argc(); i < len; i++) {
-      uiCommand += " " + std::string(CG_Argv(i));
-    }
-
-    uiCommand += '\n';
-
-    // we need to forward this command to UI to parse the list there,
-    // so we can populate the map vote list
-    trap_SendConsoleCommand(uiCommand.c_str());
-    return qtrue;
-  }
-
-  if (command == "forceCustomvoteRefresh") {
-    ETJump::resetCustomvoteInfo();
-    return qtrue;
-  }
-
-  if (command == "numcustomvotes") {
-    if (trap_Argc() < 2) {
-      return qtrue;
-    }
-
-    cg.numCustomvotes = Q_atoi(CG_Argv(1));
-    // forward count to UI
-    trap_SendConsoleCommand(va("uiNumCustomvotes %i\n", cg.numCustomvotes));
-    return qtrue;
-  }
-
-  if (command == "customvotelist") {
-    std::string uiCommand = "uiParseCustomvote";
-
-    for (int i = 1, len = trap_Argc(); i < len; i++) {
-      uiCommand += " " + std::string(CG_Argv(i));
-    }
-
-    uiCommand += '\n';
-
-    trap_SendConsoleCommand(uiCommand.c_str());
-    return qtrue;
-  }
-
-  if (command == "pmFlashWindow") {
-    if (etj_highlight.integer &
-        static_cast<int>(ETJump::ChatHighlightFlags::HIGHLIGHT_FLASH)) {
-      ETJump::SyscallExt::trap_SysFlashWindowETLegacy(
-          ETJump::SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
-    }
-
-    return qtrue;
-  }
-
-  if (command == "extShaderIndex") {
-    for (int32_t i = 1; i < trap_Argc(); i++) {
-      const auto shaderKvp = ETJump::StringUtil::split(CG_Argv(i), "|");
-
-      // sanity check, shouldn't happen,
-      // but just skip if the command is somehow malformed
-      if (shaderKvp.size() != 2) {
-        continue;
-      }
-
-      ETJump::registerGameShader(Q_atoi(shaderKvp[0].c_str()),
-                                 shaderKvp[1].c_str());
-    }
-
-    // request state once we've gotten the shaders
-    trap_SendClientCommand("getExtShaderState");
-    return qtrue;
-  }
-
-  if (command == "extShaderState") {
-    std::string state;
-
-    // start from 1, skipping the command prefix
-    // because of the timeoffset formatting, there might be whitespace
-    // in the state string, so go through all args just in case
-    for (int32_t i = 1; i < trap_Argc(); i++) {
-      state += CG_Argv(i);
-    }
-
-    CG_ShaderStateChanged(state);
-    return qtrue;
-  }
-
-  return qfalse;
-}
 
 /**
  * Checks if the command exists and calls the handler
