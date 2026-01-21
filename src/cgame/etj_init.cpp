@@ -67,6 +67,7 @@
 #include "etj_pmove_utils.h"
 #include "etj_savepos.h"
 #include "etj_servercommands.h"
+#include "etj_consolecommands.h"
 
 #include "../game/etj_syscall_ext_shared.h"
 
@@ -288,7 +289,8 @@ void initTimeruns() {
 }
 
 static void initTrickjumpLines() {
-  trickjumpLines = std::make_shared<TrickjumpLines>(serverCommandsHandler);
+  trickjumpLines = std::make_shared<TrickjumpLines>(serverCommandsHandler,
+                                                    consoleCommandsHandler);
 
   // Check if load TJL on connection is enable
   if (etj_tjlAlwaysLoadTJL.integer == 1) {
@@ -360,6 +362,7 @@ void init() {
   std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
 
   ServerCommands::registerCommands();
+  ConsoleCommands::registerCommands();
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
@@ -406,234 +409,6 @@ void shutdown() {
 }
 } // namespace ETJump
 
-/**
- * Checks if the command exists and calls the handler
- * @param cmd The command to be matched
- * @returns qboolean Whether a match was found
- */
-qboolean CG_ConsoleCommandExt(const char *cmd) {
-  const std::string command = cmd ? cmd : "";
-
-  if (command == "tjl_displaybyname") {
-    return CG_displaybyname();
-  }
-
-  if (command == "tjl_displaybynumber") {
-    return CG_displaybynumber();
-  }
-
-  if (command == "tjl_clearrender") {
-    ETJump::trickjumpLines->setCurrentRouteToRender(-1);
-    return qtrue;
-  }
-
-  // TODO: could just make an array out of this and go thru it
-  if (command == "tjl_record") {
-    const auto argc = trap_Argc();
-    if (argc == 1) {
-      ETJump::trickjumpLines->record(nullptr);
-    } else {
-      auto name = CG_Argv(1);
-      ETJump::trickjumpLines->record(name);
-    }
-    return qtrue;
-  }
-
-  if (command == "tjl_stoprecord") {
-    ETJump::trickjumpLines->stopRecord();
-    return qtrue;
-  }
-
-  if (command == "tjl_listroute") {
-    ETJump::trickjumpLines->listRoutes();
-    return qtrue;
-  }
-
-  if (command == "tjl_displaynearestroute") {
-    ETJump::trickjumpLines->displayNearestRoutes();
-    return qtrue;
-  }
-
-  if (command == "tjl_renameroute") {
-    const auto argc = trap_Argc();
-
-    if (argc > 2) {
-      const std::string name = CG_Argv(1);
-      const std::string name2 = CG_Argv(2);
-      ETJump::trickjumpLines->renameRoute(name.c_str(), name2.c_str());
-    } else {
-      ETJump::trickjumpLines->renameRoute(nullptr, nullptr);
-    }
-    return qtrue;
-  }
-
-  if (command == "tjl_saveroute") {
-    const auto argc = trap_Argc();
-    if (argc > 1) {
-      const auto name = CG_Argv(1);
-      ETJump::trickjumpLines->saveRoutes(name);
-      return qtrue;
-    } else {
-      CG_Printf("Please provide a name to save your "
-                "TJL. (without .tjl "
-                "extension). \n");
-      return qfalse;
-    }
-  }
-
-  if (command == "tjl_loadroute") {
-    const auto argc = trap_Argc();
-    if (argc > 1) {
-      const auto name = CG_Argv(1);
-      ETJump::trickjumpLines->loadRoutes(name);
-    } else {
-      ETJump::trickjumpLines->loadRoutes(nullptr);
-    }
-    return qtrue;
-  }
-
-  if (command == "tjl_deleteroute") {
-    const auto argc = trap_Argc();
-    if (argc > 1) {
-      const auto name = CG_Argv(1);
-      ETJump::trickjumpLines->deleteRoute(name);
-    } else {
-      ETJump::trickjumpLines->deleteRoute(nullptr);
-    }
-    return qtrue;
-  }
-
-  if (command == "tjl_overwriterecording") {
-    const auto argc = trap_Argc();
-    if (argc == 1) {
-      ETJump::trickjumpLines->overwriteRecording(nullptr);
-    } else {
-      const auto name = CG_Argv(1);
-      ETJump::trickjumpLines->overwriteRecording(name);
-    }
-    return qtrue;
-  }
-
-  if (command == "tjl_enableline") {
-    const auto argc = trap_Argc();
-    if (argc == 1) {
-      CG_Printf("Please add 0 or 1 as argument to "
-                "enable or disable line.\n");
-      return qfalse;
-    } else {
-      const std::string state = CG_Argv(1);
-      if (state == "0") {
-        ETJump::trickjumpLines->toggleRoutes(false);
-      } else {
-        ETJump::trickjumpLines->toggleRoutes(true);
-      }
-      return qtrue;
-    }
-  }
-
-  if (command == "tjl_enablejumpmarker") {
-    const auto argc = trap_Argc();
-    if (argc == 1) {
-      CG_Printf("Please add 0 or 1 as argument to "
-                "enable or disable marker.\n");
-      return qfalse;
-    } else {
-      std::string state = CG_Argv(1);
-      CG_Printf("Enable marker arg : %s \n", state.c_str());
-      if (state == "0") {
-        ETJump::trickjumpLines->toggleMarker(false);
-      } else {
-        ETJump::trickjumpLines->toggleMarker(true);
-      }
-      return qtrue;
-    }
-  }
-
-  if (command == "ftSaveLimitSet") {
-    char buffer[MAX_CVAR_VALUE_STRING];
-    int limit;
-
-    trap_Cvar_VariableStringBuffer("etj_ftSaveLimit", buffer, sizeof(buffer));
-    limit = Q_atoi(buffer);
-
-    trap_SendConsoleCommand(va("fireteam rules savelimit %i\n", limit));
-    return qtrue;
-  }
-
-  if (command == "forceMaplistRefresh") {
-    cg.maplistRequested = false;
-    return qtrue;
-  }
-
-  if (command == "forceCustomvoteRefresh") {
-    ETJump::resetCustomvoteInfo();
-    return qtrue;
-  }
-
-  if (command == "uiRequestCustomvotes") {
-    cg.customvoteInfoRequested = true;
-    return qtrue;
-  }
-
-  if (command == "uiChatMenuOpen") {
-    if (trap_Argc() > 1) {
-      cg.chatMenuOpen = Q_atoi(CG_Argv(1));
-    }
-
-    return qtrue;
-  }
-
-  // cgame handles console commands before UI, so we catch some of the demo
-  // queue commands here in order to inform UI that the command was
-  // manually executed by the user. This avoids sending automatic
-  // 'next' command on UI shutdown, as we can inform the UI that the command
-  // was executed manually. On normal queue behavior, UI sends 'next' command
-  // on shutdown, but because cgame isn't loaded at that point, it's ignored.
-  if (command == "demoQueue") {
-    const int argc = trap_Argc();
-    if (argc < 2) {
-      return qfalse;
-    }
-
-    const char *demoQueueCmd = CG_Argv(1);
-
-    if (!Q_stricmp(demoQueueCmd, "next") ||
-        !Q_stricmp(demoQueueCmd, "previous") ||
-        !Q_stricmp(demoQueueCmd, "restart") ||
-        !Q_stricmp(demoQueueCmd, "goto")) {
-      trap_SendConsoleCommand("uiDemoQueueManualSkip 1\n");
-      // return qfalse here so the original command gets handled by UI!
-      return qfalse;
-    }
-  }
-
-  if (command == "fireteam") {
-    const int argc = trap_Argc();
-
-    if (argc < 2) {
-      return qfalse;
-    }
-
-    // 'fireteam' commands are normally handled by the server,
-    // but if we're using 'fireteam countdown', catch it here and make sure
-    // the duration is sent with the command if it's not manually specified
-    if (!Q_stricmp(CG_Argv(1), "countdown")) {
-      if (argc < 3) {
-        const int sec = etj_fireteamCountdownLength.integer > 0
-                            ? etj_fireteamCountdownLength.integer
-                            : 3;
-        trap_SendClientCommand(va("fireteam countdown %i", sec));
-      } else {
-        trap_SendClientCommand(va("fireteam countdown %i", Q_atoi(CG_Argv(2))));
-      }
-
-      return qtrue;
-    }
-  }
-
-  return qfalse;
-}
-
 // TODO : (Zero) And this prolly should be elsewhere (e.g. cg_view_ext.cpp) but
 // I'll just go with this one for now.. :P
 void CG_DrawActiveFrameExt() {
@@ -674,34 +449,5 @@ void CG_DrawActiveFrameExt() {
         }
       }
     }
-  }
-}
-
-qboolean CG_displaybyname() {
-  const auto argc = trap_Argc();
-  if (argc > 1) {
-    const auto name = CG_Argv(1);
-    ETJump::trickjumpLines->displayByName(name);
-  } else {
-    ETJump::trickjumpLines->displayByName(nullptr);
-  }
-  return qtrue;
-}
-
-qboolean CG_displaybynumber() {
-  const auto argc = trap_Argc();
-  if (argc > 1) {
-    const auto number = Q_atoi(CG_Argv(1));
-    const auto total = ETJump::trickjumpLines->countRoute();
-    if (number > -1 && number < total) {
-      ETJump::trickjumpLines->setCurrentRouteToRender(number);
-      return qtrue;
-    }
-    return qfalse;
-  } else {
-    CG_Printf("You need to pass the route number by argument. "
-              "Use command "
-              "/tjl_listroute to get number. \n");
-    return qfalse;
   }
 }

@@ -64,20 +64,11 @@ public:
     std::string filename;
   };
 
-  explicit TrickjumpLines(
-      const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler);
+  TrickjumpLines(
+      const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler,
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler);
   ~TrickjumpLines();
 
-  /**
-   * Starts tjl recording
-   * @param name Name of the tjl file. Can be nullptr -> automatically
-   * generated filename
-   */
-  void record(const char *name);
-  /**
-   * Stops tjl recording and saves the current tjl
-   */
-  void stopRecord();
   /**
    * Adds current position to the currently recorded tjl (if we're
    * recording)
@@ -100,22 +91,14 @@ public:
   bool isEnableLine();
   bool isEnableMarker();
 
-  void listRoutes();
-  void displayByName(const char *name);
   void displayNearestRoutes();
-  void renameRoute(const char *oldName, const char *newName);
-  void deleteRoute(const char *name);
 
   int getRoutePositionByName(const char *name);
 
-  void overwriteRecording(const char *name);
-
-  void saveRoutes(const char *savename);
   void loadRoutes(const char *loadname);
   bool loadedRoutes(const char *loadname);
 
   int getCurrentRouteToRender() { return _currentRouteToRender; }
-  void setCurrentRouteToRender(int nb) { _currentRouteToRender = nb; }
 
   bool getEnableLine() { return _enableLine; }
   void setEnableLine(bool state) { _enableLine = state; }
@@ -138,7 +121,27 @@ private:
   void addTrickjumpLinesColor(std::vector<Node> points, float minSpeed,
                               float maxSpeed, float width);
 
+  /**
+   * Starts tjl recording
+   * @param name Name of the tjl file. Can be nullptr -> automatically
+   * generated filename
+   */
+  void record(const char *name);
+  /**
+   * Stops tjl recording and saves the current tjl
+   */
+  void stopRecord();
+
   void addJumpIndicator(vec3_t point, vec4_c color, float quadSize);
+
+  void displayByName(const char *name);
+  void setCurrentRouteToRender(int nb) { _currentRouteToRender = nb; }
+
+  void saveRoutes(const char *savename);
+  void renameRoute(const char *oldName, const char *newName);
+  void deleteRoute(const char *name);
+  void overwriteRecording(const char *name);
+  void listRoutes();
 
   float normalizeSpeed(float max, float min, float speed);
   void computeHSV(float speed, vec3_t &hsv);
@@ -163,6 +166,7 @@ private:
   RotationMatrix _currentRotation;
 
   std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+  std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
 
   // Private inline function.
   float euclideanDist(const vec3_t a, const vec3_t b) {
