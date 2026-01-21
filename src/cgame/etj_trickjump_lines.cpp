@@ -93,6 +93,29 @@ TrickjumpLines::~TrickjumpLines() {
   consoleCommandsHandler->unsubscribe("tjl_enablejumpmarker");
 }
 
+void TrickjumpLines::runFrame() {
+  if (_recording) {
+    addPosition(cg.predictedPlayerState.origin);
+    return;
+  }
+
+  if (etj_tjlNearestInterval.integer > 0 && nextNearest < cg.time) {
+    if (_debugVerbose) {
+      CG_Printf("Check for nearest line!. \n");
+    }
+
+    displayNearestRoutes();
+    nextNearest = cg.time + (etj_tjlNearestInterval.integer * 1000);
+  }
+
+  if (!(_enableLine && _enableMarker) || _routes.empty() ||
+      _currentRouteToRender == -1) {
+    return;
+  }
+
+  displayCurrentRoute(_currentRouteToRender);
+}
+
 void TrickjumpLines::registerCommands() {
   serverCommandsHandler->subscribe(
       "tjl_displaybyname",

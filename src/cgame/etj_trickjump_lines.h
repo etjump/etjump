@@ -27,7 +27,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <array>
 #include <map>
 
 #include "etj_client_commands_handler.h"
@@ -68,6 +67,8 @@ public:
       const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler,
       const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler);
   ~TrickjumpLines();
+
+  void runFrame();
 
   /**
    * Adds current position to the currently recorded tjl (if we're
@@ -164,6 +165,8 @@ private:
   int _nextAddTime;
   int _currentRouteToRender;
   RotationMatrix _currentRotation;
+
+  int32_t nextNearest;
 
   std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
   std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
