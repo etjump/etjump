@@ -98,12 +98,7 @@ std::shared_ptr<PlayerBBox> playerBBox;
 std::unique_ptr<SavePos> savePos;
 std::unique_ptr<SyscallExt> syscallExt;
 std::unique_ptr<PmoveUtils> pmoveUtils;
-} // namespace ETJump
 
-// FIXME: move
-static int nextNearest = 0;
-
-namespace ETJump {
 void delayedInit() {
   // force original cvars to match the shadow values, as ETe and ETL
   // reset cheat cvars to original values after the 'CG_INIT' VMCall
@@ -403,51 +398,10 @@ void shutdown() {
 
   syscallExt = nullptr;
 
+  trickjumpLines = nullptr;
+
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
                                      " shutdown... " S_COLOR_GREEN "DONE\n");
 }
 } // namespace ETJump
-
-// TODO : (Zero) And this prolly should be elsewhere (e.g. cg_view_ext.cpp) but
-// I'll just go with this one for now.. :P
-void CG_DrawActiveFrameExt() {
-  // Check if recording
-  if (ETJump::trickjumpLines->isRecording()) {
-    // TODO : (xis) player origin doesn't change if crouch or
-    // prone, stay on feet. //cg.refdef.vieworg ,
-    // //cg.predictedPlayerState.origin
-    ETJump::trickjumpLines->addPosition(cg.predictedPlayerState.origin);
-  } else {
-    // Check if nearest mode is activate
-    if (etj_tjlNearestInterval.integer > 0) {
-      // Check if nearest mode timer is due to check for
-      // nearest.
-      if (nextNearest < cg.time) {
-        if (ETJump::trickjumpLines->isDebug()) {
-          CG_Printf("Check for nearest "
-                    "line!. \n");
-        }
-        ETJump::trickjumpLines->displayNearestRoutes();
-        nextNearest = cg.time + 1000 * etj_tjlNearestInterval.integer;
-      }
-    }
-
-    // Check if line or jumper marker are enable.
-    if (ETJump::trickjumpLines->isEnableLine() ||
-        ETJump::trickjumpLines->isEnableMarker()) {
-      // Check if record or if there line in the list
-      if (ETJump::trickjumpLines->countRoute() > 0 &&
-          !ETJump::trickjumpLines->isRecording()) {
-        // Check if display has not been
-        // cleared.
-        if (ETJump::trickjumpLines->getCurrentRouteToRender() != -1) {
-          // Display current route with
-          // the #
-          ETJump::trickjumpLines->displayCurrentRoute(
-              ETJump::trickjumpLines->getCurrentRouteToRender());
-        }
-      }
-    }
-  }
-}

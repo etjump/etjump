@@ -4213,6 +4213,7 @@ class AccelColor;
 class PlayerBBox;
 class SavePos;
 class SyscallExt;
+class TrickjumpLines;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4230,6 +4231,7 @@ extern std::shared_ptr<PlayerBBox> playerBBox;
 extern std::unique_ptr<SavePos> savePos;
 extern std::unique_ptr<SyscallExt> syscallExt;
 extern std::unique_ptr<PmoveUtils> pmoveUtils;
+extern std::shared_ptr<TrickjumpLines> trickjumpLines;
 
 enum extraTraceOptions {
   OB_DETECTOR,
@@ -4267,8 +4269,6 @@ enum class HideFlamethrowerFlags {
 } // namespace ETJump
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void CG_DrawActiveFrameExt();
 
 extern displayContextDef_t *DC;
 

@@ -7,6 +7,7 @@
 #include "etj_init.h"
 #include "etj_pmove_utils.h"
 #include "etj_event_loop.h"
+#include "etj_trickjump_lines.h"
 #include "etj_utilities.h"
 
 /*
@@ -1875,6 +1876,7 @@ namespace ETJump {
 static void runFrameEnd() {
   awaitedCommandHandler->runFrame();
   eventLoop->run();
+  trickjumpLines->runFrame();
 
   if (cg.clientFrame >= CGAME_INIT_DELAY_FRAMES) {
     delayedInit();
@@ -2143,8 +2145,6 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
       CG_AddAtmosphericEffects();
 
       DEBUGTIME
-
-      CG_DrawActiveFrameExt();
     }
 
     // Rafael mg42

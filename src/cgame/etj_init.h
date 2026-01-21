@@ -26,8 +26,6 @@
 
 #include <cstdint>
 
-void CG_DrawActiveFrameExt();
-
 namespace ETJump {
 inline constexpr int32_t CGAME_INIT_DELAY_FRAMES = 10;
 
