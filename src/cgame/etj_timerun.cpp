@@ -32,10 +32,9 @@
 
 namespace ETJump {
 Timerun::Timerun(
-    const int32_t clientNum,
     const std::shared_ptr<PlayerEventsHandler> &playerEventsHandler,
     const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler)
-    : clientNum(clientNum), playerEventsHandler(playerEventsHandler),
+    : playerEventsHandler(playerEventsHandler),
       serverCommandsHandler(serverCommandsHandler) {
   registerListeners();
 }
@@ -60,9 +59,7 @@ void Timerun::registerListeners() {
       return;
     }
 
-    const int32_t clientNum = Q_atoi(a[0].c_str());
-
-    if (clientNum == cg.clientNum) {
+    if (Q_atoi(a[0]) == cg.clientNum) {
       execCmdOnRunStart();
     }
   });
@@ -72,9 +69,7 @@ void Timerun::registerListeners() {
       return;
     }
 
-    const int32_t clientNum = Q_atoi(a[0].c_str());
-
-    if (clientNum == cg.clientNum) {
+    if (Q_atoi((a[0])) == cg.clientNum) {
       execCmdOnRunEnd();
     }
   };
@@ -84,10 +79,10 @@ void Timerun::registerListeners() {
 }
 
 void Timerun::onStop(const TimerunCommands::Stop *stop) {
-  auto clientNum = stop->clientNum;
-  playersTimerunInformation[clientNum].completionTime = stop->completionTime;
-  playersTimerunInformation[clientNum].running = false;
-  playersTimerunInformation[clientNum].lastRunTimer = cg.time;
+  playersTimerunInformation[stop->clientNum].completionTime =
+      stop->completionTime;
+  playersTimerunInformation[stop->clientNum].running = false;
+  playersTimerunInformation[stop->clientNum].lastRunTimer = cg.time;
 
   playerEventsHandler->check("timerun:stop",
                              {std::to_string(stop->clientNum), stop->runName,
@@ -117,21 +112,20 @@ void Timerun::onCheckpoint(const TimerunCommands::Checkpoint *cp) {
 }
 
 void Timerun::onStart(const TimerunCommands::Start *start) {
-  auto clientNum = start->clientNum;
-  playersTimerunInformation[clientNum].startTime = start->startTime;
-  playersTimerunInformation[clientNum].runName = start->runName;
-  playersTimerunInformation[clientNum].previousRecord =
+  playersTimerunInformation[start->clientNum].startTime = start->startTime;
+  playersTimerunInformation[start->clientNum].runName = start->runName;
+  playersTimerunInformation[start->clientNum].previousRecord =
       start->previousRecord.value_or(-1);
-  playersTimerunInformation[clientNum].running = true;
-  playersTimerunInformation[clientNum].checkpoints =
+  playersTimerunInformation[start->clientNum].running = true;
+  playersTimerunInformation[start->clientNum].checkpoints =
       start->currentRunCheckpoints;
-  playersTimerunInformation[clientNum].runHasCheckpoints =
+  playersTimerunInformation[start->clientNum].runHasCheckpoints =
       start->runHasCheckpoints;
-  playersTimerunInformation[clientNum].numCheckpointsHit =
+  playersTimerunInformation[start->clientNum].numCheckpointsHit =
       Timerun::getNumCheckpointsHit(start->currentRunCheckpoints);
-  playersTimerunInformation[clientNum].previousRecordCheckpoints =
+  playersTimerunInformation[start->clientNum].previousRecordCheckpoints =
       start->checkpoints;
-  playersTimerunInformation[clientNum].checkpointIndicesHit.fill(false);
+  playersTimerunInformation[start->clientNum].checkpointIndicesHit.fill(false);
 
   playerEventsHandler->check(
       "timerun:start", {std::to_string(start->clientNum), start->runName,
@@ -250,7 +244,7 @@ std::string Timerun::createCompletionMessage(const clientInfo_t &player,
                                              const std::string &runName,
                                              int completionTime,
                                              std::optional<int> previousTime) {
-  std::string who{(player.clientNum == clientNum) ? "You" : player.name};
+  std::string who{(player.clientNum == cg.clientNum) ? "You" : player.name};
   std::string timeFinished{millisToString(completionTime)};
   std::string timeDifference{""};
 
