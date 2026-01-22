@@ -70,8 +70,7 @@ public:
     std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
   };
 
-  Timerun(int32_t clientNum,
-          const std::shared_ptr<PlayerEventsHandler> &playerEventsHandler,
+  Timerun(const std::shared_ptr<PlayerEventsHandler> &playerEventsHandler,
           const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler);
 
   void registerListeners();
@@ -91,8 +90,6 @@ public:
   void execCmdOnRunEnd();
 
 private:
-  int clientNum;
-
   std::string createCompletionMessage(const clientInfo_t &player,
                                       const std::string &runName,
                                       int completionTime,

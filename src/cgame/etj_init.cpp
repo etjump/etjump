@@ -275,8 +275,8 @@ void initTimeruns() {
     timerunView = nullptr;
   }
 
-  timerun = std::make_shared<Timerun>(cg.clientNum, playerEventsHandler,
-                                      serverCommandsHandler);
+  timerun =
+      std::make_shared<Timerun>(playerEventsHandler, serverCommandsHandler);
   timerunView = std::make_shared<TimerunView>(timerun);
 
   // restores timerun after vid_restart (if required)
