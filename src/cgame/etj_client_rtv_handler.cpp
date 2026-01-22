@@ -28,8 +28,7 @@
 namespace ETJump {
 ClientRtvHandler::ClientRtvHandler(
     const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler)
-    : rtvVoteYes({0, 0}), isRtvVote(false),
-      serverCommandsHandler(serverCommandsHandler) {
+    : serverCommandsHandler(serverCommandsHandler) {
   rtvMaps.clear();
 
   serverCommandsHandler->subscribe(

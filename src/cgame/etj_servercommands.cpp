@@ -95,8 +95,9 @@ static void extShaderState(const Arguments &args) {
   CG_ShaderStateChanged(StringUtil::join(args, ""));
 }
 
-// noop, just silence when this gets sent on 'save' command
-static void resetStrafeQuality() {}
+static void resetStrafeQuality() {
+  // noop, just silence when this gets sent on 'save' command
+}
 
 static void savePrint(const Arguments &args) {
   std::string saveMsg = etj_saveMsg.string;

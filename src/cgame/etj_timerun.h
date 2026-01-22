@@ -86,8 +86,8 @@ public:
   static int getNumCheckpointsHit(
       const std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
 
-  void execCmdOnRunStart();
-  void execCmdOnRunEnd();
+  static void execCmdOnRunStart();
+  static void execCmdOnRunEnd();
 
 private:
   std::string createCompletionMessage(const clientInfo_t &player,
