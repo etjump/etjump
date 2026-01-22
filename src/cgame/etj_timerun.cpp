@@ -54,22 +54,22 @@ void Timerun::registerListeners() {
       },
       false);
 
-  playerEventsHandler->subscribe("timerun:start", [this](const auto &a) {
-    if (a.empty()) {
+  playerEventsHandler->subscribe("timerun:start", [](const auto &args) {
+    if (args.empty()) {
       return;
     }
 
-    if (Q_atoi(a[0]) == cg.clientNum) {
+    if (Q_atoi(args[0]) == cg.clientNum) {
       execCmdOnRunStart();
     }
   });
 
-  const auto runEnd = [this](const auto &a) {
-    if (a.empty()) {
+  const auto runEnd = [](const auto &args) {
+    if (args.empty()) {
       return;
     }
 
-    if (Q_atoi((a[0])) == cg.clientNum) {
+    if (Q_atoi(args[0]) == cg.clientNum) {
       execCmdOnRunEnd();
     }
   };

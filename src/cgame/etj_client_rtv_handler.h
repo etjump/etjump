@@ -31,8 +31,8 @@
 namespace ETJump {
 class ClientRtvHandler {
   std::vector<RtvMapVoteInfo> rtvMaps;
-  RtvVoteCountInfo rtvVoteYes;
-  bool isRtvVote;
+  RtvVoteCountInfo rtvVoteYes{};
+  bool isRtvVote{};
 
   std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 

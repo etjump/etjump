@@ -103,7 +103,7 @@ void delayedInit() {
   // force original cvars to match the shadow values, as ETe and ETL
   // reset cheat cvars to original values after the 'CG_INIT' VMCall
   if (!cg.shadowCvarsSet) {
-    for (auto &cvarShadow : cvarShadows) {
+    for (const auto &cvarShadow : cvarShadows) {
       cvarShadow->forceCvarSet();
     }
 
@@ -262,9 +262,8 @@ static void initCvarUnlockers() {
       {&etj_flareSize, "r_flareSize"},
   };
 
-  for (const auto &cvar : cvars) {
-    cvarShadows.emplace_back(
-        std::make_shared<CvarShadow>(cvar.first, cvar.second));
+  for (const auto &[shadow, target] : cvars) {
+    cvarShadows.emplace_back(std::make_shared<CvarShadow>(shadow, target));
   }
 }
 
