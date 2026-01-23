@@ -839,11 +839,9 @@ static void CG_DrawLagometer() {
 
   trap_R_SetColor(nullptr);
 
-  if (cg_nopredict.integer
-#ifdef ALLOW_GSYNC
-      || cgs.synchronousClients
-#endif // ALLOW_GSYNC
-  ) {
+  // FIXME: this draws in totally wrong location,
+  // and we probably want to make this a bit nicer indicator anyway
+  if (cg_nopredict.integer || cgs.synchronousClients) {
     CG_DrawBigString(ax, ay, "snc", 1.0);
   }
 

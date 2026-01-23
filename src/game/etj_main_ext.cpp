@@ -131,6 +131,28 @@ bool checkCheatCvars(gclient_s *client, int flags) {
 
   return cheatCvarsEnabled;
 }
+
+void validateServerConfig() {
+  std::vector<std::string> errors;
+
+  if (sv_fps.integer != 125 && g_synchronousClients.integer) {
+    errors.emplace_back(
+        "^3'g_synchronousClients 1' ^7set without ^3'sv_fps 125'");
+  }
+
+  if (!errors.empty()) {
+    level.serverConfigValid = false;
+    Printer::chatAll("^1Server misconfguration detected!");
+
+    for (const auto &err : errors) {
+      Printer::chatAll(err);
+    }
+  } else {
+    level.serverConfigValid = true;
+  }
+
+  level.nextConfigCheckTime = level.time + 5000;
+}
 } // namespace ETJump
 
 void RunFrame(int levelTime) {
@@ -142,6 +164,10 @@ void RunFrame(int levelTime) {
   }
 
   game.fireteamCountdown->runFrame();
+
+  if (level.time > level.nextConfigCheckTime) {
+    ETJump::validateServerConfig();
+  }
 
   ETJump::Log::processMessages();
 }

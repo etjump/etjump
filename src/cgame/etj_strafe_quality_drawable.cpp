@@ -71,6 +71,8 @@ void StrafeQuality::resetStrafeQuality() {
 }
 
 bool StrafeQuality::beforeRender() {
+  ps = getValidPlayerState();
+
   // update team before checking if we should draw or not,
   // since we don't draw for spectators
   if (_team != ps->persistant[PERS_TEAM]) {

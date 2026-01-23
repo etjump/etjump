@@ -86,7 +86,7 @@ private:
   bool borderOnly{};
   int lastUpdateTime{};
 
-  const playerState_t *ps = &cg.predictedPlayerState;
+  const playerState_t *ps{};
   const pmove_t *pm{};
 
   struct DrawableSnap {

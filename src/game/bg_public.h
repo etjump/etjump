@@ -577,6 +577,9 @@ bool canFireWeapon(const playerState_t *ps);
 inline constexpr int8_t CMDSCALE_DEFAULT = 127;
 inline constexpr int8_t CMDSCALE_WALK = 64;
 
+inline constexpr int32_t PMOVE_MSEC_MIN = 8;
+inline constexpr int32_t PMOVE_MSEC_MAX = 33;
+
 //===================================================================================
 
 inline constexpr int PC_SOLDIER = 0;   //	shoot stuff
