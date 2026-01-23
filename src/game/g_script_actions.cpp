@@ -150,112 +150,6 @@ qboolean G_ScriptAction_SetAutoSpawn(gentity_t *ent, char *params) {
   return qtrue;
 }
 
-static qboolean etjump_ScriptSetPlayerSpawn(gentity_t *ent, const char *params,
-                                            bool isAutoSpawn) {
-  auto mod = isAutoSpawn ? "setplayerautospawn" : "setplayerspawn";
-  auto activator = ent->activator;
-  if (!activator || !activator->client) {
-    return qfalse;
-  }
-  // get target name
-  auto token = COM_ParseExt(&params, qfalse);
-  if (!token[0]) {
-    G_Error("G_Scripting: %s must have a target spawn\n", mod);
-  }
-  // get objective entity
-  char spawnname[MAX_QPATH];
-  Q_strncpyz(spawnname, token, MAX_QPATH);
-  auto tent = G_Find(nullptr, FOFS(message), spawnname);
-  if (!tent) {
-    G_Error("G_Scripting: %s, couldn't find target\n", mod);
-  }
-  if (!tent->count) {
-    return qfalse;
-  }
-  // set spawn
-  if (isAutoSpawn) {
-    // set auto spawn for specific player
-    activator->client->sess.spawnObjectiveIndex =
-        (tent->count - CS_MULTI_SPAWNTARGETS) + 1;
-    G_Printf("Force spawn change for %s to %s\n",
-             activator->client->pers.netname, spawnname);
-  } else {
-    // set auto spawn for specific player
-    activator->client->sess.autoSpawnObjectiveIndex =
-        (tent->count - CS_MULTI_SPAWNTARGETS) + 1;
-    G_Printf("Setting auto spawn for %s to %s\n",
-             activator->client->pers.netname, spawnname);
-  }
-  // store updates
-  G_UpdateSpawnCounts();
-  return qtrue;
-}
-
-/*
-        ETJump
-        Description: Sets auto spawn for specific player only.
-        Usage: setplayerautospawn "objective description"
-        Note: In order to work trigger running this action should be
-        activated by target_script_trigger as it requires activator entity.
-*/
-qboolean G_ScriptAction_SetPlayerAutoSpawn(gentity_t *ent, char *params) {
-  return etjump_ScriptSetPlayerSpawn(ent, params, false);
-}
-
-/*
-        ETJump
-        Description: Sets auto spawn for specific player only.
-        Usage: setplayerspawn "objective description"
-        Note: In order to work trigger running this action should be
-        activated by target_script_trigger as it requires activator entity.
-*/
-qboolean G_ScriptAction_SetPlayerSpawn(gentity_t *ent, char *params) {
-  return etjump_ScriptSetPlayerSpawn(ent, params, true);
-}
-
-/*
-        ETJump
-        Description: Inflicts certain number of damage to the player.
-        Usage: damageplayer 10000
-        Note: In order to work trigger running this action should be
-        activated by target_script_trigger as it requires activator entity.
-*/
-qboolean G_ScriptAction_DamagePlayer(gentity_t *ent, char *params) {
-  auto activator = ent->activator;
-  if (!activator || !activator->client) {
-    return qfalse;
-  }
-  const char *constparams = params;
-  auto token = COM_ParseExt(&constparams, qfalse);
-  if (!token[0]) {
-    G_Error("G_Scripting: damageplayer must have damage points\n");
-  }
-  auto damaged = Q_atoi(token);
-  G_Damage(activator, nullptr, nullptr, nullptr, nullptr, damaged,
-           DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
-  return qtrue;
-}
-
-/*
-        ETJump
-        Description: Kills the player, same as if the player would use /kill
-   command. Usage: killplayer Note: In order to work trigger running this action
-   should be activated by target_script_trigger as it requires activator entity.
-*/
-qboolean G_ScriptAction_KillPlayer(gentity_t *ent, char *params) {
-  auto activator = ent->activator;
-  if (!activator || !activator->client) {
-    return qfalse;
-  }
-  activator->flags &= ~FL_GODMODE;
-  activator->client->ps.stats[STAT_HEALTH] = activator->health = 0;
-  activator->client->ps.persistant[PERS_HWEAPON_USE] = 0;
-  player_die(activator, activator, activator,
-             (g_gamestate.integer == GS_PLAYING) ? 100000 : 135, MOD_SUICIDE);
-  activator->client->sess.lastKillTime = level.time;
-  return qtrue;
-}
-
 qboolean G_ScriptAction_ChangeModel(gentity_t *ent, char *params) {
   const char *pString, *token;
   char tagname[MAX_QPATH];
@@ -4573,20 +4467,164 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
   return qtrue;
 }
 
-/*
-===================
-G_ScriptAction_Create (inspired by etpro_ScriptAction_SetValues)
-setup - made in a rush...
-===================
-*/
+extern field_t fields[];
+void G_SpawnGEntityFromSpawnVars();
 
-void G_SpawnGEntityFromSpawnVars(void);
-qboolean G_ScriptAction_Create(gentity_t *ent, char *params) {
-  const char *token, *p;
+namespace ETJump::ScriptActions {
+inline constexpr char setPlayerAutoSpawnUsage[] =
+    "setplayerautospawn <objective description>";
+inline constexpr char setPlayerSpawnUsage[] =
+    "setplayerautospawn <objective description>";
+inline constexpr char damagePlayerUsage[] = "damageplayer <damage>";
+inline constexpr char createUsage[] =
+    R"(create { "key1" "value1" "key2" "value2" .. })";
+inline constexpr char deleteUsage[] =
+    R"(delete { "key1" "value1" "key2" "value2" .. })";
+inline constexpr char useTargetUsage[] = "usetarget <targetname>";
+inline constexpr char wmAnnouncePrivateUsage[] =
+    "wm_announce_private <message>";
+inline constexpr char trackerUsage[] = "tracker [index] <command> <value>";
+inline constexpr char changeSkinUsage[] = "changeskin <skinfile>";
+
+#define FMT_FUNC(x) stringFormat("ScriptActions::%s", x).c_str()
+
+enum class ScriptSpawnType {
+  PLAYER_SPAWN = 1,
+  PLAYER_AUTOSPAWN = 2,
+};
+
+static qboolean scriptSetPlayerSpawn(gentity_t *ent, const char *params,
+                                     ScriptSpawnType type,
+                                     const std::string_view func) {
+  const auto *activator = ent->activator;
+
+  if (!activator || !activator->client) {
+    G_Printf(S_COLOR_RED "%s: activator must be a client\n", FMT_FUNC(func));
+    return qfalse;
+  }
+
+  // get target name
+  const auto *const token = COM_ParseExt(&params, qfalse);
+
+  if (!token[0]) {
+    const auto *const usageStr = type == ScriptSpawnType::PLAYER_AUTOSPAWN
+                                     ? setPlayerAutoSpawnUsage
+                                     : setPlayerSpawnUsage;
+    G_Error("%s: required parameter 'objective description' was not "
+            "provided\n\n%s\n",
+            FMT_FUNC(func), usageStr);
+  }
+
+  // get objective entity
+  char spawnname[MAX_QPATH];
+  Q_strncpyz(spawnname, token, MAX_QPATH);
+  const auto *targetSpawn = G_Find(nullptr, FOFS(message), spawnname);
+
+  if (!targetSpawn) {
+    G_Error("%s: couldn't find a spawnpoint matching name '%s'\n",
+            FMT_FUNC(func), spawnname);
+  }
+
+  if (!targetSpawn->count) {
+    return qfalse;
+  }
+
+  if (type == ScriptSpawnType::PLAYER_AUTOSPAWN) {
+    activator->client->sess.autoSpawnObjectiveIndex =
+        (targetSpawn->count - CS_MULTI_SPAWNTARGETS) + 1;
+    G_Printf("Setting auto spawn for %s to %s\n",
+             activator->client->pers.netname, spawnname);
+  } else {
+    activator->client->sess.spawnObjectiveIndex =
+        (targetSpawn->count - CS_MULTI_SPAWNTARGETS) + 1;
+    G_Printf("Forcing spawn change for %s to %s\n",
+             activator->client->pers.netname, spawnname);
+  }
+
+  // store updates
+  G_UpdateSpawnCounts();
+  return qtrue;
+}
+
+/*
+ * usage: 'setplayerautospawn <objective description>'
+ * must be called with a valid client as activator
+ */
+qboolean setPlayerAutoSpawn(gentity_t *ent, char *params) {
+  return scriptSetPlayerSpawn(ent, params, ScriptSpawnType::PLAYER_AUTOSPAWN,
+                              __func__);
+}
+
+/*
+ * usage: 'setplayerspawn <objective description>'
+ * must be called with a valid client as activator
+ */
+qboolean setPlayerSpawn(gentity_t *ent, char *params) {
+  return scriptSetPlayerSpawn(ent, params, ScriptSpawnType::PLAYER_SPAWN,
+                              __func__);
+}
+
+/*
+ * usage: 'damageplayer <damage>'
+ * must be called with a valid client as activator
+ */
+qboolean damagePlayer(gentity_t *ent, char *params) {
+  auto *const activator = ent->activator;
+
+  if (!activator || !activator->client) {
+    G_Printf(S_COLOR_RED "%s: activator must be a client\n",
+             FMT_FUNC(__func__));
+    return qfalse;
+  }
+
+  const char *constparams = params;
+  const auto *const token = COM_ParseExt(&constparams, qfalse);
+
+  if (!token[0]) {
+    G_Error("%s: required parameter 'damage' was not provided\n\n%s\n",
+            FMT_FUNC(__func__), damagePlayerUsage);
+  }
+
+  const int32_t damage = Q_atoi(token);
+
+  G_Damage(activator, nullptr, nullptr, nullptr, nullptr, damage,
+           DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+  return qtrue;
+}
+
+/*
+ * usage: 'killplayer'
+ * must be called with a valid client as activator
+ */
+qboolean killPlayer(gentity_t *ent, char *params) {
+  auto *const activator = ent->activator;
+
+  if (!activator || !activator->client) {
+    G_Printf(S_COLOR_RED "%s: activator must be a client\n",
+             FMT_FUNC(__func__));
+    return qfalse;
+  }
+
+  activator->flags &= ~FL_GODMODE;
+  activator->client->ps.stats[STAT_HEALTH] = activator->health = 0;
+  activator->client->ps.persistant[PERS_HWEAPON_USE] = 0;
+
+  player_die(activator, activator, activator,
+             (g_gamestate.integer == GS_PLAYING) ? 100000 : 135, MOD_SUICIDE);
+  activator->client->sess.lastKillTime = level.time;
+
+  return qtrue;
+}
+
+/*
+ * usage: 'create { "key1" "value1" "key2" "value2" .. }'
+ */
+qboolean create(gentity_t *ent, char *params) {
+  const char *token = nullptr;
+  const char *p = nullptr;
   char key[MAX_TOKEN_CHARS];
 
-  // reset and fill in the spawnVars info so that spawn functions can
-  // use them
+  // reset and fill in the spawnVars info so that spawn functions can use them
   level.numSpawnVars = 0;
   level.numSpawnVarChars = 0;
 
@@ -4595,34 +4633,42 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params) {
   // get each key/value pair
   while (true) {
     token = COM_ParseExt(&p, qfalse);
+
     if (!token[0]) {
       break;
     }
 
     Q_strncpyz(key, token, sizeof(key));
-
     token = COM_ParseExt(&p, qfalse);
+
     if (!token[0]) {
-      G_Error("key \"%s\" has no value", key);
-      break;
+      G_Error("%s: key '%s' has no value\n\n%s\n", FMT_FUNC(__func__), key,
+              createUsage);
     }
 
     // add spawn var so that spawn functions can use them
     if (level.numSpawnVars == MAX_SPAWN_VARS) {
-      G_Error("G_ScriptAction_Create: MAX_SPAWN_VARS");
+      G_Error("%s: MAX_SPAWN_VARS (%i) reached, too many keys in an entity",
+              FMT_FUNC(__func__), MAX_SPAWN_VARS);
     }
+
     level.spawnVars[level.numSpawnVars][0] = G_AddSpawnVarToken(key);
     level.spawnVars[level.numSpawnVars][1] = G_AddSpawnVarToken(token);
     level.numSpawnVars++;
   }
+
   G_SpawnGEntityFromSpawnVars();
 
   return qtrue;
 }
 
-extern field_t fields[];
+// since 'delete' is a reserved keyword
+inline constexpr char deleteFuncStr[] = "delete";
 
-qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
+/*
+ * usage: 'delete { "key1" "value1" "key2" "value2" .. }'
+ */
+qboolean deleteAction(gentity_t *ent, char *params) {
   char key[MAX_TOKEN_CHARS]{};
   char value[MAX_TOKEN_CHARS]{};
   const char *p = params;
@@ -4647,7 +4693,8 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
     token = COM_ParseExt(&p, qfalse);
 
     if (!token[0]) {
-      G_Error("%s: key '%s' has no value.\n", __func__, key);
+      G_Error("%s: key '%s' has no value\n\n%s\n", FMT_FUNC(deleteFuncStr), key,
+              deleteUsage);
     }
 
     Q_strncpyz(value, token, sizeof(value));
@@ -4662,7 +4709,7 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
     }
 
     if (!fields[i].name) {
-      G_Error("%s: non-existing key '%s'\n", __func__, key);
+      G_Error("%s: non-existing key '%s'\n", FMT_FUNC(deleteFuncStr), key);
     }
 
     // k/v pair parsed successfully, add it to count
@@ -4674,14 +4721,12 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
     vec3_t valueVec{};
     std::vector<std::string> args = ETJump::StringUtil::split(value, " ");
 
-    // can't capture __func__ for the lambda directly
-    constexpr auto func = __func__;
-
     const auto invalidArgCount = [&](const int expectedArgs,
                                      const size_t numArgs) {
       G_Printf("%s: Invalid number of arguments for ^3'%s'^7, expected ^3%i^7, "
                "got ^3%i\n",
-               func, key, expectedArgs, static_cast<int>(numArgs));
+               FMT_FUNC(deleteFuncStr), key, expectedArgs,
+               static_cast<int>(numArgs));
       count--;
     };
 
@@ -4689,7 +4734,7 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
                                     const std::string &type) {
       G_Printf(
           "%s: Invalid argument for ^3'%s'^7, expected ^3%s^7, got ^3'%s'\n",
-          func, key, expectedType.c_str(), type.c_str());
+          FMT_FUNC(deleteFuncStr), key, expectedType.c_str(), type.c_str());
       count--;
     };
 
@@ -4809,7 +4854,8 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
 
         break;
       default:
-        G_Printf(S_COLOR_YELLOW "%s: invalid key '%s'\n", __func__, key);
+        G_Printf(S_COLOR_YELLOW "%s: invalid key '%s'\n",
+                 FMT_FUNC(deleteFuncStr), key);
         parse = false;
         break;
     }
@@ -4842,26 +4888,30 @@ qboolean G_ScriptAction_Delete(gentity_t *ent, char *params) {
 
   // did we actually delete anything?
   if (!numDeleted) {
-    G_Printf("%s: no entities found matching params ^3'%s'\n", __func__,
-             params);
+    G_Printf("%s: no entities found matching params ^3'%s'\n",
+             FMT_FUNC(deleteFuncStr), params);
   }
 
   return qtrue;
 }
 
-// alertentity -equivalent that passes activator
-qboolean G_ScriptAction_UseTarget(gentity_t *ent, char *params) {
-  if (!ent->activator) {
-    G_Error("G_ScriptAction_UseTarget: no activator found, consider using "
-            "alertentity instead\n");
+/*
+ * usage: 'usetarget <targetname'
+ * same as 'alertentity' except passes the activator data to the targeted entity
+ */
+qboolean useTarget(gentity_t *ent, char *params) {
+  if (!ent || !ent->activator) {
+    G_Error("%s: activator must be a client, consider using 'alertentity' "
+            "instead\n",
+            FMT_FUNC(__func__));
   }
 
   if (!params || !*params) {
-    G_Error("G_ScriptAction_UseTarget: no targetname given\n");
+    G_Error("%s: required parameter 'targetname' was not provided\n\n%s\n",
+            FMT_FUNC(__func__), useTargetUsage);
   }
 
-  const int hash = BG_StringHashValue(params);
-
+  const auto hash = static_cast<int32_t>(BG_StringHashValue(params));
   qboolean foundalertent = qfalse;
   gentity_t *alertent = nullptr;
 
@@ -4869,9 +4919,8 @@ qboolean G_ScriptAction_UseTarget(gentity_t *ent, char *params) {
     alertent = G_FindByTargetnameFast(alertent, params, hash);
     if (!alertent) {
       if (!foundalertent) {
-        G_Error("G_ScriptAction_UseTarget: cannot find targetname \"%s\"\n",
-                params);
-        return qfalse;
+        G_Error("%s: cannot find an entity with targetname '%s'\n",
+                FMT_FUNC(__func__), params);
       } else {
         break;
       }
@@ -4880,31 +4929,38 @@ qboolean G_ScriptAction_UseTarget(gentity_t *ent, char *params) {
     foundalertent = qtrue;
 
     if (!alertent->use) {
-      G_Error("G_ScriptAction_UseTarget: \"%s\" "
-              "(classname = %s) doesn't have a \"use\" function\n",
-              params, alertent->classname);
+      G_Error("%s: \"%s\" (classname = %s) doesn't have a \"use\" function\n",
+              FMT_FUNC(__func__), params, alertent->classname);
     }
+
     G_UseEntity(alertent, nullptr, ent->activator);
   }
 
   return qtrue;
 }
 
-qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params) {
-  const char *pString, *token;
+/*
+ * usage: 'wm_announce_private <message>'
+ * must be called with a valid client as activator
+ */
+qboolean wmAnnouncePrivate(gentity_t *ent, char *params) {
+  const char *pString = nullptr;
+  const char *token = nullptr;
 
-  auto activator = ent->activator;
+  const auto *const activator = ent->activator;
+
   if (!activator || !activator->client) {
     // if we don't error out here, script execution hangs in the block where
     // this gets called, so better to error out to avoid any confusion
-    G_Error("G_ScriptAction_Announce_Private: call to client only script "
-            "action with no activator\n");
+    G_Error("%s: activator must be a client\n", FMT_FUNC(__func__));
   }
 
   pString = params;
   token = COM_Parse(&pString);
+
   if (!token[0]) {
-    G_Error("G_ScriptAction_Announce_Private: statement parameter required\n");
+    G_Error("%s: required parameter 'message' was not provided\n\n%s\n",
+            FMT_FUNC(__func__), wmAnnouncePrivateUsage);
   }
 
   std::string str = token;
@@ -4912,19 +4968,22 @@ qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params) {
       ETJump::stringFormat("%s^7", activator->client->pers.netname);
   ETJump::StringUtil::replaceAll(str, "%s", name);
 
-  Printer::popup(ClientNum(activator), str);
+  Printer::popup(activator, str);
 
   return qtrue;
 }
 
-qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
-  const auto activator = ent->activator;
+/*
+ * usage: 'tracker [index] <command> <value>'
+ * must be called with a valid client as activator
+ */
+qboolean tracker(gentity_t *ent, char *params) {
+  const auto *const activator = ent->activator;
 
   if (!activator || !activator->client) {
     // if we don't error out here, script execution hangs in the block where
     // this gets called, so better to error out to avoid any confusion
-    G_Error("G_ScriptAction_Tracker: call to client only script action with no "
-            "activator\n");
+    G_Error("%s: activator must be a client\n", FMT_FUNC(__func__));
   }
 
   auto *const progression = activator->client->pers.progression;
@@ -4936,14 +4995,16 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
     memcpy(oldValues.data(), progression, sizeof(oldValues));
   }
 
-  const char *pString, *token;
-  char command[MAX_QPATH];
+  const char *pString = nullptr;
+  const char *token = nullptr;
+  char command[MAX_QPATH]{};
 
   pString = params;
-
   token = COM_ParseExt(&pString, qfalse);
+
   if (!token[0]) {
-    G_Error("G_ScriptAction_Tracker: tracker without an index/command\n");
+    G_Error("%s: required parameter 'command' was not provided\n\n%s\n",
+            FMT_FUNC(__func__), trackerUsage);
   }
 
   int trackerIndex = 0;
@@ -4954,9 +5015,8 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
     trackerIndex = Q_atoi(token) - 1;
 
     if (trackerIndex < 0 || trackerIndex >= MAX_PROGRESSION_TRACKERS) {
-      G_Error("G_ScriptAction_Tracker: parsed tracker index (%i) is outside "
-              "range (1 - %i)\n",
-              trackerIndex + 1, MAX_PROGRESSION_TRACKERS);
+      G_Error("%s: invalid tracker index '%i', valid range is 1 - %i\n",
+              FMT_FUNC(__func__), trackerIndex + 1, MAX_PROGRESSION_TRACKERS);
     }
 
     // parse next arg as command instead
@@ -4964,15 +5024,20 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
   }
 
   if (!token[0]) {
-    G_Error("G_ScriptAction_Tracker: tracker without a command\n");
+    G_Error("%s: required parameter 'command' was not provided\n\n%s\n",
+            FMT_FUNC(__func__), trackerUsage);
   }
 
+  // TODO: we should validate the parsed command before doing this, so invalid
+  // command such as 'tracker 1 foo' will print that the command is invalid,
+  // rather than that the value is missing, as that's the first error
+  // chronologically when reading the command normally
   Q_strncpyz(command, token, sizeof(command));
   token = COM_ParseExt(&pString, qfalse);
 
   if (!token[0]) {
-    G_Error("G_ScriptAction_Tracker: tracker commands require a value\n",
-            command);
+    G_Error("%s: required parameter 'value' was not provided\n\n%s\n",
+            FMT_FUNC(__func__), trackerUsage);
   }
 
   const int trackerValue = Q_atoi(token);
@@ -5002,7 +5067,7 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
   } else if (!Q_stricmp(command, "set")) {
     progression[trackerIndex] = trackerValue;
   } else {
-    G_Error("G_ScriptAction_Tracker: unknown tracker command %s\n", command);
+    G_Error("%s: unknown tracker command '%s'\n", FMT_FUNC(__func__), command);
   }
 
   if (abort) {
@@ -5017,12 +5082,16 @@ qboolean G_ScriptAction_Tracker(gentity_t *ent, char *params) {
   return qtrue;
 }
 
-qboolean G_ScriptAction_ChangeSkin(gentity_t *ent, char *params) {
+/*
+ * usage: 'changeskin <skinfile>'
+ */
+qboolean changeSkin(gentity_t *ent, char *params) {
   const char *pString = params;
   const char *token = COM_ParseExt(&pString, qfalse);
 
   if (!token[0]) {
-    G_Error("%s: 'changeskin' must have a target skin name\n", __func__);
+    G_Error("%s: required parameter 'skinfile' was not provided\n\n%s\n",
+            FMT_FUNC(__func__), changeSkinUsage);
   }
 
   // misc_constructiblemarker holds the .skin in ent->s.effect1Time,
@@ -5035,3 +5104,4 @@ qboolean G_ScriptAction_ChangeSkin(gentity_t *ent, char *params) {
 
   return qtrue;
 }
+} // namespace ETJump::ScriptActions

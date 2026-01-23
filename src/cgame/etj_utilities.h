@@ -89,5 +89,32 @@ void resetTempTraceIgnoredClients();
 bool skipPortalDraw(int selfNum, int otherNum);
 
 void registerGameShader(int32_t index, const char *shader);
+
+void centerCursor();
+
+void addLoopingSound(const vec3_t origin, const vec3_t velocity,
+                     sfxHandle_t sfx, int volume, int soundTime);
+
+void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
+                         sfxHandle_t sfx, int range, int volume, int soundTime);
+
+// true if 'entityNum' is a player with hideme enabled
+bool hideMeCheck(int32_t entityNum);
+
+// returns correct trace contents depending on 'etj_extraTrace' value
+int32_t getExtraTraceContents(int32_t value);
+
+int32_t weapnumForClient();
+
+// true if scoreboard is visible
+bool showingScores();
+
+void onPlayerRespawn(bool revived);
+
+playerState_t *getValidPlayerState();
+
+void resetTransitionEffects();
+
+void resetCustomvoteInfo();
 #endif
 } // namespace ETJump

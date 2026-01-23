@@ -125,6 +125,8 @@ extern vmCvar_t ui_voteCheats;
 extern vmCvar_t ui_voteCustomRTV;
 
 extern vmCvar_t etj_menuSensitivity;
+extern vmCvar_t etj_cursorSize;
+extern vmCvar_t etj_altCursor;
 
 extern vmCvar_t ui_currentChangelog;
 

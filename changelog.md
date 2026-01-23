@@ -12,8 +12,17 @@
 * demo compatibility settings are no longer automatically printed when playback starts [#1804](https://github.com/etjump/etjump/pull/1804)
   * active compatibility settings can be printed with `printDemoCompatInfo` command
 * improved smoothness of in-game mouse cursor - the cursor now operates on real screen pixels rather than virtual grid pixels [#1809](https://github.com/etjump/etjump/pull/1809)
-  * this greatly increases the accuracy of the cursor, especially on small movememnts, as your movement "resolution" is now higher
+  * this greatly increases the accuracy of the cursor, especially on small movements, as your movement "resolution" is now higher
   * as a side effect, the overall mouse sensitivity in menus is now lower, as the mouse movement deltas per frame are no longer scaled to virtual grid
+* mouse cursor is now always warped to center of the screen when UI is brought up, instead of remembering it's position [#1811](https://github.com/etjump/etjump/pull/1811)
+  * chat UI is an exception to this, which positions the mouse to the top left
+* added 2 new mouse cursors, can be enabled with `etj_altCursor` cvar [#1812](https://github.com/etjump/etjump/pull/1812)
+  * the mouse cursor can now also be resized with `etj_cursorSize` cvar (valid range `8 - 128`)
+* added `etj_CGaz1DrawMidline` to draw the middle point between min/max angles on CGaz 1 [#1813](https://github.com/etjump/etjump/pull/1813)
+  * this is not a meaningful angle when it comes to physics calculations, it's purely a helper line to indicate you're approaching minline soon
+  * color can be adjusted with `etj_CGaz1MidlineColor` (default `1.0 0.5 0.0 0.75`)
+* added `etj_runtimerSize` cvar to adjust size of timerun timer [#1814](https://github.com/etjump/etjump/pull/1814)
+  * valid range is `0.0 - 10.0`
 
 # ETJump 3.4.2
 

@@ -1818,8 +1818,6 @@ typedef struct {
   qhandle_t limboSpectator;
   qhandle_t limboRadioBroadcast;
 
-  qhandle_t cursorIcon;
-
   qhandle_t hudPowerIcon;
   qhandle_t hudSprintIcon;
   qhandle_t hudHealthIcon;
@@ -2017,10 +2015,11 @@ typedef struct {
   int notifyPos;
   int notifyLastPos;
 
-  int cursorX;
-  int cursorY;
-  int32_t realCursorX; // real X coordinate as per resolution
-  int32_t realCursorY; // real Y coordinate as per resolution
+  int16_t cursorX;     // virtual grid X coordinate
+  int16_t cursorY;     // virtual grid Y coordinate
+  int16_t realCursorX; // real X coordinate as per resolution
+  int16_t realCursorY; // real Y coordinate as per resolution
+
   int eventHandling;
   qboolean mouseCaptured;
   qboolean sizingHud;
@@ -2411,6 +2410,8 @@ extern vmCvar_t etj_CGaz2NoVelocityDir;
 extern vmCvar_t etj_CGaz1DrawSnapZone;
 extern vmCvar_t etj_CGaz2WishDirFixedSpeed;
 extern vmCvar_t etj_CGaz2WishDirUniformLength;
+extern vmCvar_t etj_CGaz1DrawMidLine;
+extern vmCvar_t etj_CGaz1MidlineColor;
 
 extern vmCvar_t etj_drawOB;
 // Aciz: movable drawOB
@@ -2555,6 +2556,7 @@ extern vmCvar_t etj_spectatorInfoDirection;
 extern vmCvar_t etj_drawRunTimer;
 extern vmCvar_t etj_runTimerX;
 extern vmCvar_t etj_runTimerY;
+extern vmCvar_t etj_runtimerSize;
 extern vmCvar_t etj_runTimerShadow;
 extern vmCvar_t etj_runTimerAutoHide;
 extern vmCvar_t etj_runTimerInactiveColor;
@@ -2759,6 +2761,8 @@ extern vmCvar_t etj_optimizePrediction;
 // END unlagged - optimized prediction
 
 extern vmCvar_t etj_menuSensitivity;
+extern vmCvar_t etj_cursorSize;
+extern vmCvar_t etj_altCursor;
 
 extern vmCvar_t etj_crosshairThickness;
 extern vmCvar_t etj_crosshairOutline;
@@ -4207,6 +4211,7 @@ class AccelColor;
 class PlayerBBox;
 class SavePos;
 class SyscallExt;
+class TrickjumpLines;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4224,18 +4229,7 @@ extern std::shared_ptr<PlayerBBox> playerBBox;
 extern std::unique_ptr<SavePos> savePos;
 extern std::unique_ptr<SyscallExt> syscallExt;
 extern std::unique_ptr<PmoveUtils> pmoveUtils;
-
-void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
-                         sfxHandle_t sfx, int range, int volume, int soundTime);
-void addLoopingSound(const vec3_t origin, const vec3_t velocity,
-                     sfxHandle_t sfx, int volume, int soundTime);
-bool hideMeCheck(int entityNum);
-int checkExtraTrace(int value);
-int weapnumForClient();
-void onPlayerRespawn(qboolean revived);
-void runFrameEnd();
-playerState_t *getValidPlayerState();
-bool showingScores();
+extern std::shared_ptr<TrickjumpLines> trickjumpLines;
 
 enum extraTraceOptions {
   OB_DETECTOR,
@@ -4273,10 +4267,6 @@ enum class HideFlamethrowerFlags {
 } // namespace ETJump
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-qboolean CG_ConsoleCommandExt(const char *cmd);
-void CG_DrawActiveFrameExt();
-void CG_ResetTransitionEffects();
 
 extern displayContextDef_t *DC;
 

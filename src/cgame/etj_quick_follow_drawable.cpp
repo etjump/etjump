@@ -23,6 +23,8 @@
  */
 
 #include "etj_quick_follow_drawable.h"
+#include "etj_utilities.h"
+
 #include "../game/etj_string_utilities.h"
 
 char *BindingFromName(const char *cvar);

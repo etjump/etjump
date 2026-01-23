@@ -966,8 +966,7 @@ void _UI_Refresh(int realtime) {
     uiClientState_t cstate;
     trap_GetClientState(&cstate);
     if (cstate.connState <= CA_DISCONNECTED || cstate.connState >= CA_ACTIVE) {
-      uiInfo.uiDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE,
-                             uiInfo.uiDC.Assets.cursor);
+      uiInfo.uiDC.cursor.draw();
     }
   }
 }
@@ -1106,12 +1105,13 @@ qboolean Asset_Parse(int handle) {
       continue;
     }
 
+    // only overrides default cursor
     if (Q_stricmp(token.string, "cursor") == 0) {
-      if (!PC_String_Parse(handle, &uiInfo.uiDC.Assets.cursorStr)) {
+      if (!PC_String_Parse(handle, &uiInfo.uiDC.cursor.cursorStr)) {
         return qfalse;
       }
-      uiInfo.uiDC.Assets.cursor =
-          trap_R_RegisterShaderNoMip(uiInfo.uiDC.Assets.cursorStr);
+      uiInfo.uiDC.cursor.defaultShader =
+          trap_R_RegisterShaderNoMip(uiInfo.uiDC.cursor.cursorStr);
       continue;
     }
 
@@ -6438,7 +6438,7 @@ qboolean UI_FeederSelectionClick(itemDef_t *item) {
     // ugly hack for favourites handling
     rectDef_t rect;
 
-    Item_ListBox_MouseEnter(item, DC->cursorx, DC->cursory, qtrue);
+    Item_ListBox_MouseEnter(item, DC->cursor.virtX, DC->cursor.virtY, qtrue);
 
     rect.x = item->window.rect.x + listPtr->columnInfo[SORT_FAVOURITES].pos;
     rect.y = item->window.rect.y +
@@ -7116,7 +7116,6 @@ void _UI_Init(int legacyClient, int clientVersion) {
   uiInfo.uiDC.setColor = &UI_SetColor;
   uiInfo.uiDC.drawHandlePic = &UI_DrawHandlePic;
   uiInfo.uiDC.drawStretchPic = &trap_R_DrawStretchPic;
-  uiInfo.uiDC.drawCursor = &ETJump::drawCursor;
   uiInfo.uiDC.drawText = &Text_Paint;
   uiInfo.uiDC.drawTextExt = &Text_Paint_Ext;
   uiInfo.uiDC.textWidth = &Text_Width;
@@ -7194,6 +7193,11 @@ void _UI_Init(int legacyClient, int clientVersion) {
   Init_Display(&uiInfo.uiDC);
 
   String_Init();
+
+  uiInfo.uiDC.cursor.registerShaders = &ETJump::registerCursors;
+  uiInfo.uiDC.cursor.draw = &ETJump::drawCursor;
+
+  uiInfo.uiDC.cursor.registerShaders();
 
   uiInfo.uiDC.whiteShader = trap_R_RegisterShaderNoMip("white");
 
@@ -7371,7 +7375,8 @@ void _UI_MouseEvent(int dx, int dy) {
   ETJump::computeCursorPosition(dx, dy);
 
   if (Menu_Count() > 0) {
-    Display_MouseMove(nullptr, uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory);
+    Display_MouseMove(nullptr, uiInfo.uiDC.cursor.virtX,
+                      uiInfo.uiDC.cursor.virtY);
   }
 }
 
@@ -7552,13 +7557,8 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
 
   menutype = menu; //----(SA)	added
 
-  // FIXME: this is a dumb hack, we should just not draw the cursor at all,
-  // so that the next time UI is brought back, the cursor isn't at the bottom
-  // right of the screen, but rather remembers the last position it was in
-  const auto hideCursor = [] {
-    uiInfo.uiDC.realCursorX = uiInfo.uiDC.glconfig.vidWidth;
-    uiInfo.uiDC.realCursorY = uiInfo.uiDC.glconfig.vidHeight;
-  };
+  // assume cursor is visible by default
+  uiInfo.uiDC.cursor.visible = true;
 
   switch (menu) {
     case UIMENU_NONE:
@@ -7678,42 +7678,42 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
 
     // NERVE - SMF
     case UIMENU_WM_QUICKMESSAGE:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_quickmessage");
       return;
 
     case UIMENU_WM_QUICKMESSAGEALT:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_quickmessageAlt");
       return;
 
     case UIMENU_WM_FTQUICKMESSAGE:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_ftquickmessage");
       return;
 
     case UIMENU_WM_FTQUICKMESSAGEALT:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_ftquickmessageAlt");
       return;
 
     case UIMENU_WM_TAPOUT:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("tapoutmsg");
       return;
 
     case UIMENU_WM_TAPOUT_LMS:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("tapoutmsglms");
@@ -7731,6 +7731,15 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
       // trap_Cvar_Set( "cl_paused", "1" );
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_OpenByName("ingame_messagemode");
+
+      // special case for chat, we don't really want the cursor to be
+      // in the middle of the screen, it would be annoying to have the cursor
+      // constantly pop-up in the middle of the screen e.g. when spectating
+      // someone and chatting - set to top-left instead
+      uiInfo.uiDC.cursor.virtX = 0;
+      uiInfo.uiDC.cursor.virtY = 0;
+      uiInfo.uiDC.cursor.realX = 0;
+      uiInfo.uiDC.cursor.realY = 0;
       return;
 
     case UIMENU_INGAME_FT_SAVELIMIT:
@@ -7962,6 +7971,8 @@ vmCvar_t ui_voteCheats;
 vmCvar_t ui_voteCustomRTV;
 
 vmCvar_t etj_menuSensitivity;
+vmCvar_t etj_cursorSize;
+vmCvar_t etj_altCursor;
 
 vmCvar_t ui_currentChangelog;
 
@@ -8206,6 +8217,8 @@ cvarTable_t cvarTable[] = {
     {&ui_voteCustomRTV, "ui_voteCustomRTV", "0", CVAR_ARCHIVE},
 
     {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
+    {&etj_cursorSize, "etj_cursorSize", "32", CVAR_ARCHIVE},
+    {&etj_altCursor, "etj_altCursor", "0", CVAR_ARCHIVE},
 
     {&ui_currentChangelog, "ui_currentChangelog", "", CVAR_TEMP | CVAR_ROM},
 

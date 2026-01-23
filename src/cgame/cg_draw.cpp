@@ -2160,6 +2160,7 @@ static void CG_DrawVote() {
 
   std::string line_a;
   std::string line_b;
+  std::string line_c; // used for rtv with spectator voting disabled
   float x_a = 8.0f;
   float x_b = 8.0f;
 
@@ -2245,7 +2246,8 @@ static void CG_DrawVote() {
         const int32_t totalYes =
             rtvYesVotes.playerCount + rtvYesVotes.spectatorCount;
 
-        if (ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+        if (!etj_spectatorVote.integer ||
+            ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
           return ETJump::stringFormat(str, std::to_string(totalYes),
                                       std::to_string(cgs.voteNo));
         }
@@ -2257,7 +2259,8 @@ static void CG_DrawVote() {
             ETJump::stringFormat("%i(%i)", cgs.voteNo, cgs.voteNoSpectators));
       }
 
-      if (ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+      if (!etj_spectatorVote.integer ||
+          ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
         return ETJump::stringFormat(str, std::to_string(cgs.voteYes),
                                     std::to_string(cgs.voteNo));
       }
@@ -2271,11 +2274,13 @@ static void CG_DrawVote() {
     if (isRtvVote) {
       if (!(cg.snap->ps.eFlags & EF_VOTED)) {
         line_a = ETJump::stringFormat("VOTE(%i): %s", sec, cgs.voteString);
-        line_b = formatVoteStr("Change map(" + str1 +
-                               "):%s, Keep current map(" + str2 + "):%s");
 
-        if (!canVote) {
-          line_b += " (Spectators can't vote)";
+        if (canVote) {
+          line_b = formatVoteStr("Change map(" + str1 +
+                                 "):%s, Keep current map(" + str2 + "):%s");
+        } else {
+          line_b = formatVoteStr("Change map:%s, Keep current map:%s");
+          line_c = "Spectators can't vote";
         }
       } else {
         line_a =
@@ -2317,10 +2322,12 @@ static void CG_DrawVote() {
     } else {
       if (!(cg.snap->ps.eFlags & EF_VOTED)) {
         line_a = ETJump::stringFormat("VOTE(%i): %s", sec, cgs.voteString);
-        line_b = formatVoteStr("YES:%s, NO:%s");
 
-        if (!canVote) {
-          line_b += " (Spectators can't vote)";
+        if (canVote) {
+          line_b = formatVoteStr("YES(" + str1 + "):%s, NO(" + str2 + "):%s");
+        } else {
+          line_b = formatVoteStr("YES:%s, NO:%s");
+          line_c = "Spectators can't vote";
         }
       } else {
         line_a =
@@ -2415,6 +2422,11 @@ static void CG_DrawVote() {
 
   if (!line_b.empty()) {
     ETJump::DrawString(x_b, 226, 0.23f, 0.25f, color, qtrue, line_b.c_str(), 80,
+                       ITEM_TEXTSTYLE_SHADOWED);
+  }
+
+  if (!line_c.empty()) {
+    ETJump::DrawString(x_b, 240, 0.23f, 0.25f, color, qtrue, line_c.c_str(), 80,
                        ITEM_TEXTSTYLE_SHADOWED);
   }
 }
@@ -2632,7 +2644,7 @@ static void CG_DrawSlick(void) {
     return;
   }
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::SLICK_DETECTOR);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::SLICK_DETECTOR);
 
   playerState_t *ps = ETJump::getValidPlayerState();
 
@@ -2663,7 +2675,7 @@ static void CG_DrawJumpDelay(void) {
     return;
   }
 
-  int traceContents = ETJump::checkExtraTrace(ETJump::NJD_DETECTOR);
+  int traceContents = ETJump::getExtraTraceContents(ETJump::NJD_DETECTOR);
 
   playerState_t *ps = ETJump::getValidPlayerState();
 
@@ -4401,7 +4413,7 @@ static void CG_Draw2D() {
     if (cgs.eventHandling != CGAME_EVENT_NONE) {
       // draw cursor
       trap_R_SetColor(nullptr);
-      cgDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE, cgs.media.cursorIcon);
+      cgDC.cursor.draw();
     }
   }
 

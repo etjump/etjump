@@ -904,9 +904,6 @@ void CG_AddToNotify(const char *str) {
   }
 }
 
-namespace ETJump {
-extern void initTimer();
-}
 /*
 ===============
 CG_MapRestart
@@ -1041,7 +1038,7 @@ static void CG_MapRestart(void) {
 
   trap_Cvar_Set("cg_thirdPerson", "0");
 
-  ETJump::initTimer();
+  ETJump::initTimeruns();
 }
 // NERVE - SMF
 
@@ -2792,63 +2789,17 @@ static void CG_ServerCommand(void) {
 
   std::vector<std::string> arguments;
   for (auto i = 1, argc = trap_Argc(); i < argc; ++i) {
-    // Zero: CG_Argv cannot be used here as it uses a single
-    // static buffer and breaks the CG_ServerCommandExt as cmd
+    // Zero: 'CG_Argv' cannot be used here as it uses a single
+    // static buffer and breaks the serverCommandsHandler as 'cmd'
     // will be replaced with whatever was the last argument
     char buf[MAX_TOKEN_CHARS]{};
     trap_Argv(i, buf, sizeof(buf));
-    arguments.push_back(buf);
+    arguments.emplace_back(buf);
   }
 
-  bool found = ETJump::serverCommandsHandler->check(cmd, arguments);
-
-  if (CG_ServerCommandExt(cmd)) {
+  if (ETJump::serverCommandsHandler->check(cmd, arguments)) {
     return;
   }
-
-  // shut up console when we send this over from save
-  if (!Q_stricmp(cmd, "resetStrafeQuality")) {
-    return;
-  }
-
-  if (!Q_stricmp(cmd, "savePrint")) {
-    int pos = Q_atoi(CG_Argv(1));
-    std::string saveMsg = etj_saveMsg.string;
-
-    if (pos) {
-      saveMsg += ' ' + std::to_string(pos);
-    }
-    if (trap_Argc() == 3) {
-      int remainingSaves = Q_atoi(CG_Argv(2));
-      std::string remainingSavesStr =
-          va("^7(^3%d ^7remaining)\n", remainingSaves);
-      saveMsg += '\n' + remainingSavesStr;
-    }
-
-    CG_CenterPrint(saveMsg.c_str(), SCREEN_HEIGHT - SCREEN_HEIGHT * 0.2,
-                   SMALLCHAR_WIDTH, false);
-    return;
-  }
-
-  if (!Q_stricmp(cmd, "openRtvMenu")) {
-    trap_SendConsoleCommand("openRtvMenu");
-    return;
-  }
-
-  // for !rtv admin command
-  if (!Q_stricmp(cmd, "callvote")) {
-    std::string command = va("%s %s", cmd, arguments[0].c_str());
-
-    if (arguments.size() > 1) {
-      command += " " + arguments[1];
-    }
-
-    trap_SendConsoleCommand(command.c_str());
-    return;
-  }
-
-  if (found)
-    return;
 
   CG_Printf("Unknown client game command: %s\n", cmd);
 }

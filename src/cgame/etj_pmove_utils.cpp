@@ -24,6 +24,7 @@
 
 #include "etj_pmove_utils.h"
 #include "etj_cvar_update_handler.h"
+#include "etj_utilities.h"
 
 #include "../game/bg_local.h"
 

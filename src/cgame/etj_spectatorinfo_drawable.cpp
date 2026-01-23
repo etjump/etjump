@@ -25,6 +25,7 @@
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_spectatorinfo_data.h"
 #include "etj_cvar_update_handler.h"
+#include "etj_utilities.h"
 
 namespace ETJump {
 SpectatorInfo::SpectatorInfo() {

@@ -2382,19 +2382,12 @@ void CG_LimboPanel_RenderCounter(panel_button_t *button) {
 void CG_LimboPanel_Setup(void) {
   panel_button_t *button;
   clientInfo_t *ci = &cgs.clientinfo[cg.clientNum];
-  // bg_playerclass_t *classinfo;
   int i;
   char buffer[256];
 
   cgs.limboLoadoutModified = qfalse;
 
-  //	if( !cgs.playedLimboMusic ) {
-  //		trap_S_StartBackgroundTrack(
-  //"sound/music/menu_briefing.wav",
-  //"",
-  // 0
-  //); 		cgs.playedLimboMusic = qtrue;
-  //	}
+  ETJump::centerCursor();
 
   trap_Cvar_VariableStringBuffer("name", buffer, 256);
   trap_Cvar_Set("limboname", buffer);
@@ -2504,7 +2497,7 @@ qboolean CG_LimboPanel_Draw(void) {
   BG_PanelButtonsRender(limboPanelButtonsLayout);
 
   trap_R_SetColor(NULL);
-  cgDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE, cgs.media.cursorIcon);
+  cgDC.cursor.draw();
 
   if (cgs.ccRequestedObjective != -1) {
     if (cg.time - cgs.ccLastObjectiveRequestTime > 1000) {

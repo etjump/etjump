@@ -23,12 +23,20 @@
  */
 
 #include "etj_client_rtv_handler.h"
+#include "etj_client_commands_handler.h"
 
 namespace ETJump {
-ClientRtvHandler::ClientRtvHandler() {
+ClientRtvHandler::ClientRtvHandler(
+    const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler)
+    : serverCommandsHandler(serverCommandsHandler) {
   rtvMaps.clear();
-  rtvVoteYes = {0, 0};
-  isRtvVote = false;
+
+  serverCommandsHandler->subscribe(
+      "openRtvMenu",
+      [](const std::vector<std::string> &) {
+        trap_SendConsoleCommand("openRtvMenu");
+      },
+      false);
 }
 
 void ClientRtvHandler::initialize() {

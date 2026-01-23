@@ -2,6 +2,7 @@
 // not necessarily every single rendered frame
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 #include "etj_demo_compatibility.h"
 #if __MACOS__
   #ifdef GAMERANGER
@@ -422,7 +423,7 @@ static snapshot_t *CG_ReadNextSnapshot(void) {
       // server has been restarted
       if (cg.snap &&
           (dest->snapFlags ^ cg.snap->snapFlags) & SNAPFLAG_SERVERCOUNT) {
-        CG_ResetTransitionEffects();
+        ETJump::resetTransitionEffects();
       }
 
       // adjust entity types to be compatible with 2.3.0/2.3.0 RC4,

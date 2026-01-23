@@ -24,20 +24,18 @@
 
 #pragma once
 
-/**
- * Extended CG_ServerCommand function. Checks whether server
- * sent command matches to any defined here. If no match is found
- * returns false
- * @return qboolean Whether a match was found or not
- */
-qboolean CG_ServerCommandExt(const char *cmd);
-qboolean CG_ConsoleCommandExt(const char *cmd);
-void CG_DrawActiveFrameExt();
-
-qboolean CG_displaybyname();
-qboolean CG_displaybynumber();
+#include <cstdint>
 
 namespace ETJump {
+inline constexpr int32_t CGAME_INIT_DELAY_FRAMES = 10;
+
 void init();
 void shutdown();
+
+void initTimeruns();
+
+// performs one-time actions slightly delayed from actual cgame init,
+// to work around issues that certain actions have when they are performed
+// on the same frame as the module is initialized
+void delayedInit();
 } // namespace ETJump

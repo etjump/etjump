@@ -15,6 +15,7 @@
 #include "../game/etj_json_utilities.h"
 #include "etj_savepos.h"
 #include "etj_utilities.h"
+#include "etj_consolecommands.h"
 
 /*
 =============
@@ -1409,24 +1410,21 @@ qboolean CG_ConsoleCommand(void) {
   }
 
   std::vector<std::string> arguments;
-  std::string command = cmd;
-  auto argc = trap_Argc();
-  for (i = 1; i < argc; ++i) {
+
+  for (i = 1; i < trap_Argc(); ++i) {
     // Zero: cannot use CG_Argv here either. Check
     // serverCommandsHandler on cg_servercommands.c for more
     // info
     char buf[MAX_TOKEN_CHARS]{};
     trap_Argv(i, buf, sizeof(buf));
-    arguments.push_back(buf);
+    arguments.emplace_back(buf);
   }
 
-  bool found = ETJump::consoleCommandsHandler->check(command, arguments);
-
-  if (CG_ConsoleCommandExt(cmd)) {
+  if (!ETJump::ConsoleCommands::forwardedConsoleCommand(cmd, arguments)) {
     return qtrue;
   }
 
-  return found ? qtrue : qfalse;
+  return ETJump::consoleCommandsHandler->check(cmd, arguments) ? qtrue : qfalse;
 }
 
 /*
@@ -1553,31 +1551,6 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("rankings");
   trap_AddCommand("seasons");
   trap_AddCommand("loadcheckpoints");
-
-  // XIS tjl command
-  trap_AddCommand("tjl_enableline");       // display a route by it number
-                                           // (start at 0 to total - 1)
-  trap_AddCommand("tjl_enablejumpmarker"); // display a route by it number
-                                           // (start at 0 to total - 1)
-
-  trap_AddCommand("tjl_record");              // Start record
-  trap_AddCommand("tjl_stoprecord");          // Stop record
-  trap_AddCommand("tjl_listroute");           // Display in console all loaded
-                                              // route or recorded
-  trap_AddCommand("tjl_displaybyname");       // Render a route if name exist
-  trap_AddCommand("tjl_displaynearestroute"); // Render the nearest route to the
-                                              // player position
-  trap_AddCommand("tjl_renameroute");         // Rename a route in the vector
-  trap_AddCommand("tjl_saveroute");           // Save route in a file
-  trap_AddCommand("tjl_loadroute");           // Load route from a file
-
-  trap_AddCommand("tjl_deleteroute");        // Delete a route
-  trap_AddCommand("tjl_overwriterecording"); // Overwrite a route by
-                                             // name if possible
-
-  trap_AddCommand("tjl_clearrender");     // Clear the current displayed route.
-  trap_AddCommand("tjl_displaybynumber"); // display a route by it number (start
-                                          // at 0 to total - 1)
 
   trap_AddCommand("setoffset"); // autocompletion
   trap_AddCommand("interruptRun");

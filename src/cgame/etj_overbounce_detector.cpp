@@ -35,7 +35,7 @@ bool OverbounceDetector::beforeRender() {
   belowOverbounce = jumpOverbounce = fallOverbounce = stickyOverbounce = false;
 
   ps = getValidPlayerState();
-  traceContents = checkExtraTrace(ETJump::OB_DETECTOR) | CONTENTS_BODY;
+  traceContents = getExtraTraceContents(ETJump::OB_DETECTOR) | CONTENTS_BODY;
   pmoveSec = static_cast<float>(cgs.pmove_msec) / 1000.0f;
   gravity = ps->gravity;
   zVel = ps->velocity[2];
