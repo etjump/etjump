@@ -41,10 +41,7 @@ const char *getTextForEnum(int enumVal) { return EnumStrings[enumVal]; }
 TrickjumpLines::TrickjumpLines(
     const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler,
     const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler)
-    : _recording(false), _enableLine(false), _enableMarker(false),
-      _jumpRelease(true), _debugVerbose(false), _nextRecording(1),
-      _nextAddTime(0), _currentRouteToRender(-1), _currentRotation({}),
-      serverCommandsHandler(serverCommandsHandler),
+    : serverCommandsHandler(serverCommandsHandler),
       consoleCommandsHandler(consoleCommandsHandler) {
   this->_currentRotation.init();
 
@@ -140,18 +137,15 @@ void TrickjumpLines::registerCommands() {
     setCurrentRouteToRender(num);
   };
 
-  serverCommandsHandler->subscribe(
-      "tjl_displaybynumber",
-      [&displayByNumber](const auto &args) { displayByNumber(args); }, false);
+  serverCommandsHandler->subscribe("tjl_displaybynumber", displayByNumber,
+                                   false);
 
   consoleCommandsHandler->subscribe(
       "tjl_displaybyname", [this](const auto &args) {
         displayByName(args.empty() ? nullptr : args[0].c_str());
       });
 
-  consoleCommandsHandler->subscribe(
-      "tjl_displaybynumber",
-      [&displayByNumber](const auto &args) { displayByNumber(args); });
+  consoleCommandsHandler->subscribe("tjl_displaybynumber", displayByNumber);
 
   consoleCommandsHandler->subscribe(
       "tjl_clearrender", [this](const auto &) { setCurrentRouteToRender(-1); });
