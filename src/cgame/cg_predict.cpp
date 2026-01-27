@@ -86,6 +86,12 @@ void CG_BuildSolidList(void) {
       cg_numTriggerEntities++;
     }
 
+    if (ent->eType == ET_PLAYER &&
+        (!ETJump::playerIsSolid(cg.snap->ps.clientNum, ent->number) ||
+         ETJump::playerIsNoclipping(ent->number))) {
+      continue;
+    }
+
     if (cent->nextState.solid) {
       /*			if(cg_fastSolids.integer)
          { // Gordon: "optimization" (disabling until i
@@ -146,11 +152,6 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
 
     if (ent->number == skipNumber ||
         (!tracePlayers && ent->eType == ET_PLAYER)) {
-      continue;
-    }
-
-    if (ent->number < MAX_CLIENTS &&
-        ETJump::tempTraceIgnoredClients[ent->number]) {
       continue;
     }
 
@@ -1064,19 +1065,6 @@ void CG_PredictPlayerState() {
 
   cg_pmove.skill = cgs.clientinfo[cg.snap->ps.clientNum].skill;
 
-  for (int i = 0; i < MAX_CLIENTS; i++) {
-    const int other = cg_entities[i].currentState.number;
-
-    if (cg.snap->ps.clientNum == other) {
-      continue;
-    }
-
-    if (!ETJump::playerIsSolid(cg.snap->ps.clientNum, other) ||
-        ETJump::playerIsNoclipping(other)) {
-      ETJump::tempTraceIgnoreClient(other);
-    }
-  }
-
   cg_pmove.trace = CG_TraceCapsule;
   cg_pmove.pointcontents = CG_PointContents;
 
@@ -1457,8 +1445,6 @@ void CG_PredictPlayerState() {
     // add push trigger movement effects
     CG_TouchTriggerPrediction();
   }
-
-  ETJump::resetTempTraceIgnoredClients();
 
   // unlagged - optimized prediction
   //  do a /condump after a few seconds of this

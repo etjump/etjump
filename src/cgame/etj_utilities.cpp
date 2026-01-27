@@ -261,18 +261,6 @@ bool playerIsNoclipping(const int clientNum) {
          static_cast<int>(PlayerDensityFlags::Noclip);
 }
 
-void tempTraceIgnoreClient(int clientNum) {
-  if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  tempTraceIgnoredClients[clientNum] = true;
-}
-
-void resetTempTraceIgnoredClients() {
-  std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
-}
-
 bool skipPortalDraw(const int selfNum, const int otherNum) {
   if (selfNum == otherNum) {
     return false;

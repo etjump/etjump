@@ -1915,26 +1915,6 @@ static float CG_ScanForCrosshairEntity(float *zChange, qboolean *hitClient) {
   return dist;
 }
 
-namespace ETJump {
-void cursorhintTrace(trace_t *trace, vec3_t start, vec3_t end) {
-  CG_Trace(trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
-           MASK_PLAYERSOLID);
-
-  if (trace->entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (trace->entityNum < MAX_CLIENTS &&
-         !playerIsSolid(cg.snap->ps.clientNum, trace->entityNum)) {
-    tempTraceIgnoreClient(trace->entityNum);
-    CG_Trace(trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
-             MASK_PLAYERSOLID);
-  }
-
-  resetTempTraceIgnoredClients();
-}
-} // namespace ETJump
-
 /*
 ==============
 CG_CheckForCursorHints
@@ -1967,7 +1947,8 @@ void CG_CheckForCursorHints() {
   VectorCopy(cg.refdef_current->vieworg, start);
   VectorMA(start, CH_DIST, cg.refdef_current->viewaxis[0], end);
 
-  ETJump::cursorhintTrace(&trace, start, end);
+  CG_Trace(&trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
+           MASK_PLAYERSOLID);
 
   if (trace.fraction == 1.0f) {
     return;

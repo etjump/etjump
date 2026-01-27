@@ -57,7 +57,8 @@ bool OverbounceDetector::beforeRender() {
     VectorCopy(start, end);
     end[2] -= Overbounce::MAX_TRACE_DIST;
 
-    overbounceTrace(trace, start, end);
+    CG_Trace(&trace, start, nullptr, nullptr, end, ps->clientNum,
+             traceContents);
 
     if (trace.fraction != 1.0 && trace.plane.type == 2) {
       // something was hit and it's a floor
@@ -76,7 +77,7 @@ bool OverbounceDetector::beforeRender() {
   VectorCopy(cg.refdef.vieworg, start);
   VectorMA(start, Overbounce::MAX_TRACE_DIST, cg.refdef.viewaxis[0], end);
 
-  overbounceTrace(trace, start, end);
+  CG_Trace(&trace, start, nullptr, nullptr, end, ps->clientNum, traceContents);
 
   if (trace.fraction != 1.0 && trace.plane.type == 2) {
     // something was hit and it's a floor
@@ -143,25 +144,6 @@ void OverbounceDetector::render() const {
     CG_DrawStringExt(static_cast<int>(x - 20), etj_OBY.integer, "S", colorWhite,
                      qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
   }
-}
-
-void OverbounceDetector::overbounceTrace(trace_t &tr, const vec3_t tr_start,
-                                         const vec3_t tr_end) {
-  CG_Trace(&tr, tr_start, nullptr, nullptr, tr_end, ps->clientNum,
-           traceContents);
-
-  if (cg_ghostPlayers.integer != 1 || tr.entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (tr.entityNum < MAX_CLIENTS &&
-         !ETJump::playerIsSolid(ps->clientNum, tr.entityNum)) {
-    tempTraceIgnoreClient(tr.entityNum);
-    CG_Trace(&tr, tr_start, nullptr, nullptr, tr_end, ps->clientNum,
-             traceContents);
-  }
-
-  resetTempTraceIgnoredClients();
 }
 
 bool OverbounceDetector::canSkipDraw() {

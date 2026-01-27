@@ -93,7 +93,6 @@ std::shared_ptr<ClientRtvHandler> rtvHandler;
 std::shared_ptr<AreaIndicator> areaIndicator;
 std::unique_ptr<DemoCompatibility> demoCompatibility;
 std::shared_ptr<AccelColor> accelColor;
-std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 std::shared_ptr<PlayerBBox> playerBBox;
 std::unique_ptr<SavePos> savePos;
 std::unique_ptr<SyscallExt> syscallExt;
@@ -352,8 +351,6 @@ void init() {
 
   assert(timerun != nullptr);
   savePos = std::make_unique<SavePos>(timerun);
-
-  std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
 
   ServerCommands::registerCommands();
   ConsoleCommands::registerCommands();

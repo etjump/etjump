@@ -6344,24 +6344,6 @@ void SnapVectorTowards(vec3_t v, vec3_t to) {
   }
 }
 
-namespace ETJump {
-void bulletTrace(trace_t *trace, vec3_t start, vec3_t end, int mask) {
-  CG_Trace(trace, start, nullptr, nullptr, end, 0, mask);
-
-  if (trace->entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (trace->entityNum < MAX_CLIENTS &&
-         !ETJump::playerIsSolid(cg.snap->ps.clientNum, trace->entityNum)) {
-    tempTraceIgnoreClient(trace->entityNum);
-    CG_Trace(trace, start, nullptr, nullptr, end, 0, mask);
-  }
-
-  resetTempTraceIgnoredClients();
-}
-} // namespace ETJump
-
 /*
 ======================
 CG_Bullet
@@ -6416,8 +6398,7 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
     VectorMA(muzzle, 8192, forward, end);
     VectorMA(end, r, right, end);
     VectorMA(end, u, up, end);
-
-    ETJump::bulletTrace(&tr, muzzle, end, MASK_SHOT);
+    CG_Trace(&tr, muzzle, nullptr, nullptr, end, otherEntNum2, MASK_SHOT);
 
     SnapVectorTowards(tr.endpos, muzzle);
     VectorCopy(tr.endpos, end);
@@ -6601,7 +6582,8 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         VectorSubtract(end, start, dist);
         VectorMA(start, waterfraction, dist, end2);
 
-        ETJump::bulletTrace(&trace2, start, end, MASK_SHOT | MASK_WATER);
+        CG_Trace(&trace2, start, nullptr, nullptr, end, 0,
+                 MASK_SHOT | MASK_WATER);
 
         trap_S_StartSound(end, -1, CHAN_AUTO,
                           cgs.media.sfx_bullet_waterhit[rand() % 5]);
@@ -6619,8 +6601,9 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         VectorNormalizeFast(dir);
         VectorMA(end, 4, dir, end);
 
-        ETJump::bulletTrace(&trace, start, end, MASK_SHOT);
-        ETJump::bulletTrace(&trace2, start, end, MASK_SHOT | MASK_WATER);
+        CG_Trace(&trace, start, nullptr, nullptr, end, 0, MASK_SHOT);
+        CG_Trace(&trace2, start, nullptr, nullptr, end, 0,
+                 MASK_SHOT | MASK_WATER);
 
         if (trace.fraction != trace2.fraction) {
           trap_S_StartSound(end, -1, CHAN_AUTO,

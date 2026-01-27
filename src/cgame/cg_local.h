@@ -4226,7 +4226,6 @@ extern std::shared_ptr<EventLoop> eventLoop;
 extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 extern std::shared_ptr<ClientRtvHandler> rtvHandler;
 extern std::unique_ptr<DemoCompatibility> demoCompatibility;
-extern std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
 extern std::shared_ptr<PlayerBBox> playerBBox;
 extern std::unique_ptr<SavePos> savePos;
 extern std::unique_ptr<SyscallExt> syscallExt;
