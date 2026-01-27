@@ -234,20 +234,20 @@ typedef int clipHandle_t;
 
 // networked fields in entityState_t and playerState_t,
 // with their respective networked sizes
-typedef int net_uint2_t;
-typedef int net_uint4_t;
-typedef int net_uint7_t;
-typedef int net_uint8_t;
-typedef int net_uint9_t;
-typedef int net_uint10_t;
-typedef int net_uint16_t;
-typedef int net_uint24_t;
+using net_uint2_t = int32_t;
+using net_uint4_t = int32_t;
+using net_uint7_t = int32_t;
+using net_uint8_t = int32_t;
+using net_uint9_t = int32_t;
+using net_uint10_t = int32_t;
+using net_uint16_t = int32_t;
+using net_uint24_t = int32_t;
 
-typedef int net_int8_t;
-typedef int net_int16_t;
-typedef int net_int32_t;
+using net_int8_t = int32_t;
+using net_int16_t = int32_t;
+using net_int32_t = int32_t;
 
-typedef float net_float;
+using net_float = float;
 
 // allow sound to be cut off by any following sounds on this channel
 inline constexpr int SND_OKTOCUT = 0x001;
@@ -1718,7 +1718,7 @@ static_assert(sizeof(entityTypeNames) / sizeof(entityTypeNames[0]) ==
  */
 
 typedef struct entityState_s {
-  net_uint8_t number; // entity index
+  net_uint10_t number; // entity index
   // changed from entityType_t to int to allow ET_EVENTS + eventNum
   net_uint8_t eType;
   net_uint24_t eFlags;
