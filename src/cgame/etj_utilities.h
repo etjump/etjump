@@ -82,6 +82,8 @@ bool playerIsSolid(int self, int other);
 // checks if target client is noclipping
 bool playerIsNoclipping(int clientNum);
 
+void tempTraceIgnoreEntities();
+
 void tempTraceIgnoreClient(int clientNum);
 
 void resetTempTraceIgnoredClients();

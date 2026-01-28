@@ -96,6 +96,7 @@ std::shared_ptr<AreaIndicator> areaIndicator;
 std::unique_ptr<DemoCompatibility> demoCompatibility;
 std::shared_ptr<AccelColor> accelColor;
 std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
+std::vector<int32_t> tempTraceIgnoredEntities;
 std::shared_ptr<PlayerBBox> playerBBox;
 std::unique_ptr<SavePos> savePos;
 std::unique_ptr<SyscallExt> syscallExt;
