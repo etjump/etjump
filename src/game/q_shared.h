@@ -1621,6 +1621,8 @@ typedef enum {
 
   ET_FAKEBRUSH, // func_fakebrush
 
+  ET_STATIC_CLIENT, // func_static_client
+
   ET_EVENTS, // any of the EV_* events can be added freestanding
              // by setting eType to ET_EVENTS + eventNum
              // this avoids having to set eFlags and eventNum
