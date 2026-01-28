@@ -1238,12 +1238,26 @@ void ClientThink_real(gentity_t *ent) {
     pm.cmd.weapon = client->ps.weapon;
   }
 
-  // setup nonsolid players
-  for (int i = 0; i < level.numConnectedClients; i++) {
-    const int otherNum = level.sortedClients[i];
+  // setup nonsolid entities
+  for (int i = 0; i < level.num_entities; i++) {
+    if (i < MAX_CLIENTS) {
+      const int otherNum = level.sortedClients[i];
 
-    if (!ETJump::EntityUtilities::playerIsSolid(clientNum, otherNum)) {
-      G_TempTraceIgnoreEntity(g_entities + otherNum);
+      if (!ETJump::EntityUtilities::playerIsSolid(clientNum, otherNum)) {
+        G_TempTraceIgnoreEntity(g_entities + otherNum);
+      }
+    } else {
+      gentity_t *tent = &g_entities[i];
+
+      if (tent->s.eType != ET_STATIC_CLIENT) {
+        continue;
+      }
+
+      if (COM_BitCheck((clientNum < MAX_CLIENTS / 2) ? &tent->s.effect1Time
+                                                     : &tent->s.effect2Time,
+                       clientNum)) {
+        G_TempTraceIgnoreEntity(tent);
+      }
     }
   }
 
