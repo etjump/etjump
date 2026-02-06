@@ -22,13 +22,10 @@
  * SOFTWARE.
  */
 
-#include <unordered_map>
+#include "etj_colorpicker.h"
 
-#include "ui_shared.h"
 #include "../cgame/etj_utilities.h"
 #include "../game/etj_string_utilities.h"
-
-#include "etj_colorpicker.h"
 
 extern displayContextDef_t *DC;
 
