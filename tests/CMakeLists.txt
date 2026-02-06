@@ -1,6 +1,6 @@
 include(GoogleTest)
 
-add_executable(tests 
+add_executable(tests
 	"../src/cgame/etj_client_commands_handler.cpp"
 	"../src/cgame/etj_entity_events_handler.cpp"
 	"../src/cgame/etj_utilities.cpp"
@@ -17,6 +17,7 @@ add_executable(tests
 	"command_parser_tests.cpp"
 	"deathrun_system_tests.cpp"
 	"entity_events_handler_tests.cpp"
+	"enum_bitset_tests.cpp"
 	"inline_command_parser_tests.cpp"
 	"string_utilities_tests.cpp"
 	"time_utilities_tests.cpp"
