@@ -48,6 +48,8 @@ public:
   // if index is invalid, returns an empty string
   [[nodiscard]] std::string buildConnectCommand(int index) const;
 
+  static constexpr int32_t MAX_QUICKCONNECT_SERVERS = 5;
+
   // label texts are not fixed sized arrays, they are normally allocated
   // to the UI string pool with 'String_Alloc'. Because we're potentially
   // editing the label texts multiple times on one session, we hold the

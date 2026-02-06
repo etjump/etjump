@@ -1,4 +1,5 @@
 #include "ui_local.h"
+#include "etj_local.h"
 #include "../game/etj_syscall_ext_shared.h"
 
 // this file is only included when building a dll
@@ -479,6 +480,6 @@ void trap_GetHunkData(int *hunkused, int *hunkexpected) {
 namespace ETJump {
 // entry point for additional system calls for other engines (ETe, ET: Legacy)
 bool SyscallExt::trap_GetValue(char *value, const int size, const char *key) {
-  return SystemCall(syscallExt->dll_com_trapGetValue, value, size, key);
+  return SystemCall(ui.syscallExt->dll_com_trapGetValue, value, size, key);
 }
 } // namespace ETJump
