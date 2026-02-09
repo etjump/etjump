@@ -244,6 +244,8 @@ std::string CHSDataHandler::speed(const SpeedType type) const {
       return stringFormat("%.0f %.0f %.0f", VectorLength2(ps->velocity),
                           DotProduct(ps->velocity, cg.refdef.viewaxis[0]),
                           DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
+    default:
+      return "-";
   }
 }
 
@@ -339,6 +341,8 @@ std::string CHSDataHandler::distance(const DistanceType type) {
                                 Distance(tr.endpos, cg.refdef.vieworg))
                  : "- - -";
     } break;
+    default:
+      return "-";
   }
 }
 
@@ -381,6 +385,8 @@ std::string CHSDataHandler::position(const PositionType type) const {
       return stringFormat("%.0f", cg.refdef.vieworg[1]);
     case PositionType::VIEW_Z:
       return stringFormat("%.0f", cg.refdef.vieworg[2]);
+    default:
+      return "-";
   }
 }
 
