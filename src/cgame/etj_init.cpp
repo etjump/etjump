@@ -66,6 +66,8 @@
 #include "etj_player_bbox.h"
 #include "etj_pmove_utils.h"
 #include "etj_savepos.h"
+#include "etj_chs_data.h"
+#include "etj_chs_drawable.h"
 #include "etj_servercommands.h"
 #include "etj_consolecommands.h"
 
@@ -98,6 +100,7 @@ std::shared_ptr<PlayerBBox> playerBBox;
 std::unique_ptr<SavePos> savePos;
 std::unique_ptr<SyscallExt> syscallExt;
 std::unique_ptr<PmoveUtils> pmoveUtils;
+std::shared_ptr<CHSDataHandler> chsDataHandler;
 
 void delayedInit() {
   // force original cvars to match the shadow values, as ETe and ETL
@@ -206,8 +209,11 @@ static void initDrawKeys(const std::shared_ptr<KeySetSystem> &keySetSystem) {
 }
 
 static void initRenderables() {
-  assert(pmoveUtils != nullptr && accelColor != nullptr);
+  assert(pmoveUtils != nullptr && accelColor != nullptr &&
+         chsDataHandler != nullptr);
 
+  renderables.emplace_back(
+      std::make_shared<CHS>(cvarUpdateHandler, chsDataHandler));
   renderables.emplace_back(
       std::make_shared<OverbounceWatcher>(consoleCommandsHandler.get()));
   renderables.emplace_back(std::make_shared<OverbounceDetector>());
@@ -342,6 +348,8 @@ void init() {
   // must be initialized before accelColor & renderables!
   pmoveUtils = std::make_unique<PmoveUtils>();
   accelColor = std::make_shared<AccelColor>();
+  chsDataHandler = std::make_shared<CHSDataHandler>(cvarUpdateHandler,
+                                                    consoleCommandsHandler);
   initRenderables();
 
   // FIXME: remove this 'Drawable' class and move this to 'IRenderable'
@@ -398,6 +406,8 @@ void shutdown() {
   syscallExt = nullptr;
 
   trickjumpLines = nullptr;
+
+  chsDataHandler = nullptr;
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME

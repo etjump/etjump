@@ -1354,7 +1354,6 @@ static const consoleCommand_t anyTimeCommands[] = {
 
     {"viewpos", CG_Viewpos_f},
     {"portal", CG_portalinfo_f},
-    {"chs", CG_InfoCHS_f},
     {"help", CG_Manual_f},
     {"man", CG_Manual_f},
     {"manual", CG_Manual_f},

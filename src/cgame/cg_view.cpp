@@ -9,6 +9,7 @@
 #include "etj_event_loop.h"
 #include "etj_trickjump_lines.h"
 #include "etj_utilities.h"
+#include "etj_chs_data.h"
 
 /*
 =============================================================================
@@ -2223,6 +2224,10 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
     // setup pmove for renderables
     if (ETJump::pmoveUtils->check()) {
       ETJump::pmoveUtils->runPmove();
+    }
+
+    if (etj_drawCHS1.integer || etj_drawCHS2.integer) {
+      ETJump::chsDataHandler->runFrame();
     }
 
     // actually issue the rendering calls
