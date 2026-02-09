@@ -4409,8 +4409,6 @@ static void CG_Draw2D() {
       CG_DrawSlick();
       CG_DrawJumpDelay();
     }
-
-    CG_DrawCHS();
   } else {
     if (cgs.eventHandling != CGAME_EVENT_NONE) {
       // draw cursor
