@@ -1173,6 +1173,143 @@ void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
       });
 }
 
+class ListCheckpointsResult
+    : public ETJump::SynchronizationContext::ResultBase {
+public:
+  ListCheckpointsResult(std::vector<ETJump::Timerun::Checkpoints> checkpoints,
+                        std::vector<ETJump::Timerun::Season> seasons)
+      : checkpoints(std::move(checkpoints)), seasons(std::move(seasons)) {}
+
+  std::vector<ETJump::Timerun::Checkpoints> checkpoints;
+  std::vector<ETJump::Timerun::Season> seasons;
+};
+
+void ETJump::TimerunV2::listCheckpoints(
+    const Timerun::ListCheckpointsParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const int32_t rank = params.rank;
+
+  _sc->postTask(
+      [this, params]() {
+        const auto checkpoints = _repository->getCheckpoints(params);
+        const auto seasons =
+            _repository->getSeasonsForName(params.season.value(), false);
+        return std::make_unique<ListCheckpointsResult>(checkpoints, seasons);
+      },
+      [this, clientNum, rank](const auto results) {
+        const auto *const r =
+            dynamic_cast<ListCheckpointsResult *>(results.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: unable to list checkpoints for player %i: "
+                         "ListCheckpointsResult is NULL",
+                         clientNum);
+          throw std::runtime_error(
+              stringFormat("%s: unable to list checkpoints. This is a bug, "
+                           "please report this to the developers."));
+        }
+
+        // ensure we have at least some valid checkpoint times
+        bool anyValid = false;
+
+        for (const auto &cp : r->checkpoints) {
+          if (cp.checkpoints[0] != TIMERUN_CHECKPOINT_NOT_SET) {
+            anyValid = true;
+            break;
+          }
+        }
+
+        if (!anyValid || r->checkpoints.empty()) {
+          Printer::console(clientNum, "No checkpoints available.\n");
+          return;
+        }
+
+        std::map<int32_t, Timerun::Season> seasonIdToName;
+
+        for (const auto &s : r->seasons) {
+          seasonIdToName[s.id] = s;
+        }
+
+        for (const auto &data : r->checkpoints) {
+          // Don't print a result if it has no checkpoint times.
+          // We potentially get multiple results back
+          // (e.g. partial match on multiple runs/seasons),
+          // and it's possible that some of them have no checkpoint times.
+          if (data.checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
+            continue;
+          }
+
+          const auto seasonIt = seasonIdToName.find(data.seasonID);
+
+          // This can only ever happen in cases where a server owner goes
+          // and manually deletes a season from the database, without also
+          // deleting the records associated with it. If a season is deleted
+          // with '!delete-season' command, all the records associated
+          // with that season area also deleted, so this should never happen.
+          if (seasonIt == seasonIdToName.cend()) {
+            Printer::console(clientNum,
+                             "Malformed data received from the timerun "
+                             "database. Please inform the server owner, more "
+                             "information is available in the server logs.\n");
+            _logger->error(stringFormat(
+                "Record on map %s, run %s by player %s with time %i "
+                "contains invalid season ID '%i'. The database might have been "
+                "manually modified, or is corrupted. If you have manually "
+                "deleted a season on purpose from the database instead of "
+                "using !delete-season command, please delete all records "
+                "associated with the invalid season ID as well. If the "
+                "database is intact and hasn't been modified by hand, please "
+                "report this error to the developers.",
+                data.map, data.run, data.playerName, data.runTime,
+                data.seasonID));
+            continue;
+          }
+
+          const Timerun::Season season = seasonIt->second;
+          std::string s = "\n";
+
+          if (data.seasonID == defaultSeasonId) {
+            s += stringFormat("^2Checkpoint times for map ^7%s\n", data.map);
+          } else {
+            s += stringFormat(
+                "^2Checkpoint times on season ^7%s ^2for map ^7%s\n",
+                season.name, data.map);
+          }
+
+          s += "^g-------------------------------------------------------------"
+               "\n";
+          s += stringFormat(
+              " ^2Run: ^7%s\n ^2Player: ^7%s\n ^2Time: ^7%s (%s^7)\n\n",
+              data.run, data.playerName, millisToString(data.runTime),
+              rankToString(rank));
+
+          for (size_t i = 0; i < data.checkpoints.size(); i++) {
+            if (data.checkpoints[i] == TIMERUN_CHECKPOINT_NOT_SET) {
+              break;
+            }
+
+            s += stringFormat(" ^g%2i. ^7%s", static_cast<int32_t>(i + 1),
+                              millisToString(data.checkpoints[i]));
+
+            // from 2nd checkpoint onwards, display the absolute time
+            // difference between checkpoints
+            if (i > 0) {
+              s += stringFormat(" ^z(%s)",
+                                millisToString(data.checkpoints[i] -
+                                               data.checkpoints[i - 1]));
+            }
+
+            s += "\n";
+          }
+
+          Printer::console(clientNum, s);
+        }
+      },
+      [this, clientNum](const std::runtime_error &e) {
+        Printer::console(clientNum, stringFormat("%s\n", e.what()));
+      });
+}
+
 int32_t ETJump::TimerunV2::getRunStartTime(const int32_t clientNum) const {
   return _players[clientNum]->startTime.value_or(0);
 }

@@ -263,7 +263,7 @@ ETJump::TimerunRepository::getTopRecord(int seasonId, const std::string &map,
       player_name,
       metadata
     from record
-    where 
+    where
       season_id=? and
       map=? and
       run=?
@@ -545,7 +545,7 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
       player_name,
       metadata
     from record
-    where 
+    where
       (%s) and
       map=?
       %s
@@ -711,6 +711,115 @@ void ETJump::TimerunRepository::deleteSeason(const std::string &name) {
 
   _database->sql << "delete from record where season_id=?;" << id;
   _database->sql << "delete from season where id=?" << id;
+}
+
+// TODO: this shares a lot of logic with 'getRecords',
+// should maybe extract some of it to separate functions
+std::vector<ETJump::Timerun::Checkpoints>
+ETJump::TimerunRepository::getCheckpoints(
+    const ETJump::Timerun::ListCheckpointsParams &params) {
+  std::vector<ETJump::Timerun::Checkpoints> checkpoints;
+
+  const std::string season = params.season.value_or("Default");
+  const auto seasons = getSeasonsForName(season, false);
+
+  if (seasons.empty()) {
+    throw std::runtime_error(
+        stringFormat("No seasons found matching name '%s'", season));
+  }
+
+  const std::string map = params.map;
+  const auto maps = getMapsForName(map, params.exactMap);
+
+  if (maps.size() > 1) {
+    bool exactMapFound = false;
+
+    for (const auto &m : maps) {
+      if (m == map) {
+        exactMapFound = true;
+        break;
+      }
+    }
+
+    if (!exactMapFound) {
+      std::string error = stringFormat(
+          "^3records: ^7found %d maps matching ^3%s^7\n", maps.size(), map);
+
+      const int perRow = 3;
+      int i = 0;
+      for (const auto &m : maps) {
+        if (i != 0 && i % perRow == 0) {
+          error += "\n";
+        }
+
+        error += stringFormat("%-22s", m);
+        ++i;
+      }
+
+      throw std::runtime_error(error);
+    }
+  }
+
+  const std::string runPlaceHolder = "and lsanitize(run) like ?";
+
+  const auto runs =
+      getRunsForName(maps.empty() ? map : maps[0], params.run, true, true);
+  const std::string runBinder =
+      runs.size() == 1 ? runs[0] : "%" + params.run + "%";
+
+  const std::string seasonPlaceholders = StringUtil::join(
+      Container::map(seasons, [](const auto &) { return "season_id=?"; }),
+      " or ");
+
+  std::string query = stringFormat(R"(
+    select *
+      from (
+        select
+          season_id,
+          map,
+          run,
+          time,
+          checkpoints,
+          player_name,
+          rank() over (partition by season_id, map, run order by time asc) as rank
+        FROM record
+        where (%s) and map=? %s
+      ) as ranked_records
+      where rank = ?;
+  )",
+                                   seasonPlaceholders, runPlaceHolder);
+
+  sqlite::database_binder binder = _database->sql << query;
+
+  for (const auto &s : seasons) {
+    binder << s.id;
+  }
+
+  binder << StringUtil::toLowerCase(maps.empty() ? map : maps[0]);
+  binder << runBinder;
+  binder << params.rank;
+
+  binder >> [&checkpoints](const int32_t seasonID, const std::string &map,
+                           const std::string &run, const int32_t runTime,
+                           const std::string &checkpointsStr,
+                           const std::string &playerName) {
+    Timerun::Checkpoints cp;
+
+    cp.seasonID = seasonID;
+    cp.map = map;
+    cp.run = run;
+    cp.runTime = runTime;
+
+    for (const auto &time : StringUtil::split(checkpointsStr, ",")) {
+      cp.checkpoints.emplace_back(Q_atoi(time));
+    }
+
+    cp.playerName = playerName;
+
+    checkpoints.emplace_back(cp);
+  };
+
+  return checkpoints;
 }
 
 void ETJump::TimerunRepository::tryToMigrateRecords() {

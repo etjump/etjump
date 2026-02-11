@@ -109,6 +109,7 @@ public:
   void printRankings(const Timerun::PrintRankingsParams &params);
   void printSeasons(int clientNum);
   void deleteSeason(int clientNum, const std::string &name);
+  void listCheckpoints(const Timerun::ListCheckpointsParams &params);
 
   [[nodiscard]] int32_t getRunStartTime(int32_t clientNum) const;
 

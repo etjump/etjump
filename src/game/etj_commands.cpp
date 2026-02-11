@@ -213,6 +213,122 @@ bool ListSeasons(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+static bool listCheckpoints(gentity_t *ent, Arguments argv) {
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+  const std::string desc = R"(Print checkpoint times for a run.
+    /listcheckpoints --season <season name> --map <map name> --run <run name> --rank <rank>
+
+    Has a shorthand format of:
+    /listcheckpoints <run name>
+    /listcheckpoints <run name> <rank>
+    /listcheckpoints <map name> <run name> <rank>
+    /listcheckpoints <season name> <map name> <run name> <rank>)";
+
+  const auto args = ETJump::Container::skipFirstN(*argv, 1);
+  auto optCommand = ETJump::getOptCommand(
+      "listcheckpoints", clientNum,
+      ETJump::CommandParser::CommandDefinition::create("listcheckpoints", desc)
+          .addOption("season", "s",
+                     "Name of the season to list checkpoint times from. "
+                     "Default is the overall season.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("map", "m",
+                     "Name of the map to list checkpoints from. Default is the "
+                     "current map.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "run", "r", "Name of the run to list checkpoint times from.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption(
+              "rank", "rk",
+              "Rank from which to list checkpoints from. Default is rank 1.",
+              ETJump::CommandParser::OptionDefinition::Type::Integer, false),
+      &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto optSeason = optCommand.value().getOptional("season");
+  const auto optMap = optCommand.value().getOptional("map");
+  const auto optRun = optCommand.value().getOptional("run");
+  const auto optRank = optCommand.value().getOptional("rank");
+
+  std::string season;
+  std::string map;
+  std::string run;
+  int32_t rank = 0;
+  bool exactMap = false;
+
+  if (!optCommand->extraArgs.empty()) {
+    switch (optCommand->extraArgs.size()) {
+      case 1:
+        season = "Default";
+        map = level.rawmapname;
+        run = optCommand->extraArgs[0];
+        rank = 1;
+        break;
+      case 2:
+        season = "Default";
+        map = level.rawmapname;
+        run = optCommand->extraArgs[0];
+        rank = Q_atoi(optCommand->extraArgs[1]);
+        break;
+      case 3:
+        season = "Default";
+        map = optCommand->extraArgs[0];
+        run = optCommand->extraArgs[1];
+        rank = Q_atoi(optCommand->extraArgs[2]);
+        break;
+      default: // >= 4
+        season = optCommand->extraArgs[0];
+        map = optCommand->extraArgs[1];
+        run = optCommand->extraArgs[2];
+        rank = Q_atoi(optCommand->extraArgs[3]);
+    }
+  }
+
+  if (run.empty()) {
+    // this is a bit awkward, but because we can use shorthand format
+    // for specifying the run, we can't make it a required option,
+    // so we can end up with a command with no run specified,
+    // in which case mimic the error that an invalid command would print out
+    // TODO: this should probably be a callable function in the command itself,
+    // or we should make the parser use 'extraArgs' as the required option(s)
+    if (!optRun.has_value()) {
+      Printer::chat(clientNum, "^3listcheckpoints: ^7operation failed. Check "
+                               "console for more information.");
+      Printer::console(clientNum, "Required option `run` was not specified.\n");
+      return false;
+    }
+
+    run = optRun.value().text;
+  }
+
+  if (season.empty()) {
+    season = optSeason.has_value() ? optSeason.value().text : "Default";
+  }
+
+  if (map.empty()) {
+    map = optMap.has_value() ? optMap.value().text : level.rawmapname;
+    exactMap = !optMap.has_value();
+  }
+
+  if (rank == 0) {
+    rank = optRank.has_value() ? optRank.value().integer : 1;
+  }
+
+  game.timerunV2->listCheckpoints(
+      {clientNum, season, map, run, rank, exactMap});
+  return true;
+}
+
 bool Records(gentity_t *ent, Arguments argv) {
   // these are console commands but to make them more accessible
   // they were also made admin commands
@@ -2626,6 +2742,8 @@ Commands::Commands() {
       AdminCommandPair(ClientCommands::ListSeasons, CommandFlags::BASIC);
   adminCommands_["rtv"] =
       AdminCommandPair(AdminCommands::RockTheVote, CommandFlags::BASIC);
+  adminCommands_["listcheckpoints"] =
+      AdminCommandPair(ClientCommands::listCheckpoints, CommandFlags::BASIC);
   adminCommands_["add-customvote"] =
       AdminCommandPair(AdminCommands::addCustomVote, CommandFlags::CUSTOMVOTES);
   adminCommands_["delete-customvote"] = AdminCommandPair(
@@ -2648,6 +2766,7 @@ Commands::Commands() {
   commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
   commands_["rankings"] = ClientCommands::Rankings;
   commands_["seasons"] = ClientCommands::ListSeasons;
+  commands_["listcheckpoints"] = ClientCommands::listCheckpoints;
   commands_["getchatreplay"] = ClientCommands::GetChatReplay;
   commands_["requestmaplist"] = ClientCommands::sendMaplist;
   commands_["requestnumcustomvotes"] = ClientCommands::sendNumCustomvotes;
