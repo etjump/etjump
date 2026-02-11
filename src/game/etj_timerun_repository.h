@@ -74,6 +74,8 @@ public:
                                            const std::string &run, int rank);
   std::vector<Timerun::Season> getSeasons();
   void deleteSeason(const std::string &name);
+  std::vector<Timerun::Checkpoints>
+  getCheckpoints(const Timerun::ListCheckpointsParams &params);
 
 private:
   void tryToMigrateRecords();
@@ -87,7 +89,7 @@ private:
       stringFormat(R"(
     select
       %s
-    from season    
+    from season
   )",
                    _defaultSeasonFieldsStr);
   const std::vector<std::string> _defaultRecordFields{

@@ -27,12 +27,9 @@
 #include <optional>
 #include <string>
 
-#include "etj_synchronization_context.h"
 #include "etj_time_utilities.h"
 
-namespace ETJump {
-namespace Timerun {
-
+namespace ETJump::Timerun {
 inline constexpr int32_t DEFAULT_PAGE_SIZE_ALL_RUNS = 3;
 inline constexpr int32_t DEFAULT_PAGE_SIZE_SINGLE_RUN = 20;
 inline constexpr int32_t MAX_PAGE_SIZE_SINGLE_RUN = 100;
@@ -60,6 +57,15 @@ struct Record {
     return this->seasonId == otherRecord->seasonId &&
            this->map == otherRecord->map && this->run == otherRecord->run;
   }
+};
+
+struct Checkpoints {
+  int32_t seasonID;
+  int32_t runTime;
+  std::string playerName;
+  std::string map;
+  std::string run;
+  std::vector<int32_t> checkpoints;
 };
 
 struct AddSeasonParams {
@@ -94,5 +100,13 @@ struct PrintRankingsParams {
   int page{};
   int pageSize{};
 };
-} // namespace Timerun
-} // namespace ETJump
+
+struct ListCheckpointsParams {
+  int32_t clientNum{};
+  std::optional<std::string> season;
+  std::string map;
+  std::string run;
+  int32_t rank{};
+  bool exactMap;
+};
+} // namespace ETJump::Timerun
