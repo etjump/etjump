@@ -329,6 +329,122 @@ static bool listCheckpoints(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+static bool compareCheckpoints(gentity_t *ent, Arguments argv) {
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+  const std::string desc = R"(Compares checkpoint times for a run.
+    /comparecheckpoints --season <season name> --map <map name> --run <run name> --rank-1 <rank> --rank-2 <rank>
+
+    Has a shorthand format of:
+    /comparecheckpoints <run name> <rank-2>
+    /comparecheckpoints <run name> <rank-1> <rank-2>)";
+
+  const auto args = ETJump::Container::skipFirstN(*argv, 1);
+  auto optCommand = ETJump::getOptCommand(
+      "comparecheckpoints", clientNum,
+      ETJump::CommandParser::CommandDefinition::create("comparecheckpoints",
+                                                       desc)
+          .addOption("season", "s",
+                     "Name of the season to compare checkpoint times from. "
+                     "Default is the overall season.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("map", "m",
+                     "Name of the map to compare checkpoints from. Default is "
+                     "the current map.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "run", "r", "Name of the run to compare checkpoint times from.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("rank-1", "rk1",
+                     "Rank to compare checkpoint times to. Default is rank 1.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false)
+          .addOption("rank-2", "rk2",
+                     "Rank to compare against the base checkpoint times.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false),
+      &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto optSeason = optCommand.value().getOptional("season");
+  const auto optMap = optCommand.value().getOptional("map");
+  const auto optRun = optCommand.value().getOptional("run");
+  const auto optRankBase = optCommand.value().getOptional("rank-1");
+  const auto optRankCmp = optCommand.value().getOptional("rank-2");
+
+  std::string season;
+  std::string map;
+  std::string run;
+  int32_t rankBase = 0;
+  int32_t rankCmp = 0;
+  bool exactMap = false;
+
+  // shorthand commands need at least 2 arguments
+  if (optCommand->extraArgs.size() > 1) {
+    if (optCommand->extraArgs.size() == 2) {
+      season = "Default";
+      map = level.rawmapname;
+      run = optCommand->extraArgs[0];
+      rankBase = 1;
+      rankCmp = Q_atoi(optCommand->extraArgs[1]);
+    } else if (optCommand->extraArgs.size() >= 3) {
+      season = "Default";
+      map = level.rawmapname;
+      run = optCommand->extraArgs[0];
+      rankBase = Q_atoi(optCommand->extraArgs[1]);
+      rankCmp = Q_atoi(optCommand->extraArgs[2]);
+    }
+  }
+
+  // manual error handling like in 'listcheckpoints', more details there
+  if (run.empty() || rankCmp == 0) {
+    if (!optRun.has_value() || !optRankCmp.has_value()) {
+      Printer::chat(clientNum,
+                    "^3comparecheckpoints: ^7operation failed. Check "
+                    "console for more information.");
+      if (!optRun.has_value()) {
+        Printer::console(clientNum,
+                         "Required option `run` was not specified.\n");
+      }
+
+      if (!optRankCmp.has_value()) {
+        Printer::console(clientNum,
+                         "Required option `rank-2` was not specified.\n");
+      }
+
+      return false;
+    }
+
+    run = optRun.value().text;
+    rankCmp = optRankCmp.value().integer;
+  }
+
+  if (season.empty()) {
+    season = optSeason.has_value() ? optSeason.value().text : "Default";
+  }
+
+  if (map.empty()) {
+    map = optMap.has_value() ? optMap.value().text : level.rawmapname;
+    exactMap = !optMap.has_value();
+  }
+
+  if (rankBase == 0) {
+    rankBase = optRankBase.has_value() ? optRankBase.value().integer : 1;
+  }
+
+  game.timerunV2->compareCheckpoints(
+      {clientNum, season, map, run, rankBase, rankCmp, exactMap});
+  return true;
+}
+
 bool Records(gentity_t *ent, Arguments argv) {
   // these are console commands but to make them more accessible
   // they were also made admin commands
@@ -343,7 +459,8 @@ bool Records(gentity_t *ent, Arguments argv) {
           "records",
           "Print the timerun records.\n    /records --season <season name> "
           "--map <map name> --run <run name>\n\n    Has a shorthand format "
-          "of:\n    /records <run name>\n    /records <map name> <run name>\n  "
+          "of:\n    /records <run name>\n    /records <map name> <run "
+          "name>\n  "
           "  /records <season name> <map name> <run name>")
           .addOption("season", "s",
                      "Name of the season to print the records for. Default is "
@@ -536,11 +653,12 @@ static bool sendCustomvoteInfo(gentity_t *ent, Arguments argv) {
    *
    * cmd <type> <field> <data>
    *
-   * Each command includes the list type as the first argument, so client knows
-   * which list the data in this command belongs to. This way we can ensure
-   * the client can construct the complete struct for any given list, regardless
-   * of the order in which the packets arrive in. They *should* arrive
-   * sequentially in the order we send them, this is just extra guarantee.
+   * Each command includes the list type as the first argument, so client
+   * knows which list the data in this command belongs to. This way we can
+   * ensure the client can construct the complete struct for any given list,
+   * regardless of the order in which the packets arrive in. They *should*
+   * arrive sequentially in the order we send them, this is just extra
+   * guarantee.
    */
 
   const std::string cmd = ETJump::stringFormat("%s \"%s\"", prefix, list->type);
@@ -2744,6 +2862,8 @@ Commands::Commands() {
       AdminCommandPair(AdminCommands::RockTheVote, CommandFlags::BASIC);
   adminCommands_["listcheckpoints"] =
       AdminCommandPair(ClientCommands::listCheckpoints, CommandFlags::BASIC);
+  adminCommands_["comparecheckpoints"] =
+      AdminCommandPair(ClientCommands::compareCheckpoints, CommandFlags::BASIC);
   adminCommands_["add-customvote"] =
       AdminCommandPair(AdminCommands::addCustomVote, CommandFlags::CUSTOMVOTES);
   adminCommands_["delete-customvote"] = AdminCommandPair(
@@ -2767,6 +2887,7 @@ Commands::Commands() {
   commands_["rankings"] = ClientCommands::Rankings;
   commands_["seasons"] = ClientCommands::ListSeasons;
   commands_["listcheckpoints"] = ClientCommands::listCheckpoints;
+  commands_["comparecheckpoints"] = ClientCommands::compareCheckpoints;
   commands_["getchatreplay"] = ClientCommands::GetChatReplay;
   commands_["requestmaplist"] = ClientCommands::sendMaplist;
   commands_["requestnumcustomvotes"] = ClientCommands::sendNumCustomvotes;

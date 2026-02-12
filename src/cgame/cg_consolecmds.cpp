@@ -1552,6 +1552,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("seasons");
   trap_AddCommand("loadcheckpoints");
   trap_AddCommand("listcheckpoints");
+  trap_AddCommand("comparecheckpoints");
 
   trap_AddCommand("setoffset"); // autocompletion
   trap_AddCommand("interruptRun");

@@ -109,4 +109,14 @@ struct ListCheckpointsParams {
   int32_t rank{};
   bool exactMap;
 };
+
+struct CompareCheckpointsParams {
+  int32_t clientNum{};
+  std::optional<std::string> season;
+  std::string map;
+  std::string run;
+  int32_t rankBase{};
+  int32_t rankCmp{};
+  bool exactMap;
+};
 } // namespace ETJump::Timerun
