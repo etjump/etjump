@@ -1,5 +1,7 @@
 file(GLOB GAME_HEADERS "*.h" "*.hpp")
 
+option(NO_TIMERUN_RANKINGS "Disable timerun rankings calculations" OFF)
+
 add_library(qagame MODULE
 	"bg_animation.cpp"
 	"bg_animgroup.cpp"
@@ -103,7 +105,14 @@ add_library(qagame MODULE
 	"etj_utilities.cpp"
 	${GAME_HEADERS}
 )
+
 target_compile_definitions(qagame PRIVATE GAMEDLL)
+
+if (NO_TIMERUN_RANKINGS)
+  add_compile_definitions(NO_TIMERUN_RANKINGS)
+  message(STATUS "Disabling timerun rankings calculations")
+endif()
+
 target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt::fmt)
 target_link_libraries(qagame PRIVATE $<IF:$<CXX_COMPILER_ID:MSVC>,,pthread>)
 set_target_properties(qagame PROPERTIES

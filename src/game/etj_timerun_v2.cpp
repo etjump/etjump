@@ -253,7 +253,10 @@ void ETJump::TimerunV2::initialize() {
   }
 
   _sc->startWorkerThreads(1);
+
+#ifndef NO_TIMERUN_RANKINGS
   computeRanks();
+#endif
 }
 
 void ETJump::TimerunV2::shutdown() {

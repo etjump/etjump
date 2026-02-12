@@ -141,7 +141,13 @@ bool listCustomVotes(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-bool Rankings(gentity_t *ent, Arguments argv) {
+static bool Rankings(gentity_t *ent, Arguments argv) {
+#ifdef NO_TIMERUN_RANKINGS
+  Printer::console(ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER,
+                   "Rankings are disabled on this build.\n");
+  return false;
+#endif
+
   // these are console commands but to make them more accessible
   // they were also made admin commands
   // server can't call these as they expect clientNum
