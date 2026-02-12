@@ -30,31 +30,29 @@
 #include "etj_database_v2.h"
 #include "q_shared.h"
 
-ETJump::Timerun::Record getRecordFromStandardQueryResult(
+namespace ETJump {
+Timerun::Record getRecordFromStandardQueryResult(
     int seasonId, std::string map, std::string runName, int userId, int time,
     std::string checkpointsString, std::string recordDate,
     std::string playerName, std::string metadataString) {
-  auto checkpoints = ETJump::Container::map(
-      ETJump::Container::filter(
-          ETJump::StringUtil::split(checkpointsString, ","),
-          [](const std::string &input) {
-            return ETJump::trim(input).length() > 0;
-          }),
+  auto checkpoints = Container::map(
+      Container::filter(
+          StringUtil::split(checkpointsString, ","),
+          [](const std::string &input) { return trim(input).length() > 0; }),
       [](const std::string &checkpoint) {
         try {
-          return std::stoi(ETJump::trim(checkpoint));
+          return std::stoi(trim(checkpoint));
         } catch (const std::logic_error &) {
           return TIMERUN_CHECKPOINT_NOT_SET;
         }
       });
-  ETJump::Time recordDateTime = ETJump::Time::fromString(recordDate);
+  Time recordDateTime = Time::fromString(recordDate);
 
   std::map<std::string, std::string> metadata;
-  for (const auto &kvp :
-       ETJump::Container::map(ETJump::StringUtil::split(metadataString, ","),
-                              [](const std::string &kvp) {
-                                return ETJump::StringUtil::split(kvp, "=");
-                              })) {
+  for (const auto &kvp : Container::map(StringUtil::split(metadataString, ","),
+                                        [](const std::string &kvp) {
+                                          return StringUtil::split(kvp, "=");
+                                        })) {
     if (kvp.size() != 2) {
       continue;
     }
@@ -62,7 +60,7 @@ ETJump::Timerun::Record getRecordFromStandardQueryResult(
     metadata[kvp[0]] = kvp[1];
   }
 
-  ETJump::Timerun::Record record;
+  Timerun::Record record;
   record.seasonId = seasonId;
   record.map = std::move(map);
   record.run = std::move(runName);
@@ -76,13 +74,13 @@ ETJump::Timerun::Record getRecordFromStandardQueryResult(
   return record;
 }
 
-void ETJump::TimerunRepository::initialize() { migrate(); }
+void TimerunRepository::initialize() { migrate(); }
 
-void ETJump::TimerunRepository::shutdown() { _database = nullptr; }
+void TimerunRepository::shutdown() { _database = nullptr; }
 
-std::vector<ETJump::Timerun::Record>
-ETJump::TimerunRepository::getRecordsForPlayer(
-    const std::vector<int> activeSeasons, const std::string &map, int userId) {
+std::vector<Timerun::Record>
+TimerunRepository::getRecordsForPlayer(const std::vector<int> activeSeasons,
+                                       const std::string &map, int userId) {
   auto parameters = StringUtil::join(
       Container::map(activeSeasons,
                      [](int season) { return std::to_string(season); }),
@@ -105,8 +103,7 @@ ETJump::TimerunRepository::getRecordsForPlayer(
   return records;
 }
 
-ETJump::Timerun::Season
-ETJump::TimerunRepository::addSeason(Timerun::AddSeasonParams params) {
+Timerun::Season TimerunRepository::addSeason(Timerun::AddSeasonParams params) {
   int count = 0;
   _database->sql << R"(
                       select count(name) from season where name=? collate nocase;
@@ -149,10 +146,10 @@ ETJump::TimerunRepository::addSeason(Timerun::AddSeasonParams params) {
                          params.name, params.startTime, params.endTime};
 }
 
-std::vector<ETJump::Timerun::Record>
-ETJump::TimerunRepository::getRecordsForPlayer(
-    const std::vector<int> &activeSeasons, const std::string &map,
-    const std::string &run, int userId) {
+std::vector<Timerun::Record>
+TimerunRepository::getRecordsForPlayer(const std::vector<int> &activeSeasons,
+                                       const std::string &map,
+                                       const std::string &run, int userId) {
   auto records = std::vector<Timerun::Record>();
 
   _database->sql << stringFormat(R"(
@@ -188,13 +185,13 @@ ETJump::TimerunRepository::getRecordsForPlayer(
   return records;
 }
 
-std::vector<ETJump::Timerun::Record>
-ETJump::TimerunRepository::getRecordsForRun(const std::string &map,
-                                            const std::string &run) const {
+std::vector<Timerun::Record>
+TimerunRepository::getRecordsForRun(const std::string &map,
+                                    const std::string &run) const {
   throw std::runtime_error("Not implemented");
 }
 
-void ETJump::TimerunRepository::insertRecord(const Timerun::Record &record) {
+void TimerunRepository::insertRecord(const Timerun::Record &record) {
   _database->sql << R"(
     insert into record (
       season_id,
@@ -224,7 +221,7 @@ void ETJump::TimerunRepository::insertRecord(const Timerun::Record &record) {
                  << serializeMetadata(record.metadata);
 }
 
-void ETJump::TimerunRepository::updateRecord(const Timerun::Record &record) {
+void TimerunRepository::updateRecord(const Timerun::Record &record) {
   _database->sql << R"(
     update
       record
@@ -246,9 +243,9 @@ void ETJump::TimerunRepository::updateRecord(const Timerun::Record &record) {
                  << record.map << record.run << record.userId;
 }
 
-std::optional<ETJump::Timerun::Record>
-ETJump::TimerunRepository::getTopRecord(int seasonId, const std::string &map,
-                                        const std::string &run) {
+std::optional<Timerun::Record>
+TimerunRepository::getTopRecord(int seasonId, const std::string &map,
+                                const std::string &run) {
   std::optional<Timerun::Record> record;
 
   _database->sql << R"(
@@ -282,10 +279,10 @@ ETJump::TimerunRepository::getTopRecord(int seasonId, const std::string &map,
   return record;
 }
 
-std::vector<ETJump::Timerun::Record>
-ETJump::TimerunRepository::getTopRecords(const std::vector<int> &seasonIds,
-                                         const std::string &map,
-                                         const std::string &run) const {
+std::vector<Timerun::Record>
+TimerunRepository::getTopRecords(const std::vector<int> &seasonIds,
+                                 const std::string &map,
+                                 const std::string &run) const {
   auto seasonIdsPlaceholder = DatabaseV2::createPlaceholderString(seasonIds);
 
   std::string query = stringFormat(
@@ -330,8 +327,7 @@ ETJump::TimerunRepository::getTopRecords(const std::vector<int> &seasonIds,
   return records;
 }
 
-void ETJump::TimerunRepository::editSeason(
-    const Timerun::EditSeasonParams &params) {
+void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
   int seasonId = -1;
   Time startTime;
   std::optional<Time> endTime;
@@ -349,7 +345,7 @@ void ETJump::TimerunRepository::editSeason(
         seasonId = sid;
         startTime = Time::fromString(s);
         if (e) {
-          endTime = ETJump::Time(Time::fromString(*e));
+          endTime = Time(Time::fromString(*e));
         }
       };
 
@@ -408,7 +404,7 @@ void ETJump::TimerunRepository::editSeason(
 }
 
 std::vector<std::string>
-ETJump::TimerunRepository::getMapsForName(const std::string &map, bool exact) {
+TimerunRepository::getMapsForName(const std::string &map, bool exact) {
 
   std::string mapFilter = exact ? "map=?" : "map like ?";
   std::string mapSearchString = exact ? map : "%" + map + "%";
@@ -428,9 +424,9 @@ ETJump::TimerunRepository::getMapsForName(const std::string &map, bool exact) {
 }
 
 std::vector<std::string>
-ETJump::TimerunRepository::getRunsForName(const std::string &map,
-                                          const std::string &run, bool exact,
-                                          bool sanitizeResults) {
+TimerunRepository::getRunsForName(const std::string &map,
+                                  const std::string &run, bool exact,
+                                  bool sanitizeResults) {
 
   std::string runFilter = exact ? "lsanitize(run)=?" : "lsanitize(run) like ?";
   std::string runSearchString = exact ? run : "%" + run + "%";
@@ -452,7 +448,7 @@ ETJump::TimerunRepository::getRunsForName(const std::string &map,
   return runs;
 }
 
-std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords() {
+std::vector<Timerun::Record> TimerunRepository::getRecords() {
   auto binder = _database->sql << R"(
     select
       season_id,
@@ -471,8 +467,8 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords() {
   return getRecordsFromQuery(binder);
 }
 
-std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
-    const Timerun::PrintRecordsParams &params) {
+std::vector<Timerun::Record>
+TimerunRepository::getRecords(const Timerun::PrintRecordsParams &params) {
   const auto season = params.season.value_or("Default");
   const std::string &map = params.map;
   const std::string &run = params.run.value_or("");
@@ -583,9 +579,8 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
   return records;
 }
 
-std::vector<ETJump::Timerun::Season>
-ETJump::TimerunRepository::getSeasonsForName(const std::string &name,
-                                             bool exact) {
+std::vector<Timerun::Season>
+TimerunRepository::getSeasonsForName(const std::string &name, bool exact) {
   std::string query;
 
   std::vector<Timerun::Season> seasons;
@@ -630,9 +625,9 @@ ETJump::TimerunRepository::getSeasonsForName(const std::string &name,
   return seasons;
 }
 
-std::optional<ETJump::Timerun::Record>
-ETJump::TimerunRepository::getRecord(const std::string &map,
-                                     const std::string &run, int rank) {
+std::optional<Timerun::Record>
+TimerunRepository::getRecord(const std::string &map, const std::string &run,
+                             int rank) {
   std::optional<Timerun::Record> record;
 
   _database->sql << R"(
@@ -666,7 +661,7 @@ ETJump::TimerunRepository::getRecord(const std::string &map,
   return record;
 }
 
-std::vector<ETJump::Timerun::Season> ETJump::TimerunRepository::getSeasons() {
+std::vector<Timerun::Season> TimerunRepository::getSeasons() {
   std::vector<Timerun::Season> seasons;
 
   _database->sql << R"(
@@ -691,7 +686,7 @@ std::vector<ETJump::Timerun::Season> ETJump::TimerunRepository::getSeasons() {
   return seasons;
 }
 
-void ETJump::TimerunRepository::deleteSeason(const std::string &name) {
+void TimerunRepository::deleteSeason(const std::string &name) {
   if (name == "default") {
     throw std::runtime_error("Cannot delete default season.");
   }
@@ -715,10 +710,9 @@ void ETJump::TimerunRepository::deleteSeason(const std::string &name) {
 
 // TODO: this shares a lot of logic with 'getRecords',
 // should maybe extract some of it to separate functions
-std::vector<ETJump::Timerun::Checkpoints>
-ETJump::TimerunRepository::getCheckpoints(
-    const ETJump::Timerun::ListCheckpointsParams &params) {
-  std::vector<ETJump::Timerun::Checkpoints> checkpoints;
+std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
+    const Timerun::ListCheckpointsParams &params) {
+  std::vector<Timerun::Checkpoints> checkpoints;
 
   const std::string season = params.season.value_or("Default");
   const auto seasons = getSeasonsForName(season, false);
@@ -822,7 +816,7 @@ ETJump::TimerunRepository::getCheckpoints(
   return checkpoints;
 }
 
-void ETJump::TimerunRepository::tryToMigrateRecords() {
+void TimerunRepository::tryToMigrateRecords() {
   int count = 0;
   _oldDatabase->sql
           << "select count(*) from sqlite_master where tbl_name='records'" >>
@@ -869,7 +863,7 @@ void ETJump::TimerunRepository::tryToMigrateRecords() {
   _database->sql << "commit;";
 }
 
-void ETJump::TimerunRepository::migrate() {
+void TimerunRepository::migrate() {
   _database->addMigration(
       // clang-format off
       "initial",
@@ -924,7 +918,7 @@ void ETJump::TimerunRepository::migrate() {
   }
 }
 
-std::string ETJump::TimerunRepository::serializeMetadata(
+std::string TimerunRepository::serializeMetadata(
     std::map<std::string, std::string> metadata) {
   std::string result;
   for (const auto &kvp : metadata) {
@@ -934,9 +928,8 @@ std::string ETJump::TimerunRepository::serializeMetadata(
   return result;
 }
 
-std::vector<ETJump::Timerun::Record>
-ETJump::TimerunRepository::getRecordsFromQuery(
-    sqlite::database_binder &binder) {
+std::vector<Timerun::Record>
+TimerunRepository::getRecordsFromQuery(sqlite::database_binder &binder) {
   std::vector<Timerun::Record> records;
   binder >> [&records](int seasonId, std::string map, std::string runName,
                        int userId, int time, std::string checkpointsString,
@@ -950,3 +943,4 @@ ETJump::TimerunRepository::getRecordsFromQuery(
   };
   return records;
 }
+} // namespace ETJump
