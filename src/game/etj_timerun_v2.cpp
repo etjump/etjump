@@ -1315,8 +1315,251 @@ void ETJump::TimerunV2::listCheckpoints(
       });
 }
 
+class CompareCheckpointsResult
+    : public ETJump::SynchronizationContext::ResultBase {
+public:
+  CompareCheckpointsResult(
+      std::vector<ETJump::Timerun::Checkpoints> baseCheckpoints,
+      std::vector<ETJump::Timerun::Checkpoints> cmpCheckpoints,
+      std::vector<ETJump::Timerun::Season> seasons)
+      : baseCheckpoints(std::move(baseCheckpoints)),
+        cmpCheckpoints(std::move(cmpCheckpoints)), seasons(std::move(seasons)) {
+  }
+
+  std::vector<ETJump::Timerun::Checkpoints> baseCheckpoints;
+  std::vector<ETJump::Timerun::Checkpoints> cmpCheckpoints;
+  std::vector<ETJump::Timerun::Season> seasons;
+};
+
+void ETJump::TimerunV2::compareCheckpoints(
+    const Timerun::CompareCheckpointsParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const int32_t baseRank = params.rankBase;
+  const int32_t cmpRank = params.rankCmp;
+
+  _sc->postTask(
+      [this, params]() {
+        // we can grab all the data we need for the comparison by using the same
+        // query as 'listcheckpoints' uses, and just make sure the data matches
+        const auto baseCheckpoints = _repository->getCheckpoints(
+            {params.clientNum, params.season, params.map, params.run,
+             params.rankBase, params.exactMap});
+        const auto cmpCheckpoints = _repository->getCheckpoints(
+            {params.clientNum, params.season, params.map, params.run,
+             params.rankCmp, params.exactMap});
+
+        const auto seasons = _repository->getSeasons();
+
+        return std::make_unique<CompareCheckpointsResult>(
+            baseCheckpoints, cmpCheckpoints, seasons);
+      },
+      [this, clientNum, baseRank, cmpRank](const auto results) {
+        const auto *const r =
+            dynamic_cast<CompareCheckpointsResult *>(results.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: unable to compare checkpoints for player %i: "
+                         "CompareCheckpointsResult is NULL",
+                         clientNum);
+          throw std::runtime_error(
+              stringFormat("%s: unable to compare checkpoints. This is a bug, "
+                           "please report this to the developers."));
+        }
+
+        if (r->baseCheckpoints.empty()) {
+          Printer::console(clientNum,
+                           "No valid checkpoints to compare against.\n");
+          return;
+        }
+
+        if (r->cmpCheckpoints.empty()) {
+          Printer::console(clientNum,
+                           "No valid checkpoints found for comparison.\n");
+          return;
+        }
+
+        // build a comparable dataset - a pair will contain the checkpoints
+        // from a run with same season/map/run, where both have checkpoints
+        const std::vector<std::pair<Timerun::Checkpoints, Timerun::Checkpoints>>
+            processedCheckpoints = getCheckpointsForComparison(
+                r->baseCheckpoints, r->cmpCheckpoints);
+
+        if (processedCheckpoints.empty()) {
+          Printer::console(
+              clientNum,
+              "None of the checkpoint times found are comparable.\n");
+          return;
+        }
+
+        std::map<int32_t, Timerun::Season> seasonIdToName;
+
+        for (const auto &s : r->seasons) {
+          seasonIdToName[s.id] = s;
+        }
+
+        for (const auto &[base, cmp] : processedCheckpoints) {
+          const auto seasonIt = seasonIdToName.find(base.seasonID);
+
+          // should not happen, see 'listCheckpoints()' for more info
+          if (seasonIt == seasonIdToName.cend()) {
+            Printer::console(clientNum,
+                             "Malformed data received from the timerun "
+                             "database. Please inform the server owner, more "
+                             "information is available in the server logs.\n");
+            _logger->error(stringFormat(
+                "Record on map %s, run %s by player %s with time %i "
+                "contains invalid season ID '%i'. The database might have been "
+                "manually modified, or is corrupted. If you have manually "
+                "deleted a season on purpose from the database instead of "
+                "using !delete-season command, please delete all records "
+                "associated with the invalid season ID as well. If the "
+                "database is intact and hasn't been modified by hand, please "
+                "report this error to the developers.",
+                base.map, base.run, base.playerName, base.runTime,
+                base.seasonID));
+            continue;
+          }
+
+          const Timerun::Season season = seasonIt->second;
+          std::string s = "\n";
+
+          if (base.seasonID == defaultSeasonId) {
+            s += stringFormat("^2Comparing checkpoints for map ^7%s\n",
+                              base.map);
+          } else {
+            s += stringFormat(
+                "^2Comparing checkpoints on season ^7%s ^2for map ^7%s\n",
+                season.name, base.map);
+          }
+
+          s += "^g-------------------------------------------------------------"
+               "\n";
+          s += stringFormat(" ^2Run: ^7%s\n\n", base.run);
+
+          // minimum column width
+          constexpr size_t BASE_MIN_PADDING = 24;
+
+          std::string tmpName;
+          tmpName.insert(0, MAX_NETNAME, 'A');
+
+          const std::string baseHeader = stringFormat(
+              "^7%s ^7(%s^7)", base.playerName, rankToString(baseRank));
+          const std::string cmpHeader = stringFormat(
+              "^7%s ^7(%s^7)", cmp.playerName, rankToString(cmpRank));
+
+          const size_t baseWidth =
+              std::max(sanitize(baseHeader).length(), BASE_MIN_PADDING);
+          const size_t cmpWidth =
+              std::max(sanitize(cmpHeader).length(), BASE_MIN_PADDING);
+
+          const size_t basePadding =
+              baseWidth + StringUtil::countExtraPadding(baseHeader);
+
+          s += stringFormat("     %-*s ^g| ^7%s\n", basePadding, baseHeader,
+                            cmpHeader);
+
+          s += "     ^g";
+          s.insert(s.length(), baseWidth + 1, '-');
+          s += "|";
+          s.insert(s.length(), cmpWidth + 1, '-');
+          s += "\n";
+
+          for (size_t i = 0; i < base.checkpoints.size(); i++) {
+            // if both records have no time set, we've reached max checkpoints
+            if (base.checkpoints[i] == TIMERUN_CHECKPOINT_NOT_SET &&
+                cmp.checkpoints[i] == TIMERUN_CHECKPOINT_NOT_SET) {
+              break;
+            }
+
+            s += stringFormat(" ^g%2i. ", i + 1);
+
+            // because checkpoints aren't mandatory, runs might have different
+            // number of checkpoints, so ensure we only display valid times
+            const std::string baseTime =
+                base.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET
+                    ? millisToString(base.checkpoints[i])
+                    : "^z-";
+            const std::string cmpTime =
+                cmp.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET
+                    ? millisToString(cmp.checkpoints[i])
+                    : "^z-";
+
+            // the minimum width for a column is wide enough that
+            // the checkpoint times are never going to be wider than that,
+            // so we don't need to compare against the current column width
+            const size_t baseTimePadding =
+                baseWidth + StringUtil::countExtraPadding(baseTime);
+
+            s += stringFormat("^7%-*s ^g| ^7%s", baseTimePadding, baseTime,
+                              cmpTime);
+
+            // only display diff if both times are valid
+            if (base.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET &&
+                cmp.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET) {
+              s += stringFormat(" (%s^7)", diffToString(cmp.checkpoints[i],
+                                                        base.checkpoints[i]));
+            }
+
+            s += "\n";
+          }
+
+          s += "     ^g";
+          s.insert(s.length(), baseWidth + 1, '-');
+          s += "|";
+          s.insert(s.length(), cmpWidth + 1, '-');
+          s += "\n";
+
+          const std::string baseRunTime = millisToString(base.runTime);
+          const size_t baseRunTimeWidth =
+              std::max(sanitize(baseRunTime).length(), baseWidth);
+          const size_t baseRunTimePadding =
+              baseRunTimeWidth + StringUtil::countExtraPadding(baseRunTime);
+
+          s += stringFormat("     ^7%-*s ^g| ^7%s (%s^7)\n", baseRunTimePadding,
+                            baseRunTime, millisToString(cmp.runTime),
+                            diffToString(cmp.runTime, base.runTime));
+
+          Printer::console(clientNum, s);
+        }
+      },
+      [this, clientNum](const std::runtime_error &e) {
+        Printer::console(clientNum, stringFormat("%s\n", e.what()));
+      });
+}
+
 int32_t ETJump::TimerunV2::getRunStartTime(const int32_t clientNum) const {
   return _players[clientNum]->startTime.value_or(0);
+}
+
+std::vector<
+    std::pair<ETJump::Timerun::Checkpoints, ETJump::Timerun::Checkpoints>>
+ETJump::TimerunV2::getCheckpointsForComparison(
+    const std::vector<Timerun::Checkpoints> &base,
+    const std::vector<Timerun::Checkpoints> &cmp) {
+  std::vector<std::pair<Timerun::Checkpoints, Timerun::Checkpoints>>
+      processedRecords;
+
+  for (const auto &baseData : base) {
+    // no checkpoint data, throw away
+    if (baseData.checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
+      continue;
+    }
+
+    for (const auto &cmpData : cmp) {
+      // no checkpoint data, throw away
+      if (cmpData.checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
+        continue;
+      }
+
+      if (baseData.seasonID == cmpData.seasonID &&
+          baseData.map == cmpData.map && baseData.run == cmpData.run) {
+        processedRecords.emplace_back(baseData, cmpData);
+        break;
+      }
+    }
+  }
+
+  return processedRecords;
 }
 
 void ETJump::TimerunV2::startNotify(Player *player) const {

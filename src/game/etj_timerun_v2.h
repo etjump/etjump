@@ -110,8 +110,14 @@ public:
   void printSeasons(int clientNum);
   void deleteSeason(int clientNum, const std::string &name);
   void listCheckpoints(const Timerun::ListCheckpointsParams &params);
+  void compareCheckpoints(const Timerun::CompareCheckpointsParams &params);
 
   [[nodiscard]] int32_t getRunStartTime(int32_t clientNum) const;
+
+  // builds a comparable dataset for checkpoints from two sets of records
+  static std::vector<std::pair<Timerun::Checkpoints, Timerun::Checkpoints>>
+  getCheckpointsForComparison(const std::vector<Timerun::Checkpoints> &base,
+                              const std::vector<Timerun::Checkpoints> &cmp);
 
   static void removeDisallowedWeapons(gentity_t *ent);
   static void removePlayerProjectiles(gentity_t *ent);
