@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <utility>
 #include <chrono>
+#include <unordered_set>
 
 #include "etj_timerun_v2.h"
 
@@ -89,10 +90,14 @@ void ETJump::TimerunV2::computeRanks() {
         std::map<UserId, std::string> latestName{};
         const double maxPointsPerRun = 1000.0;
 
+        const auto maps = game.mapStatistics->getMaps();
+        const std::unordered_set<std::string> validMaps(maps.cbegin(),
+                                                        maps.cend());
+
         for (const auto &r : records) {
           // we don't want to compute score for maps not on the server,
           // e.g. when a new version of a map is released
-          if (!game.mapStatistics->mapExists(r.map)) {
+          if (validMaps.count(r.map) == 0) {
             continue;
           }
           if (scores.count(r.seasonId) == 0) {
