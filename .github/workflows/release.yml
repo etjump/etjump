@@ -95,7 +95,7 @@ jobs:
         arch: [x86_64, arm64]
         config: [Release]
         include:
-          - osx-target: "10.13"
+          - osx-target: "10.15"
 
     steps:
       - uses: actions/checkout@v4

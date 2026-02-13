@@ -74,9 +74,9 @@ if (USE_ASAN OR USE_LSAN OR USE_UBSAN)
 	setup_sanitizers()
 endif ()
 
-create_compiler_opts(cxx_compiler_opts WARN 3 DEFINE 
-	GAME_NAME="${CMAKE_PROJECT_NAME}" 
-	GAME_URL="${CMAKE_PROJECT_HOMEPAGE_URL}" 
+create_compiler_opts(cxx_compiler_opts WARN 3 DEFINE
+	GAME_NAME="${CMAKE_PROJECT_NAME}"
+	GAME_URL="${CMAKE_PROJECT_HOMEPAGE_URL}"
 	GAME_VERSION="${GAME_VERSION}"
 	GIT_COMMIT_HASH="${GAME_VERSION_COMMIT_HASH}"
 	GIT_COMMIT_HASH_SHORT="${GAME_VERSION_COMMIT_HASH_SHORT}"
@@ -102,6 +102,7 @@ add_subdirectory(deps/sqlite)
 add_subdirectory(deps/sqlite_modern_cpp)
 add_subdirectory(deps/gtest)
 add_subdirectory(deps/uuid4)
+add_subdirectory(deps/toml11)
 
 # fmt 10.0.0 changed default of FMT_INSTALL from OFF to ON
 set(FMT_INSTALL OFF)
@@ -121,7 +122,7 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 set(BUNDLED_TARGETS_FOLDER Bundled)
 set(PACKING_TARGETS_FOLDER Package)
 
-set_target_properties(gmock gmock_main gtest gtest_main libjson libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt
+set_target_properties(gmock gmock_main gtest gtest_main libjson libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt toml11
                       PROPERTIES FOLDER ${BUNDLED_TARGETS_FOLDER})
 
 add_subdirectory(src/cgame)
