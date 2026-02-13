@@ -779,8 +779,8 @@ void BG_RGBtoHSV(const vec4_t rgb, vec4_t hsv);
 
 #define SCREEN_WIDTH DC->screenWidth
 #define SCREEN_HEIGHT DC->screenHeight
-#define SCREEN_OFFSET_X (SCREEN_WIDTH - 640) / 2.f
-#define SCREEN_CENTER_X SCREEN_WIDTH / 2.f
-#define SCREEN_CENTER_Y SCREEN_HEIGHT / 2.f
+#define SCREEN_OFFSET_X ((SCREEN_WIDTH - 640) / 2.f)
+#define SCREEN_CENTER_X (SCREEN_WIDTH / 2.f)
+#define SCREEN_CENTER_Y (SCREEN_HEIGHT / 2.f)
 
 #endif

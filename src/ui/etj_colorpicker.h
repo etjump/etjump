@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include "ui_shared.h"
+
 namespace ETJump {
 class ColorPicker {
   enum ColorType {
@@ -44,8 +46,8 @@ class ColorPicker {
   vec4_t pickerColor{};
 
   // the cvar that the color picker is currently modifying
-  std::string currentCvar{};
-  std::string currentCvarOldValue{};
+  std::string currentCvar;
+  std::string currentCvarOldValue;
 
   bool normalizedRGBSliders;
 
@@ -89,6 +91,6 @@ public:
 
   // toggle RGB sliders between normalized and full RGB
   void toggleRGBSliderValues();
-  bool RGBSlidersAreNormalized() const;
+  [[nodiscard]] bool RGBSlidersAreNormalized() const;
 };
 } // namespace ETJump

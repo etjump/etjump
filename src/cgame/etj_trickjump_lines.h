@@ -152,21 +152,21 @@ private:
   void registerCommands();
 
   // Private variable
-  bool _recording;
-  bool _enableLine;
-  bool _enableMarker;
-  bool _jumpRelease;
-  bool _debugVerbose;
+  bool _recording{};
+  bool _enableLine{};
+  bool _enableMarker{};
+  bool _jumpRelease{};
+  bool _debugVerbose{};
 
-  Route _currentRoute;
+  Route _currentRoute{};
   std::vector<Route> _routes;
   std::vector<Node> _currentTrail;
-  unsigned _nextRecording;
-  int _nextAddTime;
-  int _currentRouteToRender;
-  RotationMatrix _currentRotation;
+  unsigned _nextRecording{};
+  int _nextAddTime{};
+  int _currentRouteToRender{};
+  RotationMatrix _currentRotation{};
 
-  int32_t nextNearest;
+  int32_t nextNearest{};
 
   std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
   std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;

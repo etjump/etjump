@@ -4171,12 +4171,6 @@ void CG_Fireteams_Setup(void);
 void CG_Fireteams_MenuText_Draw(panel_button_t *button);
 void CG_Fireteams_MenuTitleText_Draw(panel_button_t *button);
 
-//
-// cg_drawCHS.c
-//
-void CG_DrawCHS(void);
-void CG_InfoCHS_f(void);
-
 void CG_BannerPrint(const char *str);
 const char *G_SHA1(const char *str);
 
@@ -4212,6 +4206,7 @@ class PlayerBBox;
 class SavePos;
 class SyscallExt;
 class TrickjumpLines;
+class CHSDataHandler;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4225,11 +4220,16 @@ extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 extern std::shared_ptr<ClientRtvHandler> rtvHandler;
 extern std::unique_ptr<DemoCompatibility> demoCompatibility;
 extern std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
+// TODO: remove the client array and just use this for everything
+extern std::vector<int32_t> tempTraceIgnoredEntities;
 extern std::shared_ptr<PlayerBBox> playerBBox;
 extern std::unique_ptr<SavePos> savePos;
 extern std::unique_ptr<SyscallExt> syscallExt;
 extern std::unique_ptr<PmoveUtils> pmoveUtils;
 extern std::shared_ptr<TrickjumpLines> trickjumpLines;
+extern std::shared_ptr<CHSDataHandler> chsDataHandler;
+
+inline constexpr int32_t MAX_CHS_INFO = 8;
 
 enum extraTraceOptions {
   OB_DETECTOR,

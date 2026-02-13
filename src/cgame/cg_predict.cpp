@@ -5,9 +5,11 @@
 // ahead the client's movement.
 // It also handles local physics interaction, like fragments bouncing off walls
 
+#include <algorithm>
 #include <array>
 #include "cg_local.h"
 #include "etj_utilities.h"
+
 #include "../game/etj_entity_utilities_shared.h"
 #include "../game/etj_portalgun_shared.h"
 
@@ -151,6 +153,14 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
 
     if (ent->number < MAX_CLIENTS &&
         ETJump::tempTraceIgnoredClients[ent->number]) {
+      continue;
+    }
+
+    // ignore collision with 'func_static_client' if it's turned off for us
+    if (ent->eType == ET_STATIC_CLIENT &&
+        std::find(ETJump::tempTraceIgnoredEntities.cbegin(),
+                  ETJump::tempTraceIgnoredEntities.cend(),
+                  ent->number) != ETJump::tempTraceIgnoredEntities.cend()) {
       continue;
     }
 
@@ -1060,18 +1070,7 @@ void CG_PredictPlayerState() {
 
   cg_pmove.skill = cgs.clientinfo[cg.snap->ps.clientNum].skill;
 
-  for (int i = 0; i < MAX_CLIENTS; i++) {
-    const int other = cg_entities[i].currentState.number;
-
-    if (cg.snap->ps.clientNum == other) {
-      continue;
-    }
-
-    if (!ETJump::playerIsSolid(cg.snap->ps.clientNum, other) ||
-        ETJump::playerIsNoclipping(other)) {
-      ETJump::tempTraceIgnoreClient(other);
-    }
-  }
+  ETJump::tempTraceIgnoreEntities();
 
   cg_pmove.trace = CG_TraceCapsule;
   cg_pmove.pointcontents = CG_PointContents;
@@ -1455,6 +1454,7 @@ void CG_PredictPlayerState() {
   }
 
   ETJump::resetTempTraceIgnoredClients();
+  ETJump::tempTraceIgnoredEntities.clear();
 
   // unlagged - optimized prediction
   //  do a /condump after a few seconds of this

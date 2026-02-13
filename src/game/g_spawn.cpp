@@ -23,6 +23,7 @@
 #include "etj_entity_utilities.h"
 #include "etj_progression_tracker.h"
 #include "etj_target_random.h"
+#include "etj_func_static_client.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -729,6 +730,7 @@ spawn_t spawns[] = {
     {"target_ft_setrules", ETJump::TargetFtSetRules::spawn},
     {"target_spawn_relay", ETJump::TargetSpawnRelay::spawn},
     {"target_random", ETJump::TargetRandom::spawn},
+    {"func_static_client", ETJump::FuncStaticClient::spawn},
     {nullptr, nullptr},
 };
 

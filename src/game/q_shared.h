@@ -234,20 +234,20 @@ typedef int clipHandle_t;
 
 // networked fields in entityState_t and playerState_t,
 // with their respective networked sizes
-typedef int net_uint2_t;
-typedef int net_uint4_t;
-typedef int net_uint7_t;
-typedef int net_uint8_t;
-typedef int net_uint9_t;
-typedef int net_uint10_t;
-typedef int net_uint16_t;
-typedef int net_uint24_t;
+using net_uint2_t = int32_t;
+using net_uint4_t = int32_t;
+using net_uint7_t = int32_t;
+using net_uint8_t = int32_t;
+using net_uint9_t = int32_t;
+using net_uint10_t = int32_t;
+using net_uint16_t = int32_t;
+using net_uint24_t = int32_t;
 
-typedef int net_int8_t;
-typedef int net_int16_t;
-typedef int net_int32_t;
+using net_int8_t = int32_t;
+using net_int16_t = int32_t;
+using net_int32_t = int32_t;
 
-typedef float net_float;
+using net_float = float;
 
 // allow sound to be cut off by any following sounds on this channel
 inline constexpr int SND_OKTOCUT = 0x001;
@@ -560,7 +560,8 @@ void ByteToDir(int b, vec3_t dir);
 
 #if 1
 
-  #define DotProduct(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
+  #define DotProduct(x, y)                                                     \
+    (((x)[0] * (y)[0]) + ((x)[1] * (y)[1]) + ((x)[2] * (y)[2]))
   #define VectorSubtract(a, b, c)                                              \
     ((c)[0] = (a)[0] - (b)[0], (c)[1] = (a)[1] - (b)[1],                       \
      (c)[2] = (a)[2] - (b)[2])
@@ -571,8 +572,8 @@ void ByteToDir(int b, vec3_t dir);
   #define VectorScale(v, s, o)                                                 \
     ((o)[0] = (v)[0] * (s), (o)[1] = (v)[1] * (s), (o)[2] = (v)[2] * (s))
   #define VectorMA(v, s, b, o)                                                 \
-    ((o)[0] = (v)[0] + (b)[0] * (s), (o)[1] = (v)[1] + (b)[1] * (s),           \
-     (o)[2] = (v)[2] + (b)[2] * (s))
+    ((o)[0] = (v)[0] + ((b)[0] * (s)), (o)[1] = (v)[1] + ((b)[1] * (s)),       \
+     (o)[2] = (v)[2] + ((b)[2] * (s)))
 
 #else
 
@@ -1621,6 +1622,8 @@ typedef enum {
 
   ET_FAKEBRUSH, // func_fakebrush
 
+  ET_STATIC_CLIENT, // func_static_client
+
   ET_EVENTS, // any of the EV_* events can be added freestanding
              // by setting eType to ET_EVENTS + eventNum
              // this avoids having to set eFlags and eventNum
@@ -1718,7 +1721,7 @@ static_assert(sizeof(entityTypeNames) / sizeof(entityTypeNames[0]) ==
  */
 
 typedef struct entityState_s {
-  net_uint8_t number; // entity index
+  net_uint10_t number; // entity index
   // changed from entityType_t to int to allow ET_EVENTS + eventNum
   net_uint8_t eType;
   net_uint24_t eFlags;

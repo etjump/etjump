@@ -1354,7 +1354,6 @@ static const consoleCommand_t anyTimeCommands[] = {
 
     {"viewpos", CG_Viewpos_f},
     {"portal", CG_portalinfo_f},
-    {"chs", CG_InfoCHS_f},
     {"help", CG_Manual_f},
     {"man", CG_Manual_f},
     {"manual", CG_Manual_f},
@@ -1551,6 +1550,8 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("rankings");
   trap_AddCommand("seasons");
   trap_AddCommand("loadcheckpoints");
+  trap_AddCommand("listcheckpoints");
+  trap_AddCommand("comparecheckpoints");
 
   trap_AddCommand("setoffset"); // autocompletion
   trap_AddCommand("interruptRun");

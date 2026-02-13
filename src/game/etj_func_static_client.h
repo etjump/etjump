@@ -24,12 +24,15 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include "g_local.h"
 
-namespace ETJump::ConsoleCommands {
-using Arguments = std::vector<std::string>;
-
-void registerCommands();
-bool forwardedConsoleCommand(std::string_view cmd, const Arguments &args);
-} // namespace ETJump::ConsoleCommands
+namespace ETJump {
+class FuncStaticClient {
+public:
+  static void spawn(gentity_t *ent);
+  static void use(gentity_t *self, gentity_t *other, gentity_t *activator);
+  static void turnOn(gentity_t *self, int32_t clientNum);
+  static void turnOff(gentity_t *self, int32_t clientNum);
+  static bool activatorIsInsideEnt(const gentity_t *self, int32_t clientNum);
+};
+} // namespace ETJump

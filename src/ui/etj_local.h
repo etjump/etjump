@@ -24,12 +24,25 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include "etj_colorpicker.h"
+#include "etj_demo_queue.h"
+#include "etj_quick_connect.h"
 
-namespace ETJump::ConsoleCommands {
-using Arguments = std::vector<std::string>;
+#include "../game/etj_syscall_ext_shared.h"
 
-void registerCommands();
-bool forwardedConsoleCommand(std::string_view cmd, const Arguments &args);
-} // namespace ETJump::ConsoleCommands
+namespace ETJump {
+// global UI objects
+struct UIContext {
+  std::unique_ptr<SyscallExt> syscallExt;
+  std::unique_ptr<ColorPicker> colorPicker;
+  std::unique_ptr<DemoQueue> demoQueue;
+  std::unique_ptr<QuickConnect> quickConnect;
+};
+
+inline UIContext ui;
+
+void init(int32_t legacyClient, int32_t clientVersion);
+void shutdown();
+// outside of 'init()', as this requires menus to be loaded already
+void initQuickConnect();
+} // namespace ETJump

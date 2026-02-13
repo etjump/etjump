@@ -23,6 +23,26 @@
   * color can be adjusted with `etj_CGaz1MidlineColor` (default `1.0 0.5 0.0 0.75`)
 * added `etj_runtimerSize` cvar to adjust size of timerun timer [#1814](https://github.com/etjump/etjump/pull/1814)
   * valid range is `0.0 - 10.0`
+* fixed certain votes not showing the keybinds for `vote yes/no` in the vote text [#1817](https://github.com/etjump/etjump/pull/1817)
+* massively sped up the computation for timerun rankings [#1831](https://github.com/etjump/etjump/pull/1831)
+* added `listcheckpoints` and `comparecheckpoints` commands [#1829](https://github.com/etjump/etjump/pull/1829)
+  * `listcheckpoints --season <season name> --map <map name> --run <run name> --rank <rank>`
+    * lists checkpoint times for a given run
+  * `comparecheckpoints --season <season name> --map <map name> --run <run name> --rank-1 <rank> --rank-2 <rank>`
+    * compares checkpoint times between two runs
+  * also accessible via admin commands `!list/comparecheckpoints`
+* added `func_static_client` entity [#1824](https://github.com/etjump/etjump/pull/1824)
+  * works like `func_static`, except it's on/off state is unique for each client
+  * keys:
+    * `model2` - optional `md3/mdc` model to draw
+    * `offModel` - optional model to draw when the brush is turned off (the brush is invisible otherwise)
+    * `offShader` - optional shader to use when the brush is turned off (invisible otherwise)
+    * `scriptname` - optionally call script block when activated, calls `activate (allies/axis)` action
+    * `target` - targets to fire when activated
+    * `offShader` and `offModel` are mutually exclusive - `offModel` only works if `model2` is set, and `offShader` does nothing in such cases
+  * spawnflags:
+    * `1` - starts off for all clients
+    * `2` - gibs the activator if they are inside the brush when it's turned on
 
 # ETJump 3.4.2
 
