@@ -154,20 +154,14 @@ void CG_ParseSysteminfo(void) {
 
   cgs.shared = Q_atoi(Info_ValueForKey(info, "shared"));
 
-  cgs.pmove_msec = Q_atoi(Info_ValueForKey(info, "pmove_msec"));
-  if (cgs.pmove_msec < 8) {
-    cgs.pmove_msec = 8;
-  } else if (cgs.pmove_msec > 33) {
-    cgs.pmove_msec = 33;
-  }
+  cgs.pmove_msec = std::clamp(Q_atoi(Info_ValueForKey(info, "pmove_msec")),
+                              PMOVE_MSEC_MIN, PMOVE_MSEC_MAX);
 
   cgs.cheats = Q_atoi(Info_ValueForKey(info, "sv_cheats"));
   cgs.sv_fps = Q_atoi(Info_ValueForKey(info, "sv_fps"));
 
-#ifdef ALLOW_GSYNC
   cgs.synchronousClients =
-      (Q_atoi(Info_ValueForKey(info, "g_synchronousClients"))) ? qtrue : qfalse;
-#endif
+      Q_atoi(Info_ValueForKey(info, "g_synchronousClients"));
 }
 
 /*

@@ -98,6 +98,7 @@ bool AccelMeter::beforeRender() {
 
   playing = cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback;
 
+  ps = getValidPlayerState();
   pm = pmoveUtils->getPmove();
 
   if (pmoveUtils->skipUpdate(lastUpdateTime, std::nullopt)) {

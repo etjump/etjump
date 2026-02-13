@@ -1958,9 +1958,7 @@ typedef struct {
   int shared;
   int pmove_msec;
   int cheats;
-#ifdef ALLOW_GSYNC
-  qboolean synchronousClients;
-#endif
+  bool synchronousClients;
 
   float timelimit; // NERVE - SMF - made this a float
   int maxclients;

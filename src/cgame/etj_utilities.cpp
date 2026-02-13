@@ -387,10 +387,11 @@ void onPlayerRespawn(bool revived) {
 }
 
 playerState_t *getValidPlayerState() {
-  return (cg.snap->ps.clientNum != cg.clientNum || cg.demoPlayback)
-             // spectating/demo playback
+  return (cg.snap->ps.clientNum != cg.clientNum || cg.demoPlayback ||
+          cgs.synchronousClients)
+             // interpolating
              ? &cg.snap->ps
-             // playing
+             // predicting
              : &cg.predictedPlayerState;
 }
 

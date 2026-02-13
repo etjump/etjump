@@ -85,7 +85,7 @@ private:
                          const pmove_t *pm);
   void startListeners();
 
-  const playerState_t *ps = &cg.predictedPlayerState;
+  const playerState_t *ps{};
   const pmove_t *pm{};
 };
 } // namespace ETJump

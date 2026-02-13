@@ -222,9 +222,12 @@ float CGaz::GetSlickGravity(const playerState_t *ps, const pmove_t *pm) {
 }
 
 bool CGaz::beforeRender() {
+  ps = getValidPlayerState();
+
   if (canSkipDraw()) {
     return false;
   }
+
   pm = pmoveUtils->getPmove();
 
   // water and ladder movement are not important

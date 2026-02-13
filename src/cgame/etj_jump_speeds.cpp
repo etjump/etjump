@@ -184,10 +184,7 @@ void JumpSpeeds::updateJumpSpeeds() {
   // runs, so we can't rely on predictedPlayerState on demos because it
   // still contains previous playerstate at the time EV_JUMP event is
   // processed
-  playerState_t *ps =
-      (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback)
-          ? &cg.predictedPlayerState
-          : &cg.snap->ps;
+  playerState_t *ps = getValidPlayerState();
 
   // queue reset if last update was on different team
   if (team != ps->persistant[PERS_TEAM]) {

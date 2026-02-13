@@ -421,12 +421,12 @@ static void PM_Friction(void) {
 
   frametime = pml.frametime;
 
-  // following spectators and demo playback get different pml.frametime
-  // to clients so we need to make sure this gets corrected for drawing
-  // things
+  // 'pml.frametime' is inaccurate when interpolating, make sure we're using
+  // correct frametime to calculate friction
 #ifdef CGAMEDLL
   if (pm->ps->pm_flags & PMF_FOLLOW ||
-      (cg.demoPlayback && !cgs.demoCam.renderingFreeCam)) {
+      (cg.demoPlayback && !cgs.demoCam.renderingFreeCam) ||
+      cgs.synchronousClients) {
     frametime = pm->pmext->frametime;
   }
 #endif // CGAMEDLL

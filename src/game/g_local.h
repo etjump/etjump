@@ -1484,6 +1484,9 @@ typedef struct {
   int checkpointsCount[MAX_TIMERUNS];
 
   SpawnRelayEntities spawnRelayEntities;
+
+  bool serverConfigValid;
+  int32_t nextConfigCheckTime;
 } level_locals_t;
 
 //
@@ -1980,9 +1983,7 @@ extern vmCvar_t g_debugMove;
 extern vmCvar_t g_debugAlloc;
 extern vmCvar_t g_debugDamage;
 extern vmCvar_t g_debugBullets; //----(SA)	added
-#ifdef ALLOW_GSYNC
 extern vmCvar_t g_synchronousClients;
-#endif // ALLOW_GSYNC
 extern vmCvar_t g_motd;
 extern vmCvar_t g_warmup;
 extern vmCvar_t voteFlags;
@@ -2968,6 +2969,7 @@ enum class FuncInvisSpawnflags {
 };
 
 bool checkCheatCvars(gclient_s *client, int flags);
+void validateServerConfig();
 } // namespace ETJump
 
 void TimerunConnectNotify(gentity_t *ent);

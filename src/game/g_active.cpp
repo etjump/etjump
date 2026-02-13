@@ -991,6 +991,10 @@ void ClientThink_real(gentity_t *ent) {
         ((ucmd->serverTime + pmove_msec.integer - 1) / pmove_msec.integer) *
         pmove_msec.integer;
   } else {
+    // we want to intentionally ignore 'g_synchronousClients' here,
+    // in case it's changed in runtime, to prevent exploits
+    // this means that you must selfkill after toggling 'pmove_fixed',
+    // even if 'g_synchronousClients' is enabled
     client->pmoveOffThisLife = true;
   }
 
@@ -1125,6 +1129,13 @@ void ClientThink_real(gentity_t *ent) {
     if (client->pers.maxFPS > 0 && client->pers.maxFPS < 25) {
       Printer::center(clientNum,
                       "^3WARNING: ^7Timerun stopped due to low FPS!");
+      InterruptRun(ent);
+    }
+
+    if (!level.serverConfigValid) {
+      Printer::center(
+          clientNum,
+          "^3WARNING: ^7Timerun stopped due to invalid server configuration!");
       InterruptRun(ent);
     }
   }
@@ -1472,10 +1483,7 @@ void ClientThink(int clientNum) {
   // phone jack if they don't get any for a while
   ent->client->lastCmdTime = level.time;
 
-#ifdef ALLOW_GSYNC
-  if (!g_synchronousClients.integer)
-#endif // ALLOW_GSYNC
-  {
+  if (!g_synchronousClients.integer) {
     ClientThink_real(ent);
   }
 }
@@ -1492,10 +1500,7 @@ void G_RunClient(gentity_t *ent) {
     }
   }
 
-#ifdef ALLOW_GSYNC
-  if (!g_synchronousClients.integer)
-#endif // ALLOW_GSYNC
-  {
+  if (!g_synchronousClients.integer) {
     return;
   }
 
