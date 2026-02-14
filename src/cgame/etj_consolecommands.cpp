@@ -119,6 +119,34 @@ bool forwardedConsoleCommand(const std::string_view cmd,
   return true;
 }
 
+std::optional<CommandParser::Command>
+getOptCommand(const std::string &commandPrefix,
+              const CommandParser::CommandDefinition &def,
+              const std::vector<std::string> &args) {
+  auto cmd = CommandParser(def, args).parse();
+
+  if (cmd.helpRequested) {
+    CG_AddToTeamChat(
+        stringFormat("^3%s: ^7check console for help.", commandPrefix).c_str(),
+        TEAM_SPECTATOR);
+    Com_Printf(def.help().c_str());
+    return std::nullopt;
+  }
+
+  if (!cmd.errors.empty()) {
+    CG_AddToTeamChat(
+        stringFormat(
+            "^3%s: ^7operation failed. Check console for more information.",
+            commandPrefix)
+            .c_str(),
+        TEAM_SPECTATOR);
+    CG_Printf("%s\n", cmd.getErrorMessage().c_str());
+    return std::nullopt;
+  }
+
+  return cmd;
+}
+
 void registerCommands() {
   consoleCommandsHandler->subscribe(
       "ftSaveLimitSet", [](const auto &) { ftSaveLimitSet(); }, false);
