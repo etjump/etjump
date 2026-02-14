@@ -19,7 +19,6 @@
 
 #include "../game/q_shared.h"
 #include "../game/bg_public.h"
-#include "../game/etj_syscalls.h"
 #include "../ui/ui_shared.h"
 
 #include "tr_types.h"
@@ -3499,6 +3498,7 @@ void CG_ShaderStateChanged(const std::string &state = "");
 void CG_ChargeTimesChanged(void);
 void CG_LoadVoiceChats();         // NERVE - SMF
 void CG_PlayBufferedVoiceChats(); // NERVE - SMF
+void CG_AddToTeamChat(const char *str, team_t team);
 void CG_AddToNotify(const char *str);
 void CG_wstatsParse_cmd(void);
 void CG_wtopshotsParse_cmd(qboolean doBest);
@@ -3659,8 +3659,8 @@ void trap_S_UpdateEntityPosition(int entityNum, const vec3_t origin);
 int trap_S_GetVoiceAmplitude(int entityNum);
 // done.
 
-// repatialize recalculates the volumes of sound as they should be heard by the
-// given entityNum and position
+// repatialize recalculates the volumes of sound as they should be heard by
+// the given entityNum and position
 void trap_S_Respatialize(int entityNum, const vec3_t origin, vec3_t axis[3],
                          int inwater);
 sfxHandle_t
@@ -3692,8 +3692,8 @@ qboolean trap_R_GetSkinModel(qhandle_t skinid, const char *type,
 qhandle_t trap_R_GetShaderFromModel(qhandle_t modelid, int surfnum,
                                     int withlightmap); //----(SA)	added
 
-// a scene is built up by calls to R_ClearScene and the various R_Add functions.
-// Nothing is drawn until R_RenderScene is called.
+// a scene is built up by calls to R_ClearScene and the various R_Add
+// functions. Nothing is drawn until R_RenderScene is called.
 void trap_R_ClearScene(void);
 void trap_R_AddRefEntityToScene(const refEntity_t *re);
 
@@ -4265,6 +4265,12 @@ enum class ExecFileType {
 enum class HideFlamethrowerFlags {
   HIDE_SELF = 1 << 0,
   HIDE_OTHERS = 1 << 1,
+};
+
+enum class ChatMessageType {
+  DEFAULT = 0,         // normal message from any team
+  REPLAY_MSG = 1 << 0, // chat replay message
+  SERVER_MSG = 1 << 1, // server console chat message
 };
 } // namespace ETJump
 

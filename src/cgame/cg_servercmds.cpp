@@ -16,8 +16,7 @@
 
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_syscall_ext_shared.h"
-
-void CG_LimboMenu_f();
+#include "../game/etj_shared.h"
 
 /*
 =================
@@ -747,16 +746,13 @@ static void CG_ConfigStringModified(void) {
   }
 }
 
-constexpr int REPLAY_MSG = 1 << 0;
-constexpr int SERVER_MSG = 1 << 1;
-
 /*
 =======================
 CG_AddToTeamChat
 
 =======================
 */
-static void CG_AddToTeamChat(const char *str, int clientnum, int msgType) {
+void CG_AddToTeamChat(const char *str, const team_t team) {
   int len;
   char *p, *ls;
   int lastcolor;
@@ -764,9 +760,6 @@ static void CG_AddToTeamChat(const char *str, int clientnum, int msgType) {
       std::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
   const int chatWidth =
       std::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
-  const team_t team = ((msgType & REPLAY_MSG || msgType & SERVER_MSG)
-                           ? TEAM_SPECTATOR
-                           : cgs.clientinfo[clientnum].team);
 
   if (chatHeight <= 0 || cg_teamChatTime.integer <= 0) {
     // team chat disabled, dump into normal chat
@@ -1392,7 +1385,13 @@ void CG_PlayVoiceChat(bufferedVoiceChat_t *vchat) {
     }
   }
   if (!vchat->voiceOnly && !cg_noVoiceText.integer) {
-    CG_AddToTeamChat(vchat->message, vchat->clientNum, 0);
+    // pretty sure the 'vchat->clientNum != -1' check is never false and
+    // 'vchat->clientNum' is always valid (in fact, 'G_VoiceTo' would crash
+    // if called without a valid ent), but let's be sure
+    const team_t team = ETJump::isValidClientNum(vchat->clientNum)
+                            ? cgs.clientinfo[vchat->clientNum].team
+                            : TEAM_SPECTATOR;
+    CG_AddToTeamChat(vchat->message, team);
     CG_Printf(va("[skipnotify]%s\n", vchat->message)); // JPW NERVE
   }
   voiceChatBuffer[cg.voiceChatBufferOut].snd = 0;
@@ -2376,16 +2375,16 @@ static void CG_ServerCommand(void) {
 
   enc = !Q_stricmp(cmd, "enc_chat") ? qtrue : qfalse;
   if (!Q_stricmp(cmd, "chat") || enc) {
-    int msgType = 0;
+    ETJump::EnumBitset<ETJump::ChatMessageType> msgType{};
 
     if (Q_atoi(CG_Argv(4))) {
-      msgType |= REPLAY_MSG;
+      msgType |= ETJump::ChatMessageType::REPLAY_MSG;
     }
 
     std::string s = CG_Argv(2);
 
     if (s.empty()) { // server sends empty clientNum
-      msgType |= SERVER_MSG;
+      msgType |= ETJump::ChatMessageType::SERVER_MSG;
     }
 
     const int clientNum = Q_atoi(s.c_str());
@@ -2409,13 +2408,15 @@ static void CG_ServerCommand(void) {
     CG_RemoveChatEscapeChar(text);
     ETJump::fixLinesEndingWithCaret(text, MAX_SAY_TEXT);
 
-    if (msgType & REPLAY_MSG) {
+    if (msgType & ETJump::ChatMessageType::REPLAY_MSG) {
       s = ETJump::addChatReplayModifications(text);
     } else {
-      s = ETJump::addChatModifications(text, clientNum, msgType);
+      s = ETJump::addChatModifications(
+          text, clientNum, msgType & ETJump::ChatMessageType::SERVER_MSG);
     }
 
-    CG_AddToTeamChat(s.c_str(), clientNum, msgType);
+    CG_AddToTeamChat(s.c_str(),
+                     msgType ? TEAM_SPECTATOR : cgs.clientinfo[clientNum].team);
     CG_Printf("%s\n", s.c_str());
 
     return;
@@ -2440,8 +2441,9 @@ static void CG_ServerCommand(void) {
     s = ETJump::addChatModifications(text, Q_atoi(CG_Argv(2)), false);
     Q_strncpyz(text, s.c_str(), MAX_SAY_TEXT);
 
+    const int32_t clientNum = Q_atoi(CG_Argv(2));
     ETJump::fixLinesEndingWithCaret(text, MAX_SAY_TEXT);
-    CG_AddToTeamChat(text, Q_atoi(CG_Argv(2)), 0);
+    CG_AddToTeamChat(text, cgs.clientinfo[clientNum].team);
     CG_Printf("%s\n", text); // JPW NERVE
 
     return;
