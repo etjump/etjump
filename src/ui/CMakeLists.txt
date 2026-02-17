@@ -3,8 +3,10 @@ file(GLOB UI_HEADERS "*.h" "*.hpp")
 add_library(ui MODULE
 	"etj_colorpicker.cpp"
 	"etj_demo_queue.cpp"
+	"etj_main.cpp"
 	"etj_menu_integrity_checker.cpp"
 	"etj_quick_connect.cpp"
+	"etj_utilities.cpp"
 	"ui_atoms.cpp"
 	"ui_gameinfo.cpp"
 	"ui_loadpanel.cpp"

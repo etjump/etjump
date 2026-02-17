@@ -1,6 +1,7 @@
 // cg_syscalls.c -- this file is only included when building a dll
 // cg_syscalls.asm is included instead when building a qvm
 #include "cg_local.h"
+#include "../game/etj_syscalls.h"
 #include "../game/etj_syscall_ext_shared.h"
 
 intptr_t(QDECL *vmSyscall)(intptr_t arg,

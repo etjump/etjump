@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <utility>
 #include <chrono>
+#include <unordered_set>
 
 #include "etj_timerun_v2.h"
 
@@ -37,16 +38,16 @@
 #include "etj_local.h"
 #include "etj_map_statistics.h"
 
-ETJump::TimerunV2::TimerunV2(
+namespace ETJump {
+TimerunV2::TimerunV2(
     std::string currentMap, std::unique_ptr<TimerunRepository> repository,
     std::unique_ptr<Log> logger,
     std::unique_ptr<SynchronizationContext> synchronizationContext)
     : _currentMap(std::move(currentMap)), _repository(std::move(repository)),
       _logger(std::move(logger)), _sc(std::move(synchronizationContext)) {}
 
-const ETJump::Timerun::Record *
-ETJump::TimerunV2::Player::getRecord(int seasonId,
-                                     const std::string &runName) const {
+const Timerun::Record *
+TimerunV2::Player::getRecord(int seasonId, const std::string &runName) const {
   for (const auto &r : records) {
     if (r.seasonId == seasonId && r.run == runName) {
       return &r;
@@ -55,16 +56,16 @@ ETJump::TimerunV2::Player::getRecord(int seasonId,
   return nullptr;
 }
 
-class ComputeRanksResult : public ETJump::SynchronizationContext::ResultBase {
+class ComputeRanksResult : public SynchronizationContext::ResultBase {
 public:
   explicit ComputeRanksResult(
-      const std::map<int, std::vector<ETJump::TimerunV2::Ranking>> &rankings)
+      const std::map<int, std::vector<TimerunV2::Ranking>> &rankings)
       : rankings(rankings) {}
 
-  std::map<int, std::vector<ETJump::TimerunV2::Ranking>> rankings;
+  std::map<int, std::vector<TimerunV2::Ranking>> rankings;
 };
 
-void ETJump::TimerunV2::computeRanks() {
+void TimerunV2::computeRanks() {
   _sc->postTask(
       [this]() {
         auto start = std::chrono::high_resolution_clock::now();
@@ -89,10 +90,14 @@ void ETJump::TimerunV2::computeRanks() {
         std::map<UserId, std::string> latestName{};
         const double maxPointsPerRun = 1000.0;
 
+        const auto maps = game.mapStatistics->getMaps();
+        const std::unordered_set<std::string> validMaps(maps.cbegin(),
+                                                        maps.cend());
+
         for (const auto &r : records) {
           // we don't want to compute score for maps not on the server,
           // e.g. when a new version of a map is released
-          if (!game.mapStatistics->mapExists(r.map)) {
+          if (validMaps.count(r.map) == 0) {
             continue;
           }
           if (scores.count(r.seasonId) == 0) {
@@ -189,7 +194,7 @@ void ETJump::TimerunV2::computeRanks() {
       });
 }
 
-void ETJump::TimerunV2::updateSeasonStates() {
+void TimerunV2::updateSeasonStates() {
   const auto seasons = _repository->getSeasons();
   const auto currentTime = getCurrentTime();
 
@@ -230,7 +235,7 @@ void ETJump::TimerunV2::updateSeasonStates() {
                 _pastSeasonsIds.size());
 }
 
-void ETJump::TimerunV2::initialize() {
+void TimerunV2::initialize() {
   try {
     _repository->initialize();
 
@@ -256,23 +261,23 @@ void ETJump::TimerunV2::initialize() {
   computeRanks();
 }
 
-void ETJump::TimerunV2::shutdown() {
+void TimerunV2::shutdown() {
   _repository->shutdown();
   _repository = nullptr;
   _sc->stopWorkerThreads();
 }
 
-void ETJump::TimerunV2::runFrame() { _sc->processCompletedTasks(); }
+void TimerunV2::runFrame() { _sc->processCompletedTasks(); }
 
-class ClientConnectResult : public ETJump::SynchronizationContext::ResultBase {
+class ClientConnectResult : public SynchronizationContext::ResultBase {
 public:
-  explicit ClientConnectResult(std::vector<ETJump::Timerun::Record> runs)
+  explicit ClientConnectResult(std::vector<Timerun::Record> runs)
       : runs(std::move(runs)) {}
 
-  std::vector<ETJump::Timerun::Record> runs;
+  std::vector<Timerun::Record> runs;
 };
 
-void ETJump::TimerunV2::clientConnect(int clientNum, int userId) {
+void TimerunV2::clientConnect(int clientNum, int userId) {
   _sc->postTask(
       [this, clientNum, userId] {
         auto parameters = StringUtil::join(
@@ -309,13 +314,14 @@ void ETJump::TimerunV2::clientConnect(int clientNum, int userId) {
       });
 }
 
-void ETJump::TimerunV2::clientDisconnect(int clientNum) {
+void TimerunV2::clientDisconnect(int clientNum) {
   _players[clientNum] = nullptr;
 }
 
-ETJump::TimerunV2::Player *ETJump::TimerunV2::setupPlayerData(
-    const int clientNum, const std::string &runName,
-    const std::string &playerName, const int currentTimeMs) const {
+TimerunV2::Player *TimerunV2::setupPlayerData(const int clientNum,
+                                              const std::string &runName,
+                                              const std::string &playerName,
+                                              const int currentTimeMs) const {
   const auto player = _players[clientNum].get();
 
   if (!player) {
@@ -346,9 +352,8 @@ ETJump::TimerunV2::Player *ETJump::TimerunV2::setupPlayerData(
   return player;
 }
 
-void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
-                                   const std::string &playerName,
-                                   int currentTimeMs) {
+void TimerunV2::startTimer(const std::string &runName, int clientNum,
+                           const std::string &playerName, int currentTimeMs) {
   const auto player =
       setupPlayerData(clientNum, runName, playerName, currentTimeMs);
 
@@ -360,10 +365,9 @@ void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
   Utilities::startRun(clientNum);
 }
 
-void ETJump::TimerunV2::startSaveposTimer(int clientNum,
-                                          const std::string &playerName,
-                                          const int currentTimeMs,
-                                          const ETJump::SavePosData &data) {
+void TimerunV2::startSaveposTimer(int clientNum, const std::string &playerName,
+                                  const int currentTimeMs,
+                                  const SavePosData &data) {
   const auto player = setupPlayerData(clientNum, data.timerunInfo.runName,
                                       playerName, currentTimeMs);
 
@@ -382,10 +386,9 @@ void ETJump::TimerunV2::startSaveposTimer(int clientNum,
   Utilities::startRun(clientNum);
 }
 
-void ETJump::TimerunV2::checkpoint(const std::string &runName,
-                                   const int clientNum,
-                                   const int checkpointIndex,
-                                   const int currentTimeMs) const {
+void TimerunV2::checkpoint(const std::string &runName, const int clientNum,
+                           const int checkpointIndex,
+                           const int currentTimeMs) const {
   Player *player = _players[clientNum].get();
 
   if (player == nullptr) {
@@ -417,8 +420,8 @@ void ETJump::TimerunV2::checkpoint(const std::string &runName,
           .serialize());
 }
 
-void ETJump::TimerunV2::stopTimer(const std::string &runName, int clientNum,
-                                  int currentTimeMs) {
+void TimerunV2::stopTimer(const std::string &runName, int clientNum,
+                          int currentTimeMs) {
   Player *player = _players[clientNum].get();
 
   if (player == nullptr) {
@@ -446,14 +449,14 @@ void ETJump::TimerunV2::stopTimer(const std::string &runName, int clientNum,
   Utilities::stopRun(clientNum);
 }
 
-class AddSeasonResult : public ETJump::SynchronizationContext::ResultBase {
+class AddSeasonResult : public SynchronizationContext::ResultBase {
 public:
   explicit AddSeasonResult(std::string message) : message(std::move(message)) {}
 
   std::string message;
 };
 
-void ETJump::TimerunV2::addSeason(const Timerun::AddSeasonParams &season) {
+void TimerunV2::addSeason(const Timerun::AddSeasonParams &season) {
   _sc->postTask(
       [this, season]() {
         try {
@@ -478,7 +481,7 @@ void ETJump::TimerunV2::addSeason(const Timerun::AddSeasonParams &season) {
       });
 }
 
-class EditSeasonResult : public ETJump::SynchronizationContext::ResultBase {
+class EditSeasonResult : public SynchronizationContext::ResultBase {
 public:
   explicit EditSeasonResult(std::string message)
       : message(std::move(message)) {}
@@ -486,7 +489,7 @@ public:
   std::string message;
 };
 
-void ETJump::TimerunV2::editSeason(const Timerun::EditSeasonParams &params) {
+void TimerunV2::editSeason(const Timerun::EditSeasonParams &params) {
   _sc->postTask(
       [this, params]() {
         try {
@@ -508,7 +511,7 @@ void ETJump::TimerunV2::editSeason(const Timerun::EditSeasonParams &params) {
       });
 }
 
-void ETJump::TimerunV2::interrupt(int clientNum) {
+void TimerunV2::interrupt(int clientNum) {
   Player *player = _players[clientNum].get();
 
   if (player == nullptr || !player->running) {
@@ -522,7 +525,7 @@ void ETJump::TimerunV2::interrupt(int clientNum) {
   Printer::commandAll(TimerunCommands::Interrupt(clientNum).serialize());
 }
 
-void ETJump::TimerunV2::connectNotify(int clientNum) {
+void TimerunV2::connectNotify(int clientNum) {
   for (int idx = 0; idx < MAX_CLIENTS; ++idx) {
     auto player = _players[idx].get();
     if (player && player->activeRunName.length() > 0) {
@@ -557,14 +560,14 @@ void ETJump::TimerunV2::connectNotify(int clientNum) {
   }
 }
 
-class PrintRecordsResult : public ETJump::SynchronizationContext::ResultBase {
+class PrintRecordsResult : public SynchronizationContext::ResultBase {
 public:
-  PrintRecordsResult(std::vector<ETJump::Timerun::Record> records,
-                     std::vector<ETJump::Timerun::Season> seasons)
+  PrintRecordsResult(std::vector<Timerun::Record> records,
+                     std::vector<Timerun::Season> seasons)
       : records(std::move(records)), seasons(std::move(seasons)) {}
 
-  std::vector<ETJump::Timerun::Record> records;
-  std::vector<ETJump::Timerun::Season> seasons;
+  std::vector<Timerun::Record> records;
+  std::vector<Timerun::Season> seasons;
 };
 
 std::string rankToString(int rank) {
@@ -580,8 +583,7 @@ std::string rankToString(int rank) {
   }
 }
 
-void ETJump::TimerunV2::printRecords(
-    const Timerun::PrintRecordsParams &params) {
+void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
   _sc->postTask(
       [this, params] {
         auto records = _repository->getRecords(params);
@@ -802,8 +804,7 @@ void ETJump::TimerunV2::printRecords(
       });
 }
 
-class LoadCheckpointsResult
-    : public ETJump::SynchronizationContext::ResultBase {
+class LoadCheckpointsResult : public SynchronizationContext::ResultBase {
 public:
   explicit LoadCheckpointsResult(std::string matchedRun,
                                  std::vector<int> checkpoints)
@@ -814,9 +815,8 @@ public:
   std::vector<int> checkpoints;
 };
 
-void ETJump::TimerunV2::loadCheckpoints(int clientNum,
-                                        const std::string &mapName,
-                                        const std::string &runName, int rank) {
+void TimerunV2::loadCheckpoints(int clientNum, const std::string &mapName,
+                                const std::string &runName, int rank) {
   _sc->postTask(
       [this, clientNum, mapName, runName, rank] {
         std::string matchedRun;
@@ -921,16 +921,16 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum,
       });
 }
 
-class PrintResult : public ETJump::SynchronizationContext::ResultBase {
+class PrintResult : public SynchronizationContext::ResultBase {
 public:
   explicit PrintResult(std::string message) : message(std::move(message)) {}
 
   std::string message;
 };
 
-std::string ETJump::TimerunV2::getRankingsStringFor(
-    const std::vector<Ranking> *rankings,
-    const Timerun::PrintRankingsParams &params) {
+std::string
+TimerunV2::getRankingsStringFor(const std::vector<Ranking> *rankings,
+                                const Timerun::PrintRankingsParams &params) {
   std::string message;
   message += "^gRank  Player                                      Score\n";
   for (size_t i = 0, len = rankings->size(); i < len; ++i) {
@@ -970,8 +970,7 @@ std::string ETJump::TimerunV2::getRankingsStringFor(
   return message;
 }
 
-void ETJump::TimerunV2::printRankings(
-    const Timerun::PrintRankingsParams &params) {
+void TimerunV2::printRankings(const Timerun::PrintRankingsParams &params) {
   _sc->postTask(
       [this, params] {
         std::string message;
@@ -1039,7 +1038,7 @@ void ETJump::TimerunV2::printRankings(
       });
 }
 
-void ETJump::TimerunV2::printSeasons(int clientNum) {
+void TimerunV2::printSeasons(int clientNum) {
   _sc->postTask(
       [this] {
         // 1 active season means only default season is active
@@ -1139,7 +1138,7 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
       });
 }
 
-class DeleteSeasonResult : public ETJump::SynchronizationContext::ResultBase {
+class DeleteSeasonResult : public SynchronizationContext::ResultBase {
 public:
   explicit DeleteSeasonResult(std::string message)
       : message(std::move(message)) {}
@@ -1147,7 +1146,7 @@ public:
   std::string message;
 };
 
-void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
+void TimerunV2::deleteSeason(int clientNum, const std::string &name) {
   _sc->postTask(
       [this, name]() {
         try {
@@ -1173,11 +1172,386 @@ void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
       });
 }
 
-int32_t ETJump::TimerunV2::getRunStartTime(const int32_t clientNum) const {
+class ListCheckpointsResult : public SynchronizationContext::ResultBase {
+public:
+  ListCheckpointsResult(std::vector<Timerun::Checkpoints> checkpoints,
+                        std::vector<Timerun::Season> seasons)
+      : checkpoints(std::move(checkpoints)), seasons(std::move(seasons)) {}
+
+  std::vector<Timerun::Checkpoints> checkpoints;
+  std::vector<Timerun::Season> seasons;
+};
+
+void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const int32_t rank = params.rank;
+
+  _sc->postTask(
+      [this, params]() {
+        const auto checkpoints = _repository->getCheckpoints(params);
+        const auto seasons =
+            _repository->getSeasonsForName(params.season.value(), false);
+        return std::make_unique<ListCheckpointsResult>(checkpoints, seasons);
+      },
+      [this, clientNum, rank](const auto results) {
+        const auto *const r =
+            dynamic_cast<ListCheckpointsResult *>(results.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: unable to list checkpoints for player %i: "
+                         "ListCheckpointsResult is NULL",
+                         clientNum);
+          throw std::runtime_error(
+              stringFormat("%s: unable to list checkpoints. This is a bug, "
+                           "please report this to the developers."));
+        }
+
+        // ensure we have at least some valid checkpoint times
+        bool anyValid = false;
+
+        for (const auto &cp : r->checkpoints) {
+          if (cp.checkpoints[0] != TIMERUN_CHECKPOINT_NOT_SET) {
+            anyValid = true;
+            break;
+          }
+        }
+
+        if (!anyValid || r->checkpoints.empty()) {
+          Printer::console(clientNum, "No checkpoints available.\n");
+          return;
+        }
+
+        std::map<int32_t, Timerun::Season> seasonIdToName;
+
+        for (const auto &s : r->seasons) {
+          seasonIdToName[s.id] = s;
+        }
+
+        for (const auto &data : r->checkpoints) {
+          // Don't print a result if it has no checkpoint times.
+          // We potentially get multiple results back
+          // (e.g. partial match on multiple runs/seasons),
+          // and it's possible that some of them have no checkpoint times.
+          if (data.checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
+            continue;
+          }
+
+          const auto seasonIt = seasonIdToName.find(data.seasonID);
+
+          // This can only ever happen in cases where a server owner goes
+          // and manually deletes a season from the database, without also
+          // deleting the records associated with it. If a season is deleted
+          // with '!delete-season' command, all the records associated
+          // with that season area also deleted, so this should never happen.
+          if (seasonIt == seasonIdToName.cend()) {
+            Printer::console(clientNum,
+                             "Malformed data received from the timerun "
+                             "database. Please inform the server owner, more "
+                             "information is available in the server logs.\n");
+            _logger->error(stringFormat(
+                "Record on map %s, run %s by player %s with time %i "
+                "contains invalid season ID '%i'. The database might have been "
+                "manually modified, or is corrupted. If you have manually "
+                "deleted a season on purpose from the database instead of "
+                "using !delete-season command, please delete all records "
+                "associated with the invalid season ID as well. If the "
+                "database is intact and hasn't been modified by hand, please "
+                "report this error to the developers.",
+                data.map, data.run, data.playerName, data.runTime,
+                data.seasonID));
+            continue;
+          }
+
+          const Timerun::Season season = seasonIt->second;
+          std::string s = "\n";
+
+          if (data.seasonID == defaultSeasonId) {
+            s += stringFormat("^2Checkpoint times for map ^7%s\n", data.map);
+          } else {
+            s += stringFormat(
+                "^2Checkpoint times on season ^7%s ^2for map ^7%s\n",
+                season.name, data.map);
+          }
+
+          s += "^g-------------------------------------------------------------"
+               "\n";
+          s += stringFormat(
+              " ^2Run: ^7%s\n ^2Player: ^7%s\n ^2Time: ^7%s (%s^7)\n\n",
+              data.run, data.playerName, millisToString(data.runTime),
+              rankToString(rank));
+
+          for (size_t i = 0; i < data.checkpoints.size(); i++) {
+            if (data.checkpoints[i] == TIMERUN_CHECKPOINT_NOT_SET) {
+              break;
+            }
+
+            s += stringFormat(" ^g%2i. ^7%s", static_cast<int32_t>(i + 1),
+                              millisToString(data.checkpoints[i]));
+
+            // from 2nd checkpoint onwards, display the absolute time
+            // difference between checkpoints
+            if (i > 0) {
+              s += stringFormat(" ^z(%s)",
+                                millisToString(data.checkpoints[i] -
+                                               data.checkpoints[i - 1]));
+            }
+
+            s += "\n";
+          }
+
+          Printer::console(clientNum, s);
+        }
+      },
+      [this, clientNum](const std::runtime_error &e) {
+        Printer::console(clientNum, stringFormat("%s\n", e.what()));
+      });
+}
+
+class CompareCheckpointsResult : public SynchronizationContext::ResultBase {
+public:
+  CompareCheckpointsResult(std::vector<Timerun::Checkpoints> baseCheckpoints,
+                           std::vector<Timerun::Checkpoints> cmpCheckpoints,
+                           std::vector<Timerun::Season> seasons)
+      : baseCheckpoints(std::move(baseCheckpoints)),
+        cmpCheckpoints(std::move(cmpCheckpoints)), seasons(std::move(seasons)) {
+  }
+
+  std::vector<Timerun::Checkpoints> baseCheckpoints;
+  std::vector<Timerun::Checkpoints> cmpCheckpoints;
+  std::vector<Timerun::Season> seasons;
+};
+
+void TimerunV2::compareCheckpoints(
+    const Timerun::CompareCheckpointsParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const int32_t baseRank = params.rankBase;
+  const int32_t cmpRank = params.rankCmp;
+
+  _sc->postTask(
+      [this, params]() {
+        // we can grab all the data we need for the comparison by using the same
+        // query as 'listcheckpoints' uses, and just make sure the data matches
+        const auto baseCheckpoints = _repository->getCheckpoints(
+            {params.clientNum, params.season, params.map, params.run,
+             params.rankBase, params.exactMap});
+        const auto cmpCheckpoints = _repository->getCheckpoints(
+            {params.clientNum, params.season, params.map, params.run,
+             params.rankCmp, params.exactMap});
+
+        const auto seasons = _repository->getSeasons();
+
+        return std::make_unique<CompareCheckpointsResult>(
+            baseCheckpoints, cmpCheckpoints, seasons);
+      },
+      [this, clientNum, baseRank, cmpRank](const auto results) {
+        const auto *const r =
+            dynamic_cast<CompareCheckpointsResult *>(results.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: unable to compare checkpoints for player %i: "
+                         "CompareCheckpointsResult is NULL",
+                         clientNum);
+          throw std::runtime_error(
+              stringFormat("%s: unable to compare checkpoints. This is a bug, "
+                           "please report this to the developers."));
+        }
+
+        if (r->baseCheckpoints.empty()) {
+          Printer::console(clientNum,
+                           "No valid checkpoints to compare against.\n");
+          return;
+        }
+
+        if (r->cmpCheckpoints.empty()) {
+          Printer::console(clientNum,
+                           "No valid checkpoints found for comparison.\n");
+          return;
+        }
+
+        // build a comparable dataset - a pair will contain the checkpoints
+        // from a run with same season/map/run, where both have checkpoints
+        const std::vector<std::pair<Timerun::Checkpoints, Timerun::Checkpoints>>
+            processedCheckpoints = getCheckpointsForComparison(
+                r->baseCheckpoints, r->cmpCheckpoints);
+
+        if (processedCheckpoints.empty()) {
+          Printer::console(
+              clientNum,
+              "None of the checkpoint times found are comparable.\n");
+          return;
+        }
+
+        std::map<int32_t, Timerun::Season> seasonIdToName;
+
+        for (const auto &s : r->seasons) {
+          seasonIdToName[s.id] = s;
+        }
+
+        for (const auto &[base, cmp] : processedCheckpoints) {
+          const auto seasonIt = seasonIdToName.find(base.seasonID);
+
+          // should not happen, see 'listCheckpoints()' for more info
+          if (seasonIt == seasonIdToName.cend()) {
+            Printer::console(clientNum,
+                             "Malformed data received from the timerun "
+                             "database. Please inform the server owner, more "
+                             "information is available in the server logs.\n");
+            _logger->error(stringFormat(
+                "Record on map %s, run %s by player %s with time %i "
+                "contains invalid season ID '%i'. The database might have been "
+                "manually modified, or is corrupted. If you have manually "
+                "deleted a season on purpose from the database instead of "
+                "using !delete-season command, please delete all records "
+                "associated with the invalid season ID as well. If the "
+                "database is intact and hasn't been modified by hand, please "
+                "report this error to the developers.",
+                base.map, base.run, base.playerName, base.runTime,
+                base.seasonID));
+            continue;
+          }
+
+          const Timerun::Season season = seasonIt->second;
+          std::string s = "\n";
+
+          if (base.seasonID == defaultSeasonId) {
+            s += stringFormat("^2Comparing checkpoints for map ^7%s\n",
+                              base.map);
+          } else {
+            s += stringFormat(
+                "^2Comparing checkpoints on season ^7%s ^2for map ^7%s\n",
+                season.name, base.map);
+          }
+
+          s += "^g-------------------------------------------------------------"
+               "\n";
+          s += stringFormat(" ^2Run: ^7%s\n\n", base.run);
+
+          // minimum column width
+          constexpr size_t BASE_MIN_PADDING = 24;
+
+          std::string tmpName;
+          tmpName.insert(0, MAX_NETNAME, 'A');
+
+          const std::string baseHeader = stringFormat(
+              "^7%s ^7(%s^7)", base.playerName, rankToString(baseRank));
+          const std::string cmpHeader = stringFormat(
+              "^7%s ^7(%s^7)", cmp.playerName, rankToString(cmpRank));
+
+          const size_t baseWidth =
+              std::max(sanitize(baseHeader).length(), BASE_MIN_PADDING);
+          const size_t cmpWidth =
+              std::max(sanitize(cmpHeader).length(), BASE_MIN_PADDING);
+
+          const size_t basePadding =
+              baseWidth + StringUtil::countExtraPadding(baseHeader);
+
+          s += stringFormat("     %-*s ^g| ^7%s\n", basePadding, baseHeader,
+                            cmpHeader);
+
+          s += "     ^g";
+          s.insert(s.length(), baseWidth + 1, '-');
+          s += "|";
+          s.insert(s.length(), cmpWidth + 1, '-');
+          s += "\n";
+
+          for (size_t i = 0; i < base.checkpoints.size(); i++) {
+            // if both records have no time set, we've reached max checkpoints
+            if (base.checkpoints[i] == TIMERUN_CHECKPOINT_NOT_SET &&
+                cmp.checkpoints[i] == TIMERUN_CHECKPOINT_NOT_SET) {
+              break;
+            }
+
+            s += stringFormat(" ^g%2i. ", i + 1);
+
+            // because checkpoints aren't mandatory, runs might have different
+            // number of checkpoints, so ensure we only display valid times
+            const std::string baseTime =
+                base.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET
+                    ? millisToString(base.checkpoints[i])
+                    : "^z-";
+            const std::string cmpTime =
+                cmp.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET
+                    ? millisToString(cmp.checkpoints[i])
+                    : "^z-";
+
+            // the minimum width for a column is wide enough that
+            // the checkpoint times are never going to be wider than that,
+            // so we don't need to compare against the current column width
+            const size_t baseTimePadding =
+                baseWidth + StringUtil::countExtraPadding(baseTime);
+
+            s += stringFormat("^7%-*s ^g| ^7%s", baseTimePadding, baseTime,
+                              cmpTime);
+
+            // only display diff if both times are valid
+            if (base.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET &&
+                cmp.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET) {
+              s += stringFormat(" (%s^7)", diffToString(cmp.checkpoints[i],
+                                                        base.checkpoints[i]));
+            }
+
+            s += "\n";
+          }
+
+          s += "     ^g";
+          s.insert(s.length(), baseWidth + 1, '-');
+          s += "|";
+          s.insert(s.length(), cmpWidth + 1, '-');
+          s += "\n";
+
+          const std::string baseRunTime = millisToString(base.runTime);
+          const size_t baseRunTimeWidth =
+              std::max(sanitize(baseRunTime).length(), baseWidth);
+          const size_t baseRunTimePadding =
+              baseRunTimeWidth + StringUtil::countExtraPadding(baseRunTime);
+
+          s += stringFormat("     ^7%-*s ^g| ^7%s (%s^7)\n", baseRunTimePadding,
+                            baseRunTime, millisToString(cmp.runTime),
+                            diffToString(cmp.runTime, base.runTime));
+
+          Printer::console(clientNum, s);
+        }
+      },
+      [this, clientNum](const std::runtime_error &e) {
+        Printer::console(clientNum, stringFormat("%s\n", e.what()));
+      });
+}
+
+int32_t TimerunV2::getRunStartTime(const int32_t clientNum) const {
   return _players[clientNum]->startTime.value_or(0);
 }
 
-void ETJump::TimerunV2::startNotify(Player *player) const {
+std::vector<std::pair<Timerun::Checkpoints, Timerun::Checkpoints>>
+TimerunV2::getCheckpointsForComparison(
+    const std::vector<Timerun::Checkpoints> &base,
+    const std::vector<Timerun::Checkpoints> &cmp) {
+  std::vector<std::pair<Timerun::Checkpoints, Timerun::Checkpoints>>
+      processedRecords;
+
+  for (const auto &baseData : base) {
+    // no checkpoint data, throw away
+    if (baseData.checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
+      continue;
+    }
+
+    for (const auto &cmpData : cmp) {
+      // no checkpoint data, throw away
+      if (cmpData.checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
+        continue;
+      }
+
+      if (baseData.seasonID == cmpData.seasonID &&
+          baseData.map == cmpData.map && baseData.run == cmpData.run) {
+        processedRecords.emplace_back(baseData, cmpData);
+        break;
+      }
+    }
+  }
+
+  return processedRecords;
+}
+
+void TimerunV2::startNotify(Player *player) const {
   auto previousRecord =
       player->getRecord(defaultSeasonId, player->activeRunName);
 
@@ -1205,7 +1579,7 @@ void ETJump::TimerunV2::startNotify(Player *player) const {
           .serialize());
 }
 
-bool ETJump::TimerunV2::isDebugging(const int clientNum) {
+bool TimerunV2::isDebugging(const int clientNum) {
   std::vector<std::string> debuggers;
 
   if (g_debugTrackers.integer) {
@@ -1226,7 +1600,7 @@ bool ETJump::TimerunV2::isDebugging(const int clientNum) {
   return true;
 }
 
-int ETJump::TimerunV2::indexForRunname(const std::string &runName) {
+int TimerunV2::indexForRunname(const std::string &runName) {
   int index;
   std::string currentRun;
   std::string activeRun = sanitize(runName, true);
@@ -1241,10 +1615,10 @@ int ETJump::TimerunV2::indexForRunname(const std::string &runName) {
   return index;
 }
 
-class CheckRecordResult : public ETJump::SynchronizationContext::ResultBase {
+class CheckRecordResult : public SynchronizationContext::ResultBase {
 public:
   struct NewRecord {
-    ETJump::Timerun::Record record;
+    Timerun::Record record;
     std::string seasonName;
     std::optional<int> previousTime;
   };
@@ -1257,17 +1631,17 @@ public:
   std::map<int, NewRecord> newOwnRecordsPerSeason{};
 
   // our previous overall record
-  std::optional<ETJump::Timerun::Record> playerPreviousOverallRecord;
+  std::optional<Timerun::Record> playerPreviousOverallRecord;
   // our previous seasonal record
-  std::optional<ETJump::Timerun::Record> playerPreviousSeasonalRecord;
+  std::optional<Timerun::Record> playerPreviousSeasonalRecord;
 
   // previous overall record
-  std::optional<ETJump::Timerun::Record> previousOverallRecord;
+  std::optional<Timerun::Record> previousOverallRecord;
   // previous seasonal record
-  std::optional<ETJump::Timerun::Record> previousSeasonalRecord;
+  std::optional<Timerun::Record> previousSeasonalRecord;
 };
 
-void ETJump::TimerunV2::checkRecord(Player *player) {
+void TimerunV2::checkRecord(Player *player) {
   const auto clientNum = player->clientNum;
   const auto &activeRunName = player->activeRunName;
   const auto userId = player->userId;
@@ -1587,7 +1961,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
 }
 
 std::array<int, MAX_TIMERUN_CHECKPOINTS>
-ETJump::TimerunV2::toCheckpointsArray(const std::vector<int> *input) {
+TimerunV2::toCheckpointsArray(const std::vector<int> *input) {
   std::array<int, MAX_TIMERUN_CHECKPOINTS> arr{};
   arr.fill(TIMERUN_CHECKPOINT_NOT_SET);
 
@@ -1598,7 +1972,7 @@ ETJump::TimerunV2::toCheckpointsArray(const std::vector<int> *input) {
   return arr;
 }
 
-const ETJump::Timerun::Season *ETJump::TimerunV2::getMostRelevantSeason() {
+const Timerun::Season *TimerunV2::getMostRelevantSeason() {
   // Most relevant = Most recently started
   const Timerun::Season *mostRelevant = &_activeSeasons[0];
   for (const auto &season : _activeSeasons) {
@@ -1609,7 +1983,7 @@ const ETJump::Timerun::Season *ETJump::TimerunV2::getMostRelevantSeason() {
   return mostRelevant;
 }
 
-void ETJump::TimerunV2::removeDisallowedWeapons(gentity_t *ent) {
+void TimerunV2::removeDisallowedWeapons(gentity_t *ent) {
   for (int i = 0; i < WP_NUM_WEAPONS; i++) {
     if (BG_WeaponDisallowedInTimeruns(i)) {
       COM_BitClear(ent->client->ps.weapons, i);
@@ -1622,7 +1996,7 @@ void ETJump::TimerunV2::removeDisallowedWeapons(gentity_t *ent) {
   ent->client->ps.grenadeTimeLeft = 0;
 }
 
-void ETJump::TimerunV2::removePlayerProjectiles(gentity_t *ent) {
+void TimerunV2::removePlayerProjectiles(gentity_t *ent) {
   for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; i++) {
     gentity_t *e = &g_entities[i];
 
@@ -1634,7 +2008,7 @@ void ETJump::TimerunV2::removePlayerProjectiles(gentity_t *ent) {
   }
 }
 
-bool ETJump::TimerunV2::weaponIsExplosivePickup(const int weapon) {
+bool TimerunV2::weaponIsExplosivePickup(const int weapon) {
   // FIXME: we should allow K43/Garand, but remove rifle nades on pickup
   switch (weapon) {
     case WP_GRENADE_LAUNCHER:
@@ -1657,3 +2031,4 @@ bool ETJump::TimerunV2::weaponIsExplosivePickup(const int weapon) {
       return false;
   }
 }
+} // namespace ETJump

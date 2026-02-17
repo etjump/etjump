@@ -22,19 +22,20 @@
  * SOFTWARE.
  */
 
-#ifndef TRICKJUMP_LINES_HPP
-#define TRICKJUMP_LINES_HPP
+#pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <array>
-#include "etj_rotation_matrix.h"
 #include <map>
 
+#include "etj_client_commands_handler.h"
+#include "etj_rotation_matrix.h"
+
+namespace ETJump {
 enum routeStatus { map, load, record };
 
 class TrickjumpLines {
-
 public:
   static const unsigned LINE_WIDTH = 8;
 
@@ -62,19 +63,13 @@ public:
     std::string filename;
   };
 
-  TrickjumpLines();
+  TrickjumpLines(
+      const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler,
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler);
   ~TrickjumpLines();
 
-  /**
-   * Starts tjl recording
-   * @param name Name of the tjl file. Can be nullptr -> automatically
-   * generated filename
-   */
-  void record(const char *name);
-  /**
-   * Stops tjl recording and saves the current tjl
-   */
-  void stopRecord();
+  void runFrame();
+
   /**
    * Adds current position to the currently recorded tjl (if we're
    * recording)
@@ -97,22 +92,14 @@ public:
   bool isEnableLine();
   bool isEnableMarker();
 
-  void listRoutes();
-  void displayByName(const char *name);
   void displayNearestRoutes();
-  void renameRoute(const char *oldName, const char *newName);
-  void deleteRoute(const char *name);
 
   int getRoutePositionByName(const char *name);
 
-  void overwriteRecording(const char *name);
-
-  void saveRoutes(const char *savename);
   void loadRoutes(const char *loadname);
   bool loadedRoutes(const char *loadname);
 
   int getCurrentRouteToRender() { return _currentRouteToRender; }
-  void setCurrentRouteToRender(int nb) { _currentRouteToRender = nb; }
 
   bool getEnableLine() { return _enableLine; }
   void setEnableLine(bool state) { _enableLine = state; }
@@ -135,27 +122,54 @@ private:
   void addTrickjumpLinesColor(std::vector<Node> points, float minSpeed,
                               float maxSpeed, float width);
 
+  /**
+   * Starts tjl recording
+   * @param name Name of the tjl file. Can be nullptr -> automatically
+   * generated filename
+   */
+  void record(const char *name);
+  /**
+   * Stops tjl recording and saves the current tjl
+   */
+  void stopRecord();
+
   void addJumpIndicator(vec3_t point, vec4_c color, float quadSize);
+
+  void displayByName(const char *name);
+  void setCurrentRouteToRender(int nb) { _currentRouteToRender = nb; }
+
+  void saveRoutes(const char *savename);
+  void renameRoute(const char *oldName, const char *newName);
+  void deleteRoute(const char *name);
+  void overwriteRecording(const char *name);
+  void listRoutes();
 
   float normalizeSpeed(float max, float min, float speed);
   void computeHSV(float speed, vec3_t &hsv);
   void hsv2rgb(vec3_t &hsv, vec3_t &rgb);
   void computeColorForNode(float max, float min, float speed, vec3_t &color);
 
-  // Private variable
-  bool _recording;
-  bool _enableLine;
-  bool _enableMarker;
-  bool _jumpRelease;
-  bool _debugVerbose;
+  void registerCommands();
 
-  Route _currentRoute;
+  // Private variable
+  bool _recording{};
+  bool _enableLine{};
+  bool _enableMarker{};
+  bool _jumpRelease{};
+  bool _debugVerbose{};
+
+  Route _currentRoute{};
   std::vector<Route> _routes;
   std::vector<Node> _currentTrail;
-  unsigned _nextRecording;
-  int _nextAddTime;
-  int _currentRouteToRender;
-  RotationMatrix _currentRotation;
+  unsigned _nextRecording{};
+  int _nextAddTime{};
+  int _currentRouteToRender{};
+  RotationMatrix _currentRotation{};
+
+  int32_t nextNearest{};
+
+  std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+  std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
 
   // Private inline function.
   float euclideanDist(const vec3_t a, const vec3_t b) {
@@ -166,4 +180,4 @@ private:
     return std::sqrt(sum);
   }
 };
-#endif
+} // namespace ETJump

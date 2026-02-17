@@ -3,6 +3,7 @@
 
 #include "cg_local.h"
 #include "etj_crosshair.h"
+#include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
 
@@ -1820,7 +1821,7 @@ void CG_SpeakerEditorDraw(void) {
 
     // render cursor
     trap_R_SetColor(NULL);
-    cgDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE, cgs.media.cursorIcon);
+    cgDC.cursor.draw();
   }
 }
 
@@ -1990,6 +1991,7 @@ void CG_ModifyEditSpeaker(void) {
   }
 
   CG_EventHandling(CGAME_EVENT_SPEAKEREDITOR, qfalse);
+  ETJump::centerCursor();
 
   editSpeakerActive = qtrue;
   memcpy(&undoSpeaker, editSpeaker, sizeof(undoSpeaker));

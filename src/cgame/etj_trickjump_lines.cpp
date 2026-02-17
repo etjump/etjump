@@ -34,15 +34,16 @@
 
 #include "cg_local.h"
 
+namespace ETJump {
 static const char *EnumStrings[] = {"mapper", "loaded", "recorded"};
 const char *getTextForEnum(int enumVal) { return EnumStrings[enumVal]; }
 
-TrickjumpLines::TrickjumpLines()
-    : _nextRecording(1), _nextAddTime(0), _currentRouteToRender(-1) {
-  this->_recording = false;
-  this->_jumpRelease = true;
+TrickjumpLines::TrickjumpLines(
+    const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler,
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler)
+    : serverCommandsHandler(serverCommandsHandler),
+      consoleCommandsHandler(consoleCommandsHandler) {
   this->_currentRotation.init();
-  this->_debugVerbose = false;
 
   // Create a map of possible color for TJL.
   colorMap.insert(std::pair<std::string, std::vector<unsigned char>>(
@@ -65,9 +66,157 @@ TrickjumpLines::TrickjumpLines()
       "orange", {128, 128, 0, 255}));
   colorMap.insert(std::pair<std::string, std::vector<unsigned char>>(
       "speed", {0, 0, 0, 0}));
+
+  registerCommands();
 }
 
-TrickjumpLines::~TrickjumpLines() {}
+TrickjumpLines::~TrickjumpLines() {
+  serverCommandsHandler->unsubscribe("tjl_displaybyname");
+  serverCommandsHandler->unsubscribe("tjl_displaybynumber");
+
+  consoleCommandsHandler->unsubscribe("tjl_displaybyname");
+  consoleCommandsHandler->unsubscribe("tjl_displaybynumber");
+  consoleCommandsHandler->unsubscribe("tjl_clearrender");
+  consoleCommandsHandler->unsubscribe("tjl_record");
+  consoleCommandsHandler->unsubscribe("tjl_stoprecord");
+  consoleCommandsHandler->unsubscribe("tjl_listroute");
+  consoleCommandsHandler->unsubscribe("tjl_displaynearestroute");
+  consoleCommandsHandler->unsubscribe("tjl_renameroute");
+  consoleCommandsHandler->unsubscribe("tjl_saveroute");
+  consoleCommandsHandler->unsubscribe("tjl_loadroute");
+  consoleCommandsHandler->unsubscribe("tjl_deleteroute");
+  consoleCommandsHandler->unsubscribe("tjl_overwriterecording");
+  consoleCommandsHandler->unsubscribe("tjl_enableline");
+  consoleCommandsHandler->unsubscribe("tjl_enablejumpmarker");
+}
+
+void TrickjumpLines::runFrame() {
+  if (_recording) {
+    addPosition(cg.predictedPlayerState.origin);
+    return;
+  }
+
+  if (etj_tjlNearestInterval.integer > 0 && nextNearest < cg.time) {
+    if (_debugVerbose) {
+      CG_Printf("Check for nearest line!. \n");
+    }
+
+    displayNearestRoutes();
+    nextNearest = cg.time + (etj_tjlNearestInterval.integer * 1000);
+  }
+
+  if (!(_enableLine && _enableMarker) || _routes.empty() ||
+      _currentRouteToRender == -1) {
+    return;
+  }
+
+  displayCurrentRoute(_currentRouteToRender);
+}
+
+void TrickjumpLines::registerCommands() {
+  serverCommandsHandler->subscribe(
+      "tjl_displaybyname",
+      [this](const auto &args) {
+        displayByName(args.empty() ? nullptr : args[0].c_str());
+      },
+      false);
+
+  const auto displayByNumber = [this](const std::vector<std::string> &args) {
+    if (args.empty()) {
+      CG_Printf("You need to pass the route number by argument. Use "
+                "command /tjl_listroute to get number. \n");
+      return;
+    }
+
+    const int32_t num = Q_atoi(args[0]);
+
+    if (num < 0 || num > countRoute()) {
+      return;
+    }
+
+    setCurrentRouteToRender(num);
+  };
+
+  serverCommandsHandler->subscribe("tjl_displaybynumber", displayByNumber,
+                                   false);
+
+  consoleCommandsHandler->subscribe(
+      "tjl_displaybyname", [this](const auto &args) {
+        displayByName(args.empty() ? nullptr : args[0].c_str());
+      });
+
+  consoleCommandsHandler->subscribe("tjl_displaybynumber", displayByNumber);
+
+  consoleCommandsHandler->subscribe(
+      "tjl_clearrender", [this](const auto &) { setCurrentRouteToRender(-1); });
+
+  consoleCommandsHandler->subscribe("tjl_record", [this](const auto &args) {
+    record(args.empty() ? nullptr : args[0].c_str());
+  });
+
+  consoleCommandsHandler->subscribe("tjl_stoprecord",
+                                    [this](const auto &) { stopRecord(); });
+
+  consoleCommandsHandler->subscribe("tjl_listroute",
+                                    [this](const auto &) { listRoutes(); });
+
+  consoleCommandsHandler->subscribe(
+      "tjl_displaynearestroute",
+      [this](const auto &) { displayNearestRoutes(); });
+
+  consoleCommandsHandler->subscribe(
+      "tjl_renameroute", [this](const auto &args) {
+        if (args.size() >= 2) {
+          renameRoute(args[0].c_str(), args[1].c_str());
+        } else {
+          renameRoute(nullptr, nullptr);
+        }
+      });
+
+  consoleCommandsHandler->subscribe("tjl_saveroute", [this](const auto &args) {
+    if (args.empty()) {
+      CG_Printf("Please provide a name to save your TJL. (without .tjl "
+                "extension). \n");
+      return;
+    }
+
+    saveRoutes(args[0].c_str());
+  });
+
+  consoleCommandsHandler->subscribe("tjl_loadroute", [this](const auto &args) {
+    loadRoutes(args.empty() ? nullptr : args[0].c_str());
+  });
+
+  consoleCommandsHandler->subscribe(
+      "tjl_deleteroute", [this](const auto &args) {
+        deleteRoute(args.empty() ? nullptr : args[0].c_str());
+      });
+
+  consoleCommandsHandler->subscribe(
+      "tjl_overwriterecording", [this](const auto &args) {
+        overwriteRecording(args.empty() ? nullptr : args[0].c_str());
+      });
+
+  consoleCommandsHandler->subscribe("tjl_enableline", [this](const auto &args) {
+    if (args.empty()) {
+      CG_Printf("Please add 0 or 1 as argument to enable or disable line.\n");
+      return;
+    }
+
+    toggleRoutes(Q_atoi(args[0]) ? true : false);
+  });
+
+  consoleCommandsHandler->subscribe(
+      "tjl_enablejumpmarker", [this](const auto &args) {
+        if (args.empty()) {
+          CG_Printf(
+              "Please add 0 or 1 as argument to enable or disable marker.\n");
+          return;
+        }
+
+        toggleMarker(Q_atoi(args[0]) ? true : false);
+      });
+}
 
 // Create simple function to return cvar.
 bool TrickjumpLines::isEnableLine() { return this->_enableLine; }
@@ -1168,3 +1317,4 @@ void TrickjumpLines::toggleMarker(bool state) {
   setEnableMarker(state);
   return;
 }
+} // namespace ETJump

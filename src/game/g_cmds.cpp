@@ -5003,6 +5003,12 @@ void ClientCommand(int clientNum) {
   }
   trap_Argv(0, cmd, sizeof(cmd));
 
+  // workaround for ETe's broken command tokenizer,
+  // which sometimes sends empty client commands on localhost
+  if (cmd[0] == '\0') {
+    return;
+  }
+
   if (OnClientCommand(ent)) {
     return;
   }

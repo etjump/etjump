@@ -19,7 +19,6 @@
 
 #include "../game/q_shared.h"
 #include "../game/bg_public.h"
-#include "../game/etj_syscalls.h"
 #include "../ui/ui_shared.h"
 
 #include "tr_types.h"
@@ -1818,8 +1817,6 @@ typedef struct {
   qhandle_t limboSpectator;
   qhandle_t limboRadioBroadcast;
 
-  qhandle_t cursorIcon;
-
   qhandle_t hudPowerIcon;
   qhandle_t hudSprintIcon;
   qhandle_t hudHealthIcon;
@@ -2019,10 +2016,11 @@ typedef struct {
   int notifyPos;
   int notifyLastPos;
 
-  int cursorX;
-  int cursorY;
-  int32_t realCursorX; // real X coordinate as per resolution
-  int32_t realCursorY; // real Y coordinate as per resolution
+  int16_t cursorX;     // virtual grid X coordinate
+  int16_t cursorY;     // virtual grid Y coordinate
+  int16_t realCursorX; // real X coordinate as per resolution
+  int16_t realCursorY; // real Y coordinate as per resolution
+
   int eventHandling;
   qboolean mouseCaptured;
   qboolean sizingHud;
@@ -2413,6 +2411,8 @@ extern vmCvar_t etj_CGaz2NoVelocityDir;
 extern vmCvar_t etj_CGaz1DrawSnapZone;
 extern vmCvar_t etj_CGaz2WishDirFixedSpeed;
 extern vmCvar_t etj_CGaz2WishDirUniformLength;
+extern vmCvar_t etj_CGaz1DrawMidLine;
+extern vmCvar_t etj_CGaz1MidlineColor;
 
 extern vmCvar_t etj_drawOB;
 // Aciz: movable drawOB
@@ -2557,6 +2557,7 @@ extern vmCvar_t etj_spectatorInfoDirection;
 extern vmCvar_t etj_drawRunTimer;
 extern vmCvar_t etj_runTimerX;
 extern vmCvar_t etj_runTimerY;
+extern vmCvar_t etj_runtimerSize;
 extern vmCvar_t etj_runTimerShadow;
 extern vmCvar_t etj_runTimerAutoHide;
 extern vmCvar_t etj_runTimerInactiveColor;
@@ -2761,6 +2762,8 @@ extern vmCvar_t etj_optimizePrediction;
 // END unlagged - optimized prediction
 
 extern vmCvar_t etj_menuSensitivity;
+extern vmCvar_t etj_cursorSize;
+extern vmCvar_t etj_altCursor;
 
 extern vmCvar_t etj_crosshairThickness;
 extern vmCvar_t etj_crosshairOutline;
@@ -3495,6 +3498,7 @@ void CG_ShaderStateChanged(const std::string &state = "");
 void CG_ChargeTimesChanged(void);
 void CG_LoadVoiceChats();         // NERVE - SMF
 void CG_PlayBufferedVoiceChats(); // NERVE - SMF
+void CG_AddToTeamChat(const char *str, team_t team);
 void CG_AddToNotify(const char *str);
 void CG_wstatsParse_cmd(void);
 void CG_wtopshotsParse_cmd(qboolean doBest);
@@ -3658,8 +3662,8 @@ void trap_S_UpdateEntityPosition(int entityNum, const vec3_t origin);
 int trap_S_GetVoiceAmplitude(int entityNum);
 // done.
 
-// repatialize recalculates the volumes of sound as they should be heard by the
-// given entityNum and position
+// repatialize recalculates the volumes of sound as they should be heard by
+// the given entityNum and position
 void trap_S_Respatialize(int entityNum, const vec3_t origin, vec3_t axis[3],
                          int inwater);
 sfxHandle_t
@@ -3691,8 +3695,8 @@ qboolean trap_R_GetSkinModel(qhandle_t skinid, const char *type,
 qhandle_t trap_R_GetShaderFromModel(qhandle_t modelid, int surfnum,
                                     int withlightmap); //----(SA)	added
 
-// a scene is built up by calls to R_ClearScene and the various R_Add functions.
-// Nothing is drawn until R_RenderScene is called.
+// a scene is built up by calls to R_ClearScene and the various R_Add
+// functions. Nothing is drawn until R_RenderScene is called.
 void trap_R_ClearScene(void);
 void trap_R_AddRefEntityToScene(const refEntity_t *re);
 
@@ -4172,12 +4176,6 @@ void CG_Fireteams_Setup(void);
 void CG_Fireteams_MenuText_Draw(panel_button_t *button);
 void CG_Fireteams_MenuTitleText_Draw(panel_button_t *button);
 
-//
-// cg_drawCHS.c
-//
-void CG_DrawCHS(void);
-void CG_InfoCHS_f(void);
-
 void CG_BannerPrint(const char *str);
 
 //
@@ -4211,6 +4209,8 @@ class AccelColor;
 class PlayerBBox;
 class SavePos;
 class SyscallExt;
+class TrickjumpLines;
+class CHSDataHandler;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4224,22 +4224,16 @@ extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 extern std::shared_ptr<ClientRtvHandler> rtvHandler;
 extern std::unique_ptr<DemoCompatibility> demoCompatibility;
 extern std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
+// TODO: remove the client array and just use this for everything
+extern std::vector<int32_t> tempTraceIgnoredEntities;
 extern std::shared_ptr<PlayerBBox> playerBBox;
 extern std::unique_ptr<SavePos> savePos;
 extern std::unique_ptr<SyscallExt> syscallExt;
 extern std::unique_ptr<PmoveUtils> pmoveUtils;
+extern std::shared_ptr<TrickjumpLines> trickjumpLines;
+extern std::shared_ptr<CHSDataHandler> chsDataHandler;
 
-void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
-                         sfxHandle_t sfx, int range, int volume, int soundTime);
-void addLoopingSound(const vec3_t origin, const vec3_t velocity,
-                     sfxHandle_t sfx, int volume, int soundTime);
-bool hideMeCheck(int entityNum);
-int checkExtraTrace(int value);
-int weapnumForClient();
-void onPlayerRespawn(qboolean revived);
-void runFrameEnd();
-playerState_t *getValidPlayerState();
-bool showingScores();
+inline constexpr int32_t MAX_CHS_INFO = 8;
 
 enum extraTraceOptions {
   OB_DETECTOR,
@@ -4274,13 +4268,15 @@ enum class HideFlamethrowerFlags {
   HIDE_SELF = 1 << 0,
   HIDE_OTHERS = 1 << 1,
 };
+
+enum class ChatMessageType {
+  DEFAULT = 0,         // normal message from any team
+  REPLAY_MSG = 1 << 0, // chat replay message
+  SERVER_MSG = 1 << 1, // server console chat message
+};
 } // namespace ETJump
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-qboolean CG_ConsoleCommandExt(const char *cmd);
-void CG_DrawActiveFrameExt();
-void CG_ResetTransitionEffects();
 
 extern displayContextDef_t *DC;
 

@@ -23,6 +23,8 @@
  */
 
 #include "etj_upper_right_drawable.h"
+#include "etj_utilities.h"
+
 #include "../game/etj_time_utilities.h"
 
 ETJump::UpperRight::UpperRight() {

@@ -5,8 +5,9 @@
 
     User interface building blocks and support functions.
 **********************************************************************/
-#include "etj_demo_queue.h"
 #include "ui_local.h"
+#include "etj_local.h"
+#include "etj_utilities.h"
 
 uiStatic_t uis;
 qboolean m_entersound; // after a frame, so caching won't disrupt the sound
@@ -187,32 +188,32 @@ qboolean UI_ConsoleCommand(const int realTime) {
   }
 
   if (!Q_stricmp(cmd, "uiParseMaplist")) {
-    ETJump::parseMaplist();
+    ETJump::Utilities::parseMaplist();
     return qtrue;
   }
 
   if (!Q_stricmp(cmd, "uiNumCustomvotes")) {
-    ETJump::parseNumCustomvotes();
+    ETJump::Utilities::parseNumCustomvotes();
     return qtrue;
   }
 
   if (!Q_stricmp(cmd, "uiParseCustomvote")) {
-    ETJump::parseCustomvote();
+    ETJump::Utilities::parseCustomvote();
     return qtrue;
   }
 
   if (!Q_stricmp(cmd, "uiResetCustomvotes")) {
-    ETJump::resetCustomvotes();
+    ETJump::Utilities::resetCustomvotes();
     return qtrue;
   }
 
   if (!Q_stricmp(cmd, "demoQueue")) {
-    ETJump::demoQueue->commandHandler();
+    ETJump::ui.demoQueue->commandHandler();
     return qtrue;
   }
 
   if (!Q_stricmp(cmd, "uiDemoQueueManualSkip")) {
-    ETJump::demoQueue->setManualSkip();
+    ETJump::ui.demoQueue->setManualSkip();
     return qtrue;
   }
 
@@ -228,7 +229,7 @@ qboolean UI_ConsoleCommand(const int realTime) {
     // FIXME: this breaks if 'ui_restart' is performed while in demo playback,
     //  but there's no nice way to make this work for now, it is what it is
     if (cstate.connState == CA_ACTIVE && !uiInfo.demoPlayback) {
-      ETJump::toggleSettingsMenu();
+      ETJump::Utilities::toggleSettingsMenu();
     }
 
     return qtrue;
@@ -390,8 +391,9 @@ void UI_DrawTextBox(int x, int y, int width, int lines) {
 }
 
 qboolean UI_CursorInRect(int x, int y, int width, int height) {
-  if (uiInfo.uiDC.cursorx < x || uiInfo.uiDC.cursory < y ||
-      uiInfo.uiDC.cursorx > x + width || uiInfo.uiDC.cursory > y + height) {
+  if (uiInfo.uiDC.cursor.virtX < x || uiInfo.uiDC.cursor.virtY < y ||
+      uiInfo.uiDC.cursor.virtX > x + width ||
+      uiInfo.uiDC.cursor.virtY > y + height) {
     return qfalse;
   }
 

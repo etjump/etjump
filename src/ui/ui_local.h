@@ -125,6 +125,8 @@ extern vmCvar_t ui_voteCheats;
 extern vmCvar_t ui_voteCustomRTV;
 
 extern vmCvar_t etj_menuSensitivity;
+extern vmCvar_t etj_cursorSize;
+extern vmCvar_t etj_altCursor;
 
 extern vmCvar_t ui_currentChangelog;
 
@@ -802,24 +804,4 @@ void trap_GetHunkData(int *hunkused, int *hunkexpected);
 void QDECL Com_DPrintf(const char *fmt, ...);
 
 const char *G_SHA1(const char *str);
-
-namespace ETJump {
-inline constexpr int MAX_QUICKCONNECT_SERVERS = 5;
-
-class SyscallExt;
-extern std::unique_ptr<SyscallExt> syscallExt;
-
-void parseMaplist();
-void parseNumCustomvotes();
-void parseCustomvote();
-void resetCustomvotes();
-
-void toggleSettingsMenu();
-
-class DemoQueue;
-class QuickConnect;
-
-extern std::unique_ptr<DemoQueue> demoQueue;
-extern std::unique_ptr<QuickConnect> quickConnect;
-} // namespace ETJump
 #endif

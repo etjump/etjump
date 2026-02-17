@@ -63,6 +63,7 @@ add_library(qagame MODULE
 	"etj_file.cpp"
 	"etj_filesystem.cpp"
 	"etj_fireteam_countdown.cpp"
+	"etj_func_static_client.cpp"
 	"etj_inactivity_timer.cpp"
 	"etj_json_utilities.cpp"
 	"etj_levels.cpp"

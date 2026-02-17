@@ -48,12 +48,13 @@ private:
 
   static int getTransitionRange(int previousTime);
 
-  static void pastRecordAnimation(vec4_t *color, const char *text,
-                                  int timerTime, int record);
+  void pastRecordAnimation(vec4_t *color, const char *text, int timerTime,
+                           int record);
 
   static float getTimerAlpha(bool running, bool autoHide, int fadeStart,
                              int duration);
 
+  void setRuntimerSize(const vmCvar_t &cvar);
   void setCheckpointSize(const vmCvar_t &cvar);
   void setCheckpointPopupSize(const vmCvar_t &cvar);
   void drawCheckpoints(float x, float y, int timeVar,
@@ -77,6 +78,7 @@ private:
   fontInfo_t *font;
   bool autoHide;
 
+  CvarValue::Size runtimerSize{};
   CvarValue::Size checkpointSize{};
   CvarValue::Size popupSize{};
 

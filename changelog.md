@@ -12,8 +12,37 @@
 * demo compatibility settings are no longer automatically printed when playback starts [#1804](https://github.com/etjump/etjump/pull/1804)
   * active compatibility settings can be printed with `printDemoCompatInfo` command
 * improved smoothness of in-game mouse cursor - the cursor now operates on real screen pixels rather than virtual grid pixels [#1809](https://github.com/etjump/etjump/pull/1809)
-  * this greatly increases the accuracy of the cursor, especially on small movememnts, as your movement "resolution" is now higher
+  * this greatly increases the accuracy of the cursor, especially on small movements, as your movement "resolution" is now higher
   * as a side effect, the overall mouse sensitivity in menus is now lower, as the mouse movement deltas per frame are no longer scaled to virtual grid
+* mouse cursor is now always warped to center of the screen when UI is brought up, instead of remembering it's position [#1811](https://github.com/etjump/etjump/pull/1811)
+  * chat UI is an exception to this, which positions the mouse to the top left
+* added 2 new mouse cursors, can be enabled with `etj_altCursor` cvar [#1812](https://github.com/etjump/etjump/pull/1812)
+  * the mouse cursor can now also be resized with `etj_cursorSize` cvar (valid range `8 - 128`)
+* added `etj_CGaz1DrawMidline` to draw the middle point between min/max angles on CGaz 1 [#1813](https://github.com/etjump/etjump/pull/1813)
+  * this is not a meaningful angle when it comes to physics calculations, it's purely a helper line to indicate you're approaching minline soon
+  * color can be adjusted with `etj_CGaz1MidlineColor` (default `1.0 0.5 0.0 0.75`)
+* added `etj_runtimerSize` cvar to adjust size of timerun timer [#1814](https://github.com/etjump/etjump/pull/1814)
+  * valid range is `0.0 - 10.0`
+* fixed certain votes not showing the keybinds for `vote yes/no` in the vote text [#1817](https://github.com/etjump/etjump/pull/1817)
+* massively sped up the computation for timerun rankings [#1831](https://github.com/etjump/etjump/pull/1831)
+* added `listcheckpoints` and `comparecheckpoints` commands [#1829](https://github.com/etjump/etjump/pull/1829)
+  * `listcheckpoints --season <season name> --map <map name> --run <run name> --rank <rank>`
+    * lists checkpoint times for a given run
+  * `comparecheckpoints --season <season name> --map <map name> --run <run name> --rank-1 <rank> --rank-2 <rank>`
+    * compares checkpoint times between two runs
+  * also accessible via admin commands `!list/comparecheckpoints`
+* added `func_static_client` entity [#1824](https://github.com/etjump/etjump/pull/1824)
+  * works like `func_static`, except it's on/off state is unique for each client
+  * keys:
+    * `model2` - optional `md3/mdc` model to draw
+    * `offModel` - optional model to draw when the brush is turned off (the brush is invisible otherwise)
+    * `offShader` - optional shader to use when the brush is turned off (invisible otherwise)
+    * `scriptname` - optionally call script block when activated, calls `activate (allies/axis)` action
+    * `target` - targets to fire when activated
+    * `offShader` and `offModel` are mutually exclusive - `offModel` only works if `model2` is set, and `offShader` does nothing in such cases
+  * spawnflags:
+    * `1` - starts off for all clients
+    * `2` - gibs the activator if they are inside the brush when it's turned on
 
 # ETJump 3.4.2
 

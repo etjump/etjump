@@ -12,19 +12,15 @@ USER INTERFACE MAIN
 #include <memory>
 
 #include "ui_local.h"
-#include "etj_colorpicker.h"
-#include "etj_demo_queue.h"
-#include "etj_quick_connect.h"
+#include "etj_local.h"
+
 #include "etj_menu_integrity_checker.h"
+#include "etj_utilities.h"
 
 #include "../cgame/etj_cvar_parser.h"
 #include "../game/etj_string_utilities.h"
 #include "../cgame/etj_utilities.h"
 #include "../game/etj_filesystem.h"
-#include "../game/etj_file.h"
-#include "../game/etj_syscall_ext_shared.h"
-
-#include "../../assets/ui/changelog/version_headers.h"
 
 // NERVE - SMF
 inline constexpr int AXIS_TEAM = 0;
@@ -669,211 +665,6 @@ void UI_ShowPostGame(qboolean newHigh) {
   _UI_SetActiveMenu(UIMENU_POSTGAME);
 }
 
-namespace ETJump {
-std::unique_ptr<ColorPicker> colorPicker;
-std::unique_ptr<SyscallExt> syscallExt;
-std::unique_ptr<DemoQueue> demoQueue;
-std::unique_ptr<QuickConnect> quickConnect;
-
-static void initColorPicker() {
-  colorPicker = std::make_unique<ColorPicker>();
-
-  uiInfo.uiDC.updateSliderState = [p = colorPicker.get()](itemDef_t *item) {
-    p->updateSliderState(item);
-  };
-
-  uiInfo.uiDC.cvarToColorPickerState =
-      [p = colorPicker.get()](const std::string &cvar) {
-        p->cvarToColorPickerState(cvar);
-      };
-
-  uiInfo.uiDC.resetColorPickerState = [p = colorPicker.get()] {
-    p->resetColorPickerState();
-  };
-
-  uiInfo.uiDC.colorPickerDragFunc =
-      [p = colorPicker.get()](itemDef_t *item, const float cursorX,
-                              const float cursorY, const int key) {
-        p->colorPickerDragFunc(item, cursorX, cursorY, key);
-      };
-
-  uiInfo.uiDC.toggleRGBSliderValues = [p = colorPicker.get()] {
-    p->toggleRGBSliderValues();
-  };
-
-  uiInfo.uiDC.RGBSlidersAreNormalized = [p = colorPicker.get()] {
-    return p->RGBSlidersAreNormalized();
-  };
-
-  uiInfo.uiDC.getColorSliderString = &ColorPicker::getColorSliderString;
-  uiInfo.uiDC.setColorSliderType = &ColorPicker::setColorSliderType;
-  uiInfo.uiDC.getColorSliderValue = &ColorPicker::getColorSliderValue;
-  uiInfo.uiDC.setColorSliderValue = &ColorPicker::setColorSliderValue;
-}
-
-static void initExtensionSystem() {
-  syscallExt = std::make_unique<SyscallExt>();
-  syscallExt->setupExtensions();
-}
-
-static void drawLevelshotPreview(rectDef_t &rect) {
-  // unregistered levelshot is -1, not 0
-  if (uiInfo.mapList[ui_mapIndex.integer].levelShot == -1) {
-    uiInfo.mapList[ui_mapIndex.integer].levelShot = trap_R_RegisterShaderNoMip(
-        va("levelshots/%s", uiInfo.mapList[ui_mapIndex.integer].mapLoadName));
-
-    if (!uiInfo.mapList[ui_mapIndex.integer].levelShot) {
-      uiInfo.mapList[ui_mapIndex.integer].levelShot =
-          trap_R_RegisterShaderNoMip("levelshots/unknownmap");
-    }
-  }
-
-  uiInfo.uiDC.drawHandlePic(rect.x, rect.y, rect.w, rect.h,
-                            uiInfo.mapList[ui_mapIndex.integer].levelShot);
-}
-
-static void drawMapname(rectDef_t &rect, float scale, vec4_t color,
-                        float text_x, int textStyle, int align) {
-  rectDef_t textRect = {0, 0, rect.w, rect.h};
-
-  const int map = ui_currentNetMap.integer;
-  std::string mapname;
-
-  if (uiInfo.mapList[map].mapLoadName != nullptr) {
-    mapname = uiInfo.mapList[map].mapLoadName;
-  } else {
-    mapname = "unknownmap";
-  }
-
-  const auto width = static_cast<float>(Text_Width(mapname.c_str(), scale, 0));
-
-  switch (align) {
-    case ITEM_ALIGN_LEFT:
-      textRect.x = text_x;
-      break;
-    case ITEM_ALIGN_RIGHT:
-      textRect.x = text_x - width;
-      break;
-    case ITEM_ALIGN_CENTER:
-      textRect.x = text_x - (width * 0.5f);
-      break;
-    default:
-      break;
-  }
-
-  textRect.x += rect.x;
-  textRect.y += rect.y;
-  Text_Paint(textRect.x, textRect.y, scale, color, mapname.c_str(), 0, 0,
-             textStyle);
-}
-
-static void parseChangelogs() {
-  // the "cvar" names are the filenames, excluding .txt extension
-  const std::vector<std::string> files =
-      StringUtil::split(CHANGELOG_CVARS, "|");
-  const std::string path = "ui/changelog/";
-
-  for (const auto &file : files) {
-    try {
-      File fIn(path + file + ".txt");
-      const auto contents = fIn.read();
-      uiInfo.changelogs[file] = std::string(contents.begin(), contents.end());
-    } catch (...) {
-      Com_Printf(S_COLOR_RED
-                 "%s: failed to open changelog '%s.txt' for reading.\n",
-                 __func__, file.c_str());
-    }
-  }
-}
-
-// formats the current changelog to a give window width, preserving indentation
-// this does not handle color codes, there's no reason we ever
-// should have color codes in the changelog
-std::vector<std::string>
-fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
-                         const float scale, fontInfo_t *font) {
-  std::vector<std::string> fmtLines;
-
-  for (auto &line : lines) {
-    int width = 0;
-    size_t indent = 0;
-    size_t lastWhitespace = 0;
-
-    // do we have to split this line at all?
-    if (Text_Width_Ext(line.c_str(), scale, 0, font) <= maxW) {
-      fmtLines.emplace_back(line);
-      continue;
-    }
-
-    // find first non-dash, non-whitespace character to get indentation
-    auto textStart = std::find_if(line.begin(), line.end(), [](const char c) {
-      return c != '-' && !std::isspace(c);
-    });
-
-    if (textStart != line.end()) {
-      indent = std::distance(line.begin(), textStart);
-    }
-
-    std::string tmp;
-    tmp.reserve(line.length());
-
-    for (int i = 0; i < static_cast<int>(line.length()); i++) {
-      tmp += line[i];
-
-      if (std::isspace(line[i])) {
-        lastWhitespace = i;
-      }
-
-      width = Text_Width_Ext(tmp.c_str(), scale, 0, font);
-
-      if (width > maxW) {
-        if (lastWhitespace != 0) {
-          // we have a line with single word that is over max width,
-          // just split at the line end
-          if (lastWhitespace < indent) {
-            fmtLines.emplace_back(tmp.substr(0, i));
-            line.erase(0, i);
-          } else {
-            fmtLines.emplace_back(tmp.substr(0, lastWhitespace));
-            line.erase(0, lastWhitespace + 1); // consume the whitespace too
-          }
-
-          lastWhitespace = 0;
-        } else {
-          // this should never happen, but it protects against an infinite loop
-          fmtLines.emplace_back(tmp);
-          line.erase(0, i);
-        }
-
-        i = -1; // so we start from 0 again after i++
-
-        tmp.clear();
-        line.insert(0, indent, ' ');
-      }
-    }
-
-    fmtLines.emplace_back(line);
-  }
-
-  return fmtLines;
-}
-
-static void initDemoQueueHandler() {
-  demoQueue = std::make_unique<DemoQueue>();
-}
-
-// NOTE: this must be called after 'UI_LoadMenus'!
-static void initQuickConnect() {
-  assert(Menu_Count() > 0);
-
-  quickConnect = std::make_unique<QuickConnect>();
-
-  uiInfo.uiDC.quickConnectListIsFull = [p = quickConnect.get()] {
-    return p->isFull();
-  };
-}
-} // namespace ETJump
-
 /*
 =================
 _UI_Refresh
@@ -947,11 +738,11 @@ void _UI_Refresh(int realtime) {
     UI_BuildFindPlayerList(qfalse);
 
     if (etj_drawQuickConnectMenu.integer) {
-      if (!ETJump::quickConnect->initialRefreshDone) {
-        ETJump::quickConnect->initialRefreshDone = true;
-        ETJump::quickConnect->refreshServers(true);
+      if (!ETJump::ui.quickConnect->initialRefreshDone) {
+        ETJump::ui.quickConnect->initialRefreshDone = true;
+        ETJump::ui.quickConnect->refreshServers(true);
       } else {
-        ETJump::quickConnect->refreshServers(false);
+        ETJump::ui.quickConnect->refreshServers(false);
       }
     }
 
@@ -966,8 +757,7 @@ void _UI_Refresh(int realtime) {
     uiClientState_t cstate;
     trap_GetClientState(&cstate);
     if (cstate.connState <= CA_DISCONNECTED || cstate.connState >= CA_ACTIVE) {
-      uiInfo.uiDC.drawCursor(CURSOR_SIZE, CURSOR_SIZE,
-                             uiInfo.uiDC.Assets.cursor);
+      uiInfo.uiDC.cursor.draw();
     }
   }
 }
@@ -980,15 +770,7 @@ _UI_Shutdown
 void _UI_Shutdown(void) {
   trap_LAN_SaveCachedServers();
 
-  if (etj_demoQueueCurrent.string[0] != '\0' && uiInfo.demoPlayback &&
-      !ETJump::demoQueue->manualSkip) {
-    trap_Cmd_ExecuteText(EXEC_APPEND, "demoQueue next\n");
-  }
-
-  ETJump::colorPicker = nullptr;
-  ETJump::syscallExt = nullptr;
-  ETJump::demoQueue = nullptr;
-  ETJump::quickConnect = nullptr;
+  ETJump::shutdown();
 
   Shutdown_Display();
 }
@@ -1106,12 +888,13 @@ qboolean Asset_Parse(int handle) {
       continue;
     }
 
+    // only overrides default cursor
     if (Q_stricmp(token.string, "cursor") == 0) {
-      if (!PC_String_Parse(handle, &uiInfo.uiDC.Assets.cursorStr)) {
+      if (!PC_String_Parse(handle, &uiInfo.uiDC.cursor.cursorStr)) {
         return qfalse;
       }
-      uiInfo.uiDC.Assets.cursor =
-          trap_R_RegisterShaderNoMip(uiInfo.uiDC.Assets.cursorStr);
+      uiInfo.uiDC.cursor.defaultShader =
+          trap_R_RegisterShaderNoMip(uiInfo.uiDC.cursor.cursorStr);
       continue;
     }
 
@@ -2473,21 +2256,22 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x,
       break;
     case UI_COLOR_PICKER:
       ETJump::ColorPicker::shrinkRectForColorPicker(rect);
-      ETJump::colorPicker->drawColorPicker(&rect);
+      ETJump::ui.colorPicker->drawColorPicker(&rect);
       break;
     case UI_COLOR_PICKER_PREVIEW_OLD:
       ETJump::ColorPicker::shrinkRectForColorPicker(rect);
-      ETJump::colorPicker->drawPreviewOld(&rect);
+      ETJump::ui.colorPicker->drawPreviewOld(&rect);
       break;
     case UI_COLOR_PICKER_PREVIEW_NEW:
       ETJump::ColorPicker::shrinkRectForColorPicker(rect);
-      ETJump::colorPicker->drawPreviewNew(&rect);
+      ETJump::ui.colorPicker->drawPreviewNew(&rect);
       break;
     case UI_MAPNAME:
-      ETJump::drawMapname(rect, scale, color, text_x, textStyle, align);
+      ETJump::Utilities::drawMapname(rect, scale, color, text_x, textStyle,
+                                     align);
       break;
     case UI_LEVELSHOT_PREVIEW:
-      ETJump::drawLevelshotPreview(rect);
+      ETJump::Utilities::drawLevelshotPreview(rect);
       break;
     default:
       break;
@@ -4998,7 +4782,7 @@ void UI_RunMenuScript(const char **args) {
       std::string contents = uiInfo.changelogs[ui_currentChangelog.string];
 
       uiInfo.formattedChangelog = ETJump::StringUtil::split(contents, "\n");
-      uiInfo.formattedChangelog = ETJump::fitChangelogLinesToWidth(
+      uiInfo.formattedChangelog = ETJump::Utilities::fitChangelogLinesToWidth(
           uiInfo.formattedChangelog,
           static_cast<int>(item->window.rect.w - SCROLLBAR_SIZE - 10),
           item->textscale, font);
@@ -5009,7 +4793,7 @@ void UI_RunMenuScript(const char **args) {
     }
 
     if (!Q_stricmp(name, "quickConnectRefresh")) {
-      ETJump::quickConnect->refreshServers(true);
+      ETJump::ui.quickConnect->refreshServers(true);
       return;
     }
 
@@ -5027,7 +4811,7 @@ void UI_RunMenuScript(const char **args) {
                                      sizeof(buf));
       const std::string customName = buf;
 
-      ETJump::quickConnect->addServer(address, password, customName);
+      ETJump::ui.quickConnect->addServer(address, password, customName);
       return;
     }
 
@@ -5035,7 +4819,7 @@ void UI_RunMenuScript(const char **args) {
       if (String_Parse(args, &name2)) {
         // menu variables are 1-indexed
         std::string command =
-            ETJump::quickConnect->buildConnectCommand(Q_atoi(name2) - 1);
+            ETJump::ui.quickConnect->buildConnectCommand(Q_atoi(name2) - 1);
 
         if (!command.empty()) {
           trap_Cmd_ExecuteText(EXEC_APPEND, command.c_str());
@@ -5052,7 +4836,7 @@ void UI_RunMenuScript(const char **args) {
       if (String_Parse(args, &name2)) {
         // menu variables are 1-indexed
         const int index = Q_atoi(name2) - 1;
-        ETJump::quickConnect->setEditData(index);
+        ETJump::ui.quickConnect->setEditData(index);
       } else {
         Com_Printf(S_COLOR_YELLOW "%s: '%s' called with no arguments!\n",
                    __func__, name);
@@ -5062,12 +4846,12 @@ void UI_RunMenuScript(const char **args) {
     }
 
     if (!Q_stricmp(name, "quickConnectEditServer")) {
-      ETJump::quickConnect->editServer();
+      ETJump::ui.quickConnect->editServer();
       return;
     }
 
     if (!Q_stricmp(name, "quickConnectDeleteServer")) {
-      ETJump::quickConnect->deleteServer();
+      ETJump::ui.quickConnect->deleteServer();
       return;
     }
 
@@ -5096,11 +4880,11 @@ void UI_RunMenuScript(const char **args) {
       };
 
       // hide everything by default
-      for (int i = 0; i < ETJump::MAX_QUICKCONNECT_SERVERS; i++) {
+      for (int i = 0; i < ETJump::QuickConnect::MAX_QUICKCONNECT_SERVERS; i++) {
         toggleButtonState(i, qfalse);
       }
 
-      const int count = ETJump::quickConnect->getServerCount();
+      const int count = ETJump::ui.quickConnect->getServerCount();
 
       if (count == 0) {
         // make sure the label is visible, e.g. if we deleted the last server
@@ -6438,7 +6222,7 @@ qboolean UI_FeederSelectionClick(itemDef_t *item) {
     // ugly hack for favourites handling
     rectDef_t rect;
 
-    Item_ListBox_MouseEnter(item, DC->cursorx, DC->cursory, qtrue);
+    Item_ListBox_MouseEnter(item, DC->cursor.virtX, DC->cursor.virtY, qtrue);
 
     rect.x = item->window.rect.x + listPtr->columnInfo[SORT_FAVOURITES].pos;
     rect.y = item->window.rect.y +
@@ -6979,80 +6763,6 @@ static void UI_DrawCinematic(int handle, float x, float y, float w, float h) {
 
 static void UI_RunCinematicFrame(int handle) { trap_CIN_RunCinematic(handle); }
 
-namespace ETJump {
-/*
- * TL;DR - every client is shit and pretends to be something it's not.
- *
- * ET: Legacy sends 3 args to UI_INIT, but 2.60b only sends 1.
- * The idea is that ET: Legacy wants to nag 2.60b users to download ET: Legacy
- * client if legacy mod is loaded with the vanilla client.
- * arg1 is a boolean (is this ET: Legacy client?) and arg2 is an integer
- * representation of current version (for various compatibility checks).
- *
- * ETe also sends 3 args, and fakes being an ET: Legacy client (though for UI,
- * I'm not sure what good this does as it doesn't get around the nagging).
- * What this means for us is that we can't rely on checking the arg1/2
- * to detect if a client is ET: Legacy or not, because ETe pretends
- * that it's ET: Legacy too.
- *
- * Solution? Check the 'version' string that each client sends, right?
- * Right...? Yeah lol, no.
- *
- * We CAN differentiate ETe from 2.60b using the version string, vanilla client
- * is either 'ET 2.60b' or 'ET 2.60d', and ETe is 'ET 2.60e'.
- * So this means we can just check for the version string first,
- * try to match that to ETe, and then fallback to arg1/arg2 for ET: Legacy,
- * and if neither match = vanilla client, right? Nope.
- *
- * The VM_Call argument parsing function in vanilla is not ideal.
- * For every VM_Call, it reads memory as if you're sending the max amount of
- * supported varags. This means that it will *very* likely read and send
- * garbage memory as arg1 and arg2 to UI_Init, which means it can accidentally
- * identify as an ET: Legacy client, because arg1 is treated as boolean.
- *
- * Okay, so just read the version string then and forget arg1/2 completely?
- * Yeah nope, ET: Legacy needs to be special.
- *
- * For some reason it sends a faked 'version' string, pretending
- * to be 2.60b client, presumably to maintain compatibility with some mods.
- * Which is a bit odd as ETPro doesn't run anyway, and no other mod has a
- * client version check that prevents you from playing them on custom clients.
- *
- * There is a saving grace though: ET: Legacy also sends a special 'etVersion'
- * string, along with the regular 'version' string. So this means, we can
- * identify the client by doing the following:
- *
- * 1. parse 'etVersion' string
- * 2. if 'etVersion string is empty, we can parse the 'version' string safely
- * to differentiate between vanilla client and ETe
- * 3. if 'etVersion' string is not empty, we can parse arg1/2 to grab
- * ET: Legacy client version.
- */
-
-static void detectClientEngine(int legacyClient, int clientVersion) {
-  char etVersionStr[MAX_CVAR_VALUE_STRING]; // ET: Legacy exclusive
-  trap_Cvar_VariableStringBuffer("etVersion", etVersionStr,
-                                 sizeof(etVersionStr));
-
-  if (etVersionStr[0] == '\0') {
-    char versionStr[MAX_CVAR_VALUE_STRING];
-    trap_Cvar_VariableStringBuffer("version", versionStr, sizeof(versionStr));
-
-    // we can use this length for every detection
-    const auto len = static_cast<int>(strlen("ET 2.60b"));
-
-    if (!Q_stricmpn(versionStr, "ET 2.60b", len) ||
-        !Q_stricmpn(versionStr, "ET 2.60d", len)) {
-      uiInfo.vetClient = true;
-    } else if (!Q_stricmpn(versionStr, "ET 2.60e", len)) {
-      uiInfo.eteClient = true;
-    }
-  } else {
-    MOD_CHECK_ETLEGACY(legacyClient, clientVersion, uiInfo.etLegacyClient);
-  }
-}
-} // namespace ETJump
-
 static void UI_RegisterConsoleCommands() {
   trap_AddCommand("ui_report");
   trap_AddCommand("demoQueue");
@@ -7105,8 +6815,6 @@ void _UI_Init(int legacyClient, int clientVersion) {
     uiInfo.uiDC.bias = 0;
   }
 
-  ETJump::detectClientEngine(legacyClient, clientVersion);
-
   char buf[MAX_CVAR_VALUE_STRING]{};
   trap_Cvar_VariableStringBuffer("fs_game", buf, sizeof(buf));
   uiInfo.fsGame = buf;
@@ -7116,7 +6824,6 @@ void _UI_Init(int legacyClient, int clientVersion) {
   uiInfo.uiDC.setColor = &UI_SetColor;
   uiInfo.uiDC.drawHandlePic = &UI_DrawHandlePic;
   uiInfo.uiDC.drawStretchPic = &trap_R_DrawStretchPic;
-  uiInfo.uiDC.drawCursor = &ETJump::drawCursor;
   uiInfo.uiDC.drawText = &Text_Paint;
   uiInfo.uiDC.drawTextExt = &Text_Paint_Ext;
   uiInfo.uiDC.textWidth = &Text_Width;
@@ -7186,14 +6893,16 @@ void _UI_Init(int legacyClient, int clientVersion) {
   uiInfo.uiDC.getConfigString = &trap_GetConfigString;
   uiInfo.uiDC.getActiveFont = &GetActiveFont;
 
-  ETJump::initColorPicker();
-  ETJump::initExtensionSystem();
-  ETJump::parseChangelogs();
-  ETJump::initDemoQueueHandler();
-
   Init_Display(&uiInfo.uiDC);
 
   String_Init();
+
+  ETJump::init(legacyClient, clientVersion);
+
+  uiInfo.uiDC.cursor.registerShaders = &ETJump::registerCursors;
+  uiInfo.uiDC.cursor.draw = &ETJump::drawCursor;
+
+  uiInfo.uiDC.cursor.registerShaders();
 
   uiInfo.uiDC.whiteShader = trap_R_RegisterShaderNoMip("white");
 
@@ -7232,6 +6941,7 @@ void _UI_Init(int legacyClient, int clientVersion) {
   UI_ParseGameInfo("gameinfo.txt");
 
   UI_LoadMenus(DEFAULT_MENU_FILE, qfalse);
+  ETJump::initQuickConnect();
 
   Com_DPrintf("Performing menu integrity check\n");
 
@@ -7240,8 +6950,6 @@ void _UI_Init(int legacyClient, int clientVersion) {
   if (!uiInfo.integrityCheckOk) {
     ETJump::MenuIntegrityChecker::printIntegrityViolation();
   }
-
-  ETJump::initQuickConnect();
 
   Menus_CloseAll();
 
@@ -7371,7 +7079,8 @@ void _UI_MouseEvent(int dx, int dy) {
   ETJump::computeCursorPosition(dx, dy);
 
   if (Menu_Count() > 0) {
-    Display_MouseMove(nullptr, uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory);
+    Display_MouseMove(nullptr, uiInfo.uiDC.cursor.virtX,
+                      uiInfo.uiDC.cursor.virtY);
   }
 }
 
@@ -7382,162 +7091,6 @@ uiMenuCommand_t _UI_GetActiveMenu(void) { return menutype; }
 //----(SA)	end
 
 inline constexpr char MISSING_FILES_MSG[] = "The following packs are missing:";
-
-/*
- *	We handle here illegal redirects, that happen upon serverlist loading
- *	due to incorrect response recieve for a getstatus request.
- */
-namespace ETJump {
-void markAllServersVisible() {
-  int count = trap_LAN_GetServerCount(ui_netSource.integer);
-  for (int i = 0; i < count; i++) {
-    trap_LAN_MarkServerVisible(ui_netSource.integer, i, qtrue);
-  }
-}
-
-void keepServerListUpdating() {
-  uiInfo.serverStatus.refreshActive = qtrue;
-  uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime + 1000;
-}
-
-void openPlayOnlineMenu() {
-  Menus_CloseByName("main"); // opened by main_opener after ui reload
-  Menus_ActivateByName("playonline", qtrue);
-  const char *str = "clearError"; // clears com_errorMessage
-  UI_RunMenuScript(&str);
-}
-
-void handleIllegalRedirect() {
-  Com_Printf("^1ETJump: illegal redirect was detected, reacting...\n");
-  markAllServersVisible();
-  keepServerListUpdating();
-  openPlayOnlineMenu();
-}
-
-void parseMaplist() {
-  char arg[MAX_QPATH];
-
-  // start iterating from 1 to skip the command string
-  for (int i = 1, len = trap_Argc(); i < len; i++) {
-    trap_Argv(i, arg, sizeof(arg));
-    uiInfo.serverMaplist.emplace_back(arg);
-  }
-
-  ETJump::StringUtil::sortStrings(uiInfo.serverMaplist, true);
-}
-
-void parseNumCustomvotes() {
-  if (trap_Argc() < 2) {
-    Com_Printf(va(S_COLOR_YELLOW
-                  "%s: unable to parse customvote count: no arguments given.\n",
-                  __func__));
-    return;
-  }
-
-  char arg[MAX_TOKEN_CHARS];
-  trap_Argv(1, arg, sizeof(arg));
-  uiInfo.numCustomvotes = Q_atoi(arg);
-}
-
-void parseCustomvote() {
-  // if a mapsOnServer or otherMaps is empty, we only have 3 args
-  static constexpr int minArgs = 3;
-  const int numArgs = trap_Argc();
-
-  if (numArgs < minArgs) {
-    Com_Printf(va(S_COLOR_YELLOW "%s: unable to parse customvote: malformed "
-                                 "command - too few arguments (%i < %i).\n",
-                  __func__, numArgs, minArgs));
-    return;
-  }
-
-  char arg[MAX_TOKEN_CHARS];
-  CustomMapVotes::MapType *mapType = nullptr;
-
-  trap_Argv(1, arg, sizeof(arg));
-
-  // grab an existing list if we've already parsed this list before
-  for (auto &customVote : uiInfo.customVotes) {
-    if (customVote.type == arg) {
-      mapType = &customVote;
-      break;
-    }
-  }
-
-  // create a new entry if we didn't find an existing list
-  if (mapType == nullptr) {
-    uiInfo.customVotes.emplace_back();
-    mapType = &uiInfo.customVotes.back();
-    mapType->type = arg;
-  }
-
-  trap_Argv(2, arg, sizeof(arg));
-  const std::string field = arg;
-
-  if (field == CUSTOMVOTE_TYPE) {
-    trap_Argv(3, arg, sizeof(arg));
-    mapType->type = arg;
-  } else if (field == CUSTOMVOTE_CVTEXT) {
-    // this can potentially be multiple args
-    std::string cvtext;
-
-    for (int i = 3; i < numArgs; i++) {
-      trap_Argv(i, arg, sizeof(arg));
-      cvtext += std::string(arg) + " ";
-    }
-
-    cvtext.pop_back();
-    mapType->callvoteText = std::move(cvtext);
-  } else if (field == CUSTOMVOTE_SERVERMAPS) {
-    for (int i = 3; i < numArgs; i++) {
-      trap_Argv(i, arg, sizeof(arg));
-      mapType->mapsOnServer.emplace_back(arg);
-    }
-  } else if (field == CUSTOMVOTE_OTHERMAPS) {
-    for (int i = 3; i < numArgs; i++) {
-      trap_Argv(i, arg, sizeof(arg));
-      mapType->otherMaps.emplace_back(arg);
-    }
-  }
-}
-
-void resetCustomvotes() {
-  uiInfo.customVotes.clear();
-  uiInfo.numCustomvotes = -1;
-  uiInfo.customvoteIndex = 0;
-  uiInfo.customvoteMapsOnServerIndex = 0;
-  uiInfo.customvoteOtherMapsIndex = 0;
-
-  static constexpr char DETAILS_MENU[] = "ingame_customvote_details";
-  static constexpr char VOTE_MENU[] = "ingame_vote_customvote";
-
-  const menuDef_t *detailsMenu = Menus_FindByName(DETAILS_MENU);
-  const menuDef_t *voteMenu = Menus_FindByName(VOTE_MENU);
-
-  if (detailsMenu && detailsMenu->window.flags & WINDOW_VISIBLE) {
-    Menus_CloseByName(DETAILS_MENU);
-  }
-
-  if (voteMenu && voteMenu->window.flags & WINDOW_VISIBLE) {
-    Menus_CloseByName(VOTE_MENU);
-    Menus_OpenByName("ingame_vote");
-  }
-}
-
-void toggleSettingsMenu() {
-  const menuDef_t *activeMenu = Menu_GetFocused();
-
-  if (activeMenu &&
-      StringUtil::startsWith(activeMenu->window.name, "etjump_settings_")) {
-    Menus_CloseAll();
-  } else {
-    trap_Key_SetCatcher(KEYCATCH_UI);
-    Menus_CloseAll();
-    Menus_OpenByName("etjump_settings_general_gameplay");
-  }
-}
-
-} // namespace ETJump
 
 void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
   // this should be the ONLY way the menu system is brought up
@@ -7552,13 +7105,8 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
 
   menutype = menu; //----(SA)	added
 
-  // FIXME: this is a dumb hack, we should just not draw the cursor at all,
-  // so that the next time UI is brought back, the cursor isn't at the bottom
-  // right of the screen, but rather remembers the last position it was in
-  const auto hideCursor = [] {
-    uiInfo.uiDC.realCursorX = uiInfo.uiDC.glconfig.vidWidth;
-    uiInfo.uiDC.realCursorY = uiInfo.uiDC.glconfig.vidHeight;
-  };
+  // assume cursor is visible by default
+  uiInfo.uiDC.cursor.visible = true;
 
   switch (menu) {
     case UIMENU_NONE:
@@ -7595,7 +7143,7 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
         } else if (strlen(buf) > 5 && !Q_stricmpn(buf, "ET://", 5)) { // fretn
           // legal redirects contain source ip in this variable
           if (!UI_Cvar_VariableString("com_errorDiagnoseIP")[0]) {
-            ETJump::handleIllegalRedirect();
+            ETJump::Utilities::handleIllegalRedirect();
             return;
           }
 
@@ -7678,42 +7226,42 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
 
     // NERVE - SMF
     case UIMENU_WM_QUICKMESSAGE:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_quickmessage");
       return;
 
     case UIMENU_WM_QUICKMESSAGEALT:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_quickmessageAlt");
       return;
 
     case UIMENU_WM_FTQUICKMESSAGE:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_ftquickmessage");
       return;
 
     case UIMENU_WM_FTQUICKMESSAGEALT:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("wm_ftquickmessageAlt");
       return;
 
     case UIMENU_WM_TAPOUT:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("tapoutmsg");
       return;
 
     case UIMENU_WM_TAPOUT_LMS:
-      hideCursor();
+      uiInfo.uiDC.cursor.visible = false;
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_CloseAll();
       Menus_OpenByName("tapoutmsglms");
@@ -7731,6 +7279,15 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
       // trap_Cvar_Set( "cl_paused", "1" );
       trap_Key_SetCatcher(KEYCATCH_UI);
       Menus_OpenByName("ingame_messagemode");
+
+      // special case for chat, we don't really want the cursor to be
+      // in the middle of the screen, it would be annoying to have the cursor
+      // constantly pop-up in the middle of the screen e.g. when spectating
+      // someone and chatting - set to top-left instead
+      uiInfo.uiDC.cursor.virtX = 0;
+      uiInfo.uiDC.cursor.virtY = 0;
+      uiInfo.uiDC.cursor.realX = 0;
+      uiInfo.uiDC.cursor.realY = 0;
       return;
 
     case UIMENU_INGAME_FT_SAVELIMIT:
@@ -7962,6 +7519,8 @@ vmCvar_t ui_voteCheats;
 vmCvar_t ui_voteCustomRTV;
 
 vmCvar_t etj_menuSensitivity;
+vmCvar_t etj_cursorSize;
+vmCvar_t etj_altCursor;
 
 vmCvar_t ui_currentChangelog;
 
@@ -8206,6 +7765,8 @@ cvarTable_t cvarTable[] = {
     {&ui_voteCustomRTV, "ui_voteCustomRTV", "0", CVAR_ARCHIVE},
 
     {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
+    {&etj_cursorSize, "etj_cursorSize", "32", CVAR_ARCHIVE},
+    {&etj_altCursor, "etj_altCursor", "0", CVAR_ARCHIVE},
 
     {&ui_currentChangelog, "ui_currentChangelog", "", CVAR_TEMP | CVAR_ROM},
 

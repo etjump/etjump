@@ -2090,8 +2090,12 @@ typedef struct cabinetTag_s {
 cabinetTag_t cabinetInfo[CT_MAX] = {
     {
         {
-            "tag_ammo01", "tag_ammo02", "tag_ammo03", "tag_ammo04",
-            "tag_ammo05", "tag_ammo06",
+            "tag_ammo01",
+            "tag_ammo02",
+            "tag_ammo03",
+            "tag_ammo04",
+            "tag_ammo05",
+            "tag_ammo06",
             /*			"tag_obj1",
                         "tag_obj1",
                         "tag_obj1",
@@ -2549,6 +2553,49 @@ static void CG_TokenMarker(centity_t *cent, int difficulty) {
   trap_R_AddPolyToScene(cgs.media.sparkParticleShader, 4, verts);
 }
 
+namespace ETJump {
+static void funcStaticClient(centity_t *cent) {
+  const int32_t clientNum = cg.snap->ps.clientNum;
+  const entityState_t *es = &cent->currentState;
+  const bool hidden = COM_BitCheck(
+      (clientNum < MAX_CLIENTS / 2) ? &es->effect1Time : &es->effect2Time,
+      clientNum);
+
+  // not visible, no 'offShader' or 'offModel' set -> don't draw at all
+  if (hidden && !es->density) {
+    return;
+  }
+
+  refEntity_t ent{};
+
+  // 'es->density' contains either model or shader index,
+  // these are mutually exclusive so if 'es->modelindex2' is set,
+  // it will be a model index, otherwise shader index
+  if (es->modelindex2) {
+    ent.hModel =
+        hidden ? cgs.gameModels[es->density] : cgs.gameModels[es->modelindex2];
+  } else {
+    ent.hModel = cgs.inlineDrawModel[es->modelindex];
+
+    if (hidden) {
+      ent.customShader = cgs.gameShaders[es->density];
+    }
+  }
+
+  VectorCopy(cent->lerpOrigin, ent.origin);
+  VectorCopy(cent->lerpOrigin, ent.oldorigin);
+  AnglesToAxis(cent->lerpAngles, ent.axis);
+
+  ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+  trap_R_AddRefEntityToScene(&ent);
+
+  // TODO: is this necessary? not sure, a lot of other entities do this too
+  if (es->modelindex2) {
+    memcpy(&cent->refEnt, &ent, sizeof(refEntity_t));
+  }
+}
+} // namespace ETJump
+
 /*
 ===============
 CG_ProcessEntity
@@ -2670,6 +2717,9 @@ static void CG_ProcessEntity(centity_t *cent) {
       break;
     case ET_TOKEN_HARD:
       CG_TokenMarker(cent, TOKEN_DIFFICULTY_HARD);
+      break;
+    case ET_STATIC_CLIENT:
+      ETJump::funcStaticClient(cent);
       break;
   }
 }
