@@ -33,6 +33,12 @@
 namespace ETJump {
 class UserRepository {
 public:
+  class BanNotFoundException : public std::runtime_error {
+  public:
+    explicit BanNotFoundException(const std::string &msg)
+        : std::runtime_error(msg) {}
+  };
+
   UserRepository(std::unique_ptr<DatabaseV2> database,
                  std::unique_ptr<DatabaseV2> oldDatabase);
   ~UserRepository();
@@ -76,6 +82,7 @@ public:
 
   // returns the ban ID on successful ban
   [[nodiscard]] int32_t banUser(const UserModels::BanUserParams &params) const;
+  void unbanUser(int32_t banId) const;
 
   [[nodiscard]] std::vector<UserModels::User> getUsers() const;
   [[nodiscard]] std::vector<std::pair<int32_t, std::string>>

@@ -2637,12 +2637,20 @@ bool Unban(gentity_t *ent, Arguments argv) {
     return false;
   }
 
+#ifdef NEW_AUTH
+
+  game.sessionV2->unban(ent, id);
+
+#else
+
   if (!ETJump::database->Unban(ent, id)) {
     Printer::chat(ent, "^3unban: ^7" + ETJump::database->GetMessage());
     return false;
   }
 
   Printer::chat(ent, "^3unban: ^7removed ban with id " + argv->at(1));
+#endif
+
   return true;
 }
 

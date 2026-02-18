@@ -180,6 +180,14 @@ public:
   std::optional<int32_t> clientNum;
 };
 
+class UnbanResult final : public SynchronizationContext::ResultBase {
+public:
+  UnbanResult(std::string message, bool success)
+      : message(std::move(message)), success(success) {}
+
+  std::string message;
+  bool success;
+};
 } // namespace ETJump
 
 #endif

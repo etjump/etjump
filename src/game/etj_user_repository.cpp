@@ -585,6 +585,33 @@ int32_t UserRepository::banUser(const UserModels::BanUserParams &params) const {
   }
 }
 
+void UserRepository::unbanUser(const int32_t banId) const {
+  try {
+    db->sql << "begin;";
+
+    int32_t id = 0;
+    db->sql << "select coalesce((select id from bans where id=?), -1);"
+            << banId >>
+        id;
+
+    if (id < 0) {
+      throw BanNotFoundException(
+          stringFormat("^3unban: ^7no ban found with ID ^3%i^7.", banId));
+    }
+
+    db->sql << "delete from hwid_bans where ban_id=?;" << banId;
+    db->sql << "delete from bans where id=?;" << banId;
+
+    db->sql << "commit;";
+  } catch (const BanNotFoundException &e) {
+    db->sql << "rollback;";
+    throw;
+  } catch (const std::exception &e) {
+    db->sql << "rollback;";
+    throw;
+  }
+}
+
 std::vector<UserModels::User> UserRepository::getUsers() const {
   std::vector<UserModels::User> users;
 

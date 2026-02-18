@@ -1336,6 +1336,56 @@ void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
       });
 }
 
+void SessionV2::unban(const gentity_t *ent, const int32_t banId) {
+  const int32_t clientNum =
+      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string name = ent ? ent->client->pers.netname : "Server console";
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this, banId, clientNum, name]() {
+        try {
+          repository->unbanUser(banId);
+
+          return std::make_unique<UnbanResult>(
+              stringFormat("^3unban: ^7removed ban with ID ^3%i^7.", banId),
+              true);
+        } catch (const UserRepository::BanNotFoundException &e) {
+          return std::make_unique<UnbanResult>(e.what(), false);
+        } catch (const std::exception &e) {
+          Printer::chat(clientNum,
+                        stringFormat("^3unban: ^7failed to execute unban "
+                                     "operation for ban ID ^3%i^7.",
+                                     banId));
+          throw std::runtime_error(stringFormat(
+              "Command executed by %s failed: %s", name, e.what()));
+        }
+      },
+      [this, clientNum, banId](const auto result) {
+        const auto *const r = dynamic_cast<UnbanResult *>(result.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("UnbanResult is NULL.");
+        }
+
+        Printer::chat(clientNum, r->message);
+
+        // make sure the ban is removed from 'expiringBans'
+        // in case this was a temporary ban
+        if (r->success) {
+          expiringBans.erase(std::remove_if(expiringBans.begin(),
+                                            expiringBans.end(),
+                                            [banId](const auto &pair) {
+                                              return pair.first == banId;
+                                            }),
+                             expiringBans.end());
+        }
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
+}
+
 void SessionV2::addMute(const int32_t clientNum) {
   if (clients[clientNum].guid.empty()) {
     logger->error("Unable to add mute for client %i - empty GUID!", clientNum);
