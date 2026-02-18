@@ -2759,8 +2759,15 @@ static constexpr Manual commandManuals[] = {
      "!addlevel [level] -cmds [commands] -greeting [greeting] -title [title]",
      "Adds a new level. Provide optional -switches to set level attributes."},
     {"admintest", "!admintest", "Displays your admin level."},
+#ifdef NEW_AUTH
+    {"ban",
+     "!ban [player] [(optional) seconds] [(optional) reason]\n"
+     "!ban -id [id] [(optional) seconds] [(optional) reason]",
+     "Bans target player from server. If seconds is 0, ban is permanent."},
+#else
     {"ban", "!ban [player] [(optional) seconds] [(optional) reason]",
      "Bans target player from server. If seconds is 0, ban is permanent."},
+#endif
     {"cancelvote", "!cancelvote", "Cancels current vote in progress."},
     {"deletelevel", "!deletelevel [level]", "Deletes a level."},
     //    {"deleteuser", "!deleteuser -id [user id]", "Deletes a user based on

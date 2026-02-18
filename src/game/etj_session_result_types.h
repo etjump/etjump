@@ -167,6 +167,19 @@ public:
   std::vector<int32_t> connectedClients;
 };
 
+class BanResult final : public SynchronizationContext::ResultBase {
+public:
+  BanResult(std::string message, int32_t banId, int64_t expires,
+            std::optional<int32_t> clientNum = std::nullopt)
+      : message(std::move(message)), banId(banId), expires(expires),
+        clientNum(clientNum) {}
+
+  std::string message;
+  int32_t banId; // 0 if no ban was made
+  int64_t expires;
+  std::optional<int32_t> clientNum;
+};
+
 } // namespace ETJump
 
 #endif

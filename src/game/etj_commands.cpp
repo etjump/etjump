@@ -788,8 +788,6 @@ static bool IsTargetHigherLevel(gentity_t *ent, gentity_t *target,
 #endif
 }
 
-// FIXME: 'GetLevelById' fetches from database, this needs to be reworked
-// (used in '!setlevel' as it can target offline users)
 bool IsTargetHigherLevel(gentity_t *ent, unsigned id, bool equalIsHigher) {
   if (equalIsHigher) {
     return ETJump::session->GetLevel(ent) <= ETJump::session->GetLevelById(id);
@@ -981,6 +979,85 @@ bool Ban(gentity_t *ent, Arguments argv) {
     PrintManual(ent, "ban");
     return false;
   }
+
+#ifdef NEW_AUTH
+  int32_t id = -1;
+  gentity_t *target = nullptr;
+  std::string err;
+  int32_t timeArg = 2;
+  int32_t reasonArg = 3;
+
+  // offline ban, target by user id
+  if (ETJump::StringUtil::iEqual(argv->at(1), "-id")) {
+    if (argv->size() < 3) {
+      PrintManual(ent, "ban");
+      return false;
+    }
+
+    id = Q_atoi(argv->at(2));
+    timeArg++;
+    reasonArg++;
+  } else {
+    target = PlayerGentityFromString(argv->at(1), err);
+
+    if (!target) {
+      Printer::chat(ent, "^3ban: ^7no player with name " + argv->at(1));
+      return false;
+    }
+
+    id = game.sessionV2->getID(ClientNum(target));
+
+    if (id == -1) {
+      Printer::chat(ent, ETJump::stringFormat(
+                             "^3ban: ^7failed to get user ID for player %s^7.",
+                             target->client->pers.netname));
+      return false;
+    }
+  }
+
+  int64_t expires = 0;
+
+  if (argv->size() > timeArg) {
+    try {
+      expires = std::stoll(argv->at(timeArg));
+
+      if (expires < 0) {
+        Printer::chat(ent, "^3ban: ^7time cannot be negative.");
+        return false;
+      }
+    } catch (const std::invalid_argument &e) {
+      Printer::chat(ent, "^3ban: ^7time is not a number.");
+      return false;
+    } catch (const std::out_of_range &e) {
+      Printer::chat(ent, "^3ban: ^7time is out of range.");
+      return false;
+    }
+  }
+
+  std::string reason = "Banned by admin.";
+
+  // concatenate the rest of the arguments as a 'reason',
+  // so it works even when not typed in quotes
+  if (argv->size() > reasonArg) {
+    reason = ETJump::StringUtil::join(
+        ETJump::Container::skipFirstN(*argv, reasonArg), " ");
+  }
+
+  ETJump::UserModels::BanParams params{};
+
+  params.id = id;
+  params.bannedBy = ent ? ent->client->pers.netname : "Server console";
+  params.expires = expires;
+  params.reason = reason;
+
+  if (target) {
+    params.targetClientNum = ClientNum(target);
+  }
+
+  game.sessionV2->ban(ent, params);
+
+#else
+
   // ban permanently
   time_t t;
   time(&t);
@@ -1029,6 +1106,8 @@ bool Ban(gentity_t *ent, Arguments argv) {
   }
 
   trap_DropClient(ClientNum(player), "You are banned", 0);
+#endif
+
   return true;
 }
 

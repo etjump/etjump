@@ -46,6 +46,7 @@ SessionV2::SessionV2(
     : repository(std::move(userRepository)), logger(std::move(log)),
       sc(std::move(synchronizationContext)) {
   sc->startWorkerThreads(1);
+  getExpiringBansForSession();
 }
 
 SessionV2::~SessionV2() {
@@ -55,7 +56,10 @@ SessionV2::~SessionV2() {
   sc = nullptr;
 }
 
-void SessionV2::runFrame() const { sc->processCompletedTasks(); }
+void SessionV2::runFrame() const {
+  sc->processCompletedTasks();
+  // TODO: check for expiring bans
+}
 
 void SessionV2::initClientSession(const int clientNum) {
   resetClient(clientNum);
@@ -1223,6 +1227,115 @@ void SessionV2::deleteLevel(const gentity_t *ent, const int32_t deletedLevel) {
       });
 }
 
+void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
+  const int32_t clientNum =
+      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this, params, clientNum]() {
+        const auto target = repository->getUserData(params.id);
+
+        if (target.id == 0) {
+          return std::make_unique<BanResult>(
+              stringFormat("^3ban: ^7user with ID ^3%i ^7does not exist.",
+                           params.id),
+              0, 0);
+        }
+
+        if (clientNum != Printer::CONSOLE_CLIENT_NUMBER &&
+            clients[clientNum].level->level <= target.level) {
+          return std::make_unique<BanResult>(
+              "^3ban: ^7you cannot ban a fellow admin.", 0, 0);
+        }
+
+        const auto legacyAuth = repository->getLegacyAuthData(target.id);
+        const auto hwidData = repository->getHWIDsForUser(target.id);
+
+        std::time_t t = std::time(nullptr);
+
+        UserModels::BanUserParams ban;
+        ban.id = params.id;
+        ban.name = params.targetClientNum.has_value()
+                       ? (g_entities + params.targetClientNum.value())
+                             ->client->pers.netname
+                       : target.name;
+        ban.bannedBy = params.bannedBy;
+        ban.banDate = Time::fromInt(t).toDateTimeString();
+        ban.expires = params.expires == 0 ? params.expires : params.expires + t;
+        ban.reason = params.reason;
+        ban.parentBanId = 0; // FIXME: actually handle this in the command
+        ban.guid = target.guid;
+        ban.ipv4 = target.ipv4;
+        ban.ipv6 = target.ipv6;
+        ban.legacyGUID =
+            legacyAuth.guid != "MALFORMED_ENTRY" ? legacyAuth.guid : "";
+        ban.legacyHWID =
+            legacyAuth.hwid != "MALFORMED_ENTRY" ? legacyAuth.hwid : "";
+
+        for (const auto &data : hwidData) {
+          UserModels::HWIDBanParams hwidBan;
+
+          hwidBan.platform = data.platform;
+          hwidBan.hwid = data.hwid;
+
+          ban.hwidBan.emplace_back(hwidBan);
+        }
+
+        try {
+          const int32_t banId = repository->banUser(ban);
+
+          std::string msg;
+          std::string banDuration =
+              ban.expires == 0
+                  ? "permanently"
+                  : "for " + getPluralizedString(params.expires, "second");
+
+          if (params.targetClientNum.has_value()) {
+            msg = stringFormat(
+                "^3ban: ^7player %s ^7(user ID ^3%i^7) was banned %s.",
+                ban.name, ban.id, banDuration);
+            return std::make_unique<BanResult>(msg, banId, ban.expires,
+                                               params.targetClientNum);
+          }
+
+          msg = stringFormat("^3ban: ^7user with ID ^3%i ^7was banned %s.",
+                             ban.id, banDuration);
+          return std::make_unique<BanResult>(msg, banId, ban.expires);
+
+        } catch (const std::exception &e) {
+          Printer::chat(
+              clientNum,
+              stringFormat("^3ban: ^7failed to add ban for user ID ^3%i^7.\n",
+                           target.id));
+          throw std::runtime_error(stringFormat(
+              "Command executed by %s failed: %s", params.bannedBy, e.what()));
+        }
+      },
+      [this, clientNum](const auto result) {
+        const auto *const r = dynamic_cast<BanResult *>(result.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("BanResult is NULL.");
+        }
+
+        Printer::chat(clientNum, r->message);
+
+        if (r->clientNum.has_value()) {
+          trap_DropClient(r->clientNum.value(), "You are banned.", 0);
+        }
+
+        // if the ban isn't permanent, add to expiring bans so we can
+        // potentially unban the user during this session automatically
+        if (r->banId > 0 && r->expires > 0) {
+          expiringBans.emplace_back(r->banId, r->expires);
+        }
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
+}
+
 void SessionV2::addMute(const int32_t clientNum) {
   if (clients[clientNum].guid.empty()) {
     logger->error("Unable to add mute for client %i - empty GUID!", clientNum);
@@ -1333,6 +1446,35 @@ void SessionV2::writeSessionData() const {
                     err);
     }
   }
+}
+
+void SessionV2::getExpiringBansForSession() {
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this]() {
+        const auto bans = repository->getBans();
+        return std::make_unique<GetBansResult>(bans);
+      },
+      [this](const auto result) {
+        const auto *const r = dynamic_cast<GetBansResult *>(result.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("GetBanResult is NULL.");
+        }
+
+        std::time_t t = std::time(nullptr);
+        expiringBans.clear();
+
+        for (const auto &ban : r->bans) {
+          if (ban.expires > t) {
+            expiringBans.emplace_back(ban.banID, ban.expires);
+          }
+        }
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
 }
 
 std::string SessionV2::getIP(const int32_t clientNum) const {

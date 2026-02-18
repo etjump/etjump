@@ -524,6 +524,67 @@ int32_t UserRepository::deleteLevel(const int32_t level) const {
   return db->sql.rows_modified();
 }
 
+int32_t UserRepository::banUser(const UserModels::BanUserParams &params) const {
+  try {
+    db->sql << "begin;";
+
+    db->sql << R"(
+    insert into bans (
+      name,
+      banned_by,
+      ban_date,
+      expires,
+      reason,
+      parent_ban,
+      guid,
+      ipv4,
+      ipv6,
+      legacy_guid,
+      legacy_hwid
+    ) values (
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?
+    );
+  )" << params.name
+            << params.bannedBy << params.banDate << params.expires
+            << params.reason << params.parentBanId << params.guid << params.ipv4
+            << params.ipv6 << params.legacyGUID << params.legacyHWID;
+
+    const auto banId = db->sql.last_insert_rowid();
+
+    for (const auto &hwid : params.hwidBan) {
+      db->sql << R"(
+      insert into hwid_bans (
+        ban_id,
+        platform,
+        hwid
+      ) values (
+        ?,
+        ?,
+        ?
+      );
+    )" << banId
+              << hwid.platform << hwid.hwid;
+    }
+
+    db->sql << "commit";
+
+    return static_cast<int32_t>(banId);
+  } catch (const std::exception &e) {
+    db->sql << "rollback;";
+    throw;
+  }
+}
+
 std::vector<UserModels::User> UserRepository::getUsers() const {
   std::vector<UserModels::User> users;
 

@@ -109,5 +109,34 @@ struct SetLevelParams {
   std::optional<int32_t> id;
   std::optional<int32_t> targetClientNum;
 };
+
+struct BanParams {
+  int32_t id;
+  int64_t expires;
+  std::string bannedBy;
+  std::string reason;
+  std::optional<int32_t> targetClientNum;
+};
+
+struct HWIDBanParams {
+  int32_t platform;
+  std::string hwid;
+};
+
+struct BanUserParams {
+  int32_t id;
+  std::string name;
+  std::string bannedBy;
+  std::string banDate;
+  int64_t expires{};
+  std::string reason;
+  int32_t parentBanId;
+  std::string guid;
+  std::string ipv4;
+  std::string ipv6;
+  std::string legacyGUID;
+  std::string legacyHWID;
+  std::vector<HWIDBanParams> hwidBan;
+};
 } // namespace ETJump::UserModels
 #endif

@@ -74,6 +74,9 @@ public:
   // returns the number of users who's level was deleted
   [[nodiscard]] int32_t deleteLevel(int32_t level) const;
 
+  // returns the ban ID on successful ban
+  [[nodiscard]] int32_t banUser(const UserModels::BanUserParams &params) const;
+
   [[nodiscard]] std::vector<UserModels::User> getUsers() const;
   [[nodiscard]] std::vector<std::pair<int32_t, std::string>>
   getUsersByName(const std::string &name) const;

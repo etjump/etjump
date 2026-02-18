@@ -84,6 +84,7 @@ public:
   void listBans(const gentity_t *ent, int32_t page) const;
   void setLevel(const gentity_t *ent, const UserModels::SetLevelParams &params);
   void deleteLevel(const gentity_t *ent, int32_t deletedLevel);
+  void ban(const gentity_t *ent, const UserModels::BanParams &params);
 
   bool readSessionData(int clientNum);
   void writeSessionData() const;
@@ -102,6 +103,7 @@ private:
   };
 
   void onAuthSuccess(int32_t clientNum);
+  void getExpiringBansForSession();
 
   void updateHWID(int clientNum, int userID) const;
   void updateLastKnownIP(int clientNum, int userID) const;
@@ -125,6 +127,8 @@ private:
   std::array<Client, MAX_CLIENTS> clients{};
 
   std::vector<std::string> mutedClients;
+  // banId, expires
+  std::vector<std::pair<int32_t, int64_t>> expiringBans;
 
   std::unique_ptr<UserRepository> repository;
   std::unique_ptr<Log> logger;
