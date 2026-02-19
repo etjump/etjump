@@ -61,6 +61,7 @@ private:
 
   void addCommand(const std::vector<std::string> &args);
   void deleteCommand(const std::vector<std::string> &args);
+  void editCommand(const std::vector<std::string> &args);
   void listCommands(const std::vector<std::string> &args) const;
 
   bool validateAddCommand(const CommandParser::Command &optCommand,
@@ -70,6 +71,9 @@ private:
   bool validateDeleteCommand(const CommandParser::Command &optCommand,
                              std::optional<uint8_t> &page,
                              std::optional<uint8_t> &slot) const;
+  [[nodiscard]] bool
+  validateEditCommand(const CommandParser::Command &optCommand, uint8_t page,
+                      uint8_t slot) const;
 
   [[nodiscard]] inline bool commandsFull() const;
   [[nodiscard]] inline bool pageIsFull(uint8_t page) const;
