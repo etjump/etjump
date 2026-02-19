@@ -62,6 +62,7 @@ private:
   void addCommand(const std::vector<std::string> &args);
   void deleteCommand(const std::vector<std::string> &args);
   void editCommand(const std::vector<std::string> &args);
+  void moveCommand(const std::vector<std::string> &args);
   void listCommands(const std::vector<std::string> &args) const;
 
   bool validateAddCommand(const CommandParser::Command &optCommand,
@@ -75,6 +76,11 @@ private:
   validateEditCommand(const CommandParser::Command &optCommand, uint8_t page,
                       uint8_t slot) const;
 
+  [[nodiscard]] bool
+  validateMoveCommand(const CommandParser::Command &optCommand,
+                      uint8_t fromPage, uint8_t fromSlot, uint8_t toPage,
+                      std::optional<uint8_t> &toSlot) const;
+
   [[nodiscard]] inline bool commandsFull() const;
   [[nodiscard]] inline bool pageIsFull(uint8_t page) const;
 
@@ -84,6 +90,8 @@ private:
   [[nodiscard]] uint8_t findFreeSlot(uint8_t page) const;
   // returns '0' if page is invalid, or no commands are found
   [[nodiscard]] uint8_t findSlotForDeletion(uint8_t page) const;
+
+  static void sortTable(toml::ordered_value &table, const std::string &key);
 
   [[nodiscard]] bool readFile(toml::ordered_value &table) const;
   [[nodiscard]] bool writeFile(const toml::ordered_value &table) const;
