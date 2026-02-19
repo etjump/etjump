@@ -51,6 +51,7 @@ CustomCommandMenu::~CustomCommandMenu() {
   consoleCommandsHandler->unsubscribe("addCustomCommand");
   consoleCommandsHandler->unsubscribe("deleteCustomCommand");
   consoleCommandsHandler->unsubscribe("editCustomCommand");
+  consoleCommandsHandler->unsubscribe("moveCustomCommand");
   consoleCommandsHandler->unsubscribe("listCustomCommands");
   consoleCommandsHandler->unsubscribe("readCustomCommands");
 }
@@ -71,6 +72,10 @@ void CustomCommandMenu::startListeners() {
   consoleCommandsHandler->subscribe(
       "editCustomCommand",
       [this](const std::vector<std::string> &args) { editCommand(args); });
+
+  consoleCommandsHandler->subscribe(
+      "moveCustomCommand",
+      [this](const std::vector<std::string> &args) { moveCommand(args); });
 
   consoleCommandsHandler->subscribe(
       "listCustomCommands",
@@ -567,6 +572,181 @@ bool CustomCommandMenu::validateEditCommand(
   return true;
 }
 
+void CustomCommandMenu::moveCommand(const std::vector<std::string> &args) {
+  if (!FileSystem::exists(customCommandMenuFile)) {
+    CG_Printf("Unable to find ^3'%s' ^7file.\n", customCommandMenuFile.c_str());
+    return;
+  }
+
+  constexpr char desc[] = R"(Moves a custom command to new slot.
+    If the target slot already contains a command, the commands will be swapped.
+    If 'to-slot' isn't provided, first free slot on the page is selected.
+
+    /moveCustomCommand --from-page <page> --from-slot <slot> --to-page <page> --to-slot <slot>
+
+    Has a shorthand format of:
+    /moveCustomCommand <from-page> <from-slot> <to-page>
+    /moveCustomCommand <from-page> <from-slot> <to-page> <to-slot>)";
+
+  const auto optCommand = ConsoleCommands::getOptCommand(
+      "editCustomCommand",
+      CommandParser::CommandDefinition::create("editCustomCommand", desc)
+          .addOption("from-page", "fp", "Page to move a command from.",
+                     CommandParser::OptionDefinition::Type::Integer, true, 0)
+          .addOption("from-slot", "fs",
+                     "Slot at 'from-page' to move a command from.",
+                     CommandParser::OptionDefinition::Type::Integer, true, 1)
+          .addOption("to-page", "tp", "Page to move the targeted command to.",
+                     CommandParser::OptionDefinition::Type::Integer, true, 2)
+          .addOption("to-slot", "ts",
+                     "Slot at 'to-page' to move the targeted command to.",
+                     CommandParser::OptionDefinition::Type::Integer, false, 3),
+      args);
+
+  if (!optCommand.has_value()) {
+    return;
+  }
+
+  const auto fromPage = static_cast<uint8_t>(
+      optCommand.value().getOptional("from-page").value().integer);
+  const auto fromSlot = static_cast<uint8_t>(
+      optCommand.value().getOptional("from-slot").value().integer);
+  const auto toPage = static_cast<uint8_t>(
+      optCommand.value().getOptional("to-page").value().integer);
+  std::optional<uint8_t> toSlot;
+
+  if (!validateMoveCommand(optCommand.value(), fromPage, fromSlot, toPage,
+                           toSlot)) {
+    return;
+  }
+
+  toml::ordered_value table;
+
+  if (!readFile(table)) {
+    return;
+  }
+
+  try {
+    const std::string fromPageStr = "page-" + std::to_string(fromPage);
+    const std::string fromNameStr = "name-" + std::to_string(fromSlot);
+    const std::string fromCmdStr = "command-" + std::to_string(fromSlot);
+
+    const std::string toPageStr = "page-" + std::to_string(toPage);
+    const std::string toNameStr = "name-" + std::to_string(toSlot.value());
+    const std::string toCmdStr = "command-" + std::to_string(toSlot.value());
+
+    const bool targetPageEmpty = commands.find(toPage) == commands.cend();
+
+    // swap
+    if (!targetPageEmpty &&
+        (!commands.at(toPage)[toSlot.value() - 1].name.empty() ||
+         !commands.at(toPage)[toSlot.value() - 1].command.empty())) {
+      const std::string oldName = table.at(toPageStr).at(toNameStr).as_string();
+      const std::string oldCmd = table.at(toPageStr).at(toCmdStr).as_string();
+
+      table[toPageStr][toNameStr] = commands.at(fromPage)[fromSlot - 1].name;
+      table[toPageStr][toCmdStr] = commands.at(fromPage)[fromSlot - 1].command;
+
+      table[fromPageStr][fromNameStr] = oldName;
+      table[fromPageStr][fromCmdStr] = oldCmd;
+
+      sortTable(table, toPageStr);
+      sortTable(table, fromPageStr);
+    } else { // move
+      table[toPageStr][toNameStr] = commands.at(fromPage)[fromSlot - 1].name;
+      table[toPageStr][toCmdStr] = commands.at(fromPage)[fromSlot - 1].command;
+
+      table.at(fromPageStr).as_table().erase(fromNameStr);
+      table.at(fromPageStr).as_table().erase(fromCmdStr);
+
+      // delete the table we moved from if it's empty
+      if (table.at(fromPageStr).as_table().empty()) {
+        table.as_table().erase(fromPageStr);
+      }
+
+      // sort only if the target page isn't empty
+      if (!targetPageEmpty) {
+        sortTable(table, toPageStr);
+      }
+    }
+  } catch (const toml::type_error &e) {
+    CG_Printf("Failed to move command: %s",
+              TOMLUtils::getError(e.what()).c_str());
+  } catch (const std::out_of_range &e) {
+    CG_Printf("Failed to move command: %s",
+              TOMLUtils::getError(e.what()).c_str());
+  }
+
+  if (writeFile(table)) {
+    parseCommands();
+  }
+}
+
+bool CustomCommandMenu::validateMoveCommand(
+    const CommandParser::Command &optCommand, const uint8_t fromPage,
+    const uint8_t fromSlot, const uint8_t toPage,
+    std::optional<uint8_t> &toSlot) const {
+  const auto opFailedChatMsg = []() {
+    CG_AddToTeamChat("^3moveCustomCommand: ^7operation failed. Check console "
+                     "for more information.",
+                     TEAM_SPECTATOR);
+  };
+
+  if (fromPage == 0 || fromPage > CUSTOM_COMMAND_MENU_MAX_PAGES) {
+    opFailedChatMsg();
+    CG_Printf("Parameter `from-page` is out of range (1-5).\n");
+    return false;
+  }
+
+  if (commands.find(fromPage) == commands.cend()) {
+    opFailedChatMsg();
+    CG_Printf("No commands found on page ^3%i^7.\n", fromPage);
+    return false;
+  }
+
+  if (fromSlot == 0 || fromSlot > CUSTOM_COMMAND_MENU_PAGE_SIZE) {
+    opFailedChatMsg();
+    CG_Printf("Parameter `from-slot` is out of range (1-8).\n");
+    return false;
+  }
+
+  if (commands.at(fromPage)[fromSlot - 1].name.empty() ||
+      commands.at(fromPage)[fromSlot - 1].command.empty()) {
+    opFailedChatMsg();
+    CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n", fromPage,
+              fromSlot);
+    return false;
+  }
+
+  if (toPage == 0 || toPage > CUSTOM_COMMAND_MENU_MAX_PAGES) {
+    opFailedChatMsg();
+    CG_Printf("Parameter `to-page` is out of range (1-5).\n");
+    return false;
+  }
+
+  const auto optToSlot = optCommand.getOptional("to-slot");
+
+  if (optToSlot.has_value()) {
+    toSlot = static_cast<uint8_t>(optToSlot.value().integer);
+
+    if (toSlot.value() == 0 || toSlot.value() > CUSTOM_COMMAND_MENU_PAGE_SIZE) {
+      opFailedChatMsg();
+      CG_Printf("Parameter `to-slot` is out of range (1-8).\n");
+      return false;
+    }
+  } else {
+    toSlot = findFreeSlot(toPage);
+
+    if (toSlot.value() == 0) {
+      opFailedChatMsg();
+      CG_Printf("No free slots on page ^3%i^7.\n", toPage);
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void CustomCommandMenu::listCommands(
     const std::vector<std::string> &args) const {
   if (commands.empty()) {
@@ -710,6 +890,27 @@ uint8_t CustomCommandMenu::findSlotForDeletion(const uint8_t page) const {
 
   // no populated slots
   return 0;
+}
+
+void CustomCommandMenu::sortTable(toml::ordered_value &table,
+                                  const std::string &key) {
+  const auto &targetPage = table.at(key).as_table();
+  toml::ordered_value::table_type sortedPage;
+
+  for (uint8_t i = 1; i <= CUSTOM_COMMAND_MENU_PAGE_SIZE; i++) {
+    const std::string nameKey = "name-" + std::to_string(i);
+    const std::string cmdKey = "command-" + std::to_string(i);
+
+    if (targetPage.contains(nameKey)) {
+      sortedPage[nameKey] = targetPage.at(nameKey);
+    }
+
+    if (targetPage.contains(cmdKey)) {
+      sortedPage[cmdKey] = targetPage.at(cmdKey);
+    }
+  }
+
+  table[key] = toml::ordered_value(sortedPage);
 }
 
 const std::map<uint8_t, std::array<CustomCommandMenu::CustomCommand,
