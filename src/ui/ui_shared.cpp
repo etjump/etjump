@@ -5121,6 +5121,7 @@ static bind_t g_bindings[] = {
     {"team r 1", -1, -1, -1, -1},
     {"team s", -1, -1, -1, -1},
     {"toggleETJumpSettings", -1, -1, -1, -1},
+    {"openCustomCommandMenu", -1, -1, -1, -1},
 };
 
 static const int g_bindCount = sizeof(g_bindings) / sizeof(bind_t);
