@@ -50,6 +50,7 @@ CustomCommandMenu::~CustomCommandMenu() {
 
   consoleCommandsHandler->unsubscribe("addCustomCommand");
   consoleCommandsHandler->unsubscribe("deleteCustomCommand");
+  consoleCommandsHandler->unsubscribe("editCustomCommand");
   consoleCommandsHandler->unsubscribe("listCustomCommands");
   consoleCommandsHandler->unsubscribe("readCustomCommands");
 }
@@ -66,6 +67,10 @@ void CustomCommandMenu::startListeners() {
   consoleCommandsHandler->subscribe(
       "deleteCustomCommand",
       [this](const std::vector<std::string> &args) { deleteCommand(args); });
+
+  consoleCommandsHandler->subscribe(
+      "editCustomCommand",
+      [this](const std::vector<std::string> &args) { editCommand(args); });
 
   consoleCommandsHandler->subscribe(
       "listCustomCommands",
@@ -148,7 +153,7 @@ void CustomCommandMenu::addCommand(const std::vector<std::string> &args) {
   constexpr char desc[] = R"(Adds a new custom command
     /addCustomCommand --name <name> --command <command> --page <page> --slot <slot>
 
-    Has a shorthand format of
+    Has a shorthand format of:
     /addCustomCommand <name> <command>
     /addCustomCommand <name> <command> <page>
     /addCustomCommand <name> <command> <page> <slot>)";
@@ -439,6 +444,123 @@ bool CustomCommandMenu::validateDeleteCommand(
                              : findSlotForDeletion(page.value());
 
   if (!isValidSlot()) {
+    return false;
+  }
+
+  return true;
+}
+
+void CustomCommandMenu::editCommand(const std::vector<std::string> &args) {
+  if (!FileSystem::exists(customCommandMenuFile)) {
+    CG_Printf("Unable to find ^3'%s' ^7file.\n", customCommandMenuFile.c_str());
+    return;
+  }
+
+  constexpr char desc[] = R"(Edits a custom command.
+    /editCustomCommand --page <page> --slot <slot> --name <name> --command <command>
+
+    Has a shorthand format of:
+    /editCustomCommand <page> <slot>)";
+
+  const auto optCommand = ConsoleCommands::getOptCommand(
+      "editCustomCommand",
+      CommandParser::CommandDefinition::create("editCustomCommand", desc)
+          .addOption("page", "p", "Page to edit a command from.",
+                     CommandParser::OptionDefinition::Type::Integer, true, 0)
+          .addOption("slot", "s", "Slot to edit a command from.",
+                     CommandParser::OptionDefinition::Type::Integer, true, 1)
+          .addOption("name", "n",
+                     "Name to set for the command in the targeted slot.",
+                     CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("command", "c", "Command to set to the targeted slot.",
+                     CommandParser::OptionDefinition::Type::MultiToken, false),
+      args);
+
+  if (!optCommand.has_value()) {
+    return;
+  }
+
+  const uint8_t page = static_cast<uint8_t>(
+      optCommand.value().getOptional("page").value().integer);
+  const uint8_t slot = static_cast<uint8_t>(
+      optCommand.value().getOptional("slot").value().integer);
+
+  if (!validateEditCommand(optCommand.value(), page, slot)) {
+    return;
+  }
+
+  const auto optName = optCommand.value().getOptional("name");
+  const auto optCmd = optCommand.value().getOptional("command");
+
+  toml::ordered_value table;
+
+  if (!readFile(table)) {
+    return;
+  }
+
+  const std::string pageStr = "page-" + std::to_string(page);
+  const std::string nameStr = "name-" + std::to_string(slot);
+  const std::string cmdStr = "command-" + std::to_string(slot);
+
+  try {
+    if (optName.has_value()) {
+      table.at(pageStr).at(nameStr) = optName.value().text;
+    }
+
+    if (optCmd.has_value()) {
+      table.at(pageStr).at(cmdStr) = optCmd.value().text;
+    }
+  } catch (const toml::type_error &e) {
+    CG_Printf("Failed to edit command: %s",
+              TOMLUtils::getError(e.what()).c_str());
+  } catch (const std::out_of_range &e) {
+    CG_Printf("Failed to edit command: %s",
+              TOMLUtils::getError(e.what()).c_str());
+  }
+
+  if (writeFile(table)) {
+    parseCommands();
+  }
+}
+
+bool CustomCommandMenu::validateEditCommand(
+    const CommandParser::Command &optCommand, const uint8_t page,
+    const uint8_t slot) const {
+  const auto opFailedChatMsg = []() {
+    CG_AddToTeamChat("^3editCustomCommand: ^7operation failed. Check console "
+                     "for more information.",
+                     TEAM_SPECTATOR);
+  };
+
+  if (page == 0 || page > CUSTOM_COMMAND_MENU_MAX_PAGES) {
+    opFailedChatMsg();
+    CG_Printf("Parameter `page` is out of range (1-5).\n");
+    return false;
+  }
+
+  if (commands.find(page) == commands.cend()) {
+    opFailedChatMsg();
+    CG_Printf("No commands found on page ^3%i^7.\n", page);
+    return false;
+  }
+
+  if (slot == 0 || slot > CUSTOM_COMMAND_MENU_PAGE_SIZE) {
+    opFailedChatMsg();
+    CG_Printf("Parameter `slot` is out of range (1-8).\n");
+    return false;
+  }
+
+  if (commands.at(page)[slot - 1].name.empty() ||
+      commands.at(page)[slot - 1].command.empty()) {
+    opFailedChatMsg();
+    CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n", page, slot);
+    return false;
+  }
+
+  if (!optCommand.getOptional("name").has_value() &&
+      !optCommand.getOptional("command").has_value()) {
+    opFailedChatMsg();
+    CG_Printf("Neither of parameters `name` or `command` were provided.\n");
     return false;
   }
 
