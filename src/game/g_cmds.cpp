@@ -4356,6 +4356,11 @@ void Cmd_Ignore_f(gentity_t *ent) {
     return;
   }
 
+  if (clientNum == ClientNum(ent)) {
+    Printer::console(ent, "You cannot ignore yourself.\n");
+    return;
+  }
+
   if (clientNum != MAX_CLIENTS) {
     COM_BitSet(ent->client->sess.ignoreClients, clientNum);
   }
