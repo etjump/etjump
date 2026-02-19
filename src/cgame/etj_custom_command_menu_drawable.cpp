@@ -203,8 +203,21 @@ void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
     y += button->rect.h;
     CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
                       button->font->scaley, button->font->colour,
-                      "to add a new command.", 0, 0, button->font->style,
+                      "to add a new command, or use", 0, 0, button->font->style,
                       button->font->font);
+
+    y += button->rect.h;
+    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
+                      button->font->scaley, button->font->colour,
+                      "'generateCustomCommandsFile'", 0, 0, button->font->style,
+                      button->font->font);
+
+    y += button->rect.h;
+    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
+                      button->font->scaley, button->font->colour,
+                      "to generate an example file.", 0, 0, button->font->style,
+                      button->font->font);
+
     return;
   }
 
