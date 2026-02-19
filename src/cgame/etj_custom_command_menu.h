@@ -93,6 +93,8 @@ private:
 
   static void sortTable(toml::ordered_value &table, const std::string &key);
 
+  static void generateExampleFile(const std::vector<std::string> &args);
+
   [[nodiscard]] bool readFile(toml::ordered_value &table) const;
   [[nodiscard]] bool writeFile(const toml::ordered_value &table) const;
 

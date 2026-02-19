@@ -54,6 +54,7 @@ CustomCommandMenu::~CustomCommandMenu() {
   consoleCommandsHandler->unsubscribe("moveCustomCommand");
   consoleCommandsHandler->unsubscribe("listCustomCommands");
   consoleCommandsHandler->unsubscribe("readCustomCommands");
+  consoleCommandsHandler->unsubscribe("generateCustomCommandsFile");
 }
 
 void CustomCommandMenu::startListeners() {
@@ -84,6 +85,10 @@ void CustomCommandMenu::startListeners() {
   consoleCommandsHandler->subscribe(
       "readCustomCommands",
       [this](const std::vector<std::string> &) { parseCommands(); });
+
+  consoleCommandsHandler->subscribe(
+      "generateCustomCommandsFile",
+      [](const std::vector<std::string> &args) { generateExampleFile(args); });
 }
 
 void CustomCommandMenu::setFilename(const vmCvar_t *cvar) {
@@ -936,6 +941,73 @@ const std::map<uint8_t, std::array<CustomCommandMenu::CustomCommand,
                                    CUSTOM_COMMAND_MENU_PAGE_SIZE>> &
 CustomCommandMenu::getCustomCommands() const {
   return commands;
+}
+
+void CustomCommandMenu::generateExampleFile(
+    const std::vector<std::string> &args) {
+  if (args.empty() || (!StringUtil::iEqual(args[0], "-f") &&
+                       !StringUtil::iEqual(args[0], "--force"))) {
+    // we don't really care for a potential custom file here, just make sure
+    // we don't overwrite the default one, that most players likely use.
+    if (FileSystem::exists(DEFAULT_CUSTOM_COMMAND_FILE)) {
+      CG_Printf(
+          "Existing custom command file ^3'%s' ^7was found.\nRun this command "
+          "again with ^3'-f' ^7or ^3'--force' ^7argument to overwrite it.\n",
+          DEFAULT_CUSTOM_COMMAND_FILE);
+      return;
+    }
+  }
+
+  constexpr char in[] = R"(# Example custom command file
+# This file may contain up to 5 pages, each with 8 slots worth of commands.
+# You may edit this file by hand, or use the following in-game commands:
+#
+# - addCustomCommand
+# - editCustomCommand
+# - moveCustomCommand
+# - deleteCustomCommand
+#
+# This is a TOML file, meaning it needs to follow the TOML language syntax.
+# Each page must be defined with a header, followed by key-value pairs, where the value is in quotes.
+# Below is a generated example file which contains pages 1, 2 and 4.
+# Note that the command ordering does not matter, only the key names matter, along with under which header they are.
+# The in-game commands will try to keep the commands in order as you add/edit/move/delete them however.
+# The pages do not need to appear in order from 1 to 5, nor do all of them have to be present.
+# You may add your own comments to this file as well by starting a line with #
+
+[page-1]
+name-1 = "Example command 1"
+command-1 = "echo This is an example command 1"
+name-2 = "Example command 2"
+command-2 = "echo This is an example command 2"
+name-5 = "Example command 5"
+command-5 = "echo This is an example command 5; echo Note that the commands don't need to be defined sequentially!"
+
+[page-2]
+name-2 = "Example command 2"
+command-2 = "echo This is an example command 2 on page 2; echo Note that it appears on slot 2 even though it's defined first!"
+name-1 = "Example command 1"
+command-1 = "echo This is an example command 1 on page 2"
+
+[page-4]
+name-1 = "Example command 1"
+command-1 = "echo This is an example command 1 on page 4; echo You can have blank pages too, and can choose which pages to use!"
+)";
+
+  try {
+    const File fOut(DEFAULT_CUSTOM_COMMAND_FILE, File::Mode::Write);
+    fOut.write(in);
+
+    CG_Printf("Wrote example custom command file ^3'%s'\n",
+              DEFAULT_CUSTOM_COMMAND_FILE);
+
+    // the file will not exist immediately after we call 'write', so calling
+    // 'parseCommands' here directly will fail to parse the generated file
+    // instead send a console command to queue the parsing to next frame
+    trap_SendConsoleCommand("readCustomCommands\n");
+  } catch (const File::FileIOException &e) {
+    CG_Printf("Failed to write example custom command file: %s\n", e.what());
+  }
 }
 
 bool CustomCommandMenu::readFile(toml::ordered_value &table) const {
