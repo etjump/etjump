@@ -217,6 +217,8 @@ void CustomCommandMenu::addCommand(const std::vector<std::string> &args) {
   sortTable(table, pageStr);
 
   if (writeFile(table)) {
+    CG_Printf("Added new custom command to page ^3%i^7, slot ^3%i^7.\n",
+              page.value(), slot.value());
     parseCommands();
   }
 }
@@ -395,6 +397,8 @@ void CustomCommandMenu::deleteCommand(const std::vector<std::string> &args) {
   }
 
   if (writeFile(table)) {
+    CG_Printf("Deleted custom command from page ^3%i^7, slot ^3%i^7.\n",
+              page.value(), slot.value());
     parseCommands();
   }
 }
@@ -528,6 +532,8 @@ void CustomCommandMenu::editCommand(const std::vector<std::string> &args) {
   }
 
   if (writeFile(table)) {
+    CG_Printf("Edited custom command on page ^3%i^7, slot ^3%i^7.\n", page,
+              slot);
     parseCommands();
   }
 }
@@ -630,6 +636,11 @@ void CustomCommandMenu::moveCommand(const std::vector<std::string> &args) {
     return;
   }
 
+  const bool targetPageEmpty = commands.find(toPage) == commands.cend();
+  const bool swap = !targetPageEmpty &&
+                    (!commands.at(toPage)[toSlot.value() - 1].name.empty() ||
+                     !commands.at(toPage)[toSlot.value() - 1].command.empty());
+
   try {
     const std::string fromPageStr = "page-" + std::to_string(fromPage);
     const std::string fromNameStr = "name-" + std::to_string(fromSlot);
@@ -639,12 +650,7 @@ void CustomCommandMenu::moveCommand(const std::vector<std::string> &args) {
     const std::string toNameStr = "name-" + std::to_string(toSlot.value());
     const std::string toCmdStr = "command-" + std::to_string(toSlot.value());
 
-    const bool targetPageEmpty = commands.find(toPage) == commands.cend();
-
-    // swap
-    if (!targetPageEmpty &&
-        (!commands.at(toPage)[toSlot.value() - 1].name.empty() ||
-         !commands.at(toPage)[toSlot.value() - 1].command.empty())) {
+    if (swap) {
       const std::string oldName = table.at(toPageStr).at(toNameStr).as_string();
       const std::string oldCmd = table.at(toPageStr).at(toCmdStr).as_string();
 
@@ -682,6 +688,15 @@ void CustomCommandMenu::moveCommand(const std::vector<std::string> &args) {
   }
 
   if (writeFile(table)) {
+    CG_Printf("Moved custom command from page ^3%i^7, slot ^3%i ^7to page "
+              "^3%i, ^7slot ^3%i^7.\n",
+              fromPage, fromSlot, toPage, toSlot.value());
+    if (swap) {
+      CG_Printf("The command previously on the targeted slot has been moved to "
+                "page ^3%i^7, slot ^3%i^7.\n",
+                fromPage, fromSlot);
+    }
+
     parseCommands();
   }
 }
