@@ -585,7 +585,7 @@ int32_t UserRepository::banUser(const UserModels::BanUserParams &params) const {
   }
 }
 
-void UserRepository::unbanUser(const int32_t banId) const {
+int32_t UserRepository::unbanUser(const int32_t banId) const {
   try {
     db->sql << "begin;";
 
@@ -595,21 +595,34 @@ void UserRepository::unbanUser(const int32_t banId) const {
         id;
 
     if (id < 0) {
-      throw BanNotFoundException(
-          stringFormat("^3unban: ^7no ban found with ID ^3%i^7.", banId));
+      db->sql << "rollback;";
+      return 0;
     }
 
     db->sql << "delete from hwid_bans where ban_id=?;" << banId;
     db->sql << "delete from bans where id=?;" << banId;
 
     db->sql << "commit;";
-  } catch (const BanNotFoundException &e) {
-    db->sql << "rollback;";
-    throw;
-  } catch (const std::exception &e) {
+    return banId;
+  } catch (...) {
     db->sql << "rollback;";
     throw;
   }
+}
+
+std::vector<int32_t>
+UserRepository::unbanUsers(const std::vector<int32_t> &banIds) const {
+  std::vector<int32_t> unbans;
+
+  for (const auto &banId : banIds) {
+    const int32_t id = unbanUser(banId);
+
+    if (id > 0) {
+      unbans.emplace_back(id);
+    }
+  }
+
+  return unbans;
 }
 
 std::vector<UserModels::User> UserRepository::getUsers() const {

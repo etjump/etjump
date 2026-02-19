@@ -45,7 +45,7 @@ public:
             std::unique_ptr<SynchronizationContext> synchronizationContext);
   ~SessionV2();
 
-  void runFrame() const;
+  void runFrame();
 
   void initClientSession(int clientNum);
   void resetClient(int clientNum);
@@ -105,6 +105,7 @@ private:
 
   void onAuthSuccess(int32_t clientNum);
   void getExpiringBansForSession();
+  void removeExpiredBans();
 
   void updateHWID(int clientNum, int userID) const;
   void updateLastKnownIP(int clientNum, int userID) const;
@@ -130,6 +131,7 @@ private:
   std::vector<std::string> mutedClients;
   // banId, expires
   std::vector<std::pair<int32_t, int64_t>> expiringBans;
+  int32_t nextUnbanCheckTime{};
 
   std::unique_ptr<UserRepository> repository;
   std::unique_ptr<Log> logger;

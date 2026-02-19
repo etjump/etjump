@@ -182,11 +182,20 @@ public:
 
 class UnbanResult final : public SynchronizationContext::ResultBase {
 public:
-  UnbanResult(std::string message, bool success)
-      : message(std::move(message)), success(success) {}
+  UnbanResult(std::string message, int32_t banId)
+      : message(std::move(message)), banId(banId) {}
 
   std::string message;
-  bool success;
+  int32_t banId;
+};
+
+class BanExpiryResult final : public SynchronizationContext::ResultBase {
+public:
+  BanExpiryResult(std::string message, std::vector<int32_t> expiredBans)
+      : message(std::move(message)), expiredBans(std::move(expiredBans)) {}
+
+  std::string message;
+  std::vector<int32_t> expiredBans;
 };
 } // namespace ETJump
 

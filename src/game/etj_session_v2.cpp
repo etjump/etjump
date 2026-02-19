@@ -56,9 +56,13 @@ SessionV2::~SessionV2() {
   sc = nullptr;
 }
 
-void SessionV2::runFrame() const {
+void SessionV2::runFrame() {
+  if (level.time > nextUnbanCheckTime) {
+    removeExpiredBans();
+    nextUnbanCheckTime = level.time + 5000;
+  }
+
   sc->processCompletedTasks();
-  // TODO: check for expiring bans
 }
 
 void SessionV2::initClientSession(const int clientNum) {
@@ -112,6 +116,9 @@ void SessionV2::onClientConnect(const int clientNum, const bool firstTime) {
 
 void SessionV2::onClientDisconnect(const int clientNum) {
   G_DPrintf("%s called for %i\n", __func__, clientNum);
+  // FIXME: this fires when a banned client tries to connect,
+  // resulting in an error getting logged about a null user
+  // technically correct, but a bit deceiving
   updateLastSeen(clientNum);
   resetClient(clientNum);
 
@@ -1345,13 +1352,14 @@ void SessionV2::unban(const gentity_t *ent, const int32_t banId) {
   sc->postTask(
       [this, banId, clientNum, name]() {
         try {
-          repository->unbanUser(banId);
+          const int32_t id = repository->unbanUser(banId);
+          const std::string msg =
+              (id == 0)
+                  ? stringFormat("^3unban: ^7no ban found with ID ^3%i^7.",
+                                 banId)
+                  : stringFormat("^3unban: ^7removed ban with ID ^3%i^7.", id);
 
-          return std::make_unique<UnbanResult>(
-              stringFormat("^3unban: ^7removed ban with ID ^3%i^7.", banId),
-              true);
-        } catch (const UserRepository::BanNotFoundException &e) {
-          return std::make_unique<UnbanResult>(e.what(), false);
+          return std::make_unique<UnbanResult>(msg, id);
         } catch (const std::exception &e) {
           Printer::chat(clientNum,
                         stringFormat("^3unban: ^7failed to execute unban "
@@ -1361,7 +1369,7 @@ void SessionV2::unban(const gentity_t *ent, const int32_t banId) {
               "Command executed by %s failed: %s", name, e.what()));
         }
       },
-      [this, clientNum, banId](const auto result) {
+      [this, clientNum](const auto result) {
         const auto *const r = dynamic_cast<UnbanResult *>(result.get());
 
         if (r == nullptr) {
@@ -1372,11 +1380,11 @@ void SessionV2::unban(const gentity_t *ent, const int32_t banId) {
 
         // make sure the ban is removed from 'expiringBans'
         // in case this was a temporary ban
-        if (r->success) {
+        if (r->banId > 0) {
           expiringBans.erase(std::remove_if(expiringBans.begin(),
                                             expiringBans.end(),
-                                            [banId](const auto &pair) {
-                                              return pair.first == banId;
+                                            [&r](const auto &pair) {
+                                              return pair.first == r->banId;
                                             }),
                              expiringBans.end());
         }
@@ -1521,6 +1529,74 @@ void SessionV2::getExpiringBansForSession() {
             expiringBans.emplace_back(ban.banID, ban.expires);
           }
         }
+      },
+      [this, func](const std::runtime_error &e) {
+        logger->error("%s: %s", func, e.what());
+      });
+}
+
+void SessionV2::removeExpiredBans() {
+  std::time_t t = std::time(nullptr);
+  std::vector<int32_t> banIds;
+
+  for (const auto &[id, expires] : expiringBans) {
+    if (t > expires) {
+      banIds.emplace_back(id);
+    }
+  }
+
+  if (banIds.empty()) {
+    return;
+  }
+
+  const std::string func = __func__;
+
+  sc->postTask(
+      [this, banIds]() {
+        try {
+          const auto unbans = repository->unbanUsers(banIds);
+
+          // we shouldn't be here if the query returns no results
+          if (unbans.empty()) {
+            throw std::runtime_error(
+                "Trying to remove non-existent expiring ban(s). This is a bug, "
+                "please report this to the developers.");
+          }
+
+          if (unbans.size() == 1) {
+            return std::make_unique<BanExpiryResult>(
+                stringFormat("Ban with ID %i has been automatically removed "
+                             "due to expiring.",
+                             unbans[0]),
+                unbans);
+          }
+
+          return std::make_unique<BanExpiryResult>(
+              stringFormat("Bans with IDs %s have been automatically removed "
+                           "due to expiring.",
+                           StringUtil::join(unbans, ", ")),
+              unbans);
+        } catch (const std::exception &e) {
+          throw std::runtime_error(e.what());
+        }
+      },
+      [this](const auto result) {
+        const auto *const r = dynamic_cast<BanExpiryResult *>(result.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("BanExpiryResult is NULL.");
+        }
+
+        for (const auto &ban : r->expiredBans) {
+          expiringBans.erase(std::remove_if(expiringBans.begin(),
+                                            expiringBans.end(),
+                                            [ban](const auto &pair) {
+                                              return pair.first == ban;
+                                            }),
+                             expiringBans.end());
+        }
+
+        logger->info(r->message);
       },
       [this, func](const std::runtime_error &e) {
         logger->error("%s: %s", func, e.what());
