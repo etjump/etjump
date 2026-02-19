@@ -206,11 +206,15 @@ void CustomCommandMenu::addCommand(const std::vector<std::string> &args) {
     return;
   }
 
+  const std::string pageStr = "page-" + std::to_string(page.value());
   const std::string slotName = "name-" + std::to_string(slot.value());
   const std::string slotCmd = "command-" + std::to_string(slot.value());
 
-  table["page-" + std::to_string(page.value())][slotName] = name;
-  table["page-" + std::to_string(page.value())][slotCmd] = cmd;
+  table[pageStr][slotName] = name;
+  table[pageStr][slotCmd] = cmd;
+
+  // we might not be inserting to last slot, so sort the table again
+  sortTable(table, pageStr);
 
   if (writeFile(table)) {
     parseCommands();
