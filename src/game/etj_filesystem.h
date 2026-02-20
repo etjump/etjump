@@ -34,8 +34,8 @@ class FileSystem {
 public:
   static void copy(const std::string &src, const std::string &dst);
   static void move(const std::string &src, const std::string &dst);
-  static bool remove(const std::string &path);
-  static bool exists(const std::string &path);
+  static bool remove(const std::string &file);
+  static bool exists(const std::string &file);
   static bool safeCopy(const std::string &src, const std::string &dst);
   static bool safeMove(const std::string &src, const std::string &dst);
   static std::vector<std::string>
