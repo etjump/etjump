@@ -54,7 +54,7 @@ std::vector<std::string> ETJump::OperatingSystem::getHwid() {
 
   // not sure if this can happen
   if (buf[0] == '\0') {
-    hwid.emplace_back(NOHWID);
+    hwid.emplace_back(NOHWID_MAC_ADDR);
     return hwid;
   }
 

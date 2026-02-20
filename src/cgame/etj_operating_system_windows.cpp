@@ -99,7 +99,7 @@ std::string ETJump::OperatingSystem::getMACAddress() {
       static_cast<IP_ADAPTER_INFO *>(malloc(sizeof(IP_ADAPTER_INFO)));
 
   if (pAdapterInfo == nullptr) {
-    return NOHWID;
+    return NOHWID_MAC_ADDR;
   }
 
   // Make an initial call to GetAdaptersInfo to get
@@ -109,7 +109,7 @@ std::string ETJump::OperatingSystem::getMACAddress() {
 
     pAdapterInfo = static_cast<IP_ADAPTER_INFO *>(malloc(ulOutBufLen));
     if (pAdapterInfo == nullptr) {
-      return NOHWID;
+      return NOHWID_MAC_ADDR;
     }
   }
 
@@ -117,7 +117,7 @@ std::string ETJump::OperatingSystem::getMACAddress() {
 
   if (dwRetVal != NO_ERROR) {
     free(pAdapterInfo);
-    return NOHWID;
+    return NOHWID_MAC_ADDR;
   }
 
   pAdapter = pAdapterInfo;
@@ -125,6 +125,7 @@ std::string ETJump::OperatingSystem::getMACAddress() {
 
   while (pAdapter) {
     // skip invalid adapters to try to ensure that this is the active adapter
+    // TODO: this might filter out too aggressively?
     if (pAdapter->Type == MIB_IF_TYPE_LOOPBACK ||
         pAdapter->AddressLength == 0 || pAdapter->Address[0] == 0x00) {
       pAdapter = pAdapter->Next;
@@ -209,7 +210,7 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
   }
 
   if (vendor.empty() || vendorExt.empty()) {
-    return NOHWID;
+    return NOHWID_CPUID;
   }
 
   // it's very likely that vendorExt contains trailing null bytes
@@ -229,7 +230,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   IWbemServices *pServices = getWMIService();
 
   if (!pServices) {
-    return NOHWID;
+    return NOHWID_DISK;
   }
 
   // figure out where Windows is installed
@@ -288,7 +289,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
 
   if (partitionDeviceID.empty()) {
     pServices->Release();
-    return NOHWID;
+    return NOHWID_DISK;
   }
 
   // find the physical device which has our partition
@@ -298,7 +299,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
 
   if (FAILED(hr)) {
     pServices->Release();
-    return NOHWID;
+    return NOHWID_DISK;
   }
 
   std::wstring diskDeviceID;
@@ -342,7 +343,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
 
   if (diskDeviceID.empty()) {
     pServices->Release();
-    return NOHWID;
+    return NOHWID_DISK;
   }
 
   // get the physical disk devices
@@ -352,7 +353,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
 
   if (FAILED(hr)) {
     pServices->Release();
-    return NOHWID;
+    return NOHWID_DISK;
   }
 
   std::wstring serial;
@@ -407,7 +408,7 @@ std::string ETJump::OperatingSystem::getCurrentUserSID() {
   HANDLE hToken = nullptr;
 
   if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
-    return NOHWID;
+    return NOHWID_SID;
   }
 
   DWORD dwBufferSize = 0;
@@ -415,7 +416,7 @@ std::string ETJump::OperatingSystem::getCurrentUserSID() {
 
   if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
     CLOSEHANDLE(hToken)
-    return NOHWID;
+    return NOHWID_SID;
   }
 
   const auto pTokenUser =
@@ -423,14 +424,14 @@ std::string ETJump::OperatingSystem::getCurrentUserSID() {
 
   if (!pTokenUser) {
     CLOSEHANDLE(hToken)
-    return NOHWID;
+    return NOHWID_SID;
   }
 
   if (!GetTokenInformation(hToken, TokenUser, pTokenUser, dwBufferSize,
                            &dwBufferSize)) {
     LOCALFREE(pTokenUser);
     CLOSEHANDLE(hToken);
-    return NOHWID;
+    return NOHWID_SID;
   }
 
   LPSTR stringSID = nullptr;
@@ -438,7 +439,7 @@ std::string ETJump::OperatingSystem::getCurrentUserSID() {
   if (!ConvertSidToStringSid(pTokenUser->User.Sid, &stringSID)) {
     LOCALFREE(pTokenUser);
     CLOSEHANDLE(hToken);
-    return NOHWID;
+    return NOHWID_SID;
   }
 
   const std::string result = stringSID;
@@ -451,11 +452,21 @@ std::string ETJump::OperatingSystem::getCurrentUserSID() {
 
 std::string ETJump::OperatingSystem::getSystemUUID() {
   const auto uuid = getWMIProperty(L"Win32_ComputerSystemProduct", L"UUID");
+
+  if (StringUtil::iEqual(uuid, NO_HWID)) {
+    return NOHWID_SYS_UUID;
+  }
+
   return Crypto::sha2(uuid);
 }
 
 std::string ETJump::OperatingSystem::getMBSerial() {
   const auto mbSerial = getWMIProperty(L"Win32_BaseBoard", L"SerialNumber");
+
+  if (StringUtil::iEqual(mbSerial, NO_HWID)) {
+    return NOHWID_MB_SERIAL;
+  }
+
   return Crypto::sha2(mbSerial);
 }
 

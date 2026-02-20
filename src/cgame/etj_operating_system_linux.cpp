@@ -75,14 +75,14 @@ std::string ETJump::OperatingSystem::getMACAddress() {
   const int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
   if (sock == -1) {
     closeSocket(sock);
-    return NOHWID;
+    return NOHWID_MAC_ADDR;
   }
 
   ifc.ifc_len = sizeof(buf);
   ifc.ifc_buf = buf;
   if (ioctl(sock, SIOCGIFCONF, &ifc) == -1) {
     closeSocket(sock);
-    return NOHWID;
+    return NOHWID_MAC_ADDR;
   }
 
   const ifreq *it = ifc.ifc_req;
@@ -101,14 +101,14 @@ std::string ETJump::OperatingSystem::getMACAddress() {
       }
     } else {
       closeSocket(sock);
-      return NOHWID;
+      return NOHWID_MAC_ADDR;
     }
   }
 
   closeSocket(sock);
 
   if (!success) {
-    return NOHWID;
+    return NOHWID_MAC_ADDR;
   }
 
   unsigned char mac_address[6];
@@ -129,7 +129,7 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
   // find the CPUID level and short vendor string
   if (__get_cpuid(0x0, &cpuInfo[EAX], &cpuInfo[EBX], &cpuInfo[ECX],
                   &cpuInfo[EDX]) == 0) {
-    return NOHWID;
+    return NOHWID_CPUID;
   }
 
   // note: vendor string register order is EBX -> EDX -> ECX
@@ -179,7 +179,7 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
   }
 
   if (vendor.empty() || vendorExt.empty()) {
-    return NOHWID;
+    return NOHWID_CPUID;
   }
 
   // it's very likely that vendorExt contains trailing null bytes
@@ -196,19 +196,20 @@ std::string ETJump::OperatingSystem::getMachineID() {
   std::ifstream machineID("/etc/machine-id");
 
   if (!machineID) {
-    return NOHWID;
+    return NOHWID_SYS_UUID;
   }
 
   std::string id;
   std::getline(machineID, id);
 
   if (id.empty()) {
-    return NOHWID;
+    return NOHWID_SYS_UUID;
   }
 
   return Crypto::sha2(id);
 }
 
+// FIXME: this probably does not work on BTRFS or LVM
 std::string ETJump::OperatingSystem::getDiskInfo() {
   // to avoid this being easily changed by just mounting new partitions,
   // we only grab the root partition block device id, since that's
@@ -216,7 +217,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   std::ifstream mounts("/proc/mounts");
 
   if (!mounts) {
-    return NOHWID;
+    return NOHWID_DISK;
   }
 
   std::string line;
@@ -235,7 +236,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   }
 
   if (mountPath.empty()) {
-    return NOHWID;
+    return NOHWID_DISK;
   }
 
   // we now have the mount path for root,
@@ -249,9 +250,9 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
     physicalDevice =
         std::filesystem::read_symlink(physicalDevicePath).lexically_normal();
   } catch (const std::bad_alloc &) {
-    return NOHWID;
+    return NOHWID_DISK;
   } catch (const std::filesystem::filesystem_error &) {
-    return NOHWID;
+    return NOHWID_DISK;
   }
 
   // real path looks something like this (e.g. for NVMe drives)
@@ -262,14 +263,14 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   std::ifstream device("/sys/block/" + deviceName + "/device/serial");
 
   if (!device) {
-    return NOHWID;
+    return NOHWID_DISK;
   }
 
   std::string diskID;
   std::getline(device, diskID);
 
   if (diskID.empty()) {
-    return NOHWID;
+    return NOHWID_DISK;
   }
 
   diskID = trim(diskID);

@@ -43,6 +43,12 @@ public:
 
 #ifdef NEW_AUTH
   static constexpr char NOHWID[] = "NOHWID";
+  static constexpr char NOHWID_MAC_ADDR[] = "NOHWID_MAC_ADDR";
+  static constexpr char NOHWID_CPUID[] = "NOHWID_CPUID";
+  static constexpr char NOHWID_DISK[] = "NOHWID_DISK";
+  static constexpr char NOHWID_SID[] = "NOHWID_SID";
+  static constexpr char NOHWID_SYS_UUID[] = "NOHWID_SYS_UUID";
+  static constexpr char NOHWID_MB_SERIAL[] = "NOHWID_MB_SERIAL";
 
   static int getOS();
   static std::vector<std::string> getHwid();
