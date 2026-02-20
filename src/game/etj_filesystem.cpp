@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-#include <stdexcept>
 #include <algorithm>
 
 #include "../game/etj_file.h"
@@ -48,26 +47,24 @@ void FileSystem::copy(const std::string &src, const std::string &dst) {
   dstFile.write(srcFile.read());
 }
 
-// FIXME: THIS IS NOT SAFE AND CAN BLOW UP!
-//  add safeMove if you actually want to use this somewhere (see safeCopy)
 void FileSystem::move(const std::string &src, const std::string &dst) {
   copy(src, dst);
   remove(src);
 }
 
-bool FileSystem::remove(const std::string &path) {
+bool FileSystem::remove(const std::string &file) {
 #ifdef GAMEDLL
   // hacky fallback because qagame doesn't have trap_FS_Delete
-  trap_FS_Rename(path.c_str(), "");
+  trap_FS_Rename(file.c_str(), "");
   return true;
 #else
-  const int success = trap_FS_Delete(path.c_str());
+  const int success = trap_FS_Delete(file.c_str());
   return success == 1;
 #endif
 }
 
-bool FileSystem::exists(const std::string &path) {
-  const int length = trap_FS_FOpenFile(path.c_str(), nullptr, FS_READ);
+bool FileSystem::exists(const std::string &file) {
+  const int length = trap_FS_FOpenFile(file.c_str(), nullptr, FS_READ);
   return length > File::FILE_NOT_FOUND;
 }
 
