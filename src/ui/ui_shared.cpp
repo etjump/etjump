@@ -12,6 +12,8 @@
 #include "../cgame/etj_cvar_parser.h"
 
 #include "../game/etj_string_utilities.h"
+#include "../game/etj_file.h"
+#include "../game/etj_filesystem.h"
 
 inline constexpr int SCROLL_TIME_START = 500;
 inline constexpr int SCROLL_TIME_ADJUST = 150;
@@ -1886,30 +1888,22 @@ qboolean Script_CheckProfile(char *profile_path) {
   return qtrue;
 }
 
-qboolean Script_WriteProfile(char *profile_path) {
-  fileHandle_t f;
-  char com_pid[256];
-
-  if (FileExists(profile_path)) {
-    trap_FS_Delete(profile_path);
+static qboolean Script_WriteProfile(char *profile_path) {
+  if (ETJump::FileSystem::exists(profile_path)) {
+    ETJump::FileSystem::remove(profile_path);
   }
 
-  if (trap_FS_FOpenFile(profile_path, &f, FS_WRITE) < 0) {
-    Com_Printf("Script_WriteProfile: Can't write %s.\n", profile_path);
-    return qfalse;
-  }
-  if (f < 0) {
-    Com_Printf("Script_WriteProfile: Can't write %s.\n", profile_path);
-    return qfalse;
-  }
-
+  char com_pid[MAX_CVAR_VALUE_STRING]{};
   DC->getCVarString("com_pid", com_pid, sizeof(com_pid));
 
-  trap_FS_Write(com_pid, strlen(com_pid), f);
-
-  trap_FS_FCloseFile(f);
-
-  return qtrue;
+  try {
+    ETJump::File fOut(profile_path, ETJump::File::Mode::Write);
+    fOut.write(com_pid, static_cast<int>(strlen(com_pid)));
+    return qtrue;
+  } catch (const ETJump::File::FileIOException &) {
+    Com_Printf("%s: Can't write %s\n", __func__, profile_path);
+    return qfalse;
+  }
 }
 
 void Script_ExecWolfConfig(itemDef_t *item, qboolean *bAbort,
