@@ -1009,7 +1009,7 @@ std::string UserRepository::getPlatformString(const int32_t platform) {
 
 int32_t UserRepository::getPlatformId(const std::string &platformStr) {
   for (const auto &[id, string] : Constants::operatingSystemStrings) {
-    if (string == platformStr) {
+    if (StringUtil::iEqual(string, platformStr)) {
       return id;
     }
   }
