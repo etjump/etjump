@@ -26,14 +26,8 @@
 
 #include <optional>
 
-#if defined(CGAMEDLL)
-  #include "cg_local.h"
-#elif defined(UIDLL)
-  #include "../ui/ui_local.h"
-#endif
-
+#include "../game/q_shared.h"
 #include "../game/etj_string_utilities.h"
-#include "../game/etj_shared.h"
 
 namespace ETJump {
 class CvarValue {

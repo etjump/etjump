@@ -29,6 +29,7 @@
   #include "etj_string_utilities.h"
 #elif CGAMEDLL
   #include "../cgame/cg_local.h"
+  #include "etj_string_utilities.h"
 #elif UIDLL
   #include "../ui/ui_local.h"
 #endif
@@ -101,7 +102,9 @@ void ETJump::File::write(const char *data, int len) const {
     throw FileIOException("Cannot write to a file when mode is Mode::Read.");
   }
 
-#ifdef GAMEDLL
+#ifdef UIDLL
+  trap_FS_Write(data, len, _handle);
+#else
   const auto bytesWritten = trap_FS_Write(data, len, _handle);
 
   if (bytesWritten != len) {
@@ -109,7 +112,5 @@ void ETJump::File::write(const char *data, int len) const {
         stringFormat("Write to file '%s' failed. Wrote %d out of %d bytes.",
                      _path, bytesWritten, len));
   }
-#else
-  trap_FS_Write(data, len, _handle);
 #endif
 }
