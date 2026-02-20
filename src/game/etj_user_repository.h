@@ -99,6 +99,9 @@ private:
 
   void insertLegacyAuth(const UserModels::LegacyAuth &auth) const;
 
+  static std::string getPlatformString(int32_t platform);
+  static int32_t getPlatformId(const std::string &platformStr);
+
   [[nodiscard]] bool oldTableHasData(const std::string &table) const;
   static std::vector<std::string> createInitialMigration();
 

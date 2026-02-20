@@ -24,7 +24,7 @@
 
 #pragma once
 #include <string>
-#include <stdexcept>
+#include <unordered_map>
 
 namespace ETJump {
 namespace Constants {
@@ -41,6 +41,14 @@ inline constexpr int OS_MACOS_AARCH64 = 1 << 7;   // macOS aarch64
 inline constexpr int OS_WIN_X86_64 = 1 << 8;      // Windows x86_64
 inline constexpr int OS_ANDROID_X86 = 1 << 9;     // Android x86
 inline constexpr int OS_ANDROID_X86_64 = 1 << 10; // Android x86_64
+
+// only contains the platforms we actually support + fallback
+inline const std::unordered_map<int32_t, std::string> operatingSystemStrings = {
+    {OS_DEFAULT, "Default (unknown)"},   {OS_WIN_X86, "Windows x86"},
+    {OS_WIN_X86_64, "Windows x86_64"},   {OS_LINUX_X86, "Linux x86"},
+    {OS_LINUX_X86_64, "Linux x86_64"},   {OS_MACOS_X86_64, "macOS x86_64"},
+    {OS_MACOS_AARCH64, "macOS AArch64"},
+};
 
 namespace Authentication {
 #ifdef NEW_AUTH

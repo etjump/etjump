@@ -27,6 +27,7 @@
   #include "etj_user_repository.h"
   #include "etj_crypto.h"
   #include "etj_time_utilities.h"
+  #include "etj_shared.h"
 
 namespace ETJump {
 UserRepository::UserRepository(std::unique_ptr<DatabaseV2> database,
@@ -344,10 +345,11 @@ UserRepository::getHWIDsForUser(const int userID) const {
     where
       user_id=?;
   )" << userID >>
-      [&userHwids](const int id, const int platform, const std::string &hwid) {
+      [&userHwids](const int id, const std::string &platform,
+                   const std::string &hwid) {
         UserModels::UserHWID userHwid{};
         userHwid.userID = id;
-        userHwid.platform = platform;
+        userHwid.platform = getPlatformId(platform);
         userHwid.hwid = hwid;
 
         userHwids.emplace_back(userHwid);
@@ -360,6 +362,7 @@ std::vector<UserModels::UserHWID>
 UserRepository::getHWIDsForUsersPlatform(const int userID,
                                          const int userPlatform) const {
   std::vector<UserModels::UserHWID> userHwids{};
+  const std::string platformStr = getPlatformString(userPlatform);
 
   db->sql << R"(
     select
@@ -369,13 +372,15 @@ UserRepository::getHWIDsForUsersPlatform(const int userID,
     from users_hwid
     where
       user_id=? and
-      platform=?;
+      platform=?
+    collate nocase;
   )" << userID
-          << userPlatform >>
-      [&userHwids](const int id, const int platform, const std::string &hwid) {
+          << platformStr >>
+      [&userHwids](const int id, const std::string &platform,
+                   const std::string &hwid) {
         UserModels::UserHWID userHwid{};
         userHwid.userID = id;
-        userHwid.platform = platform;
+        userHwid.platform = getPlatformId(platform);
         userHwid.hwid = hwid;
 
         userHwids.emplace_back(userHwid);
@@ -385,6 +390,8 @@ UserRepository::getHWIDsForUsersPlatform(const int userID,
 }
 
 void UserRepository::addHwid(const UserModels::UserHWID &params) const {
+  const std::string platform = getPlatformString(params.platform);
+
   db->sql << R"(
     insert into users_hwid (
       user_id,
@@ -396,7 +403,7 @@ void UserRepository::addHwid(const UserModels::UserHWID &params) const {
       ?
     );
   )" << params.userID
-          << params.platform << params.hwid;
+          << platform << params.hwid;
 }
 
 void UserRepository::updateIPv4(const int userID, const std::string &ip) const {
@@ -562,6 +569,8 @@ int32_t UserRepository::banUser(const UserModels::BanUserParams &params) const {
     const auto banId = db->sql.last_insert_rowid();
 
     for (const auto &hwid : params.hwidBan) {
+      const std::string platform = getPlatformString(hwid.platform);
+
       db->sql << R"(
       insert into hwid_bans (
         ban_id,
@@ -573,7 +582,7 @@ int32_t UserRepository::banUser(const UserModels::BanUserParams &params) const {
         ?
       );
     )" << banId
-              << hwid.platform << hwid.hwid;
+              << platform << hwid.hwid;
     }
 
     db->sql << "commit";
@@ -989,6 +998,25 @@ bool UserRepository::oldTableHasData(const std::string &table) const {
   return count != 0;
 }
 
+std::string UserRepository::getPlatformString(const int32_t platform) {
+  if (Constants::operatingSystemStrings.find(platform) ==
+      Constants::operatingSystemStrings.cend()) {
+    return Constants::operatingSystemStrings.at(Constants::OS_DEFAULT);
+  }
+
+  return Constants::operatingSystemStrings.at(platform);
+}
+
+int32_t UserRepository::getPlatformId(const std::string &platformStr) {
+  for (const auto &[id, string] : Constants::operatingSystemStrings) {
+    if (string == platformStr) {
+      return id;
+    }
+  }
+
+  return Constants::OS_DEFAULT;
+}
+
 std::vector<std::string> UserRepository::createInitialMigration() {
   const std::string usersStmt = R"(
     create table users (
@@ -1020,7 +1048,7 @@ std::vector<std::string> UserRepository::createInitialMigration() {
     create table users_hwid (
       id integer primary key autoincrement,
       user_id integer not null,
-      platform integer not null,
+      platform text not null,
       hwid text not null,
       foreign key (user_id) references users(id)
     );
@@ -1047,7 +1075,7 @@ std::vector<std::string> UserRepository::createInitialMigration() {
   const std::string hwidBansStmt = R"(
     create table hwid_bans (
       ban_id integer not null,
-      platform integer not null,
+      platform text not null,
       hwid text not null,
       foreign key (ban_id) references bans(id)
     );
