@@ -6,6 +6,7 @@
 #include "etj_string_utilities.h"
 #include "etj_utilities.h"
 #include "etj_entity_utilities.h"
+#include "etj_trace_utils.h"
 
 /*
 ===============
@@ -1238,28 +1239,7 @@ void ClientThink_real(gentity_t *ent) {
     pm.cmd.weapon = client->ps.weapon;
   }
 
-  // setup nonsolid entities
-  for (int i = 0; i < level.num_entities; i++) {
-    if (i < MAX_CLIENTS) {
-      const int otherNum = level.sortedClients[i];
-
-      if (!ETJump::EntityUtilities::playerIsSolid(clientNum, otherNum)) {
-        G_TempTraceIgnoreEntity(g_entities + otherNum);
-      }
-    } else {
-      gentity_t *tent = &g_entities[i];
-
-      if (tent->s.eType != ET_STATIC_CLIENT) {
-        continue;
-      }
-
-      if (COM_BitCheck((clientNum < MAX_CLIENTS / 2) ? &tent->s.effect1Time
-                                                     : &tent->s.effect2Time,
-                       clientNum)) {
-        G_TempTraceIgnoreEntity(tent);
-      }
-    }
-  }
+  ETJump::TraceUtils::setupIgnoredEntities(clientNum);
 
   Pmove(&pm);
 

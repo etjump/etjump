@@ -10,6 +10,7 @@
 #include "cg_local.h"
 #include "etj_utilities.h"
 #include "../game/etj_portalgun_shared.h"
+#include "../game/etj_entity_utilities_shared.h"
 
 /*
 ======================
@@ -2555,11 +2556,9 @@ static void CG_TokenMarker(centity_t *cent, int difficulty) {
 
 namespace ETJump {
 static void funcStaticClient(centity_t *cent) {
-  const int32_t clientNum = cg.snap->ps.clientNum;
   const entityState_t *es = &cent->currentState;
-  const bool hidden = COM_BitCheck(
-      (clientNum < MAX_CLIENTS / 2) ? &es->effect1Time : &es->effect2Time,
-      clientNum);
+  const bool hidden = ETJump::EntityUtilsShared::funcStaticClientIsHidden(
+      es, cg.snap->ps.clientNum);
 
   // not visible, no 'offShader' or 'offModel' set -> don't draw at all
   if (hidden && !es->density) {

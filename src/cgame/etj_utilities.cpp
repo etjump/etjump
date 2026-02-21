@@ -261,45 +261,6 @@ bool playerIsNoclipping(const int clientNum) {
          static_cast<int>(PlayerDensityFlags::Noclip);
 }
 
-void tempTraceIgnoreEntities() {
-  for (int i = 0; i < cg.snap->numEntities; i++) {
-    if (cg.snap->entities[i].eType == ET_PLAYER) {
-      const int other = cg.snap->entities[i].number;
-
-      if (!playerIsSolid(cg.snap->ps.clientNum, other) ||
-          playerIsNoclipping(other)) {
-        tempTraceIgnoreClient(other);
-      }
-    } else {
-      const entityState_t *es = &cg.snap->entities[i];
-
-      if (es->eType != ET_STATIC_CLIENT) {
-        continue;
-      }
-
-      const int32_t clientNum = cg.snap->ps.clientNum;
-
-      if (COM_BitCheck((clientNum < MAX_CLIENTS / 2) ? &es->effect1Time
-                                                     : &es->effect2Time,
-                       clientNum)) {
-        tempTraceIgnoredEntities.emplace_back(es->number);
-      }
-    }
-  }
-}
-
-void tempTraceIgnoreClient(int clientNum) {
-  if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  tempTraceIgnoredClients[clientNum] = true;
-}
-
-void resetTempTraceIgnoredClients() {
-  std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
-}
-
 bool skipPortalDraw(const int selfNum, const int otherNum) {
   if (selfNum == otherNum) {
     return false;

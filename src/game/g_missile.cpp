@@ -1,6 +1,6 @@
 #include "g_local.h"
 #include "etj_printer.h"
-#include "etj_entity_utilities.h"
+#include "etj_trace_utils.h"
 
 inline constexpr int MISSILE_PRESTEP_TIME = 50;
 
@@ -598,32 +598,6 @@ void Landmine_Check_Ground(gentity_t *self) {
   G_SetOrigin( self, oldorigin );*/
 }
 
-namespace ETJump {
-void missileTrace(trace_t *tr, gentity_t *ent, vec3_t end) {
-  // trace a line from the previous position to the current position,
-  // ignoring interactions with the missile owner
-  trap_Trace(tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, end,
-             ent->r.ownerNum, ent->clipmask);
-
-  if (g_ghostPlayers.integer != 1) {
-    return;
-  }
-
-  if (ent->r.ownerNum >= MAX_CLIENTS || tr->entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (tr->entityNum < MAX_CLIENTS && !ETJump::EntityUtilities::playerIsSolid(
-                                            ent->r.ownerNum, tr->entityNum)) {
-    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
-    trap_Trace(tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, end,
-               ent->r.ownerNum, ent->clipmask);
-  }
-
-  G_ResetTempTraceIgnoreEnts();
-}
-} // namespace ETJump
-
 /*
 ================
 G_RunMissile
@@ -725,7 +699,9 @@ void G_RunMissile(gentity_t *ent) {
     }
   }
 
-  ETJump::missileTrace(&tr, ent, origin);
+  ETJump::TraceUtils::projectileTrace(
+      ent->r.ownerNum, &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
+      origin, ent->r.ownerNum, ent->clipmask);
 
   // fix for engine bug where trace sometimes starts in solid even if
   // the entity that it starts in is nonsolid
@@ -959,26 +935,6 @@ int G_PredictMissile(gentity_t *ent, int duration, vec3_t endPos,
 // DHM - Nerve :: Server side Flamethrower
 //=============================================================================
 
-namespace ETJump {
-void flamechunkTrace(gentity_t *ent, trace_t *tr, vec3_t start, vec3_t end,
-                     const int mask) {
-  trap_Trace(tr, start, ent->r.mins, ent->r.maxs, end, ent->r.ownerNum, mask);
-
-  if (g_ghostPlayers.integer != 1 || !EntityUtilities::isPlayer(ent) ||
-      tr->entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (tr->entityNum < MAX_CLIENTS &&
-         !EntityUtilities::playerIsSolid(ent->r.ownerNum, tr->entityNum)) {
-    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
-    trap_Trace(tr, start, ent->r.mins, ent->r.maxs, end, ent->r.ownerNum, mask);
-  }
-
-  G_ResetTempTraceIgnoreEnts();
-}
-} // namespace ETJump
-
 void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit) {
   if (!body->takedamage) {
     return;
@@ -1133,8 +1089,9 @@ void G_RunFlamechunk(gentity_t *ent) {
   // Move the chunk
   VectorMA(ent->r.currentOrigin, deltaTime, ent->s.pos.trDelta, neworg);
 
-  ETJump::flamechunkTrace(ent, &tr, ent->r.currentOrigin, neworg,
-                          MASK_SHOT | MASK_WATER);
+  ETJump::TraceUtils::projectileTrace(
+      ent->r.ownerNum, &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
+      neworg, ent->r.ownerNum, MASK_SHOT | MASK_WATER);
 
   // fix for engine bug where trace sometimes starts in solid even if
   // the entity that it starts in is nonsolid

@@ -8,6 +8,7 @@
 
 #include "cg_local.h"
 #include "etj_utilities.h"
+#include "etj_trace_utils.h"
 
 // a flameChunk is a ball or section of fuel which goes from fuel->blue
 // ignition->flame ball optimization is necessary, since lots of these will be
@@ -139,29 +140,6 @@ inline constexpr int FLAME_BLUE_LIFE =
 int rotatingFlames = qtrue;
 
 namespace ETJump {
-static void flamechunkTrace(trace_t *trace, vec3_t start, vec3_t end,
-                            const int skipNumber, const int mask) {
-  CG_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, skipNumber, mask);
-
-  // a flamechunk might be spawned by an entity in the map (props_flamethrower)
-  if (!isValidClientNum(skipNumber)) {
-    return;
-  }
-
-  if (trace->entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (trace->entityNum < MAX_CLIENTS &&
-         !playerIsSolid(skipNumber, trace->entityNum)) {
-    tempTraceIgnoreClient(trace->entityNum);
-    CG_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, skipNumber,
-             mask);
-  }
-
-  resetTempTraceIgnoredClients();
-}
-
 static bool drawFlamethrowerEffect(const flameChunk_t *f) {
   if (f->ownerCent == cg.snap->ps.clientNum) {
     if (etj_hideFlamethrowerEffects.integer &
@@ -268,8 +246,10 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
     while (t <= cg.time) {
       // spawn a new chunk
       CG_FlameLerpVec(lastOrg, thisOrg, backLerp, org);
-      ETJump::flamechunkTrace(&trace, org, org, cent->currentState.number,
-                              MASK_SHOT | MASK_WATER);
+      ETJump::traceUtils->flamechunkTrace(cent->currentState.number, &trace,
+                                          org, flameChunkMins, flameChunkMaxs,
+                                          org, cent->currentState.number,
+                                          MASK_SHOT | MASK_WATER);
 
       // fix for engine bug where trace sometimes starts in solid even if
       // the entity that it starts in is nonsolid
@@ -662,9 +642,9 @@ void CG_MoveFlameChunk(flameChunk_t *f) {
   VectorCopy(f->baseOrg, sOrg);
   while (f->velSpeed > 1 && f->baseOrgTime != cg.time) {
     CG_FlameCalcOrg(f, cg.time, newOrigin);
-
-    ETJump::flamechunkTrace(&trace, sOrg, newOrigin, f->ownerCent,
-                            MASK_SHOT | MASK_WATER);
+    ETJump::traceUtils->flamechunkTrace(
+        f->ownerCent, &trace, sOrg, flameChunkMins, flameChunkMaxs, newOrigin,
+        f->ownerCent, MASK_SHOT | MASK_WATER);
 
     // fix for engine bug where trace sometimes starts in solid even if
     // the entity that it starts in is nonsolid

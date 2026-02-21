@@ -9,11 +9,11 @@
 
 #include "g_local.h"
 #include "etj_printer.h"
-#include "etj_entity_utilities.h"
 #include "etj_portalgun.h"
 #include "etj_local.h"
 #include "etj_timerun_v2.h"
 #include "etj_string_utilities.h"
+#include "etj_trace_utils.h"
 
 vec3_t forward, right, up;
 vec3_t muzzleEffect;
@@ -114,30 +114,6 @@ KNIFE/GAUNTLET (NOTE: gauntlet is now the Zombie melee)
 ======================================================================
 */
 
-// Let's use the same angle between function we've used before
-extern float sAngleBetweenVectors(vec3_t a, vec3_t b);
-
-namespace ETJump {
-void historicalKnifeTrace(gentity_t *ent, trace_t *tr, vec3_t start, vec3_t end,
-                          int passEntityNum) {
-  G_HistoricalTrace(ent, tr, start, nullptr, nullptr, end, passEntityNum,
-                    MASK_SHOT);
-
-  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (tr->entityNum < MAX_CLIENTS &&
-         !EntityUtilities::playerIsSolid(ClientNum(ent), tr->entityNum)) {
-    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
-    G_HistoricalTrace(ent, tr, start, nullptr, nullptr, end, passEntityNum,
-                      MASK_SHOT);
-  }
-
-  G_ResetTempTraceIgnoreEnts();
-}
-} // namespace ETJump
-
 /*
 ==============
 Weapon_Knife
@@ -155,7 +131,9 @@ void Weapon_Knife(gentity_t *ent) {
   CalcMuzzlePoint(ent, ent->s.weapon, forward, right, up, muzzleTrace);
   VectorMA(muzzleTrace, KNIFE_DIST, forward, end);
 
-  ETJump::historicalKnifeTrace(ent, &tr, muzzleTrace, end, ent->s.number);
+  ETJump::TraceUtils::filteredHistoricalTrace(ent->s.number, &tr, muzzleTrace,
+                                              nullptr, nullptr, end,
+                                              ent->s.number, MASK_SHOT);
 
   if (tr.surfaceFlags & SURF_NOIMPACT) {
     return;
@@ -3406,43 +3384,6 @@ void Bullet_Fire(gentity_t *ent, float spread, int damage,
   G_HistoricalTraceEnd(ent);
 }
 
-namespace ETJump {
-void bulletTrace(gentity_t *source, const gentity_t *attacker, trace_t *tr,
-                 vec3_t start, vec3_t end, const int mask) {
-  G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number, mask);
-
-  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (tr->entityNum < MAX_CLIENTS &&
-         !EntityUtilities::playerIsSolid(attacker->client->ps.clientNum,
-                                         tr->entityNum)) {
-    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
-    G_Trace(source, tr, start, nullptr, nullptr, end, source->s.number, mask);
-  }
-
-  G_ResetTempTraceIgnoreEnts();
-}
-
-void portalTrace(gentity_t *ent, trace_t *tr, vec3_t start, vec3_t end) {
-  G_Trace(ent, tr, start, nullptr, nullptr, end, ent->s.number, MASK_PORTAL);
-
-  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (tr->entityNum < MAX_CLIENTS &&
-         !EntityUtilities::playerIsSolid(ent->client->ps.clientNum,
-                                         tr->entityNum)) {
-    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
-    G_Trace(ent, tr, start, nullptr, nullptr, end, ent->s.number, MASK_PORTAL);
-  }
-
-  G_ResetTempTraceIgnoreEnts();
-}
-} // namespace ETJump
-
 /*
 ==============
 Bullet_Fire_Extended
@@ -3472,7 +3413,9 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
     waslinked = qtrue;
   }
 
-  ETJump::bulletTrace(source, attacker, &tr, start, end, MASK_SHOT);
+  ETJump::TraceUtils::filteredBulletTrace(source->s.number, attacker->s.number,
+                                          &tr, start, end, source->s.number,
+                                          MASK_SHOT);
 
   // bani - prevent shooting ourselves in the head when prone,
   // firing through a breakable
@@ -3580,8 +3523,9 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
 
     tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_WALL);
 
-    ETJump::bulletTrace(source, attacker, &tr2, start, end,
-                        MASK_WATER | MASK_SHOT);
+    ETJump::TraceUtils::filteredBulletTrace(
+        source->s.number, attacker->s.number, &tr2, start, end,
+        source->s.number, MASK_WATER | MASK_SHOT);
 
     if ((tr.entityNum != tr2.entityNum && tr2.fraction != 1)) {
       vec3_t v;
@@ -3914,29 +3858,8 @@ LIGHTNING GUN
 */
 
 // TTimo - for traces calls
-static vec3_t flameChunkMins = {-4, -4, -4};
-static vec3_t flameChunkMaxs = {4, 4, 4};
-
-namespace ETJump {
-void flamethrowerTrace(const gentity_t *ent, trace_t *trace, vec3_t start,
-                       vec3_t end, const int mask) {
-  trap_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, ent->s.number,
-             mask);
-
-  if (g_ghostPlayers.integer != 1 || trace->entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (trace->entityNum < MAX_CLIENTS &&
-         !EntityUtilities::playerIsSolid(ent->s.number, trace->entityNum)) {
-    G_TempTraceIgnoreEntity(&g_entities[trace->entityNum]);
-    trap_Trace(trace, start, flameChunkMins, flameChunkMaxs, end, ent->s.number,
-               mask);
-  }
-
-  G_ResetTempTraceIgnoreEnts();
-}
-} // namespace ETJump
+inline constexpr vec3_t flameChunkMins = {-4, -4, -4};
+inline constexpr vec3_t flameChunkMaxs = {4, 4, 4};
 
 void G_BurnMeGood(gentity_t *self, gentity_t *body, const bool directhit) {
   // normalize dps, direct hits every 50ms, indirect (flamechunks) every 100ms
@@ -3987,8 +3910,9 @@ void Weapon_FlamethrowerFire(gentity_t *ent) {
   // view point towards the ground) is enough to cover the area around
   // the feet
   VectorMA(trace_start, 77.0, forward, trace_end);
-  ETJump::flamethrowerTrace(ent, &trace, trace_start, trace_end,
-                            MASK_SHOT | MASK_WATER);
+  ETJump::TraceUtils::filteredTraceNoBody(
+      ent->s.number, &trace, trace_start, flameChunkMins, flameChunkMaxs,
+      trace_end, ent->s.number, MASK_SHOT | MASK_WATER);
 
   if (trace.fraction != 1.0) {
     // additional checks to filter out false positives

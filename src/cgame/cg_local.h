@@ -4215,6 +4215,7 @@ class SyscallExt;
 class TrickjumpLines;
 class CHSDataHandler;
 class CustomCommandMenu;
+class TraceUtils;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4227,9 +4228,6 @@ extern std::shared_ptr<EventLoop> eventLoop;
 extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 extern std::shared_ptr<ClientRtvHandler> rtvHandler;
 extern std::unique_ptr<DemoCompatibility> demoCompatibility;
-extern std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
-// TODO: remove the client array and just use this for everything
-extern std::vector<int32_t> tempTraceIgnoredEntities;
 extern std::shared_ptr<PlayerBBox> playerBBox;
 extern std::unique_ptr<SavePos> savePos;
 extern std::unique_ptr<SyscallExt> syscallExt;
@@ -4237,6 +4235,7 @@ extern std::unique_ptr<PmoveUtils> pmoveUtils;
 extern std::shared_ptr<TrickjumpLines> trickjumpLines;
 extern std::shared_ptr<CHSDataHandler> chsDataHandler;
 extern std::unique_ptr<CustomCommandMenu> customCommandMenu;
+extern std::unique_ptr<TraceUtils> traceUtils;
 
 inline constexpr int32_t MAX_CHS_INFO = 8;
 
