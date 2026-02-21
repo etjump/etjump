@@ -5,10 +5,9 @@
 // ahead the client's movement.
 // It also handles local physics interaction, like fragments bouncing off walls
 
-#include <algorithm>
-#include <array>
 #include "cg_local.h"
 #include "etj_utilities.h"
+#include "etj_trace_utils.h"
 
 #include "../game/etj_entity_utilities_shared.h"
 #include "../game/etj_portalgun_shared.h"
@@ -151,16 +150,7 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
       continue;
     }
 
-    if (ent->number < MAX_CLIENTS &&
-        ETJump::tempTraceIgnoredClients[ent->number]) {
-      continue;
-    }
-
-    // ignore collision with 'func_static_client' if it's turned off for us
-    if (ent->eType == ET_STATIC_CLIENT &&
-        std::find(ETJump::tempTraceIgnoredEntities.cbegin(),
-                  ETJump::tempTraceIgnoredEntities.cend(),
-                  ent->number) != ETJump::tempTraceIgnoredEntities.cend()) {
+    if (ETJump::traceUtils->entityIsIgnored(ent->number)) {
       continue;
     }
 
@@ -1074,8 +1064,6 @@ void CG_PredictPlayerState() {
 
   cg_pmove.skill = cgs.clientinfo[cg.snap->ps.clientNum].skill;
 
-  ETJump::tempTraceIgnoreEntities();
-
   cg_pmove.trace = CG_TraceCapsule;
   cg_pmove.pointcontents = CG_PointContents;
 
@@ -1400,6 +1388,8 @@ void CG_PredictPlayerState() {
 
     fflush(stdout);
 
+    ETJump::traceUtils->setupIgnoredEntities(cg.snap->ps.clientNum);
+
     // unlagged - optimized prediction
     if (etj_optimizePrediction.integer) {
       // if we need to predict this command, or we've run out of space in the
@@ -1457,8 +1447,7 @@ void CG_PredictPlayerState() {
     CG_TouchTriggerPrediction();
   }
 
-  ETJump::resetTempTraceIgnoredClients();
-  ETJump::tempTraceIgnoredEntities.clear();
+  ETJump::traceUtils->resetIgnoredEntities();
 
   // unlagged - optimized prediction
   //  do a /condump after a few seconds of this

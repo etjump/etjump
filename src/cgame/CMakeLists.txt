@@ -93,6 +93,7 @@ add_library(cgame MODULE
 	"etj_spectatorinfo_data.cpp"
 	"etj_spectatorinfo_drawable.cpp"
 	"etj_strafe_quality_drawable.cpp"
+	"etj_trace_utils.cpp"
 	"etj_upper_right_drawable.cpp"
 	"etj_upmove_meter_drawable.cpp"
 	"etj_timerun.cpp"

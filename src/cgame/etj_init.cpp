@@ -70,6 +70,7 @@
 #include "etj_chs_drawable.h"
 #include "etj_custom_command_menu.h"
 #include "etj_custom_command_menu_drawable.h"
+#include "etj_trace_utils.h"
 
 #include "etj_servercommands.h"
 #include "etj_consolecommands.h"
@@ -98,14 +99,13 @@ std::shared_ptr<ClientRtvHandler> rtvHandler;
 std::shared_ptr<AreaIndicator> areaIndicator;
 std::unique_ptr<DemoCompatibility> demoCompatibility;
 std::shared_ptr<AccelColor> accelColor;
-std::array<bool, MAX_CLIENTS> tempTraceIgnoredClients;
-std::vector<int32_t> tempTraceIgnoredEntities;
 std::shared_ptr<PlayerBBox> playerBBox;
 std::unique_ptr<SavePos> savePos;
 std::unique_ptr<SyscallExt> syscallExt;
 std::unique_ptr<PmoveUtils> pmoveUtils;
 std::shared_ptr<CHSDataHandler> chsDataHandler;
 std::unique_ptr<CustomCommandMenu> customCommandMenu;
+std::unique_ptr<TraceUtils> traceUtils;
 
 void delayedInit() {
   // force original cvars to match the shadow values, as ETe and ETL
@@ -339,6 +339,7 @@ void init() {
   initCvarUnlockers();
 
   eventLoop = std::make_shared<EventLoop>();
+  traceUtils = std::make_unique<TraceUtils>();
 
   demoCompatibility = std::make_unique<DemoCompatibility>();
 
@@ -369,8 +370,6 @@ void init() {
 
   assert(timerun != nullptr);
   savePos = std::make_unique<SavePos>(timerun);
-
-  std::fill_n(tempTraceIgnoredClients.begin(), MAX_CLIENTS, false);
 
   ServerCommands::registerCommands();
   ConsoleCommands::registerCommands();
@@ -404,6 +403,8 @@ void shutdown() {
     eventLoop->shutdown();
     eventLoop = nullptr;
   }
+
+  traceUtils = nullptr;
 
   consoleCommandsHandler = nullptr;
   serverCommandsHandler = nullptr;

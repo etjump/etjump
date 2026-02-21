@@ -24,11 +24,7 @@
 
 #pragma once
 
-#ifdef CGAMEDLL
-  #include "../cgame/cg_local.h"
-#else
-  #include "g_local.h"
-#endif
+#include "q_shared.h"
 
 namespace ETJump {
 class EntityUtilsShared {
@@ -53,5 +49,8 @@ public:
 
   static void setPortalBBox(vec3_t mins, vec3_t maxs, const vec3_t angles,
                             float scale);
+
+  static bool funcStaticClientIsHidden(const entityState_t *es,
+                                       int32_t clientNum);
 };
 } // namespace ETJump

@@ -28,6 +28,7 @@
 #include "etj_entity_utilities.h"
 #include "etj_entity_utilities_shared.h"
 #include "etj_portalgun_shared.h"
+#include "etj_trace_utils.h"
 
 namespace ETJump {
 // max range where you can place next portal gate
@@ -303,8 +304,9 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
   // End pos
   VectorMA(trace_start, MAX_PORTAL_RANGE, forward, trace_end);
 
-  // Trace
-  portalgunTrace(ent, &tr, trace_start, trace_end);
+  ETJump::TraceUtils::filteredTrace(ent->s.number, &tr, trace_start, nullptr,
+                                    nullptr, trace_end, ent->s.number,
+                                    MASK_PORTAL);
 
   if (tr.surfaceFlags & SURF_NOIMPACT || tr.fraction == 1.0f) {
     return;
@@ -469,23 +471,5 @@ bool Portalgun::portalsOverlap(gentity_t *ent, Portal::Type type,
                     MIN_ANGLES_DIFF &&
                 Distance(endPos, otherPortal->s.origin) < min_dist);
       });
-}
-
-void Portalgun::portalgunTrace(gentity_t *ent, trace_t *tr, vec3_t start,
-                               vec3_t end) {
-  G_Trace(ent, tr, start, nullptr, nullptr, end, ent->s.number, MASK_PORTAL);
-
-  if (g_ghostPlayers.integer != 1 || tr->entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (tr->entityNum < MAX_CLIENTS &&
-         !EntityUtilities::playerIsSolid(ent->client->ps.clientNum,
-                                         tr->entityNum)) {
-    G_TempTraceIgnoreEntity(&g_entities[tr->entityNum]);
-    G_Trace(ent, tr, start, nullptr, nullptr, end, ent->s.number, MASK_PORTAL);
-  }
-
-  G_ResetTempTraceIgnoreEnts();
 }
 } // namespace ETJump
