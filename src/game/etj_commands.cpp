@@ -325,7 +325,7 @@ static bool listCheckpoints(gentity_t *ent, Arguments argv) {
   }
 
   game.timerunV2->listCheckpoints(
-      {clientNum, season, map, run, rank, exactMap});
+      {clientNum, season, std::move(map), std::move(run), rank, exactMap});
   return true;
 }
 
@@ -440,8 +440,9 @@ static bool compareCheckpoints(gentity_t *ent, Arguments argv) {
     rankBase = optRankBase.has_value() ? optRankBase.value().integer : 1;
   }
 
-  game.timerunV2->compareCheckpoints(
-      {clientNum, season, map, run, rankBase, rankCmp, exactMap});
+  game.timerunV2->compareCheckpoints({clientNum, season, std::move(map),
+                                      std::move(run), rankBase, rankCmp,
+                                      exactMap});
   return true;
 }
 

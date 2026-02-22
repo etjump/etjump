@@ -66,10 +66,10 @@ Timerun::Record getRecordFromStandardQueryResult(
   record.run = std::move(runName);
   record.userId = userId;
   record.time = time;
-  record.recordDate = recordDateTime;
+  record.recordDate = std::move(recordDateTime);
   record.checkpoints = std::move(checkpoints);
   record.playerName = std::move(playerName);
-  record.metadata = metadata;
+  record.metadata = std::move(metadata);
 
   return record;
 }
