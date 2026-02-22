@@ -423,7 +423,7 @@ trace_t &CHSDataHandler::getTraceResults(const extraTraceOptions opt) {
 
 void CHSDataHandler::printInfo() const {
   for (const auto &[key, info] : stats) {
-    CG_Printf("%3i: %s\n", info.name.c_str(), info.description.c_str());
+    CG_Printf("%3i: %s\n", key, info.description.c_str());
   }
 }
 
