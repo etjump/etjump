@@ -24,18 +24,17 @@
 
 #pragma once
 
-#include <cstdint>
+#include <string>
 
 namespace ETJump {
-inline constexpr int32_t CGAME_INIT_DELAY_FRAMES = 10;
+class ConsoleShader {
+  const char *shaderName{"__etjump-console-shader__"};
+  std::string createBackground();
+  std::string createTexturedBackground();
+  std::string createSolidBackground();
 
-void init();
-void shutdown();
-
-void initTimeruns();
-
-// performs one-time actions slightly delayed from actual cgame init,
-// to work around issues that certain actions have when they are performed
-// on the same frame as the module is initialized
-void delayedInit();
+public:
+  ConsoleShader();
+  ~ConsoleShader();
+};
 } // namespace ETJump

@@ -25,6 +25,7 @@
 #pragma once
 
 #include "cg_local.h"
+#include "etj_entity_events_handler.h"
 #include "etj_irenderable.h"
 #include "etj_cvar_parser.h"
 

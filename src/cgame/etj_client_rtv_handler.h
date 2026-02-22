@@ -23,10 +23,10 @@
  */
 
 #pragma once
-#include <vector>
-#include <string>
 
-#include "cg_local.h"
+#include "etj_client_commands_handler.h"
+
+#include "../game/bg_public.h"
 
 namespace ETJump {
 class ClientRtvHandler {

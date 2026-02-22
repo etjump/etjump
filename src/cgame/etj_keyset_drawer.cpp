@@ -23,8 +23,8 @@
  */
 
 #include "etj_keyset_drawer.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_cvar_update_handler.h"
 
 ETJump::KeySetDrawer::KeySetDrawer(const std::vector<KeyShader> &keyShaders)
     : keyShaders(keyShaders) {
@@ -33,20 +33,21 @@ ETJump::KeySetDrawer::KeySetDrawer(const std::vector<KeyShader> &keyShaders)
 }
 
 void ETJump::KeySetDrawer::initListeners() {
-  cvarUpdateHandler->subscribe(&etj_keysColor, [&](const vmCvar_t *cvar) {
-    updateKeysColor(etj_keysColor.string);
-  });
-  cvarUpdateHandler->subscribe(&etj_keysSize,
-                               [&](const vmCvar_t *cvar) { updateKeysSize(); });
-  cvarUpdateHandler->subscribe(&etj_keysX, [&](const vmCvar_t *cvar) {
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_keysColor,
+      [&](const vmCvar_t *cvar) { updateKeysColor(etj_keysColor.string); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_keysSize, [&](const vmCvar_t *cvar) { updateKeysSize(); });
+  cgame.handlers.cvarUpdate->subscribe(&etj_keysX, [&](const vmCvar_t *cvar) {
     updateKeysOrigin(etj_keysX.value, etj_keysY.value);
   });
-  cvarUpdateHandler->subscribe(&etj_keysY, [&](const vmCvar_t *cvar) {
+  cgame.handlers.cvarUpdate->subscribe(&etj_keysY, [&](const vmCvar_t *cvar) {
     updateKeysOrigin(etj_keysX.value, etj_keysY.value);
   });
-  cvarUpdateHandler->subscribe(&etj_keysShadow, [&](const vmCvar_t *cvar) {
-    updateKeysShadow(etj_keysShadow.integer > 0);
-  });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_keysShadow, [&](const vmCvar_t *cvar) {
+        updateKeysShadow(etj_keysShadow.integer > 0);
+      });
 }
 
 void ETJump::KeySetDrawer::initAttrs() {
@@ -59,7 +60,7 @@ void ETJump::KeySetDrawer::initAttrs() {
 }
 
 void ETJump::KeySetDrawer::updateKeysColor(const char *str) {
-  parseColorString(str, attrs.color);
+  cgame.utils.colorParser->parseColorString(str, attrs.color);
 }
 
 void ETJump::KeySetDrawer::updateKeysSize() {

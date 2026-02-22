@@ -23,7 +23,8 @@
  */
 
 #include "etj_demo_compatibility.h"
-#include "etj_client_commands_handler.h"
+#include "etj_local.h"
+
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
@@ -35,7 +36,7 @@ DemoCompatibility::DemoCompatibility() {
   parseDemoVersion();
   setupCompatibilityFlags();
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "printDemoCompatInfo",
       [this](const std::vector<std::string> &) { printCompatibilityInfo(); });
 }

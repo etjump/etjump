@@ -14,16 +14,12 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
-#include <memory>
-#include <vector>
-
 #include "../game/q_shared.h"
 #include "../game/bg_public.h"
 #include "../ui/ui_shared.h"
 
 #include "tr_types.h"
 #include "cg_public.h"
-#include "etj_awaited_command_handler.h"
 
 inline constexpr float STATS_FADE_TIME = 200.0f;
 inline constexpr int FADE_TIME = 200;
@@ -1255,7 +1251,7 @@ typedef struct {
 
   char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
 
-  bool shadowCvarsSet;
+  bool cvarUnlocksForced;
   bool chatReplayReceived;
   bool maplistRequested;
 
@@ -4197,48 +4193,6 @@ void ETJump_EnableWidthScale(bool enable);
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace ETJump {
-class ClientCommandsHandler;
-class EntityEventsHandler;
-class IRenderable;
-class CvarUpdateHandler;
-class AutoDemoRecorder;
-class EventLoop;
-class PlayerEventsHandler;
-class PmoveUtils;
-class CvarShadow;
-class ClientRtvHandler;
-class DemoCompatibility;
-class AccelColor;
-class PlayerBBox;
-class SavePos;
-class SyscallExt;
-class TrickjumpLines;
-class CHSDataHandler;
-class CustomCommandMenu;
-class TraceUtils;
-
-extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
-extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
-extern std::shared_ptr<EntityEventsHandler> entityEventsHandler;
-extern std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
-extern std::vector<std::shared_ptr<IRenderable>> renderables;
-extern std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
-extern std::vector<std::shared_ptr<CvarShadow>> cvarShadows;
-extern std::shared_ptr<EventLoop> eventLoop;
-extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
-extern std::shared_ptr<ClientRtvHandler> rtvHandler;
-extern std::unique_ptr<DemoCompatibility> demoCompatibility;
-extern std::shared_ptr<PlayerBBox> playerBBox;
-extern std::unique_ptr<SavePos> savePos;
-extern std::unique_ptr<SyscallExt> syscallExt;
-extern std::unique_ptr<PmoveUtils> pmoveUtils;
-extern std::shared_ptr<TrickjumpLines> trickjumpLines;
-extern std::shared_ptr<CHSDataHandler> chsDataHandler;
-extern std::unique_ptr<CustomCommandMenu> customCommandMenu;
-extern std::unique_ptr<TraceUtils> traceUtils;
-
-inline constexpr int32_t MAX_CHS_INFO = 8;
-
 enum extraTraceOptions {
   OB_DETECTOR,
   SLICK_DETECTOR,

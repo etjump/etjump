@@ -25,10 +25,9 @@
 #include <algorithm>
 
 #include "etj_snaphud.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_pmove_utils.h"
 #include "etj_cgaz.h"
-#include "etj_cvar_update_handler.h"
 
 #include "../game/bg_local.h"
 
@@ -38,31 +37,43 @@
 
 namespace ETJump {
 Snaphud::Snaphud() {
-  parseColorString(etj_snapHUDColor1.string, snaphudColors[0]);
-  parseColorString(etj_snapHUDColor2.string, snaphudColors[1]);
+  cgame.utils.colorParser->parseColorString(etj_snapHUDColor1.string,
+                                            snaphudColors[0]);
+  cgame.utils.colorParser->parseColorString(etj_snapHUDColor2.string,
+                                            snaphudColors[1]);
 
   // always parse the highlighting colors on init to make sure they are
   // initialized even in cases where client connects to server with
   // highlighting disabled
-  parseColorString(etj_snapHUDHLColor1.string, snaphudColors[2]);
-  parseColorString(etj_snapHUDHLColor2.string, snaphudColors[3]);
+  cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor1.string,
+                                            snaphudColors[2]);
+  cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor2.string,
+                                            snaphudColors[3]);
 
   startListeners();
 }
 
 void Snaphud::startListeners() {
-  cvarUpdateHandler->subscribe(&etj_snapHUDColor1, [&](const vmCvar_t *cvar) {
-    parseColorString(etj_snapHUDColor1.string, snaphudColors[0]);
-  });
-  cvarUpdateHandler->subscribe(&etj_snapHUDColor2, [&](const vmCvar_t *cvar) {
-    parseColorString(etj_snapHUDColor2.string, snaphudColors[1]);
-  });
-  cvarUpdateHandler->subscribe(&etj_snapHUDHLColor1, [&](const vmCvar_t *cvar) {
-    parseColorString(etj_snapHUDHLColor1.string, snaphudColors[2]);
-  });
-  cvarUpdateHandler->subscribe(&etj_snapHUDHLColor2, [&](const vmCvar_t *cvar) {
-    parseColorString(etj_snapHUDHLColor2.string, snaphudColors[3]);
-  });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_snapHUDColor1, [&](const vmCvar_t *cvar) {
+        cgame.utils.colorParser->parseColorString(etj_snapHUDColor1.string,
+                                                  snaphudColors[0]);
+      });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_snapHUDColor2, [&](const vmCvar_t *cvar) {
+        cgame.utils.colorParser->parseColorString(etj_snapHUDColor2.string,
+                                                  snaphudColors[1]);
+      });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_snapHUDHLColor1, [&](const vmCvar_t *cvar) {
+        cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor1.string,
+                                                  snaphudColors[2]);
+      });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_snapHUDHLColor2, [&](const vmCvar_t *cvar) {
+        cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor2.string,
+                                                  snaphudColors[3]);
+      });
 }
 
 void Snaphud::InitSnaphud(vec3_t wishvel, const int8_t uCmdScale) {
@@ -73,8 +84,8 @@ void Snaphud::InitSnaphud(vec3_t wishvel, const int8_t uCmdScale) {
     cmd.rightmove = uCmdScale;
 
     // recalculate wishvel with defaulted forward/rightmove
-    pmoveUtils->updateWishvel(wishvel, pm->pmext->forward, pm->pmext->right,
-                              pm->pmext->up, cmd);
+    cgame.utils.pmove->updateWishvel(wishvel, pm->pmext->forward,
+                                     pm->pmext->right, pm->pmext->up, cmd);
   }
 
   // set correct yaw based on strafe style/keys pressed
@@ -233,7 +244,7 @@ bool Snaphud::beforeRender() {
     return false;
   }
 
-  pm = pmoveUtils->getPmove();
+  pm = cgame.utils.pmove->getPmove();
 
   // water and ladder movement are not important
   // since speed is capped anyway
@@ -242,7 +253,7 @@ bool Snaphud::beforeRender() {
     return false;
   }
 
-  if (pmoveUtils->skipUpdate(lastUpdateTime, HUDLerpFlags::SNAPHUD)) {
+  if (cgame.utils.pmove->skipUpdate(lastUpdateTime, HUDLerpFlags::SNAPHUD)) {
     return true;
   }
 
@@ -254,15 +265,15 @@ bool Snaphud::beforeRender() {
 
   // calculate wishspeed
   vec3_t wishvel;
-  float wishspeed = pmoveUtils->getWishspeed(wishvel, scale, pm->pmext->forward,
-                                             pm->pmext->right, pm->pmext->up);
+  float wishspeed = cgame.utils.pmove->getWishspeed(
+      wishvel, scale, pm->pmext->forward, pm->pmext->right, pm->pmext->up);
 
   // set default wishspeed for drawing if no user input
   if (!pm->cmd.forwardmove && !pm->cmd.rightmove) {
     wishspeed = ps->speed * ps->sprintSpeedScale;
   }
 
-  const int8_t uCmdScale = pmoveUtils->getUserCmdScale();
+  const int8_t uCmdScale = cgame.utils.pmove->getUserCmdScale();
   InitSnaphud(wishvel, uCmdScale);
 
   // show true groundzones?
@@ -369,7 +380,7 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
   // get player yaw
   float yaw = ps.viewangles[YAW];
 
-  const usercmd_t *cmd = pmoveUtils->getUserCmd();
+  const usercmd_t *cmd = cgame.utils.pmove->getUserCmd();
 
   // determine whether strafestyle is "forwards"
   const bool forwards = CGaz::strafingForwards(ps, pm);
@@ -383,7 +394,7 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
   // get opt angle
   float opt = CGaz::getOptAngle(ps, pm, false);
 
-  float frameAccel = pmoveUtils->getFrameAccel(upmoveTrueness);
+  float frameAccel = cgame.utils.pmove->getFrameAccel(upmoveTrueness);
 
   // clamp the max value to match max scaling of target_scale_velocity
   if (frameAccel > 85) {

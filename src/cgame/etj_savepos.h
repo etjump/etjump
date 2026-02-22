@@ -25,8 +25,9 @@
 #pragma once
 
 #include <unordered_map>
-#include "../game/etj_savepos_shared.h"
 #include "etj_timerun.h"
+
+#include "../game/etj_savepos_shared.h"
 
 namespace ETJump {
 class SavePos {

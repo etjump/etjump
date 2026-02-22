@@ -25,7 +25,6 @@
 #pragma once
 #include "etj_irenderable.h"
 #include "etj_entity_events_handler.h"
-#include "cg_local.h"
 
 namespace ETJump {
 class ClientCommandsHandler;

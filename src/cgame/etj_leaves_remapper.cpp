@@ -24,14 +24,13 @@
 
 #include <string>
 
-#include "cg_local.h"
-#include "etj_draw_leaves_handler.h"
+#include "etj_leaves_remapper.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_cvar_update_handler.h"
 
 using namespace ETJump;
 
-DrawLeavesHandler::DrawLeavesHandler() {
+LeavesRemapper::LeavesRemapper() {
   auto shader = composeShader(
       shaderName,
       {{"map *white", "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
@@ -43,21 +42,22 @@ DrawLeavesHandler::DrawLeavesHandler() {
     turnOffLeaves();
   }
 
-  cvarUpdateHandler->subscribe(&etj_drawLeaves, [&](const vmCvar_t *cvar) {
-    cvar->integer ? turnOnLeaves() : turnOffLeaves();
-  });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_drawLeaves, [&](const vmCvar_t *cvar) {
+        cvar->integer ? turnOnLeaves() : turnOffLeaves();
+      });
 }
 
-void DrawLeavesHandler::turnOnLeaves() {
+void LeavesRemapper::turnOnLeaves() {
   for (auto &leavesShader : leavesShaders) {
     trap_R_RemapShader(leavesShader, leavesShader, "0");
   }
 }
 
-void DrawLeavesHandler::turnOffLeaves() {
+void LeavesRemapper::turnOffLeaves() {
   for (auto &leavesShader : leavesShaders) {
     trap_R_RemapShader(leavesShader, shaderName, "0");
   }
 }
 
-DrawLeavesHandler::~DrawLeavesHandler() { turnOnLeaves(); }
+LeavesRemapper::~LeavesRemapper() { turnOnLeaves(); }

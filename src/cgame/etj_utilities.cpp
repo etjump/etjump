@@ -26,16 +26,10 @@
 #include <unordered_map>
 #include <string>
 #include <sstream>
-#include <memory>
-#include <array>
 
 #include "etj_utilities.h"
-#include "etj_event_loop.h"
-#include "cg_local.h"
-#include "etj_demo_compatibility.h"
-#include "etj_player_events_handler.h"
-#include "etj_cvar_shadow.h"
-#include "etj_pmove_utils.h"
+#include "etj_local.h"
+
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_portalgun_shared.h"
 
@@ -66,123 +60,31 @@ std::string composeShader(const char *name, ShaderStages stages) {
   return composeShader(name, {""}, stages);
 }
 
-static std::unordered_map<std::string, const vec4_t *> validColorNames = {
-    {"white", &colorWhite},       {"red", &colorRed},
-    {"green", &colorGreen},       {"blue", &colorBlue},
-    {"yellow", &colorYellow},     {"magenta", &colorMagenta},
-    {"cyan", &colorCyan},         {"orange", &colorOrange},
-    {"mdred", &colorMdRed},       {"mdgreen", &colorMdGreen},
-    {"dkgreen", &colorDkGreen},   {"mdcyan", &colorMdCyan},
-    {"mdyellow", &colorMdYellow}, {"mdorange", &colorMdOrange},
-    {"mdblue", &colorMdBlue},     {"gray", &colorMdGrey},
-    {"grey", &colorMdGrey},       {"ltgrey", &colorLtGrey},
-    {"mdgrey", &colorMdGrey},     {"dkgrey", &colorDkGrey},
-    {"black", &colorBlack},
-};
-
-static void parseNamedColorString(const std::string &token, vec4_t &color) {
-  auto validColor = validColorNames[token];
-  if (validColor) {
-    color[0] = (*validColor)[0];
-    color[1] = (*validColor)[1];
-    color[2] = (*validColor)[2];
-  }
-}
-
-static void parseRGBAValuedColorString(const std::string &colorString,
-                                       vec4_t &color) {
-  std::istringstream tokenStream{colorString};
-  std::string token;
-  auto colorChannel = 0;
-  while (tokenStream >> token) {
-    if (colorChannel > 3) {
-      break;
-    }
-    auto value = std::min(std::max(std::stof(token), 0.f), 255.f);
-    color[colorChannel] = value;
-    colorChannel++;
-  }
-}
-
-static void parseHexValuedColorString(const std::string &token, vec4_t &color) {
-  auto colorValue = std::stoll(token, nullptr, 16);
-  auto channelCount = ((token.size() - 1) >> 1) + 1;
-  auto maxShift = 8 * channelCount;
-  for (unsigned long i = 0; i < channelCount; i++) {
-    color[i] = (colorValue >> (maxShift - 8 * (i + 1))) & 0xff;
-  }
-}
-
-static void normalizeColorIfRequired(vec4_t &v) {
-  float max = 0.f;
-  for (auto i = 0; i < 3; i++) {
-    max = std::max(v[i], max);
-  }
-
-  // non-normalized color
-  if (max > 1.0f) {
-    for (auto i = 0; i < 3; i++) {
-      v[i] /= 255.f;
-    }
-  }
-
-  // handle alpha separately
-  if (v[3] > 1.0) {
-    v[3] /= 255.f;
-  }
-}
-
-const std::string alphaRegexStr{"^[a-z]+"}; // white, black, etc
-const std::string digitRegexStr{
-    "^([-+]?[0-9]*\\.?[0-9]+\\s*)+"};              // 255 0 0, 1.0 0 0
-const std::string hexedRegexStr{"^0[x][a-f0-9]+"}; // 0xff0000
-const std::string hashdRegexStr{"^#[a-f0-9]+"};    // #ff0000
-
-const std::basic_regex<char> alphaRegex = std::regex(alphaRegexStr);
-const std::basic_regex<char> digitRegex = std::regex(digitRegexStr);
-const std::basic_regex<char> hexedRegex = std::regex(hexedRegexStr);
-const std::basic_regex<char> hashdRegex = std::regex(hashdRegexStr);
-
-void parseColorString(const std::string &colorString, vec4_t &color) {
-  Vector4Set(color, 0.0f, 0.0f, 0.0f, 1.0); // set defaults
-
-  std::string token{StringUtil::toLowerCase(trim(colorString))};
-
-  if (std::regex_match(token, alphaRegex)) {
-    parseNamedColorString(token, color);
-    return;
-  } else if (std::regex_match(token, digitRegex)) {
-    parseRGBAValuedColorString(token, color);
-  } else if (std::regex_match(token, hexedRegex)) {
-    parseHexValuedColorString(token.substr(2, 8), color);
-  } else if (std::regex_match(token, hashdRegex)) {
-    parseHexValuedColorString(token.substr(1, 8), color);
-  }
-
-  normalizeColorIfRequired(color);
-}
-
-#ifdef CGAMEDLL
-
 int setTimeout(std::function<void()> fun, int delay) {
-  return eventLoop->schedule(fun, delay);
+  return cgame.utils.eventLoop->schedule(fun, delay);
 }
 
-bool clearTimeout(int handle) { return eventLoop->unschedule(handle); }
+bool clearTimeout(int handle) {
+  return cgame.utils.eventLoop->unschedule(handle);
+}
 
 int setInterval(std::function<void()> fun, int delay) {
-  return eventLoop->schedulePersistent(fun, delay);
+  return cgame.utils.eventLoop->schedulePersistent(fun, delay);
 }
 
-bool clearInterval(int handle) { return eventLoop->unschedule(handle); }
+bool clearInterval(int handle) {
+  return cgame.utils.eventLoop->unschedule(handle);
+}
 
 int setImmediate(std::function<void()> fun) {
-  return eventLoop->schedule(fun, 0, TaskPriorities::Immediate);
+  return cgame.utils.eventLoop->schedule(fun, 0, TaskPriorities::Immediate);
 }
 
-bool clearImmediate(int handle) { return eventLoop->unschedule(handle); }
+bool clearImmediate(int handle) {
+  return cgame.utils.eventLoop->unschedule(handle);
+}
 
-void executeTimeout(int handle) { eventLoop->execute(handle); }
+void executeTimeout(int handle) { cgame.utils.eventLoop->execute(handle); }
 
 bool configFileExists(const std::string &filename) {
   bool fileExists = true;
@@ -223,10 +125,10 @@ int getSvFps() {
 
   int fps;
 
-  if (demoCompatibility->flags.svFpsUnavailable) {
+  if (cgame.demo.compatibility->flags.svFpsUnavailable) {
     // no way to know for sure, assume default
     fps = 1000 / DEFAULT_SV_FRAMETIME;
-  } else if (demoCompatibility->flags.svFpsInSysteminfo) {
+  } else if (cgame.demo.compatibility->flags.svFpsInSysteminfo) {
     const char *cs = CG_ConfigString(CS_SYSTEMINFO);
     fps = Q_atoi(Info_ValueForKey(cs, "sv_fps"));
   } else {
@@ -344,7 +246,7 @@ bool showingScores() {
 }
 
 void onPlayerRespawn(bool revived) {
-  playerEventsHandler->check("respawn", {revived ? "1" : "0"});
+  cgame.handlers.playerEvents->check("respawn", {revived ? "1" : "0"});
 }
 
 playerState_t *getValidPlayerState() {
@@ -367,5 +269,4 @@ void resetCustomvoteInfo() {
 
   trap_SendConsoleCommand("uiResetCustomvotes\n");
 }
-#endif
 } // namespace ETJump

@@ -23,11 +23,8 @@
  */
 
 #include "etj_upmove_meter_drawable.h"
-#include "etj_cvar_update_handler.h"
-#include "etj_client_commands_handler.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_pmove_utils.h"
-#include "etj_player_events_handler.h"
 
 namespace ETJump {
 UpmoveMeter::UpmoveMeter() {
@@ -41,58 +38,62 @@ UpmoveMeter::UpmoveMeter() {
 void UpmoveMeter::startListeners() {
   // only subscribe to cvars whose parsing would be inefficient each
   // frame
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_upmoveMeterGraphColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterGraphColor.string, jump_.graph_rgba);
+        cgame.utils.colorParser->parseColorString(
+            etj_upmoveMeterGraphColor.string, jump_.graph_rgba);
       });
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_upmoveMeterGraphOnGroundColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterGraphOnGroundColor.string,
-                         jump_.graph_rgbaOnGround);
+        cgame.utils.colorParser->parseColorString(
+            etj_upmoveMeterGraphOnGroundColor.string, jump_.graph_rgbaOnGround);
       });
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_upmoveMeterGraphPreJumpColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterGraphPreJumpColor.string,
-                         jump_.graph_rgbaPreJump);
+        cgame.utils.colorParser->parseColorString(
+            etj_upmoveMeterGraphPreJumpColor.string, jump_.graph_rgbaPreJump);
       });
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_upmoveMeterGraphPostJumpColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterGraphPostJumpColor.string,
-                         jump_.graph_rgbaPostJump);
+        cgame.utils.colorParser->parseColorString(
+            etj_upmoveMeterGraphPostJumpColor.string, jump_.graph_rgbaPostJump);
       });
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_upmoveMeterGraphOutlineColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterGraphOutlineColor.string,
-                         jump_.graph_outline_rgba);
+        cgame.utils.colorParser->parseColorString(
+            etj_upmoveMeterGraphOutlineColor.string, jump_.graph_outline_rgba);
       });
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_upmoveMeterTextColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterTextColor.string, jump_.text_rgba);
+        cgame.utils.colorParser->parseColorString(
+            etj_upmoveMeterTextColor.string, jump_.text_rgba);
       });
 
-  cvarUpdateHandler->subscribe(&etj_upmoveMeterTextSize,
-                               [&](const vmCvar_t *) { setTextSize(); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_upmoveMeterTextSize, [&](const vmCvar_t *) { setTextSize(); });
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "resetUpmoveMeter",
       [&](const std::vector<std::string> &args) { resetUpmoveMeter(); });
 
-  playerEventsHandler->subscribe(
+  cgame.handlers.playerEvents->subscribe(
       "respawn",
       [&](const std::vector<std::string> &args) { resetUpmoveMeter(); });
 }
 
 void UpmoveMeter::parseAllColors() {
-  parseColorString(etj_upmoveMeterGraphColor.string, jump_.graph_rgba);
-  parseColorString(etj_upmoveMeterGraphOnGroundColor.string,
-                   jump_.graph_rgbaOnGround);
-  parseColorString(etj_upmoveMeterGraphPreJumpColor.string,
-                   jump_.graph_rgbaPreJump);
-  parseColorString(etj_upmoveMeterGraphPostJumpColor.string,
-                   jump_.graph_rgbaPostJump);
-  parseColorString(etj_upmoveMeterGraphOutlineColor.string,
-                   jump_.graph_outline_rgba);
-  parseColorString(etj_upmoveMeterTextColor.string, jump_.text_rgba);
+  cgame.utils.colorParser->parseColorString(etj_upmoveMeterGraphColor.string,
+                                            jump_.graph_rgba);
+  cgame.utils.colorParser->parseColorString(
+      etj_upmoveMeterGraphOnGroundColor.string, jump_.graph_rgbaOnGround);
+  cgame.utils.colorParser->parseColorString(
+      etj_upmoveMeterGraphPreJumpColor.string, jump_.graph_rgbaPreJump);
+  cgame.utils.colorParser->parseColorString(
+      etj_upmoveMeterGraphPostJumpColor.string, jump_.graph_rgbaPostJump);
+  cgame.utils.colorParser->parseColorString(
+      etj_upmoveMeterGraphOutlineColor.string, jump_.graph_outline_rgba);
+  cgame.utils.colorParser->parseColorString(etj_upmoveMeterTextColor.string,
+                                            jump_.text_rgba);
 }
 
 void UpmoveMeter::setTextSize() {
@@ -122,10 +123,10 @@ bool UpmoveMeter::beforeRender() {
   }
 
   // get correct pmove
-  pm = pmoveUtils->getPmove();
+  pm = cgame.utils.pmove->getPmove();
 
   // never lerp this, because it would just produce unrealistic jump timings
-  if (pmoveUtils->skipUpdate(lastUpdateTime, std::nullopt)) {
+  if (cgame.utils.pmove->skipUpdate(lastUpdateTime, std::nullopt)) {
     return true;
   }
 

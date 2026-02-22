@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include "etj_irenderable.h"
 #include "cg_local.h"
+#include "etj_irenderable.h"
 #include "etj_cvar_parser.h"
 
 namespace ETJump {

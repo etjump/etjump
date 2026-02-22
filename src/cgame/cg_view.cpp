@@ -4,12 +4,8 @@
 #include <algorithm>
 
 #include "cg_local.h"
-#include "etj_init.h"
-#include "etj_pmove_utils.h"
-#include "etj_event_loop.h"
-#include "etj_trickjump_lines.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_chs_data.h"
 
 /*
 =============================================================================
@@ -1875,9 +1871,9 @@ qboolean CG_CullPointAndRadius(const vec3_t pt, vec_t radius) {
 
 namespace ETJump {
 static void runFrameEnd() {
-  awaitedCommandHandler->runFrame();
-  eventLoop->run();
-  trickjumpLines->runFrame();
+  cgame.handlers.awaitedCommand->runFrame();
+  cgame.utils.eventLoop->run();
+  cgame.visuals.trickjumpLines->runFrame();
 
   if (cg.clientFrame >= CGAME_INIT_DELAY_FRAMES) {
     delayedInit();
@@ -1925,7 +1921,7 @@ static void runFrameEnd() {
     static int lastActivity = -minAutoSpecDelay;
 
     const auto *const ps = getValidPlayerState();
-    const usercmd_t *cmd = pmoveUtils->getUserCmd();
+    const usercmd_t *cmd = cgame.utils.pmove->getUserCmd();
     const auto team = cgs.clientinfo[cg.clientNum].team;
     const bool moving = cmd->forwardmove || cmd->rightmove || cmd->upmove;
     const bool following = ps->pm_flags & PMF_FOLLOW;
@@ -2222,12 +2218,12 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
                              cg.refdef.vieworg[2]);
 
     // setup pmove for renderables
-    if (ETJump::pmoveUtils->check()) {
-      ETJump::pmoveUtils->runPmove();
+    if (ETJump::cgame.utils.pmove->check()) {
+      ETJump::cgame.utils.pmove->runPmove();
     }
 
     if (etj_drawCHS1.integer || etj_drawCHS2.integer) {
-      ETJump::chsDataHandler->runFrame();
+      ETJump::cgame.hud.chsDataHandler->runFrame();
     }
 
     // actually issue the rendering calls

@@ -30,6 +30,7 @@
 
 #include "etj_chs_drawable.h"
 #include "cg_local.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
 
 // TODO: make font size configurable via cvars
@@ -66,7 +67,7 @@ void CHS::setupListeners() {
 }
 
 void CHS::setColor(const vmCvar_t *cvar) {
-  parseColorString(cvar->string, color);
+  cgame.utils.colorParser->parseColorString(cvar->string, color);
 }
 
 void CHS::setAlpha(const vmCvar_t *cvar) {

@@ -6,16 +6,16 @@
  *
  */
 
-#include "cg_local.h"
-
 #include <string>
 #include <vector>
-#include "etj_client_commands_handler.h"
-#include "../game/etj_string_utilities.h"
-#include "../game/etj_json_utilities.h"
+
+#include "cg_local.h"
+#include "etj_local.h"
 #include "etj_savepos.h"
 #include "etj_utilities.h"
 #include "etj_consolecommands.h"
+
+#include "../game/etj_string_utilities.h"
 
 /*
 =============
@@ -1176,23 +1176,23 @@ static void storeSavepos() {
     flags = Q_atoi(CG_Argv(2));
   }
 
-  savePos->createSaveposData(filename, flags);
+  cgame.utils.savePos->createSaveposData(filename, flags);
 }
 
 static void loadSavepos() {
   const int argc = trap_Argc();
-  std::string filename = savePos->getDefaultSaveposName();
+  std::string filename = cgame.utils.savePos->getDefaultSaveposName();
 
   if (argc > 1) {
     filename = CG_Argv(1);
   }
 
-  if (!savePos->saveposExists(filename)) {
+  if (!cgame.utils.savePos->saveposExists(filename)) {
     CG_Printf("No savepos found with name ^3'%s'\n", filename.c_str());
     return;
   }
 
-  const SavePosData &data = savePos->getSaveposData(filename);
+  const SavePosData &data = cgame.utils.savePos->getSaveposData(filename);
 
   // this is obviously trivial to bypass by just editing the mapname field
   // in the savepos file, but it's a good idea to check this anyway
@@ -1207,7 +1207,8 @@ static void loadSavepos() {
 }
 
 static void listSavepos() {
-  const std::vector<std::string> saveposNames = savePos->getSaveposNames();
+  const std::vector<std::string> saveposNames =
+      cgame.utils.savePos->getSaveposNames();
 
   if (saveposNames.empty()) {
     CG_Printf("No positions found. Make sure savepos files are located in "
@@ -1222,7 +1223,7 @@ static void listSavepos() {
   }
 }
 
-static void readSavepos() { savePos->parseExistingPositions(true); }
+static void readSavepos() { cgame.utils.savePos->parseExistingPositions(true); }
 
 static void toggleETJumpSettings() {
   trap_SendConsoleCommand("uiToggleETJumpSettings\n");
@@ -1423,7 +1424,8 @@ qboolean CG_ConsoleCommand(void) {
     return qtrue;
   }
 
-  return ETJump::consoleCommandsHandler->check(cmd, arguments) ? qtrue : qfalse;
+  return ETJump::cgame.handlers.consoleCommands->check(cmd, arguments) ? qtrue
+                                                                       : qfalse;
 }
 
 /*

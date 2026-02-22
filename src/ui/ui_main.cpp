@@ -18,8 +18,8 @@ USER INTERFACE MAIN
 #include "etj_utilities.h"
 
 #include "../cgame/etj_cvar_parser.h"
+
 #include "../game/etj_string_utilities.h"
-#include "../cgame/etj_utilities.h"
 #include "../game/etj_filesystem.h"
 
 // NERVE - SMF
@@ -1856,10 +1856,12 @@ static void UI_DrawCrosshair(const rectDef_t *rect) {
     vec4_t crosshairColor = {1.0, 1.0, 1.0, 1.0};
     vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
 
-    ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
+    ETJump::ui.colorParser->parseColorString(cg_crosshairColor.string,
+                                             crosshairColor);
     crosshairColor[3] = std::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
 
-    ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
+    ETJump::ui.colorParser->parseColorString(cg_crosshairColorAlt.string,
+                                             crosshairColorAlt);
     crosshairColorAlt[3] = std::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
 
     auto size = ETJump::CvarValueParser::parse<ETJump::CvarValue::Size>(

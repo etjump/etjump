@@ -24,7 +24,7 @@
 
 #include "etj_crosshair.h"
 #include "etj_crosshair_drawer.h"
-#include "etj_cvar_update_handler.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
 #include "etj_cvar_parser.h"
 
@@ -37,21 +37,23 @@ Crosshair::Crosshair() {
 
 void Crosshair::startListeners() {
   // colors
-  cvarUpdateHandler->subscribe(&cg_crosshairColor,
-                               [&](const vmCvar_t *cvar) { parseColors(); });
-  cvarUpdateHandler->subscribe(&cg_crosshairColorAlt,
-                               [&](const vmCvar_t *cvar) { parseColors(); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &cg_crosshairColor, [&](const vmCvar_t *cvar) { parseColors(); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &cg_crosshairColorAlt, [&](const vmCvar_t *cvar) { parseColors(); });
 
   // position
-  cvarUpdateHandler->subscribe(&cg_crosshairX,
-                               [&](const vmCvar_t *cvar) { adjustPosition(); });
-  cvarUpdateHandler->subscribe(&cg_crosshairY,
-                               [&](const vmCvar_t *cvar) { adjustPosition(); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &cg_crosshairX, [&](const vmCvar_t *cvar) { adjustPosition(); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &cg_crosshairY, [&](const vmCvar_t *cvar) { adjustPosition(); });
 }
 
 void Crosshair::parseColors() {
-  parseColorString(cg_crosshairColor.string, crosshair.color);
-  parseColorString(cg_crosshairColorAlt.string, crosshair.colorAlt);
+  cgame.utils.colorParser->parseColorString(cg_crosshairColor.string,
+                                            crosshair.color);
+  cgame.utils.colorParser->parseColorString(cg_crosshairColorAlt.string,
+                                            crosshair.colorAlt);
 }
 
 void Crosshair::adjustSize() {

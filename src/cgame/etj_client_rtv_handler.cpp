@@ -23,7 +23,7 @@
  */
 
 #include "etj_client_rtv_handler.h"
-#include "etj_client_commands_handler.h"
+#include "cg_local.h"
 
 namespace ETJump {
 ClientRtvHandler::ClientRtvHandler(

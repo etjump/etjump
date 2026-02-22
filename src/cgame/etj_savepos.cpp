@@ -22,20 +22,19 @@
  * SOFTWARE.
  */
 
+#include "etj_savepos.h"
 #include "cg_local.h"
-#include "etj_demo_compatibility.h"
+#include "etj_local.h"
 
-#include "../game/etj_string_utilities.h"
 #include "../game/etj_json_utilities.h"
 #include "../game/etj_filesystem.h"
-
-#include "etj_savepos.h"
 
 namespace ETJump {
 
 SavePos::SavePos(const std::shared_ptr<Timerun> &p) {
   const bool timerunCompatible =
-      cg.demoPlayback ? !demoCompatibility->flags.noSavePosTimerunInfo : true;
+      cg.demoPlayback ? !cgame.demo.compatibility->flags.noSavePosTimerunInfo
+                      : true;
 
   if (!p || !timerunCompatible) {
     CG_Printf("^3WARNING: ^7unable to initialize timerun information for "

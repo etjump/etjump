@@ -22,9 +22,8 @@
  * SOFTWARE.
  */
 
-#include "etj_client_commands_handler.h"
 #include "etj_overbounce_watcher.h"
-#include "etj_cvar_update_handler.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
 #include "cg_local.h"
 #include "etj_overbounce_shared.h"
@@ -97,15 +96,17 @@ OverbounceWatcher::OverbounceWatcher(
         list();
       });
 
-  cvarUpdateHandler->subscribe(&etj_obWatcherColor, [&](const vmCvar_t *cvar) {
-    parseColorString(etj_obWatcherColor.string, _color);
-  });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_obWatcherColor, [&](const vmCvar_t *cvar) {
+        cgame.utils.colorParser->parseColorString(etj_obWatcherColor.string,
+                                                  _color);
+      });
 
-  cvarUpdateHandler->subscribe(&etj_obWatcherSize,
-                               [&](const vmCvar_t *) { setSize(); });
+  cgame.handlers.cvarUpdate->subscribe(&etj_obWatcherSize,
+                                       [&](const vmCvar_t *) { setSize(); });
 
   setSize();
-  parseColorString(etj_obWatcherColor.string, _color);
+  cgame.utils.colorParser->parseColorString(etj_obWatcherColor.string, _color);
 }
 
 OverbounceWatcher::~OverbounceWatcher() {

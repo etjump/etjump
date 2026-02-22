@@ -23,8 +23,7 @@
  */
 
 #include "etj_accelmeter_drawable.h"
-#include "etj_cvar_update_handler.h"
-#include "etj_pmove_utils.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
@@ -44,27 +43,28 @@ AccelMeter::AccelMeter() {
 }
 
 void AccelMeter::startListeners() {
-  cvarUpdateHandler->subscribe(&etj_accelColor, [&](const vmCvar_t *cvar) {
-    parseColor(cvar->string, accelColor);
-  });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_accelColor,
+      [&](const vmCvar_t *cvar) { parseColor(cvar->string, accelColor); });
 
-  cvarUpdateHandler->subscribe(&etj_accelAlpha, [&](const vmCvar_t *cvar) {
-    parseColor(etj_accelColor.string, accelColor);
-  });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_accelAlpha, [&](const vmCvar_t *cvar) {
+        parseColor(etj_accelColor.string, accelColor);
+      });
 
-  cvarUpdateHandler->subscribe(&etj_accelSize,
-                               [&](const vmCvar_t *cvar) { setSize(); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_accelSize, [&](const vmCvar_t *cvar) { setSize(); });
 
-  cvarUpdateHandler->subscribe(&etj_accelShadow,
-                               [&](const vmCvar_t *cvar) { setTextStyle(); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_accelShadow, [&](const vmCvar_t *cvar) { setTextStyle(); });
 
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_accelColorUsesAccel,
       [&](const vmCvar_t *cvar) { setAccelColorStyle(); });
 }
 
 void AccelMeter::parseColor(const std::string &color, vec4_t &out) {
-  parseColorString(color, out);
+  cgame.utils.colorParser->parseColorString(color, out);
   out[3] *= etj_accelAlpha.value;
 }
 
@@ -98,9 +98,9 @@ bool AccelMeter::beforeRender() {
 
   playing = cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback;
 
-  pm = pmoveUtils->getPmove();
+  pm = cgame.utils.pmove->getPmove();
 
-  if (pmoveUtils->skipUpdate(lastUpdateTime, std::nullopt)) {
+  if (cgame.utils.pmove->skipUpdate(lastUpdateTime, std::nullopt)) {
     return true;
   }
 

@@ -14,6 +14,8 @@
 
 #include <array>
 
+#include "q_shared.h"
+
 #define BUILD_TIME __DATE__ " " __TIME__
 
 #if !defined(GAME_NAME)

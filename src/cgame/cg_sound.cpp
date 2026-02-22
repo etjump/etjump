@@ -3,6 +3,7 @@
 
 #include "cg_local.h"
 #include "etj_crosshair.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
@@ -1799,7 +1800,7 @@ void CG_SpeakerEditorDraw(void) {
     }
 
     // render crosshair
-    for (const auto &r : ETJump::renderables) {
+    for (const auto &r : ETJump::cgame.hud.renderables) {
       if (const auto &crosshair =
               std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
         if (crosshair->beforeRender()) {
