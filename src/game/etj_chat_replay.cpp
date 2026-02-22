@@ -111,7 +111,7 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
   // timestamp is set to -1 to identify this from other chat replays
   trap_SendServerCommand(
       clientNum,
-      "chat \"^gServer: replaying latest chat messages:\" -1 0 1 -1");
+      "chat \"^7Server: replaying latest chat messages:\" -1 0 1 -1");
 
   time_t now;
   now = std::time(&now);
