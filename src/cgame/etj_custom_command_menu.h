@@ -24,10 +24,10 @@
 
 #pragma once
 
-#include <toml.hpp>
-#include <json/json.h>
+#include <toml11/types.hpp>
 
-#include "cg_local.h"
+#include "etj_client_commands_handler.h"
+#include "etj_cvar_update_handler.h"
 
 #include "../game/etj_command_parser.h"
 

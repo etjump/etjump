@@ -25,10 +25,11 @@
 #include <algorithm>
 
 #include "etj_cvar_master_drawer.h"
+#include "etj_local.h"
 
 ETJump::CvarBasedMasterDrawer::CvarBasedMasterDrawer(const vmCvar_t &cvar)
     : selector(cvar) {
-  cvarUpdateHandler->subscribe(&selector, [&](const vmCvar_t *update) {
+  cgame.handlers.cvarUpdate->subscribe(&selector, [&](const vmCvar_t *update) {
     updateCurrentIndex(update->integer);
   });
 }

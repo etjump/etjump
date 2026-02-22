@@ -24,7 +24,7 @@
 
 #include "etj_consolecommands.h"
 #include "etj_demo_compatibility.h"
-#include "etj_client_commands_handler.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
@@ -51,7 +51,7 @@ static void uiChatMenuOpen(const Arguments &args) {
 }
 
 static void printMapCustomizationInfo() {
-  if (demoCompatibility->flags.noMapCustomizationHashes) {
+  if (cgame.demo.compatibility->flags.noMapCustomizationHashes) {
     CG_Printf("Map customization data is unavailable in demos recorded prior "
               "to ETJump 3.5.0.\n");
     return;
@@ -185,25 +185,25 @@ getOptCommand(const std::string &commandPrefix,
 }
 
 void registerCommands() {
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "ftSaveLimitSet", [](const auto &) { ftSaveLimitSet(); }, false);
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "forceMaplistRefresh", [](const auto &) { forceMaplistRefresh(); },
       false);
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "forceCustomvoteRefresh", [](const auto &) { forceCustomvoteRefresh(); },
       false);
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "uiRequestCustomvotes", [](const auto &) { uiRequestCustomvotes(); },
       false);
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "uiChatMenuOpen", [](const auto &args) { uiChatMenuOpen(args); }, false);
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "printMapCustomizationInfo",
       [](const auto &) { printMapCustomizationInfo(); });
 }

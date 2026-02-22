@@ -23,7 +23,7 @@
  */
 
 #include "etj_pmove_utils.h"
-#include "etj_cvar_update_handler.h"
+#include "etj_local.h"
 
 #include "../game/bg_local.h"
 
@@ -45,7 +45,7 @@ void PmoveUtils::initCvars() {
 
 void PmoveUtils::setupCallbacks() {
   for (const auto &cvar : cvars) {
-    cvarUpdateHandler->subscribe(
+    cgame.handlers.cvarUpdate->subscribe(
         cvar, [this](const vmCvar_t *) { setPmoveStatus(); });
   }
 }

@@ -23,10 +23,9 @@
  */
 
 #include "etj_speed_drawable.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_cvar_update_handler.h"
-#include "etj_client_commands_handler.h"
-#include "etj_pmove_utils.h"
+
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
@@ -40,34 +39,36 @@ DrawSpeed::DrawSpeed() {
 }
 
 DrawSpeed::~DrawSpeed() {
-  consoleCommandsHandler->unsubscribe("resetmaxspeed");
+  cgame.handlers.consoleCommands->unsubscribe("resetmaxspeed");
 }
 
 void DrawSpeed::parseColor(const std::string &color, vec4_t &out) {
-  parseColorString(color, out);
+  cgame.utils.colorParser->parseColorString(color, out);
   out[3] *= etj_speedAlpha.value;
 }
 
 void DrawSpeed::startListeners() {
-  cvarUpdateHandler->subscribe(&etj_speedColor, [&](const vmCvar_t *cvar) {
-    parseColor(etj_speedColor.string, speedColor);
-  });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_speedColor, [&](const vmCvar_t *cvar) {
+        parseColor(etj_speedColor.string, speedColor);
+      });
 
-  cvarUpdateHandler->subscribe(&etj_speedAlpha, [&](const vmCvar_t *cvar) {
-    parseColor(etj_speedColor.string, speedColor);
-  });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_speedAlpha, [&](const vmCvar_t *cvar) {
+        parseColor(etj_speedColor.string, speedColor);
+      });
 
-  cvarUpdateHandler->subscribe(&etj_speedSize,
-                               [&](const vmCvar_t *cvar) { setSize(); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_speedSize, [&](const vmCvar_t *cvar) { setSize(); });
 
-  cvarUpdateHandler->subscribe(&etj_speedShadow,
-                               [&](const vmCvar_t *cvar) { setTextStyle(); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_speedShadow, [&](const vmCvar_t *cvar) { setTextStyle(); });
 
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_speedColorUsesAccel,
       [&](const vmCvar_t *cvar) { setAccelColorStyle(); });
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "resetmaxspeed",
       [&](const std::vector<std::string> &args) { resetMaxSpeed(); });
 }
@@ -79,12 +80,12 @@ bool DrawSpeed::beforeRender() {
 
   playing = cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback;
 
-  pm = pmoveUtils->getPmove();
+  pm = cgame.utils.pmove->getPmove();
 
   // store the old last update time so we can re-check it accel coloring
   int oldLastUpdateTime = lastUpdateTime;
 
-  if (pmoveUtils->skipUpdate(lastUpdateTime, HUDLerpFlags::DRAWSPEED2)) {
+  if (cgame.utils.pmove->skipUpdate(lastUpdateTime, HUDLerpFlags::DRAWSPEED2)) {
     return true;
   }
 
@@ -112,7 +113,7 @@ bool DrawSpeed::beforeRender() {
   VectorCopy(ps->velocity, lastSpeed);
 
   if (accelColorStyle &&
-      !pmoveUtils->skipUpdate(oldLastUpdateTime, std::nullopt)) {
+      !cgame.utils.pmove->skipUpdate(oldLastUpdateTime, std::nullopt)) {
     AccelColor::setAccelColor(style, currentSpeed, etj_speedAlpha.value, pm, ps,
                               storedSpeeds, accel, speedColor);
   }

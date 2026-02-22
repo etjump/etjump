@@ -28,6 +28,8 @@
 #include "etj_demo_queue.h"
 #include "etj_quick_connect.h"
 
+#include "../cgame/etj_color_parser.h"
+
 #include "../game/etj_syscall_ext_shared.h"
 
 namespace ETJump {
@@ -37,6 +39,7 @@ struct UIContext {
   std::unique_ptr<ColorPicker> colorPicker;
   std::unique_ptr<DemoQueue> demoQueue;
   std::unique_ptr<QuickConnect> quickConnect;
+  std::unique_ptr<ColorParser> colorParser;
 };
 
 inline UIContext ui;

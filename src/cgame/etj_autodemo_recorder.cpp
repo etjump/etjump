@@ -23,14 +23,13 @@
  */
 
 #include "etj_autodemo_recorder.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
 #include "etj_demo_recorder.h"
+
 #include "../game/etj_filesystem.h"
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_time_utilities.h"
-#include "etj_client_commands_handler.h"
-#include "etj_player_events_handler.h"
-#include "cg_local.h"
 
 // constants
 inline constexpr int DEMO_SAVE_DELAY = 500;
@@ -67,13 +66,13 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
   if (cg.demoPlayback)
     return;
 
-  playerEventsHandler->subscribe("load",
-                                 [&](const std::vector<std::string> &args) {
-                                   if (etj_autoDemo.integer > 0)
-                                     tryRestart();
-                                 });
+  cgame.handlers.playerEvents->subscribe(
+      "load", [&](const std::vector<std::string> &args) {
+        if (etj_autoDemo.integer > 0)
+          tryRestart();
+      });
 
-  playerEventsHandler->subscribe(
+  cgame.handlers.playerEvents->subscribe(
       "respawn", [&](const std::vector<std::string> &args) {
         if (etj_ad_stopInSpec.integer && DemoRecorder::recordingAutoDemo() &&
             cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR &&
@@ -93,7 +92,7 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
         }
       });
 
-  playerEventsHandler->subscribe(
+  cgame.handlers.playerEvents->subscribe(
       "timerun:completion", [&](const std::vector<std::string> &args) {
         auto clientNum = std::stoi(args[0]);
         if (clientNum != cg.clientNum) {
@@ -105,7 +104,7 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
         }
       });
 
-  playerEventsHandler->subscribe(
+  cgame.handlers.playerEvents->subscribe(
       "timerun:record", [&](const std::vector<std::string> &args) {
         auto clientNum = std::stoi(args[0]);
         if (clientNum != cg.clientNum) {
@@ -116,7 +115,7 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
           trySaveTimerunDemo(sanitize(args[1]), args[2]);
       });
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "ad_save", [&](const std::vector<std::string> &args) {
         if (etj_autoDemo.integer <= 0) {
           return;

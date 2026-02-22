@@ -23,12 +23,9 @@
  */
 
 #include "etj_strafe_quality_drawable.h"
-#include "etj_cvar_update_handler.h"
-#include "etj_client_commands_handler.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
 #include "etj_snaphud.h"
-#include "etj_pmove_utils.h"
-#include "etj_player_events_handler.h"
 
 namespace ETJump {
 StrafeQuality::StrafeQuality() {
@@ -40,22 +37,23 @@ StrafeQuality::StrafeQuality() {
 void StrafeQuality::startListeners() {
   // only subscribe to cvars whose parsing would be inefficient each
   // frame
-  cvarUpdateHandler->subscribe(&etj_strafeQualityColor,
-                               [&](const vmCvar_t *cvar) { parseColor(); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_strafeQualityColor, [&](const vmCvar_t *cvar) { parseColor(); });
 
-  cvarUpdateHandler->subscribe(&etj_strafeQualitySize,
-                               [&](const vmCvar_t *) { setSize(); });
+  cgame.handlers.cvarUpdate->subscribe(&etj_strafeQualitySize,
+                                       [&](const vmCvar_t *) { setSize(); });
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "resetStrafeQuality",
       [&](const std::vector<std::string> &args) { resetStrafeQuality(); });
-  playerEventsHandler->subscribe(
+  cgame.handlers.playerEvents->subscribe(
       "respawn",
       [&](const std::vector<std::string> &args) { resetStrafeQuality(); });
 }
 
 void StrafeQuality::parseColor() {
-  parseColorString(etj_strafeQualityColor.string, _color);
+  cgame.utils.colorParser->parseColorString(etj_strafeQualityColor.string,
+                                            _color);
 }
 
 void StrafeQuality::setSize() {
@@ -86,9 +84,10 @@ bool StrafeQuality::beforeRender() {
   }
 
   // get correct pmove
-  pm = pmoveUtils->getPmove();
+  pm = cgame.utils.pmove->getPmove();
 
-  if (pmoveUtils->skipUpdate(_lastUpdateTime, HUDLerpFlags::STRAFE_QUALITY)) {
+  if (cgame.utils.pmove->skipUpdate(_lastUpdateTime,
+                                    HUDLerpFlags::STRAFE_QUALITY)) {
     return true;
   }
 
@@ -103,9 +102,9 @@ bool StrafeQuality::beforeRender() {
   // check whether user input is good
   const float speed = VectorLength2(ps->velocity);
   vec3_t wishvel;
-  const float wishspeed =
-      pmoveUtils->getWishspeed(wishvel, pm->pmext->scale, pm->pmext->forward,
-                               pm->pmext->right, pm->pmext->up);
+  const float wishspeed = cgame.utils.pmove->getWishspeed(
+      wishvel, pm->pmext->scale, pm->pmext->forward, pm->pmext->right,
+      pm->pmext->up);
   if (speed < wishspeed) {
     // possibly good frame under ground speed if speed increased
     // note that without speed increased you could go forward in

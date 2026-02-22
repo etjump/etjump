@@ -24,8 +24,9 @@
 
 #pragma once
 
-#include "cg_local.h"
 #include "etj_irenderable.h"
+
+#include "../game/q_shared.h"
 
 namespace ETJump {
 class Crosshair : public IRenderable {

@@ -6,8 +6,8 @@
 // It also handles local physics interaction, like fragments bouncing off walls
 
 #include "cg_local.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_trace_utils.h"
 
 #include "../game/etj_entity_utilities_shared.h"
 #include "../game/etj_portalgun_shared.h"
@@ -150,7 +150,7 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
       continue;
     }
 
-    if (ETJump::traceUtils->entityIsIgnored(ent->number)) {
+    if (ETJump::cgame.utils.trace->entityIsIgnored(ent->number)) {
       continue;
     }
 
@@ -1381,7 +1381,7 @@ void CG_PredictPlayerState() {
 
     fflush(stdout);
 
-    ETJump::traceUtils->setupIgnoredEntities(cg.snap->ps.clientNum);
+    ETJump::cgame.utils.trace->setupIgnoredEntities(cg.snap->ps.clientNum);
 
     // unlagged - optimized prediction
     if (etj_optimizePrediction.integer) {
@@ -1440,7 +1440,7 @@ void CG_PredictPlayerState() {
     CG_TouchTriggerPrediction();
   }
 
-  ETJump::traceUtils->resetIgnoredEntities();
+  ETJump::cgame.utils.trace->resetIgnoredEntities();
 
   // unlagged - optimized prediction
   //  do a /condump after a few seconds of this

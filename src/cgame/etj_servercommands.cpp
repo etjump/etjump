@@ -23,10 +23,8 @@
  */
 
 #include "etj_servercommands.h"
-#include "cg_local.h"
-#include "etj_init.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_client_commands_handler.h"
 
 #include "../game/etj_syscall_ext_shared.h"
 #include "../game/etj_string_utilities.h"
@@ -143,35 +141,35 @@ static void callvote(const Arguments &args) {
 }
 
 void registerCommands() {
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "maplist", [](const auto &args) { maplist(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "forceCustomvoteRefresh", [](const auto &) { forceCustomvoteRefresh(); },
       false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "numcustomvotes", [](const auto &args) { numCustomvotes(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "customvotelist", [](const auto &args) { customvoteList(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "pmFlashWindow", [](const auto &) { pmFlashWindow(); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "extShaderIndex", [](const auto &args) { extShaderIndex(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "extShaderState", [](const auto &args) { extShaderState(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "resetStrafeQuality", [](const auto &) { resetStrafeQuality(); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "savePrint", [](const auto &args) { savePrint(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "callvote", [](const auto &args) { callvote(args); }, false);
 }
 } // namespace ETJump::ServerCommands

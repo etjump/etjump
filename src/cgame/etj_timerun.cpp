@@ -78,6 +78,12 @@ void Timerun::registerListeners() {
   playerEventsHandler->subscribe("timerun:interrupt", runEnd);
 }
 
+void Timerun::reset() {
+  playersTimerunInformation[cg.clientNum] = {};
+  // to reset the fade timestamp for 'etj_runtimerAutoHide'
+  playersTimerunInformation[cg.clientNum].lastRunTimer = cg.time;
+}
+
 void Timerun::onStop(const TimerunCommands::Stop *stop) {
   playersTimerunInformation[stop->clientNum].completionTime =
       stop->completionTime;

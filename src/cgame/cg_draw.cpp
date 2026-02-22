@@ -4,12 +4,11 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_crosshair.h"
-#include "etj_client_rtv_handler.h"
-#include "etj_demo_compatibility.h"
 #include "etj_cvar_parser.h"
 #include "etj_trace_utils.h"
+#include "etj_crosshair.h"
 
 #include "../game/etj_string_utilities.h"
 
@@ -1948,9 +1947,9 @@ void CG_CheckForCursorHints() {
   VectorCopy(cg.refdef_current->vieworg, start);
   VectorMA(start, CH_DIST, cg.refdef_current->viewaxis[0], end);
 
-  ETJump::traceUtils->filteredTrace(cg.snap->ps.clientNum, &trace, start,
-                                    nullptr, nullptr, end,
-                                    cg.snap->ps.clientNum, MASK_PLAYERSOLID);
+  ETJump::cgame.utils.trace->filteredTrace(
+      cg.snap->ps.clientNum, &trace, start, nullptr, nullptr, end,
+      cg.snap->ps.clientNum, MASK_PLAYERSOLID);
 
   if (trace.fraction == 1.0f) {
     return;
@@ -2149,8 +2148,6 @@ static void CG_DrawVote() {
   float x_a = 8.0f;
   float x_b = 8.0f;
 
-  const auto rtvHandler = ETJump::rtvHandler;
-
   const std::string str1 = BindingFromName("vote yes");
   const std::string str2 = BindingFromName("vote no");
 
@@ -2222,8 +2219,9 @@ static void CG_DrawVote() {
 
     const bool canVote = cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR ||
                          etj_spectatorVote.integer;
-    const bool isRtvVote = rtvHandler->rtvVoteActive();
-    const ETJump::RtvVoteCountInfo rtvYesVotes = rtvHandler->getRtvYesVotes();
+    const bool isRtvVote = ETJump::cgame.handlers.rtv->rtvVoteActive();
+    const ETJump::RtvVoteCountInfo rtvYesVotes =
+        ETJump::cgame.handlers.rtv->getRtvYesVotes();
 
     const auto formatVoteStr = [&isRtvVote,
                                 &rtvYesVotes](const std::string &str) {
@@ -2232,7 +2230,7 @@ static void CG_DrawVote() {
             rtvYesVotes.playerCount + rtvYesVotes.spectatorCount;
 
         if (!etj_spectatorVote.integer ||
-            ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+            ETJump::cgame.demo.compatibility->flags.noSpecCountInVoteCs) {
           return ETJump::stringFormat(str, std::to_string(totalYes),
                                       std::to_string(cgs.voteNo));
         }
@@ -2245,7 +2243,7 @@ static void CG_DrawVote() {
       }
 
       if (!etj_spectatorVote.integer ||
-          ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+          ETJump::cgame.demo.compatibility->flags.noSpecCountInVoteCs) {
         return ETJump::stringFormat(str, std::to_string(cgs.voteYes),
                                     std::to_string(cgs.voteNo));
       }
@@ -2283,7 +2281,7 @@ static void CG_DrawVote() {
         } else if (cgs.votedNo) {
           std::string yesVotes = "Change map:";
 
-          if (ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+          if (ETJump::cgame.demo.compatibility->flags.noSpecCountInVoteCs) {
             yesVotes += std::to_string(rtvYesVotes.playerCount);
           } else {
             yesVotes += ETJump::stringFormat(
@@ -2326,7 +2324,7 @@ static void CG_DrawVote() {
         } else {
           std::string yesVotes = "Y:";
 
-          if (ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+          if (ETJump::cgame.demo.compatibility->flags.noSpecCountInVoteCs) {
             yesVotes += std::to_string(cgs.voteYes);
           } else {
             yesVotes += ETJump::stringFormat("%i(%i)", cgs.voteYes,
@@ -4298,7 +4296,7 @@ static void CG_Draw2D() {
     CG_CheckForReticle();
 
     // crosshair is the only renderable that should be drawn here
-    for (const auto &r : ETJump::renderables) {
+    for (const auto &r : ETJump::cgame.hud.renderables) {
       if (const auto &crosshair =
               std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
         if (crosshair->beforeRender()) {
@@ -4401,7 +4399,7 @@ static void CG_Draw2D() {
   }
 
   if (!cgs.demoCam.renderingFreeCam) {
-    for (const auto &r : ETJump::renderables) {
+    for (const auto &r : ETJump::cgame.hud.renderables) {
       if (r->beforeRender()) {
         r->render();
       }
@@ -4541,7 +4539,7 @@ void CG_DrawMiscGamemodels() {
 
 namespace ETJump {
 static void drawCoronas() {
-  if (demoCompatibility->flags.serverSideCoronas) {
+  if (cgame.demo.compatibility->flags.serverSideCoronas) {
     return;
   }
 
@@ -4558,7 +4556,7 @@ static void drawCoronas() {
 }
 
 static void drawClientDlights() {
-  if (demoCompatibility->flags.serverSideDlights) {
+  if (cgame.demo.compatibility->flags.serverSideDlights) {
     return;
   }
 

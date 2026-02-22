@@ -14,7 +14,7 @@ add_library(ui MODULE
 	"ui_shared.cpp"
 	"ui_syscalls.cpp"
 	"ui_util.cpp"
-	"../cgame/etj_utilities.cpp"
+	"../cgame/etj_color_parser.cpp"
 	"../game/bg_classes.cpp"
 	"../game/bg_misc.cpp"
 	"../game/bg_sha1.cpp"

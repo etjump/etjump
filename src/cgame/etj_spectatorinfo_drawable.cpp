@@ -23,8 +23,8 @@
  */
 
 #include "etj_spectatorinfo_drawable.h"
+#include "etj_local.h"
 #include "etj_spectatorinfo_data.h"
-#include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
 namespace ETJump {
@@ -36,13 +36,13 @@ SpectatorInfo::SpectatorInfo() {
 }
 
 void SpectatorInfo::startListeners() {
-  cvarUpdateHandler->subscribe(&etj_spectatorInfoScale,
-                               [this](const vmCvar_t *cvar) {
-                                 setTextSize(*cvar);
-                                 setRowHeight();
-                               });
+  cgame.handlers.cvarUpdate->subscribe(&etj_spectatorInfoScale,
+                                       [this](const vmCvar_t *cvar) {
+                                         setTextSize(*cvar);
+                                         setRowHeight();
+                                       });
 
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_spectatorInfoShadow,
       [this](const vmCvar_t *cvar) { setTextStyle(*cvar); });
 }

@@ -23,6 +23,7 @@
  */
 
 #include "etj_custom_command_menu.h"
+#include "cg_local.h"
 #include "etj_consolecommands.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_client_commands_handler.h"

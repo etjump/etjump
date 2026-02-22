@@ -1,12 +1,12 @@
 // cg_event.c -- handle entity events at snapshot or playerstate transitions
 
-#include "cg_local.h"
-#include "etj_demo_compatibility.h"
-#include "etj_entity_events_handler.h"
 #include <algorithm>
-#include "etj_player_events_handler.h"
-#include "../game/etj_string_utilities.h"
+
+#include "cg_local.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
+
+#include "../game/etj_string_utilities.h"
 #include "../game/etj_portalgun_shared.h"
 
 extern void CG_StartShakeCamera(float param, entityState_t *es);
@@ -1534,7 +1534,8 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
 
   // shift event numbers for 'EV_GENERAL_CLIENT_SOUND_VOLUME' due to it
   // getting placed in the middle of entity_events_t enum in 2.3.0
-  if (ETJump::demoCompatibility->flags.adjustEvGeneralClientSoundVolume) {
+  if (ETJump::cgame.demo.compatibility->flags
+          .adjustEvGeneralClientSoundVolume) {
     if (event == EV_GENERAL_CLIENT_SOUND_VOLUME) {
       event = EV_GLOBAL_SOUND;
     } else if (event > EV_GENERAL_CLIENT_SOUND_VOLUME) {
@@ -1545,11 +1546,12 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
   // adjust freestanding events to account for ET_TOKEN_EASY/MEDIUM/HARD,
   // ET_VELOCITY_PUSH_TRIGGER, ET_FAKEBRUSH and ET_TELEPORT_TRIGGER_CLIENT
   // freestanding events always have an eType > ET_EVENTS
-  if ((ETJump::demoCompatibility->flags.adjustEvVelocityPushTrigger ||
-       ETJump::demoCompatibility->flags.adjustEvFakebrushAndClientTeleporter ||
-       ETJump::demoCompatibility->flags.adjustEvTokens) &&
+  if ((ETJump::cgame.demo.compatibility->flags.adjustEvVelocityPushTrigger ||
+       ETJump::cgame.demo.compatibility->flags
+           .adjustEvFakebrushAndClientTeleporter ||
+       ETJump::cgame.demo.compatibility->flags.adjustEvTokens) &&
       es->eType > ET_EVENTS) {
-    event = ETJump::demoCompatibility->adjustedEventNum(event);
+    event = ETJump::cgame.demo.compatibility->adjustedEventNum(event);
   }
 
   if (event == EV_CUSHIONFALLSTEP) {
@@ -1835,7 +1837,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       trap_S_StartSound(nullptr, es->number, CHAN_VOICE,
                         CG_CustomSound(es->number, "*jump1.wav"));
       if (clientNum == cg.predictedPlayerState.clientNum) {
-        ETJump::entityEventsHandler->check(EV_JUMP, cent);
+        ETJump::cgame.handlers.entityEvents->check(EV_JUMP, cent);
       }
       break;
     case EV_TAUNT:
@@ -2085,7 +2087,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
 
       // NOTE: only for other players,
       // 'CG_AddPlayerWeapon' handles this for first person view
-      if (ETJump::demoCompatibility->flags.setAttack2FiringFlag &&
+      if (ETJump::cgame.demo.compatibility->flags.setAttack2FiringFlag &&
           cg.snap->ps.clientNum != cent->currentState.clientNum) {
         cent->currentState.eFlags |= EF_FIRING;
       }
@@ -2101,7 +2103,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
     case EV_FIRE_WEAPON_LASTSHOT:
       // NOTE: only for other players,
       // 'CG_AddPlayerWeapon' handles this for first person view
-      if (ETJump::demoCompatibility->flags.setAttack2FiringFlag &&
+      if (ETJump::cgame.demo.compatibility->flags.setAttack2FiringFlag &&
           cg.snap->ps.clientNum != cent->currentState.clientNum) {
         cent->currentState.eFlags |= EF_FIRING;
       }
@@ -2760,8 +2762,8 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       }
 
       // should refactor users to playereventshandler
-      ETJump::entityEventsHandler->check(EV_LOAD_TELEPORT, cent);
-      ETJump::playerEventsHandler->check("load", {});
+      ETJump::cgame.handlers.entityEvents->check(EV_LOAD_TELEPORT, cent);
+      ETJump::cgame.handlers.playerEvents->check("load", {});
       trap_SendConsoleCommand("resetJumpSpeeds\n");
       trap_SendConsoleCommand("resetStrafeQuality\n");
       trap_SendConsoleCommand("resetUpmoveMeter\n");

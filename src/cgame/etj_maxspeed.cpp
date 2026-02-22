@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-#include "etj_entity_events_handler.h"
-#include "etj_maxspeed.h"
-#include "cg_local.h"
 #include <string>
+
+#include "etj_maxspeed.h"
+#include "etj_entity_events_handler.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_cvar_update_handler.h"
 
 ETJump::DisplayMaxSpeed::DisplayMaxSpeed(
     EntityEventsHandler *entityEventsHandler)
@@ -49,12 +49,12 @@ ETJump::DisplayMaxSpeed::DisplayMaxSpeed(
   });
 
   parseColor(etj_speedColor.string, _color);
-  cvarUpdateHandler->subscribe(&etj_speedColor, [&](const vmCvar_t *cvar) {
-    parseColor(etj_speedColor.string, _color);
-  });
-  cvarUpdateHandler->subscribe(&etj_speedAlpha, [&](const vmCvar_t *cvar) {
-    parseColor(etj_speedColor.string, _color);
-  });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_speedColor,
+      [&](const vmCvar_t *cvar) { parseColor(etj_speedColor.string, _color); });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_speedAlpha,
+      [&](const vmCvar_t *cvar) { parseColor(etj_speedColor.string, _color); });
 }
 
 ETJump::DisplayMaxSpeed::~DisplayMaxSpeed() {
@@ -63,7 +63,7 @@ ETJump::DisplayMaxSpeed::~DisplayMaxSpeed() {
 
 void ETJump::DisplayMaxSpeed::parseColor(const std::string &color,
                                          vec4_t &out) {
-  parseColorString(color, out);
+  cgame.utils.colorParser->parseColorString(color, out);
   out[3] *= etj_speedAlpha.value;
 }
 

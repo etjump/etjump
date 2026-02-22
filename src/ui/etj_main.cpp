@@ -182,6 +182,8 @@ void init(const int32_t legacyClient, const int32_t clientVersion) {
 
   detectClientEngine(legacyClient, clientVersion);
 
+  ui.colorParser = std::make_unique<ColorParser>();
+
   initColorPicker();
   initDemoQueueHandler();
 
@@ -197,6 +199,7 @@ void shutdown() {
   ui.quickConnect = nullptr;
   ui.demoQueue = nullptr;
   ui.colorPicker = nullptr;
+  ui.colorParser = nullptr;
   ui.syscallExt = nullptr;
 }
 } // namespace ETJump

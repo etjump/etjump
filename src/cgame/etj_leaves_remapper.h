@@ -23,7 +23,7 @@
  */
 
 #pragma once
-#include "cg_local.h"
+#include <vector>
 
 #ifdef min
   #undef min
@@ -32,18 +32,34 @@
   #undef max
 #endif
 
-#include <string>
-#include <vector>
-
 namespace ETJump {
-class CvarShadow {
-  const vmCvar_t *_shadow;
-  std::string _target;
+class LeavesRemapper {
+  const char *shaderName{"__etjump-leaves-shader__"};
+  std::vector<const char *> leavesShaders{
+      "models/mapobjects/trees_sd/winterbranch01",
+      "models/mapobjects/tree_temperate_sd/leaves_temperate1",
+      "models/mapobjects/tree_temperate_sd/leaves_temperate2",
+      "models/mapobjects/tree_temperate_sd/leaves_temperate3",
+      "models/mapobjects/tree_desert_sd/palm_leaf1",
+      "models/mapobjects/plants_sd/bush_desert1",
+      "models/mapobjects/plants_sd/bush_desert2",
+      "models/mapobjects/plants_sd/bush_snow1",
+      "models/mapobjects/plants_sd/catail1",
+      "models/mapobjects/plants_sd/catail2",
+      "models/mapobjects/plants_sd/deadbranch1",
+      "models/mapobjects/plants_sd/deadbranch1_damp",
+      "models/mapobjects/plants_sd/deadbranch2",
+      "models/mapobjects/plants_sd/deadbranch3",
+      "models/mapobjects/plants_sd/grassfoliage1",
+      "models/mapobjects/plants_sd/grass_dry3",
+      "models/mapobjects/plants_sd/grass_green1",
+  };
+
+  void turnOnLeaves();
+  void turnOffLeaves();
 
 public:
-  CvarShadow(const vmCvar_t *shadow, const std::string &target);
-  ~CvarShadow();
-  void forceCvarSet(const vmCvar_t *cvar) const;
-  void forceCvarSet() const;
+  LeavesRemapper();
+  ~LeavesRemapper();
 };
 } // namespace ETJump

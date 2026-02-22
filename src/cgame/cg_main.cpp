@@ -9,9 +9,7 @@
 #include <cmath>
 
 #include "cg_local.h"
-#include "etj_init.h"
-#include "etj_cvar_update_handler.h"
-#include "etj_demo_compatibility.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
 #include "etj_rtv_drawable.h"
 #include "etj_custom_command_menu_drawable.h"
@@ -1434,7 +1432,7 @@ void CG_UpdateCvars(void) {
           }
         }
 
-        ETJump::cvarUpdateHandler->check(cv->vmCvar);
+        ETJump::cgame.handlers.cvarUpdate->check(cv->vmCvar);
       }
     }
   }
@@ -3858,7 +3856,8 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   memset(cg_items, 0, sizeof(cg_items));
   memset(&cg_pmove, 0, sizeof(cg_pmove));
 
-  ETJump::cvarUpdateHandler = std::make_unique<ETJump::CvarUpdateHandler>();
+  ETJump::cgame.handlers.cvarUpdate =
+      std::make_unique<ETJump::CvarUpdateHandler>();
 
   cgs.initing = qtrue;
 
@@ -4094,7 +4093,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   Com_Printf("CG_Init... DONE\n");
 
   if (cg.demoPlayback) {
-    ETJump::demoCompatibility->printDemoInformation();
+    ETJump::cgame.demo.compatibility->printDemoInformation();
 
     // notify UI that we're in demo playback
     trap_SendConsoleCommand("uiDemoPlaybackEnabled");

@@ -25,13 +25,14 @@
 #include <string>
 
 #include "cg_local.h"
-#include "etj_console_alpha.h"
+#include "etj_console_shader.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
+
 #include "../game/etj_string_utilities.h"
 
-using namespace ETJump;
-
-ConsoleAlphaHandler::ConsoleAlphaHandler() {
+namespace ETJump {
+ConsoleShader::ConsoleShader() {
   auto shader = createBackground();
   trap_R_LoadDynamicShader(shaderName, shader.c_str());
   // once shader is registered, any changes to dynamic shader will have
@@ -40,14 +41,14 @@ ConsoleAlphaHandler::ConsoleAlphaHandler() {
   trap_R_RemapShader("console-16bit", shaderName, "0");
 }
 
-std::string ConsoleAlphaHandler::createBackground() {
+std::string ConsoleShader::createBackground() {
   if (etj_consoleShader.integer > 0) {
     return createTexturedBackground();
   }
   return createSolidBackground();
 }
 
-std::string ConsoleAlphaHandler::createTexturedBackground() {
+std::string ConsoleShader::createTexturedBackground() {
   auto alphaGen =
       ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
 
@@ -74,9 +75,9 @@ std::string ConsoleAlphaHandler::createTexturedBackground() {
                         }});
 }
 
-std::string ConsoleAlphaHandler::createSolidBackground() {
+std::string ConsoleShader::createSolidBackground() {
   vec4_t bg;
-  parseColorString(etj_consoleColor.string, bg);
+  cgame.utils.colorParser->parseColorString(etj_consoleColor.string, bg);
   auto alphaGen =
       ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
   auto colorGen =
@@ -91,6 +92,7 @@ std::string ConsoleAlphaHandler::createSolidBackground() {
                        }});
 }
 
-ConsoleAlphaHandler::~ConsoleAlphaHandler() {
+ConsoleShader::~ConsoleShader() {
   trap_R_RemapShader("console-16bit", "console-16bit", "0");
 }
+} // namespace ETJump

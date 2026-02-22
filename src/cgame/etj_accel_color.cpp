@@ -25,8 +25,8 @@
 #include <algorithm>
 
 #include "etj_accel_color.h"
-#include "etj_pmove_utils.h"
 #include "etj_cgaz.h"
+#include "etj_local.h"
 
 namespace ETJump {
 void AccelColor::setAccelColor(const int style, const float speed,
@@ -59,7 +59,7 @@ void AccelColor::setAccelColor(const int style, const float speed,
 void AccelColor::calcAccelColor(const pmove_t *pm, const playerState_t *ps,
                                 const vec3_t &accel, vec4_t &outColor) {
   vec4_t color;
-  const usercmd_t *cmd = pmoveUtils->getUserCmd();
+  const usercmd_t *cmd = cgame.utils.pmove->getUserCmd();
 
   float speedX = ps->velocity[0];
   float speedY = ps->velocity[1];
@@ -70,7 +70,7 @@ void AccelColor::calcAccelColor(const pmove_t *pm, const playerState_t *ps,
       RAD2DEG(std::atan2(cmd->rightmove, cmd->forwardmove));
 
   // max acceleration possible per frame
-  const float frameAccel = pmoveUtils->getFrameAccel(true);
+  const float frameAccel = cgame.utils.pmove->getFrameAccel(true);
   const float gravityAccel =
       -std::round(static_cast<float>(ps->gravity) * pm->pmext->frametime);
 

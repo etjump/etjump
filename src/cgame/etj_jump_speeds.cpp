@@ -23,12 +23,9 @@
  */
 
 #include "etj_jump_speeds.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_client_commands_handler.h"
-#include "etj_player_events_handler.h"
 #include "etj_entity_events_handler.h"
-#include "etj_cvar_update_handler.h"
-#include "etj_demo_compatibility.h"
 
 namespace ETJump {
 inline constexpr float BASE_OFFSET_X = 30.0f;
@@ -43,25 +40,25 @@ JumpSpeeds::JumpSpeeds(EntityEventsHandler *entityEventsHandler)
 }
 
 JumpSpeeds::~JumpSpeeds() {
-  consoleCommandsHandler->unsubscribe("resetJumpSpeeds");
-  serverCommandsHandler->unsubscribe("resetJumpSpeeds");
+  cgame.handlers.consoleCommands->unsubscribe("resetJumpSpeeds");
+  cgame.handlers.serverCommands->unsubscribe("resetJumpSpeeds");
   _entityEventsHandler->unsubscribe(EV_JUMP);
 }
 
 void JumpSpeeds::startListeners() {
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "resetJumpSpeeds",
       [&](const std::vector<std::string> &args) { queueJumpSpeedsReset(); });
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "resetJumpSpeeds",
       [&](const std::vector<std::string> &args) { queueJumpSpeedsReset(); });
-  entityEventsHandler->subscribe(EV_JUMP,
-                                 [&](centity_t *cent) { updateJumpSpeeds(); });
-  playerEventsHandler->subscribe(
+  _entityEventsHandler->subscribe(EV_JUMP,
+                                  [&](centity_t *cent) { updateJumpSpeeds(); });
+  cgame.handlers.playerEvents->subscribe(
       "respawn",
       [&](const std::vector<std::string> &args) { queueJumpSpeedsReset(); });
 
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_jumpSpeedsTextSize,
       [this](const vmCvar_t *cvar) { adjustSize(*cvar); });
 }
@@ -107,7 +104,7 @@ void JumpSpeeds::render() const {
   x2 = ETJump_AdjustPosition(x2);
   if (!(etj_jumpSpeedsStyle.integer &
         static_cast<int>(jumpSpeedStyle::NoLabel))) {
-    parseColorString(baseColorStr, color);
+    cgame.utils.colorParser->parseColorString(baseColorStr, color);
     DrawString(x1, y1, size.x, size.y, color, qfalse, label.c_str(), 0,
                textStyle);
 
@@ -202,7 +199,7 @@ void JumpSpeeds::updateJumpSpeeds() {
   team = ps->persistant[PERS_TEAM];
   baseColorStr = etj_jumpSpeedsColor.string;
 
-  if (demoCompatibility->flags.predictedJumpSpeeds) {
+  if (cgame.demo.compatibility->flags.predictedJumpSpeeds) {
     jumpSpeeds.emplace_back(VectorLength2(ps->velocity), baseColorStr);
   } else {
     jumpSpeeds.emplace_back(ps->persistant[PERS_JUMP_SPEED], baseColorStr);
@@ -247,7 +244,8 @@ void JumpSpeeds::adjustColors() {
 
 void JumpSpeeds::colorStrToVec() {
   for (std::size_t i = 0; i < jumpSpeeds.size(); i++) {
-    parseColorString(jumpSpeeds[i].second, jumpSpeedsColors[i]);
+    cgame.utils.colorParser->parseColorString(jumpSpeeds[i].second,
+                                              jumpSpeedsColors[i]);
   }
 }
 

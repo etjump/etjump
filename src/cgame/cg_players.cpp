@@ -6,8 +6,8 @@
  */
 
 #include "cg_local.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_player_bbox.h"
 
 inline constexpr int SWING_RIGHT = 1;
 inline constexpr int SWING_LEFT = 2;
@@ -2364,7 +2364,7 @@ void CG_Player(centity_t *cent) {
   }
 
   if (etj_drawPlayerBBox.integer) {
-    ETJump::playerBBox->drawBBox(ci, cent);
+    ETJump::cgame.visuals.playerBBox->drawBBox(ci, cent);
   }
 }
 
@@ -3271,7 +3271,8 @@ void ETJump_SetEntityAutoTransparency(refEntity_t *ent) {
 
   // don't allow colors to affect default skins/shaders
   if (etj_drawSimplePlayers.integer > 0) {
-    ETJump::parseColorString(etj_simplePlayersColor.string, simplePlayersColor);
+    ETJump::cgame.utils.colorParser->parseColorString(
+        etj_simplePlayersColor.string, simplePlayersColor);
     ent->customShader = cgs.media.simplePlayersShader;
   }
   ETJump_SetEntityRGBA(ent, simplePlayersColor[0], simplePlayersColor[1],

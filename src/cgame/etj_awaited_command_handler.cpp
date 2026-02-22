@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 
-#include "cg_local.h"
-
 #include "etj_awaited_command_handler.h"
+#include "cg_local.h"
+#include "etj_local.h"
 #include "etj_client_commands_handler.h"
-#include "../game/etj_string_utilities.h"
 #include "etj_inline_command_parser.h"
-#include "etj_player_events_handler.h"
+
+#include "../game/etj_string_utilities.h"
 
 ETJump::AwaitedCommandHandler::AwaitedCommandHandler(
     std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler,
@@ -47,7 +47,7 @@ ETJump::AwaitedCommandHandler::AwaitedCommandHandler(
         this->awaitCommand(args);
       });
 
-  playerEventsHandler->subscribe(
+  cgame.handlers.playerEvents->subscribe(
       "timerun:start", [&](const std::vector<std::string> &args) {
         if (_awaitedCommands.size()) {
           CG_AddPMItem(PM_MESSAGE,

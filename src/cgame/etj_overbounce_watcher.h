@@ -27,6 +27,7 @@
 #include <map>
 
 #include "etj_irenderable.h"
+#include "etj_client_commands_handler.h"
 #include "etj_cvar_parser.h"
 
 #include "../game/q_shared.h"

@@ -25,11 +25,10 @@
 #include <string>
 #include <utility>
 
-#include "cg_local.h"
 #include "etj_timerun_view.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_cvar_update_handler.h"
-#include "etj_player_events_handler.h"
+
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
@@ -41,29 +40,32 @@ inline constexpr int POPUP_FADE_TIME = 100;
 TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
     : _timerun(std::move(timerun)), font(&cgs.media.limboFont1),
       autoHide(etj_runTimerAutoHide.integer) {
-  parseColorString(etj_runTimerInactiveColor.string, inactiveTimerColor);
+  cgame.utils.colorParser->parseColorString(etj_runTimerInactiveColor.string,
+                                            inactiveTimerColor);
+
   setRuntimerSize(etj_runtimerSize);
   setCheckpointSize(etj_checkpointsSize);
   setCheckpointPopupSize(etj_checkpointsPopupSize);
 
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_runTimerInactiveColor, [this](const vmCvar_t *cvar) {
-        parseColorString(cvar->string, inactiveTimerColor);
+        cgame.utils.colorParser->parseColorString(cvar->string,
+                                                  inactiveTimerColor);
       });
 
-  cvarUpdateHandler->subscribe(&etj_runtimerSize, [this](const vmCvar_t *cvar) {
-    setRuntimerSize(*cvar);
-  });
+  cgame.handlers.cvarUpdate->subscribe(
+      &etj_runtimerSize,
+      [this](const vmCvar_t *cvar) { setRuntimerSize(*cvar); });
 
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_checkpointsSize,
       [this](const vmCvar_t *cvar) { setCheckpointSize(*cvar); });
 
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_checkpointsPopupSize,
       [this](const vmCvar_t *cvar) { setCheckpointPopupSize(*cvar); });
 
-  cvarUpdateHandler->subscribe(
+  cgame.handlers.cvarUpdate->subscribe(
       &etj_runTimerAutoHide,
       [this](const vmCvar_t *cvar) { autoHide = cvar->integer; });
 
