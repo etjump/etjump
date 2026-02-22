@@ -164,16 +164,15 @@ void CustomMapVotes::loadCustomvotes(const bool init) {
                static_cast<int>(customMapVotes_.size()), filename);
 }
 
-std::string CustomMapVotes::listTypes() const {
-  std::string buf;
-  for (int i = 0; i < customMapVotes_.size(); i++) {
-    if (i != (customMapVotes_.size() - 1)) {
-      buf += customMapVotes_[i].type + ", ";
-    } else {
-      buf += customMapVotes_[i].type;
-    }
+std::vector<std::string> CustomMapVotes::getCustomVoteTypes() const {
+  std::vector<std::string> list;
+  list.reserve(customMapVotes_.size());
+
+  for (const auto &type : customMapVotes_) {
+    list.emplace_back(type.type);
   }
-  return buf;
+
+  return list;
 }
 
 void CustomMapVotes::generateVotesFile() {
@@ -475,11 +474,11 @@ std::string CustomMapVotes::listInfo(const std::string &type) {
 
   for (const auto &customMapVote : customMapVotes_) {
     if (customMapVote.type == type) {
-      buffer += stringFormat("^gMaps on the list ^3%s^g: \n", type);
+      buffer += stringFormat("^7Maps on the list ^3%s:\n\n", type);
       auto numMapsOnServer = customMapVote.mapsOnServer.size();
 
       int count = 0;
-      for (auto &mapOnServer : customMapVote.mapsOnServer) {
+      for (const auto &mapOnServer : customMapVote.mapsOnServer) {
         buffer += stringFormat("^7%-30s", mapOnServer);
 
         ++count;
@@ -489,10 +488,10 @@ std::string CustomMapVotes::listInfo(const std::string &type) {
       }
 
       if (!customMapVote.otherMaps.empty()) {
-        buffer += "\n^gMaps included on the list, but missing on server: \n";
+        buffer += "\n^7Maps included on the list, but missing on server:\n\n";
         count = 0;
         auto numMapsNotOnServer = customMapVote.otherMaps.size();
-        for (auto &mapNotOnServer : customMapVote.otherMaps) {
+        for (const auto &mapNotOnServer : customMapVote.otherMaps) {
           buffer += stringFormat("^9%-30s", mapNotOnServer);
 
           ++count;

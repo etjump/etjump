@@ -606,7 +606,7 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
     // if auto rtv is already off, no point turning it off again
     if (Q_atoi(arg2) == 0 && !g_autoRtv.integer) {
       Printer::popup(ClientNum(ent),
-                     "^gAutomatic Rock The Vote is already turned off.");
+                     "^7Automatic Rock The Vote is already turned off.");
       return G_INVALID;
     }
 
@@ -616,14 +616,14 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
                             va("g_autoRtv %s", level.voteInfo.vote_value));
 
     if (!Q_stricmp(level.voteInfo.vote_value, "0")) {
-      Printer::popupAll("^gAutomatic Rock The Vote has been turned off.");
+      Printer::popupAll("^7Automatic Rock The Vote has been turned off.");
     } else {
       std::string voteMsg;
 
       if (!g_autoRtv.integer) {
-        voteMsg = "^gAutomatic Rock The Vote has been turned on!";
+        voteMsg = "^7Automatic Rock The Vote has been turned on!";
       } else {
-        voteMsg = "^gAutomatic Rock The Vote interval was adjusted!";
+        voteMsg = "^7Automatic Rock The Vote interval was adjusted!";
       }
 
       const int interval = Q_atoi(level.voteInfo.vote_value);
@@ -634,7 +634,7 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
       Printer::popupAll(voteMsg);
       if (nextVoteTime > 0) {
         Printer::popupAll(
-            stringFormat("^gNext vote will be called in ^3%i ^g%s.",
+            stringFormat("^7Next vote will be called in ^3%i ^7%s.",
                          nextVoteTime, minutesStr));
       }
     }

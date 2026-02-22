@@ -150,7 +150,7 @@ bool RockTheVote::checkAutoRtv() {
   if (level.time == autoRtvCooldown - (1000 * 60 * 2) &&
       g_autoRtv.integer >= 2) {
     Printer::chatAll(
-        "^gServer: automatic Rock The Vote will be called in ^32 ^gminutes.");
+        "^7Server: automatic Rock The Vote will be called in ^32 ^7minutes.");
     return false;
   }
 

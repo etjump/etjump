@@ -113,30 +113,41 @@ bool listCustomVotes(gentity_t *ent, Arguments argv) {
   const std::string &cmd = argv->at(0);
 
   if (argv->size() != 2) {
-    std::string types = game.customMapVotes->listTypes();
+    const auto types = game.customMapVotes->getCustomVoteTypes();
 
     if (types.empty()) {
       Printer::console(clientNum, "No custom map votes found on the server.\n");
       return true;
     }
 
-    Printer::console(
-        clientNum,
-        ETJump::stringFormat(
-            "^gAvailable custom map vote lists:\n^z %s\n\n^gUse ^3%s "
-            "[listname] ^gto view maps in the specified list.\n",
-            types, cmd));
+    std::string msg = "Available custom map vote lists:\n\n";
+    size_t count = 0;
+
+    for (const auto &type : types) {
+      msg += ETJump::stringFormat("^7%-20s", type);
+      count++;
+
+      if (count % 3 == 0 || count == types.size()) {
+        msg += "\n";
+      }
+    }
+
+    msg += ETJump::stringFormat(
+        "\n^7Use ^3%s [listname] ^7to view maps in the specified list.\n", cmd);
+    Printer::console(ent, msg);
     return true;
   }
 
   const auto &type = argv->at(1);
   const std::string maplist = game.customMapVotes->listInfo(type);
+
   if (maplist.empty()) {
     Printer::console(
-        clientNum, ETJump::stringFormat("^3%s: ^gcould not find list ^3'%s'\n",
+        clientNum, ETJump::stringFormat("^3%s: ^7could not find list ^3'%s'\n",
                                         cmd, type));
     return false;
   }
+
   Printer::console(clientNum, maplist);
   return true;
 }
@@ -2914,7 +2925,7 @@ bool Commands::List(gentity_t *ent) {
   const int clienNum = ClientNum(ent);
   std::string helpMsg;
 
-  Printer::chat(clienNum, "^3help: ^gcheck console for more information.");
+  Printer::chat(clienNum, "^3help: ^7check console for more information.");
 
   int i = 1;
   std::bitset<256> perm = ETJump::session->Permissions(ent);
@@ -2938,7 +2949,7 @@ bool Commands::List(gentity_t *ent) {
 
   // Let client know if they have access to silent commands
   if (ent && ETJump::session->HasPermission(ent, '/')) {
-    helpMsg += "\n^gUse admin commands silently with ^3/!command\n";
+    helpMsg += "\n^7Use admin commands silently with ^3/!command\n";
   }
 
   Printer::console(clienNum, helpMsg);

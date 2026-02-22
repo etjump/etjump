@@ -58,8 +58,8 @@ public:
   TypeInfo getTypeInfo(const std::string &type) const;
   std::string randomMap(const std::string &type);
   static bool isValidMap(const std::string &mapName);
-  std::string listTypes() const;
-  std::string listInfo(const std::string &name);
+  [[nodiscard]] std::vector<std::string> getCustomVoteTypes() const;
+  std::string listInfo(const std::string &type);
   std::vector<std::string> getMapsOnList(const std::string &name);
   void generateVotesFile();
   size_t getNumVotelists() const;

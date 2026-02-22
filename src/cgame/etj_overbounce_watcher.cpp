@@ -191,13 +191,11 @@ bool OverbounceWatcher::load(const std::string &name) {
 }
 
 void OverbounceWatcher::list() const {
-  CG_Printf("^gSaved OB watcher coordinates\n"
-            "^g-----------------------------------\n");
-  for (const auto &pos : _positions) {
-    CG_Printf("^3%-15s ^7(%f %f %f)%s\n", pos.first.c_str(), pos.second[0],
-              pos.second[1], pos.second[2],
-              _current && VectorCompare(*_current, pos.second) ? " ^9(current)"
-                                                               : "");
+  CG_Printf("Saved OB watcher coordinates:\n\n");
+
+  for (const auto &[name, pos] : _positions) {
+    CG_Printf("^2%-15s ^7%s%s\n", name.c_str(), vtosf(pos),
+              _current && VectorCompare(*_current, pos) ? " ^9(current)" : "");
   }
 }
 

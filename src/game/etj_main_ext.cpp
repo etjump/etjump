@@ -101,7 +101,7 @@ bool checkCheatCvars(gclient_s *client, int flags) {
   bool cheatCvarsEnabled = false;
   const int clientNum = ClientNum(client);
   std::string message =
-      "^gThe following cvars are not allowed on this server:\n";
+      "^7The following cvars are not allowed on this server:\n\n";
 
   if (flags & static_cast<int>(CheatCvarFlags::LookYaw)) {
     message += "^3cl_yawspeed != 0\n"
@@ -113,8 +113,8 @@ bool checkCheatCvars(gclient_s *client, int flags) {
   }
 
   if (flags & static_cast<int>(CheatCvarFlags::PmoveFPS)) {
-    message += "^3pmove_fixed 0 ^gwith:\n"
-               "^3com_maxfps ^goutside of ^325-125\n\"";
+    message += "^3pmove_fixed 0 ^7with:\n"
+               "^3com_maxfps ^7outside of ^325-125\n";
 
     if ((client->pers.maxFPS > 125 || client->pers.maxFPS < 25) &&
         !client->pers.pmoveFixed) {
@@ -124,8 +124,9 @@ bool checkCheatCvars(gclient_s *client, int flags) {
 
   if (cheatCvarsEnabled) {
     trap_SendServerCommand(clientNum, va("cheatCvarsOff %i", flags));
-    Printer::chat(clientNum, "^gCheat cvars are not allowed on this server, "
+    Printer::chat(clientNum, "^7Certain cvars are not allowed on this server, "
                              "check console for more information.\n");
+    message += "\n^7Your cvars have been automatically adjusted.\n";
     Printer::console(clientNum, message);
   }
 
