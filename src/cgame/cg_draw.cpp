@@ -4295,7 +4295,7 @@ static void CG_Draw2D() {
     }
     CG_CheckForReticle();
 
-    // crosshair is the only renderable that should be drawn here
+    // crosshair is the only HUD renderable that should be drawn here
     for (const auto &r : ETJump::cgame.hud.renderables) {
       if (const auto &crosshair =
               std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
@@ -4306,6 +4306,14 @@ static void CG_Draw2D() {
         break;
       }
     }
+
+    // we want to draw UI elements too
+    for (const auto &r : ETJump::cgame.ui.renderables) {
+      if (r->beforeRender()) {
+        r->render();
+      }
+    }
+
     CG_DrawFlashFade();
     return;
   }
@@ -4415,6 +4423,12 @@ static void CG_Draw2D() {
   if (!cg.cameraMode && (cg.snap->ps.stats[STAT_HEALTH] > 0 ||
                          (cg.snap->ps.pm_flags & PMF_FOLLOW))) {
     CG_DrawCrosshairNames();
+  }
+
+  for (const auto &r : ETJump::cgame.ui.renderables) {
+    if (r->beforeRender()) {
+      r->render();
+    }
   }
 
   // Info overlays
