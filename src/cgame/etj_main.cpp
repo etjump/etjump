@@ -168,7 +168,7 @@ static void initCvarUnlockers() {
 
   for (const auto &[shadow, target] : cvars) {
     cgame.utils.cvarUnlocker.emplace_back(
-        std::make_shared<CvarUnlocker>(shadow, target));
+        std::make_unique<CvarUnlocker>(shadow, target));
   }
 }
 
@@ -226,68 +226,51 @@ static void initVisuals() {
   initTrickjumpLines();
 }
 
-static void initDrawKeys(const std::shared_ptr<KeySetSystem> &keySetSystem) {
-  // key set themes
-  const char *keySetNames[]{
-      "keyset",  // Keyset 1 (original)
-      "keyset2", // Aciz: Keyset 2 (DeFRaG style keys)
-      "keyset3",
-      "keyset4",
-      // + add more
-  };
-  for (const auto &keySetName : keySetNames) {
-    keySetSystem->addSet(keySetName);
-  }
-  keySetSystem->addKeyBindSet("keyset5");
-}
-
 static void initHUD() {
   assert(cgame.utils.pmove != nullptr);
 
-  cgame.hud.accelColor = std::make_shared<AccelColor>();
-  cgame.hud.chsDataHandler = std::make_shared<CHSDataHandler>(
+  cgame.hud.accelColor = std::make_unique<AccelColor>();
+  cgame.hud.chsDataHandler = std::make_unique<CHSDataHandler>(
       cgame.handlers.cvarUpdate, cgame.handlers.consoleCommands);
 
-  cgame.hud.renderables.emplace_back(std::make_shared<CHS>(
+  cgame.hud.renderables.emplace_back(std::make_unique<CHS>(
       cgame.handlers.cvarUpdate, cgame.hud.chsDataHandler));
-  cgame.hud.renderables.emplace_back(std::make_shared<OverbounceWatcher>(
+  cgame.hud.renderables.emplace_back(std::make_unique<OverbounceWatcher>(
       cgame.handlers.consoleCommands.get()));
-  cgame.hud.renderables.emplace_back(std::make_shared<OverbounceDetector>());
+  cgame.hud.renderables.emplace_back(std::make_unique<OverbounceDetector>());
   cgame.hud.renderables.emplace_back(
-      std::make_shared<DisplayMaxSpeed>(cgame.handlers.entityEvents.get()));
-  cgame.hud.renderables.emplace_back(std::make_shared<DrawSpeed>());
-  cgame.hud.renderables.emplace_back(std::make_shared<AccelMeter>());
-  cgame.hud.renderables.emplace_back(std::make_shared<StrafeQuality>());
+      std::make_unique<DisplayMaxSpeed>(cgame.handlers.entityEvents.get()));
+  cgame.hud.renderables.emplace_back(std::make_unique<DrawSpeed>());
+  cgame.hud.renderables.emplace_back(std::make_unique<AccelMeter>());
+  cgame.hud.renderables.emplace_back(std::make_unique<StrafeQuality>());
   cgame.hud.renderables.emplace_back(
-      std::make_shared<JumpSpeeds>(cgame.handlers.entityEvents.get()));
-  cgame.hud.renderables.emplace_back(std::make_shared<QuickFollowDrawer>());
-  cgame.hud.renderables.emplace_back(std::make_shared<SpectatorInfo>());
-  cgame.hud.renderables.emplace_back(std::make_shared<AreaIndicator>());
+      std::make_unique<JumpSpeeds>(cgame.handlers.entityEvents.get()));
+  cgame.hud.renderables.emplace_back(std::make_unique<QuickFollowDrawer>());
+  cgame.hud.renderables.emplace_back(std::make_unique<SpectatorInfo>());
+  cgame.hud.renderables.emplace_back(std::make_unique<AreaIndicator>());
 
   if (etj_CGazOnTop.integer) {
-    cgame.hud.renderables.emplace_back(std::make_shared<Snaphud>());
-    cgame.hud.renderables.emplace_back(std::make_shared<CGaz>());
+    cgame.hud.renderables.emplace_back(std::make_unique<Snaphud>());
+    cgame.hud.renderables.emplace_back(std::make_unique<CGaz>());
   } else {
-    cgame.hud.renderables.emplace_back(std::make_shared<CGaz>());
-    cgame.hud.renderables.emplace_back(std::make_shared<Snaphud>());
+    cgame.hud.renderables.emplace_back(std::make_unique<CGaz>());
+    cgame.hud.renderables.emplace_back(std::make_unique<Snaphud>());
   }
 
-  cgame.hud.renderables.emplace_back(std::make_shared<UpperRight>());
-  cgame.hud.renderables.emplace_back(std::make_shared<UpmoveMeter>());
+  cgame.hud.renderables.emplace_back(std::make_unique<UpperRight>());
+  cgame.hud.renderables.emplace_back(std::make_unique<UpmoveMeter>());
 
-  // FIXME: this is dumb, the init should be handled in the constructor
-  const auto keySetSystem = std::make_shared<KeySetSystem>(etj_drawKeys);
-  cgame.hud.renderables.emplace_back(keySetSystem);
-  initDrawKeys(keySetSystem);
+  cgame.hud.renderables.emplace_back(
+      std::make_unique<KeySetSystem>(etj_drawKeys));
 
   // FIXME: move to renderables
   ETJump_ClearDrawables();
-  cgame.hud.timerunView = std::make_shared<TimerunView>(cgame.handlers.timerun);
+  cgame.hud.timerunView = std::make_unique<TimerunView>(cgame.handlers.timerun);
 
   // restores timerun after vid_restart (if required)
   trap_SendClientCommand("timerun_status");
 
-  cgame.hud.renderables.emplace_back(std::make_shared<Crosshair>());
+  cgame.hud.renderables.emplace_back(std::make_unique<Crosshair>());
 }
 
 void init() {
