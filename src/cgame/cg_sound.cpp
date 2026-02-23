@@ -1801,8 +1801,7 @@ void CG_SpeakerEditorDraw(void) {
 
     // render crosshair
     for (const auto &r : ETJump::cgame.hud.renderables) {
-      if (const auto &crosshair =
-              std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
+      if (auto *const crosshair = dynamic_cast<ETJump::Crosshair *>(r.get())) {
         if (crosshair->beforeRender()) {
           crosshair->render();
         }

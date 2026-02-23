@@ -83,7 +83,7 @@ struct Demo {
 
 struct Utils {
   std::shared_ptr<EventLoop> eventLoop;
-  std::vector<std::shared_ptr<CvarUnlocker>> cvarUnlocker;
+  std::vector<std::unique_ptr<CvarUnlocker>> cvarUnlocker;
   std::unique_ptr<SavePos> savePos;
   std::unique_ptr<ColorParser> colorParser;
   std::unique_ptr<TraceUtils> trace;
@@ -105,7 +105,7 @@ struct HUD {
   std::shared_ptr<AccelColor> accelColor;
   std::shared_ptr<CHSDataHandler> chsDataHandler;
 
-  std::vector<std::shared_ptr<IRenderable>> renderables;
+  std::vector<std::unique_ptr<IRenderable>> renderables;
   std::shared_ptr<TimerunView> timerunView;
 };
 

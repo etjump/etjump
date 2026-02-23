@@ -29,7 +29,22 @@
 #include "../game/etj_string_utilities.h"
 
 ETJump::KeySetSystem::KeySetSystem(const vmCvar_t &controlCvar)
-    : keySetMasterDrawer(controlCvar) {}
+    : keySetMasterDrawer(controlCvar) {
+  // key set themes
+  const char *keySetNames[]{
+      "keyset",  // Keyset 1 (original)
+      "keyset2", // Aciz: Keyset 2 (DeFRaG style keys)
+      "keyset3",
+      "keyset4",
+      // + add more
+  };
+
+  for (const auto &keySetName : keySetNames) {
+    addSet(keySetName);
+  }
+
+  addKeyBindSet("keyset5");
+}
 
 ETJump::KeySetSystem::~KeySetSystem() {}
 
