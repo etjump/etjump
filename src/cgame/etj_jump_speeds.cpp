@@ -39,7 +39,7 @@ inline constexpr float DEFAULT_TEXT_SIZE = 0.2f;
 JumpSpeeds::JumpSpeeds(EntityEventsHandler *entityEventsHandler)
     : _entityEventsHandler{entityEventsHandler} {
   startListeners();
-  adjustSize(etj_upmoveMeterTextSize);
+  adjustSize(etj_jumpSpeedsTextSize);
 }
 
 JumpSpeeds::~JumpSpeeds() {
