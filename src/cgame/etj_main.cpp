@@ -190,6 +190,10 @@ static void initDemo() {
 
 static void initUserInterface() {
   cgame.ui.consoleShader = std::make_shared<ConsoleShader>();
+
+  cgame.ui.renderables.emplace_back(std::make_unique<RtvDrawable>());
+  cgame.ui.renderables.emplace_back(
+      std::make_unique<CustomCommandMenuDrawable>());
 }
 
 static void initTrickjumpLines() {
@@ -270,9 +274,6 @@ static void initHUD() {
 
   cgame.hud.renderables.emplace_back(std::make_shared<UpperRight>());
   cgame.hud.renderables.emplace_back(std::make_shared<UpmoveMeter>());
-  cgame.hud.renderables.emplace_back(std::make_shared<RtvDrawable>());
-  cgame.hud.renderables.emplace_back(
-      std::make_shared<CustomCommandMenuDrawable>());
 
   // FIXME: this is dumb, the init should be handled in the constructor
   const auto keySetSystem = std::make_shared<KeySetSystem>(etj_drawKeys);

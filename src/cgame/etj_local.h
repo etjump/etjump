@@ -92,6 +92,7 @@ struct Utils {
 
 struct UI {
   std::shared_ptr<ConsoleShader> consoleShader;
+  std::vector<std::unique_ptr<IRenderable>> renderables;
 };
 
 struct Visuals {
