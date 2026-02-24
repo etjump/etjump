@@ -1363,8 +1363,8 @@ int CG_CalcViewValues() {
     if (!cgs.demoCam.renderingFreeCam) {
       VectorCopy(ps->origin, cg.refdef_current->vieworg);
 
-      if (etj_smoothAngles.integer && cg_pmove.pmove_fixed &&
-          !(ps->pm_flags & PMF_FOLLOW)) {
+      if (!cg.demoPlayback && etj_smoothAngles.integer &&
+          cg_pmove.pmove_fixed && !(ps->pm_flags & PMF_FOLLOW)) {
         ETJump::updateRefdefAngles(ps);
       } else {
         VectorCopy(ps->viewangles, cg.refdefViewAngles);
