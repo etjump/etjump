@@ -550,6 +550,7 @@ void CG_MouseEvent(int x, int y) {
     case CGAME_EVENT_GAMEVIEW:
     case CGAME_EVENT_FIRETEAMMSG:
     case CGAME_EVENT_RTV:
+    case CGAME_EVENT_CUSTOM_COMMAND:
       if (!cgs.demoCam.renderingFreeCam) {
         ETJump::computeCursorPosition(x, y);
 
@@ -664,6 +665,7 @@ void CG_EventHandling(int type, qboolean fForced) {
     case CGAME_EVENT_NONE:
     case CGAME_EVENT_FIRETEAMMSG:
     case CGAME_EVENT_RTV:
+    case CGAME_EVENT_CUSTOM_COMMAND:
     default:
       // default handling (cleanup mostly)
       if (cgs.eventHandling == CGAME_EVENT_GAMEVIEW) {
@@ -729,6 +731,7 @@ void CG_EventHandling(int type, qboolean fForced) {
     trap_Key_SetCatcher(KEYCATCH_CGAME);
   } else if (type == CGAME_EVENT_CUSTOM_COMMAND) {
     cg.showCustomCommandMenu = true;
+    cgDC.cursor.visible = false;
     trap_Cvar_Set("cl_bypassmouseinput", "1");
     trap_Key_SetCatcher(KEYCATCH_CGAME);
   } else {
