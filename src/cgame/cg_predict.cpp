@@ -1023,14 +1023,6 @@ void CG_PredictPlayerState() {
     return;
   }
 
-  if (cg_pmove.ps && cg_pmove.ps->eFlags & EF_MOUNTEDTANK) {
-    centity_t *tank =
-        &cg_entities[cg_entities[cg.snap->ps.clientNum].tagParent];
-
-    cg.pmext.centerangles[YAW] = tank->lerpAngles[YAW];
-    cg.pmext.centerangles[PITCH] = tank->lerpAngles[PITCH];
-  }
-
   // prepare for pmove
   cg_pmove.ps = &cg.predictedPlayerState;
   cg_pmove.pmext = &pmext; //&cg.pmext;
@@ -1059,6 +1051,7 @@ void CG_PredictPlayerState() {
     centity_t *tank =
         &cg_entities[cg_entities[cg.snap->ps.clientNum].tagParent];
 
+    cg.pmext.centerangles[YAW] = tank->lerpAngles[YAW];
     cg.pmext.centerangles[PITCH] = tank->lerpAngles[PITCH];
   }
 
