@@ -3856,6 +3856,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   memset(cg_entities, 0, sizeof(cg_entities));
   memset(cg_weapons, 0, sizeof(cg_weapons));
   memset(cg_items, 0, sizeof(cg_items));
+  memset(&cg_pmove, 0, sizeof(cg_pmove));
 
   ETJump::cvarUpdateHandler = std::make_unique<ETJump::CvarUpdateHandler>();
 
