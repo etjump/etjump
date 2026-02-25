@@ -24,12 +24,57 @@
 
 #pragma once
 
-#include <cstdint>
-
+#include "cg_public.h"
 #include "etj_cgame.h"
 
 namespace ETJump {
 inline constexpr int32_t CGAME_INIT_DELAY_FRAMES = 10;
+
+// we need to reserve the extended value for this, it doesn't matter
+// if the client doesn't actually support CMD_BACKUP_EXT
+inline constexpr int MAX_BACKUP_STATES = CMD_BACKUP_EXT + 2;
+
+enum class FTMenuOptions {
+  FT_DISBAND_PROPOSE = 0,
+  FT_CREATE_LEAVE = 1,
+  FT_INVITE = 2,
+  FT_KICK = 3,
+  FT_WARN = 4,
+  FT_RULES = 5,
+  FT_TJMODE = 6,
+  FT_COUNTDOWN_START = 7,
+  FT_MAX_OPTIONS = 8,
+};
+
+enum class FTMenuMode {
+  FT_VSAY = 0,
+  FT_MANAGE = 1, // create, leave, disband
+  FT_APPLY = 2,
+  FT_PROPOSE = 3,
+  FT_ADMIN = 4
+};
+
+// sub-pages of fireteam menus
+enum class FTMenuPos {
+  FT_MENUPOS_NONE = -1,
+  FT_MENUPOS_INVITE = 2,
+  FT_MENUPOS_KICK = 3,
+  FT_MENUPOS_WARN = 4,
+  FT_MENUPOS_RULES = 5,
+};
+
+enum class FTMenuRulesPos {
+  FT_RULES_RESET = 0,
+  FT_RULES_SAVELIMIT = 1,
+  FT_RULES_NOGHOST = 2
+};
+
+enum AutoSwitchFlags {
+  Disabled = 0 << 0,
+  Enabled = 1 << 0,
+  IfReplacingPrimary = 1 << 1,
+  IgnorePortalGun = 1 << 2,
+};
 
 enum extraTraceOptions {
   OB_DETECTOR,

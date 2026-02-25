@@ -353,29 +353,29 @@ void CG_QuickFireteamAdmin_f() {
   trap_UI_Popup(UIMENU_NONE);
 
   if (cg.showFireteamMenu) {
-    if (cgs.ftMenuMode == static_cast<int>(FTMenuMode::FT_MANAGE)) {
+    if (cgs.ftMenuMode == static_cast<int>(ETJump::FTMenuMode::FT_MANAGE)) {
       CG_EventHandling(CGAME_EVENT_NONE, qfalse);
     } else {
-      cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
+      cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_MANAGE);
     }
   } else {
     CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
-    cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
+    cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_MANAGE);
   }
 }
 
 static void CG_QuickFireteams_f() {
   if (cg.showFireteamMenu) {
-    if (cgs.ftMenuMode == static_cast<int>(FTMenuMode::FT_VSAY)) {
+    if (cgs.ftMenuMode == static_cast<int>(ETJump::FTMenuMode::FT_VSAY)) {
       CG_EventHandling(CGAME_EVENT_NONE, qfalse);
     } else {
-      cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
-      cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
+      cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_VSAY);
+      cgs.ftMenuPos = static_cast<int>(ETJump::FTMenuPos::FT_MENUPOS_NONE);
     }
   } else if (CG_IsOnFireteam(cg.clientNum)) {
     CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
-    cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
-    cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
+    cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_VSAY);
+    cgs.ftMenuPos = static_cast<int>(ETJump::FTMenuPos::FT_MENUPOS_NONE);
   }
 }
 

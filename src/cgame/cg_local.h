@@ -20,6 +20,7 @@
 
 #include "tr_types.h"
 #include "cg_public.h"
+#include "etj_local.h"
 
 inline constexpr float STATS_FADE_TIME = 200.0f;
 inline constexpr int FADE_TIME = 200;
@@ -761,10 +762,6 @@ typedef enum { SHOW_OFF, SHOW_SHUTDOWN, SHOW_ON } showView_t;
 
 void CG_ParseMapEntityInfo(int axis_number, int allied_number);
 
-// we need to reserve the extended value for this, it doesn't matter
-// if the client doesn't actually support CMD_BACKUP_EXT
-inline constexpr int MAX_BACKUP_STATES = CMD_BACKUP_EXT + 2;
-
 typedef struct {
   int clientFrame; // incremented each frame
 
@@ -1173,7 +1170,7 @@ typedef struct {
 
   centity_t *satchelCharge;
 
-  playerState_t backupStates[MAX_BACKUP_STATES];
+  playerState_t backupStates[ETJump::MAX_BACKUP_STATES];
   int backupStateTop;
   int backupStateTail;
   int lastPredictedCommand;
@@ -2148,41 +2145,6 @@ struct range_t {
   bool split;
 };
 
-enum class FTMenuOptions {
-  FT_DISBAND_PROPOSE = 0,
-  FT_CREATE_LEAVE = 1,
-  FT_INVITE = 2,
-  FT_KICK = 3,
-  FT_WARN = 4,
-  FT_RULES = 5,
-  FT_TJMODE = 6,
-  FT_COUNTDOWN_START = 7,
-  FT_MAX_OPTIONS = 8,
-};
-
-enum class FTMenuMode {
-  FT_VSAY = 0,
-  FT_MANAGE = 1, // create, leave, disband
-  FT_APPLY = 2,
-  FT_PROPOSE = 3,
-  FT_ADMIN = 4
-};
-
-// sub-pages of fireteam menus
-enum class FTMenuPos {
-  FT_MENUPOS_NONE = -1,
-  FT_MENUPOS_INVITE = 2,
-  FT_MENUPOS_KICK = 3,
-  FT_MENUPOS_WARN = 4,
-  FT_MENUPOS_RULES = 5,
-};
-
-enum class FTMenuRulesPos {
-  FT_RULES_RESET = 0,
-  FT_RULES_SAVELIMIT = 1,
-  FT_RULES_NOGHOST = 2
-};
-
 //==============================================================================
 
 extern cgs_t cgs;
@@ -3101,13 +3063,6 @@ void CG_EDV_RunInput(void);
 //
 // cg_events.c
 //
-enum AutoSwitchFlags {
-  Disabled = 0 << 0,
-  Enabled = 1 << 0,
-  IfReplacingPrimary = 1 << 1,
-  IgnorePortalGun = 1 << 2,
-};
-
 void CG_CheckEvents(centity_t *cent);
 void CG_EntityEvent(centity_t *cent, vec3_t position);
 void CG_PainEvent(centity_t *cent, int health, qboolean crouching);

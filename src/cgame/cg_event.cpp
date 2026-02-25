@@ -60,7 +60,7 @@ static void CG_ItemPickup(int itemNum) {
                  cgs.media.pmImages[PM_MESSAGE]);
   }
 
-  if (autoSwitch == AutoSwitchFlags::Disabled ||
+  if (autoSwitch == ETJump::AutoSwitchFlags::Disabled ||
       bg_itemlist[itemNum].giType != IT_WEAPON) {
     return;
   }
@@ -88,17 +88,17 @@ static void CG_ItemPickup(int itemNum) {
 
   bool doSwitch = false;
 
-  if (autoSwitch & AutoSwitchFlags::Enabled) {
+  if (autoSwitch & ETJump::AutoSwitchFlags::Enabled) {
     doSwitch = true;
   }
 
-  if (autoSwitch & AutoSwitchFlags::IfReplacingPrimary) {
+  if (autoSwitch & ETJump::AutoSwitchFlags::IfReplacingPrimary) {
     if (isPrimary && !primaryActive) {
       doSwitch = false;
     }
   }
 
-  if (autoSwitch & AutoSwitchFlags::IgnorePortalGun) {
+  if (autoSwitch & ETJump::AutoSwitchFlags::IgnorePortalGun) {
     if (itemID == WP_PORTAL_GUN) {
       doSwitch = false;
     }
