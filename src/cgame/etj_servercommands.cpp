@@ -23,7 +23,7 @@
  */
 
 #include "etj_servercommands.h"
-#include "etj_local.h"
+#include "etj_client_commands_handler.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_syscall_ext_shared.h"

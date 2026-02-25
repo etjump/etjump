@@ -6,7 +6,8 @@
  */
 
 #include "cg_local.h"
-#include "etj_local.h"
+#include "etj_demo_compatibility.h"
+#include "etj_trace_utils.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"

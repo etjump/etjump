@@ -2,7 +2,7 @@
 // not necessarily every single rendered frame
 
 #include "cg_local.h"
-#include "etj_local.h"
+#include "etj_demo_compatibility.h"
 #include "etj_utilities.h"
 
 #if __MACOS__

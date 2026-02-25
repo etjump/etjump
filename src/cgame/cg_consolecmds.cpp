@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "cg_local.h"
-#include "etj_local.h"
+#include "etj_client_commands_handler.h"
 #include "etj_savepos.h"
 #include "etj_utilities.h"
 #include "etj_consolecommands.h"

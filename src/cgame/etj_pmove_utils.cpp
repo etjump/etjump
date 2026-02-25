@@ -23,6 +23,7 @@
  */
 
 #include "etj_pmove_utils.h"
+#include "cg_local.h"
 #include "etj_cvar_update_handler.h"
 
 #include "../game/bg_local.h"

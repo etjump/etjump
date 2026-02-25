@@ -3,7 +3,9 @@
 #include <algorithm>
 
 #include "cg_local.h"
-#include "etj_local.h"
+#include "etj_demo_compatibility.h"
+#include "etj_entity_events_handler.h"
+#include "etj_player_events_handler.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"

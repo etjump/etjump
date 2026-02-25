@@ -22,26 +22,51 @@
  * SOFTWARE.
  */
 
+#include "cg_local.h"
+
 #include "etj_accelmeter_drawable.h"
 #include "etj_areaindicator_drawable.h"
+#include "etj_autodemo_recorder.h"
+#include "etj_awaited_command_handler.h"
+#include "etj_cgame.h"
 #include "etj_cgaz.h"
 #include "etj_chs_drawable.h"
+#include "etj_client_authentication.h"
+#include "etj_client_commands_handler.h"
+#include "etj_client_rtv_handler.h"
+#include "etj_color_parser.h"
+#include "etj_console_shader.h"
 #include "etj_consolecommands.h"
 #include "etj_crosshair.h"
+#include "etj_custom_command_menu.h"
 #include "etj_custom_command_menu_drawable.h"
+#include "etj_cvar_unlocker.h"
+#include "etj_demo_compatibility.h"
+#include "etj_entity_events_handler.h"
+#include "etj_event_loop.h"
 #include "etj_jump_speeds.h"
 #include "etj_keyset_system.h"
+#include "etj_leaves_remapper.h"
 #include "etj_local.h"
 #include "etj_maxspeed.h"
+#include "etj_operating_system.h"
 #include "etj_overbounce_detector.h"
 #include "etj_overbounce_watcher.h"
+#include "etj_player_bbox.h"
+#include "etj_player_events_handler.h"
+#include "etj_pmove_utils.h"
 #include "etj_quick_follow_drawable.h"
 #include "etj_rtv_drawable.h"
+#include "etj_savepos.h"
 #include "etj_servercommands.h"
 #include "etj_snaphud.h"
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_speed_drawable.h"
 #include "etj_strafe_quality_drawable.h"
+#include "etj_timerun.h"
+#include "etj_timerun_view.h"
+#include "etj_trace_utils.h"
+#include "etj_trickjump_lines.h"
 #include "etj_upmove_meter_drawable.h"
 #include "etj_upper_right_drawable.h"
 
@@ -331,4 +356,6 @@ void shutdown() {
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
                                      " shutdown... " S_COLOR_GREEN "DONE\n");
 }
+
+CGameContext cgame;
 } // namespace ETJump

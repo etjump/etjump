@@ -23,8 +23,10 @@
  */
 
 #include "etj_consolecommands.h"
+#include "etj_client_commands_handler.h"
 #include "etj_demo_compatibility.h"
 #include "etj_local.h"
+#include "cg_local.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"

@@ -4188,54 +4188,6 @@ void ETJump_AdjustPosition(float *x);
 float ETJump_AdjustPosition(float x);
 void ETJump_EnableWidthScale(bool enable);
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Global ETJump objects
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-namespace ETJump {
-enum extraTraceOptions {
-  OB_DETECTOR,
-  SLICK_DETECTOR,
-  NJD_DETECTOR,
-  CHS_10_11,
-  CHS_12,
-  CHS_13_15,
-  CHS_16,
-  CHS_53,
-};
-
-enum class ChatHighlightFlags {
-  HIGHLIGHT_BEEPER = 1,
-  HIGHLIGHT_FLASH = 2,
-};
-
-enum class HUDLerpFlags {
-  DRAWSPEED2 = 1 << 0,
-  CGAZ = 1 << 1,
-  SNAPHUD = 1 << 2,
-  STRAFE_QUALITY = 1 << 3,
-};
-
-enum class ExecFileType {
-  NONE = 0,
-  MAP_AUTOEXEC = 1 << 0,
-  TEAM_AUTOEXEC = 1 << 1,
-};
-
-enum class HideFlamethrowerFlags {
-  HIDE_SELF = 1 << 0,
-  HIDE_OTHERS = 1 << 1,
-};
-
-enum class ChatMessageType {
-  DEFAULT = 0,         // normal message from any team
-  REPLAY_MSG = 1 << 0, // chat replay message
-  SERVER_MSG = 1 << 1, // server console chat message
-};
-} // namespace ETJump
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 extern displayContextDef_t *DC;
 
 #endif // CG_LOCAL_H

@@ -24,7 +24,7 @@
 
 #include "etj_overbounce_detector.h"
 #include "etj_overbounce_shared.h"
-#include "etj_local.h"
+#include "etj_trace_utils.h"
 #include "etj_utilities.h"
 
 namespace ETJump {

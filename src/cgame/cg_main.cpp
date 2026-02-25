@@ -9,7 +9,8 @@
 #include <cmath>
 
 #include "cg_local.h"
-#include "etj_local.h"
+#include "etj_cvar_update_handler.h"
+#include "etj_demo_compatibility.h"
 #include "etj_utilities.h"
 #include "etj_rtv_drawable.h"
 #include "etj_custom_command_menu_drawable.h"

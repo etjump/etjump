@@ -6,7 +6,8 @@
  */
 
 #include "cg_local.h"
-#include "etj_local.h"
+#include "etj_color_parser.h"
+#include "etj_player_bbox.h"
 #include "etj_utilities.h"
 
 inline constexpr int SWING_RIGHT = 1;

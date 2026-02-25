@@ -23,7 +23,8 @@
  */
 
 #include "etj_player_bbox.h"
-#include "etj_local.h"
+#include "etj_color_parser.h"
+#include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
 namespace ETJump {

@@ -29,7 +29,8 @@
 #include <algorithm>
 
 #include "etj_chs_drawable.h"
-#include "etj_local.h"
+#include "etj_color_parser.h"
+#include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
 // TODO: make font size configurable via cvars

@@ -23,7 +23,12 @@
  */
 
 #include "etj_jump_speeds.h"
-#include "etj_local.h"
+#include "etj_client_commands_handler.h"
+#include "etj_color_parser.h"
+#include "etj_cvar_update_handler.h"
+#include "etj_demo_compatibility.h"
+#include "etj_entity_events_handler.h"
+#include "etj_player_events_handler.h"
 #include "etj_utilities.h"
 
 namespace ETJump {

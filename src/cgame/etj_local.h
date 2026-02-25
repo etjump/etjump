@@ -24,102 +24,52 @@
 
 #pragma once
 
-#include <memory>
+#include <cstdint>
 
-#include "etj_accel_color.h"
-#include "etj_autodemo_recorder.h"
-#include "etj_awaited_command_handler.h"
-#include "etj_chs_data.h"
-#include "etj_client_authentication.h"
-#include "etj_client_commands_handler.h"
-#include "etj_client_rtv_handler.h"
-#include "etj_color_parser.h"
-#include "etj_console_shader.h"
-#include "etj_custom_command_menu.h"
-#include "etj_cvar_unlocker.h"
-#include "etj_cvar_update_handler.h"
-#include "etj_demo_compatibility.h"
-#include "etj_entity_events_handler.h"
-#include "etj_event_loop.h"
-#include "etj_irenderable.h"
-#include "etj_leaves_remapper.h"
-#include "etj_operating_system.h"
-#include "etj_player_bbox.h"
-#include "etj_player_events_handler.h"
-#include "etj_pmove_utils.h"
-#include "etj_savepos.h"
-#include "etj_timerun.h"
-#include "etj_timerun_view.h"
-#include "etj_trace_utils.h"
-#include "etj_trickjump_lines.h"
-
-#include "../game/etj_syscall_ext_shared.h"
+#include "etj_cgame.h"
 
 namespace ETJump {
 inline constexpr int32_t CGAME_INIT_DELAY_FRAMES = 10;
 
-struct Handlers {
-  std::shared_ptr<ClientCommandsHandler> serverCommands;
-  std::shared_ptr<ClientCommandsHandler> consoleCommands;
-  std::shared_ptr<EntityEventsHandler> entityEvents;
-  std::shared_ptr<PlayerEventsHandler> playerEvents;
-  std::unique_ptr<AwaitedCommandHandler> awaitedCommand;
-  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
-  std::unique_ptr<ClientRtvHandler> rtv;
-  std::unique_ptr<CustomCommandMenu> customCommandMenu;
-  std::shared_ptr<Timerun> timerun;
+enum extraTraceOptions {
+  OB_DETECTOR,
+  SLICK_DETECTOR,
+  NJD_DETECTOR,
+  CHS_10_11,
+  CHS_12,
+  CHS_13_15,
+  CHS_16,
+  CHS_53,
 };
 
-struct Platform {
-  std::unique_ptr<ClientAuthentication> authentication;
-  std::unique_ptr<OperatingSystem> operatingSystem;
-  std::unique_ptr<SyscallExt> syscallExt;
+enum class ChatHighlightFlags {
+  HIGHLIGHT_BEEPER = 1,
+  HIGHLIGHT_FLASH = 2,
 };
 
-struct Demo {
-  std::unique_ptr<DemoCompatibility> compatibility;
-  std::unique_ptr<AutoDemoRecorder> autoDemoRecorder;
+enum class HUDLerpFlags {
+  DRAWSPEED2 = 1 << 0,
+  CGAZ = 1 << 1,
+  SNAPHUD = 1 << 2,
+  STRAFE_QUALITY = 1 << 3,
 };
 
-struct Utils {
-  std::unique_ptr<EventLoop> eventLoop;
-  std::vector<std::unique_ptr<CvarUnlocker>> cvarUnlocker;
-  std::unique_ptr<SavePos> savePos;
-  std::unique_ptr<ColorParser> colorParser;
-  std::unique_ptr<TraceUtils> trace;
-  std::unique_ptr<PmoveUtils> pmove;
+enum class ExecFileType {
+  NONE = 0,
+  MAP_AUTOEXEC = 1 << 0,
+  TEAM_AUTOEXEC = 1 << 1,
 };
 
-struct UI {
-  std::unique_ptr<ConsoleShader> consoleShader;
-  std::vector<std::unique_ptr<IRenderable>> renderables;
+enum class HideFlamethrowerFlags {
+  HIDE_SELF = 1 << 0,
+  HIDE_OTHERS = 1 << 1,
 };
 
-struct Visuals {
-  std::unique_ptr<LeavesRemapper> leavesRemapper;
-  std::unique_ptr<PlayerBBox> playerBBox;
-  std::unique_ptr<TrickjumpLines> trickjumpLines;
+enum class ChatMessageType {
+  DEFAULT = 0,         // normal message from any team
+  REPLAY_MSG = 1 << 0, // chat replay message
+  SERVER_MSG = 1 << 1, // server console chat message
 };
-
-struct HUD {
-  std::shared_ptr<AccelColor> accelColor;
-  std::shared_ptr<CHSDataHandler> chsDataHandler;
-
-  std::vector<std::unique_ptr<IRenderable>> renderables;
-  std::unique_ptr<TimerunView> timerunView;
-};
-
-struct CGameContext {
-  Handlers handlers;
-  Platform platform;
-  Demo demo;
-  Utils utils;
-  UI ui;
-  Visuals visuals;
-  HUD hud;
-};
-
-inline CGameContext cgame;
 
 void init();
 void shutdown();
@@ -127,4 +77,6 @@ void shutdown();
 // to work around issues that certain actions have when they are performed
 // on the same frame as the module is initialized
 void delayedInit();
+
+extern CGameContext cgame;
 } // namespace ETJump
