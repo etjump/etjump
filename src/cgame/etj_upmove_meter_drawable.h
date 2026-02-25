@@ -29,6 +29,10 @@
 #include "etj_cvar_parser.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+class ClientCommandsHandler;
+class PlayerEventsHandler;
+
 class UpmoveMeter : public IRenderable {
   typedef enum {
     AIR_NOJUMP,       // player is midair, not holding the jump button
@@ -53,20 +57,20 @@ class UpmoveMeter : public IRenderable {
     int preDelay;
     int fullDelay;
 
-    mutable vec4_t graph_xywh;
-    mutable vec2_t text_xh;
+    vec4_t graph_xywh;
+    vec2_t text_xh;
 
-    mutable vec4_t graph_rgba;
-    mutable vec4_t graph_rgbaPostJump;
-    mutable vec4_t graph_rgbaOnGround;
-    mutable vec4_t graph_rgbaPreJump;
-    mutable vec4_t graph_outline_rgba;
-    mutable vec4_t text_rgba;
+    vec4_t graph_rgba;
+    vec4_t graph_rgbaPostJump;
+    vec4_t graph_rgbaOnGround;
+    vec4_t graph_rgbaPreJump;
+    vec4_t graph_outline_rgba;
+    vec4_t text_rgba;
   } jump_t;
 
-  jump_t jump_{};
+  jump_t jump{};
 
-  int team_;
+  int team{};
 
   // default absolute hud position
   static constexpr float graphX_ = 8.0f;
@@ -78,15 +82,23 @@ class UpmoveMeter : public IRenderable {
   const pmove_t *pm{};
   const playerState_t *ps = &cg.predictedPlayerState;
 
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
+  std::shared_ptr<PlayerEventsHandler> playerEvents;
+
   void startListeners();
   void parseAllColors();
-  void setTextSize();
+  void setTextSize(const vmCvar_t *cvar);
   void resetUpmoveMeter();
   bool canSkipDraw() const;
   bool canSkipUpdate() const;
 
 public:
-  UpmoveMeter();
+  UpmoveMeter(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+              const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+              const std::shared_ptr<PlayerEventsHandler> &playerEvents);
+  ~UpmoveMeter() override;
+
   bool beforeRender() override;
   void render() const override;
 };

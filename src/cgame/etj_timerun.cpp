@@ -39,6 +39,14 @@ Timerun::Timerun(
   registerListeners();
 }
 
+Timerun::~Timerun() {
+  serverCommandsHandler->unsubscribe("timerun");
+
+  playerEventsHandler->unsubscribe("timerun:start");
+  playerEventsHandler->unsubscribe("timerun:stop");
+  playerEventsHandler->unsubscribe("timerun:interupt");
+}
+
 void Timerun::registerListeners() {
   // this is awkward, but the timerun command deserializer *really* wants
   // the first argument to be 'timerun', but we don't get that here

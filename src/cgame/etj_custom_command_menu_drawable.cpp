@@ -119,17 +119,21 @@ static panel_button_t commandMenuItemText = {
 static std::vector<panel_button_t> commandMenuPanels;
 uint8_t CustomCommandMenuDrawable::currentPage = 1;
 
-CustomCommandMenuDrawable::CustomCommandMenuDrawable() {
+CustomCommandMenuDrawable::CustomCommandMenuDrawable(
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+    : consoleCommands(consoleCommands) {
   setupListeners();
   setupPanels();
 }
 
 CustomCommandMenuDrawable::~CustomCommandMenuDrawable() {
   commandMenuPanels.clear();
+
+  consoleCommands->unsubscribe("openCustomCommandMenu");
 }
 
 void CustomCommandMenuDrawable::setupListeners() {
-  cgame.handlers.consoleCommands->subscribe(
+  consoleCommands->subscribe(
       "openCustomCommandMenu", [](const std::vector<std::string> &args) {
         if (args.empty()) {
           openMenu(currentPage);

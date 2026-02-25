@@ -23,15 +23,22 @@
  */
 
 #include "etj_pmove_utils.h"
-#include "etj_local.h"
+#include "etj_cvar_update_handler.h"
 
 #include "../game/bg_local.h"
 
 namespace ETJump {
-PmoveUtils::PmoveUtils() {
+PmoveUtils::PmoveUtils(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : cvarUpdate(cvarUpdate) {
   initCvars();
   setupCallbacks();
   setPmoveStatus();
+}
+
+PmoveUtils::~PmoveUtils() {
+  for (const auto &cvar : cvars) {
+    cvarUpdate->unsubscribe(cvar);
+  }
 }
 
 void PmoveUtils::initCvars() {
@@ -45,8 +52,7 @@ void PmoveUtils::initCvars() {
 
 void PmoveUtils::setupCallbacks() {
   for (const auto &cvar : cvars) {
-    cgame.handlers.cvarUpdate->subscribe(
-        cvar, [this](const vmCvar_t *) { setPmoveStatus(); });
+    cvarUpdate->subscribe(cvar, [this](const vmCvar_t *) { setPmoveStatus(); });
   }
 }
 

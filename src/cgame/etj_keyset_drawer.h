@@ -26,11 +26,12 @@
 
 #include <vector>
 
-#include "cg_local.h"
 #include "etj_irenderable.h"
 #include "etj_cvar_parser.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+
 class KeySetDrawer : public IRenderable {
 public:
   enum class KeyNames {
@@ -60,8 +61,10 @@ public:
     qhandle_t release;
   };
 
-  KeySetDrawer(const std::vector<KeyShader> &keyShaders);
-  virtual ~KeySetDrawer() {};
+  KeySetDrawer(const std::vector<KeyShader> &keyShaders,
+               const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~KeySetDrawer() override;
+
   void render() const override;
   // FIXME: this should to be refactored, see etj_cvar_master_drawer.cpp/h,
   //  this whole system with keysets is more complex than it needs to be
@@ -82,13 +85,15 @@ protected:
     bool shouldDrawShadow;
   };
 
-  KeyAttrs attrs;
-  const std::vector<KeyShader> keyShaders;
+  KeyAttrs attrs{};
+  std::vector<KeyShader> keyShaders;
+
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 
   void initListeners();
   void initAttrs();
   void updateKeysColor(const char *str);
-  void updateKeysSize();
+  void updateKeysSize(const vmCvar_t *cvar);
   void updateKeysOrigin(float x, float y);
   void updateKeysShadow(bool shouldDrawShadow);
   void updateKeysShadowColor(const vec4_t shadowColor);

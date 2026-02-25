@@ -29,7 +29,6 @@
 #include <algorithm>
 
 #include "etj_chs_drawable.h"
-#include "cg_local.h"
 #include "etj_local.h"
 #include "etj_utilities.h"
 

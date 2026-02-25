@@ -36,7 +36,12 @@
 // https://github.com/Jelvan1/cgame_proxymod/
 
 namespace ETJump {
-Snaphud::Snaphud() {
+Snaphud::Snaphud(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : cvarUpdate(cvarUpdate) {
+  if (!this->cvarUpdate) {
+    return;
+  }
+
   cgame.utils.colorParser->parseColorString(etj_snapHUDColor1.string,
                                             snaphudColors[0]);
   cgame.utils.colorParser->parseColorString(etj_snapHUDColor2.string,
@@ -53,27 +58,33 @@ Snaphud::Snaphud() {
   startListeners();
 }
 
+Snaphud::~Snaphud() {
+  if (!cvarUpdate) {
+    return;
+  }
+
+  cvarUpdate->unsubscribe(&etj_snapHUDColor1);
+  cvarUpdate->unsubscribe(&etj_snapHUDColor2);
+  cvarUpdate->unsubscribe(&etj_snapHUDHLColor1);
+  cvarUpdate->unsubscribe(&etj_snapHUDHLColor2);
+}
+
 void Snaphud::startListeners() {
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_snapHUDColor1, [&](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(etj_snapHUDColor1.string,
-                                                  snaphudColors[0]);
-      });
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_snapHUDColor2, [&](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(etj_snapHUDColor2.string,
-                                                  snaphudColors[1]);
-      });
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_snapHUDHLColor1, [&](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor1.string,
-                                                  snaphudColors[2]);
-      });
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_snapHUDHLColor2, [&](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor2.string,
-                                                  snaphudColors[3]);
-      });
+  cvarUpdate->subscribe(&etj_snapHUDColor1, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, snaphudColors[0]);
+  });
+
+  cvarUpdate->subscribe(&etj_snapHUDColor2, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, snaphudColors[1]);
+  });
+
+  cvarUpdate->subscribe(&etj_snapHUDHLColor1, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, snaphudColors[2]);
+  });
+
+  cvarUpdate->subscribe(&etj_snapHUDHLColor2, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, snaphudColors[3]);
+  });
 }
 
 void Snaphud::InitSnaphud(vec3_t wishvel, const int8_t uCmdScale) {
@@ -374,7 +385,9 @@ void Snaphud::render() const {
 Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
                                              const pmove_t *pm,
                                              const bool upmoveTrueness) {
-  static Snaphud s;
+  // FIXME: this whole thing is kinda dumb, snaphud probably should be
+  // split into data + renderable classes like CHS
+  static Snaphud s(nullptr);
   CurrentSnap cs{};
 
   // get player yaw

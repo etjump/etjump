@@ -25,26 +25,37 @@
 #pragma once
 
 #include "cg_local.h"
-#include "etj_entity_events_handler.h"
 #include "etj_irenderable.h"
 #include "etj_cvar_parser.h"
 
 namespace ETJump {
+class EntityEventsHandler;
+class ClientCommandsHandler;
+class CvarUpdateHandler;
+class EntityEventsHandler;
+class PlayerEventsHandler;
+
 class JumpSpeeds : public IRenderable {
 public:
-  explicit JumpSpeeds(EntityEventsHandler *entityEventsHandler);
-  ~JumpSpeeds();
+  explicit JumpSpeeds(
+      const std::shared_ptr<EntityEventsHandler> &entityEvents,
+      const std::shared_ptr<PlayerEventsHandler> &playerEvents,
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+      const std::shared_ptr<ClientCommandsHandler> &serverCommands,
+      const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~JumpSpeeds() override;
 
   void render() const override;
   bool beforeRender() override;
 
 private:
-  EntityEventsHandler *_entityEventsHandler;
-  static const int MAX_JUMPS = 10;
-  std::vector<std::pair<int, std::string>>
-      jumpSpeeds;              // jumpspeeds + color string
-  vec4_t jumpSpeedsColors[10]; // jumpspeed colors parsed to vec4_t for
-                               // drawing
+  static constexpr int MAX_JUMPS = 10;
+
+  // jumpspeeds + color string
+  std::vector<std::pair<int, std::string>> jumpSpeeds;
+  // jumpspeed colors parsed to vec4_t for drawing
+  vec4_t jumpSpeedsColors[MAX_JUMPS]{};
+
   std::string baseColorStr = etj_jumpSpeedsColor.string;
   std::string fasterColorStr = etj_jumpSpeedsFasterColor.string;
   std::string slowerColorStr = etj_jumpSpeedsSlowerColor.string;
@@ -55,6 +66,12 @@ private:
   enum class jumpSpeedStyle { Horizontal = 1, NoLabel = 2, Reversed = 4 };
 
   CvarValue::Size size{};
+
+  std::shared_ptr<EntityEventsHandler> entityEvents;
+  std::shared_ptr<PlayerEventsHandler> playerEvents;
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
+  std::shared_ptr<ClientCommandsHandler> serverCommands;
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 
   void startListeners();
   void updateJumpSpeeds();

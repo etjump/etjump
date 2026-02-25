@@ -28,36 +28,49 @@
 #include "etj_snaphud.h"
 
 namespace ETJump {
-StrafeQuality::StrafeQuality() {
-  parseColor();
-  setSize();
+StrafeQuality::StrafeQuality(
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+    const std::shared_ptr<PlayerEventsHandler> &playerEvents)
+    : cvarUpdate(cvarUpdate), consoleCommands(consoleCommands),
+      playerEvents(playerEvents) {
+  parseColor(&etj_strafeQualityColor);
+  setSize(&etj_strafeQualitySize);
   startListeners();
 }
 
+StrafeQuality::~StrafeQuality() {
+  cvarUpdate->unsubscribe(&etj_strafeQualityColor);
+  cvarUpdate->unsubscribe(&etj_strafeQualitySize);
+
+  consoleCommands->unsubscribe("resetStrafeQuality");
+
+  playerEvents->unsubscribe("respawn");
+}
+
 void StrafeQuality::startListeners() {
-  // only subscribe to cvars whose parsing would be inefficient each
-  // frame
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_strafeQualityColor, [&](const vmCvar_t *cvar) { parseColor(); });
+  // only subscribe to cvars whose parsing would be inefficient each frame
+  cvarUpdate->subscribe(&etj_strafeQualityColor,
+                        [this](const vmCvar_t *cvar) { parseColor(cvar); });
 
-  cgame.handlers.cvarUpdate->subscribe(&etj_strafeQualitySize,
-                                       [&](const vmCvar_t *) { setSize(); });
+  cvarUpdate->subscribe(&etj_strafeQualitySize,
+                        [this](const vmCvar_t *cvar) { setSize(cvar); });
 
-  cgame.handlers.consoleCommands->subscribe(
+  consoleCommands->subscribe(
       "resetStrafeQuality",
-      [&](const std::vector<std::string> &args) { resetStrafeQuality(); });
-  cgame.handlers.playerEvents->subscribe(
-      "respawn",
-      [&](const std::vector<std::string> &args) { resetStrafeQuality(); });
+      [this](const std::vector<std::string> &) { resetStrafeQuality(); });
+
+  playerEvents->subscribe("respawn", [this](const std::vector<std::string> &) {
+    resetStrafeQuality();
+  });
 }
 
-void StrafeQuality::parseColor() {
-  cgame.utils.colorParser->parseColorString(etj_strafeQualityColor.string,
-                                            _color);
+void StrafeQuality::parseColor(const vmCvar_t *cvar) {
+  cgame.utils.colorParser->parseColorString(cvar->string, color);
 }
 
-void StrafeQuality::setSize() {
-  size = CvarValueParser::parse<CvarValue::Size>(etj_strafeQualitySize, 0, 10);
+void StrafeQuality::setSize(const vmCvar_t *cvar) {
+  size = CvarValueParser::parse<CvarValue::Size>(*cvar, 0, 10);
   size.x *= 0.1f;
   size.y *= 0.1f;
 }
@@ -65,14 +78,14 @@ void StrafeQuality::setSize() {
 void StrafeQuality::resetStrafeQuality() {
   // reset underlying vars, but not what is rendered until actually
   // needed
-  _totalFrames = _goodFrames = _oldSpeed = 0;
+  totalFrames = goodFrames = oldSpeed = 0;
 }
 
 bool StrafeQuality::beforeRender() {
   // update team before checking if we should draw or not,
   // since we don't draw for spectators
-  if (_team != ps->persistant[PERS_TEAM]) {
-    _team = ps->persistant[PERS_TEAM];
+  if (team != ps->persistant[PERS_TEAM]) {
+    team = ps->persistant[PERS_TEAM];
     // reset strafe quality upon team change
     // note: not handled by consoleCommandsHandler because _team
     // is needed in render() either ways
@@ -86,7 +99,7 @@ bool StrafeQuality::beforeRender() {
   // get correct pmove
   pm = cgame.utils.pmove->getPmove();
 
-  if (cgame.utils.pmove->skipUpdate(_lastUpdateTime,
+  if (cgame.utils.pmove->skipUpdate(lastUpdateTime,
                                     HUDLerpFlags::STRAFE_QUALITY)) {
     return true;
   }
@@ -97,7 +110,7 @@ bool StrafeQuality::beforeRender() {
   }
 
   // count this frame towards strafe quality
-  ++_totalFrames;
+  ++totalFrames;
 
   // check whether user input is good
   const float speed = VectorLength2(ps->velocity);
@@ -109,48 +122,48 @@ bool StrafeQuality::beforeRender() {
     // possibly good frame under ground speed if speed increased
     // note that without speed increased you could go forward in
     // a "ps.speed - 1" angle endlessly because of velocity snapping
-    if (speed > _oldSpeed) {
+    if (speed > oldSpeed) {
       // good frame if no upmove and either only forwardmove or only rightmove
       if (pm->cmd.upmove == 0 &&
           ((pm->cmd.forwardmove != 0 && pm->cmd.rightmove == 0) ||
            (pm->cmd.forwardmove == 0 && pm->cmd.rightmove != 0))) {
-        ++_goodFrames;
+        ++goodFrames;
       }
       // otherwise only half as good because not optimal
       else {
-        _goodFrames += 0.5;
+        goodFrames += 0.5;
       }
     }
   } else {
     // good frame above ground speed if no upmove and in main accel zone
     if (pm->cmd.upmove == 0 && Snaphud::inMainAccelZone(*ps, pm)) {
-      ++_goodFrames;
+      ++goodFrames;
     }
     // or if speed increased, half as good because not optimal
-    else if (speed > _oldSpeed) {
-      _goodFrames += 0.5;
+    else if (speed > oldSpeed) {
+      goodFrames += 0.5;
     }
   }
 
   // update strafe quality
-  _strafeQuality = 100 * _goodFrames / _totalFrames;
+  strafeQuality = 100 * goodFrames / totalFrames;
 
   // update vars for next frame
-  _oldSpeed = speed;
+  oldSpeed = speed;
 
   return true;
 }
 
 void StrafeQuality::render() const {
   // get coordinates and size
-  float x = _x + etj_strafeQualityX.value;
-  const float y = _y + etj_strafeQualityY.value;
+  float x = posX + etj_strafeQualityX.value;
+  const float y = posY + etj_strafeQualityY.value;
   ETJump_AdjustPosition(&x);
 
   // get hud text
   std::string str;
-  std::string qualityStr = std::to_string(_strafeQuality);
-  qualityStr.resize(_digits + 1);
+  std::string qualityStr = std::to_string(strafeQuality);
+  qualityStr.resize(digits + 1);
   switch (etj_strafeQualityStyle.integer) {
     case 1:
       // percent
@@ -172,7 +185,7 @@ void StrafeQuality::render() const {
                                             : ITEM_TEXTSTYLE_NORMAL);
 
   // draw quality on screen
-  CG_Text_Paint_Ext(x, y, size.x, size.y, _color, str, 0, 0, textStyle,
+  CG_Text_Paint_Ext(x, y, size.x, size.y, color, str, 0, 0, textStyle,
                     &cgs.media.limboFont1);
 }
 
@@ -210,7 +223,7 @@ bool StrafeQuality::canSkipDraw() const {
     return true;
   }
 
-  if (_team == TEAM_SPECTATOR) {
+  if (team == TEAM_SPECTATOR) {
     return true;
   }
 

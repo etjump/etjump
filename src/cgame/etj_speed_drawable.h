@@ -32,6 +32,9 @@
 #include "etj_cvar_parser.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+class ClientCommandsHandler;
+
 class DrawSpeed : public IRenderable {
   std::list<AccelColor::StoredSpeed> storedSpeeds;
 
@@ -58,19 +61,23 @@ class DrawSpeed : public IRenderable {
   int accelColorStyle{};
   bool playing{};
 
-  std::string getSpeedString() const;
+  [[nodiscard]] std::string getSpeedString() const;
+
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
 
   void resetMaxSpeed();
-  void setTextStyle();
-  void setAccelColorStyle();
-  void setSize();
+  void setTextStyle(const vmCvar_t *cvar);
+  void setAccelColorStyle(const vmCvar_t *cvar);
+  void setSize(const vmCvar_t *cvar);
 
   void startListeners();
   static void parseColor(const std::string &color, vec4_t &out);
   static bool canSkipDraw();
 
 public:
-  DrawSpeed();
+  DrawSpeed(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+            const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
   ~DrawSpeed() override;
 
   void render() const override;

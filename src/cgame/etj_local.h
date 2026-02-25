@@ -63,26 +63,26 @@ struct Handlers {
   std::shared_ptr<ClientCommandsHandler> consoleCommands;
   std::shared_ptr<EntityEventsHandler> entityEvents;
   std::shared_ptr<PlayerEventsHandler> playerEvents;
-  std::shared_ptr<AwaitedCommandHandler> awaitedCommand;
+  std::unique_ptr<AwaitedCommandHandler> awaitedCommand;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
-  std::shared_ptr<ClientRtvHandler> rtv;
+  std::unique_ptr<ClientRtvHandler> rtv;
   std::unique_ptr<CustomCommandMenu> customCommandMenu;
   std::shared_ptr<Timerun> timerun;
 };
 
 struct Platform {
-  std::shared_ptr<ClientAuthentication> authentication;
-  std::shared_ptr<OperatingSystem> operatingSystem;
+  std::unique_ptr<ClientAuthentication> authentication;
+  std::unique_ptr<OperatingSystem> operatingSystem;
   std::unique_ptr<SyscallExt> syscallExt;
 };
 
 struct Demo {
   std::unique_ptr<DemoCompatibility> compatibility;
-  std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
+  std::unique_ptr<AutoDemoRecorder> autoDemoRecorder;
 };
 
 struct Utils {
-  std::shared_ptr<EventLoop> eventLoop;
+  std::unique_ptr<EventLoop> eventLoop;
   std::vector<std::unique_ptr<CvarUnlocker>> cvarUnlocker;
   std::unique_ptr<SavePos> savePos;
   std::unique_ptr<ColorParser> colorParser;
@@ -91,14 +91,14 @@ struct Utils {
 };
 
 struct UI {
-  std::shared_ptr<ConsoleShader> consoleShader;
+  std::unique_ptr<ConsoleShader> consoleShader;
   std::vector<std::unique_ptr<IRenderable>> renderables;
 };
 
 struct Visuals {
-  std::shared_ptr<LeavesRemapper> leavesRemapper;
-  std::shared_ptr<PlayerBBox> playerBBox;
-  std::shared_ptr<TrickjumpLines> trickjumpLines;
+  std::unique_ptr<LeavesRemapper> leavesRemapper;
+  std::unique_ptr<PlayerBBox> playerBBox;
+  std::unique_ptr<TrickjumpLines> trickjumpLines;
 };
 
 struct HUD {
@@ -106,7 +106,7 @@ struct HUD {
   std::shared_ptr<CHSDataHandler> chsDataHandler;
 
   std::vector<std::unique_ptr<IRenderable>> renderables;
-  std::shared_ptr<TimerunView> timerunView;
+  std::unique_ptr<TimerunView> timerunView;
 };
 
 struct CGameContext {

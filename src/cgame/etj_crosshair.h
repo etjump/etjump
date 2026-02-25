@@ -24,14 +24,18 @@
 
 #pragma once
 
+#include <memory>
+
 #include "etj_irenderable.h"
 
 #include "../game/q_shared.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+
 class Crosshair : public IRenderable {
   void startListeners();
-  void parseColors();
+  static void parseColor(const vmCvar_t *cvar, vec4_t &out);
   void adjustSize();
   void adjustPosition();
   static bool canSkipDraw();
@@ -64,8 +68,12 @@ protected:
 
   crosshair_t crosshair{};
 
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+
 public:
-  Crosshair();
+  explicit Crosshair(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~Crosshair() override;
+
   void render() const override;
   bool beforeRender() override;
 };

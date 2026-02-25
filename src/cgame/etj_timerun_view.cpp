@@ -22,9 +22,6 @@
  * SOFTWARE.
  */
 
-#include <string>
-#include <utility>
-
 #include "etj_timerun_view.h"
 #include "etj_local.h"
 #include "etj_utilities.h"
@@ -37,41 +34,52 @@ inline constexpr int FADE_HOLD = 5000; // 5s pause before fade starts
 inline constexpr int FADE_TIME = 2000; // 2s fade
 inline constexpr int POPUP_FADE_TIME = 100;
 
-TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
-    : _timerun(std::move(timerun)), font(&cgs.media.limboFont1),
-      autoHide(etj_runTimerAutoHide.integer) {
+TimerunView::TimerunView(const std::shared_ptr<Timerun> &timerun,
+                         const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : font(&cgs.media.limboFont1), autoHide(etj_runTimerAutoHide.integer),
+      timerun(timerun), cvarUpdate(cvarUpdate) {
   cgame.utils.colorParser->parseColorString(etj_runTimerInactiveColor.string,
                                             inactiveTimerColor);
 
   setRuntimerSize(etj_runtimerSize);
   setCheckpointSize(etj_checkpointsSize);
   setCheckpointPopupSize(etj_checkpointsPopupSize);
-
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_runTimerInactiveColor, [this](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(cvar->string,
-                                                  inactiveTimerColor);
-      });
-
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_runtimerSize,
-      [this](const vmCvar_t *cvar) { setRuntimerSize(*cvar); });
-
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_checkpointsSize,
-      [this](const vmCvar_t *cvar) { setCheckpointSize(*cvar); });
-
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_checkpointsPopupSize,
-      [this](const vmCvar_t *cvar) { setCheckpointPopupSize(*cvar); });
-
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_runTimerAutoHide,
-      [this](const vmCvar_t *cvar) { autoHide = cvar->integer; });
+  startListeners();
 
   if (cg.demoPlayback) {
     demoSvFps = getSvFps();
   }
+}
+
+TimerunView::~TimerunView() {
+  cvarUpdate->unsubscribe(&etj_runTimerInactiveColor);
+  cvarUpdate->unsubscribe(&etj_runtimerSize);
+  cvarUpdate->unsubscribe(&etj_checkpointsSize);
+  cvarUpdate->unsubscribe(&etj_checkpointsPopupSize);
+  cvarUpdate->unsubscribe(&etj_runTimerAutoHide);
+}
+
+void TimerunView::startListeners() {
+  cvarUpdate->subscribe(&etj_runTimerInactiveColor, [this](
+                                                        const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, inactiveTimerColor);
+  });
+
+  cvarUpdate->subscribe(&etj_runtimerSize, [this](const vmCvar_t *cvar) {
+    setRuntimerSize(*cvar);
+  });
+
+  cvarUpdate->subscribe(&etj_checkpointsSize, [this](const vmCvar_t *cvar) {
+    setCheckpointSize(*cvar);
+  });
+
+  cvarUpdate->subscribe(
+      &etj_checkpointsPopupSize,
+      [this](const vmCvar_t *cvar) { setCheckpointPopupSize(*cvar); });
+
+  cvarUpdate->subscribe(&etj_runTimerAutoHide, [this](const vmCvar_t *cvar) {
+    autoHide = cvar->integer;
+  });
 }
 
 void TimerunView::setRuntimerSize(const vmCvar_t &cvar) {
@@ -87,7 +95,7 @@ void TimerunView::setCheckpointPopupSize(const vmCvar_t &cvar) {
 }
 
 const Timerun::PlayerTimerunInformation *TimerunView::currentRun() const {
-  return _timerun->getTimerunInformationFor(cg.snap->ps.clientNum);
+  return timerun->getTimerunInformationFor(cg.snap->ps.clientNum);
 }
 
 std::string TimerunView::getTimerString(int msec) {

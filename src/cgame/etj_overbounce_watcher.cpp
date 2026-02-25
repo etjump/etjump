@@ -24,100 +24,56 @@
 
 #include "etj_overbounce_watcher.h"
 #include "etj_local.h"
-#include "etj_utilities.h"
-#include "cg_local.h"
 #include "etj_overbounce_shared.h"
+#include "etj_utilities.h"
+
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
 OverbounceWatcher::OverbounceWatcher(
-    ClientCommandsHandler *clientCommandsHandler)
-    : _clientCommandsHandler{clientCommandsHandler}, _positions{},
-      _current{nullptr}, ps(nullptr) {
-  if (!clientCommandsHandler) {
-    CG_Error("OverbounceWatcher: clientCommandsHandler is null.\n");
-    return;
-  }
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : shader(cgs.media.voiceChatShader), consoleCommands(consoleCommands),
+      cvarUpdate(cvarUpdate) {
 
-  shader = cgs.media.voiceChatShader;
-  _positions.clear();
-
-  clientCommandsHandler->subscribe(
-      "ob_save", [&](const std::vector<std::string> &args) {
-        vec3_t c;
-        ps = getValidPlayerState();
-        for (int i = 0; i < 3; ++i) {
-          c[i] = ps->origin[i];
-        }
-        // shift z-coordinate to feet level
-        c[2] += ps->mins[2];
-
-        const auto &name = !args.empty() ? sanitize(args[0], true) : "default";
-        save(name, c);
-        CG_AddPMItem(
-            PM_MESSAGE,
-            va("^3OB watcher: ^7saved coordinate as ^3%s ^7(%f, %f, %f)\n",
-               name.c_str(), c[0], c[1], c[2]),
-            shader);
-      });
-
-  clientCommandsHandler->subscribe(
-      "ob_load", [&](const std::vector<std::string> &args) {
-        const auto &name = !args.empty() ? sanitize(args[0], true) : "default";
-        if (!load(name)) {
-          CG_AddPMItem(PM_MESSAGE,
-                       va("^3OB watcher: ^7coordinate ^3%s ^7was not found.\n",
-                          name.c_str()),
-                       shader);
-          return;
-        }
-
-        CG_AddPMItem(
-            PM_MESSAGE,
-            va("^3OB watcher: ^7loaded coordinate ^3%s ^7(%f, %f, %f)\n",
-               name.c_str(), (*_current)[0], (*_current)[1], (*_current)[2]),
-            shader);
-      });
-
-  clientCommandsHandler->subscribe(
-      "ob_reset", [&](const std::vector<std::string> &args) {
-        reset();
-        CG_AddPMItem(PM_MESSAGE,
-                     "^3OB watcher: ^7current coordinates have been reset.\n",
-                     shader);
-      });
-
-  clientCommandsHandler->subscribe(
-      "ob_list", [&](const std::vector<std::string> &args) {
-        if (_positions.empty()) {
-          CG_Printf("^3OB watcher: ^7no saved positions.\n");
-          return;
-        }
-        list();
-      });
-
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_obWatcherColor, [&](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(etj_obWatcherColor.string,
-                                                  _color);
-      });
-
-  cgame.handlers.cvarUpdate->subscribe(&etj_obWatcherSize,
-                                       [&](const vmCvar_t *) { setSize(); });
-
-  setSize();
-  cgame.utils.colorParser->parseColorString(etj_obWatcherColor.string, _color);
+  setSize(&etj_obWatcherSize);
+  cgame.utils.colorParser->parseColorString(etj_obWatcherColor.string, color);
+  startListeners();
 }
 
 OverbounceWatcher::~OverbounceWatcher() {
-  _clientCommandsHandler->unsubscribe("ob_save");
-  _clientCommandsHandler->unsubscribe("ob_load");
-  _clientCommandsHandler->unsubscribe("ob_reset");
-  _clientCommandsHandler->unsubscribe("ob_list");
+  consoleCommands->unsubscribe("ob_save");
+  consoleCommands->unsubscribe("ob_load");
+  consoleCommands->unsubscribe("ob_reset");
+  consoleCommands->unsubscribe("ob_list");
+
+  cvarUpdate->unsubscribe(&etj_obWatcherSize);
+  cvarUpdate->unsubscribe(&etj_obWatcherColor);
 }
 
-void OverbounceWatcher::setSize() {
-  size = CvarValueParser::parse<CvarValue::Size>(etj_obWatcherSize, 0, 10);
+void OverbounceWatcher::startListeners() {
+  consoleCommands->subscribe(
+      "ob_save", [this](const std::vector<std::string> &args) { save(args); });
+
+  consoleCommands->subscribe(
+      "ob_load", [this](const std::vector<std::string> &args) { load(args); });
+
+  consoleCommands->subscribe(
+      "ob_reset", [this](const std::vector<std::string> &) { reset(); });
+
+  consoleCommands->subscribe(
+      "ob_list", [this](const std::vector<std::string> &) { list(); });
+
+  cvarUpdate->subscribe(&etj_obWatcherColor, [&](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, color);
+  });
+
+  cvarUpdate->subscribe(&etj_obWatcherSize,
+                        [&](const vmCvar_t *cvar) { setSize(cvar); });
+}
+
+void OverbounceWatcher::setSize(const vmCvar_t *cvar) {
+  size = CvarValueParser::parse<CvarValue::Size>(*cvar, 0, 10);
   size.x *= 0.1f;
   size.y *= 0.1f;
 }
@@ -144,14 +100,14 @@ bool OverbounceWatcher::beforeRender() {
   trap_SnapVector(snap);
   zVelSnapped = snap[2];
 
-  endHeight = (*_current)[2];
+  endHeight = (*current)[2];
 
   x = etj_obWatcherX.value;
   ETJump_AdjustPosition(&x);
 
   // setup & do trace, so we can determine if surface allows OB
   trace_t trace;
-  VectorCopy(*_current, start);
+  VectorCopy(*current, start);
   start[2] = startHeight;
   VectorCopy(start, end);
   end[2] -= Overbounce::MAX_TRACE_DIST;
@@ -170,38 +126,67 @@ bool OverbounceWatcher::beforeRender() {
 }
 
 void OverbounceWatcher::render() const {
-  DrawString(x, etj_obWatcherY.value, size.x, size.y, _color, qfalse, "OB", 0,
+  DrawString(x, etj_obWatcherY.value, size.x, size.y, color, qfalse, "OB", 0,
              ITEM_TEXTSTYLE_SHADOWED);
 }
 
-void OverbounceWatcher::save(const std::string &name, const vec3_t coordinate) {
-  VectorCopy(coordinate, _positions[name]);
-  _current = &_positions[name];
+void OverbounceWatcher::save(const std::vector<std::string> &args) {
+  ps = getValidPlayerState();
+  const std::string name = !args.empty() ? sanitize(args[0], true) : "default";
+
+  VectorCopy(ps->origin, positions[name]);
+  // shift z-coordinate to feet level
+  positions[name][2] += ps->mins[2];
+
+  current = &positions[name];
+  CG_AddPMItem(PM_MESSAGE,
+               va("^3OB watcher: ^7saved coordinate as ^3%s ^7%s\n",
+                  name.c_str(), vtosf(positions[name])),
+               shader);
 }
 
-void OverbounceWatcher::reset() { _current = nullptr; }
+void OverbounceWatcher::reset() {
+  current = nullptr;
+  CG_AddPMItem(PM_MESSAGE,
+               "^3OB watcher: ^7current coordinates have been reset.\n",
+               shader);
+}
 
-bool OverbounceWatcher::load(const std::string &name) {
-  auto pos = _positions.find(name);
-  if (pos == _positions.end()) {
-    return false;
+void OverbounceWatcher::load(const std::vector<std::string> &args) {
+  const std::string name = !args.empty() ? sanitize(args[0], true) : "default";
+
+  if (positions.find(name) == positions.cend()) {
+    CG_AddPMItem(
+        PM_MESSAGE,
+        va("^3OB watcher: ^7coordinate ^3%s ^7was not found.\n", name.c_str()),
+        shader);
+    return;
   }
 
-  _current = &(pos->second);
-  return true;
+  current = &positions[name];
+
+  CG_AddPMItem(PM_MESSAGE,
+               va("^3OB watcher: ^7loaded coordinate ^3%s ^7%s\n", name.c_str(),
+                  vtosf(*current)),
+               shader);
 }
 
 void OverbounceWatcher::list() const {
+  if (positions.empty()) {
+    CG_Printf("^3OB watcher: ^7no saved positions.\n");
+    return;
+  }
+
   CG_Printf("Saved OB watcher coordinates:\n\n");
 
-  for (const auto &[name, pos] : _positions) {
+  for (const auto &[name, pos] : positions) {
     CG_Printf("^2%-15s ^7%s%s\n", name.c_str(), vtosf(pos),
-              _current && VectorCompare(*_current, pos) ? " ^9(current)" : "");
+              current && VectorCompare(*current, pos) ? " ^9(current)" : "");
   }
 }
 
 bool OverbounceWatcher::canSkipDraw() const {
-  if (!etj_drawObWatcher.integer || !_current) {
+  if (!etj_drawObWatcher.integer || !current) {
     return true;
   }
 

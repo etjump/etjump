@@ -23,24 +23,24 @@
  */
 
 #pragma once
-#include <string>
-#include <vector>
-#include "etj_keyset_drawer.h"
-#include "cg_local.h"
+
 #include <map>
+
 #include "etj_cvar_master_drawer.h"
 #include "etj_irenderable.h"
+#include "etj_keyset_drawer.h"
 
 namespace ETJump {
 class KeySetSystem : public IRenderable {
   // key set layout
-  std::vector<KeySetDrawer::KeyNames> const keyLayout{
+  std::vector<KeySetDrawer::KeyNames> keyLayout{
       KeySetDrawer::KeyNames::Sprint, KeySetDrawer::KeyNames::Forward,
       KeySetDrawer::KeyNames::Jump,   KeySetDrawer::KeyNames::Left,
       KeySetDrawer::KeyNames::Empty,  KeySetDrawer::KeyNames::Right,
       KeySetDrawer::KeyNames::Prone,  KeySetDrawer::KeyNames::Backward,
       KeySetDrawer::KeyNames::Crouch,
   };
+
   CvarBasedMasterDrawer keySetMasterDrawer;
 
   std::vector<KeySetDrawer::KeyShader>
@@ -51,13 +51,17 @@ class KeySetSystem : public IRenderable {
   std::string createKeyPressSetShaderPath(const std::string &keySetName,
                                           const std::string &keyName);
   qhandle_t registerShaderNoMip(const std::string &shaderName);
-  bool canSkipDraw() const;
+  [[nodiscard]] bool canSkipDraw() const;
 
 public:
-  KeySetSystem(const vmCvar_t &cvar);
-  ~KeySetSystem();
-  void addSet(const std::string &keySetName);
-  void addKeyBindSet(const std::string &keySetName);
+  KeySetSystem(const vmCvar_t *cvar,
+               const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~KeySetSystem() override = default;
+
+  void addSet(const std::string &keySetName,
+              const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  void addKeyBindSet(const std::string &keySetName,
+                     const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   bool beforeRender() override;
   void render() const override;
 };

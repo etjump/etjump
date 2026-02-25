@@ -25,12 +25,13 @@
 #include <string>
 
 #include "etj_leaves_remapper.h"
-#include "etj_local.h"
+#include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
-using namespace ETJump;
-
-LeavesRemapper::LeavesRemapper() {
+namespace ETJump {
+LeavesRemapper::LeavesRemapper(
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : cvarUpdate(cvarUpdate) {
   auto shader = composeShader(
       shaderName,
       {{"map *white", "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
@@ -42,10 +43,9 @@ LeavesRemapper::LeavesRemapper() {
     turnOffLeaves();
   }
 
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_drawLeaves, [&](const vmCvar_t *cvar) {
-        cvar->integer ? turnOnLeaves() : turnOffLeaves();
-      });
+  this->cvarUpdate->subscribe(&etj_drawLeaves, [&](const vmCvar_t *cvar) {
+    cvar->integer ? turnOnLeaves() : turnOffLeaves();
+  });
 }
 
 void LeavesRemapper::turnOnLeaves() {
@@ -60,4 +60,9 @@ void LeavesRemapper::turnOffLeaves() {
   }
 }
 
-LeavesRemapper::~LeavesRemapper() { turnOnLeaves(); }
+LeavesRemapper::~LeavesRemapper() {
+  turnOnLeaves();
+
+  cvarUpdate->unsubscribe(&etj_drawLeaves);
+}
+} // namespace ETJump

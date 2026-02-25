@@ -23,18 +23,14 @@
  */
 
 #include "etj_keyset_keybind_drawer.h"
-#include "../game/etj_string_utilities.h"
+#include "cg_local.h"
 
-ETJump::KeySetKeyBindDrawer::KeySetKeyBindDrawer(
-    const std::vector<KeyShader> &keyShaders,
-    const std::map<int, qhandle_t> controlShaders)
-    : KeySetDrawer(keyShaders), controlShaders(controlShaders) {}
+namespace ETJump {
+void KeySetKeyBindDrawer::drawReleaseShader(qhandle_t shader,
+                                            int position) const {}
 
-void ETJump::KeySetKeyBindDrawer::drawReleaseShader(qhandle_t shader,
-                                                    int position) const {}
-
-void ETJump::KeySetKeyBindDrawer::drawPressShader(qhandle_t shader,
-                                                  int position) const {
+void KeySetKeyBindDrawer::drawPressShader(qhandle_t shader,
+                                          int position) const {
   if (!shader) {
     return;
   }
@@ -64,7 +60,7 @@ void ETJump::KeySetKeyBindDrawer::drawPressShader(qhandle_t shader,
   if (keyCodeShader) {
     drawPic(x, y, sizeX, sizeY, keyCodeShader, color, shadowColor);
   } else {
-    auto binding = ETJump::StringUtil::toUpperCase(getKeyCodeBinding(keyCode));
+    auto binding = StringUtil::toUpperCase(getKeyCodeBinding(keyCode));
     // factor = 16 / ... = 0.20
     // size / factor;
     auto bindWidth = DrawStringWidth(binding.c_str(), 0.2f);
@@ -76,7 +72,7 @@ void ETJump::KeySetKeyBindDrawer::drawPressShader(qhandle_t shader,
   }
 }
 
-std::string ETJump::KeySetKeyBindDrawer::keyNameToCommand(KeyNames keyName) {
+std::string KeySetKeyBindDrawer::keyNameToCommand(KeyNames keyName) {
   switch (keyName) {
     case KeyNames::Forward:
       return "+forward";
@@ -117,7 +113,7 @@ std::string ETJump::KeySetKeyBindDrawer::keyNameToCommand(KeyNames keyName) {
   }
 }
 
-int ETJump::KeySetKeyBindDrawer::getKeyCodeForName(std::string &name) {
+int KeySetKeyBindDrawer::getKeyCodeForName(std::string &name) {
   if (name.size()) {
     int b1, b2;
     trap_Key_KeysForBinding(name.c_str(), &b1, &b2);
@@ -128,7 +124,7 @@ int ETJump::KeySetKeyBindDrawer::getKeyCodeForName(std::string &name) {
   return 0;
 }
 
-std::string ETJump::KeySetKeyBindDrawer::getKeyCodeBinding(int keyCode) {
+std::string KeySetKeyBindDrawer::getKeyCodeBinding(int keyCode) {
   auto binding = getKeyCodeShortBinding(keyCode);
   if (!binding.size()) {
     binding = getKeyCodeFullBinding(keyCode);
@@ -136,7 +132,7 @@ std::string ETJump::KeySetKeyBindDrawer::getKeyCodeBinding(int keyCode) {
   return binding;
 }
 
-std::string ETJump::KeySetKeyBindDrawer::getKeyCodeFullBinding(int keyCode) {
+std::string KeySetKeyBindDrawer::getKeyCodeFullBinding(int keyCode) {
   if (keyCode) {
     char buf[32];
     trap_Key_KeynumToStringBuf(keyCode, buf, 32);
@@ -145,7 +141,7 @@ std::string ETJump::KeySetKeyBindDrawer::getKeyCodeFullBinding(int keyCode) {
   return "?";
 }
 
-std::string ETJump::KeySetKeyBindDrawer::getKeyCodeShortBinding(int keyCode) {
+std::string KeySetKeyBindDrawer::getKeyCodeShortBinding(int keyCode) {
   switch (keyCode) {
     case K_MOUSE1:
       return "m1";
@@ -162,7 +158,7 @@ std::string ETJump::KeySetKeyBindDrawer::getKeyCodeShortBinding(int keyCode) {
   }
 }
 
-int ETJump::KeySetKeyBindDrawer::checkKeyCodeRemap(int keyCode) const {
+int KeySetKeyBindDrawer::checkKeyCodeRemap(int keyCode) {
   switch (keyCode) {
     case K_KP_HOME:
       return K_HOME;
@@ -212,11 +208,11 @@ int ETJump::KeySetKeyBindDrawer::checkKeyCodeRemap(int keyCode) const {
   return keyCode;
 }
 
-qhandle_t
-ETJump::KeySetKeyBindDrawer::checkIfKeyCodeHasShader(int keyCode) const {
+qhandle_t KeySetKeyBindDrawer::checkIfKeyCodeHasShader(int keyCode) const {
   const auto it = controlShaders.find(keyCode);
   if (it != controlShaders.end()) {
     return it->second;
   }
   return 0;
 }
+} // namespace ETJump

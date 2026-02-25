@@ -32,13 +32,15 @@
 #include "etj_cvar_parser.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+
 class AccelMeter : public IRenderable {
   int textStyle{};
   float y{};
   float halfW{};
   CvarValue::Size size{};
   int accelColorStyle{};
-  std::vector<std::string> accelStr{};
+  std::vector<std::string> accelStr;
   bool playing{};
 
   std::list<AccelColor::StoredSpeed> storedSpeeds;
@@ -51,18 +53,20 @@ class AccelMeter : public IRenderable {
   enum Alignment { Left = 1, Right = 2 };
 
   static void parseColor(const std::string &color, vec4_t &out);
-  void setTextStyle();
-  void setSize();
-  void setAccelColorStyle();
+  void setTextStyle(const vmCvar_t *cvar);
+  void setSize(const vmCvar_t *cvar);
+  void setAccelColorStyle(const vmCvar_t *cvar);
   void startListeners();
   static bool canSkipDraw();
 
   const pmove_t *pm{};
   playerState_t *ps = &cg.predictedPlayerState;
 
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+
 public:
-  AccelMeter();
-  ~AccelMeter() override = default;
+  explicit AccelMeter(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~AccelMeter() override;
 
   bool beforeRender() override;
   void render() const override;
