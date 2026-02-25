@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../game/q_shared.h"
+
 // allow a lot of command backups for very fast systems
 // multiple commands may be combined into a single packet, so this
 // needs to be larger than PACKET_BACKUP

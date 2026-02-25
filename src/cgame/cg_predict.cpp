@@ -1188,7 +1188,7 @@ void CG_PredictPlayerState() {
 
       // loop through the saved states queue
       for (int i = cg.backupStateTop; i != cg.backupStateTail;
-           i = (i + 1) % MAX_BACKUP_STATES) {
+           i = (i + 1) % ETJump::MAX_BACKUP_STATES) {
         // if we find a predicted state whose commandTime matches the snapshot
         // player state's commandTime
         if (cg.backupStates[i].commandTime ==
@@ -1212,7 +1212,7 @@ void CG_PredictPlayerState() {
           // point
           *cg_pmove.ps = cg.backupStates[i];
           // advance the head
-          cg.backupStateTop = (i + 1) % MAX_BACKUP_STATES;
+          cg.backupStateTop = (i + 1) % ETJump::MAX_BACKUP_STATES;
 
           // set the next command to predict
           predictCmd = cg.lastPredictedCommand + 1;
@@ -1388,7 +1388,7 @@ void CG_PredictPlayerState() {
       // if we need to predict this command, or we've run out of space in the
       // saved states queue
       if (cmdNum >= predictCmd ||
-          (stateIndex + 1) % MAX_BACKUP_STATES == cg.backupStateTop) {
+          (stateIndex + 1) % ETJump::MAX_BACKUP_STATES == cg.backupStateTop) {
         // run the Pmove
         Pmove(&cg_pmove);
         numPredicted++; // debug code
@@ -1397,11 +1397,11 @@ void CG_PredictPlayerState() {
         cg.lastPredictedCommand = cmdNum;
 
         // if we haven't run out of space in the saved states queue
-        if ((stateIndex + 1) % MAX_BACKUP_STATES != cg.backupStateTop) {
+        if ((stateIndex + 1) % ETJump::MAX_BACKUP_STATES != cg.backupStateTop) {
           // save the state for the false case (of cmdNum >= predictCmd)
           // in later calls to this function
           cg.backupStates[stateIndex] = *cg_pmove.ps;
-          stateIndex = (stateIndex + 1) % MAX_BACKUP_STATES;
+          stateIndex = (stateIndex + 1) % ETJump::MAX_BACKUP_STATES;
           cg.backupStateTail = stateIndex;
         }
       } else {
@@ -1418,7 +1418,7 @@ void CG_PredictPlayerState() {
         *cg_pmove.ps = cg.backupStates[stateIndex];
 
         // go to the next element in the saved states array
-        stateIndex = (stateIndex + 1) % MAX_BACKUP_STATES;
+        stateIndex = (stateIndex + 1) % ETJump::MAX_BACKUP_STATES;
       }
     } else {
       // run the Pmove
