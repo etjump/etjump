@@ -23,6 +23,7 @@
  */
 
 #include "etj_servercommands.h"
+#include "cg_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_utilities.h"
 

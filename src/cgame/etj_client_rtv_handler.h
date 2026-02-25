@@ -44,8 +44,6 @@ public:
       const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler);
   ~ClientRtvHandler();
 
-  void initialize();
-
   void setRtvConfigStrings(const char *cs);
   void countRtvVotes();
   int getTotalVotesForMap(int mapIndex);
