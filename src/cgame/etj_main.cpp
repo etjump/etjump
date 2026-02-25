@@ -139,7 +139,6 @@ static void initHandlers() {
 
   cgame.handlers.rtv =
       std::make_unique<ClientRtvHandler>(cgame.handlers.serverCommands);
-  cgame.handlers.rtv->initialize();
 
   cgame.handlers.customCommandMenu = std::make_unique<CustomCommandMenu>(
       cgame.handlers.cvarUpdate, cgame.handlers.consoleCommands);
@@ -177,7 +176,6 @@ static void initDemo() {
 }
 
 static void initCvarUnlockers() {
-  // TODO: move to the class
   const std::vector<std::pair<const vmCvar_t *, const std::string>> cvars{
       {&etj_drawFoliage, "r_drawfoliage"},
       {&etj_showTris, "r_showtris"},
@@ -320,11 +318,11 @@ void init() {
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
                                      " init...\n");
 
-  // NOTE: client and server commands handlers must be created before other
-  // modules as other modules use them to subscribe to commands.
-  // Generally all modules should get these as constructor params but
-  // they're still being used in the C code
-  // => make sure they're created first
+  // NOTE: The main handlers must be created before everything else!
+  // All C++ modules should get these as constructor params to subscribe
+  // to console commands, server commands, cvar updates etc, and not reach
+  // for the global pointers. They exists because they are still used in
+  // various places outside of C++ objects, in legacy C code.
   initHandlers();
 
   initPlatform();

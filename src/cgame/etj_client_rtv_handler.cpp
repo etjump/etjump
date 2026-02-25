@@ -30,6 +30,13 @@ namespace ETJump {
 ClientRtvHandler::ClientRtvHandler(
     const std::shared_ptr<ClientCommandsHandler> &serverCommands)
     : serverCommands(serverCommands) {
+  setRtvVoteStatus();
+
+  if (rtvVoteActive()) {
+    setRtvConfigStrings(CG_ConfigString(CS_VOTE_YES));
+    countRtvVotes();
+  }
+
   this->serverCommands->subscribe(
       "openRtvMenu",
       [](const std::vector<std::string> &) {
@@ -40,17 +47,6 @@ ClientRtvHandler::ClientRtvHandler(
 
 ClientRtvHandler::~ClientRtvHandler() {
   serverCommands->unsubscribe("openRtvMenu");
-}
-
-void ClientRtvHandler::initialize() {
-  setRtvVoteStatus();
-
-  if (!rtvVoteActive()) {
-    return;
-  }
-
-  setRtvConfigStrings(CG_ConfigString(CS_VOTE_YES));
-  countRtvVotes();
 }
 
 void ClientRtvHandler::setRtvConfigStrings(const char *cs) {
