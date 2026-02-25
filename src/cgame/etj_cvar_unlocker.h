@@ -24,17 +24,22 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "../game/q_shared.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+
 class CvarUnlocker {
   const vmCvar_t *unlocker;
   std::string target;
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 
 public:
-  CvarUnlocker(const vmCvar_t *unlocker, std::string target);
+  CvarUnlocker(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+               const vmCvar_t *unlocker, std::string target);
   ~CvarUnlocker();
   void forceCvarSet(const vmCvar_t *cvar) const;
   void forceCvarSet() const;

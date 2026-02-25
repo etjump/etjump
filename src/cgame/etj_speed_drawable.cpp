@@ -30,16 +30,25 @@
 
 namespace ETJump {
 
-DrawSpeed::DrawSpeed() {
+DrawSpeed::DrawSpeed(
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+    : cvarUpdate(cvarUpdate), consoleCommands(consoleCommands) {
   parseColor(etj_speedColor.string, speedColor);
-  setTextStyle();
-  setAccelColorStyle();
-  setSize();
+  setTextStyle(&etj_speedShadow);
+  setAccelColorStyle(&etj_speedColorUsesAccel);
+  setSize(&etj_speedSize);
   startListeners();
 }
 
 DrawSpeed::~DrawSpeed() {
-  cgame.handlers.consoleCommands->unsubscribe("resetmaxspeed");
+  cvarUpdate->unsubscribe(&etj_speedColor);
+  cvarUpdate->unsubscribe(&etj_speedAlpha);
+  cvarUpdate->unsubscribe(&etj_speedSize);
+  cvarUpdate->unsubscribe(&etj_speedShadow);
+  cvarUpdate->unsubscribe(&etj_speedColorUsesAccel);
+
+  consoleCommands->unsubscribe("resetmaxspeed");
 }
 
 void DrawSpeed::parseColor(const std::string &color, vec4_t &out) {
@@ -48,29 +57,27 @@ void DrawSpeed::parseColor(const std::string &color, vec4_t &out) {
 }
 
 void DrawSpeed::startListeners() {
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_speedColor, [&](const vmCvar_t *cvar) {
-        parseColor(etj_speedColor.string, speedColor);
-      });
+  cvarUpdate->subscribe(&etj_speedColor, [this](const vmCvar_t *cvar) {
+    parseColor(cvar->string, speedColor);
+  });
 
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_speedAlpha, [&](const vmCvar_t *cvar) {
-        parseColor(etj_speedColor.string, speedColor);
-      });
+  cvarUpdate->subscribe(&etj_speedAlpha, [this](const vmCvar_t *) {
+    parseColor(etj_speedColor.string, speedColor);
+  });
 
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_speedSize, [&](const vmCvar_t *cvar) { setSize(); });
+  cvarUpdate->subscribe(&etj_speedSize,
+                        [this](const vmCvar_t *cvar) { setSize(cvar); });
 
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_speedShadow, [&](const vmCvar_t *cvar) { setTextStyle(); });
+  cvarUpdate->subscribe(&etj_speedShadow,
+                        [this](const vmCvar_t *cvar) { setTextStyle(cvar); });
 
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_speedColorUsesAccel,
-      [&](const vmCvar_t *cvar) { setAccelColorStyle(); });
+  cvarUpdate->subscribe(&etj_speedColorUsesAccel, [this](const vmCvar_t *cvar) {
+    setAccelColorStyle(cvar);
+  });
 
-  cgame.handlers.consoleCommands->subscribe(
+  consoleCommands->subscribe(
       "resetmaxspeed",
-      [&](const std::vector<std::string> &args) { resetMaxSpeed(); });
+      [this](const std::vector<std::string> &) { resetMaxSpeed(); });
 }
 
 bool DrawSpeed::beforeRender() {
@@ -156,21 +163,20 @@ void DrawSpeed::resetMaxSpeed() {
   cg.resetmaxspeed = qtrue; // fix me
 }
 
-void DrawSpeed::setTextStyle() {
-  textStyle =
-      etj_speedShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
+void DrawSpeed::setTextStyle(const vmCvar_t *cvar) {
+  textStyle = cvar->integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
 }
 
-void DrawSpeed::setAccelColorStyle() {
-  if (!etj_speedColorUsesAccel.integer) {
+void DrawSpeed::setAccelColorStyle(const vmCvar_t *cvar) {
+  if (!cvar->integer) {
     parseColor(etj_speedColor.string, speedColor);
   }
 
-  accelColorStyle = etj_speedColorUsesAccel.integer;
+  accelColorStyle = cvar->integer;
 }
 
-void DrawSpeed::setSize() {
-  size = CvarValueParser::parse<CvarValue::Size>(etj_speedSize, 1, 10);
+void DrawSpeed::setSize(const vmCvar_t *cvar) {
+  size = CvarValueParser::parse<CvarValue::Size>(*cvar, 1, 10);
   size.x *= 0.1f;
   size.y *= 0.1f;
 }

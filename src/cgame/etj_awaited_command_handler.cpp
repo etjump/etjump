@@ -22,49 +22,54 @@
  * SOFTWARE.
  */
 
+#include <algorithm>
+
 #include "etj_awaited_command_handler.h"
 #include "cg_local.h"
-#include "etj_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_inline_command_parser.h"
+#include "etj_player_events_handler.h"
 
 #include "../game/etj_string_utilities.h"
 
-ETJump::AwaitedCommandHandler::AwaitedCommandHandler(
-    std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler,
-    std::function<void(const char *)> sendConsoleCommand,
-    std::function<void(const char *)> printToConsole)
-    : _consoleCommandsHandler(consoleCommandsHandler),
-      _sendConsoleCommand(sendConsoleCommand), _printToConsole(printToConsole) {
-  _awaitedCommands.clear();
-  _consoleCommandsHandler->subscribe(
-      "await", [this](const std::vector<std::string> &args) {
-        if (cgs.clientinfo->timerunActive) {
-          message("^3Error: ^7cannot use ^3await "
-                  "^7during timeruns.");
-          return;
-        }
-        this->awaitCommand(args);
-      });
+namespace ETJump {
+AwaitedCommandHandler::AwaitedCommandHandler(
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+    const std::shared_ptr<PlayerEventsHandler> &playerEvents)
+    : consoleCommands(consoleCommands), playerEvents(playerEvents) {
+  startListeners();
+}
 
-  cgame.handlers.playerEvents->subscribe(
-      "timerun:start", [&](const std::vector<std::string> &args) {
-        if (_awaitedCommands.size()) {
+AwaitedCommandHandler::~AwaitedCommandHandler() {
+  consoleCommands->unsubscribe("await");
+  playerEvents->unsubscribe("timerun:start");
+}
+
+void AwaitedCommandHandler::startListeners() {
+  consoleCommands->subscribe("await",
+                             [this](const std::vector<std::string> &args) {
+                               if (cgs.clientinfo->timerunActive) {
+                                 message("^3Error: ^7cannot use ^3await "
+                                         "^7during timeruns.");
+                                 return;
+                               }
+                               this->awaitCommand(args);
+                             });
+
+  playerEvents->subscribe(
+      "timerun:start", [this](const std::vector<std::string> &) {
+        if (awaitedCommands.size()) {
           CG_AddPMItem(PM_MESSAGE,
                        "^7Timerun started, ^3await ^7queue cleared.",
                        cgs.media.stopwatchIcon);
-          _awaitedCommands.clear();
+          awaitedCommands.clear();
         }
       });
 }
 
-ETJump::AwaitedCommandHandler::~AwaitedCommandHandler() {
-  _consoleCommandsHandler->unsubscribe("await");
-}
-
-void ETJump::AwaitedCommandHandler::runFrame() {
+void AwaitedCommandHandler::runFrame() {
   std::vector<AwaitedCommand *> executedCommands;
-  for (const auto &awaitedCommand : _awaitedCommands) {
+  for (const auto &awaitedCommand : awaitedCommands) {
     awaitedCommand->currentFrameCount++;
 
     if (awaitedCommand->currentFrameCount >=
@@ -78,25 +83,23 @@ void ETJump::AwaitedCommandHandler::runFrame() {
   }
 
   for (auto executedCommand : executedCommands) {
-    _awaitedCommands.erase(
-        std::remove_if(_awaitedCommands.begin(), _awaitedCommands.end(),
+    awaitedCommands.erase(
+        std::remove_if(awaitedCommands.begin(), awaitedCommands.end(),
                        [&](const std::unique_ptr<AwaitedCommand> &command) {
                          return command.get() == executedCommand;
                        }));
   }
 }
 
-void ETJump::AwaitedCommandHandler::message(const std::string &message) {
-  _printToConsole(stringFormat("%s\n", message).c_str());
+void AwaitedCommandHandler::message(const std::string &message) {
+  CG_Printf(stringFormat("%s\n", message).c_str());
 }
 
-void ETJump::AwaitedCommandHandler::executeConsoleCommand(
-    const std::string &command) {
-  _sendConsoleCommand(stringFormat("%s\n", command).c_str());
+void AwaitedCommandHandler::executeConsoleCommand(const std::string &command) {
+  trap_SendConsoleCommand(stringFormat("%s\n", command).c_str());
 }
 
-void ETJump::AwaitedCommandHandler::awaitCommand(
-    const std::vector<std::string> &args) {
+void AwaitedCommandHandler::awaitCommand(const std::vector<std::string> &args) {
   if (args.size() < 2) {
     message("^3Usage: ^7await <number of frames> <command> | "
             "<another command> "
@@ -141,5 +144,6 @@ void ETJump::AwaitedCommandHandler::awaitCommand(
   message(stringFormat("Executing ^3%d ^7%s after ^3%d ^7%s.",
                        command->commands.size(), numCommandsString,
                        command->requiredFrameCount, numFramesString));
-  _awaitedCommands.push_back(std::move(command));
+  awaitedCommands.push_back(std::move(command));
 }
+} // namespace ETJump

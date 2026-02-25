@@ -29,36 +29,48 @@
 #include "etj_cvar_parser.h"
 
 namespace ETJump {
-class StrafeQuality : public IRenderable {
-  double _totalFrames{0};
-  double _goodFrames{0};
-  double _strafeQuality{0};
-  int _lastUpdateTime{0};
+class CvarUpdateHandler;
+class ClientCommandsHandler;
+class PlayerEventsHandler;
 
-  float _oldSpeed{0};
-  int _team{0};
-  mutable vec4_t _color{};
+class StrafeQuality : public IRenderable {
+  double totalFrames{};
+  double goodFrames{};
+  double strafeQuality{};
+  int lastUpdateTime{};
+
+  float oldSpeed{};
+  int team{};
+  vec4_t color{};
 
   // default absolute hud position
-  static constexpr float _x = 100;
-  static constexpr float _y = 100;
+  static constexpr float posX = 100;
+  static constexpr float posY = 100;
   // amount of digits to show on hud
-  static constexpr std::size_t _digits = 4;
+  static constexpr std::size_t digits = 4;
 
   CvarValue::Size size{};
 
   void startListeners();
-  void parseColor();
-  void setSize();
+  void parseColor(const vmCvar_t *cvar);
+  void setSize(const vmCvar_t *cvar);
   void resetStrafeQuality();
-  bool canSkipDraw() const;
+  [[nodiscard]] bool canSkipDraw() const;
   bool canSkipUpdate(usercmd_t cmd);
 
   const pmove_t *pm{};
   const playerState_t *ps = &cg.predictedPlayerState;
 
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
+  std::shared_ptr<PlayerEventsHandler> playerEvents;
+
 public:
-  StrafeQuality();
+  StrafeQuality(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+                const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+                const std::shared_ptr<PlayerEventsHandler> &playerEvents);
+  ~StrafeQuality() override;
+
   bool beforeRender() override;
   void render() const override;
 };

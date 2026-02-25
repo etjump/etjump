@@ -25,7 +25,6 @@
 #include "etj_jump_speeds.h"
 #include "etj_local.h"
 #include "etj_utilities.h"
-#include "etj_entity_events_handler.h"
 
 namespace ETJump {
 inline constexpr float BASE_OFFSET_X = 30.0f;
@@ -33,34 +32,46 @@ inline constexpr float BASE_OFFSET_Y = 12.0f;
 inline constexpr float HOR_FIRSTJUMP_OFFSET = 5.0f;
 inline constexpr float DEFAULT_TEXT_SIZE = 0.2f;
 
-JumpSpeeds::JumpSpeeds(EntityEventsHandler *entityEventsHandler)
-    : _entityEventsHandler{entityEventsHandler} {
+JumpSpeeds::JumpSpeeds(
+    const std::shared_ptr<EntityEventsHandler> &entityEvents,
+    const std::shared_ptr<PlayerEventsHandler> &playerEvents,
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+    const std::shared_ptr<ClientCommandsHandler> &serverCommands,
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : entityEvents(entityEvents), playerEvents(playerEvents),
+      consoleCommands(consoleCommands), serverCommands(serverCommands),
+      cvarUpdate(cvarUpdate) {
   startListeners();
   adjustSize(etj_jumpSpeedsTextSize);
 }
 
 JumpSpeeds::~JumpSpeeds() {
-  cgame.handlers.consoleCommands->unsubscribe("resetJumpSpeeds");
-  cgame.handlers.serverCommands->unsubscribe("resetJumpSpeeds");
-  _entityEventsHandler->unsubscribe(EV_JUMP);
+  entityEvents->unsubscribe(EV_JUMP);
+  playerEvents->unsubscribe("respawn");
+
+  consoleCommands->unsubscribe("resetJumpSpeeds");
+  serverCommands->unsubscribe("resetJumpSpeeds");
+
+  cvarUpdate->unsubscribe(&etj_jumpSpeedsTextSize);
 }
 
 void JumpSpeeds::startListeners() {
-  cgame.handlers.serverCommands->subscribe(
-      "resetJumpSpeeds",
-      [&](const std::vector<std::string> &args) { queueJumpSpeedsReset(); });
-  cgame.handlers.consoleCommands->subscribe(
-      "resetJumpSpeeds",
-      [&](const std::vector<std::string> &args) { queueJumpSpeedsReset(); });
-  _entityEventsHandler->subscribe(EV_JUMP,
-                                  [&](centity_t *cent) { updateJumpSpeeds(); });
-  cgame.handlers.playerEvents->subscribe(
-      "respawn",
-      [&](const std::vector<std::string> &args) { queueJumpSpeedsReset(); });
+  entityEvents->subscribe(EV_JUMP, [this](centity_t *) { updateJumpSpeeds(); });
 
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_jumpSpeedsTextSize,
-      [this](const vmCvar_t *cvar) { adjustSize(*cvar); });
+  playerEvents->subscribe("respawn", [this](const std::vector<std::string> &) {
+    queueJumpSpeedsReset();
+  });
+
+  consoleCommands->subscribe(
+      "resetJumpSpeeds",
+      [this](const std::vector<std::string> &) { queueJumpSpeedsReset(); });
+
+  serverCommands->subscribe(
+      "resetJumpSpeeds",
+      [this](const std::vector<std::string> &) { queueJumpSpeedsReset(); });
+
+  cvarUpdate->subscribe(&etj_jumpSpeedsTextSize,
+                        [this](const vmCvar_t *cvar) { adjustSize(*cvar); });
 }
 
 bool JumpSpeeds::beforeRender() {

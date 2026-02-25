@@ -22,10 +22,8 @@
  * SOFTWARE.
  */
 
-#include <string>
-
-#include "cg_local.h"
 #include "etj_console_shader.h"
+#include "cg_local.h"
 #include "etj_local.h"
 #include "etj_utilities.h"
 
@@ -35,22 +33,21 @@ namespace ETJump {
 ConsoleShader::ConsoleShader() {
   auto shader = createBackground();
   trap_R_LoadDynamicShader(shaderName, shader.c_str());
-  // once shader is registered, any changes to dynamic shader will have
-  // no effect
+  // once a dynamic shader is registered, any changes to it will have no effect
   trap_R_RegisterShader(shaderName);
   trap_R_RemapShader("console-16bit", shaderName, "0");
 }
 
 std::string ConsoleShader::createBackground() {
-  if (etj_consoleShader.integer > 0) {
+  if (etj_consoleShader.integer) {
     return createTexturedBackground();
   }
+
   return createSolidBackground();
 }
 
 std::string ConsoleShader::createTexturedBackground() {
-  auto alphaGen =
-      ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
+  auto alphaGen = stringFormat("alphaGen const %f", etj_consoleAlpha.value);
 
   return composeShader(shaderName, {"nopicmip"},
                        {{"map textures/skies_sd/wurzburg_clouds.tga",
@@ -78,10 +75,9 @@ std::string ConsoleShader::createTexturedBackground() {
 std::string ConsoleShader::createSolidBackground() {
   vec4_t bg;
   cgame.utils.colorParser->parseColorString(etj_consoleColor.string, bg);
-  auto alphaGen =
-      ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
+  auto alphaGen = stringFormat("alphaGen const %f", etj_consoleAlpha.value);
   auto colorGen =
-      ETJump::stringFormat("rgbGen const ( %f %f %f )", bg[0], bg[1], bg[2]);
+      stringFormat("rgbGen const ( %f %f %f )", bg[0], bg[1], bg[2]);
 
   return composeShader(shaderName, {"nopicmip"},
                        {{

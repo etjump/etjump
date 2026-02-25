@@ -26,12 +26,13 @@
 
 #include <toml11/types.hpp>
 
-#include "etj_client_commands_handler.h"
-#include "etj_cvar_update_handler.h"
-
 #include "../game/etj_command_parser.h"
+#include "../game/q_shared.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+class ClientCommandsHandler;
+
 inline constexpr int32_t MAX_CUSTOM_COMMANDS = 40;
 // 9 and 0 are reserved for prev/next page navigation
 inline constexpr uint8_t CUSTOM_COMMAND_MENU_PAGE_SIZE = 8;
@@ -41,8 +42,8 @@ inline constexpr uint8_t CUSTOM_COMMAND_MENU_MAX_PAGES =
 class CustomCommandMenu {
 public:
   CustomCommandMenu(
-      const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
-      const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler);
+      const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
   ~CustomCommandMenu();
 
   struct CustomCommand {
@@ -101,7 +102,7 @@ private:
   std::string customCommandMenuFile;
   std::map<uint8_t, std::array<CustomCommand, CUSTOM_COMMAND_MENU_PAGE_SIZE>>
       commands;
-  std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
-  std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
 };
 } // namespace ETJump

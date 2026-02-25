@@ -42,7 +42,8 @@ float CGaz::drawVel{};
 float CGaz::yaw{};
 float CGaz::drawSnap{};
 
-CGaz::CGaz() {
+CGaz::CGaz(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : cvarUpdate(cvarUpdate) {
   // CGaz 1
   cgame.utils.colorParser->parseColorString(etj_CGaz1Color1.string,
                                             CGaz1Colors[0]);
@@ -65,40 +66,47 @@ CGaz::CGaz() {
   startListeners();
 }
 
+CGaz::~CGaz() {
+  cvarUpdate->unsubscribe(&etj_CGaz1Color1);
+  cvarUpdate->unsubscribe(&etj_CGaz1Color2);
+  cvarUpdate->unsubscribe(&etj_CGaz1Color3);
+  cvarUpdate->unsubscribe(&etj_CGaz1Color4);
+  cvarUpdate->unsubscribe(&etj_CGaz1MidlineColor);
+
+  cvarUpdate->unsubscribe(&etj_CGaz2Color1);
+  cvarUpdate->unsubscribe(&etj_CGaz2Color2);
+}
+
 void CGaz::startListeners() {
   // CGaz 1
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_CGaz1Color1, [this](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[0]);
-      });
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_CGaz1Color2, [this](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[1]);
-      });
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_CGaz1Color3, [this](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[2]);
-      });
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_CGaz1Color4, [this](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[3]);
-      });
+  cvarUpdate->subscribe(&etj_CGaz1Color1, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[0]);
+  });
 
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_CGaz1MidlineColor, [this](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(cvar->string,
-                                                  CGaz1MidlineColor);
-      });
+  cvarUpdate->subscribe(&etj_CGaz1Color2, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[1]);
+  });
+
+  cvarUpdate->subscribe(&etj_CGaz1Color3, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[2]);
+  });
+
+  cvarUpdate->subscribe(&etj_CGaz1Color4, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[3]);
+  });
+
+  cvarUpdate->subscribe(&etj_CGaz1MidlineColor, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz1MidlineColor);
+  });
 
   // CGaz 2
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_CGaz2Color1, [this](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(cvar->string, CGaz2Colors[0]);
-      });
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_CGaz2Color2, [this](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(cvar->string, CGaz2Colors[1]);
-      });
+  cvarUpdate->subscribe(&etj_CGaz2Color1, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz2Colors[0]);
+  });
+
+  cvarUpdate->subscribe(&etj_CGaz2Color2, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz2Colors[1]);
+  });
 }
 
 void CGaz::UpdateCGaz1(vec3_t wishvel, const int8_t uCmdScale) const {

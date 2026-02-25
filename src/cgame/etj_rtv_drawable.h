@@ -25,9 +25,8 @@
 #pragma once
 
 #include "etj_irenderable.h"
+
 #include "../ui/ui_shared.h"
-#include <string>
-#include <vector>
 
 namespace ETJump {
 class RtvDrawable : public IRenderable {

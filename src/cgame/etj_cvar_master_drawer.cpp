@@ -25,20 +25,27 @@
 #include <algorithm>
 
 #include "etj_cvar_master_drawer.h"
-#include "etj_local.h"
+#include "cg_local.h"
+#include "etj_cvar_update_handler.h"
 
-ETJump::CvarBasedMasterDrawer::CvarBasedMasterDrawer(const vmCvar_t &cvar)
-    : selector(cvar) {
-  cgame.handlers.cvarUpdate->subscribe(&selector, [&](const vmCvar_t *update) {
-    updateCurrentIndex(update->integer);
+namespace ETJump {
+CvarBasedMasterDrawer::CvarBasedMasterDrawer(
+    const vmCvar_t *cvar, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : selector(cvar), cvarUpdate(cvarUpdate) {
+  this->cvarUpdate->subscribe(selector, [this](const vmCvar_t *cvar) {
+    updateCurrentIndex(cvar->integer);
   });
 }
 
-void ETJump::CvarBasedMasterDrawer::updateCurrentIndex(int index) {
+CvarBasedMasterDrawer::~CvarBasedMasterDrawer() {
+  cvarUpdate->unsubscribe(selector);
+}
+
+void CvarBasedMasterDrawer::updateCurrentIndex(int index) {
   currentIndex = std::clamp(index, 1, static_cast<int>(renderables.size())) - 1;
 }
 
-bool ETJump::CvarBasedMasterDrawer::beforeRender() {
+bool CvarBasedMasterDrawer::beforeRender() {
   if (shouldRender()) {
     return renderables[currentIndex]->beforeRender();
   }
@@ -46,17 +53,18 @@ bool ETJump::CvarBasedMasterDrawer::beforeRender() {
   return false;
 }
 
-void ETJump::CvarBasedMasterDrawer::render() const {
+void CvarBasedMasterDrawer::render() const {
   if (shouldRender()) {
     renderables[currentIndex]->render();
   }
 }
 
-bool ETJump::CvarBasedMasterDrawer::shouldRender() const {
+bool CvarBasedMasterDrawer::shouldRender() const {
   return etj_drawKeys.integer > 0 && renderables.size() > 0;
 }
 
-void ETJump::CvarBasedMasterDrawer::push(IRenderable *renderable) {
-  renderables.push_back(std::unique_ptr<IRenderable>(renderable));
-  updateCurrentIndex(selector.integer);
+void CvarBasedMasterDrawer::push(std::unique_ptr<IRenderable> renderable) {
+  renderables.push_back(std::move(renderable));
+  updateCurrentIndex(selector->integer);
 }
+} // namespace ETJump

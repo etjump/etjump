@@ -22,52 +22,53 @@
  * SOFTWARE.
  */
 
-#include <string>
-
 #include "etj_maxspeed.h"
-#include "etj_entity_events_handler.h"
 #include "etj_local.h"
 #include "etj_utilities.h"
 
-ETJump::DisplayMaxSpeed::DisplayMaxSpeed(
-    EntityEventsHandler *entityEventsHandler)
-    : _entityEventsHandler{entityEventsHandler} {
-  if (!entityEventsHandler) {
-    CG_Error("DisplayMaxSpeed: clientCommandsHandler is null.\n");
-    return;
-  }
+namespace ETJump {
+DisplayMaxSpeed::DisplayMaxSpeed(
+    const std::shared_ptr<EntityEventsHandler> &entityEvents,
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : entityEvents(entityEvents), cvarUpdate(cvarUpdate) {
+  parseColor(etj_speedColor.string, color);
+  startListeners();
+}
 
-  entityEventsHandler->subscribe(EV_LOAD_TELEPORT, [&](centity_t *cent) {
+DisplayMaxSpeed::~DisplayMaxSpeed() {
+  entityEvents->unsubscribe(EV_LOAD_TELEPORT);
+
+  cvarUpdate->unsubscribe(&etj_speedColor);
+  cvarUpdate->unsubscribe(&etj_speedAlpha);
+}
+
+void DisplayMaxSpeed::startListeners() {
+  entityEvents->subscribe(EV_LOAD_TELEPORT, [this](centity_t *) {
     if (cg.snap->ps.clientNum != cg.clientNum) {
-      _maxSpeed = 0;
+      maxSpeed = 0;
       return;
     }
 
-    _displayMaxSpeed = _maxSpeed;
-    _maxSpeed = 0;
-    _animationStartTime = cg.time;
+    displayMaxSpeed = maxSpeed;
+    maxSpeed = 0;
+    animationStartTime = cg.time;
   });
 
-  parseColor(etj_speedColor.string, _color);
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_speedColor,
-      [&](const vmCvar_t *cvar) { parseColor(etj_speedColor.string, _color); });
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_speedAlpha,
-      [&](const vmCvar_t *cvar) { parseColor(etj_speedColor.string, _color); });
+  cvarUpdate->subscribe(&etj_speedColor, [this](const vmCvar_t *cvar) {
+    parseColor(cvar->string, color);
+  });
+
+  cvarUpdate->subscribe(&etj_speedAlpha, [this](const vmCvar_t *) {
+    parseColor(etj_speedColor.string, color);
+  });
 }
 
-ETJump::DisplayMaxSpeed::~DisplayMaxSpeed() {
-  _entityEventsHandler->unsubscribe(EV_LOAD_TELEPORT);
-}
-
-void ETJump::DisplayMaxSpeed::parseColor(const std::string &color,
-                                         vec4_t &out) {
+void DisplayMaxSpeed::parseColor(const std::string &color, vec4_t &out) {
   cgame.utils.colorParser->parseColorString(color, out);
   out[3] *= etj_speedAlpha.value;
 }
 
-bool ETJump::DisplayMaxSpeed::beforeRender() {
+bool DisplayMaxSpeed::beforeRender() {
   if (canSkipDraw()) {
     return false;
   }
@@ -75,24 +76,24 @@ bool ETJump::DisplayMaxSpeed::beforeRender() {
   auto speed = sqrt(cg.snap->ps.velocity[0] * cg.snap->ps.velocity[0] +
                     cg.snap->ps.velocity[1] * cg.snap->ps.velocity[1]);
 
-  if (speed >= _maxSpeed) {
-    _maxSpeed = speed;
+  if (speed >= maxSpeed) {
+    maxSpeed = speed;
   }
 
   return true;
 }
 
-void ETJump::DisplayMaxSpeed::render() const {
+void DisplayMaxSpeed::render() const {
 
   vec4_t color = {1, 1, 1, 1};
-  auto fade = CG_FadeAlpha(_animationStartTime, etj_maxSpeedDuration.integer);
-  Vector4Copy(_color, color);
+  auto fade = CG_FadeAlpha(animationStartTime, etj_maxSpeedDuration.integer);
+  Vector4Copy(color, color);
   color[3] *= fade;
 
   auto size = 0.1f;
   size *= etj_speedSize.value;
 
-  auto str = va("%0.f", _displayMaxSpeed);
+  auto str = va("%0.f", displayMaxSpeed);
   float w;
   switch (etj_speedAlign.integer) {
     case 1: // left align
@@ -121,6 +122,7 @@ void ETJump::DisplayMaxSpeed::render() const {
                     &cgs.media.limboFont1);
 }
 
-bool ETJump::DisplayMaxSpeed::canSkipDraw() const {
-  return !etj_drawMaxSpeed.integer || ETJump::showingScores();
+bool DisplayMaxSpeed::canSkipDraw() {
+  return !etj_drawMaxSpeed.integer || showingScores();
 }
+} // namespace ETJump

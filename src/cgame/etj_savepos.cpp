@@ -23,20 +23,21 @@
  */
 
 #include "etj_savepos.h"
-#include "cg_local.h"
 #include "etj_local.h"
+#include "etj_timerun.h"
+#include "cg_local.h"
 
 #include "../game/etj_json_utilities.h"
 #include "../game/etj_filesystem.h"
 
 namespace ETJump {
 
-SavePos::SavePos(const std::shared_ptr<Timerun> &p) {
+SavePos::SavePos(const std::shared_ptr<Timerun> &timerun) {
   const bool timerunCompatible =
       cg.demoPlayback ? !cgame.demo.compatibility->flags.noSavePosTimerunInfo
                       : true;
 
-  if (!p || !timerunCompatible) {
+  if (!timerun || !timerunCompatible) {
     CG_Printf("^3WARNING: ^7unable to initialize timerun information for "
               "^3'savepos'^7. Timerun state will not be saved in positions!\n");
 
@@ -48,7 +49,7 @@ SavePos::SavePos(const std::shared_ptr<Timerun> &p) {
                 "issue.\n");
     }
   } else {
-    timerun = p;
+    this->timerun = timerun;
   }
 
   parseExistingPositions(false);

@@ -23,33 +23,33 @@
  */
 
 #pragma once
-#include "cg_local.h"
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
+#include <memory>
+#include <vector>
 
 #include "etj_irenderable.h"
-#include <vector>
-#include "etj_cvar_update_handler.h"
+
+#include "../game/q_shared.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+
 class CvarBasedMasterDrawer : public IRenderable {
   std::vector<std::unique_ptr<IRenderable>> renderables;
-  const vmCvar_t &selector;
+  const vmCvar_t *selector;
   int currentIndex = 0;
 
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+
   void updateCurrentIndex(int index);
-  bool shouldRender() const;
+  [[nodiscard]] bool shouldRender() const;
 
 public:
-  explicit CvarBasedMasterDrawer(const vmCvar_t &cvar);
-  virtual ~CvarBasedMasterDrawer() {}
+  CvarBasedMasterDrawer(const vmCvar_t *cvar,
+                        const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~CvarBasedMasterDrawer() override;
   bool beforeRender() override;
   void render() const override;
-  void push(IRenderable *renderable);
+  void push(std::unique_ptr<IRenderable> renderable);
 };
 } // namespace ETJump

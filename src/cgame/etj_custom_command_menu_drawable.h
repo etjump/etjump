@@ -24,13 +24,17 @@
 
 #pragma once
 
-#include "cg_local.h"
 #include "etj_irenderable.h"
 
+#include "../ui/ui_shared.h"
+
 namespace ETJump {
+class ClientCommandsHandler;
+
 class CustomCommandMenuDrawable : public IRenderable {
 public:
-  CustomCommandMenuDrawable();
+  explicit CustomCommandMenuDrawable(
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
   ~CustomCommandMenuDrawable() override;
 
   bool beforeRender() override;
@@ -46,7 +50,9 @@ public:
 private:
   static uint8_t currentPage;
 
-  static void setupListeners();
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
+
+  void setupListeners();
   static void openMenu(uint8_t page);
   static void setupPanels();
   static bool canSkipDraw();

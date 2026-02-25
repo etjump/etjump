@@ -25,7 +25,6 @@
 #pragma once
 
 #include "etj_irenderable.h"
-#include "etj_cvar_update_handler.h"
 
 #include "etj_chs_data.h"
 

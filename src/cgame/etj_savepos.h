@@ -24,19 +24,21 @@
 
 #pragma once
 
+#include <memory>
 #include <unordered_map>
-#include "etj_timerun.h"
 
 #include "../game/etj_savepos_shared.h"
 
 namespace ETJump {
+class Timerun;
+
 class SavePos {
   enum class PosFlags {
     NoVelocity = 1,
     NoPitch = 2,
   };
 
-  const std::string defaultName = "default";
+  std::string defaultName = "default";
 
   std::unordered_map<std::string, SavePosData> savePositions;
 
@@ -53,7 +55,7 @@ class SavePos {
   std::string errors;
 
 public:
-  explicit SavePos(const std::shared_ptr<Timerun> &p);
+  explicit SavePos(const std::shared_ptr<Timerun> &timerun);
   ~SavePos() = default;
 
   // parses all existing savepos files and adds them to the savePositions map

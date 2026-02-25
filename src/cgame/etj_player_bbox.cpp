@@ -22,30 +22,15 @@
  * SOFTWARE.
  */
 
-#include "cg_local.h"
-#include "etj_local.h"
 #include "etj_player_bbox.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
 
 namespace ETJump {
-PlayerBBox::PlayerBBox() {
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_playerBBoxColorSelf, [&](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(
-            etj_playerBBoxColorSelf.string, colorSelf);
-      });
-
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_playerBBoxColorOther, [&](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(
-            etj_playerBBoxColorOther.string, colorOther);
-      });
-
-  cgame.handlers.cvarUpdate->subscribe(
-      &etj_playerBBoxColorFireteam, [&](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(
-            etj_playerBBoxColorFireteam.string, colorFireteam);
-      });
+PlayerBBox::PlayerBBox(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : shader(trap_R_RegisterShader(etj_playerBBoxShader.string)),
+      cvarUpdate(cvarUpdate) {
+  setupListeners();
 
   cgame.utils.colorParser->parseColorString(etj_playerBBoxColorSelf.string,
                                             colorSelf);
@@ -53,8 +38,28 @@ PlayerBBox::PlayerBBox() {
                                             colorOther);
   cgame.utils.colorParser->parseColorString(etj_playerBBoxColorFireteam.string,
                                             colorFireteam);
+}
 
-  shader = trap_R_RegisterShader(etj_playerBBoxShader.string);
+PlayerBBox::~PlayerBBox() {
+  cvarUpdate->unsubscribe(&etj_playerBBoxColorSelf);
+  cvarUpdate->unsubscribe(&etj_playerBBoxColorOther);
+  cvarUpdate->unsubscribe(&etj_playerBBoxColorFireteam);
+}
+
+void PlayerBBox::setupListeners() {
+  cvarUpdate->subscribe(&etj_playerBBoxColorSelf, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, colorSelf);
+  });
+
+  cvarUpdate->subscribe(
+      &etj_playerBBoxColorOther, [this](const vmCvar_t *cvar) {
+        cgame.utils.colorParser->parseColorString(cvar->string, colorOther);
+      });
+
+  cvarUpdate->subscribe(
+      &etj_playerBBoxColorFireteam, [this](const vmCvar_t *cvar) {
+        cgame.utils.colorParser->parseColorString(cvar->string, colorFireteam);
+      });
 }
 
 void PlayerBBox::drawBBox(const clientInfo_t *ci, const centity_t *cent) const {

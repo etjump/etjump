@@ -71,6 +71,7 @@ public:
 
   Timerun(const std::shared_ptr<PlayerEventsHandler> &playerEventsHandler,
           const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler);
+  ~Timerun();
 
   void registerListeners();
   void reset(); // called on map_restart to clear status
@@ -85,7 +86,7 @@ public:
   void parseServerCommand(const std::vector<std::string> &args);
   const PlayerTimerunInformation *getTimerunInformationFor(int clientNum);
   static int getNumCheckpointsHit(
-      const std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
+      std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
 
   static void execCmdOnRunStart();
   static void execCmdOnRunEnd();
