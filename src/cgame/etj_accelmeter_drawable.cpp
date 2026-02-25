@@ -23,7 +23,9 @@
  */
 
 #include "etj_accelmeter_drawable.h"
-#include "etj_local.h"
+#include "etj_color_parser.h"
+#include "etj_cvar_update_handler.h"
+#include "etj_pmove_utils.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"

@@ -26,7 +26,7 @@
 
 #include "etj_accel_color.h"
 #include "etj_cgaz.h"
-#include "etj_local.h"
+#include "etj_pmove_utils.h"
 
 namespace ETJump {
 void AccelColor::setAccelColor(const int style, const float speed,

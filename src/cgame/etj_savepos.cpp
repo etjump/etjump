@@ -23,6 +23,7 @@
  */
 
 #include "etj_savepos.h"
+#include "etj_demo_compatibility.h"
 #include "etj_local.h"
 #include "etj_timerun.h"
 #include "cg_local.h"

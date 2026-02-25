@@ -23,7 +23,10 @@
  */
 
 #include "etj_maxspeed.h"
-#include "etj_local.h"
+#include "cg_local.h"
+#include "etj_color_parser.h"
+#include "etj_cvar_update_handler.h"
+#include "etj_entity_events_handler.h"
 #include "etj_utilities.h"
 
 namespace ETJump {

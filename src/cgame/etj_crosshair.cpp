@@ -23,9 +23,11 @@
  */
 
 #include "etj_crosshair.h"
+#include "cg_local.h"
+#include "etj_color_parser.h"
 #include "etj_crosshair_drawer.h"
 #include "etj_cvar_parser.h"
-#include "etj_local.h"
+#include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
 namespace ETJump {

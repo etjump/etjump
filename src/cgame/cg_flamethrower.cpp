@@ -7,7 +7,7 @@
 // NOTE: some AI's are treated different, mostly for aesthetical reasons.
 
 #include "cg_local.h"
-#include "etj_local.h"
+#include "etj_trace_utils.h"
 #include "etj_utilities.h"
 
 // a flameChunk is a ball or section of fuel which goes from fuel->blue

@@ -26,7 +26,10 @@
 
 #include <optional>
 
-#include "cg_local.h"
+#include "etj_local.h"
+
+#include "../game/q_shared.h"
+#include "../game/bg_public.h"
 
 namespace ETJump {
 class CvarUpdateHandler;

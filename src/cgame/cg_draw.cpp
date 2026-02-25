@@ -4,7 +4,8 @@
 #include <algorithm>
 
 #include "cg_local.h"
-#include "etj_local.h"
+#include "etj_client_rtv_handler.h"
+#include "etj_demo_compatibility.h"
 #include "etj_utilities.h"
 #include "etj_cvar_parser.h"
 #include "etj_trace_utils.h"

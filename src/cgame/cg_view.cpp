@@ -4,7 +4,11 @@
 #include <algorithm>
 
 #include "cg_local.h"
-#include "etj_local.h"
+#include "etj_awaited_command_handler.h"
+#include "etj_chs_data.h"
+#include "etj_event_loop.h"
+#include "etj_pmove_utils.h"
+#include "etj_trickjump_lines.h"
 #include "etj_utilities.h"
 
 /*

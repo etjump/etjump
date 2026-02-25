@@ -6,8 +6,11 @@
 #include <ctime>
 
 #include "cg_local.h"
+#include "etj_client_rtv_handler.h"
+#include "etj_demo_compatibility.h"
 #include "etj_local.h"
 #include "etj_spectatorinfo_data.h"
+#include "etj_timerun.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"

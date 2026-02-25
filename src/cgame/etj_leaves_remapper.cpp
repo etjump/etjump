@@ -25,6 +25,7 @@
 #include <string>
 
 #include "etj_leaves_remapper.h"
+#include "cg_local.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 

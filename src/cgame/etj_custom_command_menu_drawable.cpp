@@ -23,8 +23,9 @@
  */
 
 #include "etj_custom_command_menu_drawable.h"
+#include "cg_local.h"
+#include "etj_client_commands_handler.h"
 #include "etj_custom_command_menu.h"
-#include "etj_local.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"

@@ -27,6 +27,7 @@
 #include <map>
 
 #include "cg_local.h"
+#include "etj_local.h"
 
 #include "../game/etj_shared.h"
 

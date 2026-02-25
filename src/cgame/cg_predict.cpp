@@ -6,7 +6,7 @@
 // It also handles local physics interaction, like fragments bouncing off walls
 
 #include "cg_local.h"
-#include "etj_local.h"
+#include "etj_trace_utils.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_entity_utilities_shared.h"

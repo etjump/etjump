@@ -23,9 +23,11 @@
  */
 
 #include "etj_autodemo_recorder.h"
-#include "etj_local.h"
-#include "etj_utilities.h"
+#include "cg_local.h"
+#include "etj_client_commands_handler.h"
 #include "etj_demo_recorder.h"
+#include "etj_player_events_handler.h"
+#include "etj_utilities.h"
 
 #include "../game/etj_filesystem.h"
 #include "../game/etj_string_utilities.h"

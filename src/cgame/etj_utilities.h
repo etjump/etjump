@@ -23,10 +23,13 @@
  */
 
 #pragma once
+
 #include <string>
 #include <functional>
 
-#include "cg_local.h"
+#include "etj_local.h"
+
+#include "../game/q_shared.h"
 
 namespace ETJump {
 typedef std::initializer_list<const char *> ShaderStage;
