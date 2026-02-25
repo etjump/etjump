@@ -114,6 +114,7 @@ target_link_libraries(libuuid4 PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsqlite PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(fmt PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsqlite_modern_cpp INTERFACE cxx_compiler_opts_w0)
+target_link_libraries(toml11 INTERFACE cxx_compiler_opts_w0)
 
 # setup directories for IDEs that use them (Visual Studio, XCode...)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
