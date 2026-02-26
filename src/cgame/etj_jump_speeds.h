@@ -32,7 +32,6 @@ namespace ETJump {
 class EntityEventsHandler;
 class ClientCommandsHandler;
 class CvarUpdateHandler;
-class EntityEventsHandler;
 class PlayerEventsHandler;
 
 class JumpSpeeds : public IRenderable {
