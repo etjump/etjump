@@ -67,19 +67,23 @@ void KeySetSystem::render() const {
   if (canSkipDraw()) {
     return;
   }
+
   keySetMasterDrawer.render();
 }
 
 std::vector<KeySetDrawer::KeyShader>
 KeySetSystem::createKeyPressSet(const std::string &keySetName) {
   std::vector<KeySetDrawer::KeyShader> keyPressSet;
-  for (auto &&keyName : keyLayout) {
+  keyPressSet.reserve(keyLayout.size());
+
+  for (const auto &keyName : keyLayout) {
     keyPressSet.push_back(
         {keyName,
          registerKeySetShader(keySetName,
                               KeySetDrawer::keyNameToString(keyName)),
          0});
   }
+
   return keyPressSet;
 }
 
@@ -120,17 +124,19 @@ qhandle_t KeySetSystem::registerKeySetShader(const std::string &keySetName,
 std::string
 KeySetSystem::createKeyPressSetShaderPath(const std::string &keySetName,
                                           const std::string &keyName) {
-  if (keyName.size() == 0) {
+  if (keyName.empty()) {
     return "";
   }
+
   return stringFormat("gfx/%s/key_%s_pressed", keySetName, keyName);
 }
 
-qhandle_t KeySetSystem::registerShaderNoMip(const std::string &shaderPath) {
-  if (shaderPath.size() == 0) {
+qhandle_t KeySetSystem::registerShaderNoMip(const std::string &shaderName) {
+  if (shaderName.empty()) {
     return 0;
   }
-  return trap_R_RegisterShaderNoMip(shaderPath.c_str());
+
+  return trap_R_RegisterShaderNoMip(shaderName.c_str());
 }
 
 bool KeySetSystem::canSkipDraw() const {

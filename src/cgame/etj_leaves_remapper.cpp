@@ -49,13 +49,13 @@ LeavesRemapper::LeavesRemapper(
   });
 }
 
-void LeavesRemapper::turnOnLeaves() {
+void LeavesRemapper::turnOnLeaves() const {
   for (auto &leavesShader : leavesShaders) {
     trap_R_RemapShader(leavesShader, leavesShader, "0");
   }
 }
 
-void LeavesRemapper::turnOffLeaves() {
+void LeavesRemapper::turnOffLeaves() const {
   for (auto &leavesShader : leavesShaders) {
     trap_R_RemapShader(leavesShader, shaderName, "0");
   }

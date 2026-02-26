@@ -113,14 +113,17 @@ std::string KeySetKeyBindDrawer::keyNameToCommand(KeyNames keyName) {
   }
 }
 
-int KeySetKeyBindDrawer::getKeyCodeForName(std::string &name) {
-  if (name.size()) {
-    int b1, b2;
+int KeySetKeyBindDrawer::getKeyCodeForName(const std::string &name) {
+  if (!name.empty()) {
+    int b1 = 0;
+    int b2 = 0;
     trap_Key_KeysForBinding(name.c_str(), &b1, &b2);
+
     if (b1 != -1) {
       return b1;
     }
   }
+
   return 0;
 }
 

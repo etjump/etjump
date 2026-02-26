@@ -46,7 +46,7 @@ std::string ConsoleShader::createBackground() {
   return createSolidBackground();
 }
 
-std::string ConsoleShader::createTexturedBackground() {
+std::string ConsoleShader::createTexturedBackground() const {
   auto alphaGen = stringFormat("alphaGen const %f", etj_consoleAlpha.value);
 
   return composeShader(shaderName, {"nopicmip"},
@@ -72,7 +72,7 @@ std::string ConsoleShader::createTexturedBackground() {
                         }});
 }
 
-std::string ConsoleShader::createSolidBackground() {
+std::string ConsoleShader::createSolidBackground() const {
   vec4_t bg;
   cgame.utils.colorParser->parseColorString(etj_consoleColor.string, bg);
   auto alphaGen = stringFormat("alphaGen const %f", etj_consoleAlpha.value);

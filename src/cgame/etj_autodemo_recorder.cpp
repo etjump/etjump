@@ -175,7 +175,9 @@ std::string AutoDemoRecorder::TempNameGenerator::current() {
   return names.size() > 0 ? names.back() : "temp";
 }
 
-size_t AutoDemoRecorder::TempNameGenerator::size() { return names.size(); }
+size_t AutoDemoRecorder::TempNameGenerator::size() const {
+  return names.size();
+}
 
 void AutoDemoRecorder::tryRestart() {
   // no autodemo for specs
