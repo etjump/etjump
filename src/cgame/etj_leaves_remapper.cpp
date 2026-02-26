@@ -44,7 +44,7 @@ LeavesRemapper::LeavesRemapper(
     turnOffLeaves();
   }
 
-  this->cvarUpdate->subscribe(&etj_drawLeaves, [&](const vmCvar_t *cvar) {
+  this->cvarUpdate->subscribe(&etj_drawLeaves, [this](const vmCvar_t *cvar) {
     cvar->integer ? turnOnLeaves() : turnOffLeaves();
   });
 }

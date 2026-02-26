@@ -66,12 +66,12 @@ void OverbounceWatcher::startListeners() {
   consoleCommands->subscribe(
       "ob_list", [this](const std::vector<std::string> &) { list(); });
 
-  cvarUpdate->subscribe(&etj_obWatcherColor, [&](const vmCvar_t *cvar) {
+  cvarUpdate->subscribe(&etj_obWatcherColor, [this](const vmCvar_t *cvar) {
     cgame.utils.colorParser->parseColorString(cvar->string, color);
   });
 
   cvarUpdate->subscribe(&etj_obWatcherSize,
-                        [&](const vmCvar_t *cvar) { setSize(cvar); });
+                        [this](const vmCvar_t *cvar) { setSize(cvar); });
 }
 
 void OverbounceWatcher::setSize(const vmCvar_t *cvar) {
