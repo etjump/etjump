@@ -33,6 +33,7 @@
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_time_utilities.h"
 
+namespace ETJump {
 // constants
 inline constexpr int DEMO_SAVE_DELAY = 500;
 inline constexpr int DEMO_MAX_SAVE_DELAY = 10000;
@@ -40,182 +41,217 @@ inline constexpr int DEMO_START_TIMEOUT = 500;
 inline constexpr int MAX_TEMP = 20;
 inline constexpr char TEMP_PATH[] = "temp";
 
-std::string ETJump::AutoDemoRecorder::TempNameGenerator::pop() {
-  if (!names.size())
+inline constexpr int32_t AUTODEMO_TIMERUN_ONLY = 1;
+inline constexpr int32_t AUTODEMO_ALWAYS = 2;
+
+AutoDemoRecorder::AutoDemoRecorder(
+    const std::shared_ptr<PlayerEventsHandler> &playerEvents,
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+    : playerEvents(playerEvents), consoleCommands(consoleCommands) {
+  if (cg.demoPlayback) {
+    return;
+  }
+
+  startListeners();
+}
+
+AutoDemoRecorder::~AutoDemoRecorder() {
+  if (cg.demoPlayback) {
+    return;
+  }
+
+  playerEvents->unsubscribe("load");
+  playerEvents->unsubscribe("respawn");
+  playerEvents->unsubscribe("timerun:completion");
+  playerEvents->unsubscribe("timerun:record");
+
+  consoleCommands->unsubscribe("ad_save");
+}
+
+void AutoDemoRecorder::startListeners() {
+  playerEvents->subscribe("load", [this](const std::vector<std::string> &) {
+    if (etj_autoDemo.integer) {
+      tryRestart();
+    }
+  });
+
+  playerEvents->subscribe(
+      "respawn",
+      [this](const std::vector<std::string> &args) { onRespawn(args); });
+
+  playerEvents->subscribe("timerun:completion",
+                          [this](const std::vector<std::string> &args) {
+                            onTimerunEnd(args, false);
+                          });
+
+  playerEvents->subscribe("timerun:record",
+                          [this](const std::vector<std::string> &args) {
+                            onTimerunEnd(args, true);
+                          });
+
+  consoleCommands->subscribe(
+      "ad_save",
+      [this](const std::vector<std::string> &args) { onManualSave(args); });
+}
+
+void AutoDemoRecorder::onRespawn(const std::vector<std::string> &args) {
+  if (etj_ad_stopInSpec.integer && DemoRecorder::recordingAutoDemo() &&
+      cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR && !delayedTimerId) {
+    demo.stop();
+    return;
+  }
+
+  if (args.empty()) {
+    return;
+  }
+
+  // don't restart if we're getting revived ('respawn 1')
+  if (Q_atoi(args[0])) {
+    return;
+  }
+
+  if (etj_autoDemo.integer) {
+    tryRestart();
+  }
+}
+
+void AutoDemoRecorder::onTimerunEnd(const std::vector<std::string> &args,
+                                    const bool record) {
+  if (!etj_autoDemo.integer || args.size() < 3) {
+    return;
+  }
+
+  if (Q_atoi(args[0]) != cg.clientNum) {
+    return;
+  }
+
+  if (!record && etj_ad_savePBOnly.integer) {
+    return;
+  }
+
+  trySaveTimerunDemo(sanitize(args[1]), args[2]);
+}
+
+void AutoDemoRecorder::onManualSave(const std::vector<std::string> &args) {
+  if (!etj_autoDemo.integer) {
+    return;
+  }
+
+  if (!cl_demorecording.integer) {
+    CG_AddPMItem(PM_MESSAGE, "^7Not recording a demo.\n",
+                 cgs.media.voiceChatShader);
+    return;
+  }
+
+  if (!DemoRecorder::recordingAutoDemo()) {
+    CG_AddPMItem(PM_MESSAGE, "Not recording an autodemo.\n",
+                 cgs.media.voiceChatShader);
+    return;
+  }
+
+  const std::string src = createDemoTempPath(demoNames.current());
+  const std::string dst = createDemoPath(args.empty() ? "demo" : args[0]);
+  saveDemoWithRestart(src, dst);
+}
+
+std::string AutoDemoRecorder::TempNameGenerator::pop() {
+  if (!names.size()) {
     return "temp";
+  }
+
   auto name = names.front();
   names.pop();
   return name;
 }
 
-std::string ETJump::AutoDemoRecorder::TempNameGenerator::next() {
-  // Clock clock = getCurrentClock();
-  // auto name = stringFormat("%s/temp_%d-%d-%d-%03d", TEMP_PATH,
-  // clock.hours, clock.min, clock.sec, clock.ms);
-  auto name =
+std::string AutoDemoRecorder::TempNameGenerator::next() {
+  const std::string name =
       stringFormat("%s/temp_%02d", TEMP_PATH, (nameCounter++ % MAX_TEMP) + 1);
   names.push(name);
   return name;
 }
 
-std::string ETJump::AutoDemoRecorder::TempNameGenerator::current() {
+std::string AutoDemoRecorder::TempNameGenerator::current() {
   return names.size() > 0 ? names.back() : "temp";
 }
 
-int ETJump::AutoDemoRecorder::TempNameGenerator::size() { return names.size(); }
+size_t AutoDemoRecorder::TempNameGenerator::size() { return names.size(); }
 
-ETJump::AutoDemoRecorder::AutoDemoRecorder() {
-  if (cg.demoPlayback)
-    return;
-
-  cgame.handlers.playerEvents->subscribe(
-      "load", [&](const std::vector<std::string> &args) {
-        if (etj_autoDemo.integer > 0)
-          tryRestart();
-      });
-
-  cgame.handlers.playerEvents->subscribe(
-      "respawn", [&](const std::vector<std::string> &args) {
-        if (etj_ad_stopInSpec.integer && DemoRecorder::recordingAutoDemo() &&
-            cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR &&
-            !_delayedTimerId) {
-          _demo.stop();
-          return;
-        }
-
-        const int revive = Q_atoi(args[0].c_str());
-
-        if (revive) {
-          return;
-        }
-
-        if (etj_autoDemo.integer) {
-          tryRestart();
-        }
-      });
-
-  cgame.handlers.playerEvents->subscribe(
-      "timerun:completion", [&](const std::vector<std::string> &args) {
-        auto clientNum = std::stoi(args[0]);
-        if (clientNum != cg.clientNum) {
-          return;
-        }
-
-        if (etj_autoDemo.integer > 0 && etj_ad_savePBOnly.integer <= 0) {
-          trySaveTimerunDemo(sanitize(args[1]), args[2]);
-        }
-      });
-
-  cgame.handlers.playerEvents->subscribe(
-      "timerun:record", [&](const std::vector<std::string> &args) {
-        auto clientNum = std::stoi(args[0]);
-        if (clientNum != cg.clientNum) {
-          return;
-        }
-
-        if (etj_autoDemo.integer > 0)
-          trySaveTimerunDemo(sanitize(args[1]), args[2]);
-      });
-
-  cgame.handlers.consoleCommands->subscribe(
-      "ad_save", [&](const std::vector<std::string> &args) {
-        if (etj_autoDemo.integer <= 0) {
-          return;
-        }
-
-        if (!cl_demorecording.integer) {
-          CG_AddPMItem(PM_MESSAGE, "^7Not recording a demo.\n",
-                       cgs.media.voiceChatShader);
-          return;
-        }
-
-        if (!DemoRecorder::recordingAutoDemo()) {
-          CG_AddPMItem(PM_MESSAGE, "Not recording an autodemo.\n",
-                       cgs.media.voiceChatShader);
-          return;
-        }
-
-        const std::string src = createDemoTempPath(_demoNames.current());
-        const std::string dst = createDemoPath(args.empty() ? "demo" : args[0]);
-        saveDemoWithRestart(src, dst);
-      });
-}
-
-ETJump::AutoDemoRecorder::~AutoDemoRecorder() {}
-
-void ETJump::AutoDemoRecorder::tryRestart() {
+void AutoDemoRecorder::tryRestart() {
   // no autodemo for specs
   if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
     return;
   }
 
   // start autodemo for timerun maps only
-  if (etj_autoDemo.integer == 1 && !cg.hasTimerun) {
+  if (etj_autoDemo.integer == AUTODEMO_TIMERUN_ONLY && !cg.hasTimerun) {
     return;
   }
 
-  // don't start autodemo if timeruns are disabled unless autodemo is
-  // enabled for all maps
-  if (etj_autoDemo.integer < 2 && !etj_enableTimeruns.integer) {
+  // don't start autodemo if timeruns are disabled,
+  // unless autodemo is enabled for all maps
+  if (etj_autoDemo.integer != AUTODEMO_ALWAYS && !etj_enableTimeruns.integer) {
     return;
   }
 
   // timeout
-  if (_demo.getStartTime() + DEMO_START_TIMEOUT >= cg.time) {
+  if (demo.getStartTime() + DEMO_START_TIMEOUT >= cg.time) {
     return;
   }
 
   // dont attempt to restart if in timerun mode
-  if (cgs.clientinfo[cg.clientNum].timerunActive || _delayedTimerId) {
+  if (cgs.clientinfo[cg.clientNum].timerunActive || delayedTimerId) {
     return;
   }
 
   restart();
 }
 
-void ETJump::AutoDemoRecorder::restart() {
-  _demo.restart(_demoNames.next());
-  if (_demoNames.size() > MAX_TEMP) {
-    // FileSystem::remove(createDemoTempPath(_demoNames.pop()));
-    _demoNames.pop();
+void AutoDemoRecorder::restart() {
+  demo.restart(demoNames.next());
+
+  if (demoNames.size() > MAX_TEMP) {
+    demoNames.pop();
   }
 }
 
-void ETJump::AutoDemoRecorder::trySaveTimerunDemo(const std::string &runName,
-                                                  const std::string &runTime) {
-  if (_delayedTimerId || !DemoRecorder::recordingAutoDemo()) {
+void AutoDemoRecorder::trySaveTimerunDemo(const std::string &runName,
+                                          const std::string &runTime) {
+  if (delayedTimerId || !DemoRecorder::recordingAutoDemo()) {
     return;
   }
 
-  const std::string src = createDemoTempPath(_demoNames.current());
+  const std::string src = createDemoTempPath(demoNames.current());
   const std::string dst = createTimerunDemoPath(runName, runTime);
+
   CG_AddPMItem(PM_MESSAGE, "^7Stopping demo...\n", cgs.media.voiceChatShader);
   saveTimerunDemo(src, dst);
 }
 
-void ETJump::AutoDemoRecorder::saveTimerunDemo(const std::string &src,
-                                               const std::string &dst) {
+void AutoDemoRecorder::saveTimerunDemo(const std::string &src,
+                                       const std::string &dst) {
   const int delay =
       std::clamp(etj_ad_stopDelay.integer, 0, DEMO_MAX_SAVE_DELAY);
-  _delayedTimerId =
-      setTimeout([&, src, dst] { saveDemoWithRestart(src, dst); }, delay);
+
+  delayedTimerId =
+      setTimeout([this, src, dst] { saveDemoWithRestart(src, dst); }, delay);
 }
 
-void ETJump::AutoDemoRecorder::saveDemo(const std::string &src,
-                                        const std::string &dst) {
+void AutoDemoRecorder::saveDemo(const std::string &src,
+                                const std::string &dst) {
   maybeCancelDelayedSave();
   setTimeout([src, dst] { FileSystem::safeCopy(src, dst); }, DEMO_SAVE_DELAY);
 }
 
-void ETJump::AutoDemoRecorder::saveDemoWithRestart(const std::string &src,
-                                                   const std::string &dst) {
+void AutoDemoRecorder::saveDemoWithRestart(const std::string &src,
+                                           const std::string &dst) {
   saveDemo(src, dst);
   CG_AddPMItem(PM_MESSAGE, "^7Demo saved!\n", cgs.media.voiceChatShader);
   CG_Printf("^7Demo saved to %s\n", dst.c_str());
   restart();
 }
 
-std::string ETJump::AutoDemoRecorder::createDemoPath(std::string name) {
+std::string AutoDemoRecorder::createDemoPath(const std::string &name) {
   return stringFormat(
       "demos/%s/%s_%s_%s[%s].dm_84",
       FileSystem::Path::sanitizeFolder(etj_ad_targetPath.string),
@@ -224,8 +260,8 @@ std::string ETJump::AutoDemoRecorder::createDemoPath(std::string name) {
 }
 
 std::string
-ETJump::AutoDemoRecorder::createTimerunDemoPath(const std::string &runName,
-                                                const std::string &runTime) {
+AutoDemoRecorder::createTimerunDemoPath(const std::string &runName,
+                                        const std::string &runTime) {
   return stringFormat(
       "demos/%s/%s_%s_%s_%s[%s].dm_84",
       FileSystem::Path::sanitizeFolder(etj_ad_targetPath.string),
@@ -234,26 +270,26 @@ ETJump::AutoDemoRecorder::createTimerunDemoPath(const std::string &runName,
       formatRunTime(Q_atoi(runTime.c_str())), createTimeString());
 }
 
-std::string
-ETJump::AutoDemoRecorder::createDemoTempPath(const std::string &name) {
+std::string AutoDemoRecorder::createDemoTempPath(const std::string &name) {
   return stringFormat("demos/%s.dm_84", name);
 }
 
-std::string ETJump::AutoDemoRecorder::createTimeString() {
+std::string AutoDemoRecorder::createTimeString() {
   Time time = getCurrentTime();
   return stringFormat("%02d-%02d-%d-%02d%02d%02d", time.date.day, time.date.mon,
                       time.date.year, time.clock.hours, time.clock.min,
                       time.clock.sec);
 }
 
-std::string ETJump::AutoDemoRecorder::formatRunTime(int millis) {
+std::string AutoDemoRecorder::formatRunTime(int millis) {
   Clock clock = toClock(millis, false);
   return stringFormat("%02d.%02d.%03d", clock.min, clock.sec, clock.ms);
 }
 
-void ETJump::AutoDemoRecorder::maybeCancelDelayedSave() {
-  if (_delayedTimerId) {
-    clearTimeout(_delayedTimerId);
-    _delayedTimerId = 0;
+void AutoDemoRecorder::maybeCancelDelayedSave() {
+  if (delayedTimerId) {
+    clearTimeout(delayedTimerId);
+    delayedTimerId = 0;
   }
 }
+} // namespace ETJump

@@ -172,7 +172,8 @@ static void initPlatform() {
 static void initDemo() {
   cgame.demo.compatibility =
       std::make_unique<DemoCompatibility>(cgame.handlers.consoleCommands);
-  cgame.demo.autoDemoRecorder = std::make_unique<AutoDemoRecorder>();
+  cgame.demo.autoDemoRecorder = std::make_unique<AutoDemoRecorder>(
+      cgame.handlers.playerEvents, cgame.handlers.consoleCommands);
 }
 
 static void initCvarUnlockers() {
