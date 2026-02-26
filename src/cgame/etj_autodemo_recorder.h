@@ -43,7 +43,7 @@ class AutoDemoRecorder {
     std::string pop();
     std::string next();
     std::string current();
-    size_t size();
+    [[nodiscard]] size_t size() const;
   };
 
   int delayedTimerId{};

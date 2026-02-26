@@ -39,10 +39,11 @@ public:
 
 private:
   void parseNamedColorString(const std::string &token, vec4_t &color);
-  void parseRGBAValuedColorString(const std::string &colorString,
-                                  vec4_t &color);
-  void parseHexValuedColorString(const std::string &token, vec4_t &color);
-  void normalizeColorIfRequired(vec4_t &v);
+  static void parseRGBAValuedColorString(const std::string &colorString,
+                                         vec4_t &color);
+  static void parseHexValuedColorString(const std::string &token,
+                                        vec4_t &color);
+  static void normalizeColorIfRequired(vec4_t &v);
 
   std::unordered_map<std::string, const vec4_t *> validColorNames = {
       {"white", &colorWhite},       {"red", &colorRed},

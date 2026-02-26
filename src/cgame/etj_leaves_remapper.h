@@ -54,8 +54,8 @@ class LeavesRemapper {
 
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 
-  void turnOnLeaves();
-  void turnOffLeaves();
+  void turnOnLeaves() const;
+  void turnOffLeaves() const;
 
 public:
   explicit LeavesRemapper(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);

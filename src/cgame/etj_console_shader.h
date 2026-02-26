@@ -29,9 +29,10 @@
 namespace ETJump {
 class ConsoleShader {
   const char *shaderName{"__etjump-console-shader__"};
+
   std::string createBackground();
-  std::string createTexturedBackground();
-  std::string createSolidBackground();
+  [[nodiscard]] std::string createTexturedBackground() const;
+  [[nodiscard]] std::string createSolidBackground() const;
 
 public:
   ConsoleShader();

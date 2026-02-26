@@ -44,7 +44,7 @@ protected:
   void drawReleaseShader(qhandle_t shader, int position) const override;
   void drawPressShader(qhandle_t shader, int position) const override;
   static std::string keyNameToCommand(KeyNames keyName);
-  static int getKeyCodeForName(std::string &name);
+  static int getKeyCodeForName(const std::string &name);
   static std::string getKeyCodeBinding(int keyCode);
   static std::string getKeyCodeFullBinding(int keyCode);
   static std::string getKeyCodeShortBinding(int keyCode);

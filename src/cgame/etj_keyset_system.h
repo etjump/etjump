@@ -45,12 +45,13 @@ class KeySetSystem : public IRenderable {
 
   std::vector<KeySetDrawer::KeyShader>
   createKeyPressSet(const std::string &keySetName);
-  std::map<int, qhandle_t> createKeyBindSet(const std::string &keySetName);
-  qhandle_t registerKeySetShader(const std::string &keySetName,
-                                 const std::string &keyName);
-  std::string createKeyPressSetShaderPath(const std::string &keySetName,
-                                          const std::string &keyName);
-  qhandle_t registerShaderNoMip(const std::string &shaderName);
+  static std::map<int, qhandle_t>
+  createKeyBindSet(const std::string &keySetName);
+  static qhandle_t registerKeySetShader(const std::string &keySetName,
+                                        const std::string &keyName);
+  static std::string createKeyPressSetShaderPath(const std::string &keySetName,
+                                                 const std::string &keyName);
+  static qhandle_t registerShaderNoMip(const std::string &shaderName);
   [[nodiscard]] bool canSkipDraw() const;
 
 public:
