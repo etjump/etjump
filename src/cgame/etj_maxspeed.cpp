@@ -87,11 +87,10 @@ bool DisplayMaxSpeed::beforeRender() {
 }
 
 void DisplayMaxSpeed::render() const {
-
-  vec4_t color = {1, 1, 1, 1};
+  vec4_t fadeColor = {1, 1, 1, 1};
   auto fade = CG_FadeAlpha(animationStartTime, etj_maxSpeedDuration.integer);
-  Vector4Copy(color, color);
-  color[3] *= fade;
+  Vector4Copy(color, fadeColor);
+  fadeColor[3] *= fade;
 
   auto size = 0.1f;
   size *= etj_speedSize.value;
@@ -121,7 +120,7 @@ void DisplayMaxSpeed::render() const {
     style = ITEM_TEXTSTYLE_SHADOWED;
   }
 
-  CG_Text_Paint_Ext(x - w, y, size, size, color, str, 0, 0, style,
+  CG_Text_Paint_Ext(x - w, y, size, size, fadeColor, str, 0, 0, style,
                     &cgs.media.limboFont1);
 }
 
