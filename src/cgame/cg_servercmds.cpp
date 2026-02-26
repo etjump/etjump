@@ -655,7 +655,7 @@ static void CG_ConfigStringModified(void) {
     cgs.voteTime = Q_atoi(str);
 
     if (!ETJump::cgame.handlers.rtv->rtvVoteActive()) {
-      ETJump::cgame.handlers.rtv->resetRtvEventHandler();
+      ETJump::ClientRtvHandler::resetRtvEventHandler();
     }
 
     cgs.voteModified = qtrue;
