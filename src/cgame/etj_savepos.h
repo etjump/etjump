@@ -55,7 +55,7 @@ class SavePos {
   std::string errors;
 
 public:
-  explicit SavePos(const std::shared_ptr<Timerun> &timerun);
+  explicit SavePos(const std::shared_ptr<Timerun> &timerunHandler);
   ~SavePos() = default;
 
   // parses all existing savepos files and adds them to the savePositions map
