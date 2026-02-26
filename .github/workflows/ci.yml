@@ -71,6 +71,7 @@ jobs:
       matrix:
         arch: [x86, x86_64]
         config: [Release]
+        generator: [Ninja]
 
     steps:
       - name: Install dependencies
@@ -86,9 +87,9 @@ jobs:
       - name: Configure CMake
         run: |
           if [ ${{ matrix.arch }} == "x86" ]; then
-            cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-cross-x86-linux.cmake
+            cmake -B ${{ github.workspace }}/build -G ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-cross-x86-linux.cmake
           else
-            cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+            cmake -B ${{ github.workspace }}/build -G ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.config }}
           fi
 
       - name: Build
