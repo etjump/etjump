@@ -71,6 +71,7 @@ public:
     bool predictedJumpSpeeds = false;
     bool noSpecCountInVoteCs = false;
     bool stripLocalizationMarkers = false;
+    bool noMapCustomizationHashes = false;
   };
 
   // everything in here will be set to false unless we're on demo playback

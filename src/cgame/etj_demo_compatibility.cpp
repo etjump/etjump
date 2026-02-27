@@ -179,6 +179,10 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.stripLocalizationMarkers = true;
     compatibilityStrings.emplace_back(
         "Stripping localization markers from server commands manually");
+
+    flags.noMapCustomizationHashes = true;
+    compatibilityStrings.emplace_back(
+        "Custom mapscript and entity file hashes not available");
   }
 }
 
