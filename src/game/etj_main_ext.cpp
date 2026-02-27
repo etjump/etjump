@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "etj_file.h"
 #include "etj_local.h"
 #include "etj_game.h"
 #include "etj_session.h"
@@ -44,6 +45,64 @@
 #include "etj_fireteam_countdown.h"
 
 Game game;
+
+namespace ETJump {
+/*
+ * Computes SHA-1 hashes for any custom mapscript and/or entity file that
+ * is loaded for the current map. We save this to configstrings, so a client
+ * can both see that the server is not necessarily running the original
+ * version found in a pk3, and to be able to tell if a demo gets recorded
+ * in some weird, custom variation of a map, for integrity's sake.
+ */
+static void computeCustomMapDataHashes() {
+  const char *mapscriptHash = "-";
+  const char *entityFileHash = "-";
+
+  const auto computeHash = [](const std::string &filename) {
+    File fIn(filename);
+    const auto contents = fIn.read();
+
+    std::string normalizedContents =
+        std::string(contents.cbegin(), contents.cend());
+    StringUtil::replaceAll(normalizedContents, "\r\n", "\n");
+
+    return G_SHA1(normalizedContents.c_str());
+  };
+
+  // we do not care about different line endings here, as we care about the
+  // contents of the files, not the actual file integrity, therefore
+  // all line endings are normalized to LF while computing the hashes
+
+  if (g_mapScriptDir.string[0] != '\0') {
+    try {
+      mapscriptHash = computeHash(stringFormat(
+          "%s/%s.script", g_mapScriptDir.string, level.rawmapname));
+    } catch (const File::FileIOException &) {
+      G_Printf("No custom map script loaded, skipping hash calculation\n");
+    }
+  }
+
+  // FIXME: We should only do this for non-2.60b servers, as it does not
+  // support custom entity files anyway, but this currently reports a valid
+  // hash if someone just has the file in the directory, while it's
+  // not actually being used. But because ETL fakes it's 'version' cvar
+  // to be 2.60b, and 'etVersion' is client only, we can't rely on
+  // either here and thus can't detect the mod running on etlded.
+  try {
+    entityFileHash = computeHash(stringFormat("maps/%s.ent", level.rawmapname));
+  } catch (const File::FileIOException &) {
+    G_Printf("No custom entity file found, skipping hash calculation\n");
+  }
+
+  char cs[MAX_STRING_CHARS];
+  trap_GetConfigstring(CS_ETJUMP_MAPINFO, cs, sizeof(cs));
+
+  Info_SetValueForKey(cs, "msh", mapscriptHash);
+  Info_SetValueForKey(cs, "efh", entityFileHash);
+
+  trap_SetConfigstring(CS_ETJUMP_MAPINFO, cs);
+}
+} // namespace ETJump
 
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   // Do not do g_entities + clientNum here, entity is not initialized
@@ -213,6 +272,8 @@ void OnGameInit() {
   }
 
   game.mapStatistics->writeMapsToDisk("maps.json");
+
+  ETJump::computeCustomMapDataHashes();
 
   ETJump::Log::processMessages();
 }

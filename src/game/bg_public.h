@@ -299,7 +299,11 @@ inline constexpr int CS_ENDGAME_STATS = 35;
 inline constexpr int CS_CHARGETIMES = 36;
 inline constexpr int CS_FILTERCAMS = 37;
 
-// 38-63 (or 40-63) = unused (see comment above)
+// any index up from 38/40 to 64 that isn't defined = unused (see comment above)
+
+// for now, this holds mapscript/entity file hashes, rename to something
+// more fitting if different data is added in the future
+inline constexpr int32_t CS_ETJUMP_MAPINFO = 40;
 
 inline constexpr int CS_MODELS = 64;
 inline constexpr int CS_SOUNDS = CS_MODELS + MAX_MODELS;

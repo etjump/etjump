@@ -23,6 +23,7 @@
  */
 
 #include "etj_consolecommands.h"
+#include "etj_demo_compatibility.h"
 #include "etj_client_commands_handler.h"
 #include "etj_utilities.h"
 
@@ -47,6 +48,37 @@ static void uiChatMenuOpen(const Arguments &args) {
   }
 
   cg.chatMenuOpen = Q_atoi(args[0]);
+}
+
+static void printMapCustomizationInfo() {
+  if (demoCompatibility->flags.noMapCustomizationHashes) {
+    CG_Printf("Map customization data is unavailable in demos recorded prior "
+              "to ETJump 3.5.0.\n");
+    return;
+  }
+
+  const std::string cs = CG_ConfigString(CS_ETJUMP_MAPINFO);
+  const std::string mapscriptHash = Info_ValueForKey(cs.c_str(), "msh");
+  const std::string entityFileHash = Info_ValueForKey(cs.c_str(), "efh");
+
+  if (mapscriptHash.empty() || entityFileHash.empty()) {
+    CG_Printf("No map customization data found in configstrings. This is a "
+              "bug, please report this to the developers.\n");
+    return;
+  }
+
+  if (mapscriptHash == "-" && entityFileHash == "-") {
+    CG_Printf(
+        "No custom mapscript or entity file loaded for the current map.\n");
+    return;
+  }
+
+  CG_Printf("%-25s %s\n%-25s %s\n\nPlease note that the hashes are computed "
+            "with line endings normalized to ^3LF^7.\nIf you're computing the "
+            "hashes using external tools for comparison, ensure the files are "
+            "saved with ^3LF ^7line endings.\n",
+            "Custom mapscript hash:", mapscriptHash.c_str(),
+            "Entity file hash:", entityFileHash.c_str());
 }
 
 /*
@@ -170,5 +202,9 @@ void registerCommands() {
 
   consoleCommandsHandler->subscribe(
       "uiChatMenuOpen", [](const auto &args) { uiChatMenuOpen(args); }, false);
+
+  consoleCommandsHandler->subscribe(
+      "printMapCustomizationInfo",
+      [](const auto &) { printMapCustomizationInfo(); });
 }
 } // namespace ETJump::ConsoleCommands
