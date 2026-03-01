@@ -741,12 +741,12 @@ void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
                   auto playerNameString =
                       ownRecord ? r->playerName + " ^g(You)" : r->playerName;
 
-                  auto rankPadding =
-                      rankWidth + StringUtil::countExtraPadding(rankString);
-                  auto millisPadding =
-                      timeWidth + StringUtil::countExtraPadding(millisString);
-                  auto diffPadding =
-                      diffWidth + StringUtil::countExtraPadding(diffString);
+                  const int32_t rankPadding =
+                      StringUtil::countExtraPadding(rankString, rankWidth);
+                  const int32_t millisPadding =
+                      StringUtil::countExtraPadding(millisString, timeWidth);
+                  const int32_t diffPadding =
+                      StringUtil::countExtraPadding(diffString, diffWidth);
 
                   auto formatString =
                       stringFormat("^7 %%-%ds^7 %%-%ds^7 %%-%ds^7 %%s^7\n",
@@ -939,30 +939,34 @@ TimerunV2::getRankingsStringFor(const std::vector<Ranking> *rankings,
     auto isOnVisiblePage = rank > (params.page) * params.pageSize &&
                            rank <= (params.page + 1) * params.pageSize;
     auto isOwnRanking = r->userId == params.userId;
+    constexpr int32_t rankWidth = 5;
+    constexpr int32_t youWidth = 5; // '(you)' appended to your name
 
     if (isOnVisiblePage) {
-      auto rankString = rankToString(i + 1);
-      auto rankStringWidth = 5 + StringUtil::countExtraPadding(rankString);
+      const std::string rankString = rankToString(static_cast<int32_t>(i) + 1);
+      const int32_t rankStringWidth =
+          StringUtil::countExtraPadding(rankString, rankWidth);
 
-      auto name = isOwnRanking ? (r->name + " ^g(You)") : r->name;
-      auto nameStringWidth =
-          MAX_NAME_LENGTH + 1 + 5 + StringUtil::countExtraPadding(name);
+      const std::string name = isOwnRanking ? (r->name + " ^g(You)") : r->name;
+      const int32_t nameStringWidth =
+          StringUtil::countExtraPadding(name, MAX_NAME_LENGTH + 1 + youWidth);
 
-      std::string formatString = stringFormat("^7%%-%ds ^7%%-%ds  ^7%%.0f\n",
-                                              rankStringWidth, nameStringWidth);
+      const std::string formatString = stringFormat(
+          "^7%%-%ds ^7%%-%ds  ^7%%.0f\n", rankStringWidth, nameStringWidth);
 
       message += stringFormat(formatString, rankString, name, r->score);
     }
 
     if (isOwnRanking && !isOnVisiblePage) {
-      auto rankString = rankToString(i + 1);
-      auto rankStringWidth = 5 + StringUtil::countExtraPadding(rankString);
-      auto name = r->name + " ^g(You)";
-      auto nameStringWidth =
-          MAX_NAME_LENGTH + 1 + 5 + StringUtil::countExtraPadding(name);
+      const std::string rankString = rankToString(static_cast<int32_t>(i) + 1);
+      const int32_t rankStringWidth =
+          StringUtil::countExtraPadding(rankString, rankWidth);
+      const std::string name = r->name + " ^g(You)";
+      const int32_t nameStringWidth =
+          StringUtil::countExtraPadding(name, MAX_NAME_LENGTH + 1 + youWidth);
 
-      std::string formatString = stringFormat("\n^7%%-%ds ^7%%-%ds  ^7%%.0f\n",
-                                              rankStringWidth, nameStringWidth);
+      const std::string formatString = stringFormat(
+          "\n^7%%-%ds ^7%%-%ds  ^7%%.0f\n", rankStringWidth, nameStringWidth);
 
       message += stringFormat(formatString, rankString, name, r->score);
     }
@@ -1047,6 +1051,7 @@ void TimerunV2::printSeasons(int clientNum) {
           return std::make_unique<PrintResult>("No seasons found.\n");
         }
 
+        constexpr int32_t seasonWidth = 30;
         std::string seasonHeader = stringFormat(
             "\n^g %-30s %-15s%s\n", "Season", "Start Date", "End date");
 
@@ -1066,9 +1071,9 @@ void TimerunV2::printSeasons(int clientNum) {
               continue;
             }
 
-            std::string formatString =
-                stringFormat(" ^7%%-%ds ^7%%-15s%%s\n",
-                             30 + StringUtil::countExtraPadding(s.name));
+            const std::string formatString = stringFormat(
+                " ^7%%-%ds ^7%%-15s%%s\n",
+                StringUtil::countExtraPadding(s.name, seasonWidth));
 
             message += stringFormat(
                 formatString, s.name, s.startTime.toAbbrevMonthDateString(),
@@ -1085,9 +1090,9 @@ void TimerunV2::printSeasons(int clientNum) {
           message += " ^gUpcoming seasons\n" + seasonHeader;
 
           for (const auto &s : _upcomingSeasons) {
-            std::string formatString =
-                stringFormat(" ^7%%-%ds ^7%%-15s%%s\n",
-                             30 + StringUtil::countExtraPadding(s.name));
+            const std::string formatString = stringFormat(
+                " ^7%%-%ds ^7%%-15s%%s\n",
+                StringUtil::countExtraPadding(s.name, seasonWidth));
 
             message += stringFormat(
                 formatString, s.name, s.startTime.toAbbrevMonthDateString(),
@@ -1104,9 +1109,9 @@ void TimerunV2::printSeasons(int clientNum) {
           message += " ^gPast seasons\n" + seasonHeader;
 
           for (const auto &s : _pastSeasons) {
-            std::string formatString =
-                stringFormat(" ^9%%-%ds ^9%%-15s%%s\n",
-                             30 + StringUtil::countExtraPadding(s.name));
+            const std::string formatString = stringFormat(
+                " ^9%%-%ds ^9%%-15s%%s\n",
+                StringUtil::countExtraPadding(s.name, seasonWidth));
 
             message += stringFormat(
                 formatString, s.name, s.startTime.toAbbrevMonthDateString(),
@@ -1427,7 +1432,7 @@ void TimerunV2::compareCheckpoints(
           s += stringFormat(" ^2Run: ^7%s\n\n", base.run);
 
           // minimum column width
-          constexpr size_t BASE_MIN_PADDING = 24;
+          constexpr int32_t BASE_MIN_PADDING = 24;
 
           std::string tmpName;
           tmpName.insert(0, MAX_NETNAME, 'A');
@@ -1437,13 +1442,15 @@ void TimerunV2::compareCheckpoints(
           const std::string cmpHeader = stringFormat(
               "^7%s ^7(%s^7)", cmp.playerName, rankToString(cmpRank));
 
-          const size_t baseWidth =
-              std::max(sanitize(baseHeader).length(), BASE_MIN_PADDING);
-          const size_t cmpWidth =
-              std::max(sanitize(cmpHeader).length(), BASE_MIN_PADDING);
+          const int32_t baseWidth =
+              std::max(static_cast<int32_t>(sanitize(baseHeader).length()),
+                       BASE_MIN_PADDING);
+          const int32_t cmpWidth =
+              std::max(static_cast<int32_t>(sanitize(cmpHeader).length()),
+                       BASE_MIN_PADDING);
 
-          const size_t basePadding =
-              baseWidth + StringUtil::countExtraPadding(baseHeader);
+          const int32_t basePadding =
+              StringUtil::countExtraPadding(baseHeader, baseWidth);
 
           s += stringFormat("     %-*s ^g| ^7%s\n", basePadding, baseHeader,
                             cmpHeader);
@@ -1478,7 +1485,7 @@ void TimerunV2::compareCheckpoints(
             // the checkpoint times are never going to be wider than that,
             // so we don't need to compare against the current column width
             const size_t baseTimePadding =
-                baseWidth + StringUtil::countExtraPadding(baseTime);
+                StringUtil::countExtraPadding(baseTime, baseWidth);
 
             s += stringFormat("^7%-*s ^g| ^7%s", baseTimePadding, baseTime,
                               cmpTime);
@@ -1500,10 +1507,10 @@ void TimerunV2::compareCheckpoints(
           s += "\n";
 
           const std::string baseRunTime = millisToString(base.runTime);
-          const size_t baseRunTimeWidth =
-              std::max(sanitize(baseRunTime).length(), baseWidth);
-          const size_t baseRunTimePadding =
-              baseRunTimeWidth + StringUtil::countExtraPadding(baseRunTime);
+          const int32_t baseRunTimeWidth = std::max(
+              static_cast<int32_t>(sanitize(baseRunTime).length()), baseWidth);
+          const int32_t baseRunTimePadding =
+              StringUtil::countExtraPadding(baseRunTime, baseRunTimeWidth);
 
           s += stringFormat("     ^7%-*s ^g| ^7%s (%s^7)\n", baseRunTimePadding,
                             baseRunTime, millisToString(cmp.runTime),

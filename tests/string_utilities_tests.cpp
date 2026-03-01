@@ -109,10 +109,10 @@ TEST_F(StringUtilitiesTests,
 }
 
 TEST_F(StringUtilitiesTests, countExtraPadding_ShouldWorkCorrectly) {
-  EXPECT_EQ(StringUtil::countExtraPadding("123"), 0);
-  EXPECT_EQ(StringUtil::countExtraPadding("^1123"), 2);
-  EXPECT_EQ(StringUtil::countExtraPadding("^^1123"), 2);
-  EXPECT_EQ(StringUtil::countExtraPadding("^1t^2e^3s^4t"), 8);
+  EXPECT_EQ(StringUtil::countExtraPadding("123", 10), 10);
+  EXPECT_EQ(StringUtil::countExtraPadding("^1123", 10), 12);
+  EXPECT_EQ(StringUtil::countExtraPadding("^^1123", 10), 12);
+  EXPECT_EQ(StringUtil::countExtraPadding("^1t^2e^3s^4t", 10), 18);
 }
 
 TEST_F(StringUtilitiesTests, iEqual_ShouldWorkCorrectly) {

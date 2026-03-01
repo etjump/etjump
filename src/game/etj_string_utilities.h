@@ -112,9 +112,9 @@ bool contains(const std::string &str, const T &text) {
 // case-insensitive string comparison, optionally with sanitized strings
 bool iEqual(std::string_view str1, std::string_view str2,
             bool sanitized = false);
-// Counts the extra padding needed when using format specifiers like
-// %-20s with text that contains ET color codes
-unsigned countExtraPadding(const std::string &input);
+// Counts the padding needed to reach 'targetPadding' when using
+// format specifiers like '%-20s' with text that contains ET color codes
+int32_t countExtraPadding(const std::string &input, int32_t targetPadding);
 
 // removes any leading and trailing zeroes from a number
 // always returns at least 0 even if there are no significant numbers
