@@ -285,14 +285,14 @@ std::string CHSDataHandler::distance(const DistanceType type) {
                                 std::sqrt(SQR(tr.endpos[0] - ps->origin[0]) +
                                           SQR(tr.endpos[1] - ps->origin[1])))
                  : "-";
-    } break;
+    }
     case DistanceType::Z: {
       const trace_t tr = getTraceResults(CHS_10_11);
 
       return tr.fraction != 1.0f
                  ? stringFormat("%.0f", tr.endpos[2] - ps->origin[2] - ZOffset)
                  : "-";
-    } break;
+    }
     case DistanceType::XYZ: {
       const trace_t tr = getTraceResults(CHS_12);
       vec3_t origin;
@@ -303,14 +303,14 @@ std::string CHSDataHandler::distance(const DistanceType type) {
       return tr.fraction != 1.0f
                  ? stringFormat("%.0f", Distance(tr.endpos, origin))
                  : "-";
-    } break;
+    }
     case DistanceType::VIEW_XYZ: {
       const trace_t tr = getTraceResults(CHS_13_15);
 
       return tr.fraction != 1.0f
                  ? stringFormat("%.0f", Distance(tr.endpos, cg.refdef.vieworg))
                  : "-";
-    } break;
+    }
     case DistanceType::XY_Z_XYZ: {
       const trace_t tr = getTraceResults(CHS_13_15);
       vec3_t origin;
@@ -325,7 +325,7 @@ std::string CHSDataHandler::distance(const DistanceType type) {
                                 tr.endpos[2] - origin[2],
                                 Distance(tr.endpos, origin))
                  : "- - -";
-    } break;
+    }
     case DistanceType::XY_Z_VIEW_XYZ: {
       const trace_t tr = getTraceResults(CHS_13_15);
       vec3_t origin;
@@ -340,7 +340,7 @@ std::string CHSDataHandler::distance(const DistanceType type) {
                                 tr.endpos[2] - origin[2],
                                 Distance(tr.endpos, cg.refdef.vieworg))
                  : "- - -";
-    } break;
+    }
     default:
       return "-";
   }
