@@ -303,8 +303,10 @@ bool ETJump::StringUtil::iEqual(const std::string_view str1,
                     });
 }
 
-unsigned ETJump::StringUtil::countExtraPadding(const std::string &input) {
-  return input.length() - sanitize(input).length();
+int32_t ETJump::StringUtil::countExtraPadding(const std::string &input,
+                                              const int32_t targetPadding) {
+  return targetPadding +
+         static_cast<int32_t>(input.length() - sanitize(input).length());
 }
 
 std::string
