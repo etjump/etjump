@@ -361,9 +361,9 @@ static void CG_SetNextSnap(snapshot_t *snap) {
     }
   }
 
-  // if the next frame is a teleport for the playerstate, we
-  // can't interpolate during demos
-  if (cg.snap && ((snap->ps.eFlags ^ cg.snap->ps.eFlags) & EF_TELEPORT_BIT)) {
+  // if the next frame is a teleport for the playerstate,
+  // we can't interpolate during demos
+  if ((snap->ps.eFlags ^ cg.snap->ps.eFlags) & EF_TELEPORT_BIT) {
     cg.nextFrameTeleport = qtrue;
   } else {
     cg.nextFrameTeleport = qfalse;
