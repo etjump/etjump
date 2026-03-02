@@ -110,7 +110,7 @@ std::string TimerunView::getTimerString(int msec) {
   auto seconds = millis / 1000;
   millis -= seconds * 1000;
 
-  return stringFormat("%02d:%02d.%03d", minutes, seconds, millis);
+  return StringUtils::format("%02d:%02d.%03d", minutes, seconds, millis);
 }
 
 void TimerunView::draw() {

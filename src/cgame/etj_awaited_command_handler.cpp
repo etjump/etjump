@@ -92,11 +92,11 @@ void AwaitedCommandHandler::runFrame() {
 }
 
 void AwaitedCommandHandler::message(const std::string &message) {
-  CG_Printf(stringFormat("%s\n", message).c_str());
+  CG_Printf(StringUtils::format("%s\n", message).c_str());
 }
 
 void AwaitedCommandHandler::executeConsoleCommand(const std::string &command) {
-  trap_SendConsoleCommand(stringFormat("%s\n", command).c_str());
+  trap_SendConsoleCommand(StringUtils::format("%s\n", command).c_str());
 }
 
 void AwaitedCommandHandler::awaitCommand(const std::vector<std::string> &args) {
@@ -112,9 +112,9 @@ void AwaitedCommandHandler::awaitCommand(const std::vector<std::string> &args) {
   const auto &waitedFramesStr = args[0];
   int waitedFrames;
   std::string outOfRangeError =
-      stringFormat("^3Error: ^7First parameter (number of frames) must be "
-                   "between ^31 ^7and ^3%i^7.",
-                   std::numeric_limits<int>::max());
+      StringUtils::format("^3Error: ^7First parameter (number of frames) must "
+                          "be between ^31 ^7and ^3%i^7.",
+                          std::numeric_limits<int>::max());
   try {
     waitedFrames = std::stoi(waitedFramesStr);
   } catch (const std::out_of_range &) {
@@ -141,9 +141,9 @@ void AwaitedCommandHandler::awaitCommand(const std::vector<std::string> &args) {
   auto numCommandsString =
       command->commands.size() == 1 ? "command" : "commands";
   auto numFramesString = command->requiredFrameCount == 1 ? "frame" : "frames";
-  message(stringFormat("Executing ^3%d ^7%s after ^3%d ^7%s.",
-                       command->commands.size(), numCommandsString,
-                       command->requiredFrameCount, numFramesString));
+  message(StringUtils::format("Executing ^3%d ^7%s after ^3%d ^7%s.",
+                              command->commands.size(), numCommandsString,
+                              command->requiredFrameCount, numFramesString));
   awaitedCommands.push_back(std::move(command));
 }
 } // namespace ETJump

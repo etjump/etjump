@@ -53,5 +53,5 @@ ETJump::InlineCommandParser::parse(const std::vector<std::string> &args) {
 }
 
 bool ETJump::InlineCommandParser::isSeparator(const std::string &input) {
-  return trim(input) == "|";
+  return StringUtils::trim(input) == "|";
 }

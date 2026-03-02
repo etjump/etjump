@@ -40,7 +40,7 @@ ProgressionTrackers::~ProgressionTrackers() {}
 void ProgressionTrackers::printParserErrors(
     const std::vector<std::string> &errors, const std::string &text) {
   auto buffer = "Tracker parse error on line: " + text + "\n";
-  buffer += StringUtil::join(errors, "\n");
+  buffer += StringUtils::join(errors, "\n");
   G_Error(buffer.c_str());
 }
 
@@ -217,7 +217,7 @@ void ProgressionTrackers::printTrackerChanges(
 
   for (int i = 0; i < oldValues.size(); i++) {
     if (oldValues[i] != activator->client->pers.progression[i]) {
-      const std::string &trackerChangeMsg = stringFormat(
+      const std::string &trackerChangeMsg = StringUtils::format(
           "^7Tracker change - index: ^3%i ^7value: ^2%i ^7from: ^9%i^7\n",
           i + 1, activator->client->pers.progression[i], oldValues[i]);
       Printer::popup(clientNum, trackerChangeMsg);

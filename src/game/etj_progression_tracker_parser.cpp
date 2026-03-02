@@ -42,13 +42,11 @@ void ProgressionTrackerParser::parse() {
       end(_trackerString));
 
   // get pairs
-  std::vector<std::string> pairs =
-      ETJump::StringUtil::split(_trackerString, "|");
+  std::vector<std::string> pairs = StringUtils::split(_trackerString, "|");
 
   _parsedPairs.clear();
   for (const auto &pair : pairs) {
-    std::vector<std::string> indexValuePair =
-        ETJump::StringUtil::split(pair, ",");
+    std::vector<std::string> indexValuePair = StringUtils::split(pair, ",");
 
     _parsedPairs.push_back(parseIndexValuePair(indexValuePair));
   }
@@ -63,36 +61,36 @@ ProgressionTrackerParser::parseIndexValuePair(
     try {
       result.value = stoi(indexValuePair[0]);
     } catch (const std::invalid_argument &) {
-      _errors.push_back(ETJump::stringFormat("value \"%s\" is not an integer",
-                                             indexValuePair[0]));
+      _errors.push_back(StringUtils::format("value \"%s\" is not an integer",
+                                            indexValuePair[0]));
     } catch (const std::out_of_range &) {
-      _errors.push_back(ETJump::stringFormat("value \"%s\" is out of range",
-                                             indexValuePair[0]));
+      _errors.push_back(StringUtils::format("value \"%s\" is out of range",
+                                            indexValuePair[0]));
     }
   } else {
     try {
       result.index = stoi(indexValuePair[0]) - 1;
     } catch (const std::invalid_argument &) {
-      _errors.push_back(ETJump::stringFormat("index \"%s\" is not an integer",
-                                             indexValuePair[0]));
+      _errors.push_back(StringUtils::format("index \"%s\" is not an integer",
+                                            indexValuePair[0]));
     } catch (const std::out_of_range &) {
-      _errors.push_back(ETJump::stringFormat("index \"%s\" is out of range",
-                                             indexValuePair[0]));
+      _errors.push_back(StringUtils::format("index \"%s\" is out of range",
+                                            indexValuePair[0]));
     }
 
     if (result.index < 0) {
-      _errors.push_back(ETJump::stringFormat("index \"%s\" is less than 0",
-                                             indexValuePair[0]));
+      _errors.push_back(StringUtils::format("index \"%s\" is less than 0",
+                                            indexValuePair[0]));
     }
 
     try {
       result.value = stoi(indexValuePair[1]);
     } catch (const std::invalid_argument &) {
-      _errors.push_back(ETJump::stringFormat("value \"%s\" is not an integer",
-                                             indexValuePair[1]));
+      _errors.push_back(StringUtils::format("value \"%s\" is not an integer",
+                                            indexValuePair[1]));
     } catch (const std::out_of_range &) {
-      _errors.push_back(ETJump::stringFormat("value \"%s\" is out of range",
-                                             indexValuePair[1]));
+      _errors.push_back(StringUtils::format("value \"%s\" is out of range",
+                                            indexValuePair[1]));
     }
   }
   return result;

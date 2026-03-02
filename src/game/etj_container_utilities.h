@@ -25,6 +25,7 @@
 #pragma once
 
 #include <algorithm>
+#include <vector>
 
 namespace ETJump {
 namespace Container {

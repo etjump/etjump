@@ -33,13 +33,13 @@ ETJump::Log logger("databasev2");
 namespace ETJump {
 DatabaseV2::DatabaseV2(const std::string &name, const std::string &fileName)
     : sql(sqlite::database(fileName)), _name(name) {
-  logger.info(stringFormat("Initializing `%s` at `%s`", name, fileName));
+  logger.info(StringUtils::format("Initializing `%s` at `%s`", name, fileName));
   sql << "PRAGMA journal_mode=WAL;";
 
   sql.define("lsanitize",
-             [](std::string s) { return ETJump::sanitize(s, true); });
+             [](std::string s) { return StringUtils::sanitize(s, true); });
   sql.define("sanitize",
-             [](std::string s) { return ETJump::sanitize(s, false); });
+             [](std::string s) { return StringUtils::sanitize(s, false); });
 }
 
 DatabaseV2::~DatabaseV2() = default;
@@ -54,7 +54,7 @@ void DatabaseV2::addMigration(const std::string &name,
 }
 
 void DatabaseV2::applyMigrations() {
-  logger.info(stringFormat("Applying migrations to `%s`", _name));
+  logger.info(StringUtils::format("Applying migrations to `%s`", _name));
 
   sql << R"(
       create table if not exists migrations (
@@ -104,7 +104,7 @@ void DatabaseV2::applyMigrations() {
     if (!_migrations.empty()) {
       latestMigration = _migrations[_migrations.size() - 1].name;
     }
-    logger.info(stringFormat(
+    logger.info(StringUtils::format(
         "`%s` is up to date. Latest migration `%s`. No migrations applied.",
         _name, latestMigration));
   }

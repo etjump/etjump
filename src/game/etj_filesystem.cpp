@@ -107,7 +107,7 @@ std::vector<std::string> FileSystem::getFileList(const std::string &path,
   }
 
   if (sort) {
-    StringUtil::sortStrings(files, true);
+    StringUtils::sortStrings(files, true);
   }
 
   return files;
@@ -146,7 +146,7 @@ std::string FileSystem::Path::buildOSPath(const std::string &file) {
   }
 
   path += file;
-  StringUtil::replaceAll(path, "\\", "/");
+  StringUtils::replaceAll(path, "\\", "/");
   return path;
 }
 

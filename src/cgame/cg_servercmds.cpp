@@ -2108,17 +2108,20 @@ static const char *addChatReplayModifications(const char *text) {
   }
 
   if (diffTime < 60) {
-    Q_strcat(msg, sizeof(msg), stringFormat("^z[%is ago] ", diffTime).c_str());
+    Q_strcat(msg, sizeof(msg),
+             StringUtils::format("^z[%is ago] ", diffTime).c_str());
   } else if (diffTime < 60 * 60) {
     const int min = diffTime / 60;
-    Q_strcat(msg, sizeof(msg), stringFormat("^z[%im ago] ", min).c_str());
+    Q_strcat(msg, sizeof(msg),
+             StringUtils::format("^z[%im ago] ", min).c_str());
   } else {
     // up to 12h
     if (diffTime >= 60 * 60 * 12) {
       Q_strcat(msg, sizeof(msg), "^z[12h+ ago] ");
     } else {
       const int hours = diffTime / 3600;
-      Q_strcat(msg, sizeof(msg), stringFormat("^z[%ih ago] ", hours).c_str());
+      Q_strcat(msg, sizeof(msg),
+               StringUtils::format("^z[%ih ago] ", hours).c_str());
     }
   }
 
@@ -2290,7 +2293,7 @@ static void CG_ServerCommand(void) {
     std::string s = CG_Argv(1);
 
     if (!ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
-      ETJump::StringUtil::stripLocalizationMarkers(s);
+      StringUtils::stripLocalizationMarkers(s);
     }
 
     CG_AddPMItem(PM_MESSAGE, s.c_str(), cgs.media.voiceChatShader);
@@ -2302,7 +2305,7 @@ static void CG_ServerCommand(void) {
     std::string s = CG_Argv(1);
 
     if (!ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
-      ETJump::StringUtil::stripLocalizationMarkers(s);
+      StringUtils::stripLocalizationMarkers(s);
     }
 
     CG_BannerPrint(s.c_str());
@@ -2315,12 +2318,12 @@ static void CG_ServerCommand(void) {
     std::string s = CG_Argv(1);
 
     if (ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
-      ETJump::StringUtil::stripLocalizationMarkers(s);
+      StringUtils::stripLocalizationMarkers(s);
     }
 
     if (args >= 3) {
       if (args == 4) {
-        s = ETJump::stringFormat("%s%s", CG_Argv(3), s);
+        s = StringUtils::format("%s%s", CG_Argv(3), s);
       }
 
       // OSP - for client logging
@@ -2351,7 +2354,7 @@ static void CG_ServerCommand(void) {
     std::string s = CG_Argv(1);
 
     if (ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
-      ETJump::StringUtil::stripLocalizationMarkers(s);
+      StringUtils::stripLocalizationMarkers(s);
     }
 
     CG_Printf("[cgnotify]%s", s.c_str());
@@ -2396,7 +2399,7 @@ static void CG_ServerCommand(void) {
     s = CG_Argv(1);
 
     if (ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
-      ETJump::StringUtil::stripLocalizationMarkers(s);
+      StringUtils::stripLocalizationMarkers(s);
     }
 
     Q_strncpyz(text, s.c_str(), MAX_SAY_TEXT);
@@ -2427,7 +2430,7 @@ static void CG_ServerCommand(void) {
     std::string s = CG_Argv(1);
 
     if (ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
-      ETJump::StringUtil::stripLocalizationMarkers(s);
+      StringUtils::stripLocalizationMarkers(s);
     }
 
     Q_strncpyz(text, s.c_str(), MAX_SAY_TEXT);

@@ -112,9 +112,9 @@ void File::write(const char *data, int len) const {
   const auto bytesWritten = trap_FS_Write(data, len, handle);
 
   if (bytesWritten != len) {
-    throw FileIOException(
-        stringFormat("Write to file '%s' failed. Wrote %d out of %d bytes.",
-                     FileSystem::Path::getPath(file), bytesWritten, len));
+    throw FileIOException(StringUtils::format(
+        "Write to file '%s' failed. Wrote %d out of %d bytes.",
+        FileSystem::Path::getPath(file), bytesWritten, len));
   }
 #endif
 }

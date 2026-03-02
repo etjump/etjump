@@ -29,7 +29,7 @@ ETJump::EntityEventsHandler::EntityEventsHandler() { _callbacks.clear(); }
 
 bool ETJump::EntityEventsHandler::check(const std::string &eventName,
                                         centity_t *cent) {
-  auto lowercasedCommand = ETJump::StringUtil::toLowerCase(eventName);
+  auto lowercasedCommand = StringUtils::toLowerCase(eventName);
   auto match = _callbacks.find(lowercasedCommand);
   if (match != end(_callbacks)) {
     for (const auto &callback : match->second) {
@@ -41,26 +41,26 @@ bool ETJump::EntityEventsHandler::check(const std::string &eventName,
 }
 
 bool ETJump::EntityEventsHandler::check(int event, centity_t *cent) {
-  auto eventName = ETJump::stringFormat("__event__%d", event);
+  auto eventName = StringUtils::format("__event__%d", event);
   return check(eventName, cent);
 }
 
 bool ETJump::EntityEventsHandler::subscribe(
     const std::string &eventName,
     const std::function<void(centity_t *cent)> &callback) {
-  auto lowercasedCommand = ETJump::StringUtil::toLowerCase(eventName);
+  auto lowercasedCommand = StringUtils::toLowerCase(eventName);
   _callbacks[lowercasedCommand].push_back(callback);
   return true;
 }
 
 bool ETJump::EntityEventsHandler::subscribe(
     int event, const std::function<void(centity_t *cent)> &callback) {
-  auto eventName = ETJump::stringFormat("__event__%d", event);
+  auto eventName = StringUtils::format("__event__%d", event);
   return subscribe(eventName, callback);
 }
 
 bool ETJump::EntityEventsHandler::unsubscribe(const std::string &eventName) {
-  auto lowercasedCommand = ETJump::StringUtil::toLowerCase(eventName);
+  auto lowercasedCommand = StringUtils::toLowerCase(eventName);
   auto callback = _callbacks.find(lowercasedCommand);
   if (callback != end(_callbacks)) {
     return false;
@@ -71,6 +71,6 @@ bool ETJump::EntityEventsHandler::unsubscribe(const std::string &eventName) {
 }
 
 bool ETJump::EntityEventsHandler::unsubscribe(int event) {
-  auto eventName = ETJump::stringFormat("__event__%d", event);
+  auto eventName = StringUtils::format("__event__%d", event);
   return unsubscribe(eventName);
 }

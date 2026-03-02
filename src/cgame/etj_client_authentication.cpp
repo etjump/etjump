@@ -52,8 +52,8 @@ void ETJump::ClientAuthentication::login() {
   }
   auto hwid = getHwid();
   auto authenticate =
-      ETJump::stringFormat("%s %s %s", Constants::Authentication::AUTHENTICATE,
-                           ETJump::hash(guid), hwid);
+      StringUtils::format("%s %s %s", Constants::Authentication::AUTHENTICATE,
+                          StringUtils::hash(guid), hwid);
   _sendClientCommand(authenticate);
 }
 
@@ -73,7 +73,7 @@ std::string ETJump::ClientAuthentication::createGuid() const {
   char buf[UUID4_LEN];
   uuid4_init();
   uuid4_generate(buf);
-  auto guid = ETJump::StringUtil::toUpperCase(buf);
+  auto guid = StringUtils::toUpperCase(buf);
   return guid;
 }
 

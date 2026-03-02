@@ -180,8 +180,8 @@ void CustomCommandMenuDrawable::commandMenuTitleDraw(panel_button_t *button) {
   std::string title = "CUSTOM COMMANDS";
 
   if (!commands.empty()) {
-    title += stringFormat(" (PAGE %i OF %i)", currentPage,
-                          CUSTOM_COMMAND_MENU_MAX_PAGES);
+    title += StringUtils::format(" (PAGE %i OF %i)", currentPage,
+                                 CUSTOM_COMMAND_MENU_MAX_PAGES);
   }
 
   CG_Text_Paint_Ext(button->rect.x, button->rect.y, button->font->scalex,
@@ -238,7 +238,7 @@ void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
       continue;
     }
 
-    std::string s = stringFormat("%i. ", (i + 1) % NUM_MENU_ITEMS);
+    std::string s = StringUtils::format("%i. ", (i + 1) % NUM_MENU_ITEMS);
 
     switch (i) {
       case MENU_PREV:
@@ -248,8 +248,8 @@ void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
         s += "Next page";
         break;
       default:
-        s += StringUtil::truncate(commands.at(currentPage)[i].name,
-                                  MAX_COMNMAND_NAME_LEN);
+        s += StringUtils::truncate(commands.at(currentPage)[i].name,
+                                   MAX_COMNMAND_NAME_LEN);
         break;
     }
 

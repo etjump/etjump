@@ -1204,7 +1204,7 @@ void checkpoint_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
     time++;
     trap_SendServerCommand(activator - g_entities,
                            va("cp \"Flag will be held in %s!\n\"",
-                              ETJump::getSecondsString(time).c_str()));
+                              StringUtils::getSecondsString(time).c_str()));
     return;
   }
 
@@ -1228,7 +1228,7 @@ void checkpoint_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   time++;
   trap_SendServerCommand(activator - g_entities,
                          va("cp \"Flag will be held in %s!\n\"",
-                            ETJump::getSecondsString(time).c_str()));
+                            StringUtils::getSecondsString(time).c_str()));
 
   ent->count2 = level.time;
   ent->think = checkpoint_use_think;

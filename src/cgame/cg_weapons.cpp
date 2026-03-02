@@ -1750,7 +1750,7 @@ void CG_RegisterWeapon(int weaponNum, qboolean force) {
       COM_StripExtension(weaponInfo->pickupModelPath,
                          weaponInfo->pickupModelPath);
       std::string path =
-          ETJump::StringUtil::eraseLast(weaponInfo->pickupModelPath, "_pickup");
+          StringUtils::eraseLast(weaponInfo->pickupModelPath, "_pickup");
       path += "_stand.md3";
       weaponInfo->standModel = trap_R_RegisterModel(path.c_str());
     }

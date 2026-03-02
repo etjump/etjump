@@ -134,7 +134,8 @@ void OverbounceWatcher::render() const {
 
 void OverbounceWatcher::save(const std::vector<std::string> &args) {
   ps = getValidPlayerState();
-  const std::string name = !args.empty() ? sanitize(args[0], true) : "default";
+  const std::string name =
+      !args.empty() ? StringUtils::sanitize(args[0], true) : "default";
 
   VectorCopy(ps->origin, positions[name]);
   // shift z-coordinate to feet level
@@ -155,7 +156,8 @@ void OverbounceWatcher::reset() {
 }
 
 void OverbounceWatcher::load(const std::vector<std::string> &args) {
-  const std::string name = !args.empty() ? sanitize(args[0], true) : "default";
+  const std::string name =
+      !args.empty() ? StringUtils::sanitize(args[0], true) : "default";
 
   if (positions.find(name) == positions.cend()) {
     CG_AddPMItem(

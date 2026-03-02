@@ -227,7 +227,7 @@ void QuickConnect::updateLabels() {
 
     // NOTE: only handles a single digit, if we were want to support
     // more than 9 quick connect servers, this needs to be updated!
-    if (StringUtil::startsWith(name, "lblQuickConnectServer")) {
+    if (StringUtils::startsWith(name, "lblQuickConnectServer")) {
       // menu entries are 1-indexed
       char buf[2] = {name.back(), '\0'};
       int index = Q_atoi(buf) - 1;
@@ -253,21 +253,21 @@ void QuickConnect::buildLabelString(const int index) {
   bool infoValid = servers[index].valid;
   bool hasCustomName = !servers[index].customName.empty();
 
-  const std::string line1 = StringUtil::truncate(
+  const std::string line1 = StringUtils::truncate(
       hasCustomName ? servers[index].customName : servers[index].serverName,
       MAX_LABEL_LINE_CHARS);
 
-  const std::string playerCountStr = stringFormat(
+  const std::string playerCountStr = StringUtils::format(
       " (%s/%s)", infoValid ? std::to_string(servers[index].players) : "-",
       infoValid ? std::to_string(servers[index].maxClients) : "-");
   const std::string mapStr =
-      StringUtil::truncate(infoValid ? servers[index].map : "-",
-                           MAX_LABEL_LINE_CHARS - playerCountStr.length());
+      StringUtils::truncate(infoValid ? servers[index].map : "-",
+                            MAX_LABEL_LINE_CHARS - playerCountStr.length());
 
-  const std::string line2 = stringFormat("%s%s", mapStr, playerCountStr);
+  const std::string line2 = StringUtils::format("%s%s", mapStr, playerCountStr);
 
   Com_sprintf(serverLabels[index], sizeof(serverLabels[index]),
-              stringFormat("%s\n%s", line1, line2).c_str());
+              StringUtils::format("%s\n%s", line1, line2).c_str());
 }
 
 void QuickConnect::addServer(const std::string &address,

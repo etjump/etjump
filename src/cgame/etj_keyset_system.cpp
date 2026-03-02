@@ -128,7 +128,7 @@ KeySetSystem::createKeyPressSetShaderPath(const std::string &keySetName,
     return "";
   }
 
-  return stringFormat("gfx/%s/key_%s_pressed", keySetName, keyName);
+  return StringUtils::format("gfx/%s/key_%s_pressed", keySetName, keyName);
 }
 
 qhandle_t KeySetSystem::registerShaderNoMip(const std::string &shaderName) {

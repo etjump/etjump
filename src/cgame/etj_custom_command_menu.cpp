@@ -944,8 +944,8 @@ CustomCommandMenu::getCustomCommands() const {
 
 void CustomCommandMenu::generateExampleFile(
     const std::vector<std::string> &args) {
-  if (args.empty() || (!StringUtil::iEqual(args[0], "-f") &&
-                       !StringUtil::iEqual(args[0], "--force"))) {
+  if (args.empty() || (!StringUtils::iEqual(args[0], "-f") &&
+                       !StringUtils::iEqual(args[0], "--force"))) {
     // we don't really care for a potential custom file here, just make sure
     // we don't overwrite the default one, that most players likely use.
     if (FileSystem::exists(DEFAULT_CUSTOM_COMMAND_FILE)) {

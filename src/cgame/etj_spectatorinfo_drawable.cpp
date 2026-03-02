@@ -154,7 +154,8 @@ void SpectatorInfo::render() const {
 
     const auto remaining = static_cast<int>(totalClients - max);
     drawRow(
-        va("(%s hidden)", getPluralizedString(remaining, "spectator").c_str()),
+        va("(%s hidden)",
+           StringUtils::getPluralizedString(remaining, "spectator").c_str()),
         colorMdGrey);
   }
 }

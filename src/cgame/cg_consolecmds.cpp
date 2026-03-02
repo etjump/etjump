@@ -1121,7 +1121,7 @@ void CG_ExtraTrace_f() {
   std::string listPrint{"Bitmask values for ^3etj_extraTrace^7:\n"};
 
   for (auto &traceList : extraTraceList) {
-    std::string listValues = ETJump::stringFormat(
+    std::string listValues = StringUtils::format(
         "  ^3%d ^7= %s\n", traceList.bitmaskValue, traceList.description);
     listPrint += (listValues);
   }
@@ -1196,10 +1196,10 @@ static void loadSavepos() {
 
   // this is obviously trivial to bypass by just editing the mapname field
   // in the savepos file, but it's a good idea to check this anyway
-  if (!StringUtil::iEqual(data.mapname, cgs.rawmapname, true)) {
+  if (!StringUtils::iEqual(data.mapname, cgs.rawmapname, true)) {
     CG_Printf("Savepos ^3'%s' ^7was not saved in the current map, change map "
               "to ^3'%s' ^7to load this position.\n",
-              filename.c_str(), ETJump::sanitize(data.mapname).c_str());
+              filename.c_str(), StringUtils::sanitize(data.mapname).c_str());
     return;
   }
 

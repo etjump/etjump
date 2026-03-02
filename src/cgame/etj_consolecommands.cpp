@@ -96,10 +96,10 @@ static void demoQueue(const Arguments &args) {
     return;
   }
 
-  if (StringUtil::iEqual(args[0], "next") ||
-      StringUtil::iEqual(args[0], "previous") ||
-      StringUtil::iEqual(args[0], "restart") ||
-      StringUtil::iEqual(args[0], "goto")) {
+  if (StringUtils::iEqual(args[0], "next") ||
+      StringUtils::iEqual(args[0], "previous") ||
+      StringUtils::iEqual(args[0], "restart") ||
+      StringUtils::iEqual(args[0], "goto")) {
     trap_SendConsoleCommand("uiDemoQueueManualSkip 1\n");
   }
 }
@@ -112,7 +112,7 @@ static bool fireteam(const Arguments &args) {
   // 'fireteam' commands are normally handled by the server,
   // but if we're using 'fireteam countdown', catch it here and make sure
   // the duration is sent with the command if it's not manually specified
-  if (!StringUtil::iEqual(args[0], "countdown")) {
+  if (!StringUtils::iEqual(args[0], "countdown")) {
     return true;
   }
 
@@ -139,14 +139,14 @@ static bool fireteam(const Arguments &args) {
  */
 bool forwardedConsoleCommand(const std::string_view cmd,
                              const Arguments &args) {
-  if (StringUtil::iEqual(cmd, "demoQueue")) {
+  if (StringUtils::iEqual(cmd, "demoQueue")) {
     // this should always return true, regardless if we actually modify
     // anything, as we always want UI to also handle this command
     demoQueue(args);
     return true;
   }
 
-  if (StringUtil::iEqual(cmd, "fireteam")) {
+  if (StringUtils::iEqual(cmd, "fireteam")) {
     return fireteam(args);
   }
 
@@ -161,9 +161,11 @@ getOptCommand(const std::string &commandPrefix,
 
   if (cmd.helpRequested) {
     CG_AddToTeamChat(
-        stringFormat("^3%s: ^7check console for help.", commandPrefix).c_str(),
+        StringUtils::format("^3%s: ^7check console for help.", commandPrefix)
+            .c_str(),
         TEAM_SPECTATOR);
-    const auto splits = wrapWords(def.help(), '\n', MAX_STRING_CHARS - 1);
+    const auto splits =
+        StringUtils::wrapWords(def.help(), '\n', MAX_STRING_CHARS - 1);
 
     for (const auto &s : splits) {
       CG_Printf("%s", s.c_str());
@@ -174,7 +176,7 @@ getOptCommand(const std::string &commandPrefix,
 
   if (!cmd.errors.empty()) {
     CG_AddToTeamChat(
-        stringFormat(
+        StringUtils::format(
             "^3%s: ^7operation failed. Check console for more information.",
             commandPrefix)
             .c_str(),

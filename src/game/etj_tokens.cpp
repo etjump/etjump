@@ -115,11 +115,13 @@ std::pair<bool, std::string> Tokens::deleteToken(const Difficulty difficulty,
     token->entity = nullptr;
     saveTokens(_filepath);
     return std::make_pair(
-        true, stringFormat("Successfully deleted %s token #%d",
-                           tokenDifficultyToString(difficulty), index + 1));
+        true,
+        StringUtils::format("Successfully deleted %s token #%d",
+                            tokenDifficultyToString(difficulty), index + 1));
   }
   return std::make_pair(
-      false, stringFormat("%s token with number #%d does not exist.",
+      false,
+      StringUtils::format("%s token with number #%d does not exist.",
                           tokenDifficultyToString(difficulty), index + 1));
 }
 
@@ -135,10 +137,10 @@ Tokens::deleteNearestToken(const std::array<float, 3> coordinates) {
   saveTokens(_filepath);
   G_FreeEntity(nearestToken.token->entity);
   nearestToken.token->entity = nullptr;
-  return std::make_pair(
-      true, stringFormat("Deleted %s token #%d.",
-                         tokenDifficultyToString(nearestToken.difficulty),
-                         nearestToken.number));
+  return std::make_pair(true, StringUtils::format("Deleted %s token #%d.",
+                                                  tokenDifficultyToString(
+                                                      nearestToken.difficulty),
+                                                  nearestToken.number));
 }
 
 std::pair<bool, std::string>
@@ -155,9 +157,10 @@ Tokens::moveNearestToken(std::array<float, 3> coordinates) {
   saveTokens(_filepath);
 
   return std::make_pair(
-      true, stringFormat("Moved %s #%d to new location.",
-                         tokenDifficultyToString(nearestToken.difficulty),
-                         nearestToken.number));
+      true,
+      StringUtils::format("Moved %s #%d to new location.",
+                          tokenDifficultyToString(nearestToken.difficulty),
+                          nearestToken.number));
 }
 
 std::pair<bool, std::string>
@@ -192,8 +195,8 @@ Tokens::createToken(const Difficulty difficulty,
 
   if (nextFreeToken == nullptr) {
     return std::make_pair(
-        false, stringFormat("No free tokens left for '%s' difficulty.",
-                            tokenDifficultyToString(difficulty)));
+        false, StringUtils::format("No free tokens left for '%s' difficulty.",
+                                   tokenDifficultyToString(difficulty)));
   }
 
   nextFreeToken->isActive = true;

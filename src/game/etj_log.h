@@ -40,12 +40,12 @@ public:
 
   template <typename... Targs>
   void info(const std::string &format, const Targs &...fargs) const {
-    println("info", stringFormat(format, fargs...));
+    println("info", StringUtils::format(format, fargs...));
   }
 
   template <typename... Targs>
   void error(const std::string &format, const Targs &...fargs) const {
-    println("error", stringFormat(format, fargs...));
+    println("error", StringUtils::format(format, fargs...));
   }
 
   static void processMessages();

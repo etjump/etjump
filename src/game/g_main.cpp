@@ -1471,8 +1471,8 @@ void G_UpdateCvars(void) {
 
         if (cv->trackChange && !(cv->cvarFlags & CVAR_LATCH)) {
           Printer::popupAll(
-              ETJump::stringFormat("Server: ^3%s ^7changed to ^3%s",
-                                   cv->cvarName, cv->vmCvar->string));
+              StringUtils::format("Server: ^3%s ^7changed to ^3%s",
+                                  cv->cvarName, cv->vmCvar->string));
         }
 
         if (cv->teamShader) {
@@ -1816,7 +1816,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   // callvote already turns the name to all lower case, which means
   // custom mapscripts are required to be lower case on Linux
   const std::string &mapName =
-      ETJump::StringUtil::toLowerCase(Info_ValueForKey(cs, "mapname"));
+      StringUtils::toLowerCase(Info_ValueForKey(cs, "mapname"));
   Info_SetValueForKey(cs, "mapname", mapName.c_str());
   trap_Cvar_Set("mapname", mapName.c_str());
   Q_strncpyz(level.rawmapname, mapName.c_str(), sizeof(level.rawmapname));
@@ -2919,8 +2919,8 @@ void CheckVote() {
   } else if (level.voteInfo.voteNo >=
                  level.numConnectedClients - requiredClients ||
              level.time - level.voteInfo.voteTime >= VOTE_TIME) {
-    std::string voteFailedMsg = ETJump::stringFormat("^3Vote FAILED! ^3(%s)",
-                                                     level.voteInfo.voteString);
+    std::string voteFailedMsg =
+        StringUtils::format("^3Vote FAILED! ^3(%s)", level.voteInfo.voteString);
     Printer::popupAll(voteFailedMsg);
     G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
 

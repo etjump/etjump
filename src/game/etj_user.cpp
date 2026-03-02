@@ -45,7 +45,7 @@ std::string User_s::GetGuid() { return guid; }
 
 char const *User_s::ToChar() const {
   return va("%d %s %d %d %s %s %s %s %s", id, guid.c_str(), level, lastSeen,
-            name.c_str(), (ETJump::StringUtil::join(hwids, ", ")).c_str(),
+            name.c_str(), (StringUtils::join(hwids, ", ")).c_str(),
             title.c_str(), commands.c_str(), greeting.c_str());
 }
 

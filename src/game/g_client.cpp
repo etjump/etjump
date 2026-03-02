@@ -1675,9 +1675,9 @@ void G_NameChanged(gentity_t *ent) {
 
   if (g_nameChangeLimit.integer - client->sess.nameChangeCount == 0) {
     Printer::popup(
-        ent,
-        va("^3WARNING: ^7You must wait at least %s before renaming.",
-           ETJump::getSecondsString(g_nameChangeInterval.integer).c_str()));
+        ent, va("^3WARNING: ^7You must wait at least %s before renaming.",
+                StringUtils::getSecondsString(g_nameChangeInterval.integer)
+                    .c_str()));
   } else if (client->sess.nameChangeCount > g_nameChangeLimit.integer) {
     trap_DropClient(ClientNum(ent), "You were kicked for spamming rename.", 0);
   } else {
@@ -1879,8 +1879,8 @@ void ClientUserinfoChanged(int clientNum) {
 
       ClientNameChanged(ent);
 
-      Printer::consoleAll(ETJump::stringFormat("%s ^7renamed to %s\n", oldname,
-                                               client->pers.netname));
+      Printer::consoleAll(StringUtils::format("%s ^7renamed to %s\n", oldname,
+                                              client->pers.netname));
 
       G_NameChanged(ent);
     }
@@ -1994,7 +1994,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
         "Possible DoS attack. Rejecting client from %s "
         "(%s already)\n",
         ip,
-        ETJump::getPluralizedString(g_maxConnsPerIP.integer, "connection")
+        StringUtils::getPluralizedString(g_maxConnsPerIP.integer, "connection")
             .c_str());
     return "Too many connections from your ip.";
   }
@@ -2182,7 +2182,7 @@ void ClientBegin(int clientNum) {
 
   if (client->sess.sessionTeam != TEAM_SPECTATOR) {
     Printer::consoleAll(
-        ETJump::stringFormat("%s ^7entered the game\n", client->pers.netname));
+        StringUtils::format("%s ^7entered the game\n", client->pers.netname));
   }
 
   client->pers.nofatigue =

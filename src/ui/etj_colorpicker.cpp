@@ -115,8 +115,8 @@ void ColorPicker::colorPickerStateToCvar(const bool reset) const {
     DC->setCVar(currentCvar.c_str(), currentCvarOldValue.c_str());
   } else {
     const std::string &value =
-        stringFormat("%f %f %f %f", normalizedRGB[0], normalizedRGB[1],
-                     normalizedRGB[2], normalizedRGB[3]);
+        StringUtils::format("%f %f %f %f", normalizedRGB[0], normalizedRGB[1],
+                            normalizedRGB[2], normalizedRGB[3]);
     DC->setCVar(currentCvar.c_str(), value.c_str());
   }
 }

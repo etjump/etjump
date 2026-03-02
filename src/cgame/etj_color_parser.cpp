@@ -31,7 +31,7 @@ void ColorParser::parseColorString(const std::string &colorString,
                                    vec4_t &color) {
   Vector4Set(color, 0.0f, 0.0f, 0.0f, 1.0); // set defaults
 
-  std::string token{StringUtil::toLowerCase(trim(colorString))};
+  std::string token{StringUtils::toLowerCase(StringUtils::trim(colorString))};
 
   if (std::regex_match(token, alphaRegex)) {
     parseNamedColorString(token, color);

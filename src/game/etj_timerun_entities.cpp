@@ -69,8 +69,8 @@ int TimerunEntity::getOrSetTimerunIndex(const std::string &runName) {
     runIndices[runName] = level.timerunNamesCount++;
   }
 
-  cleanNames.insert(sanitize(runName, true));
-  names.insert(sanitize(runName, true));
+  cleanNames.insert(StringUtils::sanitize(runName, true));
+  names.insert(StringUtils::sanitize(runName, true));
 
   if (cleanNames.size() != names.size()) {
     G_Error(
@@ -107,7 +107,7 @@ void TimerunEntity::validateTimerunEntities() {
 
     if (!std::any_of(timerunEntities.cbegin(), timerunEntities.cend(),
                      [&ent](const std::string &entity) {
-                       return StringUtil::iEqual(ent->classname, entity);
+                       return StringUtils::iEqual(ent->classname, entity);
                      })) {
       continue;
     }
@@ -116,14 +116,14 @@ void TimerunEntity::validateTimerunEntities() {
       validationResults[ent->runName] = TimerunEntityValidationResult{};
     }
 
-    if (StringUtil::iEqual(ent->classname, "target_startTimer") ||
-        StringUtil::iEqual(ent->classname, "trigger_startTimer")) {
+    if (StringUtils::iEqual(ent->classname, "target_startTimer") ||
+        StringUtils::iEqual(ent->classname, "trigger_startTimer")) {
       validationResults[ent->runName].hasStartTimer = true;
-    } else if (StringUtil::iEqual(ent->classname, "target_stopTimer") ||
-               StringUtil::iEqual(ent->classname, "trigger_stopTimer")) {
+    } else if (StringUtils::iEqual(ent->classname, "target_stopTimer") ||
+               StringUtils::iEqual(ent->classname, "trigger_stopTimer")) {
       validationResults[ent->runName].hasStopTimer = true;
-    } else if (StringUtil::iEqual(ent->classname, "target_checkpoint") ||
-               StringUtil::iEqual(ent->classname, "trigger_checkpoint")) {
+    } else if (StringUtils::iEqual(ent->classname, "target_checkpoint") ||
+               StringUtils::iEqual(ent->classname, "trigger_checkpoint")) {
       validationResults[ent->runName].hasCheckpoints = true;
     }
   }
@@ -197,18 +197,18 @@ bool TimerunEntity::canStartTimerun(const gentity_t *self,
   }
 
   if (speed > self->velocityUpperLimit) {
-    Printer::center(clientNum,
-                    stringFormat("^3WARNING: ^7Timerun was not started. Too "
-                                 "high starting speed (%.2f > %.2f)\n",
-                                 speed, self->velocityUpperLimit));
+    Printer::center(clientNum, StringUtils::format(
+                                   "^3WARNING: ^7Timerun was not started. Too "
+                                   "high starting speed (%.2f > %.2f)\n",
+                                   speed, self->velocityUpperLimit));
     return false;
   }
 
   if (client->ps.viewangles[ROLL] != 0) {
     Printer::center(clientNum,
-                    stringFormat("^3WARNING: ^7Timerun was not started. "
-                                 "Illegal roll angles (%.2f != 0)",
-                                 client->ps.viewangles[ROLL]));
+                    StringUtils::format("^3WARNING: ^7Timerun was not started. "
+                                        "Illegal roll angles (%.2f != 0)",
+                                        client->ps.viewangles[ROLL]));
     return false;
   }
 

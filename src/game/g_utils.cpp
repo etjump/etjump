@@ -75,10 +75,10 @@ int G_FindConfigstringIndex(const char *name, int start, int max,
 
     if (it != csStrings.end()) {
       err =
-          ETJump::stringFormat("%s: overflow on index %s (%s = %i)\n", __func__,
-                               it->second.first, it->second.second, max);
+          StringUtils::format("%s: overflow on index %s (%s = %i)\n", __func__,
+                              it->second.first, it->second.second, max);
     } else {
-      err = ETJump::stringFormat("%s: overflow on index %i\n", __func__, start);
+      err = StringUtils::format("%s: overflow on index %i\n", __func__, start);
     }
 
     G_Error("%s", err.c_str());

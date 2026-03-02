@@ -61,7 +61,7 @@ bool MenuIntegrityChecker::checkIntegrity() {
       const auto *const currentHash =
           G_SHA1(std::string(contents.cbegin(), contents.cend()).c_str());
 
-      if (!StringUtil::iEqual(currentHash, hash)) {
+      if (!StringUtils::iEqual(currentHash, hash)) {
         Com_DPrintf("Integrity check failed on file '%s' - invalid hash!\n",
                     file.c_str());
         return false;
@@ -80,7 +80,7 @@ std::vector<std::pair<std::string, std::string>>
 MenuIntegrityChecker::generateFileHashList() {
   std::vector<std::pair<std::string, std::string>> list;
 
-  const auto fileHashKvp = StringUtil::split(MENU_HASH_LIST, ",");
+  const auto fileHashKvp = StringUtils::split(MENU_HASH_LIST, ",");
 
   for (const auto &kvp : fileHashKvp) {
     const size_t pos = kvp.find(':');

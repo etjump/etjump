@@ -227,9 +227,9 @@ void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator) {
       static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts)) {
     if (activator && activator->client) {
       const std::string nameStr =
-          ETJump::stringFormat("%s^7", activator->client->pers.netname);
-      ETJump::StringUtil::stringSubstitute(message, '%', nameStr, 1);
-      ETJump::StringUtil::replaceAll(message, "[n]", nameStr);
+          StringUtils::format("%s^7", activator->client->pers.netname);
+      StringUtils::stringSubstitute(message, '%', nameStr, 1);
+      StringUtils::replaceAll(message, "[n]", nameStr);
     } else {
       // better not call G_Error here since this error handling
       // wasn't here earlier, just print a warning and exit
@@ -2024,8 +2024,7 @@ void target_deathrun_start_use(gentity_t *self, gentity_t *other,
   auto message = ETJump::deathrunSystem->getStartMessage();
   auto location = ETJump::deathrunSystem->getPrintLocation();
   if (message.length() > 0) {
-    ETJump::StringUtil::replaceAll(message, "[n]",
-                                   activator->client->pers.netname);
+    StringUtils::replaceAll(message, "[n]", activator->client->pers.netname);
     auto fmtString = ETJump::DeathrunSystem::getMessageFormat(location);
     auto output = va(fmtString.c_str(), message.c_str());
     for (const auto &c : affectedClients) {
@@ -2081,9 +2080,8 @@ void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other,
     auto checkpointMessage =
         ETJump::deathrunSystem->getCheckpointMessage(self->id);
     auto score = ETJump::deathrunSystem->getScore(clientNum);
-    ETJump::StringUtil::replaceAll(message, "[n]",
-                                   activator->client->pers.netname);
-    ETJump::StringUtil::replaceAll(message, "[s]", std::to_string(score));
+    StringUtils::replaceAll(message, "[n]", activator->client->pers.netname);
+    StringUtils::replaceAll(message, "[s]", std::to_string(score));
     auto output = va(fmtString.c_str(), message.c_str());
     for (const auto &cnum : affectedPlayers) {
       trap_SendServerCommand(cnum, output);
