@@ -2,8 +2,9 @@
 // not necessarily every single rendered frame
 
 #include "cg_local.h"
-#include "etj_utilities.h"
 #include "etj_demo_compatibility.h"
+#include "etj_utilities.h"
+
 #if __MACOS__
   #ifdef GAMERANGER
     #include "GameRanger SDK/GameRanger.h"
@@ -432,12 +433,12 @@ static snapshot_t *CG_ReadNextSnapshot(void) {
 
       // adjust entity types to be compatible with 2.3.0/2.3.0 RC4,
       // or modelindices for pre-2.0.6
-      if (ETJump::demoCompatibility->flags.adjustEntityTypes ||
-          ETJump::demoCompatibility->flags.adjustItemlistIndex) {
+      if (ETJump::cgame.demo.compatibility->flags.adjustEntityTypes ||
+          ETJump::cgame.demo.compatibility->flags.adjustItemlistIndex) {
         for (int i = 0; i < dest->numEntities; i++) {
           entityState_t *es = &dest->entities[i];
 
-          if (ETJump::demoCompatibility->flags.adjustEntityTypes) {
+          if (ETJump::cgame.demo.compatibility->flags.adjustEntityTypes) {
             // ET_VELOCITY_PUSH_TRIGGER = 9 in 2.3.0,
             // so we should remap it to the current position
             if (es->eType == ETJump::COMPAT_ET_VELOCITY_PUSH_TRIGGER_NUM) {
@@ -452,7 +453,7 @@ static snapshot_t *CG_ReadNextSnapshot(void) {
           }
 
           // adjust itemlist index for removal of duplicate 'weapon_medic_heal'
-          if (ETJump::demoCompatibility->flags.adjustItemlistIndex &&
+          if (ETJump::cgame.demo.compatibility->flags.adjustItemlistIndex &&
               es->eType == ET_ITEM &&
               es->modelindex > ETJump::COMPAT_WEAPON_MEDIC_HEAL_INDEX) {
             es->modelindex--;

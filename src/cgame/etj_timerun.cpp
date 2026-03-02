@@ -39,6 +39,14 @@ Timerun::Timerun(
   registerListeners();
 }
 
+Timerun::~Timerun() {
+  serverCommandsHandler->unsubscribe("timerun");
+
+  playerEventsHandler->unsubscribe("timerun:start");
+  playerEventsHandler->unsubscribe("timerun:stop");
+  playerEventsHandler->unsubscribe("timerun:interupt");
+}
+
 void Timerun::registerListeners() {
   // this is awkward, but the timerun command deserializer *really* wants
   // the first argument to be 'timerun', but we don't get that here
@@ -76,6 +84,12 @@ void Timerun::registerListeners() {
 
   playerEventsHandler->subscribe("timerun:stop", runEnd);
   playerEventsHandler->subscribe("timerun:interrupt", runEnd);
+}
+
+void Timerun::reset() {
+  playersTimerunInformation[cg.clientNum] = {};
+  // to reset the fade timestamp for 'etj_runtimerAutoHide'
+  playersTimerunInformation[cg.clientNum].lastRunTimer = cg.time;
 }
 
 void Timerun::onStop(const TimerunCommands::Stop *stop) {

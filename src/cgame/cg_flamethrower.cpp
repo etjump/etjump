@@ -7,8 +7,8 @@
 // NOTE: some AI's are treated different, mostly for aesthetical reasons.
 
 #include "cg_local.h"
-#include "etj_utilities.h"
 #include "etj_trace_utils.h"
+#include "etj_utilities.h"
 
 // a flameChunk is a ball or section of fuel which goes from fuel->blue
 // ignition->flame ball optimization is necessary, since lots of these will be
@@ -246,10 +246,10 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
     while (t <= cg.time) {
       // spawn a new chunk
       CG_FlameLerpVec(lastOrg, thisOrg, backLerp, org);
-      ETJump::traceUtils->flamechunkTrace(cent->currentState.number, &trace,
-                                          org, flameChunkMins, flameChunkMaxs,
-                                          org, cent->currentState.number,
-                                          MASK_SHOT | MASK_WATER);
+      ETJump::cgame.utils.trace->flamechunkTrace(
+          cent->currentState.number, &trace, org, flameChunkMins,
+          flameChunkMaxs, org, cent->currentState.number,
+          MASK_SHOT | MASK_WATER);
 
       // fix for engine bug where trace sometimes starts in solid even if
       // the entity that it starts in is nonsolid
@@ -642,7 +642,7 @@ void CG_MoveFlameChunk(flameChunk_t *f) {
   VectorCopy(f->baseOrg, sOrg);
   while (f->velSpeed > 1 && f->baseOrgTime != cg.time) {
     CG_FlameCalcOrg(f, cg.time, newOrigin);
-    ETJump::traceUtils->flamechunkTrace(
+    ETJump::cgame.utils.trace->flamechunkTrace(
         f->ownerCent, &trace, sOrg, flameChunkMins, flameChunkMaxs, newOrigin,
         f->ownerCent, MASK_SHOT | MASK_WATER);
 

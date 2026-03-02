@@ -23,6 +23,8 @@
  */
 
 #include "etj_chs_data.h"
+#include "etj_client_commands_handler.h"
+#include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"

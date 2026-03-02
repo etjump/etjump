@@ -23,8 +23,9 @@
  */
 
 #include "etj_custom_command_menu_drawable.h"
-#include "etj_custom_command_menu.h"
+#include "cg_local.h"
 #include "etj_client_commands_handler.h"
+#include "etj_custom_command_menu.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
@@ -119,17 +120,21 @@ static panel_button_t commandMenuItemText = {
 static std::vector<panel_button_t> commandMenuPanels;
 uint8_t CustomCommandMenuDrawable::currentPage = 1;
 
-CustomCommandMenuDrawable::CustomCommandMenuDrawable() {
+CustomCommandMenuDrawable::CustomCommandMenuDrawable(
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+    : consoleCommands(consoleCommands) {
   setupListeners();
   setupPanels();
 }
 
 CustomCommandMenuDrawable::~CustomCommandMenuDrawable() {
   commandMenuPanels.clear();
+
+  consoleCommands->unsubscribe("openCustomCommandMenu");
 }
 
 void CustomCommandMenuDrawable::setupListeners() {
-  consoleCommandsHandler->subscribe(
+  consoleCommands->subscribe(
       "openCustomCommandMenu", [](const std::vector<std::string> &args) {
         if (args.empty()) {
           openMenu(currentPage);
@@ -171,7 +176,7 @@ void CustomCommandMenuDrawable::setupPanels() {
 }
 
 void CustomCommandMenuDrawable::commandMenuTitleDraw(panel_button_t *button) {
-  const auto &commands = customCommandMenu->getCustomCommands();
+  const auto &commands = cgame.handlers.customCommandMenu->getCustomCommands();
   std::string title = "CUSTOM COMMANDS";
 
   if (!commands.empty()) {
@@ -186,7 +191,7 @@ void CustomCommandMenuDrawable::commandMenuTitleDraw(panel_button_t *button) {
 
 void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
   float y = button->rect.y;
-  const auto &commands = customCommandMenu->getCustomCommands();
+  const auto &commands = cgame.handlers.customCommandMenu->getCustomCommands();
 
   if (commands.empty()) {
     CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
@@ -277,7 +282,7 @@ qboolean CustomCommandMenuDrawable::checkExecKey(const int32_t key,
 
   // this corresponds to the actual menu item number, not 0-indexed selection
   int32_t realKey = key - '0';
-  const auto &commands = customCommandMenu->getCustomCommands();
+  const auto &commands = cgame.handlers.customCommandMenu->getCustomCommands();
 
   if (commands.empty()) {
     return qfalse;

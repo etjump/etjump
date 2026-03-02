@@ -22,24 +22,27 @@
  * SOFTWARE.
  */
 
-#include "etj_cvar_shadow.h"
+#include "etj_cvar_unlocker.h"
+#include "cg_local.h"
 #include "etj_cvar_update_handler.h"
 
-using namespace ETJump;
+namespace ETJump {
+CvarUnlocker::CvarUnlocker(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+                           const vmCvar_t *unlocker, std::string target)
+    : unlocker(unlocker), target(std::move(target)), cvarUpdate(cvarUpdate) {
+  forceCvarSet(unlocker);
 
-CvarShadow::CvarShadow(const vmCvar_t *shadow, const std::string &target)
-    : _shadow(shadow), _target(target) {
-  forceCvarSet(shadow);
-  cvarUpdateHandler->subscribe(
-      _shadow, [this](const vmCvar_t *cvar) { this->forceCvarSet(cvar); });
+  this->cvarUpdate->subscribe(
+      unlocker, [this](const vmCvar_t *cvar) { forceCvarSet(cvar); });
 }
 
-CvarShadow::~CvarShadow() { cvarUpdateHandler->unsubscribe(_shadow); }
+CvarUnlocker::~CvarUnlocker() { cvarUpdate->unsubscribe(unlocker); }
 
-void CvarShadow::forceCvarSet(const vmCvar_t *cvar) const {
-  trap_Cvar_Set(_target.c_str(), cvar->string);
+void CvarUnlocker::forceCvarSet(const vmCvar_t *cvar) const {
+  trap_Cvar_Set(target.c_str(), cvar->string);
 }
 
-void CvarShadow::forceCvarSet() const {
-  trap_Cvar_Set(_target.c_str(), _shadow->string);
+void CvarUnlocker::forceCvarSet() const {
+  trap_Cvar_Set(target.c_str(), unlocker->string);
 }
+} // namespace ETJump

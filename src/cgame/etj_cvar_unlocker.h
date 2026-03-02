@@ -22,42 +22,26 @@
  * SOFTWARE.
  */
 
+#pragma once
+
+#include <memory>
 #include <string>
 
-#include "cg_local.h"
-#include "etj_draw_leaves_handler.h"
-#include "etj_utilities.h"
-#include "etj_cvar_update_handler.h"
+#include "../game/q_shared.h"
 
-using namespace ETJump;
+namespace ETJump {
+class CvarUpdateHandler;
 
-DrawLeavesHandler::DrawLeavesHandler() {
-  auto shader = composeShader(
-      shaderName,
-      {{"map *white", "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
-        "alphaGen const 0.0"}});
-  trap_R_LoadDynamicShader(shaderName, shader.c_str());
-  trap_R_RegisterShader(shaderName);
+class CvarUnlocker {
+  const vmCvar_t *unlocker;
+  std::string target;
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 
-  if (!etj_drawLeaves.integer) {
-    turnOffLeaves();
-  }
-
-  cvarUpdateHandler->subscribe(&etj_drawLeaves, [&](const vmCvar_t *cvar) {
-    cvar->integer ? turnOnLeaves() : turnOffLeaves();
-  });
-}
-
-void DrawLeavesHandler::turnOnLeaves() {
-  for (auto &leavesShader : leavesShaders) {
-    trap_R_RemapShader(leavesShader, leavesShader, "0");
-  }
-}
-
-void DrawLeavesHandler::turnOffLeaves() {
-  for (auto &leavesShader : leavesShaders) {
-    trap_R_RemapShader(leavesShader, shaderName, "0");
-  }
-}
-
-DrawLeavesHandler::~DrawLeavesHandler() { turnOnLeaves(); }
+public:
+  CvarUnlocker(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+               const vmCvar_t *unlocker, std::string target);
+  ~CvarUnlocker();
+  void forceCvarSet(const vmCvar_t *cvar) const;
+  void forceCvarSet() const;
+};
+} // namespace ETJump

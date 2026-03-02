@@ -4,15 +4,14 @@
 
 #include <vector>
 #include <ctime>
-#include <chrono>
 
 #include "cg_local.h"
-#include "etj_init.h"
-#include "etj_client_commands_handler.h"
 #include "etj_client_rtv_handler.h"
-#include "etj_spectatorinfo_data.h"
-#include "etj_utilities.h"
 #include "etj_demo_compatibility.h"
+#include "etj_local.h"
+#include "etj_spectatorinfo_data.h"
+#include "etj_timerun.h"
+#include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_syscall_ext_shared.h"
@@ -598,7 +597,6 @@ CG_ConfigStringModified
 static void CG_ConfigStringModified(void) {
   const char *str;
   int num;
-  auto rtvHandler = ETJump::rtvHandler;
 
   num = Q_atoi(CG_Argv(1));
 
@@ -610,7 +608,7 @@ static void CG_ConfigStringModified(void) {
   str = CG_ConfigString(num);
 
   const auto setVoteCounts = [&str, &num] {
-    if (ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+    if (ETJump::cgame.demo.compatibility->flags.noSpecCountInVoteCs) {
       num == CS_VOTE_YES ? cgs.voteYes = Q_atoi(str) : cgs.voteNo = Q_atoi(str);
     } else {
       if (num == CS_VOTE_YES) {
@@ -656,8 +654,8 @@ static void CG_ConfigStringModified(void) {
   } else if (num == CS_VOTE_TIME) {
     cgs.voteTime = Q_atoi(str);
 
-    if (!rtvHandler->rtvVoteActive()) {
-      rtvHandler->resetRtvEventHandler();
+    if (!ETJump::cgame.handlers.rtv->rtvVoteActive()) {
+      ETJump::ClientRtvHandler::resetRtvEventHandler();
     }
 
     cgs.voteModified = qtrue;
@@ -666,9 +664,9 @@ static void CG_ConfigStringModified(void) {
     // 'callvote rtv' command, the check for rtvVoteActive might return false
     // therefore also check if strlen > 13 (rtvMaps 'str' len should always be
     // higher)
-    if (rtvHandler->rtvVoteActive() || strlen(str) > 13) {
-      rtvHandler->setRtvConfigStrings(str);
-      rtvHandler->countRtvVotes();
+    if (ETJump::cgame.handlers.rtv->rtvVoteActive() || strlen(str) > 13) {
+      ETJump::cgame.handlers.rtv->setRtvConfigStrings(str);
+      ETJump::cgame.handlers.rtv->countRtvVotes();
     } else {
       setVoteCounts();
     }
@@ -678,7 +676,7 @@ static void CG_ConfigStringModified(void) {
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_STRING) {
     Q_strncpyz(cgs.voteString, str, sizeof(cgs.voteString));
-    rtvHandler->setRtvVoteStatus();
+    ETJump::cgame.handlers.rtv->setRtvVoteStatus();
   } else if (num == CS_INTERMISSION) {
     cg.intermissionStarted = Q_atoi(str) ? qtrue : qfalse;
   } else if (num == CS_SCREENFADE) {
@@ -1021,7 +1019,7 @@ static void CG_MapRestart(void) {
 
   // reset on map restart to avoid de-sync from cheat protected cvars
   // on ETe/ETL due to them resetting cheat cvars on map start
-  cg.shadowCvarsSet = false;
+  cg.cvarUnlocksForced = false;
 
   CG_ChargeTimesChanged();
 
@@ -1037,7 +1035,9 @@ static void CG_MapRestart(void) {
 
   trap_Cvar_Set("cg_thirdPerson", "0");
 
-  ETJump::initTimeruns();
+  if (cg.hasTimerun) {
+    ETJump::cgame.handlers.timerun->reset();
+  }
 }
 // NERVE - SMF
 
@@ -2185,7 +2185,7 @@ static void fixLinesEndingWithCaret(char *text, int size) {
 }
 
 void initVoteTally() {
-  if (ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+  if (ETJump::cgame.demo.compatibility->flags.noSpecCountInVoteCs) {
     cgs.voteYes = Q_atoi(CG_ConfigString(CS_VOTE_YES));
     cgs.voteNo = Q_atoi(CG_ConfigString(CS_VOTE_NO));
   } else {
@@ -2289,7 +2289,7 @@ static void CG_ServerCommand(void) {
   if (!Q_stricmp(cmd, "cpm")) {
     std::string s = CG_Argv(1);
 
-    if (!ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+    if (!ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
       ETJump::StringUtil::stripLocalizationMarkers(s);
     }
 
@@ -2301,7 +2301,7 @@ static void CG_ServerCommand(void) {
   if (!Q_stricmp(cmd, "bp")) {
     std::string s = CG_Argv(1);
 
-    if (!ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+    if (!ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
       ETJump::StringUtil::stripLocalizationMarkers(s);
     }
 
@@ -2314,7 +2314,7 @@ static void CG_ServerCommand(void) {
     const int args = trap_Argc();
     std::string s = CG_Argv(1);
 
-    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+    if (ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
       ETJump::StringUtil::stripLocalizationMarkers(s);
     }
 
@@ -2350,7 +2350,7 @@ static void CG_ServerCommand(void) {
   if (!Q_stricmp(cmd, "print")) {
     std::string s = CG_Argv(1);
 
-    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+    if (ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
       ETJump::StringUtil::stripLocalizationMarkers(s);
     }
 
@@ -2395,7 +2395,7 @@ static void CG_ServerCommand(void) {
 
     s = CG_Argv(1);
 
-    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+    if (ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
       ETJump::StringUtil::stripLocalizationMarkers(s);
     }
 
@@ -2426,7 +2426,7 @@ static void CG_ServerCommand(void) {
   if (!Q_stricmp(cmd, "tchat") || enc) {
     std::string s = CG_Argv(1);
 
-    if (ETJump::demoCompatibility->flags.stripLocalizationMarkers) {
+    if (ETJump::cgame.demo.compatibility->flags.stripLocalizationMarkers) {
       ETJump::StringUtil::stripLocalizationMarkers(s);
     }
 
@@ -2805,7 +2805,7 @@ static void CG_ServerCommand(void) {
     arguments.emplace_back(buf);
   }
 
-  if (ETJump::serverCommandsHandler->check(cmd, arguments)) {
+  if (ETJump::cgame.handlers.serverCommands->check(cmd, arguments)) {
     return;
   }
 

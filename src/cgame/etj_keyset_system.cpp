@@ -23,51 +23,72 @@
  */
 
 #include "etj_keyset_system.h"
-#include "etj_cvar_master_drawer.h"
-#include "etj_keyset_drawer.h"
+
 #include "etj_keyset_keybind_drawer.h"
-#include "../game/etj_string_utilities.h"
+#include "cg_local.h"
 
-ETJump::KeySetSystem::KeySetSystem(const vmCvar_t &controlCvar)
-    : keySetMasterDrawer(controlCvar) {}
+namespace ETJump {
+KeySetSystem::KeySetSystem(const vmCvar_t *controlCvar,
+                           const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : keySetMasterDrawer(controlCvar, cvarUpdate) {
+  // key set themes
+  const char *keySetNames[]{
+      "keyset",  // Keyset 1 (original)
+      "keyset2", // Aciz: Keyset 2 (DeFRaG style keys)
+      "keyset3",
+      "keyset4",
+      // + add more
+  };
 
-ETJump::KeySetSystem::~KeySetSystem() {}
+  for (const auto &keySetName : keySetNames) {
+    addSet(keySetName, cvarUpdate);
+  }
 
-void ETJump::KeySetSystem::addSet(const std::string &keySetName) {
-  keySetMasterDrawer.push(new KeySetDrawer(createKeyPressSet(keySetName)));
+  addKeyBindSet("keyset5", cvarUpdate);
 }
 
-void ETJump::KeySetSystem::addKeyBindSet(const std::string &keySetName) {
-  keySetMasterDrawer.push(new KeySetKeyBindDrawer(
-      createKeyPressSet(keySetName), createKeyBindSet(keySetName)));
+void KeySetSystem::addSet(
+    const std::string &keySetName,
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate) {
+  keySetMasterDrawer.push(std::make_unique<KeySetDrawer>(
+      createKeyPressSet(keySetName), cvarUpdate));
 }
 
-bool ETJump::KeySetSystem::beforeRender() {
-  return keySetMasterDrawer.beforeRender();
+void KeySetSystem::addKeyBindSet(
+    const std::string &keySetName,
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate) {
+  keySetMasterDrawer.push(std::make_unique<KeySetKeyBindDrawer>(
+      createKeyPressSet(keySetName), createKeyBindSet(keySetName), cvarUpdate));
 }
 
-void ETJump::KeySetSystem::render() const {
+bool KeySetSystem::beforeRender() { return keySetMasterDrawer.beforeRender(); }
+
+void KeySetSystem::render() const {
   if (canSkipDraw()) {
     return;
   }
+
   keySetMasterDrawer.render();
 }
 
-std::vector<ETJump::KeySetDrawer::KeyShader>
-ETJump::KeySetSystem::createKeyPressSet(const std::string &keySetName) {
+std::vector<KeySetDrawer::KeyShader>
+KeySetSystem::createKeyPressSet(const std::string &keySetName) {
   std::vector<KeySetDrawer::KeyShader> keyPressSet;
-  for (auto &&keyName : keyLayout) {
+  keyPressSet.reserve(keyLayout.size());
+
+  for (const auto &keyName : keyLayout) {
     keyPressSet.push_back(
         {keyName,
          registerKeySetShader(keySetName,
                               KeySetDrawer::keyNameToString(keyName)),
          0});
   }
+
   return keyPressSet;
 }
 
 std::map<int, qhandle_t>
-ETJump::KeySetSystem::createKeyBindSet(const std::string &keySetName) {
+KeySetSystem::createKeyBindSet(const std::string &keySetName) {
   return {
       {K_ENTER, registerKeySetShader(keySetName, "enter")},
       {K_SHIFT, registerKeySetShader(keySetName, "shift")},
@@ -94,30 +115,31 @@ ETJump::KeySetSystem::createKeyBindSet(const std::string &keySetName) {
   };
 }
 
-qhandle_t
-ETJump::KeySetSystem::registerKeySetShader(const std::string &keySetName,
-                                           const std::string &keyName) {
+qhandle_t KeySetSystem::registerKeySetShader(const std::string &keySetName,
+                                             const std::string &keyName) {
   auto path = createKeyPressSetShaderPath(keySetName, keyName);
   return registerShaderNoMip(path);
 }
 
 std::string
-ETJump::KeySetSystem::createKeyPressSetShaderPath(const std::string &keySetName,
-                                                  const std::string &keyName) {
-  if (keyName.size() == 0) {
+KeySetSystem::createKeyPressSetShaderPath(const std::string &keySetName,
+                                          const std::string &keyName) {
+  if (keyName.empty()) {
     return "";
   }
+
   return stringFormat("gfx/%s/key_%s_pressed", keySetName, keyName);
 }
 
-qhandle_t
-ETJump::KeySetSystem::registerShaderNoMip(const std::string &shaderPath) {
-  if (shaderPath.size() == 0) {
+qhandle_t KeySetSystem::registerShaderNoMip(const std::string &shaderName) {
+  if (shaderName.empty()) {
     return 0;
   }
-  return trap_R_RegisterShaderNoMip(shaderPath.c_str());
+
+  return trap_R_RegisterShaderNoMip(shaderName.c_str());
 }
 
-bool ETJump::KeySetSystem::canSkipDraw() const {
+bool KeySetSystem::canSkipDraw() const {
   return cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time;
 }
+} // namespace ETJump

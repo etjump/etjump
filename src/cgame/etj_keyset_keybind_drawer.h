@@ -23,26 +23,32 @@
  */
 
 #pragma once
-#include "etj_keyset_drawer.h"
+
 #include <map>
+
+#include "etj_keyset_drawer.h"
 
 namespace ETJump {
 class KeySetKeyBindDrawer : public KeySetDrawer {
 public:
-  const std::map<int, qhandle_t> controlShaders;
   KeySetKeyBindDrawer(const std::vector<KeyShader> &keyShaders,
-                      const std::map<int, qhandle_t> controlShaders);
-  virtual ~KeySetKeyBindDrawer() {};
+                      std::map<int, qhandle_t> controlShaders,
+                      const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+      : KeySetDrawer(keyShaders, cvarUpdate),
+        controlShaders(std::move(controlShaders)) {}
+  ~KeySetKeyBindDrawer() override = default;
+
+  std::map<int, qhandle_t> controlShaders;
 
 protected:
   void drawReleaseShader(qhandle_t shader, int position) const override;
   void drawPressShader(qhandle_t shader, int position) const override;
   static std::string keyNameToCommand(KeyNames keyName);
-  static int getKeyCodeForName(std::string &name);
+  static int getKeyCodeForName(const std::string &name);
   static std::string getKeyCodeBinding(int keyCode);
   static std::string getKeyCodeFullBinding(int keyCode);
   static std::string getKeyCodeShortBinding(int keyCode);
-  int checkKeyCodeRemap(int keyCode) const;
-  qhandle_t checkIfKeyCodeHasShader(int keyCode) const;
+  static int checkKeyCodeRemap(int keyCode);
+  [[nodiscard]] qhandle_t checkIfKeyCodeHasShader(int keyCode) const;
 };
 } // namespace ETJump

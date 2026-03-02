@@ -24,6 +24,14 @@
 
 #include "etj_syscall_ext_shared.h"
 
+#if defined(GAMEDLL)
+  #include "g_local.h"
+#elif defined(CGAMEDLL)
+  #include "../cgame/cg_local.h"
+#elif defined(UIDLL)
+  #include "../ui/ui_local.h"
+#endif
+
 namespace ETJump {
 void SyscallExt::setupExtensions() {
   trap_Cvar_VariableStringBuffer(entryPointCvar, value, sizeof(value));
@@ -36,8 +44,8 @@ void SyscallExt::setupExtensions() {
   dll_com_trapGetValue = Q_atoi(value);
 
 #ifdef CGAMEDLL
-  for (auto &ext : cgameExtensions) {
-    setupExtensionTrap(value, ext.first, ext.second);
+  for (auto &[name, trap] : cgameExtensions) {
+    setupExtensionTrap(value, name, trap);
   }
 #endif
 }

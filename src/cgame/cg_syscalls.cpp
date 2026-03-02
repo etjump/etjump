@@ -1,6 +1,8 @@
 // cg_syscalls.c -- this file is only included when building a dll
 // cg_syscalls.asm is included instead when building a qvm
 #include "cg_local.h"
+#include "etj_local.h"
+
 #include "../game/etj_syscalls.h"
 #include "../game/etj_syscall_ext_shared.h"
 
@@ -926,22 +928,28 @@ void trap_R_Finish(void) { SystemCall(CG_R_FINISH); }
 namespace ETJump {
 // entry point for additional system calls for other engines (ETe, ET: Legacy)
 bool SyscallExt::trap_GetValue(char *value, const int size, const char *key) {
-  return SystemCall(syscallExt->dll_com_trapGetValue, value, size, key);
+  return SystemCall(cgame.platform.syscallExt->dll_com_trapGetValue, value,
+                    size, key);
 }
 
 // ET: Legacy - flash client window
 void SyscallExt::trap_SysFlashWindowETLegacy(const FlashWindowState state) {
-  if (syscallExt->cgameExtensions[syscallExt->flashWindowETLegacy]) {
-    SystemCall(syscallExt->cgameExtensions[syscallExt->flashWindowETLegacy],
-               static_cast<int>(state));
+  if (cgame.platform.syscallExt
+          ->cgameExtensions[cgame.platform.syscallExt->flashWindowETLegacy]) {
+    SystemCall(
+        cgame.platform.syscallExt
+            ->cgameExtensions[cgame.platform.syscallExt->flashWindowETLegacy],
+        static_cast<int>(state));
   }
 }
 
 void SyscallExt::trap_CmdBackup_Ext() {
-  if (syscallExt->cgameExtensions[syscallExt->cmdBackupExt]) {
+  if (cgame.platform.syscallExt
+          ->cgameExtensions[cgame.platform.syscallExt->cmdBackupExt]) {
     cg.cmdBackup = CMD_BACKUP_EXT;
     cg.cmdMask = CMD_MASK_EXT;
-    SystemCall(syscallExt->cgameExtensions[syscallExt->cmdBackupExt]);
+    SystemCall(cgame.platform.syscallExt
+                   ->cgameExtensions[cgame.platform.syscallExt->cmdBackupExt]);
   } else {
     cg.cmdBackup = CMD_BACKUP;
     cg.cmdMask = CMD_MASK;

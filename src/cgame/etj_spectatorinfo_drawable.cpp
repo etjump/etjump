@@ -23,28 +23,33 @@
  */
 
 #include "etj_spectatorinfo_drawable.h"
-#include "etj_spectatorinfo_data.h"
 #include "etj_cvar_update_handler.h"
+#include "etj_spectatorinfo_data.h"
 #include "etj_utilities.h"
 
 namespace ETJump {
-SpectatorInfo::SpectatorInfo() {
+SpectatorInfo::SpectatorInfo(
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : cvarUpdate(cvarUpdate) {
   startListeners();
   setTextSize(etj_spectatorInfoScale);
   setRowHeight();
   setTextStyle(etj_spectatorInfoShadow);
 }
 
-void SpectatorInfo::startListeners() {
-  cvarUpdateHandler->subscribe(&etj_spectatorInfoScale,
-                               [this](const vmCvar_t *cvar) {
-                                 setTextSize(*cvar);
-                                 setRowHeight();
-                               });
+SpectatorInfo::~SpectatorInfo() {
+  cvarUpdate->unsubscribe(&etj_spectatorInfoScale);
+  cvarUpdate->unsubscribe(&etj_spectatorInfoShadow);
+}
 
-  cvarUpdateHandler->subscribe(
-      &etj_spectatorInfoShadow,
-      [this](const vmCvar_t *cvar) { setTextStyle(*cvar); });
+void SpectatorInfo::startListeners() {
+  cvarUpdate->subscribe(&etj_spectatorInfoScale, [this](const vmCvar_t *cvar) {
+    setTextSize(*cvar);
+    setRowHeight();
+  });
+
+  cvarUpdate->subscribe(&etj_spectatorInfoShadow,
+                        [this](const vmCvar_t *cvar) { setTextStyle(*cvar); });
 }
 
 void SpectatorInfo::setTextSize(const vmCvar_t &cvar) {

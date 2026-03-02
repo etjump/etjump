@@ -23,6 +23,7 @@
  */
 
 #include "etj_custom_command_menu.h"
+#include "cg_local.h"
 #include "etj_consolecommands.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_client_commands_handler.h"
@@ -34,10 +35,9 @@ namespace ETJump {
 inline constexpr char DEFAULT_CUSTOM_COMMAND_FILE[] = "custom_commands.dat";
 
 CustomCommandMenu::CustomCommandMenu(
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
-    const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler)
-    : cvarUpdateHandler(cvarUpdateHandler),
-      consoleCommandsHandler(consoleCommandsHandler) {
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+    : cvarUpdate(cvarUpdate), consoleCommands(consoleCommands) {
 
   startListeners();
   setFilename(&etj_ccMenu_filename);
@@ -46,47 +46,46 @@ CustomCommandMenu::CustomCommandMenu(
 }
 
 CustomCommandMenu::~CustomCommandMenu() {
-  cvarUpdateHandler->unsubscribe(&etj_ccMenu_filename);
+  cvarUpdate->unsubscribe(&etj_ccMenu_filename);
 
-  consoleCommandsHandler->unsubscribe("addCustomCommand");
-  consoleCommandsHandler->unsubscribe("deleteCustomCommand");
-  consoleCommandsHandler->unsubscribe("editCustomCommand");
-  consoleCommandsHandler->unsubscribe("moveCustomCommand");
-  consoleCommandsHandler->unsubscribe("listCustomCommands");
-  consoleCommandsHandler->unsubscribe("readCustomCommands");
-  consoleCommandsHandler->unsubscribe("generateCustomCommandsFile");
+  consoleCommands->unsubscribe("addCustomCommand");
+  consoleCommands->unsubscribe("deleteCustomCommand");
+  consoleCommands->unsubscribe("editCustomCommand");
+  consoleCommands->unsubscribe("moveCustomCommand");
+  consoleCommands->unsubscribe("listCustomCommands");
+  consoleCommands->unsubscribe("readCustomCommands");
+  consoleCommands->unsubscribe("generateCustomCommandsFile");
 }
 
 void CustomCommandMenu::startListeners() {
-  cvarUpdateHandler->subscribe(
-      &etj_ccMenu_filename,
-      [this](const vmCvar_t *cvar) { setFilename(cvar); });
+  cvarUpdate->subscribe(&etj_ccMenu_filename,
+                        [this](const vmCvar_t *cvar) { setFilename(cvar); });
 
-  consoleCommandsHandler->subscribe(
+  consoleCommands->subscribe(
       "addCustomCommand",
       [this](const std::vector<std::string> &args) { addCommand(args); });
 
-  consoleCommandsHandler->subscribe(
+  consoleCommands->subscribe(
       "deleteCustomCommand",
       [this](const std::vector<std::string> &args) { deleteCommand(args); });
 
-  consoleCommandsHandler->subscribe(
+  consoleCommands->subscribe(
       "editCustomCommand",
       [this](const std::vector<std::string> &args) { editCommand(args); });
 
-  consoleCommandsHandler->subscribe(
+  consoleCommands->subscribe(
       "moveCustomCommand",
       [this](const std::vector<std::string> &args) { moveCommand(args); });
 
-  consoleCommandsHandler->subscribe(
+  consoleCommands->subscribe(
       "listCustomCommands",
       [this](const std::vector<std::string> &args) { listCommands(args); });
 
-  consoleCommandsHandler->subscribe(
+  consoleCommands->subscribe(
       "readCustomCommands",
       [this](const std::vector<std::string> &) { parseCommands(); });
 
-  consoleCommandsHandler->subscribe(
+  consoleCommands->subscribe(
       "generateCustomCommandsFile",
       [](const std::vector<std::string> &args) { generateExampleFile(args); });
 }

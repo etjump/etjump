@@ -23,8 +23,8 @@
  */
 
 #include "etj_colorpicker.h"
+#include "etj_local.h"
 
-#include "../cgame/etj_utilities.h"
 #include "../game/etj_string_utilities.h"
 
 extern displayContextDef_t *DC;
@@ -91,7 +91,7 @@ void ColorPicker::cvarToColorPickerState(const std::string &cvar) {
 
   // this can potentially be a bit wasteful if the color is already
   // in 0-255 range, but I'd rather not complicate the logic around that
-  parseColorString(currentCvarOldValue, normalizedRGB);
+  ui.colorParser->parseColorString(currentCvarOldValue, normalizedRGB);
 
   Vector4Copy(normalizedRGB, oldRGB);
   Vector4Copy(normalizedRGB, pickerRGB);

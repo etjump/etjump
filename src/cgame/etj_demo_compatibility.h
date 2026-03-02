@@ -24,9 +24,13 @@
 
 #pragma once
 
-#include "cg_local.h"
-
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <vector>
 namespace ETJump {
+class ClientCommandsHandler;
+
 // 2.3.0 (+ RC4) ET_VELOCITY_PUSH_TRIGGER eType number
 inline constexpr int32_t COMPAT_ET_VELOCITY_PUSH_TRIGGER_NUM = 9;
 // old array index of removed 'weapon_medic_heal' item
@@ -53,6 +57,8 @@ class DemoCompatibility {
   [[nodiscard]] bool isExactVersion(const Version &version) const;
 
   Version demoVersion{};
+
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
 
 public:
   struct CompatibilityFlags {
@@ -86,7 +92,8 @@ public:
 
   void printDemoInformation() const;
 
-  DemoCompatibility();
-  ~DemoCompatibility() = default;
+  explicit DemoCompatibility(
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
+  ~DemoCompatibility();
 };
 } // namespace ETJump

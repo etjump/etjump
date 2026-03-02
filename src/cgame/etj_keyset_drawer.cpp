@@ -23,63 +23,79 @@
  */
 
 #include "etj_keyset_drawer.h"
-#include "etj_utilities.h"
+#include "cg_local.h"
+#include "etj_color_parser.h"
 #include "etj_cvar_update_handler.h"
+#include "etj_utilities.h"
 
-ETJump::KeySetDrawer::KeySetDrawer(const std::vector<KeyShader> &keyShaders)
-    : keyShaders(keyShaders) {
+namespace ETJump {
+KeySetDrawer::KeySetDrawer(const std::vector<KeyShader> &keyShaders,
+                           const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : keyShaders(keyShaders), cvarUpdate(cvarUpdate) {
   initAttrs();
   initListeners();
 }
 
-void ETJump::KeySetDrawer::initListeners() {
-  cvarUpdateHandler->subscribe(&etj_keysColor, [&](const vmCvar_t *cvar) {
-    updateKeysColor(etj_keysColor.string);
+KeySetDrawer::~KeySetDrawer() {
+  cvarUpdate->unsubscribe(&etj_keysColor);
+  cvarUpdate->unsubscribe(&etj_keysSize);
+  cvarUpdate->unsubscribe(&etj_keysX);
+  cvarUpdate->unsubscribe(&etj_keysY);
+  cvarUpdate->unsubscribe(&etj_keysShadow);
+}
+
+void KeySetDrawer::initListeners() {
+  cvarUpdate->subscribe(&etj_keysColor, [this](const vmCvar_t *cvar) {
+    updateKeysColor(cvar->string);
   });
-  cvarUpdateHandler->subscribe(&etj_keysSize,
-                               [&](const vmCvar_t *cvar) { updateKeysSize(); });
-  cvarUpdateHandler->subscribe(&etj_keysX, [&](const vmCvar_t *cvar) {
+
+  cvarUpdate->subscribe(&etj_keysSize,
+                        [this](const vmCvar_t *cvar) { updateKeysSize(cvar); });
+
+  cvarUpdate->subscribe(&etj_keysX, [this](const vmCvar_t *) {
     updateKeysOrigin(etj_keysX.value, etj_keysY.value);
   });
-  cvarUpdateHandler->subscribe(&etj_keysY, [&](const vmCvar_t *cvar) {
+
+  cvarUpdate->subscribe(&etj_keysY, [this](const vmCvar_t *) {
     updateKeysOrigin(etj_keysX.value, etj_keysY.value);
   });
-  cvarUpdateHandler->subscribe(&etj_keysShadow, [&](const vmCvar_t *cvar) {
-    updateKeysShadow(etj_keysShadow.integer > 0);
+
+  cvarUpdate->subscribe(&etj_keysShadow, [this](const vmCvar_t *cvar) {
+    updateKeysShadow(cvar->integer);
   });
 }
 
-void ETJump::KeySetDrawer::initAttrs() {
+void KeySetDrawer::initAttrs() {
   updateKeysColor(etj_keysColor.string);
-  updateKeysSize();
+  updateKeysSize(&etj_keysSize);
   updateKeysOrigin(etj_keysX.value, etj_keysY.value);
-  updateKeysShadow(etj_keysShadow.integer > 0);
+  updateKeysShadow(etj_keysShadow.integer);
   vec4_t shadowColor{0.0f, 0.0f, 0.0f, 1.0f};
   updateKeysShadowColor(shadowColor);
 }
 
-void ETJump::KeySetDrawer::updateKeysColor(const char *str) {
-  parseColorString(str, attrs.color);
+void KeySetDrawer::updateKeysColor(const char *str) {
+  cgame.utils.colorParser->parseColorString(str, attrs.color);
 }
 
-void ETJump::KeySetDrawer::updateKeysSize() {
-  attrs.size = CvarValueParser::parse<CvarValue::Size>(etj_keysSize, 0, 256);
+void KeySetDrawer::updateKeysSize(const vmCvar_t *cvar) {
+  attrs.size = CvarValueParser::parse<CvarValue::Size>(*cvar, 0, 256);
 }
 
-void ETJump::KeySetDrawer::updateKeysOrigin(float x, float y) {
+void KeySetDrawer::updateKeysOrigin(float x, float y) {
   attrs.origin.x = ETJump_AdjustPosition(std::clamp(x, 0.f, 640.f));
   attrs.origin.y = std::clamp(y, 0.f, 480.f);
 }
 
-void ETJump::KeySetDrawer::updateKeysShadow(bool shouldDrawShadow) {
+void KeySetDrawer::updateKeysShadow(bool shouldDrawShadow) {
   attrs.shouldDrawShadow = shouldDrawShadow;
 }
 
-void ETJump::KeySetDrawer::updateKeysShadowColor(const vec4_t shadowColor) {
+void KeySetDrawer::updateKeysShadowColor(const vec4_t shadowColor) {
   Vector4Copy(shadowColor, attrs.shadowColor);
 }
 
-void ETJump::KeySetDrawer::render() const {
+void KeySetDrawer::render() const {
   if (attrs.size.x == 0 || attrs.size.y == 0) {
     return;
   }
@@ -94,17 +110,15 @@ void ETJump::KeySetDrawer::render() const {
   }
 }
 
-void ETJump::KeySetDrawer::drawPressShader(qhandle_t shader,
-                                           int position) const {
+void KeySetDrawer::drawPressShader(qhandle_t shader, int position) const {
   drawShader(shader, position);
 }
 
-void ETJump::KeySetDrawer::drawReleaseShader(qhandle_t shader,
-                                             int position) const {
+void KeySetDrawer::drawReleaseShader(qhandle_t shader, int position) const {
   drawShader(shader, position);
 }
 
-void ETJump::KeySetDrawer::drawShader(qhandle_t shader, int position) const {
+void KeySetDrawer::drawShader(qhandle_t shader, int position) const {
   if (!shader) {
     return;
   }
@@ -123,7 +137,7 @@ void ETJump::KeySetDrawer::drawShader(qhandle_t shader, int position) const {
   drawPic(x, y, sizeX, sizeY, shader, color, shadowColor);
 }
 
-int ETJump::KeySetDrawer::isKeyPressed(KeyNames key) {
+int KeySetDrawer::isKeyPressed(KeyNames key) {
   const auto ps = getValidPlayerState();
   switch (key) {
     case KeyNames::Forward:
@@ -165,7 +179,7 @@ int ETJump::KeySetDrawer::isKeyPressed(KeyNames key) {
   }
 }
 
-std::string ETJump::KeySetDrawer::keyNameToString(KeyNames keyName) {
+std::string KeySetDrawer::keyNameToString(KeyNames keyName) {
   switch (keyName) {
     case KeyNames::Forward:
       return "forward";
@@ -205,3 +219,4 @@ std::string ETJump::KeySetDrawer::keyNameToString(KeyNames keyName) {
       return "";
   }
 }
+} // namespace ETJump

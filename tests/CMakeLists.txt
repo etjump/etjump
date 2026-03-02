@@ -2,8 +2,8 @@ include(GoogleTest)
 
 add_executable(tests
 	"../src/cgame/etj_client_commands_handler.cpp"
+	"../src/cgame/etj_color_parser.cpp"
 	"../src/cgame/etj_entity_events_handler.cpp"
-	"../src/cgame/etj_utilities.cpp"
 	"../src/cgame/etj_inline_command_parser.cpp"
 	"../src/game/etj_command_parser.cpp"
 	"../src/game/etj_deathrun_system.cpp"

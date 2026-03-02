@@ -23,6 +23,7 @@
  */
 
 #include "etj_accelmeter_drawable.h"
+#include "etj_color_parser.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_pmove_utils.h"
 #include "etj_utilities.h"
@@ -30,11 +31,12 @@
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
-AccelMeter::AccelMeter() {
+AccelMeter::AccelMeter(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : cvarUpdate(cvarUpdate) {
   parseColor(etj_accelColor.string, accelColor);
-  setTextStyle();
-  setSize();
-  setAccelColorStyle();
+  setTextStyle(&etj_accelShadow);
+  setSize(&etj_accelSize);
+  setAccelColorStyle(&etj_accelColorUsesAccel);
   startListeners();
 
   // add dummy elements here, so we don't try to read an empty vector
@@ -43,38 +45,45 @@ AccelMeter::AccelMeter() {
   accelStr.emplace_back("0");
 }
 
+AccelMeter::~AccelMeter() {
+  cvarUpdate->unsubscribe(&etj_accelColor);
+  cvarUpdate->unsubscribe(&etj_accelAlpha);
+  cvarUpdate->unsubscribe(&etj_accelSize);
+  cvarUpdate->unsubscribe(&etj_accelShadow);
+  cvarUpdate->unsubscribe(&etj_accelColorUsesAccel);
+}
+
 void AccelMeter::startListeners() {
-  cvarUpdateHandler->subscribe(&etj_accelColor, [&](const vmCvar_t *cvar) {
+  cvarUpdate->subscribe(&etj_accelColor, [this](const vmCvar_t *cvar) {
     parseColor(cvar->string, accelColor);
   });
 
-  cvarUpdateHandler->subscribe(&etj_accelAlpha, [&](const vmCvar_t *cvar) {
+  cvarUpdate->subscribe(&etj_accelAlpha, [this](const vmCvar_t *) {
     parseColor(etj_accelColor.string, accelColor);
   });
 
-  cvarUpdateHandler->subscribe(&etj_accelSize,
-                               [&](const vmCvar_t *cvar) { setSize(); });
+  cvarUpdate->subscribe(&etj_accelSize,
+                        [this](const vmCvar_t *cvar) { setSize(cvar); });
 
-  cvarUpdateHandler->subscribe(&etj_accelShadow,
-                               [&](const vmCvar_t *cvar) { setTextStyle(); });
+  cvarUpdate->subscribe(&etj_accelShadow,
+                        [this](const vmCvar_t *cvar) { setTextStyle(cvar); });
 
-  cvarUpdateHandler->subscribe(
-      &etj_accelColorUsesAccel,
-      [&](const vmCvar_t *cvar) { setAccelColorStyle(); });
+  cvarUpdate->subscribe(&etj_accelColorUsesAccel, [this](const vmCvar_t *cvar) {
+    setAccelColorStyle(cvar);
+  });
 }
 
 void AccelMeter::parseColor(const std::string &color, vec4_t &out) {
-  parseColorString(color, out);
+  cgame.utils.colorParser->parseColorString(color, out);
   out[3] *= etj_accelAlpha.value;
 }
 
-void AccelMeter::setTextStyle() {
-  textStyle =
-      etj_accelShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
+void AccelMeter::setTextStyle(const vmCvar_t *cvar) {
+  textStyle = cvar->integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
 }
 
-void AccelMeter::setSize() {
-  size = CvarValueParser::parse<CvarValue::Size>(etj_accelSize, 1, 10);
+void AccelMeter::setSize(const vmCvar_t *cvar) {
+  size = CvarValueParser::parse<CvarValue::Size>(*cvar, 1, 10);
   size.x *= 0.1f;
   size.y *= 0.1f;
 
@@ -83,12 +92,12 @@ void AccelMeter::setSize() {
           0.5f;
 }
 
-void AccelMeter::setAccelColorStyle() {
-  if (!etj_accelColorUsesAccel.integer) {
+void AccelMeter::setAccelColorStyle(const vmCvar_t *cvar) {
+  if (!cvar->integer) {
     parseColor(etj_accelColor.string, accelColor);
   }
 
-  accelColorStyle = etj_accelColorUsesAccel.integer;
+  accelColorStyle = cvar->integer;
 }
 
 bool AccelMeter::beforeRender() {
@@ -98,9 +107,9 @@ bool AccelMeter::beforeRender() {
 
   playing = cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback;
 
-  pm = pmoveUtils->getPmove();
+  pm = cgame.utils.pmove->getPmove();
 
-  if (pmoveUtils->skipUpdate(lastUpdateTime, std::nullopt)) {
+  if (cgame.utils.pmove->skipUpdate(lastUpdateTime, std::nullopt)) {
     return true;
   }
 
@@ -152,30 +161,27 @@ void AccelMeter::render() const {
   float accelX = etj_accelX.value;
   ETJump_AdjustPosition(&accelX);
 
-  vec4_t color;
-  Vector4Copy(accelColor, color);
-
   switch (etj_accelAlign.integer) {
     case Left:
-      CG_Text_Paint_Ext(accelX, y, size.x, size.y, color, accelStr[0], 0, 0,
-                        textStyle, &cgs.media.limboFont1);
-      CG_Text_Paint_Ext(accelX + halfW, y, size.x, size.y, color, accelStr[1],
-                        0, 0, textStyle, &cgs.media.limboFont1);
+      CG_Text_Paint_Ext(accelX, y, size.x, size.y, accelColor, accelStr[0], 0,
+                        0, textStyle, &cgs.media.limboFont1);
+      CG_Text_Paint_Ext(accelX + halfW, y, size.x, size.y, accelColor,
+                        accelStr[1], 0, 0, textStyle, &cgs.media.limboFont1);
       break;
     case Right:
-      CG_Text_Paint_RightAligned_Ext(accelX, y, size.x, size.y, color,
+      CG_Text_Paint_RightAligned_Ext(accelX, y, size.x, size.y, accelColor,
                                      accelStr[0], 0, 0, textStyle,
                                      &cgs.media.limboFont1);
-      CG_Text_Paint_RightAligned_Ext(accelX - halfW, y, size.x, size.y, color,
-                                     accelStr[1], 0, 0, textStyle,
+      CG_Text_Paint_RightAligned_Ext(accelX - halfW, y, size.x, size.y,
+                                     accelColor, accelStr[1], 0, 0, textStyle,
                                      &cgs.media.limboFont1);
       break;
     default: // center align
       CG_Text_Paint_Centred_Ext(accelX - (halfW * 0.5f), y, size.x, size.y,
-                                color, accelStr[0], 0, 0, textStyle,
+                                accelColor, accelStr[0], 0, 0, textStyle,
                                 &cgs.media.limboFont1);
       CG_Text_Paint_Centred_Ext(accelX + (halfW * 0.5f), y, size.x, size.y,
-                                color, accelStr[1], 0, 0, textStyle,
+                                accelColor, accelStr[1], 0, 0, textStyle,
                                 &cgs.media.limboFont1);
       break;
   }

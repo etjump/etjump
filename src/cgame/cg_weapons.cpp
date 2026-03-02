@@ -7,8 +7,8 @@
 
 #include "cg_local.h"
 #include "etj_demo_compatibility.h"
-#include "etj_utilities.h"
 #include "etj_trace_utils.h"
+#include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
 
@@ -2400,7 +2400,8 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
 
   // NOTE: only for first person view,
   // 'CG_EntityEvent' handles this for other players
-  if (ETJump::demoCompatibility->flags.setAttack2FiringFlag && ps && !firing) {
+  if (ETJump::cgame.demo.compatibility->flags.setAttack2FiringFlag && ps &&
+      !firing) {
     // need to override this from 'CG_EDV_RunInput' setup,
     // otherwise we don't get correct ammo counts in 'PM_WeaponAmmoAvailable'
     cg_pmove.noWeapClips = qfalse;
@@ -6400,8 +6401,8 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
     VectorMA(end, r, right, end);
     VectorMA(end, u, up, end);
 
-    ETJump::traceUtils->filteredTrace(sourceEntityNum, &tr, muzzle, nullptr,
-                                      nullptr, end, 0, MASK_SHOT);
+    ETJump::cgame.utils.trace->filteredTrace(
+        sourceEntityNum, &tr, muzzle, nullptr, nullptr, end, 0, MASK_SHOT);
 
     SnapVectorTowards(tr.endpos, muzzle);
     VectorCopy(tr.endpos, end);
@@ -6586,9 +6587,9 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         VectorMA(start, waterfraction, dist, end2);
 
         // TODO: regarding the comment below, should this use 'end2'...?
-        ETJump::traceUtils->filteredTrace(sourceEntityNum, &trace2, start,
-                                          nullptr, nullptr, end, 0,
-                                          MASK_SHOT | MASK_WATER);
+        ETJump::cgame.utils.trace->filteredTrace(sourceEntityNum, &trace2,
+                                                 start, nullptr, nullptr, end,
+                                                 0, MASK_SHOT | MASK_WATER);
 
         trap_S_StartSound(end, -1, CHAN_AUTO,
                           cgs.media.sfx_bullet_waterhit[rand() % 5]);
@@ -6606,11 +6607,12 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         VectorNormalizeFast(dir);
         VectorMA(end, 4, dir, end);
 
-        ETJump::traceUtils->filteredTrace(sourceEntityNum, &trace, start,
-                                          nullptr, nullptr, end, 0, MASK_SHOT);
-        ETJump::traceUtils->filteredTrace(sourceEntityNum, &trace2, start,
-                                          nullptr, nullptr, end, 0,
-                                          MASK_SHOT | MASK_WATER);
+        ETJump::cgame.utils.trace->filteredTrace(sourceEntityNum, &trace, start,
+                                                 nullptr, nullptr, end, 0,
+                                                 MASK_SHOT);
+        ETJump::cgame.utils.trace->filteredTrace(sourceEntityNum, &trace2,
+                                                 start, nullptr, nullptr, end,
+                                                 0, MASK_SHOT | MASK_WATER);
 
         if (trace.fraction != trace2.fraction) {
           trap_S_StartSound(end, -1, CHAN_AUTO,

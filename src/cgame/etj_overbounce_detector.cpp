@@ -24,8 +24,8 @@
 
 #include "etj_overbounce_detector.h"
 #include "etj_overbounce_shared.h"
-#include "etj_utilities.h"
 #include "etj_trace_utils.h"
+#include "etj_utilities.h"
 
 namespace ETJump {
 bool OverbounceDetector::beforeRender() {
@@ -58,8 +58,9 @@ bool OverbounceDetector::beforeRender() {
     VectorCopy(start, end);
     end[2] -= Overbounce::MAX_TRACE_DIST;
 
-    traceUtils->filteredTrace(ps->clientNum, &trace, start, nullptr, nullptr,
-                              end, ps->clientNum, traceContents);
+    cgame.utils.trace->filteredTrace(ps->clientNum, &trace, start, nullptr,
+                                     nullptr, end, ps->clientNum,
+                                     traceContents);
 
     if (trace.fraction != 1.0 && trace.plane.type == 2) {
       // something was hit and it's a floor
@@ -78,8 +79,8 @@ bool OverbounceDetector::beforeRender() {
   VectorCopy(cg.refdef.vieworg, start);
   VectorMA(start, Overbounce::MAX_TRACE_DIST, cg.refdef.viewaxis[0], end);
 
-  traceUtils->filteredTrace(ps->clientNum, &trace, start, nullptr, nullptr, end,
-                            ps->clientNum, traceContents);
+  cgame.utils.trace->filteredTrace(ps->clientNum, &trace, start, nullptr,
+                                   nullptr, end, ps->clientNum, traceContents);
 
   if (trace.fraction != 1.0 && trace.plane.type == 2) {
     // something was hit and it's a floor

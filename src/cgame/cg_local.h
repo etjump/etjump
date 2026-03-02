@@ -14,16 +14,13 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
-#include <memory>
-#include <vector>
-
 #include "../game/q_shared.h"
 #include "../game/bg_public.h"
 #include "../ui/ui_shared.h"
 
 #include "tr_types.h"
 #include "cg_public.h"
-#include "etj_awaited_command_handler.h"
+#include "etj_local.h"
 
 inline constexpr float STATS_FADE_TIME = 200.0f;
 inline constexpr int FADE_TIME = 200;
@@ -765,10 +762,6 @@ typedef enum { SHOW_OFF, SHOW_SHUTDOWN, SHOW_ON } showView_t;
 
 void CG_ParseMapEntityInfo(int axis_number, int allied_number);
 
-// we need to reserve the extended value for this, it doesn't matter
-// if the client doesn't actually support CMD_BACKUP_EXT
-inline constexpr int MAX_BACKUP_STATES = CMD_BACKUP_EXT + 2;
-
 typedef struct {
   int clientFrame; // incremented each frame
 
@@ -1177,7 +1170,7 @@ typedef struct {
 
   centity_t *satchelCharge;
 
-  playerState_t backupStates[MAX_BACKUP_STATES];
+  playerState_t backupStates[ETJump::MAX_BACKUP_STATES];
   int backupStateTop;
   int backupStateTail;
   int lastPredictedCommand;
@@ -1255,7 +1248,7 @@ typedef struct {
 
   char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
 
-  bool shadowCvarsSet;
+  bool cvarUnlocksForced;
   bool chatReplayReceived;
   bool maplistRequested;
 
@@ -2150,41 +2143,6 @@ struct range_t {
   float x1;
   float x2;
   bool split;
-};
-
-enum class FTMenuOptions {
-  FT_DISBAND_PROPOSE = 0,
-  FT_CREATE_LEAVE = 1,
-  FT_INVITE = 2,
-  FT_KICK = 3,
-  FT_WARN = 4,
-  FT_RULES = 5,
-  FT_TJMODE = 6,
-  FT_COUNTDOWN_START = 7,
-  FT_MAX_OPTIONS = 8,
-};
-
-enum class FTMenuMode {
-  FT_VSAY = 0,
-  FT_MANAGE = 1, // create, leave, disband
-  FT_APPLY = 2,
-  FT_PROPOSE = 3,
-  FT_ADMIN = 4
-};
-
-// sub-pages of fireteam menus
-enum class FTMenuPos {
-  FT_MENUPOS_NONE = -1,
-  FT_MENUPOS_INVITE = 2,
-  FT_MENUPOS_KICK = 3,
-  FT_MENUPOS_WARN = 4,
-  FT_MENUPOS_RULES = 5,
-};
-
-enum class FTMenuRulesPos {
-  FT_RULES_RESET = 0,
-  FT_RULES_SAVELIMIT = 1,
-  FT_RULES_NOGHOST = 2
 };
 
 //==============================================================================
@@ -3105,13 +3063,6 @@ void CG_EDV_RunInput(void);
 //
 // cg_events.c
 //
-enum AutoSwitchFlags {
-  Disabled = 0 << 0,
-  Enabled = 1 << 0,
-  IfReplacingPrimary = 1 << 1,
-  IgnorePortalGun = 1 << 2,
-};
-
 void CG_CheckEvents(centity_t *cent);
 void CG_EntityEvent(centity_t *cent, vec3_t position);
 void CG_PainEvent(centity_t *cent, int health, qboolean crouching);
@@ -4191,96 +4142,6 @@ void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
 void ETJump_AdjustPosition(float *x);
 float ETJump_AdjustPosition(float x);
 void ETJump_EnableWidthScale(bool enable);
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Global ETJump objects
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-namespace ETJump {
-class ClientCommandsHandler;
-class EntityEventsHandler;
-class IRenderable;
-class CvarUpdateHandler;
-class AutoDemoRecorder;
-class EventLoop;
-class PlayerEventsHandler;
-class PmoveUtils;
-class CvarShadow;
-class ClientRtvHandler;
-class DemoCompatibility;
-class AccelColor;
-class PlayerBBox;
-class SavePos;
-class SyscallExt;
-class TrickjumpLines;
-class CHSDataHandler;
-class CustomCommandMenu;
-class TraceUtils;
-
-extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
-extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
-extern std::shared_ptr<EntityEventsHandler> entityEventsHandler;
-extern std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
-extern std::vector<std::shared_ptr<IRenderable>> renderables;
-extern std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
-extern std::vector<std::shared_ptr<CvarShadow>> cvarShadows;
-extern std::shared_ptr<EventLoop> eventLoop;
-extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
-extern std::shared_ptr<ClientRtvHandler> rtvHandler;
-extern std::unique_ptr<DemoCompatibility> demoCompatibility;
-extern std::shared_ptr<PlayerBBox> playerBBox;
-extern std::unique_ptr<SavePos> savePos;
-extern std::unique_ptr<SyscallExt> syscallExt;
-extern std::unique_ptr<PmoveUtils> pmoveUtils;
-extern std::shared_ptr<TrickjumpLines> trickjumpLines;
-extern std::shared_ptr<CHSDataHandler> chsDataHandler;
-extern std::unique_ptr<CustomCommandMenu> customCommandMenu;
-extern std::unique_ptr<TraceUtils> traceUtils;
-
-inline constexpr int32_t MAX_CHS_INFO = 8;
-
-enum extraTraceOptions {
-  OB_DETECTOR,
-  SLICK_DETECTOR,
-  NJD_DETECTOR,
-  CHS_10_11,
-  CHS_12,
-  CHS_13_15,
-  CHS_16,
-  CHS_53,
-};
-
-enum class ChatHighlightFlags {
-  HIGHLIGHT_BEEPER = 1,
-  HIGHLIGHT_FLASH = 2,
-};
-
-enum class HUDLerpFlags {
-  DRAWSPEED2 = 1 << 0,
-  CGAZ = 1 << 1,
-  SNAPHUD = 1 << 2,
-  STRAFE_QUALITY = 1 << 3,
-};
-
-enum class ExecFileType {
-  NONE = 0,
-  MAP_AUTOEXEC = 1 << 0,
-  TEAM_AUTOEXEC = 1 << 1,
-};
-
-enum class HideFlamethrowerFlags {
-  HIDE_SELF = 1 << 0,
-  HIDE_OTHERS = 1 << 1,
-};
-
-enum class ChatMessageType {
-  DEFAULT = 0,         // normal message from any team
-  REPLAY_MSG = 1 << 0, // chat replay message
-  SERVER_MSG = 1 << 1, // server console chat message
-};
-} // namespace ETJump
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern displayContextDef_t *DC;
 

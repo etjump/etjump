@@ -23,17 +23,14 @@
  */
 
 #pragma once
+
+#include <memory>
 #include <vector>
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
-
 namespace ETJump {
-class DrawLeavesHandler {
+class CvarUpdateHandler;
+
+class LeavesRemapper {
   const char *shaderName{"__etjump-leaves-shader__"};
   std::vector<const char *> leavesShaders{
       "models/mapobjects/trees_sd/winterbranch01",
@@ -55,11 +52,13 @@ class DrawLeavesHandler {
       "models/mapobjects/plants_sd/grass_green1",
   };
 
-  void turnOnLeaves();
-  void turnOffLeaves();
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+
+  void turnOnLeaves() const;
+  void turnOffLeaves() const;
 
 public:
-  DrawLeavesHandler();
-  ~DrawLeavesHandler();
+  explicit LeavesRemapper(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~LeavesRemapper();
 };
 } // namespace ETJump

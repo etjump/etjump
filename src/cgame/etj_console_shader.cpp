@@ -22,34 +22,32 @@
  * SOFTWARE.
  */
 
-#include <string>
-
+#include "etj_console_shader.h"
 #include "cg_local.h"
-#include "etj_console_alpha.h"
+#include "etj_color_parser.h"
 #include "etj_utilities.h"
+
 #include "../game/etj_string_utilities.h"
 
-using namespace ETJump;
-
-ConsoleAlphaHandler::ConsoleAlphaHandler() {
+namespace ETJump {
+ConsoleShader::ConsoleShader() {
   auto shader = createBackground();
   trap_R_LoadDynamicShader(shaderName, shader.c_str());
-  // once shader is registered, any changes to dynamic shader will have
-  // no effect
+  // once a dynamic shader is registered, any changes to it will have no effect
   trap_R_RegisterShader(shaderName);
   trap_R_RemapShader("console-16bit", shaderName, "0");
 }
 
-std::string ConsoleAlphaHandler::createBackground() {
-  if (etj_consoleShader.integer > 0) {
+std::string ConsoleShader::createBackground() {
+  if (etj_consoleShader.integer) {
     return createTexturedBackground();
   }
+
   return createSolidBackground();
 }
 
-std::string ConsoleAlphaHandler::createTexturedBackground() {
-  auto alphaGen =
-      ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
+std::string ConsoleShader::createTexturedBackground() const {
+  auto alphaGen = stringFormat("alphaGen const %f", etj_consoleAlpha.value);
 
   return composeShader(shaderName, {"nopicmip"},
                        {{"map textures/skies_sd/wurzburg_clouds.tga",
@@ -74,13 +72,12 @@ std::string ConsoleAlphaHandler::createTexturedBackground() {
                         }});
 }
 
-std::string ConsoleAlphaHandler::createSolidBackground() {
+std::string ConsoleShader::createSolidBackground() const {
   vec4_t bg;
-  parseColorString(etj_consoleColor.string, bg);
-  auto alphaGen =
-      ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
+  cgame.utils.colorParser->parseColorString(etj_consoleColor.string, bg);
+  auto alphaGen = stringFormat("alphaGen const %f", etj_consoleAlpha.value);
   auto colorGen =
-      ETJump::stringFormat("rgbGen const ( %f %f %f )", bg[0], bg[1], bg[2]);
+      stringFormat("rgbGen const ( %f %f %f )", bg[0], bg[1], bg[2]);
 
   return composeShader(shaderName, {"nopicmip"},
                        {{
@@ -91,6 +88,7 @@ std::string ConsoleAlphaHandler::createSolidBackground() {
                        }});
 }
 
-ConsoleAlphaHandler::~ConsoleAlphaHandler() {
+ConsoleShader::~ConsoleShader() {
   trap_R_RemapShader("console-16bit", "console-16bit", "0");
 }
+} // namespace ETJump

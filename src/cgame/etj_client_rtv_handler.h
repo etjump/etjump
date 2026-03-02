@@ -23,31 +23,32 @@
  */
 
 #pragma once
-#include <vector>
-#include <string>
 
-#include "cg_local.h"
+#include <memory>
+#include <vector>
+
+#include "../game/bg_public.h"
 
 namespace ETJump {
+class ClientCommandsHandler;
+
 class ClientRtvHandler {
   std::vector<RtvMapVoteInfo> rtvMaps;
   RtvVoteCountInfo rtvVoteYes{};
   bool isRtvVote{};
 
-  std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+  std::shared_ptr<ClientCommandsHandler> serverCommands;
 
 public:
   explicit ClientRtvHandler(
       const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler);
-  ~ClientRtvHandler() = default;
-
-  void initialize();
+  ~ClientRtvHandler();
 
   void setRtvConfigStrings(const char *cs);
   void countRtvVotes();
   int getTotalVotesForMap(int mapIndex);
-  RtvVoteCountInfo getRtvYesVotes() const;
-  bool rtvVoteActive() const;
+  [[nodiscard]] RtvVoteCountInfo getRtvYesVotes() const;
+  [[nodiscard]] bool rtvVoteActive() const;
   void setRtvVoteStatus();
   static void resetRtvEventHandler();
   const std::vector<RtvMapVoteInfo> *getRtvMaps();

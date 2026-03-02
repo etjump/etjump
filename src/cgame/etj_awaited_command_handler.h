@@ -23,38 +23,39 @@
  */
 
 #pragma once
+
 #include <memory>
 #include <string>
 #include <vector>
-#include <functional>
 
 namespace ETJump {
 class ClientCommandsHandler;
+class PlayerEventsHandler;
 
 class AwaitedCommandHandler {
 public:
   struct AwaitedCommand {
-    AwaitedCommand() : currentFrameCount(0), requiredFrameCount(0) {}
-    int currentFrameCount;
-    int requiredFrameCount;
+    int currentFrameCount{};
+    int requiredFrameCount{};
     std::vector<std::string> commands;
   };
 
   AwaitedCommandHandler(
-      std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler,
-      std::function<void(const char *)> sendConsoleCommand,
-      std::function<void(const char *)> printToConsole);
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+      const std::shared_ptr<PlayerEventsHandler> &playerEvents);
   ~AwaitedCommandHandler();
 
   void runFrame();
 
 private:
-  void message(const std::string &message);
-  void executeConsoleCommand(const std::string &command);
+  void startListeners();
+  static void message(const std::string &message);
+  static void executeConsoleCommand(const std::string &command);
   void awaitCommand(const std::vector<std::string> &args);
-  std::shared_ptr<ClientCommandsHandler> _consoleCommandsHandler;
-  std::vector<std::unique_ptr<AwaitedCommand>> _awaitedCommands;
-  std::function<void(const char *)> _sendConsoleCommand;
-  std::function<void(const char *)> _printToConsole;
+
+  std::vector<std::unique_ptr<AwaitedCommand>> awaitedCommands;
+
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
+  std::shared_ptr<PlayerEventsHandler> playerEvents;
 };
 } // namespace ETJump

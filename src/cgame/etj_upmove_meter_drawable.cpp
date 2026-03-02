@@ -23,94 +23,118 @@
  */
 
 #include "etj_upmove_meter_drawable.h"
-#include "etj_cvar_update_handler.h"
 #include "etj_client_commands_handler.h"
-#include "etj_utilities.h"
-#include "etj_pmove_utils.h"
+#include "etj_color_parser.h"
+#include "etj_cvar_update_handler.h"
 #include "etj_player_events_handler.h"
+#include "etj_pmove_utils.h"
+#include "etj_utilities.h"
 
 namespace ETJump {
-UpmoveMeter::UpmoveMeter() {
+UpmoveMeter::UpmoveMeter(
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+    const std::shared_ptr<PlayerEventsHandler> &playerEvents)
+    : cvarUpdate(cvarUpdate), consoleCommands(consoleCommands),
+      playerEvents(playerEvents) {
   parseAllColors();
-  setTextSize();
+  setTextSize(&etj_upmoveMeterTextSize);
   startListeners();
+}
 
-  team_ = 0;
+UpmoveMeter::~UpmoveMeter() {
+  cvarUpdate->unsubscribe(&etj_upmoveMeterGraphColor);
+  cvarUpdate->unsubscribe(&etj_upmoveMeterGraphOnGroundColor);
+  cvarUpdate->unsubscribe(&etj_upmoveMeterGraphPreJumpColor);
+  cvarUpdate->unsubscribe(&etj_upmoveMeterGraphPostJumpColor);
+  cvarUpdate->unsubscribe(&etj_upmoveMeterGraphOutlineColor);
+  cvarUpdate->unsubscribe(&etj_upmoveMeterTextColor);
+  cvarUpdate->unsubscribe(&etj_upmoveMeterTextSize);
+
+  consoleCommands->unsubscribe("resetUpmoveMeter");
+  playerEvents->unsubscribe("respawn");
 }
 
 void UpmoveMeter::startListeners() {
   // only subscribe to cvars whose parsing would be inefficient each
   // frame
-  cvarUpdateHandler->subscribe(
-      &etj_upmoveMeterGraphColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterGraphColor.string, jump_.graph_rgba);
-      });
-  cvarUpdateHandler->subscribe(
-      &etj_upmoveMeterGraphOnGroundColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterGraphOnGroundColor.string,
-                         jump_.graph_rgbaOnGround);
-      });
-  cvarUpdateHandler->subscribe(
-      &etj_upmoveMeterGraphPreJumpColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterGraphPreJumpColor.string,
-                         jump_.graph_rgbaPreJump);
-      });
-  cvarUpdateHandler->subscribe(
-      &etj_upmoveMeterGraphPostJumpColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterGraphPostJumpColor.string,
-                         jump_.graph_rgbaPostJump);
-      });
-  cvarUpdateHandler->subscribe(
-      &etj_upmoveMeterGraphOutlineColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterGraphOutlineColor.string,
-                         jump_.graph_outline_rgba);
-      });
-  cvarUpdateHandler->subscribe(
-      &etj_upmoveMeterTextColor, [&](const vmCvar_t *cvar) {
-        parseColorString(etj_upmoveMeterTextColor.string, jump_.text_rgba);
+  cvarUpdate->subscribe(&etj_upmoveMeterGraphColor, [this](
+                                                        const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, jump.graph_rgba);
+  });
+
+  cvarUpdate->subscribe(&etj_upmoveMeterGraphOnGroundColor,
+                        [this](const vmCvar_t *cvar) {
+                          cgame.utils.colorParser->parseColorString(
+                              cvar->string, jump.graph_rgbaOnGround);
+                        });
+
+  cvarUpdate->subscribe(&etj_upmoveMeterGraphPreJumpColor,
+                        [this](const vmCvar_t *cvar) {
+                          cgame.utils.colorParser->parseColorString(
+                              cvar->string, jump.graph_rgbaPreJump);
+                        });
+
+  cvarUpdate->subscribe(&etj_upmoveMeterGraphPostJumpColor,
+                        [this](const vmCvar_t *cvar) {
+                          cgame.utils.colorParser->parseColorString(
+                              cvar->string, jump.graph_rgbaPostJump);
+                        });
+
+  cvarUpdate->subscribe(&etj_upmoveMeterGraphOutlineColor,
+                        [this](const vmCvar_t *cvar) {
+                          cgame.utils.colorParser->parseColorString(
+                              cvar->string, jump.graph_outline_rgba);
+                        });
+
+  cvarUpdate->subscribe(
+      &etj_upmoveMeterTextColor, [this](const vmCvar_t *cvar) {
+        cgame.utils.colorParser->parseColorString(cvar->string, jump.text_rgba);
       });
 
-  cvarUpdateHandler->subscribe(&etj_upmoveMeterTextSize,
-                               [&](const vmCvar_t *) { setTextSize(); });
+  cvarUpdate->subscribe(&etj_upmoveMeterTextSize,
+                        [this](const vmCvar_t *cvar) { setTextSize(cvar); });
 
-  consoleCommandsHandler->subscribe(
+  consoleCommands->subscribe(
       "resetUpmoveMeter",
-      [&](const std::vector<std::string> &args) { resetUpmoveMeter(); });
+      [this](const std::vector<std::string> &) { resetUpmoveMeter(); });
 
-  playerEventsHandler->subscribe(
-      "respawn",
-      [&](const std::vector<std::string> &args) { resetUpmoveMeter(); });
+  playerEvents->subscribe("respawn", [this](const std::vector<std::string> &) {
+    resetUpmoveMeter();
+  });
 }
 
 void UpmoveMeter::parseAllColors() {
-  parseColorString(etj_upmoveMeterGraphColor.string, jump_.graph_rgba);
-  parseColorString(etj_upmoveMeterGraphOnGroundColor.string,
-                   jump_.graph_rgbaOnGround);
-  parseColorString(etj_upmoveMeterGraphPreJumpColor.string,
-                   jump_.graph_rgbaPreJump);
-  parseColorString(etj_upmoveMeterGraphPostJumpColor.string,
-                   jump_.graph_rgbaPostJump);
-  parseColorString(etj_upmoveMeterGraphOutlineColor.string,
-                   jump_.graph_outline_rgba);
-  parseColorString(etj_upmoveMeterTextColor.string, jump_.text_rgba);
+  cgame.utils.colorParser->parseColorString(etj_upmoveMeterGraphColor.string,
+                                            jump.graph_rgba);
+  cgame.utils.colorParser->parseColorString(
+      etj_upmoveMeterGraphOnGroundColor.string, jump.graph_rgbaOnGround);
+  cgame.utils.colorParser->parseColorString(
+      etj_upmoveMeterGraphPreJumpColor.string, jump.graph_rgbaPreJump);
+  cgame.utils.colorParser->parseColorString(
+      etj_upmoveMeterGraphPostJumpColor.string, jump.graph_rgbaPostJump);
+  cgame.utils.colorParser->parseColorString(
+      etj_upmoveMeterGraphOutlineColor.string, jump.graph_outline_rgba);
+  cgame.utils.colorParser->parseColorString(etj_upmoveMeterTextColor.string,
+                                            jump.text_rgba);
 }
 
-void UpmoveMeter::setTextSize() {
-  textSize = CvarValueParser::parse<CvarValue::Size>(etj_upmoveMeterTextSize);
+void UpmoveMeter::setTextSize(const vmCvar_t *cvar) {
+  textSize = CvarValueParser::parse<CvarValue::Size>(*cvar);
   textSize.x *= 0.1f;
   textSize.y *= 0.1f;
 }
 
 void UpmoveMeter::resetUpmoveMeter() {
-  jump_.preDelay = jump_.postDelay = jump_.fullDelay = 0;
-  jump_.lastState = AIR_NOJUMP;
+  jump.preDelay = jump.postDelay = jump.fullDelay = 0;
+  jump.lastState = AIR_NOJUMP;
 }
 
 bool UpmoveMeter::beforeRender() {
   // update team before checking if we should draw or not,
   // since we don't draw for spectators
-  if (team_ != ps->persistant[PERS_TEAM]) {
-    team_ = ps->persistant[PERS_TEAM];
+  if (team != ps->persistant[PERS_TEAM]) {
+    team = ps->persistant[PERS_TEAM];
     // reset upon team change
     // note: not handled by consoleCommandsHandler because team
     // is needed in render() either ways
@@ -122,10 +146,10 @@ bool UpmoveMeter::beforeRender() {
   }
 
   // get correct pmove
-  pm = pmoveUtils->getPmove();
+  pm = cgame.utils.pmove->getPmove();
 
   // never lerp this, because it would just produce unrealistic jump timings
-  if (pmoveUtils->skipUpdate(lastUpdateTime, std::nullopt)) {
+  if (cgame.utils.pmove->skipUpdate(lastUpdateTime, std::nullopt)) {
     return true;
   }
 
@@ -139,7 +163,7 @@ bool UpmoveMeter::beforeRender() {
 
   // determine current state
   state_t state;
-  switch (jump_.lastState) {
+  switch (jump.lastState) {
     case AIR_JUMP:
     case AIR_NOJUMP:
       if (inAir) {
@@ -170,58 +194,68 @@ bool UpmoveMeter::beforeRender() {
     case AIR_NOJUMP: // we spend the most time in this state
                      // that is why here we show the last jump
                      // stats
-      if (jump_.lastState == GROUND_NOJUMP) {
-        jump_.preDelay = jump_.t_jumpPreGround - lastUpdateTime;
-        jump_.postDelay = 0;
-        jump_.fullDelay = 0;
-      } else if (jump_.lastState == AIR_JUMP) {
-        jump_.postDelay = 0;
-        jump_.fullDelay = jump_.preDelay;
-      } else if (jump_.lastState == AIR_JUMPNORELEASE) {
-        jump_.fullDelay = jump_.postDelay;
-        if (jump_.preDelay > 0) {
-          jump_.fullDelay += jump_.preDelay;
+      if (jump.lastState == GROUND_NOJUMP) {
+        jump.preDelay = jump.t_jumpPreGround - lastUpdateTime;
+        jump.postDelay = 0;
+        jump.fullDelay = 0;
+      } else if (jump.lastState == AIR_JUMP) {
+        jump.postDelay = 0;
+        jump.fullDelay = jump.preDelay;
+      } else if (jump.lastState == AIR_JUMPNORELEASE) {
+        jump.fullDelay = jump.postDelay;
+        if (jump.preDelay > 0) {
+          jump.fullDelay += jump.preDelay;
         }
       }
       break;
 
     case AIR_JUMP:
-      if (jump_.lastState == AIR_NOJUMP)
-        jump_.t_jumpPreGround = lastUpdateTime;
-      jump_.preDelay = lastUpdateTime - jump_.t_jumpPreGround; // ms
+      if (jump.lastState == AIR_NOJUMP)
+        jump.t_jumpPreGround = lastUpdateTime;
+      jump.preDelay = lastUpdateTime - jump.t_jumpPreGround; // ms
       break;
 
     case GROUND_JUMP:
-      jump_.t_groundTouch = lastUpdateTime;
+      jump.t_groundTouch = lastUpdateTime;
       break;
 
     case GROUND_NOJUMP:
-      if (jump_.lastState == AIR_JUMP || jump_.lastState == GROUND_JUMP) {
-        jump_.postDelay = 0;
-        jump_.fullDelay = jump_.preDelay;
-      } else if (jump_.lastState == AIR_NOJUMP) {
-        jump_.t_jumpPreGround = lastUpdateTime; // groundtime
+      if (jump.lastState == AIR_JUMP || jump.lastState == GROUND_JUMP) {
+        jump.postDelay = 0;
+        jump.fullDelay = jump.preDelay;
+      } else if (jump.lastState == AIR_NOJUMP) {
+        jump.t_jumpPreGround = lastUpdateTime; // groundtime
       }
-      jump_.preDelay = jump_.t_jumpPreGround - lastUpdateTime;
-      jump_.t_groundTouch = lastUpdateTime;
+      jump.preDelay = jump.t_jumpPreGround - lastUpdateTime;
+      jump.t_groundTouch = lastUpdateTime;
       break;
 
     case AIR_JUMPNORELEASE:
-      if (jump_.lastState == GROUND_NOJUMP) {
-        jump_.preDelay = jump_.t_jumpPreGround - lastUpdateTime;
+      if (jump.lastState == GROUND_NOJUMP) {
+        jump.preDelay = jump.t_jumpPreGround - lastUpdateTime;
       }
-      jump_.postDelay = lastUpdateTime - jump_.t_groundTouch; // ms
+      jump.postDelay = lastUpdateTime - jump.t_groundTouch; // ms
       break;
   }
 
-  if (jump_.preDelay > etj_upmoveMeterMaxDelay.integer)
-    jump_.preDelay = etj_upmoveMeterMaxDelay.integer;
-  if (jump_.preDelay < -etj_upmoveMeterMaxDelay.integer)
-    jump_.preDelay = -etj_upmoveMeterMaxDelay.integer;
-  if (jump_.postDelay > etj_upmoveMeterMaxDelay.integer)
-    jump_.postDelay = etj_upmoveMeterMaxDelay.integer;
+  if (jump.preDelay > etj_upmoveMeterMaxDelay.integer)
+    jump.preDelay = etj_upmoveMeterMaxDelay.integer;
+  if (jump.preDelay < -etj_upmoveMeterMaxDelay.integer)
+    jump.preDelay = -etj_upmoveMeterMaxDelay.integer;
+  if (jump.postDelay > etj_upmoveMeterMaxDelay.integer)
+    jump.postDelay = etj_upmoveMeterMaxDelay.integer;
 
-  jump_.lastState = state;
+  jump.lastState = state;
+
+  jump.graph_xywh[0] = graphX_ + etj_upmoveMeterGraphX.value;
+  ETJump_AdjustPosition(&jump.graph_xywh[0]);
+  jump.graph_xywh[1] = graphY_ + etj_upmoveMeterGraphY.value;
+  jump.graph_xywh[2] = etj_upmoveMeterGraphW.value;
+  jump.graph_xywh[3] = etj_upmoveMeterGraphH.value;
+
+  jump.text_xh[0] = etj_upmoveMeterTextX.value;
+  ETJump_AdjustPosition(&jump.text_xh[0]);
+  jump.text_xh[1] = etj_upmoveMeterTextH.value;
 
   return true;
 }
@@ -233,53 +267,41 @@ void UpmoveMeter::render() const {
   const float textHeightOffset =
       0.5f * CG_Text_Height_Ext("0", textSize.y, 0, &cgs.media.limboFont1);
 
-  jump_.graph_xywh[0] = graphX_ + etj_upmoveMeterGraphX.value;
-  ETJump_AdjustPosition(&jump_.graph_xywh[0]);
-  jump_.graph_xywh[1] = graphY_ + etj_upmoveMeterGraphY.value;
-  jump_.graph_xywh[2] = etj_upmoveMeterGraphW.value;
-  jump_.graph_xywh[3] = etj_upmoveMeterGraphH.value;
-
-  jump_.text_xh[0] = etj_upmoveMeterTextX.value;
-  ETJump_AdjustPosition(&jump_.text_xh[0]);
-  jump_.text_xh[1] = etj_upmoveMeterTextH.value;
-
-  const float graph_hh = jump_.graph_xywh[3] / 2.0f; // half height
-  const float graph_m = jump_.graph_xywh[1] + graph_hh;
+  const float graph_hh = jump.graph_xywh[3] / 2.0f; // half height
+  const float graph_m = jump.graph_xywh[1] + graph_hh;
 
   const float upHeight =
-      (jump_.postDelay / std::max(etj_upmoveMeterMaxDelay.value, 1.0f)) *
+      (jump.postDelay / std::max(etj_upmoveMeterMaxDelay.value, 1.0f)) *
       graph_hh;
-  const float downHeight = (std::abs(jump_.preDelay) /
+  const float downHeight = (std::abs(jump.preDelay) /
                             std::max(etj_upmoveMeterMaxDelay.value, 1.0f)) *
                            graph_hh;
 
   if (etj_drawUpmoveMeter.integer & 1) {
-    CG_FillRect(jump_.graph_xywh[0], jump_.graph_xywh[1], jump_.graph_xywh[2],
-                jump_.graph_xywh[3], jump_.graph_rgba);
-    CG_FillRect(jump_.graph_xywh[0], graph_m, jump_.graph_xywh[2], downHeight,
-                jump_.preDelay < 0 ? jump_.graph_rgbaOnGround
-                                   : jump_.graph_rgbaPreJump);
-    CG_FillRect(jump_.graph_xywh[0], graph_m - upHeight, jump_.graph_xywh[2],
-                upHeight, jump_.graph_rgbaPostJump);
-    CG_DrawRect(jump_.graph_xywh[0], jump_.graph_xywh[1], jump_.graph_xywh[2],
-                jump_.graph_xywh[3], etj_upmoveMeterGraphOutlineW.value,
-                jump_.graph_outline_rgba);
+    CG_FillRect(jump.graph_xywh[0], jump.graph_xywh[1], jump.graph_xywh[2],
+                jump.graph_xywh[3], jump.graph_rgba);
+    CG_FillRect(jump.graph_xywh[0], graph_m, jump.graph_xywh[2], downHeight,
+                jump.preDelay < 0 ? jump.graph_rgbaOnGround
+                                  : jump.graph_rgbaPreJump);
+    CG_FillRect(jump.graph_xywh[0], graph_m - upHeight, jump.graph_xywh[2],
+                upHeight, jump.graph_rgbaPostJump);
+    CG_DrawRect(jump.graph_xywh[0], jump.graph_xywh[1], jump.graph_xywh[2],
+                jump.graph_xywh[3], etj_upmoveMeterGraphOutlineW.value,
+                jump.graph_outline_rgba);
   }
   if (etj_drawUpmoveMeter.integer & 2) {
-    CG_Text_Paint_Ext(jump_.graph_xywh[0] + jump_.graph_xywh[2] +
-                          jump_.text_xh[0],
-                      graph_m - jump_.text_xh[1] + textHeightOffset, textSize.x,
-                      textSize.y, jump_.text_rgba, va("%i", jump_.postDelay), 0,
+    CG_Text_Paint_Ext(jump.graph_xywh[0] + jump.graph_xywh[2] + jump.text_xh[0],
+                      graph_m - jump.text_xh[1] + textHeightOffset, textSize.x,
+                      textSize.y, jump.text_rgba, va("%i", jump.postDelay), 0,
                       0, textStyle, &cgs.media.limboFont1);
-    CG_Text_Paint_Ext(
-        jump_.graph_xywh[0] + jump_.graph_xywh[2] + jump_.text_xh[0],
-        graph_m + textHeightOffset, textSize.x, textSize.y, jump_.text_rgba,
-        va("%i", jump_.fullDelay), 0, 0, textStyle, &cgs.media.limboFont1);
-    CG_Text_Paint_Ext(jump_.graph_xywh[0] + jump_.graph_xywh[2] +
-                          jump_.text_xh[0],
-                      graph_m + jump_.text_xh[1] + textHeightOffset, textSize.x,
-                      textSize.y, jump_.text_rgba, va("%i", jump_.preDelay), 0,
-                      0, textStyle, &cgs.media.limboFont1);
+    CG_Text_Paint_Ext(jump.graph_xywh[0] + jump.graph_xywh[2] + jump.text_xh[0],
+                      graph_m + textHeightOffset, textSize.x, textSize.y,
+                      jump.text_rgba, va("%i", jump.fullDelay), 0, 0, textStyle,
+                      &cgs.media.limboFont1);
+    CG_Text_Paint_Ext(jump.graph_xywh[0] + jump.graph_xywh[2] + jump.text_xh[0],
+                      graph_m + jump.text_xh[1] + textHeightOffset, textSize.x,
+                      textSize.y, jump.text_rgba, va("%i", jump.preDelay), 0, 0,
+                      textStyle, &cgs.media.limboFont1);
   }
 }
 
@@ -305,7 +327,7 @@ bool UpmoveMeter::canSkipDraw() const {
     return true;
   }
 
-  if (team_ == TEAM_SPECTATOR) {
+  if (team == TEAM_SPECTATOR) {
     return true;
   }
 
