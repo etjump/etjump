@@ -72,14 +72,14 @@ void TargetSpawnRelay::setTeams(gentity_t *self) {
     return;
   }
 
-  const auto teams = StringUtil::split(self->team, ",");
+  const auto teams = StringUtils::split(self->team, ",");
 
   for (const auto &team : teams) {
-    if (StringUtil::iEqual(team, "axis")) {
+    if (StringUtils::iEqual(team, "axis")) {
       registerEntity(TEAM_AXIS);
-    } else if (StringUtil::iEqual(team, "allies")) {
+    } else if (StringUtils::iEqual(team, "allies")) {
       registerEntity(TEAM_ALLIES);
-    } else if (StringUtil::iEqual(team, "spectator")) {
+    } else if (StringUtils::iEqual(team, "spectator")) {
       registerEntity(TEAM_SPECTATOR);
     }
   }
@@ -150,14 +150,14 @@ void TargetSpawnRelay::invalidateSpawnRelayPointers(const gentity_t *ent) {
     level.spawnRelayEntities.axisRelay = nullptr;
     level.spawnRelayEntities.spectatorRelay = nullptr;
   } else {
-    const auto teams = StringUtil::split(ent->team, ",");
+    const auto teams = StringUtils::split(ent->team, ",");
 
     for (const auto &team : teams) {
-      if (StringUtil::iEqual(team, "allies")) {
+      if (StringUtils::iEqual(team, "allies")) {
         level.spawnRelayEntities.alliesRelay = nullptr;
-      } else if (StringUtil::iEqual(team, "axis")) {
+      } else if (StringUtils::iEqual(team, "axis")) {
         level.spawnRelayEntities.axisRelay = nullptr;
-      } else if (StringUtil::iEqual(team, "spectator")) {
+      } else if (StringUtils::iEqual(team, "spectator")) {
         level.spawnRelayEntities.spectatorRelay = nullptr;
       }
     }

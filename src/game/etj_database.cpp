@@ -227,7 +227,7 @@ bool Database::UserInfo(gentity_t *ent, int id) {
     ip = ipport.substr(0, pos);
   }
 
-  std::string msg = ETJump::stringFormat(
+  std::string msg = StringUtils::format(
       "^5ID: ^7%d\n"
       "^5GUID: ^7%s\n"
       "^5IP: ^7%s\n"
@@ -262,13 +262,13 @@ bool Database::ListUsers(gentity_t *ent, int page) {
   time_t t;
   time(&t);
 
-  std::string msg = ETJump::stringFormat("Listing page %d/%d\n", page, pages);
-  msg += ETJump::stringFormat("^7%-5s %-10s %-15s %-36s\n", "ID", "Level",
-                              "Last seen", "Name");
+  std::string msg = StringUtils::format("Listing page %d/%d\n", page, pages);
+  msg += StringUtils::format("^7%-5s %-10s %-15s %-36s\n", "ID", "Level",
+                             "Last seen", "Name");
 
   for (const auto &user : users_) {
     if (curr >= i && curr < i + USERS_PER_PAGE) {
-      msg += ETJump::stringFormat(
+      msg += StringUtils::format(
           "^7%-5d %-10d %-15s %-36s\n", user.second->id, user.second->level,
           TimeStampDifferenceToString(static_cast<int>(t) -
                                       user.second->lastSeen) +
@@ -345,14 +345,14 @@ bool Database::ListBans(gentity_t *ent, int page) {
   }
 
   Printer::chat(ent, "^3listbans: ^7check console for more information.");
-  std::string msg = ETJump::stringFormat("^7Showing page %d/%d\n", page, pages);
+  std::string msg = StringUtils::format("^7Showing page %d/%d\n", page, pages);
 
   for (; i < size; i++, printed++) {
     if (printed == BANS_PER_PAGE) {
       break;
     }
 
-    msg += ETJump::stringFormat(
+    msg += StringUtils::format(
         "%d %s ^7%s %s ^7%s %s\n", bans_[i]->id, bans_[i]->name,
         bans_[i]->banDate, bans_[i]->bannedBy,
         bans_[i]->expires != 0 ? TimeStampToString(bans_[i]->expires)
@@ -668,7 +668,7 @@ bool Database::AddNewHWIDToDatabase(User user) {
     return false;
   }
 
-  std::string hwids = ETJump::StringUtil::join(user->hwids, ",");
+  std::string hwids = StringUtils::join(user->hwids, ",");
 
   if (!BindString(stmt, 1, hwids) || !BindInt(stmt, 2, user->id)) {
     sqlite3_finalize(stmt);
@@ -851,7 +851,7 @@ bool Database::LoadUsers() {
         newUser.name = val ? val : "";
         val = (const char *)(sqlite3_column_text(stmt, 5));
         if (val) {
-          newUser.hwids = ETJump::StringUtil::split(val, ",");
+          newUser.hwids = StringUtils::split(val, ",");
         }
         val = (const char *)(sqlite3_column_text(stmt, 6));
         newUser.title = val ? val : "";
@@ -987,7 +987,7 @@ void Database::InsertUserOperation::Execute() {
     return;
   }
 
-  std::string hardwareIds = ETJump::StringUtil::join(user_->hwids, ",");
+  std::string hardwareIds = StringUtils::join(user_->hwids, ",");
 
   if (!BindInt(1, user_->id) || !BindString(2, user_->guid) ||
       !BindInt(3, user_->level) || !BindInt(4, user_->lastSeen) ||
@@ -1026,7 +1026,7 @@ void Database::InsertNewHardwareIdOperation::Execute() {
     return;
   }
 
-  std::string hwids = ETJump::StringUtil::join(user_->hwids, ",");
+  std::string hwids = StringUtils::join(user_->hwids, ",");
 
   if (!BindString(1, hwids) || !BindInt(2, user_->id)) {
     G_LogPrintf("ERROR: failed to bind value to update user "
@@ -1079,8 +1079,7 @@ void Database::AsyncSaveUserOperation::Execute() {
   }
 
   std::string query = "UPDATE users SET " +
-                      ETJump::StringUtil::join(queryOptions, ", ") +
-                      " WHERE id=:id;";
+                      StringUtils::join(queryOptions, ", ") + " WHERE id=:id;";
 
   if (!OpenDatabase(g_userConfig.string)) {
     G_LogPrintf("ERROR: failed to open database on save user "
@@ -1303,7 +1302,7 @@ void Database::FindUserOperation::Execute() {
   std::string msg = "ID       Name\n";
 
   for (const auto &user : users) {
-    msg += ETJump::stringFormat("%-8d %-36s^7\n", user.first, user.second);
+    msg += StringUtils::format("%-8d %-36s^7\n", user.first, user.second);
   }
 
   Printer::console(ent_, msg);
@@ -1327,7 +1326,7 @@ void Database::SaveNameOperation::Execute() {
     return;
   }
 
-  std::string sanitizedName = ETJump::sanitize(name_, true);
+  std::string sanitizedName = StringUtils::sanitize(name_, true);
 
   if (!BindString(1, sanitizedName) || !BindString(2, name_) ||
       !BindInt(3, id_)) {
@@ -1378,7 +1377,7 @@ void Database::ListUserNamesOperation::Execute() {
     Printer::chat(ent_,
                   "^3listusernames: ^7check console for more information.");
     std::string msg =
-        ETJump::stringFormat("Found %d names with id: %d\n", names.size(), id_);
+        StringUtils::format("Found %d names with id: %d\n", names.size(), id_);
 
     for (const auto &name : names) {
       msg += name + '\n';

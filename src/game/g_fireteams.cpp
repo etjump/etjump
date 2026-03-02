@@ -734,14 +734,14 @@ void setSaveLimitForFTMembers(fireteamData_t *ft, const int limit) {
 
     gentity_t *ent = g_entities + ft->joinOrder[i];
     ent->client->sess.saveLimitFt = limit;
-    Printer::popup(
-        ent, stringFormat("fireteam: ^3savelimit ^7was set to ^3%i", limit));
+    Printer::popup(ent, StringUtils::format(
+                            "fireteam: ^3savelimit ^7was set to ^3%i", limit));
   }
 }
 
 void setFireTeamGhosting(fireteamData_t *ft, const bool noGhost) {
-  const std::string &msg = stringFormat("fireteam: ^3noghost ^7has been ^3%s",
-                                        noGhost ? "enabled" : "disabled");
+  const std::string &msg = StringUtils::format(
+      "fireteam: ^3noghost ^7has been ^3%s", noGhost ? "enabled" : "disabled");
 
   ft->noGhost = noGhost;
 
@@ -768,8 +768,8 @@ void setFireTeamGhosting(fireteamData_t *ft, const bool noGhost) {
 
 void setFireteamTeamjumpMode(fireteamData_t *ft, const bool teamjumpMode) {
   const std::string &msg =
-      stringFormat("fireteam: ^3teamjump mode ^7has been ^3%s",
-                   teamjumpMode ? "enabled" : "disabled");
+      StringUtils::format("fireteam: ^3teamjump mode ^7has been ^3%s",
+                          teamjumpMode ? "enabled" : "disabled");
 
   ft->teamJumpMode = teamjumpMode;
 
@@ -923,9 +923,10 @@ static void setFireTeamRules(const int &clientNum) {
 
   if (!Q_stricmp(arg1, "noghost")) {
     if (g_ghostPlayers.integer != 1) {
-      Printer::popup(clientNum,
-                     stringFormat("fireteam: ^3noghost ^7is disabled by the %s",
-                                  level.noGhost ? "map" : "server"));
+      Printer::popup(
+          clientNum,
+          StringUtils::format("fireteam: ^3noghost ^7is disabled by the %s",
+                              level.noGhost ? "map" : "server"));
       return;
     }
 

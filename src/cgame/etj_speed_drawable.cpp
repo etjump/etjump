@@ -187,25 +187,25 @@ void DrawSpeed::setSize(const vmCvar_t *cvar) {
 std::string DrawSpeed::getSpeedString() const {
   switch (etj_drawSpeed2.integer) {
     case 2:
-      return stringFormat("%.0f %.0f", currentSpeed, maxSpeed);
+      return StringUtils::format("%.0f %.0f", currentSpeed, maxSpeed);
     case 3:
-      return stringFormat("%.0f ^z%.0f", currentSpeed, maxSpeed);
+      return StringUtils::format("%.0f ^z%.0f", currentSpeed, maxSpeed);
     case 4:
-      return stringFormat("%.0f (%.0f)", currentSpeed, maxSpeed);
+      return StringUtils::format("%.0f (%.0f)", currentSpeed, maxSpeed);
     case 5:
-      return stringFormat("%.0f ^z(%.0f)", currentSpeed, maxSpeed);
+      return StringUtils::format("%.0f ^z(%.0f)", currentSpeed, maxSpeed);
     case 6:
-      return stringFormat("%.0f ^z[%.0f]", currentSpeed, maxSpeed);
+      return StringUtils::format("%.0f ^z[%.0f]", currentSpeed, maxSpeed);
     case 7:
-      return stringFormat("%.0f | %.0f", currentSpeed, maxSpeed);
+      return StringUtils::format("%.0f | %.0f", currentSpeed, maxSpeed);
     case 8:
-      return stringFormat("Speed: %.0f", currentSpeed);
+      return StringUtils::format("Speed: %.0f", currentSpeed);
     // tens
     case 9:
-      return stringFormat("%02i",
-                          static_cast<int>(currentSpeed) / 10 % 10 * 10);
+      return StringUtils::format("%02i",
+                                 static_cast<int>(currentSpeed) / 10 % 10 * 10);
     default:
-      return stringFormat("%.0f", currentSpeed);
+      return StringUtils::format("%.0f", currentSpeed);
   }
 }
 

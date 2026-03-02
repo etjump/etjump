@@ -69,7 +69,7 @@ public:
       return T{1.0f, 1.0f};
     }
 
-    auto scaleComponents = StringUtil::split(cvar.string, " ");
+    auto scaleComponents = StringUtils::split(cvar.string, " ");
 
     // remove any whitespace, if user inputs a string like "  2   3  "
     scaleComponents.erase(

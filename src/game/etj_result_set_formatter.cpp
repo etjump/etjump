@@ -93,7 +93,7 @@ std::string Utilities::ResultSetFormatter::toString(
     for (const auto &header : headers) {
       const auto iter = row.find(header);
       if (iter == end(row)) {
-        auto lwrCase = ETJump::StringUtil::toLowerCase(header);
+        auto lwrCase = StringUtils::toLowerCase(header);
         if (lwrCase == "index" || lwrCase == "idx" || lwrCase == "i") {
           maxColumnWidths[header] =
               std::max(maxColumnWidths[header],

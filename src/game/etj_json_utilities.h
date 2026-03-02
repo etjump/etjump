@@ -51,9 +51,9 @@ public:
       return true;
     } catch (const Json::LogicError &e) {
       if (errors) {
-        *errors = stringFormat(
+        *errors = StringUtils::format(
             "Failed to parse JSON value%s: %s",
-            field.empty() ? "" : stringFormat(" for field '%s'", field),
+            field.empty() ? "" : StringUtils::format(" for field '%s'", field),
             e.what());
       }
 

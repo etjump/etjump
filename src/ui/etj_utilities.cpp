@@ -35,7 +35,7 @@ void parseMaplist() {
     uiInfo.serverMaplist.emplace_back(arg);
   }
 
-  ETJump::StringUtil::sortStrings(uiInfo.serverMaplist, true);
+  StringUtils::sortStrings(uiInfo.serverMaplist, true);
 }
 
 void parseNumCustomvotes() {
@@ -140,7 +140,7 @@ void toggleSettingsMenu() {
   const menuDef_t *activeMenu = Menu_GetFocused();
 
   if (activeMenu &&
-      StringUtil::startsWith(activeMenu->window.name, "etjump_settings_")) {
+      StringUtils::startsWith(activeMenu->window.name, "etjump_settings_")) {
     Menus_CloseAll();
   } else {
     trap_Key_SetCatcher(KEYCATCH_UI);

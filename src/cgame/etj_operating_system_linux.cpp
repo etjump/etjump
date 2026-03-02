@@ -93,9 +93,9 @@ std::string ETJump::OperatingSystem::getHwid() {
 
   unsigned char mac_address[6];
   memcpy(mac_address, ifr.ifr_hwaddr.sa_data, sizeof(mac_address));
-  hwid += stringFormat("%02X:%02X:%02X:%02X:%02X:%02X", mac_address[0],
-                       mac_address[1], mac_address[2], mac_address[3],
-                       mac_address[4], mac_address[5]);
+  hwid += StringUtils::format("%02X:%02X:%02X:%02X:%02X:%02X", mac_address[0],
+                              mac_address[1], mac_address[2], mac_address[3],
+                              mac_address[4], mac_address[5]);
 
   // TODO: include this in HWID, when user database has been refactored
   //  to store HWIDs of individual components

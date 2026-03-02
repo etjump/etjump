@@ -203,7 +203,7 @@ void CG_DrawHeader2(float x, float y, float fade) {
 
   // Draw the server hostname
   std::string ipAddress =
-      ETJump::stringFormat("^7%s", cg.ipAddr[0] ? cg.ipAddr : "localhost");
+      StringUtils::format("^7%s", cg.ipAddr[0] ? cg.ipAddr : "localhost");
   header = va("^7%s", Info_ValueForKey(configString, "sv_hostname"));
   CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0,
                     font);
@@ -533,9 +533,9 @@ void CG_DrawHeader3(float x, float y, float fade, vec4_t textColor,
   float rightTextX = SCREEN_WIDTH - leftTextX;
 
   // Draw server name & map name (top row)
-  std::string hostName = ETJump::stringFormat(
+  std::string hostName = StringUtils::format(
       "^7%s", Info_ValueForKey(configString, "sv_hostname"));
-  std::string mapName = ETJump::stringFormat("^7%s", cgs.rawmapname);
+  std::string mapName = StringUtils::format("^7%s", cgs.rawmapname);
   if (cgs.cheats) {
     mapName += " ^9(cheats)";
   }
@@ -561,8 +561,8 @@ void CG_DrawHeader3(float x, float y, float fade, vec4_t textColor,
   // Server IP and mod version (bottom row)
 
   std::string ipAddress =
-      ETJump::stringFormat("^7%s", cg.ipAddr[0] ? cg.ipAddr : "localhost");
-  std::string modVersion = ETJump::stringFormat("^7%s", GAME_TAG);
+      StringUtils::format("^7%s", cg.ipAddr[0] ? cg.ipAddr : "localhost");
+  std::string modVersion = StringUtils::format("^7%s", GAME_TAG);
   float bottomTextY = headerTextY + ALT_SCOREBOARD_3_HEADER_HEIGHT -
                       ALT_SCOREBOARD_3_TEXT_XY_PADDING;
   auto modVersionOffsetX =
@@ -610,8 +610,7 @@ void CG_DrawScoreboardRows3(float x, float y, int j, score_t *score,
 
 void CG_DrawPlayerHeader3(float x, float y, int playerCount, float fade,
                           vec4_t textColor, fontInfo_t *font) {
-  std::string playerHeader =
-      ETJump::stringFormat("^7Players (%d)", playerCount);
+  std::string playerHeader = StringUtils::format("^7Players (%d)", playerCount);
   auto textHeight =
       static_cast<float>(CG_Text_Height_Ext(playerHeader, 0.2f, 0, font));
   float playerHeaderY = y + (ALT_SCOREBOARD_3_DIVIDER + textHeight) / 2;
@@ -636,7 +635,7 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX,
                     ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Draw FPS
-  std::string maxFPS = ETJump::stringFormat("%i", ci->maxFPS);
+  std::string maxFPS = StringUtils::format("%i", ci->maxFPS);
   CG_Text_Paint_Centred_Ext(fpsCenterX, y, 0.15f, 0.15f, textColor, maxFPS, 0,
                             0, ITEM_TEXTSTYLE_SHADOWED, font);
 
@@ -672,7 +671,7 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX,
                             font);
 
   // Draw client ping
-  std::string ping = ETJump::stringFormat("%i", score->ping);
+  std::string ping = StringUtils::format("%i", score->ping);
   CG_Text_Paint_Centred_Ext(pingCenterX, y, 0.15f, 0.15f, textColor, ping, 0, 0,
                             ITEM_TEXTSTYLE_SHADOWED, font);
 }
@@ -735,7 +734,7 @@ void CG_DrawPlayerList3(float x, float y, float fade, vec4_t textColor,
 void CG_DrawSpectatorHeader3(float x, float y, int spectatorCount, float fade,
                              vec4_t textColor, fontInfo_t *font) {
   std::string playerHeader =
-      ETJump::stringFormat("^7Spectators (%d)", spectatorCount);
+      StringUtils::format("^7Spectators (%d)", spectatorCount);
   auto textHeight =
       static_cast<float>(CG_Text_Height_Ext(playerHeader, 0.2f, 0, font));
   float spectatorHeaderY = y + (ALT_SCOREBOARD_3_DIVIDER + textHeight) / 2;
@@ -751,7 +750,7 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
   std::string spectator = "^3SPECTATOR";
   std::string followingArrow = "^3>";
   std::string followedClient = cgs.clientinfo[score->followedClient].name;
-  std::string ping = ETJump::stringFormat("%i", score->ping);
+  std::string ping = StringUtils::format("%i", score->ping);
   float playerX = ALT_SCOREBOARD_3_PLAYER_X;
   float rightTextX = ALT_SCOREBOARD_3_PING_X - ALT_SCOREBOARD_3_TEXT_XY_PADDING;
   auto followingArrowHalfW = static_cast<float>(CG_Text_Width_Ext(

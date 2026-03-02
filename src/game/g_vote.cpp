@@ -271,8 +271,8 @@ static bool matchMap(const char *voteArg, std::string &resultedMap,
   auto matchedMaps = G_MatchAllMaps(voteArg);
 
   if (matchedMaps.size() == 0) {
-    resultedMap =
-        stringFormat("^3callvote: ^7no maps found matching ^3%s^7.\n", voteArg);
+    resultedMap = StringUtils::format(
+        "^3callvote: ^7no maps found matching ^3%s^7.\n", voteArg);
     return false;
   }
 
@@ -285,18 +285,18 @@ static bool matchMap(const char *voteArg, std::string &resultedMap,
   }
 
   if (matchedMaps.size() > 1 && resultedMap.empty()) {
-    resultedMap =
-        stringFormat("^3callvote: ^7found ^3%i ^7maps matching ^3%s^7.\n",
-                     static_cast<int>(matchedMaps.size()), voteArg);
+    resultedMap = StringUtils::format(
+        "^3callvote: ^7found ^3%i ^7maps matching ^3%s^7.\n",
+        static_cast<int>(matchedMaps.size()), voteArg);
     auto perRow = 3;
     auto mapsOnCurrentRow = 0;
     for (auto &map : matchedMaps) {
       ++mapsOnCurrentRow;
       if (mapsOnCurrentRow > perRow) {
         mapsOnCurrentRow = 1;
-        resultedMap += ETJump::stringFormat("\n%-22s", map);
+        resultedMap += StringUtils::format("\n%-22s", map);
       } else {
-        resultedMap += ETJump::stringFormat("%-22s", map);
+        resultedMap += StringUtils::format("%-22s", map);
       }
     }
     resultedMap += "\n";
@@ -307,15 +307,15 @@ static bool matchMap(const char *voteArg, std::string &resultedMap,
 
   if (resultedMap == level.rawmapname &&
       cheats == static_cast<bool>(g_cheats.integer)) {
-    resultedMap =
-        stringFormat("^3callvote: ^7%s is the current map (cheats %s).\n",
-                     level.rawmapname, cheats ? "enabled" : "disabled");
+    resultedMap = StringUtils::format(
+        "^3callvote: ^7%s is the current map (cheats %s).\n", level.rawmapname,
+        cheats ? "enabled" : "disabled");
     return false;
   }
 
   if (ETJump::MapStatistics::isBlockedMap(resultedMap)) {
-    resultedMap = stringFormat("^3callvote: ^7Voting for %s is not allowed.\n",
-                               resultedMap);
+    resultedMap = StringUtils::format(
+        "^3callvote: ^7Voting for %s is not allowed.\n", resultedMap);
     return false;
   }
 
@@ -328,9 +328,8 @@ bool matchRandomMap(const char *arg, std::string &map) {
   if (isCustomMapType) {
     auto customMapType = CustomMapTypeExists(arg);
     if (!customMapType) {
-      map = stringFormat("^3randommap: ^7Map type %s "
-                         "does not exist\n.",
-                         arg);
+      map = StringUtils::format("^3randommap: ^7Map type %s does not exist\n.",
+                                arg);
       return false;
     }
 
@@ -488,8 +487,8 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       if (!CustomMapTypeExists(arg2)) {
         Printer::popup(
             clientNum,
-            stringFormat("Specified custom vote type ^3'%s' ^7does not exist.",
-                         arg2));
+            StringUtils::format(
+                "Specified custom vote type ^3'%s' ^7does not exist.", arg2));
         return G_INVALID;
       }
 
@@ -498,10 +497,11 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 
       // in case someone made an empty map list, or none are available
       if (numMaps == 0) {
-        Printer::popup(clientNum,
-                       stringFormat("Specified custom vote type ^3'%s' ^7is "
-                                    "empty or none of the maps are available.",
-                                    arg2));
+        Printer::popup(
+            clientNum,
+            StringUtils::format("Specified custom vote type ^3'%s' ^7is empty "
+                                "or none of the maps are available.",
+                                arg2));
         return G_INVALID;
       }
 
@@ -526,10 +526,10 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                     "use this feature.\n",
                     arg);
       } else {
-        Printer::popup(clientNum,
-                       stringFormat("Sorry, calling ^3%s^7 with less than 3 "
-                                    "valid maps on %s is not possible.",
-                                    arg, arg2[0] ? "a list" : "the server"));
+        Printer::popup(clientNum, StringUtils::format(
+                                      "Sorry, calling ^3%s^7 with less than 3 "
+                                      "valid maps on %s is not possible.",
+                                      arg, arg2[0] ? "a list" : "the server"));
       }
       return G_INVALID;
     }
@@ -560,8 +560,8 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 
     for (size_t i = 0; i < maxMaps; ++i, ++it) {
       (*rtvMaps)[i].mapName = *it;
-      cs += stringFormat("%s\\0%s", (*rtvMaps)[i].mapName,
-                         i == maxMaps - 1 ? "" : "\\");
+      cs += StringUtils::format("%s\\0%s", (*rtvMaps)[i].mapName,
+                                i == maxMaps - 1 ? "" : "\\");
     }
 
     if (arg2[0] != '\0') {
@@ -634,8 +634,8 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
       Printer::popupAll(voteMsg);
       if (nextVoteTime > 0) {
         Printer::popupAll(
-            stringFormat("^7Next vote will be called in ^3%i ^7%s.",
-                         nextVoteTime, minutesStr));
+            StringUtils::format("^7Next vote will be called in ^3%i ^7%s.",
+                                nextVoteTime, minutesStr));
       }
     }
   }

@@ -1072,7 +1072,7 @@ static void initStrictSaveLoad() {
   } else {
     std::string token;
     while (str >> token) {
-      token = ETJump::StringUtil::toLowerCase(token);
+      token = StringUtils::toLowerCase(token);
       value |= static_cast<int>(allowedStrictValues[token]); // else 0
     }
   }
@@ -1328,7 +1328,7 @@ void SP_worldspawn(void) {
     int limit = Q_atoi(s);
     level.limitedSaves = limit;
     G_Printf("Save is limited to %s.\n",
-             ETJump::getPluralizedString(limit, "save").c_str());
+             StringUtils::getPluralizedString(limit, "save").c_str());
   } else {
     level.limitedSaves = 0;
     G_Printf("Save is not limited.\n");

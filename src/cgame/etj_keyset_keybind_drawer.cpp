@@ -60,7 +60,7 @@ void KeySetKeyBindDrawer::drawPressShader(qhandle_t shader,
   if (keyCodeShader) {
     drawPic(x, y, sizeX, sizeY, keyCodeShader, color, shadowColor);
   } else {
-    auto binding = StringUtil::toUpperCase(getKeyCodeBinding(keyCode));
+    auto binding = StringUtils::toUpperCase(getKeyCodeBinding(keyCode));
     // factor = 16 / ... = 0.20
     // size / factor;
     auto bindWidth = DrawStringWidth(binding.c_str(), 0.2f);

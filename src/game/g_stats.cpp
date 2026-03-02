@@ -201,12 +201,12 @@ void G_LoseSkillPoints(gentity_t *ent, skillType_t skill, float points) {
     ent->client->sess.skillpoints[skill] = skillLevels[oldskill];
   }
 
-  G_Printf("%s just lost %s for skill %s\n", ent->client->pers.netname,
-           ETJump::getPluralizedString(oldskillpoints -
-                                           ent->client->sess.skillpoints[skill],
-                                       "skill point")
-               .c_str(),
-           skillNames[skill]);
+  G_Printf(
+      "%s just lost %s for skill %s\n", ent->client->pers.netname,
+      StringUtils::getPluralizedString(
+          oldskillpoints - ent->client->sess.skillpoints[skill], "skill point")
+          .c_str(),
+      skillNames[skill]);
 
   trap_PbStat(ent - g_entities, "loseskill",
               va("%d %d %d %f", ent->client->sess.sessionTeam,

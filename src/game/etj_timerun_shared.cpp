@@ -75,11 +75,11 @@ TimerunCommands::Start::Start(
       checkpoints(checkpoints), currentRunCheckpoints(currentRunCheckpoints) {}
 
 std::string TimerunCommands::Start::serialize() const {
-  return stringFormat("timerun start %d %d \"%s\" %d %d \"%s\" \"%s\"",
-                      clientNum, startTime, runName,
-                      previousRecord.value_or(-1), runHasCheckpoints,
-                      StringUtil::join(checkpoints, ","),
-                      StringUtil::join(currentRunCheckpoints, ","));
+  return StringUtils::format("timerun start %d %d \"%s\" %d %d \"%s\" \"%s\"",
+                             clientNum, startTime, runName,
+                             previousRecord.value_or(-1), runHasCheckpoints,
+                             StringUtils::join(checkpoints, ","),
+                             StringUtils::join(currentRunCheckpoints, ","));
 }
 
 std::optional<TimerunCommands::Start>
@@ -129,7 +129,7 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
 
   unsigned idx = 0;
   for (const auto &v :
-       Container::map(StringUtil::split(args[7], ","),
+       Container::map(StringUtils::split(args[7], ","),
                       [](const auto &c) { return std::stoi(c); })) {
     if (idx >= start.checkpoints.size()) {
       break;
@@ -142,7 +142,7 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
 
   idx = 0;
   for (const auto &v :
-       Container::map(StringUtil::split(args[8], ","),
+       Container::map(StringUtils::split(args[8], ","),
                       [](const auto &c) { return std::stoi(c); })) {
     if (idx >= start.currentRunCheckpoints.size()) {
       break;
@@ -166,16 +166,17 @@ TimerunCommands::SavePosStart::SavePosStart(
       checkpoints(checkpoints), currentRunCheckpoints(currentRunCheckpoints) {}
 
 std::string TimerunCommands::SavePosStart::serialize() const {
-  return stringFormat("timerun saveposstart %d %d \"%s\" %d %d \"%s\" \"%s\"",
-                      clientNum, startTime, runName,
-                      previousRecord.value_or(-1), runHasCheckpoints,
-                      StringUtil::join(checkpoints, ","),
-                      StringUtil::join(currentRunCheckpoints, ","));
+  return StringUtils::format(
+      "timerun saveposstart %d %d \"%s\" %d %d \"%s\" \"%s\"", clientNum,
+      startTime, runName, previousRecord.value_or(-1), runHasCheckpoints,
+      StringUtils::join(checkpoints, ","),
+      StringUtils::join(currentRunCheckpoints, ","));
 }
 
 std::string TimerunCommands::Checkpoint::serialize() const {
-  return stringFormat("timerun checkpoint %d %d %d \"%s\" %d", clientNum,
-                      checkpointNum, checkpointTime, runName, checkpointIndex);
+  return StringUtils::format("timerun checkpoint %d %d %d \"%s\" %d", clientNum,
+                             checkpointNum, checkpointTime, runName,
+                             checkpointIndex);
 }
 
 std::optional<TimerunCommands::Checkpoint>
@@ -232,7 +233,7 @@ TimerunCommands::Checkpoint::deserialize(const std::vector<std::string> &args) {
 }
 
 std::string TimerunCommands::Interrupt::serialize() const {
-  return stringFormat("timerun interrupt %d", clientNum);
+  return StringUtils::format("timerun interrupt %d", clientNum);
 }
 
 std::optional<TimerunCommands::Interrupt>
@@ -251,9 +252,9 @@ TimerunCommands::Interrupt::deserialize(const std::vector<std::string> &args) {
 }
 
 std::string TimerunCommands::Completion::serialize() const {
-  return stringFormat("timerun completion %d %d %d \"%s\"", clientNum,
-                      completionTime,
-                      previousRecordTime.value_or(NO_PREVIOUS_RECORD), runName);
+  return StringUtils::format(
+      "timerun completion %d %d %d \"%s\"", clientNum, completionTime,
+      previousRecordTime.value_or(NO_PREVIOUS_RECORD), runName);
 }
 
 std::optional<TimerunCommands::Completion>
@@ -285,9 +286,9 @@ TimerunCommands::Completion::deserialize(const std::vector<std::string> &args) {
 }
 
 std::string TimerunCommands::Record::serialize() const {
-  return stringFormat("timerun record %d %d %d \"%s\"", clientNum,
-                      completionTime,
-                      previousRecordTime.value_or(NO_PREVIOUS_RECORD), runName);
+  return StringUtils::format(
+      "timerun record %d %d %d \"%s\"", clientNum, completionTime,
+      previousRecordTime.value_or(NO_PREVIOUS_RECORD), runName);
 }
 
 std::optional<TimerunCommands::Record>
@@ -317,8 +318,8 @@ TimerunCommands::Record::deserialize(const std::vector<std::string> &args) {
 }
 
 std::string TimerunCommands::Stop::serialize() const {
-  return stringFormat("timerun stop %d %d \"%s\"", clientNum, completionTime,
-                      runName);
+  return StringUtils::format("timerun stop %d %d \"%s\"", clientNum,
+                             completionTime, runName);
 }
 
 std::optional<TimerunCommands::Stop>

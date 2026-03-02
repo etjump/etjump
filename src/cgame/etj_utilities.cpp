@@ -104,8 +104,9 @@ bool configFileExists(const std::string &filename) {
 
 void execFile(const std::string &filename, ExecFileType type) {
   const bool quiet = static_cast<int>(type) & etj_useExecQuiet.integer;
-  const std::string cmd = quiet ? stringFormat("execq \"%s.cfg\"\n", filename)
-                                : stringFormat("exec \"%s.cfg\"\n", filename);
+  const std::string cmd =
+      quiet ? StringUtils::format("execq \"%s.cfg\"\n", filename)
+            : StringUtils::format("exec \"%s.cfg\"\n", filename);
   trap_SendConsoleCommand(cmd.c_str());
 }
 

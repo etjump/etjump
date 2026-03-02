@@ -77,7 +77,7 @@ std::string ETJump::millisToString(int millis) {
   seconds = millis / 1000;
   millis -= seconds * 1000;
 
-  return ETJump::stringFormat("%02d:%02d.%03d", minutes, seconds, millis);
+  return StringUtils::format("%02d:%02d.%03d", minutes, seconds, millis);
 }
 
 std::string ETJump::diffToString(int selfTime, int otherTime) {
@@ -94,6 +94,6 @@ std::string ETJump::diffToString(int selfTime, int otherTime) {
     diffSign = "^7+";
   }
 
-  return ETJump::stringFormat("%s%02i:%02i.%03i", diffSign, diffComponents.min,
-                              diffComponents.sec, diffComponents.ms);
+  return StringUtils::format("%s%02i:%02i.%03i", diffSign, diffComponents.min,
+                             diffComponents.sec, diffComponents.ms);
 }

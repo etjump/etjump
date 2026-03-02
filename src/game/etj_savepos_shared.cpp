@@ -27,24 +27,24 @@
 
 namespace ETJump {
 std::string SavePosData::serialize(const SavePosData &data) {
-  const std::string &origin = StringUtil::join(data.pos.origin, " ");
-  const std::string &angles = StringUtil::join(data.pos.angles, " ");
-  const std::string &velocity = StringUtil::join(data.pos.velocity, " ");
+  const std::string &origin = StringUtils::join(data.pos.origin, " ");
+  const std::string &angles = StringUtils::join(data.pos.angles, " ");
+  const std::string &velocity = StringUtils::join(data.pos.velocity, " ");
 
   // omit timerun data if this position wasn't saved during a timerun
   if (data.timerunInfo.runName.empty()) {
-    return stringFormat("loadpos %s %s %s %i", origin, angles, velocity,
-                        static_cast<int>(data.pos.stance));
+    return StringUtils::format("loadpos %s %s %s %i", origin, angles, velocity,
+                               static_cast<int>(data.pos.stance));
   }
 
   const std::string &checkpoints =
-      StringUtil::join(data.timerunInfo.checkpoints, ",");
+      StringUtils::join(data.timerunInfo.checkpoints, ",");
   const std::string &previousRecordCheckpoints =
-      StringUtil::join(data.timerunInfo.previousRecordCheckpoints, ",");
+      StringUtils::join(data.timerunInfo.previousRecordCheckpoints, ",");
   const std::string &checkpointIndicesHit =
-      StringUtil::join(data.timerunInfo.checkpointIndicesHit, ",");
+      StringUtils::join(data.timerunInfo.checkpointIndicesHit, ",");
 
-  return stringFormat(
+  return StringUtils::format(
       "loadpos %s %s %s %i \"%s\" %i %i %s %s %s", origin, angles, velocity,
       static_cast<int>(data.pos.stance), data.timerunInfo.runName,
       data.timerunInfo.currentRunTimer, data.timerunInfo.previousRecord,
@@ -59,8 +59,9 @@ SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
   static constexpr int MIN_SAVEPOS_TIMERUN_ARGS = 16;
 
   if (args.size() < MIN_SAVEPOS_ARGS) {
-    data.error = stringFormat("Too few arguments to parse position (%i < %i)\n",
-                              argc, MIN_SAVEPOS_ARGS);
+    data.error =
+        StringUtils::format("Too few arguments to parse position (%i < %i)\n",
+                            argc, MIN_SAVEPOS_ARGS);
     return data;
   }
 
@@ -78,7 +79,7 @@ SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
     }
 
     if (argc < MIN_SAVEPOS_TIMERUN_ARGS) {
-      data.error = stringFormat(
+      data.error = StringUtils::format(
           "Too few arguments to parse timerun information (%i < %i)", argc,
           MIN_SAVEPOS_TIMERUN_ARGS);
       return data;
@@ -88,9 +89,9 @@ SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
     data.timerunInfo.currentRunTimer = std::stoi(args[11]);
     data.timerunInfo.previousRecord = std::stoi(args[12]);
 
-    const auto checkpoints = StringUtil::split(args[13], ",");
-    const auto previousRecordCheckpoints = StringUtil::split(args[14], ",");
-    const auto checkpointIndicesHit = StringUtil::split(args[15], ",");
+    const auto checkpoints = StringUtils::split(args[13], ",");
+    const auto previousRecordCheckpoints = StringUtils::split(args[14], ",");
+    const auto checkpointIndicesHit = StringUtils::split(args[15], ",");
 
     // sanity check
     if (checkpoints.size() != MAX_TIMERUN_CHECKPOINTS ||
@@ -107,10 +108,11 @@ SavePosData SavePosData::deserialize(const std::vector<std::string> &args) {
           static_cast<bool>(std::stoi(checkpointIndicesHit[i]));
     }
   } catch (const std::invalid_argument &e) {
-    data.error = stringFormat("invalid argument for %s\n", e.what());
+    data.error = StringUtils::format("invalid argument for %s\n", e.what());
     return data;
   } catch (const std::out_of_range &e) {
-    data.error = stringFormat("argument out of range for %s\n", e.what());
+    data.error =
+        StringUtils::format("argument out of range for %s\n", e.what());
     return data;
   }
 

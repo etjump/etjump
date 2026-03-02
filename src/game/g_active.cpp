@@ -587,10 +587,10 @@ qboolean ClientInactivityTimer(gclient_t *client) {
                   client->sess.sessionTeam, vtosf(client->ps.origin),
                   vtosf(client->ps.viewangles));
 
-      Printer::popupAll(ETJump::stringFormat(
+      Printer::popupAll(StringUtils::format(
           "%s ^7was removed from teams due to inactivity! (%s)",
           client->pers.netname,
-          ETJump::getSecondsString(g_inactivity.integer)));
+          StringUtils::getSecondsString(g_inactivity.integer)));
 
       SetTeam(g_entities + (client - level.clients), "s", qtrue,
               static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);

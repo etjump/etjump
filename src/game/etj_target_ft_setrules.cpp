@@ -74,8 +74,8 @@ void TargetFtSetRules::use(const gentity_t *self, gentity_t *activator) {
 
       // this will never be nullptr, otherwise we wouldn't have gotten this far
       const gentity_t *leader = getFireteamLeader(clientNum);
-      StringUtil::replaceAll(msg, "%s",
-                             std::string(leader->client->pers.netname) + "^7");
+      StringUtils::replaceAll(msg, "%s",
+                              std::string(leader->client->pers.netname) + "^7");
       Printer::center(activator, msg);
     }
 

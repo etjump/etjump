@@ -99,7 +99,7 @@ void DemoCompatibility::parseDemoVersion() {
 void DemoCompatibility::fillVersionInfo(Version &version,
                                         const std::string &versionStr,
                                         const std::string &delimiter) {
-  const auto splits = StringUtil::split(versionStr, delimiter);
+  const auto splits = StringUtils::split(versionStr, delimiter);
 
   // bail if we have some weird version without at least 3 digits
   if (splits.size() < 3) {

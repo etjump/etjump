@@ -129,7 +129,7 @@ void AutoDemoRecorder::onTimerunEnd(const std::vector<std::string> &args,
     return;
   }
 
-  trySaveTimerunDemo(sanitize(args[1]), args[2]);
+  trySaveTimerunDemo(StringUtils::sanitize(args[1]), args[2]);
 }
 
 void AutoDemoRecorder::onManualSave(const std::vector<std::string> &args) {
@@ -165,8 +165,8 @@ std::string AutoDemoRecorder::TempNameGenerator::pop() {
 }
 
 std::string AutoDemoRecorder::TempNameGenerator::next() {
-  const std::string name =
-      stringFormat("%s/temp_%02d", TEMP_PATH, (nameCounter++ % MAX_TEMP) + 1);
+  const std::string name = StringUtils::format("%s/temp_%02d", TEMP_PATH,
+                                               (nameCounter++ % MAX_TEMP) + 1);
   names.push(name);
   return name;
 }
@@ -254,7 +254,7 @@ void AutoDemoRecorder::saveDemoWithRestart(const std::string &src,
 }
 
 std::string AutoDemoRecorder::createDemoPath(const std::string &name) {
-  return stringFormat(
+  return StringUtils::format(
       "demos/%s/%s_%s_%s[%s].dm_84",
       FileSystem::Path::sanitizeFolder(etj_ad_targetPath.string),
       FileSystem::Path::sanitize(cgs.clientinfo[cg.clientNum].cleanname),
@@ -264,7 +264,7 @@ std::string AutoDemoRecorder::createDemoPath(const std::string &name) {
 std::string
 AutoDemoRecorder::createTimerunDemoPath(const std::string &runName,
                                         const std::string &runTime) {
-  return stringFormat(
+  return StringUtils::format(
       "demos/%s/%s_%s_%s_%s[%s].dm_84",
       FileSystem::Path::sanitizeFolder(etj_ad_targetPath.string),
       FileSystem::Path::sanitize(cgs.clientinfo[cg.clientNum].cleanname),
@@ -273,19 +273,19 @@ AutoDemoRecorder::createTimerunDemoPath(const std::string &runName,
 }
 
 std::string AutoDemoRecorder::createDemoTempPath(const std::string &name) {
-  return stringFormat("demos/%s.dm_84", name);
+  return StringUtils::format("demos/%s.dm_84", name);
 }
 
 std::string AutoDemoRecorder::createTimeString() {
   Time time = getCurrentTime();
-  return stringFormat("%02d-%02d-%d-%02d%02d%02d", time.date.day, time.date.mon,
-                      time.date.year, time.clock.hours, time.clock.min,
-                      time.clock.sec);
+  return StringUtils::format("%02d-%02d-%d-%02d%02d%02d", time.date.day,
+                             time.date.mon, time.date.year, time.clock.hours,
+                             time.clock.min, time.clock.sec);
 }
 
 std::string AutoDemoRecorder::formatRunTime(int millis) {
   Clock clock = toClock(millis, false);
-  return stringFormat("%02d.%02d.%03d", clock.min, clock.sec, clock.ms);
+  return StringUtils::format("%02d.%02d.%03d", clock.min, clock.sec, clock.ms);
 }
 
 void AutoDemoRecorder::maybeCancelDelayedSave() {

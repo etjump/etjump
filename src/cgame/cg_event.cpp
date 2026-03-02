@@ -1512,10 +1512,10 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
   const auto debugPrint = [&] {
     const std::string entityType =
         es->eType < ET_EVENTS
-            ? ETJump::stringFormat("^z[%s]", entityTypeNames[es->eType])
+            ? StringUtils::format("^z[%s]", entityTypeNames[es->eType])
             : "^z[N/A]";
     const std::string eventName =
-        ETJump::stringFormat("^z[%s]", eventnames[event]);
+        StringUtils::format("^z[%s]", eventnames[event]);
     CG_Printf("time: %i ent: %3i %-22s ^7event: %3i %-28s ^7eventParm: %3i\n",
               cg.time, es->number, entityType.c_str(), event, eventName.c_str(),
               es->eventParm);

@@ -48,16 +48,16 @@ public:
       }
     } catch (const toml::syntax_error &e) {
       if (err) {
-        *err =
-            stringFormat("Failed to parse TOML file '%s': %s", file, e.what());
-        StringUtil::escapeColorCodes(*err, '7');
+        *err = StringUtils::format("Failed to parse TOML file '%s': %s", file,
+                                   e.what());
+        StringUtils::escapeColorCodes(*err, '7');
       }
 
       return false;
     } catch (toml::file_io_error &e) {
       if (err) {
-        *err = stringFormat("Failed to open file '%s' for reading: %s", file,
-                            e.what());
+        *err = StringUtils::format("Failed to open file '%s' for reading: %s",
+                                   file, e.what());
       }
 
       return false;
@@ -82,7 +82,7 @@ public:
       fOut.write(toml::format(table));
     } catch (const File::FileIOException &e) {
       if (err) {
-        *err = stringFormat("Failed to write TOML file: %s", e.what());
+        *err = StringUtils::format("Failed to write TOML file: %s", e.what());
       }
 
       return false;
@@ -96,7 +96,7 @@ public:
   // back an escaped version of the error string.
   static std::string getError(const char *exception) {
     std::string err = exception;
-    StringUtil::escapeColorCodes(err, '7');
+    StringUtils::escapeColorCodes(err, '7');
     return err;
   }
 };

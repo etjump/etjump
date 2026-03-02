@@ -131,7 +131,7 @@ bool EntityUtilities::entitiesFree(const int threshold) {
 void EntityUtilities::setCursorhintFromString(int &value,
                                               const std::string &hint) {
   for (int i = 0; i < HINT_NUM_HINTS; i++) {
-    if (StringUtil::iEqual(hint, hintStrings[i])) {
+    if (StringUtils::iEqual(hint, hintStrings[i])) {
       value = i;
     }
   }
@@ -177,8 +177,8 @@ void EntityUtilities::storeParsedEntity() {
   std::string entity;
 
   for (int i = 0; i < level.numSpawnVars; i++) {
-    entity += ETJump::stringFormat("\"%s\" \"%s\"\n", level.spawnVars[i][0],
-                                   level.spawnVars[i][1]);
+    entity += StringUtils::format("\"%s\" \"%s\"\n", level.spawnVars[i][0],
+                                  level.spawnVars[i][1]);
   }
 
   parsedEntities.push_back("{\n" + entity + "}\n");

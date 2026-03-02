@@ -58,24 +58,23 @@ static void computeCustomMapDataHashes() {
   const char *mapscriptHash = "-";
   const char *entityFileHash = "-";
 
+  // we do not care about different line endings here, as we care about the
+  // contents of the files, not the actual file integrity, therefore
+  // all line endings are normalized to LF while computing the hashes
   const auto computeHash = [](const std::string &filename) {
     File fIn(filename);
     const auto contents = fIn.read();
 
     std::string normalizedContents =
         std::string(contents.cbegin(), contents.cend());
-    StringUtil::replaceAll(normalizedContents, "\r\n", "\n");
+    StringUtils::replaceAll(normalizedContents, "\r\n", "\n");
 
     return G_SHA1(normalizedContents.c_str());
   };
 
-  // we do not care about different line endings here, as we care about the
-  // contents of the files, not the actual file integrity, therefore
-  // all line endings are normalized to LF while computing the hashes
-
   if (g_mapScriptDir.string[0] != '\0') {
     try {
-      mapscriptHash = computeHash(stringFormat(
+      mapscriptHash = computeHash(StringUtils::format(
           "%s/%s.script", g_mapScriptDir.string, level.rawmapname));
     } catch (const File::FileIOException &) {
       G_Printf("No custom map script loaded, skipping hash calculation\n");
@@ -89,7 +88,8 @@ static void computeCustomMapDataHashes() {
   // to be 2.60b, and 'etVersion' is client only, we can't rely on
   // either here and thus can't detect the mod running on etlded.
   try {
-    entityFileHash = computeHash(stringFormat("maps/%s.ent", level.rawmapname));
+    entityFileHash =
+        computeHash(StringUtils::format("maps/%s.ent", level.rawmapname));
   } catch (const File::FileIOException &) {
     G_Printf("No custom entity file found, skipping hash calculation\n");
   }
@@ -322,7 +322,7 @@ qboolean OnConnectedClientCommand(gentity_t *ent) {
             ConcatArgs(0), ent->client->pers.netname);
 
   auto argv = GetArgs();
-  auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
+  auto command = StringUtils::toLowerCase((*argv)[0]);
 
   if (ent->client->pers.connected != CON_CONNECTED) {
     return qfalse;
@@ -345,7 +345,7 @@ qboolean OnClientCommand(gentity_t *ent) {
             ConcatArgs(0), ent->client->pers.netname);
 
   auto argv = GetArgs();
-  auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
+  auto command = StringUtils::toLowerCase((*argv)[0]);
 
   if (command == ETJump::Constants::Authentication::AUTHENTICATE) {
     ETJump::session->GuidReceived(ent);
@@ -366,7 +366,7 @@ qboolean OnConsoleCommand() {
   G_DPrintf("OnConsoleCommand called: %s.\n", ConcatArgs(0));
 
   auto argv = GetArgs();
-  auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
+  auto command = StringUtils::toLowerCase((*argv)[0]);
 
   if (command == "generatemotd") {
     game.motd->generateMotdFile();
@@ -406,7 +406,7 @@ std::vector<std::string> getMapsOnList(const std::string &name) {
 const char *G_MatchOneMap(const char *arg) {
   auto currentMaps = game.mapStatistics->getCurrentMaps();
   std::vector<std::string> matchingMaps;
-  std::string mapName = arg ? ETJump::StringUtil::toLowerCase(arg) : "";
+  std::string mapName = arg ? StringUtils::toLowerCase(arg) : "";
 
   for (auto &map : *(currentMaps)) {
     if (map.find(mapName) != std::string::npos) {
@@ -434,7 +434,7 @@ const char *G_MatchOneMap(const char *arg) {
 std::vector<std::string> G_MatchAllMaps(const char *arg) {
   auto currentMaps = game.mapStatistics->getCurrentMaps();
   std::vector<std::string> matchingMaps;
-  std::string mapName = arg ? ETJump::StringUtil::toLowerCase(arg) : "";
+  std::string mapName = arg ? StringUtils::toLowerCase(arg) : "";
 
   for (auto &map : *(currentMaps)) {
     if (map.find(mapName) != std::string::npos) {
@@ -499,8 +499,8 @@ void LogServerState() {
     int clientNum = level.sortedClients[i];
 
     state +=
-        ETJump::stringFormat("%i %s %s\n", clientNum, GetTeamString(clientNum),
-                             (g_entities + clientNum)->client->pers.netname);
+        StringUtils::format("%i %s %s\n", clientNum, GetTeamString(clientNum),
+                            (g_entities + clientNum)->client->pers.netname);
   }
 
   if (level.numConnectedClients == 0) {

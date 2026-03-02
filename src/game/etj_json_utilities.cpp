@@ -47,7 +47,7 @@ bool JsonUtils::writeFile(const std::string &file, const Json::Value &root,
     return true;
   } catch (const File::FileIOException &e) {
     if (errors) {
-      *errors = stringFormat("Failed to write JSON file: %s", e.what());
+      *errors = StringUtils::format("Failed to write JSON file: %s", e.what());
     }
 
     return false;
@@ -62,7 +62,7 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root,
     fIn.close();
 
     if (errors) {
-      *errors = stringFormat(
+      *errors = StringUtils::format(
           "Failed to read JSON file: unable to open file '%s' for reading",
           file);
     }
@@ -76,7 +76,8 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root,
 
   if (!parseFromStream(readerBuilder, fIn, &root, &err)) {
     if (errors) {
-      *errors = stringFormat("Failed to parse JSON file '%s':\n%s", file, err);
+      *errors =
+          StringUtils::format("Failed to parse JSON file '%s':\n%s", file, err);
     }
 
     return false;

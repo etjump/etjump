@@ -243,14 +243,14 @@ void TimerunV2::initialize() {
 
     _mostRelevantSeason = getMostRelevantSeason();
 
-    _logger->info("Active seasons: %s",
-                  StringUtil::join(Container::map(_activeSeasons,
-                                                  [](const Timerun::Season &s) {
-                                                    return stringFormat(
-                                                        "%s (%d)", s.name,
-                                                        s.id);
-                                                  }),
-                                   ", "));
+    _logger->info(
+        "Active seasons: %s",
+        StringUtils::join(Container::map(_activeSeasons,
+                                         [](const Timerun::Season &s) {
+                                           return StringUtils::format(
+                                               "%s (%d)", s.name, s.id);
+                                         }),
+                          ", "));
 
   } catch (const std::exception &e) {
     Printer::logLn(std::string("Unable to initialize timerun database") +
@@ -280,7 +280,7 @@ public:
 void TimerunV2::clientConnect(int clientNum, int userId) {
   _sc->postTask(
       [this, clientNum, userId] {
-        auto parameters = StringUtil::join(
+        auto parameters = StringUtils::join(
             Container::map(_activeSeasonsIds,
                            [](int season) { return std::to_string(season); }),
             ", ");
@@ -310,7 +310,8 @@ void TimerunV2::clientConnect(int clientNum, int userId) {
                       "Unable to load player information. Any timeruns will "
                       "not work. Try to reconnect or file a bug report at "
                       "github.com/etjump/etjump.");
-        Printer::console(clientNum, stringFormat("cause: %s\n", error.what()));
+        Printer::console(clientNum,
+                         StringUtils::format("cause: %s\n", error.what()));
       });
 }
 
@@ -462,8 +463,8 @@ void TimerunV2::addSeason(const Timerun::AddSeasonParams &season) {
         try {
           _repository->addSeason(season);
           updateSeasonStates();
-          return std::make_unique<AddSeasonResult>(
-              stringFormat("Successfully added season `%s`", season.name));
+          return std::make_unique<AddSeasonResult>(StringUtils::format(
+              "Successfully added season `%s`", season.name));
         } catch (const std::runtime_error &e) {
           return std::make_unique<AddSeasonResult>(e.what());
         }
@@ -476,8 +477,9 @@ void TimerunV2::addSeason(const Timerun::AddSeasonParams &season) {
       },
       [this, season](const std::runtime_error &e) {
         const char *what = e.what();
-        Printer::console(season.clientNum,
-                         stringFormat("Unable to add season: %s\n", e.what()));
+        Printer::console(
+            season.clientNum,
+            StringUtils::format("Unable to add season: %s\n", e.what()));
       });
 }
 
@@ -495,8 +497,8 @@ void TimerunV2::editSeason(const Timerun::EditSeasonParams &params) {
         try {
           _repository->editSeason(params);
           updateSeasonStates();
-          return std::make_unique<EditSeasonResult>(
-              stringFormat("Successfully edited season `%s`", params.name));
+          return std::make_unique<EditSeasonResult>(StringUtils::format(
+              "Successfully edited season `%s`", params.name));
         } catch (const std::runtime_error &e) {
           return std::make_unique<EditSeasonResult>(e.what());
         }
@@ -506,8 +508,9 @@ void TimerunV2::editSeason(const Timerun::EditSeasonParams &params) {
         Printer::console(params.clientNum, editSeasonResult->message + "\n");
       },
       [this, params](const std::runtime_error &e) {
-        Printer::console(params.clientNum,
-                         stringFormat("Unable to edit season: %s\n", e.what()));
+        Printer::console(
+            params.clientNum,
+            StringUtils::format("Unable to edit season: %s\n", e.what()));
       });
 }
 
@@ -656,10 +659,11 @@ void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
           const Timerun::Season *season = &seasonIt->second;
 
           if (seasonIt->first == defaultSeasonId) {
-            message += stringFormat("^2Overall records for map ^7%s\n",
-                                    result->records[0].map);
+            message += StringUtils::format("^2Overall records for map ^7%s\n",
+                                           result->records[0].map);
           } else {
-            message += stringFormat("^2Records for map ^7%s ^2on season ^7%s\n",
+            message +=
+                StringUtils::format("^2Records for map ^7%s ^2on season ^7%s\n",
                                     result->records[0].map, season->name);
           }
 
@@ -686,7 +690,7 @@ void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
               // clang-format off
               message += "^g-------------------------------------------------------------\n";
               // clang-format on
-              message += stringFormat(" ^2Run: ^7%s\n\n", rkvp.first);
+              message += StringUtils::format(" ^2Run: ^7%s\n\n", rkvp.first);
 
               constexpr int rankWidth = 4;
               constexpr int timeWidth = 10;
@@ -742,26 +746,26 @@ void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
                       ownRecord ? r->playerName + " ^g(You)" : r->playerName;
 
                   const int32_t rankPadding =
-                      StringUtil::countExtraPadding(rankString, rankWidth);
+                      StringUtils::countExtraPadding(rankString, rankWidth);
                   const int32_t millisPadding =
-                      StringUtil::countExtraPadding(millisString, timeWidth);
+                      StringUtils::countExtraPadding(millisString, timeWidth);
                   const int32_t diffPadding =
-                      StringUtil::countExtraPadding(diffString, diffWidth);
+                      StringUtils::countExtraPadding(diffString, diffWidth);
 
-                  auto formatString =
-                      stringFormat("^7 %%-%ds^7 %%-%ds^7 %%-%ds^7 %%s^7\n",
-                                   rankPadding, millisPadding, diffPadding);
+                  auto formatString = StringUtils::format(
+                      "^7 %%-%ds^7 %%-%ds^7 %%-%ds^7 %%s^7\n", rankPadding,
+                      millisPadding, diffPadding);
 
                   // we want to print our own record as the last one if it's not
                   // visible
                   if (isOnVisiblePage) {
-                    message +=
-                        stringFormat(formatString, rankString, millisString,
-                                     diffString, playerNameString);
+                    message += StringUtils::format(formatString, rankString,
+                                                   millisString, diffString,
+                                                   playerNameString);
                   } else {
-                    ownRecordString =
-                        stringFormat(formatString, rankString, millisString,
-                                     diffString, playerNameString);
+                    ownRecordString = StringUtils::format(
+                        formatString, rankString, millisString, diffString,
+                        playerNameString);
                   }
                 }
                 rank++;
@@ -781,7 +785,7 @@ void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
                 const int32_t end =
                     std::min(start + params.pageSize - 1, numRecords);
 
-                message += stringFormat(
+                message += StringUtils::format(
                     "\n ^7Showing ^2%i-%i ^7of ^2%i ^7total records\n", start,
                     end, numRecords);
 
@@ -820,7 +824,8 @@ void TimerunV2::loadCheckpoints(int clientNum, const std::string &mapName,
   _sc->postTask(
       [this, clientNum, mapName, runName, rank] {
         std::string matchedRun;
-        const std::string sanitizedRunName = sanitize(runName, true);
+        const std::string sanitizedRunName =
+            StringUtils::sanitize(runName, true);
         std::string errMsg;
         int matchedCount = 0;
         const auto matchedRuns =
@@ -842,16 +847,18 @@ void TimerunV2::loadCheckpoints(int clientNum, const std::string &mapName,
         if (matchedCount > 1) {
           const int runsPerRow = 3;
           int runsOnCurrentRow = 0;
-          errMsg = stringFormat("Multiple matches found for run ^3`%s`^7.\n",
-                                runName);
+          errMsg = StringUtils::format(
+              "Multiple matches found for run ^3`%s`^7.\n", runName);
 
           for (const auto &matches : matchedRuns) {
             ++runsOnCurrentRow;
             if (runsOnCurrentRow > runsPerRow) {
               runsOnCurrentRow = 1;
-              errMsg += stringFormat("\n%-16s", sanitize(matches, false));
+              errMsg += StringUtils::format(
+                  "\n%-16s", StringUtils::sanitize(matches, false));
             } else {
-              errMsg += stringFormat("%-16s", sanitize(matches, false));
+              errMsg += StringUtils::format(
+                  "%-16s", StringUtils::sanitize(matches, false));
             }
           }
           throw std::runtime_error(errMsg);
@@ -859,14 +866,14 @@ void TimerunV2::loadCheckpoints(int clientNum, const std::string &mapName,
         if (rank == -1) {
           _players[clientNum]->overriddenCheckpoints = {};
           // not really a runtime error but can't return here so bleh
-          throw std::runtime_error(stringFormat(
+          throw std::runtime_error(StringUtils::format(
               "^7Cleared loaded checkpoints for run ^3`%s`", matchedRun));
         }
 
         const auto record = _repository->getRecord(mapName, matchedRun, rank);
 
         if (!record.has_value()) {
-          throw std::runtime_error(stringFormat(
+          throw std::runtime_error(StringUtils::format(
               "^7Could not find a record on map ^3`%s` ^7for run ^3`%s` ^7for "
               "rank ^3`%d`",
               mapName, matchedRun.empty() ? runName : matchedRun, rank));
@@ -892,9 +899,9 @@ void TimerunV2::loadCheckpoints(int clientNum, const std::string &mapName,
         // bail out if no checkpoints are present
         if (result->checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
           throw std::runtime_error(
-              stringFormat("^7No checkpoint times found for run ^3`%s`^7 "
-                           "from rank ^3`%d`^7 record.",
-                           runName, rank));
+              StringUtils::format("^7No checkpoint times found for run "
+                                  "^3`%s`^7 from rank ^3`%d`^7 record.",
+                                  runName, rank));
         }
 
         _players[clientNum]->overriddenCheckpoints[runName] = {};
@@ -906,10 +913,10 @@ void TimerunV2::loadCheckpoints(int clientNum, const std::string &mapName,
         std::copy_n(begin(result->checkpoints), checkpointsToCopy,
                     begin(_players[clientNum]->overriddenCheckpoints[runName]));
 
-        Printer::console(clientNum,
-                         stringFormat("^7Loaded checkpoints for run ^3`%s`^7 "
-                                      "from rank ^3`%d`^7 record.\n",
-                                      runName, rank));
+        Printer::console(clientNum, StringUtils::format(
+                                        "^7Loaded checkpoints for run ^3`%s`^7 "
+                                        "from rank ^3`%d`^7 record.\n",
+                                        runName, rank));
 
         if (_players[clientNum]->running) {
           Printer::console(clientNum, "^7You need to restart the run for the "
@@ -945,30 +952,30 @@ TimerunV2::getRankingsStringFor(const std::vector<Ranking> *rankings,
     if (isOnVisiblePage) {
       const std::string rankString = rankToString(static_cast<int32_t>(i) + 1);
       const int32_t rankStringWidth =
-          StringUtil::countExtraPadding(rankString, rankWidth);
+          StringUtils::countExtraPadding(rankString, rankWidth);
 
       const std::string name = isOwnRanking ? (r->name + " ^g(You)") : r->name;
       const int32_t nameStringWidth =
-          StringUtil::countExtraPadding(name, MAX_NAME_LENGTH + 1 + youWidth);
+          StringUtils::countExtraPadding(name, MAX_NAME_LENGTH + 1 + youWidth);
 
-      const std::string formatString = stringFormat(
+      const std::string formatString = StringUtils::format(
           "^7%%-%ds ^7%%-%ds  ^7%%.0f\n", rankStringWidth, nameStringWidth);
 
-      message += stringFormat(formatString, rankString, name, r->score);
+      message += StringUtils::format(formatString, rankString, name, r->score);
     }
 
     if (isOwnRanking && !isOnVisiblePage) {
       const std::string rankString = rankToString(static_cast<int32_t>(i) + 1);
       const int32_t rankStringWidth =
-          StringUtil::countExtraPadding(rankString, rankWidth);
+          StringUtils::countExtraPadding(rankString, rankWidth);
       const std::string name = r->name + " ^g(You)";
       const int32_t nameStringWidth =
-          StringUtil::countExtraPadding(name, MAX_NAME_LENGTH + 1 + youWidth);
+          StringUtils::countExtraPadding(name, MAX_NAME_LENGTH + 1 + youWidth);
 
-      const std::string formatString = stringFormat(
+      const std::string formatString = StringUtils::format(
           "\n^7%%-%ds ^7%%-%ds  ^7%%.0f\n", rankStringWidth, nameStringWidth);
 
-      message += stringFormat(formatString, rankString, name, r->score);
+      message += StringUtils::format(formatString, rankString, name, r->score);
     }
   }
   return message;
@@ -983,16 +990,17 @@ void TimerunV2::printRankings(const Timerun::PrintRankingsParams &params) {
               _repository->getSeasonsForName(params.season.value(), false);
 
           if (matchingSeasons.empty()) {
-            message = stringFormat("No matching season for name `%s`\n",
-                                   params.season.value());
+            message = StringUtils::format("No matching season for name `%s`\n",
+                                          params.season.value());
           } else {
             for (const auto &s : matchingSeasons) {
               if (_rankingsPerSeason.count(s.id) == 0) {
-                message = stringFormat("No records for season `%s`\n", s.name);
+                message =
+                    StringUtils::format("No records for season `%s`\n", s.name);
               } else {
                 // clang-format off
                 message =
-                    stringFormat(
+                    StringUtils::format(
                         "^g=============================================================\n"
                         " ^gRankings for season: ^2%s^7\n"
                         "^g=============================================================\n",
@@ -1038,7 +1046,7 @@ void TimerunV2::printRankings(const Timerun::PrintRankingsParams &params) {
       [params](auto e) {
         Printer::console(
             params.clientNum,
-            stringFormat("Unable to print rankings: %s\n", e.what()));
+            StringUtils::format("Unable to print rankings: %s\n", e.what()));
       });
 }
 
@@ -1052,7 +1060,7 @@ void TimerunV2::printSeasons(int clientNum) {
         }
 
         constexpr int32_t seasonWidth = 30;
-        std::string seasonHeader = stringFormat(
+        std::string seasonHeader = StringUtils::format(
             "\n^g %-30s %-15s%s\n", "Season", "Start Date", "End date");
 
         // clang-format off
@@ -1071,11 +1079,11 @@ void TimerunV2::printSeasons(int clientNum) {
               continue;
             }
 
-            const std::string formatString = stringFormat(
+            const std::string formatString = StringUtils::format(
                 " ^7%%-%ds ^7%%-15s%%s\n",
-                StringUtil::countExtraPadding(s.name, seasonWidth));
+                StringUtils::countExtraPadding(s.name, seasonWidth));
 
-            message += stringFormat(
+            message += StringUtils::format(
                 formatString, s.name, s.startTime.toAbbrevMonthDateString(),
                 s.endTime.has_value()
                     ? s.endTime.value().toAbbrevMonthDateString()
@@ -1090,11 +1098,11 @@ void TimerunV2::printSeasons(int clientNum) {
           message += " ^gUpcoming seasons\n" + seasonHeader;
 
           for (const auto &s : _upcomingSeasons) {
-            const std::string formatString = stringFormat(
+            const std::string formatString = StringUtils::format(
                 " ^7%%-%ds ^7%%-15s%%s\n",
-                StringUtil::countExtraPadding(s.name, seasonWidth));
+                StringUtils::countExtraPadding(s.name, seasonWidth));
 
-            message += stringFormat(
+            message += StringUtils::format(
                 formatString, s.name, s.startTime.toAbbrevMonthDateString(),
                 s.endTime.has_value()
                     ? s.endTime.value().toAbbrevMonthDateString()
@@ -1109,11 +1117,11 @@ void TimerunV2::printSeasons(int clientNum) {
           message += " ^gPast seasons\n" + seasonHeader;
 
           for (const auto &s : _pastSeasons) {
-            const std::string formatString = stringFormat(
+            const std::string formatString = StringUtils::format(
                 " ^9%%-%ds ^9%%-15s%%s\n",
-                StringUtil::countExtraPadding(s.name, seasonWidth));
+                StringUtils::countExtraPadding(s.name, seasonWidth));
 
-            message += stringFormat(
+            message += StringUtils::format(
                 formatString, s.name, s.startTime.toAbbrevMonthDateString(),
                 s.endTime.has_value()
                     ? s.endTime.value().toAbbrevMonthDateString()
@@ -1139,7 +1147,8 @@ void TimerunV2::printSeasons(int clientNum) {
       },
       [clientNum](auto e) {
         Printer::console(
-            clientNum, stringFormat("Unable to print seasons: %s\n", e.what()));
+            clientNum,
+            StringUtils::format("Unable to print seasons: %s\n", e.what()));
       });
 }
 
@@ -1158,7 +1167,7 @@ void TimerunV2::deleteSeason(int clientNum, const std::string &name) {
           _repository->deleteSeason(name);
           updateSeasonStates();
           return std::make_unique<DeleteSeasonResult>(
-              stringFormat("Successfully deleted season `%s`", name));
+              StringUtils::format("Successfully deleted season `%s`", name));
         } catch (const std::runtime_error &e) {
           return std::make_unique<DeleteSeasonResult>(e.what());
         }
@@ -1173,7 +1182,8 @@ void TimerunV2::deleteSeason(int clientNum, const std::string &name) {
       [this, clientNum](const std::runtime_error &e) {
         const char *what = e.what();
         Printer::console(
-            clientNum, stringFormat("Unable to delete season: %s\n", e.what()));
+            clientNum,
+            StringUtils::format("Unable to delete season: %s\n", e.what()));
       });
 }
 
@@ -1190,6 +1200,7 @@ public:
 void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
   const int32_t clientNum = params.clientNum;
   const int32_t rank = params.rank;
+  const std::string func = __func__;
 
   _sc->postTask(
       [this, params]() {
@@ -1198,7 +1209,7 @@ void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
             _repository->getSeasonsForName(params.season.value(), false);
         return std::make_unique<ListCheckpointsResult>(checkpoints, seasons);
       },
-      [this, clientNum, rank](const auto results) {
+      [this, clientNum, rank, func](const auto results) {
         const auto *const r =
             dynamic_cast<ListCheckpointsResult *>(results.get());
 
@@ -1207,8 +1218,9 @@ void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
                          "ListCheckpointsResult is NULL",
                          clientNum);
           throw std::runtime_error(
-              stringFormat("%s: unable to list checkpoints. This is a bug, "
-                           "please report this to the developers."));
+              StringUtils::format("%s: unable to list checkpoints. This is a "
+                                  "bug, please report this to the developers.",
+                                  func));
         }
 
         // ensure we have at least some valid checkpoint times
@@ -1253,7 +1265,7 @@ void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
                              "Malformed data received from the timerun "
                              "database. Please inform the server owner, more "
                              "information is available in the server logs.\n");
-            _logger->error(stringFormat(
+            _logger->error(StringUtils::format(
                 "Record on map %s, run %s by player %s with time %i "
                 "contains invalid season ID '%i'. The database might have been "
                 "manually modified, or is corrupted. If you have manually "
@@ -1271,16 +1283,17 @@ void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
           std::string s = "\n";
 
           if (data.seasonID == defaultSeasonId) {
-            s += stringFormat("^2Checkpoint times for map ^7%s\n", data.map);
+            s += StringUtils::format("^2Checkpoint times for map ^7%s\n",
+                                     data.map);
           } else {
-            s += stringFormat(
+            s += StringUtils::format(
                 "^2Checkpoint times on season ^7%s ^2for map ^7%s\n",
                 season.name, data.map);
           }
 
           s += "^g-------------------------------------------------------------"
                "\n";
-          s += stringFormat(
+          s += StringUtils::format(
               " ^2Run: ^7%s\n ^2Player: ^7%s\n ^2Time: ^7%s (%s^7)\n\n",
               data.run, data.playerName, millisToString(data.runTime),
               rankToString(rank));
@@ -1290,15 +1303,16 @@ void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
               break;
             }
 
-            s += stringFormat(" ^g%2i. ^7%s", static_cast<int32_t>(i + 1),
-                              millisToString(data.checkpoints[i]));
+            s +=
+                StringUtils::format(" ^g%2i. ^7%s", static_cast<int32_t>(i + 1),
+                                    millisToString(data.checkpoints[i]));
 
             // from 2nd checkpoint onwards, display the absolute time
             // difference between checkpoints
             if (i > 0) {
-              s += stringFormat(" ^z(%s)",
-                                millisToString(data.checkpoints[i] -
-                                               data.checkpoints[i - 1]));
+              s += StringUtils::format(" ^z(%s)",
+                                       millisToString(data.checkpoints[i] -
+                                                      data.checkpoints[i - 1]));
             }
 
             s += "\n";
@@ -1308,7 +1322,7 @@ void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
         }
       },
       [this, clientNum](const std::runtime_error &e) {
-        Printer::console(clientNum, stringFormat("%s\n", e.what()));
+        Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
       });
 }
 
@@ -1331,6 +1345,7 @@ void TimerunV2::compareCheckpoints(
   const int32_t clientNum = params.clientNum;
   const int32_t baseRank = params.rankBase;
   const int32_t cmpRank = params.rankCmp;
+  const std::string func = __func__;
 
   _sc->postTask(
       [this, params]() {
@@ -1348,7 +1363,7 @@ void TimerunV2::compareCheckpoints(
         return std::make_unique<CompareCheckpointsResult>(
             baseCheckpoints, cmpCheckpoints, seasons);
       },
-      [this, clientNum, baseRank, cmpRank](const auto results) {
+      [this, clientNum, baseRank, cmpRank, func](const auto results) {
         const auto *const r =
             dynamic_cast<CompareCheckpointsResult *>(results.get());
 
@@ -1356,9 +1371,10 @@ void TimerunV2::compareCheckpoints(
           _logger->error("%s: unable to compare checkpoints for player %i: "
                          "CompareCheckpointsResult is NULL",
                          clientNum);
-          throw std::runtime_error(
-              stringFormat("%s: unable to compare checkpoints. This is a bug, "
-                           "please report this to the developers."));
+          throw std::runtime_error(StringUtils::format(
+              "%s: unable to compare checkpoints. This is a bug, please report "
+              "this to the developers.",
+              func));
         }
 
         if (r->baseCheckpoints.empty()) {
@@ -1401,7 +1417,7 @@ void TimerunV2::compareCheckpoints(
                              "Malformed data received from the timerun "
                              "database. Please inform the server owner, more "
                              "information is available in the server logs.\n");
-            _logger->error(stringFormat(
+            _logger->error(StringUtils::format(
                 "Record on map %s, run %s by player %s with time %i "
                 "contains invalid season ID '%i'. The database might have been "
                 "manually modified, or is corrupted. If you have manually "
@@ -1419,17 +1435,17 @@ void TimerunV2::compareCheckpoints(
           std::string s = "\n";
 
           if (base.seasonID == defaultSeasonId) {
-            s += stringFormat("^2Comparing checkpoints for map ^7%s\n",
-                              base.map);
+            s += StringUtils::format("^2Comparing checkpoints for map ^7%s\n",
+                                     base.map);
           } else {
-            s += stringFormat(
+            s += StringUtils::format(
                 "^2Comparing checkpoints on season ^7%s ^2for map ^7%s\n",
                 season.name, base.map);
           }
 
           s += "^g-------------------------------------------------------------"
                "\n";
-          s += stringFormat(" ^2Run: ^7%s\n\n", base.run);
+          s += StringUtils::format(" ^2Run: ^7%s\n\n", base.run);
 
           // minimum column width
           constexpr int32_t BASE_MIN_PADDING = 24;
@@ -1437,23 +1453,23 @@ void TimerunV2::compareCheckpoints(
           std::string tmpName;
           tmpName.insert(0, MAX_NETNAME, 'A');
 
-          const std::string baseHeader = stringFormat(
+          const std::string baseHeader = StringUtils::format(
               "^7%s ^7(%s^7)", base.playerName, rankToString(baseRank));
-          const std::string cmpHeader = stringFormat(
+          const std::string cmpHeader = StringUtils::format(
               "^7%s ^7(%s^7)", cmp.playerName, rankToString(cmpRank));
 
-          const int32_t baseWidth =
-              std::max(static_cast<int32_t>(sanitize(baseHeader).length()),
-                       BASE_MIN_PADDING);
-          const int32_t cmpWidth =
-              std::max(static_cast<int32_t>(sanitize(cmpHeader).length()),
-                       BASE_MIN_PADDING);
+          const int32_t baseWidth = std::max(
+              static_cast<int32_t>(StringUtils::sanitize(baseHeader).length()),
+              BASE_MIN_PADDING);
+          const int32_t cmpWidth = std::max(
+              static_cast<int32_t>(StringUtils::sanitize(cmpHeader).length()),
+              BASE_MIN_PADDING);
 
           const int32_t basePadding =
-              StringUtil::countExtraPadding(baseHeader, baseWidth);
+              StringUtils::countExtraPadding(baseHeader, baseWidth);
 
-          s += stringFormat("     %-*s ^g| ^7%s\n", basePadding, baseHeader,
-                            cmpHeader);
+          s += StringUtils::format("     %-*s ^g| ^7%s\n", basePadding,
+                                   baseHeader, cmpHeader);
 
           s += "     ^g";
           s.insert(s.length(), baseWidth + 1, '-');
@@ -1468,7 +1484,7 @@ void TimerunV2::compareCheckpoints(
               break;
             }
 
-            s += stringFormat(" ^g%2i. ", i + 1);
+            s += StringUtils::format(" ^g%2i. ", i + 1);
 
             // because checkpoints aren't mandatory, runs might have different
             // number of checkpoints, so ensure we only display valid times
@@ -1485,16 +1501,17 @@ void TimerunV2::compareCheckpoints(
             // the checkpoint times are never going to be wider than that,
             // so we don't need to compare against the current column width
             const size_t baseTimePadding =
-                StringUtil::countExtraPadding(baseTime, baseWidth);
+                StringUtils::countExtraPadding(baseTime, baseWidth);
 
-            s += stringFormat("^7%-*s ^g| ^7%s", baseTimePadding, baseTime,
-                              cmpTime);
+            s += StringUtils::format("^7%-*s ^g| ^7%s", baseTimePadding,
+                                     baseTime, cmpTime);
 
             // only display diff if both times are valid
             if (base.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET &&
                 cmp.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET) {
-              s += stringFormat(" (%s^7)", diffToString(cmp.checkpoints[i],
-                                                        base.checkpoints[i]));
+              s += StringUtils::format(
+                  " (%s^7)",
+                  diffToString(cmp.checkpoints[i], base.checkpoints[i]));
             }
 
             s += "\n";
@@ -1508,19 +1525,21 @@ void TimerunV2::compareCheckpoints(
 
           const std::string baseRunTime = millisToString(base.runTime);
           const int32_t baseRunTimeWidth = std::max(
-              static_cast<int32_t>(sanitize(baseRunTime).length()), baseWidth);
+              static_cast<int32_t>(StringUtils::sanitize(baseRunTime).length()),
+              baseWidth);
           const int32_t baseRunTimePadding =
-              StringUtil::countExtraPadding(baseRunTime, baseRunTimeWidth);
+              StringUtils::countExtraPadding(baseRunTime, baseRunTimeWidth);
 
-          s += stringFormat("     ^7%-*s ^g| ^7%s (%s^7)\n", baseRunTimePadding,
-                            baseRunTime, millisToString(cmp.runTime),
-                            diffToString(cmp.runTime, base.runTime));
+          s += StringUtils::format("     ^7%-*s ^g| ^7%s (%s^7)\n",
+                                   baseRunTimePadding, baseRunTime,
+                                   millisToString(cmp.runTime),
+                                   diffToString(cmp.runTime, base.runTime));
 
           Printer::console(clientNum, s);
         }
       },
       [this, clientNum](const std::runtime_error &e) {
-        Printer::console(clientNum, stringFormat("%s\n", e.what()));
+        Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
       });
 }
 
@@ -1600,7 +1619,8 @@ bool TimerunV2::isDebugging(const int clientNum) {
   Printer::popup(clientNum, "Record not saved:\n");
 
   for (auto &debugger : debuggers) {
-    std::string fmt = stringFormat("- ^3%s ^7debugging enabled.\n", debugger);
+    std::string fmt =
+        StringUtils::format("- ^3%s ^7debugging enabled.\n", debugger);
     Printer::popup(clientNum, fmt);
   }
 
@@ -1610,10 +1630,10 @@ bool TimerunV2::isDebugging(const int clientNum) {
 int TimerunV2::indexForRunname(const std::string &runName) {
   int index;
   std::string currentRun;
-  std::string activeRun = sanitize(runName, true);
+  std::string activeRun = StringUtils::sanitize(runName, true);
 
   for (index = 0; index < level.timerunNamesCount; index++) {
-    currentRun = sanitize(level.timerunNames[index], true);
+    currentRun = StringUtils::sanitize(level.timerunNames[index], true);
     if (currentRun == activeRun) {
       break;
     }
@@ -1834,11 +1854,11 @@ void TimerunV2::checkRecord(Player *player) {
                          diffToString(completionTime, previousTopRecordTime) +
                          "^7)";
 
-            Printer::bannerAll(
-                stringFormat("^7%s ^7broke the overall server record for "
-                             "^3%s\n^7with ^3%s %s ^7!!!\n",
-                             playerName, sanitize(record.record.run),
-                             millisToString(record.record.time), diffString));
+            Printer::bannerAll(StringUtils::format(
+                "^7%s ^7broke the overall server record for ^3%s\n^7with ^3%s "
+                "%s ^7!!!\n",
+                playerName, StringUtils::sanitize(record.record.run),
+                millisToString(record.record.time), diffString));
           }
           Printer::commandAll(
               TimerunCommands::Record(clientNum, record.record.time,
@@ -1866,10 +1886,11 @@ void TimerunV2::checkRecord(Player *player) {
                          diffToString(completionTime, previousTopRecordTime) +
                          "^7)";
 
-            Printer::bannerAll(stringFormat(
+            Printer::bannerAll(StringUtils::format(
                 "^7%s ^7broke the server record on ^3%s^7 season for "
                 "^3%s\n^7with ^3%s %s ^7!!!\n",
-                playerName, record.seasonName, sanitize(record.record.run),
+                playerName, record.seasonName,
+                StringUtils::sanitize(record.record.run),
                 millisToString(record.record.time), diffString));
           }
 
@@ -1901,11 +1922,11 @@ void TimerunV2::checkRecord(Player *player) {
           }
           Printer::console(
               checkRecordResult->clientNum,
-              stringFormat("^7New personal record on season ^3%s^7 for ^7^3%s "
-                           "^7with ^3%s %s^7!\n",
-                           record.second.seasonName, record.second.record.run,
-                           millisToString(record.second.record.time),
-                           diffString));
+              StringUtils::format(
+                  "^7New personal record on season ^3%s^7 for ^7^3%s ^7with "
+                  "^3%s %s^7!\n",
+                  record.second.seasonName, record.second.record.run,
+                  millisToString(record.second.record.time), diffString));
         }
 
         for (const auto &newRecord :

@@ -33,7 +33,7 @@ void RemapShaderHandler::addRemap(const std::string_view oldShader,
 
   for (int32_t i = 0; i < remapCount; i++) {
     // already registered, just update and exit
-    if (StringUtil::iEqual(oldShader, shaderRemaps[i].oldShader)) {
+    if (StringUtils::iEqual(oldShader, shaderRemaps[i].oldShader)) {
       shaderRemaps[i].newShader = newShader;
       shaderRemaps[i].timeOffset = timeOffset;
       return;
@@ -97,11 +97,12 @@ std::string RemapShaderHandler::buildShaderStateConfig(const int32_t index) {
   const int32_t i1 = G_ShaderIndex(shaderRemaps[index].oldShader.c_str());
   const int32_t i2 = G_ShaderIndex(shaderRemaps[index].newShader.c_str());
 
-  return stringFormat("%i=%i:%5.2f@", i1, i2, shaderRemaps[index].timeOffset);
+  return StringUtils::format("%i=%i:%5.2f@", i1, i2,
+                             shaderRemaps[index].timeOffset);
 }
 
 void RemapShaderHandler::sendExtShaderState(const int32_t index) {
   Printer::commandAll(
-      stringFormat("extShaderState %s", extShaderStates[index]));
+      StringUtils::format("extShaderState %s", extShaderStates[index]));
 }
 } // namespace ETJump

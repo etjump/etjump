@@ -150,7 +150,7 @@ static void initDemoQueueHandler() {
 static void parseChangelogs() {
   // the "cvar" names are the filenames, excluding .txt extension
   const std::vector<std::string> files =
-      StringUtil::split(CHANGELOG_CVARS, "|");
+      StringUtils::split(CHANGELOG_CVARS, "|");
   const std::string path = "ui/changelog/";
 
   for (const auto &file : files) {

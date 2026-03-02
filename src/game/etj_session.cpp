@@ -153,12 +153,13 @@ bool Session::GuidReceived(gentity_t *ent) {
   int clientNum = ClientNum(ent);
   char guidBuf[MAX_CVAR_VALUE_STRING];
   char hwidBuf[MAX_CVAR_VALUE_STRING];
-  const std::string cleanName = ETJump::sanitize(ent->client->pers.netname);
+  const std::string cleanName =
+      StringUtils::sanitize(ent->client->pers.netname);
 
   // Client sends 'AUTHENTICATE guid hwid'
   constexpr int ARGC = 3;
   if (argc != ARGC) {
-    Printer::logAdminLn(ETJump::stringFormat(
+    Printer::logAdminLn(StringUtils::format(
         "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
         clientNum, cleanName, ClientIPAddr(ent)));
     return false;
@@ -168,7 +169,7 @@ bool Session::GuidReceived(gentity_t *ent) {
   trap_Argv(2, hwidBuf, sizeof(hwidBuf));
 
   if (!ValidGuid(guidBuf) || !ValidGuid(hwidBuf)) {
-    Printer::logAdminLn(ETJump::stringFormat(
+    Printer::logAdminLn(StringUtils::format(
         "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
         clientNum, cleanName, ClientIPAddr(ent)));
     return false;
@@ -181,7 +182,7 @@ bool Session::GuidReceived(gentity_t *ent) {
             clients_[clientNum].guid.c_str(), clients_[clientNum].hwid.c_str());
 
   if (database_->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid)) {
-    Printer::logAdminLn(ETJump::stringFormat(
+    Printer::logAdminLn(StringUtils::format(
         "authentication: Banned player %s tried to connect with GUID '%s' and "
         "HWID '%s'",
         cleanName, clients_[clientNum].guid, clients_[clientNum].hwid));
@@ -315,11 +316,9 @@ void Session::PrintGreeting(gentity_t *ent) {
   // If user has own greeting, print it
   if (cl->user->greeting.length() > 0) {
     std::string greeting = cl->user->greeting;
-    ETJump::StringUtil::replaceAll(greeting, "[n]", ent->client->pers.netname);
-    ETJump::StringUtil::replaceAll(greeting, "[t]",
-                                   cl->user->GetLastSeenString());
-    ETJump::StringUtil::replaceAll(greeting, "[d]",
-                                   cl->user->GetLastVisitString());
+    StringUtils::replaceAll(greeting, "[n]", ent->client->pers.netname);
+    StringUtils::replaceAll(greeting, "[t]", cl->user->GetLastSeenString());
+    StringUtils::replaceAll(greeting, "[d]", cl->user->GetLastVisitString());
     G_DPrintf("Printing greeting %s\n", greeting.c_str());
     Printer::chatAll(greeting);
   } else {
@@ -329,12 +328,9 @@ void Session::PrintGreeting(gentity_t *ent) {
     // if user has a level greeting, print it
     if (cl->level->greeting.length() > 0) {
       std::string greeting = cl->level->greeting;
-      ETJump::StringUtil::replaceAll(greeting, "[n]",
-                                     ent->client->pers.netname);
-      ETJump::StringUtil::replaceAll(greeting, "[t]",
-                                     cl->user->GetLastSeenString());
-      ETJump::StringUtil::replaceAll(greeting, "[d]",
-                                     cl->user->GetLastVisitString());
+      StringUtils::replaceAll(greeting, "[n]", ent->client->pers.netname);
+      StringUtils::replaceAll(greeting, "[t]", cl->user->GetLastSeenString());
+      StringUtils::replaceAll(greeting, "[d]", cl->user->GetLastVisitString());
       G_DPrintf("Printing greeting %s\n", greeting.c_str());
       Printer::chatAll(greeting);
     }
@@ -460,7 +456,7 @@ void Session::PrintFinger(gentity_t *ent, gentity_t *target) {
 
   const auto user = clients_[num].user;
   Printer::console(
-      ent, ETJump::stringFormat(
+      ent, StringUtils::format(
                "^7Name: %s\n"
                "^7Original name: %s\n"
                "^7ID: %d\n"

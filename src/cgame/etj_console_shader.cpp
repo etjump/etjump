@@ -47,7 +47,8 @@ std::string ConsoleShader::createBackground() {
 }
 
 std::string ConsoleShader::createTexturedBackground() const {
-  auto alphaGen = stringFormat("alphaGen const %f", etj_consoleAlpha.value);
+  auto alphaGen =
+      StringUtils::format("alphaGen const %f", etj_consoleAlpha.value);
 
   return composeShader(shaderName, {"nopicmip"},
                        {{"map textures/skies_sd/wurzburg_clouds.tga",
@@ -75,9 +76,10 @@ std::string ConsoleShader::createTexturedBackground() const {
 std::string ConsoleShader::createSolidBackground() const {
   vec4_t bg;
   cgame.utils.colorParser->parseColorString(etj_consoleColor.string, bg);
-  auto alphaGen = stringFormat("alphaGen const %f", etj_consoleAlpha.value);
+  auto alphaGen =
+      StringUtils::format("alphaGen const %f", etj_consoleAlpha.value);
   auto colorGen =
-      stringFormat("rgbGen const ( %f %f %f )", bg[0], bg[1], bg[2]);
+      StringUtils::format("rgbGen const ( %f %f %f )", bg[0], bg[1], bg[2]);
 
   return composeShader(shaderName, {"nopicmip"},
                        {{

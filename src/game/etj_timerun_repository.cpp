@@ -36,12 +36,13 @@ Timerun::Record getRecordFromStandardQueryResult(
     std::string checkpointsString, std::string recordDate,
     std::string playerName, std::string metadataString) {
   auto checkpoints = Container::map(
-      Container::filter(
-          StringUtil::split(checkpointsString, ","),
-          [](const std::string &input) { return trim(input).length() > 0; }),
+      Container::filter(StringUtils::split(checkpointsString, ","),
+                        [](const std::string &input) {
+                          return StringUtils::trim(input).length() > 0;
+                        }),
       [](const std::string &checkpoint) {
         try {
-          return std::stoi(trim(checkpoint));
+          return std::stoi(StringUtils::trim(checkpoint));
         } catch (const std::logic_error &) {
           return TIMERUN_CHECKPOINT_NOT_SET;
         }
@@ -49,9 +50,9 @@ Timerun::Record getRecordFromStandardQueryResult(
   Time recordDateTime = Time::fromString(recordDate);
 
   std::map<std::string, std::string> metadata;
-  for (const auto &kvp : Container::map(StringUtil::split(metadataString, ","),
+  for (const auto &kvp : Container::map(StringUtils::split(metadataString, ","),
                                         [](const std::string &kvp) {
-                                          return StringUtil::split(kvp, "=");
+                                          return StringUtils::split(kvp, "=");
                                         })) {
     if (kvp.size() != 2) {
       continue;
@@ -81,13 +82,13 @@ void TimerunRepository::shutdown() { _database = nullptr; }
 std::vector<Timerun::Record>
 TimerunRepository::getRecordsForPlayer(const std::vector<int> activeSeasons,
                                        const std::string &map, int userId) {
-  auto parameters = StringUtil::join(
+  auto parameters = StringUtils::join(
       Container::map(activeSeasons,
                      [](int season) { return std::to_string(season); }),
       ", ");
 
   auto binder = _database->sql
-                << stringFormat(R"(
+                << StringUtils::format(R"(
           select
             %s
           from record
@@ -95,7 +96,7 @@ TimerunRepository::getRecordsForPlayer(const std::vector<int> activeSeasons,
             map=? and
             user_id=?;
         )",
-                                _defaultRecordFieldsStr, parameters)
+                                       _defaultRecordFieldsStr, parameters)
                 << map << userId;
 
   auto records = getRecordsFromQuery(binder);
@@ -112,7 +113,7 @@ Timerun::Season TimerunRepository::addSeason(Timerun::AddSeasonParams params) {
       count;
 
   if (count > 0) {
-    throw std::runtime_error(stringFormat(
+    throw std::runtime_error(StringUtils::format(
         "Cannot add season `%s` as it already exists.", params.name));
   }
 
@@ -152,7 +153,7 @@ TimerunRepository::getRecordsForPlayer(const std::vector<int> &activeSeasons,
                                        const std::string &run, int userId) {
   auto records = std::vector<Timerun::Record>();
 
-  _database->sql << stringFormat(R"(
+  _database->sql << StringUtils::format(R"(
     select
       season_id,
       map,
@@ -169,7 +170,7 @@ TimerunRepository::getRecordsForPlayer(const std::vector<int> &activeSeasons,
       run=? and
       user_id=?;
     )",
-                                 StringUtil::join(activeSeasons, ", "))
+                                        StringUtils::join(activeSeasons, ", "))
                  << map << run << userId >>
       [&records](int seasonId, std::string map, std::string runName, int userId,
                  int time, std::string checkpointsString,
@@ -216,7 +217,7 @@ void TimerunRepository::insertRecord(const Timerun::Record &record) {
     );
   )" << record.seasonId
                  << record.map << record.run << record.userId << record.time
-                 << StringUtil::join(record.checkpoints, ",")
+                 << StringUtils::join(record.checkpoints, ",")
                  << record.recordDate.toDateTimeString() << record.playerName
                  << serializeMetadata(record.metadata);
 }
@@ -237,7 +238,7 @@ void TimerunRepository::updateRecord(const Timerun::Record &record) {
       run=? and
       user_id=?;
   )" << record.time
-                 << StringUtil::join(record.checkpoints, ",")
+                 << StringUtils::join(record.checkpoints, ",")
                  << record.recordDate.toDateTimeString() << record.playerName
                  << serializeMetadata(record.metadata) << record.seasonId
                  << record.map << record.run << record.userId;
@@ -285,7 +286,7 @@ TimerunRepository::getTopRecords(const std::vector<int> &seasonIds,
                                  const std::string &run) const {
   auto seasonIdsPlaceholder = DatabaseV2::createPlaceholderString(seasonIds);
 
-  std::string query = stringFormat(
+  std::string query = StringUtils::format(
       R"(
         select *
         from (select season_id,
@@ -351,7 +352,7 @@ void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
 
   if (seasonId < 0) {
     throw std::runtime_error(
-        stringFormat("No season matching name `%s`", params.name));
+        StringUtils::format("No season matching name `%s`", params.name));
   }
 
   std::vector<std::string> updatedFields;
@@ -382,10 +383,10 @@ void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
     return;
   }
 
-  std::string updatedFieldsString = StringUtil::join(
+  std::string updatedFieldsString = StringUtils::join(
       Container::map(updatedFields, [](auto a) { return a + "=?"; }), ",");
 
-  auto query = stringFormat(R"(
+  auto query = StringUtils::format(R"(
     update
       season
     set
@@ -393,7 +394,7 @@ void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
     where
       id=?
   )",
-                            updatedFieldsString);
+                                   updatedFieldsString);
 
   auto q = _database->sql << query;
 
@@ -410,14 +411,14 @@ TimerunRepository::getMapsForName(const std::string &map, bool exact) {
   std::string mapSearchString = exact ? map : "%" + map + "%";
 
   std::vector<std::string> maps;
-  _database->sql << stringFormat(R"(
+  _database->sql << StringUtils::format(R"(
     select
       distinct map
     from record
     where %s
     collate nocase
   )",
-                                 mapFilter)
+                                        mapFilter)
                  << mapSearchString >>
       [&maps](std::string map) { maps.push_back(map); };
   return maps;
@@ -432,7 +433,7 @@ TimerunRepository::getRunsForName(const std::string &map,
   std::string runSearchString = exact ? run : "%" + run + "%";
 
   std::vector<std::string> runs;
-  _database->sql << stringFormat(R"(
+  _database->sql << StringUtils::format(R"(
     select
       distinct run
     from record
@@ -440,10 +441,11 @@ TimerunRepository::getRunsForName(const std::string &map,
       and map = ?
     collate nocase
   )",
-                                 runFilter)
+                                        runFilter)
                  << runSearchString << map >>
       [&runs, sanitizeResults](const std::string &run) {
-        runs.push_back(sanitizeResults ? sanitize(run, true) : run);
+        runs.push_back(sanitizeResults ? StringUtils::sanitize(run, true)
+                                       : run);
       };
   return runs;
 }
@@ -478,7 +480,7 @@ TimerunRepository::getRecords(const Timerun::PrintRecordsParams &params) {
 
   if (seasons.empty()) {
     throw std::runtime_error(
-        stringFormat("No season matches name `%s`", season));
+        StringUtils::format("No season matches name `%s`", season));
   }
 
   const auto maps = getMapsForName(map, params.exactMap);
@@ -493,7 +495,7 @@ TimerunRepository::getRecords(const Timerun::PrintRecordsParams &params) {
     }
 
     if (!exactMapFound) {
-      std::string error = stringFormat(
+      std::string error = StringUtils::format(
           "^3records: ^7found %d maps matching ^3%s^7\n", maps.size(), map);
 
       const int perRow = 3;
@@ -503,7 +505,7 @@ TimerunRepository::getRecords(const Timerun::PrintRecordsParams &params) {
           error += "\n";
         }
 
-        error += stringFormat("%-22s", m);
+        error += StringUtils::format("%-22s", m);
         ++i;
       }
 
@@ -525,11 +527,12 @@ TimerunRepository::getRecords(const Timerun::PrintRecordsParams &params) {
     runBinder = runs.size() == 1 ? runs[0] : "%" + run + "%";
   }
 
-  const std::string seasonPlaceholders = StringUtil::join(
+  const std::string seasonPlaceholders = StringUtils::join(
       Container::map(seasons, [](const auto &s) { return "season_id=?"; }),
       " or ");
 
-  const std::string query = stringFormat(R"(
+  const std::string query =
+      StringUtils::format(R"(
     select
       season_id,
       map,
@@ -548,7 +551,7 @@ TimerunRepository::getRecords(const Timerun::PrintRecordsParams &params) {
     collate nocase
     order by season_id, map, run, time asc, record_date asc
   )",
-                                         seasonPlaceholders, runPlaceholder);
+                          seasonPlaceholders, runPlaceholder);
 
   auto binder = _database->sql << query;
 
@@ -556,7 +559,7 @@ TimerunRepository::getRecords(const Timerun::PrintRecordsParams &params) {
     binder << s.id;
   }
 
-  binder << StringUtil::toLowerCase(!maps.empty() ? maps[0] : map);
+  binder << StringUtils::toLowerCase(!maps.empty() ? maps[0] : map);
 
   if (runSpecified) {
     binder << runBinder;
@@ -696,7 +699,8 @@ void TimerunRepository::deleteSeason(const std::string &name) {
                  << name >>
       id;
   if (id < 0) {
-    throw std::runtime_error(stringFormat("Season `%s` does not exist.", name));
+    throw std::runtime_error(
+        StringUtils::format("Season `%s` does not exist.", name));
   }
 
   // for some reason someone named it something else
@@ -719,7 +723,7 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
 
   if (seasons.empty()) {
     throw std::runtime_error(
-        stringFormat("No seasons found matching name '%s'", season));
+        StringUtils::format("No seasons found matching name '%s'", season));
   }
 
   const std::string map = params.map;
@@ -736,7 +740,7 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
     }
 
     if (!exactMapFound) {
-      std::string error = stringFormat(
+      std::string error = StringUtils::format(
           "^3records: ^7found %d maps matching ^3%s^7\n", maps.size(), map);
 
       const int perRow = 3;
@@ -746,7 +750,7 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
           error += "\n";
         }
 
-        error += stringFormat("%-22s", m);
+        error += StringUtils::format("%-22s", m);
         ++i;
       }
 
@@ -761,11 +765,11 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
   const std::string runBinder =
       runs.size() == 1 ? runs[0] : "%" + params.run + "%";
 
-  const std::string seasonPlaceholders = StringUtil::join(
+  const std::string seasonPlaceholders = StringUtils::join(
       Container::map(seasons, [](const auto &) { return "season_id=?"; }),
       " or ");
 
-  std::string query = stringFormat(R"(
+  std::string query = StringUtils::format(R"(
     select *
       from (
         select
@@ -781,7 +785,7 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
       ) as ranked_records
       where rank = ?;
   )",
-                                   seasonPlaceholders, runPlaceHolder);
+                                          seasonPlaceholders, runPlaceHolder);
 
   sqlite::database_binder binder = _database->sql << query;
 
@@ -789,7 +793,7 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
     binder << s.id;
   }
 
-  binder << StringUtil::toLowerCase(maps.empty() ? map : maps[0]);
+  binder << StringUtils::toLowerCase(maps.empty() ? map : maps[0]);
   binder << runBinder;
   binder << params.rank;
 
@@ -804,7 +808,7 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
     cp.run = run;
     cp.runTime = runTime;
 
-    for (const auto &time : StringUtil::split(checkpointsStr, ",")) {
+    for (const auto &time : StringUtils::split(checkpointsStr, ",")) {
       cp.checkpoints.emplace_back(Q_atoi(time));
     }
 

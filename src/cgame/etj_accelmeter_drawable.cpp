@@ -151,8 +151,8 @@ bool AccelMeter::beforeRender() {
   y = etj_accelY.value;
 
   accelStr.clear();
-  accelStr.emplace_back(stringFormat("%.0f", accel[0]));
-  accelStr.emplace_back(stringFormat("%.0f", accel[1]));
+  accelStr.emplace_back(StringUtils::format("%.0f", accel[0]));
+  accelStr.emplace_back(StringUtils::format("%.0f", accel[1]));
 
   return true;
 }

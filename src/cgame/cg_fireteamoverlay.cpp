@@ -317,9 +317,9 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
 
   CG_FillRect(x, y, FT_WIDTH - 4, FT_HEADER_HEIGHT, clr1);
 
-  buffer = ETJump::StringUtil::toUpperCase(
-      ETJump::stringFormat("FT: %s%s", bg_fireteamNames[f->ident],
-                           f->teamJumpMode ? " (TJ MODE)" : ""));
+  buffer = StringUtils::toUpperCase(
+      StringUtils::format("FT: %s%s", bg_fireteamNames[f->ident],
+                          f->teamJumpMode ? " (TJ MODE)" : ""));
   CG_Text_Paint_Ext(x + 3, y + FT_BAR_HEIGHT, .19f, .19f, tclr, buffer, 0, 0, 0,
                     &cgs.media.limboFont1);
 
@@ -335,7 +335,7 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
                       cgs.media.friendShader, friendShaderColor);
 
     } else {
-      buffer = ETJump::stringFormat("%i", f->saveLimit);
+      buffer = StringUtils::format("%i", f->saveLimit);
       saveTextW = static_cast<float>(
           CG_Text_Width_Ext(buffer, 0.19f, 0, &cgs.media.limboFont1));
       CG_Text_Paint_RightAligned_Ext(iconX, y + FT_BAR_HEIGHT, .19f, .19f, tclr,
