@@ -1889,18 +1889,18 @@ qboolean Script_CheckProfile(char *profile_path) {
 }
 
 static qboolean Script_WriteProfile(char *profile_path) {
-  if (ETJump::FileSystem::exists(profile_path)) {
-    ETJump::FileSystem::remove(profile_path);
+  if (FileSystem::exists(profile_path)) {
+    FileSystem::remove(profile_path);
   }
 
   char com_pid[MAX_CVAR_VALUE_STRING]{};
   DC->getCVarString("com_pid", com_pid, sizeof(com_pid));
 
   try {
-    ETJump::File fOut(profile_path, ETJump::File::Mode::Write);
+    File fOut(profile_path, File::Mode::Write);
     fOut.write(com_pid, static_cast<int>(strlen(com_pid)));
     return qtrue;
-  } catch (const ETJump::File::FileIOException &) {
+  } catch (const File::FileIOException &) {
     Com_Printf("%s: Can't write %s\n", __func__, profile_path);
     return qfalse;
   }
