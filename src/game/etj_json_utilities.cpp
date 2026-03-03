@@ -27,7 +27,6 @@
 #include "etj_filesystem.h"
 #include "etj_file.h"
 
-namespace ETJump {
 bool JsonUtils::writeFile(const std::string &file, const Json::Value &root,
                           std::string *errors) {
   Json::StyledWriter writer;
@@ -86,4 +85,3 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root,
   fIn.close();
   return true;
 }
-} // namespace ETJump

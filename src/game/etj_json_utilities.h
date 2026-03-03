@@ -27,7 +27,6 @@
 #include "json/json.h"
 #include "etj_string_utilities.h"
 
-namespace ETJump {
 class JsonUtils {
 public:
   // returns true on successful read
@@ -61,4 +60,3 @@ public:
     }
   }
 };
-} // namespace ETJump
