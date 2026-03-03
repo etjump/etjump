@@ -38,6 +38,7 @@ public:
                     vec3_t end, const vec3_t angles);
   static void think(gentity_t *self);
   static void touch(gentity_t *self, gentity_t *other);
+  static void free(gentity_t *self);
 };
 
 class Portalgun {
