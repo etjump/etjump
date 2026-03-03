@@ -159,7 +159,7 @@ bool Rankings(gentity_t *ent, Arguments argv) {
   if (!ent) {
     return false;
   }
-  auto args = ETJump::Container::skipFirstN(*argv, 1);
+  auto args = Container::skipFirstN(*argv, 1);
 
   auto optCommand = getOptCommand(
       "rankings", ClientNum(ent),
@@ -239,7 +239,7 @@ static bool listCheckpoints(gentity_t *ent, Arguments argv) {
     /listcheckpoints <map name> <run name> <rank>
     /listcheckpoints <season name> <map name> <run name> <rank>)";
 
-  const auto args = ETJump::Container::skipFirstN(*argv, 1);
+  const auto args = Container::skipFirstN(*argv, 1);
   auto optCommand = ETJump::getOptCommand(
       "listcheckpoints", clientNum,
       ETJump::CommandParser::CommandDefinition::create("listcheckpoints", desc)
@@ -353,7 +353,7 @@ static bool compareCheckpoints(gentity_t *ent, Arguments argv) {
     /comparecheckpoints <run name> <rank-2>
     /comparecheckpoints <run name> <rank-1> <rank-2>)";
 
-  const auto args = ETJump::Container::skipFirstN(*argv, 1);
+  const auto args = Container::skipFirstN(*argv, 1);
   auto optCommand = ETJump::getOptCommand(
       "comparecheckpoints", clientNum,
       ETJump::CommandParser::CommandDefinition::create("comparecheckpoints",
@@ -464,7 +464,7 @@ bool Records(gentity_t *ent, Arguments argv) {
   if (!ent) {
     return false;
   }
-  auto args = ETJump::Container::skipFirstN(*argv, 1);
+  auto args = Container::skipFirstN(*argv, 1);
   auto optCommand = getOptCommand(
       "records", ClientNum(ent),
       ETJump::CommandParser::CommandDefinition::create(
@@ -576,7 +576,7 @@ bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
   if (!ent) {
     return false;
   }
-  auto args = ETJump::Container::skipFirstN(*argv, 1);
+  auto args = Container::skipFirstN(*argv, 1);
   auto optCommand = getOptCommand(
       "loadcheckpoints", ClientNum(ent),
       ETJump::CommandParser::CommandDefinition::create(
@@ -736,8 +736,8 @@ static bool loadPos(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  ETJump::SavePosHandler::execSaveposCommand(
-      ent, ETJump::Container::skipFirstN(*argv, 1));
+  ETJump::SavePosHandler::execSaveposCommand(ent,
+                                             Container::skipFirstN(*argv, 1));
   return true;
 }
 } // namespace ClientCommands
@@ -1955,7 +1955,7 @@ bool Rename(gentity_t *ent, Arguments argv) {
   }
 
   const std::string newName =
-      StringUtils::join(ETJump::Container::skipFirstN(*argv, 2), " ");
+      StringUtils::join(Container::skipFirstN(*argv, 2), " ");
 
   if (newName.length() > MAX_NETNAME) {
     Printer::chat(
@@ -3021,7 +3021,7 @@ bool Commands::AdminCommand(gentity_t *ent) {
 
       // skip the first arg because we might have partially matched the command
       const std::string cmdArgs =
-          StringUtils::join(ETJump::Container::skipFirstN(*argv, 1), " ");
+          StringUtils::join(Container::skipFirstN(*argv, 1), " ");
       Printer::logAdminLn(StringUtils::format(
           "admincommand: %s%s used '%s%s'",
           ent ? std::to_string(ent->s.number) + " " : "", name,
