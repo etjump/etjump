@@ -6,16 +6,16 @@
  *
  */
 
-#include "cg_local.h"
-
 #include <string>
 #include <vector>
+
+#include "cg_local.h"
 #include "etj_client_commands_handler.h"
-#include "../game/etj_string_utilities.h"
-#include "../game/etj_json_utilities.h"
 #include "etj_savepos.h"
 #include "etj_utilities.h"
 #include "etj_consolecommands.h"
+
+#include "../game/etj_string_utilities.h"
 
 /*
 =============
@@ -353,29 +353,29 @@ void CG_QuickFireteamAdmin_f() {
   trap_UI_Popup(UIMENU_NONE);
 
   if (cg.showFireteamMenu) {
-    if (cgs.ftMenuMode == static_cast<int>(FTMenuMode::FT_MANAGE)) {
+    if (cgs.ftMenuMode == static_cast<int>(ETJump::FTMenuMode::FT_MANAGE)) {
       CG_EventHandling(CGAME_EVENT_NONE, qfalse);
     } else {
-      cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
+      cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_MANAGE);
     }
   } else {
     CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
-    cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
+    cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_MANAGE);
   }
 }
 
 static void CG_QuickFireteams_f() {
   if (cg.showFireteamMenu) {
-    if (cgs.ftMenuMode == static_cast<int>(FTMenuMode::FT_VSAY)) {
+    if (cgs.ftMenuMode == static_cast<int>(ETJump::FTMenuMode::FT_VSAY)) {
       CG_EventHandling(CGAME_EVENT_NONE, qfalse);
     } else {
-      cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
-      cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
+      cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_VSAY);
+      cgs.ftMenuPos = static_cast<int>(ETJump::FTMenuPos::FT_MENUPOS_NONE);
     }
   } else if (CG_IsOnFireteam(cg.clientNum)) {
     CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
-    cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
-    cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
+    cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_VSAY);
+    cgs.ftMenuPos = static_cast<int>(ETJump::FTMenuPos::FT_MENUPOS_NONE);
   }
 }
 
@@ -1121,7 +1121,7 @@ void CG_ExtraTrace_f() {
   std::string listPrint{"Bitmask values for ^3etj_extraTrace^7:\n"};
 
   for (auto &traceList : extraTraceList) {
-    std::string listValues = ETJump::stringFormat(
+    std::string listValues = StringUtils::format(
         "  ^3%d ^7= %s\n", traceList.bitmaskValue, traceList.description);
     listPrint += (listValues);
   }
@@ -1176,30 +1176,30 @@ static void storeSavepos() {
     flags = Q_atoi(CG_Argv(2));
   }
 
-  savePos->createSaveposData(filename, flags);
+  cgame.utils.savePos->createSaveposData(filename, flags);
 }
 
 static void loadSavepos() {
   const int argc = trap_Argc();
-  std::string filename = savePos->getDefaultSaveposName();
+  std::string filename = cgame.utils.savePos->getDefaultSaveposName();
 
   if (argc > 1) {
     filename = CG_Argv(1);
   }
 
-  if (!savePos->saveposExists(filename)) {
+  if (!cgame.utils.savePos->saveposExists(filename)) {
     CG_Printf("No savepos found with name ^3'%s'\n", filename.c_str());
     return;
   }
 
-  const SavePosData &data = savePos->getSaveposData(filename);
+  const SavePosData &data = cgame.utils.savePos->getSaveposData(filename);
 
   // this is obviously trivial to bypass by just editing the mapname field
   // in the savepos file, but it's a good idea to check this anyway
-  if (!StringUtil::iEqual(data.mapname, cgs.rawmapname, true)) {
+  if (!StringUtils::iEqual(data.mapname, cgs.rawmapname, true)) {
     CG_Printf("Savepos ^3'%s' ^7was not saved in the current map, change map "
               "to ^3'%s' ^7to load this position.\n",
-              filename.c_str(), ETJump::sanitize(data.mapname).c_str());
+              filename.c_str(), StringUtils::sanitize(data.mapname).c_str());
     return;
   }
 
@@ -1207,7 +1207,8 @@ static void loadSavepos() {
 }
 
 static void listSavepos() {
-  const std::vector<std::string> saveposNames = savePos->getSaveposNames();
+  const std::vector<std::string> saveposNames =
+      cgame.utils.savePos->getSaveposNames();
 
   if (saveposNames.empty()) {
     CG_Printf("No positions found. Make sure savepos files are located in "
@@ -1222,7 +1223,7 @@ static void listSavepos() {
   }
 }
 
-static void readSavepos() { savePos->parseExistingPositions(true); }
+static void readSavepos() { cgame.utils.savePos->parseExistingPositions(true); }
 
 static void toggleETJumpSettings() {
   trap_SendConsoleCommand("uiToggleETJumpSettings\n");
@@ -1423,7 +1424,8 @@ qboolean CG_ConsoleCommand(void) {
     return qtrue;
   }
 
-  return ETJump::consoleCommandsHandler->check(cmd, arguments) ? qtrue : qfalse;
+  return ETJump::cgame.handlers.consoleCommands->check(cmd, arguments) ? qtrue
+                                                                       : qfalse;
 }
 
 /*

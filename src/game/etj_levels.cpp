@@ -184,7 +184,7 @@ void Levels::PrintLevelInfo(gentity_t *ent) {
   std::string msg = "Levels:";
 
   for (const auto &lvl : levels_) {
-    msg += ETJump::stringFormat(" %i,", lvl->level);
+    msg += StringUtils::format(" %i,", lvl->level);
   }
 
   if (!msg.empty() && msg.back() == ',') {
@@ -198,12 +198,12 @@ void Levels::PrintLevelInfo(gentity_t *ent, int level) {
   for (const auto &lvl : levels_) {
     if (lvl->level == level) {
       Printer::chat(ent, "^3levelinfo: ^7check console for more information.");
-      Printer::console(ent, ETJump::stringFormat("^5Level: ^7%d\n"
-                                                 "^5Name: ^7%s\n"
-                                                 "^5Commands: ^7%s\n"
-                                                 "^5Greeting: ^7%s",
-                                                 level, lvl->name,
-                                                 lvl->commands, lvl->greeting));
+      Printer::console(ent, StringUtils::format("^5Level: ^7%d\n"
+                                                "^5Name: ^7%s\n"
+                                                "^5Commands: ^7%s\n"
+                                                "^5Greeting: ^7%s",
+                                                level, lvl->name, lvl->commands,
+                                                lvl->greeting));
       return;
     }
   }
@@ -290,7 +290,7 @@ std::string ReadString(const char **configFile) {
     token = COM_ParseExt(configFile, qfalse);
   }
 
-  return ETJump::trimEnd(std::move(output));
+  return StringUtils::trimEnd(output);
 }
 
 bool Levels::ReadFromConfig() {

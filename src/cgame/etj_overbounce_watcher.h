@@ -32,52 +32,65 @@
 #include "../game/q_shared.h"
 
 namespace ETJump {
+class ClientCommandsHandler;
+class CvarUpdateHandler;
+
 class OverbounceWatcher : public IRenderable {
 public:
-  explicit OverbounceWatcher(ClientCommandsHandler *clientCommandsHandler);
+  OverbounceWatcher(
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+      const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~OverbounceWatcher() override;
 
 private:
   void render() const override;
   bool beforeRender() override;
-  bool canSkipDraw() const;
+  [[nodiscard]] bool canSkipDraw() const;
 
-  ClientCommandsHandler *_clientCommandsHandler;
-  std::map<std::string, vec3_t> _positions;
-
-  // Currently displayed position
-  vec3_t *_current;
+  void startListeners();
 
   // saves the position with name
-  void save(const std::string &name, const vec3_t coordinate);
+  void save(const std::vector<std::string> &args);
 
   // stop displaying anything
   void reset();
 
   // loads the position to currently displayed position
   // if position is not found, returns false
-  bool load(const std::string &name);
+  void load(const std::vector<std::string> &args);
 
   // lists all available positions
   void list() const;
 
-  void setSize();
+  void setSize(const vmCvar_t *cvar);
+
+  std::map<std::string, vec3_t> positions;
+
+  // Currently displayed position
+  vec3_t *current = nullptr;
 
   bool overbounce = false;
 
-  playerState_t *ps;
+  const playerState_t *ps = nullptr;
+
   float x{};
   float pmoveSec{};
-  float zVel{}, zVelSnapped{};
+  float zVel{};
+  float zVelSnapped{};
 
-  float startHeight{}, endHeight{};
-  vec3_t start{}, end{};
+  float startHeight{};
+  float endHeight{};
+  vec3_t start{};
+  vec3_t end{};
   vec3_t snap{};
 
   int gravity{};
 
-  CvarValue::Size size;
+  CvarValue::Size size{};
   qhandle_t shader;
-  vec4_t _color{};
+  vec4_t color{};
+
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 } // namespace ETJump

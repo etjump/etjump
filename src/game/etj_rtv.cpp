@@ -83,7 +83,7 @@ void RockTheVote::setRtvConfigstrings() {
   std::string newcs;
 
   for (size_t i = 0; i < maxMaps; ++i) {
-    newcs += stringFormat(
+    newcs += StringUtils::format(
         "%s\\%i,%i%s", rtvMaps[i].mapName, rtvMaps[i].voteCountInfo.playerCount,
         rtvMaps[i].voteCountInfo.spectatorCount, i == maxMaps - 1 ? "" : "\\");
   }
@@ -150,7 +150,7 @@ bool RockTheVote::checkAutoRtv() {
   if (level.time == autoRtvCooldown - (1000 * 60 * 2) &&
       g_autoRtv.integer >= 2) {
     Printer::chatAll(
-        "^gServer: automatic Rock The Vote will be called in ^32 ^gminutes.");
+        "^7Server: automatic Rock The Vote will be called in ^32 ^7minutes.");
     return false;
   }
 
@@ -201,8 +201,8 @@ void RockTheVote::callAutoRtv() {
   anyonePlayedSinceLastVote = false;
   isRtvVote = true;
 
-  std::string voteMsg = stringFormat("Server called an automatic %s.\n",
-                                     level.voteInfo.voteString);
+  std::string voteMsg = StringUtils::format("Server called an automatic %s.\n",
+                                            level.voteInfo.voteString);
 
   Printer::consoleAll(voteMsg);
   Printer::centerAll("Server called an automatic vote.");

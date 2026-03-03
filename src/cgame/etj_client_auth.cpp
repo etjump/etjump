@@ -41,15 +41,15 @@ namespace ETJump {
 inline constexpr char MIGRATE_CMD[] = "migrateGuid";
 
 ClientAuth::ClientAuth() {
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       Constants::Authentication::AUTH_REQUEST,
       [&](const std::vector<std::string> &) { authResponse(); });
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       Constants::Authentication::GUID_MIGRATE_REQUEST,
       [&](const std::vector<std::string> &) { migrationResponse(); });
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       MIGRATE_CMD, [&](const std::vector<std::string> &args) {
         if (cg.demoPlayback) {
           return;
@@ -74,10 +74,11 @@ ClientAuth::ClientAuth() {
 }
 
 ClientAuth::~ClientAuth() {
-  serverCommandsHandler->unsubscribe(Constants::Authentication::AUTH_REQUEST);
-  serverCommandsHandler->unsubscribe(
+  cgame.handlers.serverCommands->unsubscribe(
+      Constants::Authentication::AUTH_REQUEST);
+  cgame.handlers.serverCommands->unsubscribe(
       Constants::Authentication::GUID_MIGRATE_REQUEST);
-  consoleCommandsHandler->unsubscribe(MIGRATE_CMD);
+  cgame.handlers.consoleCommands->unsubscribe(MIGRATE_CMD);
 }
 
 void ClientAuth::authResponse() {
@@ -89,9 +90,9 @@ void ClientAuth::authResponse() {
   const int os = getOS();
   const std::vector<std::string> hwid = getHwid();
 
-  const std::string authMsg =
-      stringFormat("%s %s %i %s", Constants::Authentication::AUTHENTICATE,
-                   Crypto::sha2(guid), os, StringUtil::join(hwid, " "));
+  const std::string authMsg = StringUtils::format(
+      "%s %s %i %s", Constants::Authentication::AUTHENTICATE,
+      Crypto::sha2(guid), os, StringUtils::join(hwid, " "));
   trap_SendClientCommand(authMsg.c_str());
 }
 
@@ -196,7 +197,7 @@ void ClientAuth::createAuthFile() {
 
   // we don't know if the old GUID exists yet, so leave this empty
   guidArray["v1"] = "";
-  guidArray["v2"] = StringUtil::toUpperCase(buf);
+  guidArray["v2"] = StringUtils::toUpperCase(buf);
 
   root["GUID"] = guidArray;
 

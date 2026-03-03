@@ -277,13 +277,13 @@ void DemoQueue::printStatus() {
   std::string msg;
 
   for (int i = 0; i < static_cast<int>(queue.size()); i++) {
-    msg +=
-        stringFormat("%-4i%s %s\n", i + 1, current == queue[i] ? "^z>^7" : " ",
-                     sanitize(queue[i]));
+    msg += StringUtils::format("%-4i%s %s\n", i + 1,
+                               current == queue[i] ? "^z>^7" : " ",
+                               StringUtils::sanitize(queue[i]));
   }
 
   // this can be quite lengthy with lots of demos in queue, so do splits
-  const auto splits = wrapWords(msg, '\n', 998);
+  const auto splits = StringUtils::wrapWords(msg, '\n', 998);
   for (const auto &split : splits) {
     uiInfo.uiDC.Print("%s", split.c_str());
   }

@@ -24,22 +24,35 @@
 
 #pragma once
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
+#include <vector>
+
+#include "../game/q_shared.h"
 
 namespace ETJump {
-class ConsoleAlphaHandler {
-  const char *shaderName{"__etjump-console-shader__"};
-  std::string createBackground();
-  std::string createTexturedBackground();
-  std::string createSolidBackground();
-
+class TraceUtils {
 public:
-  ConsoleAlphaHandler();
-  ~ConsoleAlphaHandler();
+  TraceUtils() = default;
+  ~TraceUtils() = default;
+
+  void filteredTrace(int32_t clientNum, trace_t *result, const vec3_t start,
+                     const vec3_t mins, const vec3_t maxs, const vec3_t end,
+                     int32_t skipNumber, int32_t mask);
+
+  // flamechunks might be owned by players or 'props_flamethrower' entity,
+  // which means we don't need to always do conditional filtering
+  void flamechunkTrace(int32_t clientNum, trace_t *result, const vec3_t start,
+                       const vec3_t mins, const vec3_t maxs, const vec3_t end,
+                       int32_t skipNumber, int32_t mask);
+
+  // prediction code gets pretty awkward & inefficient if we set/reset
+  // entities for every single trace, so expose these so they can be
+  // called directly in 'CG_PredictPlayerState' before/after 'Pmove'
+  void setupIgnoredEntities(int32_t clientNum);
+  void resetIgnoredEntities();
+
+  bool entityIsIgnored(int32_t entityNum);
+
+private:
+  std::vector<int32_t> tempTraceIgnoredEnts;
 };
 } // namespace ETJump

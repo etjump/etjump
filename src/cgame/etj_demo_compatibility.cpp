@@ -23,11 +23,15 @@
  */
 
 #include "etj_demo_compatibility.h"
+#include "cg_local.h"
 #include "etj_client_commands_handler.h"
+
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
-DemoCompatibility::DemoCompatibility() {
+DemoCompatibility::DemoCompatibility(
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+    : consoleCommands(consoleCommands) {
   if (!cg.demoPlayback) {
     return;
   }
@@ -35,9 +39,15 @@ DemoCompatibility::DemoCompatibility() {
   parseDemoVersion();
   setupCompatibilityFlags();
 
-  consoleCommandsHandler->subscribe(
+  this->consoleCommands->subscribe(
       "printDemoCompatInfo",
       [this](const std::vector<std::string> &) { printCompatibilityInfo(); });
+}
+
+DemoCompatibility::~DemoCompatibility() {
+  if (cg.demoPlayback) {
+    consoleCommands->unsubscribe("printDemoCompatInfo");
+  }
 }
 
 void DemoCompatibility::parseDemoVersion() {
@@ -89,7 +99,7 @@ void DemoCompatibility::parseDemoVersion() {
 void DemoCompatibility::fillVersionInfo(Version &version,
                                         const std::string &versionStr,
                                         const std::string &delimiter) {
-  const auto splits = StringUtil::split(versionStr, delimiter);
+  const auto splits = StringUtils::split(versionStr, delimiter);
 
   // bail if we have some weird version without at least 3 digits
   if (splits.size() < 3) {
@@ -179,6 +189,10 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.stripLocalizationMarkers = true;
     compatibilityStrings.emplace_back(
         "Stripping localization markers from server commands manually");
+
+    flags.noMapCustomizationHashes = true;
+    compatibilityStrings.emplace_back(
+        "Custom mapscript and entity file hashes not available");
   }
 }
 

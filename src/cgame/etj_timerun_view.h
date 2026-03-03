@@ -30,14 +30,19 @@
 #include "etj_cvar_parser.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+
 class TimerunView : public Drawable {
 public:
-  explicit TimerunView(std::shared_ptr<Timerun> timerun);
-  ~TimerunView() override = default;
+  TimerunView(const std::shared_ptr<Timerun> &timerun,
+              const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~TimerunView() override;
 
   void draw() override;
 
 private:
+  void startListeners();
+
   // returns the currently active run if there's any
   // e.g. if player is running => return player's run,
   // else if player is running, and we're speccing the player
@@ -69,7 +74,6 @@ private:
                              const Timerun::PlayerTimerunInformation &run);
 
   vec4_t inactiveTimerColor{};
-  std::shared_ptr<Timerun> _timerun;
 
   vec4_t colorDefault = {1.0f, 1.0f, 1.0f, 1.0f};
   vec4_t colorSuccess = {0.627f, 0.941f, 0.349f, 1.0f};
@@ -83,6 +87,9 @@ private:
   CvarValue::Size popupSize{};
 
   int demoSvFps{};
+
+  std::shared_ptr<Timerun> timerun;
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 
   static bool canSkipDraw();
 };

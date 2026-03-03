@@ -31,8 +31,7 @@
 #include <vector>
 
 #include "cg_local.h"
-#include "../game/q_shared.h"
-#include "../game/etj_shared.h"
+#include "etj_client_commands_handler.h"
 
 namespace ETJump {
 namespace TimerunCommands {
@@ -72,8 +71,11 @@ public:
 
   Timerun(const std::shared_ptr<PlayerEventsHandler> &playerEventsHandler,
           const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler);
+  ~Timerun();
 
   void registerListeners();
+  void reset(); // called on map_restart to clear status
+
   void onStop(const TimerunCommands::Stop *stop);
   void onInterrupt(const TimerunCommands::Interrupt *interrupt);
   void onCheckpoint(const TimerunCommands::Checkpoint *cp);
@@ -84,7 +86,7 @@ public:
   void parseServerCommand(const std::vector<std::string> &args);
   const PlayerTimerunInformation *getTimerunInformationFor(int clientNum);
   static int getNumCheckpointsHit(
-      const std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
+      std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
 
   static void execCmdOnRunStart();
   static void execCmdOnRunEnd();

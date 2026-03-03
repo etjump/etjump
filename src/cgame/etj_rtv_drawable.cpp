@@ -25,7 +25,7 @@
 #include <array>
 
 #include "etj_rtv_drawable.h"
-
+#include "cg_local.h"
 #include "etj_client_rtv_handler.h"
 #include "etj_utilities.h"
 
@@ -126,7 +126,7 @@ void RtvDrawable::drawMenuTitleText(panel_button_t *button) {
     sec = 0;
   }
 
-  std::string str = stringFormat("VOTE FOR A MAP (%i)", sec);
+  std::string str = StringUtils::format("VOTE FOR A MAP (%i)", sec);
 
   CG_Text_Paint_Ext(
       button->rect.x, button->rect.y + static_cast<float>(button->data[0]),
@@ -137,7 +137,7 @@ void RtvDrawable::drawMenuTitleText(panel_button_t *button) {
 void RtvDrawable::drawMenuText(panel_button_t *button) {
   float y = button->rect.y;
   const auto arrSize = static_cast<int>(rtvMenuStrings.size());
-  auto rtvMaps = rtvHandler->getRtvMaps();
+  auto rtvMaps = cgame.handlers.rtv->getRtvMaps();
 
   for (int i = 0; i < arrSize; i++) {
     // skip empty entries
@@ -146,14 +146,16 @@ void RtvDrawable::drawMenuText(panel_button_t *button) {
       continue;
     }
 
-    std::string str = stringFormat("%i. %s", (i + 1) % 10, rtvMenuStrings[i]);
+    std::string str =
+        StringUtils::format("%i. %s", (i + 1) % 10, rtvMenuStrings[i]);
 
     // last entry is current map, so we need 'No' vote count for that
     if (i == arrSize - 1) {
-      str += stringFormat(": %i(%i)", cgs.voteNo, cgs.voteNoSpectators);
+      str += StringUtils::format(": %i(%i)", cgs.voteNo, cgs.voteNoSpectators);
     } else {
-      str += stringFormat(": %i(%i)", rtvHandler->getTotalVotesForMap(i),
-                          (*rtvMaps)[i].voteCountInfo.spectatorCount);
+      str += StringUtils::format(": %i(%i)",
+                                 cgame.handlers.rtv->getTotalVotesForMap(i),
+                                 (*rtvMaps)[i].voteCountInfo.spectatorCount);
     }
 
     CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
@@ -182,7 +184,8 @@ qboolean RtvDrawable::checkExecKey(int key, qboolean doAction) {
     // so 0 = 'Keep current map'
     int selection = key - '0';
 
-    if (selection > static_cast<int>(rtvHandler->getRtvMaps()->size()) &&
+    if (selection >
+            static_cast<int>(cgame.handlers.rtv->getRtvMaps()->size()) &&
         selection != 0) {
       return qfalse;
     }
@@ -209,7 +212,7 @@ bool RtvDrawable::beforeRender() {
     return false;
   }
 
-  auto rtvMaps = rtvHandler->getRtvMaps();
+  auto rtvMaps = cgame.handlers.rtv->getRtvMaps();
   std::fill_n(rtvMenuStrings.begin(), rtvMenuStrings.size() - 1, "");
 
   for (size_t i = 0; i < rtvMaps->size(); i++) {
@@ -230,7 +233,7 @@ bool RtvDrawable::canSkipDraw() {
     return true;
   }
 
-  if (!rtvHandler->rtvVoteActive()) {
+  if (!cgame.handlers.rtv->rtvVoteActive()) {
     return true;
   }
 

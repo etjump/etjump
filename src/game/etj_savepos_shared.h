@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <array>
+#include <vector>
 
 #include "q_shared.h"
 #include "bg_public.h"

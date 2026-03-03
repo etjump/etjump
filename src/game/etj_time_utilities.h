@@ -76,17 +76,17 @@ struct Date {
     ss >> std::get_time(&t, format.c_str());
 
     if (ss.fail()) {
-      throw std::invalid_argument(stringFormat(
+      throw std::invalid_argument(StringUtils::format(
           "`%s` does not match to format `%s`", dateString, format));
     }
 
     if (t.tm_year < 70) {
       throw std::invalid_argument(
-          stringFormat("`%s` has to be above year 1970"));
+          StringUtils::format("`%s` has to be above year 1970"));
     }
 
     if (t.tm_mday < 1) {
-      throw std::invalid_argument(stringFormat("Day should be defined"));
+      throw std::invalid_argument(StringUtils::format("Day should be defined"));
     }
 
     date.year = t.tm_year + 1900;
@@ -98,7 +98,8 @@ struct Date {
   }
 
   std::string toDateString() const {
-    return stringFormat("%04d-%02d-%02d", this->year, this->mon, this->day);
+    return StringUtils::format("%04d-%02d-%02d", this->year, this->mon,
+                               this->day);
   }
 
   int year{}; // year
@@ -153,15 +154,16 @@ struct Time {
   bool operator>=(const Time &other) const { return !(*this < other); }
 
   std::string toDateTimeString() const {
-    return stringFormat("%04d-%02d-%02d %02d:%02d:%02d", this->date.year,
-                        this->date.mon, this->date.day, this->clock.hours,
-                        this->clock.min, this->clock.sec);
+    return StringUtils::format(
+        "%04d-%02d-%02d %02d:%02d:%02d", this->date.year, this->date.mon,
+        this->date.day, this->clock.hours, this->clock.min, this->clock.sec);
   }
 
   // date with abbreviated month, e.g. 01 Jan 1970
   std::string toAbbrevMonthDateString() const {
-    return stringFormat("%02d %s %04d", this->date.day,
-                        date.abbrevMonths[this->date.mon - 1], this->date.year);
+    return StringUtils::format("%02d %s %04d", this->date.day,
+                               date.abbrevMonths[this->date.mon - 1],
+                               this->date.year);
   }
 
   static Time fromInt(int64_t input) {
@@ -189,10 +191,10 @@ struct Time {
     ss >> std::get_time(&t, format.c_str());
 
     if (ss.fail()) {
-      Printer::logLn(
-          stringFormat("%s: Failed to parse timestamp string '%s' in given "
-                       "format '%s', using default timestamp.",
-                       __func__, input, format));
+      Printer::logLn(StringUtils::format(
+          "%s: Failed to parse timestamp string '%s' in given "
+          "format '%s', using default timestamp.",
+          __func__, input, format));
 
       t = {};
       std::istringstream defaultTime("1900-01-01 00:00:00");

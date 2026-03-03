@@ -124,7 +124,7 @@ void SessionV2::onClientDisconnect(const int clientNum) {
 
   // TODO: this is probably unnecessary and could be removed,
   //  there will only ever be max 64 of these files anyway
-  FileSystem::remove(stringFormat(SESSION_FILE, clientNum));
+  FileSystem::remove(StringUtils::format(SESSION_FILE, clientNum));
 }
 
 void SessionV2::onClientBegin(const gentity_t *ent) {
@@ -158,7 +158,7 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
         // this should never happen, because we have authenticated already
         if (user.id == 0) {
           throw std::runtime_error(
-              stringFormat("Failed to get user data for GUID %s", guid));
+              StringUtils::format("Failed to get user data for GUID %s", guid));
         }
 
         return std::make_unique<GetUserDataResult>(user);
@@ -188,7 +188,7 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
           if (r->user.lastSeen > 0) {
             Printer::popup(
                 clientNum,
-                stringFormat(
+                StringUtils::format(
                     "^5Your last visit was on %s.",
                     Time::fromInt(r->user.lastSeen).toDateTimeString()));
           }
@@ -211,8 +211,9 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
 bool SessionV2::authenticate(const gentity_t *ent) {
   const int argc = trap_Argc();
   const int clientNum = ClientNum(ent);
-  const std::string cleanName = sanitize(ent->client->pers.netname);
-  const std::string spoofAttempt = stringFormat(
+  const std::string cleanName =
+      StringUtils::sanitize(ent->client->pers.netname);
+  const std::string spoofAttempt = StringUtils::format(
       "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
       clientNum, cleanName, getIP(clientNum));
 
@@ -334,8 +335,9 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
   const int argc = trap_Argc();
   constexpr int NUM_EXPECTED_ARGS = 3;
   const int clientNum = ClientNum(ent);
-  const std::string cleanName = sanitize(ent->client->pers.netname);
-  const std::string spoofAttempt = stringFormat(
+  const std::string cleanName =
+      StringUtils::sanitize(ent->client->pers.netname);
+  const std::string spoofAttempt = StringUtils::format(
       "authentication: Potential GUID migration spoof attempt by %i %s (%s)",
       clientNum, cleanName.c_str(), getIP(clientNum));
 
@@ -423,7 +425,8 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
       },
       [this, clientNum, cleanName](const std::runtime_error &e) {
         Printer::console(
-            clientNum, stringFormat("Failed to migrate GUID: %s\n", e.what()));
+            clientNum,
+            StringUtils::format("Failed to migrate GUID: %s\n", e.what()));
         logger->error("GUID migration failed for client %i %s: %s", clientNum,
                       cleanName, e.what());
       });
@@ -453,8 +456,8 @@ void SessionV2::addNewUser(const int32_t clientNum) {
 
         // TODO: remove the entry from DB if this fails?
         if (userID == 0) {
-          throw std::runtime_error(
-              stringFormat("Failed to get user id for GUID '%s'.", guid));
+          throw std::runtime_error(StringUtils::format(
+              "Failed to get user id for GUID '%s'.", guid));
         }
 
         updateHWID(clientNum, userID);
@@ -486,7 +489,7 @@ void SessionV2::updateHWID(const int clientNum, const int userID) const {
   // the existing ones for the users current platform
   const auto userHWIDs = repository->getHWIDsForUsersPlatform(userID, platform);
   const std::string currentHWID =
-      StringUtil::join(clients[clientNum].hwid, ",");
+      StringUtils::join(clients[clientNum].hwid, ",");
 
   const auto addHWID = [&] {
     UserModels::UserHWID hwid{};
@@ -541,7 +544,7 @@ void SessionV2::updateLastSeen(const int32_t clientNum) {
       [this, clientNum, id, t] {
         repository->updateLastSeen(id, t);
         return std::make_unique<UpdateLastSeenResult>(
-            stringFormat("Updated last seen timestamp for user %i", id));
+            StringUtils::format("Updated last seen timestamp for user %i", id));
       },
       [this, id](std::unique_ptr<SynchronizationContext::ResultBase>
                      updateLastSeenResult) {
@@ -648,14 +651,14 @@ void SessionV2::storeNewName(const gentity_t *ent) const {
       [this, id, clientName] {
         UserModels::Name name{};
         name.name = clientName;
-        name.cleanName = sanitize(clientName, true);
+        name.cleanName = StringUtils::sanitize(clientName, true);
         name.userID = id;
 
         std::string message;
 
         if (repository->addNewName(name)) {
-          message = stringFormat("Added new nickname '%s' for user %i",
-                                 name.name, name.userID);
+          message = StringUtils::format("Added new nickname '%s' for user %i",
+                                        name.name, name.userID);
         }
 
         return std::make_unique<AddNewNameResult>(message);
@@ -713,12 +716,12 @@ void SessionV2::listUsers(const gentity_t *ent, const int32_t page) const {
         const uint32_t end = std::min(start + USERS_PER_PAGE, size);
 
         std::string msg =
-            stringFormat("Listing page ^3%i ^7of ^3%i\n", page, pages);
-        msg += stringFormat("^7%-6s %-10s %-15s %-36s\n", "ID", "Level",
-                            "Last seen", "Name");
+            StringUtils::format("Listing page ^3%i ^7of ^3%i\n", page, pages);
+        msg += StringUtils::format("^7%-6s %-10s %-15s %-36s\n", "ID", "Level",
+                                   "Last seen", "Name");
 
         for (uint32_t i = start; i < end; i++) {
-          msg += ETJump::stringFormat(
+          msg += StringUtils::format(
               "^7%-6i %-10i %-15s %-36s\n", r->users[i].id, r->users[i].level,
               r->users[i].lastSeen > 0
                   ? TimeStampDifferenceToString(
@@ -757,7 +760,7 @@ void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) const {
         if (r->usernames.empty()) {
           Printer::chat(
               clientNum,
-              stringFormat(
+              StringUtils::format(
                   "^3listusernames: ^7couldn't find any names with id ^3%i",
                   id));
           return;
@@ -767,8 +770,8 @@ void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) const {
                       "^3listusernames: ^7check console for more information.");
 
         std::string msg =
-            stringFormat("Found ^3%i ^7usernames for ID ^3%i^7:\n",
-                         static_cast<int32_t>(r->usernames.size()), id);
+            StringUtils::format("Found ^3%i ^7usernames for ID ^3%i^7:\n",
+                                static_cast<int32_t>(r->usernames.size()), id);
 
         for (const auto &name : r->usernames) {
           msg += name + "\n^7";
@@ -783,7 +786,7 @@ void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) const {
 
 void SessionV2::findUser(const gentity_t *ent, const std::string &name) const {
   // query is case-insensitive, so we just need to strip color codes
-  const std::string cleanName = sanitize(name);
+  const std::string cleanName = StringUtils::sanitize(name);
   const int32_t clientNum =
       ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
   const std::string func = __func__;
@@ -804,21 +807,22 @@ void SessionV2::findUser(const gentity_t *ent, const std::string &name) const {
         }
 
         if (r->users.empty()) {
-          Printer::chat(
-              clientNum,
-              stringFormat("^3finduser: ^7no users found with name ^3'%s'^7.",
-                           cleanName));
+          Printer::chat(clientNum,
+                        StringUtils::format(
+                            "^3finduser: ^7no users found with name ^3'%s'^7.",
+                            cleanName));
           return;
         }
 
         Printer::chat(clientNum,
                       "^3finduser: ^7check console for more information.");
-        std::string msg = stringFormat("Listing users matching the name ^3'%s' "
-                                       "^7(max 20 results)\n\nID       Name\n",
-                                       cleanName);
+        std::string msg =
+            StringUtils::format("Listing users matching the name ^3'%s' "
+                                "^7(max 20 results)\n\nID       Name\n",
+                                cleanName);
 
         for (const auto &[id, name] : r->users) {
-          msg += ETJump::stringFormat("%-8d %-36s^7\n", id, name);
+          msg += StringUtils::format("%-8d %-36s^7\n", id, name);
         }
 
         Printer::console(clientNum, msg);
@@ -881,7 +885,7 @@ void SessionV2::userInfo(const gentity_t *ent, const int32_t id) const {
                 ? Time::fromInt(r->user.lastSeen).toDateTimeString()
                 : "N/A";
 
-        std::string msg = stringFormat(
+        std::string msg = StringUtils::format(
             "^5ID: ^7%d\n"
             "^5GUID: ^7%s\n"
             "^5Last IPv4: ^7%s\n"
@@ -912,16 +916,16 @@ void SessionV2::editUser(const gentity_t *ent,
       [this, params] {
         if (!repository->userExists(params.id)) {
           return std::make_unique<EditUserResult>(
-              stringFormat("^3edituser: ^7no user found with id ^3%i",
-                           params.id),
+              StringUtils::format("^3edituser: ^7no user found with id ^3%i",
+                                  params.id),
               CLIENT_NOT_CONNECTED);
         }
 
         repository->editUser(params);
 
         return std::make_unique<EditUserResult>(
-            stringFormat("^3edituser: ^7successfully updated user ^3%i",
-                         params.id),
+            StringUtils::format("^3edituser: ^7successfully updated user ^3%i",
+                                params.id),
             clientNumFromID(params.id));
       },
       [this, clientNum, params](
@@ -997,7 +1001,7 @@ void SessionV2::listBans(const gentity_t *ent, const int32_t page) const {
                       "^3listbans: ^7check console for more information.");
 
         std::string msg =
-            stringFormat("^7Showing page ^3%i ^7of ^3%i\n", page, pages);
+            StringUtils::format("^7Showing page ^3%i ^7of ^3%i\n", page, pages);
 
         // FIXME: this formatting is terrible, but it cannot really be fixed
         // properly because we run out of space on a single line.
@@ -1005,7 +1009,7 @@ void SessionV2::listBans(const gentity_t *ent, const int32_t page) const {
         // '!baninfo <id>' command to display more detailed information
         // about a specific ban.
         for (uint32_t i = start; i < end; i++) {
-          msg += stringFormat(
+          msg += StringUtils::format(
               "^7%-3i %s ^7%s %s ^7%s %s\n", r->bans[i].banID, r->bans[i].name,
               r->bans[i].banDate, r->bans[i].bannedBy,
               r->bans[i].expires > 0
@@ -1051,7 +1055,7 @@ void SessionV2::setLevel(const gentity_t *ent,
             const auto targetUser = repository->getUserData(params.id.value());
 
             if (targetUser.id == 0) {
-              return std::make_unique<SetLevelResult>(stringFormat(
+              return std::make_unique<SetLevelResult>(StringUtils::format(
                   "^3setlevel: user with id ^3%i ^7does not exist.",
                   params.id.value()));
             }
@@ -1069,7 +1073,7 @@ void SessionV2::setLevel(const gentity_t *ent,
               clientNum,
               "^3setlevel: ^7no valid target found. This is a bug, please "
               "report this to the developers.");
-          throw std::runtime_error(stringFormat(
+          throw std::runtime_error(StringUtils::format(
               "called by client %i with no valid target! (id: %s "
               "targetClientNum: %s)",
               clientNum,
@@ -1081,7 +1085,7 @@ void SessionV2::setLevel(const gentity_t *ent,
         }
 
         if (params.level == targetUserLevel) {
-          return std::make_unique<SetLevelResult>(stringFormat(
+          return std::make_unique<SetLevelResult>(StringUtils::format(
               "^3setlevel: ^7targeted user is already a level ^3%i ^7user.",
               params.level));
         }
@@ -1105,15 +1109,16 @@ void SessionV2::setLevel(const gentity_t *ent,
                 game.levels->GetLevel(params.level);
             parsePermissions(targetClientNum);
 
-            messageOther = stringFormat(
+            messageOther = StringUtils::format(
                 "^3setlevel: ^7you are now a level ^3%i ^7user (%s^7).",
                 params.level, clients[targetClientNum].level->name);
           }
 
           return std::make_unique<SetLevelResult>(
-              stringFormat("^3setlevel: ^7user with id ^3%i ^7is now a level "
-                           "^3%i ^7user.",
-                           params.id.value(), params.level),
+              StringUtils::format(
+                  "^3setlevel: ^7user with id ^3%i ^7is now a level "
+                  "^3%i ^7user.",
+                  params.id.value(), params.level),
               messageOther.has_value() ? messageOther : std::nullopt);
         }
 
@@ -1123,10 +1128,11 @@ void SessionV2::setLevel(const gentity_t *ent,
         parsePermissions(targetClientNum);
 
         return std::make_unique<SetLevelResult>(
-            stringFormat("^3setlevel: ^7%s^7 is now a level ^3%i ^7user.",
-                         (g_entities + targetClientNum)->client->pers.netname,
-                         params.level),
-            stringFormat(
+            StringUtils::format(
+                "^3setlevel: ^7%s^7 is now a level ^3%i ^7user.",
+                (g_entities + targetClientNum)->client->pers.netname,
+                params.level),
+            StringUtils::format(
                 "^3setlevel: ^7you are now a level ^3%i ^7user (%s^7).",
                 params.level, clients[targetClientNum].level->name));
       },
@@ -1185,12 +1191,12 @@ void SessionV2::deleteLevel(const gentity_t *ent, const int32_t deletedLevel) {
 
         // this should never fail, we've already checked that the level exists
         if (!game.levels->Delete(deletedLevel)) {
-          Printer::chat(
-              clientNum,
-              stringFormat("^3deletelevel: ^7level ^3%i ^7doesn't exist. This "
-                           "is a bug, please report this to the developers.",
-                           deletedLevel));
-          throw std::runtime_error(stringFormat(
+          Printer::chat(clientNum,
+                        StringUtils::format(
+                            "^3deletelevel: ^7level ^3%i ^7doesn't exist. This "
+                            "is a bug, please report this to the developers.",
+                            deletedLevel));
+          throw std::runtime_error(StringUtils::format(
               "client %i tried to delete level %i that doesn't exist, but the "
               "level was already verified to exist earlier!",
               clientNum, deletedLevel));
@@ -1211,19 +1217,20 @@ void SessionV2::deleteLevel(const gentity_t *ent, const int32_t deletedLevel) {
           throw std::runtime_error("DeleteLevelResult is null.");
         }
 
-        Printer::chat(clientNum,
-                      stringFormat("^3deletelevel: ^7level ^3%i ^7was deleted. "
-                                   "^3%i ^7%s been set to level 0.",
-                                   deletedLevel, r->numAffectedClients,
-                                   r->numAffectedClients == 1 ? "user has"
-                                                              : "users have"));
+        Printer::chat(
+            clientNum,
+            StringUtils::format("^3deletelevel: ^7level ^3%i ^7was deleted. "
+                                "^3%i ^7%s been set to level 0.",
+                                deletedLevel, r->numAffectedClients,
+                                r->numAffectedClients == 1 ? "user has"
+                                                           : "users have"));
 
         for (const auto &cl : r->connectedClients) {
           clients[cl].level = game.levels->GetLevel(0);
           parsePermissions(cl);
 
           Printer::chat(
-              cl, stringFormat(
+              cl, StringUtils::format(
                       "^3deletelevel: ^7your previous level ^3%i ^7has "
                       "been deleted. You are now a level ^30 ^7user (%s^7).",
                       deletedLevel, clients[cl].level->name));
@@ -1245,8 +1252,8 @@ void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
 
         if (target.id == 0) {
           return std::make_unique<BanResult>(
-              stringFormat("^3ban: ^7user with ID ^3%i ^7does not exist.",
-                           params.id),
+              StringUtils::format(
+                  "^3ban: ^7user with ID ^3%i ^7does not exist.", params.id),
               0, 0);
         }
 
@@ -1294,28 +1301,29 @@ void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
 
           std::string msg;
           std::string banDuration =
-              ban.expires == 0
-                  ? "permanently"
-                  : "for " + getPluralizedString(params.expires, "second");
+              ban.expires == 0 ? "permanently"
+                               : "for " + StringUtils::getPluralizedString(
+                                              params.expires, "second");
 
           if (params.targetClientNum.has_value()) {
-            msg = stringFormat(
+            msg = StringUtils::format(
                 "^3ban: ^7player %s ^7(user ID ^3%i^7) was banned %s.",
                 ban.name, ban.id, banDuration);
             return std::make_unique<BanResult>(msg, banId, ban.expires,
                                                params.targetClientNum);
           }
 
-          msg = stringFormat("^3ban: ^7user with ID ^3%i ^7was banned %s.",
-                             ban.id, banDuration);
+          msg =
+              StringUtils::format("^3ban: ^7user with ID ^3%i ^7was banned %s.",
+                                  ban.id, banDuration);
           return std::make_unique<BanResult>(msg, banId, ban.expires);
 
         } catch (const std::exception &e) {
-          Printer::chat(
-              clientNum,
-              stringFormat("^3ban: ^7failed to add ban for user ID ^3%i^7.\n",
-                           target.id));
-          throw std::runtime_error(stringFormat(
+          Printer::chat(clientNum,
+                        StringUtils::format(
+                            "^3ban: ^7failed to add ban for user ID ^3%i^7.\n",
+                            target.id));
+          throw std::runtime_error(StringUtils::format(
               "Command executed by %s failed: %s", params.bannedBy, e.what()));
         }
       },
@@ -1354,18 +1362,18 @@ void SessionV2::unban(const gentity_t *ent, const int32_t banId) {
         try {
           const int32_t id = repository->unbanUser(banId);
           const std::string msg =
-              (id == 0)
-                  ? stringFormat("^3unban: ^7no ban found with ID ^3%i^7.",
-                                 banId)
-                  : stringFormat("^3unban: ^7removed ban with ID ^3%i^7.", id);
+              (id == 0) ? StringUtils::format(
+                              "^3unban: ^7no ban found with ID ^3%i^7.", banId)
+                        : StringUtils::format(
+                              "^3unban: ^7removed ban with ID ^3%i^7.", id);
 
           return std::make_unique<UnbanResult>(msg, id);
         } catch (const std::exception &e) {
-          Printer::chat(clientNum,
-                        stringFormat("^3unban: ^7failed to execute unban "
-                                     "operation for ban ID ^3%i^7.",
-                                     banId));
-          throw std::runtime_error(stringFormat(
+          Printer::chat(clientNum, StringUtils::format(
+                                       "^3unban: ^7failed to execute unban "
+                                       "operation for ban ID ^3%i^7.",
+                                       banId));
+          throw std::runtime_error(StringUtils::format(
               "Command executed by %s failed: %s", name, e.what()));
         }
       },
@@ -1444,7 +1452,8 @@ bool SessionV2::readSessionData(const int clientNum) {
   };
 
   // if we can't read the data for some reason, send authentication request
-  if (!JsonUtils::readFile(stringFormat(SESSION_FILE, clientNum), root, &err)) {
+  if (!JsonUtils::readFile(StringUtils::format(SESSION_FILE, clientNum), root,
+                           &err)) {
     parsingFailed();
     return false;
   }
@@ -1498,8 +1507,8 @@ void SessionV2::writeSessionData() const {
 
     std::string err;
 
-    if (!JsonUtils::writeFile(stringFormat(SESSION_FILE, clientNum), root,
-                              &err)) {
+    if (!JsonUtils::writeFile(StringUtils::format(SESSION_FILE, clientNum),
+                              root, &err)) {
       logger->error("Failed to write session data for client %i: %s", clientNum,
                     err);
     }
@@ -1565,16 +1574,18 @@ void SessionV2::removeExpiredBans() {
 
           if (unbans.size() == 1) {
             return std::make_unique<BanExpiryResult>(
-                stringFormat("Ban with ID %i has been automatically removed "
-                             "due to expiring.",
-                             unbans[0]),
+                StringUtils::format(
+                    "Ban with ID %i has been automatically removed "
+                    "due to expiring.",
+                    unbans[0]),
                 unbans);
           }
 
           return std::make_unique<BanExpiryResult>(
-              stringFormat("Bans with IDs %s have been automatically removed "
-                           "due to expiring.",
-                           StringUtil::join(unbans, ", ")),
+              StringUtils::format(
+                  "Bans with IDs %s have been automatically removed "
+                  "due to expiring.",
+                  StringUtils::join(unbans, ", ")),
               unbans);
         } catch (const std::exception &e) {
           throw std::runtime_error(e.what());
@@ -1649,11 +1660,11 @@ void SessionV2::checkIPBan(const int clientNum) const {
 
         if (result->isBanned) {
           const std::string cleanName =
-              sanitize(g_entities[clientNum].client->pers.netname);
-          Printer::logAdminLn(
-              stringFormat("authentication: Rejected connection from IP banned "
-                           "client %i %s (%s)",
-                           clientNum, cleanName, result->ip));
+              StringUtils::sanitize(g_entities[clientNum].client->pers.netname);
+          Printer::logAdminLn(StringUtils::format(
+              "authentication: Rejected connection from IP banned "
+              "client %i %s (%s)",
+              clientNum, cleanName, result->ip));
           trap_DropClient(clientNum, "You are banned.", 0);
         }
       },
@@ -1666,7 +1677,7 @@ void SessionV2::checkIPBan(const int clientNum) const {
 bool SessionV2::isBanned(const int clientNum, const int userID,
                          const std::string &legacyGuid) const {
   const auto bans = repository->getBanData();
-  const std::string userHwid = StringUtil::join(clients[clientNum].hwid, ",");
+  const std::string userHwid = StringUtils::join(clients[clientNum].hwid, ",");
 
   UserModels::LegacyAuth legacyAuth{};
   std::vector<std::string> legacyAuthHWIDs{};
@@ -1675,7 +1686,7 @@ bool SessionV2::isBanned(const int clientNum, const int userID,
     legacyAuth = repository->getLegacyAuthData(legacyGuid);
 
     if (legacyAuth.userID == userID) {
-      legacyAuthHWIDs = StringUtil::split(legacyAuth.hwid, ",");
+      legacyAuthHWIDs = StringUtils::split(legacyAuth.hwid, ",");
     }
   }
 
@@ -1713,15 +1724,16 @@ bool SessionV2::isBanned(const int clientNum, const int userID,
 
 void SessionV2::dropBannedClient(const int clientNum) const {
   const std::string cleanName =
-      sanitize(g_entities[clientNum].client->pers.netname);
+      StringUtils::sanitize(g_entities[clientNum].client->pers.netname);
 
-  Printer::logAdminLn(
-      stringFormat("authentication: Banned player %s tried to connect with "
-                   "GUID '%s' and HWID '%s'",
-                   cleanName, clients[clientNum].guid,
-                   StringUtil::join(clients[clientNum].hwid, ",")));
-  Printer::popupAll(stringFormat("Banned player %s ^7tried to connect.",
-                                 g_entities[clientNum].client->pers.netname));
+  Printer::logAdminLn(StringUtils::format(
+      "authentication: Banned player %s tried to connect with "
+      "GUID '%s' and HWID '%s'",
+      cleanName, clients[clientNum].guid,
+      StringUtils::join(clients[clientNum].hwid, ",")));
+  Printer::popupAll(
+      StringUtils::format("Banned player %s ^7tried to connect.",
+                          g_entities[clientNum].client->pers.netname));
   trap_DropClient(clientNum, "You are banned.", 0);
 }
 
@@ -1750,16 +1762,16 @@ void SessionV2::printGreeting(const int32_t clientNum) const {
 std::string SessionV2::formatGreeting(const gentity_t *ent,
                                       const std::string &greeting) const {
   std::string s = greeting;
-  StringUtil::replaceAll(s, "[n]", ent->client->pers.netname);
+  StringUtils::replaceAll(s, "[n]", ent->client->pers.netname);
   const auto lastSeen = clients[ClientNum(ent)].user->lastSeen;
 
   const std::string lastSeenStr =
       lastSeen > 0 ? Time::fromInt(lastSeen).toDateTimeString() : "never";
-  StringUtil::replaceAll(s, "[t]", lastSeenStr);
+  StringUtils::replaceAll(s, "[t]", lastSeenStr);
 
   time_t t = 0;
   t = std::time(&t);
-  StringUtil::replaceAll(
+  StringUtils::replaceAll(
       s, "[d]",
       TimeStampDifferenceToString(static_cast<int32_t>(t - lastSeen)));
 

@@ -172,55 +172,55 @@ const char **ftMenuStringsMsg[] = {
 };
 
 void CG_Fireteams_MenuTitleText_Draw(panel_button_t *button) {
-  switch (static_cast<FTMenuMode>(cgs.ftMenuMode)) {
-    case FTMenuMode::FT_VSAY:
+  switch (static_cast<ETJump::FTMenuMode>(cgs.ftMenuMode)) {
+    case ETJump::FTMenuMode::FT_VSAY:
       CG_Text_Paint_Ext(
           button->rect.x, button->rect.y + static_cast<float>(button->data[0]),
           button->font->scalex, button->font->scaley, button->font->colour,
           "MESSAGE", 0, 0, button->font->style, button->font->font);
       break;
-    case FTMenuMode::FT_MANAGE:
+    case ETJump::FTMenuMode::FT_MANAGE:
       CG_Text_Paint_Ext(
           button->rect.x, button->rect.y + static_cast<float>(button->data[0]),
           button->font->scalex, button->font->scaley, button->font->colour,
           "FIRETEAMS", 0, 0, button->font->style, button->font->font);
       break;
-    case FTMenuMode::FT_APPLY:
+    case ETJump::FTMenuMode::FT_APPLY:
       CG_Text_Paint_Ext(
           button->rect.x, button->rect.y + static_cast<float>(button->data[0]),
           button->font->scalex, button->font->scaley, button->font->colour,
           "JOIN", 0, 0, button->font->style, button->font->font);
       break;
-    case FTMenuMode::FT_PROPOSE:
+    case ETJump::FTMenuMode::FT_PROPOSE:
       CG_Text_Paint_Ext(
           button->rect.x, button->rect.y + static_cast<float>(button->data[0]),
           button->font->scalex, button->font->scaley, button->font->colour,
           "PROPOSE", 0, 0, button->font->style, button->font->font);
       break;
-    case FTMenuMode::FT_ADMIN:
-      switch (static_cast<FTMenuPos>(cgs.ftMenuPos)) {
-        case FTMenuPos::FT_MENUPOS_INVITE:
+    case ETJump::FTMenuMode::FT_ADMIN:
+      switch (static_cast<ETJump::FTMenuPos>(cgs.ftMenuPos)) {
+        case ETJump::FTMenuPos::FT_MENUPOS_INVITE:
           CG_Text_Paint_Ext(
               button->rect.x,
               button->rect.y + static_cast<float>(button->data[0]),
               button->font->scalex, button->font->scaley, button->font->colour,
               "INVITE", 0, 0, button->font->style, button->font->font);
           break;
-        case FTMenuPos::FT_MENUPOS_KICK:
+        case ETJump::FTMenuPos::FT_MENUPOS_KICK:
           CG_Text_Paint_Ext(
               button->rect.x,
               button->rect.y + static_cast<float>(button->data[0]),
               button->font->scalex, button->font->scaley, button->font->colour,
               "KICK", 0, 0, button->font->style, button->font->font);
           break;
-        case FTMenuPos::FT_MENUPOS_WARN:
+        case ETJump::FTMenuPos::FT_MENUPOS_WARN:
           CG_Text_Paint_Ext(
               button->rect.x,
               button->rect.y + static_cast<float>(button->data[0]),
               button->font->scalex, button->font->scaley, button->font->colour,
               "WARN", 0, 0, button->font->style, button->font->font);
           break;
-        case FTMenuPos::FT_MENUPOS_RULES:
+        case ETJump::FTMenuPos::FT_MENUPOS_RULES:
           CG_Text_Paint_Ext(
               button->rect.x,
               button->rect.y + static_cast<float>(button->data[0]),
@@ -571,7 +571,7 @@ void CG_DrawFireteamRules(panel_button_t *button) {
       str = va("%s. %s", ftOnMenuRulesListAlphaChars[i], ftOnMenuRulesList[i]);
     }
 
-    if (i == static_cast<int>(FTMenuRulesPos::FT_RULES_NOGHOST)) {
+    if (i == static_cast<int>(ETJump::FTMenuRulesPos::FT_RULES_NOGHOST)) {
       if (cg_ghostPlayers.integer == 1) {
         str = va(str, cgs.clientinfo[cg.clientNum].fireteamData->noGhost
                           ? "Disable"
@@ -594,9 +594,10 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
   float y = button->rect.y;
   int i;
 
-  switch (static_cast<FTMenuMode>(cgs.ftMenuMode)) {
-    case FTMenuMode::FT_VSAY:
-      if (cgs.ftMenuPos == static_cast<int>(FTMenuPos::FT_MENUPOS_NONE)) {
+  switch (static_cast<ETJump::FTMenuMode>(cgs.ftMenuMode)) {
+    case ETJump::FTMenuMode::FT_VSAY:
+      if (cgs.ftMenuPos ==
+          static_cast<int>(ETJump::FTMenuPos::FT_MENUPOS_NONE)) {
         for (i = 0; ftMenuRootStrings[i]; i++) {
           const char *str;
 
@@ -647,7 +648,7 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
         }
       }
       break;
-    case FTMenuMode::FT_MANAGE:
+    case ETJump::FTMenuMode::FT_MANAGE:
       if (!CG_IsOnFireteam(cg.clientNum)) {
         for (i = 0; ftOffMenuList[i]; i++) {
           const char *str;
@@ -709,7 +710,7 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
                        ftLeaderMenuList[i]);
             }
 
-            if (i == static_cast<int>(FTMenuOptions::FT_TJMODE)) {
+            if (i == static_cast<int>(ETJump::FTMenuOptions::FT_TJMODE)) {
               str = va(str,
                        cgs.clientinfo[cg.clientNum].fireteamData->teamJumpMode
                            ? "Disable"
@@ -731,7 +732,8 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
           if (cg_quickMessageAlt.integer) {
             str = va(
                 "%i. %s",
-                (i + 1 + static_cast<int>(FTMenuOptions::FT_COUNTDOWN_START)) %
+                (i + 1 +
+                 static_cast<int>(ETJump::FTMenuOptions::FT_COUNTDOWN_START)) %
                     10,
                 ftOnCommonList[i]);
           } else {
@@ -747,45 +749,45 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
       }
       break;
 
-    case FTMenuMode::FT_APPLY:
+    case ETJump::FTMenuMode::FT_APPLY:
       if (!CG_CountFireteamsByTeam(cgs.clientinfo[cg.clientNum].team) ||
           CG_IsOnFireteam(cg.clientNum)) {
-        cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
+        cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_MANAGE);
         break;
       }
 
       CG_DrawFireteamsByTeam(button, cgs.clientinfo[cg.clientNum].team);
       break;
 
-    case FTMenuMode::FT_PROPOSE:
+    case ETJump::FTMenuMode::FT_PROPOSE:
       if (!CG_CountPlayersNF()) {
-        cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
+        cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_MANAGE);
         break;
       }
 
       CG_DrawPlayerNF(button, &cgs.ftMenuModeEx);
       break;
 
-    case FTMenuMode::FT_ADMIN:
-      switch (static_cast<FTMenuPos>(cgs.ftMenuPos)) {
-        case FTMenuPos::FT_MENUPOS_INVITE:
+    case ETJump::FTMenuMode::FT_ADMIN:
+      switch (static_cast<ETJump::FTMenuPos>(cgs.ftMenuPos)) {
+        case ETJump::FTMenuPos::FT_MENUPOS_INVITE:
           if (!CG_CountPlayersNF()) {
-            cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
+            cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_MANAGE);
             break;
           }
 
           CG_DrawPlayerNF(button, &cgs.ftMenuModeEx);
           break;
-        case FTMenuPos::FT_MENUPOS_KICK:
-        case FTMenuPos::FT_MENUPOS_WARN:
+        case ETJump::FTMenuPos::FT_MENUPOS_KICK:
+        case ETJump::FTMenuPos::FT_MENUPOS_WARN:
           if (!CG_CountPlayersSF()) {
-            cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
+            cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_MANAGE);
             break;
           }
 
           CG_DrawPlayerSF(button, &cgs.ftMenuModeEx);
           break;
-        case FTMenuPos::FT_MENUPOS_RULES:
+        case ETJump::FTMenuPos::FT_MENUPOS_RULES:
           CG_DrawFireteamRules(button);
           break;
         default:
@@ -828,9 +830,10 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
 
   key &= ~K_CHAR_FLAG;
 
-  switch (static_cast<FTMenuMode>(cgs.ftMenuMode)) {
-    case FTMenuMode::FT_VSAY:
-      if (cgs.ftMenuPos == static_cast<int>(FTMenuPos::FT_MENUPOS_NONE)) {
+  switch (static_cast<ETJump::FTMenuMode>(cgs.ftMenuMode)) {
+    case ETJump::FTMenuMode::FT_VSAY:
+      if (cgs.ftMenuPos ==
+          static_cast<int>(ETJump::FTMenuPos::FT_MENUPOS_NONE)) {
         if (cg_quickMessageAlt.integer) {
           if (key >= '0' && key <= '9') {
             int i = ((key - '0') + 9) % 10;
@@ -940,7 +943,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
         }
       }
       break;
-    case FTMenuMode::FT_MANAGE: {
+    case ETJump::FTMenuMode::FT_MANAGE: {
       int i = -1, x;
 
       if (cg_quickMessageAlt.integer) {
@@ -987,7 +990,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
             trap_SendConsoleCommand("fireteam create\n");
             CG_EventHandling(CGAME_EVENT_NONE, qfalse);
           } else {
-            cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_APPLY);
+            cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_APPLY);
             cgs.ftMenuModeEx = 0;
             cgs.ftMenuPos = i;
           }
@@ -996,28 +999,31 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
         return qtrue;
       } else {
         if (!CG_IsFireTeamLeader(cg.clientNum)) {
-          if (i >= static_cast<int>(FTMenuOptions::FT_INVITE) &&
-              i != static_cast<int>(FTMenuOptions::FT_COUNTDOWN_START)) {
+          if (i >= static_cast<int>(ETJump::FTMenuOptions::FT_INVITE) &&
+              i !=
+                  static_cast<int>(ETJump::FTMenuOptions::FT_COUNTDOWN_START)) {
             break;
           }
 
-          if (i == static_cast<int>(FTMenuOptions::FT_DISBAND_PROPOSE) &&
+          if (i ==
+                  static_cast<int>(ETJump::FTMenuOptions::FT_DISBAND_PROPOSE) &&
               !CG_CountPlayersNF()) {
             break;
           }
 
           if (doaction) {
-            switch (static_cast<FTMenuOptions>(i)) {
-              case FTMenuOptions::FT_CREATE_LEAVE:
+            switch (static_cast<ETJump::FTMenuOptions>(i)) {
+              case ETJump::FTMenuOptions::FT_CREATE_LEAVE:
                 trap_SendConsoleCommand("fireteam leave\n");
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
-              case FTMenuOptions::FT_COUNTDOWN_START:
+              case ETJump::FTMenuOptions::FT_COUNTDOWN_START:
                 trap_SendConsoleCommand("fireteam countdown\n");
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
               default:
-                cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_PROPOSE);
+                cgs.ftMenuMode =
+                    static_cast<int>(ETJump::FTMenuMode::FT_PROPOSE);
                 cgs.ftMenuModeEx = 0;
                 cgs.ftMenuPos = i;
                 break;
@@ -1026,32 +1032,32 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
 
           return qtrue;
         } else {
-          if (i >= static_cast<int>(FTMenuOptions::FT_MAX_OPTIONS)) {
+          if (i >= static_cast<int>(ETJump::FTMenuOptions::FT_MAX_OPTIONS)) {
             break;
           }
 
-          if (i == static_cast<int>(FTMenuOptions::FT_INVITE) &&
+          if (i == static_cast<int>(ETJump::FTMenuOptions::FT_INVITE) &&
               !CG_CountPlayersNF()) {
             break;
           }
 
-          if ((i == static_cast<int>(FTMenuOptions::FT_KICK) ||
-               i == static_cast<int>(FTMenuOptions::FT_WARN)) &&
+          if ((i == static_cast<int>(ETJump::FTMenuOptions::FT_KICK) ||
+               i == static_cast<int>(ETJump::FTMenuOptions::FT_WARN)) &&
               !CG_CountPlayersSF()) {
             break;
           }
 
           if (doaction) {
-            switch (static_cast<FTMenuOptions>(i)) {
-              case FTMenuOptions::FT_DISBAND_PROPOSE:
+            switch (static_cast<ETJump::FTMenuOptions>(i)) {
+              case ETJump::FTMenuOptions::FT_DISBAND_PROPOSE:
                 trap_SendConsoleCommand("fireteam disband\n");
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
-              case FTMenuOptions::FT_CREATE_LEAVE:
+              case ETJump::FTMenuOptions::FT_CREATE_LEAVE:
                 trap_SendConsoleCommand("fireteam leave\n");
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
-              case FTMenuOptions::FT_TJMODE:
+              case ETJump::FTMenuOptions::FT_TJMODE:
                 trap_SendConsoleCommand(
                     va("fireteam teamjump %i",
                        cgs.clientinfo[cg.clientNum].fireteamData->teamJumpMode
@@ -1059,12 +1065,12 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
                            : 1));
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
-              case FTMenuOptions::FT_COUNTDOWN_START:
+              case ETJump::FTMenuOptions::FT_COUNTDOWN_START:
                 trap_SendConsoleCommand("fireteam countdown\n");
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
               default:
-                cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_ADMIN);
+                cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_ADMIN);
                 cgs.ftMenuModeEx = 0;
                 cgs.ftMenuPos = i;
                 break;
@@ -1075,7 +1081,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
         }
       }
     }
-    case FTMenuMode::FT_APPLY: {
+    case ETJump::FTMenuMode::FT_APPLY: {
       int i;
 
       for (i = 0; i < MAX_FIRETEAMS; i++) {
@@ -1104,7 +1110,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
         }
       }
     } break;
-    case FTMenuMode::FT_PROPOSE: {
+    case ETJump::FTMenuMode::FT_PROPOSE: {
       int i = -1, x;
 
       if (cg_quickMessageAlt.integer) {
@@ -1148,7 +1154,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
       }
       break;
     }
-    case FTMenuMode::FT_ADMIN: {
+    case ETJump::FTMenuMode::FT_ADMIN: {
       int i = -1, x;
 
       if (cg_quickMessageAlt.integer) {
@@ -1171,8 +1177,8 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
         break;
       }
 
-      switch (static_cast<FTMenuPos>(cgs.ftMenuPos)) {
-        case FTMenuPos::FT_MENUPOS_INVITE:
+      switch (static_cast<ETJump::FTMenuPos>(cgs.ftMenuPos)) {
+        case ETJump::FTMenuPos::FT_MENUPOS_INVITE:
           if (CG_CountPlayersNF() > (cgs.ftMenuModeEx + 1) * 8) {
             if (i == 9) {
               if (doaction) {
@@ -1201,8 +1207,8 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
             return qtrue;
           }
           break;
-        case FTMenuPos::FT_MENUPOS_KICK:
-        case FTMenuPos::FT_MENUPOS_WARN:
+        case ETJump::FTMenuPos::FT_MENUPOS_KICK:
+        case ETJump::FTMenuPos::FT_MENUPOS_WARN:
           if (CG_CountPlayersSF() > (cgs.ftMenuModeEx + 1) * 8) {
             if (i == 0) {
               cgs.ftMenuModeEx++;
@@ -1216,12 +1222,12 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           x = CG_PlayerSFFromPos(i, &cgs.ftMenuModeEx);
           if (x != -1) {
             if (doaction) {
-              switch (static_cast<FTMenuPos>(cgs.ftMenuPos)) {
-                case FTMenuPos::FT_MENUPOS_KICK:
+              switch (static_cast<ETJump::FTMenuPos>(cgs.ftMenuPos)) {
+                case ETJump::FTMenuPos::FT_MENUPOS_KICK:
                   trap_SendConsoleCommand(va("fireteam kick %i\n", x));
                   CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                   break;
-                case FTMenuPos::FT_MENUPOS_WARN:
+                case ETJump::FTMenuPos::FT_MENUPOS_WARN:
                   trap_SendConsoleCommand(va("fireteam warn %i\n", x));
                   CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                   break;
@@ -1233,18 +1239,18 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
             return qtrue;
           }
           break;
-        case FTMenuPos::FT_MENUPOS_RULES:
+        case ETJump::FTMenuPos::FT_MENUPOS_RULES:
           if (doaction) {
-            switch (static_cast<FTMenuRulesPos>(i)) {
-              case FTMenuRulesPos::FT_RULES_RESET:
+            switch (static_cast<ETJump::FTMenuRulesPos>(i)) {
+              case ETJump::FTMenuRulesPos::FT_RULES_RESET:
                 trap_SendConsoleCommand("fireteam rules savelimit reset\n");
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
-              case FTMenuRulesPos::FT_RULES_SAVELIMIT:
+              case ETJump::FTMenuRulesPos::FT_RULES_SAVELIMIT:
                 trap_UI_Popup(UIMENU_INGAME_FT_SAVELIMIT);
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 break;
-              case FTMenuRulesPos::FT_RULES_NOGHOST:
+              case ETJump::FTMenuRulesPos::FT_RULES_NOGHOST:
                 trap_SendConsoleCommand(
                     va("fireteam rules noghost %i",
                        cgs.clientinfo[cg.clientNum].fireteamData->noGhost ? 0

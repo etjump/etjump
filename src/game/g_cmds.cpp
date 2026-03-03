@@ -303,15 +303,14 @@ int ClientNumberFromString(gentity_t *to, char *s) {
   if (fIsNumber) {
     idnum = Q_atoi(s);
     if (idnum < 0 || idnum >= level.maxclients) {
-      Printer::console(to,
-                       ETJump::stringFormat("Bad client slot: %i\n", idnum));
+      Printer::console(to, StringUtils::format("Bad client slot: %i\n", idnum));
       return -1;
     }
 
     cl = &level.clients[idnum];
     if (cl->pers.connected != CON_CONNECTED) {
-      Printer::console(
-          to, ETJump::stringFormat("Client %i is not active\n", idnum));
+      Printer::console(to,
+                       StringUtils::format("Client %i is not active\n", idnum));
       return -1;
     }
     return (idnum);
@@ -326,7 +325,7 @@ int ClientNumberFromString(gentity_t *to, char *s) {
   }
 
   Printer::console(to,
-                   ETJump::stringFormat("User %s is not on the server\n", s));
+                   StringUtils::format("User %s is not on the server\n", s));
   return (-1);
 }
 
@@ -574,13 +573,15 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
   if (isRtvVote) {
     game.rtv->setRtvConfigstrings();
   } else {
-    std::string newcs = stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
-                                     level.voteInfo.voteYesSpectators);
+    std::string newcs =
+        StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
+                            level.voteInfo.voteYesSpectators);
     trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
   }
 
-  std::string newcs = stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
-                                   level.voteInfo.voteNoSpectators);
+  std::string newcs =
+      StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
+                          level.voteInfo.voteNoSpectators);
   trap_SetConfigstring(CS_VOTE_NO, newcs.c_str());
 }
 } // namespace ETJump
@@ -930,8 +931,8 @@ void decreaseNoclipCount(gentity_t *ent, const std::string &action) {
     --ent->client->pers.noclipCount;
     Printer::center(
         ClientNum(ent),
-        ETJump::stringFormat("^7You may use ^3%s ^2%d^7 more times.\n", action,
-                             ent->client->pers.noclipCount));
+        StringUtils::format("^7You may use ^3%s ^2%d^7 more times.\n", action,
+                            ent->client->pers.noclipCount));
   }
 }
 
@@ -952,7 +953,7 @@ void setPlayerOffset(gentity_t *ent) {
   auto result = canNoclip(ent);
 
   if (!result.success) {
-    std::string str = ETJump::stringFormat(result.message, "setoffset");
+    std::string str = StringUtils::format(result.message, "setoffset");
     capitalizeWithColor(str);
     Printer::console(clientNum, str);
     return;
@@ -1033,8 +1034,8 @@ void printTracker(gentity_t *ent) {
   }
 
   if (trap_Argc() < 2) {
-    printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", 1,
-                                   ent->client->pers.progression[0]);
+    printTrackerMsg = StringUtils::format("Index: ^3%i ^7value: ^2%i\n", 1,
+                                          ent->client->pers.progression[0]);
     Printer::console(clientNum, printTrackerMsg);
     return;
   }
@@ -1043,8 +1044,9 @@ void printTracker(gentity_t *ent) {
 
   if (!Q_stricmp("all", buffer)) {
     for (i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
-      printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", i + 1,
-                                     ent->client->pers.progression[i]);
+      printTrackerMsg =
+          StringUtils::format("Index: ^3%i ^7value: ^2%i\n", i + 1,
+                              ent->client->pers.progression[i]);
       Printer::console(clientNum, printTrackerMsg);
     }
   } else {
@@ -1055,8 +1057,9 @@ void printTracker(gentity_t *ent) {
       int idx = Q_atoi(buffer);
 
       if (checkTrackerIndex(clientNum, idx, buffer, false)) {
-        printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", idx,
-                                       ent->client->pers.progression[idx - 1]);
+        printTrackerMsg =
+            StringUtils::format("Index: ^3%i ^7value: ^2%i\n", idx,
+                                ent->client->pers.progression[idx - 1]);
         Printer::console(clientNum, printTrackerMsg);
       }
     }
@@ -1104,9 +1107,8 @@ void setTracker(gentity_t *ent) {
         ent->client->pers.progression[i] = value;
       }
 
-      setTrackerMsg = stringFormat("^7Set tracker value on all "
-                                   "indices to ^2%i^7.\n",
-                                   value);
+      setTrackerMsg = StringUtils::format(
+          "^7Set tracker value on all indices to ^2%i^7.\n", value);
       Printer::console(clientNum, setTrackerMsg);
     }
   }
@@ -1117,9 +1119,8 @@ void setTracker(gentity_t *ent) {
       if (checkTrackerIndex(clientNum, idx, bufferIndex, noIndex)) {
         ent->client->pers.progression[0] = idx; // No index specified, use it
                                                 // for value on index 1
-        setTrackerMsg = stringFormat("^7Tracker set - index: ^31 "
-                                     "^7value: ^2%i\n",
-                                     idx);
+        setTrackerMsg = StringUtils::format(
+            "^7Tracker set - index: ^31 ^7value: ^2%i\n", idx);
         Printer::console(clientNum, setTrackerMsg);
         return;
       }
@@ -1141,9 +1142,8 @@ void setTracker(gentity_t *ent) {
       if (checkTrackerValue(clientNum, bufferValue)) {
         value = Q_atoi(bufferValue);
         ent->client->pers.progression[idx - 1] = value;
-        setTrackerMsg = stringFormat("^7Tracker set - index: ^3%i "
-                                     "^7value: ^2%i\n",
-                                     idx, value);
+        setTrackerMsg = StringUtils::format(
+            "^7Tracker set - index: ^3%i ^7value: ^2%i\n", idx, value);
         Printer::console(clientNum, setTrackerMsg);
       }
     }
@@ -1172,7 +1172,7 @@ static void dumpEntities(gentity_t *ent) {
 
   std::string arg = ConcatArgs(1);
   const std::string filename =
-      stringFormat("maps/%s.ent", arg.empty() ? level.rawmapname : arg);
+      StringUtils::format("maps/%s.ent", arg.empty() ? level.rawmapname : arg);
 
   try {
     File out(filename, File::Mode::Write);
@@ -1183,11 +1183,11 @@ static void dumpEntities(gentity_t *ent) {
     }
 
     out.write(contents);
-    Printer::console(ent,
-                     stringFormat("Dumped entities to ^3'%s'\n", filename));
+    Printer::console(
+        ent, StringUtils::format("Dumped entities to ^3'%s'\n", filename));
   } catch (const File::FileIOException &e) {
-    Printer::console(ent,
-                     stringFormat("Failed to write file ^3'%s'\n", e.what()));
+    Printer::console(
+        ent, StringUtils::format("Failed to write file ^3'%s'\n", e.what()));
   }
 }
 } // namespace ETJump
@@ -1205,7 +1205,7 @@ void Cmd_Noclip_f(gentity_t *ent) {
   auto result = ETJump::canNoclip(ent);
 
   if (!result.success) {
-    std::string str = ETJump::stringFormat(result.message, "noclip");
+    std::string str = StringUtils::format(result.message, "noclip");
     capitalizeWithColor(str);
     Printer::center(clientNum, str);
     return;
@@ -2125,9 +2125,9 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
       color = COLOR_YELLOW;
       break;
     case SAY_ADMIN:
-      Printer::logAdminLn(ETJump::stringFormat(
+      Printer::logAdminLn(StringUtils::format(
           "adminchat: %i %s: %s", ent->s.number,
-          ETJump::sanitize(ent->client->pers.netname), chatText));
+          StringUtils::sanitize(ent->client->pers.netname), chatText));
       Com_sprintf(name, sizeof(name),
                   "^A> ^7%s^7: ", ent->client->pers.netname);
       color = COLOR_LTORANGE;
@@ -2633,7 +2633,7 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
 
   if (vote_limit.integer > 0 &&
       ent->client->pers.voteCount >= vote_limit.integer) {
-    voteError = ETJump::stringFormat(
+    voteError = StringUtils::format(
         "You have already called the maximum number of votes (%d).",
         vote_limit.integer);
     Printer::popup(clientNum, voteError);
@@ -2644,7 +2644,8 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
     const int remainingTime = std::ceil(
         (g_disableVoteAfterMapChange.integer - (level.time - level.startTime)) /
         1000.0);
-    voteError = "You must wait " + ETJump::getSecondsString(remainingTime) +
+    voteError = "You must wait " +
+                StringUtils::getSecondsString(remainingTime) +
                 " before voting after a map change.";
     Printer::popup(clientNum, voteError);
     return false;
@@ -2656,7 +2657,7 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
                    (level.time - ent->client->lastVoteTime)) /
                   1000.0);
     voteError = "^3callvote:^7 you must wait " +
-                ETJump::getSecondsString(voteCooldown) +
+                StringUtils::getSecondsString(voteCooldown) +
                 " before voting again.";
     Printer::chat(clientNum, voteError);
     return false;
@@ -2672,11 +2673,11 @@ void setCvString(char *voteMsg, char *voteArg) {
   const auto func = level.voteInfo.vote_fn;
 
   if (func == G_DevMap_v_Wrapper) {
-    voteString = stringFormat("%s (cheats enabled)", voteArg);
+    voteString = StringUtils::format("%s (cheats enabled)", voteArg);
     Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
   } else if (func == G_RandomMap_v || func == G_RockTheVote_v) {
     if (voteArg[0]) {
-      voteString = stringFormat("from %s", voteArg);
+      voteString = StringUtils::format("from %s", voteArg);
       Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
     }
   } else if (func == G_AutoRtv_v) {
@@ -2685,11 +2686,13 @@ void setCvString(char *voteMsg, char *voteArg) {
     if (voteArgInt == 0) {
       Q_strncpyz(voteArg, "Off", MAX_STRING_TOKENS);
     } else {
-      voteString = stringFormat("%s", getMinutesString(voteArgInt));
+      voteString =
+          StringUtils::format("%s", StringUtils::getMinutesString(voteArgInt));
       Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
     }
   } else if (func == G_PortalPredict_v) {
-    voteString = stringFormat("%s", Q_atoi(voteArg) ? "ON" : "OFF", voteMsg);
+    voteString =
+        StringUtils::format("%s", Q_atoi(voteArg) ? "ON" : "OFF", voteMsg);
     Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
   }
 
@@ -2700,7 +2703,7 @@ void setCvString(char *voteMsg, char *voteArg) {
 bool isValidVoteString(const std::string &str) {
   return std::none_of(
       tokenDelimiters.cbegin(), tokenDelimiters.cend(),
-      [&](const char token) { return StringUtil::contains(str, token); });
+      [&](const char token) { return StringUtils::contains(str, token); });
 }
 
 } // namespace ETJump
@@ -2732,7 +2735,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   if ((i = G_voteCmdCheck(ent, arg1, arg2)) != G_OK) {
     if (i == G_NOTFOUND) {
       if (arg1[0]) {
-        std::string errorMessage = ETJump::stringFormat(
+        std::string errorMessage = StringUtils::format(
             "\n^3Unknown vote command: ^7%s %s\n", arg1, arg2);
         Printer::console(clientNum, errorMessage);
       }
@@ -2762,13 +2765,13 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     trap_SendServerCommand(clientNum, "voted yes");
   }
 
-  std::string calledVoteString = ETJump::stringFormat(
-      "%s^7 called a vote. Voting for: %s\n", ent->client->pers.netname,
-      level.voteInfo.voteString);
+  std::string calledVoteString =
+      StringUtils::format("%s^7 called a vote. Voting for: %s\n",
+                          ent->client->pers.netname, level.voteInfo.voteString);
   Printer::consoleAll(calledVoteString);
 
   calledVoteString =
-      ETJump::stringFormat("%s^7 called a vote.", ent->client->pers.netname);
+      StringUtils::format("%s^7 called a vote.", ent->client->pers.netname);
   Printer::centerAll(calledVoteString);
 
   G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname,
@@ -2800,13 +2803,13 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     game.rtv->setRtvConfigstrings();
   } else {
     std::string newcs =
-        ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
-                             level.voteInfo.voteYesSpectators);
+        StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
+                            level.voteInfo.voteYesSpectators);
     trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
   }
   std::string newcs =
-      ETJump::stringFormat("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
-                           level.voteInfo.voteNoSpectators);
+      StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
+                          level.voteInfo.voteNoSpectators);
   trap_SetConfigstring(CS_VOTE_NO, newcs.c_str());
 }
 
@@ -2838,22 +2841,22 @@ void Cmd_Vote_f(gentity_t *ent) {
   const auto printVoteMsgs = [&] {
     std::string voteMsgs = "^7Invalid vote argument.\n";
     voteMsgs += "  ^7Valid arguments for '^2Yes^7' are: ^3<" +
-                ETJump::StringUtil::join(yesMsgs, "|") + "^3>\n";
+                StringUtils::join(yesMsgs, "|") + "^3>\n";
     voteMsgs += "  ^7Valid arguments for '^1No^7' are: ^3<" +
-                ETJump::StringUtil::join(noMsgs, "|") + "^3>\n";
+                StringUtils::join(noMsgs, "|") + "^3>\n";
     Printer::console(clientNum, voteMsgs);
   };
 
   const auto printRtvVoteMsgs = [&] {
     const auto *rtvMaps = game.rtv->getRtvMaps();
     std::string voteMsgs = "^7Invalid vote argument.\n";
-    voteMsgs += ETJump::stringFormat(
+    voteMsgs += StringUtils::format(
         "^7Valid arguments for this vote are:\n  ^3rtvVote 1-%i\n",
         rtvMaps->size());
     voteMsgs += "  ^7Open map selection with: ^3vote <" +
-                ETJump::StringUtil::join(yesMsgs, "|") + ">\n";
+                StringUtils::join(yesMsgs, "|") + ">\n";
     voteMsgs += "  ^7Vote '^1No^7' to keep current map with: ^3vote <" +
-                ETJump::StringUtil::join(noMsgs, "|") + ">\n";
+                StringUtils::join(noMsgs, "|") + ">\n";
     Printer::console(clientNum, voteMsgs);
   };
 
@@ -2868,11 +2871,13 @@ void Cmd_Vote_f(gentity_t *ent) {
   };
 
   trap_Argv(0, voteCmd, sizeof(voteCmd));
-  const std::string voteCmdStr = ETJump::sanitize(std::string(voteCmd), true);
+  const std::string voteCmdStr =
+      StringUtils::sanitize(std::string(voteCmd), true);
   const bool isRtvVoteCmd = voteCmdStr == "rtvvote";
 
   trap_Argv(1, voteArg, sizeof(voteArg));
-  const std::string voteArgStr = ETJump::sanitize(std::string(voteArg), true);
+  const std::string voteArgStr =
+      StringUtils::sanitize(std::string(voteArg), true);
 
   if (ent->client->pers.applicationEndTime > level.time) {
 
@@ -3128,9 +3133,9 @@ void Cmd_Vote_f(gentity_t *ent) {
         // this will need to be adjusted!
         Printer::popup(
             clientNum,
-            ETJump::stringFormat(
+            StringUtils::format(
                 "^7You must wait for ^3%s ^7before re-voting.",
-                ETJump::getSecondsString(ETJump::VOTING_TIMEOUT / 1000)));
+                StringUtils::getSecondsString(ETJump::VOTING_TIMEOUT / 1000)));
       }
       return;
     }
@@ -3169,9 +3174,9 @@ void Cmd_Vote_f(gentity_t *ent) {
       }
     }
 
-    Printer::popup(clientNum, ETJump::stringFormat(
+    Printer::popup(clientNum, StringUtils::format(
                                   "Vote cast, you can change your vote %s.",
-                                  ETJump::getPluralizedString(
+                                  StringUtils::getPluralizedString(
                                       ETJump::VOTING_ATTEMPTS + 1 -
                                           client->pers.votingInfo.attempts,
                                       "time")));
@@ -3834,7 +3839,7 @@ bool allowQuickFollow(gentity_t *ent, gentity_t *traceEnt) {
   }
   if (!G_AllowFollow(ent, traceEnt)) {
     auto clientNum = ClientNum(ent);
-    std::string specLockMsg = ETJump::stringFormat(
+    std::string specLockMsg = StringUtils::format(
         "%s is speclocked.", traceEnt->client->pers.netname);
     Printer::popup(clientNum, specLockMsg);
     return false;
@@ -4364,6 +4369,11 @@ void Cmd_Ignore_f(gentity_t *ent) {
     return;
   }
 
+  if (clientNum == ClientNum(ent)) {
+    Printer::console(ent, "You cannot ignore yourself.\n");
+    return;
+  }
+
   if (clientNum != MAX_CLIENTS) {
     COM_BitSet(ent->client->sess.ignoreClients, clientNum);
   }
@@ -4475,11 +4485,11 @@ void Cmd_Goto_f(gentity_t *ent) {
   VectorClear(ent->client->ps.velocity);
 
   Printer::popup(ClientNum(ent),
-                 ETJump::stringFormat("%s ^7-> %s", ent->client->pers.netname,
-                                      other->client->pers.netname));
+                 StringUtils::format("%s ^7-> %s", ent->client->pers.netname,
+                                     other->client->pers.netname));
   Printer::popup(ClientNum(other),
-                 ETJump::stringFormat("%s ^7-> %s", ent->client->pers.netname,
-                                      other->client->pers.netname));
+                 StringUtils::format("%s ^7-> %s", ent->client->pers.netname,
+                                     other->client->pers.netname));
 }
 
 void Cmd_Call_f(gentity_t *ent) {
@@ -4560,11 +4570,11 @@ void Cmd_Call_f(gentity_t *ent) {
   VectorCopy(ent->client->ps.origin, other->client->ps.origin);
 
   Printer::popup(ClientNum(ent),
-                 ETJump::stringFormat("%s ^7-> %s", other->client->pers.netname,
-                                      ent->client->pers.netname));
+                 StringUtils::format("%s ^7-> %s", other->client->pers.netname,
+                                     ent->client->pers.netname));
   Printer::popup(ClientNum(other),
-                 ETJump::stringFormat("%s ^7-> %s", other->client->pers.netname,
-                                      ent->client->pers.netname));
+                 StringUtils::format("%s ^7-> %s", other->client->pers.netname,
+                                     ent->client->pers.netname));
 }
 
 void Cmd_PrivateMessage_f(gentity_t *ent) {
@@ -4754,7 +4764,7 @@ void Cmd_Class_f(gentity_t *ent) {
     std::string usageText{"^3Usage:\n"};
 
     for (auto &loadout : ETJump::availableLoadouts) {
-      usageText += ETJump::stringFormat(
+      usageText += StringUtils::format(
           "  ^7%-30s ^9/class %c %i\n", loadout.description,
           ETJump::getPlayerClassSymbol(loadout.classId), loadout.weaponSlot);
     }
@@ -4795,10 +4805,10 @@ void Cmd_Class_f(gentity_t *ent) {
   for (auto &loadout : ETJump::availableLoadouts) {
     if (loadout.classId == classId && loadout.weaponSlot == weaponSlot) {
       Printer::center(clientNum,
-                      ETJump::stringFormat("You will spawn as an %s %s",
-                                           ETJump::getPlayerTeamName(
-                                               ent->client->sess.sessionTeam),
-                                           loadout.description),
+                      StringUtils::format("You will spawn as an %s %s",
+                                          ETJump::getPlayerTeamName(
+                                              ent->client->sess.sessionTeam),
+                                          loadout.description),
                       false);
       break;
     }
@@ -5122,7 +5132,7 @@ void ClientCommand(int clientNum) {
           "You don't have permission to use adminchat on this server.");
     } else if (ClientIsFlooding(ent)) {
       Printer::console(clientNum,
-                       ETJump::stringFormat(
+                       StringUtils::format(
                            "^1Spam Protection: ^7command %s ^7ignored\n", cmd));
     } else if (!ent->client->sess.muted) {
       Cmd_Say_f(ent, SAY_ADMIN, qfalse, enc);

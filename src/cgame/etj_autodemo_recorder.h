@@ -24,11 +24,16 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <queue>
+
 #include "etj_demo_recorder.h"
 
 namespace ETJump {
+class PlayerEventsHandler;
+class ClientCommandsHandler;
+
 class AutoDemoRecorder {
   class TempNameGenerator {
     std::queue<std::string> names;
@@ -38,16 +43,22 @@ class AutoDemoRecorder {
     std::string pop();
     std::string next();
     std::string current();
-    int size();
+    [[nodiscard]] size_t size() const;
   };
 
-  int _delayedTimerId{0};
-  DemoRecorder _demo;
-  TempNameGenerator _demoNames;
+  int delayedTimerId{};
+  DemoRecorder demo;
+  TempNameGenerator demoNames;
 
-public:
-  AutoDemoRecorder();
-  ~AutoDemoRecorder();
+  std::shared_ptr<PlayerEventsHandler> playerEvents;
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
+
+  void startListeners();
+
+  void onRespawn(const std::vector<std::string> &args);
+  void onTimerunEnd(const std::vector<std::string> &args, bool record);
+  void onManualSave(const std::vector<std::string> &args);
+
   void tryRestart();
   void restart();
   void trySaveTimerunDemo(const std::string &runName,
@@ -55,12 +66,19 @@ public:
   void saveTimerunDemo(const std::string &src, const std::string &dst);
   void saveDemo(const std::string &src, const std::string &dst);
   void saveDemoWithRestart(const std::string &src, const std::string &dst);
-  std::string createDemoPath(std::string name = "");
-  std::string createTimerunDemoPath(const std::string &runName,
-                                    const std::string &runTime);
-  std::string createDemoTempPath(const std::string &name);
-  std::string createTimeString();
-  std::string formatRunTime(int millis);
+
+  static std::string createDemoPath(const std::string &name = "");
+  static std::string createTimerunDemoPath(const std::string &runName,
+                                           const std::string &runTime);
+  static std::string createDemoTempPath(const std::string &name);
+  static std::string createTimeString();
+  static std::string formatRunTime(int millis);
   void maybeCancelDelayedSave();
+
+public:
+  AutoDemoRecorder(
+      const std::shared_ptr<PlayerEventsHandler> &playerEvents,
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
+  ~AutoDemoRecorder();
 };
 } // namespace ETJump

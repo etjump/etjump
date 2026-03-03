@@ -23,10 +23,11 @@
  */
 
 #pragma once
+
 namespace ETJump {
 class IRenderable {
 public:
-  virtual ~IRenderable() {};
+  virtual ~IRenderable() = default;
   virtual bool beforeRender() = 0;
   virtual void render() const = 0;
 };

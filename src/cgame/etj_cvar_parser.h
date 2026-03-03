@@ -26,14 +26,8 @@
 
 #include <optional>
 
-#if defined(CGAMEDLL)
-  #include "cg_local.h"
-#elif defined(UIDLL)
-  #include "../ui/ui_local.h"
-#endif
-
+#include "../game/q_shared.h"
 #include "../game/etj_string_utilities.h"
-#include "../game/etj_shared.h"
 
 namespace ETJump {
 class CvarValue {
@@ -75,7 +69,7 @@ public:
       return T{1.0f, 1.0f};
     }
 
-    auto scaleComponents = StringUtil::split(cvar.string, " ");
+    auto scaleComponents = StringUtils::split(cvar.string, " ");
 
     // remove any whitespace, if user inputs a string like "  2   3  "
     scaleComponents.erase(

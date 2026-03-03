@@ -24,6 +24,9 @@
 
 #include "etj_consolecommands.h"
 #include "etj_client_commands_handler.h"
+#include "etj_demo_compatibility.h"
+#include "etj_local.h"
+#include "cg_local.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
@@ -49,6 +52,37 @@ static void uiChatMenuOpen(const Arguments &args) {
   cg.chatMenuOpen = Q_atoi(args[0]);
 }
 
+static void printMapCustomizationInfo() {
+  if (cgame.demo.compatibility->flags.noMapCustomizationHashes) {
+    CG_Printf("Map customization data is unavailable in demos recorded prior "
+              "to ETJump 3.5.0.\n");
+    return;
+  }
+
+  const std::string cs = CG_ConfigString(CS_ETJUMP_MAPINFO);
+  const std::string mapscriptHash = Info_ValueForKey(cs.c_str(), "msh");
+  const std::string entityFileHash = Info_ValueForKey(cs.c_str(), "efh");
+
+  if (mapscriptHash.empty() || entityFileHash.empty()) {
+    CG_Printf("No map customization data found in configstrings. This is a "
+              "bug, please report this to the developers.\n");
+    return;
+  }
+
+  if (mapscriptHash == "-" && entityFileHash == "-") {
+    CG_Printf(
+        "No custom mapscript or entity file loaded for the current map.\n");
+    return;
+  }
+
+  CG_Printf("%-25s %s\n%-25s %s\n\nPlease note that the hashes are computed "
+            "with line endings normalized to ^3LF^7.\nIf you're computing the "
+            "hashes using external tools for comparison, ensure the files are "
+            "saved with ^3LF ^7line endings.\n",
+            "Custom mapscript hash:", mapscriptHash.c_str(),
+            "Entity file hash:", entityFileHash.c_str());
+}
+
 /*
  * cgame handles console commands before UI, so we catch some of the demo
  * queue commands here in order to inform UI that the command was
@@ -62,10 +96,10 @@ static void demoQueue(const Arguments &args) {
     return;
   }
 
-  if (StringUtil::iEqual(args[0], "next") ||
-      StringUtil::iEqual(args[0], "previous") ||
-      StringUtil::iEqual(args[0], "restart") ||
-      StringUtil::iEqual(args[0], "goto")) {
+  if (StringUtils::iEqual(args[0], "next") ||
+      StringUtils::iEqual(args[0], "previous") ||
+      StringUtils::iEqual(args[0], "restart") ||
+      StringUtils::iEqual(args[0], "goto")) {
     trap_SendConsoleCommand("uiDemoQueueManualSkip 1\n");
   }
 }
@@ -78,7 +112,7 @@ static bool fireteam(const Arguments &args) {
   // 'fireteam' commands are normally handled by the server,
   // but if we're using 'fireteam countdown', catch it here and make sure
   // the duration is sent with the command if it's not manually specified
-  if (!StringUtil::iEqual(args[0], "countdown")) {
+  if (!StringUtils::iEqual(args[0], "countdown")) {
     return true;
   }
 
@@ -105,14 +139,14 @@ static bool fireteam(const Arguments &args) {
  */
 bool forwardedConsoleCommand(const std::string_view cmd,
                              const Arguments &args) {
-  if (StringUtil::iEqual(cmd, "demoQueue")) {
+  if (StringUtils::iEqual(cmd, "demoQueue")) {
     // this should always return true, regardless if we actually modify
     // anything, as we always want UI to also handle this command
     demoQueue(args);
     return true;
   }
 
-  if (StringUtil::iEqual(cmd, "fireteam")) {
+  if (StringUtils::iEqual(cmd, "fireteam")) {
     return fireteam(args);
   }
 
@@ -127,15 +161,22 @@ getOptCommand(const std::string &commandPrefix,
 
   if (cmd.helpRequested) {
     CG_AddToTeamChat(
-        stringFormat("^3%s: ^7check console for help.", commandPrefix).c_str(),
+        StringUtils::format("^3%s: ^7check console for help.", commandPrefix)
+            .c_str(),
         TEAM_SPECTATOR);
-    Com_Printf(def.help().c_str());
+    const auto splits =
+        StringUtils::wrapWords(def.help(), '\n', MAX_STRING_CHARS - 1);
+
+    for (const auto &s : splits) {
+      CG_Printf("%s", s.c_str());
+    }
+
     return std::nullopt;
   }
 
   if (!cmd.errors.empty()) {
     CG_AddToTeamChat(
-        stringFormat(
+        StringUtils::format(
             "^3%s: ^7operation failed. Check console for more information.",
             commandPrefix)
             .c_str(),
@@ -148,22 +189,26 @@ getOptCommand(const std::string &commandPrefix,
 }
 
 void registerCommands() {
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "ftSaveLimitSet", [](const auto &) { ftSaveLimitSet(); }, false);
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "forceMaplistRefresh", [](const auto &) { forceMaplistRefresh(); },
       false);
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "forceCustomvoteRefresh", [](const auto &) { forceCustomvoteRefresh(); },
       false);
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "uiRequestCustomvotes", [](const auto &) { uiRequestCustomvotes(); },
       false);
 
-  consoleCommandsHandler->subscribe(
+  cgame.handlers.consoleCommands->subscribe(
       "uiChatMenuOpen", [](const auto &args) { uiChatMenuOpen(args); }, false);
+
+  cgame.handlers.consoleCommands->subscribe(
+      "printMapCustomizationInfo",
+      [](const auto &) { printMapCustomizationInfo(); });
 }
 } // namespace ETJump::ConsoleCommands

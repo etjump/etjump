@@ -150,7 +150,7 @@ static void initDemoQueueHandler() {
 static void parseChangelogs() {
   // the "cvar" names are the filenames, excluding .txt extension
   const std::vector<std::string> files =
-      StringUtil::split(CHANGELOG_CVARS, "|");
+      StringUtils::split(CHANGELOG_CVARS, "|");
   const std::string path = "ui/changelog/";
 
   for (const auto &file : files) {
@@ -182,6 +182,8 @@ void init(const int32_t legacyClient, const int32_t clientVersion) {
 
   detectClientEngine(legacyClient, clientVersion);
 
+  ui.colorParser = std::make_unique<ColorParser>();
+
   initColorPicker();
   initDemoQueueHandler();
 
@@ -197,6 +199,7 @@ void shutdown() {
   ui.quickConnect = nullptr;
   ui.demoQueue = nullptr;
   ui.colorPicker = nullptr;
+  ui.colorParser = nullptr;
   ui.syscallExt = nullptr;
 }
 } // namespace ETJump

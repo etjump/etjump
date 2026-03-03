@@ -3,6 +3,7 @@
 
 #include "cg_local.h"
 #include "etj_crosshair.h"
+#include "etj_local.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
@@ -641,10 +642,10 @@ qboolean CG_SaveSpeakersToScript(void) {
 
   trap_FS_FCloseFile(fh);
 
-  CG_Printf(
-      "Saved %s to 'sound/maps/%s.sps'\n",
-      ETJump::getPluralizedString(BG_NumScriptSpeakers(), "speaker").c_str(),
-      cgs.rawmapname);
+  CG_Printf("Saved %s to 'sound/maps/%s.sps'\n",
+            StringUtils::getPluralizedString(BG_NumScriptSpeakers(), "speaker")
+                .c_str(),
+            cgs.rawmapname);
 
   return qtrue;
 }
@@ -1052,7 +1053,7 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
       button->rect.y + 9.f, button->font->scalex, button->font->scaley, colour,
       "V", 0, 0, 0, button->font->font);
 
-  const auto buttonStrings = ETJump::StringUtil::split(button->text, " ");
+  const auto buttonStrings = StringUtils::split(button->text, " ");
   s = buttonStrings[button->data[1]].c_str();
 
   CG_Text_Paint_Ext(
@@ -1799,9 +1800,8 @@ void CG_SpeakerEditorDraw(void) {
     }
 
     // render crosshair
-    for (const auto &r : ETJump::renderables) {
-      if (const auto &crosshair =
-              std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
+    for (const auto &r : ETJump::cgame.hud.renderables) {
+      if (auto *const crosshair = dynamic_cast<ETJump::Crosshair *>(r.get())) {
         if (crosshair->beforeRender()) {
           crosshair->render();
         }

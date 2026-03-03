@@ -483,11 +483,11 @@ void UserRepository::editUser(const UserModels::EditUserParams &params) const {
     return;
   }
 
-  const auto updateFieldsStr = StringUtil::join(
+  const auto updateFieldsStr = StringUtils::join(
       Container::map(updateColumns, [](const auto &s) { return s + "=?"; }),
       ", ");
 
-  const std::string query = stringFormat(R"(
+  const std::string query = StringUtils::format(R"(
     update
       users
     set
@@ -495,7 +495,7 @@ void UserRepository::editUser(const UserModels::EditUserParams &params) const {
     where
       id=?;
   )",
-                                         updateFieldsStr);
+                                                updateFieldsStr);
 
   auto q = db->sql << query;
 
@@ -1009,7 +1009,7 @@ std::string UserRepository::getPlatformString(const int32_t platform) {
 
 int32_t UserRepository::getPlatformId(const std::string &platformStr) {
   for (const auto &[id, string] : Constants::operatingSystemStrings) {
-    if (StringUtil::iEqual(string, platformStr)) {
+    if (StringUtils::iEqual(string, platformStr)) {
       return id;
     }
   }

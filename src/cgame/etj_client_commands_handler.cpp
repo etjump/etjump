@@ -35,7 +35,7 @@ ETJump::ClientCommandsHandler::~ClientCommandsHandler() {}
 
 bool ETJump::ClientCommandsHandler::check(
     const std::string &command, const std::vector<std::string> &arguments) {
-  auto lowercasedCommand = ETJump::StringUtil::toLowerCase(command);
+  auto lowercasedCommand = StringUtils::toLowerCase(command);
   auto match = _callbacks.find(lowercasedCommand);
   if (match != end(_callbacks)) {
     match->second(arguments);
@@ -48,7 +48,7 @@ bool ETJump::ClientCommandsHandler::subscribe(
     const std::string &command,
     std::function<void(const std::vector<std::string> &)> callback,
     bool autocomplete) {
-  auto lowercasedCommand = ETJump::StringUtil::toLowerCase(command);
+  auto lowercasedCommand = StringUtils::toLowerCase(command);
   if (_callbacks.find(lowercasedCommand) != end(_callbacks)) {
     return false;
   }
@@ -61,7 +61,7 @@ bool ETJump::ClientCommandsHandler::subscribe(
 }
 
 bool ETJump::ClientCommandsHandler::unsubscribe(const std::string &command) {
-  auto lowercasedCommand = ETJump::StringUtil::toLowerCase(command);
+  auto lowercasedCommand = StringUtils::toLowerCase(command);
   auto callback = _callbacks.find(lowercasedCommand);
   if (callback != end(_callbacks)) {
     return false;

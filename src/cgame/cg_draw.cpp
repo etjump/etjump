@@ -4,11 +4,12 @@
 #include <algorithm>
 
 #include "cg_local.h"
-#include "etj_utilities.h"
-#include "etj_crosshair.h"
 #include "etj_client_rtv_handler.h"
 #include "etj_demo_compatibility.h"
+#include "etj_utilities.h"
 #include "etj_cvar_parser.h"
+#include "etj_trace_utils.h"
+#include "etj_crosshair.h"
 
 #include "../game/etj_string_utilities.h"
 
@@ -854,7 +855,7 @@ static void CG_DrawLagometer() {
   const size_t pad = std::strlen(std::to_string(static_cast<int>(fps)).c_str());
 
   // server snapshot rate (sv_fps)
-  std::string svStr = ETJump::stringFormat(
+  std::string svStr = StringUtils::format(
       "sv: %*s", pad, std::to_string(static_cast<int>(fps)));
   CG_Text_Paint_Ext(x + 2, y + 13, 0.16f, 0.16f, textColor, svStr.c_str(), 0, 0,
                     ITEM_TEXTSTYLE_NORMAL, &cgs.media.limboFont2);
@@ -868,7 +869,7 @@ static void CG_DrawLagometer() {
     Vector4Copy(colorYellow, textColor);
   }
 
-  std::string clStr = ETJump::stringFormat(
+  std::string clStr = StringUtils::format(
       "cl: %*s", pad, std::to_string(static_cast<int>(avg)));
   CG_Text_Paint_Ext(x + 2, y + 7, 0.16f, 0.16f, textColor, clStr.c_str(), 0, 0,
                     ITEM_TEXTSTYLE_NORMAL, &cgs.media.limboFont2);
@@ -1054,7 +1055,7 @@ void logCenterPrint() {
   // this is called before center print gets automatically word wrapped
   // to fit on screen properly, so it's fairly safe to assume that
   // explicit newlines should be replaced with whitespace
-  StringUtil::replaceAll(msg, "\n", " ");
+  StringUtils::replaceAll(msg, "\n", " ");
 
   // it's possible to send an empty center print/only whitespace to "clear"
   // whatever is being displayed, but we don't want to log that obviously
@@ -1915,26 +1916,6 @@ static float CG_ScanForCrosshairEntity(float *zChange, qboolean *hitClient) {
   return dist;
 }
 
-namespace ETJump {
-void cursorhintTrace(trace_t *trace, vec3_t start, vec3_t end) {
-  CG_Trace(trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
-           MASK_PLAYERSOLID);
-
-  if (trace->entityNum >= MAX_CLIENTS) {
-    return;
-  }
-
-  while (trace->entityNum < MAX_CLIENTS &&
-         !playerIsSolid(cg.snap->ps.clientNum, trace->entityNum)) {
-    tempTraceIgnoreClient(trace->entityNum);
-    CG_Trace(trace, start, vec3_origin, vec3_origin, end, cg.snap->ps.clientNum,
-             MASK_PLAYERSOLID);
-  }
-
-  resetTempTraceIgnoredClients();
-}
-} // namespace ETJump
-
 /*
 ==============
 CG_CheckForCursorHints
@@ -1967,7 +1948,9 @@ void CG_CheckForCursorHints() {
   VectorCopy(cg.refdef_current->vieworg, start);
   VectorMA(start, CH_DIST, cg.refdef_current->viewaxis[0], end);
 
-  ETJump::cursorhintTrace(&trace, start, end);
+  ETJump::cgame.utils.trace->filteredTrace(
+      cg.snap->ps.clientNum, &trace, start, nullptr, nullptr, end,
+      cg.snap->ps.clientNum, MASK_PLAYERSOLID);
 
   if (trace.fraction == 1.0f) {
     return;
@@ -2166,38 +2149,35 @@ static void CG_DrawVote() {
   float x_a = 8.0f;
   float x_b = 8.0f;
 
-  const auto rtvHandler = ETJump::rtvHandler;
-
   const std::string str1 = BindingFromName("vote yes");
   const std::string str2 = BindingFromName("vote no");
 
   if (cgs.applicationEndTime > cg.time && cgs.applicationClient >= 0) {
     line_a =
-        ETJump::stringFormat("Accept %s's application to join your fireteam?",
-                             cgs.clientinfo[cgs.applicationClient].name);
+        StringUtils::format("Accept %s's application to join your fireteam?",
+                            cgs.clientinfo[cgs.applicationClient].name);
     line_b =
-        ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
+        StringUtils::format("Press '%s' for YES, or '%s' for No", str1, str2);
   } else if (cgs.propositionEndTime > cg.time && cgs.propositionClient >= 0) {
-    line_a = ETJump::stringFormat(
-        "Accept %s's proposition to invite %s to join your "
-        "fireteam?",
+    line_a = StringUtils::format(
+        "Accept %s's proposition to invite %s to join your fireteam?",
         cgs.clientinfo[cgs.propositionClient2].name,
         cgs.clientinfo[cgs.propositionClient].name);
     line_b =
-        ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
+        StringUtils::format("Press '%s' for YES, or '%s' for No", str1, str2);
   } else if (cgs.invitationEndTime > cg.time && cgs.invitationClient >= 0) {
     line_a =
-        ETJump::stringFormat("Accept %s's invitation to join their fireteam?",
-                             cgs.clientinfo[cgs.invitationClient].name);
+        StringUtils::format("Accept %s's invitation to join their fireteam?",
+                            cgs.clientinfo[cgs.invitationClient].name);
     line_b =
-        ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
+        StringUtils::format("Press '%s' for YES, or '%s' for No", str1, str2);
   } else if (cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -1) {
     // make sure we're still on the fireteam before displaying
     // this prompt
     if (CG_IsOnFireteam(cg.clientNum)) {
       line_a = "Make Fireteam private?";
-      line_b = ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1,
-                                    str2);
+      line_b =
+          StringUtils::format("Press '%s' for YES, or '%s' for No", str1, str2);
     }
     // we have left, so reset the timer
     else {
@@ -2239,8 +2219,9 @@ static void CG_DrawVote() {
 
     const bool canVote = cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR ||
                          etj_spectatorVote.integer;
-    const bool isRtvVote = rtvHandler->rtvVoteActive();
-    const ETJump::RtvVoteCountInfo rtvYesVotes = rtvHandler->getRtvYesVotes();
+    const bool isRtvVote = ETJump::cgame.handlers.rtv->rtvVoteActive();
+    const ETJump::RtvVoteCountInfo rtvYesVotes =
+        ETJump::cgame.handlers.rtv->getRtvYesVotes();
 
     const auto formatVoteStr = [&isRtvVote,
                                 &rtvYesVotes](const std::string &str) {
@@ -2249,33 +2230,32 @@ static void CG_DrawVote() {
             rtvYesVotes.playerCount + rtvYesVotes.spectatorCount;
 
         if (!etj_spectatorVote.integer ||
-            ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
-          return ETJump::stringFormat(str, std::to_string(totalYes),
-                                      std::to_string(cgs.voteNo));
+            ETJump::cgame.demo.compatibility->flags.noSpecCountInVoteCs) {
+          return StringUtils::format(str, std::to_string(totalYes),
+                                     std::to_string(cgs.voteNo));
         }
 
-        return ETJump::stringFormat(
+        return StringUtils::format(
             str,
-            ETJump::stringFormat("%i(%i)", totalYes,
-                                 rtvYesVotes.spectatorCount),
-            ETJump::stringFormat("%i(%i)", cgs.voteNo, cgs.voteNoSpectators));
+            StringUtils::format("%i(%i)", totalYes, rtvYesVotes.spectatorCount),
+            StringUtils::format("%i(%i)", cgs.voteNo, cgs.voteNoSpectators));
       }
 
       if (!etj_spectatorVote.integer ||
-          ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
-        return ETJump::stringFormat(str, std::to_string(cgs.voteYes),
-                                    std::to_string(cgs.voteNo));
+          ETJump::cgame.demo.compatibility->flags.noSpecCountInVoteCs) {
+        return StringUtils::format(str, std::to_string(cgs.voteYes),
+                                   std::to_string(cgs.voteNo));
       }
 
-      return ETJump::stringFormat(
+      return StringUtils::format(
           str,
-          ETJump::stringFormat("%i(%i)", cgs.voteYes, cgs.voteYesSpectators),
-          ETJump::stringFormat("%i(%i)", cgs.voteNo, cgs.voteNoSpectators));
+          StringUtils::format("%i(%i)", cgs.voteYes, cgs.voteYesSpectators),
+          StringUtils::format("%i(%i)", cgs.voteNo, cgs.voteNoSpectators));
     };
 
     if (isRtvVote) {
       if (!(cg.snap->ps.eFlags & EF_VOTED)) {
-        line_a = ETJump::stringFormat("VOTE(%i): %s", sec, cgs.voteString);
+        line_a = StringUtils::format("VOTE(%i): %s", sec, cgs.voteString);
 
         if (canVote) {
           line_b = formatVoteStr("Change map(" + str1 +
@@ -2286,7 +2266,7 @@ static void CG_DrawVote() {
         }
       } else {
         line_a =
-            ETJump::stringFormat("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
+            StringUtils::format("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
         line_b = formatVoteStr("Change map:%s, Keep current map:%s");
 
         x_b = 13;
@@ -2300,17 +2280,17 @@ static void CG_DrawVote() {
         } else if (cgs.votedNo) {
           std::string yesVotes = "Change map:";
 
-          if (ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+          if (ETJump::cgame.demo.compatibility->flags.noSpecCountInVoteCs) {
             yesVotes += std::to_string(rtvYesVotes.playerCount);
           } else {
-            yesVotes += ETJump::stringFormat(
+            yesVotes += StringUtils::format(
                 "%i(%i)", rtvYesVotes.playerCount + rtvYesVotes.spectatorCount,
                 rtvYesVotes.spectatorCount);
           }
 
           // FIXME: this should probably actually format something..?
           std::string noVotes =
-              ETJump::stringFormat("Keep current map", cgs.voteNo);
+              StringUtils::format("Keep current map", cgs.voteNo);
 
           auto yesStrWidth = static_cast<float>(
               ETJump::DrawStringWidth(yesVotes.c_str(), 0.23f));
@@ -2323,7 +2303,7 @@ static void CG_DrawVote() {
       }
     } else {
       if (!(cg.snap->ps.eFlags & EF_VOTED)) {
-        line_a = ETJump::stringFormat("VOTE(%i): %s", sec, cgs.voteString);
+        line_a = StringUtils::format("VOTE(%i): %s", sec, cgs.voteString);
 
         if (canVote) {
           line_b = formatVoteStr("YES(" + str1 + "):%s, NO(" + str2 + "):%s");
@@ -2333,7 +2313,7 @@ static void CG_DrawVote() {
         }
       } else {
         line_a =
-            ETJump::stringFormat("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
+            StringUtils::format("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
         line_b = formatVoteStr("Y:%s, N:%s");
 
         x_b = 13;
@@ -2343,11 +2323,11 @@ static void CG_DrawVote() {
         } else {
           std::string yesVotes = "Y:";
 
-          if (ETJump::demoCompatibility->flags.noSpecCountInVoteCs) {
+          if (ETJump::cgame.demo.compatibility->flags.noSpecCountInVoteCs) {
             yesVotes += std::to_string(cgs.voteYes);
           } else {
-            yesVotes += ETJump::stringFormat("%i(%i)", cgs.voteYes,
-                                             cgs.voteYesSpectators);
+            yesVotes += StringUtils::format("%i(%i)", cgs.voteYes,
+                                            cgs.voteYesSpectators);
           }
 
           auto strWidth = static_cast<float>(
@@ -2540,12 +2520,12 @@ static void CG_DrawSpectatorMessage(void) {
   if (!Q_stricmp(str2, "(openlimbomenu)")) {
     str2 = "ESCAPE";
   }
-  str = ETJump::stringFormat("Press %s to open Limbo Menu", str2);
+  str = StringUtils::format("Press %s to open Limbo Menu", str2);
   ETJump::DrawString(8, 154 + 12, 0.23f, 0.25f, colorWhite, qtrue, str.c_str(),
                      0, ITEM_TEXTSTYLE_SHADOWED);
 
   str2 = BindingFromName("+attack");
-  str = ETJump::stringFormat("Press %s to follow next player", str2);
+  str = StringUtils::format("Press %s to follow next player", str2);
   ETJump::DrawString(8, 172 + 12, 0.23f, 0.25f, colorWhite, qtrue, str.c_str(),
                      0, ITEM_TEXTSTYLE_SHADOWED);
 #ifdef MV_SUPPORT
@@ -2630,7 +2610,7 @@ static void CG_DrawLimboMessage(void) {
 
   // JPW NERVE
   str = "Reinforcements deploy in " +
-        ETJump::getSecondsString(CG_CalculateReinfTime(qfalse)) + ".";
+        StringUtils::getSecondsString(CG_CalculateReinfTime(qfalse)) + ".";
   ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse,
                      str.c_str(), 0, 0);
 }
@@ -2721,7 +2701,7 @@ static void CG_DrawFollow() {
     return;
   }
 
-  const std::string str = ETJump::stringFormat(
+  const std::string str = StringUtils::format(
       "^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name);
   ETJump::DrawString(INFOTEXT_STARTX, 118 + 12, 0.23f, 0.25f, colorWhite,
                      qfalse, str.c_str(), 0, ITEM_TEXTSTYLE_SHADOWED);
@@ -4263,17 +4243,17 @@ void CG_DrawDemoRecording() {
   std::string waveStatus;
 
   if (cl_demorecording.integer) {
-    demoStatus = ETJump::stringFormat(" demo %s: %ik ", cl_demofilename.string,
-                                      cl_demooffset.integer / 1024);
+    demoStatus = StringUtils::format(" demo %s: %ik ", cl_demofilename.string,
+                                     cl_demooffset.integer / 1024);
   }
 
   if (cl_waverecording.integer) {
-    waveStatus = ETJump::stringFormat(" audio: %s %ik ", cl_wavefilename.string,
-                                      cl_waveoffset.integer / 1024);
+    waveStatus = StringUtils::format(" audio: %s %ik ", cl_wavefilename.string,
+                                     cl_waveoffset.integer / 1024);
   }
 
   const std::string status =
-      ETJump::stringFormat("RECORDING%s%s", demoStatus, waveStatus);
+      StringUtils::format("RECORDING%s%s", demoStatus, waveStatus);
 
   const float x = ETJump_AdjustPosition(etj_recordingStatusX.value);
   const float y = etj_recordingStatusY.value;
@@ -4314,10 +4294,9 @@ static void CG_Draw2D() {
     }
     CG_CheckForReticle();
 
-    // crosshair is the only renderable that should be drawn here
-    for (const auto &r : ETJump::renderables) {
-      if (const auto &crosshair =
-              std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
+    // crosshair is the only HUD renderable that should be drawn here
+    for (const auto &r : ETJump::cgame.hud.renderables) {
+      if (auto *const crosshair = dynamic_cast<ETJump::Crosshair *>(r.get())) {
         if (crosshair->beforeRender()) {
           crosshair->render();
         }
@@ -4325,6 +4304,14 @@ static void CG_Draw2D() {
         break;
       }
     }
+
+    // we want to draw UI elements too
+    for (const auto &r : ETJump::cgame.ui.renderables) {
+      if (r->beforeRender()) {
+        r->render();
+      }
+    }
+
     CG_DrawFlashFade();
     return;
   }
@@ -4418,7 +4405,7 @@ static void CG_Draw2D() {
   }
 
   if (!cgs.demoCam.renderingFreeCam) {
-    for (const auto &r : ETJump::renderables) {
+    for (const auto &r : ETJump::cgame.hud.renderables) {
       if (r->beforeRender()) {
         r->render();
       }
@@ -4434,6 +4421,12 @@ static void CG_Draw2D() {
   if (!cg.cameraMode && (cg.snap->ps.stats[STAT_HEALTH] > 0 ||
                          (cg.snap->ps.pm_flags & PMF_FOLLOW))) {
     CG_DrawCrosshairNames();
+  }
+
+  for (const auto &r : ETJump::cgame.ui.renderables) {
+    if (r->beforeRender()) {
+      r->render();
+    }
   }
 
   // Info overlays
@@ -4558,7 +4551,7 @@ void CG_DrawMiscGamemodels() {
 
 namespace ETJump {
 static void drawCoronas() {
-  if (demoCompatibility->flags.serverSideCoronas) {
+  if (cgame.demo.compatibility->flags.serverSideCoronas) {
     return;
   }
 
@@ -4575,7 +4568,7 @@ static void drawCoronas() {
 }
 
 static void drawClientDlights() {
-  if (demoCompatibility->flags.serverSideDlights) {
+  if (cgame.demo.compatibility->flags.serverSideDlights) {
     return;
   }
 

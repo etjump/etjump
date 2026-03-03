@@ -84,26 +84,26 @@ private:
   const std::vector<std::string> _defaultSeasonFields{"id", "name",
                                                       "start_time", "end_time"};
   const std::string _defaultSeasonFieldsStr =
-      StringUtil::join(_defaultSeasonFields, ",");
+      StringUtils::join(_defaultSeasonFields, ",");
   const std::string _defaultSeasonQueryBase =
-      stringFormat(R"(
+      StringUtils::format(R"(
     select
       %s
     from season
   )",
-                   _defaultSeasonFieldsStr);
+                          _defaultSeasonFieldsStr);
   const std::vector<std::string> _defaultRecordFields{
       "season_id",   "map",         "run",         "user_id", "time",
       "checkpoints", "record_date", "player_name", "metadata"};
   const std::string _defaultRecordFieldsStr =
-      StringUtil::join(_defaultRecordFields, ",");
+      StringUtils::join(_defaultRecordFields, ",");
   const std::string _defaultRecordQueryBase =
-      stringFormat(R"(
+      StringUtils::format(R"(
         select
           %s
         from record
       )",
-                   _defaultRecordFieldsStr);
+                          _defaultRecordFieldsStr);
 
   static std::vector<Timerun::Record>
   getRecordsFromQuery(sqlite::database_binder &binder);

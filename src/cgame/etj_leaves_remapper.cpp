@@ -22,20 +22,48 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include <string>
 
-#include <cstdint>
+#include "etj_leaves_remapper.h"
+#include "cg_local.h"
+#include "etj_cvar_update_handler.h"
+#include "etj_utilities.h"
 
 namespace ETJump {
-inline constexpr int32_t CGAME_INIT_DELAY_FRAMES = 10;
+LeavesRemapper::LeavesRemapper(
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : cvarUpdate(cvarUpdate) {
+  auto shader = composeShader(
+      shaderName,
+      {{"map *white", "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
+        "alphaGen const 0.0"}});
+  trap_R_LoadDynamicShader(shaderName, shader.c_str());
+  trap_R_RegisterShader(shaderName);
 
-void init();
-void shutdown();
+  if (!etj_drawLeaves.integer) {
+    turnOffLeaves();
+  }
 
-void initTimeruns();
+  this->cvarUpdate->subscribe(&etj_drawLeaves, [this](const vmCvar_t *cvar) {
+    cvar->integer ? turnOnLeaves() : turnOffLeaves();
+  });
+}
 
-// performs one-time actions slightly delayed from actual cgame init,
-// to work around issues that certain actions have when they are performed
-// on the same frame as the module is initialized
-void delayedInit();
+void LeavesRemapper::turnOnLeaves() const {
+  for (auto &leavesShader : leavesShaders) {
+    trap_R_RemapShader(leavesShader, leavesShader, "0");
+  }
+}
+
+void LeavesRemapper::turnOffLeaves() const {
+  for (auto &leavesShader : leavesShaders) {
+    trap_R_RemapShader(leavesShader, shaderName, "0");
+  }
+}
+
+LeavesRemapper::~LeavesRemapper() {
+  turnOnLeaves();
+
+  cvarUpdate->unsubscribe(&etj_drawLeaves);
+}
 } // namespace ETJump

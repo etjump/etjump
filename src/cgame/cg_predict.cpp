@@ -5,9 +5,8 @@
 // ahead the client's movement.
 // It also handles local physics interaction, like fragments bouncing off walls
 
-#include <algorithm>
-#include <array>
 #include "cg_local.h"
+#include "etj_trace_utils.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_entity_utilities_shared.h"
@@ -151,16 +150,7 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
       continue;
     }
 
-    if (ent->number < MAX_CLIENTS &&
-        ETJump::tempTraceIgnoredClients[ent->number]) {
-      continue;
-    }
-
-    // ignore collision with 'func_static_client' if it's turned off for us
-    if (ent->eType == ET_STATIC_CLIENT &&
-        std::find(ETJump::tempTraceIgnoredEntities.cbegin(),
-                  ETJump::tempTraceIgnoredEntities.cend(),
-                  ent->number) != ETJump::tempTraceIgnoredEntities.cend()) {
+    if (ETJump::cgame.utils.trace->entityIsIgnored(ent->number)) {
       continue;
     }
 
@@ -1033,14 +1023,6 @@ void CG_PredictPlayerState() {
     return;
   }
 
-  if (cg_pmove.ps && cg_pmove.ps->eFlags & EF_MOUNTEDTANK) {
-    centity_t *tank =
-        &cg_entities[cg_entities[cg.snap->ps.clientNum].tagParent];
-
-    cg.pmext.centerangles[YAW] = tank->lerpAngles[YAW];
-    cg.pmext.centerangles[PITCH] = tank->lerpAngles[PITCH];
-  }
-
   // prepare for pmove
   cg_pmove.ps = &cg.predictedPlayerState;
   cg_pmove.pmext = &pmext; //&cg.pmext;
@@ -1069,12 +1051,11 @@ void CG_PredictPlayerState() {
     centity_t *tank =
         &cg_entities[cg_entities[cg.snap->ps.clientNum].tagParent];
 
+    cg.pmext.centerangles[YAW] = tank->lerpAngles[YAW];
     cg.pmext.centerangles[PITCH] = tank->lerpAngles[PITCH];
   }
 
   cg_pmove.skill = cgs.clientinfo[cg.snap->ps.clientNum].skill;
-
-  ETJump::tempTraceIgnoreEntities();
 
   cg_pmove.trace = CG_TraceCapsule;
   cg_pmove.pointcontents = CG_PointContents;
@@ -1207,7 +1188,7 @@ void CG_PredictPlayerState() {
 
       // loop through the saved states queue
       for (int i = cg.backupStateTop; i != cg.backupStateTail;
-           i = (i + 1) % MAX_BACKUP_STATES) {
+           i = (i + 1) % ETJump::MAX_BACKUP_STATES) {
         // if we find a predicted state whose commandTime matches the snapshot
         // player state's commandTime
         if (cg.backupStates[i].commandTime ==
@@ -1231,7 +1212,7 @@ void CG_PredictPlayerState() {
           // point
           *cg_pmove.ps = cg.backupStates[i];
           // advance the head
-          cg.backupStateTop = (i + 1) % MAX_BACKUP_STATES;
+          cg.backupStateTop = (i + 1) % ETJump::MAX_BACKUP_STATES;
 
           // set the next command to predict
           predictCmd = cg.lastPredictedCommand + 1;
@@ -1400,12 +1381,14 @@ void CG_PredictPlayerState() {
 
     fflush(stdout);
 
+    ETJump::cgame.utils.trace->setupIgnoredEntities(cg.snap->ps.clientNum);
+
     // unlagged - optimized prediction
     if (etj_optimizePrediction.integer) {
       // if we need to predict this command, or we've run out of space in the
       // saved states queue
       if (cmdNum >= predictCmd ||
-          (stateIndex + 1) % MAX_BACKUP_STATES == cg.backupStateTop) {
+          (stateIndex + 1) % ETJump::MAX_BACKUP_STATES == cg.backupStateTop) {
         // run the Pmove
         Pmove(&cg_pmove);
         numPredicted++; // debug code
@@ -1414,11 +1397,11 @@ void CG_PredictPlayerState() {
         cg.lastPredictedCommand = cmdNum;
 
         // if we haven't run out of space in the saved states queue
-        if ((stateIndex + 1) % MAX_BACKUP_STATES != cg.backupStateTop) {
+        if ((stateIndex + 1) % ETJump::MAX_BACKUP_STATES != cg.backupStateTop) {
           // save the state for the false case (of cmdNum >= predictCmd)
           // in later calls to this function
           cg.backupStates[stateIndex] = *cg_pmove.ps;
-          stateIndex = (stateIndex + 1) % MAX_BACKUP_STATES;
+          stateIndex = (stateIndex + 1) % ETJump::MAX_BACKUP_STATES;
           cg.backupStateTail = stateIndex;
         }
       } else {
@@ -1435,7 +1418,7 @@ void CG_PredictPlayerState() {
         *cg_pmove.ps = cg.backupStates[stateIndex];
 
         // go to the next element in the saved states array
-        stateIndex = (stateIndex + 1) % MAX_BACKUP_STATES;
+        stateIndex = (stateIndex + 1) % ETJump::MAX_BACKUP_STATES;
       }
     } else {
       // run the Pmove
@@ -1457,8 +1440,7 @@ void CG_PredictPlayerState() {
     CG_TouchTriggerPrediction();
   }
 
-  ETJump::resetTempTraceIgnoredClients();
-  ETJump::tempTraceIgnoredEntities.clear();
+  ETJump::cgame.utils.trace->resetIgnoredEntities();
 
   // unlagged - optimized prediction
   //  do a /condump after a few seconds of this

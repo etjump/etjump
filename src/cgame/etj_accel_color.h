@@ -24,8 +24,10 @@
 
 #pragma once
 
-#include "cg_local.h"
 #include <list>
+
+#include "../game/q_shared.h"
+#include "../game/bg_public.h"
 
 namespace ETJump {
 class AccelColor {

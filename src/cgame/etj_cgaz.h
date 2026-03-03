@@ -28,6 +28,8 @@
 #include "cg_local.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+
 class CGaz : public IRenderable {
 public:
   static bool strafingForwards(const playerState_t &ps, const pmove_t *pm);
@@ -59,8 +61,8 @@ public:
 
   int lastUpdateTime{};
 
-  CGaz();
-  ~CGaz() override = default;
+  explicit CGaz(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~CGaz() override;
 
   void render() const override;
   bool beforeRender() override;
@@ -87,5 +89,7 @@ private:
 
   const playerState_t *ps = &cg.predictedPlayerState;
   const pmove_t *pm{};
+
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 } // namespace ETJump

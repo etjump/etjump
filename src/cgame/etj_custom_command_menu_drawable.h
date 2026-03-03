@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2026 ETJump team <zero@etjump.com>
+ * Copyright (c) 2025 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,39 @@
  * SOFTWARE.
  */
 
-#include "etj_cvar_shadow.h"
-#include "etj_cvar_update_handler.h"
+#pragma once
 
-using namespace ETJump;
+#include "etj_irenderable.h"
 
-CvarShadow::CvarShadow(const vmCvar_t *shadow, const std::string &target)
-    : _shadow(shadow), _target(target) {
-  forceCvarSet(shadow);
-  cvarUpdateHandler->subscribe(
-      _shadow, [this](const vmCvar_t *cvar) { this->forceCvarSet(cvar); });
-}
+#include "../ui/ui_shared.h"
 
-CvarShadow::~CvarShadow() { cvarUpdateHandler->unsubscribe(_shadow); }
+namespace ETJump {
+class ClientCommandsHandler;
 
-void CvarShadow::forceCvarSet(const vmCvar_t *cvar) const {
-  trap_Cvar_Set(_target.c_str(), cvar->string);
-}
+class CustomCommandMenuDrawable : public IRenderable {
+public:
+  explicit CustomCommandMenuDrawable(
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
+  ~CustomCommandMenuDrawable() override;
 
-void CvarShadow::forceCvarSet() const {
-  trap_Cvar_Set(_target.c_str(), _shadow->string);
-}
+  bool beforeRender() override;
+  void render() const override;
+
+  static void commandMenuTitleDraw(panel_button_t *button);
+  static void commandMenuTextDraw(panel_button_t *button);
+
+  static void keyHandling(int32_t key, bool down);
+  // this is qboolean so that we don't need to cast the result to engine
+  static qboolean checkExecKey(int32_t key, qboolean doAction);
+
+private:
+  static uint8_t currentPage;
+
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
+
+  void setupListeners();
+  static void openMenu(uint8_t page);
+  static void setupPanels();
+  static bool canSkipDraw();
+};
+} // namespace ETJump

@@ -62,7 +62,7 @@ bool MenuIntegrityChecker::checkIntegrity() {
       const auto currentHash =
           Crypto::sha1(std::string(contents.cbegin(), contents.cend()));
 
-      if (!StringUtil::iEqual(currentHash, hash)) {
+      if (!StringUtils::iEqual(currentHash, hash)) {
         Com_DPrintf("Integrity check failed on file '%s' - invalid hash!\n",
                     file.c_str());
         return false;
@@ -81,7 +81,7 @@ std::vector<std::pair<std::string, std::string>>
 MenuIntegrityChecker::generateFileHashList() {
   std::vector<std::pair<std::string, std::string>> list;
 
-  const auto fileHashKvp = StringUtil::split(MENU_HASH_LIST, ",");
+  const auto fileHashKvp = StringUtils::split(MENU_HASH_LIST, ",");
 
   for (const auto &kvp : fileHashKvp) {
     const size_t pos = kvp.find(':');
@@ -140,7 +140,7 @@ void MenuIntegrityChecker::printIntegrityViolation() {
 std::vector<std::string> MenuIntegrityChecker::getBadPaks() {
   // see if we can find the offending packs
   const auto files =
-      ETJump::FileSystem::getFileList("../" + uiInfo.fsGame, ".pk3", true);
+      FileSystem::getFileList("../" + uiInfo.fsGame, ".pk3", true);
   const auto pk3name =
       std::string(GAME_NAME) + "-" + std::string(GAME_VERSION) + ".pk3";
   const auto it = std::find(files.cbegin(), files.cend(), pk3name);

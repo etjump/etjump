@@ -93,6 +93,7 @@ add_library(qagame MODULE
 	"etj_target_init.cpp"
 	"etj_target_random.cpp"
 	"etj_target_spawn_relay.cpp"
+	"etj_trace_utils.cpp"
 	"etj_time_utilities.cpp"
 	"etj_timerun_repository.cpp"
 	"etj_timerun_v2.cpp"
@@ -106,7 +107,7 @@ add_library(qagame MODULE
 	${GAME_HEADERS}
 )
 target_compile_definitions(qagame PRIVATE GAMEDLL)
-target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 picosha2 libsqlite libsqlite_modern_cpp libuuid4 fmt::fmt)
+target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 picosha2 libsqlite libsqlite_modern_cpp libuuid4 fmt::fmt toml11::toml11)
 target_link_libraries(qagame PRIVATE $<IF:$<CXX_COMPILER_ID:MSVC>,,pthread>)
 set_target_properties(qagame PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"

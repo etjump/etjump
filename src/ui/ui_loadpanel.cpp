@@ -3,8 +3,6 @@
 #include "ui_local.h"
 #include "ui_shared.h"
 
-#include "../cgame/etj_utilities.h"
-
 extern displayContextDef_t *DC;
 
 fontInfo_t bg_loadscreenfont1;

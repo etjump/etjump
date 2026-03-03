@@ -75,9 +75,9 @@ if (USE_ASAN OR USE_LSAN OR USE_UBSAN)
 	setup_sanitizers()
 endif ()
 
-create_compiler_opts(cxx_compiler_opts WARN 3 DEFINE 
-	GAME_NAME="${CMAKE_PROJECT_NAME}" 
-	GAME_URL="${CMAKE_PROJECT_HOMEPAGE_URL}" 
+create_compiler_opts(cxx_compiler_opts WARN 3 DEFINE
+	GAME_NAME="${CMAKE_PROJECT_NAME}"
+	GAME_URL="${CMAKE_PROJECT_HOMEPAGE_URL}"
 	GAME_VERSION="${GAME_VERSION}"
 	GIT_COMMIT_HASH="${GAME_VERSION_COMMIT_HASH}"
 	GIT_COMMIT_HASH_SHORT="${GAME_VERSION_COMMIT_HASH_SHORT}"
@@ -104,6 +104,7 @@ add_subdirectory(deps/sqlite)
 add_subdirectory(deps/sqlite_modern_cpp)
 add_subdirectory(deps/gtest)
 add_subdirectory(deps/uuid4)
+add_subdirectory(deps/toml11)
 
 # fmt 10.0.0 changed default of FMT_INSTALL from OFF to ON
 set(FMT_INSTALL OFF)
@@ -116,6 +117,7 @@ target_link_libraries(libuuid4 PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsqlite PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(fmt PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsqlite_modern_cpp INTERFACE cxx_compiler_opts_w0)
+target_link_libraries(toml11 INTERFACE cxx_compiler_opts_w0)
 
 # setup directories for IDEs that use them (Visual Studio, XCode...)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -136,6 +138,7 @@ set_target_properties(
 		libsqlite_modern_cpp
 		libuuid4
 		fmt
+        toml11
 		PROPERTIES FOLDER ${BUNDLED_TARGETS_FOLDER})
 
 add_subdirectory(src/cgame)

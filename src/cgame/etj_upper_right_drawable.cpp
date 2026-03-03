@@ -27,18 +27,19 @@
 
 #include "../game/etj_time_utilities.h"
 
-ETJump::UpperRight::UpperRight() {
+namespace ETJump {
+UpperRight::UpperRight() {
   FPSIndex = FPSInit = 0;
   FPSLastUpdate = FPSLastTime = fps = 0;
 }
 
-bool ETJump::UpperRight::beforeRender() {
-  if (cg_paused.integer || ETJump::showingScores()) {
+bool UpperRight::beforeRender() {
+  if (cg_paused.integer || showingScores()) {
     return false;
   }
 
   // FPS meter
-  const long long currentTime = getCurrentTimestamp();
+  const int64_t currentTime = getCurrentTimestamp();
   if (FPSInit < FPSFrames + 1) {
     ++FPSInit;
   }
@@ -64,7 +65,7 @@ bool ETJump::UpperRight::beforeRender() {
   return true;
 }
 
-void ETJump::UpperRight::render() const {
+void UpperRight::render() const {
   if (etj_HUD_fireteam.integer && CG_IsOnFireteam(cg.clientNum)) {
     rectDef_t rect = {10, 10, 100, 100};
     CG_DrawFireTeamOverlay(&rect);
@@ -79,29 +80,29 @@ void ETJump::UpperRight::render() const {
 
   float y = y0;
   if (cg_drawRoundTimer.integer) {
-    DrawTimer(y);
+    drawRoundTimer(y);
   }
 
   if (etj_drawClock.integer) {
-    DrawTime(y);
+    drawClock(y);
   }
 
   if (cg_drawFPS.integer) {
-    DrawFPS(y);
+    drawFPS(y);
   }
 
   if (etj_drawspeed.integer) {
-    DrawSpeed(y);
+    drawSpeed(y);
   }
 
   if (cg_drawSnapshot.integer) {
-    DrawSnapshot(y);
+    drawSnapshot(y);
   }
 }
 
-void ETJump::UpperRight::DrawTimer(float &y) const {
+void UpperRight::drawRoundTimer(float &y) const {
   const int msec = cg.time - cgs.levelStartTime;
-  auto time = ETJump::toClock(msec, true);
+  auto time = toClock(msec, true);
 
   const char *s = time.hours > 0
                       ? va("%02d:%02d:%02d", time.hours, time.min, time.sec)
@@ -117,7 +118,7 @@ void ETJump::UpperRight::DrawTimer(float &y) const {
   y += 16;
 }
 
-void ETJump::UpperRight::DrawTime(float &y) const {
+void UpperRight::drawClock(float &y) const {
   char displayTime[12];
   qtime_t tm;
 
@@ -150,7 +151,7 @@ void ETJump::UpperRight::DrawTime(float &y) const {
   y += 16;
 }
 
-void ETJump::UpperRight::DrawFPS(float &y) const {
+void UpperRight::drawFPS(float &y) const {
   const std::string s = std::to_string(fps) + " FPS";
   const int w =
       CG_Text_Width_Ext(s.c_str(), textScale, 0, &cgs.media.limboFont1);
@@ -164,10 +165,11 @@ void ETJump::UpperRight::DrawFPS(float &y) const {
   y += 16;
 }
 
-void ETJump::UpperRight::DrawSpeed(float &y) const {
+void UpperRight::drawSpeed(float &y) const {
   static constexpr float SPEED_US_TO_KPH = 14.56f;
   static constexpr float SPEED_US_TO_MPH = 23.44f;
-  static vec_t highestSpeed, speed;
+  static vec_t highestSpeed;
+  static vec_t speed;
   static int lasttime;
 
   if (cg.resetmaxspeed) {
@@ -250,7 +252,7 @@ void ETJump::UpperRight::DrawSpeed(float &y) const {
   y += 16;
 }
 
-void ETJump::UpperRight::DrawSnapshot(float &y) const {
+void UpperRight::drawSnapshot(float &y) const {
   const char *s = va("time:%i snap:%i cmd:%i", cg.snap->serverTime,
                      cg.latestSnapshotNum, cgs.serverCommandSequence);
   const int w = CG_DrawStrlen(s) * BIGCHAR_WIDTH;
@@ -259,3 +261,4 @@ void ETJump::UpperRight::DrawSnapshot(float &y) const {
 
   y += BIGCHAR_HEIGHT + 4;
 }
+} // namespace ETJump

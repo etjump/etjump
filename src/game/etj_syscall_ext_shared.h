@@ -24,15 +24,10 @@
 
 #pragma once
 
-#if defined(GAMEDLL)
-  #include "g_local.h"
-#elif defined(CGAMEDLL)
-  #include "../cgame/cg_local.h"
-#elif defined(UIDLL)
-  #include "../ui/ui_local.h"
-#endif
-
+#include <string>
 #include <unordered_map>
+
+#include "q_shared.h"
 
 namespace ETJump {
 class SyscallExt {
@@ -64,8 +59,6 @@ public:
   // due to SystemCall macro expansion
   static bool trap_GetValue(char *value, int size, const char *key);
 
-  SyscallExt() = default;
-  ~SyscallExt() = default;
   void setupExtensions();
 
 private:

@@ -3395,8 +3395,8 @@ qboolean G_ScriptAction_Announce(gentity_t *ent, char *params) {
   auto activator = ent->activator;
   if (activator && activator->client) {
     const std::string name =
-        ETJump::stringFormat("%s^7", activator->client->pers.netname);
-    ETJump::StringUtil::replaceAll(str, "%s", name);
+        StringUtils::format("%s^7", activator->client->pers.netname);
+    StringUtils::replaceAll(str, "%s", name);
   }
 
   Printer::popupAll(str);
@@ -4486,7 +4486,7 @@ inline constexpr char wmAnnouncePrivateUsage[] =
 inline constexpr char trackerUsage[] = "tracker [index] <command> <value>";
 inline constexpr char changeSkinUsage[] = "changeskin <skinfile>";
 
-#define FMT_FUNC(x) stringFormat("ScriptActions::%s", x).c_str()
+#define FMT_FUNC(x) StringUtils::format("ScriptActions::%s", x).c_str()
 
 enum class ScriptSpawnType {
   PLAYER_SPAWN = 1,
@@ -4719,7 +4719,7 @@ qboolean deleteAction(gentity_t *ent, char *params) {
     int valueInt{};
     float valueFloat{};
     vec3_t valueVec{};
-    std::vector<std::string> args = ETJump::StringUtil::split(value, " ");
+    std::vector<std::string> args = StringUtils::split(value, " ");
 
     const auto invalidArgCount = [&](const int expectedArgs,
                                      const size_t numArgs) {
@@ -4755,7 +4755,7 @@ qboolean deleteAction(gentity_t *ent, char *params) {
         while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != nullptr) {
           pass[found->s.number].first++;
           pass[found->s.number].second.emplace_back(
-              ETJump::stringFormat(R"(%s "%s")", key, value));
+              StringUtils::format(R"(%s "%s")", key, value));
         }
 
         break;
@@ -4776,7 +4776,7 @@ qboolean deleteAction(gentity_t *ent, char *params) {
                nullptr) {
           pass[found->s.number].first++;
           pass[found->s.number].second.emplace_back(
-              ETJump::stringFormat(R"(%s "%s")", key, value));
+              StringUtils::format(R"(%s "%s")", key, value));
         }
 
         break;
@@ -4785,7 +4785,7 @@ qboolean deleteAction(gentity_t *ent, char *params) {
         while ((found = G_Find(found, fields[i].ofs, value)) != nullptr) {
           pass[found->s.number].first++;
           pass[found->s.number].second.emplace_back(
-              ETJump::stringFormat(R"(%s "%s")", key, value));
+              StringUtils::format(R"(%s "%s")", key, value));
         }
         break;
 
@@ -4809,7 +4809,7 @@ qboolean deleteAction(gentity_t *ent, char *params) {
         while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
           pass[found->s.number].first++;
           pass[found->s.number].second.emplace_back(
-              ETJump::stringFormat(R"(%s "%s")", key, value));
+              StringUtils::format(R"(%s "%s")", key, value));
         }
 
         break;
@@ -4831,7 +4831,7 @@ qboolean deleteAction(gentity_t *ent, char *params) {
         while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
           pass[found->s.number].first++;
           pass[found->s.number].second.emplace_back(
-              ETJump::stringFormat(R"(%s "%s")", key, value));
+              StringUtils::format(R"(%s "%s")", key, value));
         }
 
         break;
@@ -4849,7 +4849,7 @@ qboolean deleteAction(gentity_t *ent, char *params) {
         while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != nullptr) {
           pass[found->s.number].first++;
           pass[found->s.number].second.emplace_back(
-              ETJump::stringFormat(R"(%s "%s")", key, value));
+              StringUtils::format(R"(%s "%s")", key, value));
         }
 
         break;
@@ -4872,13 +4872,11 @@ qboolean deleteAction(gentity_t *ent, char *params) {
   for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < ENTITYNUM_MAX_NORMAL; i++) {
     if (pass[i].first == count) {
       numDeleted++;
-      const std::string paramsMatched =
-          ETJump::StringUtil::join(pass[i].second, ", ");
+      const std::string paramsMatched = StringUtils::join(pass[i].second, ", ");
       G_Printf("%s: deleted entity %i [^z%s^7], matched params: ^3'%s'\n",
                __func__, i, g_entities[i].classname, paramsMatched.c_str());
 
-      if (ETJump::StringUtil::iEqual(g_entities[i].classname,
-                                     "target_spawn_relay")) {
+      if (StringUtils::iEqual(g_entities[i].classname, "target_spawn_relay")) {
         ETJump::TargetSpawnRelay::invalidateSpawnRelayPointers(&g_entities[i]);
       }
 
@@ -4965,8 +4963,8 @@ qboolean wmAnnouncePrivate(gentity_t *ent, char *params) {
 
   std::string str = token;
   const std::string name =
-      ETJump::stringFormat("%s^7", activator->client->pers.netname);
-  ETJump::StringUtil::replaceAll(str, "%s", name);
+      StringUtils::format("%s^7", activator->client->pers.netname);
+  StringUtils::replaceAll(str, "%s", name);
 
   Printer::popup(activator, str);
 

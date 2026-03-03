@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "etj_file.h"
 #include "etj_local.h"
 #include "etj_game.h"
 #include "etj_session.h"
@@ -42,12 +43,71 @@
 #include "etj_filesystem.h"
 #include "etj_printer.h"
 #include "etj_fireteam_countdown.h"
+#include "etj_crypto.h"
 
 #ifdef NEW_AUTH
   #include "etj_session_v2.h"
 #endif
 
 Game game;
+
+namespace ETJump {
+/*
+ * Computes SHA-1 hashes for any custom mapscript and/or entity file that
+ * is loaded for the current map. We save this to configstrings, so a client
+ * can both see that the server is not necessarily running the original
+ * version found in a pk3, and to be able to tell if a demo gets recorded
+ * in some weird, custom variation of a map, for integrity's sake.
+ */
+static void computeCustomMapDataHashes() {
+  std::string mapscriptHash = "-";
+  std::string entityFileHash = "-";
+
+  // we do not care about different line endings here, as we care about the
+  // contents of the files, not the actual file integrity, therefore
+  // all line endings are normalized to LF while computing the hashes
+  const auto computeHash = [](const std::string &filename) {
+    File fIn(filename);
+    const auto contents = fIn.read();
+
+    std::string normalizedContents =
+        std::string(contents.cbegin(), contents.cend());
+    StringUtils::replaceAll(normalizedContents, "\r\n", "\n");
+
+    return Crypto::sha1(normalizedContents);
+  };
+
+  if (g_mapScriptDir.string[0] != '\0') {
+    try {
+      mapscriptHash = computeHash(StringUtils::format(
+          "%s/%s.script", g_mapScriptDir.string, level.rawmapname));
+    } catch (const File::FileIOException &) {
+      G_Printf("No custom map script loaded, skipping hash calculation\n");
+    }
+  }
+
+  // FIXME: We should only do this for non-2.60b servers, as it does not
+  // support custom entity files anyway, but this currently reports a valid
+  // hash if someone just has the file in the directory, while it's
+  // not actually being used. But because ETL fakes it's 'version' cvar
+  // to be 2.60b, and 'etVersion' is client only, we can't rely on
+  // either here and thus can't detect the mod running on etlded.
+  try {
+    entityFileHash =
+        computeHash(StringUtils::format("maps/%s.ent", level.rawmapname));
+  } catch (const File::FileIOException &) {
+    G_Printf("No custom entity file found, skipping hash calculation\n");
+  }
+
+  char cs[MAX_STRING_CHARS];
+  trap_GetConfigstring(CS_ETJUMP_MAPINFO, cs, sizeof(cs));
+
+  Info_SetValueForKey(cs, "msh", mapscriptHash.c_str());
+  Info_SetValueForKey(cs, "efh", entityFileHash.c_str());
+
+  trap_SetConfigstring(CS_ETJUMP_MAPINFO, cs);
+}
+} // namespace ETJump
 
 #ifndef NEW_AUTH
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
@@ -110,7 +170,7 @@ bool checkCheatCvars(gclient_s *client, int flags) {
   bool cheatCvarsEnabled = false;
   const int clientNum = ClientNum(client);
   std::string message =
-      "^gThe following cvars are not allowed on this server:\n";
+      "^7The following cvars are not allowed on this server:\n\n";
 
   if (flags & static_cast<int>(CheatCvarFlags::LookYaw)) {
     message += "^3cl_yawspeed != 0\n"
@@ -122,8 +182,8 @@ bool checkCheatCvars(gclient_s *client, int flags) {
   }
 
   if (flags & static_cast<int>(CheatCvarFlags::PmoveFPS)) {
-    message += "^3pmove_fixed 0 ^gwith:\n"
-               "^3com_maxfps ^goutside of ^325-125\n\"";
+    message += "^3pmove_fixed 0 ^7with:\n"
+               "^3com_maxfps ^7outside of ^325-125\n";
 
     if ((client->pers.maxFPS > 125 || client->pers.maxFPS < 25) &&
         !client->pers.pmoveFixed) {
@@ -133,8 +193,9 @@ bool checkCheatCvars(gclient_s *client, int flags) {
 
   if (cheatCvarsEnabled) {
     trap_SendServerCommand(clientNum, va("cheatCvarsOff %i", flags));
-    Printer::chat(clientNum, "^gCheat cvars are not allowed on this server, "
+    Printer::chat(clientNum, "^7Certain cvars are not allowed on this server, "
                              "check console for more information.\n");
+    message += "\n^7Your cvars have been automatically adjusted.\n";
     Printer::console(clientNum, message);
   }
 
@@ -204,11 +265,9 @@ void OnGameInit() {
     game.sessionV2 = std::make_unique<ETJump::SessionV2>(
         std::make_unique<ETJump::UserRepository>(
             std::make_unique<ETJump::DatabaseV2>(
-                "usersv2",
-                ETJump::FileSystem::Path::getPath(g_userDatabaseV2.string)),
+                "usersv2", FileSystem::Path::getPath(g_userDatabaseV2.string)),
             std::make_unique<ETJump::DatabaseV2>(
-                "usersv1",
-                ETJump::FileSystem::Path::getPath(g_userConfig.string))),
+                "usersv1", FileSystem::Path::getPath(g_userConfig.string))),
         std::make_unique<ETJump::Log>("sessionv2"),
         std::make_unique<ETJump::SynchronizationContext>());
   } catch (const std::exception &e) {
@@ -222,10 +281,10 @@ void OnGameInit() {
       std::make_unique<ETJump::TimerunRepository>(
           std::make_unique<ETJump::DatabaseV2>(
               "timerunv2",
-              ETJump::FileSystem::Path::getPath(g_timeruns2Database.string)),
+              FileSystem::Path::getPath(g_timeruns2Database.string)),
           std::make_unique<ETJump::DatabaseV2>(
               "timerunv1",
-              ETJump::FileSystem::Path::getPath(g_timerunsDatabase.string))),
+              FileSystem::Path::getPath(g_timerunsDatabase.string))),
       std::make_unique<ETJump::Log>("timerunv2"),
       std::make_unique<ETJump::SynchronizationContext>());
 
@@ -244,6 +303,8 @@ void OnGameInit() {
   }
 
   game.mapStatistics->writeMapsToDisk("maps.json");
+
+  ETJump::computeCustomMapDataHashes();
 
   ETJump::Log::processMessages();
 }
@@ -301,7 +362,7 @@ qboolean OnConnectedClientCommand(gentity_t *ent) {
             ConcatArgs(0), ent->client->pers.netname);
 
   auto argv = GetArgs();
-  auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
+  auto command = StringUtils::toLowerCase((*argv)[0]);
 
   if (ent->client->pers.connected != CON_CONNECTED) {
     return qfalse;
@@ -324,7 +385,7 @@ qboolean OnClientCommand(gentity_t *ent) {
             ConcatArgs(0), ent->client->pers.netname);
 
   auto argv = GetArgs();
-  auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
+  auto command = StringUtils::toLowerCase((*argv)[0]);
   const int clientNum = ClientNum(ent);
 
 #ifdef NEW_AUTH
@@ -376,7 +437,7 @@ qboolean OnConsoleCommand() {
   G_DPrintf("OnConsoleCommand called: %s.\n", ConcatArgs(0));
 
   auto argv = GetArgs();
-  auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
+  auto command = StringUtils::toLowerCase((*argv)[0]);
 
   if (command == "generatemotd") {
     game.motd->generateMotdFile();
@@ -416,7 +477,7 @@ std::vector<std::string> getMapsOnList(const std::string &name) {
 const char *G_MatchOneMap(const char *arg) {
   auto currentMaps = game.mapStatistics->getCurrentMaps();
   std::vector<std::string> matchingMaps;
-  std::string mapName = arg ? ETJump::StringUtil::toLowerCase(arg) : "";
+  std::string mapName = arg ? StringUtils::toLowerCase(arg) : "";
 
   for (auto &map : *(currentMaps)) {
     if (map.find(mapName) != std::string::npos) {
@@ -444,7 +505,7 @@ const char *G_MatchOneMap(const char *arg) {
 std::vector<std::string> G_MatchAllMaps(const char *arg) {
   auto currentMaps = game.mapStatistics->getCurrentMaps();
   std::vector<std::string> matchingMaps;
-  std::string mapName = arg ? ETJump::StringUtil::toLowerCase(arg) : "";
+  std::string mapName = arg ? StringUtils::toLowerCase(arg) : "";
 
   for (auto &map : *(currentMaps)) {
     if (map.find(mapName) != std::string::npos) {
@@ -509,8 +570,8 @@ void LogServerState() {
     int clientNum = level.sortedClients[i];
 
     state +=
-        ETJump::stringFormat("%i %s %s\n", clientNum, GetTeamString(clientNum),
-                             (g_entities + clientNum)->client->pers.netname);
+        StringUtils::format("%i %s %s\n", clientNum, GetTeamString(clientNum),
+                            (g_entities + clientNum)->client->pers.netname);
   }
 
   if (level.numConnectedClients == 0) {

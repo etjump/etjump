@@ -117,7 +117,7 @@ std::string ETJump::OperatingSystem::getMACAddress() {
   // while things like 'ip addr' use colons for separating the components,
   // windows uses dashes, so let's make this consistent
   // so that same NIC will produce the same hash on both
-  const std::string result = stringFormat(
+  const std::string result = StringUtils::format(
       "%02X-%02X-%02X-%02X-%02X-%02X", mac_address[0], mac_address[1],
       mac_address[2], mac_address[3], mac_address[4], mac_address[5]);
   return Crypto::sha2(result);
@@ -187,8 +187,8 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
     vendorExt.pop_back();
   }
 
-  const std::string cpuID = stringFormat("%s %u %u %s %u", vendor, cpuFamily,
-                                         model, vendorExt, stepping);
+  const std::string cpuID = StringUtils::format(
+      "%s %u %u %s %u", vendor, cpuFamily, model, vendorExt, stepping);
   return Crypto::sha2(cpuID);
 }
 
@@ -273,7 +273,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
     return NOHWID_DISK;
   }
 
-  diskID = trim(diskID);
+  diskID = StringUtils::trim(diskID);
   return Crypto::sha2(diskID);
 }
 
@@ -342,9 +342,9 @@ std::string ETJump::OperatingSystem::getHwid() {
 
   unsigned char mac_address[6];
   memcpy(mac_address, ifr.ifr_hwaddr.sa_data, sizeof(mac_address));
-  hwid += stringFormat("%02X:%02X:%02X:%02X:%02X:%02X", mac_address[0],
-                       mac_address[1], mac_address[2], mac_address[3],
-                       mac_address[4], mac_address[5]);
+  hwid += StringUtils::format("%02X:%02X:%02X:%02X:%02X:%02X", mac_address[0],
+                              mac_address[1], mac_address[2], mac_address[3],
+                              mac_address[4], mac_address[5]);
 
   return Crypto::sha1(hwid);
 }

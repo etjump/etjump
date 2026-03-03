@@ -28,6 +28,7 @@
 
 #include "etj_string_utilities.h"
 
+namespace StringUtils {
 // https://en.wikipedia.org/wiki/Levenshtein_distance
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C.2B.2B
 unsigned int levenshteinDistance(const std::string &s1, const std::string &s2) {
@@ -46,8 +47,8 @@ unsigned int levenshteinDistance(const std::string &s1, const std::string &s2) {
   return d[len1][len2];
 }
 
-std::string ETJump::getBestMatch(const std::vector<std::string> &words,
-                                 const std::string &current) {
+std::string getBestMatch(const std::vector<std::string> &words,
+                         const std::string &current) {
   std::vector<std::pair<std::string, int>> distances;
 
   for (const auto &word : words) {
@@ -64,12 +65,12 @@ std::string ETJump::getBestMatch(const std::vector<std::string> &words,
   return smallest->first;
 }
 
-std::string ETJump::sanitize(const std::string_view text, const bool toLower,
-                             const bool removeControlChars) {
+std::string sanitize(const std::string_view text, const bool toLower,
+                     const bool removeControlChars) {
   std::string out;
 
   for (size_t i = 0; i < text.length(); ++i) {
-    if (StringUtil::isColorString(text, i)) {
+    if (isColorString(text, i)) {
       i++;
       continue;
     }
@@ -84,17 +85,16 @@ std::string ETJump::sanitize(const std::string_view text, const bool toLower,
   return out;
 }
 
-std::string ETJump::getValue(const char *value,
-                             const std::string &defaultValue) {
+std::string getValue(const char *value, const std::string &defaultValue) {
   return strlen(value) > 0 ? value : defaultValue;
 }
 
-std::string ETJump::getValue(const std::string &value,
-                             const std::string &defaultValue) {
+std::string getValue(const std::string &value,
+                     const std::string &defaultValue) {
   return value.length() > 0 ? value : defaultValue;
 }
 
-std::string ETJump::trimStart(const std::string &input) {
+std::string trimStart(const std::string &input) {
   std::string str = input;
   str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](int ch) {
               return !std::isspace(ch);
@@ -102,7 +102,7 @@ std::string ETJump::trimStart(const std::string &input) {
   return str;
 }
 
-std::string ETJump::trimEnd(const std::string &input) {
+std::string trimEnd(const std::string &input) {
   std::string str = input;
   str.erase(std::find_if(str.rbegin(), str.rend(),
                          [](int ch) { return !std::isspace(ch); })
@@ -111,13 +111,11 @@ std::string ETJump::trimEnd(const std::string &input) {
   return str;
 }
 
-std::string ETJump::trim(const std::string &input) {
-  return trimEnd(trimStart(input));
-}
+std::string trim(const std::string &input) { return trimEnd(trimStart(input)); }
 
 // word-wrapper
-std::vector<std::string> ETJump::wrapWords(const std::string &input,
-                                           char separator, size_t maxLength) {
+std::vector<std::string> wrapWords(const std::string &input, char separator,
+                                   size_t maxLength) {
   std::vector<std::string> output;
   size_t lastPos = 0;
 
@@ -161,50 +159,49 @@ std::vector<std::string> ETJump::wrapWords(const std::string &input,
   return output;
 }
 
-std::string ETJump::getSecondsString(const int &seconds) {
+std::string getSecondsString(const int &seconds) {
   return getPluralizedString(seconds, "second");
 }
 
-std::string ETJump::getMinutesString(const int &minutes) {
+std::string getMinutesString(const int &minutes) {
   return getPluralizedString(minutes, "minute");
 }
 
-std::string ETJump::getHoursString(const int &hours) {
+std::string getHoursString(const int &hours) {
   return getPluralizedString(hours, "hour");
 }
 
-std::string ETJump::getDaysString(const int &days) {
+std::string getDaysString(const int &days) {
   return getPluralizedString(days, "day");
 }
 
-std::string ETJump::getWeeksString(const int &weeks) {
+std::string getWeeksString(const int &weeks) {
   return getPluralizedString(weeks, "week");
 }
 
-std::string ETJump::getMonthsString(const int &months) {
+std::string getMonthsString(const int &months) {
   return getPluralizedString(months, "month");
 }
 
-std::string ETJump::getYearsString(const int &years) {
+std::string getYearsString(const int &years) {
   return getPluralizedString(years, "year");
 }
 
-std::string ETJump::StringUtil::toLowerCase(const std::string &input) {
+std::string toLowerCase(const std::string &input) {
   std::string str = input;
   std::transform(str.begin(), str.end(), str.begin(),
                  [](unsigned char c) { return std::tolower(c); });
   return str;
 }
 
-std::string ETJump::StringUtil::toUpperCase(const std::string &input) {
+std::string toUpperCase(const std::string &input) {
   std::string str = input;
   std::transform(str.begin(), str.end(), str.begin(),
                  [](unsigned char c) { return std::toupper(c); });
   return str;
 }
 
-std::string ETJump::StringUtil::eraseLast(const std::string &input,
-                                          const std::string &substring) {
+std::string eraseLast(const std::string &input, const std::string &substring) {
   std::string str = input;
   auto pos = str.rfind(substring);
   if (pos != std::string::npos) {
@@ -213,9 +210,8 @@ std::string ETJump::StringUtil::eraseLast(const std::string &input,
   return str;
 }
 
-std::vector<std::string>
-ETJump::StringUtil::split(const std::string &input,
-                          const std::string &delimiter) {
+std::vector<std::string> split(const std::string &input,
+                               const std::string &delimiter) {
   size_t posStart = 0, posEnd, delimLen = delimiter.length();
   std::string token;
   std::vector<std::string> splits;
@@ -231,8 +227,8 @@ ETJump::StringUtil::split(const std::string &input,
   return splits;
 }
 
-void ETJump::StringUtil::replaceAll(std::string &input, const std::string &from,
-                                    const std::string &to) {
+void replaceAll(std::string &input, const std::string &from,
+                const std::string &to) {
   size_t startPost = 0;
   while ((startPost = input.find(from, startPost)) != std::string::npos) {
     input.replace(startPost, from.length(), to);
@@ -240,9 +236,8 @@ void ETJump::StringUtil::replaceAll(std::string &input, const std::string &from,
   }
 }
 
-void ETJump::StringUtil::replaceAll(std::wstring &input,
-                                    const std::wstring &from,
-                                    const std::wstring &to) {
+void replaceAll(std::wstring &input, const std::wstring &from,
+                const std::wstring &to) {
   size_t startPost = 0;
   while ((startPost = input.find(from, startPost)) != std::wstring::npos) {
     input.replace(startPost, from.length(), to);
@@ -250,9 +245,8 @@ void ETJump::StringUtil::replaceAll(std::wstring &input,
   }
 }
 
-void ETJump::StringUtil::stringSubstitute(std::string &input, char character,
-                                          const std::string &replacement,
-                                          size_t numChars) {
+void stringSubstitute(std::string &input, char character,
+                      const std::string &replacement, size_t numChars) {
   size_t startPos = 0;
 
   while ((startPos = input.find(character, startPos)) != std::string::npos) {
@@ -262,16 +256,14 @@ void ETJump::StringUtil::stringSubstitute(std::string &input, char character,
   }
 }
 
-bool ETJump::StringUtil::startsWith(const std::string &str,
-                                    const std::string &prefix) {
+bool startsWith(const std::string &str, const std::string &prefix) {
   if (prefix.length() > str.length())
     return false;
 
   return str.compare(0, prefix.length(), prefix) == 0;
 }
 
-bool ETJump::StringUtil::endsWith(const std::string &str,
-                                  const std::string &suffix) {
+bool endsWith(const std::string &str, const std::string &suffix) {
   if (suffix.length() > str.length())
     return false;
 
@@ -279,8 +271,8 @@ bool ETJump::StringUtil::endsWith(const std::string &str,
          0;
 }
 
-bool ETJump::StringUtil::iEqual(const std::string_view str1,
-                                const std::string_view str2, bool sanitized) {
+bool iEqual(const std::string_view str1, const std::string_view str2,
+            bool sanitized) {
   if (sanitized) {
     return sanitize(str1, true) == sanitize(str2, true);
   }
@@ -291,12 +283,13 @@ bool ETJump::StringUtil::iEqual(const std::string_view str1,
                     });
 }
 
-unsigned ETJump::StringUtil::countExtraPadding(const std::string &input) {
-  return input.length() - sanitize(input).length();
+int32_t countExtraPadding(const std::string &input,
+                          const int32_t targetPadding) {
+  return targetPadding +
+         static_cast<int32_t>(input.length() - sanitize(input).length());
 }
 
-std::string
-ETJump::StringUtil::normalizeNumberString(const std::string &input) {
+std::string normalizeNumberString(const std::string &input) {
   if (input.empty()) {
     return "";
   }
@@ -325,8 +318,7 @@ ETJump::StringUtil::normalizeNumberString(const std::string &input) {
   return result;
 }
 
-void ETJump::StringUtil::removeTrailingChars(std::string &str,
-                                             const char charToRemove) {
+void removeTrailingChars(std::string &str, const char charToRemove) {
   if (str.empty()) {
     return;
   }
@@ -340,8 +332,7 @@ void ETJump::StringUtil::removeTrailingChars(std::string &str,
   }
 }
 
-void ETJump::StringUtil::removeLeadingChars(std::string &str,
-                                            const char charToRemove) {
+void removeLeadingChars(std::string &str, const char charToRemove) {
   if (str.empty()) {
     return;
   }
@@ -355,13 +346,11 @@ void ETJump::StringUtil::removeLeadingChars(std::string &str,
   }
 }
 
-bool ETJump::StringUtil::isColorString(const std::string_view str,
-                                       const size_t idx) {
+bool isColorString(const std::string_view str, const size_t idx) {
   return str[idx] == '^' && str.length() > idx + 1 && str[idx + 1] != '^';
 }
 
-std::string ETJump::StringUtil::truncate(const std::string &str,
-                                         const size_t len) {
+std::string truncate(const std::string &str, const size_t len) {
   if (str.empty() || str.length() <= len || sanitize(str).length() <= len) {
     return str;
   }
@@ -384,7 +373,7 @@ std::string ETJump::StringUtil::truncate(const std::string &str,
   return out;
 }
 
-void ETJump::StringUtil::stripExtension(std::string &str) {
+void stripExtension(std::string &str) {
   const auto pos = str.rfind('.');
 
   if (pos != std::string::npos) {
@@ -392,7 +381,18 @@ void ETJump::StringUtil::stripExtension(std::string &str) {
   }
 }
 
-void ETJump::StringUtil::stripLocalizationMarkers(std::string &str) {
-  ETJump::StringUtil::replaceAll(str, "[lon]", "");
-  ETJump::StringUtil::replaceAll(str, "[lof]", "");
+void stripLocalizationMarkers(std::string &str) {
+  replaceAll(str, "[lon]", "");
+  replaceAll(str, "[lof]", "");
 }
+
+void escapeColorCodes(std::string &str, char escapeColor) {
+  for (size_t i = 0; i < str.length(); i++) {
+    if (isColorString(str, i) && str.length() > i + 2) {
+      str.insert(i + 1, "^");
+      str.insert(i + 2, 1, escapeColor);
+      i += 2;
+    }
+  }
+}
+} // namespace StringUtils

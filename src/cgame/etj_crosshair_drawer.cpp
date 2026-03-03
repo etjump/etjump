@@ -23,6 +23,7 @@
  */
 
 #include "etj_crosshair_drawer.h"
+#include "cg_local.h"
 
 namespace ETJump {
 void CrosshairDrawer::drawShader(const crosshair_t &crosshair,

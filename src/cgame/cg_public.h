@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../game/q_shared.h"
+
 // allow a lot of command backups for very fast systems
 // multiple commands may be combined into a single packet, so this
 // needs to be larger than PACKET_BACKUP
@@ -44,6 +46,7 @@ typedef enum cgameEvent_e {
   CGAME_EVENT_DEMO = 4, // OSP
   CGAME_EVENT_FIRETEAMMSG = 5,
   CGAME_EVENT_RTV = 6,
+  CGAME_EVENT_CUSTOM_COMMAND = 7,
 } cgameEvent_t;
 
 /*

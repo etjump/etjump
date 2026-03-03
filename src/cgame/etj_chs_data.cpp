@@ -23,6 +23,8 @@
  */
 
 #include "etj_chs_data.h"
+#include "etj_client_commands_handler.h"
+#include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
@@ -221,29 +223,30 @@ void CHSDataHandler::viewTrace(trace_t *tr, const int32_t mask) {
 std::string CHSDataHandler::speed(const SpeedType type) const {
   switch (type) {
     case SpeedType::X:
-      return stringFormat("%.0f", ps->velocity[0]);
+      return StringUtils::format("%.0f", ps->velocity[0]);
     case SpeedType::Y:
-      return stringFormat("%.0f", ps->velocity[1]);
+      return StringUtils::format("%.0f", ps->velocity[1]);
     case SpeedType::Z:
-      return stringFormat("%.0f", ps->velocity[2]);
+      return StringUtils::format("%.0f", ps->velocity[2]);
     case SpeedType::XY:
-      return stringFormat("%.0f", VectorLength2(ps->velocity));
+      return StringUtils::format("%.0f", VectorLength2(ps->velocity));
     case SpeedType::XYZ:
-      return stringFormat("%.0f", VectorLength(ps->velocity));
+      return StringUtils::format("%.0f", VectorLength(ps->velocity));
     case SpeedType::FORWARD:
-      return stringFormat("%.0f",
-                          DotProduct(ps->velocity, cg.refdef.viewaxis[0]));
+      return StringUtils::format(
+          "%.0f", DotProduct(ps->velocity, cg.refdef.viewaxis[0]));
     case SpeedType::SIDE:
-      return stringFormat("%.0f",
-                          DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
+      return StringUtils::format(
+          "%.0f", DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
     case SpeedType::FORWARD_SIDE:
-      return stringFormat("%.0f %.0f",
-                          DotProduct(ps->velocity, cg.refdef.viewaxis[0]),
-                          DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
+      return StringUtils::format(
+          "%.0f %.0f", DotProduct(ps->velocity, cg.refdef.viewaxis[0]),
+          DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
     case SpeedType::XY_FORWARD_SIDE:
-      return stringFormat("%.0f %.0f %.0f", VectorLength2(ps->velocity),
-                          DotProduct(ps->velocity, cg.refdef.viewaxis[0]),
-                          DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
+      return StringUtils::format(
+          "%.0f %.0f %.0f", VectorLength2(ps->velocity),
+          DotProduct(ps->velocity, cg.refdef.viewaxis[0]),
+          DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
     default:
       return "-";
   }
@@ -261,11 +264,11 @@ std::string CHSDataHandler::ammo() {
   CG_PlayerAmmoValue(&ammo, &clips, &akimboAmmo);
 
   if (akimboAmmo >= 0) {
-    return stringFormat("%i|%i/%i", akimboAmmo, ammo, clips);
+    return StringUtils::format("%i|%i/%i", akimboAmmo, ammo, clips);
   }
 
   if (clips >= 0) {
-    return stringFormat("%i/%i", ammo, clips);
+    return StringUtils::format("%i/%i", ammo, clips);
   }
 
   if (ammo >= 0) {
@@ -281,18 +284,19 @@ std::string CHSDataHandler::distance(const DistanceType type) {
       const trace_t tr = getTraceResults(CHS_10_11);
 
       return tr.fraction != 1.0f
-                 ? stringFormat("%.0f",
-                                std::sqrt(SQR(tr.endpos[0] - ps->origin[0]) +
-                                          SQR(tr.endpos[1] - ps->origin[1])))
+                 ? StringUtils::format(
+                       "%.0f", std::sqrt(SQR(tr.endpos[0] - ps->origin[0]) +
+                                         SQR(tr.endpos[1] - ps->origin[1])))
                  : "-";
-    } break;
+    }
     case DistanceType::Z: {
       const trace_t tr = getTraceResults(CHS_10_11);
 
       return tr.fraction != 1.0f
-                 ? stringFormat("%.0f", tr.endpos[2] - ps->origin[2] - ZOffset)
+                 ? StringUtils::format("%.0f",
+                                       tr.endpos[2] - ps->origin[2] - ZOffset)
                  : "-";
-    } break;
+    }
     case DistanceType::XYZ: {
       const trace_t tr = getTraceResults(CHS_12);
       vec3_t origin;
@@ -301,16 +305,17 @@ std::string CHSDataHandler::distance(const DistanceType type) {
       origin[2] += ZOffset;
 
       return tr.fraction != 1.0f
-                 ? stringFormat("%.0f", Distance(tr.endpos, origin))
+                 ? StringUtils::format("%.0f", Distance(tr.endpos, origin))
                  : "-";
-    } break;
+    }
     case DistanceType::VIEW_XYZ: {
       const trace_t tr = getTraceResults(CHS_13_15);
 
       return tr.fraction != 1.0f
-                 ? stringFormat("%.0f", Distance(tr.endpos, cg.refdef.vieworg))
+                 ? StringUtils::format("%.0f",
+                                       Distance(tr.endpos, cg.refdef.vieworg))
                  : "-";
-    } break;
+    }
     case DistanceType::XY_Z_XYZ: {
       const trace_t tr = getTraceResults(CHS_13_15);
       vec3_t origin;
@@ -319,13 +324,13 @@ std::string CHSDataHandler::distance(const DistanceType type) {
       origin[2] += ZOffset;
 
       return tr.fraction != 1.0f
-                 ? stringFormat("%.0f %.0f %.0f",
-                                std::sqrt(SQR(tr.endpos[0] - origin[0]) +
-                                          SQR(tr.endpos[1] - origin[1])),
-                                tr.endpos[2] - origin[2],
-                                Distance(tr.endpos, origin))
+                 ? StringUtils::format("%.0f %.0f %.0f",
+                                       std::sqrt(SQR(tr.endpos[0] - origin[0]) +
+                                                 SQR(tr.endpos[1] - origin[1])),
+                                       tr.endpos[2] - origin[2],
+                                       Distance(tr.endpos, origin))
                  : "- - -";
-    } break;
+    }
     case DistanceType::XY_Z_VIEW_XYZ: {
       const trace_t tr = getTraceResults(CHS_13_15);
       vec3_t origin;
@@ -334,13 +339,13 @@ std::string CHSDataHandler::distance(const DistanceType type) {
       origin[2] += ZOffset;
 
       return tr.fraction != 1.0f
-                 ? stringFormat("%.0f %.0f %.0f",
-                                std::sqrt(SQR(tr.endpos[0] - origin[0]) +
-                                          SQR(tr.endpos[1] - origin[1])),
-                                tr.endpos[2] - origin[2],
-                                Distance(tr.endpos, cg.refdef.vieworg))
+                 ? StringUtils::format("%.0f %.0f %.0f",
+                                       std::sqrt(SQR(tr.endpos[0] - origin[0]) +
+                                                 SQR(tr.endpos[1] - origin[1])),
+                                       tr.endpos[2] - origin[2],
+                                       Distance(tr.endpos, cg.refdef.vieworg))
                  : "- - -";
-    } break;
+    }
     default:
       return "-";
   }
@@ -350,9 +355,9 @@ std::string CHSDataHandler::lookXYZ() {
   const auto tr = getTraceResults(CHS_16);
 
   if (tr.fraction != 1.0f) {
-    return stringFormat("%.0f %.0f %.0f", tr.plane.dist * tr.plane.normal[0],
-                        tr.plane.dist * tr.plane.normal[1],
-                        tr.plane.dist * tr.plane.normal[2]);
+    return StringUtils::format(
+        "%.0f %.0f %.0f", tr.plane.dist * tr.plane.normal[0],
+        tr.plane.dist * tr.plane.normal[1], tr.plane.dist * tr.plane.normal[2]);
   }
 
   return "- - -";
@@ -361,11 +366,11 @@ std::string CHSDataHandler::lookXYZ() {
 std::string CHSDataHandler::angle(const int32_t angle) const {
   switch (angle) {
     case PITCH:
-      return stringFormat("%.2f", ps->viewangles[PITCH]);
+      return StringUtils::format("%.2f", ps->viewangles[PITCH]);
     case YAW:
-      return stringFormat("%.2f", ps->viewangles[YAW]);
+      return StringUtils::format("%.2f", ps->viewangles[YAW]);
     case ROLL:
-      return stringFormat("%.2f", ps->viewangles[ROLL]);
+      return StringUtils::format("%.2f", ps->viewangles[ROLL]);
     default:
       return "-";
   }
@@ -374,36 +379,37 @@ std::string CHSDataHandler::angle(const int32_t angle) const {
 std::string CHSDataHandler::position(const PositionType type) const {
   switch (type) {
     case PositionType::X:
-      return stringFormat("%.0f", ps->origin[0]);
+      return StringUtils::format("%.0f", ps->origin[0]);
     case PositionType::Y:
-      return stringFormat("%.0f", ps->origin[1]);
+      return StringUtils::format("%.0f", ps->origin[1]);
     case PositionType::Z:
-      return stringFormat("%.0f", ps->origin[2] + ZOffset);
+      return StringUtils::format("%.0f", ps->origin[2] + ZOffset);
     case PositionType::VIEW_X:
-      return stringFormat("%.0f", cg.refdef.vieworg[0]);
+      return StringUtils::format("%.0f", cg.refdef.vieworg[0]);
     case PositionType::VIEW_Y:
-      return stringFormat("%.0f", cg.refdef.vieworg[1]);
+      return StringUtils::format("%.0f", cg.refdef.vieworg[1]);
     case PositionType::VIEW_Z:
-      return stringFormat("%.0f", cg.refdef.vieworg[2]);
+      return StringUtils::format("%.0f", cg.refdef.vieworg[2]);
     default:
       return "-";
   }
 }
 
 std::string CHSDataHandler::lastJumpPos() const {
-  return stringFormat("%.0f %.0f %.0f", cg.etjLastJumpPos[0],
-                      cg.etjLastJumpPos[1], cg.etjLastJumpPos[2] + ZOffset);
+  return StringUtils::format("%.0f %.0f %.0f", cg.etjLastJumpPos[0],
+                             cg.etjLastJumpPos[1],
+                             cg.etjLastJumpPos[2] + ZOffset);
 }
 
 std::string CHSDataHandler::planeAngleZ() {
   const trace_t tr = getTraceResults(CHS_53);
 
   if (tr.fraction != 1.0f) {
-    return stringFormat("%.2f",
-                        std::atan2(std::sqrt(pow(tr.plane.normal[0], 2) +
-                                             pow(tr.plane.normal[1], 2)),
-                                   tr.plane.normal[2]) *
-                            180 / M_PI);
+    return StringUtils::format("%.2f",
+                               std::atan2(std::sqrt(pow(tr.plane.normal[0], 2) +
+                                                    pow(tr.plane.normal[1], 2)),
+                                          tr.plane.normal[2]) *
+                                   180 / M_PI);
   }
 
   return "-";
@@ -423,7 +429,7 @@ trace_t &CHSDataHandler::getTraceResults(const extraTraceOptions opt) {
 
 void CHSDataHandler::printInfo() const {
   for (const auto &[key, info] : stats) {
-    CG_Printf("%3i: %s\n", info.name.c_str(), info.description.c_str());
+    CG_Printf("%3i: %s\n", key, info.description.c_str());
   }
 }
 

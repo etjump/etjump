@@ -24,15 +24,15 @@
 
 #pragma once
 
-#include "cg_local.h"
 #include "etj_irenderable.h"
+
+#include "../game/q_shared.h"
 
 namespace ETJump {
 class OverbounceDetector : public IRenderable {
   bool beforeRender() override;
   void render() const override;
   static bool canSkipDraw();
-  void overbounceTrace(trace_t &tr, const vec3_t tr_start, const vec3_t tr_end);
 
   playerState_t *ps;
   float x;

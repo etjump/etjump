@@ -1,6 +1,7 @@
 
 #include "cg_local.h"
 #include "etj_rtv_drawable.h"
+#include "etj_custom_command_menu_drawable.h"
 
 int CG_DrawField(int x, int y, int width, int value, int charWidth,
                  int charHeight, qboolean dodrawpic,
@@ -549,6 +550,7 @@ void CG_MouseEvent(int x, int y) {
     case CGAME_EVENT_GAMEVIEW:
     case CGAME_EVENT_FIRETEAMMSG:
     case CGAME_EVENT_RTV:
+    case CGAME_EVENT_CUSTOM_COMMAND:
       if (!cgs.demoCam.renderingFreeCam) {
         ETJump::computeCursorPosition(x, y);
 
@@ -663,6 +665,7 @@ void CG_EventHandling(int type, qboolean fForced) {
     case CGAME_EVENT_NONE:
     case CGAME_EVENT_FIRETEAMMSG:
     case CGAME_EVENT_RTV:
+    case CGAME_EVENT_CUSTOM_COMMAND:
     default:
       // default handling (cleanup mostly)
       if (cgs.eventHandling == CGAME_EVENT_GAMEVIEW) {
@@ -692,6 +695,9 @@ void CG_EventHandling(int type, qboolean fForced) {
       } else if (cgs.eventHandling == CGAME_EVENT_RTV) {
         cg.showRtvMenu = false;
         trap_Cvar_Set("cl_bypassmouseinput", "0");
+      } else if (cgs.eventHandling == CGAME_EVENT_CUSTOM_COMMAND) {
+        cg.showCustomCommandMenu = false;
+        trap_Cvar_Set("cl_bypassmouseinput", "0");
       } else if (cg.snap && cg.snap->ps.pm_type == PM_INTERMISSION && fForced) {
         trap_UI_Popup(UIMENU_INGAME);
       }
@@ -712,14 +718,19 @@ void CG_EventHandling(int type, qboolean fForced) {
     CG_LimboPanel_Setup();
     trap_Key_SetCatcher(KEYCATCH_CGAME);
   } else if (type == CGAME_EVENT_FIRETEAMMSG) {
-    cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
-    cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
+    cgs.ftMenuPos = static_cast<int>(ETJump::FTMenuPos::FT_MENUPOS_NONE);
+    cgs.ftMenuMode = static_cast<int>(ETJump::FTMenuMode::FT_VSAY);
     cg.showFireteamMenu = qtrue;
     cgDC.cursor.visible = false;
     trap_Cvar_Set("cl_bypassmouseinput", "1");
     trap_Key_SetCatcher(KEYCATCH_CGAME);
   } else if (type == CGAME_EVENT_RTV) {
     cg.showRtvMenu = true;
+    cgDC.cursor.visible = false;
+    trap_Cvar_Set("cl_bypassmouseinput", "1");
+    trap_Key_SetCatcher(KEYCATCH_CGAME);
+  } else if (type == CGAME_EVENT_CUSTOM_COMMAND) {
+    cg.showCustomCommandMenu = true;
     cgDC.cursor.visible = false;
     trap_Cvar_Set("cl_bypassmouseinput", "1");
     trap_Key_SetCatcher(KEYCATCH_CGAME);
@@ -753,6 +764,10 @@ void CG_KeyEvent(int key, qboolean down) {
 
     case CGAME_EVENT_RTV:
       ETJump::RtvDrawable::keyHandling(key, down);
+      break;
+
+    case CGAME_EVENT_CUSTOM_COMMAND:
+      ETJump::CustomCommandMenuDrawable::keyHandling(key, down);
       break;
 
     default:

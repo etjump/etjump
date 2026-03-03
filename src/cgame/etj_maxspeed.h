@@ -23,26 +23,34 @@
  */
 
 #pragma once
+
+#include <memory>
+
 #include "etj_irenderable.h"
-#include "etj_entity_events_handler.h"
-#include "cg_local.h"
+
+#include "../game/q_shared.h"
 
 namespace ETJump {
-class ClientCommandsHandler;
+class EntityEventsHandler;
+class CvarUpdateHandler;
 
 class DisplayMaxSpeed : public IRenderable {
-  float _maxSpeed{0};
-  float _displayMaxSpeed{0};
-  int _animationStartTime{0};
-  vec4_t _color;
-  EntityEventsHandler *_entityEventsHandler;
+  float maxSpeed{};
+  float displayMaxSpeed{};
+  int animationStartTime{};
+  vec4_t color{};
 
+  std::shared_ptr<EntityEventsHandler> entityEvents;
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+
+  void startListeners();
   static void parseColor(const std::string &color, vec4_t &out);
-  bool canSkipDraw() const;
+  static bool canSkipDraw();
 
 public:
-  explicit DisplayMaxSpeed(EntityEventsHandler *entityEventsHandler);
-  ~DisplayMaxSpeed();
+  DisplayMaxSpeed(const std::shared_ptr<EntityEventsHandler> &entityEvents,
+                  const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~DisplayMaxSpeed() override;
   void render() const override;
   bool beforeRender() override;
 };

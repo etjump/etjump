@@ -28,10 +28,11 @@
 #include <algorithm>
 
 #include "etj_cgaz.h"
+#include "etj_color_parser.h"
+#include "etj_cvar_update_handler.h"
+#include "etj_pmove_utils.h"
 #include "etj_snaphud.h"
 #include "etj_utilities.h"
-#include "etj_pmove_utils.h"
-#include "etj_cvar_update_handler.h"
 
 namespace ETJump {
 CGaz::state_t state;
@@ -43,48 +44,70 @@ float CGaz::drawVel{};
 float CGaz::yaw{};
 float CGaz::drawSnap{};
 
-CGaz::CGaz() {
+CGaz::CGaz(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : cvarUpdate(cvarUpdate) {
   // CGaz 1
-  parseColorString(etj_CGaz1Color1.string, CGaz1Colors[0]);
-  parseColorString(etj_CGaz1Color2.string, CGaz1Colors[1]);
-  parseColorString(etj_CGaz1Color3.string, CGaz1Colors[2]);
-  parseColorString(etj_CGaz1Color4.string, CGaz1Colors[3]);
+  cgame.utils.colorParser->parseColorString(etj_CGaz1Color1.string,
+                                            CGaz1Colors[0]);
+  cgame.utils.colorParser->parseColorString(etj_CGaz1Color2.string,
+                                            CGaz1Colors[1]);
+  cgame.utils.colorParser->parseColorString(etj_CGaz1Color3.string,
+                                            CGaz1Colors[2]);
+  cgame.utils.colorParser->parseColorString(etj_CGaz1Color4.string,
+                                            CGaz1Colors[3]);
 
-  parseColorString(etj_CGaz1MidlineColor.string, CGaz1MidlineColor);
+  cgame.utils.colorParser->parseColorString(etj_CGaz1MidlineColor.string,
+                                            CGaz1MidlineColor);
 
   // CGaz 2
-  parseColorString(etj_CGaz2Color1.string, CGaz2Colors[0]);
-  parseColorString(etj_CGaz2Color2.string, CGaz2Colors[1]);
+  cgame.utils.colorParser->parseColorString(etj_CGaz2Color1.string,
+                                            CGaz2Colors[0]);
+  cgame.utils.colorParser->parseColorString(etj_CGaz2Color2.string,
+                                            CGaz2Colors[1]);
 
   startListeners();
 }
 
+CGaz::~CGaz() {
+  cvarUpdate->unsubscribe(&etj_CGaz1Color1);
+  cvarUpdate->unsubscribe(&etj_CGaz1Color2);
+  cvarUpdate->unsubscribe(&etj_CGaz1Color3);
+  cvarUpdate->unsubscribe(&etj_CGaz1Color4);
+  cvarUpdate->unsubscribe(&etj_CGaz1MidlineColor);
+
+  cvarUpdate->unsubscribe(&etj_CGaz2Color1);
+  cvarUpdate->unsubscribe(&etj_CGaz2Color2);
+}
+
 void CGaz::startListeners() {
   // CGaz 1
-  cvarUpdateHandler->subscribe(&etj_CGaz1Color1, [this](const vmCvar_t *cvar) {
-    parseColorString(cvar->string, CGaz1Colors[0]);
-  });
-  cvarUpdateHandler->subscribe(&etj_CGaz1Color2, [this](const vmCvar_t *cvar) {
-    parseColorString(cvar->string, CGaz1Colors[1]);
-  });
-  cvarUpdateHandler->subscribe(&etj_CGaz1Color3, [this](const vmCvar_t *cvar) {
-    parseColorString(cvar->string, CGaz1Colors[2]);
-  });
-  cvarUpdateHandler->subscribe(&etj_CGaz1Color4, [this](const vmCvar_t *cvar) {
-    parseColorString(cvar->string, CGaz1Colors[3]);
+  cvarUpdate->subscribe(&etj_CGaz1Color1, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[0]);
   });
 
-  cvarUpdateHandler->subscribe(
-      &etj_CGaz1MidlineColor, [this](const vmCvar_t *cvar) {
-        parseColorString(cvar->string, CGaz1MidlineColor);
-      });
+  cvarUpdate->subscribe(&etj_CGaz1Color2, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[1]);
+  });
+
+  cvarUpdate->subscribe(&etj_CGaz1Color3, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[2]);
+  });
+
+  cvarUpdate->subscribe(&etj_CGaz1Color4, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz1Colors[3]);
+  });
+
+  cvarUpdate->subscribe(&etj_CGaz1MidlineColor, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz1MidlineColor);
+  });
 
   // CGaz 2
-  cvarUpdateHandler->subscribe(&etj_CGaz2Color1, [this](const vmCvar_t *cvar) {
-    parseColorString(cvar->string, CGaz2Colors[0]);
+  cvarUpdate->subscribe(&etj_CGaz2Color1, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz2Colors[0]);
   });
-  cvarUpdateHandler->subscribe(&etj_CGaz2Color2, [this](const vmCvar_t *cvar) {
-    parseColorString(cvar->string, CGaz2Colors[1]);
+
+  cvarUpdate->subscribe(&etj_CGaz2Color2, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, CGaz2Colors[1]);
   });
 }
 
@@ -95,8 +118,8 @@ void CGaz::UpdateCGaz1(vec3_t wishvel, const int8_t uCmdScale) const {
     cmd.forwardmove = uCmdScale;
 
     // recalculate wishvel with defaulted forwardmove
-    pmoveUtils->updateWishvel(wishvel, pm->pmext->forward, pm->pmext->right,
-                              pm->pmext->up, cmd);
+    cgame.utils.pmove->updateWishvel(wishvel, pm->pmext->forward,
+                                     pm->pmext->right, pm->pmext->up, cmd);
   }
 
   yaw = atan2f(wishvel[1], wishvel[0]) - drawVel;
@@ -225,7 +248,7 @@ bool CGaz::beforeRender() {
   if (canSkipDraw()) {
     return false;
   }
-  pm = pmoveUtils->getPmove();
+  pm = cgame.utils.pmove->getPmove();
 
   // water and ladder movement are not important
   // since speed is capped anyway
@@ -234,7 +257,7 @@ bool CGaz::beforeRender() {
     return false;
   }
 
-  if (pmoveUtils->skipUpdate(lastUpdateTime, HUDLerpFlags::CGAZ)) {
+  if (cgame.utils.pmove->skipUpdate(lastUpdateTime, HUDLerpFlags::CGAZ)) {
     return true;
   }
 
@@ -245,8 +268,8 @@ bool CGaz::beforeRender() {
           : pm->pmext->scaleAlt;
 
   vec3_t wishvel;
-  float wishspeed = pmoveUtils->getWishspeed(wishvel, scale, pm->pmext->forward,
-                                             pm->pmext->right, pm->pmext->up);
+  float wishspeed = cgame.utils.pmove->getWishspeed(
+      wishvel, scale, pm->pmext->forward, pm->pmext->right, pm->pmext->up);
 
   // set default wishspeed for drawing if no user input
   if (!pm->cmd.forwardmove && !pm->cmd.rightmove) {
@@ -259,7 +282,7 @@ bool CGaz::beforeRender() {
   drawSnap = UpdateDrawSnap(ps, pm);
 
   if (etj_drawCGaz.integer & 1) {
-    const int8_t uCmdScale = pmoveUtils->getUserCmdScale();
+    const int8_t uCmdScale = cgame.utils.pmove->getUserCmdScale();
     UpdateCGaz1(wishvel, uCmdScale);
   }
   if (etj_drawCGaz.integer & 2) {
@@ -408,8 +431,8 @@ bool CGaz::strafingForwards(const playerState_t &ps, const pmove_t *pm) {
   const float speed = VectorLength2(ps.velocity);
 
   // get sprint scale
-  const float scale = pmoveUtils->getSprintScale();
-  const usercmd_t *cmd = pmoveUtils->getUserCmd();
+  const float scale = cgame.utils.pmove->getSprintScale();
+  const usercmd_t *cmd = cgame.utils.pmove->getUserCmd();
 
   // not strafing if speed lower than ground speed or no user input
   if (speed < static_cast<float>(ps.speed) * scale ||
@@ -419,8 +442,8 @@ bool CGaz::strafingForwards(const playerState_t &ps, const pmove_t *pm) {
 
   // get wishvel
   vec3_t wishvel;
-  pmoveUtils->updateWishvel(wishvel, pm->pmext->forward, pm->pmext->right,
-                            pm->pmext->up, *cmd);
+  cgame.utils.pmove->updateWishvel(wishvel, pm->pmext->forward,
+                                   pm->pmext->right, pm->pmext->up, *cmd);
 
   // get angle between wishvel and player velocity
   const float wishvelAngle = RAD2DEG(std::atan2(wishvel[1], wishvel[0]));
@@ -456,8 +479,8 @@ float CGaz::getOptAngle(const playerState_t &ps, const pmove_t *pm,
           : pm->pmext->scaleAlt;
 
   vec3_t wishvel;
-  float wishspeed = pmoveUtils->getWishspeed(wishvel, scale, pm->pmext->forward,
-                                             pm->pmext->right, pm->pmext->up);
+  float wishspeed = cgame.utils.pmove->getWishspeed(
+      wishvel, scale, pm->pmext->forward, pm->pmext->right, pm->pmext->up);
 
   // set default wishspeed for drawing if no user input
   if (!pm->cmd.forwardmove && !pm->cmd.rightmove) {

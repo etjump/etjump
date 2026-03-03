@@ -585,8 +585,8 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
     const auto fmt = ETJump::DeathrunSystem::getMessageFormat(
         ETJump::deathrunSystem->getPrintLocation());
     auto message = ETJump::deathrunSystem->getEndMessage();
-    ETJump::StringUtil::replaceAll(message, "[n]", self->client->pers.netname);
-    ETJump::StringUtil::replaceAll(message, "[s]", std::to_string(score));
+    StringUtils::replaceAll(message, "[n]", self->client->pers.netname);
+    StringUtils::replaceAll(message, "[s]", std::to_string(score));
     auto affectedPlayers = Utilities::getSpectators(clientNum);
     affectedPlayers.push_back(clientNum);
     for (const auto &c : affectedPlayers) {

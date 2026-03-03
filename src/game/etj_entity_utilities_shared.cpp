@@ -23,7 +23,12 @@
  */
 
 #include "etj_entity_utilities_shared.h"
+#include "bg_public.h"
 #include "etj_portalgun_shared.h"
+
+#ifdef GAMEDLL
+  #include "g_local.h"
+#endif
 
 // Entity helper functions used by both games (client side predicted entities)
 
@@ -272,5 +277,16 @@ void EntityUtilsShared::setPortalBBox(vec3_t mins, vec3_t maxs,
     VectorSet(mins, -depth, -width, -height);
     VectorSet(maxs, depth, width, height);
   }
+}
+
+bool EntityUtilsShared::funcStaticClientIsHidden(const entityState_t *es,
+                                                 const int32_t clientNum) {
+  if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
+    return false;
+  }
+
+  return COM_BitCheck((clientNum < MAX_CLIENTS / 2) ? &es->effect1Time
+                                                    : &es->effect2Time,
+                      clientNum);
 }
 } // namespace ETJump

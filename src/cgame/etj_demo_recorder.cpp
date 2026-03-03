@@ -23,8 +23,9 @@
  */
 
 #include "etj_demo_recorder.h"
-#include "../game/etj_string_utilities.h"
 #include "cg_local.h"
+
+#include "../game/etj_string_utilities.h"
 
 ETJump::DemoRecorder::DemoRecorder() {}
 
@@ -38,7 +39,7 @@ void ETJump::DemoRecorder::start(const std::string &name) {
   _startTime = cg.time;
 
   trap_SendConsoleCommand("set cl_noprint 1\n");
-  trap_SendConsoleCommand(stringFormat("record %s\n", name).c_str());
+  trap_SendConsoleCommand(StringUtils::format("record %s\n", name).c_str());
   trap_SendConsoleCommand("set cl_noprint 0\n");
 }
 
@@ -66,7 +67,7 @@ void ETJump::DemoRecorder::restart(const std::string &name) {
 }
 
 bool ETJump::DemoRecorder::recordingAutoDemo() {
-  return StringUtil::startsWith(cl_demofilename.string, "demos/temp/temp_");
+  return StringUtils::startsWith(cl_demofilename.string, "demos/temp/temp_");
 }
 
 int ETJump::DemoRecorder::elapsed() {

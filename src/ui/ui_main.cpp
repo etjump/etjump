@@ -18,8 +18,8 @@ USER INTERFACE MAIN
 #include "etj_utilities.h"
 
 #include "../cgame/etj_cvar_parser.h"
+
 #include "../game/etj_string_utilities.h"
-#include "../cgame/etj_utilities.h"
 #include "../game/etj_filesystem.h"
 
 // NERVE - SMF
@@ -316,7 +316,7 @@ fontInfo_t *GetActiveFont() {
 }
 
 int Multiline_Text_Width(const char *text, float scale, int limit) {
-  const auto lines = ETJump::StringUtil::split(text, "\n");
+  const auto lines = StringUtils::split(text, "\n");
 
   // if no linebreaks, just return the text width
   if (lines.size() == 1) {
@@ -382,7 +382,7 @@ int Text_Height(const char *text, float scale, int limit) {
 
 // despite the name, this is also used for single line tooltips
 int Multiline_Text_Height(const char *text, float scale, int limit) {
-  const auto lines = ETJump::StringUtil::split(text, "\n");
+  const auto lines = StringUtils::split(text, "\n");
 
   // single line, just return the text height
   if (lines.size() == 1) {
@@ -1422,17 +1422,17 @@ void UI_DrawMapDescription(rectDef_t *rect, float scale, const vec4_t color,
 
     if (!briefing.empty()) {
       // replace any carriage returns with whitespace
-      ETJump::StringUtil::replaceAll(briefing, "\r", " ");
+      StringUtils::replaceAll(briefing, "\r", " ");
 
       // replace special '*' char with a regular linebreak char
-      ETJump::StringUtil::replaceAll(briefing, "*", "\n");
+      StringUtils::replaceAll(briefing, "*", "\n");
     }
   } else {
     briefing = "^1No text supplied";
   }
 
   BG_FitTextToWidth_Ext(briefing, scale, textRect.w, font);
-  std::vector<std::string> lines = ETJump::StringUtil::split(briefing, "\n");
+  std::vector<std::string> lines = StringUtils::split(briefing, "\n");
 
   // remove any potential empty strings from the back of the vector
   while (!lines.empty() && lines.back().empty()) {
@@ -1856,10 +1856,12 @@ static void UI_DrawCrosshair(const rectDef_t *rect) {
     vec4_t crosshairColor = {1.0, 1.0, 1.0, 1.0};
     vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
 
-    ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
+    ETJump::ui.colorParser->parseColorString(cg_crosshairColor.string,
+                                             crosshairColor);
     crosshairColor[3] = std::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
 
-    ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
+    ETJump::ui.colorParser->parseColorString(cg_crosshairColorAlt.string,
+                                             crosshairColorAlt);
     crosshairColorAlt[3] = std::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
 
     auto size = ETJump::CvarValueParser::parse<ETJump::CvarValue::Size>(
@@ -2986,7 +2988,7 @@ static void UI_LoadDemos() {
   }
 
   const std::string path =
-      ETJump::StringUtil::join(uiInfo.currentDemoPath, PATH_SEP_STRING);
+      StringUtils::join(uiInfo.currentDemoPath, PATH_SEP_STRING);
   const std::string ext =
       "dm_" +
       std::to_string(static_cast<int>(trap_Cvar_VariableValue("protocol")));
@@ -2995,14 +2997,15 @@ static void UI_LoadDemos() {
   // so we must always send a forward slash here as the extension,
   // instead of platform-specific path separator
   const std::vector<std::string> demoDirs =
-      ETJump::FileSystem::getFileList(path, "/", true);
+      FileSystem::getFileList(path, "/", true);
   std::vector<FileSystemObjectInfo> directories;
 
   for (const auto &dir : demoDirs) {
     FileSystemObjectInfo objectInfo;
     objectInfo.type = FileSystemObjectType::Folder;
     objectInfo.name = dir;
-    objectInfo.displayName = "^7" + ETJump::sanitize(objectInfo.name, false);
+    objectInfo.displayName =
+        "^7" + StringUtils::sanitize(objectInfo.name, false);
 
     if (dir == "." || dir == "..") {
       continue;
@@ -3012,7 +3015,7 @@ static void UI_LoadDemos() {
   }
 
   const std::vector<std::string> demoFiles =
-      ETJump::FileSystem::getFileList(path, ext, true);
+      FileSystem::getFileList(path, ext, true);
   std::vector<FileSystemObjectInfo> files;
 
   for (const auto &demo : demoFiles) {
@@ -3020,9 +3023,9 @@ static void UI_LoadDemos() {
     objectInfo.type = FileSystemObjectType::Item;
     objectInfo.name = demo;
     objectInfo.displayName = demo;
-    ETJump::StringUtil::stripExtension(objectInfo.displayName);
+    StringUtils::stripExtension(objectInfo.displayName);
     objectInfo.displayName =
-        ETJump::sanitize(objectInfo.displayName) + "^*." + ext;
+        StringUtils::sanitize(objectInfo.displayName) + "^*." + ext;
     files.emplace_back(objectInfo);
   }
 
@@ -3041,7 +3044,7 @@ static void UI_LoadDemos() {
 
     // remove trailing slash
     currentPath.pop_back();
-    back.displayName = "^7" + ETJump::sanitize(currentPath, false);
+    back.displayName = "^7" + StringUtils::sanitize(currentPath, false);
     FileSystemObjectInfo beginning;
     beginning.type = FileSystemObjectType::Folder;
     beginning.name = "..";
@@ -3423,8 +3426,8 @@ void UI_RunMenuScript(const char **args) {
           if (uiInfo.currentDemoPath.empty()) {
             demoPath = uiInfo.demoObjects[uiInfo.demoIndex].name;
           } else {
-            demoPath = ETJump::StringUtil::join(uiInfo.currentDemoPath, "/") +
-                       "/" + uiInfo.demoObjects[uiInfo.demoIndex].name;
+            demoPath = StringUtils::join(uiInfo.currentDemoPath, "/") + "/" +
+                       uiInfo.demoObjects[uiInfo.demoIndex].name;
           }
 
           uiInfo.currentDemoPath.push_front(front);
@@ -3437,8 +3440,8 @@ void UI_RunMenuScript(const char **args) {
     if (Q_stricmp(name, "deleteDemo") == 0) {
       if (uiInfo.demoIndex >= 0 &&
           uiInfo.demoIndex < static_cast<int>(uiInfo.demoObjects.size())) {
-        auto demoPath = ETJump::StringUtil::join(uiInfo.currentDemoPath, "/") +
-                        "/" + uiInfo.demoObjects[uiInfo.demoIndex].name;
+        auto demoPath = StringUtils::join(uiInfo.currentDemoPath, "/") + "/" +
+                        uiInfo.demoObjects[uiInfo.demoIndex].name;
         trap_FS_Delete(demoPath.c_str());
       }
       return;
@@ -4781,7 +4784,7 @@ void UI_RunMenuScript(const char **args) {
       fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[item->font];
       std::string contents = uiInfo.changelogs[ui_currentChangelog.string];
 
-      uiInfo.formattedChangelog = ETJump::StringUtil::split(contents, "\n");
+      uiInfo.formattedChangelog = StringUtils::split(contents, "\n");
       uiInfo.formattedChangelog = ETJump::Utilities::fitChangelogLinesToWidth(
           uiInfo.formattedChangelog,
           static_cast<int>(item->window.rect.w - SCROLLBAR_SIZE - 10),
@@ -7023,8 +7026,7 @@ void _UI_KeyEvent(int key, qboolean down) {
 
       if (bindBuf[0] != '\0' && down && !g_editingField && !g_waitingForKey &&
           !Q_stricmp(bindBuf, "toggleETJumpSettings") &&
-          ETJump::StringUtil::startsWith(menu->window.name,
-                                         "etjump_settings_")) {
+          StringUtils::startsWith(menu->window.name, "etjump_settings_")) {
         // color picker and writeconfig menus run an exit script that restores
         // the previously opened menu, so if we have either of them open,
         // we end up with a menu open after Menus_CloseAll call

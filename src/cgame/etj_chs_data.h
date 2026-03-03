@@ -26,12 +26,17 @@
 
 #include <map>
 
-#include "etj_cvar_update_handler.h"
-#include "etj_client_commands_handler.h"
+#include "cg_local.h"
+#include "etj_local.h"
 
 #include "../game/etj_shared.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+class ClientCommandsHandler;
+
+inline constexpr int32_t MAX_CHS_INFO = 8;
+
 class CHSDataHandler {
 public:
   CHSDataHandler(

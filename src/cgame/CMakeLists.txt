@@ -52,25 +52,28 @@ add_library(cgame MODULE
 	"etj_client_authentication.cpp"
 	"etj_client_commands_handler.cpp"
 	"etj_client_rtv_handler.cpp"
-	"etj_console_alpha.cpp"
+	"etj_color_parser.cpp"
+	"etj_console_shader.cpp"
 	"etj_consolecommands.cpp"
 	"etj_crosshair.cpp"
 	"etj_crosshair_drawer.cpp"
+	"etj_custom_command_menu.cpp"
+	"etj_custom_command_menu_drawable.cpp"
 	"etj_cvar_master_drawer.cpp"
-	"etj_cvar_shadow.cpp"
+	"etj_cvar_unlocker.cpp"
 	"etj_cvar_update_handler.cpp"
 	"etj_demo_compatibility.cpp"
 	"etj_demo_recorder.cpp"
-	"etj_draw_leaves_handler.cpp"
 	"etj_drawable.cpp"
 	"etj_entity_events_handler.cpp"
 	"etj_event_loop.cpp"
-	"etj_init.cpp"
 	"etj_inline_command_parser.cpp"
 	"etj_jump_speeds.cpp"
 	"etj_keyset_drawer.cpp"
 	"etj_keyset_keybind_drawer.cpp"
 	"etj_keyset_system.cpp"
+	"etj_leaves_remapper.cpp"
+	"etj_main.cpp"
 	"etj_manual.cpp"
 	"etj_maxspeed.cpp"
 	"etj_operating_system_linux.cpp"
@@ -92,6 +95,7 @@ add_library(cgame MODULE
 	"etj_spectatorinfo_data.cpp"
 	"etj_spectatorinfo_drawable.cpp"
 	"etj_strafe_quality_drawable.cpp"
+	"etj_trace_utils.cpp"
 	"etj_upper_right_drawable.cpp"
 	"etj_upmove_meter_drawable.cpp"
 	"etj_timerun.cpp"
@@ -124,7 +128,7 @@ add_library(cgame MODULE
 	${CGAME_HEADERS}
 )
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
-target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 picosha2 libuuid4 fmt::fmt)
+target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 picosha2 libuuid4 fmt::fmt toml11::toml11)
 
 set_target_properties(cgame PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"

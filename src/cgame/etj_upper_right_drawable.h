@@ -23,32 +23,35 @@
  */
 
 #pragma once
+
+#include <array>
+
 #include "etj_irenderable.h"
 #include "cg_local.h"
-#include <array>
 
 namespace ETJump {
 class UpperRight : public IRenderable {
   static constexpr float y0 = 152.0f;
   static constexpr float textScale = 0.19f;
-  mutable vec4_t textColor = {0.625f, 0.625f, 0.6f, 1.0f};
-  const vec4_t backgroundColor = {0.16f, 0.2f, 0.17f, 0.8f};
-  const vec4_t borderColor = {0.5f, 0.5f, 0.5f, 0.5f};
-  const int upperRight_x = SCREEN_WIDTH - 6;
+
+  vec4_t textColor = {0.625f, 0.625f, 0.6f, 1.0f};
+  vec4_t backgroundColor = {0.16f, 0.2f, 0.17f, 0.8f};
+  vec4_t borderColor = {0.5f, 0.5f, 0.5f, 0.5f};
+  int upperRight_x = SCREEN_WIDTH - 6;
 
   static constexpr std::size_t FPSFrames = 20;
-  std::array<long long, FPSFrames> FPSFrameTimes;
+  std::array<int64_t, FPSFrames> FPSFrameTimes{};
   std::size_t FPSIndex;
   std::size_t FPSInit;
-  long long FPSLastUpdate;
-  long long FPSLastTime;
-  long long fps;
+  int64_t FPSLastUpdate;
+  int64_t FPSLastTime;
+  int64_t fps;
 
-  void DrawTimer(float &y) const;
-  void DrawTime(float &y) const;
-  void DrawFPS(float &y) const;
-  void DrawSpeed(float &y) const;
-  void DrawSnapshot(float &y) const;
+  void drawRoundTimer(float &y) const;
+  void drawClock(float &y) const;
+  void drawFPS(float &y) const;
+  void drawSpeed(float &y) const;
+  void drawSnapshot(float &y) const;
 
 public:
   UpperRight();

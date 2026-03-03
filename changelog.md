@@ -43,6 +43,24 @@
   * spawnflags:
     * `1` - starts off for all clients
     * `2` - gibs the activator if they are inside the brush when it's turned on
+* fixed a potential crash on older versions of ETe when issuing RCON commands in localhost [#1832](https://github.com/etjump/etjump/pull/1832)
+* added custom command menu - a vsay-style menu where users can define up to 40 custom commands to easily execute [#1801](https://github.com/etjump/etjump/pull/1801)
+  * commands are stored in `custom_commands.dat` by default, and are configured in TOML, a simple markup language
+  * commands & cvars:
+    * `openCustomCommandMenu [page]` - toggles the menu, optionally opens to given page
+    * `addCustomCommand <name> <command> [page] [slot]` - adds a new custom command, optionally to specific page/slot
+    * `editCustomCommand <page> <slot> [name] [command]` - edits a custom command at given page/slot
+    * `moveCustomCommand <from-page> <from-slot> <to-page> <to-slot>` - moves a command from one page/slot to another, swapping with an existing command if present
+    * `deleteCustomCommand <page> <slot>` - deletes a custom command from given page/slot
+    * `listCustomCommands [page]` - lists all saved custom commands, optionally only from a given page
+    * `generateCustomCommandsFile` - generates an example `custom_commands.dat` file
+    * `readCustomCommands` - reloads the custom command file, useful after external editing
+    * `etj_ccMenu_filename` - file to save custom commands in (without file extenstion), default `custom_commands`
+      * this must be a `.dat` file to work around pure server limitations
+    * `etj_ccMenu_rememberPage` - toggles whether the menu opens to last opened page or resets to page 1, default `0`
+    * `etj_ccMenu_autoClose` - toggles whether the menu automatically closes after executing a command, default `1`
+* `ignore` no longer works on yourself [#1835](https://github.com/etjump/etjump/pull/1835)
+* tweaked coloring of some prints, most prints should now be in white text [#1838](https://github.com/etjump/etjump/pull/1838)
 
 # ETJump 3.4.2
 

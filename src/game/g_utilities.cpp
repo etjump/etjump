@@ -179,23 +179,23 @@ std::string TimeStampDifferenceToString(int diff) {
   constexpr int YEAR = 365 * DAY;
 
   if (diff < HOUR) {
-    return ETJump::getMinutesString(diff / MINUTE);
+    return StringUtils::getMinutesString(diff / MINUTE);
   } else if (diff < DAY) {
-    return ETJump::getHoursString(diff / HOUR);
+    return StringUtils::getHoursString(diff / HOUR);
   } else if (diff < WEEK) {
-    return ETJump::getDaysString(diff / DAY);
+    return StringUtils::getDaysString(diff / DAY);
   } else if (diff < MONTH) {
-    return ETJump::getWeeksString(diff / WEEK);
+    return StringUtils::getWeeksString(diff / WEEK);
   } else if (diff < YEAR) {
-    return ETJump::getMonthsString(diff / MONTH);
+    return StringUtils::getMonthsString(diff / MONTH);
   } else {
-    return ETJump::getYearsString(diff / YEAR);
+    return StringUtils::getYearsString(diff / YEAR);
   }
 }
 
 const char *EscapeString(const char *in) {
   string str = in;
-  ETJump::StringUtil::replaceAll(str, "=", "\x19=");
+  StringUtils::replaceAll(str, "=", "\x19=");
   static char out[MAX_TOKEN_CHARS] = "\0";
   Q_strncpyz(out, str.c_str(), sizeof(out));
   return out;
@@ -208,7 +208,7 @@ std::vector<std::string> getNames(const std::vector<int> &ids) {
     std::string name = (g_entities + id)->client->pers.netname;
 
     // escape '=' for QP-encoding
-    ETJump::StringUtil::replaceAll(name, "=", "\x19=");
+    StringUtils::replaceAll(name, "=", "\x19=");
     names.push_back(name);
   }
 
@@ -229,7 +229,7 @@ std::vector<int> getMatchingIds(const std::string &name) {
 
 std::string interpolateNametags(std::string input, const int color) {
   std::string interpolated;
-  const std::vector<std::string> split = ETJump::StringUtil::split(input, "@");
+  const std::vector<std::string> split = StringUtils::split(input, "@");
 
   if (split.size() == 1 || split.size() == 2) {
     return input;
@@ -249,8 +249,7 @@ std::string interpolateNametags(std::string input, const int color) {
       auto names = getNames(getMatchingIds(split[i]));
       if (!names.empty()) {
         const std::string &splitStr = colorCode + ", ^7";
-        interpolated +=
-            "^7" + ETJump::StringUtil::join(names, splitStr) + colorCode;
+        interpolated += "^7" + StringUtils::join(names, splitStr) + colorCode;
       } else {
         interpolated += "@" + split[i] + "@";
       }
@@ -277,7 +276,7 @@ const char *findAndReplaceNametags(const char *text, const char *name) {
   static char buf[MAX_SAY_TEXT] = "\0";
 
   auto str = std::string(text);
-  ETJump::StringUtil::replaceAll(str, "[n]", name);
+  StringUtils::replaceAll(str, "[n]", name);
 
   Q_strncpyz(buf, str.c_str(), sizeof(buf));
   return buf;

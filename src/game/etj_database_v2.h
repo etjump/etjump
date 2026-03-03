@@ -48,7 +48,7 @@ public:
 
   template <typename T>
   static std::string createPlaceholderString(const std::vector<T> &input) {
-    return StringUtil::join(
+    return StringUtils::join(
         Container::map(input, [](const auto &e) { return "?"; }), ",");
   }
 

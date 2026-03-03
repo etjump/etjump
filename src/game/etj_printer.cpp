@@ -27,7 +27,7 @@
 #include "g_local.h"
 
 void Printer::log(const std::string &message) {
-  const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
+  const auto splits = StringUtils::wrapWords(message, '\n', BYTES_PER_PACKET);
 
   for (const auto &split : splits) {
     G_LogPrintf(split.c_str());
@@ -54,7 +54,7 @@ void Printer::logAdminLn(const std::string &message) {
 }
 
 void Printer::console(int clientNum, const std::string &message) {
-  const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
+  const auto splits = StringUtils::wrapWords(message, '\n', BYTES_PER_PACKET);
 
   for (const auto &split : splits) {
     if (clientNum == CONSOLE_CLIENT_NUMBER) {
@@ -76,7 +76,7 @@ void Printer::console(const gclient_t *client, const std::string &message) {
 }
 
 void Printer::consoleAll(const std::string &message) {
-  const auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
+  const auto splits = StringUtils::wrapWords(message, '\n', BYTES_PER_PACKET);
 
   for (const auto &split : splits) {
     trap_SendServerCommand(ALL_CLIENTS, va("print \"%s\"", split.c_str()));
@@ -142,7 +142,7 @@ void Printer::popupAll(const std::string &message) {
 void Printer::center(int clientNum, const std::string &message, bool log) {
   const std::string cmd = log ? "cp" : "cpnl";
   trap_SendServerCommand(
-      clientNum, ETJump::stringFormat("%s \"%s\n\"", cmd, message).c_str());
+      clientNum, StringUtils::format("%s \"%s\n\"", cmd, message).c_str());
 }
 
 void Printer::center(const gentity_t *ent, const std::string &message,
@@ -160,7 +160,7 @@ void Printer::center(const gclient_t *client, const std::string &message,
 void Printer::centerAll(const std::string &message, bool log) {
   const std::string cmd = log ? "cp" : "cpnl";
   trap_SendServerCommand(
-      ALL_CLIENTS, ETJump::stringFormat("%s \"%s\n\"", cmd, message).c_str());
+      ALL_CLIENTS, StringUtils::format("%s \"%s\n\"", cmd, message).c_str());
 
   if (g_dedicated.integer) {
     G_Printf("%s\n", message.c_str());
@@ -172,7 +172,7 @@ void Printer::centerPriority(int clientNum, const std::string &message,
   const std::string cmd = log ? "cp" : "cpnl";
   trap_SendServerCommand(
       clientNum,
-      ETJump::stringFormat("%s \"%s\" %i", cmd, message, priority).c_str());
+      StringUtils::format("%s \"%s\" %i", cmd, message, priority).c_str());
 }
 
 void Printer::centerPriority(const gentity_t *ent, const std::string &message,
@@ -193,7 +193,7 @@ void Printer::centerPriorityAll(const std::string &message, const int priority,
   const std::string cmd = log ? "cp" : "cpnl";
   trap_SendServerCommand(
       ALL_CLIENTS,
-      ETJump::stringFormat("%s \"%s\" %i", cmd, message, priority).c_str());
+      StringUtils::format("%s \"%s\" %i", cmd, message, priority).c_str());
 
   if (g_dedicated.integer) {
     G_Printf("%s\n", message.c_str());

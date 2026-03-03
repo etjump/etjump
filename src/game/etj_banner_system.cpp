@@ -35,13 +35,13 @@ static const char *LocationText[] = {"Center", "Top", "Chat", "Left"};
 ETJump::BannerSystem::BannerSystem(Options options) : _bannerIdx(0) {
   _options = std::move(options);
   subscribeToRunFrame([=](int levelTime) { check(levelTime); });
-  Printer::logLn(stringFormat("Initialized banner system\n"
-                              "- %d banners\n"
-                              "- %ds interval\n"
-                              "- %s location",
-                              _options.messages.size(),
-                              (_options.interval / 1000),
-                              LocationText[_options.location]));
+  Printer::logLn(StringUtils::format("Initialized banner system\n"
+                                     "- %d banners\n"
+                                     "- %ds interval\n"
+                                     "- %s location",
+                                     _options.messages.size(),
+                                     (_options.interval / 1000),
+                                     LocationText[_options.location]));
 }
 
 void ETJump::BannerSystem::check(int levelTime) {

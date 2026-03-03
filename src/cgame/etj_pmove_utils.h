@@ -26,18 +26,23 @@
 
 #include <optional>
 
-#include "cg_local.h"
+#include "etj_local.h"
+
+#include "../game/q_shared.h"
+#include "../game/bg_public.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+
 class PmoveUtils {
 public:
-  PmoveUtils();
-  ~PmoveUtils() = default;
-  bool check() const;
+  explicit PmoveUtils(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~PmoveUtils();
+  [[nodiscard]] bool check() const;
   void runPmove();
 
   // returns either sprintSpeedScale or runSpeedScale
-  float getSprintScale() const;
+  [[nodiscard]] float getSprintScale() const;
 
   // calculates wishspeed projected onto flat ground plane
   float getWishspeed(vec3_t wishvel, float scale, vec3_t forward, vec3_t right,
@@ -81,6 +86,8 @@ private:
   int8_t uCmdScale{};
 
   bool doPmove{};
-  std::vector<const vmCvar_t *> cvars{};
+  std::vector<const vmCvar_t *> cvars;
+
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 } // namespace ETJump

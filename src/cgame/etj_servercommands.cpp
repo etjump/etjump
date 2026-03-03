@@ -24,9 +24,8 @@
 
 #include "etj_servercommands.h"
 #include "cg_local.h"
-#include "etj_init.h"
-#include "etj_utilities.h"
 #include "etj_client_commands_handler.h"
+#include "etj_utilities.h"
 
 #include "../game/etj_syscall_ext_shared.h"
 #include "../game/etj_string_utilities.h"
@@ -42,7 +41,7 @@ static void maplist(const Arguments &args) {
   // we need to forward this command to UI to parse the list there,
   // so we can populate the map vote list
   trap_SendConsoleCommand(
-      va("uiParseMaplist %s\n", StringUtil::join(args, " ").c_str()));
+      va("uiParseMaplist %s\n", StringUtils::join(args, " ").c_str()));
 }
 
 static void forceCustomvoteRefresh() { resetCustomvoteInfo(); }
@@ -60,7 +59,7 @@ static void numCustomvotes(const Arguments &args) {
 static void customvoteList(const Arguments &args) {
   // forward to UI
   trap_SendConsoleCommand(
-      va("uiParseCustomvote %s\n", StringUtil::join(args, " ").c_str()));
+      va("uiParseCustomvote %s\n", StringUtils::join(args, " ").c_str()));
 }
 
 static void pmFlashWindow() {
@@ -73,7 +72,7 @@ static void pmFlashWindow() {
 
 static void extShaderIndex(const Arguments &args) {
   for (const auto &arg : args) {
-    const auto shaderKvp = StringUtil::split(arg, "|");
+    const auto shaderKvp = StringUtils::split(arg, "|");
 
     // sanity check, shouldn't happen,
     // but just skip if the command is somehow malformed
@@ -92,7 +91,7 @@ static void extShaderState(const Arguments &args) {
   // this *should* be a single argument, but 'timeOffset' can have padding,
   // introducing whitespace to the command, which breaks it into multiple args
   // we don't need to preserve it, the parser will ignore it anyway
-  CG_ShaderStateChanged(StringUtil::join(args, ""));
+  CG_ShaderStateChanged(StringUtils::join(args, ""));
 }
 
 static void resetStrafeQuality() {
@@ -118,7 +117,7 @@ static void savePrint(const Arguments &args) {
   if (args.size() >= 2) {
     const int32_t remainingSaves = Q_atoi(args[1]);
     const std::string remainingSavesStr =
-        stringFormat("^7(^3%d ^7remaining)\n", remainingSaves);
+        StringUtils::format("^7(^3%d ^7remaining)\n", remainingSaves);
     saveMsg += '\n' + remainingSavesStr;
   }
 
@@ -143,35 +142,35 @@ static void callvote(const Arguments &args) {
 }
 
 void registerCommands() {
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "maplist", [](const auto &args) { maplist(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "forceCustomvoteRefresh", [](const auto &) { forceCustomvoteRefresh(); },
       false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "numcustomvotes", [](const auto &args) { numCustomvotes(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "customvotelist", [](const auto &args) { customvoteList(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "pmFlashWindow", [](const auto &) { pmFlashWindow(); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "extShaderIndex", [](const auto &args) { extShaderIndex(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "extShaderState", [](const auto &args) { extShaderState(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "resetStrafeQuality", [](const auto &) { resetStrafeQuality(); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "savePrint", [](const auto &args) { savePrint(args); }, false);
 
-  serverCommandsHandler->subscribe(
+  cgame.handlers.serverCommands->subscribe(
       "callvote", [](const auto &args) { callvote(args); }, false);
 }
 } // namespace ETJump::ServerCommands

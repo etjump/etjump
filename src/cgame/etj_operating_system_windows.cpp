@@ -135,10 +135,10 @@ std::string ETJump::OperatingSystem::getMACAddress() {
     for (UINT i = 0; i < pAdapter->AddressLength; i++) {
       if (i == pAdapter->AddressLength - 1) {
         macAddress +=
-            stringFormat("%.2X", static_cast<int>(pAdapter->Address[i]));
+            StringUtils::format("%.2X", static_cast<int>(pAdapter->Address[i]));
       } else {
-        macAddress +=
-            stringFormat("%.2X-", static_cast<int>(pAdapter->Address[i]));
+        macAddress += StringUtils::format(
+            "%.2X-", static_cast<int>(pAdapter->Address[i]));
       }
     }
 
@@ -218,8 +218,8 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
     vendorExt.pop_back();
   }
 
-  const std::string cpuID = stringFormat("%s %u %u %s %u", vendor, cpuFamily,
-                                         model, vendorExt, stepping);
+  const std::string cpuID = StringUtils::format(
+      "%s %u %u %s %u", vendor, cpuFamily, model, vendorExt, stepping);
   return Crypto::sha2(cpuID);
 }
 
@@ -324,7 +324,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
 
           // backslashes are escaped in the returned string,
           // so we need to unescape the string for comparison later
-          StringUtil::replaceAll(diskDeviceID, LR"(\\)", LR"(\)");
+          StringUtils::replaceAll(diskDeviceID, LR"(\\)", LR"(\)");
         }
       }
 
@@ -453,7 +453,7 @@ std::string ETJump::OperatingSystem::getCurrentUserSID() {
 std::string ETJump::OperatingSystem::getSystemUUID() {
   const auto uuid = getWMIProperty(L"Win32_ComputerSystemProduct", L"UUID");
 
-  if (StringUtil::iEqual(uuid, NO_HWID)) {
+  if (StringUtils::iEqual(uuid, NO_HWID)) {
     return NOHWID_SYS_UUID;
   }
 
@@ -463,7 +463,7 @@ std::string ETJump::OperatingSystem::getSystemUUID() {
 std::string ETJump::OperatingSystem::getMBSerial() {
   const auto mbSerial = getWMIProperty(L"Win32_BaseBoard", L"SerialNumber");
 
-  if (StringUtil::iEqual(mbSerial, NO_HWID)) {
+  if (StringUtils::iEqual(mbSerial, NO_HWID)) {
     return NOHWID_MB_SERIAL;
   }
 

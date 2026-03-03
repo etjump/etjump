@@ -46,16 +46,16 @@ public:
       return "";
     }
 
-    return stringFormat("%08X%08X%08X%08X%08X", sha.Message_Digest[0],
-                        sha.Message_Digest[1], sha.Message_Digest[2],
-                        sha.Message_Digest[3], sha.Message_Digest[4]);
+    return StringUtils::format("%08X%08X%08X%08X%08X", sha.Message_Digest[0],
+                               sha.Message_Digest[1], sha.Message_Digest[2],
+                               sha.Message_Digest[3], sha.Message_Digest[4]);
   }
 
   // returned hash is always uppercased
   static std::string sha2(const std::string &str) {
     std::string hash_hex_str;
     picosha2::hash256_hex_string(str, hash_hex_str);
-    return StringUtil::toUpperCase(hash_hex_str);
+    return StringUtils::toUpperCase(hash_hex_str);
   }
 
   static bool isValidSHA1(const std::string &hash) {

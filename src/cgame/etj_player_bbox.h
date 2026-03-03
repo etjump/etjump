@@ -24,7 +24,11 @@
 
 #pragma once
 
+#include "cg_local.h"
+
 namespace ETJump {
+class CvarUpdateHandler;
+
 class PlayerBBox {
   struct BBox {
     vec3_t mins{};
@@ -50,6 +54,8 @@ class PlayerBBox {
   vec4_t colorOther{};
   vec4_t colorFireteam{};
 
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+
   // there's no real easy way to determine these for other players,
   // both crouch and prone use ps.crouchMaxZ for maxs[2] but it's calculated
   // differently based off stance, and since the result is not stored
@@ -59,6 +65,7 @@ class PlayerBBox {
   static constexpr int CROUCH_MAXS_OFFSET_Z = 24;
   static constexpr int PRONE_MAXS_OFFSET_Z = 32;
 
+  void setupListeners();
   static void setupBBoxExtents(const centity_t *cent, BBox &box);
   static bool bottomOnly(const int &pType);
   static void setBBoxAlpha(const centity_t *cent, BBox &box);
@@ -67,7 +74,7 @@ class PlayerBBox {
 public:
   void drawBBox(const clientInfo_t *ci, const centity_t *cent) const;
 
-  PlayerBBox();
-  ~PlayerBBox() = default;
+  explicit PlayerBBox(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~PlayerBBox();
 };
 } // namespace ETJump

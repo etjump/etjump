@@ -24,11 +24,15 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
+
 #include "etj_irenderable.h"
 #include "cg_local.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+
 class Snaphud : public IRenderable {
 public:
   static constexpr float INVALID_SNAP_DIR = -9999;
@@ -45,8 +49,8 @@ public:
                                     bool upmoveTrueness);
   static bool inMainAccelZone(const playerState_t &ps, const pmove_t *pm);
 
-  Snaphud();
-  ~Snaphud() {};
+  explicit Snaphud(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~Snaphud() override;
 
 private:
   bool canSkipDraw() const;
@@ -96,7 +100,9 @@ private:
     bool active;
   };
 
-  std::vector<DrawableSnap> drawableSnaps{};
+  std::vector<DrawableSnap> drawableSnaps;
   bool isCurrentAlt{};
+
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 } // namespace ETJump

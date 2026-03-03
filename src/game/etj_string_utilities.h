@@ -29,7 +29,7 @@
 #include <vector>
 #include <fmt/printf.h>
 
-namespace ETJump {
+namespace StringUtils {
 std::string getBestMatch(const std::vector<std::string> &words,
                          const std::string &current);
 std::string sanitize(std::string_view text, bool toLower = false,
@@ -40,7 +40,7 @@ std::string getValue(const std::string &value,
                      const std::string &defaultValue = "");
 
 template <typename... Targs>
-std::string stringFormat(const std::string &format, const Targs &...Fargs) {
+std::string format(const std::string &format, const Targs &...Fargs) {
   try {
     return fmt::sprintf(format, Fargs...);
   } catch (const fmt::v10::format_error &e) {
@@ -73,10 +73,10 @@ std::string getWeeksString(const int &weeks);
 std::string getMonthsString(const int &months);
 std::string getYearsString(const int &years);
 
-namespace StringUtil {
 std::string toLowerCase(const std::string &input);
 std::string toUpperCase(const std::string &input);
 std::string eraseLast(const std::string &input, const std::string &substring);
+
 template <typename T>
 std::string join(const T &v, const std::string &delim) {
   std::ostringstream s;
@@ -114,9 +114,10 @@ bool contains(const std::string &str, const T &text) {
 // case-insensitive string comparison, optionally with sanitized strings
 bool iEqual(std::string_view str1, std::string_view str2,
             bool sanitized = false);
-// Counts the extra padding needed when using format specifiers like
-// %-20s with text that contains ET color codes
-unsigned countExtraPadding(const std::string &input);
+
+// Counts the padding needed to reach 'targetPadding' when using
+// format specifiers like '%-20s' with text that contains ET color codes
+int32_t countExtraPadding(const std::string &input, int32_t targetPadding);
 
 // removes any leading and trailing zeroes from a number
 // always returns at least 0 even if there are no significant numbers
@@ -152,7 +153,7 @@ void sortStrings(T &v, const bool noCase) {
   std::sort(
       v.begin(), v.end(), [&](const std::string &lhs, const std::string &rhs) {
         if (noCase) {
-          return StringUtil::toUpperCase(lhs) < StringUtil::toUpperCase(rhs);
+          return StringUtils::toUpperCase(lhs) < StringUtils::toUpperCase(rhs);
         } else {
           return lhs < rhs;
         }
@@ -160,5 +161,8 @@ void sortStrings(T &v, const bool noCase) {
 }
 
 void stripLocalizationMarkers(std::string &str);
-} // namespace StringUtil
-} // namespace ETJump
+
+// escapes color codes in a string that contains carets,
+// which are not meant to be used as color codes
+void escapeColorCodes(std::string &str, char escapeColor);
+} // namespace StringUtils

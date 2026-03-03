@@ -27,12 +27,10 @@
 #include <optional>
 #include <string>
 #include <map>
-#include <ostream>
 #include <utility>
 #include <vector>
 
 #include "etj_container_utilities.h"
-#include "etj_synchronization_context.h"
 #include "etj_time_utilities.h"
 
 namespace ETJump {
@@ -102,9 +100,9 @@ public:
             pair.second.position);
       });
 
-      return stringFormat("Usage: %s\n\n    %s\n\nOptions:\n%s\n", name,
-                          description,
-                          StringUtil::join(optionsToStrings, "\n"));
+      return StringUtils::format("Usage: %s\n\n    %s\n\nOptions:\n%s\n", name,
+                                 description,
+                                 StringUtils::join(optionsToStrings, "\n"));
     }
 
     static CommandDefinition create(const std::string &name,
@@ -143,10 +141,10 @@ public:
       for (const auto &o : this->options) {
         if (o.second.position.has_value() &&
             o.second.position.value() == position) {
-          throw std::runtime_error(
-              stringFormat("`%s` already has argument `%s` configured to "
-                           "position `%d`. Use a different position for `%s`.",
-                           this->name, o.second.name, position, name));
+          throw std::runtime_error(StringUtils::format(
+              "`%s` already has argument `%s` configured to position `%d`. Use "
+              "a different position for `%s`.",
+              this->name, o.second.name, position, name));
         }
       }
 
@@ -176,9 +174,9 @@ public:
 
     explicit Option(std::string name) : name(std::move(name)) {}
 
-    std::string name{};
+    std::string name;
     bool boolean{};
-    std::string text{};
+    std::string text;
     int integer{};
     double decimal{};
     Date date{};
@@ -190,15 +188,17 @@ public:
     std::vector<std::string> extraArgs;
     bool helpRequested{};
 
-    std::optional<Option> getOptional(const std::string &name) {
+    [[nodiscard]] std::optional<Option>
+    getOptional(const std::string &name) const {
       if (options.count(name) == 0) {
-        return {};
+        return std::nullopt;
       }
-      return {options[name]};
+
+      return options.at(name);
     };
 
-    std::string getErrorMessage() const {
-      return StringUtil::join(errors, "\n");
+    [[nodiscard]] std::string getErrorMessage() const {
+      return StringUtils::join(errors, "\n");
     }
   };
 

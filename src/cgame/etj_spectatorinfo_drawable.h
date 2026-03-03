@@ -28,6 +28,8 @@
 #include "etj_cvar_parser.h"
 
 namespace ETJump {
+class CvarUpdateHandler;
+
 class SpectatorInfo : public IRenderable {
   CvarValue::Scale scale{};
   int32_t textStyle{};
@@ -42,6 +44,8 @@ class SpectatorInfo : public IRenderable {
 
   static constexpr vec4_t inactiveColor = {1.0f, 1.0f, 1.0f, 0.33f};
 
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+
   static bool canSkipDraw();
   void startListeners();
 
@@ -51,7 +55,8 @@ class SpectatorInfo : public IRenderable {
   static float getTextOffset(const char *name, float fontWidth);
 
 public:
-  SpectatorInfo();
+  explicit SpectatorInfo(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~SpectatorInfo() override;
 
   bool beforeRender() override;
   void render() const override;

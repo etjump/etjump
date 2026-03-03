@@ -12,6 +12,8 @@
 #include "../cgame/etj_cvar_parser.h"
 
 #include "../game/etj_string_utilities.h"
+#include "../game/etj_file.h"
+#include "../game/etj_filesystem.h"
 
 inline constexpr int SCROLL_TIME_START = 500;
 inline constexpr int SCROLL_TIME_ADJUST = 150;
@@ -1886,30 +1888,22 @@ qboolean Script_CheckProfile(char *profile_path) {
   return qtrue;
 }
 
-qboolean Script_WriteProfile(char *profile_path) {
-  fileHandle_t f;
-  char com_pid[256];
-
-  if (FileExists(profile_path)) {
-    trap_FS_Delete(profile_path);
+static qboolean Script_WriteProfile(char *profile_path) {
+  if (FileSystem::exists(profile_path)) {
+    FileSystem::remove(profile_path);
   }
 
-  if (trap_FS_FOpenFile(profile_path, &f, FS_WRITE) < 0) {
-    Com_Printf("Script_WriteProfile: Can't write %s.\n", profile_path);
-    return qfalse;
-  }
-  if (f < 0) {
-    Com_Printf("Script_WriteProfile: Can't write %s.\n", profile_path);
-    return qfalse;
-  }
-
+  char com_pid[MAX_CVAR_VALUE_STRING]{};
   DC->getCVarString("com_pid", com_pid, sizeof(com_pid));
 
-  trap_FS_Write(com_pid, strlen(com_pid), f);
-
-  trap_FS_FCloseFile(f);
-
-  return qtrue;
+  try {
+    File fOut(profile_path, File::Mode::Write);
+    fOut.write(com_pid, static_cast<int>(strlen(com_pid)));
+    return qtrue;
+  } catch (const File::FileIOException &) {
+    Com_Printf("%s: Can't write %s\n", __func__, profile_path);
+    return qfalse;
+  }
 }
 
 void Script_ExecWolfConfig(itemDef_t *item, qboolean *bAbort,
@@ -2947,12 +2941,12 @@ const char *Item_Multi_Setting(itemDef_t *item) {
 
     if (multiPtr->strDef) {
       // if a string is empty or a hex color, return as-is
-      if (buff[0] == '\0' || ETJump::StringUtil::startsWith(buff, "#") ||
-          ETJump::StringUtil::startsWith(buff, "0x")) {
+      if (buff[0] == '\0' || StringUtils::startsWith(buff, "#") ||
+          StringUtils::startsWith(buff, "0x")) {
         return va("Custom (%s)", buff);
       }
 
-      std::vector<std::string> splits = ETJump::StringUtil::split(buff, " ");
+      std::vector<std::string> splits = StringUtils::split(buff, " ");
 
       // at this point, we might still have nonsense strings such as
       // 'aaa.00.0000aaa.555' or some other stupid stuff, so ensure the
@@ -2964,14 +2958,14 @@ const char *Item_Multi_Setting(itemDef_t *item) {
       }
 
       for (auto &split : splits) {
-        split = ETJump::StringUtil::normalizeNumberString(split);
+        split = StringUtils::normalizeNumberString(split);
       }
 
-      const std::string &val = ETJump::StringUtil::join(splits, " ");
+      const std::string &val = StringUtils::join(splits, " ");
       return va("Custom (%s)", val.c_str());
     } else {
       std::string val = std::to_string(DC->getCVarValue(item->cvar));
-      val = ETJump::StringUtil::normalizeNumberString(val);
+      val = StringUtils::normalizeNumberString(val);
 
       return va("Custom (%s)", val.c_str());
     }
@@ -5121,6 +5115,7 @@ static bind_t g_bindings[] = {
     {"team r 1", -1, -1, -1, -1},
     {"team s", -1, -1, -1, -1},
     {"toggleETJumpSettings", -1, -1, -1, -1},
+    {"openCustomCommandMenu", -1, -1, -1, -1},
 };
 
 static const int g_bindCount = sizeof(g_bindings) / sizeof(bind_t);

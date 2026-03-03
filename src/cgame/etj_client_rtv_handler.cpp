@@ -23,15 +23,21 @@
  */
 
 #include "etj_client_rtv_handler.h"
+#include "cg_local.h"
 #include "etj_client_commands_handler.h"
 
 namespace ETJump {
 ClientRtvHandler::ClientRtvHandler(
-    const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler)
-    : serverCommandsHandler(serverCommandsHandler) {
-  rtvMaps.clear();
+    const std::shared_ptr<ClientCommandsHandler> &serverCommands)
+    : serverCommands(serverCommands) {
+  setRtvVoteStatus();
 
-  serverCommandsHandler->subscribe(
+  if (rtvVoteActive()) {
+    setRtvConfigStrings(CG_ConfigString(CS_VOTE_YES));
+    countRtvVotes();
+  }
+
+  this->serverCommands->subscribe(
       "openRtvMenu",
       [](const std::vector<std::string> &) {
         trap_SendConsoleCommand("openRtvMenu");
@@ -39,15 +45,8 @@ ClientRtvHandler::ClientRtvHandler(
       false);
 }
 
-void ClientRtvHandler::initialize() {
-  setRtvVoteStatus();
-
-  if (!rtvVoteActive()) {
-    return;
-  }
-
-  setRtvConfigStrings(CG_ConfigString(CS_VOTE_YES));
-  countRtvVotes();
+ClientRtvHandler::~ClientRtvHandler() {
+  serverCommands->unsubscribe("openRtvMenu");
 }
 
 void ClientRtvHandler::setRtvConfigStrings(const char *cs) {
