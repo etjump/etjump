@@ -28,7 +28,6 @@
 #include <vector>
 #include <stdexcept>
 
-namespace ETJump {
 class File {
 public:
   class FileIOException : public std::runtime_error {
@@ -71,4 +70,3 @@ private:
   int32_t length;
   Mode mode;
 };
-} // namespace ETJump

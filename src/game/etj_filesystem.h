@@ -27,7 +27,6 @@
 #include <string>
 #include <vector>
 
-namespace ETJump {
 class FileSystem {
   static constexpr int BIG_DIR_BUFFER = 2 << 20;
 
@@ -55,4 +54,3 @@ public:
     static std::string getPath(const std::string &file);
   };
 };
-} // namespace ETJump

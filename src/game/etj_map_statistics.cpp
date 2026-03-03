@@ -147,8 +147,7 @@ void MapStatistics::saveChanges() {
   _currentMap->lastPlayed = static_cast<int>(t);
 
   sqlite3 *db = nullptr;
-  auto rc = sqlite3_open(
-      ETJump::FileSystem::Path::getPath(_databaseName).c_str(), &db);
+  auto rc = sqlite3_open(FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
     Utilities::Error(StringUtils::format("MapStatistics::saveChanges: Error: "
                                          "Failed to open database. (%d) %s.\n",
@@ -309,8 +308,7 @@ void MapStatistics::addNewMaps() {
 
 void MapStatistics::saveNewMaps(std::vector<std::string> newMaps) {
   sqlite3 *db = nullptr;
-  auto rc = sqlite3_open(
-      ETJump::FileSystem::Path::getPath(_databaseName).c_str(), &db);
+  auto rc = sqlite3_open(FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
     Utilities::Error(StringUtils::format(
         "MapStatistics::saveNewMaps: Error: Could not open map database %s\n",
@@ -370,8 +368,7 @@ bool MapStatistics::loadFromDatabase() {
 bool MapStatistics::loadMaps() {
   sqlite3 *db = nullptr;
 
-  auto rc = sqlite3_open(
-      ETJump::FileSystem::Path::getPath(_databaseName).c_str(), &db);
+  auto rc = sqlite3_open(FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
     Utilities::Error(StringUtils::format(
         "MapStatistics::loadMaps: Error: Failed to open database %s\n",
@@ -433,8 +430,7 @@ bool MapStatistics::loadMaps() {
 
 bool MapStatistics::createDatabase() {
   sqlite3 *db = nullptr;
-  auto rc = sqlite3_open(
-      ETJump::FileSystem::Path::getPath(_databaseName).c_str(), &db);
+  auto rc = sqlite3_open(FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
     Utilities::Error(StringUtils::format(
         "MapStatistics::createDatabase: Error: Failed to open database %s\n",

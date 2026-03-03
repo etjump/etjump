@@ -35,7 +35,6 @@
   #include "../ui/ui_local.h"
 #endif
 
-namespace ETJump {
 File::File(std::string filename, const Mode mode)
     : file(std::move(filename)), handle(INVALID_FILE_HANDLE), mode(mode) {
   fsMode_t fsMode{};
@@ -118,4 +117,3 @@ void File::write(const char *data, int len) const {
   }
 #endif
 }
-} // namespace ETJump

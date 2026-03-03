@@ -35,8 +35,7 @@ void *AsyncOperation::StartThread(void *data) {
 }
 
 bool AsyncOperation::OpenDatabase(std::string const &database) {
-  int rc =
-      sqlite3_open(ETJump::FileSystem::Path::getPath(database).c_str(), &db_);
+  int rc = sqlite3_open(FileSystem::Path::getPath(database).c_str(), &db_);
   if (rc != SQLITE_OK) {
     errorMessage_ = sqlite3_errmsg(db_);
     return false;

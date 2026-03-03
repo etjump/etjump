@@ -250,10 +250,10 @@ void OnGameInit() {
       std::make_unique<ETJump::TimerunRepository>(
           std::make_unique<ETJump::DatabaseV2>(
               "timerunv2",
-              ETJump::FileSystem::Path::getPath(g_timeruns2Database.string)),
+              FileSystem::Path::getPath(g_timeruns2Database.string)),
           std::make_unique<ETJump::DatabaseV2>(
               "timerunv1",
-              ETJump::FileSystem::Path::getPath(g_timerunsDatabase.string))),
+              FileSystem::Path::getPath(g_timerunsDatabase.string))),
       std::make_unique<ETJump::Log>("timerunv2"),
       std::make_unique<ETJump::SynchronizationContext>());
 

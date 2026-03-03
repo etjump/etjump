@@ -139,7 +139,7 @@ void MenuIntegrityChecker::printIntegrityViolation() {
 std::vector<std::string> MenuIntegrityChecker::getBadPaks() {
   // see if we can find the offending packs
   const auto files =
-      ETJump::FileSystem::getFileList("../" + uiInfo.fsGame, ".pk3", true);
+      FileSystem::getFileList("../" + uiInfo.fsGame, ".pk3", true);
   const auto pk3name =
       std::string(GAME_NAME) + "-" + std::string(GAME_VERSION) + ".pk3";
   const auto it = std::find(files.cbegin(), files.cend(), pk3name);

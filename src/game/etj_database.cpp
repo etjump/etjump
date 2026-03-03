@@ -937,8 +937,7 @@ User_s const *Database::GetUserData(std::string const &guid) const {
 }
 
 bool Database::InitDatabase(char const *config) {
-  int rc =
-      sqlite3_open(ETJump::FileSystem::Path::getPath(config).c_str(), &db_);
+  int rc = sqlite3_open(FileSystem::Path::getPath(config).c_str(), &db_);
 
   users_.clear();
   bans_.clear();

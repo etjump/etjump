@@ -1678,7 +1678,7 @@ bool ListPlayers(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-bool Map(gentity_t *ent, Arguments argv) {
+static bool Map(gentity_t *ent, Arguments argv) {
   if (argv->size() != 2) {
     // PrintManual(ent, "map");
     return false;
@@ -1686,7 +1686,7 @@ bool Map(gentity_t *ent, Arguments argv) {
 
   std::string requestedMap = StringUtils::toLowerCase(argv->at(1));
 
-  if (!ETJump::FileSystem::exists("maps/" + requestedMap + ".bsp")) {
+  if (!FileSystem::exists("maps/" + requestedMap + ".bsp")) {
     Printer::chat(ent, "^3map: ^7'" + requestedMap + "' is not on the server.");
     return false;
   }

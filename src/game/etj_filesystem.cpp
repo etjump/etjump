@@ -36,7 +36,6 @@
   #include "../ui/ui_local.h"
 #endif
 
-namespace ETJump {
 void FileSystem::copy(const std::string &src, const std::string &dst) {
   if (src == dst) {
     return;
@@ -169,4 +168,3 @@ std::string FileSystem::Path::sanitizeFolder(std::string path) {
   }
   return path;
 }
-} // namespace ETJump
