@@ -23,10 +23,12 @@
  */
 
 #include "etj_func_static_client.h"
+#include "etj_entity_utilities_shared.h"
 
 namespace ETJump {
 inline constexpr int32_t SF_START_INVIS = 1 << 0;
 inline constexpr int32_t SF_GIB_INSIDE = 1 << 1;
+inline constexpr int32_t SF_FT_TEAMJUMP_SYNC = 1 << 2;
 
 /*
  * 'ent->s.effect1Time' and 'ent->s.effect2Time' are treated as boolean
@@ -145,5 +147,26 @@ bool FuncStaticClient::activatorIsInsideEnt(const gentity_t *self,
   }
 
   return false;
+}
+
+void FuncStaticClient::syncToFireteamLeaderState(const int32_t clientNum,
+                                                 const int32_t leaderNum) {
+  for (int32_t i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; i++) {
+    gentity_t *ent = &g_entities[i];
+
+    if (ent->s.eType != ET_STATIC_CLIENT) {
+      continue;
+    }
+
+    if (!(ent->spawnflags & SF_FT_TEAMJUMP_SYNC)) {
+      continue;
+    }
+
+    if (EntityUtilsShared::funcStaticClientIsHidden(&ent->s, leaderNum)) {
+      turnOff(ent, clientNum);
+    } else {
+      turnOn(ent, clientNum);
+    }
+  }
 }
 } // namespace ETJump
