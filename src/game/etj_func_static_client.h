@@ -34,5 +34,6 @@ public:
   static void turnOn(gentity_t *self, int32_t clientNum);
   static void turnOff(gentity_t *self, int32_t clientNum);
   static bool activatorIsInsideEnt(const gentity_t *self, int32_t clientNum);
+  static void syncToFireteamLeaderState(int32_t clientNum, int32_t leaderNum);
 };
 } // namespace ETJump

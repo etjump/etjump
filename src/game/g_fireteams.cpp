@@ -1,3 +1,4 @@
+#include "etj_func_static_client.h"
 #include "g_local.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
@@ -324,6 +325,11 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
         Printer::console(otherEnt,
                          "Your portals have been reset due to ^3'portalteam' "
                          "^7setting of the current map.\n");
+      }
+
+      if (ft->teamJumpMode) {
+        ETJump::FuncStaticClient::syncToFireteamLeaderState(entityNum,
+                                                            leaderNum);
       }
 
       G_UpdateFireteamConfigString(ft);
@@ -779,6 +785,13 @@ void setFireteamTeamjumpMode(fireteamData_t *ft, const bool teamjumpMode) {
     }
 
     Printer::popup(ft->joinOrder[i], msg);
+
+    // sync 'func_static_client' entities for members to match leader's state,
+    // if we're enabling teamjump mode
+    if (i != 0 && ft->teamJumpMode) {
+      FuncStaticClient::syncToFireteamLeaderState(ft->joinOrder[i],
+                                                  ft->joinOrder[0]);
+    }
   }
 }
 
