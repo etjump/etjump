@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <vector>
 
-namespace ETJump {
 namespace Container {
 /**
  * Takes an input container (e.g. std::vector<>) and loops through each
@@ -83,4 +82,3 @@ std::vector<TElement> skipFirstN(const std::vector<TElement> &input,
   return std::vector<TElement>(input.begin() + count, input.end());
 }
 } // namespace Container
-} // namespace ETJump
