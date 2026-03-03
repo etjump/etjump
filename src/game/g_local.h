@@ -596,6 +596,9 @@ struct gentity_s {
   // Zero - other portal so we know where to go
   // when someone goes in a team portal
   gentity_t *linkedPortal;
+  // the entity that the portal was fired onto, used to delete a portal
+  // that was fired onto 'func_static_client' that gets turned off
+  gentity_t *portalParentEntity;
 
   int runIndex;
   char runName[MAX_TIMERUN_NAME_LENGTH];

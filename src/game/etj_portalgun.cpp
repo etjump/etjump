@@ -98,6 +98,8 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
     portal->linkedPortal->think(portal->linkedPortal);
   }
 
+  portal->free = free;
+
   portal->r.ownerNum = ent->s.number;
   portal->parent = ent;
 
@@ -113,6 +115,10 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
   // rather than using the shared cvar, we can simply set 'portalteam'
   // value to an entitystate field that we can check on client
   portal->s.teamNum = level.portalTeam;
+
+  if (tr.entityNum < ENTITYNUM_MAX_NORMAL) {
+    portal->portalParentEntity = &g_entities[tr.entityNum];
+  }
 
   trap_LinkEntity(portal);
 }
@@ -136,7 +142,18 @@ void Portal::think(gentity_t *self) {
     }
   }
 
-  // we should think *every* frame to ensure up-to-date positons
+  // TODO: make this more generic for other entities that might disappear
+  // during runtime, such as 'func_static', 'func_explosive' etc.
+  // also, add possibility to move the portals along with movers?
+  if (self->portalParentEntity &&
+      self->portalParentEntity->s.eType == ET_STATIC_CLIENT &&
+      EntityUtilsShared::funcStaticClientIsHidden(&self->portalParentEntity->s,
+                                                  self->r.ownerNum)) {
+    G_FreeEntity(self);
+    return;
+  }
+
+  // we should think *every* frame to ensure up-to-date positions
   self->nextthink = level.time + level.frameTime;
 }
 
@@ -206,6 +223,30 @@ void Portal::touch(gentity_t *self, gentity_t *other) {
   EntityUtilsShared::portalTeleport(&other->client->ps, &other->s, &self->s,
                                     &other->client->pers.cmd, level.time,
                                     other->client->teleportBitFlipped);
+}
+
+void Portal::free(gentity_t *self) {
+  gentity_t *owner = &g_entities[self->r.ownerNum];
+
+  if (self->s.eType == ET_PORTAL_BLUE) {
+    owner->portalBlue = nullptr;
+
+    if (owner->portalRed) {
+      owner->portalRed->linkedPortal = nullptr;
+      // clear destination so prediction will not try to teleport
+      VectorClear(owner->portalRed->s.origin2);
+      VectorClear(owner->portalRed->s.angles2);
+    }
+  } else {
+    owner->portalRed = nullptr;
+
+    if (owner->portalBlue) {
+      owner->portalBlue->linkedPortal = nullptr;
+      // clear destination so prediction will not try to teleport
+      VectorClear(owner->portalBlue->s.origin2);
+      VectorClear(owner->portalBlue->s.angles2);
+    }
+  }
 }
 
 void Portalgun::spawn(gentity_t *ent) {
