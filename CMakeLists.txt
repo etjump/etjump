@@ -138,7 +138,7 @@ set_target_properties(
 		libsqlite_modern_cpp
 		libuuid4
 		fmt
-        toml11
+		toml11
 		PROPERTIES FOLDER ${BUNDLED_TARGETS_FOLDER})
 
 add_subdirectory(src/cgame)

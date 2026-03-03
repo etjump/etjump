@@ -149,7 +149,7 @@ std::string ETJump::OperatingSystem::getMACAddress() {
 
   // we didn't find valid adapters somehow
   if (macAddress.empty()) {
-    return NOHWID;
+    return NOHWID_MAC_ADDR;
   }
 
   return Crypto::sha2(macAddress);
