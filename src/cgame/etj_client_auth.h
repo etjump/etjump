@@ -25,15 +25,19 @@
 #pragma once
 
 #ifdef NEW_AUTH
-  #include <vector>
+  #include <memory>
   #include <string>
+  #include <vector>
 
   #include "../game/etj_shared.h"
 
 namespace ETJump {
+class ClientCommandsHandler;
+
 class ClientAuth {
 public:
-  ClientAuth();
+  ClientAuth(const std::shared_ptr<ClientCommandsHandler> &serverCommands,
+             const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
   ~ClientAuth();
 
 private:
@@ -45,6 +49,8 @@ private:
     GUID_V2 = 2,
   };
 
+  void startListeners();
+
   static void authResponse();
   static void migrationResponse();
   static void manualMigration(Constants::Authentication::MigrationType type);
@@ -55,6 +61,9 @@ private:
 
   static void createAuthFile();
   static void migrateOldGuid();
+
+  std::shared_ptr<ClientCommandsHandler> serverCommands;
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
 };
 } // namespace ETJump
 #endif

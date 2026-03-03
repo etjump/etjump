@@ -155,7 +155,8 @@ static void initHandlers() {
 
 static void initPlatform() {
 #ifdef NEW_AUTH
-  cgame.platform.auth = std::make_unique<ClientAuth>();
+  cgame.platform.auth = std::make_unique<ClientAuth>(
+      cgame.handlers.serverCommands, cgame.handlers.consoleCommands);
 #else
   cgame.platform.authentication = std::make_unique<ClientAuthentication>(
       [](const std::string &command) {

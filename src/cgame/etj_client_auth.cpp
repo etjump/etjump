@@ -40,16 +40,39 @@
 namespace ETJump {
 inline constexpr char MIGRATE_CMD[] = "migrateGuid";
 
-ClientAuth::ClientAuth() {
-  cgame.handlers.serverCommands->subscribe(
+ClientAuth::ClientAuth(
+    const std::shared_ptr<ClientCommandsHandler> &serverCommands,
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+    : serverCommands(serverCommands), consoleCommands(consoleCommands) {
+  if (!FileSystem::exists(AUTH_FILE)) {
+    createAuthFile();
+  }
+
+  if (FileSystem::exists(GUID_FILE_OLD) &&
+      getGuid(GUIDVersion::GUID_V1).empty()) {
+    migrateOldGuid();
+  }
+
+  startListeners();
+}
+
+ClientAuth::~ClientAuth() {
+  serverCommands->unsubscribe(Constants::Authentication::AUTH_REQUEST);
+  serverCommands->unsubscribe(Constants::Authentication::GUID_MIGRATE_REQUEST);
+
+  consoleCommands->unsubscribe(MIGRATE_CMD);
+}
+
+void ClientAuth::startListeners() {
+  serverCommands->subscribe(
       Constants::Authentication::AUTH_REQUEST,
-      [&](const std::vector<std::string> &) { authResponse(); });
+      [](const std::vector<std::string> &) { authResponse(); });
 
-  cgame.handlers.serverCommands->subscribe(
+  serverCommands->subscribe(
       Constants::Authentication::GUID_MIGRATE_REQUEST,
-      [&](const std::vector<std::string> &) { migrationResponse(); });
+      [](const std::vector<std::string> &) { migrationResponse(); });
 
-  cgame.handlers.consoleCommands->subscribe(
+  consoleCommands->subscribe(
       MIGRATE_CMD, [&](const std::vector<std::string> &args) {
         if (cg.demoPlayback) {
           return;
@@ -62,23 +85,6 @@ ClientAuth::ClientAuth() {
           manualMigration(Constants::Authentication::MigrationType::MANUAL);
         }
       });
-
-  if (!FileSystem::exists(AUTH_FILE)) {
-    createAuthFile();
-  }
-
-  if (FileSystem::exists(GUID_FILE_OLD) &&
-      getGuid(GUIDVersion::GUID_V1).empty()) {
-    migrateOldGuid();
-  }
-}
-
-ClientAuth::~ClientAuth() {
-  cgame.handlers.serverCommands->unsubscribe(
-      Constants::Authentication::AUTH_REQUEST);
-  cgame.handlers.serverCommands->unsubscribe(
-      Constants::Authentication::GUID_MIGRATE_REQUEST);
-  cgame.handlers.consoleCommands->unsubscribe(MIGRATE_CMD);
 }
 
 void ClientAuth::authResponse() {
