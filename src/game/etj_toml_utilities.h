@@ -30,7 +30,6 @@
 #include "etj_filesystem.h"
 #include "etj_string_utilities.h"
 
-namespace ETJump {
 class TOMLUtils {
 public:
   template <typename T>
@@ -100,4 +99,3 @@ public:
     return err;
   }
 };
-} // namespace ETJump
