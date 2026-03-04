@@ -226,10 +226,10 @@ struct Time {
 };
 
 long long getCurrentTimestamp();
-Clock getCurrentClock();
+Clock getCurrentClock(bool localtime);
 Clock toClock(long long timestamp, bool useHours);
-Date getCurrentDate();
-Time getCurrentTime();
+Date getCurrentDate(bool localtime);
+Time getCurrentTime(bool localtime);
 
 std::string millisToString(int millis);
 std::string diffToString(int selfTime, int otherTime);

@@ -1828,7 +1828,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   G_DebugOpenSkillLog();
 
   if (g_dailyLogs.integer) {
-    const ETJump::Date date = ETJump::getCurrentDate();
+    const ETJump::Date date = ETJump::getCurrentDate(false);
     const std::string dateStr = date.toDateString();
 
     trap_Cvar_Set("g_log", va("logs/%s.log", dateStr.c_str()));
