@@ -277,7 +277,7 @@ TEST_F(CommandParserTests, CommandParser_ParsesDatesCorrectly) {
       "date", "d", "desc", CommandParser::OptionDefinition::Type::Date, true);
   auto parser = CreateCommandParser(def, args);
 
-  auto expectedDate = Date{2023, 1, 5};
+  auto expectedDate = TimeUtils::Date{2023, 1, 5};
   ASSERT_TRUE(parser.parse().options["date"].date == expectedDate);
 }
 

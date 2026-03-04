@@ -38,8 +38,8 @@ inline constexpr int32_t MAX_PAGE_SIZE_ALL_RUNS = 10;
 struct Season {
   int id;
   std::string name;
-  Time startTime;
-  std::optional<Time> endTime;
+  TimeUtils::Time startTime;
+  std::optional<TimeUtils::Time> endTime;
 };
 
 struct Record {
@@ -49,7 +49,7 @@ struct Record {
   int userId;
   int time;
   std::vector<int> checkpoints;
-  Time recordDate;
+  TimeUtils::Time recordDate;
   std::string playerName;
   std::map<std::string, std::string> metadata;
 
@@ -71,15 +71,15 @@ struct Checkpoints {
 struct AddSeasonParams {
   int clientNum;
   std::string name;
-  Time startTime;
-  std::optional<Time> endTime;
+  TimeUtils::Time startTime;
+  std::optional<TimeUtils::Time> endTime;
 };
 
 struct EditSeasonParams {
   int clientNum;
   std::string name;
-  std::optional<Time> startTime;
-  std::optional<Time> endTime;
+  std::optional<TimeUtils::Time> startTime;
+  std::optional<TimeUtils::Time> endTime;
 };
 
 struct PrintRecordsParams {

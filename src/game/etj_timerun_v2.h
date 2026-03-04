@@ -141,7 +141,7 @@ private:
                                         int currentTimeMs) const;
 
   static std::array<int, MAX_TIMERUN_CHECKPOINTS>
-  toCheckpointsArray(const std::vector<int> *vector);
+  toCheckpointsArray(const std::vector<int> *v);
   static int indexForRunname(const std::string &runName);
   /**
    * We can have multiple seasons running at once. This will

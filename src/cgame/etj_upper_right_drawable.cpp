@@ -39,7 +39,7 @@ bool UpperRight::beforeRender() {
   }
 
   // FPS meter
-  const int64_t currentTime = getCurrentTimestamp();
+  const int64_t currentTime = TimeUtils::getCurrentTimestamp();
   if (FPSInit < FPSFrames + 1) {
     ++FPSInit;
   }
@@ -102,7 +102,7 @@ void UpperRight::render() const {
 
 void UpperRight::drawRoundTimer(float &y) const {
   const int msec = cg.time - cgs.levelStartTime;
-  auto time = toClock(msec, true);
+  auto time = TimeUtils::toClock(msec, true);
 
   const char *s = time.hours > 0
                       ? va("%02d:%02d:%02d", time.hours, time.min, time.sec)
