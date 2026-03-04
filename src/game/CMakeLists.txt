@@ -103,6 +103,7 @@ add_library(qagame MODULE
 	"etj_trigger_teleport_client.cpp"
 	"etj_user.cpp"
 	"etj_utilities.cpp"
+	"etj_worldspawn.cpp"
 	${GAME_HEADERS}
 )
 target_compile_definitions(qagame PRIVATE GAMEDLL)

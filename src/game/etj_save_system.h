@@ -89,9 +89,9 @@ public:
   };
 
   enum class SaveLoadRestrictions {
-    Default = 0,
-    Move = 1 << 0,
-    Dead = 1 << 1,
+    NONE = 0,
+    MOVE = 1 << 0,
+    DEAD = 1 << 1,
   };
 
   // Saves current position

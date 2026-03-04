@@ -1449,38 +1449,11 @@ typedef struct {
 
   qboolean tempTraceIgnoreEnts[MAX_GENTITIES];
 
-  // Deprecated
-  int noExplosives;
-
-  qboolean noSave;
-  bool noNoclip;
-  qboolean noGod;
-  qboolean noGoto;
-  bool noOverbounce;
-  bool noJumpDelay;
-  bool noFallDamage;
-  bool noProne;
-  bool noDrop;
-  bool noWallbug;
-  bool noFTNoGhost;
-  bool noFTSaveLimit;
-  bool noFTTeamjumpMode;
-  bool portalPredict;
-  int32_t bodyOverbounce;
-
-  int portalEnabled; // Feen: PGM - Enabled/Disabled by map key
-  qboolean portalSurfaces;
-
   ipMute_t ipMutes[MAX_IP_MUTES]; // I don't think we need more than 16
-
-  bool noGhost;
-  int limitedSaves;
-  int portalTeam;
 
   int timerunNamesCount;
   char timerunNames[MAX_TIMERUNS][MAX_TIMERUN_NAME_LENGTH];
   bool hasTimerun;
-  int saveLoadRestrictions;
   int checkpointsCount[MAX_TIMERUNS];
 
   SpawnRelayEntities spawnRelayEntities;

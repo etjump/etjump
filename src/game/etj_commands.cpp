@@ -40,6 +40,7 @@
 #include "etj_chat_replay.h"
 #include "etj_filesystem.h"
 #include "etj_savepos_command_handler.h"
+#include "etj_worldspawn.h"
 
 typedef std::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<std::function<bool(gentity_t *ent, Arguments argv)>, char>
@@ -1848,8 +1849,8 @@ bool Mute(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-bool Noclip(gentity_t *ent, Arguments argv) {
-  if (!g_cheats.integer && level.noNoclip) {
+static bool Noclip(gentity_t *ent, Arguments argv) {
+  if (!g_cheats.integer && game.worldspawn->noNoclip) {
     Printer::chat(ent, "^3noclip: ^7noclip is disabled on this map.");
     return false;
   }

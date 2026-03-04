@@ -35,6 +35,7 @@ class Motd;
 class CustomMapVotes;
 class MapStatistics;
 class FireteamCountdown;
+class Worldspawn;
 } // namespace ETJump
 
 class Levels;
@@ -55,4 +56,5 @@ struct Game {
   std::unique_ptr<ETJump::Tokens> tokens;
   std::unique_ptr<ETJump::ChatReplay> chatReplay;
   std::unique_ptr<ETJump::FireteamCountdown> fireteamCountdown;
+  std::unique_ptr<ETJump::Worldspawn> worldspawn;
 };

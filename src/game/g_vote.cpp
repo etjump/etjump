@@ -1,6 +1,8 @@
 // g_vote.c: All callvote handling
 // -------------------------------
 //
+#include <set>
+
 #include "g_local.h"
 #include "etj_local.h"
 #include "etj_printer.h"
@@ -8,7 +10,7 @@
 #include "etj_map_statistics.h"
 #include "etj_rtv.h"
 #include "etj_custom_map_votes.h"
-#include <set>
+#include "etj_worldspawn.h"
 
 inline constexpr char ACTIVATED[] = "ACTIVATED";
 inline constexpr char DEACTIVATED[] = "DEACTIVATED";
@@ -655,7 +657,7 @@ int G_PortalPredict_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       return G_INVALID;
     }
 
-    if (level.portalPredict) {
+    if (game.worldspawn->portalPredict) {
       Printer::popup(
           ent, "Portalgun teleport prediction cannot be changed in this map.");
       return G_INVALID;

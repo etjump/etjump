@@ -5,6 +5,7 @@
 #include "etj_local.h"
 #include "etj_fireteam_countdown.h"
 #include "etj_portalgun_shared.h"
+#include "etj_worldspawn.h"
 
 // Gordon
 // What we need....
@@ -318,7 +319,7 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
         }
       }
 
-      if (level.portalTeam == ETJump::PORTAL_TEAM_FT &&
+      if (game.worldspawn->portalTeam == ETJump::PortalTeam::FIRETEAM &&
           ETJump::EntityUtilities::clearPortals(otherEnt)) {
         Printer::center(otherEnt, "Your portal gun portals have been reset.");
         Printer::console(otherEnt,
@@ -808,7 +809,7 @@ bool canEnableFtNoGhost(const int clientNum, fireteamData_t *ft,
 
   // 'target_ft_setrules' bypasses worldspawn key restriction
   // so mappers have control of where in the map ghosting will be toggled
-  if (level.noFTNoGhost && ent && ent->client) {
+  if (game.worldspawn->noFTNoGhost && ent && ent->client) {
     Printer::popup(clientNum,
                    "fireteam: ^3noghost ^7cannot be set on this map");
     return false;
@@ -832,13 +833,13 @@ bool canSetFtSavelimit(const int clientNum, const gentity_t *ent) {
 
   // 'target_ft_setrules' bypasses worldspawn key restriction
   // so mappers have control of where in the map savelimit will be set
-  if (level.noFTSaveLimit && ent && ent->client) {
+  if (game.worldspawn->noFTSaveLimit && ent && ent->client) {
     Printer::popup(clientNum,
                    "fireteam: ^3savelimit ^7cannot be set on this map");
     return false;
   }
 
-  if (level.limitedSaves > 0) {
+  if (game.worldspawn->limitedSaves > 0) {
     Printer::popup(
         clientNum,
         "fireteam: ^7unable to set ^3savelimit ^7- save is limited by the map");
@@ -855,7 +856,7 @@ bool canSetFtTeamjumpMode(const int clientNum, const gentity_t *ent) {
 
   // 'target_ft_setrules' bypasses worldspawn key restriction
   // so mappers have control of where in the map teamjump mode will be set
-  if (level.noFTTeamjumpMode && ent && ent->client) {
+  if (game.worldspawn->noFTTeamjumpMode && ent && ent->client) {
     Printer::popup(clientNum,
                    "fireteam: ^3teamjump mode ^7cannot be set on this map");
     return false;
@@ -926,7 +927,7 @@ static void setFireTeamRules(const int &clientNum) {
       Printer::popup(
           clientNum,
           StringUtils::format("fireteam: ^3noghost ^7is disabled by the %s",
-                              level.noGhost ? "map" : "server"));
+                              game.worldspawn->noGhost ? "map" : "server"));
       return;
     }
 

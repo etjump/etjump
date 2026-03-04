@@ -26,7 +26,7 @@
 #include "utilities.hpp"
 #include "etj_printer.h"
 #include "etj_session.h"
-#include <iostream>
+#include "etj_worldspawn.h"
 
 namespace ETJump {
 SaveSystem::Client::Client() {
@@ -85,8 +85,8 @@ void SaveSystem::save(gentity_t *ent) {
     return;
   }
 
-  if (!g_cheats.integer && level.saveLoadRestrictions &
-                               static_cast<int>(SaveLoadRestrictions::Move)) {
+  if (!g_cheats.integer &&
+      game.worldspawn->strictSaveLoad & SaveLoadRestrictions::MOVE) {
     // comparing to zero vector
     if (!VectorCompare(client->ps.velocity, vec3_origin)) {
       Printer::center(ent, "^3Save ^7is disabled while moving on this map.");
@@ -96,8 +96,7 @@ void SaveSystem::save(gentity_t *ent) {
 
   // No saving while dead if it's disabled by map
   if (!g_cheats.integer && client->ps.pm_type == PM_DEAD &&
-      level.saveLoadRestrictions &
-          static_cast<int>(SaveLoadRestrictions::Dead)) {
+      game.worldspawn->strictSaveLoad & SaveLoadRestrictions::DEAD) {
     Printer::center(ent, "^3Save ^7is disabled while dead on this map.");
     return;
   }
@@ -143,7 +142,7 @@ void SaveSystem::save(gentity_t *ent) {
                     client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
 
   if (!g_cheats.integer) {
-    if (level.noSave) {
+    if (game.worldspawn->noSave) {
       if (trace.fraction == 1.0f) {
         Printer::center(ent, "^7You can not ^3save ^7inside this area.");
         return;
@@ -155,7 +154,7 @@ void SaveSystem::save(gentity_t *ent) {
       }
     }
 
-    if (level.limitedSaves > 0) {
+    if (game.worldspawn->limitedSaves > 0) {
       if (client->sess.saveLimit == 0) {
         Printer::center(ent, "^7You've used all your saves.");
         return;
@@ -236,8 +235,7 @@ void SaveSystem::load(gentity_t *ent) {
   }
 
   if (!g_cheats.integer && client->ps.pm_type == PM_DEAD &&
-      level.saveLoadRestrictions &
-          static_cast<int>(SaveLoadRestrictions::Dead)) {
+      game.worldspawn->strictSaveLoad & SaveLoadRestrictions::DEAD) {
     Printer::center(ent, "^3Load ^7is disabled while dead on this map.");
     return;
   }
@@ -390,8 +388,7 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
   }
 
   if (!g_cheats.integer && client->ps.pm_type == PM_DEAD &&
-      level.saveLoadRestrictions &
-          static_cast<int>(SaveLoadRestrictions::Dead)) {
+      game.worldspawn->strictSaveLoad & SaveLoadRestrictions::DEAD) {
     Printer::center(ent, "^3Backup ^7is disabled while dead on this map.");
     return;
   }
@@ -480,8 +477,7 @@ void SaveSystem::unload(gentity_t *ent) {
   }
 
   if (!g_cheats.integer && client->ps.pm_type == PM_DEAD &&
-      level.saveLoadRestrictions &
-          static_cast<int>(SaveLoadRestrictions::Dead)) {
+      game.worldspawn->strictSaveLoad & SaveLoadRestrictions::DEAD) {
     Printer::center(ent, "^3unload ^7is disabled while dead on this map.");
     return;
   }
@@ -513,7 +509,7 @@ void SaveSystem::unload(gentity_t *ent) {
       trap_TraceCapsule(&trace, pos->origin, ent->r.mins, ent->r.maxs,
                         pos->origin, ent->s.number, CONTENTS_NOSAVE);
 
-      if (level.noSave) {
+      if (game.worldspawn->noSave) {
         if (trace.fraction == 1.0f) {
           Printer::center(ent, "^7You can not ^3unload ^7to this area.");
           return;
@@ -925,7 +921,7 @@ void SaveSystem::sendClientCommands(gentity_t *ent, int position) {
   int target;
   std::string saveMsg = va("savePrint %d\n", position);
 
-  if (!g_cheats.integer && level.limitedSaves > 0) {
+  if (!g_cheats.integer && game.worldspawn->limitedSaves > 0) {
     saveMsg += va(" %d", ent->client->sess.saveLimit);
   }
 
