@@ -16,6 +16,7 @@
 #include "etj_inactivity_timer.h"
 #include "etj_remapshader_handler.h"
 #include "etj_shader_index_handler.h"
+#include "etj_worldspawn.h"
 
 namespace ETJump {
 enum class VotingTypes {
@@ -786,7 +787,7 @@ void Cmd_God_f(gentity_t *ent) {
       return;
     }
 
-    if (level.noGod) {
+    if (game.worldspawn->noGod) {
       Printer::center(ent, "^3god ^7has been disabled on this map.");
       return;
     }
@@ -971,7 +972,8 @@ void setPlayerOffset(gentity_t *ent) {
                     ent->client->ps.maxs, dst, ent->client->ps.clientNum,
                     CONTENTS_NONOCLIP);
 
-  if (!g_cheats.integer && level.noNoclip == (trace.fraction == 1.0f)) {
+  if (!g_cheats.integer &&
+      game.worldspawn->noNoclip == (trace.fraction == 1.0f)) {
     Printer::console(clientNum, "^7You cannot ^3setoffset ^7to this area.\n");
     return;
   }
@@ -4411,7 +4413,7 @@ void Cmd_Goto_f(gentity_t *ent) {
     return;
   }
 
-  if (!g_cheats.integer && level.noGoto) {
+  if (!g_cheats.integer && game.worldspawn->noGoto) {
     CP("print \"Goto is disabled on this map.\n\"");
     return;
   }
@@ -4494,7 +4496,7 @@ void Cmd_Call_f(gentity_t *ent) {
     return;
   }
 
-  if (!g_cheats.integer && level.noGoto) {
+  if (!g_cheats.integer && game.worldspawn->noGoto) {
     CP("print \"Call is disabled on this map.\n\"");
     return;
   }

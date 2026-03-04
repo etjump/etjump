@@ -5,6 +5,7 @@
 #include "etj_rtv.h"
 #include "etj_entity_utilities.h"
 #include "etj_progression_tracker.h"
+#include "etj_worldspawn.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -759,18 +760,23 @@ void ResetPlayerAmmo(gclient_t *client, gentity_t *ent) {
         continue;
       }
 
-      if ((i == WP_DYNAMITE || i == WP_PLIERS) && level.noExplosives != 2) {
+      if ((i == WP_DYNAMITE || i == WP_PLIERS) &&
+          game.worldspawn->noExplosives !=
+              ETJump::Worldspawn::NoExplosives::NO_DYNAMITE) {
         AddWeaponToPlayer(client, static_cast<weapon_t>(i), 0, 1, qfalse);
         continue;
       }
 
-      if (i == WP_SATCHEL && !level.noExplosives) {
+      if (i == WP_SATCHEL && game.worldspawn->noExplosives ==
+                                 ETJump::Worldspawn::NoExplosives::OFF) {
         AddWeaponToPlayer(client, WP_SATCHEL, 0, 1, qfalse);
         AddWeaponToPlayer(client, WP_SATCHEL_DET, 0, 0, qfalse);
         continue;
       }
 
-      if (level.noExplosives && !ETJump::weaponAllowedWithNoExplosives(i)) {
+      if (game.worldspawn->noExplosives !=
+              ETJump::Worldspawn::NoExplosives::OFF &&
+          !ETJump::weaponAllowedWithNoExplosives(i)) {
         continue;
       }
 
@@ -794,7 +800,8 @@ void ResetPlayerAmmo(gclient_t *client, gentity_t *ent) {
   }
 
   // no nades if explosives are disabled or timerun is active
-  if (!level.noExplosives && !client->sess.timerunActive) {
+  if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosives::OFF &&
+      !client->sess.timerunActive) {
     weapon_t nadeType;
     switch (client->sess.sessionTeam) {
       case TEAM_AXIS:
@@ -853,7 +860,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
     }
     // Engineer gets dynamite
     if (pc == PC_ENGINEER) {
-      if (level.noExplosives != 2 && !client->sess.timerunActive) {
+      if (game.worldspawn->noExplosives !=
+              ETJump::Worldspawn::NoExplosives::NO_DYNAMITE &&
+          !client->sess.timerunActive) {
         AddWeaponToPlayer(client, WP_DYNAMITE, 0, 1, qfalse);
         AddWeaponToPlayer(client, WP_PLIERS, 0, 1, qfalse);
       }
@@ -866,7 +875,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                                 GetAmmoTableData(WP_KAR98)->defaultStartingAmmo,
                                 GetAmmoTableData(WP_KAR98)->defaultStartingClip,
                                 qtrue);
-              if (!level.noExplosives && !client->sess.timerunActive) {
+              if (game.worldspawn->noExplosives ==
+                      ETJump::Worldspawn::NoExplosives::OFF &&
+                  !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_GPG40,
                     GetAmmoTableData(WP_GPG40)->defaultStartingAmmo,
@@ -889,7 +900,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                                 qtrue);
               break;
           }
-          if (!level.noExplosives && !client->sess.timerunActive) {
+          if (game.worldspawn->noExplosives ==
+                  ETJump::Worldspawn::NoExplosives::OFF &&
+              !client->sess.timerunActive) {
             AddWeaponToPlayer(
                 client, WP_LANDMINE,
                 GetAmmoTableData(WP_LANDMINE)->defaultStartingAmmo,
@@ -903,7 +916,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                   client, WP_CARBINE,
                   GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
                   GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
-              if (!level.noExplosives && !client->sess.timerunActive) {
+              if (game.worldspawn->noExplosives ==
+                      ETJump::Worldspawn::NoExplosives::OFF &&
+                  !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_M7, GetAmmoTableData(WP_M7)->defaultStartingAmmo,
                     GetAmmoTableData(WP_M7)->defaultStartingClip, qfalse);
@@ -927,7 +942,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                   GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
               break;
           }
-          if (!level.noExplosives && !client->sess.timerunActive) {
+          if (game.worldspawn->noExplosives ==
+                  ETJump::Worldspawn::NoExplosives::OFF &&
+              !client->sess.timerunActive) {
             AddWeaponToPlayer(
                 client, WP_LANDMINE,
                 GetAmmoTableData(WP_LANDMINE)->defaultStartingAmmo,
@@ -977,7 +994,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                                 qtrue);
               break;
           }
-          if (!level.noExplosives && !client->sess.timerunActive) {
+          if (game.worldspawn->noExplosives ==
+                  ETJump::Worldspawn::NoExplosives::OFF &&
+              !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
           }
         } else {
@@ -1006,7 +1025,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                   GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
               break;
           }
-          if (!level.noExplosives && !client->sess.timerunActive) {
+          if (game.worldspawn->noExplosives ==
+                  ETJump::Worldspawn::NoExplosives::OFF &&
+              !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 1, qfalse);
           }
         }
@@ -1050,7 +1071,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                                 qtrue);
               break;
           }
-          if (!level.noExplosives && !client->sess.timerunActive) {
+          if (game.worldspawn->noExplosives ==
+                  ETJump::Worldspawn::NoExplosives::OFF &&
+              !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
           }
         } else {
@@ -1078,7 +1101,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                   GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
               break;
           }
-          if (!level.noExplosives && !client->sess.timerunActive) {
+          if (game.worldspawn->noExplosives ==
+                  ETJump::Worldspawn::NoExplosives::OFF &&
+              !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 1, qfalse);
           }
         }
@@ -1092,8 +1117,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                   GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
               break;
             case WP_PANZERFAUST:
-              if (!level.noExplosives && team_maxPanzers.integer &&
-                  !client->sess.timerunActive) {
+              if (game.worldspawn->noExplosives ==
+                      ETJump::Worldspawn::NoExplosives::OFF &&
+                  team_maxPanzers.integer && !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_PANZERFAUST,
                     GetAmmoTableData(WP_PANZERFAUST)->defaultStartingAmmo,
@@ -1122,7 +1148,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                   qfalse);
               break;
             case WP_MORTAR:
-              if (!level.noExplosives && !client->sess.timerunActive) {
+              if (game.worldspawn->noExplosives ==
+                      ETJump::Worldspawn::NoExplosives::OFF &&
+                  !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_MORTAR,
                     GetAmmoTableData(WP_MORTAR)->defaultStartingAmmo,
@@ -1159,8 +1187,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                   GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
               break;
             case WP_PANZERFAUST:
-              if (!level.noExplosives && team_maxPanzers.integer &&
-                  !client->sess.timerunActive) {
+              if (game.worldspawn->noExplosives ==
+                      ETJump::Worldspawn::NoExplosives::OFF &&
+                  team_maxPanzers.integer && !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_PANZERFAUST,
                     GetAmmoTableData(WP_PANZERFAUST)->defaultStartingAmmo,
@@ -1189,7 +1218,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                   qfalse);
               break;
             case WP_MORTAR:
-              if (!level.noExplosives && !client->sess.timerunActive) {
+              if (game.worldspawn->noExplosives ==
+                      ETJump::Worldspawn::NoExplosives::OFF &&
+                  !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_MORTAR,
                     GetAmmoTableData(WP_MORTAR)->defaultStartingAmmo,
@@ -1287,7 +1318,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         // charge placed - NOTE: maybe we want
         // to change this so the thing voids on
         // death
-        if (!level.noExplosives && !client->sess.timerunActive) {
+        if (game.worldspawn->noExplosives ==
+                ETJump::Worldspawn::NoExplosives::OFF &&
+            !client->sess.timerunActive) {
           if (G_FindSatchel(&g_entities[client->ps.clientNum])) {
             AddWeaponToPlayer(client, WP_SATCHEL, 0, 0,
                               qfalse); // Big
@@ -1469,7 +1502,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
           }
       }
 
-      if (pc == PC_SOLDIER && (!level.noExplosives) &&
+      if (pc == PC_SOLDIER &&
+          (game.worldspawn->noExplosives ==
+           ETJump::Worldspawn::NoExplosives::OFF) &&
           !client->sess.timerunActive) {
         if (client->sess.sessionTeam == TEAM_AXIS) {
           AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 4, qfalse);
@@ -1477,7 +1512,9 @@ void SetWolfSpawnWeapons(gclient_t *client) {
           AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 4, qfalse);
         }
       }
-      if (pc == PC_COVERTOPS && (!level.noExplosives) &&
+      if (pc == PC_COVERTOPS &&
+          (game.worldspawn->noExplosives ==
+           ETJump::Worldspawn::NoExplosives::OFF) &&
           !client->sess.timerunActive) {
         if (client->sess.sessionTeam == TEAM_AXIS) {
           AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 2, qfalse);
@@ -1486,7 +1523,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         }
       }
 
-      if (!g_portalMode.integer && level.portalEnabled &&
+      if (!g_portalMode.integer && game.worldspawn->portalgunSpawn &&
           !client->sess.timerunActive) {
         AddWeaponToPlayer(client, WP_PORTAL_GUN, 0, 1, qfalse);
       }
@@ -2105,7 +2142,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   client->sess.clientMapProgression = 0;
   ent->client->sess.muted = qfalse;
   ent->client->pers.race.isRouteMaker = qfalse;
-  client->sess.saveLimit = level.limitedSaves;
+  client->sess.saveLimit = game.worldspawn->limitedSaves;
 
   // count current clients and rank for scoreboard
   CalculateRanks();

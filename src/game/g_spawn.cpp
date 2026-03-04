@@ -24,6 +24,7 @@
 #include "etj_progression_tracker.h"
 #include "etj_target_random.h"
 #include "etj_func_static_client.h"
+#include "etj_worldspawn.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -1021,197 +1022,6 @@ static bool G_ParseSpawnVars() {
   return true;
 }
 
-namespace ETJump {
-static void initNoOverbounce() {
-  auto value = 0;
-  G_SpawnInt("nooverbounce", "0", &value);
-  level.noOverbounce = value > 0;
-  level.noOverbounce ? shared.integer |= BG_LEVEL_NO_OVERBOUNCE
-                     : shared.integer &= ~BG_LEVEL_NO_OVERBOUNCE;
-
-  trap_Cvar_Set("shared", va("%d", shared.integer));
-  G_Printf("No overbounce %s.\n", level.noOverbounce ? "enabled" : "disabled");
-}
-
-static void initNoJumpDelay() {
-  auto value = 0;
-  G_SpawnInt("nojumpdelay", "0", &value);
-  level.noJumpDelay = value > 0;
-  level.noJumpDelay ? shared.integer |= BG_LEVEL_NO_JUMPDELAY
-                    : shared.integer &= ~BG_LEVEL_NO_JUMPDELAY;
-
-  trap_Cvar_Set("shared", va("%d", shared.integer));
-  G_Printf("No jump delay %s.\n", level.noJumpDelay ? "enabled" : "disabled");
-}
-
-static void initNoSave() {
-  auto value = 0;
-  G_SpawnInt("nosave", "0", &value);
-  level.noSave = value > 0 ? qtrue : qfalse;
-  level.noSave ? shared.integer |= BG_LEVEL_NO_SAVE
-               : shared.integer &= ~BG_LEVEL_NO_SAVE;
-
-  trap_Cvar_Set("shared", va("%d", shared.integer));
-  G_Printf("Save is %s.\n", level.noSave ? "disabled" : "enabled");
-}
-
-std::unordered_map<std::string, SaveSystem::SaveLoadRestrictions>
-    allowedStrictValues{
-        {"default", SaveSystem::SaveLoadRestrictions::Default},
-        {"move", SaveSystem::SaveLoadRestrictions::Move},
-        {"dead", SaveSystem::SaveLoadRestrictions::Dead},
-    };
-
-static void initStrictSaveLoad() {
-  char *buff = nullptr;
-  G_SpawnString("strictsaveload", "0", &buff);
-  std::istringstream str{buff};
-  auto value = 0;
-  if (isdigit(buff[0])) {
-    str >> value;
-  } else {
-    std::string token;
-    while (str >> token) {
-      token = StringUtils::toLowerCase(token);
-      value |= static_cast<int>(allowedStrictValues[token]); // else 0
-    }
-  }
-  level.saveLoadRestrictions = value;
-  G_Printf("Save restrictions are %s.\n", value ? "enabled" : "disabled");
-}
-
-static void initNoFallDamage() {
-  auto value = 0;
-
-  G_SpawnInt("nofalldamage", "0", &value);
-  level.noFallDamage = value > 0;
-
-  // reset flags
-  shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE;
-  shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE_FORCE;
-
-  if (value == 1) {
-    shared.integer |= BG_LEVEL_NO_FALLDAMAGE;
-  } else if (value == 2) {
-    shared.integer |= BG_LEVEL_NO_FALLDAMAGE_FORCE;
-  }
-
-  trap_Cvar_Set("shared", va("%d", shared.integer));
-  G_Printf("No fall damage %s.\n", level.noFallDamage ? "enabled" : "disabled");
-}
-
-static void initNoProne() {
-  auto value = 0;
-  G_SpawnInt("noprone", "0", &value);
-  level.noProne = value > 0 ? true : false;
-  level.noProne ? shared.integer |= BG_LEVEL_NO_PRONE
-                : shared.integer &= ~BG_LEVEL_NO_PRONE;
-
-  trap_Cvar_Set("shared", va("%d", shared.integer));
-  G_Printf("Prone is %s.\n", level.noProne ? "disabled" : "enabled");
-}
-
-static void initNoDrop() {
-  auto value = 0;
-  G_SpawnInt("nodrop", "0", &value);
-  level.noDrop = value > 0;
-  level.noDrop ? shared.integer |= BG_LEVEL_NO_DROP
-               : shared.integer &= ~BG_LEVEL_NO_DROP;
-
-  trap_Cvar_Set("shared", va("%d", shared.integer));
-  G_Printf("Nodrop is %s.\n", level.noDrop ? "enabled" : "disabled");
-}
-
-static void initNoWallbug() {
-  int value = 0;
-  G_SpawnInt("nowallbug", "0", &value);
-  level.noWallbug = value;
-  level.noWallbug ? shared.integer |= BG_LEVEL_NO_WALLBUG
-                  : shared.integer &= ~BG_LEVEL_NO_WALLBUG;
-
-  trap_Cvar_Set("shared", va("%d", shared.integer));
-  G_Printf("Wallbugging is %s.\n", level.noWallbug ? "disabled" : "enabled");
-}
-
-static void initNoNoclip() {
-  int value;
-  G_SpawnInt("nonoclip", "0", &value);
-
-  level.noNoclip = value;
-  level.noNoclip ? shared.integer |= BG_LEVEL_NO_NOCLIP
-                 : shared.integer &= ~BG_LEVEL_NO_NOCLIP;
-
-  trap_Cvar_Set("shared", va("%d", shared.integer));
-  G_Printf("Noclip is %s.\n", level.noNoclip ? "disabled" : "enabled");
-}
-
-static void initNoFTNoGhost() {
-  int value;
-  G_SpawnInt("noftnoghost", "0", &value);
-
-  level.noFTNoGhost = value;
-  G_Printf("Fireteam noghost %s be toggled by players.\n",
-           level.noFTNoGhost ? "cannot" : "can");
-}
-
-static void initNoFTSaveLimit() {
-  int value;
-  G_SpawnInt("noftsavelimit", "0", &value);
-
-  level.noFTSaveLimit = value;
-  G_Printf("Fireteam savelimit %s be set by players.\n",
-           level.noFTSaveLimit ? "cannot" : "can");
-}
-
-static void initNoFTTeamjumpMode() {
-  int value;
-  G_SpawnInt("noftteamjumpmode", "0", &value);
-
-  level.noFTTeamjumpMode = value;
-  G_Printf("Fireteam teamjump mode %s be toggled by players.\n",
-           level.noFTTeamjumpMode ? "cannot" : "can");
-}
-
-static void initPortalPredict() {
-  int value = 0;
-  G_SpawnInt("portalpredict", "0", &value);
-
-  level.portalPredict = value;
-  level.portalPredict ? shared.integer |= BG_LEVEL_PORTAL_PREDICT
-                      : shared.integer &= ~BG_LEVEL_PORTAL_PREDICT;
-
-  trap_Cvar_Set("shared", va("%d", shared.integer));
-  G_Printf("Predicted portal teleports are %sforced.\n",
-           level.portalPredict ? "" : "not ");
-}
-
-static void initBodyOverbounce() {
-  int32_t value = 0;
-  G_SpawnInt("overbounce_players", "0", &value);
-
-  level.bodyOverbounce = value;
-
-  shared.integer &= ~BG_LEVEL_BODY_OB_ALWAYS;
-  shared.integer &= ~BG_LEVEL_BODY_OB_NEVER;
-
-  if (level.bodyOverbounce == 1) {
-    shared.integer |= BG_LEVEL_BODY_OB_ALWAYS;
-  } else if (level.bodyOverbounce == 2) {
-    shared.integer |= BG_LEVEL_BODY_OB_NEVER;
-  }
-
-  trap_Cvar_Set("shared", va("%d", shared.integer));
-
-  if (!level.bodyOverbounce) {
-    G_Printf("Overbounces on top of players are controlled by 'nooverbounce' "
-             "key.\n");
-  } else {
-    G_Printf("Overbounces on top of players are %s allowed.\n",
-             level.bodyOverbounce == 1 ? "always" : "never");
-  }
-}
-} // namespace ETJump
-
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
 
 Every map should have exactly one worldspawn.
@@ -1222,9 +1032,8 @@ Every map should have exactly one worldspawn.
 "_color"    Ambient light color (must be used with 'ambient')
 "sun"        Shader to use for 'sun' image
 */
-void SP_worldspawn(void) {
-  char *s;
-  int val = 0;
+static void SP_worldspawn() {
+  char *s = nullptr;
 
   G_SpawnString("classname", "", &s);
   if (Q_stricmp(s, "worldspawn")) {
@@ -1246,121 +1055,6 @@ void SP_worldspawn(void) {
   if (Q_atoi(s)) {
     level.ccLayers = qtrue;
   }
-
-  G_Printf("ETJump: checking worldspawn key values:\n");
-
-  G_SpawnString("noexplosives", "0", &s);
-  if (Q_atoi(s)) {
-    int noExplosives = Q_atoi(s);
-    if (noExplosives > 2) {
-      noExplosives = 2;
-    } else if (noExplosives < 0) {
-      noExplosives = 0;
-    }
-
-    level.noExplosives = noExplosives;
-  }
-  G_Printf("Explosives are %s.\n", level.noExplosives ? "disabled" : "enabled");
-
-  G_SpawnString("nogod", "0", &s);
-  if (Q_atoi(s)) {
-    level.noGod = qtrue;
-  } else {
-    level.noGod = qfalse;
-  }
-  G_Printf("God mode is %s.\n", level.noGod ? "disabled" : "enabled");
-
-  G_SpawnString("nogoto", "0", &s);
-  if (Q_atoi(s)) {
-    level.noGoto = qtrue;
-  } else {
-    level.noGoto = qfalse;
-  }
-  G_Printf("Goto is %s.\n", level.noGoto ? "disabled" : "enabled");
-
-  // Feen: PGM - Enable/Disable frivolous use
-  //			  of portal gun....
-  G_SpawnString("portalgun_spawn", "1", &s);
-  if (Q_atoi(s)) {
-    level.portalEnabled = qtrue;
-    G_Printf("Players spawn with portal gun by default.\n");
-  } else {
-    level.portalEnabled = qfalse;
-    G_Printf("Players do not spawn with portal gun by default.\n");
-  }
-
-  G_SpawnString("portalsurfaces", "1", &s);
-  if (Q_atoi(s)) {
-    level.portalSurfaces = qtrue;
-  } else {
-    level.portalSurfaces = qfalse;
-  }
-  G_Printf("Surfaces are %s by default for portals.\n",
-           level.portalSurfaces ? "enabled" : "disabled");
-
-  G_SpawnString("noghost", "0", &s);
-  if (Q_atoi(s)) {
-    char buf[32] = "\0";
-    int currentValue = g_ghostPlayers.integer;
-    currentValue |= 2;
-
-    Com_sprintf(buf, sizeof(buf), "%d", currentValue);
-
-    trap_Cvar_Set("g_ghostPlayers", buf);
-    trap_Cvar_Update(&g_ghostPlayers);
-    G_Printf("Ghosting is disabled.\n");
-    level.noGhost = true;
-  } else {
-    char buf[128] = "\0";
-    int currentValue = g_ghostPlayers.integer;
-    currentValue &= ~(2);
-
-    Com_sprintf(buf, sizeof(buf), "%d", currentValue);
-
-    trap_Cvar_Set("g_ghostPlayers", buf);
-    trap_Cvar_Update(&g_ghostPlayers);
-    G_Printf("Ghosting is enabled.\n");
-    level.noGhost = false;
-  }
-
-  G_SpawnString("limitedsaves", "0", &s);
-  if (Q_atoi(s)) {
-    int limit = Q_atoi(s);
-    level.limitedSaves = limit;
-    G_Printf("Save is limited to %s.\n",
-             StringUtils::getPluralizedString(limit, "save").c_str());
-  } else {
-    level.limitedSaves = 0;
-    G_Printf("Save is not limited.\n");
-  }
-
-  G_SpawnString("portalteam", "0", &s);
-  val = Q_atoi(s);
-  if (val) {
-    if (val == 1) {
-      level.portalTeam = ETJump::PORTAL_TEAM_FT;
-    } else {
-      level.portalTeam = ETJump::PORTAL_TEAM_ALL;
-    }
-  }
-
-  trap_Cvar_Set("g_portaLTeam", s);
-  G_Printf("Portal team is set to %d.\n", val);
-
-  ETJump::initNoSave();
-  ETJump::initNoOverbounce();
-  ETJump::initNoJumpDelay();
-  ETJump::initStrictSaveLoad();
-  ETJump::initNoFallDamage();
-  ETJump::initNoProne();
-  ETJump::initNoDrop();
-  ETJump::initNoWallbug();
-  ETJump::initNoNoclip();
-  ETJump::initNoFTNoGhost();
-  ETJump::initNoFTSaveLimit();
-  ETJump::initNoFTTeamjumpMode();
-  ETJump::initPortalPredict();
-  ETJump::initBodyOverbounce();
 
   level.mapcoordsValid = qfalse;
   if (G_SpawnVector2D("mapcoordsmins", "-128 128",
@@ -1412,7 +1106,9 @@ void G_SpawnEntitiesFromString(void) {
   if (!G_ParseSpawnVars()) {
     G_Error("SpawnEntities: no entities");
   }
+
   SP_worldspawn();
+  game.worldspawn = std::make_unique<ETJump::Worldspawn>();
 
   // parse ents
   while (G_ParseSpawnVars()) {

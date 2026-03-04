@@ -22,13 +22,11 @@
  * SOFTWARE.
  */
 
-#include <stdexcept>
-
 #include "etj_utilities.h"
 #include "etj_entity_utilities.h"
-#include "etj_save_system.h"
 #include "etj_map_statistics.h"
 #include "etj_timerun_v2.h"
+#include "etj_worldspawn.h"
 
 std::vector<int> Utilities::getSpectators(int clientNum) {
   std::vector<int> spectators;
@@ -111,7 +109,7 @@ bool Utilities::inNoNoclipArea(gentity_t *ent) {
   // if we're touching a no-noclip area, do another trace for solids
   // so that we don't get instantly stuck in a wall, unable to noclip
   // if we fly to a no-noclip area through a wall
-  if (level.noNoclip) {
+  if (game.worldspawn->noNoclip) {
     if (trace.fraction == 1.0f) {
       trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins,
                         ent->r.maxs, ent->client->ps.origin,

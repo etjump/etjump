@@ -34,9 +34,11 @@ inline constexpr vec3_t portalGreenTrail = {0.2f, 1.0f, 0.5f};
 inline constexpr vec3_t portalYellowTrail = {1.0f, 1.0f, 0.0f};
 
 // portalteam
-inline constexpr int PORTAL_TEAM_NONE = 0;
-inline constexpr int PORTAL_TEAM_FT = 1;
-inline constexpr int PORTAL_TEAM_ALL = 2;
+enum class PortalTeam {
+  OFF = 0,
+  FIRETEAM = 1,
+  ALL = 2,
+};
 
 // cooldown between portal touch events (ms)
 inline constexpr int PORTAL_TOUCH_COOLDOWN = 100;

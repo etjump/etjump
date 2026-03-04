@@ -43,6 +43,7 @@
 #include "etj_filesystem.h"
 #include "etj_printer.h"
 #include "etj_fireteam_countdown.h"
+#include "etj_worldspawn.h"
 
 Game game;
 
@@ -313,6 +314,7 @@ void OnGameShutdown() {
   game.rtv = nullptr;
   game.chatReplay = nullptr;
   game.fireteamCountdown = nullptr;
+  game.worldspawn = nullptr;
 
   ETJump::Log::processMessages();
 }
