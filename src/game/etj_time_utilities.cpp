@@ -32,9 +32,9 @@ long long ETJump::getCurrentTimestamp() {
       .count();
 }
 
-ETJump::Clock ETJump::getCurrentClock() {
+ETJump::Clock ETJump::getCurrentClock(const bool localtime) {
   time_t now = std::time(nullptr);
-  tm tstruct = *std::localtime(&now);
+  tm tstruct = localtime ? *std::localtime(&now) : *std::gmtime(&now);
   auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()) %
             1000;
@@ -58,15 +58,14 @@ ETJump::Clock ETJump::toClock(long long timestamp, bool useHours) {
           static_cast<int>(seconds), static_cast<int>(millis)};
 }
 
-ETJump::Date ETJump::getCurrentDate() {
-
+ETJump::Date ETJump::getCurrentDate(const bool localtime) {
   time_t now = std::time(nullptr);
-  tm tstruct = *std::localtime(&now);
+  tm tstruct = localtime ? *std::localtime(&now) : *std::gmtime(&now);
   return {tstruct.tm_year + 1900, tstruct.tm_mon + 1, tstruct.tm_mday};
 }
 
-ETJump::Time ETJump::getCurrentTime() {
-  return {getCurrentClock(), getCurrentDate()};
+ETJump::Time ETJump::getCurrentTime(const bool localtime) {
+  return {getCurrentClock(localtime), getCurrentDate(localtime)};
 }
 
 std::string ETJump::millisToString(int millis) {

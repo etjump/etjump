@@ -196,7 +196,7 @@ void TimerunV2::computeRanks() {
 
 void TimerunV2::updateSeasonStates() {
   const auto seasons = _repository->getSeasons();
-  const auto currentTime = getCurrentTime();
+  const auto currentTime = getCurrentTime(false);
 
   _activeSeasonsIds = std::vector<int>();
   _activeSeasons = std::vector<Timerun::Season>();
@@ -1727,7 +1727,7 @@ void TimerunV2::checkRecord(Player *player) {
           record.userId = userId;
           record.time = completionTime;
           record.checkpoints = checkpoints;
-          record.recordDate = getCurrentTime();
+          record.recordDate = getCurrentTime(false);
           record.playerName = playerName;
           record.metadata = metadata;
 

@@ -277,7 +277,7 @@ std::string AutoDemoRecorder::createDemoTempPath(const std::string &name) {
 }
 
 std::string AutoDemoRecorder::createTimeString() {
-  Time time = getCurrentTime();
+  Time time = getCurrentTime(true);
   return StringUtils::format("%02d-%02d-%d-%02d%02d%02d", time.date.day,
                              time.date.mon, time.date.year, time.clock.hours,
                              time.clock.min, time.clock.sec);
