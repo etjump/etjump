@@ -32,7 +32,7 @@
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
 
-namespace ETJump {
+namespace TimeUtils {
 struct Clock {
   int hours;
   int min;
@@ -225,12 +225,12 @@ struct Time {
   }
 };
 
-long long getCurrentTimestamp();
+int64_t getCurrentTimestamp();
 Clock getCurrentClock(bool localtime);
-Clock toClock(long long timestamp, bool useHours);
+Clock toClock(int64_t timestamp, bool useHours);
 Date getCurrentDate(bool localtime);
 Time getCurrentTime(bool localtime);
 
 std::string millisToString(int millis);
 std::string diffToString(int selfTime, int otherTime);
-} // namespace ETJump
+} // namespace TimeUtils

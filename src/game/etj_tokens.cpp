@@ -340,7 +340,7 @@ void Tokens::tokenTouch(gentity_t *self, gentity_t *other, trace_t *trace) {
                            self->tokenInformation->idx + 1));
 
   if (allTokensCollected(other)) {
-    const std::string &time = millisToString(
+    const std::string &time = TimeUtils::millisToString(
         level.time - other->client->pers.tokenCollectionStartTime);
     Printer::popupAll(va("%s ^7collected all tokens in %s",
                          other->client->pers.netname, time.c_str()));
