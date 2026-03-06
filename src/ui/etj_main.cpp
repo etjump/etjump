@@ -22,10 +22,16 @@
  * SOFTWARE.
  */
 
-#include "ui_local.h"
+#include "etj_colorpicker.h"
+#include "etj_demo_queue.h"
 #include "etj_local.h"
+#include "etj_quick_connect.h"
+#include "ui_local.h"
+
+#include "../cgame/etj_color_parser.h"
 
 #include "../game/etj_file.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 #include "../../assets/ui/changelog/version_headers.h"
 
@@ -196,10 +202,8 @@ void shutdown() {
     trap_Cmd_ExecuteText(EXEC_APPEND, "demoQueue next\n");
   }
 
-  ui.quickConnect = nullptr;
-  ui.demoQueue = nullptr;
-  ui.colorPicker = nullptr;
-  ui.colorParser = nullptr;
-  ui.syscallExt = nullptr;
+  ui = {};
 }
+
+UIContext ui;
 } // namespace ETJump
