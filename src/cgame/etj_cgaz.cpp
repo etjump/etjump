@@ -65,6 +65,7 @@ CGaz::CGaz(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
   cgame.utils.colorParser->parseColorString(etj_CGaz2Color2.string,
                                             CGaz2Colors[1]);
 
+  setThickness(&etj_CGaz2Thickness);
   startListeners();
 }
 
@@ -77,6 +78,7 @@ CGaz::~CGaz() {
 
   cvarUpdate->unsubscribe(&etj_CGaz2Color1);
   cvarUpdate->unsubscribe(&etj_CGaz2Color2);
+  cvarUpdate->unsubscribe(&etj_CGaz2Thickness);
 }
 
 void CGaz::startListeners() {
@@ -109,6 +111,13 @@ void CGaz::startListeners() {
   cvarUpdate->subscribe(&etj_CGaz2Color2, [this](const vmCvar_t *cvar) {
     cgame.utils.colorParser->parseColorString(cvar->string, CGaz2Colors[1]);
   });
+
+  cvarUpdate->subscribe(&etj_CGaz2Thickness,
+                        [this](const vmCvar_t *cvar) { setThickness(cvar); });
+}
+
+void CGaz::setThickness(const vmCvar_t *cvar) {
+  thickness = std::clamp(cvar->value, 0.5f, 5.0f);
 }
 
 void CGaz::UpdateCGaz1(vec3_t wishvel, const int8_t uCmdScale) const {
@@ -359,6 +368,8 @@ void CGaz::render() const {
       scx -= SCREEN_OFFSET_X;
     }
 
+    const bool highRes = etj_CGaz2HighRes.integer;
+
     // draw movement keys direction
     if (cmd.rightmove || cmd.forwardmove) {
       float mult = 1.0f;
@@ -375,9 +386,15 @@ void CGaz::render() const {
         mult /= sqrt2;
       }
 
-      DrawLine(scx, scy, scx + mult * static_cast<float>(cmd.rightmove),
-               scy - mult * static_cast<float>(cmd.forwardmove),
-               CGaz2Colors[1]);
+      if (highRes) {
+        drawLineWu(scx, scy, scx + (mult * static_cast<float>(cmd.rightmove)),
+                   scy - (mult * static_cast<float>(cmd.forwardmove)),
+                   thickness, thickness, CGaz2Colors[1]);
+      } else {
+        drawLineDDA(scx, scy, scx + (mult * static_cast<float>(cmd.rightmove)),
+                    scy - (mult * static_cast<float>(cmd.forwardmove)),
+                    CGaz2Colors[1]);
+      }
     }
 
     // When under wishspeed velocity, most accel happens when
@@ -386,7 +403,7 @@ void CGaz::render() const {
     const bool drawSides = state.vf > state.wishspeed;
 
     // minline length, either fixed or from current speed
-    float velSize;
+    float velSize{};
 
     if (etj_CGaz2FixedSpeed.value > 0) {
       velSize = etj_CGaz2FixedSpeed.value / 5.0f;
@@ -403,16 +420,34 @@ void CGaz::render() const {
         dirSize = std::min(static_cast<float>(CMDSCALE_DEFAULT), dirSize);
       }
 
-      DrawLine(scx, scy, scx + dirSize * std::sin(drawVel),
-               scy - dirSize * std::cos(drawVel), CGaz2Colors[0]);
+      if (highRes) {
+        drawLineWu(scx, scy, scx + (dirSize * std::sin(drawVel)),
+                   scy - (dirSize * std::cos(drawVel)), thickness, thickness,
+                   CGaz2Colors[0]);
+      } else {
+        drawLineDDA(scx, scy, scx + (dirSize * std::sin(drawVel)),
+                    scy - (dirSize * std::cos(drawVel)), CGaz2Colors[0]);
+      }
     }
 
     if (drawSides) {
       velSize /= 2;
-      DrawLine(scx, scy, scx + velSize * std::sin(drawVel + drawOpt),
-               scy - velSize * std::cos(drawVel + drawOpt), CGaz2Colors[0]);
-      DrawLine(scx, scy, scx + velSize * std::sin(drawVel - drawOpt),
-               scy - velSize * std::cos(drawVel - drawOpt), CGaz2Colors[0]);
+
+      if (highRes) {
+        drawLineWu(scx, scy, scx + (velSize * std::sin(drawVel + drawOpt)),
+                   scy - (velSize * std::cos(drawVel + drawOpt)), thickness,
+                   thickness, CGaz2Colors[0]);
+        drawLineWu(scx, scy, scx + (velSize * std::sin(drawVel - drawOpt)),
+                   scy - (velSize * std::cos(drawVel - drawOpt)), thickness,
+                   thickness, CGaz2Colors[0]);
+      } else {
+        drawLineDDA(scx, scy, scx + (velSize * std::sin(drawVel + drawOpt)),
+                    scy - (velSize * std::cos(drawVel + drawOpt)),
+                    CGaz2Colors[0]);
+        drawLineDDA(scx, scy, scx + (velSize * std::sin(drawVel - drawOpt)),
+                    scy - (velSize * std::cos(drawVel - drawOpt)),
+                    CGaz2Colors[0]);
+      }
     }
 
     if (etj_stretchCgaz.integer) {

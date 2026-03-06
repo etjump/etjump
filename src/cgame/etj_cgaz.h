@@ -74,7 +74,9 @@ private:
   vec4_t CGaz2Colors[2]{};
   vec4_t CGaz1MidlineColor{};
 
-  bool canSkipDraw() const;
+  float thickness{};
+
+  [[nodiscard]] bool canSkipDraw() const;
   void UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale) const;
   void UpdateCGaz2() const;
   static float GetSlickGravity(const playerState_t *ps, const pmove_t *pm);
@@ -85,6 +87,7 @@ private:
   static float UpdateDrawSnap(const playerState_t *ps, const pmove_t *pm);
   static void UpdateDraw(float wishspeed, const playerState_t *ps,
                          const pmove_t *pm);
+  void setThickness(const vmCvar_t *cvar);
   void startListeners();
 
   const playerState_t *ps = &cg.predictedPlayerState;
