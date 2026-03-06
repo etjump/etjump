@@ -78,32 +78,32 @@ void CrosshairDrawer::drawCross(const crosshair_t &crosshair,
 
 void CrosshairDrawer::drawDiagCross(const crosshair_t &crosshair) {
   // top-left -> bottom-right
-  DrawLine(crosshair.x - (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
-           crosshair.y - (crosshair.h * 0.5f) - (crosshair.t * 0.5f),
-           crosshair.x + (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
-           crosshair.y + (crosshair.h * 0.5f) - (crosshair.t * 0.5f),
-           crosshair.t, crosshair.t, crosshair.color);
+  drawLineDDA(crosshair.x - (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
+              crosshair.y - (crosshair.h * 0.5f) - (crosshair.t * 0.5f),
+              crosshair.x + (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
+              crosshair.y + (crosshair.h * 0.5f) - (crosshair.t * 0.5f),
+              crosshair.t, crosshair.t, crosshair.color);
   // top-right -> bottom-left
-  DrawLine(crosshair.x + (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
-           crosshair.y - (crosshair.h * 0.5f) - (crosshair.t * 0.5f),
-           crosshair.x - (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
-           crosshair.y + (crosshair.h * 0.5f) - (crosshair.t * 0.5f),
-           crosshair.t, crosshair.t, crosshair.colorAlt);
+  drawLineDDA(crosshair.x + (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
+              crosshair.y - (crosshair.h * 0.5f) - (crosshair.t * 0.5f),
+              crosshair.x - (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
+              crosshair.y + (crosshair.h * 0.5f) - (crosshair.t * 0.5f),
+              crosshair.t, crosshair.t, crosshair.colorAlt);
 }
 
 void CrosshairDrawer::drawV(const crosshair_t &crosshair) {
   // left line
-  DrawLine(crosshair.x - (crosshair.t * 0.5f),
-           crosshair.y - (crosshair.t * 0.5f),
-           crosshair.x - (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
-           crosshair.y + crosshair.h - (crosshair.t * 0.5f), crosshair.t,
-           crosshair.t, crosshair.color);
+  drawLineDDA(crosshair.x - (crosshair.t * 0.5f),
+              crosshair.y - (crosshair.t * 0.5f),
+              crosshair.x - (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
+              crosshair.y + crosshair.h - (crosshair.t * 0.5f), crosshair.t,
+              crosshair.t, crosshair.color);
   // right line
-  DrawLine(crosshair.x - (crosshair.t * 0.5f),
-           crosshair.y - (crosshair.t * 0.5f),
-           crosshair.x + (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
-           crosshair.y + crosshair.h - (crosshair.t * 0.5f), crosshair.t,
-           crosshair.t, crosshair.colorAlt);
+  drawLineDDA(crosshair.x - (crosshair.t * 0.5f),
+              crosshair.y - (crosshair.t * 0.5f),
+              crosshair.x + (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
+              crosshair.y + crosshair.h - (crosshair.t * 0.5f), crosshair.t,
+              crosshair.t, crosshair.colorAlt);
 }
 
 void CrosshairDrawer::drawTriangle(const crosshair_t &crosshair,

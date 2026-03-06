@@ -181,56 +181,180 @@ range_t AnglesToRange(float start, float end, float yaw, float fov) {
   return ret;
 }
 
-void DrawLine(float x1, float y1, float x2, float y2, const vec4_t color) {
-  DrawLine(x1, y1, x2, y2, 1, 1, color);
+void drawLineDDA(float x0, float y0, float x1, float y1, const vec4_t color) {
+  drawLineDDA(x0, y0, x1, y1, 1, 1, color);
 }
 
-/*
-==============
-DrawLine
-Mainly used for drawing diagonal lines
-==============
-*/
-// Dzikie
-void DrawLine(float x1, float y1, float x2, float y2, float w, float h,
-              const vec4_t color) {
-  float len, stepX, stepY;
+// line drawing using Digital Differential Analyzer with slight modifications
+// https://en.wikipedia.org/wiki/Digital_differential_analyzer_(graphics_algorithm)
+// we use euclidean distance to endpoint rather than dominant axis
+// to determine the next step for the line, as this tends to produce
+// better results when drawing to the virtual grid and scaling from there
+void drawLineDDA(float x0, float y0, float x1, float y1, float w, float h,
+                 const vec4_t color) {
+  float len{};
+  float stepX{};
+  float stepY{};
   float i = 0;
 
-  if (x1 == x2 && y1 == y2) {
+  if (x0 == x1 && y0 == y1) {
     return;
   }
 
-  const auto scrw = static_cast<float>(SCREEN_WIDTH);
-  const auto scrh = static_cast<float>(SCREEN_HEIGHT);
+  const auto scrW = static_cast<float>(SCREEN_WIDTH);
+  const auto scrH = static_cast<float>(SCREEN_HEIGHT);
 
   trap_R_SetColor(color);
 
   // Use a single DrawPic for horizontal or vertical lines
-  if (x1 == x2) {
-    x1 = std::clamp(x1, 0.0f, scrw);
+  if (x0 == x1) {
+    x0 = std::clamp(x0, 0.0f, scrW);
 
-    CG_DrawPic(x1, std::min(y1, y2), w, std::abs(y1 - y2),
+    CG_DrawPic(x0, std::min(y0, y1), w, std::abs(y0 - y1),
                cgs.media.whiteShader);
-  } else if (y1 == y2) {
-    y1 = std::clamp(y1, 0.0f, scrh);
+  } else if (y0 == y1) {
+    y0 = std::clamp(y0, 0.0f, scrH);
 
-    CG_DrawPic(std::min(x1, x2), y1, std::abs(x1 - x2), h,
+    CG_DrawPic(std::min(x0, x1), y0, std::abs(x0 - x1), h,
                cgs.media.whiteShader);
   } else {
-    len = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+    len = ((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0));
     len = std::sqrt(len);
-    stepX = (x2 - x1) / len;
-    stepY = (y2 - y1) / len;
+    stepX = (x1 - x0) / len;
+    stepY = (y1 - y0) / len;
 
     while (i < len) {
-      if (x1 >= 0 && x1 <= scrw && y1 >= 0 && y1 <= scrh) {
-        CG_DrawPic(x1, y1, w, h, cgs.media.whiteShader);
+      // only draw pixels that are in the screen space
+      if (x0 >= 0 && x0 <= scrW && y0 >= 0 && y0 <= scrH) {
+        CG_DrawPic(x0, y0, w, h, cgs.media.whiteShader);
       }
-      x1 += stepX;
-      y1 += stepY;
+
+      x0 += stepX;
+      y0 += stepY;
       i++;
     }
+  }
+
+  trap_R_SetColor(nullptr);
+}
+
+void drawLineWu(float x0, float y0, float x1, float y1, const vec4_t color) {
+  drawLineWu(x0, y0, x1, y1, 1, 1, color);
+}
+
+// anti-aliased line drawing using Xiaolin Wu's line algorithm
+// https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
+// NOTE: this is a relatively expensive function, as it always draws
+// the lines on real pixel coordinates rather than virtual grid
+void drawLineWu(float x0, float y0, float x1, float y1, const float w,
+                const float h, const vec4_t color) {
+  const auto putPixel = [&](int32_t x, int32_t y, float brightness) {
+    vec4_t c = {color[0], color[1], color[2], color[3] * brightness};
+    trap_R_SetColor(c);
+    drawPicNoScale(static_cast<float>(x), static_cast<float>(y), w, h,
+                   cgs.media.whiteShader);
+  };
+
+  const auto fpart = [](const float x) { return x - std::floor(x); };
+  const auto rfpart = [fpart](const float x) { return 1.0f - fpart(x); };
+  const auto ipart = [](const float x) {
+    return static_cast<int>(std::floor(x));
+  };
+
+  if (x0 == x1 && y0 == y1) {
+    return;
+  }
+
+  // convert the x/y points to real screen coordinates
+  // before we start plotting the line for high resolution drawing
+  CG_AdjustFrom640(&x0, &y0, nullptr, nullptr);
+  CG_AdjustFrom640(&x1, &y1, nullptr, nullptr);
+
+  const auto scrW = static_cast<float>(cgs.glconfig.vidWidth);
+  const auto scrH = static_cast<float>(cgs.glconfig.vidHeight);
+
+  // for axial lines, we can use a single draw call
+  if (x0 == x1) {
+    x0 = std::clamp(x0, 0.0f, scrW);
+
+    trap_R_SetColor(color);
+    drawPicNoScale(x0, std::min(y0, y1), w, std::abs(y0 - y1),
+                   cgs.media.whiteShader);
+    trap_R_SetColor(nullptr);
+    return;
+  }
+
+  if (y0 == y1) {
+    y0 = std::clamp(y0, 0.0f, scrH);
+
+    trap_R_SetColor(color);
+    drawPicNoScale(std::min(x0, x1), y0, std::abs(x0 - x1), h,
+                   cgs.media.whiteShader);
+    trap_R_SetColor(nullptr);
+    return;
+  }
+
+  // determine the direction for drawing, and swap the coordinates around
+  // accordingly, so that we're always drawing right and down
+  const bool steep = std::abs(y1 - y0) > std::abs(x1 - x0);
+
+  if (steep) {
+    std::swap(x0, y0);
+    std::swap(x1, y1);
+  }
+
+  if (x0 > x1) {
+    std::swap(x0, x1);
+    std::swap(y0, y1);
+  }
+
+  const float dx = x1 - x0;
+  const float dy = y1 - y0;
+  const float gradient = (dx == 0.0f) ? 1.0f : dy / dx;
+
+  const auto putEndPixel = [&](const float px, const float py,
+                               const float xGap) {
+    const float xEnd = std::round(px);
+    const float yEnd = py + (gradient * (xEnd - px));
+
+    const auto xPixel = static_cast<int32_t>(xEnd);
+    const int32_t y = ipart(yEnd);
+
+    if (steep) {
+      putPixel(y, xPixel, rfpart(yEnd) * xGap);
+      putPixel(y + 1, xPixel, fpart(yEnd) * xGap);
+    } else {
+      putPixel(xPixel, y, rfpart(yEnd) * xGap);
+      putPixel(xPixel, y + 1, fpart(yEnd) * xGap);
+    }
+
+    return std::pair<int32_t, float>(xPixel, yEnd);
+  };
+
+  // draw and store the end points first
+  const auto [xPixel1, yEnd1] = putEndPixel(x0, y0, rfpart(x0 + 0.5f));
+  float interY = yEnd1 + gradient;
+  const auto [xPixel2, yEnd2] = putEndPixel(x1, y1, fpart(x1 + 0.5f));
+
+  // main loop, plot the line between the start and end points
+  // we bounds check the coordinates and skip anything
+  // that is outside of the screen space
+  for (int x = xPixel1 + 1; x < xPixel2; x++) {
+    if (steep) {
+      if (ipart(interY) >= 0 && ipart(interY) < static_cast<int32_t>(scrW) &&
+          x >= 0 && x < static_cast<int32_t>(scrH)) {
+        putPixel(ipart(interY), x, rfpart(interY));
+        putPixel(ipart(interY) + 1, x, fpart(interY));
+      }
+    } else {
+      if (x >= 0 && x < static_cast<int32_t>(scrW) && ipart(interY) >= 0 &&
+          ipart(interY) < static_cast<int32_t>(scrH)) {
+        putPixel(x, ipart(interY), rfpart(interY));
+        putPixel(x, ipart(interY) + 1, fpart(interY));
+      }
+    }
+
+    interY += gradient;
   }
 
   trap_R_SetColor(nullptr);
@@ -345,9 +469,9 @@ void DrawTriangle(float x, float y, float w, float h, float lineW, float angle,
   }
 
   // draw outer edges clockwise, starting from p1
-  DrawLine(p1.x, p1.y, p2.x, p2.y, lineW, lineW, color);
-  DrawLine(p2.x, p2.y, p3.x, p3.y, lineW, lineW, color);
-  DrawLine(p3.x, p3.y, p1.x, p1.y, lineW, lineW, color);
+  drawLineDDA(p1.x, p1.y, p2.x, p2.y, lineW, lineW, color);
+  drawLineDDA(p2.x, p2.y, p3.x, p3.y, lineW, lineW, color);
+  drawLineDDA(p3.x, p3.y, p1.x, p1.y, lineW, lineW, color);
 }
 
 /*
@@ -541,6 +665,37 @@ void CG_DrawRect_FixedBorder(float x, float y, float width, float height,
   CG_DrawSides_NoScale(x, y, width, height, border);
 
   trap_R_SetColor(NULL);
+}
+
+// coordinates are real pixel coordinates
+void drawPicNoScale(const float x, const float y, float w, float h,
+                    const qhandle_t shader) {
+  float s0{};
+  float s1{};
+  float t0{};
+  float t1{};
+
+  if (w < 0) // flip about vertical
+  {
+    w = -w;
+    s0 = 1;
+    s1 = 0;
+  } else {
+    s0 = 0;
+    s1 = 1;
+  }
+
+  if (h < 0) // flip about horizontal
+  {
+    h = -h;
+    t0 = 1;
+    t1 = 0;
+  } else {
+    t0 = 0;
+    t1 = 1;
+  }
+
+  trap_R_DrawStretchPic(x, y, w, h, s0, t0, s1, t1, shader);
 }
 
 /*
