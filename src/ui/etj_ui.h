@@ -24,15 +24,20 @@
 
 #pragma once
 
-#include <cstdint>
-
-#include "etj_ui.h"
+#include <memory>
 
 namespace ETJump {
-void init(int32_t legacyClient, int32_t clientVersion);
-void shutdown();
-// outside of 'init()', as this requires menus to be loaded already
-void initQuickConnect();
+class SyscallExt;
+class ColorPicker;
+class DemoQueue;
+class QuickConnect;
+class ColorParser;
 
-extern UIContext ui;
+struct UIContext {
+  std::unique_ptr<SyscallExt> syscallExt;
+  std::unique_ptr<ColorPicker> colorPicker;
+  std::unique_ptr<DemoQueue> demoQueue;
+  std::unique_ptr<QuickConnect> quickConnect;
+  std::unique_ptr<ColorParser> colorParser;
+};
 } // namespace ETJump
