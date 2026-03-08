@@ -562,9 +562,6 @@ struct gentity_s {
   //		@ARNOUT - does this screw up the save game?
   g_serverEntity_t *serverEntity;
 
-  // What sort of surface are we standing on?
-  int surfaceFlags;
-
   char tagBuffer[16];
 
   // bleh - ugly

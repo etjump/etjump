@@ -2230,9 +2230,6 @@ void ClientBegin(int clientNum) {
   // count current clients and rank for scoreboard
   CalculateRanks();
 
-  // No surface determined yet.
-  ent->surfaceFlags = 0;
-
   OnClientBegin(ent);
   if (level.hasTimerun) {
     trap_SendServerCommand(clientNum, "hasTimerun 1");
@@ -2898,11 +2895,4 @@ void ClientDisconnect(int clientNum) {
   ETJump::progressionTrackers->saveClientProgression(ent);
 
   ETJump::EntityUtilities::clearPortals(ent);
-}
-
-// In just the GAME DLL, we want to store the groundtrace surface stuff,
-// so we don't have to keep tracing.
-void ClientStoreSurfaceFlags(int clientNum, int surfaceFlags) {
-  // Store the surface flags
-  g_entities[clientNum].surfaceFlags = surfaceFlags;
 }
