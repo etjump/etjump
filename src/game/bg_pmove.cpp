@@ -46,14 +46,6 @@ pml_t pml;
 
 int c_pmove = 0;
 
-#ifdef GAMEDLL
-
-// In just the GAME DLL, we want to store the groundtrace surface stuff,
-// so we don't have to keep tracing.
-void ClientStoreSurfaceFlags(int clientNum, int surfaceFlags);
-
-#endif
-
 /*
 ===============
 PM_AddEvent
@@ -1697,13 +1689,6 @@ Returns an event number apropriate for the groundsurface
 ================
 */
 static int PM_FootstepForSurface(void) {
-#ifdef GAMEDLL
-  // In just the GAME DLL, we want to store the groundtrace surface
-  // stuff, so we don't have to keep tracing.
-  ClientStoreSurfaceFlags(pm->ps->clientNum, pm->groundTrace.surfaceFlags);
-
-#endif // GAMEDLL
-
   return BG_FootstepForSurface(pm->groundTrace.surfaceFlags);
 }
 
