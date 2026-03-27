@@ -57,6 +57,10 @@ public:
     }
   }
 
+  // construct from underlying integer value
+  // EnumBitset<MyEnum> bitset(int)
+  constexpr explicit EnumBitset(UnderlyingT flags) : bits(flags) {}
+
   // we don't want floating point implicit conversions for constructors
   EnumBitset(float) = delete;
   EnumBitset(double) = delete;
@@ -111,5 +115,7 @@ public:
   }
 
   constexpr explicit operator bool() const { return bits != 0; }
+
+  constexpr explicit operator UnderlyingT() const { return bits; }
 };
 } // namespace ETJump
