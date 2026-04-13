@@ -23,7 +23,7 @@ jobs:
             platform: x64
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: master
@@ -39,7 +39,7 @@ jobs:
         run: ctest -C ${{ matrix.config }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: etjump-artifacts-win-${{ matrix.arch }}
           path: ${{ github.workspace }}/build/etjump
@@ -61,7 +61,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install gcc-multilib g++-multilib
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: master
@@ -82,7 +82,7 @@ jobs:
         run: ctest -C ${{ matrix.config }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: etjump-artifacts-linux-${{ matrix.arch }}
           path: ${{ github.workspace }}/build/etjump
@@ -99,7 +99,7 @@ jobs:
           - osx-target: "10.15"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -114,7 +114,7 @@ jobs:
         run: ctest -C ${{ matrix.config }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: etjump-artifacts-macos-${{ matrix.arch }}
           path: ${{ github.workspace }}/build/etjump
@@ -124,7 +124,7 @@ jobs:
     runs-on: macos-14
     needs: [macOS]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: etjump-artifacts-macos-*
           path: artifacts
@@ -144,14 +144,14 @@ jobs:
                 -output build-universal/qagame_mac
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: etjump-artifacts-macos-universal
           path: ${{ github.workspace }}/build-universal
 
       # cleanup the individual builds so package doesn't download them
       - name: Cleanup
-        uses: geekyeggo/delete-artifact@v5
+        uses: geekyeggo/delete-artifact@v6
         with:
           name: |
             etjump-artifacts-macos-arm64
@@ -162,13 +162,13 @@ jobs:
     needs: [Windows, Linux, macOS-universal]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: master
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: etjump-artifacts-*
           merge-multiple: true
@@ -181,7 +181,7 @@ jobs:
           make mod_release
 
       - name: Upload release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: ETJump ${{ github.ref_name }}
