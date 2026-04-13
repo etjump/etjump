@@ -244,15 +244,19 @@ void drawLineWu(float x0, float y0, float x1, float y1, const vec4_t color) {
 
 // anti-aliased line drawing using Xiaolin Wu's line algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-// NOTE: this is a relatively expensive function, as it always draws
-// the lines on real pixel coordinates rather than virtual grid
-void drawLineWu(float x0, float y0, float x1, float y1, const float w,
-                const float h, const vec4_t color) {
+// NOTE: this is a relatively expensive function, as it draws
+// the lines at higher resolution (up to 1080 vertical pixels),
+// rather than using the virtual grid for pixel coordinates
+void drawLineWu(float x0, float y0, float x1, float y1, float w, float h,
+                const vec4_t color) {
+  float renderScale = 1.0f;
+
   const auto putPixel = [&](int32_t x, int32_t y, float brightness) {
     vec4_t c = {color[0], color[1], color[2], color[3] * brightness};
     trap_R_SetColor(c);
-    drawPicNoScale(static_cast<float>(x), static_cast<float>(y), w, h,
-                   cgs.media.whiteShader);
+    drawPicNoScale(static_cast<float>(x) / renderScale,
+                   static_cast<float>(y) / renderScale, w / renderScale,
+                   h / renderScale, cgs.media.whiteShader);
   };
 
   const auto fpart = [](const float x) { return x - std::floor(x); };
@@ -270,12 +274,36 @@ void drawLineWu(float x0, float y0, float x1, float y1, const float w,
   CG_AdjustFrom640(&x0, &y0, nullptr, nullptr);
   CG_AdjustFrom640(&x1, &y1, nullptr, nullptr);
 
-  const auto scrW = static_cast<float>(cgs.glconfig.vidWidth);
-  const auto scrH = static_cast<float>(cgs.glconfig.vidHeight);
+  auto scrW = static_cast<float>(cgs.glconfig.vidWidth);
+  auto scrH = static_cast<float>(cgs.glconfig.vidHeight);
+
+  // limit rendering resolution to 1080 pixel vertical resolution,
+  // otherwise we very likely run out of render command buffer space
+  // 2.60b will still break even at 720p but whatever, at least decent
+  // clients can enjoy a bit higher resolution drawing
+  if (scrH > 1080) {
+    renderScale = 1080 / scrH;
+
+    scrH = 1080;
+    scrW *= renderScale;
+
+    x0 *= renderScale;
+    x1 *= renderScale;
+    y0 *= renderScale;
+    y1 *= renderScale;
+
+    w *= renderScale;
+    h *= renderScale;
+  }
 
   // for axial lines, we can use a single draw call
   if (x0 == x1) {
     x0 = std::clamp(x0, 0.0f, scrW);
+
+    x0 /= renderScale;
+    y0 /= renderScale;
+    y1 /= renderScale;
+    w /= renderScale;
 
     trap_R_SetColor(color);
     drawPicNoScale(x0, std::min(y0, y1), w, std::abs(y0 - y1),
@@ -286,6 +314,11 @@ void drawLineWu(float x0, float y0, float x1, float y1, const float w,
 
   if (y0 == y1) {
     y0 = std::clamp(y0, 0.0f, scrH);
+
+    y0 /= renderScale;
+    x0 /= renderScale;
+    x1 /= renderScale;
+    h /= renderScale;
 
     trap_R_SetColor(color);
     drawPicNoScale(std::min(x0, x1), y0, std::abs(x0 - x1), h,
