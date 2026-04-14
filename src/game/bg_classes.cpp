@@ -9,6 +9,7 @@ bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES] = {
         "ui/assets/mp_arrow_blue.tga",
         {WP_THOMPSON, WP_MOBILE_MG42, WP_FLAMETHROWER, WP_PANZERFAUST,
          WP_MORTAR, WP_CARBINE, WP_GARAND},
+        {WP_COLT, WP_AKIMBO_COLT},
     },
 
     {
@@ -17,6 +18,7 @@ bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES] = {
         "ui/assets/mp_health_blue.tga",
         "ui/assets/mp_arrow_blue.tga",
         {WP_THOMPSON, WP_CARBINE, WP_GARAND},
+        {WP_COLT, WP_AKIMBO_COLT},
     },
 
     {
@@ -25,6 +27,7 @@ bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES] = {
         "ui/assets/mp_wrench_blue.tga",
         "ui/assets/mp_arrow_blue.tga",
         {WP_THOMPSON, WP_CARBINE, WP_GARAND},
+        {WP_COLT, WP_AKIMBO_COLT},
     },
 
     {
@@ -33,6 +36,7 @@ bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES] = {
         "ui/assets/mp_ammo_blue.tga",
         "ui/assets/mp_arrow_blue.tga",
         {WP_THOMPSON, WP_CARBINE, WP_GARAND},
+        {WP_COLT, WP_AKIMBO_COLT},
     },
 
     {
@@ -41,6 +45,7 @@ bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES] = {
         "ui/assets/mp_spy_blue.tga",
         "ui/assets/mp_arrow_blue.tga",
         {WP_STEN, WP_FG42, WP_GARAND, WP_CARBINE},
+        {WP_SILENCED_COLT, WP_AKIMBO_SILENCEDCOLT},
     },
 };
 
@@ -52,6 +57,7 @@ bg_playerclass_t bg_axis_playerclasses[NUM_PLAYER_CLASSES] = {
         "ui/assets/mp_arrow_red.tga",
         {WP_MP40, WP_MOBILE_MG42, WP_FLAMETHROWER, WP_PANZERFAUST, WP_MORTAR,
          WP_KAR98, WP_K43},
+        {WP_LUGER, WP_AKIMBO_LUGER},
     },
 
     {
@@ -60,6 +66,7 @@ bg_playerclass_t bg_axis_playerclasses[NUM_PLAYER_CLASSES] = {
         "ui/assets/mp_health_red.tga",
         "ui/assets/mp_arrow_red.tga",
         {WP_MP40, WP_KAR98, WP_K43},
+        {WP_LUGER, WP_AKIMBO_LUGER},
     },
 
     {
@@ -68,6 +75,7 @@ bg_playerclass_t bg_axis_playerclasses[NUM_PLAYER_CLASSES] = {
         "ui/assets/mp_wrench_red.tga",
         "ui/assets/mp_arrow_red.tga",
         {WP_MP40, WP_KAR98, WP_K43},
+        {WP_LUGER, WP_AKIMBO_LUGER},
     },
 
     {
@@ -76,6 +84,7 @@ bg_playerclass_t bg_axis_playerclasses[NUM_PLAYER_CLASSES] = {
         "ui/assets/mp_ammo_red.tga",
         "ui/assets/mp_arrow_red.tga",
         {WP_MP40, WP_KAR98, WP_K43},
+        {WP_LUGER, WP_AKIMBO_LUGER},
     },
 
     {
@@ -84,6 +93,7 @@ bg_playerclass_t bg_axis_playerclasses[NUM_PLAYER_CLASSES] = {
         "ui/assets/mp_spy_red.tga",
         "ui/assets/mp_arrow_red.tga",
         {WP_STEN, WP_FG42, WP_K43, WP_KAR98},
+        {WP_SILENCER, WP_AKIMBO_SILENCEDLUGER},
     },
 };
 
