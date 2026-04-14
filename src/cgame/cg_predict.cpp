@@ -493,15 +493,15 @@ static bool canUsePortal(const entityState_t *es) {
   // we can always use our own portals,
   // and can use anyone's portals if 'portalteam' is set to 2
   if (cg.snap->ps.clientNum == es->otherEntityNum ||
-      es->teamNum == PORTAL_TEAM_ALL) {
+      es->teamNum == static_cast<int32_t>(ETJump::PortalTeam::ALL)) {
     return true;
   }
 
-  if (es->teamNum == PORTAL_TEAM_NONE) {
+  if (es->teamNum == static_cast<int32_t>(ETJump::PortalTeam::OFF)) {
     return false;
   }
 
-  if (es->teamNum == PORTAL_TEAM_FT) {
+  if (es->teamNum == static_cast<int32_t>(ETJump::PortalTeam::FIRETEAM)) {
     if (!CG_IsOnSameFireteam(cg.snap->ps.clientNum, es->otherEntityNum)) {
       return false;
     }

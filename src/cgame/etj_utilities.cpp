@@ -169,12 +169,12 @@ bool skipPortalDraw(const int selfNum, const int otherNum) {
     return false;
   }
 
-  if (etj_portalTeam.integer == PORTAL_TEAM_ALL ||
+  if (etj_portalTeam.integer == static_cast<int32_t>(PortalTeam::ALL) ||
       (etj_viewPlayerPortals.integer && !cgs.clientinfo[otherNum].hideMe)) {
     return false;
   }
 
-  if (etj_portalTeam.integer == PORTAL_TEAM_FT &&
+  if (etj_portalTeam.integer == static_cast<int32_t>(PortalTeam::FIRETEAM) &&
       CG_IsOnSameFireteam(selfNum, otherNum)) {
     return false;
   }

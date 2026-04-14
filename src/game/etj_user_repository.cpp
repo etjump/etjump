@@ -953,8 +953,8 @@ void UserRepository::migrateBans() const {
         ban.bannedBy = bannedBy;
         // old bans use a custom datetime format, we want to convert it to
         // ISO-8601, so SQLite can sort by date automatically
-        ban.banDate =
-            Time::fromString(banDate, "%d/%m/%y %H:%M:%S").toDateTimeString();
+        ban.banDate = TimeUtils::Time::fromString(banDate, "%d/%m/%y %H:%M:%S")
+                          .toDateTimeString();
         ban.expires = expires;
         ban.reason = reason;
         ban.ipv4 = ip;

@@ -14,6 +14,7 @@
 #include "etj_timerun_v2.h"
 #include "etj_string_utilities.h"
 #include "etj_trace_utils.h"
+#include "etj_worldspawn.h"
 
 vec3_t forward, right, up;
 vec3_t muzzleEffect;
@@ -42,7 +43,8 @@ bool weaponAllowedWithNoExplosives(const int weapon) {
       return false;
     case WP_DYNAMITE:
     case WP_PLIERS:
-      if (level.noExplosives == 2) {
+      if (game.worldspawn->noExplosives ==
+          Worldspawn::NoExplosives::NO_DYNAMITE) {
         return false;
       }
 

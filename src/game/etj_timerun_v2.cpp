@@ -196,7 +196,7 @@ void TimerunV2::computeRanks() {
 
 void TimerunV2::updateSeasonStates() {
   const auto seasons = _repository->getSeasons();
-  const auto currentTime = getCurrentTime();
+  const auto currentTime = TimeUtils::getCurrentTime(false);
 
   _activeSeasonsIds = std::vector<int>();
   _activeSeasons = std::vector<Timerun::Season>();
@@ -735,12 +735,12 @@ void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
                     rankString = rankToString(rank);
                   }
 
-                  auto millisString = millisToString(r->time);
+                  auto millisString = TimeUtils::millisToString(r->time);
 
                   const std::string diffString =
                       ownRecord || !haveOwnTime && rank == 1
                           ? ""
-                          : diffToString(ownTime, r->time);
+                          : TimeUtils::diffToString(ownTime, r->time);
 
                   auto playerNameString =
                       ownRecord ? r->playerName + " ^g(You)" : r->playerName;
@@ -1295,23 +1295,23 @@ void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
                "\n";
           s += StringUtils::format(
               " ^2Run: ^7%s\n ^2Player: ^7%s\n ^2Time: ^7%s (%s^7)\n\n",
-              data.run, data.playerName, millisToString(data.runTime),
-              rankToString(rank));
+              data.run, data.playerName,
+              TimeUtils::millisToString(data.runTime), rankToString(rank));
 
           for (size_t i = 0; i < data.checkpoints.size(); i++) {
             if (data.checkpoints[i] == TIMERUN_CHECKPOINT_NOT_SET) {
               break;
             }
 
-            s +=
-                StringUtils::format(" ^g%2i. ^7%s", static_cast<int32_t>(i + 1),
-                                    millisToString(data.checkpoints[i]));
+            s += StringUtils::format(
+                " ^g%2i. ^7%s", static_cast<int32_t>(i + 1),
+                TimeUtils::millisToString(data.checkpoints[i]));
 
             // from 2nd checkpoint onwards, display the absolute time
             // difference between checkpoints
             if (i > 0) {
-              s += StringUtils::format(" ^z(%s)",
-                                       millisToString(data.checkpoints[i] -
+              s += StringUtils::format(" ^z(%s)", TimeUtils::millisToString(
+                                                      data.checkpoints[i] -
                                                       data.checkpoints[i - 1]));
             }
 
@@ -1490,11 +1490,11 @@ void TimerunV2::compareCheckpoints(
             // number of checkpoints, so ensure we only display valid times
             const std::string baseTime =
                 base.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET
-                    ? millisToString(base.checkpoints[i])
+                    ? TimeUtils::millisToString(base.checkpoints[i])
                     : "^z-";
             const std::string cmpTime =
                 cmp.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET
-                    ? millisToString(cmp.checkpoints[i])
+                    ? TimeUtils::millisToString(cmp.checkpoints[i])
                     : "^z-";
 
             // the minimum width for a column is wide enough that
@@ -1510,8 +1510,8 @@ void TimerunV2::compareCheckpoints(
             if (base.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET &&
                 cmp.checkpoints[i] != TIMERUN_CHECKPOINT_NOT_SET) {
               s += StringUtils::format(
-                  " (%s^7)",
-                  diffToString(cmp.checkpoints[i], base.checkpoints[i]));
+                  " (%s^7)", TimeUtils::diffToString(cmp.checkpoints[i],
+                                                     base.checkpoints[i]));
             }
 
             s += "\n";
@@ -1523,17 +1523,18 @@ void TimerunV2::compareCheckpoints(
           s.insert(s.length(), cmpWidth + 1, '-');
           s += "\n";
 
-          const std::string baseRunTime = millisToString(base.runTime);
+          const std::string baseRunTime =
+              TimeUtils::millisToString(base.runTime);
           const int32_t baseRunTimeWidth = std::max(
               static_cast<int32_t>(StringUtils::sanitize(baseRunTime).length()),
               baseWidth);
           const int32_t baseRunTimePadding =
               StringUtils::countExtraPadding(baseRunTime, baseRunTimeWidth);
 
-          s += StringUtils::format("     ^7%-*s ^g| ^7%s (%s^7)\n",
-                                   baseRunTimePadding, baseRunTime,
-                                   millisToString(cmp.runTime),
-                                   diffToString(cmp.runTime, base.runTime));
+          s += StringUtils::format(
+              "     ^7%-*s ^g| ^7%s (%s^7)\n", baseRunTimePadding, baseRunTime,
+              TimeUtils::millisToString(cmp.runTime),
+              TimeUtils::diffToString(cmp.runTime, base.runTime));
 
           Printer::console(clientNum, s);
         }
@@ -1727,7 +1728,7 @@ void TimerunV2::checkRecord(Player *player) {
           record.userId = userId;
           record.time = completionTime;
           record.checkpoints = checkpoints;
-          record.recordDate = getCurrentTime();
+          record.recordDate = TimeUtils::getCurrentTime(false);
           record.playerName = playerName;
           record.metadata = metadata;
 
@@ -1850,15 +1851,16 @@ void TimerunV2::checkRecord(Player *player) {
 
           // print banner only if there was an existing overall record
           if (completionTime < previousTopRecordTime) {
-            diffString = "^7(" +
-                         diffToString(completionTime, previousTopRecordTime) +
-                         "^7)";
+            diffString =
+                "^7(" +
+                TimeUtils::diffToString(completionTime, previousTopRecordTime) +
+                "^7)";
 
             Printer::bannerAll(StringUtils::format(
                 "^7%s ^7broke the overall server record for ^3%s\n^7with ^3%s "
                 "%s ^7!!!\n",
                 playerName, StringUtils::sanitize(record.record.run),
-                millisToString(record.record.time), diffString));
+                TimeUtils::millisToString(record.record.time), diffString));
           }
           Printer::commandAll(
               TimerunCommands::Record(clientNum, record.record.time,
@@ -1882,16 +1884,17 @@ void TimerunV2::checkRecord(Player *player) {
 
           // print banner only if there was an existing seasonal record
           if (completionTime < previousTopRecordTime) {
-            diffString = "^7(" +
-                         diffToString(completionTime, previousTopRecordTime) +
-                         "^7)";
+            diffString =
+                "^7(" +
+                TimeUtils::diffToString(completionTime, previousTopRecordTime) +
+                "^7)";
 
             Printer::bannerAll(StringUtils::format(
                 "^7%s ^7broke the server record on ^3%s^7 season for "
                 "^3%s\n^7with ^3%s %s ^7!!!\n",
                 playerName, record.seasonName,
                 StringUtils::sanitize(record.record.run),
-                millisToString(record.record.time), diffString));
+                TimeUtils::millisToString(record.record.time), diffString));
           }
 
           // Send a record only if we beat our old PB
@@ -1915,10 +1918,11 @@ void TimerunV2::checkRecord(Player *player) {
           }
 
           if (record.second.previousTime.has_value()) {
-            diffString = "^7(" +
-                         diffToString(record.second.record.time,
-                                      record.second.previousTime.value()) +
-                         "^7)";
+            diffString =
+                "^7(" +
+                TimeUtils::diffToString(record.second.record.time,
+                                        record.second.previousTime.value()) +
+                "^7)";
           }
           Printer::console(
               checkRecordResult->clientNum,
@@ -1926,7 +1930,8 @@ void TimerunV2::checkRecord(Player *player) {
                   "^7New personal record on season ^3%s^7 for ^7^3%s ^7with "
                   "^3%s %s^7!\n",
                   record.second.seasonName, record.second.record.run,
-                  millisToString(record.second.record.time), diffString));
+                  TimeUtils::millisToString(record.second.record.time),
+                  diffString));
         }
 
         for (const auto &newRecord :
@@ -1989,13 +1994,13 @@ void TimerunV2::checkRecord(Player *player) {
 }
 
 std::array<int, MAX_TIMERUN_CHECKPOINTS>
-TimerunV2::toCheckpointsArray(const std::vector<int> *input) {
+TimerunV2::toCheckpointsArray(const std::vector<int> *v) {
   std::array<int, MAX_TIMERUN_CHECKPOINTS> arr{};
   arr.fill(TIMERUN_CHECKPOINT_NOT_SET);
 
-  auto checkpointsToCopy = std::min(input->size(), arr.size());
+  auto checkpointsToCopy = std::min(v->size(), arr.size());
 
-  std::copy_n(begin(*input), checkpointsToCopy, begin(arr));
+  std::copy_n(begin(*v), checkpointsToCopy, begin(arr));
 
   return arr;
 }

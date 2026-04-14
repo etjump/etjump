@@ -179,7 +179,7 @@ public:
     std::string text;
     int integer{};
     double decimal{};
-    Date date{};
+    TimeUtils::Date date{};
   };
 
   struct Command {

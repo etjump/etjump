@@ -562,9 +562,6 @@ struct gentity_s {
   //		@ARNOUT - does this screw up the save game?
   g_serverEntity_t *serverEntity;
 
-  // What sort of surface are we standing on?
-  int surfaceFlags;
-
   char tagBuffer[16];
 
   // bleh - ugly
@@ -596,6 +593,9 @@ struct gentity_s {
   // Zero - other portal so we know where to go
   // when someone goes in a team portal
   gentity_t *linkedPortal;
+  // the entity that the portal was fired onto, used to delete a portal
+  // that was fired onto 'func_static_client' that gets turned off
+  gentity_t *portalParentEntity;
 
   int runIndex;
   char runName[MAX_TIMERUN_NAME_LENGTH];
@@ -1449,38 +1449,11 @@ typedef struct {
 
   qboolean tempTraceIgnoreEnts[MAX_GENTITIES];
 
-  // Deprecated
-  int noExplosives;
-
-  qboolean noSave;
-  bool noNoclip;
-  qboolean noGod;
-  qboolean noGoto;
-  bool noOverbounce;
-  bool noJumpDelay;
-  bool noFallDamage;
-  bool noProne;
-  bool noDrop;
-  bool noWallbug;
-  bool noFTNoGhost;
-  bool noFTSaveLimit;
-  bool noFTTeamjumpMode;
-  bool portalPredict;
-  int32_t bodyOverbounce;
-
-  int portalEnabled; // Feen: PGM - Enabled/Disabled by map key
-  qboolean portalSurfaces;
-
   ipMute_t ipMutes[MAX_IP_MUTES]; // I don't think we need more than 16
-
-  bool noGhost;
-  int limitedSaves;
-  int portalTeam;
 
   int timerunNamesCount;
   char timerunNames[MAX_TIMERUNS][MAX_TIMERUN_NAME_LENGTH];
   bool hasTimerun;
-  int saveLoadRestrictions;
   int checkpointsCount[MAX_TIMERUNS];
 
   SpawnRelayEntities spawnRelayEntities;

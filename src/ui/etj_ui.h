@@ -24,33 +24,20 @@
 
 #pragma once
 
-#include "g_local.h"
+#include <memory>
 
 namespace ETJump {
-class Portal {
-public:
-  enum class Type {
-    PORTAL_BLUE = 1,
-    PORTAL_RED = 2,
-  };
+class SyscallExt;
+class ColorPicker;
+class DemoQueue;
+class QuickConnect;
+class ColorParser;
 
-  static void spawn(gentity_t *ent, float scale, Type type, const trace_t &tr,
-                    vec3_t end, const vec3_t angles);
-  static void think(gentity_t *self);
-  static void touch(gentity_t *self, gentity_t *other);
-  static void free(gentity_t *self);
-};
-
-class Portalgun {
-public:
-  static void spawn(gentity_t *ent);
-  static void touch(gentity_t *self, gentity_t *other, trace_t *trace);
-
-  static void fire(gentity_t *ent, Portal::Type type, vec3_t forward,
-                   vec3_t right, vec3_t up, vec3_t muzzleEffect);
-
-private:
-  static bool portalsOverlap(gentity_t *ent, Portal::Type type, float scale,
-                             vec3_t portalAngles, vec3_t endPos);
+struct UIContext {
+  std::unique_ptr<SyscallExt> syscallExt;
+  std::unique_ptr<ColorPicker> colorPicker;
+  std::unique_ptr<DemoQueue> demoQueue;
+  std::unique_ptr<QuickConnect> quickConnect;
+  std::unique_ptr<ColorParser> colorParser;
 };
 } // namespace ETJump

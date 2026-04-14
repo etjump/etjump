@@ -100,11 +100,11 @@ void ChatReplay::sendChatMessages(gentity_t *ent) {
     sessStartTime -= g_chatReplayMaxMessageAge.integer * 60;
 #endif
 
-    const Time maxAge = Time::fromInt(sessStartTime);
+    const TimeUtils::Time maxAge = TimeUtils::Time::fromInt(sessStartTime);
     bool allExpired = true;
 
     for (auto &msg : chatReplayBuffer) {
-      if (maxAge > Time::fromInt(msg.timestamp)) {
+      if (maxAge > TimeUtils::Time::fromInt(msg.timestamp)) {
         msg.expired = true;
       } else {
         msg.expired = false;

@@ -277,14 +277,14 @@ std::string AutoDemoRecorder::createDemoTempPath(const std::string &name) {
 }
 
 std::string AutoDemoRecorder::createTimeString() {
-  Time time = getCurrentTime();
+  TimeUtils::Time time = TimeUtils::getCurrentTime(true);
   return StringUtils::format("%02d-%02d-%d-%02d%02d%02d", time.date.day,
                              time.date.mon, time.date.year, time.clock.hours,
                              time.clock.min, time.clock.sec);
 }
 
 std::string AutoDemoRecorder::formatRunTime(int millis) {
-  Clock clock = toClock(millis, false);
+  TimeUtils::Clock clock = TimeUtils::toClock(millis, false);
   return StringUtils::format("%02d.%02d.%03d", clock.min, clock.sec, clock.ms);
 }
 

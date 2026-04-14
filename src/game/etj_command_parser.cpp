@@ -202,7 +202,7 @@ ETJump::CommandParser::Option ETJump::CommandParser::createDateOption(
   option.text = text;
 
   try {
-    option.date = Date::fromString(text);
+    option.date = TimeUtils::Date::fromString(text);
   } catch (const std::invalid_argument &) {
     _cmd.errors.push_back(StringUtils::format(
         "`%s` does not match the expected format of `YYYY-MM-DD`", text));

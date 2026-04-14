@@ -43,6 +43,7 @@
 #include "etj_filesystem.h"
 #include "etj_printer.h"
 #include "etj_fireteam_countdown.h"
+#include "etj_worldspawn.h"
 #include "etj_crypto.h"
 
 #ifdef NEW_AUTH
@@ -349,6 +350,7 @@ void OnGameShutdown() {
   game.rtv = nullptr;
   game.chatReplay = nullptr;
   game.fireteamCountdown = nullptr;
+  game.worldspawn = nullptr;
 
 #ifdef NEW_AUTH
   game.sessionV2 = nullptr;

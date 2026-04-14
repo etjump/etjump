@@ -188,9 +188,9 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
           if (r->user.lastSeen > 0) {
             Printer::popup(
                 clientNum,
-                StringUtils::format(
-                    "^5Your last visit was on %s.",
-                    Time::fromInt(r->user.lastSeen).toDateTimeString()));
+                StringUtils::format("^5Your last visit was on %s.",
+                                    TimeUtils::Time::fromInt(r->user.lastSeen)
+                                        .toDateTimeString()));
           }
 
           // mutes expire once map changes, so it only makes sense to check
@@ -882,7 +882,7 @@ void SessionV2::userInfo(const gentity_t *ent, const int32_t id) const {
         const std::string ipv6 = !r->user.ipv6.empty() ? r->user.ipv6 : "N/A";
         const std::string lastSeen =
             r->user.lastSeen > 0
-                ? Time::fromInt(r->user.lastSeen).toDateTimeString()
+                ? TimeUtils::Time::fromInt(r->user.lastSeen).toDateTimeString()
                 : "N/A";
 
         std::string msg = StringUtils::format(
@@ -1013,7 +1013,8 @@ void SessionV2::listBans(const gentity_t *ent, const int32_t page) const {
               "^7%-3i %s ^7%s %s ^7%s %s\n", r->bans[i].banID, r->bans[i].name,
               r->bans[i].banDate, r->bans[i].bannedBy,
               r->bans[i].expires > 0
-                  ? Time::fromInt(r->bans[i].expires).toDateTimeString()
+                  ? TimeUtils::Time::fromInt(r->bans[i].expires)
+                        .toDateTimeString()
                   : "Never",
               r->bans[i].reason);
         }
@@ -1275,7 +1276,7 @@ void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
                              ->client->pers.netname
                        : target.name;
         ban.bannedBy = params.bannedBy;
-        ban.banDate = Time::fromInt(t).toDateTimeString();
+        ban.banDate = TimeUtils::Time::fromInt(t).toDateTimeString();
         ban.expires = params.expires == 0 ? params.expires : params.expires + t;
         ban.reason = params.reason;
         ban.parentBanId = 0; // FIXME: actually handle this in the command
@@ -1766,7 +1767,8 @@ std::string SessionV2::formatGreeting(const gentity_t *ent,
   const auto lastSeen = clients[ClientNum(ent)].user->lastSeen;
 
   const std::string lastSeenStr =
-      lastSeen > 0 ? Time::fromInt(lastSeen).toDateTimeString() : "never";
+      lastSeen > 0 ? TimeUtils::Time::fromInt(lastSeen).toDateTimeString()
+                   : "never";
   StringUtils::replaceAll(s, "[t]", lastSeenStr);
 
   time_t t = 0;

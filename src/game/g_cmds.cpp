@@ -16,6 +16,7 @@
 #include "etj_inactivity_timer.h"
 #include "etj_remapshader_handler.h"
 #include "etj_shader_index_handler.h"
+#include "etj_worldspawn.h"
 
 #ifdef NEW_AUTH
   #include "etj_session_v2.h"
@@ -790,7 +791,7 @@ void Cmd_God_f(gentity_t *ent) {
       return;
     }
 
-    if (level.noGod) {
+    if (game.worldspawn->noGod) {
       Printer::center(ent, "^3god ^7has been disabled on this map.");
       return;
     }
@@ -975,7 +976,8 @@ void setPlayerOffset(gentity_t *ent) {
                     ent->client->ps.maxs, dst, ent->client->ps.clientNum,
                     CONTENTS_NONOCLIP);
 
-  if (!g_cheats.integer && level.noNoclip == (trace.fraction == 1.0f)) {
+  if (!g_cheats.integer &&
+      game.worldspawn->noNoclip == (trace.fraction == 1.0f)) {
     Printer::console(clientNum, "^7You cannot ^3setoffset ^7to this area.\n");
     return;
   }
@@ -4419,7 +4421,7 @@ void Cmd_Goto_f(gentity_t *ent) {
     return;
   }
 
-  if (!g_cheats.integer && level.noGoto) {
+  if (!g_cheats.integer && game.worldspawn->noGoto) {
     CP("print \"Goto is disabled on this map.\n\"");
     return;
   }
@@ -4502,7 +4504,7 @@ void Cmd_Call_f(gentity_t *ent) {
     return;
   }
 
-  if (!g_cheats.integer && level.noGoto) {
+  if (!g_cheats.integer && game.worldspawn->noGoto) {
     CP("print \"Call is disabled on this map.\n\"");
     return;
   }
@@ -4681,7 +4683,7 @@ qboolean G_DesiredFollow(gentity_t *ent, gentity_t *other) {
 }
 
 namespace ETJump {
-static int getPlayerClassId(const std::string string) {
+static int getPlayerClassId(const std::string &string) {
   switch (string[0]) {
     case 'm':
       return PC_MEDIC;
@@ -4725,12 +4727,12 @@ static const char *getPlayerTeamName(const int teamNum) {
 }
 
 struct classLoadout {
-  const int classId;
-  const int weaponSlot;
+  int classId;
+  int weaponSlot;
   const char *description;
 };
 
-classLoadout availableLoadouts[]{
+static classLoadout availableLoadouts[]{
     {PC_MEDIC, 1, "Medic with SMG"},
     {PC_MEDIC, 2, "Medic with Rifle"},
     {PC_MEDIC, 3, "Medic with Sniper Rifle"},
@@ -4754,22 +4756,42 @@ classLoadout availableLoadouts[]{
 };
 } // namespace ETJump
 
-void Cmd_Class_f(gentity_t *ent) {
-  const auto args = GetArgs();
-  const auto clientNum = ClientNum(ent);
-  const int DEFAULT_WEAPON_SLOT = 1; // weapon argument default value
+static void Cmd_Class_f(gentity_t *ent) {
+  const auto *const args = GetArgs();
+  static constexpr int DEFAULT_WEAPON_SLOT = 1; // weapon argument default value
 
   // not enough arguments were specified, generate usage text
   if (args->size() < 2) {
-    std::string usageText{"^3Usage:\n"};
+    const std::string usageText =
+        "^3usage: ^7class <s|m|e|f|c> [primary] [secondary]\n\n"
+        "Valid loadouts:\n"
+        "^7Soldier:\n"
+        "^3 1 ^7- SMG\n"
+        "^3 2 ^7- MG42\n"
+        "^3 3 ^7- Flamethrower\n"
+        "^3 4 ^7- Panzerfaust\n"
+        "^3 5 ^7- Mortar\n"
+        "^3 6 ^7- Rifle\n"
+        "^3 7 ^7- Sniper Rifle\n\n"
+        "^7Medic/Engineer/Field Ops:\n"
+        "^3 1 ^7- SMG\n"
+        "^3 2 ^7- Rifle\n"
+        "^3 3 ^7- Sniper Rifle\n\n"
+        "^7Covert Ops:\n"
+        "^3 1 ^7- Sten\n"
+        "^3 2 ^7- FG42\n"
+        "^3 3 ^7- Sniper Rifle\n"
+        "^3 4 ^7- Rifle\n\n"
+        "^7Secondary:\n"
+        "^3 1 ^7- Pistol\n"
+        "^3 2 ^7- Akimbo Pistols\n";
 
-    for (auto &loadout : ETJump::availableLoadouts) {
-      usageText += StringUtils::format(
-          "  ^7%-30s ^9/class %c %i\n", loadout.description,
-          ETJump::getPlayerClassSymbol(loadout.classId), loadout.weaponSlot);
-    }
+    Printer::console(ent, usageText);
+    return;
+  }
 
-    Printer::console(clientNum, usageText);
+  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+    Printer::console(ent, "^7You must be in a team to use ^3class\n");
     return;
   }
 
@@ -4778,33 +4800,40 @@ void Cmd_Class_f(gentity_t *ent) {
 
   // get weapon slot
   int weaponSlot = DEFAULT_WEAPON_SLOT;
+
   if (args->size() > 2) {
-    try {
-      int parsedValue = std::stoi((*args)[2]);
-      weaponSlot = std::max(std::min(parsedValue, MAX_WEAPS_PER_CLASS),
-                            DEFAULT_WEAPON_SLOT);
-    }
-    // suppress error and use DEFAULT_WEAPON_SLOT
-    catch (const std::invalid_argument &) {
-    } catch (const std::out_of_range &) {
-    }
+    weaponSlot = std::clamp(Q_atoi((*args)[2]), DEFAULT_WEAPON_SLOT,
+                            MAX_WEAPS_PER_CLASS);
   }
+
+  int32_t secondarySlot = DEFAULT_WEAPON_SLOT;
+
+  if (args->size() > 3) {
+    secondarySlot = std::clamp(Q_atoi((*args)[3]), DEFAULT_WEAPON_SLOT,
+                               MAX_WEAPS_PER_CLASS);
+  }
+
   // out of bounds check - if no weapon is set in specified slot
-  const auto classInfo =
+  const auto *const classInfo =
       BG_GetPlayerClassInfo(ent->client->sess.sessionTeam, classId);
+
   if (classInfo->classWeapons[weaponSlot - 1] == WP_NONE) {
     weaponSlot = DEFAULT_WEAPON_SLOT;
+  }
+
+  if (classInfo->classSecondaryWeapons[secondarySlot - 1] == WP_NONE) {
+    secondarySlot = DEFAULT_WEAPON_SLOT;
   }
 
   // fetch weapons
   const auto primaryWeapon = classInfo->classWeapons[weaponSlot - 1];
   const auto secondaryWeapon =
-      static_cast<weapon_t>(ent->client->sess.latchPlayerWeapon2);
+      classInfo->classSecondaryWeapons[secondarySlot - 1];
 
   // display center print message
-  for (auto &loadout : ETJump::availableLoadouts) {
+  for (const auto &loadout : ETJump::availableLoadouts) {
     if (loadout.classId == classId && loadout.weaponSlot == weaponSlot) {
-      Printer::center(clientNum,
+      Printer::center(ent,
                       StringUtils::format("You will spawn as an %s %s",
                                           ETJump::getPlayerTeamName(
                                               ent->client->sess.sessionTeam),

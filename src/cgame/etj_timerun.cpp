@@ -259,12 +259,13 @@ std::string Timerun::createCompletionMessage(const clientInfo_t &player,
                                              int completionTime,
                                              std::optional<int> previousTime) {
   std::string who{(player.clientNum == cg.clientNum) ? "You" : player.name};
-  std::string timeFinished{millisToString(completionTime)};
+  std::string timeFinished{TimeUtils::millisToString(completionTime)};
   std::string timeDifference{""};
 
   if (previousTime.has_value()) {
     timeDifference =
-        +"^7(" + diffToString(completionTime, previousTime.value()) + "^7)";
+        +"^7(" + TimeUtils::diffToString(completionTime, previousTime.value()) +
+        "^7)";
   }
 
   std::string message =

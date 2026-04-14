@@ -25,6 +25,8 @@
 #include "etj_colorpicker.h"
 #include "etj_local.h"
 
+#include "../cgame/etj_color_parser.h"
+
 #include "../game/etj_string_utilities.h"
 
 extern displayContextDef_t *DC;

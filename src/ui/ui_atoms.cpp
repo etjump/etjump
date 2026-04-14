@@ -5,6 +5,8 @@
 
     User interface building blocks and support functions.
 **********************************************************************/
+
+#include "etj_demo_queue.h"
 #include "ui_local.h"
 #include "etj_local.h"
 #include "etj_utilities.h"

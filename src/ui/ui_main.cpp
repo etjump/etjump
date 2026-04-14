@@ -11,12 +11,14 @@ USER INTERFACE MAIN
 #include <cmath>
 #include <memory>
 
-#include "ui_local.h"
+#include "etj_colorpicker.h"
 #include "etj_local.h"
-
 #include "etj_menu_integrity_checker.h"
+#include "etj_quick_connect.h"
 #include "etj_utilities.h"
+#include "ui_local.h"
 
+#include "../cgame/etj_color_parser.h"
 #include "../cgame/etj_cvar_parser.h"
 
 #include "../game/etj_string_utilities.h"

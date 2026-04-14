@@ -30,9 +30,20 @@
 #include <array>
 
 #include "etj_string_utilities.h"
-#include "etj_printer.h"
 
-namespace ETJump {
+#ifdef GAMEDLL
+  #include "etj_printer.h"
+#else
+  #ifdef WIN32
+    #define QDECL __cdecl
+  #else
+    #define QDECL
+  #endif
+
+void QDECL Com_Printf(const char *msg, ...);
+#endif
+
+namespace TimeUtils {
 struct Clock {
   int hours;
   int min;
@@ -191,10 +202,15 @@ struct Time {
     ss >> std::get_time(&t, format.c_str());
 
     if (ss.fail()) {
-      Printer::logLn(StringUtils::format(
+      const std::string err = StringUtils::format(
           "%s: Failed to parse timestamp string '%s' in given "
           "format '%s', using default timestamp.",
-          __func__, input, format));
+          __func__, input, format);
+#ifdef GAMEDLL
+      Printer::logLn(err);
+#else
+      Com_Printf("%s\n", err.c_str());
+#endif
 
       t = {};
       std::istringstream defaultTime("1900-01-01 00:00:00");
@@ -225,12 +241,12 @@ struct Time {
   }
 };
 
-long long getCurrentTimestamp();
-Clock getCurrentClock();
-Clock toClock(long long timestamp, bool useHours);
-Date getCurrentDate();
-Time getCurrentTime();
+int64_t getCurrentTimestamp();
+Clock getCurrentClock(bool localtime);
+Clock toClock(int64_t timestamp, bool useHours);
+Date getCurrentDate(bool localtime);
+Time getCurrentTime(bool localtime);
 
 std::string millisToString(int millis);
 std::string diffToString(int selfTime, int otherTime);
-} // namespace ETJump
+} // namespace TimeUtils

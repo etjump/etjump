@@ -33,6 +33,7 @@
   * also accessible via admin commands `!list/comparecheckpoints`
 * added `func_static_client` entity [#1824](https://github.com/etjump/etjump/pull/1824)
   * works like `func_static`, except it's on/off state is unique for each client
+  * any portalgun portals fired on this entity will be deleted when it's turned off
   * keys:
     * `model2` - optional `md3/mdc` model to draw
     * `offModel` - optional model to draw when the brush is turned off (the brush is invisible otherwise)
@@ -43,6 +44,7 @@
   * spawnflags:
     * `1` - starts off for all clients
     * `2` - gibs the activator if they are inside the brush when it's turned on
+    * `4` - syncs the state of this entity for all fireteam members to fireteam leader's state when teamjump mode is enabled
 * fixed a potential crash on older versions of ETe when issuing RCON commands in localhost [#1832](https://github.com/etjump/etjump/pull/1832)
 * added custom command menu - a vsay-style menu where users can define up to 40 custom commands to easily execute [#1801](https://github.com/etjump/etjump/pull/1801)
   * commands are stored in `custom_commands.dat` by default, and are configured in TOML, a simple markup language
@@ -61,6 +63,16 @@
     * `etj_ccMenu_autoClose` - toggles whether the menu automatically closes after executing a command, default `1`
 * `ignore` no longer works on yourself [#1835](https://github.com/etjump/etjump/pull/1835)
 * tweaked coloring of some prints, most prints should now be in white text [#1838](https://github.com/etjump/etjump/pull/1838)
+* fixed jump speeds text size being initialized from wrong cvar value [#1842](https://github.com/etjump/etjump/pull/1842)
+* fixed a potential crash when loading a map after demo playback [#1844](https://github.com/etjump/etjump/pull/1844)
+* fixed `etj_smoothAngles` sometimes getting applied during demo playback, breaking view angles [#1846](https://github.com/etjump/etjump/pull/1846)
+* added `printMapCustomizationInfo` console command to print custom mapscript and entity file hashes used on the server [#1850](https://github.com/etjump/etjump/pull/1850)
+  * works during demo playback starting from ETJump 3.5.0, to see the hashes of the files that were loaded at the time the demo was recorded
+* fixed missing colon character in `etj_viewPlayerPortals` menu entry [#1852](https://github.com/etjump/etjump/pull/1852)
+* fixed season states, timerun records and daily logs using server local time for timestamps - these are now using UTC time for consistency [#1862](https://github.com/etjump/etjump/pull/1862)
+* added high resolution, anti-aliased drawing to CGaz2 [#1864](https://github.com/etjump/etjump/pull/1864)
+  * `etj_CGaz2HighRes` can be used to toggle between old and new drawing style (default `1`)
+  * `etj_CGaz2Thickness` can be used to change the line thickness when high-res drawing is enabled (default `2`, valid range `0.5 - 5.0`)
 
 # ETJump 3.4.2
 

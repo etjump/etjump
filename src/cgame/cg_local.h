@@ -2372,6 +2372,8 @@ extern vmCvar_t etj_CGaz2WishDirFixedSpeed;
 extern vmCvar_t etj_CGaz2WishDirUniformLength;
 extern vmCvar_t etj_CGaz1DrawMidLine;
 extern vmCvar_t etj_CGaz1MidlineColor;
+extern vmCvar_t etj_CGaz2HighRes;
+extern vmCvar_t etj_CGaz2Thickness;
 
 extern vmCvar_t etj_drawOB;
 // Aciz: movable drawOB
@@ -2839,9 +2841,12 @@ void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
 void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
                         float fov, vec4_t const color, bool borderOnly,
                         float borderThickness);
-void DrawLine(float x1, float y1, float x2, float y2, const vec4_t color);
-void DrawLine(float x1, float y1, float x2, float y2, float w, float h,
-              const vec4_t color);
+void drawLineDDA(float x0, float y0, float x1, float y1, const vec4_t color);
+void drawLineDDA(float x0, float y0, float x1, float y1, float w, float h,
+                 const vec4_t color);
+void drawLineWu(float x0, float y0, float x1, float y1, float w, float h,
+                const vec4_t color);
+void drawLineWu(float x0, float y0, float x1, float y1, const vec4_t color);
 void DrawTriangle(float x, float y, float w, float h, float lineW, float angle,
                   bool fill, const vec4_t color,
                   const vec4_t fillColor = nullptr);
@@ -2849,6 +2854,7 @@ float AngleToScreenX(float angle, float fov);
 range_t AnglesToRange(float start, float end, float yaw, float fov);
 void CG_HorizontalPercentBar(float x, float y, float width, float height,
                              float percent);
+void drawPicNoScale(float x, float y, float w, float h, qhandle_t shader);
 void CG_DrawPic(float x, float y, float width, float height, qhandle_t hShader);
 void CG_DrawPicST(float x, float y, float width, float height, float s0,
                   float t0, float s1, float t1, qhandle_t hShader);

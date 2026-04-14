@@ -47,7 +47,7 @@ Timerun::Record getRecordFromStandardQueryResult(
           return TIMERUN_CHECKPOINT_NOT_SET;
         }
       });
-  Time recordDateTime = Time::fromString(recordDate);
+  TimeUtils::Time recordDateTime = TimeUtils::Time::fromString(recordDate);
 
   std::map<std::string, std::string> metadata;
   for (const auto &kvp : Container::map(StringUtils::split(metadataString, ","),
@@ -330,8 +330,8 @@ TimerunRepository::getTopRecords(const std::vector<int> &seasonIds,
 
 void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
   int seasonId = -1;
-  Time startTime;
-  std::optional<Time> endTime;
+  TimeUtils::Time startTime;
+  std::optional<TimeUtils::Time> endTime;
 
   _database->sql << R"(
     select
@@ -344,9 +344,9 @@ void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
   )" << params.name >>
       [&](int sid, std::string s, std::unique_ptr<std::string> e) {
         seasonId = sid;
-        startTime = Time::fromString(s);
+        startTime = TimeUtils::Time::fromString(s);
         if (e) {
-          endTime = Time(Time::fromString(*e));
+          endTime = TimeUtils::Time(TimeUtils::Time::fromString(*e));
         }
       };
 
@@ -359,8 +359,8 @@ void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
   std::vector<std::string> updatedParams;
   bool anythingToUpdate = false;
 
-  Time newStartTime = startTime;
-  std::optional<Time> newEndTime = endTime;
+  TimeUtils::Time newStartTime = startTime;
+  std::optional<TimeUtils::Time> newEndTime = endTime;
 
   if (params.startTime.has_value()) {
     newStartTime = params.startTime.value();
@@ -591,10 +591,11 @@ TimerunRepository::getSeasonsForName(const std::string &name, bool exact) {
   auto handler = [&seasons](int id, const std::string &name,
                             const std::string &startTime,
                             std::unique_ptr<std::string> endTime) {
-    seasons.push_back(Timerun::Season{
-        id, name, Time::fromString(startTime),
-        (endTime ? std::make_optional<Time>(Time::fromString(*endTime))
-                 : std::nullopt)});
+    seasons.push_back(
+        Timerun::Season{id, name, TimeUtils::Time::fromString(startTime),
+                        (endTime ? std::make_optional<TimeUtils::Time>(
+                                       TimeUtils::Time::fromString(*endTime))
+                                 : std::nullopt)});
   };
 
   if (exact) {
@@ -677,10 +678,10 @@ std::vector<Timerun::Season> TimerunRepository::getSeasons() {
   )" >>
       [this, &seasons](int id, std::string name, std::string startTimeStr,
                        std::string endTimeStr) {
-        auto startTime = Time::fromString(startTimeStr);
-        std::optional<Time> endTime;
+        auto startTime = TimeUtils::Time::fromString(startTimeStr);
+        std::optional<TimeUtils::Time> endTime;
         if (endTimeStr.length() != 0) {
-          endTime = Time::fromString(endTimeStr);
+          endTime = TimeUtils::Time::fromString(endTimeStr);
         }
 
         seasons.push_back(Timerun::Season{id, name, startTime, endTime});
@@ -849,7 +850,7 @@ void TimerunRepository::tryToMigrateRecords() {
         r.map = map;
         r.run = run;
         r.time = time;
-        r.recordDate = Time::fromInt(recordDate);
+        r.recordDate = TimeUtils::Time::fromInt(recordDate);
         r.userId = userId;
         r.playerName = playerName;
         r.checkpoints = std::vector<int>(MAX_TIMERUN_CHECKPOINTS,

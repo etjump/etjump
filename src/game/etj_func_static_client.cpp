@@ -23,10 +23,13 @@
  */
 
 #include "etj_func_static_client.h"
+#include "etj_entity_utilities_shared.h"
 
 namespace ETJump {
 inline constexpr int32_t SF_START_INVIS = 1 << 0;
 inline constexpr int32_t SF_GIB_INSIDE = 1 << 1;
+inline constexpr int32_t SF_FT_TEAMJUMP_SYNC = 1 << 2;
+inline constexpr int32_t SF_CONSUME_PORTALS = 1 << 3;
 
 /*
  * 'ent->s.effect1Time' and 'ent->s.effect2Time' are treated as boolean
@@ -115,6 +118,10 @@ void FuncStaticClient::turnOn(gentity_t *self, const int32_t clientNum) {
     G_Damage(g_entities + clientNum, self, self, nullptr, nullptr, 9999,
              DAMAGE_NO_PROTECTION, MOD_CRUSH);
   }
+
+  if (self->spawnflags & SF_CONSUME_PORTALS) {
+    deleteTouchingPortals(self, clientNum);
+  }
 }
 
 void FuncStaticClient::turnOff(gentity_t *self, const int32_t clientNum) {
@@ -145,5 +152,46 @@ bool FuncStaticClient::activatorIsInsideEnt(const gentity_t *self,
   }
 
   return false;
+}
+
+void FuncStaticClient::syncToFireteamLeaderState(const int32_t clientNum,
+                                                 const int32_t leaderNum) {
+  for (int32_t i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; i++) {
+    gentity_t *ent = &g_entities[i];
+
+    if (ent->s.eType != ET_STATIC_CLIENT) {
+      continue;
+    }
+
+    if (!(ent->spawnflags & SF_FT_TEAMJUMP_SYNC)) {
+      continue;
+    }
+
+    if (EntityUtilsShared::funcStaticClientIsHidden(&ent->s, leaderNum)) {
+      turnOff(ent, clientNum);
+    } else {
+      turnOn(ent, clientNum);
+    }
+  }
+}
+
+void FuncStaticClient::deleteTouchingPortals(const gentity_t *self,
+                                             const int32_t clientNum) {
+  const gentity_t *activator = g_entities + clientNum;
+
+  // we check against the portal origin instead of bbox, otherwise it's
+  // possible to fire portals next to the entity while it's solid,
+  // which then get deleted when it's toggled, which feels very wrong
+  if (activator->portalBlue &&
+      trap_EntityContact(activator->portalBlue->r.currentOrigin,
+                         activator->portalBlue->r.currentOrigin, self)) {
+    G_FreeEntity(activator->portalBlue);
+  }
+
+  if (activator->portalRed &&
+      trap_EntityContact(activator->portalRed->r.currentOrigin,
+                         activator->portalRed->r.currentOrigin, self)) {
+    G_FreeEntity(activator->portalRed);
+  }
 }
 } // namespace ETJump

@@ -26,22 +26,23 @@
 #include <chrono>
 #include <ctime>
 
-long long ETJump::getCurrentTimestamp() {
+namespace TimeUtils {
+int64_t getCurrentTimestamp() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(
              std::chrono::system_clock::now().time_since_epoch())
       .count();
 }
 
-ETJump::Clock ETJump::getCurrentClock() {
+Clock getCurrentClock(const bool localtime) {
   time_t now = std::time(nullptr);
-  tm tstruct = *std::localtime(&now);
+  tm tstruct = localtime ? *std::localtime(&now) : *std::gmtime(&now);
   auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()) %
             1000;
   return {tstruct.tm_hour, tstruct.tm_min, tstruct.tm_sec, (int)ms.count()};
 }
 
-ETJump::Clock ETJump::toClock(long long timestamp, bool useHours) {
+Clock toClock(int64_t timestamp, bool useHours) {
   auto hours = timestamp / 3600000;
 
   if (useHours) {
@@ -58,18 +59,17 @@ ETJump::Clock ETJump::toClock(long long timestamp, bool useHours) {
           static_cast<int>(seconds), static_cast<int>(millis)};
 }
 
-ETJump::Date ETJump::getCurrentDate() {
-
+Date getCurrentDate(const bool localtime) {
   time_t now = std::time(nullptr);
-  tm tstruct = *std::localtime(&now);
+  tm tstruct = localtime ? *std::localtime(&now) : *std::gmtime(&now);
   return {tstruct.tm_year + 1900, tstruct.tm_mon + 1, tstruct.tm_mday};
 }
 
-ETJump::Time ETJump::getCurrentTime() {
-  return {getCurrentClock(), getCurrentDate()};
+Time getCurrentTime(const bool localtime) {
+  return {getCurrentClock(localtime), getCurrentDate(localtime)};
 }
 
-std::string ETJump::millisToString(int millis) {
+std::string millisToString(int millis) {
   int minutes, seconds;
 
   minutes = millis / 60000;
@@ -80,10 +80,10 @@ std::string ETJump::millisToString(int millis) {
   return StringUtils::format("%02d:%02d.%03d", minutes, seconds, millis);
 }
 
-std::string ETJump::diffToString(int selfTime, int otherTime) {
+std::string diffToString(int selfTime, int otherTime) {
   auto diff = otherTime - selfTime;
   auto ams = std::abs(diff);
-  auto diffComponents = ETJump::toClock(ams, false);
+  auto diffComponents = toClock(ams, false);
 
   const char *diffSign;
   if (diff > 0) {
@@ -97,3 +97,4 @@ std::string ETJump::diffToString(int selfTime, int otherTime) {
   return StringUtils::format("%s%02i:%02i.%03i", diffSign, diffComponents.min,
                              diffComponents.sec, diffComponents.ms);
 }
+} // namespace TimeUtils

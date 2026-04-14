@@ -24,28 +24,15 @@
 
 #pragma once
 
-#include "etj_colorpicker.h"
-#include "etj_demo_queue.h"
-#include "etj_quick_connect.h"
+#include <cstdint>
 
-#include "../cgame/etj_color_parser.h"
-
-#include "../game/etj_syscall_ext_shared.h"
+#include "etj_ui.h"
 
 namespace ETJump {
-// global UI objects
-struct UIContext {
-  std::unique_ptr<SyscallExt> syscallExt;
-  std::unique_ptr<ColorPicker> colorPicker;
-  std::unique_ptr<DemoQueue> demoQueue;
-  std::unique_ptr<QuickConnect> quickConnect;
-  std::unique_ptr<ColorParser> colorParser;
-};
-
-inline UIContext ui;
-
 void init(int32_t legacyClient, int32_t clientVersion);
 void shutdown();
 // outside of 'init()', as this requires menus to be loaded already
 void initQuickConnect();
+
+extern UIContext ui;
 } // namespace ETJump

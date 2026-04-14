@@ -40,6 +40,7 @@
 #include "etj_chat_replay.h"
 #include "etj_filesystem.h"
 #include "etj_savepos_command_handler.h"
+#include "etj_worldspawn.h"
 
 #ifdef NEW_AUTH
   #include "etj_session_v2.h"
@@ -2077,8 +2078,8 @@ bool Mute(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-bool Noclip(gentity_t *ent, Arguments argv) {
-  if (!g_cheats.integer && level.noNoclip) {
+static bool Noclip(gentity_t *ent, Arguments argv) {
+  if (!g_cheats.integer && game.worldspawn->noNoclip) {
     Printer::chat(ent, "^3noclip: ^7noclip is disabled on this map.");
     return false;
   }
@@ -2822,10 +2823,11 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
 
   const auto &name = command.options.at("name").text;
   auto start = command.options.at("start-date").date;
-  auto end = command.options.count("end-date-exclusive") > 0
-                 ? std::make_optional<ETJump::Time>(ETJump::Time::fromDate(
-                       command.options.at("end-date-exclusive").date))
-                 : std::nullopt;
+  auto end =
+      command.options.count("end-date-exclusive") > 0
+          ? std::make_optional<TimeUtils::Time>(TimeUtils::Time::fromDate(
+                command.options.at("end-date-exclusive").date))
+          : std::nullopt;
 
   if (end.has_value()) {
     if ((*end).date < start) {
@@ -2839,7 +2841,7 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
 
   ETJump::Timerun::AddSeasonParams params{};
   params.clientNum = clientNum;
-  params.startTime = ETJump::Time::fromDate(start);
+  params.startTime = TimeUtils::Time::fromDate(start);
   params.endTime = end;
   params.name = name;
 
@@ -2879,13 +2881,13 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
   auto start = command.getOptional("start-date");
   auto end = command.getOptional("end-date");
 
-  const auto &startTime = start.has_value()
-                              ? std::make_optional<ETJump::Time>(
-                                    ETJump::Time::fromDate(start.value().date))
-                              : std::nullopt;
+  const auto &startTime =
+      start.has_value() ? std::make_optional<TimeUtils::Time>(
+                              TimeUtils::Time::fromDate(start.value().date))
+                        : std::nullopt;
   const auto &endTime = end.has_value()
-                            ? std::make_optional<ETJump::Time>(
-                                  ETJump::Time::fromDate(end.value().date))
+                            ? std::make_optional<TimeUtils::Time>(
+                                  TimeUtils::Time::fromDate(end.value().date))
                             : std::nullopt;
 
   game.timerunV2->editSeason({clientNum, name, startTime, endTime});

@@ -104,6 +104,7 @@ add_library(qagame MODULE
 	"etj_user.cpp"
 	"etj_user_repository.cpp"
 	"etj_utilities.cpp"
+	"etj_worldspawn.cpp"
 	${GAME_HEADERS}
 )
 target_compile_definitions(qagame PRIVATE GAMEDLL)
