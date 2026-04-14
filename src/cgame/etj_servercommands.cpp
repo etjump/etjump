@@ -143,34 +143,48 @@ static void callvote(const Arguments &args) {
 
 void registerCommands() {
   cgame.handlers.serverCommands->subscribe(
-      "maplist", [](const auto &args) { maplist(args); }, false);
+      "maplist", [](const auto &args) { maplist(args); });
 
   cgame.handlers.serverCommands->subscribe(
-      "forceCustomvoteRefresh", [](const auto &) { forceCustomvoteRefresh(); },
-      false);
+      "forceCustomvoteRefresh", [](const auto &) { forceCustomvoteRefresh(); });
 
   cgame.handlers.serverCommands->subscribe(
-      "numcustomvotes", [](const auto &args) { numCustomvotes(args); }, false);
+      "numcustomvotes", [](const auto &args) { numCustomvotes(args); });
 
   cgame.handlers.serverCommands->subscribe(
-      "customvotelist", [](const auto &args) { customvoteList(args); }, false);
+      "customvotelist", [](const auto &args) { customvoteList(args); });
 
   cgame.handlers.serverCommands->subscribe(
-      "pmFlashWindow", [](const auto &) { pmFlashWindow(); }, false);
+      "pmFlashWindow", [](const auto &) { pmFlashWindow(); });
 
   cgame.handlers.serverCommands->subscribe(
-      "extShaderIndex", [](const auto &args) { extShaderIndex(args); }, false);
+      "extShaderIndex", [](const auto &args) { extShaderIndex(args); });
 
   cgame.handlers.serverCommands->subscribe(
-      "extShaderState", [](const auto &args) { extShaderState(args); }, false);
+      "extShaderState", [](const auto &args) { extShaderState(args); });
 
   cgame.handlers.serverCommands->subscribe(
-      "resetStrafeQuality", [](const auto &) { resetStrafeQuality(); }, false);
+      "resetStrafeQuality", [](const auto &) { resetStrafeQuality(); });
 
   cgame.handlers.serverCommands->subscribe(
-      "savePrint", [](const auto &args) { savePrint(args); }, false);
+      "savePrint", [](const auto &args) { savePrint(args); });
 
   cgame.handlers.serverCommands->subscribe(
-      "callvote", [](const auto &args) { callvote(args); }, false);
+      "callvote", [](const auto &args) { callvote(args); });
+}
+
+void parseWSKeyModifications() {
+  const std::vector<std::string> keys =
+      StringUtils::split(CG_ConfigString(CS_ETJUMP_WSKEY_MODS), "\\");
+
+  for (const auto &key : keys) {
+    const auto kvp = StringUtils::split(key, "=");
+
+    if (kvp.size() != 2) {
+      continue;
+    }
+
+    cgame.wsKeyModifications.emplace_back(kvp[0], Q_atoi(kvp[1]));
+  }
 }
 } // namespace ETJump::ServerCommands

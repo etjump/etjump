@@ -1,5 +1,6 @@
 #include <memory>
 
+#include "etj_worldspawn.h"
 #include "g_local.h"
 #include "etj_deathrun_system.h"
 #include "etj_database.h"
@@ -1935,6 +1936,9 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
   ETJump::TimerunEntity::validateTimerunEntities();
   ETJump::TargetSpawnRelay::validateSpawnRelayEntities();
+
+  const std::string s = game.worldspawn->getKeyModificationsString();
+  trap_SetConfigstring(CS_ETJUMP_WSKEY_MODS, s.c_str());
 
   // TAT 11/13/2002 - entities are spawned, so now we can do setup
   InitialServerEntitySetup();

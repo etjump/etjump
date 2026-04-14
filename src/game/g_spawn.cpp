@@ -24,6 +24,7 @@
 #include "etj_progression_tracker.h"
 #include "etj_target_random.h"
 #include "etj_func_static_client.h"
+#include "etj_target_worldspawn_modifications.h"
 #include "etj_worldspawn.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
@@ -732,6 +733,8 @@ spawn_t spawns[] = {
     {"target_spawn_relay", ETJump::TargetSpawnRelay::spawn},
     {"target_random", ETJump::TargetRandom::spawn},
     {"func_static_client", ETJump::FuncStaticClient::spawn},
+    {"target_worldspawn_modifications",
+     ETJump::TargetWorldspawnModifications::spawn},
     {nullptr, nullptr},
 };
 

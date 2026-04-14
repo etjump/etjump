@@ -24,7 +24,9 @@
 
 #pragma once
 #include <string>
-#include <stdexcept>
+#include <vector>
+
+#include "bg_public.h"
 
 namespace ETJump {
 namespace Constants {
@@ -33,6 +35,12 @@ const std::string GUID_REQUEST = "guid_request";
 const std::string AUTHENTICATE = "authenticate";
 } // namespace Authentication
 } // namespace Constants
+
+// 'shared' cvar value with ignored values removed
+int32_t activeSharedValue(
+    int32_t shared,
+    const std::vector<std::pair<std::string, int32_t>> &ignoredKeys,
+    team_t team, bool timerunActive);
 
 // template class for a bitset that uses 'enum class' as values for the bits
 template <typename EnumT>
@@ -56,6 +64,10 @@ public:
       bits |= static_cast<UnderlyingT>(flag);
     }
   }
+
+  // construct from underlying integer value
+  // EnumBitset<MyEnum> bitset(int)
+  constexpr explicit EnumBitset(UnderlyingT flags) : bits(flags) {}
 
   // we don't want floating point implicit conversions for constructors
   EnumBitset(float) = delete;
@@ -111,5 +123,7 @@ public:
   }
 
   constexpr explicit operator bool() const { return bits != 0; }
+
+  constexpr explicit operator UnderlyingT() const { return bits; }
 };
 } // namespace ETJump

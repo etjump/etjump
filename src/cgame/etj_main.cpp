@@ -337,7 +337,11 @@ void init() {
   ConsoleCommands::registerCommands();
 
   // get the timerun status from the server so we know if there's a timerun
-  trap_SendClientCommand("timerun_status");
+  if (!cg.demoPlayback) {
+    trap_SendClientCommand("timerun_status");
+  }
+
+  ServerCommands::parseWSKeyModifications();
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME

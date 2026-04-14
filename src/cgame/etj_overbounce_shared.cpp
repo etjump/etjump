@@ -70,18 +70,25 @@ bool Overbounce::isOverbounce(float zVel, float startHeight, float endHeight,
 
 bool Overbounce::surfaceAllowsOverbounce(const trace_t *trace) {
   const bool onPlayer = trace->entityNum >= 0 && trace->entityNum < MAX_CLIENTS;
+  const bool noOBIgnored = !(cgs.sharedActive & BG_LEVEL_NO_OVERBOUNCE);
+  const bool onPlayersIgnored = !(cgs.sharedActive & BG_LEVEL_BODY_OB_NEVER) &&
+                                !(cgs.sharedActive & BG_LEVEL_BODY_OB_ALWAYS);
 
-  if (onPlayer) {
-    if (cgs.shared & BG_LEVEL_BODY_OB_NEVER) {
+  if (onPlayer && !onPlayersIgnored) {
+    if (cgs.sharedCvar & BG_LEVEL_BODY_OB_NEVER) {
       return false;
     }
 
-    if (cgs.shared & BG_LEVEL_BODY_OB_ALWAYS) {
+    if (cgs.sharedCvar & BG_LEVEL_BODY_OB_ALWAYS) {
       return true;
     }
   }
 
-  if (cgs.shared & BG_LEVEL_NO_OVERBOUNCE) {
+  if (noOBIgnored) {
+    return true;
+  }
+
+  if (cgs.sharedCvar & BG_LEVEL_NO_OVERBOUNCE) {
     if (!(trace->surfaceFlags & SURF_OVERBOUNCE)) {
       return false;
     }

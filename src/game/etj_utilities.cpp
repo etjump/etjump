@@ -101,6 +101,10 @@ void Utilities::selectValidWeapon(const gentity_t *ent) {
 }
 
 bool Utilities::inNoNoclipArea(gentity_t *ent) {
+  if (game.worldspawn->noNoclipIgnored(ent)) {
+    return false;
+  }
+
   trace_t trace;
   trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins, ent->r.maxs,
                     ent->client->ps.origin, ent->client->ps.clientNum,
@@ -109,25 +113,14 @@ bool Utilities::inNoNoclipArea(gentity_t *ent) {
   // if we're touching a no-noclip area, do another trace for solids
   // so that we don't get instantly stuck in a wall, unable to noclip
   // if we fly to a no-noclip area through a wall
-  if (game.worldspawn->noNoclip) {
-    if (trace.fraction == 1.0f) {
-      trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins,
-                        ent->r.maxs, ent->client->ps.origin,
-                        ent->client->ps.clientNum, CONTENTS_SOLID);
+  if (game.worldspawn->noNoclip ? trace.fraction == 1.0f
+                                : trace.fraction != 1.0f) {
+    trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins, ent->r.maxs,
+                      ent->client->ps.origin, ent->client->ps.clientNum,
+                      CONTENTS_SOLID);
 
-      if (!trace.allsolid) {
-        return true;
-      }
-    }
-  } else {
-    if (trace.fraction != 1.0f) {
-      trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins,
-                        ent->r.maxs, ent->client->ps.origin,
-                        ent->client->ps.clientNum, CONTENTS_SOLID);
-
-      if (!trace.allsolid) {
-        return true;
-      }
+    if (!trace.allsolid) {
+      return true;
     }
   }
 

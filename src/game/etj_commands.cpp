@@ -1850,7 +1850,8 @@ bool Mute(gentity_t *ent, Arguments argv) {
 }
 
 static bool Noclip(gentity_t *ent, Arguments argv) {
-  if (!g_cheats.integer && game.worldspawn->noNoclip) {
+  if (!g_cheats.integer && game.worldspawn->noNoclip &&
+      !game.worldspawn->noNoclipIgnored(ent)) {
     Printer::chat(ent, "^3noclip: ^7noclip is disabled on this map.");
     return false;
   }

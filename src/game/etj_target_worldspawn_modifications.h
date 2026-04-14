@@ -24,8 +24,11 @@
 
 #pragma once
 
-namespace ETJump::ServerCommands {
-void registerCommands();
+#include "g_local.h"
 
-void parseWSKeyModifications();
-} // namespace ETJump::ServerCommands
+namespace ETJump {
+class TargetWorldspawnModifications {
+public:
+  static void spawn(gentity_t *ent);
+};
+} // namespace ETJump
