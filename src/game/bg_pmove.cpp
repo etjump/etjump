@@ -39,6 +39,10 @@ static void bgPrint(const std::string &msg, const Targs &...fargs) {
   Com_Printf("^z[sv] ^7%s\n", fmt.c_str());
 #endif
 }
+
+static inline bool sharedValueIgnored(const int32_t value) {
+  return !(pm->sharedActive & value);
+}
 } // namespace ETJump
 
 pmove_t *pm;
@@ -760,7 +764,14 @@ static qboolean PM_CheckJump(void) {
     if (ETJump::hasJustStoodUp()) {
       return qfalse;
     }
-    if (pm->shared & BG_LEVEL_NO_JUMPDELAY) {
+
+    // if 'nojumpdelay' is ignored, we always have jump delay,
+    // regardless of the surface properties
+    if (ETJump::sharedValueIgnored(BG_LEVEL_NO_JUMPDELAY)) {
+      return qfalse;
+    }
+
+    if (pm->sharedCvar & BG_LEVEL_NO_JUMPDELAY) {
       if (pm->groundTrace.surfaceFlags & SURF_NOJUMPDELAY) {
         return qfalse;
       }
@@ -878,23 +889,16 @@ static qboolean PM_CheckProne(void) {
   // Com_Printf( "%i: PM_CheckProne (%i)\n", pm->cmd.serverTime,
   // pm->pmext->proneGroundTime );
 
-  trace_t trace;
-  pm->trace(&trace, pm->ps->origin, pm->ps->mins, pm->ps->maxs, pm->ps->origin,
-            pm->ps->clientNum, CONTENTS_NOPRONE);
+  if (!PM_Cheats && !ETJump::sharedValueIgnored(BG_LEVEL_NO_PRONE)) {
+    trace_t trace;
+    pm->trace(&trace, pm->ps->origin, pm->ps->mins, pm->ps->maxs,
+              pm->ps->origin, pm->ps->clientNum, CONTENTS_NOPRONE);
 
-  if (!PM_Cheats) {
-    if (pm->shared & BG_LEVEL_NO_PRONE) {
-      if (trace.fraction == 1.0f) {
-        pm->ps->eFlags &= ~EF_PRONE;
-        pm->ps->eFlags &= ~EF_PRONE_MOVING;
-        return qfalse;
-      }
-    } else {
-      if (trace.fraction != 1.0f) {
-        pm->ps->eFlags &= ~EF_PRONE;
-        pm->ps->eFlags &= ~EF_PRONE_MOVING;
-        return qfalse;
-      }
+    if (pm->sharedCvar & BG_LEVEL_NO_PRONE ? (trace.fraction == 1.0f)
+                                           : (trace.fraction != 1.0f)) {
+      pm->ps->eFlags &= ~EF_PRONE;
+      pm->ps->eFlags &= ~EF_PRONE_MOVING;
+      return qfalse;
     }
   }
 
@@ -1822,9 +1826,9 @@ static void PM_CrashLand(void) {
   // Aciz: moved fall damage and stepsound handling into
   // PM_CheckFallDamage to avoid very messy code when checking whether
   // nofalldamage is enabled/disabled.
-  if (pm->shared & BG_LEVEL_NO_FALLDAMAGE_FORCE) {
+  if (pm->sharedCvar & BG_LEVEL_NO_FALLDAMAGE_FORCE) {
     PM_AddCushionFootstep(delta);
-  } else if (pm->shared & BG_LEVEL_NO_FALLDAMAGE) {
+  } else if (pm->sharedCvar & BG_LEVEL_NO_FALLDAMAGE) {
     if (pm->groundTrace.surfaceFlags & SURF_NODAMAGE) {
       PM_CheckFallDamage(delta);
     } else {
@@ -1940,17 +1944,22 @@ namespace ETJump {
 static bool disableOverbounce(const trace_t &trace) {
   const bool onPlayer = trace.entityNum >= 0 && trace.entityNum < MAX_CLIENTS;
 
-  if (onPlayer) {
-    if (pm->shared & BG_LEVEL_BODY_OB_NEVER) {
+  if (onPlayer && (!ETJump::sharedValueIgnored(BG_LEVEL_BODY_OB_NEVER) ||
+                   !ETJump::sharedValueIgnored(BG_LEVEL_BODY_OB_ALWAYS))) {
+    if (pm->sharedCvar & BG_LEVEL_BODY_OB_NEVER) {
       return true;
     }
 
-    if (pm->shared & BG_LEVEL_BODY_OB_ALWAYS) {
+    if (pm->sharedCvar & BG_LEVEL_BODY_OB_ALWAYS) {
       return false;
     }
   }
 
-  if (pm->shared & BG_LEVEL_NO_OVERBOUNCE) {
+  if (ETJump::sharedValueIgnored(BG_LEVEL_NO_OVERBOUNCE)) {
+    return false;
+  }
+
+  if (pm->sharedCvar & BG_LEVEL_NO_OVERBOUNCE) {
     if (!(trace.surfaceFlags & SURF_OVERBOUNCE)) {
       return true;
     }
@@ -1986,7 +1995,8 @@ static void PM_GroundTrace(void) {
   PM_TraceAllLegs(&trace, &pm->pmext->proneLegsOffset, pm->ps->origin, point);
   pm->groundTrace = trace;
 
-  if (pm->shared & BG_LEVEL_NO_WALLBUG) {
+  if (!ETJump::sharedValueIgnored(BG_LEVEL_NO_WALLBUG) &&
+      pm->sharedCvar & BG_LEVEL_NO_WALLBUG) {
     if (trace.allsolid && pm->ps->pm_type != PM_NOCLIP) {
       VectorClear(pm->ps->velocity);
     }
@@ -2588,10 +2598,10 @@ static void PM_ReloadClip(int weapon);
 PM_BeginWeaponChange
 ===============
 */
-void PM_BeginWeaponChange(
-    int oldweapon, int newweapon,
-    qboolean reload) //----(SA)	modified to play 1st person alt-mode transition
-                     // animations.
+void PM_BeginWeaponChange(int oldweapon, int newweapon,
+                          qboolean reload) //----(SA)	modified to play 1st
+                                           // person alt-mode transition
+                                           // animations.
 {
   int switchtime;
   qboolean altSwitchAnim = qfalse;
@@ -2851,8 +2861,8 @@ static void PM_FinishWeaponChange(void) {
       break;
       //		case WP_MEDIC_SYRINGE:
       //			pm->pmext->silencedSideArm
-      //&= ~4; 			break; 		case WP_MEDIC_ADRENALINE:
-      //			pm->pmext->silencedSideArm
+      //&= ~4; 			break; 		case
+      // WP_MEDIC_ADRENALINE: pm->pmext->silencedSideArm
       //|= 4; 			break;
     default:
       break;

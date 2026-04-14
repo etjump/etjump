@@ -972,8 +972,10 @@ void setPlayerOffset(gentity_t *ent) {
                     ent->client->ps.maxs, dst, ent->client->ps.clientNum,
                     CONTENTS_NONOCLIP);
 
-  if (!g_cheats.integer &&
-      game.worldspawn->noNoclip == (trace.fraction == 1.0f)) {
+  if (!g_cheats.integer && !game.worldspawn->noNoclipIgnored(ent) &&
+              game.worldspawn->noNoclip
+          ? trace.fraction == 1.0f
+          : trace.fraction != 1.0f) {
     Printer::console(clientNum, "^7You cannot ^3setoffset ^7to this area.\n");
     return;
   }
@@ -4413,7 +4415,8 @@ void Cmd_Goto_f(gentity_t *ent) {
     return;
   }
 
-  if (!g_cheats.integer && game.worldspawn->noGoto) {
+  if (!g_cheats.integer && game.worldspawn->noGoto &&
+      !game.worldspawn->noGotoIgnored(ent)) {
     CP("print \"Goto is disabled on this map.\n\"");
     return;
   }
@@ -4496,7 +4499,8 @@ void Cmd_Call_f(gentity_t *ent) {
     return;
   }
 
-  if (!g_cheats.integer && game.worldspawn->noGoto) {
+  if (!g_cheats.integer && game.worldspawn->noGoto &&
+      !game.worldspawn->noGotoIgnored(ent)) {
     CP("print \"Call is disabled on this map.\n\"");
     return;
   }
@@ -5017,6 +5021,8 @@ void ClientCommand(int clientNum) {
     return;
   }
 
+  // Let's handle rest of the commands after checking if we're really
+  // connected.
   if (ent->client->pers.connected != CON_CONNECTED) {
     return;
   }
@@ -5030,9 +5036,6 @@ void ClientCommand(int clientNum) {
     ETJump::remapShaderHandler->sendCurrentShaderStateExt();
     return;
   }
-
-  // Let's handle rest of the commands after checking if we're really
-  // connected.
 
   // handle say/vsay commands
   enc = !Q_stricmp(cmd, "enc_say") ? qtrue : qfalse;

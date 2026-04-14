@@ -27,7 +27,6 @@
 #include "etj_worldspawn.h"
 #include "etj_save_system.h"
 #include "etj_string_utilities.h"
-#include "g_local.h"
 
 namespace ETJump {
 Worldspawn::Worldspawn() {
@@ -340,5 +339,119 @@ void Worldspawn::initStrictSaveLoad(const char *key) {
 void Worldspawn::printKeyValue(const std::string &key,
                                const std::string &value) {
   G_Printf(" %s: %s\n", key.c_str(), value.c_str());
+}
+
+void Worldspawn::addKeyModification(const KeyModification &keyMod) {
+  keyModifications.emplace_back(keyMod.key, keyMod.value);
+}
+
+// key1=val\key2=val\key3=val ...
+std::string Worldspawn::getKeyModificationsString() {
+  if (keyModifications.empty()) {
+    return "";
+  }
+
+  std::vector<std::string> values;
+  values.reserve(keyModifications.size());
+
+  for (const auto &[key, value] : keyModifications) {
+    values.emplace_back(key + "=" + std::to_string(value));
+  }
+
+  return StringUtils::join(values, "\\");
+}
+
+const std::vector<std::pair<std::string, int32_t>> &
+Worldspawn::getKeyModifications() {
+  return keyModifications;
+}
+
+bool Worldspawn::noGodIgnored(const gentity_t *ent) const {
+  return keyIsIgnored(ent, Keys::NO_GOD);
+}
+
+bool Worldspawn::noGotoIgnored(const gentity_t *ent) const {
+  return keyIsIgnored(ent, Keys::NO_GOTO);
+}
+
+bool Worldspawn::noNoclipIgnored(const gentity_t *ent) const {
+  return keyIsIgnored(ent, Keys::NO_NOCLIP);
+}
+
+bool Worldspawn::noSaveIgnored(const gentity_t *ent) const {
+  return keyIsIgnored(ent, Keys::NO_SAVE);
+}
+
+bool Worldspawn::noOverbounceIgnored(const gentity_t *ent) const {
+  return keyIsIgnored(ent, Keys::NO_OVERBOUNCE);
+}
+
+bool Worldspawn::noProneIgnored(const gentity_t *ent) const {
+  return keyIsIgnored(ent, Keys::NO_PRONE);
+}
+
+bool Worldspawn::noWallbugIgnored(const gentity_t *ent) const {
+  return keyIsIgnored(ent, Keys::NO_WALLBUG);
+}
+
+bool Worldspawn::overbouncePlayersIgnored(const gentity_t *ent) const {
+  return keyIsIgnored(ent, Keys::OVERBOUCNE_PLAYERS);
+}
+
+bool Worldspawn::portalgunSpawnIgnored(const gentity_t *ent) const {
+  return keyIsIgnored(ent, Keys::PORTALGUN_SPAWN);
+}
+
+bool Worldspawn::keyIsIgnored(const gentity_t *ent,
+                              const char *checkKey) const {
+  const team_t team = ent->client->sess.sessionTeam;
+  const bool running = ent->client->sess.timerunActive;
+  bool ignored = false;
+
+  const auto checkTimerun =
+      [running](const EnumBitset<WSModificationsFlags> flags) {
+        // if neither is set, timerun status has no effect on the key
+        if (!(flags & WSModificationsFlags::IGNORE_TIMERUN_ONLY) &&
+            !(flags & WSModificationsFlags::IGNORE_NO_TIMERUN)) {
+          return true;
+        }
+
+        if (running && (flags & WSModificationsFlags::IGNORE_TIMERUN_ONLY)) {
+          return true;
+        }
+
+        if (!running && (flags & WSModificationsFlags::IGNORE_NO_TIMERUN)) {
+          return true;
+        }
+
+        return false;
+      };
+
+  for (const auto &[key, value] : keyModifications) {
+    if (!StringUtils::iEqual(key, checkKey)) {
+      continue;
+    }
+
+    EnumBitset<WSModificationsFlags> valueFlags(value);
+
+    switch (team) {
+      case TEAM_AXIS:
+        ignored = (valueFlags & WSModificationsFlags::IGNORE_AXIS) &&
+                  checkTimerun(valueFlags);
+        break;
+      case TEAM_ALLIES:
+        ignored = (valueFlags & WSModificationsFlags::IGNORE_ALLIES) &&
+                  checkTimerun(valueFlags);
+        break;
+      case TEAM_SPECTATOR:
+        ignored = (valueFlags & WSModificationsFlags::IGNORE_SPEC) &&
+                  checkTimerun(valueFlags);
+        break;
+      default:
+        break;
+    }
+  }
+
+  return ignored;
 }
 } // namespace ETJump

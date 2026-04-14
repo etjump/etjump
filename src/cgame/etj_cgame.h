@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -121,5 +122,7 @@ struct CGameContext {
   UI ui;
   Visuals visuals;
   HUD hud;
+
+  std::vector<std::pair<std::string, int32_t>> wsKeyModifications;
 };
 } // namespace ETJump

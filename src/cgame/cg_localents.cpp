@@ -560,7 +560,7 @@ void CG_AddFragment(localEntity_t *le) {
   // FIXME: static_cast to silence bogus clang-tidy warning
   if (!BG_DropItems(
           static_cast<int>(CG_PointContents(trace.endpos, 0) & CONTENTS_NODROP),
-          cgs.shared)) {
+          cgs.sharedCvar)) {
     CG_FreeLocalEntity(le);
     return;
   }
@@ -1047,7 +1047,7 @@ void CG_AddShrapnel(localEntity_t *le) {
   // FIXME: static_cast to silence bogus clang-tidy warning
   if (!BG_DropItems(
           static_cast<int>(CG_PointContents(trace.endpos, 0) & CONTENTS_NODROP),
-          cgs.shared)) {
+          cgs.sharedCvar)) {
     CG_FreeLocalEntity(le);
     return;
   }

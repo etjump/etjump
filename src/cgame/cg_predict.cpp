@@ -11,6 +11,7 @@
 
 #include "../game/etj_entity_utilities_shared.h"
 #include "../game/etj_portalgun_shared.h"
+#include "../game/etj_shared.h"
 
 /*static*/ pmove_t cg_pmove;
 
@@ -429,6 +430,13 @@ static void CG_InterpolatePlayerState(qboolean grabAngles) {
   next = cg.nextSnap;
 
   *out = cg.snap->ps;
+
+  // setup shared exceptions here for the followed client, so things like
+  // area indicators work correctly in spec/demo playback
+  const clientInfo_t *const ci = &cgs.clientinfo[out->clientNum];
+  cgs.sharedActive = ETJump::activeSharedValue(cgs.sharedCvar,
+                                               ETJump::cgame.wsKeyModifications,
+                                               ci->team, ci->timerunActive);
 
   if (cg.showGameView) {
     return;
@@ -1148,7 +1156,12 @@ void CG_PredictPlayerState() {
   cg_pmove.pmove_msec = cgs.pmove_msec;
 
   // Zero: shared values between server & client
-  cg_pmove.shared = cgs.shared;
+  const clientInfo_t *const ci = &cgs.clientinfo[cg.clientNum];
+  cgs.sharedActive = ETJump::activeSharedValue(cgs.sharedCvar,
+                                               ETJump::cgame.wsKeyModifications,
+                                               ci->team, ci->timerunActive);
+  cg_pmove.sharedCvar = cgs.sharedCvar;
+  cg_pmove.sharedActive = cgs.sharedActive;
 
   // unlagged - optimized prediction
   //  Like the comments described above, a player's state is entirely

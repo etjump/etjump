@@ -2657,6 +2657,10 @@ static void CG_DrawJumpDelay(void) {
     return;
   }
 
+  if (!(cgs.sharedActive & BG_LEVEL_NO_JUMPDELAY)) {
+    return;
+  }
+
   int traceContents = ETJump::getExtraTraceContents(ETJump::NJD_DETECTOR);
 
   playerState_t *ps = ETJump::getValidPlayerState();
@@ -2668,7 +2672,7 @@ static void CG_DrawJumpDelay(void) {
   CG_Trace(&trace, start, nullptr, nullptr, end, ps->clientNum, traceContents);
 
   if (trace.surfaceFlags & SURF_NOJUMPDELAY) {
-    if (cgs.shared & BG_LEVEL_NO_JUMPDELAY) {
+    if (cgs.sharedCvar & BG_LEVEL_NO_JUMPDELAY) {
       CG_DrawStringExt(x, y, "D", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH,
                        TINYCHAR_HEIGHT, 0);
     } else {

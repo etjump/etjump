@@ -306,6 +306,7 @@ inline constexpr int CS_FILTERCAMS = 37;
 // for now, this holds mapscript/entity file hashes, rename to something
 // more fitting if different data is added in the future
 inline constexpr int32_t CS_ETJUMP_MAPINFO = 40;
+inline constexpr int32_t CS_ETJUMP_WSKEY_MODS = 41;
 
 inline constexpr int CS_MODELS = 64;
 inline constexpr int CS_SOUNDS = CS_MODELS + MAX_MODELS;
@@ -547,7 +548,10 @@ typedef struct {
   int pmove_msec;
 
   // ETJump: shared values between client & server
-  int shared;
+  int sharedCvar;
+  // effective shared value after ignored keys
+  int32_t sharedActive;
+
   // ETJump: enable/disable strafe + activate = lean
   qboolean noActivateLean;
   bool noPanzerAutoswitch;
@@ -2951,6 +2955,15 @@ enum class PlayerStance {
   Stand = 0,
   Crouch = 1,
   Prone = 2,
+};
+
+// target_worldspawn_modifications
+enum class WSModificationsFlags {
+  IGNORE_AXIS = 1 << 0,
+  IGNORE_ALLIES = 1 << 1,
+  IGNORE_SPEC = 1 << 2,
+  IGNORE_TIMERUN_ONLY = 1 << 3,
+  IGNORE_NO_TIMERUN = 1 << 4,
 };
 } // namespace ETJump
 
