@@ -253,7 +253,14 @@ void drawLineWu(float x0, float y0, float x1, float y1, float w,
   float renderScale = 1.0f;
 
   const auto putPixel = [&](int32_t x, int32_t y, float brightness) {
-    vec4_t c = {color[0], color[1], color[2], color[3] * brightness};
+    // rough approximation for alpha to account for pixel overlap,
+    // when line thickness is > 1px
+    // not mathematically perfect, but should look good enough in most cases
+    const float alphaScale =
+        color[3] < 1.0f
+            ? std::min(brightness * (1.0f / ((w * 0.5f) / renderScale)), 1.0f)
+            : 1.0f;
+    vec4_t c = {color[0], color[1], color[2], color[3] * alphaScale};
     trap_R_SetColor(c);
 
     const float halfW = w / (2.0f * renderScale);
