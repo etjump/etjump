@@ -2373,7 +2373,8 @@ extern vmCvar_t etj_CGaz2WishDirUniformLength;
 extern vmCvar_t etj_CGaz1DrawMidLine;
 extern vmCvar_t etj_CGaz1MidlineColor;
 extern vmCvar_t etj_CGaz2HighRes;
-extern vmCvar_t etj_CGaz2Thickness;
+extern vmCvar_t etj_CGaz2Thickness1;
+extern vmCvar_t etj_CGaz2Thickness2;
 
 extern vmCvar_t etj_drawOB;
 // Aciz: movable drawOB

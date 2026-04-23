@@ -74,7 +74,7 @@ private:
   vec4_t CGaz2Colors[2]{};
   vec4_t CGaz1MidlineColor{};
 
-  float thickness{};
+  std::array<float, 2> thickness{};
 
   [[nodiscard]] bool canSkipDraw() const;
   void UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale) const;
