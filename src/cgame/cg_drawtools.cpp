@@ -210,12 +210,12 @@ void drawLineDDA(float x0, float y0, float x1, float y1, float w, float h,
   if (x0 == x1) {
     x0 = std::clamp(x0, 0.0f, scrW);
 
-    CG_DrawPic(x0, std::min(y0, y1), w, std::abs(y0 - y1),
+    CG_DrawPic(x0 - (w / 2.0f), std::min(y0, y1), w, std::abs(y0 - y1),
                cgs.media.whiteShader);
   } else if (y0 == y1) {
     y0 = std::clamp(y0, 0.0f, scrH);
 
-    CG_DrawPic(std::min(x0, x1), y0, std::abs(x0 - x1), h,
+    CG_DrawPic(std::min(x0, x1), y0 - (h / 2.0f), std::abs(x0 - x1), h,
                cgs.media.whiteShader);
   } else {
     len = ((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0));
@@ -226,7 +226,8 @@ void drawLineDDA(float x0, float y0, float x1, float y1, float w, float h,
     while (i < len) {
       // only draw pixels that are in the screen space
       if (x0 >= 0 && x0 <= scrW && y0 >= 0 && y0 <= scrH) {
-        CG_DrawPic(x0, y0, w, h, cgs.media.whiteShader);
+        CG_DrawPic(x0 - (w / 2.0f), y0 - (h / 2.0f), w, h,
+                   cgs.media.whiteShader);
       }
 
       x0 += stepX;
@@ -254,9 +255,12 @@ void drawLineWu(float x0, float y0, float x1, float y1, float w, float h,
   const auto putPixel = [&](int32_t x, int32_t y, float brightness) {
     vec4_t c = {color[0], color[1], color[2], color[3] * brightness};
     trap_R_SetColor(c);
-    drawPicNoScale(static_cast<float>(x) / renderScale,
-                   static_cast<float>(y) / renderScale, w / renderScale,
-                   h / renderScale, cgs.media.whiteShader);
+
+    const float halfW = w / (2.0f * renderScale);
+    const float halfH = h / (2.0f * renderScale);
+    drawPicNoScale((static_cast<float>(x) / renderScale) - halfW,
+                   (static_cast<float>(y) / renderScale) - halfH,
+                   w / renderScale, h / renderScale, cgs.media.whiteShader);
   };
 
   const auto fpart = [](const float x) { return x - std::floor(x); };
@@ -306,8 +310,8 @@ void drawLineWu(float x0, float y0, float x1, float y1, float w, float h,
     w /= renderScale;
 
     trap_R_SetColor(color);
-    drawPicNoScale(x0, std::min(y0, y1), w, std::abs(y0 - y1),
-                   cgs.media.whiteShader);
+    drawPicNoScale(x0 - (w / (2.0f * renderScale)), std::min(y0, y1), w,
+                   std::abs(y0 - y1), cgs.media.whiteShader);
     trap_R_SetColor(nullptr);
     return;
   }
@@ -321,8 +325,8 @@ void drawLineWu(float x0, float y0, float x1, float y1, float w, float h,
     h /= renderScale;
 
     trap_R_SetColor(color);
-    drawPicNoScale(std::min(x0, x1), y0, std::abs(x0 - x1), h,
-                   cgs.media.whiteShader);
+    drawPicNoScale(std::min(x0, x1), y0 - (h / (2.0f * renderScale)),
+                   std::abs(x0 - x1), h, cgs.media.whiteShader);
     trap_R_SetColor(nullptr);
     return;
   }
