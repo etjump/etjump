@@ -65,7 +65,9 @@ CGaz::CGaz(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
   cgame.utils.colorParser->parseColorString(etj_CGaz2Color2.string,
                                             CGaz2Colors[1]);
 
-  setThickness(&etj_CGaz2Thickness);
+  setThickness(&etj_CGaz2Thickness1);
+  setThickness(&etj_CGaz2Thickness2);
+
   startListeners();
 }
 
@@ -78,7 +80,8 @@ CGaz::~CGaz() {
 
   cvarUpdate->unsubscribe(&etj_CGaz2Color1);
   cvarUpdate->unsubscribe(&etj_CGaz2Color2);
-  cvarUpdate->unsubscribe(&etj_CGaz2Thickness);
+  cvarUpdate->unsubscribe(&etj_CGaz2Thickness1);
+  cvarUpdate->unsubscribe(&etj_CGaz2Thickness2);
 }
 
 void CGaz::startListeners() {
@@ -112,12 +115,19 @@ void CGaz::startListeners() {
     cgame.utils.colorParser->parseColorString(cvar->string, CGaz2Colors[1]);
   });
 
-  cvarUpdate->subscribe(&etj_CGaz2Thickness,
+  cvarUpdate->subscribe(&etj_CGaz2Thickness1,
+                        [this](const vmCvar_t *cvar) { setThickness(cvar); });
+
+  cvarUpdate->subscribe(&etj_CGaz2Thickness2,
                         [this](const vmCvar_t *cvar) { setThickness(cvar); });
 }
 
 void CGaz::setThickness(const vmCvar_t *cvar) {
-  thickness = std::clamp(cvar->value, 0.5f, 5.0f);
+  if (cvar == &etj_CGaz2Thickness1) {
+    thickness[0] = std::clamp(cvar->value, 0.5f, 10.0f);
+  } else if (cvar == &etj_CGaz2Thickness2) {
+    thickness[1] = std::clamp(cvar->value, 0.5f, 10.0f);
+  }
 }
 
 void CGaz::UpdateCGaz1(vec3_t wishvel, const int8_t uCmdScale) const {
@@ -389,7 +399,7 @@ void CGaz::render() const {
       if (highRes) {
         drawLineWu(scx, scy, scx + (mult * static_cast<float>(cmd.rightmove)),
                    scy - (mult * static_cast<float>(cmd.forwardmove)),
-                   thickness, thickness, CGaz2Colors[1]);
+                   thickness[1], thickness[1], CGaz2Colors[1]);
       } else {
         drawLineDDA(scx, scy, scx + (mult * static_cast<float>(cmd.rightmove)),
                     scy - (mult * static_cast<float>(cmd.forwardmove)),
@@ -422,8 +432,8 @@ void CGaz::render() const {
 
       if (highRes) {
         drawLineWu(scx, scy, scx + (dirSize * std::sin(drawVel)),
-                   scy - (dirSize * std::cos(drawVel)), thickness, thickness,
-                   CGaz2Colors[0]);
+                   scy - (dirSize * std::cos(drawVel)), thickness[0],
+                   thickness[0], CGaz2Colors[0]);
       } else {
         drawLineDDA(scx, scy, scx + (dirSize * std::sin(drawVel)),
                     scy - (dirSize * std::cos(drawVel)), CGaz2Colors[0]);
@@ -435,11 +445,11 @@ void CGaz::render() const {
 
       if (highRes) {
         drawLineWu(scx, scy, scx + (velSize * std::sin(drawVel + drawOpt)),
-                   scy - (velSize * std::cos(drawVel + drawOpt)), thickness,
-                   thickness, CGaz2Colors[0]);
+                   scy - (velSize * std::cos(drawVel + drawOpt)), thickness[0],
+                   thickness[0], CGaz2Colors[0]);
         drawLineWu(scx, scy, scx + (velSize * std::sin(drawVel - drawOpt)),
-                   scy - (velSize * std::cos(drawVel - drawOpt)), thickness,
-                   thickness, CGaz2Colors[0]);
+                   scy - (velSize * std::cos(drawVel - drawOpt)), thickness[0],
+                   thickness[0], CGaz2Colors[0]);
       } else {
         drawLineDDA(scx, scy, scx + (velSize * std::sin(drawVel + drawOpt)),
                     scy - (velSize * std::cos(drawVel + drawOpt)),
