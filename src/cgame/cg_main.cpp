@@ -294,6 +294,7 @@ vmCvar_t com_hunkmegs;
 
 vmCvar_t etj_drawCGaz;
 vmCvar_t etj_CGazY;
+vmCvar_t etj_CGaz2Y;
 vmCvar_t etj_CGazHeight;
 vmCvar_t etj_CGaz2Color1;
 vmCvar_t etj_CGaz2Color2;
@@ -907,6 +908,7 @@ cvarTable_t cvarTable[] = {
     {&etj_OBX, "etj_OBX", "320", CVAR_ARCHIVE},
     {&etj_OBY, "etj_OBY", "220", CVAR_ARCHIVE},
     {&etj_CGazY, "etj_CGazY", "240", CVAR_ARCHIVE},
+    {&etj_CGaz2Y, "etj_CGaz2Y", "240", CVAR_ARCHIVE},
     {&etj_CGazHeight, "etj_CGazHeight", "20", CVAR_ARCHIVE},
     {&etj_CGaz2Color1, "etj_CGaz2Color1", "1.0 0.0 0.0 1.0", CVAR_ARCHIVE},
     {&etj_CGaz2Color2, "etj_CGaz2Color2", "0.0 1.0 1.0 1.0", CVAR_ARCHIVE},

@@ -371,7 +371,8 @@ void CGaz::render() const {
   if (etj_drawCGaz.integer & 2) {
     const usercmd_t cmd = pm->cmd;
     float scx = SCREEN_CENTER_X;
-    const float scy = SCREEN_CENTER_Y;
+    const auto scy = static_cast<float>(
+        etj_CGaz2Y.integer > 0 ? etj_CGaz2Y.integer % 480 : 0);
 
     if (etj_stretchCgaz.integer) {
       ETJump_EnableWidthScale(false);
