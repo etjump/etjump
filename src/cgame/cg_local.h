@@ -2355,6 +2355,7 @@ extern vmCvar_t com_hunkmegs;
 
 extern vmCvar_t etj_drawCGaz;
 extern vmCvar_t etj_CGazY;
+extern vmCvar_t etj_CGaz2Y;
 extern vmCvar_t etj_CGazHeight;
 extern vmCvar_t etj_CGaz2Color1;
 extern vmCvar_t etj_CGaz2Color2;
