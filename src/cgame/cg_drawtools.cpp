@@ -182,7 +182,7 @@ range_t AnglesToRange(float start, float end, float yaw, float fov) {
 }
 
 void drawLineDDA(float x0, float y0, float x1, float y1, const vec4_t color) {
-  drawLineDDA(x0, y0, x1, y1, 1, 1, color);
+  drawLineDDA(x0, y0, x1, y1, 1, color);
 }
 
 // line drawing using Digital Differential Analyzer with slight modifications
@@ -190,7 +190,7 @@ void drawLineDDA(float x0, float y0, float x1, float y1, const vec4_t color) {
 // we use euclidean distance to endpoint rather than dominant axis
 // to determine the next step for the line, as this tends to produce
 // better results when drawing to the virtual grid and scaling from there
-void drawLineDDA(float x0, float y0, float x1, float y1, float w, float h,
+void drawLineDDA(float x0, float y0, float x1, float y1, float w,
                  const vec4_t color) {
   float len{};
   float stepX{};
@@ -215,7 +215,7 @@ void drawLineDDA(float x0, float y0, float x1, float y1, float w, float h,
   } else if (y0 == y1) {
     y0 = std::clamp(y0, 0.0f, scrH);
 
-    CG_DrawPic(std::min(x0, x1), y0 - (h / 2.0f), std::abs(x0 - x1), h,
+    CG_DrawPic(std::min(x0, x1), y0 - (w / 2.0f), std::abs(x0 - x1), w,
                cgs.media.whiteShader);
   } else {
     len = ((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0));
@@ -226,7 +226,7 @@ void drawLineDDA(float x0, float y0, float x1, float y1, float w, float h,
     while (i < len) {
       // only draw pixels that are in the screen space
       if (x0 >= 0 && x0 <= scrW && y0 >= 0 && y0 <= scrH) {
-        CG_DrawPic(x0 - (w / 2.0f), y0 - (h / 2.0f), w, h,
+        CG_DrawPic(x0 - (w / 2.0f), y0 - (w / 2.0f), w, w,
                    cgs.media.whiteShader);
       }
 
@@ -240,7 +240,7 @@ void drawLineDDA(float x0, float y0, float x1, float y1, float w, float h,
 }
 
 void drawLineWu(float x0, float y0, float x1, float y1, const vec4_t color) {
-  drawLineWu(x0, y0, x1, y1, 1, 1, color);
+  drawLineWu(x0, y0, x1, y1, 1, color);
 }
 
 // anti-aliased line drawing using Xiaolin Wu's line algorithm
@@ -248,7 +248,7 @@ void drawLineWu(float x0, float y0, float x1, float y1, const vec4_t color) {
 // NOTE: this is a relatively expensive function, as it draws
 // the lines at higher resolution (up to 1080 vertical pixels),
 // rather than using the virtual grid for pixel coordinates
-void drawLineWu(float x0, float y0, float x1, float y1, float w, float h,
+void drawLineWu(float x0, float y0, float x1, float y1, float w,
                 const vec4_t color) {
   float renderScale = 1.0f;
 
@@ -257,10 +257,9 @@ void drawLineWu(float x0, float y0, float x1, float y1, float w, float h,
     trap_R_SetColor(c);
 
     const float halfW = w / (2.0f * renderScale);
-    const float halfH = h / (2.0f * renderScale);
     drawPicNoScale((static_cast<float>(x) / renderScale) - halfW,
-                   (static_cast<float>(y) / renderScale) - halfH,
-                   w / renderScale, h / renderScale, cgs.media.whiteShader);
+                   (static_cast<float>(y) / renderScale) - halfW,
+                   w / renderScale, w / renderScale, cgs.media.whiteShader);
   };
 
   const auto fpart = [](const float x) { return x - std::floor(x); };
@@ -297,7 +296,6 @@ void drawLineWu(float x0, float y0, float x1, float y1, float w, float h,
     y1 *= renderScale;
 
     w *= renderScale;
-    h *= renderScale;
   }
 
   // for axial lines, we can use a single draw call
@@ -322,11 +320,11 @@ void drawLineWu(float x0, float y0, float x1, float y1, float w, float h,
     y0 /= renderScale;
     x0 /= renderScale;
     x1 /= renderScale;
-    h /= renderScale;
+    w /= renderScale;
 
     trap_R_SetColor(color);
-    drawPicNoScale(std::min(x0, x1), y0 - (h / (2.0f * renderScale)),
-                   std::abs(x0 - x1), h, cgs.media.whiteShader);
+    drawPicNoScale(std::min(x0, x1), y0 - (w / (2.0f * renderScale)),
+                   std::abs(x0 - x1), w, cgs.media.whiteShader);
     trap_R_SetColor(nullptr);
     return;
   }
@@ -506,9 +504,9 @@ void DrawTriangle(float x, float y, float w, float h, float lineW, float angle,
   }
 
   // draw outer edges clockwise, starting from p1
-  drawLineDDA(p1.x, p1.y, p2.x, p2.y, lineW, lineW, color);
-  drawLineDDA(p2.x, p2.y, p3.x, p3.y, lineW, lineW, color);
-  drawLineDDA(p3.x, p3.y, p1.x, p1.y, lineW, lineW, color);
+  drawLineDDA(p1.x, p1.y, p2.x, p2.y, lineW, color);
+  drawLineDDA(p2.x, p2.y, p3.x, p3.y, lineW, color);
+  drawLineDDA(p3.x, p3.y, p1.x, p1.y, lineW, color);
 }
 
 /*

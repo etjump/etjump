@@ -399,7 +399,7 @@ void CGaz::render() const {
       if (highRes) {
         drawLineWu(scx, scy, scx + (mult * static_cast<float>(cmd.rightmove)),
                    scy - (mult * static_cast<float>(cmd.forwardmove)),
-                   thickness[1], thickness[1], CGaz2Colors[1]);
+                   thickness[1], CGaz2Colors[1]);
       } else {
         drawLineDDA(scx, scy, scx + (mult * static_cast<float>(cmd.rightmove)),
                     scy - (mult * static_cast<float>(cmd.forwardmove)),
@@ -433,7 +433,7 @@ void CGaz::render() const {
       if (highRes) {
         drawLineWu(scx, scy, scx + (dirSize * std::sin(drawVel)),
                    scy - (dirSize * std::cos(drawVel)), thickness[0],
-                   thickness[0], CGaz2Colors[0]);
+                   CGaz2Colors[0]);
       } else {
         drawLineDDA(scx, scy, scx + (dirSize * std::sin(drawVel)),
                     scy - (dirSize * std::cos(drawVel)), CGaz2Colors[0]);
@@ -446,10 +446,10 @@ void CGaz::render() const {
       if (highRes) {
         drawLineWu(scx, scy, scx + (velSize * std::sin(drawVel + drawOpt)),
                    scy - (velSize * std::cos(drawVel + drawOpt)), thickness[0],
-                   thickness[0], CGaz2Colors[0]);
+                   CGaz2Colors[0]);
         drawLineWu(scx, scy, scx + (velSize * std::sin(drawVel - drawOpt)),
                    scy - (velSize * std::cos(drawVel - drawOpt)), thickness[0],
-                   thickness[0], CGaz2Colors[0]);
+                   CGaz2Colors[0]);
       } else {
         drawLineDDA(scx, scy, scx + (velSize * std::sin(drawVel + drawOpt)),
                     scy - (velSize * std::cos(drawVel + drawOpt)),

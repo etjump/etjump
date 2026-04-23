@@ -2843,9 +2843,9 @@ void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
                         float fov, vec4_t const color, bool borderOnly,
                         float borderThickness);
 void drawLineDDA(float x0, float y0, float x1, float y1, const vec4_t color);
-void drawLineDDA(float x0, float y0, float x1, float y1, float w, float h,
+void drawLineDDA(float x0, float y0, float x1, float y1, float w,
                  const vec4_t color);
-void drawLineWu(float x0, float y0, float x1, float y1, float w, float h,
+void drawLineWu(float x0, float y0, float x1, float y1, float w,
                 const vec4_t color);
 void drawLineWu(float x0, float y0, float x1, float y1, const vec4_t color);
 void DrawTriangle(float x, float y, float w, float h, float lineW, float angle,
