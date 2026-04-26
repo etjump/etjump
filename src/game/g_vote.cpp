@@ -352,6 +352,27 @@ bool matchRandomMap(const char *arg, std::string &map) {
 
   return true;
 }
+
+static void voteChangeMap(const char *cmd) {
+  trap_SendConsoleCommand(EXEC_APPEND, cmd);
+
+  if (g_dedicated.integer) {
+    return;
+  }
+
+  // for listen servers, we need to manually set 'sv_cheats' prematurely
+  // to correct value, otherwise the client parses a stale configstring value
+  // from the previous map, and overrides the cheat state
+  constexpr char cheatCmd[] = "devmap";
+  constexpr auto len =
+      static_cast<int32_t>(std::char_traits<char>::length(cheatCmd));
+
+  if (!Q_stricmpn(cmd, cheatCmd, len)) {
+    trap_Cvar_Set("sv_cheats", "1");
+  } else {
+    trap_Cvar_Set("sv_cheats", "0");
+  }
+}
 } // namespace ETJump
 
 ////////////////////////////////////////////////////////
@@ -386,8 +407,7 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
     Q_strncpyz(level.voteInfo.vote_value, map.c_str(),
                sizeof(level.voteInfo.vote_value));
   } else {
-    trap_SendConsoleCommand(EXEC_APPEND,
-                            va("map %s\n", level.voteInfo.vote_value));
+    ETJump::voteChangeMap(va("map %s\n", level.voteInfo.vote_value));
   }
 
   return G_OK;
@@ -402,10 +422,6 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
     char serverinfo[MAX_INFO_STRING];
     trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
-    if (!g_dedicated.integer && ent) {
-      G_cpmPrintf(ent, "Sorry, ^3%s^7 voting is disabled on localhost.", arg);
-      return (G_INVALID);
-    }
     if (vote_allow_map.integer <= 0 && ent) {
       G_voteDisableMessage(ent, arg);
       return (G_INVALID);
@@ -433,10 +449,9 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 
     Svcmd_ResetMatch_f(qfalse);
     trap_Cvar_VariableStringBuffer("nextmap", s, sizeof(s));
-    trap_SendConsoleCommand(EXEC_APPEND,
-                            va("%s %s%s\n", cheats ? "devmap" : "map",
-                               level.voteInfo.vote_value,
-                               ((*s) ? va("; set nextmap \"%s\"", s) : "")));
+    ETJump::voteChangeMap(va("%s %s%s\n", cheats ? "devmap" : "map",
+                             level.voteInfo.vote_value,
+                             ((*s) ? va("; set nextmap \"%s\"", s) : "")));
   }
 
   return (G_OK);
@@ -576,8 +591,7 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     trap_SetConfigstring(CS_VOTE_YES, cs.c_str());
   } else {
     game.rtv->setRtvWinner();
-    trap_SendConsoleCommand(EXEC_APPEND,
-                            va("map %s\n", level.voteInfo.vote_value));
+    ETJump::voteChangeMap(va("map %s\n", level.voteInfo.vote_value));
   }
 
   return G_OK;
