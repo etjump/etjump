@@ -297,7 +297,7 @@ vmCvar_t g_oss; //   0  - vanilla/unknown/ET:L auto setup
 
 cvarTable_t gameCvarTable[] = {
     // don't override the cheat state set by the system
-    {&g_cheats, "sv_cheats", "", 0, qfalse},
+    {&g_cheats, "sv_cheats", "", CVAR_SYSTEMINFO | CVAR_ROM, 0, qfalse},
 
     // noset vars
     {NULL, "gamename", GAME_NAME, CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
