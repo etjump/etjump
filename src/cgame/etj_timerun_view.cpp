@@ -42,7 +42,7 @@ TimerunView::TimerunView(const std::shared_ptr<Timerun> &timerun,
   cgame.utils.colorParser->parseColorString(etj_runTimerInactiveColor.string,
                                             inactiveTimerColor);
 
-  setRuntimerSize(etj_runtimerSize);
+  setRuntimerSize(etj_runTimerSize);
   setCheckpointSize(etj_checkpointsSize);
   setCheckpointPopupSize(etj_checkpointsPopupSize);
   startListeners();
@@ -54,7 +54,7 @@ TimerunView::TimerunView(const std::shared_ptr<Timerun> &timerun,
 
 TimerunView::~TimerunView() {
   cvarUpdate->unsubscribe(&etj_runTimerInactiveColor);
-  cvarUpdate->unsubscribe(&etj_runtimerSize);
+  cvarUpdate->unsubscribe(&etj_runTimerSize);
   cvarUpdate->unsubscribe(&etj_checkpointsSize);
   cvarUpdate->unsubscribe(&etj_checkpointsPopupSize);
   cvarUpdate->unsubscribe(&etj_runTimerAutoHide);
@@ -66,7 +66,7 @@ void TimerunView::startListeners() {
     cgame.utils.colorParser->parseColorString(cvar->string, inactiveTimerColor);
   });
 
-  cvarUpdate->subscribe(&etj_runtimerSize, [this](const vmCvar_t *cvar) {
+  cvarUpdate->subscribe(&etj_runTimerSize, [this](const vmCvar_t *cvar) {
     setRuntimerSize(*cvar);
   });
 

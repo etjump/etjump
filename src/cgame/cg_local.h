@@ -2520,7 +2520,7 @@ extern vmCvar_t etj_spectatorInfoDirection;
 extern vmCvar_t etj_drawRunTimer;
 extern vmCvar_t etj_runTimerX;
 extern vmCvar_t etj_runTimerY;
-extern vmCvar_t etj_runtimerSize;
+extern vmCvar_t etj_runTimerSize;
 extern vmCvar_t etj_runTimerShadow;
 extern vmCvar_t etj_runTimerAutoHide;
 extern vmCvar_t etj_runTimerInactiveColor;
