@@ -31,7 +31,7 @@ static bool hasJustStoodUp() {
 
 template <typename... Targs>
 static void bgPrint(const std::string &msg, const Targs &...fargs) {
-  const std::string fmt = format(msg, fargs...);
+  const std::string fmt = StringUtils::format(msg, fargs...);
 
 #ifdef CGAMEDLL
   Com_Printf("^g[cl] ^7%s\n", fmt.c_str());
