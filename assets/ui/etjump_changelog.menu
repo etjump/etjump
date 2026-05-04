@@ -94,10 +94,8 @@ menuDef {
         style           WINDOW_STYLE_FILLED
 #ifdef FUI
         backcolor       0 0 0 .2
-        backcolorAlt    .1 .1 .1 .2
 #else
-        backcolor       0 0 0 .6
-        backcolorAlt    .1 .1 .1 .6
+        backcolor       0 0 0 .4
 #endif
         visible         1
         notselectable
