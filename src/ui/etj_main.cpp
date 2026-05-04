@@ -161,9 +161,27 @@ static void parseChangelogs() {
 
   for (const auto &file : files) {
     try {
-      File fIn(path + file + ".txt");
+      const File fIn(path + file + ".txt");
       const auto contents = fIn.read();
-      uiInfo.changelogs[file] = std::string(contents.begin(), contents.end());
+      auto str = std::string(contents.cbegin(), contents.cend());
+      StringUtils::replaceAll(str, "\r\n", "\n");
+
+      auto lines = StringUtils::split(str, "\n");
+
+      // go through all the lines and apply color coding
+      // '__' is used to mark coloring, alternating between color/escape
+      for (auto &line : lines) {
+        bool color = true;
+        size_t pos = 0;
+
+        while ((pos = line.find("__", pos)) != std::string::npos) {
+          line.replace(pos, 2, color ? "^o" : "^*");
+          pos += 2;
+          color = !color;
+        }
+      }
+
+      uiInfo.changelogs[file] = StringUtils::join(lines, "\n");
     } catch (...) {
       Com_Printf(S_COLOR_RED
                  "%s: failed to open changelog '%s.txt' for reading.\n",

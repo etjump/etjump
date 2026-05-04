@@ -5802,6 +5802,24 @@ static void comboPaint(itemDef_t *item) {
                  color, cvarText.c_str(), 0, 0, item->textStyle);
   }
 }
+
+static void formatChangelogHeaders(const itemDef_t *item, std::string &text,
+                                   float &fontScale, float &y) {
+  if (StringUtils::startsWith(text, "# ")) {
+    text.replace(0, 2, "^7");
+    fontScale = 1.5f;
+    y += std::abs(item->textaligny) * fontScale;
+  } else if (StringUtils::startsWith(text, "## ")) {
+    if (StringUtils::contains(text, "Breaking")) {
+      text.replace(0, 3, "^i");
+    } else {
+      text.replace(0, 3, "^2");
+    }
+
+    fontScale = 1.25f;
+    y += std::abs(item->textaligny) * fontScale;
+  }
+}
 } // namespace ETJump
 
 static void Item_DrawScrollbar(itemDef_t *item, listBoxDef_t *listPtr,
@@ -5965,7 +5983,7 @@ void Item_ListBox_Paint(itemDef_t *item) {
       const bool hasAltBackground = item->window.backColorAlt[3] > 0;
 
       for (i = listPtr->startPos; i < count; i++) {
-        const char *text;
+        std::string text;
         // always draw at least one
         // which may overdraw the box if it is
         // too small for the element
@@ -5985,6 +6003,7 @@ void Item_ListBox_Paint(itemDef_t *item) {
 
             text = DC->feederItemText(item->special, i, j, optionalImages,
                                       &numOptionalImages);
+
             if (numOptionalImages > 0) {
               for (k = 0; k < numOptionalImages; k++) {
                 if (optionalImages[k] >= 0) {
@@ -6001,30 +6020,40 @@ void Item_ListBox_Paint(itemDef_t *item) {
               textOfs = listPtr->elementHeight + 2;
             }
 
-            if (text) {
+            if (!text.empty()) {
+              float fontScale = 1.0f;
+
+              // TODO: we're starting to have quite many changelog specific
+              // hacks in this listbox drawing, might be time to make this
+              // into it's own unique item type
+              if (item->special == FEEDER_CHANGELOG) {
+                ETJump::formatChangelogHeaders(item, text, fontScale, y);
+
+                // adjust for potentially adjusted font size
+                size -= (listPtr->elementHeight * fontScale) -
+                        listPtr->elementHeight;
+              }
+
               DC->drawText(x + 4 + textOfs + listPtr->columnInfo[j].pos +
                                item->textalignx,
                            y + listPtr->elementHeight + item->textaligny,
-                           item->textscale, item->window.foreColor, text, 0,
-                           listPtr->columnInfo[j].maxChars, item->textStyle);
+                           item->textscale * fontScale, item->window.foreColor,
+                           text.c_str(), 0, listPtr->columnInfo[j].maxChars,
+                           item->textStyle);
             }
           }
         } else {
           text = DC->feederItemText(item->special, i, 0, optionalImages,
                                     &numOptionalImages);
           if (numOptionalImages >= 0) {
-            // DC->drawHandlePic(x
-            // + 4 +
-            // listPtr->elementHeight,
-            // y,
-            // listPtr->columnInfo[j].width,
-            // listPtr->columnInfo[j].width,
+            // DC->drawHandlePic(x + 4 + listPtr->elementHeight, y,
+            // listPtr->columnInfo[j].width, listPtr->columnInfo[j].width,
             // optionalImage);
-          } else if (text) {
+          } else if (!text.empty()) {
             DC->drawText(x + 4 + item->textalignx,
                          y + listPtr->elementHeight + item->textaligny,
-                         item->textscale, item->window.foreColor, text, 0, 0,
-                         item->textStyle);
+                         item->textscale, item->window.foreColor, text.c_str(),
+                         0, 0, item->textStyle);
           }
         }
 
