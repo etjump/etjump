@@ -1,7 +1,7 @@
 // menu defs
-// 
-{	
-	loadMenu { "ui/global.menu" }	
+//
+{
+	loadMenu { "ui/global.menu" }
 	loadMenu { "ui/main.menu" }
 	loadMenu { "ui/profile.menu" }
 	loadMenu { "ui/profile_create.menu" }
@@ -39,7 +39,7 @@
 
 	// popups
 	loadMenu { "ui/popup_errormessage.menu" }
-	loadMenu { "ui/popup_errormessage_pb.menu" }	
+	loadMenu { "ui/popup_errormessage_pb.menu" }
 	loadMenu { "ui/popup_hostgameerrormessage.menu" }
 	loadMenu { "ui/popup_autoupdate.menu" }
 	loadMenu { "ui/popup_password.menu" }
@@ -78,6 +78,7 @@
 	loadMenu { "ui/etjump_controls.menu" }
 	loadMenu { "ui/etjump_credits.menu" }
 	loadMenu { "ui/etjump_changelog.menu" }
+	loadMenu { "ui/etjump_popup_documentation.menu" }
 
 	loadMenu { "ui/ingame_ft_savelimit.menu" }
 
