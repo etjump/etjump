@@ -85,9 +85,10 @@ void CustomCommandMenu::startListeners() {
       "readCustomCommands",
       [this](const std::vector<std::string> &) { parseCommands(); });
 
-  consoleCommands->subscribe(
-      "generateCustomCommandsFile",
-      [](const std::vector<std::string> &args) { generateExampleFile(args); });
+  consoleCommands->subscribe("generateCustomCommandsFile",
+                             [this](const std::vector<std::string> &args) {
+                               generateExampleFile(args);
+                             });
 }
 
 void CustomCommandMenu::setFilename(const vmCvar_t *cvar) {
@@ -957,56 +958,65 @@ void CustomCommandMenu::generateExampleFile(
     }
   }
 
-  constexpr char in[] = R"(# Example custom command file
-# This file may contain up to 5 pages, each with 8 slots worth of commands.
-# You may edit this file by hand, or use the following in-game commands:
-#
-# - addCustomCommand
-# - editCustomCommand
-# - moveCustomCommand
-# - deleteCustomCommand
-#
-# This is a TOML file, meaning it needs to follow the TOML language syntax.
-# Each page must be defined with a header, followed by key-value pairs, where the value is in quotes.
-# Below is a generated example file which contains pages 1, 2 and 4.
-# Note that the command ordering does not matter, only the key names matter, along with under which header they are.
-# The in-game commands will try to keep the commands in order as you add/edit/move/delete them however.
-# The pages do not need to appear in order from 1 to 5, nor do all of them have to be present.
-# You may add your own comments to this file as well by starting a line with #
+  toml::ordered_value root;
+  toml::ordered_value page1(toml::table{});
+  toml::ordered_value page2(toml::table{});
+  toml::ordered_value page4(toml::table{});
 
-[page-1]
-name-1 = "Example command 1"
-command-1 = "echo This is an example command 1"
-name-2 = "Example command 2"
-command-2 = "echo This is an example command 2"
-name-5 = "Example command 5"
-command-5 = "echo This is an example command 5; echo Note that the commands don't need to be defined sequentially!"
+  // clang-format off
+  root.comments().push_back("# Example custom command file");
+  root.comments().push_back("# This file may contain up to 5 pages, each with 8 slots worth of commands.");
+  root.comments().push_back("# Anything that you can type into console or bind to a key, can be a command.");
+  root.comments().push_back("# You may edit this file by hand, or use the following in-game commands:");
+  root.comments().push_back("#");
+  root.comments().push_back("# - addCustomCommand");
+  root.comments().push_back("# - editCustomCommand");
+  root.comments().push_back("# - moveCustomCommand");
+  root.comments().push_back("# - deleteCustomCommand");
+  root.comments().push_back("#");
+  root.comments().push_back("# This is a TOML file, meaning it needs to follow the TOML language syntax.");
+  root.comments().push_back("# Each page must be defined with a header, followed by key-value pairs, where the value is in quotes.");
+  root.comments().push_back("# Below is a generated example file which contains pages 1, 2 and 4.");
+  root.comments().push_back("# Note that the command ordering does not matter, only the key names matter, along with under which header they are.");
+  root.comments().push_back("# The in-game commands will try to keep the commands in order as you add/edit/move/delete them however.");
+  root.comments().push_back("# The pages do not need to appear in order from 1 to 5, nor do all of them have to be present.");
+  root.comments().push_back("# You may add your own comments to this file as well by starting a line with #");
 
-[page-2]
-name-2 = "Example command 2"
-command-2 = "echo This is an example command 2 on page 2; echo Note that it appears on slot 2 even though it's defined first!"
-name-1 = "Example command 1"
-command-1 = "echo This is an example command 1 on page 2"
+  page1["name-1"]    = toml::ordered_value("Example command 1");
+  page1["command-1"] = toml::ordered_value("echo This is an example command 1");
+  page1["name-2"]    = toml::ordered_value("Example command 2");
+  page1["command-2"] = toml::ordered_value("echo This is an example command 2");
+  page1["name-5"]    = toml::ordered_value("Example command 5");
+  page1["command-5"] = toml::ordered_value("echo This is an example command 5; echo Note that the commands don't need to be defined sequentially!");
 
-[page-4]
-name-1 = "Example command 1"
-command-1 = "echo This is an example command 1 on page 4; echo You can have blank pages too, and can choose which pages to use!"
-)";
+  page2["name-2"]    = toml::ordered_value("Example command 2");
+  page2["command-2"] = toml::ordered_value("echo This is an example command 2 on page 2; echo Note that it appears on slot 2 even though it's defined first inside the file!");
+  page2["name-1"]    = toml::ordered_value("Example command 1");
+  page2["command-1"] = toml::ordered_value("echo This is an example command 1 on page 2");
 
-  try {
-    const File fOut(DEFAULT_CUSTOM_COMMAND_FILE, File::Mode::Write);
-    fOut.write(in);
+  page4["name-1"]    = toml::ordered_value("Example command 1");
+  page4["command-1"] = toml::ordered_value("echo This is an example command 1 on page 4; echo You can have blank pages too, and can choose which pages to use!");
+  // clang-format on
 
-    CG_Printf("Wrote example custom command file ^3'%s'\n",
-              DEFAULT_CUSTOM_COMMAND_FILE);
+  root["page-1"] = std::move(page1);
+  root["page-2"] = std::move(page2);
+  root["page-4"] = std::move(page4);
 
-    // the file will not exist immediately after we call 'write', so calling
-    // 'parseCommands' here directly will fail to parse the generated file
-    // instead send a console command to queue the parsing to next frame
-    trap_SendConsoleCommand("readCustomCommands\n");
-  } catch (const File::FileIOException &e) {
-    CG_Printf("Failed to write example custom command file: %s\n", e.what());
+  std::string err;
+
+  // call the API directly here because we want to use the default filename
+  if (!TOMLUtils::writeFile(DEFAULT_CUSTOM_COMMAND_FILE, root, &err)) {
+    CG_Printf("%s\n", err.c_str());
+    return;
   }
+
+  CG_Printf("Wrote example custom command file ^3'%s'\n",
+            DEFAULT_CUSTOM_COMMAND_FILE);
+
+  // the file will not exist immediately after we call 'write', so calling
+  // 'parseCommands' here directly will fail to parse the generated file
+  // instead send a console command to queue the parsing to next frame
+  trap_SendConsoleCommand("readCustomCommands\n");
 }
 
 bool CustomCommandMenu::readFile(toml::ordered_value &table) const {
