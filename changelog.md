@@ -11,12 +11,14 @@
   * renders up to 1080px vertical resolution, before scaling to real screen resolution
 * `listcheckpoints` and `comparecheckpoints` commands to list and compare checkpoint times from timeruns [#1829](https://github.com/etjump/etjump/pull/1829)
   * also accessible via admin commands `!list/comparecheckpoints`
+* `etj_CGaz2Y` cvar to set Y position of CGaz 2 [#1878](https://github.com/etjump/etjump/pull/1878)
 * `etj_runTimerSize` to adjust timerun timer size (`0.0 - 10.0`) [#1814](https://github.com/etjump/etjump/pull/1814)
 * 2 alternative mouse cursors (`etj_altCursor`) [#1812](https://github.com/etjump/etjump/pull/1812)
 * `etj_cursorSize` to resize mouse cursor [#1812](https://github.com/etjump/etjump/pull/1812)
 * `target_random` entity - fire events for a client based off random chance/number [#1771](https://github.com/etjump/etjump/pull/1771)
 * `etj_CGaz1DrawMidLine` - draw a line between min/max angle in CGaz 1 [#1813](https://github.com/etjump/etjump/pull/1813)
   * `etj_CGaz1MidLineColor` adjusts the color
+* link to ETJump documentation in in-game menus [#1886](https://github.com/etjump/etjump/pull/1886)
 * `etj_onDemoPlaybackEnd` cvar to execute a command when demo playback ends [#1794](https://github.com/etjump/etjump/pull/1794)
 * `printMapCustomizationInfo` console command to print custom mapscript/entity file hashes that the server uses [#1850](https://github.com/etjump/etjump/pull/1850)
   * works in demo playback, starting from demos recorded in ETJump 3.5.0
@@ -24,12 +26,20 @@
 
 ## Changed
 * increased limit for unique remappable shaders from **32** to **511**
+* changelog improvements [#1885](https://github.com/etjump/etjump/pull/1885)
+  * changelog entries are now categorized and sorted from most to least interesting/important
+  * condensed changelog output to be easier to skim through
+  * color highlighting in in-game changelog UI
+  * slight visual tweaks to in-game UI
 * vote text displays total(spectators) as vote counts, to help with ambiguity on vote results when spectator voting is enabled [#1793](https://github.com/etjump/etjump/pull/1793)
 * improved smoothness of mouse cursor in menus [#1809](https://github.com/etjump/etjump/pull/1809)
   * overall mouse sensitivity in menus is slightly lower as a side effect
 * mouse cursor now warps to center of the screen when UI is brought up [#1811](https://github.com/etjump/etjump/pull/1811)
   * chat UI is an exception, where cursor is warped to top left instead
 * season states, timerun records and daily logs now use UTC time instead of local server time [#1862](https://github.com/etjump/etjump/pull/1862)
+* `g_mapScriptDir` can no longer be set to `maps` [#1880](https://github.com/etjump/etjump/pull/1880)
+* `class` can be used to select single (**1**) or akimbo (**2**) pistols with 3rd argument [#1874](https://github.com/etjump/etjump/pull/1874)
+* `callvote (dev)map` is no longer blocked on localhost [#1881](https://github.com/etjump/etjump/pull/1881)
 * `ignore` no longer works on yourself [#1835](https://github.com/etjump/etjump/pull/1835)
 * demo compatibility settings no longer automatically print to console on demo playback start [#1804](https://github.com/etjump/etjump/pull/1804)
 * certain prints are now colored white instead of pale green [#1838](https://github.com/etjump/etjump/pull/1838)
@@ -39,11 +49,14 @@
 * `etj_jumpSpeedsTextSize` was initialized from a wrong cvar value, requiring a value change before applying correctly [#1842](https://github.com/etjump/etjump/pull/1842)
 * some votes weren't showing the keybinds for `vote yes/no` in the vote text [#1817](https://github.com/etjump/etjump/pull/1817)
 * bad performance in score computation for timerun rankings, now faster by factor of hundred(s) depending on the server [#1831](https://github.com/etjump/etjump/pull/1831)
+* cheat state preserved from previous map when trying to change it via vote in localhost (e.g. `devmap oasis` into `callvote randommap` would load next map with cheats enabled) [#1881](https://github.com/etjump/etjump/pull/1881)
 * replay menu displayed demo names incorrectly if the filename ended in `^` [#1806](https://github.com/etjump/etjump/pull/1806)
 * potential crash on older versions of ETe when issuing RCON commands in localhost [#1832](https://github.com/etjump/etjump/pull/1832)
 * potential crash when loading a map after demo playback [#1844](https://github.com/etjump/etjump/pull/1844)
 * `etj_smoothAngles` could sometimes apply on demo playback, breaking view angles [#1846](https://github.com/etjump/etjump/pull/1846)
+* spectators were able to use `class` command [#1874](https://github.com/etjump/etjump/pull/1874)
 * `etj_viewPlayerPortals` menu entry was missing a colon character [#1852](https://github.com/etjump/etjump/pull/1852)
+* `etj_lagometerShader` menu tooltip listed an incorrect cvar name [#1875](https://github.com/etjump/etjump/pull/1875)
 
 # ETJump 3.4.2
 
