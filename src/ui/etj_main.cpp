@@ -162,11 +162,9 @@ static void parseChangelogs() {
   for (const auto &file : files) {
     try {
       const File fIn(path + file + ".txt");
-      const auto contents = fIn.read();
-      auto str = std::string(contents.cbegin(), contents.cend());
-      StringUtils::replaceAll(str, "\r\n", "\n");
+      const auto contents = fIn.readString(File::READ_ALL_BYTES, true);
 
-      auto lines = StringUtils::split(str, "\n");
+      auto lines = StringUtils::split(contents, "\n");
 
       // go through all the lines and apply color coding
       // '__' is used to mark coloring, alternating between color/escape

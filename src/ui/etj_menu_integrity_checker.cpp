@@ -57,9 +57,8 @@ bool MenuIntegrityChecker::checkIntegrity() {
     try {
       File f("ui/" + file);
 
-      const auto contents = f.read();
-      const auto *const currentHash =
-          G_SHA1(std::string(contents.cbegin(), contents.cend()).c_str());
+      const auto contents = f.readString();
+      const auto *const currentHash = G_SHA1(contents.c_str());
 
       if (!StringUtils::iEqual(currentHash, hash)) {
         Com_DPrintf("Integrity check failed on file '%s' - invalid hash!\n",

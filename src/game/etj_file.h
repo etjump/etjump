@@ -57,6 +57,8 @@ public:
   // reads `bytes` bytes from the file.
   // if file length < bytes, reads length bytes
   [[nodiscard]] std::vector<char> read(int bytes = READ_ALL_BYTES) const;
+  [[nodiscard]] std::string readString(int32_t bytes = READ_ALL_BYTES,
+                                       bool normalize = false) const;
 
   // writes all data to the file
   // throws FileIOException if operation fails

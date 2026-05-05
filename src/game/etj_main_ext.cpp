@@ -64,13 +64,9 @@ static void computeCustomMapDataHashes() {
   // all line endings are normalized to LF while computing the hashes
   const auto computeHash = [](const std::string &filename) {
     File fIn(filename);
-    const auto contents = fIn.read();
+    const auto contents = fIn.readString(File::READ_ALL_BYTES, true);
 
-    std::string normalizedContents =
-        std::string(contents.cbegin(), contents.cend());
-    StringUtils::replaceAll(normalizedContents, "\r\n", "\n");
-
-    return G_SHA1(normalizedContents.c_str());
+    return G_SHA1(contents.c_str());
   };
 
   if (g_mapScriptDir.string[0] != '\0') {
