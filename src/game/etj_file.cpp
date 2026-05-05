@@ -92,6 +92,17 @@ std::vector<char> File::read(const int bytes) const {
   return buffer;
 }
 
+std::string File::readString(const int32_t bytes, const bool normalize) const {
+  auto contents = read(bytes);
+  auto s = std::string(contents.cbegin(), contents.cend());
+
+  if (normalize) {
+    StringUtils::replaceAll(s, "\r\n", "\n");
+  }
+
+  return s;
+}
+
 void File::write(const std::string &data) const {
   write(data.c_str(), static_cast<int>(data.length()));
 }
