@@ -652,6 +652,10 @@ void QDECL G_DPrintf(const char *fmt, ...) {
   Q_vsnprintf(text, sizeof(text), fmt, argptr);
   va_end(argptr);
 
+  G_LogPrintf("==================================================\n");
+  G_LogPrintf("FATAL: %s\n", text);
+  G_LogPrintf("==================================================\n");
+
   trap_Error(text);
 }
 
