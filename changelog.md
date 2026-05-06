@@ -37,6 +37,7 @@
 * mouse cursor now warps to center of the screen when UI is brought up [#1811](https://github.com/etjump/etjump/pull/1811)
   * chat UI is an exception, where cursor is warped to top left instead
 * season states, timerun records and daily logs now use UTC time instead of local server time [#1862](https://github.com/etjump/etjump/pull/1862)
+* server shutdowns due to an error are now logged to logfile [#1889](https://github.com/etjump/etjump/pull/1889)
 * `g_mapScriptDir` can no longer be set to `maps` [#1880](https://github.com/etjump/etjump/pull/1880)
 * `class` can be used to select single (**1**) or akimbo (**2**) pistols with 3rd argument [#1874](https://github.com/etjump/etjump/pull/1874)
 * `callvote (dev)map` is no longer blocked on localhost [#1881](https://github.com/etjump/etjump/pull/1881)
