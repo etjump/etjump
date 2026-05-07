@@ -11,7 +11,7 @@
   * renders up to 1080px vertical resolution, before scaling to real screen resolution
 * `listcheckpoints` and `comparecheckpoints` commands to list and compare checkpoint times from timeruns [#1829](https://github.com/etjump/etjump/pull/1829)
   * also accessible via admin commands `!list/comparecheckpoints`
-* `etj_CGaz2Y` cvar to set Y position of CGaz 2 [#1878](https://github.com/etjump/etjump/pull/1878)
+* `etj_CGaz2Y` cvar to set Y position of CGaz 2 (`0.0 - 480.0`) [#1878](https://github.com/etjump/etjump/pull/1878)
 * `etj_runTimerSize` to adjust timerun timer size (`0.0 - 10.0`) [#1814](https://github.com/etjump/etjump/pull/1814)
 * 2 alternative mouse cursors (`etj_altCursor`) [#1812](https://github.com/etjump/etjump/pull/1812)
 * `etj_cursorSize` to resize mouse cursor [#1812](https://github.com/etjump/etjump/pull/1812)
@@ -41,6 +41,7 @@
 * `g_mapScriptDir` can no longer be set to `maps` [#1880](https://github.com/etjump/etjump/pull/1880)
 * `class` can be used to select single (**1**) or akimbo (**2**) pistols with 3rd argument [#1874](https://github.com/etjump/etjump/pull/1874)
 * `callvote (dev)map` is no longer blocked on localhost [#1881](https://github.com/etjump/etjump/pull/1881)
+* `etj_CGazY` now accepts decimal values [#1891](https://github.com/etjump/etjump/pull/1891)
 * `ignore` no longer works on yourself [#1835](https://github.com/etjump/etjump/pull/1835)
 * demo compatibility settings no longer automatically print to console on demo playback start [#1804](https://github.com/etjump/etjump/pull/1804)
 * certain prints are now colored white instead of pale green [#1838](https://github.com/etjump/etjump/pull/1838)
