@@ -165,6 +165,9 @@ inline constexpr int EXPLOSIVE_USESHADER = 4;
 inline constexpr int EXPLOSIVE_LOWGRAV = 8;
 inline constexpr int EXPLOSIVE_TANK = 32;
 
+// func_static(_client)
+inline constexpr int32_t FUNC_STATIC_PAIN_HEALTH = 9999;
+
 //============================================================================
 
 typedef struct gentity_s gentity_t;
