@@ -314,8 +314,7 @@ bool CGaz::beforeRender() {
 void CGaz::render() const {
   // DeFRaG proxymod CGaz by Jelvan1
   if (etj_drawCGaz.integer & 1) {
-    const auto y =
-        static_cast<float>(etj_CGazY.integer > 0 ? etj_CGazY.integer % 480 : 0);
+    const float y = std::clamp(etj_CGazY.value, 0.0f, 480.0f);
     const float h = etj_CGazHeight.value > 0 ? etj_CGazHeight.value : 0;
 
     float fov;
@@ -371,8 +370,7 @@ void CGaz::render() const {
   if (etj_drawCGaz.integer & 2) {
     const usercmd_t cmd = pm->cmd;
     float scx = SCREEN_CENTER_X;
-    const auto scy = static_cast<float>(
-        etj_CGaz2Y.integer > 0 ? etj_CGaz2Y.integer % 480 : 0);
+    const float scy = std::clamp(etj_CGaz2Y.value, 0.0f, 480.0f);
 
     if (etj_stretchCgaz.integer) {
       ETJump_EnableWidthScale(false);
