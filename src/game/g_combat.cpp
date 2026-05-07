@@ -7,6 +7,7 @@
 
 #include "g_local.h"
 #include "etj_deathrun_system.h"
+#include "etj_entity_utilities_shared.h"
 #include "etj_utilities.h"
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
@@ -1688,7 +1689,16 @@ qboolean G_RadiusDamage(vec3_t origin, gentity_t *inflictor,
     if (ent == ignore) {
       continue;
     }
+
     if (!ent->takedamage && (!ent->dmgparent || !ent->dmgparent->takedamage)) {
+      continue;
+    }
+
+    // 'func_static_client' is still linked when it's off,
+    // so we need to manually check and ignore damage to it
+    if (ent->s.eType == ET_STATIC_CLIENT &&
+        ETJump::EntityUtilsShared::funcStaticClientIsHidden(
+            &ent->s, ClientNum(attacker))) {
       continue;
     }
 
@@ -1807,13 +1817,23 @@ qboolean etpro_RadiusDamage(vec3_t origin, gentity_t *inflictor,
     if (ent == ignore) {
       continue;
     }
+
     if (!ent->takedamage && (!ent->dmgparent || !ent->dmgparent->takedamage)) {
+      continue;
+    }
+
+    // 'func_static_client' is still linked when it's off,
+    // so we need to manually check and ignore damage to it
+    if (ent->s.eType == ET_STATIC_CLIENT &&
+        ETJump::EntityUtilsShared::funcStaticClientIsHidden(
+            &ent->s, ClientNum(attacker))) {
       continue;
     }
 
     if (clientsonly && !ent->client) {
       continue;
     }
+
     if (!clientsonly && ent->client) {
       continue;
     }
