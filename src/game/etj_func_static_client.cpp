@@ -103,8 +103,6 @@ void FuncStaticClient::use(gentity_t *self, [[maybe_unused]] gentity_t *other,
     COM_BitCheck(&self->s.effect2Time, clientNum) ? turnOn(self, clientNum)
                                                   : turnOff(self, clientNum);
   }
-
-  useTargets(self, activator);
 }
 
 void FuncStaticClient::pain(gentity_t *self, gentity_t *attacker,
@@ -118,12 +116,7 @@ void FuncStaticClient::pain(gentity_t *self, gentity_t *attacker,
 
   // reset the health so the entity never dies
   self->health = FUNC_STATIC_PAIN_HEALTH;
-
-  useTargets(self, attacker);
-}
-
-void FuncStaticClient::useTargets(gentity_t *self, gentity_t *activator) {
-  self->activator = activator;
+  self->activator = attacker;
 
   G_UseTargets(self, self->activator);
 }
