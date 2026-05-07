@@ -281,19 +281,13 @@ static bool listCheckpoints(gentity_t *ent, Arguments argv) {
   if (!optCommand->extraArgs.empty()) {
     switch (optCommand->extraArgs.size()) {
       case 1:
-        season = "Default";
-        map = level.rawmapname;
         run = optCommand->extraArgs[0];
-        rank = 1;
         break;
       case 2:
-        season = "Default";
-        map = level.rawmapname;
         run = optCommand->extraArgs[0];
         rank = Q_atoi(optCommand->extraArgs[1]);
         break;
       case 3:
-        season = "Default";
         map = optCommand->extraArgs[0];
         run = optCommand->extraArgs[1];
         rank = Q_atoi(optCommand->extraArgs[2]);
@@ -402,14 +396,9 @@ static bool compareCheckpoints(gentity_t *ent, Arguments argv) {
   // shorthand commands need at least 2 arguments
   if (optCommand->extraArgs.size() > 1) {
     if (optCommand->extraArgs.size() == 2) {
-      season = "Default";
-      map = level.rawmapname;
       run = optCommand->extraArgs[0];
-      rankBase = 1;
       rankCmp = Q_atoi(optCommand->extraArgs[1]);
     } else if (optCommand->extraArgs.size() >= 3) {
-      season = "Default";
-      map = level.rawmapname;
       run = optCommand->extraArgs[0];
       rankBase = Q_atoi(optCommand->extraArgs[1]);
       rankCmp = Q_atoi(optCommand->extraArgs[2]);
