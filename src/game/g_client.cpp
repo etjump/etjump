@@ -1523,7 +1523,10 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         }
       }
 
-      if (!g_portalMode.integer && game.worldspawn->portalgunSpawn &&
+      if (!g_portalMode.integer &&
+          (game.worldspawn->portalgunSpawn ||
+           game.worldspawn->portalgunSpawnIgnored(g_entities +
+                                                  ClientNum(client))) &&
           !client->sess.timerunActive) {
         AddWeaponToPlayer(client, WP_PORTAL_GUN, 0, 1, qfalse);
       }

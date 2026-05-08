@@ -103,8 +103,27 @@ public:
   bool portalSurfaces{};
   bool portalPredict{};
 
+  struct KeyModification {
+    std::string key;
+    int32_t value; // spawnflags from 'target_worldspawn_modifications'
+  };
+
   Worldspawn();
   ~Worldspawn() = default;
+
+  void addKeyModification(const KeyModification &keyMod);
+  std::string getKeyModificationsString();
+  const std::vector<std::pair<std::string, int32_t>> &getKeyModifications();
+
+  bool noGodIgnored(const gentity_t *ent) const;
+  bool noGotoIgnored(const gentity_t *ent) const;
+  bool noNoclipIgnored(const gentity_t *ent) const;
+  bool noSaveIgnored(const gentity_t *ent) const;
+  bool noOverbounceIgnored(const gentity_t *ent) const;
+  bool noProneIgnored(const gentity_t *ent) const;
+  bool noWallbugIgnored(const gentity_t *ent) const;
+  bool overbouncePlayersIgnored(const gentity_t *ent) const;
+  bool portalgunSpawnIgnored(const gentity_t *ent) const;
 
 private:
   void initNoDrop(const char *key);
@@ -130,7 +149,11 @@ private:
   void initLimitedSaves(const char *key);
   void initStrictSaveLoad(const char *key);
 
+  bool keyIsIgnored(const gentity_t *ent, const char *checkKey) const;
+
   static void printKeyValue(const std::string &key, const std::string &value);
+
+  std::vector<std::pair<std::string, int32_t>> keyModifications;
 
   std::vector<std::pair<std::string, std::function<void()>>> keys = {
       {Keys::NO_DROP, [this]() { initNoDrop(Keys::NO_DROP); }},

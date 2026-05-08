@@ -137,18 +137,14 @@ void SaveSystem::save(gentity_t *ent) {
     return;
   }
 
-  trace_t trace;
-  trap_TraceCapsule(&trace, client->ps.origin, ent->r.mins, ent->r.maxs,
-                    client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
-
   if (!g_cheats.integer) {
-    if (game.worldspawn->noSave) {
-      if (trace.fraction == 1.0f) {
-        Printer::center(ent, "^7You can not ^3save ^7inside this area.");
-        return;
-      }
-    } else {
-      if (trace.fraction != 1.0f) {
+    if (!game.worldspawn->noSaveIgnored(ent)) {
+      trace_t trace;
+      trap_TraceCapsule(&trace, client->ps.origin, ent->r.mins, ent->r.maxs,
+                        client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
+
+      if (game.worldspawn->noSave ? trace.fraction == 1.0f
+                                  : trace.fraction != 1.0f) {
         Printer::center(ent, "^7You can not ^3save ^7inside this area.");
         return;
       }
@@ -503,22 +499,16 @@ void SaveSystem::unload(gentity_t *ent) {
       return;
     }
 
-    if (!g_cheats.integer) {
+    if (!g_cheats.integer && !game.worldspawn->noSaveIgnored(ent)) {
       // check for nosave areas only if we have valid pos
       trace_t trace;
       trap_TraceCapsule(&trace, pos->origin, ent->r.mins, ent->r.maxs,
                         pos->origin, ent->s.number, CONTENTS_NOSAVE);
 
-      if (game.worldspawn->noSave) {
-        if (trace.fraction == 1.0f) {
-          Printer::center(ent, "^7You can not ^3unload ^7to this area.");
-          return;
-        }
-      } else {
-        if (trace.fraction != 1.0f) {
-          Printer::center(ent, "^7You can not ^3unload ^7to this area.");
-          return;
-        }
+      if (game.worldspawn->noSave ? trace.fraction == 1.0f
+                                  : trace.fraction != 1.0f) {
+        Printer::center(ent, "^7You can not ^3unload ^7to this area.");
+        return;
       }
     }
 
@@ -529,10 +519,10 @@ void SaveSystem::unload(gentity_t *ent) {
   }
 }
 
-// Saves position client loaded from. Executed on every successful load command,
-// position validation is done later. This is to prevent unexpected behavior
-// where the last load position is not a valid position, and client is
-// teleported to a position that was valid before that.
+// Saves position client loaded from. Executed on every successful load
+// command, position validation is done later. This is to prevent unexpected
+// behavior where the last load position is not a valid position, and client
+// is teleported to a position that was valid before that.
 void SaveSystem::saveLastLoadPos(gentity_t *ent) {
   SavePosition *pos;
   const auto *client = ent->client;

@@ -1948,7 +1948,8 @@ typedef struct {
   gametype_t gametype;
   int antilag;
 
-  int shared;
+  int sharedCvar;   // value of 'shared' cvar on server
+  int sharedActive; // effective value of 'shared', after ignored keys
   int pmove_msec;
   int cheats;
 #ifdef ALLOW_GSYNC

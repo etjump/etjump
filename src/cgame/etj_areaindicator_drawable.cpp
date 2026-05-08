@@ -65,21 +65,16 @@ AreaIndicator::Indicator::Indicator(vmCvar_t *controlCvar,
 }
 
 void AreaIndicator::checkPronePrint(trace_t &trace) {
-  if (cgs.cheats || ci->team == TEAM_SPECTATOR) {
+  if (cgs.cheats || ci->team == TEAM_SPECTATOR ||
+      !(cgs.sharedActive & BG_LEVEL_NO_PRONE)) {
     printProneMessage = false;
     return;
   }
 
-  if (cgs.shared & BG_LEVEL_NO_PRONE) {
-    if (trace.fraction != 1.0f) {
-      printProneMessage = false;
-      return;
-    }
-  } else {
-    if (trace.fraction == 1.0f) {
-      printProneMessage = false;
-      return;
-    }
+  if (cgs.sharedCvar & BG_LEVEL_NO_PRONE ? (trace.fraction != 1.0f)
+                                         : (trace.fraction == 1.0f)) {
+    printProneMessage = false;
+    return;
   }
 
   if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE) {
@@ -121,13 +116,18 @@ bool AreaIndicator::beforeRender() {
       checkPronePrint(trace);
     }
 
+    const bool areaIgnored = !(cgs.sharedActive & indicator.sharedValue);
+
     switch (static_cast<DrawMode>(indicator.cvar->integer)) {
       case DrawMode::Always:
         indicator.draw = true;
         drawAny = true;
 
-        if (((cgs.shared & indicator.sharedValue) && trace.fraction == 1.0f) ||
-            (!(cgs.shared & indicator.sharedValue) && trace.fraction != 1.0f)) {
+        if ((((cgs.sharedCvar & indicator.sharedValue) &&
+              trace.fraction == 1.0f) ||
+             (!(cgs.sharedCvar & indicator.sharedValue) &&
+              trace.fraction != 1.0f)) &&
+            !areaIgnored) {
           indicator.drawForbid = true;
         }
 
@@ -137,7 +137,7 @@ bool AreaIndicator::beforeRender() {
           indicator.draw = true;
           drawAny = true;
 
-          if (cgs.shared & indicator.sharedValue) {
+          if ((cgs.sharedCvar & indicator.sharedValue) && !areaIgnored) {
             indicator.drawForbid = true;
           }
         }
@@ -148,7 +148,7 @@ bool AreaIndicator::beforeRender() {
           indicator.draw = true;
           drawAny = true;
 
-          if (!(cgs.shared & indicator.sharedValue)) {
+          if (!(cgs.sharedCvar & indicator.sharedValue) && !areaIgnored) {
             indicator.drawForbid = true;
           }
         }

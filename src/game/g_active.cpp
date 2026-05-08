@@ -1,4 +1,5 @@
 
+#include "etj_shared.h"
 #include "g_local.h"
 #include "etj_save_system.h"
 #include "etj_printer.h"
@@ -7,6 +8,7 @@
 #include "etj_utilities.h"
 #include "etj_entity_utilities.h"
 #include "etj_trace_utils.h"
+#include "etj_worldspawn.h"
 
 /*
 ===============
@@ -1170,7 +1172,10 @@ void ClientThink_real(gentity_t *ent) {
 
   pm.pmove_fixed = client->pers.pmoveFixed;
   pm.pmove_msec = pmove_msec.integer;
-  pm.shared = shared.integer;
+  pm.sharedCvar = shared.integer;
+  pm.sharedActive = ETJump::activeSharedValue(
+      shared.integer, game.worldspawn->getKeyModifications(),
+      ent->client->sess.sessionTeam, ent->client->sess.timerunActive);
   pm.noActivateLean = client->pers.noActivateLean;
   pm.noPanzerAutoswitch = client->pers.noPanzerAutoswitch;
 
