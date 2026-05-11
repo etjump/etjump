@@ -1275,8 +1275,6 @@ typedef struct {
 
   // to prevent teleport bit getting flipped multiple times per frame
   bool teleportBitFlipped;
-
-  bool requestExtShaders;
 } cg_t;
 
 inline constexpr int NUM_FUNNEL_SPRITES = 21;
@@ -1985,8 +1983,8 @@ typedef struct {
   // locally derived information from gamestate
   //
   qhandle_t gameModels[MAX_MODELS];
-  char gameShaderNames[MAX_SHADER_INDEX][MAX_QPATH];
-  qhandle_t gameShaders[MAX_SHADER_INDEX];
+  char gameShaderNames[MAX_SHADER_INDEX + 1][MAX_QPATH];
+  qhandle_t gameShaders[MAX_SHADER_INDEX + 1];
   qhandle_t gameModelSkins[MAX_MODELS];
   bg_character_t *gameCharacters[MAX_CHARACTERS];
   sfxHandle_t gameSounds[MAX_SOUNDS];
@@ -3458,7 +3456,7 @@ void CG_ParseSpawns(void);
 void CG_ParseServerVersionInfo(const char *pszVersionInfo);
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
 void CG_SetConfigValues(void);
-void CG_ShaderStateChanged(const std::string &state = "");
+void CG_ShaderStateChanged(int32_t index);
 void CG_ChargeTimesChanged(void);
 void CG_LoadVoiceChats();         // NERVE - SMF
 void CG_PlayBufferedVoiceChats(); // NERVE - SMF

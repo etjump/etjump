@@ -528,7 +528,7 @@ We should keep a local copy of the state, and compare the incoming state
 update against that, and remap only the parts that have been changed.
 =====================
 */
-void CG_ShaderStateChanged(const std::string &state) {
+void CG_ShaderStateChanged(const int32_t index) {
   char originalShader[MAX_QPATH];
   char newShader[MAX_QPATH];
   char timeOffset[16]{};
@@ -536,7 +536,7 @@ void CG_ShaderStateChanged(const std::string &state) {
   const char *n = nullptr;
   const char *t = nullptr;
 
-  o = state.empty() ? CG_ConfigString(CS_SHADERSTATE) : state.c_str();
+  o = CG_ConfigString(CS_SHADERSTATE + index);
 
   while (o && *o) {
     n = strstr(o, "=");
@@ -727,8 +727,9 @@ static void CG_ConfigStringModified(void) {
     ETJump::SpectatorInfoData::updateSpectatorData(num - CS_PLAYERS);
   } else if (num >= CS_DLIGHTS && num < CS_DLIGHTS + MAX_DLIGHT_CONFIGSTRINGS) {
     CG_SetupDlightstyles();
-  } else if (num == CS_SHADERSTATE) {
-    CG_ShaderStateChanged();
+  } else if (num >= CS_SHADERSTATE &&
+             num < CS_SHADERSTATE + MAX_CS_SHADERSTATES) {
+    CG_ShaderStateChanged(num - CS_SHADERSTATE);
   } else if (num == CS_CHARGETIMES) {
     CG_ChargeTimesChanged();
   } else if (num >= CS_FIRETEAMS && num < CS_FIRETEAMS + MAX_FIRETEAMS) {

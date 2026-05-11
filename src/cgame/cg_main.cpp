@@ -2941,20 +2941,15 @@ static void CG_RegisterGraphics(void) {
     cgs.gameModelSkins[i] = trap_R_RegisterSkin(skinName);
   }
 
-  for (i = 1; i < MAX_CS_SHADERS; i++) {
-    const char *shaderName;
+  // NOTE: 0-indexed unlike other graphics, we use the first index for shaders
+  for (i = 0; i < MAX_CS_SHADERS; i++) {
+    const char *shaderStr = CG_ConfigString(CS_SHADERS + i);
 
-    shaderName = CG_ConfigString(CS_SHADERS + i);
-    if (!shaderName[0]) {
+    if (!shaderStr[0]) {
       break;
     }
 
-    ETJump::registerGameShader(i, shaderName);
-
-    // we might have more, send a request for them once we're connected
-    if (i == MAX_CS_SHADERS - 1) {
-      cg.requestExtShaders = true;
-    }
+    ETJump::registerGameShader(i, shaderStr);
   }
 
   for (i = 1; i < MAX_CHARACTERS; i++) {
@@ -4035,7 +4030,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_LoadingString("");
 
-  CG_ShaderStateChanged();
+  for (int32_t i = 0; i < MAX_CS_SHADERSTATES; i++) {
+    CG_ShaderStateChanged(i);
+  }
 
   CG_ChargeTimesChanged();
 

@@ -80,7 +80,7 @@ bool playerIsNoclipping(int clientNum);
 
 bool skipPortalDraw(int selfNum, int otherNum);
 
-void registerGameShader(int32_t index, const char *shader);
+void registerGameShader(int32_t index, const char *shaderStr);
 
 void centerCursor();
 

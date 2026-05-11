@@ -2973,11 +2973,8 @@ extern std::shared_ptr<ProgressionTrackers> progressionTrackers;
 class SyscallExt;
 extern std::unique_ptr<SyscallExt> syscallExt;
 
-class ShaderIndexHandler;
-extern std::unique_ptr<ShaderIndexHandler> shaderIndexHandler;
-
-class RemapShaderHandler;
-extern std::unique_ptr<RemapShaderHandler> remapShaderHandler;
+class ShaderConfigHandler;
+extern std::unique_ptr<ShaderConfigHandler> shaderConfigHandler;
 
 struct GameLogicException : public std::exception {
 private:
