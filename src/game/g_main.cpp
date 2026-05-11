@@ -11,11 +11,10 @@
 #include "etj_timerun_entities.h"
 #include "etj_entity_utilities.h"
 #include "etj_rtv.h"
+#include "etj_shader_config_handler.h"
 #include "etj_syscall_ext_shared.h"
 #include "etj_target_spawn_relay.h"
 #include "etj_time_utilities.h"
-#include "etj_remapshader_handler.h"
-#include "etj_shader_index_handler.h"
 
 level_locals_t level;
 
@@ -42,8 +41,7 @@ std::shared_ptr<Database> database;
 std::shared_ptr<Session> session;
 std::shared_ptr<ProgressionTrackers> progressionTrackers;
 std::unique_ptr<SyscallExt> syscallExt;
-std::unique_ptr<RemapShaderHandler> remapShaderHandler;
-std::unique_ptr<ShaderIndexHandler> shaderIndexHandler;
+std::unique_ptr<ShaderConfigHandler> shaderConfigHandler;
 } // namespace ETJump
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,8 +70,7 @@ static void shutdownETJump() {
   ETJump::saveSystem = nullptr;
   ETJump::progressionTrackers = nullptr;
   ETJump::syscallExt = nullptr;
-  ETJump::shaderIndexHandler = nullptr;
-  ETJump::remapShaderHandler = nullptr;
+  ETJump::shaderConfigHandler = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1911,10 +1908,8 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   // Reset the amount of timerun timers
   level.timerunNamesCount = 0;
 
-  // me must register these before the mapscript is loaded,
-  // as it may contain remapshader calls
-  ETJump::shaderIndexHandler = std::make_unique<ETJump::ShaderIndexHandler>();
-  ETJump::remapShaderHandler = std::make_unique<ETJump::RemapShaderHandler>();
+  // before mapscript is loaded, so remapshaders from mapscripts work properly
+  ETJump::shaderConfigHandler = std::make_unique<ETJump::ShaderConfigHandler>();
 
   // load level script
   G_Script_ScriptLoad();

@@ -24,33 +24,36 @@
 
 #pragma once
 
-#include "g_local.h"
+#include "q_shared.h"
+#include <cstdint>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 namespace ETJump {
+// 128 in VET for 32 shaders, completely arbitrary
+inline constexpr int32_t MAX_SHADER_REMAPS = MAX_SHADER_INDEX * 4;
 
-// 128 in VET for 32 shaders, upped to 2048 for our extended 512 shaders
-inline constexpr int32_t MAX_SHADER_REMAPS = 2048;
-
-class RemapShaderHandler {
+class ShaderConfigHandler {
 public:
-  void addRemap(std::string_view oldShader, std::string_view newShader);
+  int16_t getShaderIndex(const char *name, bool create);
+  void addShaderRemap(const char *oldShader, const char *newShader);
   void updateShaderState();
-
-  // so clients get the state of extended shaders on init
-  void sendCurrentShaderStateExt();
 
 private:
   struct ShaderRemap {
-    std::string oldShader;
-    std::string newShader;
+    std::string originalShader;
+    std::string currentShader;
     float timeOffset{};
+    int16_t i1; // 'originalShader' index
+    int16_t i2; // 'currentShader index
   };
 
-  std::array<ShaderRemap, MAX_SHADER_REMAPS> shaderRemaps{};
-  std::array<std::string, EXT_SHADER_SET_COUNT> extShaderStates{};
-  int32_t remapCount{};
+  std::unordered_map<std::string, int16_t> gameShaderCache;
+  std::vector<ShaderRemap> shaderRemaps;
+  std::unordered_set<int16_t> remapQueue;
 
-  std::string buildShaderStateConfig(int32_t index);
-  void sendExtShaderState(int32_t index);
+  std::string buildShaderStateString(int32_t index);
 };
 } // namespace ETJump

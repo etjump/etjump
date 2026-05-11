@@ -182,12 +182,24 @@ bool skipPortalDraw(const int selfNum, const int otherNum) {
   return true;
 }
 
-void registerGameShader(const int32_t index, const char *shader) {
-  cgs.gameShaders[index] = shader[0] == '*'
-                               ? trap_R_RegisterShader(shader + 1)
-                               : trap_R_RegisterShaderNoMip(shader);
-  Q_strncpyz(cgs.gameShaderNames[index], shader[0] == '*' ? shader + 1 : shader,
-             MAX_QPATH);
+void registerGameShader(const int32_t index, const char *shaderStr) {
+  const auto shaders = StringUtils::split(shaderStr, " ");
+  const int32_t start = index * MAX_SHADERS_PER_INDEX;
+
+  for (int32_t i = 0; i < shaders.size(); i++) {
+    // 1-indexed, index 0 is always empty (invalid)
+    const int32_t shaderNum = start + i + 1;
+    const std::string &shader = shaders[i];
+
+    if (StringUtils::startsWith(shaders[i], "*")) {
+      const char *s = shader.c_str() + 1;
+      cgs.gameShaders[shaderNum] = trap_R_RegisterShader(s);
+      Q_strncpyz(cgs.gameShaderNames[shaderNum], s, MAX_QPATH);
+    } else {
+      cgs.gameShaders[shaderNum] = trap_R_RegisterShaderNoMip(shader.c_str());
+      Q_strncpyz(cgs.gameShaderNames[shaderNum], shader.c_str(), MAX_QPATH);
+    }
+  }
 }
 
 void centerCursor() {
