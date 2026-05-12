@@ -124,9 +124,9 @@ void CGaz::startListeners() {
 
 void CGaz::setThickness(const vmCvar_t *cvar) {
   if (cvar == &etj_CGaz2Thickness1) {
-    thickness[0] = std::clamp(cvar->value, 0.5f, 10.0f);
+    thickness[0] = std::clamp(cvar->value, 0.5f, 100.0f);
   } else if (cvar == &etj_CGaz2Thickness2) {
-    thickness[1] = std::clamp(cvar->value, 0.5f, 10.0f);
+    thickness[1] = std::clamp(cvar->value, 0.5f, 100.0f);
   }
 }
 

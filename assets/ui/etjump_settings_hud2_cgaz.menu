@@ -80,9 +80,9 @@ menuDef {
         COMBO               (SETTINGS_COMBO_POS(21), "Midline color:", 0.2, SETTINGS_ITEM_H, "etj_CGaz1MidlineColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets midline color of CGaz 1\netj_CGaz1MidlineColor")
         YESNO               (SETTINGS_ITEM_POS(22), "High resolution CGaz2:", 0.2, SETTINGS_ITEM_H, "etj_CGaz2HighRes", "Enable high-resolution, anti-aliased drawing for CGaz2\nThis might cause rendering bugs on some clients\netj_CGaz2HighRes")
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(23), "etj_CGaz2Thickness1", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(23), "CGaz 2 primary thickness:", 0.2, SETTINGS_ITEM_H, etj_CGaz2Thickness1 2 0.5 10 0.1, "Line thickness for velocity direction/angle lines on CGaz2, requires etj_CGaz2HighRes to apply\netj_CGaz2Thickness1")
+        SLIDER              (SETTINGS_ITEM_POS(23), "CGaz 2 primary thickness:", 0.2, SETTINGS_ITEM_H, etj_CGaz2Thickness1 2 0.5 100 0.5, "Line thickness for velocity direction/angle lines on CGaz2, requires etj_CGaz2HighRes to apply\netj_CGaz2Thickness1")
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(24), "etj_CGaz2Thickness2", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(24), "CGaz 2 secondary thickness:", 0.2, SETTINGS_ITEM_H, etj_CGaz2Thickness2 2 0.5 10 0.1, "Line thickness for wishdir direction lines CGaz2, requires etj_CGaz2HighRes to apply\netj_CGaz2Thickness2")
+        SLIDER              (SETTINGS_ITEM_POS(24), "CGaz 2 secondary thickness:", 0.2, SETTINGS_ITEM_H, etj_CGaz2Thickness2 2 0.5 100 0.5, "Line thickness for wishdir direction lines CGaz2, requires etj_CGaz2HighRes to apply\netj_CGaz2Thickness2")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
