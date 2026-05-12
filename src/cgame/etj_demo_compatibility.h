@@ -82,6 +82,7 @@ public:
     bool stripLocalizationMarkers = false;
     bool noMapCustomizationHashes = false;
     bool adjustEvFuncStaticClient = false;
+    bool oldShaderIndexOrder = false;
   };
 
   // everything in here will be set to false unless we're on demo playback

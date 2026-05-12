@@ -621,6 +621,16 @@ static void CG_ConfigStringModified(void) {
     }
   };
 
+  int32_t shaderCsMax = MAX_CS_SHADERS;
+  int32_t shaderStateCs = CS_SHADERSTATE;
+  int32_t shaderStateCsMax = MAX_CS_SHADERSTATES;
+
+  if (ETJump::cgame.demo.compatibility->flags.oldShaderIndexOrder) {
+    shaderCsMax = MAX_CS_SHADERS_COMPAT;
+    shaderStateCs = CS_SHADERS + MAX_CS_SHADERS_COMPAT;
+    shaderStateCsMax = 1;
+  }
+
   // do something with it if necessary
   if (num == CS_MUSIC) {
     CG_StartMusic();
@@ -703,7 +713,7 @@ static void CG_ConfigStringModified(void) {
                                                // compress flag?
       }
     }
-  } else if (num >= CS_SHADERS && num < CS_SHADERS + MAX_CS_SHADERS) {
+  } else if (num >= CS_SHADERS && num < CS_SHADERS + shaderCsMax) {
     ETJump::registerGameShader(num - CS_SHADERS, str);
   } else if (num >= CS_SKINS && num < CS_SKINS + MAX_CS_SKINS) {
     cgs.gameModelSkins[num - CS_SKINS] = trap_R_RegisterSkin(str);
@@ -727,8 +737,7 @@ static void CG_ConfigStringModified(void) {
     ETJump::SpectatorInfoData::updateSpectatorData(num - CS_PLAYERS);
   } else if (num >= CS_DLIGHTS && num < CS_DLIGHTS + MAX_DLIGHT_CONFIGSTRINGS) {
     CG_SetupDlightstyles();
-  } else if (num >= CS_SHADERSTATE &&
-             num < CS_SHADERSTATE + MAX_CS_SHADERSTATES) {
+  } else if (num >= shaderStateCs && num < shaderStateCs + shaderStateCsMax) {
     CG_ShaderStateChanged(num - CS_SHADERSTATE);
   } else if (num == CS_CHARGETIMES) {
     CG_ChargeTimesChanged();

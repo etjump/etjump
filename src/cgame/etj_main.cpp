@@ -126,7 +126,7 @@ void delayedInit() {
   }
 }
 
-static void initHandlers() {
+void initHandlers() {
   cgame.handlers.serverCommands =
       std::make_shared<ClientCommandsHandler>(nullptr);
   cgame.handlers.consoleCommands =
@@ -136,6 +136,8 @@ static void initHandlers() {
 
   cgame.handlers.awaitedCommand = std::make_unique<AwaitedCommandHandler>(
       cgame.handlers.consoleCommands, cgame.handlers.playerEvents);
+
+  cgame.handlers.cvarUpdate = std::make_shared<CvarUpdateHandler>();
 
   cgame.handlers.rtv =
       std::make_unique<ClientRtvHandler>(cgame.handlers.serverCommands);
@@ -169,7 +171,7 @@ static void initPlatform() {
   SyscallExt::trap_CmdBackup_Ext();
 }
 
-static void initDemo() {
+void initDemo() {
   cgame.demo.compatibility =
       std::make_unique<DemoCompatibility>(cgame.handlers.consoleCommands);
   cgame.demo.autoDemoRecorder = std::make_unique<AutoDemoRecorder>(
@@ -319,15 +321,7 @@ void init() {
                                      " " S_COLOR_LTGREY GAME_BINARY_NAME
                                      " init...\n");
 
-  // NOTE: The main handlers must be created before everything else!
-  // All C++ modules should get these as constructor params to subscribe
-  // to console commands, server commands, cvar updates etc, and not reach
-  // for the global pointers. They exists because they are still used in
-  // various places outside of C++ objects, in legacy C code.
-  initHandlers();
-
   initPlatform();
-  initDemo();
   initUtils();
   initUserInterface();
   initVisuals();

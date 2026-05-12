@@ -1126,6 +1126,9 @@ inline constexpr int32_t MAX_SHADER_INDEX =
 
 inline constexpr int32_t MAX_SHADERSTATES_PER_INDEX = MAX_SHADERS_PER_INDEX;
 
+// for demo compatibility, to make the indices back to the old values
+inline constexpr int32_t MAX_CS_SHADERS_COMPAT = 32;
+
 inline constexpr int MAX_SERVER_TAGS = 256;
 inline constexpr int MAX_TAG_FILES = 64;
 
