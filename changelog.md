@@ -25,7 +25,7 @@
 * `printDemoCompatInfo` console command to print active compatibility settings during demo playback [#1804](https://github.com/etjump/etjump/pull/1804)
 
 ## Changed
-* increased limit for unique remappable shaders from **32** to **511**
+* increased limit for networked shaders (remapshader, custom entity shaders etc.) from **31** to **240** [#1894](https://github.com/etjump/etjump/pull/1894)
 * changelog improvements [#1885](https://github.com/etjump/etjump/pull/1885)
   * changelog entries are now categorized and sorted from most to least interesting/important
   * condensed changelog output to be easier to skim through
