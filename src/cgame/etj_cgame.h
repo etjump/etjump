@@ -115,8 +115,9 @@ struct HUD {
 
 struct CGameContext {
   Handlers handlers;
-  Platform platform;
   Demo demo;
+
+  Platform platform;
   Utils utils;
   UI ui;
   Visuals visuals;

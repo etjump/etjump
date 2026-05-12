@@ -182,7 +182,21 @@ bool skipPortalDraw(const int selfNum, const int otherNum) {
   return true;
 }
 
+// compatibility version, for old shader index numbering (1 shader per index)
+static void registerGameShaderCompat(const int32_t index, const char *shader) {
+  cgs.gameShaders[index] = shader[0] == '*'
+                               ? trap_R_RegisterShader(shader + 1)
+                               : trap_R_RegisterShaderNoMip(shader);
+  Q_strncpyz(cgs.gameShaderNames[index], shader[0] == '*' ? shader + 1 : shader,
+             MAX_QPATH);
+}
+
 void registerGameShader(const int32_t index, const char *shaderStr) {
+  if (cgame.demo.compatibility->flags.oldShaderIndexOrder) {
+    registerGameShaderCompat(index, shaderStr);
+    return;
+  }
+
   const auto shaders = StringUtils::split(shaderStr, " ");
   const int32_t start = index * MAX_SHADERS_PER_INDEX;
 

@@ -204,6 +204,10 @@ void DemoCompatibility::setupCompatibilityFlags() {
     compatibilityStrings.emplace_back(
         "Adjusted event indices for ET_STATIC_CLIENT");
 
+    flags.oldShaderIndexOrder = true;
+    compatibilityStrings.emplace_back("Using old shader configstring indices "
+                                      "for game shaders and shaderstate");
+
     adjustEventNums = true;
   }
 }

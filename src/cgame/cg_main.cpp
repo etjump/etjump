@@ -1441,7 +1441,11 @@ void CG_UpdateCvars(void) {
           }
         }
 
-        ETJump::cgame.handlers.cvarUpdate->check(cv->vmCvar);
+        // if we're in the loading screen and just drawing a frame on that,
+        // we haven't finished initialization and this might be null
+        if (ETJump::cgame.handlers.cvarUpdate) {
+          ETJump::cgame.handlers.cvarUpdate->check(cv->vmCvar);
+        }
       }
     }
   }
@@ -2941,8 +2945,16 @@ static void CG_RegisterGraphics(void) {
     cgs.gameModelSkins[i] = trap_R_RegisterSkin(skinName);
   }
 
-  // NOTE: 0-indexed unlike other graphics, we use the first index for shaders
-  for (i = 0; i < MAX_CS_SHADERS; i++) {
+  int32_t start = 0;
+  int32_t max = MAX_CS_SHADERS;
+
+  // old shader index setup starts form 1, up to 32
+  if (ETJump::cgame.demo.compatibility->flags.oldShaderIndexOrder) {
+    start = 1;
+    max = MAX_CS_SHADERS_COMPAT;
+  }
+
+  for (i = start; i < max; i++) {
     const char *shaderStr = CG_ConfigString(CS_SHADERS + i);
 
     if (!shaderStr[0]) {
@@ -3860,9 +3872,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   memset(cg_items, 0, sizeof(cg_items));
   memset(&cg_pmove, 0, sizeof(cg_pmove));
 
-  ETJump::cgame.handlers.cvarUpdate =
-      std::make_unique<ETJump::CvarUpdateHandler>();
-
   cgs.initing = qtrue;
 
   for (i = 0; i < MAX_CLIENTS; i++) {
@@ -3916,6 +3925,13 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_RegisterCvars();
 
+  // NOTE: The main handlers must be created before any ETJump objects
+  // are created! All C++ modules should get these as constructor params
+  // to subscribe to console commands, server commands, cvar updates etc,
+  // and not reach for the global pointers. They exists because they are still
+  // used in various places outside of C++ objects, in legacy C code.
+  ETJump::initHandlers();
+
   CG_InitConsoleCommands();
 
   // get the gamestate from the client system
@@ -3925,6 +3941,10 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_ParseServerinfo();
   CG_ParseSysteminfo();
+
+  // we need demo compatibility object asap, once server info is parsed,
+  // so we can get the mod version
+  ETJump::initDemo();
 
   if (cgs.gametype == ETJUMP_GAMETYPE) {
     CG_LocateArena();
@@ -4030,8 +4050,12 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_LoadingString("");
 
-  for (int32_t i = 0; i < MAX_CS_SHADERSTATES; i++) {
-    CG_ShaderStateChanged(i);
+  if (ETJump::cgame.demo.compatibility->flags.oldShaderIndexOrder) {
+    CG_ShaderStateChanged(MAX_CS_SHADERSTATES - 1);
+  } else {
+    for (i = 0; i < MAX_CS_SHADERSTATES; i++) {
+      CG_ShaderStateChanged(i);
+    }
   }
 
   CG_ChargeTimesChanged();
