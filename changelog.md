@@ -7,7 +7,7 @@
   * can store up to **40** commands, spread across 5 pages of the menu
 * `func_static_client` entity - conditional brush entity with a unique state for each client [#1824](https://github.com/etjump/etjump/pull/1824)
 * high resolution, anti-aliased CGaz 2 drawing (`etj_CGaz2HighRes`) [#1864](https://github.com/etjump/etjump/pull/1864)
-  * `etj_CGaz2Thickness1/2` controls the thickness of the lines (`0.5 - 10.0`)
+  * `etj_CGaz2Thickness1/2` controls the thickness of the lines (`0.5 - 100.0`)
   * renders up to 1080px vertical resolution, before scaling to real screen resolution
 * `listcheckpoints` and `comparecheckpoints` commands to list and compare checkpoint times from timeruns [#1829](https://github.com/etjump/etjump/pull/1829)
   * also accessible via admin commands `!list/comparecheckpoints`
