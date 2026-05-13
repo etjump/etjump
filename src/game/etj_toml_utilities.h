@@ -47,7 +47,15 @@ public:
       }
     } catch (const toml::syntax_error &e) {
       if (err) {
-        *err = StringUtils::format("Failed to parse TOML file '%s': %s", file,
+        *err = StringUtils::format("Failed to parse TOML file '%s':\n %s", file,
+                                   e.what());
+        StringUtils::escapeColorCodes(*err, '7');
+      }
+
+      return false;
+    } catch (const toml::type_error &e) {
+      if (err) {
+        *err = StringUtils::format("Failed to parse TOML file '%s':\n %s", file,
                                    e.what());
         StringUtils::escapeColorCodes(*err, '7');
       }
@@ -55,7 +63,7 @@ public:
       return false;
     } catch (toml::file_io_error &e) {
       if (err) {
-        *err = StringUtils::format("Failed to open file '%s' for reading: %s",
+        *err = StringUtils::format("Failed to open file '%s' for reading:\n %s",
                                    file, e.what());
       }
 
