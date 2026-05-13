@@ -1545,13 +1545,9 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
     }
   }
 
-  // adjust freestanding events to account for ET_TOKEN_EASY/MEDIUM/HARD,
-  // ET_VELOCITY_PUSH_TRIGGER, ET_FAKEBRUSH and ET_TELEPORT_TRIGGER_CLIENT
+  // adjust freestanding events to account for any added entity types
   // freestanding events always have an eType > ET_EVENTS
-  if ((ETJump::cgame.demo.compatibility->flags.adjustEvVelocityPushTrigger ||
-       ETJump::cgame.demo.compatibility->flags
-           .adjustEvFakebrushAndClientTeleporter ||
-       ETJump::cgame.demo.compatibility->flags.adjustEvTokens) &&
+  if (ETJump::cgame.demo.compatibility->adjustEventNums &&
       es->eType > ET_EVENTS) {
     event = ETJump::cgame.demo.compatibility->adjustedEventNum(event);
   }

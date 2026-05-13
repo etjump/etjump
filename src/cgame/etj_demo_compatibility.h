@@ -58,6 +58,9 @@ class DemoCompatibility {
 
   Version demoVersion{};
 
+  // stores the strings to print for compatibility info
+  std::vector<std::string> compatibilityStrings;
+
   std::shared_ptr<ClientCommandsHandler> consoleCommands;
 
 public:
@@ -78,13 +81,16 @@ public:
     bool noSpecCountInVoteCs = false;
     bool stripLocalizationMarkers = false;
     bool noMapCustomizationHashes = false;
+    bool adjustEvFuncStaticClient = false;
   };
 
   // everything in here will be set to false unless we're on demo playback
   CompatibilityFlags flags{};
 
-  // stores the strings to print for compatibility info
-  std::vector<std::string> compatibilityStrings;
+  // 'master' check for any event number adjustments, any version that
+  // requires event number adjustments sets this, so it's easy to check
+  // just one boolean in 'CG_EntityEvent'
+  bool adjustEventNums{};
 
   // performs event number adjustments for events that are added freestanding
   // by setting event num to ET_EVENTS + event due to additional entity types
