@@ -2492,7 +2492,7 @@ void Item_ListBox_MouseEnter(itemDef_t *item, const float x, const float y,
     r.h = item->window.rect.h - static_cast<float>(listPtr->drawPadding);
     if (Rect_ContainsPoint(&r, x, y)) {
       listPtr->cursorPos =
-          static_cast<int>((y - 2 - r.y) / listPtr->elementHeight) +
+          static_cast<int>((y - r.y) / listPtr->elementHeight) +
           listPtr->startPos;
       if (listPtr->cursorPos > listPtr->endPos) {
         listPtr->cursorPos = listPtr->endPos;
