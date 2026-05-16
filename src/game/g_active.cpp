@@ -1650,7 +1650,6 @@ qboolean StuckInClient(gentity_t *self) {
   return (qfalse);
 }
 
-extern vec3_t playerMins, playerMaxs;
 inline constexpr float WR_PUSHAMOUNT = 25.0f;
 
 void WolfRevivePushEnt(gentity_t *self, gentity_t *other) {

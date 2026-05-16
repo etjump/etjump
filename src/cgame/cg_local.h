@@ -1275,6 +1275,11 @@ typedef struct {
 
   // to prevent teleport bit getting flipped multiple times per frame
   bool teleportBitFlipped;
+
+  // matches 'pm->maxs', which accounts for crouch & prone, unlike 'ps->maxs'
+  // this should be used in capsule traces as maxs for area traces,
+  // since 'cg_pmove.maxs' is not setup properly when interpolating
+  vec3_t pmoveMaxs;
 } cg_t;
 
 inline constexpr int NUM_FUNNEL_SPRITES = 21;

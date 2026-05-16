@@ -87,10 +87,19 @@ inline constexpr int CROUCH_VIEWHEIGHT = 16;
 inline constexpr int DEAD_VIEWHEIGHT = -16;
 inline constexpr int PRONE_VIEWHEIGHT = -8;
 
-extern vec3_t playerMins;
-extern vec3_t playerMaxs;
-extern vec3_t playerlegsProneMins;
-extern vec3_t playerlegsProneMaxs;
+inline constexpr vec3_t playerMins = {-18, -18, -24};
+inline constexpr vec3_t playerMaxs = {18, 18, 48};
+inline constexpr vec3_t playerlegsProneMins = {-13.5f, -13.5f, -24.f};
+inline constexpr vec3_t playerlegsProneMaxs = {13.5f, 13.5f, -14.4f};
+
+// there's no real easy way to determine these for other players,
+// both crouch and prone use ps.crouchMaxZ for maxs[2] but it's calculated
+// differently based off stance, and since the result is not stored
+// in entitystate, it's simpler to just use hardcoded values
+// these are always correct anyway, there's no variation in any scenario
+
+inline constexpr int32_t CROUCH_MAXS_Z = playerMaxs[2] - 24;
+inline constexpr int32_t PRONE_MAXS_Z = playerMaxs[2] - 32;
 
 // RF, on fire effects
 inline constexpr int FIRE_FLASH_TIME = 2000;

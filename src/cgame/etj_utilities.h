@@ -108,4 +108,6 @@ playerState_t *getValidPlayerState();
 void resetTransitionEffects();
 
 void resetCustomvoteInfo();
+
+void setPmoveMaxs(const playerState_t *ps);
 } // namespace ETJump

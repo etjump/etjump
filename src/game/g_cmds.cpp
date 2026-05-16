@@ -3352,9 +3352,6 @@ void Cmd_SetCameraOrigin_f(gentity_t *ent) {
 
 extern gentity_t *BotFindEntityForName(char *name);
 
-extern vec3_t playerMins;
-extern vec3_t playerMaxs;
-
 qboolean G_TankIsOccupied(gentity_t *ent) {
   if (!ent->tankLink) {
     return qfalse;
