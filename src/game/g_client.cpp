@@ -2846,6 +2846,7 @@ void ClientDisconnect(int clientNum) {
                   level.voteInfo.voteString, ent->client->pers.netname);
       resetVote();
       level.voteInfo.voteYes = 0;
+      level.voteInfo.voteYesSpectators = 0;
       level.voteInfo.voteNo = level.numConnectedClients;
       level.voteInfo.voteNoSpectators = 0;
     } else if (ent->client->ps.eFlags & EF_VOTED) {
