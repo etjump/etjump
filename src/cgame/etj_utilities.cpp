@@ -296,4 +296,24 @@ void resetCustomvoteInfo() {
 
   trap_SendConsoleCommand("uiResetCustomvotes\n");
 }
+
+void setPmoveMaxs(const playerState_t *ps) {
+  if (!ps) {
+    return;
+  }
+
+  // if we're not interpolating, 'cg_pmove.maxs' is setup correctly
+  if (!cg.demoPlayback && !(ps->pm_flags & PMF_FOLLOW)) {
+    VectorCopy(cg_pmove.maxs, cg.pmoveMaxs);
+    return;
+  }
+
+  VectorCopy(ps->maxs, cg.pmoveMaxs);
+
+  if (ps->eFlags & EF_CROUCHING) {
+    cg.pmoveMaxs[2] = CROUCH_MAXS_Z;
+  } else if (ps->eFlags & (EF_PRONE | EF_PRONE_MOVING)) {
+    cg.pmoveMaxs[2] = PRONE_MAXS_Z;
+  }
+}
 } // namespace ETJump

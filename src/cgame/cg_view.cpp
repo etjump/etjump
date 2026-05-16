@@ -2072,6 +2072,8 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
   // update cg.predictedPlayerState
   CG_PredictPlayerState();
 
+  ETJump::setPmoveMaxs(&cg.snap->ps);
+
   DEBUGTIME
 
   // OSP -- MV handling

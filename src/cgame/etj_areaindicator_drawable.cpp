@@ -114,7 +114,7 @@ bool AreaIndicator::beforeRender() {
     // this is a bit wasteful if none of the indicators are being drawn,
     // but we need to do a trace for prone print always,
     // and I'd rather not complicate the logic based around that
-    CG_TraceCapsule(&trace, ps->origin, ps->mins, ps->maxs, ps->origin,
+    CG_TraceCapsule(&trace, ps->origin, ps->mins, cg.pmoveMaxs, ps->origin,
                     ps->clientNum, indicator.traceContents);
 
     if (indicator.traceContents == CONTENTS_NOPRONE) {
