@@ -2751,9 +2751,9 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     level.voteInfo.voteYes = 0;
   } else {
     level.voteInfo.voteYes = 1;
-    if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
-      level.voteInfo.voteYesSpectators = 1;
-    }
+    level.voteInfo.voteYesSpectators =
+        ent->client->sess.sessionTeam == TEAM_SPECTATOR ? 1 : 0;
+
     trap_SendServerCommand(clientNum, "voted yes");
   }
 
