@@ -603,6 +603,14 @@ void CG_AddLagometerSnapshotInfo(snapshot_t *snap) {
     return;
   }
 
+  // if server is resetting time on map changes ('sv_server/leveltimeReset'),
+  // the snapshot timestamp is in the past -> reset all stats as the
+  // sampling period is no longer valid - we're effectively restarting
+  // with no previous valid data
+  if (snap->serverTime < sampledStat.lastSampleTime) {
+    std::memset(&sampledStat, 0, sizeof(sampledStat));
+  }
+
   // add this snapshot's info
   // demo playback displays snapshot delta values instead of ping (ala ETPro)
   // https://bani.anime.net/banimod/forums/viewtopic.php?t=6381
