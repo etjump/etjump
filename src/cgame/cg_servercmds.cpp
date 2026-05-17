@@ -664,7 +664,7 @@ static void CG_ConfigStringModified(void) {
   } else if (num == CS_VOTE_TIME) {
     cgs.voteTime = Q_atoi(str);
 
-    if (!ETJump::cgame.handlers.rtv->rtvVoteActive()) {
+    if (!ETJump::cgame.systems.rtv->rtvVoteActive()) {
       ETJump::ClientRtvHandler::resetRtvEventHandler();
     }
 
@@ -674,9 +674,9 @@ static void CG_ConfigStringModified(void) {
     // 'callvote rtv' command, the check for rtvVoteActive might return false
     // therefore also check if strlen > 13 (rtvMaps 'str' len should always be
     // higher)
-    if (ETJump::cgame.handlers.rtv->rtvVoteActive() || strlen(str) > 13) {
-      ETJump::cgame.handlers.rtv->setRtvConfigStrings(str);
-      ETJump::cgame.handlers.rtv->countRtvVotes();
+    if (ETJump::cgame.systems.rtv->rtvVoteActive() || strlen(str) > 13) {
+      ETJump::cgame.systems.rtv->setRtvConfigStrings(str);
+      ETJump::cgame.systems.rtv->countRtvVotes();
     } else {
       setVoteCounts();
     }
@@ -686,7 +686,7 @@ static void CG_ConfigStringModified(void) {
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_STRING) {
     Q_strncpyz(cgs.voteString, str, sizeof(cgs.voteString));
-    ETJump::cgame.handlers.rtv->setRtvVoteStatus();
+    ETJump::cgame.systems.rtv->setRtvVoteStatus();
   } else if (num == CS_INTERMISSION) {
     cg.intermissionStarted = Q_atoi(str) ? qtrue : qfalse;
   } else if (num == CS_SCREENFADE) {
@@ -1046,7 +1046,7 @@ static void CG_MapRestart(void) {
   trap_Cvar_Set("cg_thirdPerson", "0");
 
   if (cg.hasTimerun) {
-    ETJump::cgame.handlers.timerun->reset();
+    ETJump::cgame.systems.timerun->reset();
   }
 }
 // NERVE - SMF
@@ -2818,7 +2818,7 @@ static void CG_ServerCommand(void) {
     arguments.emplace_back(buf);
   }
 
-  if (ETJump::cgame.handlers.serverCommands->check(cmd, arguments)) {
+  if (ETJump::cgame.core.serverCommands->check(cmd, arguments)) {
     return;
   }
 

@@ -176,7 +176,7 @@ void CustomCommandMenuDrawable::setupPanels() {
 }
 
 void CustomCommandMenuDrawable::commandMenuTitleDraw(panel_button_t *button) {
-  const auto &commands = cgame.handlers.customCommandMenu->getCustomCommands();
+  const auto &commands = cgame.systems.customCommandMenu->getCustomCommands();
   std::string title = "CUSTOM COMMANDS";
 
   if (!commands.empty()) {
@@ -191,7 +191,7 @@ void CustomCommandMenuDrawable::commandMenuTitleDraw(panel_button_t *button) {
 
 void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
   float y = button->rect.y;
-  const auto &commands = cgame.handlers.customCommandMenu->getCustomCommands();
+  const auto &commands = cgame.systems.customCommandMenu->getCustomCommands();
 
   if (commands.empty()) {
     CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
@@ -282,7 +282,7 @@ qboolean CustomCommandMenuDrawable::checkExecKey(const int32_t key,
 
   // this corresponds to the actual menu item number, not 0-indexed selection
   int32_t realKey = key - '0';
-  const auto &commands = cgame.handlers.customCommandMenu->getCustomCommands();
+  const auto &commands = cgame.systems.customCommandMenu->getCustomCommands();
 
   if (commands.empty()) {
     return qfalse;

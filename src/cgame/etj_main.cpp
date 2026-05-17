@@ -126,27 +126,17 @@ void delayedInit() {
   }
 }
 
-void initHandlers() {
-  cgame.handlers.serverCommands =
-      std::make_shared<ClientCommandsHandler>(nullptr);
-  cgame.handlers.consoleCommands =
+void initCore() {
+  cgame.core.serverCommands = std::make_shared<ClientCommandsHandler>(nullptr);
+  cgame.core.consoleCommands =
       std::make_shared<ClientCommandsHandler>(trap_AddCommand);
-  cgame.handlers.entityEvents = std::make_shared<EntityEventsHandler>();
-  cgame.handlers.playerEvents = std::make_shared<PlayerEventsHandler>();
+  cgame.core.entityEvents = std::make_shared<EntityEventsHandler>();
+  cgame.core.playerEvents = std::make_shared<PlayerEventsHandler>();
 
-  cgame.handlers.awaitedCommand = std::make_unique<AwaitedCommandHandler>(
-      cgame.handlers.consoleCommands, cgame.handlers.playerEvents);
+  cgame.core.awaitedCommand = std::make_unique<AwaitedCommandHandler>(
+      cgame.core.consoleCommands, cgame.core.playerEvents);
 
-  cgame.handlers.cvarUpdate = std::make_shared<CvarUpdateHandler>();
-
-  cgame.handlers.rtv =
-      std::make_unique<ClientRtvHandler>(cgame.handlers.serverCommands);
-
-  cgame.handlers.customCommandMenu = std::make_unique<CustomCommandMenu>(
-      cgame.handlers.cvarUpdate, cgame.handlers.consoleCommands);
-
-  cgame.handlers.timerun = std::make_shared<Timerun>(
-      cgame.handlers.playerEvents, cgame.handlers.serverCommands);
+  cgame.core.cvarUpdate = std::make_shared<CvarUpdateHandler>();
 }
 
 static void initPlatform() {
@@ -155,7 +145,7 @@ static void initPlatform() {
         trap_SendClientCommand(command.c_str());
       },
       [](const std::string &message) { CG_Printf(message.c_str()); },
-      [] { return OperatingSystem::getHwid(); }, cgame.handlers.serverCommands);
+      [] { return OperatingSystem::getHwid(); }, cgame.core.serverCommands);
 
   cgame.platform.operatingSystem = std::make_unique<OperatingSystem>();
 
@@ -163,19 +153,30 @@ static void initPlatform() {
     OperatingSystem::minimize();
   };
 
-  cgame.handlers.consoleCommands->subscribe("min", minimize);
-  cgame.handlers.consoleCommands->subscribe("minimize", minimize);
+  cgame.core.consoleCommands->subscribe("min", minimize);
+  cgame.core.consoleCommands->subscribe("minimize", minimize);
 
   cgame.platform.syscallExt = std::make_unique<SyscallExt>();
   cgame.platform.syscallExt->setupExtensions();
   SyscallExt::trap_CmdBackup_Ext();
 }
 
+static void initSystems() {
+  cgame.systems.rtv =
+      std::make_unique<ClientRtvHandler>(cgame.core.serverCommands);
+
+  cgame.systems.customCommandMenu = std::make_unique<CustomCommandMenu>(
+      cgame.core.cvarUpdate, cgame.core.consoleCommands);
+
+  cgame.systems.timerun = std::make_shared<Timerun>(cgame.core.playerEvents,
+                                                    cgame.core.serverCommands);
+}
+
 void initDemo() {
   cgame.demo.compatibility =
-      std::make_unique<DemoCompatibility>(cgame.handlers.consoleCommands);
+      std::make_unique<DemoCompatibility>(cgame.core.consoleCommands);
   cgame.demo.autoDemoRecorder = std::make_unique<AutoDemoRecorder>(
-      cgame.handlers.playerEvents, cgame.handlers.consoleCommands);
+      cgame.core.playerEvents, cgame.core.consoleCommands);
 }
 
 static void initCvarUnlockers() {
@@ -198,33 +199,33 @@ static void initCvarUnlockers() {
   };
 
   for (const auto &[shadow, target] : cvars) {
-    cgame.utils.cvarUnlocker.emplace_back(std::make_unique<CvarUnlocker>(
-        cgame.handlers.cvarUpdate, shadow, target));
+    cgame.utils.cvarUnlocker.emplace_back(
+        std::make_unique<CvarUnlocker>(cgame.core.cvarUpdate, shadow, target));
   }
 }
 
 static void initUtils() {
-  assert(cgame.handlers.timerun != nullptr);
+  assert(cgame.systems.timerun != nullptr);
 
   cgame.utils.eventLoop = std::make_unique<EventLoop>();
   initCvarUnlockers();
-  cgame.utils.savePos = std::make_unique<SavePos>(cgame.handlers.timerun);
+  cgame.utils.savePos = std::make_unique<SavePos>(cgame.systems.timerun);
   cgame.utils.colorParser = std::make_unique<ColorParser>();
   cgame.utils.trace = std::make_unique<TraceUtils>();
-  cgame.utils.pmove = std::make_unique<PmoveUtils>(cgame.handlers.cvarUpdate);
+  cgame.utils.pmove = std::make_unique<PmoveUtils>(cgame.core.cvarUpdate);
 }
 
 static void initUserInterface() {
   cgame.ui.consoleShader = std::make_unique<ConsoleShader>();
 
   cgame.ui.renderables.emplace_back(std::make_unique<RtvDrawable>());
-  cgame.ui.renderables.emplace_back(std::make_unique<CustomCommandMenuDrawable>(
-      cgame.handlers.consoleCommands));
+  cgame.ui.renderables.emplace_back(
+      std::make_unique<CustomCommandMenuDrawable>(cgame.core.consoleCommands));
 }
 
 static void initTrickjumpLines() {
   cgame.visuals.trickjumpLines = std::make_unique<TrickjumpLines>(
-      cgame.handlers.serverCommands, cgame.handlers.consoleCommands);
+      cgame.core.serverCommands, cgame.core.consoleCommands);
 
   // Check if load TJL on connection is enable
   if (etj_tjlAlwaysLoadTJL.integer == 1) {
@@ -248,9 +249,9 @@ static void initTrickjumpLines() {
 
 static void initVisuals() {
   cgame.visuals.leavesRemapper =
-      std::make_unique<LeavesRemapper>(cgame.handlers.cvarUpdate);
+      std::make_unique<LeavesRemapper>(cgame.core.cvarUpdate);
   cgame.visuals.playerBBox =
-      std::make_unique<PlayerBBox>(cgame.handlers.cvarUpdate);
+      std::make_unique<PlayerBBox>(cgame.core.cvarUpdate);
   initTrickjumpLines();
 }
 
@@ -259,58 +260,58 @@ static void initHUD() {
 
   cgame.hud.accelColor = std::make_unique<AccelColor>();
   cgame.hud.chsDataHandler = std::make_unique<CHSDataHandler>(
-      cgame.handlers.cvarUpdate, cgame.handlers.consoleCommands);
+      cgame.core.cvarUpdate, cgame.core.consoleCommands);
 
-  cgame.hud.renderables.emplace_back(std::make_unique<CHS>(
-      cgame.handlers.cvarUpdate, cgame.hud.chsDataHandler));
+  cgame.hud.renderables.emplace_back(
+      std::make_unique<CHS>(cgame.core.cvarUpdate, cgame.hud.chsDataHandler));
   cgame.hud.renderables.emplace_back(std::make_unique<OverbounceWatcher>(
-      cgame.handlers.consoleCommands, cgame.handlers.cvarUpdate));
+      cgame.core.consoleCommands, cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<OverbounceDetector>());
   cgame.hud.renderables.emplace_back(std::make_unique<DisplayMaxSpeed>(
-      cgame.handlers.entityEvents, cgame.handlers.cvarUpdate));
+      cgame.core.entityEvents, cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<DrawSpeed>(
-      cgame.handlers.cvarUpdate, cgame.handlers.consoleCommands));
+      cgame.core.cvarUpdate, cgame.core.consoleCommands));
   cgame.hud.renderables.emplace_back(
-      std::make_unique<AccelMeter>(cgame.handlers.cvarUpdate));
+      std::make_unique<AccelMeter>(cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<StrafeQuality>(
-      cgame.handlers.cvarUpdate, cgame.handlers.consoleCommands,
-      cgame.handlers.playerEvents));
+      cgame.core.cvarUpdate, cgame.core.consoleCommands,
+      cgame.core.playerEvents));
   cgame.hud.renderables.emplace_back(std::make_unique<JumpSpeeds>(
-      cgame.handlers.entityEvents, cgame.handlers.playerEvents,
-      cgame.handlers.consoleCommands, cgame.handlers.serverCommands,
-      cgame.handlers.cvarUpdate));
+      cgame.core.entityEvents, cgame.core.playerEvents,
+      cgame.core.consoleCommands, cgame.core.serverCommands,
+      cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<QuickFollowDrawer>());
   cgame.hud.renderables.emplace_back(
-      std::make_unique<SpectatorInfo>(cgame.handlers.cvarUpdate));
+      std::make_unique<SpectatorInfo>(cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<AreaIndicator>());
 
   if (etj_CGazOnTop.integer) {
     cgame.hud.renderables.emplace_back(
-        std::make_unique<Snaphud>(cgame.handlers.cvarUpdate));
+        std::make_unique<Snaphud>(cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(
-        std::make_unique<CGaz>(cgame.handlers.cvarUpdate));
+        std::make_unique<CGaz>(cgame.core.cvarUpdate));
   } else {
     cgame.hud.renderables.emplace_back(
-        std::make_unique<CGaz>(cgame.handlers.cvarUpdate));
+        std::make_unique<CGaz>(cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(
-        std::make_unique<Snaphud>(cgame.handlers.cvarUpdate));
+        std::make_unique<Snaphud>(cgame.core.cvarUpdate));
   }
 
   cgame.hud.renderables.emplace_back(std::make_unique<UpperRight>());
   cgame.hud.renderables.emplace_back(std::make_unique<UpmoveMeter>(
-      cgame.handlers.cvarUpdate, cgame.handlers.consoleCommands,
-      cgame.handlers.playerEvents));
+      cgame.core.cvarUpdate, cgame.core.consoleCommands,
+      cgame.core.playerEvents));
 
   cgame.hud.renderables.emplace_back(
-      std::make_unique<KeySetSystem>(&etj_drawKeys, cgame.handlers.cvarUpdate));
+      std::make_unique<KeySetSystem>(&etj_drawKeys, cgame.core.cvarUpdate));
 
   // FIXME: move to renderables
   ETJump_ClearDrawables();
-  cgame.hud.timerunView = std::make_unique<TimerunView>(
-      cgame.handlers.timerun, cgame.handlers.cvarUpdate);
+  cgame.hud.timerunView = std::make_unique<TimerunView>(cgame.systems.timerun,
+                                                        cgame.core.cvarUpdate);
 
   cgame.hud.renderables.emplace_back(
-      std::make_unique<Crosshair>(cgame.handlers.cvarUpdate));
+      std::make_unique<Crosshair>(cgame.core.cvarUpdate));
 }
 
 void init() {
@@ -322,6 +323,7 @@ void init() {
                                      " init...\n");
 
   initPlatform();
+  initSystems();
   initUtils();
   initUserInterface();
   initVisuals();

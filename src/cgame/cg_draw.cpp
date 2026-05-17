@@ -2227,9 +2227,9 @@ static void CG_DrawVote() {
 
     const bool canVote = cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR ||
                          etj_spectatorVote.integer;
-    const bool isRtvVote = ETJump::cgame.handlers.rtv->rtvVoteActive();
+    const bool isRtvVote = ETJump::cgame.systems.rtv->rtvVoteActive();
     const ETJump::RtvVoteCountInfo rtvYesVotes =
-        ETJump::cgame.handlers.rtv->getRtvYesVotes();
+        ETJump::cgame.systems.rtv->getRtvYesVotes();
 
     const auto formatVoteStr = [&isRtvVote,
                                 &rtvYesVotes](const std::string &str) {

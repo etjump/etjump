@@ -1443,8 +1443,8 @@ void CG_UpdateCvars(void) {
 
         // if we're in the loading screen and just drawing a frame on that,
         // we haven't finished initialization and this might be null
-        if (ETJump::cgame.handlers.cvarUpdate) {
-          ETJump::cgame.handlers.cvarUpdate->check(cv->vmCvar);
+        if (ETJump::cgame.core.cvarUpdate) {
+          ETJump::cgame.core.cvarUpdate->check(cv->vmCvar);
         }
       }
     }
@@ -3925,13 +3925,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_RegisterCvars();
 
-  // NOTE: The main handlers must be created before any ETJump objects
-  // are created! All C++ modules should get these as constructor params
-  // to subscribe to console commands, server commands, cvar updates etc,
-  // and not reach for the global pointers. They exists because they are still
-  // used in various places outside of C++ objects, in legacy C code.
-  ETJump::initHandlers();
-
   CG_InitConsoleCommands();
 
   // get the gamestate from the client system
@@ -3941,6 +3934,13 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_ParseServerinfo();
   CG_ParseSysteminfo();
+
+  // NOTE: The core systems must be created before any ETJump objects
+  // are created! All C++ modules should get these as constructor params
+  // to subscribe to console commands, server commands, cvar updates etc,
+  // and not reach for the global pointers. They exists because they are still
+  // used in various places outside of C++ objects, in legacy C code.
+  ETJump::initCore();
 
   // we need demo compatibility object asap, once server info is parsed,
   // so we can get the mod version

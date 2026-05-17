@@ -273,7 +273,7 @@ bool showingScores() {
 }
 
 void onPlayerRespawn(bool revived) {
-  cgame.handlers.playerEvents->check("respawn", {revived ? "1" : "0"});
+  cgame.core.playerEvents->check("respawn", {revived ? "1" : "0"});
 }
 
 playerState_t *getValidPlayerState() {
