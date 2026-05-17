@@ -118,29 +118,29 @@ static void callvote(const Arguments &args) {
 }
 
 void registerCommands() {
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "maplist", [](const auto &args) { maplist(args); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "forceCustomvoteRefresh", [](const auto &) { forceCustomvoteRefresh(); },
       false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "numcustomvotes", [](const auto &args) { numCustomvotes(args); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "customvotelist", [](const auto &args) { customvoteList(args); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "pmFlashWindow", [](const auto &) { pmFlashWindow(); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "resetStrafeQuality", [](const auto &) { resetStrafeQuality(); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "savePrint", [](const auto &args) { savePrint(args); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "callvote", [](const auto &args) { callvote(args); }, false);
 }
 } // namespace ETJump::ServerCommands

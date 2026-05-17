@@ -117,7 +117,7 @@ enum class ChatMessageType {
 };
 
 void init();
-void initHandlers();
+void initCore();
 void initDemo();
 void shutdown();
 // performs one-time actions slightly delayed from actual cgame init,

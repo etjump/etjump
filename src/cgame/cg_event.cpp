@@ -1835,7 +1835,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       trap_S_StartSound(nullptr, es->number, CHAN_VOICE,
                         CG_CustomSound(es->number, "*jump1.wav"));
       if (clientNum == cg.predictedPlayerState.clientNum) {
-        ETJump::cgame.handlers.entityEvents->check(EV_JUMP, cent);
+        ETJump::cgame.core.entityEvents->check(EV_JUMP, cent);
       }
       break;
     case EV_TAUNT:
@@ -2760,8 +2760,8 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       }
 
       // should refactor users to playereventshandler
-      ETJump::cgame.handlers.entityEvents->check(EV_LOAD_TELEPORT, cent);
-      ETJump::cgame.handlers.playerEvents->check("load", {});
+      ETJump::cgame.core.entityEvents->check(EV_LOAD_TELEPORT, cent);
+      ETJump::cgame.core.playerEvents->check("load", {});
       trap_SendConsoleCommand("resetJumpSpeeds\n");
       trap_SendConsoleCommand("resetStrafeQuality\n");
       trap_SendConsoleCommand("resetUpmoveMeter\n");

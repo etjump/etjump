@@ -33,20 +33,14 @@ class EntityEventsHandler;
 class PlayerEventsHandler;
 class AwaitedCommandHandler;
 class CvarUpdateHandler;
-class ClientRtvHandler;
-class CustomCommandMenu;
-class Timerun;
 
-struct Handlers {
+struct Core {
   std::shared_ptr<ClientCommandsHandler> serverCommands;
   std::shared_ptr<ClientCommandsHandler> consoleCommands;
   std::shared_ptr<EntityEventsHandler> entityEvents;
   std::shared_ptr<PlayerEventsHandler> playerEvents;
   std::unique_ptr<AwaitedCommandHandler> awaitedCommand;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
-  std::unique_ptr<ClientRtvHandler> rtv;
-  std::unique_ptr<CustomCommandMenu> customCommandMenu;
-  std::shared_ptr<Timerun> timerun;
 };
 
 class ClientAuthentication;
@@ -57,6 +51,16 @@ struct Platform {
   std::unique_ptr<ClientAuthentication> authentication;
   std::unique_ptr<OperatingSystem> operatingSystem;
   std::unique_ptr<SyscallExt> syscallExt;
+};
+
+class ClientRtvHandler;
+class CustomCommandMenu;
+class Timerun;
+
+struct Systems {
+  std::unique_ptr<ClientRtvHandler> rtv;
+  std::unique_ptr<CustomCommandMenu> customCommandMenu;
+  std::shared_ptr<Timerun> timerun;
 };
 
 class DemoCompatibility;
@@ -114,10 +118,11 @@ struct HUD {
 };
 
 struct CGameContext {
-  Handlers handlers;
+  Core core;
   Demo demo;
 
   Platform platform;
+  Systems systems;
   Utils utils;
   UI ui;
   Visuals visuals;

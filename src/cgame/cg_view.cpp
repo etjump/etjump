@@ -1875,7 +1875,7 @@ qboolean CG_CullPointAndRadius(const vec3_t pt, vec_t radius) {
 
 namespace ETJump {
 static void runFrameEnd() {
-  cgame.handlers.awaitedCommand->runFrame();
+  cgame.core.awaitedCommand->runFrame();
   cgame.utils.eventLoop->run();
   cgame.visuals.trickjumpLines->runFrame();
 
