@@ -205,21 +205,10 @@ float CGaz::UpdateDrawSnap(const playerState_t *ps, const pmove_t *pm) {
 
   // edge case, solution from snaphud code
   if (cs.rightStrafe && snap > 90.0f) {
-    snap = 90.0f - std::fmod(snap, 90.0f);
+    snap = 90.0f - snap;
   }
 
-  // snaps are in absolute angles, calculate it relative to yaw
-  const float viewOffset =
-      AngleNormalize180(cs.yaw - static_cast<float>(RAD2DEG(yaw)));
-
-  float snapInCgazAngles =
-      std::fmod(!cs.rightStrafe ? snap - viewOffset : viewOffset - snap, 90.0f);
-
-  if (snapInCgazAngles < 0.0f) {
-    snapInCgazAngles += 90.0f;
-  }
-
-  return DEG2RAD(snapInCgazAngles);
+  return DEG2RAD(std::abs(snap - cs.opt));
 }
 
 float CGaz::UpdateDrawMin(state_t const *state) {
@@ -328,41 +317,44 @@ void CGaz::render() const {
     float zone2 = drawOpt;
 
     if (drawSnap != Snaphud::INVALID_SNAP_DIR) {
-      // if snap < min angle, the accel zone fills the whole snapzone
-      zone2 = drawSnap < drawMin ? drawMaxCos : drawSnap;
-    }
+      // not perfect but more accuracy requires snap to use min instead of "opt"
+      // angle
+      zone2 = drawSnap + drawMin;
+      CG_FillAngleYaw(+zone1, +zone2, yaw, y, h, fov, CGaz1Colors[1]);
+      CG_FillAngleYaw(-zone2, -zone1, yaw, y, h, fov, CGaz1Colors[1]);
+    } else {
+      const float zone3 = std::max(zone2, drawMaxCos);
 
-    const float zone3 = std::max(zone2, drawMaxCos);
+      const float zone4 =
+          drawMax == 0 || drawMax == (float)M_PI || drawMax >= zone3 ? drawMax
+                                                                     : zone3;
 
-    const float zone4 =
-        drawMax == 0 || drawMax == (float)M_PI || drawMax >= zone3 ? drawMax
-                                                                   : zone3;
+      // No accel zone
+      CG_FillAngleYaw(-zone1, +zone1, yaw, y, h, fov, CGaz1Colors[0]);
 
-    // No accel zone
-    CG_FillAngleYaw(-zone1, +zone1, yaw, y, h, fov, CGaz1Colors[0]);
+      // Min angle
+      CG_FillAngleYaw(+zone1, +zone2, yaw, y, h, fov, CGaz1Colors[1]);
+      CG_FillAngleYaw(-zone2, -zone1, yaw, y, h, fov, CGaz1Colors[1]);
 
-    // Min angle
-    CG_FillAngleYaw(+zone1, +zone2, yaw, y, h, fov, CGaz1Colors[1]);
-    CG_FillAngleYaw(-zone2, -zone1, yaw, y, h, fov, CGaz1Colors[1]);
+      // Accel/snap zone
+      CG_FillAngleYaw(+zone2, +zone3, yaw, y, h, fov, CGaz1Colors[2]);
+      CG_FillAngleYaw(-zone3, -zone2, yaw, y, h, fov, CGaz1Colors[2]);
 
-    // Accel/snap zone
-    CG_FillAngleYaw(+zone2, +zone3, yaw, y, h, fov, CGaz1Colors[2]);
-    CG_FillAngleYaw(-zone3, -zone2, yaw, y, h, fov, CGaz1Colors[2]);
+      // Max angle
+      CG_FillAngleYaw(+zone3, +zone4, yaw, y, h, fov, CGaz1Colors[3]);
+      CG_FillAngleYaw(-zone4, -zone3, yaw, y, h, fov, CGaz1Colors[3]);
 
-    // Max angle
-    CG_FillAngleYaw(+zone3, +zone4, yaw, y, h, fov, CGaz1Colors[3]);
-    CG_FillAngleYaw(-zone4, -zone3, yaw, y, h, fov, CGaz1Colors[3]);
+      if (etj_CGaz1DrawMidLine.integer) {
+        const float midLineStart = zone2 + ((zone3 - zone2) / 2);
+        // make it an average width between min/max angle lines
+        const float midlineEnd =
+            midLineStart + (((zone2 - zone1) + (zone4 - zone3)) / 2);
 
-    if (etj_CGaz1DrawMidLine.integer) {
-      const float midLineStart = zone2 + ((zone3 - zone2) / 2);
-      // make it an average width between min/max angle lines
-      const float midlineEnd =
-          midLineStart + (((zone2 - zone1) + (zone4 - zone3)) / 2);
-
-      CG_FillAngleYaw(+midLineStart, +midlineEnd, yaw, y, h, fov,
-                      CGaz1MidlineColor);
-      CG_FillAngleYaw(-midLineStart, -midlineEnd, yaw, y, h, fov,
-                      CGaz1MidlineColor);
+        CG_FillAngleYaw(+midLineStart, +midlineEnd, yaw, y, h, fov,
+                        CGaz1MidlineColor);
+        CG_FillAngleYaw(-midLineStart, -midlineEnd, yaw, y, h, fov,
+                        CGaz1MidlineColor);
+      }
     }
   }
 
