@@ -2,6 +2,7 @@
 
 ## Fixed
 * some worldspawn keys were working incorrectly if the map explicitly had the key set at it's default value [#1898](https://github.com/etjump/etjump/pull/1898)
+* `etj_CGaz1DrawSnapZone` was drawing only up to CGaz max angle instead to the end of the snapzone [#1906](https://github.com/etjump/etjump/pull/1906)
 * vote counts for spectators who voted "yes" on a failed vote were not correctly reset on next vote [#1905](https://github.com/etjump/etjump/pull/1905)
 * fireteam `propose/warn/kick` menu actions interacted with wrong client when multiple pages were present [#1904](https://github.com/etjump/etjump/pull/1904)
 * area indicators (save/prone/noclip) ignored crouch/prone when determining if player touched an area brush [#1903](https://github.com/etjump/etjump/pull/1903)
