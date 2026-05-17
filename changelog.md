@@ -6,6 +6,7 @@
 * vote counts for spectators who voted "yes" on a failed vote were not correctly reset on next vote [#1905](https://github.com/etjump/etjump/pull/1905)
 * fireteam `propose/warn/kick` menu actions interacted with wrong client when multiple pages were present [#1904](https://github.com/etjump/etjump/pull/1904)
 * area indicators (save/prone/noclip) ignored crouch/prone when determining if player touched an area brush [#1903](https://github.com/etjump/etjump/pull/1903)
+* lagometer client snapshot rate would start to drift down if server timestamp was reset on map changes [#1907](https://github.com/etjump/etjump/pull/1907)
 * listbox item (replay menu, map vote menu etc.) click areas were slightly offset vertically [#1899](https://github.com/etjump/etjump/pull/1899)
 
 # ETJump 3.5.0
