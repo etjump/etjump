@@ -592,6 +592,15 @@ bool canFireWeapon(const playerState_t *ps);
 inline constexpr int8_t CMDSCALE_DEFAULT = 127;
 inline constexpr int8_t CMDSCALE_WALK = 64;
 
+// ms before jump is allowed again
+inline constexpr int JUMP_DELAY_TIME = 850;
+// ms before jump is allowed after standing up from prone
+inline constexpr int32_t PRONE_JUMP_DELAY_TIME = 650;
+// ms before player is allowed to stand up after going prone
+inline constexpr int32_t PRONE_DELAY_TIME = 750;
+
+inline constexpr float TRACE_LADDER_DIST = 48.0f;
+
 //===================================================================================
 
 inline constexpr int PC_SOLDIER = 0;   //	shoot stuff
