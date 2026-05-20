@@ -21,10 +21,6 @@ extern vmCvar_t g_cheats;
 #endif
 
 namespace ETJump {
-inline constexpr int JUMP_DELAY_TIME = 850;
-inline constexpr int PRONE_JUMP_DELAY_TIME = 650;
-inline constexpr int PRONE_DELAY_TIME = 750;
-
 static bool hasJustStoodUp() {
   return pm->pmext->proneTime - pm->pmext->jumpTime == PRONE_JUMP_DELAY_TIME;
 }
@@ -748,7 +744,7 @@ static qboolean PM_CheckJump(void) {
 
   // rain - revert to using pmext for this since pmext is fixed now.
   // fix for #166
-  if (pm->cmd.serverTime - pm->pmext->jumpTime < ETJump::JUMP_DELAY_TIME) {
+  if (pm->cmd.serverTime - pm->pmext->jumpTime < JUMP_DELAY_TIME) {
     if (ETJump::hasJustStoodUp()) {
       return qfalse;
     }
@@ -926,7 +922,7 @@ static qboolean PM_CheckProne(void) {
     //}
     if (((pm->ps->pm_flags & PMF_DUCKED && pm->cmd.doubleTap == DT_FORWARD) ||
          (pm->cmd.wbuttons & WBUTTON_PRONE)) &&
-        pm->cmd.serverTime - pm->pmext->proneTime > ETJump::PRONE_DELAY_TIME) {
+        pm->cmd.serverTime - pm->pmext->proneTime > PRONE_DELAY_TIME) {
       trace_t trace;
 
       pm->mins[0] = pm->ps->mins[0];
@@ -962,8 +958,7 @@ static qboolean PM_CheckProne(void) {
         // pm->pmext->proneGroundTime > 450 ||
         ((pm->cmd.doubleTap == DT_BACK || pm->cmd.upmove > 10 ||
           pm->cmd.wbuttons & WBUTTON_PRONE) &&
-         pm->cmd.serverTime - pm->pmext->proneTime >
-             ETJump::PRONE_DELAY_TIME)) {
+         pm->cmd.serverTime - pm->pmext->proneTime > PRONE_DELAY_TIME)) {
       trace_t trace;
 
       // see if we have the space to stop prone
@@ -995,9 +990,8 @@ static qboolean PM_CheckProne(void) {
         }
 
         // don't jump for a bit
-        pm->pmext->jumpTime =
-            pm->cmd.serverTime - ETJump::PRONE_JUMP_DELAY_TIME;
-        pm->ps->jumpTime = pm->cmd.serverTime - ETJump::PRONE_JUMP_DELAY_TIME;
+        pm->pmext->jumpTime = pm->cmd.serverTime - PRONE_JUMP_DELAY_TIME;
+        pm->ps->jumpTime = pm->cmd.serverTime - PRONE_JUMP_DELAY_TIME;
       }
     }
   }
@@ -1432,7 +1426,7 @@ static void PM_WalkMove(void) {
       PM_AirMove();
     }
 
-    if (!(pm->cmd.serverTime - pm->pmext->jumpTime < ETJump::JUMP_DELAY_TIME)) {
+    if (!(pm->cmd.serverTime - pm->pmext->jumpTime < JUMP_DELAY_TIME)) {
 
       pm->pmext->sprintTime -= 2500;
       if (pm->pmext->sprintTime < 0) {
@@ -5395,8 +5389,6 @@ PM_CheckLadderMove
 */
 qboolean ladderforward;
 vec3_t laddervec;
-
-inline constexpr float TRACE_LADDER_DIST = 48.0f;
 
 void PM_CheckLadderMove(void) {
   vec3_t spot;

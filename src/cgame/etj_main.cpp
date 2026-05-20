@@ -30,6 +30,7 @@
 #include "etj_awaited_command_handler.h"
 #include "etj_cgame.h"
 #include "etj_cgaz.h"
+#include "etj_cgaz_v2.h"
 #include "etj_chs_drawable.h"
 #include "etj_client_authentication.h"
 #include "etj_client_commands_handler.h"
@@ -290,9 +291,13 @@ static void initHUD() {
         std::make_unique<Snaphud>(cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(
         std::make_unique<CGaz>(cgame.core.cvarUpdate));
+    cgame.hud.renderables.emplace_back(
+        std::make_unique<CGazV2>(cgame.core.cvarUpdate));
   } else {
     cgame.hud.renderables.emplace_back(
         std::make_unique<CGaz>(cgame.core.cvarUpdate));
+    cgame.hud.renderables.emplace_back(
+        std::make_unique<CGazV2>(cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(
         std::make_unique<Snaphud>(cgame.core.cvarUpdate));
   }
