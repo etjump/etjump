@@ -411,6 +411,10 @@ typedef int fixed16_t;
   #define M_PIf 3.14159265358979323846f // matches value in gcc math.h
 #endif
 
+#ifndef M_PI_2f
+  #define M_PI_2f 1.57079632679489661923f // pi/2, matches value in gcc math.h
+#endif
+
 #ifndef M_SQRT2
   #define M_SQRT2 1.41421356237309504880 // sqrt(2), matches value in gcc math.h
 #endif

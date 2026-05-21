@@ -568,9 +568,6 @@ void CGazV2::walkMove() {
 
   friction();
 
-  const float fmove = pm.cmd.forwardmove;
-  const float smove = pm.cmd.rightmove;
-
   const float scale = PmoveUtilsV2::cmdScale(
       pm, pm.cmd,
       etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
@@ -589,10 +586,7 @@ void CGazV2::walkMove() {
   VectorNormalize(pml.forward);
   VectorNormalize(pml.right);
 
-  for (int32_t i = 0; i < 2; i++) {
-    s.wishvel[i] = (pml.forward[i] * fmove) + (pml.right[i] * smove);
-  }
-
+  PmoveUtilsV2::updateWishvel(s.wishvel, pm, pml);
   float wishspeed = scale * VectorLength2(s.wishvel);
 
   // clamp the speed lower if prone
@@ -640,18 +634,13 @@ void CGazV2::airMove() {
       pm, pm.cmd,
       etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
 
-  const float fmove = pm.cmd.forwardmove;
-  const float smove = pm.cmd.rightmove;
-
   // project moves down to flat plane
   pml.forward[2] = 0;
   pml.right[2] = 0;
   VectorNormalize(pml.forward);
   VectorNormalize(pml.right);
 
-  for (int32_t i = 0; i < 2; i++) {
-    s.wishvel[i] = (pml.forward[i] * fmove) + (pml.right[i] * smove);
-  }
+  PmoveUtilsV2::updateWishvel(s.wishvel, pm, pml);
 
   // not on ground, so little effect on velocity
   accelerate(scale * VectorLength2(s.wishvel), pm_airaccelerate, false);
