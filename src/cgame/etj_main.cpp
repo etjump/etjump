@@ -61,6 +61,7 @@
 #include "etj_savepos.h"
 #include "etj_servercommands.h"
 #include "etj_snaphud.h"
+#include "etj_snaphud_v2.h"
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_speed_drawable.h"
 #include "etj_strafe_quality_drawable.h"
@@ -290,6 +291,8 @@ static void initHUD() {
     cgame.hud.renderables.emplace_back(
         std::make_unique<Snaphud>(cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(
+        std::make_unique<SnaphudV2>(cgame.core.cvarUpdate));
+    cgame.hud.renderables.emplace_back(
         std::make_unique<CGaz>(cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(
         std::make_unique<CGazV2>(cgame.core.cvarUpdate));
@@ -300,6 +303,8 @@ static void initHUD() {
         std::make_unique<CGazV2>(cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(
         std::make_unique<Snaphud>(cgame.core.cvarUpdate));
+    cgame.hud.renderables.emplace_back(
+        std::make_unique<SnaphudV2>(cgame.core.cvarUpdate));
   }
 
   cgame.hud.renderables.emplace_back(std::make_unique<UpperRight>());

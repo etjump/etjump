@@ -648,6 +648,15 @@ void PmoveUtilsV2::sprint(pmove_t &pm) {
   }
 }
 
+void PmoveUtilsV2::updateWishvel(vec2_t &wishvel, pmove_t &pm, pml_t &pml) {
+  const float fmove = pm.cmd.forwardmove;
+  const float smove = pm.cmd.rightmove;
+
+  for (int32_t i = 0; i < 2; i++) {
+    wishvel[i] = (pml.forward[i] * fmove) + (pml.right[i] * smove);
+  }
+}
+
 float PmoveUtilsV2::cmdScale(const pmove_t &pm, const usercmd_t &cmd,
                              const bool upmove) {
   float total = 0;

@@ -24,36 +24,85 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
+#include "etj_irenderable.h"
 #include "../game/bg_public.h"
 #include "../game/bg_local.h"
 
 namespace ETJump {
 class CvarUpdateHandler;
 
-class PmoveUtilsV2 {
+class SnaphudV2 : public IRenderable {
 public:
-  static constexpr float PM_FRAMETIME = 0.008f;
+  explicit SnaphudV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~SnaphudV2() override;
 
-  static void setupPmove(pmove_t &pm);
-  static void setupUserCmd(int8_t scale, pmove_t &pm);
-
-  static void setWaterLevel(pmove_t &pm);
-  static bool checkProne(pmove_t &pm);
-  static void checkDuck(pmove_t &pm);
-  static void groundTrace(pmove_t &pm, pml_t &pml);
-  static void checkLadderMove(pmove_t &pm, pml_t &pml);
-  static bool checkJump(pmove_t &pm, pml_t &pml, bool isLerpFrame);
-  static void sprint(pmove_t &pm);
-  static void updateWishvel(vec2_t &wishvel, pmove_t &pm, pml_t &pml);
-  static float cmdScale(const pmove_t &pm, const usercmd_t &cmd, bool upmove);
+  bool beforeRender() override;
+  void render() const override;
 
 private:
-  static bool canProne(const pmove_t &pm);
-  static void groundTraceMissed(pmove_t &pm, pml_t &pml);
-  static void traceAll(trace_t &trace, vec3_t start, vec3_t end,
-                       const pmove_t &pm);
-  static void traceAllLegs(trace_t &trace, float *legsOffset, vec3_t start,
-                           vec3_t end, const pmove_t &pm);
-  static bool correctAllSolid(trace_t &trace, pmove_t &pm, pml_t &pml);
+  void updateSnapState();
+  void updateSnaphud();
+  void buildSnapZones();
+
+  bool pmoveSingle();
+  void walkMove();
+  void airMove();
+  void accelerate(float wishspeed, float accel);
+
+  void startListeners();
+
+  [[nodiscard]] bool canSkipDraw() const;
+
+  enum class SnapTrueness { UPMOVE = 1, GROUND = 2 };
+
+  enum class SnaphudStyle {
+    OFF = 0,
+    NORMAL = 1,
+    EDGE = 2,
+    BORDER = 3,
+  };
+
+  struct State {
+    std::vector<float> snapAngles;
+    float a;
+    vec2_t wishvel;
+  };
+
+  State s{};
+
+  struct Snapzone {
+    float start;
+    float end;
+    bool alt;
+    bool active;
+  };
+
+  struct Snaphud {
+    float yaw;
+    float y;
+    float h;
+    float fov;
+
+    SnaphudStyle style;
+
+    bool isCurrentAlt;
+    bool borderOnly;
+    float borderThickness;
+    float edgeThickness;
+
+    std::vector<Snapzone> zones;
+    std::array<vec4_t, 4> colors;
+  };
+
+  Snaphud snaphud{};
+
+  playerState_t ps{};
+  pmove_t pm{};
+  pmoveExt_t pmext{};
+  pml_t pml{};
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 } // namespace ETJump
