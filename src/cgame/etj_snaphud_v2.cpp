@@ -26,7 +26,6 @@
 #include "cg_local.h"
 #include "etj_color_parser.h"
 #include "etj_cvar_update_handler.h"
-#include "etj_pmove_utils_v2.h"
 #include "etj_utilities.h"
 
 // wishspeed may be modified by 'target_scale_velocity' up to 3x
@@ -49,6 +48,7 @@ SnaphudV2::SnaphudV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
                                             snaphud.colors[2]);
   cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor2.string,
                                             snaphud.colors[3]);
+  setDefaultInput();
   startListeners();
 }
 
@@ -75,6 +75,12 @@ void SnaphudV2::startListeners() {
   cvarUpdate->subscribe(&etj_snapHUDHLColor2, [this](const vmCvar_t *cvar) {
     cgame.utils.colorParser->parseColorString(cvar->string, snaphud.colors[3]);
   });
+}
+
+void SnaphudV2::setDefaultInput() {
+  defaultInput.set(PmoveUtilsV2::PmoveDefaultInput::FORWARD);
+  defaultInput.set(PmoveUtilsV2::PmoveDefaultInput::SIDE);
+  defaultInput.set(PmoveUtilsV2::PmoveDefaultInput::SPRINT);
 }
 
 void SnaphudV2::updateSnapState() {
@@ -168,8 +174,18 @@ bool SnaphudV2::beforeRender() {
   pm.pmext = &pmext;
   PmoveUtilsV2::setupPmove(pm);
 
-  if (!pmoveSingle()) {
-    return false;
+  PmoveUtilsV2::PmoveSingleResult result =
+      PmoveUtilsV2::pmoveSingle(pm, pml, defaultInput);
+
+  switch (result) {
+    case PmoveUtilsV2::PmoveSingleResult::WALK:
+      walkMove();
+      break;
+    case PmoveUtilsV2::PmoveSingleResult::AIR:
+      airMove();
+      break;
+    default:
+      return false;
   }
 
   // this will be true at the very beginning of the game, before the server
@@ -209,98 +225,6 @@ void SnaphudV2::render() const {
                          snaphud.borderOnly, snaphud.borderThickness);
     }
   }
-}
-
-bool SnaphudV2::pmoveSingle() {
-  const int8_t scale = pm.ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_WALKING << 8
-                           ? CMDSCALE_WALK
-                           : CMDSCALE_DEFAULT;
-
-  PmoveUtilsV2::setupUserCmd(scale, pm);
-
-  // because autosprint directly flips the sprint button bit in the players
-  // 'usercmd_t', it is already accounted for in the stats that pmove
-  // saves to the playerstate, so we don't care about it here
-  // if we're in spec/demo playback
-  if (!cg.demoPlayback && pm.ps->clientNum == cg.clientNum &&
-      pm.pmext->autoSprint) {
-    pm.cmd.buttons ^= BUTTON_SPRINT;
-  }
-
-  // clear all pmove local vars
-  memset(&pml, 0, sizeof(pml));
-
-  VectorClear(pml.forward);
-  VectorClear(pml.right);
-  VectorClear(pml.up);
-
-  // save old velocity for crashlanding
-  VectorCopy(pm.ps->velocity, pml.previous_velocity);
-
-  AngleVectors(pm.ps->viewangles, pml.forward, pml.right, pml.up);
-
-  if (pm.cmd.upmove < 10) {
-    // not holding jump
-    pm.ps->pm_flags &= ~PMF_JUMP_HELD;
-  }
-
-  if (pm.cmd.upmove > 0) {
-    pm.cmd.upmove = 127;
-  }
-
-  // uncomment if we ever start drawing snaphud while dead
-  // if (pm.ps->pm_type >= PM_DEAD ||
-  //     pm.ps->pm_flags & (PMF_LIMBO | PMF_TIME_LOCKPLAYER) ||
-  //     BG_PlayerMounted(pm.ps->eFlags)) {
-  //   pm.cmd.forwardmove = 0;
-  //   pm.cmd.rightmove = 0;
-  //   pm.cmd.upmove = 0;
-  // }
-
-  // set default key combination if there's no user input
-  if (!pm.cmd.forwardmove && !pm.cmd.rightmove) {
-    pm.cmd.forwardmove = scale;
-    pm.cmd.rightmove = scale;
-    // so we get correct cmdScale (default view is with sprint)
-    pm.ps->runSpeedScale = pm.ps->sprintSpeedScale;
-  }
-
-  // set watertype, and waterlevel
-  PmoveUtilsV2::setWaterLevel(pm);
-
-  // set mins, maxs, and viewheight
-  if (!PmoveUtilsV2::checkProne(pm)) {
-    PmoveUtilsV2::checkDuck(pm);
-  }
-
-  // set groundentity
-  PmoveUtilsV2::groundTrace(pm, pml);
-
-  PmoveUtilsV2::checkLadderMove(pm, pml);
-
-  if (pml.ladder) {
-    return false;
-  }
-
-  if (pm.waterlevel > 1 || pm.ps->pm_flags & PMF_TIME_WATERJUMP) {
-    return false;
-  }
-
-  if (pm.ps->eFlags & EF_MOUNTEDTANK) {
-    return false;
-  }
-
-  if (pml.walking) {
-    // walking on ground
-    walkMove();
-  } else {
-    // airborne
-    airMove();
-  }
-
-  PmoveUtilsV2::sprint(pm);
-
-  return true;
 }
 
 void SnaphudV2::walkMove() {

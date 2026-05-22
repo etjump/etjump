@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "etj_irenderable.h"
+#include "etj_pmove_utils_v2.h"
 #include "../game/bg_public.h"
 #include "../game/bg_local.h"
 
@@ -47,12 +48,12 @@ private:
   void updateSnaphud();
   void buildSnapZones();
 
-  bool pmoveSingle();
   void walkMove();
   void airMove();
   void accelerate(float wishspeed, float accel);
 
   void startListeners();
+  void setDefaultInput();
 
   [[nodiscard]] bool canSkipDraw() const;
 
@@ -98,6 +99,8 @@ private:
   };
 
   Snaphud snaphud{};
+
+  EnumBitset<PmoveUtilsV2::PmoveDefaultInput> defaultInput;
 
   playerState_t ps{};
   pmove_t pm{};
