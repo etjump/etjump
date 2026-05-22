@@ -26,6 +26,7 @@
 
 #include "../game/bg_public.h"
 #include "../game/bg_local.h"
+#include "../game/etj_shared.h"
 
 namespace ETJump {
 class CvarUpdateHandler;
@@ -34,9 +35,29 @@ class PmoveUtilsV2 {
 public:
   static constexpr float PM_FRAMETIME = 0.008f;
 
+  enum class PmoveSingleResult {
+    NONE = 0,
+    LADDER = 1,
+    WATER = 2,
+    MOUNTED = 3,
+    WALK = 4,
+    AIR = 5,
+  };
+
+  enum class PmoveDefaultInput {
+    NONE = 0,
+    FORWARD = 1 << 0,
+    SIDE = 1 << 2,
+    UP = 1 << 3,
+    SPRINT = 1 << 4,
+  };
+
   static void setupPmove(pmove_t &pm);
   static void setupUserCmd(int8_t scale, pmove_t &pm);
 
+  static PmoveSingleResult
+  pmoveSingle(pmove_t &pm, pml_t &pml,
+              const EnumBitset<PmoveDefaultInput> &defaultInput);
   static void setWaterLevel(pmove_t &pm);
   static bool checkProne(pmove_t &pm);
   static void checkDuck(pmove_t &pm);
@@ -55,5 +76,8 @@ private:
   static void traceAllLegs(trace_t &trace, float *legsOffset, vec3_t start,
                            vec3_t end, const pmove_t &pm);
   static bool correctAllSolid(trace_t &trace, pmove_t &pm, pml_t &pml);
+  static void
+  setDefaultInput(pmove_t &pm, int8_t scale,
+                  const EnumBitset<PmoveDefaultInput> &defaultInput);
 };
 } // namespace ETJump

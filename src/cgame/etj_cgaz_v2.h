@@ -27,6 +27,7 @@
 #include <memory>
 
 #include "etj_irenderable.h"
+#include "etj_pmove_utils_v2.h"
 #include "../game/bg_local.h"
 
 namespace ETJump {
@@ -50,8 +51,6 @@ private:
   [[nodiscard]] float updateMaxCosAngle(float angleOpt) const;
   [[nodiscard]] float updateMaxAngle(float angleMaxCos) const;
 
-  bool pmoveSingle();
-
   void walkMove();
   void airMove();
   void friction() const;
@@ -59,6 +58,8 @@ private:
 
   void startListeners();
   void setThickness(const vmCvar_t *cvar);
+  void setDefaultInput();
+
   [[nodiscard]] bool canSkipDraw() const;
 
   enum class CGazTrueness { UPMOVE = 1, GROUND = 2 };
@@ -114,6 +115,8 @@ private:
   };
 
   CGaz2 cgaz2{};
+
+  EnumBitset<PmoveUtilsV2::PmoveDefaultInput> defaultInput;
 
   playerState_t ps{};
   pmove_t pm{};

@@ -65,6 +65,90 @@ void PmoveUtilsV2::setupUserCmd(const int8_t scale, pmove_t &pm) {
   pm.cmd.wbuttons = pm.ps->stats[STAT_USERCMD_BUTTONS] & 0xff;
 }
 
+PmoveUtilsV2::PmoveSingleResult
+PmoveUtilsV2::pmoveSingle(pmove_t &pm, pml_t &pml,
+                          const EnumBitset<PmoveDefaultInput> &defaultInput) {
+  const int8_t scale = pm.ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_WALKING << 8
+                           ? CMDSCALE_WALK
+                           : CMDSCALE_DEFAULT;
+
+  PmoveUtilsV2::setupUserCmd(scale, pm);
+
+  // because autosprint directly flips the sprint button bit in the players
+  // 'usercmd_t', it is already accounted for it the stats that pmove
+  // saves to the playerstate, so we don't care about it here
+  // if we're in spec/demo playback
+  if (!cg.demoPlayback && pm.ps->clientNum == cg.clientNum &&
+      pm.pmext->autoSprint) {
+    pm.cmd.buttons ^= BUTTON_SPRINT;
+  }
+
+  // clear all pmove local vars
+  memset(&pml, 0, sizeof(pml));
+
+  VectorClear(pml.forward);
+  VectorClear(pml.right);
+  VectorClear(pml.up);
+
+  // save old velocity for crashlanding
+  VectorCopy(pm.ps->velocity, pml.previous_velocity);
+
+  AngleVectors(pm.ps->viewangles, pml.forward, pml.right, pml.up);
+
+  if (pm.cmd.upmove < 10) {
+    // not holding jump
+    pm.ps->pm_flags &= ~PMF_JUMP_HELD;
+  }
+
+  if (pm.cmd.upmove > 0) {
+    pm.cmd.upmove = CMDSCALE_DEFAULT;
+  }
+
+  if (pm.ps->pm_type >= PM_DEAD ||
+      pm.ps->pm_flags & (PMF_LIMBO | PMF_TIME_LOCKPLAYER) ||
+      BG_PlayerMounted(pm.ps->eFlags)) {
+    pm.cmd.forwardmove = 0;
+    pm.cmd.rightmove = 0;
+    pm.cmd.upmove = 0;
+  }
+
+  // set default key combination if there's no user input
+  if (!pm.cmd.forwardmove && !pm.cmd.rightmove && defaultInput) {
+    setDefaultInput(pm, scale, defaultInput);
+  }
+
+  // set watertype, and waterlevel
+  PmoveUtilsV2::setWaterLevel(pm);
+
+  // set mins, maxs, and viewheight
+  if (!PmoveUtilsV2::checkProne(pm)) {
+    PmoveUtilsV2::checkDuck(pm);
+  }
+
+  // set groundentity
+  PmoveUtilsV2::groundTrace(pm, pml);
+
+  PmoveUtilsV2::checkLadderMove(pm, pml);
+
+  PmoveSingleResult result{};
+
+  if (pml.ladder) {
+    result = PmoveSingleResult::LADDER;
+  } else if (pm.waterlevel > 1 || pm.ps->pm_flags & PMF_TIME_WATERJUMP) {
+    result = PmoveSingleResult::WATER;
+  } else if (pm.ps->eFlags & EF_MOUNTEDTANK) {
+    result = PmoveSingleResult::MOUNTED;
+  } else if (pml.walking) {
+    result = PmoveSingleResult::WALK;
+  } else {
+    result = PmoveSingleResult::AIR;
+  }
+
+  PmoveUtilsV2::sprint(pm);
+
+  return result;
+}
+
 void PmoveUtilsV2::setWaterLevel(pmove_t &pm) {
   vec3_t point{};
   int32_t cont = 0;
@@ -704,5 +788,26 @@ float PmoveUtilsV2::cmdScale(const pmove_t &pm, const usercmd_t &cmd,
   }
 
   return scale;
+}
+
+void PmoveUtilsV2::setDefaultInput(
+    pmove_t &pm, const int8_t scale,
+    const EnumBitset<PmoveDefaultInput> &defaultInput) {
+  if (defaultInput & PmoveDefaultInput::FORWARD) {
+    pm.cmd.forwardmove = scale;
+  }
+
+  if (defaultInput & PmoveDefaultInput::SIDE) {
+    pm.cmd.rightmove = scale;
+  }
+
+  if (defaultInput & PmoveDefaultInput::UP) {
+    pm.cmd.upmove = scale;
+  }
+
+  // if we don't have sprint pressed, 'cmdScale' will return 'runSpeedScale'
+  if (defaultInput & PmoveDefaultInput::SPRINT) {
+    pm.ps->runSpeedScale = pm.ps->sprintSpeedScale;
+  }
 }
 } // namespace ETJump
