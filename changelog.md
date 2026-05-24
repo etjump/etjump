@@ -1,3 +1,8 @@
+# ETJump 3.5.2
+
+## Fixed
+* custom clients could crash a server upon connecting with malformed userinfo [#1909](https://github.com/etjump/etjump/pull/1909)
+
 # ETJump 3.5.1
 
 ## Fixed
