@@ -2019,8 +2019,17 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     trap_GetUserinfo(clientNum2, userinfo2, sizeof(userinfo2));
 
     value = Info_ValueForKey(userinfo2, "ip");
+    const char *parsedIP = GetParsedIP(value);
 
-    Q_strncpyz(ip2, GetParsedIP(value), sizeof(ip2));
+    if (!parsedIP) {
+      G_LogPrintf("Possible DoS attack by client %i - malformed userinfo read "
+                  "for client %i: %s\n",
+                  clientNum, clientNum2,
+                  userinfo2[0] != '\0' ? userinfo2 : "empty userinfo!");
+      continue;
+    }
+
+    Q_strncpyz(ip2, parsedIP, sizeof(ip2));
     if (!Q_stricmp(ip, ip2)) {
       connPerIP++;
     }
