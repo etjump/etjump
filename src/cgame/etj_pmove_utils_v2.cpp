@@ -790,6 +790,33 @@ float PmoveUtilsV2::cmdScale(const pmove_t &pm, const usercmd_t &cmd,
   return scale;
 }
 
+bool PmoveUtilsV2::strafingForwards(const pmove_t &pm, const float wishspeed,
+                                    const vec2_t wishvel) {
+  // not strafing if speed is low, or no user input
+  if (VectorLength2(pm.ps->velocity) < wishspeed ||
+      (!pm.cmd.forwardmove && !pm.cmd.rightmove)) {
+    return false;
+  }
+
+  // get angle between wishvel and player velocity
+  const float wishvelAngle = RAD2DEG(std::atan2(wishvel[1], wishvel[0]));
+  const float velAngle =
+      RAD2DEG(std::atan2(pm.ps->velocity[1], pm.ps->velocity[0]));
+  const float diffAngle = AngleDelta(wishvelAngle, velAngle);
+
+  // return true if 'diffAngle' matches notion of "forwards"
+  // fullbeat / halfbeat / invert (holding +moveleft) or
+  // fullbeat / halfbeat / invert (holding +moveright) or
+  // nobeat
+  if ((pm.cmd.rightmove < 0 && diffAngle >= 0) ||
+      (pm.cmd.rightmove > 0 && diffAngle < 0) ||
+      (pm.cmd.forwardmove != 0 && diffAngle >= 0)) {
+    return true;
+  }
+
+  return false;
+}
+
 void PmoveUtilsV2::setDefaultInput(
     pmove_t &pm, const int8_t scale,
     const EnumBitset<PmoveDefaultInput> &defaultInput) {

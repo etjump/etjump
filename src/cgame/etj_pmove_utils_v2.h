@@ -68,6 +68,13 @@ public:
   static void updateWishvel(vec2_t &wishvel, pmove_t &pm, pml_t &pml);
   static float cmdScale(const pmove_t &pm, const usercmd_t &cmd, bool upmove);
 
+  // "forwards" means player viewangles naturally match keys pressed,
+  // i.e. looking ahead with +forward and looking backwards with +back,
+  // except for nobeat: looking to the left with +forward only and
+  // looking to the right with +back only
+  static bool strafingForwards(const pmove_t &pm, float wishspeed,
+                               const vec2_t wishvel);
+
 private:
   static bool canProne(const pmove_t &pm);
   static void groundTraceMissed(pmove_t &pm, pml_t &pml);

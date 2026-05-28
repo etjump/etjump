@@ -32,10 +32,12 @@
 
 namespace ETJump {
 class CvarUpdateHandler;
+class SnaphudData;
 
 class CGazV2 : public IRenderable {
 public:
   CGazV2(const std::shared_ptr<CGazData> &cgazData,
+         const std::shared_ptr<SnaphudData> &snaphudData,
          const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~CGazV2() override;
 
@@ -55,7 +57,7 @@ private:
   void startListeners();
   void setThickness(const vmCvar_t *cvar);
 
-  [[nodiscard]] bool canSkipDraw(const CGazData::State &s) const;
+  static bool canSkipDraw(const CGazData::State &s);
 
   struct CGaz1 {
     float minAngle;
@@ -70,6 +72,8 @@ private:
     float y;
     float h;
     float fov;
+
+    std::optional<float> drawSnap; // etj_CGaz1DrawSnapZone
 
     std::array<vec4_t, 4> colors;
     vec4_t midlineColor;
@@ -96,6 +100,7 @@ private:
   CGaz2 cgaz2{};
 
   std::shared_ptr<CGazData> cgazData;
+  std::shared_ptr<SnaphudData> snaphudData;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 } // namespace ETJump
