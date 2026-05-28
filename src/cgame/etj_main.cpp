@@ -299,12 +299,14 @@ static void initHUD() {
     cgame.hud.renderables.emplace_back(
         std::make_unique<CGaz>(cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(std::make_unique<CGazV2>(
-        cgame.hud.cgazDataHandler, cgame.core.cvarUpdate));
+        cgame.hud.cgazDataHandler, cgame.hud.snaphudDataHandler,
+        cgame.core.cvarUpdate));
   } else {
     cgame.hud.renderables.emplace_back(
         std::make_unique<CGaz>(cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(std::make_unique<CGazV2>(
-        cgame.hud.cgazDataHandler, cgame.core.cvarUpdate));
+        cgame.hud.cgazDataHandler, cgame.hud.snaphudDataHandler,
+        cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(
         std::make_unique<Snaphud>(cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(std::make_unique<SnaphudV2>(

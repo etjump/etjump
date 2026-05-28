@@ -26,6 +26,7 @@
 #include "cg_local.h"
 #include "etj_color_parser.h"
 #include "etj_cvar_update_handler.h"
+#include "etj_snaphud_data.h"
 #include "etj_utilities.h"
 
 namespace ETJump {
@@ -33,8 +34,9 @@ inline constexpr float CGAZ_FOV_MIN = 1.0f;
 inline constexpr float CGAZ_FOV_MAX = 179.0f;
 
 CGazV2::CGazV2(const std::shared_ptr<CGazData> &cgazData,
+               const std::shared_ptr<SnaphudData> &snaphudData,
                const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : cgazData(cgazData), cvarUpdate(cvarUpdate) {
+    : cgazData(cgazData), snaphudData(snaphudData), cvarUpdate(cvarUpdate) {
 
   // CGaz 1
   cgame.utils.colorParser->parseColorString(etj_CGaz1Color1.string,
@@ -175,6 +177,59 @@ void CGazV2::updateCGaz2(const CGazData::State &s) {
   cgaz2.y -= 10;
 }
 
+void CGazV2::updateDrawSnap(const CGazData::State &s) {
+  // no meaningful values if speed is low
+  if (s.vf < s.wishspeed) {
+    cgaz1.drawSnap = std::nullopt;
+    return;
+  }
+
+  const bool forwards =
+      PmoveUtilsV2::strafingForwards(s.pm, s.wishspeed, s.wishvel);
+  const bool rightStrafe =
+      (forwards && s.pm.cmd.rightmove > 0) ||
+      (!forwards && (s.pm.cmd.rightmove < 0 ||
+                     (s.pm.cmd.forwardmove != 0 && s.pm.cmd.rightmove == 0)));
+
+  // convert 'cgaz1.minAngle' to an absolute world-space angle, so we can
+  // figure out which snap zone quadrant we are currently at
+  float minAngleAbsolute =
+      rightStrafe ? s.velAngle - cgaz1.minAngle : s.velAngle + cgaz1.minAngle;
+
+  minAngleAbsolute = AngleNormalizePI(minAngleAbsolute);
+
+  const SnaphudData::State &snap = snaphudData->getState();
+
+  float snapEdge = 0.0f;
+  bool found = false;
+
+  // linear search is fine here, most of the time 'snapAngles' size is 8
+  // (can go up to 85 in extreme edge cases, still fine for linear search)
+  for (size_t i = 0; i < snap.snapAngles.size() - 1; i++) {
+    for (int32_t q = 0; q < 4; q++) {
+      const float offset = static_cast<float>(q) * M_PI_2f;
+      const float start = snap.snapAngles[i] + offset;
+      const float end = snap.snapAngles[i + 1] + offset;
+
+      if (AngleNormalizePI(minAngleAbsolute - start) >= 0 &&
+          AngleNormalizePI(minAngleAbsolute - start) <=
+              AngleNormalizePI(end - start)) {
+
+        snapEdge = rightStrafe ? start : end;
+        found = true;
+        break;
+      }
+    }
+  }
+
+  if (found) {
+    cgaz1.drawSnap = cgaz1.minAngle +
+                     std::abs(AngleNormalizePI(snapEdge - minAngleAbsolute));
+  } else {
+    cgaz1.drawSnap = std::nullopt;
+  }
+}
+
 float CGazV2::updateMinAngle(const CGazData::State &s) {
 #ifndef NDEBUG
   if (s.a == 0) {
@@ -277,10 +332,12 @@ bool CGazV2::beforeRender() {
     return false;
   }
 
-  // TODO: drawsnap
-
   if (etj_drawCGaz.integer & 1) {
     updateCGaz1(s);
+
+    if (etj_CGaz1DrawSnapZone.integer) {
+      updateDrawSnap(s);
+    }
   }
 
   if (etj_drawCGaz.integer & 2) {
@@ -292,35 +349,40 @@ bool CGazV2::beforeRender() {
 
 void CGazV2::render() const {
   if (etj_drawCGaz.integer & 1) {
-    // TODO: drawsnap
+    if (etj_CGaz1DrawSnapZone.integer && cgaz1.drawSnap.has_value()) {
+      CG_FillAngleYaw(+cgaz1.minAngle, +cgaz1.drawSnap.value(), cgaz1.yaw,
+                      cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
+      CG_FillAngleYaw(-cgaz1.drawSnap.value(), -cgaz1.minAngle, cgaz1.yaw,
+                      cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
+    } else {
+      // no accel zone
+      CG_FillAngleYaw(-cgaz1.minAngle, +cgaz1.minAngle, cgaz1.yaw, cgaz1.y,
+                      cgaz1.h, cgaz1.fov, cgaz1.colors[0]);
 
-    // no accel zone
-    CG_FillAngleYaw(-cgaz1.minAngle, +cgaz1.minAngle, cgaz1.yaw, cgaz1.y,
-                    cgaz1.h, cgaz1.fov, cgaz1.colors[0]);
+      // partial accel zone
+      CG_FillAngleYaw(+cgaz1.minAngle, +cgaz1.optAngle, cgaz1.yaw, cgaz1.y,
+                      cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
+      CG_FillAngleYaw(-cgaz1.optAngle, -cgaz1.minAngle, cgaz1.yaw, cgaz1.y,
+                      cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
 
-    // partial accel zone
-    CG_FillAngleYaw(+cgaz1.minAngle, +cgaz1.optAngle, cgaz1.yaw, cgaz1.y,
-                    cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
-    CG_FillAngleYaw(-cgaz1.optAngle, -cgaz1.minAngle, cgaz1.yaw, cgaz1.y,
-                    cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
+      // full accel zone
+      CG_FillAngleYaw(+cgaz1.optAngle, +cgaz1.maxCosAngle, cgaz1.yaw, cgaz1.y,
+                      cgaz1.h, cgaz1.fov, cgaz1.colors[2]);
+      CG_FillAngleYaw(-cgaz1.maxCosAngle, -cgaz1.optAngle, cgaz1.yaw, cgaz1.y,
+                      cgaz1.h, cgaz1.fov, cgaz1.colors[2]);
 
-    // full accel zone
-    CG_FillAngleYaw(+cgaz1.optAngle, +cgaz1.maxCosAngle, cgaz1.yaw, cgaz1.y,
-                    cgaz1.h, cgaz1.fov, cgaz1.colors[2]);
-    CG_FillAngleYaw(-cgaz1.maxCosAngle, -cgaz1.optAngle, cgaz1.yaw, cgaz1.y,
-                    cgaz1.h, cgaz1.fov, cgaz1.colors[2]);
+      // max angle
+      CG_FillAngleYaw(+cgaz1.maxCosAngle, +cgaz1.maxAngle, cgaz1.yaw, cgaz1.y,
+                      cgaz1.h, cgaz1.fov, cgaz1.colors[3]);
+      CG_FillAngleYaw(-cgaz1.maxAngle, -cgaz1.maxCosAngle, cgaz1.yaw, cgaz1.y,
+                      cgaz1.h, cgaz1.fov, cgaz1.colors[3]);
 
-    // max angle
-    CG_FillAngleYaw(+cgaz1.maxCosAngle, +cgaz1.maxAngle, cgaz1.yaw, cgaz1.y,
-                    cgaz1.h, cgaz1.fov, cgaz1.colors[3]);
-    CG_FillAngleYaw(-cgaz1.maxAngle, -cgaz1.maxCosAngle, cgaz1.yaw, cgaz1.y,
-                    cgaz1.h, cgaz1.fov, cgaz1.colors[3]);
-
-    if (etj_CGaz1DrawMidLine.integer) {
-      CG_FillAngleYaw(+cgaz1.midlineStart, +cgaz1.midLineEnd, cgaz1.yaw,
-                      cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.midlineColor);
-      CG_FillAngleYaw(-cgaz1.midlineStart, -cgaz1.midLineEnd, cgaz1.yaw,
-                      cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.midlineColor);
+      if (etj_CGaz1DrawMidLine.integer) {
+        CG_FillAngleYaw(+cgaz1.midlineStart, +cgaz1.midLineEnd, cgaz1.yaw,
+                        cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.midlineColor);
+        CG_FillAngleYaw(-cgaz1.midlineStart, -cgaz1.midLineEnd, cgaz1.yaw,
+                        cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.midlineColor);
+      }
     }
   }
 
@@ -408,7 +470,7 @@ void CGazV2::render() const {
   }
 }
 
-bool CGazV2::canSkipDraw(const CGazData::State &s) const {
+bool CGazV2::canSkipDraw(const CGazData::State &s) {
   if (!etj_drawCGaz.integer) {
     return true;
   }

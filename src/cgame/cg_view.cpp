@@ -2230,7 +2230,8 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
       ETJump::cgame.utils.pmove->runPmove();
     }
 
-    if (etj_drawSnapHUD.integer) {
+    if (etj_drawSnapHUD.integer ||
+        ((etj_drawCGaz.integer & 1) && etj_CGaz1DrawSnapZone.integer)) {
       ETJump::cgame.hud.snaphudDataHandler->runFrame();
     }
 
