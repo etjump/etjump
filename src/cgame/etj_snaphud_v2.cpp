@@ -28,16 +28,13 @@
 #include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
-// wishspeed may be modified by 'target_scale_velocity' up to 3x
-// (wishspeed * 3) / 125 * pm_accelerate = 84.48
-inline constexpr float MAX_SNAP_ACCEL = 85.0f;
-
 inline constexpr float SNAPHUD_MIN_FOV = 1.0f;
 inline constexpr float SNAPHUD_MAX_FOV = 179.0f;
 
 namespace ETJump {
-SnaphudV2::SnaphudV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : cvarUpdate(cvarUpdate) {
+SnaphudV2::SnaphudV2(const std::shared_ptr<SnaphudData> &snaphudData,
+                     const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : snaphudData(snaphudData), cvarUpdate(cvarUpdate) {
 
   cgame.utils.colorParser->parseColorString(etj_snapHUDColor1.string,
                                             snaphud.colors[0]);
@@ -48,7 +45,6 @@ SnaphudV2::SnaphudV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
                                             snaphud.colors[2]);
   cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor2.string,
                                             snaphud.colors[3]);
-  setDefaultInput();
   startListeners();
 }
 
@@ -77,35 +73,7 @@ void SnaphudV2::startListeners() {
   });
 }
 
-void SnaphudV2::setDefaultInput() {
-  defaultInput.set(PmoveUtilsV2::PmoveDefaultInput::FORWARD);
-  defaultInput.set(PmoveUtilsV2::PmoveDefaultInput::SIDE);
-  defaultInput.set(PmoveUtilsV2::PmoveDefaultInput::SPRINT);
-}
-
-void SnaphudV2::updateSnapState() {
-  assert(s.a > 0);
-
-  float step = std::round(s.a) - 0.5f;
-  s.snapAngles.clear();
-
-  while (step > 0.0f) {
-    s.snapAngles.push_back(std::acos(step / s.a));
-    s.snapAngles.push_back(std::asin(step / s.a));
-
-    step -= 1.0f;
-  }
-
-  // can happen at very low speeds
-  if (s.snapAngles.empty()) {
-    return;
-  }
-
-  std::sort(s.snapAngles.begin(), s.snapAngles.end());
-  s.snapAngles.push_back(s.snapAngles[0] + M_PI_2f);
-}
-
-void SnaphudV2::updateSnaphud() {
+void SnaphudV2::updateSnaphud(const SnaphudData::State &s) {
   snaphud.yaw = std::atan2(s.wishvel[1], s.wishvel[0]);
   snaphud.y = SCREEN_CENTER_Y + std::clamp(etj_snapHUDOffsetY.value,
                                            -SCREEN_CENTER_Y, SCREEN_CENTER_Y);
@@ -139,10 +107,10 @@ void SnaphudV2::updateSnaphud() {
       break;
   }
 
-  buildSnapZones();
+  buildSnapZones(s);
 }
 
-void SnaphudV2::buildSnapZones() {
+void SnaphudV2::buildSnapZones(const SnaphudData::State &s) {
   snaphud.zones.clear();
   snaphud.isCurrentAlt = false;
 
@@ -164,38 +132,13 @@ void SnaphudV2::buildSnapZones() {
 }
 
 bool SnaphudV2::beforeRender() {
-  ps = cg.predictedPlayerState;
+  const SnaphudData::State &s = snaphudData->getState();
 
-  if (canSkipDraw()) {
+  if (canSkipDraw(s)) {
     return false;
   }
 
-  pm.ps = &ps;
-  pm.pmext = &pmext;
-  PmoveUtilsV2::setupPmove(pm);
-
-  PmoveUtilsV2::PmoveSingleResult result =
-      PmoveUtilsV2::pmoveSingle(pm, pml, defaultInput);
-
-  switch (result) {
-    case PmoveUtilsV2::PmoveSingleResult::WALK:
-      walkMove();
-      break;
-    case PmoveUtilsV2::PmoveSingleResult::AIR:
-      airMove();
-      break;
-    default:
-      return false;
-  }
-
-  // this will be true at the very beginning of the game, before the server
-  // has ran a client think at least once, or with very low speeds
-  // ('target_scale_velocity' with base scaling < 1)
-  if (s.a == 0 || s.snapAngles.empty()) {
-    return false;
-  }
-
-  updateSnaphud();
+  updateSnaphud(s);
 
   return true;
 }
@@ -227,148 +170,25 @@ void SnaphudV2::render() const {
   }
 }
 
-void SnaphudV2::walkMove() {
-  if (pm.waterlevel > 2 &&
-      DotProduct(pml.forward, pml.groundTrace.plane.normal) > 0) {
-    return;
-  }
-
-  // don't let interpolated frames modify jump times & sprint consumption
-  const bool isLerpFrame = pm.pmove_msec > cg.time - pm.cmd.serverTime;
-
-  if (PmoveUtilsV2::checkJump(pm, pml, isLerpFrame)) {
-    // jumped away
-    if (pm.waterlevel <= 1) {
-      airMove();
-    }
-
-    if (!isLerpFrame &&
-        !(pm.cmd.serverTime - pm.pmext->jumpTime < JUMP_DELAY_TIME)) {
-      pm.pmext->sprintTime -= 2500;
-
-      if (pm.pmext->sprintTime < 0) {
-        pm.pmext->sprintTime = 0;
-      }
-
-      if (pm.pmext->jumpDelayBug) {
-        pm.pmext->jumpTime = pm.cmd.serverTime;
-      }
-    }
-
-    if (!isLerpFrame && !pm.pmext->jumpDelayBug) {
-      pm.pmext->jumpTime = pm.cmd.serverTime;
-    }
-
-    return;
-  }
-
-  const float scale = PmoveUtilsV2::cmdScale(
-      pm, pm.cmd,
-      etj_snapHUDTrueness.integer & static_cast<int32_t>(SnapTrueness::UPMOVE));
-
-  // project moves down to flat plane
-  pml.forward[2] = 0;
-  pml.right[2] = 0;
-
-  // FIXME: no slopes :(
-  // project the forward and right directions onto the ground plane
-  // PM_ClipVelocity(pml.forward, pml.groundTrace.plane.normal, pml.forward,
-  //                 OVERCLIP);
-  // PM_ClipVelocity(pml.right, pml.groundTrace.plane.normal, pml.right,
-  // OVERCLIP);
-
-  VectorNormalize(pml.forward);
-  VectorNormalize(pml.right);
-
-  PmoveUtilsV2::updateWishvel(s.wishvel, pm, pml);
-  float wishspeed = scale * VectorLength2(s.wishvel);
-
-  // clamp the speed lower if prone
-  if (pm.ps->eFlags & EF_PRONE) {
-    if (wishspeed > static_cast<float>(pm.ps->speed) * pm_proneSpeedScale) {
-      wishspeed = static_cast<float>(pm.ps->speed) * pm_proneSpeedScale;
-    }
-  } else if (pm.ps->pm_flags & PMF_DUCKED) {
-    // clamp the speed lower if ducking
-    if (wishspeed >
-        static_cast<float>(pm.ps->speed) * pm.ps->crouchSpeedScale) {
-      wishspeed = static_cast<float>(pm.ps->speed) * pm.ps->crouchSpeedScale;
-    }
-  }
-
-  // clamp the speed lower if wading or walking on the bottom
-  if (pm.waterlevel) {
-    float waterScale = static_cast<float>(pm.waterlevel) / 3.0f;
-
-    if (pm.watertype == CONTENTS_SLIME) {
-      waterScale = 1.0f - ((1.0f - pm_slagSwimScale) * waterScale);
-    } else {
-      waterScale = 1.0f - ((1.0f - pm_waterSwimScale) * waterScale);
-    }
-
-    if (wishspeed > static_cast<float>(pm.ps->speed) * waterScale) {
-      wishspeed = static_cast<float>(pm.ps->speed) * waterScale;
-    }
-  }
-
-  // when a player gets hit, they temporarily lose
-  // full control, which allows them to be moved a bit
-  if (etj_snapHUDTrueness.integer &
-      static_cast<int32_t>(SnapTrueness::GROUND)) {
-    if ((pml.groundTrace.surfaceFlags & SURF_SLICK) ||
-        pm.ps->pm_flags & PMF_TIME_KNOCKBACK) {
-      accelerate(wishspeed, pm_airaccelerate);
-    } else {
-      accelerate(wishspeed, pm_accelerate);
-    }
-  } else {
-    accelerate(wishspeed, pm_airaccelerate);
-  }
-}
-
-void SnaphudV2::airMove() {
-  const float scale = PmoveUtilsV2::cmdScale(
-      pm, pm.cmd,
-      etj_snapHUDTrueness.integer & static_cast<int32_t>(SnapTrueness::UPMOVE));
-
-  // project moves down to flat plane
-  pml.forward[2] = 0;
-  pml.right[2] = 0;
-  VectorNormalize(pml.forward);
-  VectorNormalize(pml.right);
-
-  PmoveUtilsV2::updateWishvel(s.wishvel, pm, pml);
-
-  // not on ground, so little effect on velocity
-  accelerate(scale * VectorLength2(s.wishvel), pm_airaccelerate);
-
-  // FIXME: no slopes :(
-  // we may have a ground plane that is very steep,
-  // even though we don't have a groundentity
-  // slide along the steep plane
-  // if (pml.groundPlane) {
-  //   PM_ClipVelocity(pm.ps->velocity, pml.groundTrace.plane.normal,
-  //                   pm.ps->velocity, OVERCLIP);
-  // }
-}
-
-void SnaphudV2::accelerate(const float wishspeed, const float accel) {
-  const float a =
-      std::min(accel * wishspeed * PmoveUtilsV2::PM_FRAMETIME, MAX_SNAP_ACCEL);
-
-  if (s.a != a) {
-    s.a = a;
-    updateSnapState();
-  }
-}
-
-bool SnaphudV2::canSkipDraw() const {
+bool SnaphudV2::canSkipDraw(const SnaphudData::State &s) const {
   if (!etj_drawSnapHUD.integer) {
     return true;
   }
 
-  if (ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || ps.pm_type == PM_NOCLIP ||
-      ps.pm_type == PM_DEAD) {
+  if (s.result != PmoveUtilsV2::PmoveSingleResult::WALK &&
+      s.result != PmoveUtilsV2::PmoveSingleResult::AIR) {
+    return true;
+  }
+
+  // this will be true at the very beginning of the game, before the server
+  // has ran a client think at least once, or with very low speeds
+  // ('target_scale_velocity' with base scaling < 1)
+  if (s.a == 0 || s.snapAngles.empty()) {
+    return true;
+  }
+
+  if (s.pm.ps->persistant[PERS_TEAM] == TEAM_SPECTATOR ||
+      s.pm.ps->pm_type == PM_NOCLIP || s.pm.ps->pm_type == PM_DEAD) {
     return true;
   }
 
@@ -380,8 +200,9 @@ bool SnaphudV2::canSkipDraw() const {
     return true;
   }
 
-  if (BG_PlayerMounted(ps.eFlags) || ps.weapon == WP_MOBILE_MG42_SET ||
-      ps.weapon == WP_MORTAR_SET) {
+  if (BG_PlayerMounted(s.pm.ps->eFlags) ||
+      s.pm.ps->weapon == WP_MOBILE_MG42_SET ||
+      s.pm.ps->weapon == WP_MORTAR_SET) {
     return true;
   }
 
