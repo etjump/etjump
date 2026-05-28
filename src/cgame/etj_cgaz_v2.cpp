@@ -32,8 +32,9 @@ namespace ETJump {
 inline constexpr float CGAZ_FOV_MIN = 1.0f;
 inline constexpr float CGAZ_FOV_MAX = 179.0f;
 
-CGazV2::CGazV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : cvarUpdate(cvarUpdate) {
+CGazV2::CGazV2(const std::shared_ptr<CGazData> &cgazData,
+               const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : cgazData(cgazData), cvarUpdate(cvarUpdate) {
 
   // CGaz 1
   cgame.utils.colorParser->parseColorString(etj_CGaz1Color1.string,
@@ -56,7 +57,6 @@ CGazV2::CGazV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
 
   setThickness(&etj_CGaz2Thickness1);
   setThickness(&etj_CGaz2Thickness2);
-  setDefaultInput();
   startListeners();
 }
 
@@ -119,44 +119,11 @@ void CGazV2::setThickness(const vmCvar_t *cvar) {
   }
 }
 
-void CGazV2::setDefaultInput() {
-  defaultInput.set(PmoveUtilsV2::PmoveDefaultInput::FORWARD);
-  defaultInput.set(PmoveUtilsV2::PmoveDefaultInput::SPRINT);
-}
-
-void CGazV2::updateCGazState(const float wishspeed, const float accel,
-                             const float slickGravity) {
-  assert(slickGravity >= 0);
-  assert(slickGravity == 0 || pml.groundTrace.surfaceFlags & SURF_SLICK ||
-         pm.ps->pm_flags & PMF_TIME_KNOCKBACK);
-
-  s.gSquared = std::pow(slickGravity, 2.0f);
-  s.vSquared = VectorLengthSquared2(pml.previous_velocity);
-  s.vfSquared = VectorLengthSquared2(pm.ps->velocity);
-  s.wishspeed = wishspeed;
-
-  s.a = accel * s.wishspeed * PmoveUtilsV2::PM_FRAMETIME;
-  s.aSquared = std::pow(s.a, 2.0f);
-
-  if (!(etj_CGazTrueness.integer &
-        static_cast<int32_t>(CGazTrueness::GROUND)) ||
-      s.vSquared - s.vfSquared >= (2 * s.a * s.wishspeed) - s.aSquared) {
-    s.vSquared = s.vfSquared;
-  }
-
-  s.v = std::sqrt(s.vSquared);
-  s.vf = std::sqrt(s.vfSquared);
-
-  assert(s.a * PmoveUtilsV2::PM_FRAMETIME <= 1);
-
-  s.velAngle = std::atan2(pm.ps->velocity[1], pm.ps->velocity[0]);
-}
-
-void CGazV2::updateCGaz1() {
-  cgaz1.minAngle = updateMinAngle();
-  cgaz1.optAngle = updateOptAngle();
-  cgaz1.maxCosAngle = updateMaxCosAngle(cgaz1.optAngle);
-  cgaz1.maxAngle = updateMaxAngle(cgaz1.maxCosAngle);
+void CGazV2::updateCGaz1(const CGazData::State &s) {
+  cgaz1.minAngle = updateMinAngle(s);
+  cgaz1.optAngle = updateOptAngle(s);
+  cgaz1.maxCosAngle = updateMaxCosAngle(s, cgaz1.optAngle);
+  cgaz1.maxAngle = updateMaxAngle(s, cgaz1.maxCosAngle);
 
   assert(cgaz1.minAngle <= cgaz1.optAngle);
   assert(cgaz1.optAngle <= cgaz1.maxCosAngle);
@@ -187,8 +154,8 @@ void CGazV2::updateCGaz1() {
   cgaz1.y += cgaz1.h + 1;
 }
 
-void CGazV2::updateCGaz2() {
-  cgaz2.velAngle = AngleNormalize180(pm.ps->viewangles[YAW] -
+void CGazV2::updateCGaz2(const CGazData::State &s) {
+  cgaz2.velAngle = AngleNormalize180(s.pm.ps->viewangles[YAW] -
                                      AngleNormalize180(RAD2DEG(s.velAngle)));
   cgaz2.velAngle = DEG2RAD(cgaz2.velAngle);
   cgaz2.velSize = etj_CGaz2FixedSpeed.value > 0
@@ -198,6 +165,9 @@ void CGazV2::updateCGaz2() {
   cgaz2.y =
       std::clamp(etj_CGaz2Y.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
 
+  cgaz2.forwardmove = s.pm.cmd.forwardmove;
+  cgaz2.rightmove = s.pm.cmd.rightmove;
+
   cgaz2.highRes = etj_CGaz2HighRes.integer;
   cgaz2.drawSides = s.vf > s.wishspeed;
 
@@ -205,7 +175,7 @@ void CGazV2::updateCGaz2() {
   cgaz2.y -= 10;
 }
 
-float CGazV2::updateMinAngle() const {
+float CGazV2::updateMinAngle(const CGazData::State &s) {
 #ifndef NDEBUG
   if (s.a == 0) {
     assert(s.vSquared - s.vfSquared == (2 * s.a * s.wishspeed) - s.aSquared);
@@ -215,14 +185,14 @@ float CGazV2::updateMinAngle() const {
 #endif
 
   const float numSquared =
-      std::pow(s.wishspeed, 2.0f) - s.vSquared + s.vfSquared + s.gSquared;
+      s.vfSquared + std::pow(s.wishspeed, 2.0f) - s.vSquared + s.gSquared;
   assert(numSquared > 0);
 
   const float num = std::sqrt(numSquared);
   return num >= s.vf ? 0 : std::acos(num / s.vf);
 }
 
-float CGazV2::updateOptAngle() const {
+float CGazV2::updateOptAngle(const CGazData::State &s) {
   const float num = s.wishspeed - s.a;
   return num >= s.vf ? 0 : std::acos(num / s.vf);
 }
@@ -240,7 +210,8 @@ float CGazV2::updateOptAngle() const {
 // angle would exceed 180 degrees.
 // When this happens, we simply return Pi as the angle, as there's no
 // meaningful way to represent the angle on screen.
-float CGazV2::updateMaxCosAngle(const float angleOpt) const {
+float CGazV2::updateMaxCosAngle(const CGazData::State &s,
+                                const float angleOpt) {
   const float vXYSquared = s.vSquared - s.gSquared;
 
   // gravity has higher contribution - no meaningful angle
@@ -268,7 +239,8 @@ float CGazV2::updateMaxCosAngle(const float angleOpt) const {
   return angleMaxCos;
 }
 
-float CGazV2::updateMaxAngle(const float angleMaxCos) const {
+float CGazV2::updateMaxAngle(const CGazData::State &s,
+                             const float angleMaxCos) {
 #ifndef NDEBUG
   if (s.a == 0) {
     assert(s.vSquared - s.vfSquared == (2 * s.a * s.wishspeed) - s.aSquared);
@@ -299,38 +271,20 @@ float CGazV2::updateMaxAngle(const float angleMaxCos) const {
 }
 
 bool CGazV2::beforeRender() {
-  ps = cg.predictedPlayerState;
+  const CGazData::State &s = cgazData->getState();
 
-  if (canSkipDraw()) {
+  if (canSkipDraw(s)) {
     return false;
-  }
-
-  pm.ps = &ps;
-  pm.pmext = &pmext;
-  PmoveUtilsV2::setupPmove(pm);
-
-  PmoveUtilsV2::PmoveSingleResult result =
-      PmoveUtilsV2::pmoveSingle(pm, pml, defaultInput);
-
-  switch (result) {
-    case PmoveUtilsV2::PmoveSingleResult::WALK:
-      walkMove();
-      break;
-    case PmoveUtilsV2::PmoveSingleResult::AIR:
-      airMove();
-      break;
-    default:
-      return false;
   }
 
   // TODO: drawsnap
 
   if (etj_drawCGaz.integer & 1) {
-    updateCGaz1();
+    updateCGaz1(s);
   }
 
   if (etj_drawCGaz.integer & 2) {
-    updateCGaz2();
+    updateCGaz2(s);
   }
 
   return true;
@@ -378,7 +332,7 @@ void CGazV2::render() const {
       x -= SCREEN_OFFSET_X;
     }
 
-    if (pm.cmd.forwardmove || pm.cmd.rightmove) {
+    if (cgaz2.forwardmove || cgaz2.rightmove) {
       float mult = 1.0f;
 
       if (etj_CGaz2WishDirFixedSpeed.value > 0) {
@@ -386,13 +340,13 @@ void CGazV2::render() const {
         mult = etj_CGaz2WishDirFixedSpeed.value / wishDirScale;
       }
 
-      if (etj_CGaz2WishDirUniformLength.integer && pm.cmd.rightmove &&
-          pm.cmd.forwardmove) {
+      if (etj_CGaz2WishDirUniformLength.integer && cgaz2.rightmove &&
+          cgaz2.forwardmove) {
         mult /= M_SQRT2;
       }
 
-      const float fmove = mult * static_cast<float>(pm.cmd.forwardmove);
-      const float smove = mult * static_cast<float>(pm.cmd.rightmove);
+      const float fmove = mult * static_cast<float>(cgaz2.forwardmove);
+      const float smove = mult * static_cast<float>(cgaz2.rightmove);
 
       if (cgaz2.highRes) {
         drawLineWu(x, cgaz2.y, x + smove, cgaz2.y - fmove, cgaz2.thickness[1],
@@ -454,222 +408,22 @@ void CGazV2::render() const {
   }
 }
 
-void CGazV2::walkMove() {
-  if (pm.waterlevel > 2 &&
-      DotProduct(pml.forward, pml.groundTrace.plane.normal) > 0) {
-    return;
-  }
-
-  // don't let interpolated frames modify jump times & sprint consumption
-  const bool isLerpFrame = pm.pmove_msec > cg.time - pm.cmd.serverTime;
-
-  if (PmoveUtilsV2::checkJump(pm, pml, isLerpFrame)) {
-    // jumped away
-    if (pm.waterlevel <= 1) {
-      airMove();
-    }
-
-    if (!isLerpFrame &&
-        !(pm.cmd.serverTime - pm.pmext->jumpTime < JUMP_DELAY_TIME)) {
-      pm.pmext->sprintTime -= 2500;
-
-      if (pm.pmext->sprintTime < 0) {
-        pm.pmext->sprintTime = 0;
-      }
-
-      if (pm.pmext->jumpDelayBug) {
-        pm.pmext->jumpTime = pm.cmd.serverTime;
-      }
-    }
-
-    if (!isLerpFrame && !pm.pmext->jumpDelayBug) {
-      pm.pmext->jumpTime = pm.cmd.serverTime;
-    }
-
-    return;
-  }
-
-  friction();
-
-  const float scale = PmoveUtilsV2::cmdScale(
-      pm, pm.cmd,
-      etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
-
-  // project moves down to flat plane
-  pml.forward[2] = 0;
-  pml.right[2] = 0;
-
-  // FIXME: no slopes :(
-  // project the forward and right directions onto the ground plane
-  // PM_ClipVelocity(pml.forward, pml.groundTrace.plane.normal, pml.forward,
-  //                 OVERCLIP);
-  // PM_ClipVelocity(pml.right, pml.groundTrace.plane.normal, pml.right,
-  // OVERCLIP);
-
-  VectorNormalize(pml.forward);
-  VectorNormalize(pml.right);
-
-  PmoveUtilsV2::updateWishvel(s.wishvel, pm, pml);
-  float wishspeed = scale * VectorLength2(s.wishvel);
-
-  // clamp the speed lower if prone
-  if (pm.ps->eFlags & EF_PRONE) {
-    if (wishspeed > static_cast<float>(pm.ps->speed) * pm_proneSpeedScale) {
-      wishspeed = static_cast<float>(pm.ps->speed) * pm_proneSpeedScale;
-    }
-  } else if (pm.ps->pm_flags & PMF_DUCKED) {
-    // clamp the speed lower if ducking
-    if (wishspeed >
-        static_cast<float>(pm.ps->speed) * pm.ps->crouchSpeedScale) {
-      wishspeed = static_cast<float>(pm.ps->speed) * pm.ps->crouchSpeedScale;
-    }
-  }
-
-  // clamp the speed lower if wading or walking on the bottom
-  if (pm.waterlevel) {
-    float waterScale = static_cast<float>(pm.waterlevel) / 3.0f;
-
-    if (pm.watertype == CONTENTS_SLIME) {
-      waterScale = 1.0f - ((1.0f - pm_slagSwimScale) * waterScale);
-    } else {
-      waterScale = 1.0f - ((1.0f - pm_waterSwimScale) * waterScale);
-    }
-
-    if (wishspeed > static_cast<float>(pm.ps->speed) * waterScale) {
-      wishspeed = static_cast<float>(pm.ps->speed) * waterScale;
-    }
-  }
-
-  // when a player gets hit, they temporarily lose
-  // full control, which allows them to be moved a bit
-  if ((pml.groundTrace.surfaceFlags & SURF_SLICK) ||
-      pm.ps->pm_flags & PMF_TIME_KNOCKBACK) {
-    accelerate(wishspeed, pm_airaccelerate, true);
-  } else {
-    accelerate(wishspeed, pm_accelerate, false);
-  }
-}
-
-void CGazV2::airMove() {
-  friction();
-
-  const float scale = PmoveUtilsV2::cmdScale(
-      pm, pm.cmd,
-      etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
-
-  // project moves down to flat plane
-  pml.forward[2] = 0;
-  pml.right[2] = 0;
-  VectorNormalize(pml.forward);
-  VectorNormalize(pml.right);
-
-  PmoveUtilsV2::updateWishvel(s.wishvel, pm, pml);
-
-  // not on ground, so little effect on velocity
-  accelerate(scale * VectorLength2(s.wishvel), pm_airaccelerate, false);
-
-  // FIXME: no slopes :(
-  // we may have a ground plane that is very steep,
-  // even though we don't have a groundentity
-  // slide along the steep plane
-  // if (pml.groundPlane) {
-  //   PM_ClipVelocity(pm.ps->velocity, pml.groundTrace.plane.normal,
-  //                   pm.ps->velocity, OVERCLIP);
-  // }
-}
-
-void CGazV2::friction() const {
-  vec3_t vec;
-
-  const float speed = pml.walking ? VectorLength2(pm.ps->velocity)
-                                  : VectorLength(pm.ps->velocity);
-
-  if (speed == 0) {
-    return;
-  }
-
-  // rain - #179 don't do this for PM_SPECTATOR/PM_NOCLIP, we always
-  // want them to stop
-  if (speed < 1 && pm.ps->pm_type != PM_SPECTATOR &&
-      pm.ps->pm_type != PM_NOCLIP) {
-    pm.ps->velocity[0] = 0;
-    pm.ps->velocity[1] = 0; // allow sinking underwater
-    // FIXME: still have z friction underwater?
-    return;
-  }
-
-  float drop = 0;
-
-  // apply ground friction
-  if (pm.waterlevel <= 1) {
-    if (pml.walking && !(pml.groundTrace.surfaceFlags & SURF_SLICK)) {
-      // if getting knocked back, no friction
-      if (!(pm.ps->pm_flags & PMF_TIME_KNOCKBACK)) {
-        const float control = speed < pm_stopspeed ? pm_stopspeed : speed;
-        drop += control * pm_friction * PmoveUtilsV2::PM_FRAMETIME;
-      }
-    }
-  }
-
-  // apply water friction even if just wading
-  if (pm.waterlevel) {
-    if (pm.watertype == CONTENTS_SLIME) {
-      drop += speed * pm_slagfriction * static_cast<float>(pm.waterlevel) *
-              PmoveUtilsV2::PM_FRAMETIME;
-    } else {
-      drop += speed * pm_waterfriction * static_cast<float>(pm.waterlevel) *
-              PmoveUtilsV2::PM_FRAMETIME;
-    }
-  }
-
-  // uncomment if we ever start drawing cgaz in spec
-  // if (pm.ps->pm_type == PM_SPECTATOR) {
-  //   drop += speed * pm_spectatorfriction * PmoveUtilsV2::PM_FRAMETIME;
-  // }
-
-  // scale the velocity
-  float newspeed = speed - drop;
-
-  if (newspeed < 0) {
-    newspeed = 0;
-  }
-
-  newspeed /= speed;
-
-  // uncomment if we ever start drawing cgaz in spec/noclip
-  // rain - if we're barely moving and barely slowing down, we want to
-  // help things along--we don't want to end up getting snapped back to
-  // our previous speed
-  // if (pm.ps->pm_type == PM_SPECTATOR || pm.ps->pm_type == PM_NOCLIP) {
-  //   if (drop < 1.0f && speed < 3.0f) {
-  //     newspeed = 0.0;
-  //   }
-  // }
-
-  // rain - used VectorScale instead of multiplying by hand
-  VectorScale(pm.ps->velocity, newspeed, pm.ps->velocity);
-}
-
-void CGazV2::accelerate(const float wishspeed, const float accel,
-                        const bool slick) {
-  const float slickGravity =
-      slick ? static_cast<float>(pm.ps->gravity) * PmoveUtilsV2::PM_FRAMETIME
-            : 0;
-
-  updateCGazState(wishspeed, accel, slickGravity);
-}
-
-bool CGazV2::canSkipDraw() const {
+bool CGazV2::canSkipDraw(const CGazData::State &s) const {
   if (!etj_drawCGaz.integer) {
     return true;
   }
 
-  if (VectorLengthSquared2(ps.velocity) == 0) {
+  if (s.result != PmoveUtilsV2::PmoveSingleResult::WALK &&
+      s.result != PmoveUtilsV2::PmoveSingleResult::AIR) {
     return true;
   }
 
-  if (ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || ps.pm_type == PM_NOCLIP ||
-      ps.pm_type == PM_DEAD) {
+  if (VectorLengthSquared2(s.pm.ps->velocity) == 0) {
+    return true;
+  }
+
+  if (s.pm.ps->persistant[PERS_TEAM] == TEAM_SPECTATOR ||
+      s.pm.ps->pm_type == PM_NOCLIP || s.pm.ps->pm_type == PM_DEAD) {
     return true;
   }
 
@@ -681,8 +435,9 @@ bool CGazV2::canSkipDraw() const {
     return true;
   }
 
-  if (BG_PlayerMounted(ps.eFlags) || ps.weapon == WP_MOBILE_MG42_SET ||
-      ps.weapon == WP_MORTAR_SET) {
+  if (BG_PlayerMounted(s.pm.ps->eFlags) ||
+      s.pm.ps->weapon == WP_MOBILE_MG42_SET ||
+      s.pm.ps->weapon == WP_MORTAR_SET) {
     return true;
   }
 

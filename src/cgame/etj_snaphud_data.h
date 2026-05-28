@@ -24,70 +24,42 @@
 
 #pragma once
 
-#include <memory>
 #include <vector>
 
-#include "etj_irenderable.h"
 #include "etj_pmove_utils_v2.h"
-#include "etj_snaphud_data.h"
 
 namespace ETJump {
-class SnaphudData;
-class CvarUpdateHandler;
-
-class SnaphudV2 : public IRenderable {
+class SnaphudData {
 public:
-  SnaphudV2(const std::shared_ptr<SnaphudData> &snaphudData,
-            const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
-  ~SnaphudV2() override;
+  SnaphudData();
+  ~SnaphudData() = default;
 
-  bool beforeRender() override;
-  void render() const override;
+  struct State {
+    std::vector<float> snapAngles;
+    float a;
+    vec2_t wishvel;
+
+    PmoveUtilsV2::PmoveSingleResult result;
+
+    playerState_t ps;
+    pmove_t pm;
+    pmoveExt_t pmext;
+    pml_t pml;
+  };
+
+  void runFrame();
+  [[nodiscard]] const State &getState() const;
 
 private:
-  void updateSnaphud(const SnaphudData::State &s);
-  void buildSnapZones(const SnaphudData::State &s);
+  void updateState(float accel);
 
-  void startListeners();
-
-  [[nodiscard]] bool canSkipDraw(const SnaphudData::State &s) const;
+  void walkMove();
+  void airMove();
+  void accelerate(float wishspeed, float accel);
 
   enum class SnapTrueness { UPMOVE = 1, GROUND = 2 };
 
-  enum class SnaphudStyle {
-    OFF = 0,
-    NORMAL = 1,
-    EDGE = 2,
-    BORDER = 3,
-  };
-
-  struct Snapzone {
-    float start;
-    float end;
-    bool alt;
-    bool active;
-  };
-
-  struct Snaphud {
-    float yaw;
-    float y;
-    float h;
-    float fov;
-
-    SnaphudStyle style;
-
-    bool isCurrentAlt;
-    bool borderOnly;
-    float borderThickness;
-    float edgeThickness;
-
-    std::vector<Snapzone> zones;
-    std::array<vec4_t, 4> colors;
-  };
-
-  Snaphud snaphud{};
-
-  std::shared_ptr<SnaphudData> snaphudData;
-  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+  State s{};
+  EnumBitset<PmoveUtilsV2::PmoveDefaultInput> defaultInput;
 };
 } // namespace ETJump

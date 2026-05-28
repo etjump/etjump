@@ -5,9 +5,11 @@
 
 #include "cg_local.h"
 #include "etj_awaited_command_handler.h"
+#include "etj_cgaz_data.h"
 #include "etj_chs_data.h"
 #include "etj_event_loop.h"
 #include "etj_pmove_utils.h"
+#include "etj_snaphud_data.h"
 #include "etj_trickjump_lines.h"
 #include "etj_utilities.h"
 
@@ -2226,6 +2228,14 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
     // setup pmove for renderables
     if (ETJump::cgame.utils.pmove->check()) {
       ETJump::cgame.utils.pmove->runPmove();
+    }
+
+    if (etj_drawSnapHUD.integer) {
+      ETJump::cgame.hud.snaphudDataHandler->runFrame();
+    }
+
+    if (etj_drawCGaz.integer) {
+      ETJump::cgame.hud.cgazDataHandler->runFrame();
     }
 
     if (etj_drawCHS1.integer || etj_drawCHS2.integer) {

@@ -107,11 +107,15 @@ struct Visuals {
 
 class AccelColor;
 class CHSDataHandler;
+class CGazData;
+class SnaphudData;
 class TimerunView;
 
 struct HUD {
   std::shared_ptr<AccelColor> accelColor;
   std::shared_ptr<CHSDataHandler> chsDataHandler;
+  std::shared_ptr<CGazData> cgazDataHandler;
+  std::shared_ptr<SnaphudData> snaphudDataHandler;
 
   std::vector<std::unique_ptr<IRenderable>> renderables;
   std::unique_ptr<TimerunView> timerunView;

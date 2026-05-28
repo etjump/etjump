@@ -30,6 +30,7 @@
 #include "etj_awaited_command_handler.h"
 #include "etj_cgame.h"
 #include "etj_cgaz.h"
+#include "etj_cgaz_data.h"
 #include "etj_cgaz_v2.h"
 #include "etj_chs_drawable.h"
 #include "etj_client_authentication.h"
@@ -61,6 +62,7 @@
 #include "etj_savepos.h"
 #include "etj_servercommands.h"
 #include "etj_snaphud.h"
+#include "etj_snaphud_data.h"
 #include "etj_snaphud_v2.h"
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_speed_drawable.h"
@@ -263,6 +265,8 @@ static void initHUD() {
   cgame.hud.accelColor = std::make_unique<AccelColor>();
   cgame.hud.chsDataHandler = std::make_unique<CHSDataHandler>(
       cgame.core.cvarUpdate, cgame.core.consoleCommands);
+  cgame.hud.cgazDataHandler = std::make_unique<CGazData>();
+  cgame.hud.snaphudDataHandler = std::make_unique<SnaphudData>();
 
   cgame.hud.renderables.emplace_back(
       std::make_unique<CHS>(cgame.core.cvarUpdate, cgame.hud.chsDataHandler));
@@ -290,21 +294,21 @@ static void initHUD() {
   if (etj_CGazOnTop.integer) {
     cgame.hud.renderables.emplace_back(
         std::make_unique<Snaphud>(cgame.core.cvarUpdate));
-    cgame.hud.renderables.emplace_back(
-        std::make_unique<SnaphudV2>(cgame.core.cvarUpdate));
+    cgame.hud.renderables.emplace_back(std::make_unique<SnaphudV2>(
+        cgame.hud.snaphudDataHandler, cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(
         std::make_unique<CGaz>(cgame.core.cvarUpdate));
-    cgame.hud.renderables.emplace_back(
-        std::make_unique<CGazV2>(cgame.core.cvarUpdate));
+    cgame.hud.renderables.emplace_back(std::make_unique<CGazV2>(
+        cgame.hud.cgazDataHandler, cgame.core.cvarUpdate));
   } else {
     cgame.hud.renderables.emplace_back(
         std::make_unique<CGaz>(cgame.core.cvarUpdate));
-    cgame.hud.renderables.emplace_back(
-        std::make_unique<CGazV2>(cgame.core.cvarUpdate));
+    cgame.hud.renderables.emplace_back(std::make_unique<CGazV2>(
+        cgame.hud.cgazDataHandler, cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(
         std::make_unique<Snaphud>(cgame.core.cvarUpdate));
-    cgame.hud.renderables.emplace_back(
-        std::make_unique<SnaphudV2>(cgame.core.cvarUpdate));
+    cgame.hud.renderables.emplace_back(std::make_unique<SnaphudV2>(
+        cgame.hud.snaphudDataHandler, cgame.core.cvarUpdate));
   }
 
   cgame.hud.renderables.emplace_back(std::make_unique<UpperRight>());

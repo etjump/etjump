@@ -25,61 +25,37 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 
+#include "etj_cgaz_data.h"
 #include "etj_irenderable.h"
-#include "etj_pmove_utils_v2.h"
-#include "../game/bg_local.h"
 
 namespace ETJump {
 class CvarUpdateHandler;
 
 class CGazV2 : public IRenderable {
 public:
-  explicit CGazV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  CGazV2(const std::shared_ptr<CGazData> &cgazData,
+         const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~CGazV2() override;
 
   bool beforeRender() override;
   void render() const override;
 
 private:
-  void updateCGazState(float wishspeed, float accel, float slickGravity);
-  void updateCGaz1();
-  void updateCGaz2();
+  void updateCGaz1(const CGazData::State &s);
+  void updateCGaz2(const CGazData::State &s);
+  void updateDrawSnap(const CGazData::State &s);
 
-  [[nodiscard]] float updateMinAngle() const;
-  [[nodiscard]] float updateOptAngle() const;
-  [[nodiscard]] float updateMaxCosAngle(float angleOpt) const;
-  [[nodiscard]] float updateMaxAngle(float angleMaxCos) const;
-
-  void walkMove();
-  void airMove();
-  void friction() const;
-  void accelerate(float wishspeed, float accel, bool slick);
+  static float updateMinAngle(const CGazData::State &s);
+  static float updateOptAngle(const CGazData::State &s);
+  static float updateMaxCosAngle(const CGazData::State &s, float angleOpt);
+  static float updateMaxAngle(const CGazData::State &s, float angleMaxCos);
 
   void startListeners();
   void setThickness(const vmCvar_t *cvar);
-  void setDefaultInput();
 
-  [[nodiscard]] bool canSkipDraw() const;
-
-  enum class CGazTrueness { UPMOVE = 1, GROUND = 2 };
-
-  struct State {
-    float gSquared;  // gravity squared, 0 when not on slick
-    float vSquared;  // velocity squared (before friction)
-    float vfSquared; // velocity final squared (after friction)
-    float aSquared;  // accel squared
-
-    float v;  // velocity (before friction)
-    float vf; // velocity final (after friction)
-    float a;  // accel
-
-    vec2_t wishvel;
-    float wishspeed;
-    float velAngle;
-  };
-
-  State s{};
+  [[nodiscard]] bool canSkipDraw(const CGazData::State &s) const;
 
   struct CGaz1 {
     float minAngle;
@@ -107,6 +83,9 @@ private:
 
     float y;
 
+    int8_t forwardmove;
+    int8_t rightmove;
+
     bool highRes;
     bool drawSides;
 
@@ -116,12 +95,7 @@ private:
 
   CGaz2 cgaz2{};
 
-  EnumBitset<PmoveUtilsV2::PmoveDefaultInput> defaultInput;
-
-  playerState_t ps{};
-  pmove_t pm{};
-  pmoveExt_t pmext{};
-  pml_t pml{};
+  std::shared_ptr<CGazData> cgazData;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 } // namespace ETJump
