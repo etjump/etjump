@@ -109,6 +109,7 @@ class AccelColor;
 class CHSDataHandler;
 class CGazData;
 class SnaphudData;
+class StrafeQualityData;
 class TimerunView;
 
 struct HUD {
@@ -116,6 +117,7 @@ struct HUD {
   std::shared_ptr<CHSDataHandler> chsDataHandler;
   std::shared_ptr<CGazData> cgazDataHandler;
   std::shared_ptr<SnaphudData> snaphudDataHandler;
+  std::shared_ptr<StrafeQualityData> strafeQualityDataHandler;
 
   std::vector<std::unique_ptr<IRenderable>> renderables;
   std::unique_ptr<TimerunView> timerunView;

@@ -24,20 +24,19 @@
 
 #pragma once
 
-#include <vector>
-
 #include "etj_pmove_utils_v2.h"
 
 namespace ETJump {
-class SnaphudData {
+class StrafeQualityData {
 public:
-  SnaphudData();
-  ~SnaphudData() = default;
-
   struct State {
-    std::vector<float> snapAngles;
-    float a;
+    float vfSquared; // velocity final squared (after friction)
+    float vf;        // velocity final (after friction)
+    float a;         // accel
+
     vec2_t wishvel;
+    float wishspeed;
+    float velAngle;
 
     PmoveUtilsV2::PmoveSingleResult result;
 
@@ -50,20 +49,14 @@ public:
   void runFrame();
   [[nodiscard]] const State &getState() const;
 
-  // angles should be radians
-  bool inMainAccelZone(const vec2_t wishvel, float wishspeed, float velAngle,
-                       float optAngle, const pmove_t &pm);
-
 private:
-  void updateState(float accel);
+  void updateState(float wishspeed, float accel);
 
   void walkMove();
   void airMove();
+  void friction() const;
   void accelerate(float wishspeed, float accel);
 
-  enum class SnapTrueness { UPMOVE = 1, GROUND = 2 };
-
   State s{};
-  EnumBitset<PmoveUtilsV2::PmoveDefaultInput> defaultInput;
 };
 } // namespace ETJump
