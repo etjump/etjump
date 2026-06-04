@@ -66,7 +66,9 @@
 #include "etj_snaphud_v2.h"
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_speed_drawable.h"
+#include "etj_strafe_quality_data.h"
 #include "etj_strafe_quality_drawable.h"
+#include "etj_strafe_quality_v2.h"
 #include "etj_timerun.h"
 #include "etj_timerun_view.h"
 #include "etj_trace_utils.h"
@@ -267,6 +269,7 @@ static void initHUD() {
       cgame.core.cvarUpdate, cgame.core.consoleCommands);
   cgame.hud.cgazDataHandler = std::make_unique<CGazData>();
   cgame.hud.snaphudDataHandler = std::make_unique<SnaphudData>();
+  cgame.hud.strafeQualityDataHandler = std::make_unique<StrafeQualityData>();
 
   cgame.hud.renderables.emplace_back(
       std::make_unique<CHS>(cgame.core.cvarUpdate, cgame.hud.chsDataHandler));
@@ -280,6 +283,10 @@ static void initHUD() {
   cgame.hud.renderables.emplace_back(
       std::make_unique<AccelMeter>(cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<StrafeQuality>(
+      cgame.core.cvarUpdate, cgame.core.consoleCommands,
+      cgame.core.playerEvents));
+  cgame.hud.renderables.emplace_back(std::make_unique<StrafeQualityV2>(
+      cgame.hud.strafeQualityDataHandler, cgame.hud.snaphudDataHandler,
       cgame.core.cvarUpdate, cgame.core.consoleCommands,
       cgame.core.playerEvents));
   cgame.hud.renderables.emplace_back(std::make_unique<JumpSpeeds>(
