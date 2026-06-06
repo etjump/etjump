@@ -240,12 +240,9 @@ PM_ClipVelocity
 Slide off of the impacting surface
 ==================
 */
-void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce) {
-  float backoff;
-  float change;
-  int i;
-
-  backoff = DotProduct(in, normal);
+void PM_ClipVelocity(const vec3_t in, const vec3_t normal, vec3_t out,
+                     const float overbounce) {
+  float backoff = DotProduct(in, normal);
 
   if (backoff < 0) {
     backoff *= overbounce;
@@ -253,8 +250,8 @@ void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce) {
     backoff /= overbounce;
   }
 
-  for (i = 0; i < 3; i++) {
-    change = normal[i] * backoff;
+  for (int32_t i = 0; i < 3; i++) {
+    const float change = normal[i] * backoff;
     out[i] = in[i] - change;
   }
 }

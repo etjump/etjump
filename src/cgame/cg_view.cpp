@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "etj_accel_color_data.h"
 #include "etj_awaited_command_handler.h"
 #include "etj_cgaz_data.h"
 #include "etj_chs_data.h"
@@ -2243,6 +2244,11 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
 
     if (etj_drawStrafeQuality.integer) {
       ETJump::cgame.hud.strafeQualityDataHandler->runFrame();
+    }
+
+    if ((etj_drawSpeed2.integer && etj_speedColorUsesAccel.integer) ||
+        etj_drawAccel.integer) {
+      ETJump::cgame.hud.accelColorDataHandler->runFrame();
     }
 
     if (etj_drawCHS1.integer || etj_drawCHS2.integer) {

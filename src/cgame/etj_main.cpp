@@ -24,7 +24,9 @@
 
 #include "cg_local.h"
 
+#include "etj_accel_color_data.h"
 #include "etj_accelmeter_drawable.h"
+#include "etj_accelmeter_v2.h"
 #include "etj_areaindicator_drawable.h"
 #include "etj_autodemo_recorder.h"
 #include "etj_awaited_command_handler.h"
@@ -265,6 +267,7 @@ static void initHUD() {
   assert(cgame.utils.pmove != nullptr);
 
   cgame.hud.accelColor = std::make_unique<AccelColor>();
+  cgame.hud.accelColorDataHandler = std::make_unique<AccelColorData>();
   cgame.hud.chsDataHandler = std::make_unique<CHSDataHandler>(
       cgame.core.cvarUpdate, cgame.core.consoleCommands);
   cgame.hud.cgazDataHandler = std::make_unique<CGazData>();
@@ -282,6 +285,8 @@ static void initHUD() {
       cgame.core.cvarUpdate, cgame.core.consoleCommands));
   cgame.hud.renderables.emplace_back(
       std::make_unique<AccelMeter>(cgame.core.cvarUpdate));
+  cgame.hud.renderables.emplace_back(std::make_unique<AccelMeterV2>(
+      cgame.hud.accelColorDataHandler, cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<StrafeQuality>(
       cgame.core.cvarUpdate, cgame.core.consoleCommands,
       cgame.core.playerEvents));
