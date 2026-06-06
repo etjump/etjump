@@ -63,6 +63,8 @@ void PmoveUtilsV2::setupUserCmd(const int8_t scale, pmove_t &pm) {
   // store buttons too, so we get correct scale when sprint is held
   pm.cmd.buttons = pm.ps->stats[STAT_USERCMD_BUTTONS] >> 8;
   pm.cmd.wbuttons = pm.ps->stats[STAT_USERCMD_BUTTONS] & 0xff;
+
+  pm.cmd.serverTime = cg.snap->serverTime;
 }
 
 PmoveUtilsV2::PmoveSingleResult
