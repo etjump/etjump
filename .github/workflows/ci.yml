@@ -3,7 +3,7 @@ name: ETJump CI/CD
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [master, dev]
     tags-ignore:
       - "*"
     paths-ignore:
@@ -15,7 +15,7 @@ on:
       - VERSION.txt
       - release.sh
   pull_request:
-    branches: [master]
+    branches: [master, dev]
     paths-ignore:
       - docs/*
       - .gitignore
@@ -176,7 +176,7 @@ jobs:
             etjump-artifacts-macos-x86_64
 
   package:
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
     runs-on: ubuntu-22.04
     needs: [Windows, Linux, macOS-universal]
 
