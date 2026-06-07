@@ -325,12 +325,22 @@ qboolean CustomCommandMenuDrawable::checkExecKey(const int32_t key,
     return qtrue;
   }
 
-  if (key < '0' || key > '9') {
+  if ((key < '0' || key > '9') && key != K_LEFTARROW && key != K_RIGHTARROW) {
     return qfalse;
   }
 
   // this corresponds to the actual menu item number, not 0-indexed selection
-  int32_t realKey = key - '0';
+  int32_t realKey = -1;
+
+  // a bit hacky but simplifies keyhandling greatly
+  if (key == K_LEFTARROW) {
+    realKey = '9' - '0';
+  } else if (key == K_RIGHTARROW) {
+    realKey = 0;
+  } else {
+    realKey = key - '0';
+  }
+
   const auto &commands = cgame.systems.customCommandMenu->getCustomCommands();
 
   if (commands.empty()) {
