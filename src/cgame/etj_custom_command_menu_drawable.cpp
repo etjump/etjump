@@ -25,7 +25,6 @@
 #include "etj_custom_command_menu_drawable.h"
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
-#include "etj_custom_command_menu.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
@@ -147,12 +146,8 @@ void CustomCommandMenuDrawable::setupListeners() {
   consoleCommands->subscribe(
       "openCustomCommandMenu", [](const std::vector<std::string> &args) {
         if (cg.showCustomCommandMenu && etj_ccMenu_browseWithOpen.integer) {
-          if (currentPage == CUSTOM_COMMAND_MENU_MAX_PAGES) {
-            currentPage = 1;
-          } else {
-            currentPage++;
-          }
-
+          findNextPage(cgame.systems.customCommandMenu->getCustomCommands(),
+                       BrowseDirection::NEXT);
           return;
         }
 
@@ -239,6 +234,50 @@ void CustomCommandMenuDrawable::computeMaxChars() {
     }
 
     Q_strcat(text, sizeof(text), "A");
+  }
+}
+
+void CustomCommandMenuDrawable::findNextPage(const CustomCommandMap &commands,
+                                             const BrowseDirection dir) {
+  assert(dir == BrowseDirection::PREVIOUS || dir == BrowseDirection::NEXT);
+  const auto step = static_cast<int32_t>(dir);
+
+  if (etj_ccMenu_showEmptyPages.integer) {
+    currentPage = ((currentPage - 1 + step + CUSTOM_COMMAND_MENU_MAX_PAGES) %
+                   CUSTOM_COMMAND_MENU_MAX_PAGES) +
+                  1;
+    return;
+  }
+
+  uint8_t next = currentPage;
+
+  while (true) {
+    next = ((next - 1 + step + CUSTOM_COMMAND_MENU_MAX_PAGES) %
+            CUSTOM_COMMAND_MENU_MAX_PAGES) +
+           1;
+
+    if (next == currentPage) {
+      break;
+    }
+
+    // the map might not contain all pages, so verify this page exists
+    if (commands.find(next) != commands.cend()) {
+      // if the page is found, it might still be empty,
+      // if it's just defined in the file, but no commands are defined
+      bool empty = true;
+
+      for (const auto &[name, command] : commands.at(next)) {
+        if (!command.empty() && !name.empty()) {
+          empty = false;
+          break;
+        }
+      }
+
+      if (!empty) {
+        currentPage = next;
+        break;
+      }
+    }
   }
 }
 
@@ -382,20 +421,10 @@ qboolean CustomCommandMenuDrawable::checkExecKey(const int32_t key,
 
   switch (realKey) {
     case MENU_PREV_KEY:
-      if (currentPage == 1) {
-        currentPage = CUSTOM_COMMAND_MENU_MAX_PAGES;
-      } else {
-        currentPage--;
-      }
-
+      findNextPage(commands, BrowseDirection::PREVIOUS);
       break;
     case MENU_NEXT_KEY:
-      if (currentPage == CUSTOM_COMMAND_MENU_MAX_PAGES) {
-        currentPage = 1;
-      } else {
-        currentPage++;
-      }
-
+      findNextPage(commands, BrowseDirection::NEXT);
       break;
     default:
       trap_SendConsoleCommand(
