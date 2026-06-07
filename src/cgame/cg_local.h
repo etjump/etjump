@@ -2773,6 +2773,7 @@ extern vmCvar_t etj_ccMenu_filename;
 extern vmCvar_t etj_ccMenu_rememberPage;
 extern vmCvar_t etj_ccMenu_autoClose;
 extern vmCvar_t etj_ccMenu_width;
+extern vmCvar_t etj_ccMenu_browseWithOpen;
 
 //
 // cg_main.c

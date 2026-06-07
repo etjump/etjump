@@ -58,6 +58,7 @@ menuDef {
         YESNO               (SETTINGS_ITEM_POS(8), "Auto close custom command menu:", 0.2, SETTINGS_ITEM_H, etj_ccMenu_autoClose, "Automatically close custom command menu after a command is executed\netj_ccMenu_autoClose")
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(9), "etj_ccMenu_width", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(9), "Custom command menu width:", 0.2, SETTINGS_ITEM_H, etj_ccMenu_width 204 204 620 2, "Sets the width of the custom command menu\netj_ccMenu_width")
+        YESNO               (SETTINGS_ITEM_POS(10), "Browse custom commands with 'open':", 0.2, SETTINGS_ITEM_H, etj_ccMenu_browseWithOpen, "Browse to next page of custom command menu instead of closing it when\nit's already open, and 'openCustomCommandMenu' is executed again\netj_ccMenu_browseWithOpen")
 
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
