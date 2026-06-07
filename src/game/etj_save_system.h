@@ -127,6 +127,7 @@ public:
 
   void storeTeamQuickDeployPosition(gentity_t *ent, team_t team);
   void loadOnceTeamQuickDeployPosition(gentity_t *ent, team_t team);
+  void invalidateTeamQuickDeployPosition(gentity_t *ent, team_t team);
 
 private:
   // Saves backup position
