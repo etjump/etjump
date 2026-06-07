@@ -278,6 +278,8 @@ vmCvar_t g_adminChat;
 vmCvar_t g_chatReplay;
 vmCvar_t g_chatReplayMaxMessageAge;
 
+vmCvar_t g_mapAutoexecDir;
+
 // ETLegacy server browser integration
 // os support - this SERVERINFO cvar specifies supported client operating
 // systems on server
@@ -535,6 +537,8 @@ cvarTable_t gameCvarTable[] = {
     {&g_chatReplay, "g_chatReplay", "1", CVAR_ARCHIVE},
     {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "5",
      CVAR_ARCHIVE | CVAR_LATCH},
+
+    {&g_mapAutoexecDir, "g_mapAutoexecDir", "", CVAR_ARCHIVE},
 };
 
 // bk001129 - made static to avoid aliasing
@@ -1624,21 +1628,27 @@ void G_wipeCvars(void) {
 }
 
 void G_ExecMapSpecificConfig() {
-  int len;
-  fileHandle_t f;
+  int len = 0;
+  fileHandle_t f = 0;
+  const auto *const path = g_mapAutoexecDir.string[0] != '\0'
+                               ? va("%s/", g_mapAutoexecDir.string)
+                               : "";
 
-  len = trap_FS_FOpenFile(va("autoexec_%s.cfg", level.rawmapname), &f, FS_READ);
+  const char *filename = va("%sautoexec_%s.cfg", path, level.rawmapname);
+  len = trap_FS_FOpenFile(filename, &f, FS_READ);
+
   if (len > 0) {
     // autoexec_mapname.cfg file found
-    trap_SendConsoleCommand(EXEC_APPEND,
-                            va("exec autoexec_%s.cfg\n", level.rawmapname));
+    trap_SendConsoleCommand(EXEC_APPEND, va("exec %s\n", filename));
     return;
   }
 
-  len = trap_FS_FOpenFile("autoexec_default.cfg", &f, FS_READ);
+  filename = va("%sautoexec_default.cfg", path);
+  len = trap_FS_FOpenFile(filename, &f, FS_READ);
+
   if (len > 0) {
     // autoexec_default.cfg file found
-    trap_SendConsoleCommand(EXEC_APPEND, "exec autoexec_default.cfg\n");
+    trap_SendConsoleCommand(EXEC_APPEND, va("exec %s\n", filename));
   }
 }
 
