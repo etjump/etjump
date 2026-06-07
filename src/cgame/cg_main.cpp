@@ -702,6 +702,7 @@ vmCvar_t etj_onDemoPlaybackEnd;
 vmCvar_t etj_HUD_noLerp;
 
 vmCvar_t etj_useExecQuiet;
+vmCvar_t etj_mapAutoexecDir;
 
 vmCvar_t etj_hideFlamethrowerEffects;
 
@@ -1329,6 +1330,7 @@ cvarTable_t cvarTable[] = {
 
     {&etj_HUD_noLerp, "etj_HUD_noLerp", "0", CVAR_ARCHIVE},
     {&etj_useExecQuiet, "etj_useExecQuiet", "0", CVAR_ARCHIVE},
+    {&etj_mapAutoexecDir, "etj_mapAutoexecDir", "", CVAR_ARCHIVE},
 
     {&etj_hideFlamethrowerEffects, "etj_hideFlamethrowerEffects", "0",
      CVAR_ARCHIVE},
@@ -4108,11 +4110,16 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   ETJump::initVoteTally();
 
   // map-specific autoexec
-  const auto mapConfig = va("autoexec_%s", cgs.rawmapname);
+  const auto *const path = etj_mapAutoexecDir.string[0] != '\0'
+                               ? va("%s/", etj_mapAutoexecDir.string)
+                               : "";
+  auto *const mapConfig = va("%sautoexec_%s", path, cgs.rawmapname);
+
   if (ETJump::configFileExists(mapConfig)) {
     ETJump::execFile(mapConfig, ETJump::ExecFileType::MAP_AUTOEXEC);
-  } else if (ETJump::configFileExists("autoexec_default")) {
-    ETJump::execFile("autoexec_default", ETJump::ExecFileType::MAP_AUTOEXEC);
+  } else if (ETJump::configFileExists(va("%sautoexec_default", path))) {
+    ETJump::execFile(va("%sautoexec_default", path),
+                     ETJump::ExecFileType::MAP_AUTOEXEC);
   }
 
   if (!Q_stricmp(cgs.rawmapname, "solstice") ||

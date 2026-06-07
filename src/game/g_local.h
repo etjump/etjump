@@ -2127,6 +2127,8 @@ extern vmCvar_t g_adminChat;
 extern vmCvar_t g_chatReplay;
 extern vmCvar_t g_chatReplayMaxMessageAge;
 
+extern vmCvar_t g_mapAutoexecDir;
+
 void trap_Printf(const char *fmt);
 [[noreturn]] void trap_Error(const char *fmt);
 int trap_Milliseconds(void);

@@ -2765,6 +2765,7 @@ extern vmCvar_t etj_onDemoPlaybackEnd;
 extern vmCvar_t etj_HUD_noLerp;
 
 extern vmCvar_t etj_useExecQuiet;
+extern vmCvar_t etj_mapAutoexecDir;
 
 extern vmCvar_t etj_hideFlamethrowerEffects;
 
