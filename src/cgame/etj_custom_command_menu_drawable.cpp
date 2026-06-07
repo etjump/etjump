@@ -140,6 +140,7 @@ CustomCommandMenuDrawable::~CustomCommandMenuDrawable() {
 
   consoleCommands->unsubscribe("openCustomCommandMenu");
   cvarUpdate->unsubscribe(&etj_ccMenu_width);
+  cvarUpdate->unsubscribe(&etj_ccMenu_filename);
 }
 
 void CustomCommandMenuDrawable::setupListeners() {
@@ -164,6 +165,12 @@ void CustomCommandMenuDrawable::setupListeners() {
 
   cvarUpdate->subscribe(&etj_ccMenu_width, [](const vmCvar_t *cvar) {
     resizePanels(std::clamp(cvar->value, DEFAULT_MENU_WIDTH, MAX_MENU_WIDTH));
+  });
+
+  cvarUpdate->subscribe(&etj_ccMenu_filename, [](const vmCvar_t *) {
+    // changing the filename should always reset to page 1, as there's
+    // no real reason to retain the active page between different menus
+    currentPage = 1;
   });
 }
 
