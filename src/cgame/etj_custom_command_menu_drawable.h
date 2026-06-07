@@ -30,11 +30,13 @@
 
 namespace ETJump {
 class ClientCommandsHandler;
+class CvarUpdateHandler;
 
 class CustomCommandMenuDrawable : public IRenderable {
 public:
-  explicit CustomCommandMenuDrawable(
-      const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
+  CustomCommandMenuDrawable(
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+      const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~CustomCommandMenuDrawable() override;
 
   bool beforeRender() override;
@@ -49,12 +51,16 @@ public:
 
 private:
   static uint8_t currentPage;
+  static size_t maxChars;
 
   std::shared_ptr<ClientCommandsHandler> consoleCommands;
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 
   void setupListeners();
   static void openMenu(uint8_t page);
   static void setupPanels();
+  static void resizePanels(float width);
+  static void computeMaxChars();
   static bool canSkipDraw();
 };
 } // namespace ETJump

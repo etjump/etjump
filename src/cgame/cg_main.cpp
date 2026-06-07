@@ -709,6 +709,7 @@ vmCvar_t etj_hideFlamethrowerEffects;
 vmCvar_t etj_ccMenu_filename;
 vmCvar_t etj_ccMenu_rememberPage;
 vmCvar_t etj_ccMenu_autoClose;
+vmCvar_t etj_ccMenu_width;
 
 typedef struct {
   vmCvar_t *vmCvar;
@@ -1339,6 +1340,7 @@ cvarTable_t cvarTable[] = {
      CVAR_ARCHIVE},
     {&etj_ccMenu_rememberPage, "etj_ccMenu_rememberPage", "0", CVAR_ARCHIVE},
     {&etj_ccMenu_autoClose, "etj_ccMenu_autoClose", "1", CVAR_ARCHIVE},
+    {&etj_ccMenu_width, "etj_ccMenu_width", "204", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

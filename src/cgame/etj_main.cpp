@@ -219,8 +219,8 @@ static void initUserInterface() {
   cgame.ui.consoleShader = std::make_unique<ConsoleShader>();
 
   cgame.ui.renderables.emplace_back(std::make_unique<RtvDrawable>());
-  cgame.ui.renderables.emplace_back(
-      std::make_unique<CustomCommandMenuDrawable>(cgame.core.consoleCommands));
+  cgame.ui.renderables.emplace_back(std::make_unique<CustomCommandMenuDrawable>(
+      cgame.core.consoleCommands, cgame.core.cvarUpdate));
 }
 
 static void initTrickjumpLines() {
