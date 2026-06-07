@@ -711,6 +711,7 @@ vmCvar_t etj_ccMenu_rememberPage;
 vmCvar_t etj_ccMenu_autoClose;
 vmCvar_t etj_ccMenu_width;
 vmCvar_t etj_ccMenu_browseWithOpen;
+vmCvar_t etj_ccMenu_showEmptyPages;
 
 typedef struct {
   vmCvar_t *vmCvar;
@@ -1343,6 +1344,8 @@ cvarTable_t cvarTable[] = {
     {&etj_ccMenu_autoClose, "etj_ccMenu_autoClose", "1", CVAR_ARCHIVE},
     {&etj_ccMenu_width, "etj_ccMenu_width", "204", CVAR_ARCHIVE},
     {&etj_ccMenu_browseWithOpen, "etj_ccMenu_browseWithOpen", "0",
+     CVAR_ARCHIVE},
+    {&etj_ccMenu_showEmptyPages, "etj_ccMenu_showEmptyPages", "0",
      CVAR_ARCHIVE},
 };
 
