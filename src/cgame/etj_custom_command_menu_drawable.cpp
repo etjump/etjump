@@ -145,6 +145,16 @@ CustomCommandMenuDrawable::~CustomCommandMenuDrawable() {
 void CustomCommandMenuDrawable::setupListeners() {
   consoleCommands->subscribe(
       "openCustomCommandMenu", [](const std::vector<std::string> &args) {
+        if (cg.showCustomCommandMenu && etj_ccMenu_browseWithOpen.integer) {
+          if (currentPage == CUSTOM_COMMAND_MENU_MAX_PAGES) {
+            currentPage = 1;
+          } else {
+            currentPage++;
+          }
+
+          return;
+        }
+
         if (args.empty()) {
           openMenu(currentPage);
         } else {
