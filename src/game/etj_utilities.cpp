@@ -223,3 +223,22 @@ void Utilities::copyStanceFromClient(gentity_t *self, const gentity_t *target) {
     self->client->ps.pm_flags &= ~PMF_DUCKED;
   }
 }
+
+team_t Utilities::teamFromString(const std::string_view team) {
+  if (StringUtils::iEqual(team, "axis") || StringUtils::iEqual(team, "r")) {
+    return TEAM_AXIS;
+  }
+
+  if (StringUtils::iEqual(team, "allies") ||
+      StringUtils::iEqual(team, "allied") || StringUtils::iEqual(team, "b")) {
+    return TEAM_ALLIES;
+  }
+
+  if (StringUtils::iEqual(team, "spectator") ||
+      StringUtils::iEqual(team, "spectators") ||
+      StringUtils::iEqual(team, "s")) {
+    return TEAM_SPECTATOR;
+  }
+
+  return TEAM_FREE;
+}

@@ -24,9 +24,7 @@
 
 #pragma once
 
-#include <vector>
-
-#include "etj_levels.h"
+#include "g_local.h"
 
 namespace Utilities {
 /**
@@ -95,4 +93,9 @@ bool inNoNoclipArea(gentity_t *ent);
  * Copies the target clients stance (crouch/prone/stand)
  */
 void copyStanceFromClient(gentity_t *self, const gentity_t *target);
+
+/**
+ * Returns team from a string, 'TEAM_FREE' is no match
+ */
+team_t teamFromString(std::string_view team);
 } // namespace Utilities
