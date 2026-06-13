@@ -24,31 +24,6 @@
 
 #pragma once
 
-#ifdef GAMEDLL
-  #include "q_shared.h"
-#else
-  #include "../game/q_shared.h"
-#endif
-
-#if defined(__linux__) || defined(__APPLE__)
-  #define FN_PUBLIC __attribute__((visibility("default")))
-#elif defined(_WIN32)
-  #define FN_PUBLIC __declspec(dllexport)
-#else
-  #error "Unsupported compiler"
-#endif
-
-inline constexpr intptr_t VM_CALL_END = -1337;
-inline constexpr int32_t MOD_EXPORT_PADDING = 1337;
-
-#define SystemCall(...) ExpandSyscall(__VA_ARGS__, VM_CALL_END)
-
-extern intptr_t(QDECL *vmSyscall)(intptr_t arg, ...);
-extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
-                                                               ...));
-
-template <typename T, typename... Types>
-intptr_t ExpandSyscall(T syscallArg, Types... args) {
-  // C-style casts here for simplicity, to handle all types of arguments
-  return vmSyscall((intptr_t)syscallArg, (intptr_t)args...);
+namespace ETJump::CommandCompletions {
+bool completeArgument();
 }

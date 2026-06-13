@@ -52,6 +52,7 @@ add_library(cgame MODULE
 	"etj_client_commands_handler.cpp"
 	"etj_client_rtv_handler.cpp"
 	"etj_color_parser.cpp"
+	"etj_command_complete_ext.cpp"
 	"etj_console_shader.cpp"
 	"etj_consolecommands.cpp"
 	"etj_crosshair.cpp"

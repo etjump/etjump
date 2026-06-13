@@ -65,7 +65,7 @@ static void customvoteList(const Arguments &args) {
 static void pmFlashWindow() {
   if (etj_highlight.integer &
       static_cast<int>(ChatHighlightFlags::HIGHLIGHT_FLASH)) {
-    SyscallExt::trap_SysFlashWindowETLegacy(
+    SyscallExt::trap_SysFlashWindow(
         SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
   }
 }
