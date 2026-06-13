@@ -22,33 +22,23 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include "etj_command_complete_ext.h"
 
-#ifdef GAMEDLL
-  #include "q_shared.h"
-#else
-  #include "../game/q_shared.h"
-#endif
+namespace ETJump::CommandCompletions {
+bool completeArgument() {
+  // TODO: implement this - look for commands that want additional completions
+  // in e.g. std::unordered_map<std::string, std::function>, where the key
+  // is the command, and value is a function pointer to the completion
+  // implementation. The implementation itself is responsible for providing
+  // valid arguments, and calling 'trap_CommandComplete' for all the arguments
+  // that are supported by the base command. The implementations may also call
+  // additional completion requests for commands which take more than one
+  // argument, and can do this contextually (e.g. if first argument is "foo",
+  // provide a different set of completions for second argument).
+  // The syscall itself does not give context on which command is requesting
+  // autocomplete, we must call 'CG_Argv' here first to see which completion
+  // we're looking for.
 
-#if defined(__linux__) || defined(__APPLE__)
-  #define FN_PUBLIC __attribute__((visibility("default")))
-#elif defined(_WIN32)
-  #define FN_PUBLIC __declspec(dllexport)
-#else
-  #error "Unsupported compiler"
-#endif
-
-inline constexpr intptr_t VM_CALL_END = -1337;
-inline constexpr int32_t MOD_EXPORT_PADDING = 1337;
-
-#define SystemCall(...) ExpandSyscall(__VA_ARGS__, VM_CALL_END)
-
-extern intptr_t(QDECL *vmSyscall)(intptr_t arg, ...);
-extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
-                                                               ...));
-
-template <typename T, typename... Types>
-intptr_t ExpandSyscall(T syscallArg, Types... args) {
-  // C-style casts here for simplicity, to handle all types of arguments
-  return vmSyscall((intptr_t)syscallArg, (intptr_t)args...);
+  return false;
 }
+} // namespace ETJump::CommandCompletions

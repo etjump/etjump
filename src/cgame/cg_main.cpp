@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include "cg_local.h"
+#include "etj_command_complete_ext.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_demo_compatibility.h"
 #include "etj_utilities.h"
@@ -78,6 +79,9 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
       return (g_waitingForKey && g_bindItem) ? qtrue : qfalse;
     case CG_MESSAGERECEIVED:
       return -1;
+    case CG_CONSOLE_COMPLETE_ARGUMENT:
+      // qboolean for API compatibility
+      return ETJump::CommandCompletions::completeArgument() ? qtrue : qfalse;
     default:
       CG_Error("vmMain: unknown command %i", command);
       break;

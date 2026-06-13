@@ -933,26 +933,38 @@ bool SyscallExt::trap_GetValue(char *value, const int size, const char *key) {
 }
 
 // ET: Legacy - flash client window
-void SyscallExt::trap_SysFlashWindowETLegacy(const FlashWindowState state) {
-  if (cgame.platform.syscallExt
-          ->cgameExtensions[cgame.platform.syscallExt->flashWindowETLegacy]) {
-    SystemCall(
-        cgame.platform.syscallExt
-            ->cgameExtensions[cgame.platform.syscallExt->flashWindowETLegacy],
-        static_cast<int>(state));
+void SyscallExt::trap_SysFlashWindow(const FlashWindowState state) {
+  const int32_t trap =
+      cgame.platform.syscallExt
+          ->cgameExtensions[cgame.platform.syscallExt->flashWindowETLegacy];
+
+  if (trap) {
+    SystemCall(trap, static_cast<int>(state));
   }
 }
 
 void SyscallExt::trap_CmdBackup_Ext() {
-  if (cgame.platform.syscallExt
-          ->cgameExtensions[cgame.platform.syscallExt->cmdBackupExt]) {
+  const int32_t trap =
+      cgame.platform.syscallExt
+          ->cgameExtensions[cgame.platform.syscallExt->cmdBackupExt];
+
+  if (trap) {
     cg.cmdBackup = CMD_BACKUP_EXT;
     cg.cmdMask = CMD_MASK_EXT;
-    SystemCall(cgame.platform.syscallExt
-                   ->cgameExtensions[cgame.platform.syscallExt->cmdBackupExt]);
+    SystemCall(trap);
   } else {
     cg.cmdBackup = CMD_BACKUP;
     cg.cmdMask = CMD_MASK;
+  }
+}
+
+void SyscallExt::trap_CommandComplete(const char *value) {
+  const int32_t trap =
+      cgame.platform.syscallExt
+          ->cgameExtensions[cgame.platform.syscallExt->commandComplete];
+
+  if (trap) {
+    SystemCall(trap, value);
   }
 }
 
