@@ -24,19 +24,20 @@
 
 #pragma once
 
-#include "etj_accel_color_data.h"
+#include "etj_accel_color_v2.h"
 #include "etj_cvar_parser.h"
 #include "etj_irenderable.h"
+#include "etj_pmove_utils_v2.h"
+
 #include "../game/q_shared.h"
 
 namespace ETJump {
-class AccelColorData;
+class AccelColorV2;
 class CvarUpdateHandler;
 
 class AccelMeterV2 : public IRenderable {
 public:
-  AccelMeterV2(const std::shared_ptr<AccelColorData> &accelColorData,
-               const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  explicit AccelMeterV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~AccelMeterV2() override;
 
   bool beforeRender() override;
@@ -48,7 +49,7 @@ private:
   void setAccelColorStyle(const vmCvar_t &cvar);
   void startListeners();
 
-  void setupAccelColor(const AccelColorData::State &s, float speed,
+  void setupAccelColor(const PmoveUtilsV2::State &s, float speed,
                        const vec2_t accel);
 
   static bool canSkipDraw();
@@ -69,7 +70,7 @@ private:
   int32_t textStyle{};
 
   vec2_t lastSpeed{};
-  vec2_t accel{};
+  vec2_t accelVec{};
   std::array<std::string, 2> accelStr = {"0", "0"};
 
   float x{};
@@ -79,10 +80,9 @@ private:
 
   vec4_t color{};
 
-  int32_t lastUpdateTime;
-  std::list<AccelColorData::StoredSpeed> storedSpeeds;
+  int32_t lastUpdateTime{};
+  std::list<AccelColorV2::StoredSpeed> storedSpeeds;
 
-  std::shared_ptr<AccelColorData> accelColorData;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 } // namespace ETJump

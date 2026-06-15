@@ -39,14 +39,12 @@ inline constexpr float SQ_SIZE_MAX = 10.0f;
 
 namespace ETJump {
 StrafeQualityV2::StrafeQualityV2(
-    const std::shared_ptr<StrafeQualityData> &strafeQualityData,
     const std::shared_ptr<SnaphudData> &snaphudData,
     const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
     const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
     const std::shared_ptr<PlayerEventsHandler> &playerEvents)
-    : strafeQualityData(strafeQualityData), snaphudData(snaphudData),
-      cvarUpdate(cvarUpdate), consoleCommands(consoleCommands),
-      playerEvents(playerEvents) {
+    : snaphudData(snaphudData), cvarUpdate(cvarUpdate),
+      consoleCommands(consoleCommands), playerEvents(playerEvents) {
   cgame.utils.colorParser->parseColorString(etj_strafeQualityColor.string,
                                             color);
   setSize(etj_strafeQualitySize);
@@ -92,12 +90,12 @@ void StrafeQualityV2::resetStrafeQuality() {
   oldSpeed = 0;
 }
 
-float StrafeQualityV2::updateOptAngle(const StrafeQualityData::State &s) {
+float StrafeQualityV2::updateOptAngle(const PmoveUtilsV2::State &s) {
   const float num = s.wishspeed - s.a;
   return num >= s.vf ? 0 : std::acos(num / s.vf);
 }
 
-void StrafeQualityV2::updateStrafeQuality(const StrafeQualityData::State &s) {
+void StrafeQualityV2::updateStrafeQuality(const PmoveUtilsV2::State &s) {
   if (s.vf < s.wishspeed) {
     // possibly good frame under ground speed if speed increased
     // note that without speed increased you could go forward in
@@ -133,7 +131,7 @@ void StrafeQualityV2::updateStrafeQuality(const StrafeQualityData::State &s) {
 }
 
 bool StrafeQualityV2::beforeRender() {
-  const StrafeQualityData::State &s = strafeQualityData->getState();
+  const PmoveUtilsV2::State &s = cgame.utils.pmoveV2->getState();
 
   // because we don't calculate the state if strafe quality drawing is disabled,
   // we get a null playerstate here
@@ -197,7 +195,7 @@ void StrafeQualityV2::render() const {
                     &cgs.media.limboFont1);
 }
 
-bool StrafeQualityV2::canSkipUpdate(const StrafeQualityData::State &s) {
+bool StrafeQualityV2::canSkipUpdate(const PmoveUtilsV2::State &s) {
   // not strafing
   if (!s.pm.cmd.forwardmove && !s.pm.cmd.rightmove) {
     return true;

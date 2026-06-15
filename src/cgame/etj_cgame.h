@@ -77,6 +77,7 @@ class SavePos;
 class ColorParser;
 class TraceUtils;
 class PmoveUtils;
+class PmoveUtilsV2;
 
 struct Utils {
   std::unique_ptr<EventLoop> eventLoop;
@@ -85,6 +86,7 @@ struct Utils {
   std::unique_ptr<ColorParser> colorParser;
   std::unique_ptr<TraceUtils> trace;
   std::unique_ptr<PmoveUtils> pmove;
+  std::unique_ptr<PmoveUtilsV2> pmoveV2;
 };
 
 class ConsoleShader;
@@ -106,20 +108,16 @@ struct Visuals {
 };
 
 class AccelColor;
-class AccelColorData;
 class CHSDataHandler;
 class CGazData;
 class SnaphudData;
-class StrafeQualityData;
 class TimerunView;
 
 struct HUD {
   std::shared_ptr<AccelColor> accelColor;
-  std::shared_ptr<AccelColorData> accelColorDataHandler;
   std::shared_ptr<CHSDataHandler> chsDataHandler;
   std::shared_ptr<CGazData> cgazDataHandler;
   std::shared_ptr<SnaphudData> snaphudDataHandler;
-  std::shared_ptr<StrafeQualityData> strafeQualityDataHandler;
 
   std::vector<std::unique_ptr<IRenderable>> renderables;
   std::unique_ptr<TimerunView> timerunView;
