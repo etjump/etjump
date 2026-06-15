@@ -24,7 +24,7 @@
 
 #include "cg_local.h"
 
-#include "etj_accel_color_data.h"
+#include "etj_accel_color_v2.h"
 #include "etj_accelmeter_drawable.h"
 #include "etj_accelmeter_v2.h"
 #include "etj_areaindicator_drawable.h"
@@ -68,7 +68,6 @@
 #include "etj_snaphud_v2.h"
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_speed_drawable.h"
-#include "etj_strafe_quality_data.h"
 #include "etj_strafe_quality_drawable.h"
 #include "etj_strafe_quality_v2.h"
 #include "etj_timerun.h"
@@ -221,6 +220,7 @@ static void initUtils() {
   cgame.utils.colorParser = std::make_unique<ColorParser>();
   cgame.utils.trace = std::make_unique<TraceUtils>();
   cgame.utils.pmove = std::make_unique<PmoveUtils>(cgame.core.cvarUpdate);
+  cgame.utils.pmoveV2 = std::make_unique<PmoveUtilsV2>(cgame.core.cvarUpdate);
 }
 
 static void initUserInterface() {
@@ -265,14 +265,13 @@ static void initVisuals() {
 
 static void initHUD() {
   assert(cgame.utils.pmove != nullptr);
+  assert(cgame.utils.pmoveV2 != nullptr);
 
   cgame.hud.accelColor = std::make_unique<AccelColor>();
-  cgame.hud.accelColorDataHandler = std::make_unique<AccelColorData>();
   cgame.hud.chsDataHandler = std::make_unique<CHSDataHandler>(
       cgame.core.cvarUpdate, cgame.core.consoleCommands);
   cgame.hud.cgazDataHandler = std::make_unique<CGazData>();
   cgame.hud.snaphudDataHandler = std::make_unique<SnaphudData>();
-  cgame.hud.strafeQualityDataHandler = std::make_unique<StrafeQualityData>();
 
   cgame.hud.renderables.emplace_back(
       std::make_unique<CHS>(cgame.core.cvarUpdate, cgame.hud.chsDataHandler));
@@ -285,15 +284,14 @@ static void initHUD() {
       cgame.core.cvarUpdate, cgame.core.consoleCommands));
   cgame.hud.renderables.emplace_back(
       std::make_unique<AccelMeter>(cgame.core.cvarUpdate));
-  cgame.hud.renderables.emplace_back(std::make_unique<AccelMeterV2>(
-      cgame.hud.accelColorDataHandler, cgame.core.cvarUpdate));
+  cgame.hud.renderables.emplace_back(
+      std::make_unique<AccelMeterV2>(cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<StrafeQuality>(
       cgame.core.cvarUpdate, cgame.core.consoleCommands,
       cgame.core.playerEvents));
   cgame.hud.renderables.emplace_back(std::make_unique<StrafeQualityV2>(
-      cgame.hud.strafeQualityDataHandler, cgame.hud.snaphudDataHandler,
-      cgame.core.cvarUpdate, cgame.core.consoleCommands,
-      cgame.core.playerEvents));
+      cgame.hud.snaphudDataHandler, cgame.core.cvarUpdate,
+      cgame.core.consoleCommands, cgame.core.playerEvents));
   cgame.hud.renderables.emplace_back(std::make_unique<JumpSpeeds>(
       cgame.core.entityEvents, cgame.core.playerEvents,
       cgame.core.consoleCommands, cgame.core.serverCommands,

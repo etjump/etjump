@@ -26,10 +26,11 @@
 
 #include <list>
 
-#include "etj_pmove_utils_v2.h"
+#include "../game/q_shared.h"
+#include "../game/bg_local.h"
 
 namespace ETJump {
-class AccelColorData {
+class AccelColorV2 {
 public:
   struct StoredSpeed {
     int32_t time{};
@@ -41,44 +42,14 @@ public:
     ADVANCED = 2,
   };
 
-  struct State {
-    float vfSquared; // velocity final squared (after friction)
-    float vf;        // velocity final (after friction)
-    float a;         // accel
-
-    vec2_t wishvel;
-    float wishspeed;
-    float velAngle;
-    float optAngle;
-
-    PmoveUtilsV2::PmoveSingleResult result;
-
-    playerState_t ps;
-    pmove_t pm;
-    pmoveExt_t pmext;
-    pml_t pml;
-  };
-
-  void runFrame();
-  [[nodiscard]] const AccelColorData::State &getState() const;
-
-  void popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds, int32_t time);
-  float calcAvgAccel(const std::list<StoredSpeed> &storedSpeeds);
-  void calcAdvancedAccelColor(const pmove_t &pm, const pml_t &pml,
-                              const vec2_t accel, float wishspeed,
-                              const vec2_t wishvel, float velAngle,
-                              float optAngle, vec4_t outColor) const;
-  bool lowSpeedOnGround(float speed, int32_t groundEntityNum);
-
-private:
-  void updateState(float wishspeed, float accel);
-  float updateOptAngle(const AccelColorData::State &s);
-
-  void walkMove();
-  void airMove();
-  void friction() const;
-  void accelerate(float wishspeed, float accel);
-
-  State s;
+  static void popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds,
+                                 int32_t time);
+  static float calcAvgAccel(const std::list<StoredSpeed> &storedSpeeds);
+  static void calcAdvancedAccelColor(const pmove_t &pm, const pml_t &pml,
+                                     const vec2_t accelVec, float wishspeed,
+                                     const vec2_t wishvel, float velAngle,
+                                     float optAngle, float accel,
+                                     vec4_t outColor);
+  static bool lowSpeedOnGround(float speed, int32_t groundEntityNum);
 };
 } // namespace ETJump

@@ -26,7 +26,8 @@
 
 #include "etj_cvar_parser.h"
 #include "etj_irenderable.h"
-#include "etj_strafe_quality_data.h"
+#include "etj_pmove_utils_v2.h"
+
 #include "../game/q_shared.h"
 
 namespace ETJump {
@@ -37,8 +38,7 @@ class PlayerEventsHandler;
 
 class StrafeQualityV2 : public IRenderable {
 public:
-  StrafeQualityV2(const std::shared_ptr<StrafeQualityData> &strafeQualityData,
-                  const std::shared_ptr<SnaphudData> &snaphudData,
+  StrafeQualityV2(const std::shared_ptr<SnaphudData> &snaphudData,
                   const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
                   const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
                   const std::shared_ptr<PlayerEventsHandler> &playerEvents);
@@ -52,10 +52,10 @@ private:
   void setSize(const vmCvar_t &cvar);
   void resetStrafeQuality();
 
-  static float updateOptAngle(const StrafeQualityData::State &s);
-  void updateStrafeQuality(const StrafeQualityData::State &s);
+  static float updateOptAngle(const PmoveUtilsV2::State &s);
+  void updateStrafeQuality(const PmoveUtilsV2::State &s);
 
-  static bool canSkipUpdate(const StrafeQualityData::State &s);
+  static bool canSkipUpdate(const PmoveUtilsV2::State &s);
   [[nodiscard]] bool canSkipDraw() const;
 
   enum class Style {
@@ -81,7 +81,6 @@ private:
   team_t team{};
   vec4_t color{};
 
-  std::shared_ptr<StrafeQualityData> strafeQualityData;
   std::shared_ptr<SnaphudData> snaphudData;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
   std::shared_ptr<ClientCommandsHandler> consoleCommands;

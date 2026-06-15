@@ -4,14 +4,13 @@
 #include <algorithm>
 
 #include "cg_local.h"
-#include "etj_accel_color_data.h"
 #include "etj_awaited_command_handler.h"
 #include "etj_cgaz_data.h"
 #include "etj_chs_data.h"
 #include "etj_event_loop.h"
 #include "etj_pmove_utils.h"
+#include "etj_pmove_utils_v2.h"
 #include "etj_snaphud_data.h"
-#include "etj_strafe_quality_data.h"
 #include "etj_trickjump_lines.h"
 #include "etj_utilities.h"
 
@@ -2232,23 +2231,17 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
       ETJump::cgame.utils.pmove->runPmove();
     }
 
+    if (ETJump::cgame.utils.pmoveV2->check()) {
+      ETJump::cgame.utils.pmoveV2->runFrame();
+    }
+
     if (etj_drawSnapHUD.integer ||
-        ((etj_drawCGaz.integer & 1) && etj_CGaz1DrawSnapZone.integer) ||
-        etj_drawStrafeQuality.integer) {
+        ((etj_drawCGaz.integer & 1) && etj_CGaz1DrawSnapZone.integer)) {
       ETJump::cgame.hud.snaphudDataHandler->runFrame();
     }
 
     if (etj_drawCGaz.integer) {
       ETJump::cgame.hud.cgazDataHandler->runFrame();
-    }
-
-    if (etj_drawStrafeQuality.integer) {
-      ETJump::cgame.hud.strafeQualityDataHandler->runFrame();
-    }
-
-    if ((etj_drawSpeed2.integer && etj_speedColorUsesAccel.integer) ||
-        etj_drawAccel.integer) {
-      ETJump::cgame.hud.accelColorDataHandler->runFrame();
     }
 
     if (etj_drawCHS1.integer || etj_drawCHS2.integer) {

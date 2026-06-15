@@ -24,6 +24,9 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include "../game/bg_public.h"
 #include "../game/bg_local.h"
 #include "../game/etj_shared.h"
@@ -52,12 +55,38 @@ public:
     SPRINT = 1 << 4,
   };
 
+  struct State {
+    float vfSquared; // velocity final squared (after friction)
+    float vf;        // velocity final (after friction)
+    float a;         // accel
+
+    vec2_t wishvel;
+    float wishspeed;
+    float velAngle;
+    float optAngle;
+
+    PmoveSingleResult result;
+
+    playerState_t ps;
+    pmove_t pm;
+    pmoveExt_t pmext;
+    pml_t pml;
+  };
+
+  explicit PmoveUtilsV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~PmoveUtilsV2();
+
   static void setupPmove(pmove_t &pm);
   static void setupUserCmd(int8_t scale, pmove_t &pm);
+  [[nodiscard]] bool check() const;
+  void runFrame();
+
+  [[nodiscard]] const State &getState() const;
 
   static PmoveSingleResult
   pmoveSingle(pmove_t &pm, pml_t &pml,
               const EnumBitset<PmoveDefaultInput> &defaultInput);
+
   static void setWaterLevel(pmove_t &pm);
   static bool checkProne(pmove_t &pm);
   static void checkDuck(pmove_t &pm);
@@ -76,6 +105,16 @@ public:
                                const vec2_t wishvel);
 
 private:
+  void initCvars();
+  void setupCallbacks();
+  void setPmoveStatus();
+
+  void updateState(float wishspeed, float accel);
+
+  void walkMove();
+  void airMove();
+  void accelerate(float wishspeed, float accel);
+
   static bool canProne(const pmove_t &pm);
   static void groundTraceMissed(pmove_t &pm, pml_t &pml);
   static void traceAll(trace_t &trace, vec3_t start, vec3_t end,
@@ -86,5 +125,12 @@ private:
   static void
   setDefaultInput(pmove_t &pm, int8_t scale,
                   const EnumBitset<PmoveDefaultInput> &defaultInput);
+
+  State s{};
+
+  bool doPmove{};
+  std::vector<const vmCvar_t *> cvars;
+
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 } // namespace ETJump

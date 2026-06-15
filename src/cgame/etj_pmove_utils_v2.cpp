@@ -24,8 +24,46 @@
 
 #include "etj_pmove_utils_v2.h"
 #include "cg_local.h"
+#include "etj_cvar_update_handler.h"
 
 namespace ETJump {
+PmoveUtilsV2::PmoveUtilsV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : cvarUpdate(cvarUpdate) {
+  initCvars();
+  setupCallbacks();
+  setPmoveStatus();
+}
+
+PmoveUtilsV2::~PmoveUtilsV2() {
+  for (const auto &cvar : cvars) {
+    cvarUpdate->unsubscribe(cvar);
+  }
+}
+
+void PmoveUtilsV2::initCvars() {
+  cvars.emplace_back(&etj_drawSpeed2);
+  cvars.emplace_back(&etj_drawAccel);
+  cvars.emplace_back(&etj_drawStrafeQuality);
+  cvars.emplace_back(&etj_drawUpmoveMeter);
+}
+
+void PmoveUtilsV2::setupCallbacks() {
+  for (const auto &cvar : cvars) {
+    cvarUpdate->subscribe(cvar, [this](const vmCvar_t *) { setPmoveStatus(); });
+  }
+}
+
+void PmoveUtilsV2::setPmoveStatus() {
+  for (const auto &cvar : cvars) {
+    if (cvar->integer != 0) {
+      doPmove = true;
+      return;
+    }
+  }
+
+  doPmove = false;
+}
+
 void PmoveUtilsV2::setupPmove(pmove_t &pm) {
   assert(pm.ps && pm.pmext);
 
@@ -67,6 +105,48 @@ void PmoveUtilsV2::setupUserCmd(const int8_t scale, pmove_t &pm) {
   pm.cmd.serverTime = cg.snap->serverTime;
 }
 
+bool PmoveUtilsV2::check() const { return doPmove; }
+
+void PmoveUtilsV2::runFrame() {
+  s.ps = cg.predictedPlayerState;
+  s.pm.ps = &s.ps;
+  s.pm.pmext = &s.pmext;
+  setupPmove(s.pm);
+
+  s.result = pmoveSingle(s.pm, s.pml, {});
+
+  switch (s.result) {
+    case PmoveSingleResult::WALK:
+      walkMove();
+      break;
+    case PmoveSingleResult::AIR:
+      airMove();
+      break;
+    default:
+      break;
+  }
+
+  groundTrace(s.pm, s.pml);
+  setWaterLevel(s.pm);
+}
+
+const PmoveUtilsV2::State &PmoveUtilsV2::getState() const { return s; }
+
+void PmoveUtilsV2::updateState(const float wishspeed, const float accel) {
+  s.vfSquared = VectorLengthSquared2(s.pm.ps->velocity);
+  s.wishspeed = wishspeed;
+
+  s.a = accel * wishspeed * PmoveUtilsV2::PM_FRAMETIME;
+  s.vf = std::sqrt(s.vfSquared);
+
+  assert(s.a * PmoveUtilsV2::PM_FRAMETIME <= 1);
+
+  s.velAngle = std::atan2(s.pm.ps->velocity[1], s.pm.ps->velocity[0]);
+
+  const float num = s.wishspeed - s.a;
+  s.optAngle = num >= s.vf ? 0 : std::acos(num / s.vf);
+}
+
 PmoveUtilsV2::PmoveSingleResult
 PmoveUtilsV2::pmoveSingle(pmove_t &pm, pml_t &pml,
                           const EnumBitset<PmoveDefaultInput> &defaultInput) {
@@ -74,7 +154,7 @@ PmoveUtilsV2::pmoveSingle(pmove_t &pm, pml_t &pml,
                            ? CMDSCALE_WALK
                            : CMDSCALE_DEFAULT;
 
-  PmoveUtilsV2::setupUserCmd(scale, pm);
+  setupUserCmd(scale, pm);
 
   // because autosprint directly flips the sprint button bit in the players
   // 'usercmd_t', it is already accounted for it the stats that pmove
@@ -120,17 +200,17 @@ PmoveUtilsV2::pmoveSingle(pmove_t &pm, pml_t &pml,
   }
 
   // set watertype, and waterlevel
-  PmoveUtilsV2::setWaterLevel(pm);
+  setWaterLevel(pm);
 
   // set mins, maxs, and viewheight
-  if (!PmoveUtilsV2::checkProne(pm)) {
-    PmoveUtilsV2::checkDuck(pm);
+  if (!checkProne(pm)) {
+    checkDuck(pm);
   }
 
   // set groundentity
-  PmoveUtilsV2::groundTrace(pm, pml);
+  groundTrace(pm, pml);
 
-  PmoveUtilsV2::checkLadderMove(pm, pml);
+  checkLadderMove(pm, pml);
 
   PmoveSingleResult result{};
 
@@ -146,7 +226,7 @@ PmoveUtilsV2::pmoveSingle(pmove_t &pm, pml_t &pml,
     result = PmoveSingleResult::AIR;
   }
 
-  PmoveUtilsV2::sprint(pm);
+  sprint(pm);
 
   return result;
 }
@@ -194,6 +274,128 @@ void PmoveUtilsV2::setWaterLevel(pmove_t &pm) {
   if (cont & MASK_WATER) {
     pm.waterlevel = 3;
   }
+}
+
+void PmoveUtilsV2::walkMove() {
+  if (s.pm.waterlevel > 2 &&
+      DotProduct(s.pml.forward, s.pml.groundTrace.plane.normal) > 0) {
+    return;
+  }
+
+  // don't let interpolated frames modify jump times & sprint consumption
+  const bool isLerpFrame = s.pm.pmove_msec > cg.time - s.pm.cmd.serverTime;
+
+  if (checkJump(s.pm, s.pml, isLerpFrame)) {
+    // jumped away
+    if (s.pm.waterlevel <= 1) {
+      airMove();
+    }
+
+    if (!isLerpFrame &&
+        !(s.pm.cmd.serverTime - s.pm.pmext->jumpTime < JUMP_DELAY_TIME)) {
+      s.pm.pmext->sprintTime -= 2500;
+
+      if (s.pm.pmext->sprintTime < 0) {
+        s.pm.pmext->sprintTime = 0;
+      }
+
+      if (s.pm.pmext->jumpDelayBug) {
+        s.pm.pmext->jumpTime = s.pm.cmd.serverTime;
+      }
+    }
+
+    if (!isLerpFrame && !s.pm.pmext->jumpDelayBug) {
+      s.pm.pmext->jumpTime = s.pm.cmd.serverTime;
+    }
+
+    return;
+  }
+
+  const float scale = cmdScale(s.pm, s.pm.cmd, true);
+
+  // project moves down to flat plane
+  s.pml.forward[2] = 0;
+  s.pml.right[2] = 0;
+
+  // FIXME: no slopes :(
+  // project the forward and right directions onto the ground plane
+  // PM_ClipVelocity(s.pml.forward, s.pml.groundTrace.plane.normal,
+  // s.pml.forward,
+  //                 OVERCLIP);
+  // PM_ClipVelocity(s.pml.right, s.pml.groundTrace.plane.normal, s.pml.right,
+  //                 OVERCLIP);
+
+  VectorNormalize(s.pml.forward);
+  VectorNormalize(s.pml.right);
+
+  updateWishvel(s.wishvel, s.pm, s.pml);
+  float wishspeed = scale * VectorLength2(s.wishvel);
+
+  // clamp the speed lower if prone
+  if (s.pm.ps->eFlags & EF_PRONE) {
+    if (wishspeed > static_cast<float>(s.pm.ps->speed) * pm_proneSpeedScale) {
+      wishspeed = static_cast<float>(s.pm.ps->speed) * pm_proneSpeedScale;
+    }
+  } else if (s.pm.ps->pm_flags & PMF_DUCKED) {
+    // clamp the speed lower if ducking
+    if (wishspeed >
+        static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale) {
+      wishspeed =
+          static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale;
+    }
+  }
+
+  // clamp the speed lower if wading or walking on the bottom
+  if (s.pm.waterlevel) {
+    float waterScale = static_cast<float>(s.pm.waterlevel) / 3.0f;
+
+    if (s.pm.watertype == CONTENTS_SLIME) {
+      waterScale = 1.0f - ((1.0f - pm_slagSwimScale) * waterScale);
+    } else {
+      waterScale = 1.0f - ((1.0f - pm_waterSwimScale) * waterScale);
+    }
+
+    if (wishspeed > static_cast<float>(s.pm.ps->speed) * waterScale) {
+      wishspeed = static_cast<float>(s.pm.ps->speed) * waterScale;
+    }
+  }
+
+  // when a player gets hit, they temporarily lose
+  // full control, which allows them to be moved a bit
+  if ((s.pml.groundTrace.surfaceFlags & SURF_SLICK) ||
+      s.pm.ps->pm_flags & PMF_TIME_KNOCKBACK) {
+    accelerate(wishspeed, pm_airaccelerate);
+  } else {
+    accelerate(wishspeed, pm_accelerate);
+  }
+}
+
+void PmoveUtilsV2::airMove() {
+  const float scale = cmdScale(s.pm, s.pm.cmd, true);
+
+  // project moves down to flat plane
+  s.pml.forward[2] = 0;
+  s.pml.right[2] = 0;
+  VectorNormalize(s.pml.forward);
+  VectorNormalize(s.pml.right);
+
+  updateWishvel(s.wishvel, s.pm, s.pml);
+
+  // not on ground, so little effect on velocity
+  accelerate(scale * VectorLength2(s.wishvel), pm_airaccelerate);
+
+  // FIXME: no slopes :(
+  // we may have a ground plane that is very steep,
+  // even though we don't have a groundentity
+  // slide along the steep plane
+  // if (s.pml.groundPlane) {
+  //   PM_ClipVelocity(s.pm.ps->velocity, s.pml.groundTrace.plane.normal,
+  //                   s.pm.ps->velocity, OVERCLIP);
+  // }
+}
+
+void PmoveUtilsV2::accelerate(const float wishspeed, const float accel) {
+  updateState(wishspeed, accel);
 }
 
 bool PmoveUtilsV2::canProne(const pmove_t &pm) {
