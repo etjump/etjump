@@ -29,8 +29,6 @@
 #include "etj_utilities.h"
 
 namespace ETJump {
-inline constexpr float ACCEL_FOR_SOLID_COLOR = 100.0f;
-
 inline constexpr float ACCELMETER_SIZE_MIN = 1.0f;
 inline constexpr float ACCELMETER_SIZE_MAX = 10.0f;
 
@@ -83,21 +81,21 @@ void AccelMeterV2::setSize(const vmCvar_t &cvar) {
 
 void AccelMeterV2::setAccelColorStyle(const vmCvar_t &cvar) {
   accelColorStyle =
-      static_cast<AccelColorStyle>(std::clamp(cvar.integer, 0, 2));
+      static_cast<AccelColorV2::Style>(std::clamp(cvar.integer, 0, 2));
 
   // re-parse the base color if we're turning off accel-based coloring
-  if (accelColorStyle == AccelColorStyle::NONE) {
+  if (accelColorStyle == AccelColorV2::Style::NONE) {
     parseColor(etj_accelColor.string);
   }
 }
 
 void AccelMeterV2::setupAccelColor(const PmoveUtilsV2::State &s,
                                    const float speed, const vec2_t accelVec) {
-  if (accelColorStyle == AccelColorStyle::NONE) {
+  if (accelColorStyle == AccelColorV2::Style::NONE) {
     return;
   }
 
-  if (accelColorStyle == AccelColorStyle::SIMPLE ||
+  if (accelColorStyle == AccelColorV2::Style::SIMPLE ||
       AccelColorV2::lowSpeedOnGround(speed, s.pm.ps->groundEntityNum)) {
     Vector4Copy(colorGreen, color);
 
@@ -108,10 +106,11 @@ void AccelMeterV2::setupAccelColor(const PmoveUtilsV2::State &s,
       avgAccel = -avgAccel;
     }
 
-    const float frac = std::min(avgAccel / ACCEL_FOR_SOLID_COLOR, 1.0f);
+    const float frac =
+        std::min(avgAccel / AccelColorV2::ACCEL_FOR_SOLID_COLOR, 1.0f);
 
     LerpColor(colorWhite, color, color, frac);
-  } else if (accelColorStyle == AccelColorStyle::ADVANCED) {
+  } else if (accelColorStyle == AccelColorV2::Style::ADVANCED) {
     if (accelVec[0] != 0 || accelVec[1] != 0) {
       AccelColorV2::calcAdvancedAccelColor(s.pm, s.pml, accelVec, s.wishspeed,
                                            s.wishvel, s.velAngle, s.optAngle,
@@ -146,8 +145,8 @@ bool AccelMeterV2::beforeRender() {
     return false;
   }
 
-  if (accelColorStyle == AccelColorStyle::SIMPLE ||
-      (accelColorStyle == AccelColorStyle::ADVANCED) &&
+  if (accelColorStyle == AccelColorV2::Style::SIMPLE ||
+      (accelColorStyle == AccelColorV2::Style::ADVANCED) &&
           AccelColorV2::lowSpeedOnGround(s.vf, s.pm.ps->groundEntityNum)) {
     storedSpeeds.push_back({lastUpdateTime, s.vf});
     AccelColorV2::popOldStoredSpeeds(storedSpeeds, lastUpdateTime);
@@ -162,7 +161,7 @@ bool AccelMeterV2::beforeRender() {
   if (s.pm.ps->pm_type == PM_NOCLIP) {
     Vector2Set(accelVec, 0, 0);
 
-    if (accelColorStyle != AccelColorStyle::NONE) {
+    if (accelColorStyle != AccelColorV2::Style::NONE) {
       parseColor("white");
     } else {
       parseColor(etj_accelColor.string);

@@ -38,9 +38,12 @@ public:
   };
 
   enum class Style {
+    NONE = 0,
     SIMPLE = 1,
     ADVANCED = 2,
   };
+
+  static constexpr float ACCEL_FOR_SOLID_COLOR = 100.0f;
 
   static void popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds,
                                  int32_t time);

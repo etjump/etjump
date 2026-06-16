@@ -29,30 +29,44 @@
 #include "etj_irenderable.h"
 #include "etj_pmove_utils_v2.h"
 
-#include "../game/q_shared.h"
-
 namespace ETJump {
-class AccelColorV2;
 class CvarUpdateHandler;
+class ClientCommandsHandler;
 
-class AccelMeterV2 : public IRenderable {
+class DrawSpeed2 : public IRenderable {
 public:
-  explicit AccelMeterV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
-  ~AccelMeterV2() override;
+  DrawSpeed2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+             const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
+  ~DrawSpeed2() override;
 
   bool beforeRender() override;
   void render() const override;
 
 private:
-  void parseColor(const std::string &colorStr);
-  void setSize(const vmCvar_t &cvar);
-  void setAccelColorStyle(const vmCvar_t &cvar);
   void startListeners();
+  void resetMaxSpeed();
+  void setAccelColorStyle(const vmCvar_t &cvar);
+  void setSize(const vmCvar_t &cvar);
+  void parseColor(const std::string &colorStr);
 
   void setupAccelColor(const PmoveUtilsV2::State &s, float speed,
-                       const vec2_t accel);
+                       const vec2_t accelVec);
+  [[nodiscard]] std::string getSpeedString() const;
 
   static bool canSkipDraw();
+
+  enum class Style {
+    NONE = 0,
+    SPEED = 1,                       // speed
+    SPEED_MAX = 2,                   // speed max
+    SPEED_MAX_COLOR = 3,             // speed ^zmax
+    SPEED_MAX_PARENTHESIS = 4,       // speed (max)
+    SPEED_MAX_COLOR_PARENTHESIS = 5, // speed ^z(max)
+    SPEED_MAX_COLOR_BRACKETS = 6,    // speed ^z[max]
+    SPEED_MAX_PIPE = 7,              // speed | max
+    SPEED_TEXT = 8,                  // Speed: speed
+    SPEED_TENS = 9,                  // "tens" only
+  };
 
   enum class Align {
     CENTER = 0,
@@ -60,23 +74,26 @@ private:
     RIGHT = 2,
   };
 
+  std::string speedStr;
+  float currentSpeed{};
+  float maxSpeed{};
+
   AccelColorV2::Style accelColorStyle{};
   int32_t textStyle{};
 
   vec2_t lastSpeed{};
   vec2_t accelVec{};
-  std::array<std::string, 2> accelStr = {"0", "0"};
 
   float x{};
   float y{};
   CvarValue::Size size{};
-  float halfW{}; // for alignment
-
   vec4_t color{};
 
   int32_t lastUpdateTime{};
+
   std::list<AccelColorV2::StoredSpeed> storedSpeeds;
 
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
 };
 } // namespace ETJump
