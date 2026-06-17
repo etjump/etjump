@@ -25,7 +25,10 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <vector>
+
+#include "etj_local.h"
 
 #include "../game/bg_public.h"
 #include "../game/bg_local.h"
@@ -103,6 +106,22 @@ public:
   // looking to the right with +back only
   static bool strafingForwards(const pmove_t &pm, float wishspeed,
                                const vec2_t wishvel);
+
+  static bool skipUpdate(int32_t &lastUpdateTime,
+                         std::optional<HUDLerpFlags> flag, const pmove_t &pm);
+
+  // 'cg.predictedPlayerState' is considered accurate if:
+  // - we are not following anyone
+  // - we are in demo playback (not following), and the snapshot intervals
+  //   match 'pmove_msec', meaning demo was recorded at 'sv_fps/snaps 125'
+  //
+  // In any other scenario, we cannot fully trust it, because it has some form
+  // of interpolation applied to it - most notably, velocity isn't snapped,
+  // so we cannot properly measure for example acceleration.
+  // TODO: all code that uses this needs to be revised once
+  // 'g_synchronousClients' is implemented, because we no longer use
+  // predicted playerstate with that, but rather 'cg.snap->ps'
+  static bool ppsIsAccurate(const pmove_t &pm);
 
 private:
   void initCvars();

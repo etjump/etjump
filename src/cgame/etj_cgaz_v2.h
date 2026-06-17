@@ -99,6 +99,8 @@ private:
 
   CGaz2 cgaz2{};
 
+  int32_t lastUpdateTime{};
+
   std::shared_ptr<CGazData> cgazData;
   std::shared_ptr<SnaphudData> snaphudData;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;

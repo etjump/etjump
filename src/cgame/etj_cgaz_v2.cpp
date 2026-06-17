@@ -332,6 +332,10 @@ bool CGazV2::beforeRender() {
     return false;
   }
 
+  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, HUDLerpFlags::CGAZ, s.pm)) {
+    return true;
+  }
+
   if (etj_drawCGaz.integer & 1) {
     updateCGaz1(s);
 
