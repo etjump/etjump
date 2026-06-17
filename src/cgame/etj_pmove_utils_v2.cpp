@@ -582,6 +582,11 @@ void PmoveUtilsV2::checkDuck(pmove_t &pm) {
   }
 }
 
+// FIXME: this fails to detect a ground plane properly when the player is
+// landing and immediately jumping away, which means 'pm.ps->groundEntityNum'
+// cannot be reliably used to detect whether the player landed. Whenever the
+// player jumps in such cases, we always fall into 'groundTraceMissed' path.
+// Not sure why this is the case, use 'pps->groundEntityNum' for now.
 void PmoveUtilsV2::groundTrace(pmove_t &pm, pml_t &pml) {
   vec3_t point{};
   trace_t trace{};

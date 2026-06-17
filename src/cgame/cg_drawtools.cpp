@@ -40,6 +40,10 @@ void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step) {
   }
 }
 
+void CG_FillRect(const rectDef_t &rect, const float *color) {
+  CG_FillRect(rect.x, rect.y, rect.w, rect.h, color);
+}
+
 /*
 ================
 CG_FillRect
@@ -680,6 +684,10 @@ void CG_DrawTopBottom_NoScale(float x, float y, float w, float h, float size) {
   trap_R_DrawStretchPic(x, y, w, size, 0, 0, 0, 0, cgs.media.whiteShader);
   trap_R_DrawStretchPic(x, y + h - size, w, size, 0, 0, 0, 0,
                         cgs.media.whiteShader);
+}
+
+void CG_DrawRect(const rectDef_t &rect, const float size, const float *color) {
+  CG_DrawRect(rect.x, rect.y, rect.w, rect.h, size, color);
 }
 
 /*
