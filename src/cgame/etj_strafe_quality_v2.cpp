@@ -149,6 +149,11 @@ bool StrafeQualityV2::beforeRender() {
     return false;
   }
 
+  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, HUDLerpFlags::STRAFE_QUALITY,
+                               s.pm)) {
+    return true;
+  }
+
   x = std::clamp(POS_X + etj_strafeQualityX.value, 0.0f, 640.0f);
   ETJump_AdjustPosition(&x);
   y = std::clamp(POS_Y + etj_strafeQualityY.value, 0.0f,

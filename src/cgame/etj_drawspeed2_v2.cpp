@@ -164,22 +164,20 @@ bool DrawSpeed2::beforeRender() {
 
   const PmoveUtilsV2::State &s = cgame.utils.pmoveV2->getState();
 
-  // FIXME: TEMP SOLUTION - only correct at sv_fps/snaps 125 for now
-  lastUpdateTime = cg.snap->serverTime;
-
-  // store the old last update time so we can re-check it accel coloring
+  // store the old last update time so we can re-check it for accel coloring
   int32_t oldLastUpdateTime = lastUpdateTime;
+
+  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, HUDLerpFlags::DRAWSPEED2,
+                               s.pm)) {
+    return true;
+  }
 
   currentSpeed = VectorLength2(s.pm.ps->velocity);
   maxSpeed = std::max(currentSpeed, maxSpeed);
 
-  Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
-  Vector2Copy(s.pm.ps->velocity, lastSpeed);
-
-  // spectators cannot use advanced accel coloring
-  // because velocity isn't snapped
+  // pps must be accurate in order to use advanced accel coloring
   // TODO: revisit with 'g_synchronousClients'
-  if (s.pm.ps->clientNum != cg.clientNum &&
+  if (!PmoveUtilsV2::ppsIsAccurate(s.pm) &&
       accelColorStyle == AccelColorV2::Style::ADVANCED) {
     accelColorStyle = AccelColorV2::Style::SIMPLE;
   }
@@ -201,8 +199,10 @@ bool DrawSpeed2::beforeRender() {
     } else {
       parseColor(etj_speedColor.string);
     }
-  } else {
-    // FIXME: should not be called every frame - only works correctly at 125fps
+  } else if (!PmoveUtilsV2::skipUpdate(oldLastUpdateTime, std::nullopt, s.pm)) {
+    Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
+    Vector2Copy(s.pm.ps->velocity, lastSpeed);
+
     setupAccelColor(s, currentSpeed, accelVec);
   }
 

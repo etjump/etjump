@@ -232,13 +232,10 @@ bool UpmoveMeterV2::beforeRender() {
     return false;
   }
 
-  // FIXME: TEMP SOLUTION - only correct at sv_fps/snaps 125 for now
-  if (cg.nextSnap && (cg.time - lastUpdateTime <
-                      cg.nextSnap->serverTime - cg.snap->serverTime)) {
+  // never lerp this, it would just produce unrealistic jump timings
+  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, std::nullopt, s.pm)) {
     return true;
   }
-
-  lastUpdateTime = cg.snap->serverTime;
 
   if (canSkipUpdate(s)) {
     return true;

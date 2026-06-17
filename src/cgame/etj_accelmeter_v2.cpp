@@ -128,21 +128,17 @@ bool AccelMeterV2::beforeRender() {
     return false;
   }
 
-  // FIXME: TEMP SOLUTION - only correct at sv_fps/snaps 125 for now
-  if (cg.nextSnap && (cg.time - lastUpdateTime <
-                      cg.nextSnap->serverTime - cg.snap->serverTime)) {
-    return true;
-  }
-
-  lastUpdateTime = cg.snap->serverTime;
-
   const PmoveUtilsV2::State &s = cgame.utils.pmoveV2->getState();
 
-  // spectators cannot reliably measure acceleration
-  // because velocity isn't snapped
+  // pps must be accurate in order to draw this accurately
   // TODO: revisit with 'g_synchronousClients'
-  if (s.pm.ps->clientNum != cg.clientNum) {
+  if (!PmoveUtilsV2::ppsIsAccurate(s.pm)) {
     return false;
+  }
+
+  // never lerp this, we want real acceleration values always
+  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, std::nullopt, s.pm)) {
+    return true;
   }
 
   if (accelColorStyle == AccelColorV2::Style::SIMPLE ||
@@ -215,6 +211,11 @@ void AccelMeterV2::render() const {
 
 bool AccelMeterV2::canSkipDraw() {
   if (!etj_drawAccel.integer) {
+    return true;
+  }
+
+  // TODO: revisit with 'g_synchronousClients'
+  if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
     return true;
   }
 

@@ -1026,6 +1026,50 @@ bool PmoveUtilsV2::strafingForwards(const pmove_t &pm, const float wishspeed,
   return false;
 }
 
+bool PmoveUtilsV2::skipUpdate(int32_t &lastUpdateTime,
+                              std::optional<HUDLerpFlags> flag,
+                              const pmove_t &pm) {
+  // no valid frames yet
+  if (!pm.ps || !cg.nextSnap) {
+    return true;
+  }
+
+  const int32_t frameTime =
+      cg.nextSnap->serverTime - cg.snap->serverTime == pm.pmove_msec
+          ? pm.ps->commandTime
+          : cg.time;
+
+  const int now = frameTime - (frameTime % pm.pmove_msec);
+
+  // never skip updates if lerping is requested
+  if (flag.has_value() &&
+      !(etj_HUD_noLerp.integer & static_cast<int>(flag.value()))) {
+    lastUpdateTime = now;
+    return false;
+  }
+
+  if (lastUpdateTime + pm.pmove_msec > frameTime) {
+    return true;
+  }
+
+  lastUpdateTime = now;
+  return false;
+}
+
+bool PmoveUtilsV2::ppsIsAccurate(const pmove_t &pm) {
+  if (!pm.ps || !cg.nextSnap) {
+    return false;
+  }
+
+  if (pm.ps->clientNum == cg.clientNum) {
+    return cg.demoPlayback
+               ? cg.nextSnap->serverTime - cg.snap->serverTime == pm.pmove_msec
+               : true;
+  }
+
+  return false;
+}
+
 void PmoveUtilsV2::setDefaultInput(
     pmove_t &pm, const int8_t scale,
     const EnumBitset<PmoveDefaultInput> &defaultInput) {

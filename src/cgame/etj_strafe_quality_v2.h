@@ -81,6 +81,8 @@ private:
   team_t team{};
   vec4_t color{};
 
+  int32_t lastUpdateTime{};
+
   std::shared_ptr<SnaphudData> snaphudData;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
   std::shared_ptr<ClientCommandsHandler> consoleCommands;

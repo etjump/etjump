@@ -138,6 +138,10 @@ bool SnaphudV2::beforeRender() {
     return false;
   }
 
+  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, HUDLerpFlags::SNAPHUD, s.pm)) {
+    return true;
+  }
+
   updateSnaphud(s);
 
   return true;

@@ -87,6 +87,8 @@ private:
 
   Snaphud snaphud{};
 
+  int32_t lastUpdateTime{};
+
   std::shared_ptr<SnaphudData> snaphudData;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
