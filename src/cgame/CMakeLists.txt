@@ -107,6 +107,7 @@ add_library(cgame MODULE
 	"etj_trace_utils.cpp"
 	"etj_upper_right_drawable.cpp"
 	"etj_upmove_meter_drawable.cpp"
+	"etj_upmove_meter_v2.cpp"
 	"etj_timerun.cpp"
 	"etj_timerun_view.cpp"
 	"etj_trickjump_lines.cpp"

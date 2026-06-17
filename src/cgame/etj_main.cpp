@@ -76,6 +76,7 @@
 #include "etj_trace_utils.h"
 #include "etj_trickjump_lines.h"
 #include "etj_upmove_meter_drawable.h"
+#include "etj_upmove_meter_v2.h"
 #include "etj_upper_right_drawable.h"
 
 #include "../game/etj_syscall_ext_shared.h"
@@ -328,6 +329,9 @@ static void initHUD() {
 
   cgame.hud.renderables.emplace_back(std::make_unique<UpperRight>());
   cgame.hud.renderables.emplace_back(std::make_unique<UpmoveMeter>(
+      cgame.core.cvarUpdate, cgame.core.consoleCommands,
+      cgame.core.playerEvents));
+  cgame.hud.renderables.emplace_back(std::make_unique<UpmoveMeterV2>(
       cgame.core.cvarUpdate, cgame.core.consoleCommands,
       cgame.core.playerEvents));
 
