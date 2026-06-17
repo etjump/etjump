@@ -159,9 +159,6 @@ bool StrafeQualityV2::beforeRender() {
   y = std::clamp(POS_Y + etj_strafeQualityY.value, 0.0f,
                  static_cast<float>(SCREEN_HEIGHT));
 
-  // TODO: A/B testing, remove
-  y += 15;
-
   textStyle = etj_strafeQualityShadow.integer ? ITEM_TEXTSTYLE_SHADOWED
                                               : ITEM_TEXTSTYLE_NORMAL;
   style = static_cast<Style>(etj_strafeQualityStyle.integer);

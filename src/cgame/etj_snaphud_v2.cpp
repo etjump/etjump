@@ -84,9 +84,6 @@ void SnaphudV2::updateSnaphud(const SnaphudData::State &s) {
           ? std::clamp(etj_snapHUDFov.value, SNAPHUD_MIN_FOV, SNAPHUD_MAX_FOV)
           : cg.refdef.fov_x;
 
-  // TODO: A/B testing, remove
-  snaphud.y += snaphud.h + 1;
-
   snaphud.style = static_cast<SnaphudStyle>(etj_drawSnapHUD.integer);
 
   switch (snaphud.style) {
