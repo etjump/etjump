@@ -257,9 +257,6 @@ bool UpmoveMeterV2::beforeRender() {
   graph.rect.w = etj_upmoveMeterGraphW.value;
   graph.rect.h = etj_upmoveMeterGraphH.value;
 
-  // TODO: A/B testing, remove
-  graph.rect.y += graph.rect.h + 5;
-
   graph.upHeight =
       static_cast<float>(graph.postDelay) /
       std::max(static_cast<float>(etj_upmoveMeterMaxDelay.integer), 1.0f);

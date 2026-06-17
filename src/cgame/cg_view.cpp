@@ -8,7 +8,6 @@
 #include "etj_cgaz_data.h"
 #include "etj_chs_data.h"
 #include "etj_event_loop.h"
-#include "etj_pmove_utils.h"
 #include "etj_pmove_utils_v2.h"
 #include "etj_snaphud_data.h"
 #include "etj_trickjump_lines.h"
@@ -1928,9 +1927,8 @@ static void runFrameEnd() {
     static int lastActivity = -minAutoSpecDelay;
 
     const auto *const ps = getValidPlayerState();
-    const usercmd_t *cmd = cgame.utils.pmove->getUserCmd();
     const auto team = cgs.clientinfo[cg.clientNum].team;
-    const bool moving = cmd->forwardmove || cmd->rightmove || cmd->upmove;
+    const bool moving = ps->stats[STAT_USERCMD_MOVE];
     const bool following = ps->pm_flags & PMF_FOLLOW;
 
     if (team != TEAM_SPECTATOR || (!following && moving) ||
@@ -2227,10 +2225,6 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
                              cg.refdef.vieworg[2]);
 
     // setup pmove for renderables
-    if (ETJump::cgame.utils.pmove->check()) {
-      ETJump::cgame.utils.pmove->runPmove();
-    }
-
     if (ETJump::cgame.utils.pmoveV2->check()) {
       ETJump::cgame.utils.pmoveV2->runFrame();
     }

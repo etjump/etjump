@@ -214,9 +214,6 @@ bool DrawSpeed2::beforeRender() {
   ETJump_AdjustPosition(&x);
   y = std::clamp(etj_speedY.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
 
-  // TODO: A/B testing, remove
-  y += 15;
-
   return true;
 }
 

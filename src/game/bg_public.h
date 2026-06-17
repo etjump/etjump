@@ -468,27 +468,6 @@ typedef struct {
   float noclipScale;
   bool isJumpLand;
 
-  // ETJump: exported values from pmove_t & pml_t for cgame drawing
-  int tracemask;
-  qboolean walking;
-  qboolean groundPlane;
-  trace_t groundTrace;
-  int waterlevel;
-  vec3_t mins, maxs;
-
-  vec3_t previous_velocity;
-  vec3_t forward, right, up;
-  float frametime;
-  qboolean ladder;
-
-  vec3_t velocity; // we need to store this before PM_Accelerate scales
-                   // it back to preserve the true effect friction has
-                   // on ground speed
-
-  float scale;
-  float scaleAlt; // cmdScale without upmove component
-  float accel;
-
   // timestamp adrenaline should expire at
   int adrenalineTime;
 
@@ -560,12 +539,6 @@ typedef struct {
   // ETJump: enable/disable strafe + activate = lean
   qboolean noActivateLean;
   bool noPanzerAutoswitch;
-
-  qboolean walking;
-  qboolean groundPlane;
-  trace_t groundTrace;
-
-  vec3_t forward, right, up;
 
   // callbacks to test the world
   // these will be different functions during game and cgame

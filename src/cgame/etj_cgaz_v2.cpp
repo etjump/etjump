@@ -151,9 +151,6 @@ void CGazV2::updateCGaz1(const CGazData::State &s) {
   cgaz1.fov = etj_CGazFov.value > 0
                   ? std::clamp(etj_CGazFov.value, CGAZ_FOV_MIN, CGAZ_FOV_MAX)
                   : cg.refdef.fov_x;
-
-  // TODO: A/B testing, remove
-  cgaz1.y += cgaz1.h + 1;
 }
 
 void CGazV2::updateCGaz2(const CGazData::State &s) {
@@ -172,9 +169,6 @@ void CGazV2::updateCGaz2(const CGazData::State &s) {
 
   cgaz2.highRes = etj_CGaz2HighRes.integer;
   cgaz2.drawSides = s.vf > s.wishspeed;
-
-  // TODO: A/B testing, remove
-  cgaz2.y -= 10;
 }
 
 void CGazV2::updateDrawSnap(const CGazData::State &s) {

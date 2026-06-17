@@ -76,7 +76,6 @@ class CvarUnlocker;
 class SavePos;
 class ColorParser;
 class TraceUtils;
-class PmoveUtils;
 class PmoveUtilsV2;
 
 struct Utils {
@@ -85,7 +84,6 @@ struct Utils {
   std::unique_ptr<SavePos> savePos;
   std::unique_ptr<ColorParser> colorParser;
   std::unique_ptr<TraceUtils> trace;
-  std::unique_ptr<PmoveUtils> pmove;
   std::unique_ptr<PmoveUtilsV2> pmoveV2;
 };
 
@@ -107,14 +105,12 @@ struct Visuals {
   std::unique_ptr<TrickjumpLines> trickjumpLines;
 };
 
-class AccelColor;
 class CHSDataHandler;
 class CGazData;
 class SnaphudData;
 class TimerunView;
 
 struct HUD {
-  std::shared_ptr<AccelColor> accelColor;
   std::shared_ptr<CHSDataHandler> chsDataHandler;
   std::shared_ptr<CGazData> cgazDataHandler;
   std::shared_ptr<SnaphudData> snaphudDataHandler;

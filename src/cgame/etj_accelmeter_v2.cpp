@@ -170,9 +170,6 @@ bool AccelMeterV2::beforeRender() {
   ETJump_AdjustPosition(&x);
   y = std::clamp(etj_accelY.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
 
-  // TODO: A/B testing, remove
-  y += 15;
-
   textStyle =
       etj_accelShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
 
