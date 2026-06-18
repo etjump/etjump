@@ -90,7 +90,7 @@ void AccelMeterV2::setAccelColorStyle(const vmCvar_t &cvar) {
 }
 
 void AccelMeterV2::setupAccelColor(const PmoveUtilsV2::State &s,
-                                   const float speed, const vec2_t accelVec) {
+                                   const float speed) {
   if (accelColorStyle == AccelColorV2::Style::NONE) {
     return;
   }
@@ -161,7 +161,7 @@ bool AccelMeterV2::beforeRender() {
       }
     } else {
       Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
-      setupAccelColor(s, s.vf, accelVec);
+      setupAccelColor(s, s.vf);
     }
   }
 

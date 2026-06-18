@@ -25,7 +25,6 @@
 #include <algorithm>
 
 #include "etj_accel_color_v2.h"
-#include "etj_local.h"
 #include "etj_pmove_utils_v2.h"
 
 #include "../ui/ui_shared.h"
@@ -36,7 +35,7 @@ inline constexpr int32_t ACCEL_COLOR_SMOOTHING_TIME = 250;
 void AccelColorV2::popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds,
                                       int time) {
   while (!storedSpeeds.empty()) {
-    auto &front = storedSpeeds.front();
+    const auto &front = storedSpeeds.front();
 
     if (time - front.time > ACCEL_COLOR_SMOOTHING_TIME || time < front.time) {
       storedSpeeds.pop_front();
@@ -75,10 +74,7 @@ void AccelColorV2::calcAdvancedAccelColor(
     const float wishspeed, const vec2_t wishvel, const float velAngle,
     const float optAngle, float accel, vec4_t outColor) {
   const bool forwards = PmoveUtilsV2::strafingForwards(pm, wishspeed, wishvel);
-  const bool rightStrafe =
-      (forwards && pm.cmd.rightmove > 0) ||
-      (!forwards && (pm.cmd.rightmove < 0 ||
-                     (pm.cmd.forwardmove != 0 && pm.cmd.rightmove == 0)));
+  const bool rightStrafe = PmoveUtilsV2::rightStrafe(forwards, pm.cmd);
 
   // get the optimal angles on both sides of the velocity vector
   float optAngleAbsolute =

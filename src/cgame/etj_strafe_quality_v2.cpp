@@ -181,8 +181,8 @@ void StrafeQualityV2::render() const {
   std::string s;
 
   switch (style) {
-    case Style::FULL:
     default:
+    case Style::FULL:
       s = "Strafe Quality: " + strafeQualityStr + "%";
       break;
     case Style::PERCENT:

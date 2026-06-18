@@ -136,10 +136,10 @@ void PmoveUtilsV2::updateState(const float wishspeed, const float accel) {
   s.vfSquared = VectorLengthSquared2(s.pm.ps->velocity);
   s.wishspeed = wishspeed;
 
-  s.a = accel * wishspeed * PmoveUtilsV2::PM_FRAMETIME;
+  s.a = accel * wishspeed * PM_FRAMETIME;
   s.vf = std::sqrt(s.vfSquared);
 
-  assert(s.a * PmoveUtilsV2::PM_FRAMETIME <= 1);
+  assert(s.a * PM_FRAMETIME <= 1);
 
   s.velAngle = std::atan2(s.pm.ps->velocity[1], s.pm.ps->velocity[0]);
 
@@ -445,8 +445,6 @@ bool PmoveUtilsV2::checkProne(pmove_t &pm) {
     if (((pm.ps->pm_flags & PMF_DUCKED && pm.cmd.doubleTap == DT_FORWARD) ||
          (pm.cmd.wbuttons & WBUTTON_PRONE)) &&
         pm.cmd.serverTime - pm.pmext->proneTime > PRONE_DELAY_TIME) {
-      trace_t trace;
-
       pm.mins[0] = pm.ps->mins[0];
       pm.mins[1] = pm.ps->mins[1];
 
@@ -476,8 +474,6 @@ bool PmoveUtilsV2::checkProne(pmove_t &pm) {
         ((pm.cmd.doubleTap == DT_BACK || pm.cmd.upmove > 10 ||
           pm.cmd.wbuttons & WBUTTON_PRONE) &&
          pm.cmd.serverTime - pm.pmext->proneTime > PRONE_DELAY_TIME)) {
-      trace_t trace;
-
       // see if we have the space to stop prone
       pm.mins[0] = pm.ps->mins[0];
       pm.mins[1] = pm.ps->mins[1];
@@ -611,7 +607,7 @@ void PmoveUtilsV2::groundTrace(pmove_t &pm, pml_t &pml) {
 
   // do something corrective if the trace starts in a solid...
   if (trace.allsolid && !(pm.ps->eFlags & EF_MOUNTEDTANK)) {
-    if (!PmoveUtilsV2::correctAllSolid(trace, pm, pml)) {
+    if (!correctAllSolid(trace, pm, pml)) {
       return;
     }
   }
@@ -941,7 +937,8 @@ void PmoveUtilsV2::sprint(pmove_t &pm) {
   }
 }
 
-void PmoveUtilsV2::updateWishvel(vec2_t &wishvel, pmove_t &pm, pml_t &pml) {
+void PmoveUtilsV2::updateWishvel(vec2_t wishvel, const pmove_t &pm,
+                                 const pml_t &pml) {
   const float fmove = pm.cmd.forwardmove;
   const float smove = pm.cmd.rightmove;
 
@@ -1024,6 +1021,12 @@ bool PmoveUtilsV2::strafingForwards(const pmove_t &pm, const float wishspeed,
   }
 
   return false;
+}
+
+bool PmoveUtilsV2::rightStrafe(const bool forwards, const usercmd_t &cmd) {
+  return (forwards && cmd.rightmove > 0) ||
+         (!forwards &&
+          (cmd.rightmove < 0 || (cmd.forwardmove != 0 && cmd.rightmove == 0)));
 }
 
 bool PmoveUtilsV2::skipUpdate(int32_t &lastUpdateTime,

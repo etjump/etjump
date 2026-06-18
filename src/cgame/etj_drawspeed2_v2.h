@@ -49,8 +49,7 @@ private:
   void setSize(const vmCvar_t &cvar);
   void parseColor(const std::string &colorStr);
 
-  void setupAccelColor(const PmoveUtilsV2::State &s, float speed,
-                       const vec2_t accelVec);
+  void setupAccelColor(const PmoveUtilsV2::State &s, float speed);
   [[nodiscard]] std::string getSpeedString() const;
 
   static bool canSkipDraw();
