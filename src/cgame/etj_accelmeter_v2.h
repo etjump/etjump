@@ -74,6 +74,7 @@ private:
 
   vec4_t color{};
 
+  pmtype_t lastPmType{};
   int32_t lastUpdateTime{};
   std::list<AccelColorV2::StoredSpeed> storedSpeeds;
 

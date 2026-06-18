@@ -192,19 +192,22 @@ bool DrawSpeed2::beforeRender() {
     storedSpeeds.clear();
   }
 
-  // FIXME: this calls color parsing every frame when noclip is active
-  if (s.pm.ps->pm_type == PM_NOCLIP) {
-    if (accelColorStyle != AccelColorV2::Style::NONE) {
-      parseColor("white");
-    } else {
-      parseColor(etj_speedColor.string);
+  if (lastPmType != PM_NOCLIP) {
+    if (s.pm.ps->pm_type == PM_NOCLIP) {
+      if (accelColorStyle != AccelColorV2::Style::NONE) {
+        parseColor("white");
+      } else {
+        parseColor(etj_speedColor.string);
+      }
+    } else if (!PmoveUtilsV2::skipUpdate(oldLastUpdateTime, std::nullopt,
+                                         s.pm)) {
+      Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
+      setupAccelColor(s, currentSpeed, accelVec);
     }
-  } else if (!PmoveUtilsV2::skipUpdate(oldLastUpdateTime, std::nullopt, s.pm)) {
-    Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
-    Vector2Copy(s.pm.ps->velocity, lastSpeed);
-
-    setupAccelColor(s, currentSpeed, accelVec);
   }
+
+  Vector2Copy(s.pm.ps->velocity, lastSpeed);
+  lastPmType = static_cast<pmtype_t>(s.pm.ps->pm_type);
 
   speedStr = getSpeedString();
   textStyle =

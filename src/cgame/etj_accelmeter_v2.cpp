@@ -150,21 +150,23 @@ bool AccelMeterV2::beforeRender() {
     storedSpeeds.clear();
   }
 
-  Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
-  Vector2Copy(s.pm.ps->velocity, lastSpeed);
+  if (lastPmType != PM_NOCLIP) {
+    if (s.pm.ps->pm_type == PM_NOCLIP) {
+      Vector2Set(accelVec, 0, 0);
 
-  // FIXME: this calls color parsing every frame when noclip is active
-  if (s.pm.ps->pm_type == PM_NOCLIP) {
-    Vector2Set(accelVec, 0, 0);
-
-    if (accelColorStyle != AccelColorV2::Style::NONE) {
-      parseColor("white");
+      if (accelColorStyle != AccelColorV2::Style::NONE) {
+        parseColor("white");
+      } else {
+        parseColor(etj_accelColor.string);
+      }
     } else {
-      parseColor(etj_accelColor.string);
+      Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
+      setupAccelColor(s, s.vf, accelVec);
     }
-  } else {
-    setupAccelColor(s, s.vf, accelVec);
   }
+
+  Vector2Copy(s.pm.ps->velocity, lastSpeed);
+  lastPmType = static_cast<pmtype_t>(s.pm.ps->pm_type);
 
   x = std::clamp(etj_accelX.value, 0.0f, 640.0f);
   ETJump_AdjustPosition(&x);
