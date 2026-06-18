@@ -64,10 +64,7 @@ bool SnaphudData::inMainAccelZone(const vec2_t wishvel, const float wishspeed,
                                   const float velAngle, const float optAngle,
                                   const pmove_t &pm) {
   const bool forwards = PmoveUtilsV2::strafingForwards(pm, wishspeed, wishvel);
-  const bool rightStrafe =
-      (forwards && pm.cmd.rightmove > 0) ||
-      (!forwards && (pm.cmd.rightmove < 0 ||
-                     (pm.cmd.forwardmove != 0 && pm.cmd.rightmove == 0)));
+  const bool rightStrafe = PmoveUtilsV2::rightStrafe(forwards, s.pm.cmd);
 
   // convert to absolute world space angle so we can compare against snap zones
   float optAngleAbsolute =

@@ -100,7 +100,7 @@ void DrawSpeed2::setAccelColorStyle(const vmCvar_t &cvar) {
 }
 
 void DrawSpeed2::setupAccelColor(const PmoveUtilsV2::State &s,
-                                 const float speed, const vec2_t accelVec) {
+                                 const float speed) {
   if (accelColorStyle == AccelColorV2::Style::NONE) {
     return;
   }
@@ -202,7 +202,7 @@ bool DrawSpeed2::beforeRender() {
     } else if (!PmoveUtilsV2::skipUpdate(oldLastUpdateTime, std::nullopt,
                                          s.pm)) {
       Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
-      setupAccelColor(s, currentSpeed, accelVec);
+      setupAccelColor(s, currentSpeed);
     }
   }
 

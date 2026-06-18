@@ -180,10 +180,7 @@ void CGazV2::updateDrawSnap(const CGazData::State &s) {
 
   const bool forwards =
       PmoveUtilsV2::strafingForwards(s.pm, s.wishspeed, s.wishvel);
-  const bool rightStrafe =
-      (forwards && s.pm.cmd.rightmove > 0) ||
-      (!forwards && (s.pm.cmd.rightmove < 0 ||
-                     (s.pm.cmd.forwardmove != 0 && s.pm.cmd.rightmove == 0)));
+  const bool rightStrafe = PmoveUtilsV2::rightStrafe(forwards, s.pm.cmd);
 
   // convert 'cgaz1.minAngle' to an absolute world-space angle, so we can
   // figure out which snap zone quadrant we are currently at

@@ -49,8 +49,7 @@ private:
   void setAccelColorStyle(const vmCvar_t &cvar);
   void startListeners();
 
-  void setupAccelColor(const PmoveUtilsV2::State &s, float speed,
-                       const vec2_t accel);
+  void setupAccelColor(const PmoveUtilsV2::State &s, float speed);
 
   static bool canSkipDraw();
 

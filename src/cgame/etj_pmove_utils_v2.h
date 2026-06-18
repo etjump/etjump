@@ -97,7 +97,8 @@ public:
   static void checkLadderMove(pmove_t &pm, pml_t &pml);
   static bool checkJump(pmove_t &pm, pml_t &pml, bool isLerpFrame);
   static void sprint(pmove_t &pm);
-  static void updateWishvel(vec2_t &wishvel, pmove_t &pm, pml_t &pml);
+  static void updateWishvel(vec2_t wishvel, const pmove_t &pm,
+                            const pml_t &pml);
   static float cmdScale(const pmove_t &pm, const usercmd_t &cmd, bool upmove);
 
   // "forwards" means player viewangles naturally match keys pressed,
@@ -106,6 +107,8 @@ public:
   // looking to the right with +back only
   static bool strafingForwards(const pmove_t &pm, float wishspeed,
                                const vec2_t wishvel);
+
+  static bool rightStrafe(bool forwards, const usercmd_t &cmd);
 
   static bool skipUpdate(int32_t &lastUpdateTime,
                          std::optional<HUDLerpFlags> flag, const pmove_t &pm);
