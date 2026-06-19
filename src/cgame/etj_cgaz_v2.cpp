@@ -344,124 +344,132 @@ bool CGazV2::beforeRender() {
 
 void CGazV2::render() const {
   if (etj_drawCGaz.integer & 1) {
-    if (etj_CGaz1DrawSnapZone.integer && cgaz1.drawSnap.has_value()) {
-      CG_FillAngleYaw(+cgaz1.minAngle, +cgaz1.drawSnap.value(), cgaz1.yaw,
-                      cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
-      CG_FillAngleYaw(-cgaz1.drawSnap.value(), -cgaz1.minAngle, cgaz1.yaw,
-                      cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
-    } else {
-      // no accel zone
-      CG_FillAngleYaw(-cgaz1.minAngle, +cgaz1.minAngle, cgaz1.yaw, cgaz1.y,
-                      cgaz1.h, cgaz1.fov, cgaz1.colors[0]);
-
-      // partial accel zone
-      CG_FillAngleYaw(+cgaz1.minAngle, +cgaz1.optAngle, cgaz1.yaw, cgaz1.y,
-                      cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
-      CG_FillAngleYaw(-cgaz1.optAngle, -cgaz1.minAngle, cgaz1.yaw, cgaz1.y,
-                      cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
-
-      // full accel zone
-      CG_FillAngleYaw(+cgaz1.optAngle, +cgaz1.maxCosAngle, cgaz1.yaw, cgaz1.y,
-                      cgaz1.h, cgaz1.fov, cgaz1.colors[2]);
-      CG_FillAngleYaw(-cgaz1.maxCosAngle, -cgaz1.optAngle, cgaz1.yaw, cgaz1.y,
-                      cgaz1.h, cgaz1.fov, cgaz1.colors[2]);
-
-      // max angle
-      CG_FillAngleYaw(+cgaz1.maxCosAngle, +cgaz1.maxAngle, cgaz1.yaw, cgaz1.y,
-                      cgaz1.h, cgaz1.fov, cgaz1.colors[3]);
-      CG_FillAngleYaw(-cgaz1.maxAngle, -cgaz1.maxCosAngle, cgaz1.yaw, cgaz1.y,
-                      cgaz1.h, cgaz1.fov, cgaz1.colors[3]);
-
-      if (etj_CGaz1DrawMidLine.integer) {
-        CG_FillAngleYaw(+cgaz1.midlineStart, +cgaz1.midLineEnd, cgaz1.yaw,
-                        cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.midlineColor);
-        CG_FillAngleYaw(-cgaz1.midlineStart, -cgaz1.midLineEnd, cgaz1.yaw,
-                        cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.midlineColor);
-      }
-    }
+    renderCGaz1();
   }
 
   if (etj_drawCGaz.integer & 2) {
-    float x = SCREEN_CENTER_X;
+    renderCGaz2();
+  }
+}
 
-    if (etj_stretchCgaz.integer) {
-      ETJump_EnableWidthScale(false);
-      x -= SCREEN_OFFSET_X;
+void CGazV2::renderCGaz1() const {
+  if (etj_CGaz1DrawSnapZone.integer && cgaz1.drawSnap.has_value()) {
+    CG_FillAngleYaw(+cgaz1.minAngle, +cgaz1.drawSnap.value(), cgaz1.yaw,
+                    cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
+    CG_FillAngleYaw(-cgaz1.drawSnap.value(), -cgaz1.minAngle, cgaz1.yaw,
+                    cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
+  } else {
+    // no accel zone
+    CG_FillAngleYaw(-cgaz1.minAngle, +cgaz1.minAngle, cgaz1.yaw, cgaz1.y,
+                    cgaz1.h, cgaz1.fov, cgaz1.colors[0]);
+
+    // partial accel zone
+    CG_FillAngleYaw(+cgaz1.minAngle, +cgaz1.optAngle, cgaz1.yaw, cgaz1.y,
+                    cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
+    CG_FillAngleYaw(-cgaz1.optAngle, -cgaz1.minAngle, cgaz1.yaw, cgaz1.y,
+                    cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
+
+    // full accel zone
+    CG_FillAngleYaw(+cgaz1.optAngle, +cgaz1.maxCosAngle, cgaz1.yaw, cgaz1.y,
+                    cgaz1.h, cgaz1.fov, cgaz1.colors[2]);
+    CG_FillAngleYaw(-cgaz1.maxCosAngle, -cgaz1.optAngle, cgaz1.yaw, cgaz1.y,
+                    cgaz1.h, cgaz1.fov, cgaz1.colors[2]);
+
+    // max angle
+    CG_FillAngleYaw(+cgaz1.maxCosAngle, +cgaz1.maxAngle, cgaz1.yaw, cgaz1.y,
+                    cgaz1.h, cgaz1.fov, cgaz1.colors[3]);
+    CG_FillAngleYaw(-cgaz1.maxAngle, -cgaz1.maxCosAngle, cgaz1.yaw, cgaz1.y,
+                    cgaz1.h, cgaz1.fov, cgaz1.colors[3]);
+
+    if (etj_CGaz1DrawMidLine.integer) {
+      CG_FillAngleYaw(+cgaz1.midlineStart, +cgaz1.midLineEnd, cgaz1.yaw,
+                      cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.midlineColor);
+      CG_FillAngleYaw(-cgaz1.midlineStart, -cgaz1.midLineEnd, cgaz1.yaw,
+                      cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.midlineColor);
+    }
+  }
+}
+
+void CGazV2::renderCGaz2() const {
+  float x = SCREEN_CENTER_X;
+
+  if (etj_stretchCgaz.integer) {
+    ETJump_EnableWidthScale(false);
+    x -= SCREEN_OFFSET_X;
+  }
+
+  if (cgaz2.forwardmove || cgaz2.rightmove) {
+    float mult = 1.0f;
+
+    if (etj_CGaz2WishDirFixedSpeed.value > 0) {
+      constexpr float wishDirScale = 2.0f * 5.0f * CMDSCALE_DEFAULT;
+      mult = etj_CGaz2WishDirFixedSpeed.value / wishDirScale;
     }
 
-    if (cgaz2.forwardmove || cgaz2.rightmove) {
-      float mult = 1.0f;
-
-      if (etj_CGaz2WishDirFixedSpeed.value > 0) {
-        constexpr float wishDirScale = 2.0f * 5.0f * CMDSCALE_DEFAULT;
-        mult = etj_CGaz2WishDirFixedSpeed.value / wishDirScale;
-      }
-
-      if (etj_CGaz2WishDirUniformLength.integer && cgaz2.rightmove &&
-          cgaz2.forwardmove) {
-        mult /= M_SQRT2;
-      }
-
-      const float fmove = mult * static_cast<float>(cgaz2.forwardmove);
-      const float smove = mult * static_cast<float>(cgaz2.rightmove);
-
-      if (cgaz2.highRes) {
-        drawLineWu(x, cgaz2.y, x + smove, cgaz2.y - fmove, cgaz2.thickness[1],
-                   cgaz2.colors[1]);
-      } else {
-        drawLineDDA(x, cgaz2.y, x + smove, cgaz2.y - fmove, cgaz2.colors[1]);
-      }
+    if (etj_CGaz2WishDirUniformLength.integer && cgaz2.rightmove &&
+        cgaz2.forwardmove) {
+      mult /= M_SQRT2;
     }
 
-    // draw velocity direction if requested
-    if (!etj_CGaz2NoVelocityDir.integer ||
-        (!cgaz2.drawSides && etj_CGaz2NoVelocityDir.integer == 2)) {
-      float dirSize = cgaz2.velSize;
+    const float fmove = mult * static_cast<float>(cgaz2.forwardmove);
+    const float smove = mult * static_cast<float>(cgaz2.rightmove);
 
-      // prevent comically long velocity direction lines on fixed speeds
-      if (!cgaz2.drawSides && etj_CGaz2FixedSpeed.value > 0) {
-        dirSize = std::min(static_cast<float>(CMDSCALE_DEFAULT), dirSize);
-      }
+    if (cgaz2.highRes) {
+      drawLineWu(x, cgaz2.y, x + smove, cgaz2.y - fmove, cgaz2.thickness[1],
+                 cgaz2.colors[1]);
+    } else {
+      drawLineDDA(x, cgaz2.y, x + smove, cgaz2.y - fmove, cgaz2.colors[1]);
+    }
+  }
 
-      const float velDirSin = dirSize * std::sin(cgaz2.velAngle);
-      const float velDirCos = dirSize * std::cos(cgaz2.velAngle);
+  // draw velocity direction if requested
+  if (!etj_CGaz2NoVelocityDir.integer ||
+      (!cgaz2.drawSides && etj_CGaz2NoVelocityDir.integer == 2)) {
+    float dirSize = cgaz2.velSize;
 
-      if (cgaz2.highRes) {
-        drawLineWu(x, cgaz2.y, x + velDirSin, cgaz2.y - velDirCos,
-                   cgaz2.thickness[0], cgaz2.colors[0]);
-      } else {
-        drawLineDDA(x, cgaz2.y, x + velDirSin, cgaz2.y - velDirCos,
-                    cgaz2.colors[0]);
-      }
+    // prevent comically long velocity direction lines on fixed speeds
+    if (!cgaz2.drawSides && etj_CGaz2FixedSpeed.value > 0) {
+      dirSize = std::min(static_cast<float>(CMDSCALE_DEFAULT), dirSize);
     }
 
-    if (cgaz2.drawSides) {
-      const float velAngleSinL =
-          (cgaz2.velSize / 2) * std::sin(cgaz2.velAngle - cgaz1.optAngle);
-      const float velAngleCosL =
-          (cgaz2.velSize / 2) * std::cos(cgaz2.velAngle - cgaz1.optAngle);
+    const float velDirSin = dirSize * std::sin(cgaz2.velAngle);
+    const float velDirCos = dirSize * std::cos(cgaz2.velAngle);
 
-      const float velAngleSinR =
-          (cgaz2.velSize / 2) * std::sin(cgaz2.velAngle + cgaz1.optAngle);
-      const float velAngleCosR =
-          (cgaz2.velSize / 2) * std::cos(cgaz2.velAngle + cgaz1.optAngle);
-
-      if (cgaz2.highRes) {
-        drawLineWu(x, cgaz2.y, x + velAngleSinL, cgaz2.y - velAngleCosL,
-                   cgaz2.thickness[0], cgaz2.colors[0]);
-        drawLineWu(x, cgaz2.y, x + velAngleSinR, cgaz2.y - velAngleCosR,
-                   cgaz2.thickness[0], cgaz2.colors[0]);
-      } else {
-        drawLineDDA(x, cgaz2.y, x + velAngleSinL, cgaz2.y - velAngleCosL,
-                    cgaz2.colors[0]);
-        drawLineDDA(x, cgaz2.y, x + velAngleSinR, cgaz2.y - velAngleCosR,
-                    cgaz2.colors[0]);
-      }
+    if (cgaz2.highRes) {
+      drawLineWu(x, cgaz2.y, x + velDirSin, cgaz2.y - velDirCos,
+                 cgaz2.thickness[0], cgaz2.colors[0]);
+    } else {
+      drawLineDDA(x, cgaz2.y, x + velDirSin, cgaz2.y - velDirCos,
+                  cgaz2.colors[0]);
     }
+  }
 
-    if (etj_stretchCgaz.integer) {
-      ETJump_EnableWidthScale(true);
+  if (cgaz2.drawSides) {
+    const float velAngleSinL =
+        (cgaz2.velSize / 2) * std::sin(cgaz2.velAngle - cgaz1.optAngle);
+    const float velAngleCosL =
+        (cgaz2.velSize / 2) * std::cos(cgaz2.velAngle - cgaz1.optAngle);
+
+    const float velAngleSinR =
+        (cgaz2.velSize / 2) * std::sin(cgaz2.velAngle + cgaz1.optAngle);
+    const float velAngleCosR =
+        (cgaz2.velSize / 2) * std::cos(cgaz2.velAngle + cgaz1.optAngle);
+
+    if (cgaz2.highRes) {
+      drawLineWu(x, cgaz2.y, x + velAngleSinL, cgaz2.y - velAngleCosL,
+                 cgaz2.thickness[0], cgaz2.colors[0]);
+      drawLineWu(x, cgaz2.y, x + velAngleSinR, cgaz2.y - velAngleCosR,
+                 cgaz2.thickness[0], cgaz2.colors[0]);
+    } else {
+      drawLineDDA(x, cgaz2.y, x + velAngleSinL, cgaz2.y - velAngleCosL,
+                  cgaz2.colors[0]);
+      drawLineDDA(x, cgaz2.y, x + velAngleSinR, cgaz2.y - velAngleCosR,
+                  cgaz2.colors[0]);
     }
+  }
+
+  if (etj_stretchCgaz.integer) {
+    ETJump_EnableWidthScale(true);
   }
 }
 
