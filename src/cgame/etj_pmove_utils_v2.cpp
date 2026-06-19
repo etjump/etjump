@@ -139,7 +139,9 @@ void PmoveUtilsV2::updateState(const float wishspeed, const float accel) {
   s.a = accel * wishspeed * PM_FRAMETIME;
   s.vf = std::sqrt(s.vfSquared);
 
-  assert(s.a * PM_FRAMETIME <= 1);
+  // this is meant for default speed - if it breaks then,
+  // it will break with other speeds as well
+  assert(s.pm.ps->speed != G_SPEED || s.a * PM_FRAMETIME <= 1);
 
   s.velAngle = std::atan2(s.pm.ps->velocity[1], s.pm.ps->velocity[0]);
 

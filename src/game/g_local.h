@@ -84,12 +84,6 @@ inline constexpr int AAS_AREA_TEAM_ALLIES = 0x0040;
 inline constexpr int AAS_AREA_TEAM_AXIS_DISGUISED = 0x0080;
 inline constexpr int AAS_AREA_TEAM_ALLIES_DISGUISED = 0x0100;
 
-// I have no idea how I managed to forget these :D
-// Hopefully no1 will ever notice versions < 2.0.1 have the g_gravity
-// & g_speed cvars :p
-inline constexpr int G_GRAVITY = 800;
-inline constexpr int G_SPEED = 320;
-
 // TODO: relocate, this is a cvar bitflag for g_chatOptions
 inline constexpr int CHAT_OPTIONS_INTERPOLATE_NAME_TAGS = 0x000001;
 
