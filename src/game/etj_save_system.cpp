@@ -736,6 +736,15 @@ void SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent,
   }
 }
 
+void SaveSystem::invalidateTeamQuickDeployPosition(gentity_t *ent,
+                                                   const team_t team) {
+  auto *const validSave = getValidTeamQuickDeploySave(ent, team);
+
+  if (validSave) {
+    validSave->isValid = false;
+  }
+}
+
 SaveSystem::SavePosition *SaveSystem::getValidTeamSaveForSlot(gentity_t *ent,
                                                               const team_t team,
                                                               const int slot) {

@@ -1514,6 +1514,14 @@ void SpectatorClientEndFrame(gentity_t *ent) {
         ent->client->inactivityPos.team = TEAM_FREE;
         DirectTeleport(ent, ent->client->inactivityPos.savedPos,
                        ent->client->inactivityPos.savedAngles);
+
+        // invalidate quick deploy position, otherwise the next self kill
+        // will load that instead of spawning us at a spawn point if autoload
+        // is enabled, as this gets called in limbo as well, and we have not
+        // used up the saved autoload slot yet from the team switch
+        // that was triggered via inactivity drop
+        ETJump::saveSystem->invalidateTeamQuickDeployPosition(
+            ent, ent->client->sess.sessionTeam);
       } else if (ent->client->pers.autoLoad) {
         ETJump::saveSystem->loadOnceTeamQuickDeployPosition(
             ent, ent->client->sess.sessionTeam);
