@@ -57,6 +57,9 @@ private:
   void startListeners();
   void setThickness(const vmCvar_t *cvar);
 
+  void renderCGaz1() const;
+  void renderCGaz2() const;
+
   static bool canSkipDraw(const CGazData::State &s);
 
   struct CGaz1 {
