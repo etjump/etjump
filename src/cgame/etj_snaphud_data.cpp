@@ -63,6 +63,13 @@ const SnaphudData::State &SnaphudData::getState() const { return s; }
 bool SnaphudData::inMainAccelZone(const vec2_t wishvel, const float wishspeed,
                                   const float velAngle, const float optAngle,
                                   const pmove_t &pm) {
+  // snapzones are not yet calculated - this can happen on the first frame
+  // of the game if the player holds movement inputs during the loading screen,
+  // as snaphud state will not update on the very first frame, since accel is 0
+  if (s.a == 0.0f) {
+    return false;
+  }
+
   const bool forwards = PmoveUtilsV2::strafingForwards(pm, wishspeed, wishvel);
   const bool rightStrafe = PmoveUtilsV2::rightStrafe(forwards, s.pm.cmd);
 
