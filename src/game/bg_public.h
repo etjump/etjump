@@ -2947,6 +2947,9 @@ enum class PlayerStance {
 };
 } // namespace ETJump
 
+inline constexpr int32_t G_GRAVITY = 800;
+inline constexpr int32_t G_SPEED = 320;
+
 inline constexpr int JUMP_VELOCITY = 270;
 // FIXME: this is incorrect when ps.speed is modified
 inline constexpr int MAX_GROUNDSTRAFE = 452;
