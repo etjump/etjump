@@ -5,11 +5,14 @@
 * `etj_ccMenu_showEmptyPages` cvar to toggle showing empty pages in custom command menu (default **0**) [#1918](https://github.com/etjump/etjump/pull/1918)
 * `etj_ccMenu_browseWithOpen` cvar to make `openCustomCommandMenu` command browse to next page when custom command menu is open [#1917](https://github.com/etjump/etjump/pull/1917)
 * left/right arrow navigation for previous/next page in custom command menu, respectively [#1917](https://github.com/etjump/etjump/pull/1917)
-* `fireteam invite` accepts `all` or team name as an argument to invite multiple clients to fireteam [#1919](https://github.com/etjump/etjump/pull/1919)
+* `etj_jumpSpeedsMaxJumps` cvar to set maximum number of jumps in jump speeds list (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
+* `etj_jumpSpeedsMaxJumpsPerColumn` cvar to set maximum number of jumps in jump speeds list column (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
+* `etj_jumpSpeedsMaxJumpsPerRow` cvar to set maximum number of jumps in jump speeds list row (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj/g_mapAutoexecDir` cvar to set directory to load map-specific autoexec files from (client/server, respectively) [#1916](https://github.com/etjump/etjump/pull/1916)
 
 ## Changed
 * changing `etj_ccMenu_filename` resets custom command menu to first page [#1918](https://github.com/etjump/etjump/pull/1918)
+* `fireteam invite` accepts `all` or team name as an argument to invite multiple clients to fireteam [#1919](https://github.com/etjump/etjump/pull/1919)
 * `etj_drawAccel` is disabled in spec/demo playback (in some scenarios) due to interpolation inaccuracy [#1921](https://github.com/etjump/etjump/pull/1921)
   * demo playback drawing is enabled if demo was recorded at `sv_fps/snaps 125`, and not spectating
 * enabled advanced accel coloring for ETJump speed meter & accel meter on demo playback [#1921](https://github.com/etjump/etjump/pull/1921)
@@ -24,6 +27,9 @@
 * strafe quality scored frames with upmove held with full score [#1921](https://github.com/etjump/etjump/pull/1921)
   * as a result, overall scores are now slightly lower, on average ~0.7% with a decent sample size
 * interpolated strafe quality broke non-interpolated CGaz [#1921](https://github.com/etjump/etjump/pull/1921)
+* first respawn after joining to a team after inactivity drop spawned players at the latest save slot [#1915](https://github.com/etjump/etjump/pull/1915)
+* jump speed list showed unrelated jump speeds when joining team/switching followed client [#1922](https://github.com/etjump/etjump/pull/1922)
+* jump speed list colors were not updating for existing jumps, and required a jump event to trigger color change [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj_speedAlpha` and `etj_accelAlpha` were calculated incorrectly [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_accelColorUsesAccel` ignored `etj_accelAlpha` while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_drawAccel` showed incorrect accel values for 1 frame after noclip ended [#1921](https://github.com/etjump/etjump/pull/1921)
