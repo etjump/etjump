@@ -32,7 +32,9 @@
 #include "etj_player_events_handler.h"
 #include "etj_utilities.h"
 
-inline constexpr size_t MAX_JUMPS = 10;
+inline constexpr size_t MAX_JUMPS = 100;
+inline constexpr int32_t MAX_COLUMNS = 10;
+inline constexpr int32_t MAX_ROWS = 10;
 
 inline constexpr float POS_X = 6.0f;
 inline constexpr float TEXT_MIN_SIZE = 0.1f;
@@ -162,6 +164,9 @@ void JumpSpeedsV2::updateJumpSpeeds() {
     jumpSpeeds.emplace_back(ps->persistant[PERS_JUMP_SPEED]);
   }
 
+  // NOTE: check against the upper bound rather than cvar - we want to store
+  // up to the max possible amount, so there is data for jump speeds that
+  // were not previously visible, if the player adjusts the cvar value
   if (jumpSpeeds.size() > MAX_JUMPS) {
     jumpSpeeds.pop_front();
   }
@@ -242,6 +247,12 @@ bool JumpSpeedsV2::beforeRender() {
     return false;
   }
 
+  maxJumps = std::clamp(etj_jumpSpeedsMaxJumps.integer, 1,
+                        static_cast<int32_t>(MAX_JUMPS));
+  jumpsPerColumn =
+      std::clamp(etj_jumpSpeedsMaxJumpsPerColumn.integer, 1, maxJumps);
+  jumpsPerRow = std::clamp(etj_jumpSpeedsMaxJumpsPerRow.integer, 1, maxJumps);
+
   textStyle = etj_jumpSpeedsShadow.integer ? ITEM_TEXTSTYLE_SHADOWED
                                            : ITEM_TEXTSTYLE_NORMAL;
 
@@ -252,56 +263,57 @@ bool JumpSpeedsV2::beforeRender() {
 }
 
 void JumpSpeedsV2::render() const {
-  float x1 = std::clamp(POS_X + etj_jumpSpeedsX.value, 0.0f, 640.0f);
-  float x2 = x1 + textOffsetX;
-  ETJump_AdjustPosition(&x1);
-  ETJump_AdjustPosition(&x2);
+  float x = std::clamp(POS_X + etj_jumpSpeedsX.value, 0.0f, 640.0f);
+  ETJump_AdjustPosition(&x);
 
-  float y1 = std::clamp(SCREEN_CENTER_Y + etj_jumpSpeedsY.value, 0.0f,
-                        static_cast<float>(SCREEN_HEIGHT));
-  y1 -= textYAdjust;
-  float y2 = y1;
+  float y = std::clamp(SCREEN_CENTER_Y + etj_jumpSpeedsY.value, 0.0f,
+                       static_cast<float>(SCREEN_HEIGHT));
+  y -= textYAdjust;
 
   if (!(style & Style::NO_LABEL)) {
-    CG_Text_Paint_Ext(x1, y1, size.x, size.y, colorBase, LABEL_TEXT, 0, 0,
+    CG_Text_Paint_Ext(x, y, size.x, size.y, colorBase, LABEL_TEXT, 0, 0,
                       textStyle, &cgs.media.limboFont2);
 
     if (style & Style::HORIZONTAL) {
-      x1 += firstJumpHorOffsetX;
+      x += firstJumpHorOffsetX;
     } else {
-      y1 += rowHeight;
-      y2 = y1;
+      y += rowHeight;
     }
   }
 
+  const float baseX = x;
+  const float baseY = y;
+  const auto numJumps = static_cast<int32_t>(jumpSpeeds.size());
   vec4_t color{};
 
   // 'pos' is the current position index we're drawing at on the list,
   // 'i' is the actual jump index that we're drawing at 'pos'
-  for (int32_t pos = 0; pos < static_cast<int32_t>(jumpSpeeds.size()); pos++) {
+  for (int32_t pos = 0; pos < std::min(maxJumps, numJumps); pos++) {
     const int32_t i = style & Style::REVERSED
-                          ? static_cast<int32_t>(jumpSpeeds.size()) - 1 - pos
-                          : pos;
+                          ? numJumps - 1 - pos
+                          : std::max(numJumps - maxJumps, 0) + pos;
 
     setJumpColor(jumpSpeeds[i], color);
 
     if (style & Style::HORIZONTAL) {
-      CG_Text_Paint_Ext(x1, y1, size.x, size.y, color, jumpSpeeds[i].speedStr,
-                        0, 0, textStyle, &cgs.media.limboFont2);
+      CG_Text_Paint_Ext(x, y, size.x, size.y, color, jumpSpeeds[i].speedStr, 0,
+                        0, textStyle, &cgs.media.limboFont2);
 
-      x1 += textOffsetX;
-    } else {
-      // first column
-      if (pos < 5) {
-        CG_Text_Paint_Ext(x1, y1, size.x, size.y, color, jumpSpeeds[i].speedStr,
-                          0, 0, textStyle, &cgs.media.limboFont2);
-
-        y1 += rowHeight;
+      if ((pos + 1) % jumpsPerRow == 0) {
+        y += rowHeight;
+        x = baseX;
       } else {
-        CG_Text_Paint_Ext(x2, y2, size.x, size.y, color, jumpSpeeds[i].speedStr,
-                          0, 0, textStyle, &cgs.media.limboFont2);
+        x += textOffsetX;
+      }
+    } else {
+      CG_Text_Paint_Ext(x, y, size.x, size.y, color, jumpSpeeds[i].speedStr, 0,
+                        0, textStyle, &cgs.media.limboFont2);
 
-        y2 += rowHeight;
+      if ((pos + 1) % jumpsPerColumn == 0) {
+        x += baseX + textOffsetX;
+        y = baseY;
+      } else {
+        y += rowHeight;
       }
     }
   }
