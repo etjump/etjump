@@ -164,42 +164,59 @@ void JumpSpeedsV2::updateJumpSpeeds() {
   team = static_cast<team_t>(ps->persistant[PERS_TEAM]);
 
   if (cgame.demo.compatibility->flags.predictedJumpSpeeds) {
-    jumpSpeeds.emplace_back(VectorLength2(ps->velocity), colorBase);
+    jumpSpeeds.emplace_back(VectorLength2(ps->velocity));
   } else {
-    jumpSpeeds.emplace_back(ps->persistant[PERS_JUMP_SPEED], colorBase);
+    jumpSpeeds.emplace_back(ps->persistant[PERS_JUMP_SPEED]);
   }
 
   if (jumpSpeeds.size() > MAX_JUMPS) {
     jumpSpeeds.pop_front();
   }
 
-  if (etj_jumpSpeedsShowDiff.integer && jumpSpeeds.size() > 1) {
-    setDiffColor();
+  if (jumpSpeeds.size() > 1) {
+    setSpeedRelation();
   }
 
   auto &current = jumpSpeeds[jumpSpeeds.size() - 1];
 
   if (etj_jumpSpeedsMinSpeed.integer > current.speed) {
-    Vector4Copy(colorSlower, current.color);
+    current.relation = SpeedRelation::SLOWER;
   }
 }
 
-void JumpSpeedsV2::setDiffColor() {
+void JumpSpeedsV2::setSpeedRelation() {
   assert(jumpSpeeds.size() > 1);
   const size_t currentJump = jumpSpeeds.size() - 1;
 
   auto &current = jumpSpeeds[currentJump];
   const auto &prev = jumpSpeeds[currentJump - 1];
 
-  // speeds are equal, no adjustment needed (base color is default)
+  // speeds are equal, no adjustment needed (default is neutral)
   if (current.speed == prev.speed) {
     return;
   }
 
-  if (current.speed > prev.speed) {
-    Vector4Copy(colorFaster, current.color);
+  current.relation = current.speed > prev.speed ? SpeedRelation::FASTER
+                                                : SpeedRelation::SLOWER;
+}
+
+void JumpSpeedsV2::setJumpColor(const Jump &jump, vec4_t color) const {
+  if (etj_jumpSpeedsMinSpeed.integer > jump.speed) {
+    Vector4Copy(colorSlower, color);
+  } else if (etj_jumpSpeedsShowDiff.integer) {
+    switch (jump.relation) {
+      case SpeedRelation::FASTER:
+        Vector4Copy(colorFaster, color);
+        break;
+      case SpeedRelation::SLOWER:
+        Vector4Copy(colorSlower, color);
+        break;
+      default:
+        Vector4Copy(colorBase, color);
+        break;
+    }
   } else {
-    Vector4Copy(colorSlower, current.color);
+    Vector4Copy(colorBase, color);
   }
 }
 
@@ -240,6 +257,8 @@ void JumpSpeedsV2::render() const {
     }
   }
 
+  vec4_t color{};
+
   // 'pos' is the current position index we're drawing at on the list,
   // 'i' is the actual jump index that we're drawing at 'pos'
   for (int32_t pos = 0; pos < static_cast<int32_t>(jumpSpeeds.size()); pos++) {
@@ -247,24 +266,23 @@ void JumpSpeedsV2::render() const {
                           ? static_cast<int32_t>(jumpSpeeds.size()) - 1 - pos
                           : pos;
 
+    setJumpColor(jumpSpeeds[i], color);
+
     if (style & Style::HORIZONTAL) {
-      CG_Text_Paint_Ext(x1, y1, size.x, size.y, jumpSpeeds[i].color,
-                        jumpSpeeds[i].speedStr, 0, 0, textStyle,
-                        &cgs.media.limboFont2);
+      CG_Text_Paint_Ext(x1, y1, size.x, size.y, color, jumpSpeeds[i].speedStr,
+                        0, 0, textStyle, &cgs.media.limboFont2);
 
       x1 += textOffsetX;
     } else {
       // first column
       if (pos < 5) {
-        CG_Text_Paint_Ext(x1, y1, size.x, size.y, jumpSpeeds[i].color,
-                          jumpSpeeds[i].speedStr, 0, 0, textStyle,
-                          &cgs.media.limboFont2);
+        CG_Text_Paint_Ext(x1, y1, size.x, size.y, color, jumpSpeeds[i].speedStr,
+                          0, 0, textStyle, &cgs.media.limboFont2);
 
         y1 += rowHeight;
       } else {
-        CG_Text_Paint_Ext(x2, y2, size.x, size.y, jumpSpeeds[i].color,
-                          jumpSpeeds[i].speedStr, 0, 0, textStyle,
-                          &cgs.media.limboFont2);
+        CG_Text_Paint_Ext(x2, y2, size.x, size.y, color, jumpSpeeds[i].speedStr,
+                          0, 0, textStyle, &cgs.media.limboFont2);
 
         y2 += rowHeight;
       }
