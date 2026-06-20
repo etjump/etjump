@@ -145,23 +145,16 @@ void JumpSpeedsV2::computeTextOffsets() {
 }
 
 void JumpSpeedsV2::updateJumpSpeeds() {
-  // events are processed at playerstate transition before interpolation
-  // runs, so we can't rely on 'cg.predictedPlayerState' on demo playback,
-  // because it still contains previous playerstate at the time
-  // 'EV_JUMP' event is processed
-  ps = getValidPlayerState();
-
-  // team switch resets the display
-  if (team != ps->persistant[PERS_TEAM]) {
-    resetQueued = true;
-  }
-
   if (resetQueued) {
     jumpSpeeds.clear();
     resetQueued = false;
   }
 
-  team = static_cast<team_t>(ps->persistant[PERS_TEAM]);
+  // events are processed at playerstate transition before interpolation
+  // runs, so we can't rely on 'cg.predictedPlayerState' on spec/demo playback,
+  // because it still contains previous playerstate at the time
+  // 'EV_JUMP' event is processed
+  ps = getValidPlayerState();
 
   if (cgame.demo.compatibility->flags.predictedJumpSpeeds) {
     jumpSpeeds.emplace_back(VectorLength2(ps->velocity));
@@ -221,6 +214,30 @@ void JumpSpeedsV2::setJumpColor(const Jump &jump, vec4_t color) const {
 }
 
 bool JumpSpeedsV2::beforeRender() {
+  ps = getValidPlayerState();
+
+  // team switch resets the display
+  if (team != ps->persistant[PERS_TEAM]) {
+    // if we're going to free spec, immediately clear the list,
+    // otherwise just queue the reset to happen on next update
+    if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR) {
+      jumpSpeeds.clear();
+    } else {
+      resetQueued = true;
+    }
+  }
+
+  // if 'clientNum' has switched, it means we're either spectating and changed
+  // the followed client, or are joining from spectators (while following)
+  // to a team -> instantly clear jump speeds so that unrelated speeds
+  // don't linger on the screen
+  if (clientNum != ps->clientNum) {
+    jumpSpeeds.clear();
+  }
+
+  team = static_cast<team_t>(ps->persistant[PERS_TEAM]);
+  clientNum = ps->clientNum;
+
   if (canSkipDraw()) {
     return false;
   }
@@ -290,12 +307,12 @@ void JumpSpeedsV2::render() const {
   }
 }
 
-bool JumpSpeedsV2::canSkipDraw() {
+bool JumpSpeedsV2::canSkipDraw() const {
   if (!etj_drawJumpSpeeds.integer) {
     return true;
   }
 
-  if (getValidPlayerState()->persistant[PERS_TEAM] == TEAM_SPECTATOR) {
+  if (team == TEAM_SPECTATOR) {
     return true;
   }
 
