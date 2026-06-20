@@ -46,7 +46,7 @@
 #include "etj_drawspeed2_v2.h"
 #include "etj_entity_events_handler.h"
 #include "etj_event_loop.h"
-#include "etj_jump_speeds.h"
+#include "etj_jump_speeds_v2.h"
 #include "etj_keyset_system.h"
 #include "etj_leaves_remapper.h"
 #include "etj_local.h"
@@ -278,7 +278,7 @@ static void initHUD() {
   cgame.hud.renderables.emplace_back(std::make_unique<StrafeQualityV2>(
       cgame.hud.snaphudDataHandler, cgame.core.cvarUpdate,
       cgame.core.consoleCommands, cgame.core.playerEvents));
-  cgame.hud.renderables.emplace_back(std::make_unique<JumpSpeeds>(
+  cgame.hud.renderables.emplace_back(std::make_unique<JumpSpeedsV2>(
       cgame.core.entityEvents, cgame.core.playerEvents,
       cgame.core.consoleCommands, cgame.core.serverCommands,
       cgame.core.cvarUpdate));
