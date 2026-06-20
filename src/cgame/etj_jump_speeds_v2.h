@@ -79,7 +79,7 @@ private:
   void setSpeedRelation();
   void setJumpColor(const Jump &jump, vec4_t color) const;
 
-  static bool canSkipDraw();
+  [[nodiscard]] bool canSkipDraw() const;
 
   static constexpr char LABEL_TEXT[] = "Jump Speeds: ";
 
@@ -107,6 +107,7 @@ private:
   vec4_t colorSlower{};
 
   team_t team{};
+  int32_t clientNum{};
   const playerState_t *ps{};
 
   std::shared_ptr<EntityEventsHandler> entityEvents;
