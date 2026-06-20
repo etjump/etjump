@@ -52,13 +52,32 @@ public:
   void render() const override;
 
 private:
+  enum class SpeedRelation : uint8_t {
+    NEUTRAL = 0,
+    FASTER = 1,
+    SLOWER = 2,
+  };
+
+  struct Jump {
+    explicit Jump(int32_t speed) : speed(speed) {
+      this->speedStr = std::to_string(speed);
+    }
+
+    int32_t speed;
+    // store a string representation as well so we don't need to perform
+    // int -> string conversions every frame for all jumps when rendering
+    std::string speedStr;
+    SpeedRelation relation{};
+  };
+
   void startListeners();
   static void parseColor(const std::string &colorStr, vec4_t &color);
   void adjustTextSize(const vmCvar_t &cvar);
   void computeTextOffsets();
 
   void updateJumpSpeeds();
-  void setDiffColor();
+  void setSpeedRelation();
+  void setJumpColor(const Jump &jump, vec4_t color) const;
 
   static bool canSkipDraw();
 
@@ -70,20 +89,7 @@ private:
     REVERSED = 4,
   };
 
-  struct JumpSpeed {
-    JumpSpeed(int32_t speed, const vec4_t color) : speed(speed) {
-      this->speedStr = std::to_string(speed);
-      Vector4Copy(color, this->color);
-    }
-
-    int32_t speed;
-    // store a string representation as well so we don't need to perform
-    // int -> string conversions every frame for all jumps when rendering
-    std::string speedStr;
-    vec4_t color{};
-  };
-
-  std::deque<JumpSpeed> jumpSpeeds;
+  std::deque<Jump> jumpSpeeds;
   EnumBitset<Style> style;
 
   int32_t textStyle{};
