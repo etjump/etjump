@@ -65,6 +65,12 @@ menuDef {
         COMBO               (SETTINGS_COMBO_POS(10), "Slower color:", 0.2, SETTINGS_ITEM_H, "etj_jumpSpeedsSlowerColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of slower jumps\netj_jumpSpeedsSlowerColor")
         CVARINTLABEL        (SETTINGS_ITEM_POS(11), "etj_jumpSpeedsMinSpeed", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(11), "Minimum speed:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsMinSpeed 0 0 500 1, "Color jumps below this value with the slower color value\netj_jumpSpeedsMinSpeed")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(12), "etj_jumpSpeedsMaxJumps", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(12), "Max jumps:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsMaxJumps 10 1 100 1, "Maximum number of jump speeds to display (max 100)\netj_jumpSpeedsMaxJumps")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(13), "etj_jumpSpeedsMaxJumpsPerColumn", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(13), "Max jumps per column:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsMaxJumpsPerColumn 5 1 100 1, "Maximum number of jump speeds on a column, when using vertical list style\netj_jumpSpeedsMaxJumpsPerColumn")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(14), "etj_jumpSpeedsMaxJumpsPerRow", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(14), "Max jumps per row:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsMaxJumpsPerRow 10 1 100 1, "Maximum number of jump speeds on a row, when using horizontal list style\netj_jumpSpeedsMaxJumpsPerRow")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

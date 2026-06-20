@@ -2687,6 +2687,9 @@ extern vmCvar_t etj_jumpSpeedsFasterColor;
 extern vmCvar_t etj_jumpSpeedsSlowerColor;
 extern vmCvar_t etj_jumpSpeedsMinSpeed;
 extern vmCvar_t etj_jumpSpeedsTextSize;
+extern vmCvar_t etj_jumpSpeedsMaxJumps;
+extern vmCvar_t etj_jumpSpeedsMaxJumpsPerColumn;
+extern vmCvar_t etj_jumpSpeedsMaxJumpsPerRow;
 
 // Strafe quality
 extern vmCvar_t etj_drawStrafeQuality;

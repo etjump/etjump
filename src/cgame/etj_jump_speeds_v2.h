@@ -90,6 +90,9 @@ private:
   };
 
   std::deque<Jump> jumpSpeeds;
+  int32_t maxJumps{};
+  int32_t jumpsPerColumn{};
+  int32_t jumpsPerRow{};
   EnumBitset<Style> style;
 
   int32_t textStyle{};
