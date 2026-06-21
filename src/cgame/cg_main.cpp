@@ -406,6 +406,7 @@ vmCvar_t etj_CHS1Info5;
 vmCvar_t etj_CHS1Info6;
 vmCvar_t etj_CHS1Info7;
 vmCvar_t etj_CHS1Info8;
+
 vmCvar_t etj_drawCHS2;
 vmCvar_t etj_CHS2Info1;
 vmCvar_t etj_CHS2Info2;
@@ -415,9 +416,25 @@ vmCvar_t etj_CHS2Info5;
 vmCvar_t etj_CHS2Info6;
 vmCvar_t etj_CHS2Info7;
 vmCvar_t etj_CHS2Info8;
+
 // chs2 position
 vmCvar_t etj_CHS2PosX;
 vmCvar_t etj_CHS2PosY;
+
+vmCvar_t etj_drawCHS3;
+vmCvar_t etj_CHS3Info1;
+vmCvar_t etj_CHS3Info2;
+vmCvar_t etj_CHS3Info3;
+vmCvar_t etj_CHS3Info4;
+vmCvar_t etj_CHS3Info5;
+vmCvar_t etj_CHS3Info6;
+vmCvar_t etj_CHS3Info7;
+vmCvar_t etj_CHS3Info8;
+
+// chs3 position
+vmCvar_t etj_CHS3PosX;
+vmCvar_t etj_CHS3PosY;
+
 // common CHS things
 vmCvar_t etj_CHSShadow;
 vmCvar_t etj_CHSAlpha;
@@ -1017,6 +1034,7 @@ cvarTable_t cvarTable[] = {
     {&etj_CHS1Info6, "etj_CHS1Info6", "0", CVAR_ARCHIVE},
     {&etj_CHS1Info7, "etj_CHS1Info7", "0", CVAR_ARCHIVE},
     {&etj_CHS1Info8, "etj_CHS1Info8", "0", CVAR_ARCHIVE},
+
     {&etj_drawCHS2, "etj_drawCHS2", "0", CVAR_ARCHIVE},
     {&etj_CHS2Info1, "etj_CHS2Info1", "0", CVAR_ARCHIVE},
     {&etj_CHS2Info2, "etj_CHS2Info2", "0", CVAR_ARCHIVE},
@@ -1026,8 +1044,23 @@ cvarTable_t cvarTable[] = {
     {&etj_CHS2Info6, "etj_CHS2Info6", "0", CVAR_ARCHIVE},
     {&etj_CHS2Info7, "etj_CHS2Info7", "0", CVAR_ARCHIVE},
     {&etj_CHS2Info8, "etj_CHS2Info8", "0", CVAR_ARCHIVE},
+
     {&etj_CHS2PosX, "etj_CHS2PosX", "0", CVAR_ARCHIVE},
     {&etj_CHS2PosY, "etj_CHS2PosY", "0", CVAR_ARCHIVE},
+
+    {&etj_drawCHS3, "etj_drawCHS3", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info1, "etj_CHS3Info1", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info2, "etj_CHS3Info2", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info3, "etj_CHS3Info3", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info4, "etj_CHS3Info4", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info5, "etj_CHS3Info5", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info6, "etj_CHS3Info6", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info7, "etj_CHS3Info7", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info8, "etj_CHS3Info8", "0", CVAR_ARCHIVE},
+
+    {&etj_CHS3PosX, "etj_CHS3PosX", "0", CVAR_ARCHIVE},
+    {&etj_CHS3PosY, "etj_CHS3PosY", "0", CVAR_ARCHIVE},
+
     {&etj_CHSShadow, "etj_CHSShadow", "0", CVAR_ARCHIVE},
     {&etj_CHSAlpha, "etj_CHSAlpha", "1.0", CVAR_ARCHIVE},
     {&etj_CHSColor, "etj_CHSColor", "1.0 1.0 1.0", CVAR_ARCHIVE},
