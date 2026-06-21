@@ -164,6 +164,7 @@ void CustomCommandMenu::addCommand(const std::vector<std::string> &args) {
     /addCustomCommand --name <name> --command <command> --page <page> --slot <slot>
 
     Has a shorthand format of:
+    /addCustomCommand <command>
     /addCustomCommand <name> <command>
     /addCustomCommand <name> <command> <page>
     /addCustomCommand <name> <command> <page> <slot>)";
@@ -171,10 +172,11 @@ void CustomCommandMenu::addCommand(const std::vector<std::string> &args) {
   const auto optCommand = ConsoleCommands::getOptCommand(
       "addCustomCommand",
       CommandParser::CommandDefinition::create("addCustomCommand", desc)
-          .addOption("name", "n",
-                     "Name of the command, displayed in the custom command "
-                     "menu. Maximum displayed length is 28 characters.",
-                     CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption(
+              "name", "n",
+              "Name of the command, displayed in the custom command menu. If "
+              "not provided, the command will be displayed as the name.",
+              CommandParser::OptionDefinition::Type::MultiToken, false)
           .addOption(
               "command", "c",
               "The command to execute. If chaining multiple commands with "
@@ -243,8 +245,11 @@ bool CustomCommandMenu::validateAddCommand(
                      TEAM_SPECTATOR);
   };
 
-  if (optCommand.extraArgs.size() > 1) {
+  if (!optCommand.extraArgs.empty()) {
     switch (optCommand.extraArgs.size()) {
+      case 1:
+        cmd = optCommand.extraArgs[0];
+        break;
       case 2:
         name = optCommand.extraArgs[0];
         cmd = optCommand.extraArgs[1];
@@ -263,16 +268,6 @@ bool CustomCommandMenu::validateAddCommand(
     }
   }
 
-  if (name.empty()) {
-    if (!optName.has_value()) {
-      opFailedChatMsg();
-      CG_Printf("Required option `name` was not specified.\n");
-      return false;
-    }
-
-    name = optName.value().text;
-  }
-
   if (cmd.empty()) {
     if (!optCmd.has_value()) {
       opFailedChatMsg();
@@ -281,6 +276,10 @@ bool CustomCommandMenu::validateAddCommand(
     }
 
     cmd = optCmd.value().text;
+  }
+
+  if (name.empty()) {
+    name = optName.has_value() ? optName.value().text : "";
   }
 
   // if the user gave slot but no page, the command is invalid
@@ -329,8 +328,7 @@ bool CustomCommandMenu::validateAddCommand(
   }
 
   if (commands.find(page.value()) != commands.cend() &&
-      (!commands.at(page.value())[slot.value() - 1].name.empty() &&
-       !commands.at(page.value())[slot.value() - 1].command.empty())) {
+      !commands.at(page.value())[slot.value() - 1].command.empty()) {
     opFailedChatMsg();
     CG_Printf("Slot ^3%i ^7on page ^3%i ^7already contains a command.\n",
               slot.value(), page.value());
@@ -447,7 +445,6 @@ bool CustomCommandMenu::validateDeleteCommand(
     // make sure we actually have a command at this slot
     // we want to do this here, because the deletion fails silently otherwise
     if (commands.find(page.value()) != commands.cend() &&
-        commands.at(page.value())[slot.value() - 1].name.empty() &&
         commands.at(page.value())[slot.value() - 1].command.empty()) {
       opFailedChatMsg();
       CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n",
@@ -570,8 +567,7 @@ bool CustomCommandMenu::validateEditCommand(
     return false;
   }
 
-  if (commands.at(page)[slot - 1].name.empty() ||
-      commands.at(page)[slot - 1].command.empty()) {
+  if (commands.at(page)[slot - 1].command.empty()) {
     opFailedChatMsg();
     CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n", page, slot);
     return false;
@@ -643,8 +639,7 @@ void CustomCommandMenu::moveCommand(const std::vector<std::string> &args) {
 
   const bool targetPageEmpty = commands.find(toPage) == commands.cend();
   const bool swap = !targetPageEmpty &&
-                    (!commands.at(toPage)[toSlot.value() - 1].name.empty() ||
-                     !commands.at(toPage)[toSlot.value() - 1].command.empty());
+                    !commands.at(toPage)[toSlot.value() - 1].command.empty();
 
   try {
     const std::string fromPageStr = "page-" + std::to_string(fromPage);
@@ -734,8 +729,7 @@ bool CustomCommandMenu::validateMoveCommand(
     return false;
   }
 
-  if (commands.at(fromPage)[fromSlot - 1].name.empty() ||
-      commands.at(fromPage)[fromSlot - 1].command.empty()) {
+  if (commands.at(fromPage)[fromSlot - 1].command.empty()) {
     opFailedChatMsg();
     CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n", fromPage,
               fromSlot);
@@ -819,12 +813,15 @@ void CustomCommandMenu::listCommands(
         CG_Printf("^7[ Page %i ]\n", page);
 
         for (size_t i = 0; i < cmds.size(); i++) {
-          if (cmds[i].name.empty() || cmds[i].command.empty()) {
+          const auto &cmd = cmds[i];
+
+          if (cmd.command.empty()) {
             continue;
           }
 
           CG_Printf("^7%i. %s\n   ^7%s\n", static_cast<int32_t>(i + 1),
-                    cmds[i].name.c_str(), cmds[i].command.c_str());
+                    !cmd.name.empty() ? cmd.name.c_str() : "(empty name)",
+                    cmd.command.c_str());
         }
 
         CG_Printf("\n");
@@ -859,8 +856,7 @@ inline bool CustomCommandMenu::pageIsFull(const uint8_t page) const {
   assert(page > 0 && page <= CUSTOM_COMMAND_MENU_MAX_PAGES);
 
   for (uint8_t i = 0; i < CUSTOM_COMMAND_MENU_PAGE_SIZE; i++) {
-    if (commands.at(page)[i].name.empty() &&
-        commands.at(page)[i].command.empty()) {
+    if (commands.at(page)[i].command.empty()) {
       return false;
     }
   }
@@ -888,7 +884,7 @@ uint8_t CustomCommandMenu::findFreeSlot(const uint8_t page) const {
   for (uint8_t i = 0; i < CUSTOM_COMMAND_MENU_PAGE_SIZE; i++) {
     const auto &cmd = commands.at(page)[i];
 
-    if (cmd.name.empty() && cmd.command.empty()) {
+    if (cmd.command.empty()) {
       return i + 1;
     }
   }
@@ -907,7 +903,7 @@ uint8_t CustomCommandMenu::findSlotForDeletion(const uint8_t page) const {
   for (uint8_t i = CUSTOM_COMMAND_MENU_PAGE_SIZE; i > 0; i--) {
     const auto &cmd = commands.at(page)[i - 1];
 
-    if (!cmd.name.empty() && !cmd.command.empty()) {
+    if (!cmd.command.empty()) {
       return i;
     }
   }

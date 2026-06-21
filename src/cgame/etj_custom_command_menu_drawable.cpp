@@ -267,7 +267,7 @@ void CustomCommandMenuDrawable::findNextPage(const CustomCommandMap &commands,
       bool empty = true;
 
       for (const auto &[name, command] : commands.at(next)) {
-        if (!command.empty() && !name.empty()) {
+        if (!command.empty()) {
           empty = false;
           break;
         }
@@ -338,8 +338,7 @@ void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
         y += button->rect.h;
         continue;
       }
-    } else if (i < MENU_PREV && (commands.at(currentPage)[i].name.empty() ||
-                                 commands.at(currentPage)[i].command.empty())) {
+    } else if (i < MENU_PREV && commands.at(currentPage)[i].command.empty()) {
       y += button->rect.h;
       continue;
     }
@@ -354,7 +353,9 @@ void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
         s += "Next page";
         break;
       default:
-        s += StringUtils::truncate(commands.at(currentPage)[i].name, maxChars);
+        const auto &cmd = commands.at(currentPage)[i];
+        s += StringUtils::truncate(!cmd.name.empty() ? cmd.name : cmd.command,
+                                   maxChars);
         break;
     }
 
@@ -409,8 +410,7 @@ qboolean CustomCommandMenuDrawable::checkExecKey(const int32_t key,
       return qfalse;
     }
 
-    if (commands.at(currentPage)[realKey - 1].name.empty() ||
-        commands.at(currentPage)[realKey - 1].command.empty()) {
+    if (commands.at(currentPage)[realKey - 1].command.empty()) {
       return qfalse;
     }
   }
