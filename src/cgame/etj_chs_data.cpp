@@ -23,6 +23,7 @@
  */
 
 #include "etj_chs_data.h"
+#include "cg_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
@@ -35,12 +36,15 @@ CHSDataHandler::CHSDataHandler(
     const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler)
     : cvarUpdateHandler(cvarUpdateHandler),
       consoleCommandsHandler(consoleCommandsHandler) {
-  setupListeners();
+  setupObjects();
   setupStats();
   setZOffset(&etj_CHSUseFeet);
 
-  updateCHS1State();
-  updateCHS2State();
+  for (auto &[chs, obj] : chsObjects) {
+    updateState(obj);
+  }
+
+  setupListeners();
 }
 
 CHSDataHandler::~CHSDataHandler() {
@@ -49,25 +53,29 @@ CHSDataHandler::~CHSDataHandler() {
   cvarUpdateHandler->unsubscribe(&etj_CHSUseFeet);
   cvarUpdateHandler->unsubscribe(&etj_extraTrace);
 
-  for (const auto &CHSCvar : CHS1Cvars) {
-    cvarUpdateHandler->unsubscribe(CHSCvar.cvar);
-  }
-
-  for (const auto &CHSCvar : CHS2Cvars) {
-    cvarUpdateHandler->unsubscribe(CHSCvar.cvar);
+  for (const auto &[chs, obj] : chsObjects) {
+    for (const auto &cvar : obj.cvars) {
+      cvarUpdateHandler->unsubscribe(cvar.cvar);
+    }
   }
 }
 
 void CHSDataHandler::runFrame() {
   ps = getValidPlayerState();
 
-  if (CHS1NeedsTrace || CHS2NeedsTrace) {
+  if (std::any_of(chsObjects.cbegin(), chsObjects.cend(),
+                  [](const auto &obj) { return obj.second.needTrace; })) {
     viewTrace(&trace, CONTENTS_SOLID);
   }
 
-  if (CHS1NeedsExtraTrace || CHS2NeedsExtraTrace) {
+  if (std::any_of(chsObjects.cbegin(), chsObjects.cend(),
+                  [](const auto &obj) { return obj.second.needExtraTrace; })) {
     viewTrace(&extraTrace, (CONTENTS_SOLID | CONTENTS_PLAYERCLIP));
   }
+}
+
+bool CHSDataHandler::check() {
+  return etj_drawCHS1.integer || etj_drawCHS2.integer || etj_drawCHS3.integer;
 }
 
 std::string CHSDataHandler::getStat(const vmCvar_t *cvar) const {
@@ -77,7 +85,7 @@ std::string CHSDataHandler::getStat(const vmCvar_t *cvar) const {
   try {
     return stats.at(stat).fn();
   } catch (const std::out_of_range &) {
-    CG_Printf(S_COLOR_RED "Invalid CHS value access! This is a bug,please "
+    CG_Printf(S_COLOR_RED "Invalid CHS value access! This is a bug, please "
                           "report this to the developers.\n");
     return "^1ERROR";
   }
@@ -96,14 +104,10 @@ std::string CHSDataHandler::getStatName(const vmCvar_t *cvar) const {
   }
 }
 
-std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &
-CHSDataHandler::getCHS1Cvars() {
-  return CHS1Cvars;
-}
-
-std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &
-CHSDataHandler::getCHS2Cvars() {
-  return CHS2Cvars;
+const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &
+CHSDataHandler::getCvars(const int32_t chs) const {
+  assert(chs >= CHS_HUD_1 && chs <= CHS_HUD_3);
+  return chsObjects.at(chs).cvars;
 }
 
 void CHSDataHandler::setupListeners() {
@@ -116,23 +120,22 @@ void CHSDataHandler::setupListeners() {
   cvarUpdateHandler->subscribe(&etj_extraTrace, [this](const vmCvar_t *cvar) {
     // there's no nice, clean way to map the extra trace values to the stats,
     // so rather than checking if any of these CHS infos are enabled,
-    // just update the state for both of the CHS displays
+    // just update the state for all of the CHS displays
     if (cvar->integer & (1 << CHS_10_11) || cvar->integer & (1 << CHS_12) ||
         cvar->integer & (1 << CHS_13_15) || cvar->integer & (1 << CHS_16) ||
         cvar->integer & (1 << CHS_53)) {
-      updateCHS1State();
-      updateCHS2State();
+      for (auto &[chs, obj] : chsObjects) {
+        updateState(obj);
+      }
     }
   });
 
-  for (const auto &CHSCvar : CHS1Cvars) {
-    cvarUpdateHandler->subscribe(
-        CHSCvar.cvar, [this](const vmCvar_t *) { updateCHS1State(); });
-  }
-
-  for (const auto &CHSCvar : CHS2Cvars) {
-    cvarUpdateHandler->subscribe(
-        CHSCvar.cvar, [this](const vmCvar_t *) { updateCHS2State(); });
+  for (const auto &[chs, obj] : chsObjects) {
+    for (const auto &cvar : obj.cvars) {
+      cvarUpdateHandler->subscribe(cvar.cvar, [this, chs](const vmCvar_t *) {
+        updateState(chsObjects.at(chs));
+      });
+    }
   }
 }
 
@@ -142,51 +145,27 @@ void CHSDataHandler::setZOffset(const vmCvar_t *cvar) {
   ZOffset = cvar->integer ? playerMins[2] : 0;
 }
 
-void CHSDataHandler::updateCHS1State() {
-  CHS1NeedsTrace = false;
-  CHS1NeedsExtraTrace = false;
+void CHSDataHandler::updateState(CHSObject &chsObject) {
+  chsObject.needTrace = false;
+  chsObject.needExtraTrace = false;
 
-  for (auto &CHSCvar : CHS1Cvars) {
-    const auto stat = static_cast<Stats>(CHSCvar.cvar->integer);
+  for (auto &chsCvar : chsObject.cvars) {
+    const auto stat = static_cast<Stats>(chsCvar.cvar->integer);
 
     if (stats.find(stat) == stats.cend()) {
-      CHSCvar.valid = false;
+      chsCvar.valid = false;
       continue;
     }
 
-    if (!CHS1NeedsTrace && stats[stat].opts & StatOpts::TRACE) {
-      CHS1NeedsTrace = true;
+    if (!chsObject.needTrace && stats[stat].opts & StatOpts::TRACE) {
+      chsObject.needTrace = true;
     }
 
-    if (!CHS1NeedsExtraTrace && stats[stat].opts & StatOpts::EXTRA_TRACE) {
-      CHS1NeedsExtraTrace = statNeedsExtraTrace(stat);
+    if (!chsObject.needExtraTrace && stats[stat].opts & StatOpts::EXTRA_TRACE) {
+      chsObject.needExtraTrace = statNeedsExtraTrace(stat);
     }
 
-    CHSCvar.valid = true;
-  }
-}
-
-void CHSDataHandler::updateCHS2State() {
-  CHS2NeedsTrace = false;
-  CHS2NeedsExtraTrace = false;
-
-  for (auto &CHSCvar : CHS2Cvars) {
-    const auto stat = static_cast<Stats>(CHSCvar.cvar->integer);
-
-    if (stats.find(stat) == stats.cend()) {
-      CHSCvar.valid = false;
-      continue;
-    }
-
-    if (!CHS2NeedsTrace && stats[stat].opts & StatOpts::TRACE) {
-      CHS2NeedsTrace = true;
-    }
-
-    if (!CHS2NeedsExtraTrace && stats[stat].opts & StatOpts::EXTRA_TRACE) {
-      CHS2NeedsExtraTrace = statNeedsExtraTrace(stat);
-    }
-
-    CHSCvar.valid = true;
+    chsCvar.valid = true;
   }
 }
 
@@ -431,6 +410,45 @@ void CHSDataHandler::printInfo() const {
   for (const auto &[key, info] : stats) {
     CG_Printf("%3i: %s\n", key, info.description.c_str());
   }
+}
+
+void CHSDataHandler::setupObjects() {
+  constexpr std::array<CHSCvar, MAX_CHS_INFO> CHS1Cvars = {{
+      {&etj_CHS1Info1},
+      {&etj_CHS1Info2},
+      {&etj_CHS1Info3},
+      {&etj_CHS1Info4},
+      {&etj_CHS1Info5},
+      {&etj_CHS1Info6},
+      {&etj_CHS1Info7},
+      {&etj_CHS1Info8},
+  }};
+
+  constexpr std::array<CHSCvar, MAX_CHS_INFO> CHS2Cvars = {{
+      {&etj_CHS2Info1},
+      {&etj_CHS2Info2},
+      {&etj_CHS2Info3},
+      {&etj_CHS2Info4},
+      {&etj_CHS2Info5},
+      {&etj_CHS2Info6},
+      {&etj_CHS2Info7},
+      {&etj_CHS2Info8},
+  }};
+
+  constexpr std::array<CHSCvar, MAX_CHS_INFO> CHS3Cvars = {{
+      {&etj_CHS3Info1},
+      {&etj_CHS3Info2},
+      {&etj_CHS3Info3},
+      {&etj_CHS3Info4},
+      {&etj_CHS3Info5},
+      {&etj_CHS3Info6},
+      {&etj_CHS3Info7},
+      {&etj_CHS3Info8},
+  }};
+
+  chsObjects[CHS_HUD_1].cvars = CHS1Cvars;
+  chsObjects[CHS_HUD_2].cvars = CHS2Cvars;
+  chsObjects[CHS_HUD_3].cvars = CHS3Cvars;
 }
 
 void CHSDataHandler::setupStats() {

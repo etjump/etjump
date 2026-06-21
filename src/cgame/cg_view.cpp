@@ -2238,7 +2238,7 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
       ETJump::cgame.hud.cgazDataHandler->runFrame();
     }
 
-    if (etj_drawCHS1.integer || etj_drawCHS2.integer) {
+    if (ETJump::CHSDataHandler::check()) {
       ETJump::cgame.hud.chsDataHandler->runFrame();
     }
 

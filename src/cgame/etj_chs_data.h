@@ -24,9 +24,9 @@
 
 #pragma once
 
+#include <functional>
 #include <map>
 
-#include "cg_local.h"
 #include "etj_local.h"
 
 #include "../game/etj_shared.h"
@@ -37,6 +37,11 @@ class ClientCommandsHandler;
 
 inline constexpr int32_t MAX_CHS_INFO = 8;
 
+// just some constants so we don't need to pass around random numbers
+inline constexpr int32_t CHS_HUD_1 = 1;
+inline constexpr int32_t CHS_HUD_2 = 2;
+inline constexpr int32_t CHS_HUD_3 = 3;
+
 class CHSDataHandler {
 public:
   CHSDataHandler(
@@ -45,15 +50,22 @@ public:
   ~CHSDataHandler();
 
   struct CHSCvar {
-    const vmCvar_t *cvar;
+    const vmCvar_t *cvar{};
     bool valid = false;
   };
 
+  struct CHSObject {
+    std::array<CHSCvar, MAX_CHS_INFO> cvars{};
+    bool needTrace{};
+    bool needExtraTrace{};
+  };
+
   void runFrame();
+  static bool check();
   std::string getStat(const vmCvar_t *cvar) const;
   std::string getStatName(const vmCvar_t *cvar) const;
-  std::array<CHSCvar, MAX_CHS_INFO> &getCHS1Cvars();
-  std::array<CHSCvar, MAX_CHS_INFO> &getCHS2Cvars();
+  [[nodiscard]] const std::array<CHSCvar, MAX_CHS_INFO> &
+  getCvars(int32_t chs) const;
 
 private:
   // as a general rule, try to keep this in sync with
@@ -118,52 +130,24 @@ private:
     EnumBitset<StatOpts> opts;
   };
 
-  std::array<CHSCvar, MAX_CHS_INFO> CHS1Cvars = {{
-      {&etj_CHS1Info1},
-      {&etj_CHS1Info2},
-      {&etj_CHS1Info3},
-      {&etj_CHS1Info4},
-      {&etj_CHS1Info5},
-      {&etj_CHS1Info6},
-      {&etj_CHS1Info7},
-      {&etj_CHS1Info8},
-  }};
-
-  std::array<CHSCvar, MAX_CHS_INFO> CHS2Cvars = {{
-      {&etj_CHS2Info1},
-      {&etj_CHS2Info2},
-      {&etj_CHS2Info3},
-      {&etj_CHS2Info4},
-      {&etj_CHS2Info5},
-      {&etj_CHS2Info6},
-      {&etj_CHS2Info7},
-      {&etj_CHS2Info8},
-  }};
-
   void setupListeners();
+  void setupObjects();
   void setupStats();
   void setZOffset(const vmCvar_t *cvar);
 
-  void updateCHS1State();
-  void updateCHS2State();
+  void updateState(CHSObject &chsObject);
   static bool statNeedsExtraTrace(Stats stat);
 
   void viewTrace(trace_t *tr, int32_t mask);
 
   void printInfo() const;
 
+  std::map<int32_t, CHSObject> chsObjects;
+
   const playerState_t *ps{};
   trace_t trace{};
   trace_t extraTrace{}; // trace results with 'etj_extraTrace'
-
-  bool CHS1NeedsTrace{};
-  bool CHS1NeedsExtraTrace{};
-
-  bool CHS2NeedsTrace{};
-  bool CHS2NeedsExtraTrace{};
-
-  // std::abs(ps->mins[2])
-  float ZOffset{};
+  float ZOffset{};      // std::abs(ps->mins[2])
 
   enum class SpeedType {
     X = 0,

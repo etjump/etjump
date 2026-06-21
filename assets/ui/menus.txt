@@ -110,6 +110,7 @@
 	loadMenu { "ui/etjump_settings_hud2_chs.menu" }
 	loadMenu { "ui/etjump_settings_hud2_chs1.menu" }
 	loadMenu { "ui/etjump_settings_hud2_chs2.menu" }
+	loadMenu { "ui/etjump_settings_hud2_chs3.menu" }
 	loadMenu { "ui/etjump_settings_hud2_accelspeed.menu" }
 	loadMenu { "ui/etjump_settings_hud2_jumpspeeds.menu" }
 	loadMenu { "ui/etjump_settings_hud2_strafequality.menu" }

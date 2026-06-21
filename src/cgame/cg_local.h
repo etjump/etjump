@@ -2463,6 +2463,7 @@ extern vmCvar_t etj_CHS1Info5;
 extern vmCvar_t etj_CHS1Info6;
 extern vmCvar_t etj_CHS1Info7;
 extern vmCvar_t etj_CHS1Info8;
+
 extern vmCvar_t etj_drawCHS2;
 extern vmCvar_t etj_CHS2Info1;
 extern vmCvar_t etj_CHS2Info2;
@@ -2472,9 +2473,25 @@ extern vmCvar_t etj_CHS2Info5;
 extern vmCvar_t etj_CHS2Info6;
 extern vmCvar_t etj_CHS2Info7;
 extern vmCvar_t etj_CHS2Info8;
+
 // chs2 position
 extern vmCvar_t etj_CHS2PosX;
 extern vmCvar_t etj_CHS2PosY;
+
+extern vmCvar_t etj_drawCHS3;
+extern vmCvar_t etj_CHS3Info1;
+extern vmCvar_t etj_CHS3Info2;
+extern vmCvar_t etj_CHS3Info3;
+extern vmCvar_t etj_CHS3Info4;
+extern vmCvar_t etj_CHS3Info5;
+extern vmCvar_t etj_CHS3Info6;
+extern vmCvar_t etj_CHS3Info7;
+extern vmCvar_t etj_CHS3Info8;
+
+// chs3 position
+extern vmCvar_t etj_CHS3PosX;
+extern vmCvar_t etj_CHS3PosY;
+
 // common CHS things
 extern vmCvar_t etj_CHSShadow;
 extern vmCvar_t etj_CHSAlpha;
