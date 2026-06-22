@@ -2477,6 +2477,7 @@ extern vmCvar_t etj_CHS2Info8;
 // chs2 position
 extern vmCvar_t etj_CHS2PosX;
 extern vmCvar_t etj_CHS2PosY;
+extern vmCvar_t etj_CHS2HideLabels;
 
 extern vmCvar_t etj_drawCHS3;
 extern vmCvar_t etj_CHS3Info1;
@@ -2491,6 +2492,7 @@ extern vmCvar_t etj_CHS3Info8;
 // chs3 position
 extern vmCvar_t etj_CHS3PosX;
 extern vmCvar_t etj_CHS3PosY;
+extern vmCvar_t etj_CHS3HideLabels;
 
 // common CHS things
 extern vmCvar_t etj_CHSShadow;

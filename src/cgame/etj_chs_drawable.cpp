@@ -78,7 +78,8 @@ void CHS::setAlpha(const vmCvar_t *cvar) {
   color[3] = std::clamp(cvar->value, 0.0f, 1.0f);
 }
 
-void CHS::setupListCHS(CHSHUD &chs, float x, float y, bool rightAlign) {
+void CHS::setupListCHS(CHSHUD &chs, float x, float y, const bool rightAlign,
+                       const bool hideLabels) {
   const float offsetX = ETJump_AdjustPosition(x);
 
   chs.y = SCREEN_CENTER_Y + 40 + y;
@@ -91,6 +92,8 @@ void CHS::setupListCHS(CHSHUD &chs, float x, float y, bool rightAlign) {
     chs.align = ITEM_ALIGN_LEFT;
     chs.x = 30 + offsetX;
   }
+
+  chs.hideLabels = hideLabels;
 }
 
 bool CHS::beforeRender() {
@@ -100,12 +103,12 @@ bool CHS::beforeRender() {
 
   if (etj_drawCHS2.integer) {
     setupListCHS(chs2, etj_CHS2PosX.value, etj_CHS2PosY.value,
-                 etj_drawCHS2.integer == 2);
+                 etj_drawCHS2.integer == 2, etj_CHS2HideLabels.integer);
   }
 
   if (etj_drawCHS3.integer) {
     setupListCHS(chs3, etj_CHS3PosX.value, etj_CHS3PosY.value,
-                 etj_drawCHS3.integer == 2);
+                 etj_drawCHS3.integer == 2, etj_CHS3HideLabels.integer);
   }
 
   textStyle =
@@ -166,8 +169,13 @@ void CHS::drawCHSList(
       continue;
     }
 
-    const std::string text =
-        data->getStatName(cvars[i].cvar) + ": " + data->getStat(cvars[i].cvar);
+    std::string text;
+
+    if (!hud.hideLabels) {
+      text = data->getStatName(cvars[i].cvar) + ": ";
+    }
+
+    text += data->getStat(cvars[i].cvar);
 
     if (hud.align == ITEM_ALIGN_RIGHT) {
       CG_Text_Paint_RightAligned_Ext(

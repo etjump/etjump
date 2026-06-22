@@ -420,6 +420,7 @@ vmCvar_t etj_CHS2Info8;
 // chs2 position
 vmCvar_t etj_CHS2PosX;
 vmCvar_t etj_CHS2PosY;
+vmCvar_t etj_CHS2HideLabels;
 
 vmCvar_t etj_drawCHS3;
 vmCvar_t etj_CHS3Info1;
@@ -434,6 +435,7 @@ vmCvar_t etj_CHS3Info8;
 // chs3 position
 vmCvar_t etj_CHS3PosX;
 vmCvar_t etj_CHS3PosY;
+vmCvar_t etj_CHS3HideLabels;
 
 // common CHS things
 vmCvar_t etj_CHSShadow;
@@ -1050,6 +1052,7 @@ cvarTable_t cvarTable[] = {
 
     {&etj_CHS2PosX, "etj_CHS2PosX", "0", CVAR_ARCHIVE},
     {&etj_CHS2PosY, "etj_CHS2PosY", "0", CVAR_ARCHIVE},
+    {&etj_CHS2HideLabels, "etj_CHS2HideLabels", "0", CVAR_ARCHIVE},
 
     {&etj_drawCHS3, "etj_drawCHS3", "0", CVAR_ARCHIVE},
     {&etj_CHS3Info1, "etj_CHS3Info1", "0", CVAR_ARCHIVE},
@@ -1063,6 +1066,7 @@ cvarTable_t cvarTable[] = {
 
     {&etj_CHS3PosX, "etj_CHS3PosX", "0", CVAR_ARCHIVE},
     {&etj_CHS3PosY, "etj_CHS3PosY", "0", CVAR_ARCHIVE},
+    {&etj_CHS3HideLabels, "etj_CHS3HideLabels", "0", CVAR_ARCHIVE},
 
     {&etj_CHSShadow, "etj_CHSShadow", "0", CVAR_ARCHIVE},
     {&etj_CHSAlpha, "etj_CHSAlpha", "1.0", CVAR_ARCHIVE},
