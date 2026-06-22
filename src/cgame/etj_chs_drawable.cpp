@@ -141,20 +141,25 @@ void CHS::drawCHSCrosshair(
 
     const auto &pos = CHS1Positions[i];
     const std::string text = data->getStat(cvars[i].cvar);
+    const float distScale =
+        std::clamp(etj_CHS1DistanceScale.value, 0.25f, 10.0f);
 
     switch (pos.align) {
       case ITEM_ALIGN_LEFT:
-        CG_Text_Paint_Ext(hud.x + pos.offsetX, hud.y + pos.offsetY,
-                          CHSCHAR_SIZEX, CHSCHAR_SIZEY, color, text, 0, 0,
-                          textStyle, &cgs.media.limboFont1);
+        CG_Text_Paint_Ext(hud.x + (pos.offsetX * distScale),
+                          hud.y + (pos.offsetY * distScale), CHSCHAR_SIZEX,
+                          CHSCHAR_SIZEY, color, text, 0, 0, textStyle,
+                          &cgs.media.limboFont1);
         break;
       case ITEM_ALIGN_RIGHT:
         CG_Text_Paint_RightAligned_Ext(
-            hud.x + pos.offsetX, hud.y + pos.offsetY, CHSCHAR_SIZEX,
-            CHSCHAR_SIZEY, color, text, 0, 0, textStyle, &cgs.media.limboFont1);
+            hud.x + (pos.offsetX * distScale),
+            hud.y + (pos.offsetY * distScale), CHSCHAR_SIZEX, CHSCHAR_SIZEY,
+            color, text, 0, 0, textStyle, &cgs.media.limboFont1);
         break;
       default:
-        CG_Text_Paint_Centred_Ext(hud.x + pos.offsetX, hud.y + pos.offsetY,
+        CG_Text_Paint_Centred_Ext(hud.x + (pos.offsetX * distScale),
+                                  hud.y + (pos.offsetY * distScale),
                                   CHSCHAR_SIZEX, CHSCHAR_SIZEY, color, text, 0,
                                   0, textStyle, &cgs.media.limboFont1);
     }

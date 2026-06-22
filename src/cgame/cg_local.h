@@ -2464,6 +2464,8 @@ extern vmCvar_t etj_CHS1Info6;
 extern vmCvar_t etj_CHS1Info7;
 extern vmCvar_t etj_CHS1Info8;
 
+extern vmCvar_t etj_CHS1DistanceScale;
+
 extern vmCvar_t etj_drawCHS2;
 extern vmCvar_t etj_CHS2Info1;
 extern vmCvar_t etj_CHS2Info2;

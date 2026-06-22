@@ -407,6 +407,8 @@ vmCvar_t etj_CHS1Info6;
 vmCvar_t etj_CHS1Info7;
 vmCvar_t etj_CHS1Info8;
 
+vmCvar_t etj_CHS1DistanceScale;
+
 vmCvar_t etj_drawCHS2;
 vmCvar_t etj_CHS2Info1;
 vmCvar_t etj_CHS2Info2;
@@ -1036,6 +1038,8 @@ cvarTable_t cvarTable[] = {
     {&etj_CHS1Info6, "etj_CHS1Info6", "0", CVAR_ARCHIVE},
     {&etj_CHS1Info7, "etj_CHS1Info7", "0", CVAR_ARCHIVE},
     {&etj_CHS1Info8, "etj_CHS1Info8", "0", CVAR_ARCHIVE},
+
+    {&etj_CHS1DistanceScale, "etj_CHS1DistanceScale", "1.0", CVAR_ARCHIVE},
 
     {&etj_drawCHS2, "etj_drawCHS2", "0", CVAR_ARCHIVE},
     {&etj_CHS2Info1, "etj_CHS2Info1", "0", CVAR_ARCHIVE},
