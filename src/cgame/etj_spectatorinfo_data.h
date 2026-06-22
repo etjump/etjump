@@ -28,20 +28,24 @@
 #include <optional>
 #include <vector>
 
-#include "cg_local.h"
-
 namespace ETJump {
 class SpectatorInfoData {
 public:
-  static std::vector<int32_t> activeSpectators;
-  static std::vector<int32_t> inactiveSpectators;
+  SpectatorInfoData() = default;
+  ~SpectatorInfoData() = default;
 
   // If 'clientNum' has value, then this is a 'CS_PLAYERS' update.
   // This handles removing client from the lists if they disconnected.
-  static void updateSpectatorData(std::optional<int32_t> clientNum);
-  static void clearData();
+  void update(std::optional<int32_t> clientNum);
+  void clearData();
+
+  [[nodiscard]] const std::vector<int32_t> &getActiveSpectators() const;
+  [[nodiscard]] const std::vector<int32_t> &getInactiveSpectators() const;
 
 private:
   static void removeClientFromList(std::vector<int32_t> &v, int32_t clientNum);
+
+  std::vector<int32_t> activeSpectators;
+  std::vector<int32_t> inactiveSpectators;
 };
 } // namespace ETJump
