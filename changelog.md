@@ -8,11 +8,16 @@
 * `etj_jumpSpeedsMaxJumps` cvar to set maximum number of jumps in jump speeds list (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj_jumpSpeedsMaxJumpsPerColumn` cvar to set maximum number of jumps in jump speeds list column (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj_jumpSpeedsMaxJumpsPerRow` cvar to set maximum number of jumps in jump speeds list row (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
+* `etj_drawCHS3` + related cvars - same as CHS2, just a different set of data [#1924](https://github.com/etjump/etjump/pull/1924)
+* `etj_CHS2/3HideLabels` cvar to toggle drawing info labels on CHS2/3, respectively [#1924](https://github.com/etjump/etjump/pull/1924)
+* `etj_CHS1DistanceScale` cvar to scale the distance of CHS1 infos from crosshair (**0.25 - 10.0**) [#1924](https://github.com/etjump/etjump/pull/1924)
 * `etj/g_mapAutoexecDir` cvar to set directory to load map-specific autoexec files from (client/server, respectively) [#1916](https://github.com/etjump/etjump/pull/1916)
 
 ## Changed
 * changing `etj_ccMenu_filename` resets custom command menu to first page [#1918](https://github.com/etjump/etjump/pull/1918)
 * `fireteam invite` accepts `all` or team name as an argument to invite multiple clients to fireteam [#1919](https://github.com/etjump/etjump/pull/1919)
+* `name` is now optional for custom command entries [#1923](https://github.com/etjump/etjump/pull/1923)
+  * the actual command is drawn as the name in the menu if `name` is empty
 * `etj_drawAccel` is disabled in spec/demo playback (in some scenarios) due to interpolation inaccuracy [#1921](https://github.com/etjump/etjump/pull/1921)
   * demo playback drawing is enabled if demo was recorded at `sv_fps/snaps 125`, and not spectating
 * enabled advanced accel coloring for ETJump speed meter & accel meter on demo playback [#1921](https://github.com/etjump/etjump/pull/1921)
@@ -33,6 +38,7 @@
 * `etj_speedAlpha` and `etj_accelAlpha` were calculated incorrectly [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_accelColorUsesAccel` ignored `etj_accelAlpha` while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_drawAccel` showed incorrect accel values for 1 frame after noclip ended [#1921](https://github.com/etjump/etjump/pull/1921)
+* spectator info list could show old, outdated data in some scenarios [#1926](https://github.com/etjump/etjump/pull/1926)
 
 # ETJump 3.5.2
 
