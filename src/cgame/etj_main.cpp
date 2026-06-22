@@ -60,6 +60,7 @@
 #include "etj_savepos.h"
 #include "etj_servercommands.h"
 #include "etj_snaphud.h"
+#include "etj_spectatorinfo_data.h"
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_speed_drawable.h"
 #include "etj_strafe_quality_drawable.h"
@@ -261,6 +262,7 @@ static void initHUD() {
   cgame.hud.accelColor = std::make_unique<AccelColor>();
   cgame.hud.chsDataHandler = std::make_unique<CHSDataHandler>(
       cgame.core.cvarUpdate, cgame.core.consoleCommands);
+  cgame.hud.spectatorInfoData = std::make_shared<SpectatorInfoData>();
 
   cgame.hud.renderables.emplace_back(
       std::make_unique<CHS>(cgame.core.cvarUpdate, cgame.hud.chsDataHandler));
@@ -281,8 +283,8 @@ static void initHUD() {
       cgame.core.consoleCommands, cgame.core.serverCommands,
       cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<QuickFollowDrawer>());
-  cgame.hud.renderables.emplace_back(
-      std::make_unique<SpectatorInfo>(cgame.core.cvarUpdate));
+  cgame.hud.renderables.emplace_back(std::make_unique<SpectatorInfo>(
+      cgame.core.cvarUpdate, cgame.hud.spectatorInfoData));
   cgame.hud.renderables.emplace_back(std::make_unique<AreaIndicator>());
 
   if (etj_CGazOnTop.integer) {

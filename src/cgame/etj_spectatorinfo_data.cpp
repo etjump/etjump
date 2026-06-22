@@ -25,12 +25,10 @@
 #include <algorithm>
 
 #include "etj_spectatorinfo_data.h"
+#include "cg_local.h"
 
 namespace ETJump {
-std::vector<int32_t> SpectatorInfoData::activeSpectators;
-std::vector<int32_t> SpectatorInfoData::inactiveSpectators;
-
-void SpectatorInfoData::updateSpectatorData(std::optional<int32_t> clientNum) {
+void SpectatorInfoData::update(std::optional<int32_t> clientNum) {
   if (clientNum.has_value()) {
     const int32_t cnum = clientNum.value();
     const char *cs = CG_ConfigString(CS_PLAYERS + cnum);
@@ -76,13 +74,22 @@ void SpectatorInfoData::updateSpectatorData(std::optional<int32_t> clientNum) {
   }
 }
 
+void SpectatorInfoData::clearData() {
+  activeSpectators.clear();
+  inactiveSpectators.clear();
+}
+
+const std::vector<int32_t> &SpectatorInfoData::getActiveSpectators() const {
+  return activeSpectators;
+}
+
+const std::vector<int32_t> &SpectatorInfoData::getInactiveSpectators() const {
+  return inactiveSpectators;
+}
+
 void SpectatorInfoData::removeClientFromList(std::vector<int32_t> &v,
                                              const int32_t clientNum) {
   v.erase(std::remove(v.begin(), v.end(), clientNum), v.end());
 }
 
-void SpectatorInfoData::clearData() {
-  activeSpectators.clear();
-  inactiveSpectators.clear();
-}
 } // namespace ETJump

@@ -29,6 +29,7 @@
 
 namespace ETJump {
 class CvarUpdateHandler;
+class SpectatorInfoData;
 
 class SpectatorInfo : public IRenderable {
   CvarValue::Scale scale{};
@@ -45,6 +46,7 @@ class SpectatorInfo : public IRenderable {
   static constexpr vec4_t inactiveColor = {1.0f, 1.0f, 1.0f, 0.33f};
 
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+  std::shared_ptr<SpectatorInfoData> specInfoData;
 
   static bool canSkipDraw();
   void startListeners();
@@ -55,7 +57,8 @@ class SpectatorInfo : public IRenderable {
   static float getTextOffset(const char *name, float fontWidth);
 
 public:
-  explicit SpectatorInfo(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  SpectatorInfo(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+                const std::shared_ptr<SpectatorInfoData> &specInfoData);
   ~SpectatorInfo() override;
 
   bool beforeRender() override;

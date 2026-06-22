@@ -23,14 +23,16 @@
  */
 
 #include "etj_spectatorinfo_drawable.h"
+#include "cg_local.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_spectatorinfo_data.h"
 #include "etj_utilities.h"
 
 namespace ETJump {
 SpectatorInfo::SpectatorInfo(
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : cvarUpdate(cvarUpdate) {
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+    const std::shared_ptr<SpectatorInfoData> &specInfoData)
+    : cvarUpdate(cvarUpdate), specInfoData(specInfoData) {
   startListeners();
   setTextSize(etj_spectatorInfoScale);
   setRowHeight();
@@ -120,8 +122,11 @@ void SpectatorInfo::render() const {
     }
   };
 
-  const size_t totalClients = SpectatorInfoData::activeSpectators.size() +
-                              SpectatorInfoData::inactiveSpectators.size();
+  const auto &activeSpectators = specInfoData->getActiveSpectators();
+  const auto &inactiveSpectators = specInfoData->getInactiveSpectators();
+
+  const size_t totalClients =
+      activeSpectators.size() + inactiveSpectators.size();
   const size_t max = etj_spectatorInfoMaxClients.integer < 0
                          ? totalClients
                          : std::min(etj_spectatorInfoMaxClients.integer,
@@ -129,27 +134,24 @@ void SpectatorInfo::render() const {
 
   // simple case, draw all spectators
   if (totalClients <= max) {
-    for (const auto &client : SpectatorInfoData::activeSpectators) {
+    for (const auto &client : activeSpectators) {
       drawRow(cgs.clientinfo[client].name, colorWhite);
     }
 
-    for (const auto &client : SpectatorInfoData::inactiveSpectators) {
+    for (const auto &client : inactiveSpectators) {
       drawRow(cgs.clientinfo[client].name, inactiveColor);
     }
   } else {
-    const size_t activeDrawCount =
-        std::min(SpectatorInfoData::activeSpectators.size(), max);
+    const size_t activeDrawCount = std::min(activeSpectators.size(), max);
     const size_t inactiveDrawCount =
         activeDrawCount >= max ? 0 : max - activeDrawCount;
 
     for (size_t i = 0; i < activeDrawCount; i++) {
-      drawRow(cgs.clientinfo[SpectatorInfoData::activeSpectators[i]].name,
-              colorWhite);
+      drawRow(cgs.clientinfo[activeSpectators[i]].name, colorWhite);
     }
 
     for (size_t i = 0; i < inactiveDrawCount; i++) {
-      drawRow(cgs.clientinfo[SpectatorInfoData::inactiveSpectators[i]].name,
-              inactiveColor);
+      drawRow(cgs.clientinfo[inactiveSpectators[i]].name, inactiveColor);
     }
 
     const auto remaining = static_cast<int>(totalClients - max);
