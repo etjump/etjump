@@ -43,6 +43,7 @@ private:
     float x;
     float y;
     int32_t align;
+    bool hideLabels;
   };
 
   void setupListeners();
@@ -52,7 +53,8 @@ private:
   void setAlpha(const vmCvar_t *cvar);
   bool infoUsesExtraTrace(const vmCvar_t *cvar);
 
-  static void setupListCHS(CHSHUD &chs, float x, float y, bool rightAlign);
+  static void setupListCHS(CHSHUD &chs, float x, float y, bool rightAlign,
+                           bool hideLabels);
 
   void drawCHSCrosshair(
       const CHSHUD &hud,
