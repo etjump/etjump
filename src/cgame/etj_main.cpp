@@ -259,10 +259,10 @@ static void initVisuals() {
 static void initHUD() {
   assert(cgame.utils.pmoveV2 != nullptr);
 
-  cgame.hud.chsDataHandler = std::make_unique<CHSDataHandler>(
+  cgame.hud.chsDataHandler = std::make_shared<CHSDataHandler>(
       cgame.core.cvarUpdate, cgame.core.consoleCommands);
-  cgame.hud.cgazDataHandler = std::make_unique<CGazData>();
-  cgame.hud.snaphudDataHandler = std::make_unique<SnaphudData>();
+  cgame.hud.cgazDataHandler = std::make_shared<CGazData>();
+  cgame.hud.snaphudDataHandler = std::make_shared<SnaphudData>();
 
   cgame.hud.renderables.emplace_back(
       std::make_unique<CHS>(cgame.core.cvarUpdate, cgame.hud.chsDataHandler));
