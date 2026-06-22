@@ -734,7 +734,7 @@ static void CG_ConfigStringModified(void) {
     }
   } else if (num >= CS_PLAYERS && num < CS_PLAYERS + MAX_CLIENTS) {
     CG_NewClientInfo(num - CS_PLAYERS);
-    ETJump::SpectatorInfoData::updateSpectatorData(num - CS_PLAYERS);
+    ETJump::cgame.hud.spectatorInfoData->update(num - CS_PLAYERS);
   } else if (num >= CS_DLIGHTS && num < CS_DLIGHTS + MAX_DLIGHT_CONFIGSTRINGS) {
     CG_SetupDlightstyles();
   } else if (num >= shaderStateCs && num < shaderStateCs + shaderStateCsMax) {
@@ -2239,13 +2239,13 @@ static void CG_ServerCommand(void) {
   }
   if (!strcmp(cmd, "sc0")) {
     CG_ParseScore(true);
-    ETJump::SpectatorInfoData::updateSpectatorData(std::nullopt);
+    ETJump::cgame.hud.spectatorInfoData->update(std::nullopt);
     return;
   }
 
   if (!strcmp(cmd, "sc1")) {
     CG_ParseScore(false);
-    ETJump::SpectatorInfoData::updateSpectatorData(std::nullopt);
+    ETJump::cgame.hud.spectatorInfoData->update(std::nullopt);
     return;
   }
 

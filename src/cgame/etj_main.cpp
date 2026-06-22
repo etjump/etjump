@@ -62,6 +62,7 @@
 #include "etj_servercommands.h"
 #include "etj_snaphud_data.h"
 #include "etj_snaphud_v2.h"
+#include "etj_spectatorinfo_data.h"
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_strafe_quality_v2.h"
 #include "etj_timerun.h"
@@ -263,6 +264,7 @@ static void initHUD() {
       cgame.core.cvarUpdate, cgame.core.consoleCommands);
   cgame.hud.cgazDataHandler = std::make_shared<CGazData>();
   cgame.hud.snaphudDataHandler = std::make_shared<SnaphudData>();
+  cgame.hud.spectatorInfoData = std::make_shared<SpectatorInfoData>();
 
   cgame.hud.renderables.emplace_back(
       std::make_unique<CHS>(cgame.core.cvarUpdate, cgame.hud.chsDataHandler));
@@ -283,8 +285,8 @@ static void initHUD() {
       cgame.core.consoleCommands, cgame.core.serverCommands,
       cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<QuickFollowDrawer>());
-  cgame.hud.renderables.emplace_back(
-      std::make_unique<SpectatorInfo>(cgame.core.cvarUpdate));
+  cgame.hud.renderables.emplace_back(std::make_unique<SpectatorInfo>(
+      cgame.core.cvarUpdate, cgame.hud.spectatorInfoData));
   cgame.hud.renderables.emplace_back(std::make_unique<AreaIndicator>());
 
   if (etj_CGazOnTop.integer) {
