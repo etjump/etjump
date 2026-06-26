@@ -258,18 +258,36 @@ bool SessionV2::authenticate(const gentity_t *ent) {
 
   for (int i = 0; i < numHWIDs; i++) {
     trap_Argv(3 + i, hwidBuf, sizeof(hwidBuf));
+    bool currentValid = true;
 
     if (!Crypto::isValidSHA2(hwidBuf)) {
       hwidValid = false;
-      break;
+      currentValid = false;
+
+      if (!g_allowInvalidHWID.integer) {
+        break;
+      }
     }
 
-    hwid.emplace_back(Crypto::sha2(hwidBuf));
+    // don't bother hashing invalid HWIDs
+    hwid.emplace_back(currentValid ? Crypto::sha2(hwidBuf) : hwidBuf);
   }
 
   trap_Argv(1, guidBuf, sizeof(guidBuf));
 
-  if (!hwidValid || !Crypto::isValidSHA2(guidBuf)) {
+  // servers may allow invalid HWID until the new system is widely
+  // tested on larger variety of hardware, and we're confident that
+  // it produces valid results
+  if (g_allowInvalidHWID.integer) {
+    Printer::logAdminLn(StringUtils::format(
+        "Invalid HWID response from client %i %s: %s", clientNum, cleanName,
+        StringUtils::join(hwid, " ")));
+  } else if (!hwidValid) {
+    Printer::logAdminLn(spoofAttempt);
+    return false;
+  }
+
+  if (!Crypto::isValidSHA2(guidBuf)) {
     Printer::logAdminLn(spoofAttempt);
     return false;
   }
@@ -484,6 +502,15 @@ void SessionV2::addNewUser(const int32_t clientNum) {
 
 // NOTE: this performs database operations, don't call this on the main thread!
 void SessionV2::updateHWID(const int clientNum, const int userID) const {
+  // if we're allowing invalid HWIDs, don't add them to the database!
+  if (g_allowInvalidHWID.integer) {
+    for (const auto &hwid : clients[clientNum].hwid) {
+      if (StringUtils::startsWith(hwid, "NOHWID_")) {
+        return;
+      }
+    }
+  }
+
   const int platform = clients[clientNum].platform;
   // since we're potentially updating HWID, we only need to check
   // the existing ones for the users current platform

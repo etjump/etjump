@@ -2070,6 +2070,7 @@ extern vmCvar_t g_userConfig;
 extern vmCvar_t g_userDatabaseV2;
 #endif
 extern vmCvar_t g_levelConfig;
+extern vmCvar_t g_allowInvalidHWID;
 
 extern vmCvar_t g_bannerLocation;
 extern vmCvar_t g_bannerTime;

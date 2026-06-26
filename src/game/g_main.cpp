@@ -215,6 +215,7 @@ vmCvar_t g_userDatabaseV2;
 #endif
 vmCvar_t g_levelConfig;
 vmCvar_t g_adminLog;
+vmCvar_t g_allowInvalidHWID;
 
 // Banner
 vmCvar_t g_bannerLocation;
@@ -477,8 +478,9 @@ cvarTable_t gameCvarTable[] = {
     {&g_userConfig, "g_userConfig", "users.db", CVAR_ARCHIVE},
 #ifdef NEW_AUTH
     {&g_userDatabaseV2, "g_userDatabaseV2", "users.v2.db", CVAR_ARCHIVE},
-  #endif
+#endif
     {&g_levelConfig, "g_levelConfig", "levels.cfg", CVAR_ARCHIVE},
+    {&g_allowInvalidHWID, "g_allowInvalidHWID", "0", CVAR_ARCHIVE},
 
     // BannerPrint location
     {&g_bannerLocation, "g_bannerLocation", "1", CVAR_ARCHIVE},
