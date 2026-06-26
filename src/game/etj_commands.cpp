@@ -559,6 +559,111 @@ bool Records(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+static bool recordDetails(gentity_t *ent, Arguments argv) {
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const desc = R"(Prints details about a timerun record.
+    /record-details --season <season name> --map <map name --run <run name> --rank <rank>
+
+    Has a shorthand format of:
+    /record-details <run name>
+    /record-details <run name> <rank>
+    /record-details <map name> <run name> <rank>
+    /record-details <season name> <map name> <run name> <rank>)";
+
+  const auto def =
+      ETJump::CommandParser::CommandDefinition::create("record-details", desc)
+          .addOption("season", "s",
+                     "Season to print record details from. Default is the "
+                     "overall season.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "map", "m",
+              "Map to print record details from. Default is the current map.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("run", "r", "Run to print record details from.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("rank", "rk",
+                     "Rank to print record details from. Default is rank 1.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false);
+
+  const auto args = Container::skipFirstN(*argv, 1);
+  const auto optCommand =
+      ETJump::getOptCommand("record-details", clientNum, def, &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto &command = optCommand.value();
+
+  const auto optSeason = command.getOptional("season");
+  const auto optMap = command.getOptional("map");
+  const auto optRun = command.getOptional("run");
+  const auto optRank = command.getOptional("rank");
+
+  std::string season;
+  std::string map;
+  std::string run;
+  int32_t rank = 1;
+
+  if (command.extraArgs.size() >= 4) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+    rank = Q_atoi(command.extraArgs[3]);
+  } else if (command.extraArgs.size() >= 3) {
+    map = command.extraArgs[0];
+    run = command.extraArgs[1];
+    rank = Q_atoi(command.extraArgs[2]);
+  } else if (command.extraArgs.size() >= 2) {
+    run = command.extraArgs[0];
+    rank = Q_atoi(command.extraArgs[1]);
+  } else if (command.extraArgs.size() >= 1) {
+    run = command.extraArgs[0];
+  }
+
+  if (run.empty()) {
+    if (!optRun.has_value()) {
+      Printer::chat(clientNum, "^3record-details: ^7operation failed. Check "
+                               "console for more information.");
+      Printer::console(clientNum, "Required option `run` was not specified.\n");
+      return false;
+    }
+
+    run = optRun.value().text;
+  }
+
+  if (season.empty()) {
+    season = optSeason.has_value() ? optSeason.value().text : "default";
+  }
+
+  // if the user provided no map, we want to set the query to use exact
+  // map name, so no partial matches are implicitly done against the current map
+  bool exactMap = false;
+
+  if (map.empty()) {
+    map = optMap.has_value() ? optMap.value().text : level.rawmapname;
+    exactMap = !optMap.has_value();
+  }
+
+  if (optRank.has_value()) {
+    rank = optRank.value().integer;
+  }
+
+  game.timerunV2->recordDetails({clientNum, std::move(season), std::move(map),
+                                 std::move(run), rank, exactMap});
+
+  return true;
+}
+
 bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
   // these are console commands but to make them more accessible
   // they were also made admin commands
@@ -2855,6 +2960,8 @@ Commands::Commands() {
       AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
   adminCommands_["top"] =
       AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
+  adminCommands_["record-details"] =
+      AdminCommandPair(ClientCommands::recordDetails, CommandFlags::BASIC);
   adminCommands_["rankings"] =
       AdminCommandPair(ClientCommands::Rankings, CommandFlags::BASIC);
   adminCommands_["loadcheckpoints"] =
@@ -2885,6 +2992,7 @@ Commands::Commands() {
   commands_["times"] = ClientCommands::Records;
   commands_["ranks"] = ClientCommands::Records;
   commands_["top"] = ClientCommands::Records;
+  commands_["record-details"] = ClientCommands::recordDetails;
   commands_["loadcheckpoints"] = ClientCommands::LoadCheckpoints;
   commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
   commands_["rankings"] = ClientCommands::Rankings;
