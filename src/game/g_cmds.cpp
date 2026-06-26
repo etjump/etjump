@@ -14,8 +14,6 @@
 #include "etj_map_statistics.h"
 #include "etj_file.h"
 #include "etj_inactivity_timer.h"
-#include "etj_remapshader_handler.h"
-#include "etj_shader_index_handler.h"
 #include "etj_worldspawn.h"
 
 #ifdef NEW_AUTH
@@ -2761,9 +2759,9 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     level.voteInfo.voteYes = 0;
   } else {
     level.voteInfo.voteYes = 1;
-    if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
-      level.voteInfo.voteYesSpectators = 1;
-    }
+    level.voteInfo.voteYesSpectators =
+        ent->client->sess.sessionTeam == TEAM_SPECTATOR ? 1 : 0;
+
     trap_SendServerCommand(clientNum, "voted yes");
   }
 
@@ -3361,9 +3359,6 @@ void Cmd_SetCameraOrigin_f(gentity_t *ent) {
 }
 
 extern gentity_t *BotFindEntityForName(char *name);
-
-extern vec3_t playerMins;
-extern vec3_t playerMaxs;
 
 qboolean G_TankIsOccupied(gentity_t *ent) {
   if (!ent->tankLink) {
@@ -5053,16 +5048,6 @@ void ClientCommand(int clientNum) {
   }
 
   if (ent->client->pers.connected != CON_CONNECTED) {
-    return;
-  }
-
-  if (!Q_stricmp(cmd, "getExtShaderIndex")) {
-    ETJump::shaderIndexHandler->sendShadersExt(clientNum);
-    return;
-  }
-
-  if (!Q_stricmp(cmd, "getExtShaderState")) {
-    ETJump::remapShaderHandler->sendCurrentShaderStateExt();
     return;
   }
 

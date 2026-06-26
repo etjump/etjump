@@ -239,6 +239,7 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
     int width = 0;
     size_t indent = 0;
     size_t lastWhitespace = 0;
+    size_t lastColorStart = 0;
 
     // do we have to split this line at all?
     if (uiInfo.uiDC.textWidthExt(line.c_str(), scale, 0, font) <= maxW) {
@@ -257,12 +258,23 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
 
     std::string tmp;
     tmp.reserve(line.length());
+    bool color = false;
 
     for (int i = 0; i < static_cast<int>(line.length()); i++) {
       tmp += line[i];
 
       if (std::isspace(line[i])) {
         lastWhitespace = i;
+      }
+
+      if (StringUtils::isColorString(line, i)) {
+        color = line[i + 1] == '*' ? false : true;
+
+        // mark color start index so we know if we need to insert color code
+        // at the start of a new line, if we need to split this line
+        if (color) {
+          lastColorStart = i;
+        }
       }
 
       width = uiInfo.uiDC.textWidthExt(tmp.c_str(), scale, 0, font);
@@ -278,8 +290,6 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
             fmtLines.emplace_back(tmp.substr(0, lastWhitespace));
             line.erase(0, lastWhitespace + 1); // consume the whitespace too
           }
-
-          lastWhitespace = 0;
         } else {
           // this should never happen, but it protects against an infinite loop
           fmtLines.emplace_back(tmp);
@@ -290,6 +300,15 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
 
         tmp.clear();
         line.insert(0, indent, ' ');
+
+        // insert color only if last whitespace is after color,
+        // meaning we're splitting line while inside a colored string
+        if (color && lastColorStart < lastWhitespace) {
+          line.insert(indent, "^o");
+        }
+
+        lastWhitespace = 0;
+        lastColorStart = 0;
       }
     }
 
@@ -298,4 +317,5 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
 
   return fmtLines;
 }
+
 } // namespace ETJump::Utilities

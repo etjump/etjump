@@ -25,7 +25,7 @@
 #include "etj_custom_command_menu_drawable.h"
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
-#include "etj_custom_command_menu.h"
+#include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
@@ -36,8 +36,11 @@ inline constexpr uint8_t MENU_NEXT = 9;
 inline constexpr uint8_t MENU_NEXT_KEY = 0;
 inline constexpr uint8_t MENU_PREV = 8;
 inline constexpr uint8_t MENU_PREV_KEY = 9;
+
 // to prevent long names from overflowing in the menu
-inline constexpr size_t MAX_COMNMAND_NAME_LEN = 28;
+inline constexpr size_t DEFAULT_CMD_NAME_LEN = 28;
+inline constexpr float DEFAULT_MENU_WIDTH = 204.0f;
+inline constexpr float MAX_MENU_WIDTH = 620.0f;
 
 static panel_button_text_t commandMenuTitleFont = {
     0.19f, 0.19f, {0.6f, 0.6f, 0.6f, 1.f}, 0, 0, &cgs.media.limboFont1_lo,
@@ -55,7 +58,7 @@ static panel_button_text_t commandMenuFont = {
 static panel_button_t commandMenuTopBorder = {
     nullptr,
     "",
-    {10, 129, 204, 136},
+    {10, 129, DEFAULT_MENU_WIDTH, 136},
     // set color, r, g, b, a, draw rect
     {1, static_cast<int32_t>(255 * 0.5f), static_cast<int32_t>(255 * 0.5f),
      static_cast<int32_t>(255 * 0.5f), static_cast<int32_t>(255 * 0.5f), 1, 0,
@@ -70,7 +73,7 @@ static panel_button_t commandMenuTopBorder = {
 static panel_button_t commandMenuTopBorderBack = {
     "white",
     "",
-    {11, 130, 202, 134},
+    {11, 130, DEFAULT_MENU_WIDTH - 2, 134},
     // set color, r, g, b, a
     {1, 0, 0, 0, static_cast<int32_t>(255 * 0.75f), 0, 0, 0},
     nullptr,
@@ -83,7 +86,7 @@ static panel_button_t commandMenuTopBorderBack = {
 static panel_button_t commandMenuTopBorderInner = {
     "white",
     "",
-    {12, 131, 200, 12},
+    {12, 131, DEFAULT_MENU_WIDTH - 4, 12},
     // set color, r, g, b, a
     {1, 41, 51, 43, 204, 0, 0, 0},
     nullptr,
@@ -96,7 +99,7 @@ static panel_button_t commandMenuTopBorderInner = {
 static panel_button_t commandMenuTopBorderInnerText = {
     nullptr,
     "",
-    {15, 141, 200, 12},
+    {15, 141, DEFAULT_MENU_WIDTH - 4, 12},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &commandMenuTitleFont,
     nullptr,
@@ -119,29 +122,51 @@ static panel_button_t commandMenuItemText = {
 
 static std::vector<panel_button_t> commandMenuPanels;
 uint8_t CustomCommandMenuDrawable::currentPage = 1;
+size_t CustomCommandMenuDrawable::maxChars = DEFAULT_CMD_NAME_LEN;
 
 CustomCommandMenuDrawable::CustomCommandMenuDrawable(
-    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
-    : consoleCommands(consoleCommands) {
+    const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+    : consoleCommands(consoleCommands), cvarUpdate(cvarUpdate) {
   setupListeners();
-  setupPanels();
+  // this ends up calling 'setupPanels' so no need to call it manually here
+  resizePanels(
+      std::clamp(etj_ccMenu_width.value, DEFAULT_MENU_WIDTH, MAX_MENU_WIDTH));
 }
 
 CustomCommandMenuDrawable::~CustomCommandMenuDrawable() {
   commandMenuPanels.clear();
 
   consoleCommands->unsubscribe("openCustomCommandMenu");
+  cvarUpdate->unsubscribe(&etj_ccMenu_width);
+  cvarUpdate->unsubscribe(&etj_ccMenu_filename);
 }
 
 void CustomCommandMenuDrawable::setupListeners() {
   consoleCommands->subscribe(
       "openCustomCommandMenu", [](const std::vector<std::string> &args) {
+        if (cg.showCustomCommandMenu && etj_ccMenu_browseWithOpen.integer) {
+          findNextPage(cgame.systems.customCommandMenu->getCustomCommands(),
+                       BrowseDirection::NEXT);
+          return;
+        }
+
         if (args.empty()) {
           openMenu(currentPage);
         } else {
           openMenu(static_cast<uint8_t>(Q_atoi(args[0])));
         }
       });
+
+  cvarUpdate->subscribe(&etj_ccMenu_width, [](const vmCvar_t *cvar) {
+    resizePanels(std::clamp(cvar->value, DEFAULT_MENU_WIDTH, MAX_MENU_WIDTH));
+  });
+
+  cvarUpdate->subscribe(&etj_ccMenu_filename, [](const vmCvar_t *) {
+    // changing the filename should always reset to page 1, as there's
+    // no real reason to retain the active page between different menus
+    currentPage = 1;
+  });
 }
 
 void CustomCommandMenuDrawable::openMenu(const uint8_t page) {
@@ -175,8 +200,89 @@ void CustomCommandMenuDrawable::setupPanels() {
   BG_PanelButtonsSetup(commandMenuPanels);
 }
 
+void CustomCommandMenuDrawable::resizePanels(const float width) {
+  commandMenuTopBorder.rect.w = width;
+  commandMenuTopBorderBack.rect.w = width - 2;
+  commandMenuTopBorderInner.rect.w = width - 4;
+  commandMenuTopBorderInnerText.rect.w = width - 4;
+
+  computeMaxChars();
+
+  // editing the existing vector items would be a bit awkward as the sizing
+  // isn't consistent between buttons, so just rebuild the entire thing
+  commandMenuPanels.clear();
+  setupPanels();
+}
+
+void CustomCommandMenuDrawable::computeMaxChars() {
+  char text[MAX_STRING_CHARS]{};
+  Q_strncpyz(text, "1. A", sizeof(text));
+  const auto &btn = commandMenuItemText;
+  const float margin =
+      ((btn.rect.x - commandMenuTopBorder.rect.x) * 2) + btn.rect.x;
+  float width = 0;
+
+  while (true) {
+    width = static_cast<float>(
+        CG_Text_Width_Ext(text, btn.font->scalex, 0, btn.font->font));
+
+    if (width > commandMenuTopBorderInnerText.rect.w - margin) {
+      text[strlen(text) - 1] = '\0';
+      maxChars =
+          MaxCharsForWidth(text, btn.font->scalex, width, btn.font->font);
+      break;
+    }
+
+    Q_strcat(text, sizeof(text), "A");
+  }
+}
+
+void CustomCommandMenuDrawable::findNextPage(const CustomCommandMap &commands,
+                                             const BrowseDirection dir) {
+  assert(dir == BrowseDirection::PREVIOUS || dir == BrowseDirection::NEXT);
+  const auto step = static_cast<int32_t>(dir);
+
+  if (etj_ccMenu_showEmptyPages.integer) {
+    currentPage = ((currentPage - 1 + step + CUSTOM_COMMAND_MENU_MAX_PAGES) %
+                   CUSTOM_COMMAND_MENU_MAX_PAGES) +
+                  1;
+    return;
+  }
+
+  uint8_t next = currentPage;
+
+  while (true) {
+    next = ((next - 1 + step + CUSTOM_COMMAND_MENU_MAX_PAGES) %
+            CUSTOM_COMMAND_MENU_MAX_PAGES) +
+           1;
+
+    if (next == currentPage) {
+      break;
+    }
+
+    // the map might not contain all pages, so verify this page exists
+    if (commands.find(next) != commands.cend()) {
+      // if the page is found, it might still be empty,
+      // if it's just defined in the file, but no commands are defined
+      bool empty = true;
+
+      for (const auto &[name, command] : commands.at(next)) {
+        if (!command.empty()) {
+          empty = false;
+          break;
+        }
+      }
+
+      if (!empty) {
+        currentPage = next;
+        break;
+      }
+    }
+  }
+}
+
 void CustomCommandMenuDrawable::commandMenuTitleDraw(panel_button_t *button) {
-  const auto &commands = cgame.handlers.customCommandMenu->getCustomCommands();
+  const auto &commands = cgame.systems.customCommandMenu->getCustomCommands();
   std::string title = "CUSTOM COMMANDS";
 
   if (!commands.empty()) {
@@ -191,7 +297,7 @@ void CustomCommandMenuDrawable::commandMenuTitleDraw(panel_button_t *button) {
 
 void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
   float y = button->rect.y;
-  const auto &commands = cgame.handlers.customCommandMenu->getCustomCommands();
+  const auto &commands = cgame.systems.customCommandMenu->getCustomCommands();
 
   if (commands.empty()) {
     CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
@@ -232,8 +338,7 @@ void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
         y += button->rect.h;
         continue;
       }
-    } else if (i < MENU_PREV && (commands.at(currentPage)[i].name.empty() ||
-                                 commands.at(currentPage)[i].command.empty())) {
+    } else if (i < MENU_PREV && commands.at(currentPage)[i].command.empty()) {
       y += button->rect.h;
       continue;
     }
@@ -248,8 +353,9 @@ void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
         s += "Next page";
         break;
       default:
-        s += StringUtils::truncate(commands.at(currentPage)[i].name,
-                                   MAX_COMNMAND_NAME_LEN);
+        const auto &cmd = commands.at(currentPage)[i];
+        s += StringUtils::truncate(!cmd.name.empty() ? cmd.name : cmd.command,
+                                   maxChars);
         break;
     }
 
@@ -276,13 +382,23 @@ qboolean CustomCommandMenuDrawable::checkExecKey(const int32_t key,
     return qtrue;
   }
 
-  if (key < '0' || key > '9') {
+  if ((key < '0' || key > '9') && key != K_LEFTARROW && key != K_RIGHTARROW) {
     return qfalse;
   }
 
   // this corresponds to the actual menu item number, not 0-indexed selection
-  int32_t realKey = key - '0';
-  const auto &commands = cgame.handlers.customCommandMenu->getCustomCommands();
+  int32_t realKey = -1;
+
+  // a bit hacky but simplifies keyhandling greatly
+  if (key == K_LEFTARROW) {
+    realKey = '9' - '0';
+  } else if (key == K_RIGHTARROW) {
+    realKey = 0;
+  } else {
+    realKey = key - '0';
+  }
+
+  const auto &commands = cgame.systems.customCommandMenu->getCustomCommands();
 
   if (commands.empty()) {
     return qfalse;
@@ -294,8 +410,7 @@ qboolean CustomCommandMenuDrawable::checkExecKey(const int32_t key,
       return qfalse;
     }
 
-    if (commands.at(currentPage)[realKey - 1].name.empty() ||
-        commands.at(currentPage)[realKey - 1].command.empty()) {
+    if (commands.at(currentPage)[realKey - 1].command.empty()) {
       return qfalse;
     }
   }
@@ -306,20 +421,10 @@ qboolean CustomCommandMenuDrawable::checkExecKey(const int32_t key,
 
   switch (realKey) {
     case MENU_PREV_KEY:
-      if (currentPage == 1) {
-        currentPage = CUSTOM_COMMAND_MENU_MAX_PAGES;
-      } else {
-        currentPage--;
-      }
-
+      findNextPage(commands, BrowseDirection::PREVIOUS);
       break;
     case MENU_NEXT_KEY:
-      if (currentPage == CUSTOM_COMMAND_MENU_MAX_PAGES) {
-        currentPage = 1;
-      } else {
-        currentPage++;
-      }
-
+      findNextPage(commands, BrowseDirection::NEXT);
       break;
     default:
       trap_SendConsoleCommand(

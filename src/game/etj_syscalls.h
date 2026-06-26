@@ -39,6 +39,8 @@
 #endif
 
 inline constexpr intptr_t VM_CALL_END = -1337;
+inline constexpr int32_t MOD_EXPORT_PADDING = 1337;
+
 #define SystemCall(...) ExpandSyscall(__VA_ARGS__, VM_CALL_END)
 
 extern intptr_t(QDECL *vmSyscall)(intptr_t arg, ...);

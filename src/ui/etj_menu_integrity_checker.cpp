@@ -58,9 +58,8 @@ bool MenuIntegrityChecker::checkIntegrity() {
     try {
       File f("ui/" + file);
 
-      const auto contents = f.read();
-      const auto currentHash =
-          Crypto::sha1(std::string(contents.cbegin(), contents.cend()));
+      const auto contents = f.readString();
+      const auto currentHash = Crypto::sha1(contents);
 
       if (!StringUtils::iEqual(currentHash, hash)) {
         Com_DPrintf("Integrity check failed on file '%s' - invalid hash!\n",

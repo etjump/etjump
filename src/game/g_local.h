@@ -84,12 +84,6 @@ inline constexpr int AAS_AREA_TEAM_ALLIES = 0x0040;
 inline constexpr int AAS_AREA_TEAM_AXIS_DISGUISED = 0x0080;
 inline constexpr int AAS_AREA_TEAM_ALLIES_DISGUISED = 0x0100;
 
-// I have no idea how I managed to forget these :D
-// Hopefully no1 will ever notice versions < 2.0.1 have the g_gravity
-// & g_speed cvars :p
-inline constexpr int G_GRAVITY = 800;
-inline constexpr int G_SPEED = 320;
-
 // TODO: relocate, this is a cvar bitflag for g_chatOptions
 inline constexpr int CHAT_OPTIONS_INTERPOLATE_NAME_TAGS = 0x000001;
 
@@ -164,6 +158,9 @@ inline constexpr int EXPLOSIVE_TOUCHABLE = 2;
 inline constexpr int EXPLOSIVE_USESHADER = 4;
 inline constexpr int EXPLOSIVE_LOWGRAV = 8;
 inline constexpr int EXPLOSIVE_TANK = 32;
+
+// func_static(_client)
+inline constexpr int32_t FUNC_STATIC_PAIN_HEALTH = 9999;
 
 //============================================================================
 
@@ -2128,6 +2125,8 @@ extern vmCvar_t g_adminChat;
 extern vmCvar_t g_chatReplay;
 extern vmCvar_t g_chatReplayMaxMessageAge;
 
+extern vmCvar_t g_mapAutoexecDir;
+
 void trap_Printf(const char *fmt);
 [[noreturn]] void trap_Error(const char *fmt);
 int trap_Milliseconds(void);
@@ -2973,11 +2972,8 @@ extern std::shared_ptr<ProgressionTrackers> progressionTrackers;
 class SyscallExt;
 extern std::unique_ptr<SyscallExt> syscallExt;
 
-class ShaderIndexHandler;
-extern std::unique_ptr<ShaderIndexHandler> shaderIndexHandler;
-
-class RemapShaderHandler;
-extern std::unique_ptr<RemapShaderHandler> remapShaderHandler;
+class ShaderConfigHandler;
+extern std::unique_ptr<ShaderConfigHandler> shaderConfigHandler;
 
 struct GameLogicException : public std::exception {
 private:

@@ -1424,8 +1424,8 @@ qboolean CG_ConsoleCommand(void) {
     return qtrue;
   }
 
-  return ETJump::cgame.handlers.consoleCommands->check(cmd, arguments) ? qtrue
-                                                                       : qfalse;
+  return ETJump::cgame.core.consoleCommands->check(cmd, arguments) ? qtrue
+                                                                   : qfalse;
 }
 
 /*

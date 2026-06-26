@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include "cg_local.h"
+#include "etj_command_complete_ext.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_demo_compatibility.h"
 #include "etj_utilities.h"
@@ -78,6 +79,9 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
       return (g_waitingForKey && g_bindItem) ? qtrue : qfalse;
     case CG_MESSAGERECEIVED:
       return -1;
+    case CG_CONSOLE_COMPLETE_ARGUMENT:
+      // qboolean for API compatibility
+      return ETJump::CommandCompletions::completeArgument() ? qtrue : qfalse;
     default:
       CG_Error("vmMain: unknown command %i", command);
       break;
@@ -294,6 +298,7 @@ vmCvar_t com_hunkmegs;
 
 vmCvar_t etj_drawCGaz;
 vmCvar_t etj_CGazY;
+vmCvar_t etj_CGaz2Y;
 vmCvar_t etj_CGazHeight;
 vmCvar_t etj_CGaz2Color1;
 vmCvar_t etj_CGaz2Color2;
@@ -312,7 +317,8 @@ vmCvar_t etj_CGaz2WishDirUniformLength;
 vmCvar_t etj_CGaz1DrawMidLine;
 vmCvar_t etj_CGaz1MidlineColor;
 vmCvar_t etj_CGaz2HighRes;
-vmCvar_t etj_CGaz2Thickness;
+vmCvar_t etj_CGaz2Thickness1;
+vmCvar_t etj_CGaz2Thickness2;
 
 vmCvar_t etj_drawOB;
 // Aciz: movable drawOB
@@ -400,6 +406,9 @@ vmCvar_t etj_CHS1Info5;
 vmCvar_t etj_CHS1Info6;
 vmCvar_t etj_CHS1Info7;
 vmCvar_t etj_CHS1Info8;
+
+vmCvar_t etj_CHS1DistanceScale;
+
 vmCvar_t etj_drawCHS2;
 vmCvar_t etj_CHS2Info1;
 vmCvar_t etj_CHS2Info2;
@@ -409,9 +418,27 @@ vmCvar_t etj_CHS2Info5;
 vmCvar_t etj_CHS2Info6;
 vmCvar_t etj_CHS2Info7;
 vmCvar_t etj_CHS2Info8;
+
 // chs2 position
 vmCvar_t etj_CHS2PosX;
 vmCvar_t etj_CHS2PosY;
+vmCvar_t etj_CHS2HideLabels;
+
+vmCvar_t etj_drawCHS3;
+vmCvar_t etj_CHS3Info1;
+vmCvar_t etj_CHS3Info2;
+vmCvar_t etj_CHS3Info3;
+vmCvar_t etj_CHS3Info4;
+vmCvar_t etj_CHS3Info5;
+vmCvar_t etj_CHS3Info6;
+vmCvar_t etj_CHS3Info7;
+vmCvar_t etj_CHS3Info8;
+
+// chs3 position
+vmCvar_t etj_CHS3PosX;
+vmCvar_t etj_CHS3PosY;
+vmCvar_t etj_CHS3HideLabels;
+
 // common CHS things
 vmCvar_t etj_CHSShadow;
 vmCvar_t etj_CHSAlpha;
@@ -456,7 +483,7 @@ vmCvar_t etj_spectatorInfoDirection;
 vmCvar_t etj_drawRunTimer;
 vmCvar_t etj_runTimerX;
 vmCvar_t etj_runTimerY;
-vmCvar_t etj_runtimerSize;
+vmCvar_t etj_runTimerSize;
 vmCvar_t etj_runTimerShadow;
 vmCvar_t etj_runTimerAutoHide;
 vmCvar_t etj_runTimerInactiveColor;
@@ -620,6 +647,9 @@ vmCvar_t etj_jumpSpeedsFasterColor;
 vmCvar_t etj_jumpSpeedsSlowerColor;
 vmCvar_t etj_jumpSpeedsMinSpeed;
 vmCvar_t etj_jumpSpeedsTextSize;
+vmCvar_t etj_jumpSpeedsMaxJumps;
+vmCvar_t etj_jumpSpeedsMaxJumpsPerColumn;
+vmCvar_t etj_jumpSpeedsMaxJumpsPerRow;
 
 // Strafe quality
 vmCvar_t etj_drawStrafeQuality;
@@ -700,12 +730,16 @@ vmCvar_t etj_onDemoPlaybackEnd;
 vmCvar_t etj_HUD_noLerp;
 
 vmCvar_t etj_useExecQuiet;
+vmCvar_t etj_mapAutoexecDir;
 
 vmCvar_t etj_hideFlamethrowerEffects;
 
 vmCvar_t etj_ccMenu_filename;
 vmCvar_t etj_ccMenu_rememberPage;
 vmCvar_t etj_ccMenu_autoClose;
+vmCvar_t etj_ccMenu_width;
+vmCvar_t etj_ccMenu_browseWithOpen;
+vmCvar_t etj_ccMenu_showEmptyPages;
 
 typedef struct {
   vmCvar_t *vmCvar;
@@ -906,6 +940,7 @@ cvarTable_t cvarTable[] = {
     {&etj_OBX, "etj_OBX", "320", CVAR_ARCHIVE},
     {&etj_OBY, "etj_OBY", "220", CVAR_ARCHIVE},
     {&etj_CGazY, "etj_CGazY", "240", CVAR_ARCHIVE},
+    {&etj_CGaz2Y, "etj_CGaz2Y", "240", CVAR_ARCHIVE},
     {&etj_CGazHeight, "etj_CGazHeight", "20", CVAR_ARCHIVE},
     {&etj_CGaz2Color1, "etj_CGaz2Color1", "1.0 0.0 0.0 1.0", CVAR_ARCHIVE},
     {&etj_CGaz2Color2, "etj_CGaz2Color2", "0.0 1.0 1.0 1.0", CVAR_ARCHIVE},
@@ -927,7 +962,8 @@ cvarTable_t cvarTable[] = {
     {&etj_CGaz1MidlineColor, "etj_CGaz1MidlineColor", "1.0 0.5 0.0 0.75",
      CVAR_ARCHIVE},
     {&etj_CGaz2HighRes, "etj_CGaz2HighRes", "0", CVAR_ARCHIVE},
-    {&etj_CGaz2Thickness, "etj_CGaz2Thickness", "2.0", CVAR_ARCHIVE},
+    {&etj_CGaz2Thickness1, "etj_CGaz2Thickness1", "2.0", CVAR_ARCHIVE},
+    {&etj_CGaz2Thickness2, "etj_CGaz2Thickness2", "2.0", CVAR_ARCHIVE},
 
     {&cl_yawspeed, "cl_yawspeed", "0", CVAR_ARCHIVE},
     {&cl_freelook, "cl_freelook", "1", CVAR_ARCHIVE},
@@ -1005,6 +1041,9 @@ cvarTable_t cvarTable[] = {
     {&etj_CHS1Info6, "etj_CHS1Info6", "0", CVAR_ARCHIVE},
     {&etj_CHS1Info7, "etj_CHS1Info7", "0", CVAR_ARCHIVE},
     {&etj_CHS1Info8, "etj_CHS1Info8", "0", CVAR_ARCHIVE},
+
+    {&etj_CHS1DistanceScale, "etj_CHS1DistanceScale", "1.0", CVAR_ARCHIVE},
+
     {&etj_drawCHS2, "etj_drawCHS2", "0", CVAR_ARCHIVE},
     {&etj_CHS2Info1, "etj_CHS2Info1", "0", CVAR_ARCHIVE},
     {&etj_CHS2Info2, "etj_CHS2Info2", "0", CVAR_ARCHIVE},
@@ -1014,8 +1053,25 @@ cvarTable_t cvarTable[] = {
     {&etj_CHS2Info6, "etj_CHS2Info6", "0", CVAR_ARCHIVE},
     {&etj_CHS2Info7, "etj_CHS2Info7", "0", CVAR_ARCHIVE},
     {&etj_CHS2Info8, "etj_CHS2Info8", "0", CVAR_ARCHIVE},
+
     {&etj_CHS2PosX, "etj_CHS2PosX", "0", CVAR_ARCHIVE},
     {&etj_CHS2PosY, "etj_CHS2PosY", "0", CVAR_ARCHIVE},
+    {&etj_CHS2HideLabels, "etj_CHS2HideLabels", "0", CVAR_ARCHIVE},
+
+    {&etj_drawCHS3, "etj_drawCHS3", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info1, "etj_CHS3Info1", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info2, "etj_CHS3Info2", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info3, "etj_CHS3Info3", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info4, "etj_CHS3Info4", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info5, "etj_CHS3Info5", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info6, "etj_CHS3Info6", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info7, "etj_CHS3Info7", "0", CVAR_ARCHIVE},
+    {&etj_CHS3Info8, "etj_CHS3Info8", "0", CVAR_ARCHIVE},
+
+    {&etj_CHS3PosX, "etj_CHS3PosX", "0", CVAR_ARCHIVE},
+    {&etj_CHS3PosY, "etj_CHS3PosY", "0", CVAR_ARCHIVE},
+    {&etj_CHS3HideLabels, "etj_CHS3HideLabels", "0", CVAR_ARCHIVE},
+
     {&etj_CHSShadow, "etj_CHSShadow", "0", CVAR_ARCHIVE},
     {&etj_CHSAlpha, "etj_CHSAlpha", "1.0", CVAR_ARCHIVE},
     {&etj_CHSColor, "etj_CHSColor", "1.0 1.0 1.0", CVAR_ARCHIVE},
@@ -1057,7 +1113,7 @@ cvarTable_t cvarTable[] = {
     {&etj_drawRunTimer, "etj_drawRunTimer", "1", CVAR_ARCHIVE},
     {&etj_runTimerX, "etj_runTimerX", "320", CVAR_ARCHIVE},
     {&etj_runTimerY, "etj_runTimerY", "360", CVAR_ARCHIVE},
-    {&etj_runtimerSize, "etj_runtimerSize", "3", CVAR_ARCHIVE},
+    {&etj_runTimerSize, "etj_runTimerSize", "3", CVAR_ARCHIVE},
     {&etj_runTimerShadow, "etj_runTimerShadow", "0", CVAR_ARCHIVE},
     {&etj_runTimerAutoHide, "etj_runTimerAutoHide", "1", CVAR_ARCHIVE},
     {&etj_runTimerInactiveColor, "etj_runTimerInactiveColor", "mdgrey",
@@ -1230,6 +1286,11 @@ cvarTable_t cvarTable[] = {
      CVAR_ARCHIVE},
     {&etj_jumpSpeedsMinSpeed, "etj_jumpSpeedsMinSpeed", "0", CVAR_ARCHIVE},
     {&etj_jumpSpeedsTextSize, "etj_jumpSpeedsTextSize", "2", CVAR_ARCHIVE},
+    {&etj_jumpSpeedsMaxJumps, "etj_jumpSpeedsMaxJumps", "10", CVAR_ARCHIVE},
+    {&etj_jumpSpeedsMaxJumpsPerColumn, "etj_jumpSpeedsMaxJumpsPerColumn", "5",
+     CVAR_ARCHIVE},
+    {&etj_jumpSpeedsMaxJumpsPerRow, "etj_jumpSpeedsMaxJumpsPerRow", "10",
+     CVAR_ARCHIVE},
 
     // Strafe quality
     {&etj_drawStrafeQuality, "etj_drawStrafeQuality", "0", CVAR_ARCHIVE},
@@ -1325,6 +1386,7 @@ cvarTable_t cvarTable[] = {
 
     {&etj_HUD_noLerp, "etj_HUD_noLerp", "0", CVAR_ARCHIVE},
     {&etj_useExecQuiet, "etj_useExecQuiet", "0", CVAR_ARCHIVE},
+    {&etj_mapAutoexecDir, "etj_mapAutoexecDir", "", CVAR_ARCHIVE},
 
     {&etj_hideFlamethrowerEffects, "etj_hideFlamethrowerEffects", "0",
      CVAR_ARCHIVE},
@@ -1333,6 +1395,11 @@ cvarTable_t cvarTable[] = {
      CVAR_ARCHIVE},
     {&etj_ccMenu_rememberPage, "etj_ccMenu_rememberPage", "0", CVAR_ARCHIVE},
     {&etj_ccMenu_autoClose, "etj_ccMenu_autoClose", "1", CVAR_ARCHIVE},
+    {&etj_ccMenu_width, "etj_ccMenu_width", "204", CVAR_ARCHIVE},
+    {&etj_ccMenu_browseWithOpen, "etj_ccMenu_browseWithOpen", "0",
+     CVAR_ARCHIVE},
+    {&etj_ccMenu_showEmptyPages, "etj_ccMenu_showEmptyPages", "0",
+     CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -1437,7 +1504,11 @@ void CG_UpdateCvars(void) {
           }
         }
 
-        ETJump::cgame.handlers.cvarUpdate->check(cv->vmCvar);
+        // if we're in the loading screen and just drawing a frame on that,
+        // we haven't finished initialization and this might be null
+        if (ETJump::cgame.core.cvarUpdate) {
+          ETJump::cgame.core.cvarUpdate->check(cv->vmCvar);
+        }
       }
     }
   }
@@ -2937,20 +3008,23 @@ static void CG_RegisterGraphics(void) {
     cgs.gameModelSkins[i] = trap_R_RegisterSkin(skinName);
   }
 
-  for (i = 1; i < MAX_CS_SHADERS; i++) {
-    const char *shaderName;
+  int32_t start = 0;
+  int32_t max = MAX_CS_SHADERS;
 
-    shaderName = CG_ConfigString(CS_SHADERS + i);
-    if (!shaderName[0]) {
+  // old shader index setup starts form 1, up to 32
+  if (ETJump::cgame.demo.compatibility->flags.oldShaderIndexOrder) {
+    start = 1;
+    max = MAX_CS_SHADERS_COMPAT;
+  }
+
+  for (i = start; i < max; i++) {
+    const char *shaderStr = CG_ConfigString(CS_SHADERS + i);
+
+    if (!shaderStr[0]) {
       break;
     }
 
-    ETJump::registerGameShader(i, shaderName);
-
-    // we might have more, send a request for them once we're connected
-    if (i == MAX_CS_SHADERS - 1) {
-      cg.requestExtShaders = true;
-    }
+    ETJump::registerGameShader(i, shaderStr);
   }
 
   for (i = 1; i < MAX_CHARACTERS; i++) {
@@ -3861,9 +3935,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   memset(cg_items, 0, sizeof(cg_items));
   memset(&cg_pmove, 0, sizeof(cg_pmove));
 
-  ETJump::cgame.handlers.cvarUpdate =
-      std::make_unique<ETJump::CvarUpdateHandler>();
-
   cgs.initing = qtrue;
 
   for (i = 0; i < MAX_CLIENTS; i++) {
@@ -3926,6 +3997,17 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_ParseServerinfo();
   CG_ParseSysteminfo();
+
+  // NOTE: The core systems must be created before any ETJump objects
+  // are created! All C++ modules should get these as constructor params
+  // to subscribe to console commands, server commands, cvar updates etc,
+  // and not reach for the global pointers. They exists because they are still
+  // used in various places outside of C++ objects, in legacy C code.
+  ETJump::initCore();
+
+  // we need demo compatibility object asap, once server info is parsed,
+  // so we can get the mod version
+  ETJump::initDemo();
 
   if (cgs.gametype == ETJUMP_GAMETYPE) {
     CG_LocateArena();
@@ -4031,7 +4113,13 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   CG_LoadingString("");
 
-  CG_ShaderStateChanged();
+  if (ETJump::cgame.demo.compatibility->flags.oldShaderIndexOrder) {
+    CG_ShaderStateChanged(MAX_CS_SHADERSTATES - 1);
+  } else {
+    for (i = 0; i < MAX_CS_SHADERSTATES; i++) {
+      CG_ShaderStateChanged(i);
+    }
+  }
 
   CG_ChargeTimesChanged();
 
@@ -4083,11 +4171,16 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   ETJump::initVoteTally();
 
   // map-specific autoexec
-  const auto mapConfig = va("autoexec_%s", cgs.rawmapname);
+  const auto *const path = etj_mapAutoexecDir.string[0] != '\0'
+                               ? va("%s/", etj_mapAutoexecDir.string)
+                               : "";
+  auto *const mapConfig = va("%sautoexec_%s", path, cgs.rawmapname);
+
   if (ETJump::configFileExists(mapConfig)) {
     ETJump::execFile(mapConfig, ETJump::ExecFileType::MAP_AUTOEXEC);
-  } else if (ETJump::configFileExists("autoexec_default")) {
-    ETJump::execFile("autoexec_default", ETJump::ExecFileType::MAP_AUTOEXEC);
+  } else if (ETJump::configFileExists(va("%sautoexec_default", path))) {
+    ETJump::execFile(va("%sautoexec_default", path),
+                     ETJump::ExecFileType::MAP_AUTOEXEC);
   }
 
   if (!Q_stricmp(cgs.rawmapname, "solstice") ||

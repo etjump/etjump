@@ -24,33 +24,46 @@
 
 #pragma once
 
-#include "g_local.h"
+#include <vector>
+
+#include "etj_pmove_utils_v2.h"
 
 namespace ETJump {
-
-// 128 in VET for 32 shaders, upped to 2048 for our extended 512 shaders
-inline constexpr int32_t MAX_SHADER_REMAPS = 2048;
-
-class RemapShaderHandler {
+class SnaphudData {
 public:
-  void addRemap(std::string_view oldShader, std::string_view newShader);
-  void updateShaderState();
+  SnaphudData();
+  ~SnaphudData() = default;
 
-  // so clients get the state of extended shaders on init
-  void sendCurrentShaderStateExt();
+  struct State {
+    std::vector<float> snapAngles;
+    float a;
+    vec2_t wishvel;
 
-private:
-  struct ShaderRemap {
-    std::string oldShader;
-    std::string newShader;
-    float timeOffset{};
+    PmoveUtilsV2::PmoveSingleResult result;
+
+    playerState_t ps;
+    pmove_t pm;
+    pmoveExt_t pmext;
+    pml_t pml;
   };
 
-  std::array<ShaderRemap, MAX_SHADER_REMAPS> shaderRemaps{};
-  std::array<std::string, EXT_SHADER_SET_COUNT> extShaderStates{};
-  int32_t remapCount{};
+  void runFrame();
+  [[nodiscard]] const State &getState() const;
 
-  std::string buildShaderStateConfig(int32_t index);
-  void sendExtShaderState(int32_t index);
+  // angles should be radians
+  bool inMainAccelZone(const vec2_t wishvel, float wishspeed, float velAngle,
+                       float optAngle, const pmove_t &pm);
+
+private:
+  void updateState(float accel);
+
+  void walkMove();
+  void airMove();
+  void accelerate(float wishspeed, float accel);
+
+  enum class SnapTrueness { UPMOVE = 1, GROUND = 2 };
+
+  State s{};
+  EnumBitset<PmoveUtilsV2::PmoveDefaultInput> defaultInput;
 };
 } // namespace ETJump

@@ -87,10 +87,19 @@ inline constexpr int CROUCH_VIEWHEIGHT = 16;
 inline constexpr int DEAD_VIEWHEIGHT = -16;
 inline constexpr int PRONE_VIEWHEIGHT = -8;
 
-extern vec3_t playerMins;
-extern vec3_t playerMaxs;
-extern vec3_t playerlegsProneMins;
-extern vec3_t playerlegsProneMaxs;
+inline constexpr vec3_t playerMins = {-18, -18, -24};
+inline constexpr vec3_t playerMaxs = {18, 18, 48};
+inline constexpr vec3_t playerlegsProneMins = {-13.5f, -13.5f, -24.f};
+inline constexpr vec3_t playerlegsProneMaxs = {13.5f, 13.5f, -14.4f};
+
+// there's no real easy way to determine these for other players,
+// both crouch and prone use ps.crouchMaxZ for maxs[2] but it's calculated
+// differently based off stance, and since the result is not stored
+// in entitystate, it's simpler to just use hardcoded values
+// these are always correct anyway, there's no variation in any scenario
+
+inline constexpr int32_t CROUCH_MAXS_Z = playerMaxs[2] - 24;
+inline constexpr int32_t PRONE_MAXS_Z = playerMaxs[2] - 32;
 
 // RF, on fire effects
 inline constexpr int FIRE_FLASH_TIME = 2000;
@@ -311,7 +320,7 @@ inline constexpr int CS_MODELS = 64;
 inline constexpr int CS_SOUNDS = CS_MODELS + MAX_MODELS;
 inline constexpr int CS_SHADERS = CS_SOUNDS + MAX_SOUNDS;
 inline constexpr int CS_SHADERSTATE = CS_SHADERS + MAX_CS_SHADERS;
-inline constexpr int CS_SKINS = CS_SHADERSTATE + 1;
+inline constexpr int CS_SKINS = CS_SHADERSTATE + MAX_CS_SHADERSTATES;
 inline constexpr int CS_CHARACTERS = CS_SKINS + MAX_CS_SKINS;
 inline constexpr int CS_PLAYERS = CS_CHARACTERS + MAX_CHARACTERS;
 inline constexpr int CS_MULTI_SPAWNTARGETS = CS_PLAYERS + MAX_CLIENTS;
@@ -459,27 +468,6 @@ typedef struct {
   float noclipScale;
   bool isJumpLand;
 
-  // ETJump: exported values from pmove_t & pml_t for cgame drawing
-  int tracemask;
-  qboolean walking;
-  qboolean groundPlane;
-  trace_t groundTrace;
-  int waterlevel;
-  vec3_t mins, maxs;
-
-  vec3_t previous_velocity;
-  vec3_t forward, right, up;
-  float frametime;
-  qboolean ladder;
-
-  vec3_t velocity; // we need to store this before PM_Accelerate scales
-                   // it back to preserve the true effect friction has
-                   // on ground speed
-
-  float scale;
-  float scaleAlt; // cmdScale without upmove component
-  float accel;
-
   // timestamp adrenaline should expire at
   int adrenalineTime;
 
@@ -552,12 +540,6 @@ typedef struct {
   qboolean noActivateLean;
   bool noPanzerAutoswitch;
 
-  qboolean walking;
-  qboolean groundPlane;
-  trace_t groundTrace;
-
-  vec3_t forward, right, up;
-
   // callbacks to test the world
   // these will be different functions during game and cgame
   void (*trace)(trace_t *results, const vec3_t start, const vec3_t mins,
@@ -582,6 +564,15 @@ bool canFireWeapon(const playerState_t *ps);
 
 inline constexpr int8_t CMDSCALE_DEFAULT = 127;
 inline constexpr int8_t CMDSCALE_WALK = 64;
+
+// ms before jump is allowed again
+inline constexpr int JUMP_DELAY_TIME = 850;
+// ms before jump is allowed after standing up from prone
+inline constexpr int32_t PRONE_JUMP_DELAY_TIME = 650;
+// ms before player is allowed to stand up after going prone
+inline constexpr int32_t PRONE_DELAY_TIME = 750;
+
+inline constexpr float TRACE_LADDER_DIST = 48.0f;
 
 //===================================================================================
 
@@ -1966,7 +1957,8 @@ bool BG_DropItems(int contents, int shared);
 inline constexpr float OVERCLIP = 1.001f;
 
 //----(SA)	removed PM_ammoNeeded 11/27/00
-void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce);
+void PM_ClipVelocity(const vec3_t in, const vec3_t normal, vec3_t out,
+                     float overbounce);
 
 typedef enum {
   FOOTSTEP_NORMAL,
@@ -2961,6 +2953,9 @@ enum class PlayerStance {
   Prone = 2,
 };
 } // namespace ETJump
+
+inline constexpr int32_t G_GRAVITY = 800;
+inline constexpr int32_t G_SPEED = 320;
 
 inline constexpr int JUMP_VELOCITY = 270;
 // FIXME: this is incorrect when ps.speed is modified

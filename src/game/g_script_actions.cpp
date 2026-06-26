@@ -10,10 +10,10 @@
 #include "../game/g_local.h"
 #include "../game/q_shared.h"
 #include "etj_printer.h"
+#include "etj_shader_config_handler.h"
 #include "etj_string_utilities.h"
 #include "etj_progression_tracker.h"
 #include "etj_target_spawn_relay.h"
-#include "etj_remapshader_handler.h"
 
 /*
 Contains the code to handle the various commands available with an event script.
@@ -197,12 +197,12 @@ qboolean G_ScriptAction_ShaderRemap(gentity_t *ent, char *params) {
   }
   Q_strncpyz(newShader, token, 256);
 
-  ETJump::remapShaderHandler->addRemap(oldShader, newShader);
+  ETJump::shaderConfigHandler->addShaderRemap(oldShader, newShader);
   return qtrue;
 }
 
 qboolean G_ScriptAction_ShaderRemapFlush(gentity_t *ent, char *params) {
-  ETJump::remapShaderHandler->updateShaderState();
+  ETJump::shaderConfigHandler->updateShaderState();
   return qtrue;
 }
 

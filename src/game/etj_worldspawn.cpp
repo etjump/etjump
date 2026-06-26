@@ -47,9 +47,10 @@ Worldspawn::Worldspawn() {
 
 void Worldspawn::initNoDrop(const char *key) {
   int32_t value = 0;
+  G_SpawnInt(key, "0", &value);
+  noDrop = value;
 
-  if (G_SpawnInt(key, "0", &value)) {
-    noDrop = value;
+  if (noDrop) {
     shared.integer |= BG_LEVEL_NO_DROP;
   }
 
@@ -58,27 +59,21 @@ void Worldspawn::initNoDrop(const char *key) {
 
 void Worldspawn::initNoExplosives(const char *key) {
   int32_t value = 0;
-
-  if (G_SpawnInt(key, "0", &value)) {
-    value = std::clamp(value, 0, 2);
-    noExplosives = static_cast<NoExplosives>(value);
-  }
+  G_SpawnInt(key, "0", &value);
+  noExplosives = static_cast<NoExplosives>(std::clamp(value, 0, 2));
 
   printKeyValue(key, std::to_string(static_cast<int32_t>(noExplosives)));
 }
 
 void Worldspawn::initNoFallDamage(const char *key) {
   int32_t value = 0;
+  G_SpawnInt(key, "0", &value);
+  noFallDamage = static_cast<NoFallDamage>(std::clamp(value, 0, 2));
 
-  if (G_SpawnInt(key, "0", &value)) {
-    value = std::clamp(value, 0, 2);
-    noFallDamage = static_cast<NoFallDamage>(value);
-
-    if (noFallDamage == NoFallDamage::ON) {
-      shared.integer |= BG_LEVEL_NO_FALLDAMAGE;
-    } else if (noFallDamage == NoFallDamage::FORCE_ON) {
-      shared.integer |= BG_LEVEL_NO_FALLDAMAGE_FORCE;
-    }
+  if (noFallDamage == NoFallDamage::ON) {
+    shared.integer |= BG_LEVEL_NO_FALLDAMAGE;
+  } else if (noFallDamage == NoFallDamage::FORCE_ON) {
+    shared.integer |= BG_LEVEL_NO_FALLDAMAGE_FORCE;
   }
 
   printKeyValue(key, std::to_string(static_cast<int32_t>(noFallDamage)));
@@ -86,30 +81,24 @@ void Worldspawn::initNoFallDamage(const char *key) {
 
 void Worldspawn::initNoFTNoGhost(const char *key) {
   int32_t value = 0;
-
-  if (G_SpawnInt(key, "0", &value)) {
-    noFTNoGhost = value;
-  }
+  G_SpawnInt(key, "0", &value);
+  noFTNoGhost = value;
 
   printKeyValue(key, noFTNoGhost ? "1" : "0");
 }
 
 void Worldspawn::initNoFTSaveLimit(const char *key) {
   int32_t value = 0;
-
-  if (G_SpawnInt(key, "0", &value)) {
-    noFTSaveLimit = value;
-  }
+  G_SpawnInt(key, "0", &value);
+  noFTSaveLimit = value;
 
   printKeyValue(key, noFTSaveLimit ? "1" : "0");
 }
 
 void Worldspawn::initNoFTTeamjumpMode(const char *key) {
   int32_t value = 0;
-
-  if (G_SpawnInt(key, "0", &value)) {
-    noFTTeamjumpMode = value;
-  }
+  G_SpawnInt(key, "0", &value);
+  noFTTeamjumpMode = value;
 
   printKeyValue(key, noFTTeamjumpMode ? "1" : "0");
 }
@@ -130,10 +119,11 @@ void Worldspawn::initNoFTTeamjumpMode(const char *key) {
 void Worldspawn::initNoGhost(const char *key) {
   int32_t value = 0;
   int32_t currentValue = g_ghostPlayers.integer;
+  G_SpawnInt(key, "0", &value);
+  noGhost = value;
 
-  if (G_SpawnInt(key, "0", &value)) {
+  if (noGhost) {
     currentValue |= 2;
-    noGhost = value;
   } else {
     currentValue &= ~2;
   }
@@ -146,29 +136,26 @@ void Worldspawn::initNoGhost(const char *key) {
 
 void Worldspawn::initNoGod(const char *key) {
   int32_t value = 0;
-
-  if (G_SpawnInt(key, "0", &value)) {
-    noGod = value;
-  }
+  G_SpawnInt(key, "0", &value);
+  noGod = value;
 
   printKeyValue(key, noGod ? "1" : "0");
 }
 
 void Worldspawn::initNoGoto(const char *key) {
   int32_t value = 0;
-
-  if (G_SpawnInt(key, "0", &value)) {
-    noGoto = value;
-  }
+  G_SpawnInt(key, "0", &value);
+  noGoto = value;
 
   printKeyValue(key, noGoto ? "1" : "0");
 }
 
 void Worldspawn::initNoJumpDelay(const char *key) {
   int32_t value = 0;
+  G_SpawnInt(key, "0", &value);
+  noJumpDelay = value;
 
-  if (G_SpawnInt(key, "0", &value)) {
-    noJumpDelay = value;
+  if (noJumpDelay) {
     shared.integer |= BG_LEVEL_NO_JUMPDELAY;
   }
 
@@ -177,9 +164,10 @@ void Worldspawn::initNoJumpDelay(const char *key) {
 
 void Worldspawn::initNoNoclip(const char *key) {
   int32_t value = 0;
+  G_SpawnInt(key, "0", &value);
+  noNoclip = value;
 
-  if (G_SpawnInt(key, "0", &value)) {
-    noNoclip = value;
+  if (noNoclip) {
     shared.integer |= BG_LEVEL_NO_NOCLIP;
   }
 
@@ -188,9 +176,10 @@ void Worldspawn::initNoNoclip(const char *key) {
 
 void Worldspawn::initNoSave(const char *key) {
   int32_t value = 0;
+  G_SpawnInt(key, "0", &value);
+  noSave = value;
 
-  if (G_SpawnInt(key, "0", &value)) {
-    noSave = value;
+  if (noSave) {
     shared.integer |= BG_LEVEL_NO_SAVE;
   }
 
@@ -199,9 +188,10 @@ void Worldspawn::initNoSave(const char *key) {
 
 void Worldspawn::initNoOverbounce(const char *key) {
   int32_t value = 0;
+  G_SpawnInt(key, "0", &value);
+  noOverbounce = value;
 
-  if (G_SpawnInt(key, "0", &value)) {
-    noOverbounce = value;
+  if (noOverbounce) {
     shared.integer |= BG_LEVEL_NO_OVERBOUNCE;
   }
 
@@ -210,9 +200,10 @@ void Worldspawn::initNoOverbounce(const char *key) {
 
 void Worldspawn::initNoProne(const char *key) {
   int32_t value = 0;
+  G_SpawnInt(key, "0", &value);
+  noProne = value;
 
-  if (G_SpawnInt(key, "0", &value)) {
-    noProne = value;
+  if (noProne) {
     shared.integer |= BG_LEVEL_NO_PRONE;
   }
 
@@ -221,9 +212,10 @@ void Worldspawn::initNoProne(const char *key) {
 
 void Worldspawn::initNoWallbug(const char *key) {
   int32_t value = 0;
+  G_SpawnInt(key, "0", &value);
+  noWallbug = value;
 
-  if (G_SpawnInt(key, "0", &value)) {
-    noWallbug = value;
+  if (noWallbug) {
     shared.integer |= BG_LEVEL_NO_WALLBUG;
   }
 
@@ -232,16 +224,13 @@ void Worldspawn::initNoWallbug(const char *key) {
 
 void Worldspawn::initOverbouncePlayers(const char *key) {
   int32_t value = 0;
+  G_SpawnInt(key, "0", &value);
+  overbouncePlayers = static_cast<OverbouncePlayers>(std::clamp(value, 0, 2));
 
-  if (G_SpawnInt(key, "0", &value)) {
-    value = std::clamp(value, 0, 2);
-    overbouncePlayers = static_cast<OverbouncePlayers>(value);
-
-    if (overbouncePlayers == OverbouncePlayers::ALWAYS) {
-      shared.integer |= BG_LEVEL_BODY_OB_ALWAYS;
-    } else if (overbouncePlayers == OverbouncePlayers::NEVER) {
-      shared.integer |= BG_LEVEL_BODY_OB_NEVER;
-    }
+  if (overbouncePlayers == OverbouncePlayers::ALWAYS) {
+    shared.integer |= BG_LEVEL_BODY_OB_ALWAYS;
+  } else if (overbouncePlayers == OverbouncePlayers::NEVER) {
+    shared.integer |= BG_LEVEL_BODY_OB_NEVER;
   }
 
   printKeyValue(key, std::to_string(static_cast<int32_t>(overbouncePlayers)));
@@ -267,9 +256,10 @@ void Worldspawn::initPortalSurfaces(const char *key) {
 
 void Worldspawn::initPortalPredict(const char *key) {
   int32_t value = 0;
+  G_SpawnInt(key, "0", &value);
+  portalPredict = value;
 
-  if (G_SpawnInt(key, "0", &value)) {
-    portalPredict = value;
+  if (portalPredict) {
     shared.integer |= BG_LEVEL_PORTAL_PREDICT;
   }
 
@@ -278,11 +268,8 @@ void Worldspawn::initPortalPredict(const char *key) {
 
 void Worldspawn::initPortalTeam(const char *key) {
   int32_t value = 0;
-
-  if (G_SpawnInt(key, "0", &value)) {
-    value = std::clamp(value, 0, 2);
-    portalTeam = static_cast<PortalTeam>(value);
-  }
+  G_SpawnInt(key, "0", &value);
+  portalTeam = static_cast<PortalTeam>(std::clamp(value, 0, 2));
 
   trap_Cvar_Set("g_portalTeam",
                 std::to_string(static_cast<int32_t>(portalTeam)).c_str());

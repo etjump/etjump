@@ -33,20 +33,14 @@ class EntityEventsHandler;
 class PlayerEventsHandler;
 class AwaitedCommandHandler;
 class CvarUpdateHandler;
-class ClientRtvHandler;
-class CustomCommandMenu;
-class Timerun;
 
-struct Handlers {
+struct Core {
   std::shared_ptr<ClientCommandsHandler> serverCommands;
   std::shared_ptr<ClientCommandsHandler> consoleCommands;
   std::shared_ptr<EntityEventsHandler> entityEvents;
   std::shared_ptr<PlayerEventsHandler> playerEvents;
   std::unique_ptr<AwaitedCommandHandler> awaitedCommand;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
-  std::unique_ptr<ClientRtvHandler> rtv;
-  std::unique_ptr<CustomCommandMenu> customCommandMenu;
-  std::shared_ptr<Timerun> timerun;
 };
 
 #ifdef NEW_AUTH
@@ -69,6 +63,16 @@ struct Platform {
   std::unique_ptr<SyscallExt> syscallExt;
 };
 
+class ClientRtvHandler;
+class CustomCommandMenu;
+class Timerun;
+
+struct Systems {
+  std::unique_ptr<ClientRtvHandler> rtv;
+  std::unique_ptr<CustomCommandMenu> customCommandMenu;
+  std::shared_ptr<Timerun> timerun;
+};
+
 class DemoCompatibility;
 class AutoDemoRecorder;
 
@@ -82,7 +86,7 @@ class CvarUnlocker;
 class SavePos;
 class ColorParser;
 class TraceUtils;
-class PmoveUtils;
+class PmoveUtilsV2;
 
 struct Utils {
   std::unique_ptr<EventLoop> eventLoop;
@@ -90,7 +94,7 @@ struct Utils {
   std::unique_ptr<SavePos> savePos;
   std::unique_ptr<ColorParser> colorParser;
   std::unique_ptr<TraceUtils> trace;
-  std::unique_ptr<PmoveUtils> pmove;
+  std::unique_ptr<PmoveUtilsV2> pmoveV2;
 };
 
 class ConsoleShader;
@@ -111,22 +115,28 @@ struct Visuals {
   std::unique_ptr<TrickjumpLines> trickjumpLines;
 };
 
-class AccelColor;
 class CHSDataHandler;
+class CGazData;
+class SnaphudData;
+class SpectatorInfoData;
 class TimerunView;
 
 struct HUD {
-  std::shared_ptr<AccelColor> accelColor;
   std::shared_ptr<CHSDataHandler> chsDataHandler;
+  std::shared_ptr<CGazData> cgazDataHandler;
+  std::shared_ptr<SnaphudData> snaphudDataHandler;
+  std::shared_ptr<SpectatorInfoData> spectatorInfoData;
 
   std::vector<std::unique_ptr<IRenderable>> renderables;
   std::unique_ptr<TimerunView> timerunView;
 };
 
 struct CGameContext {
-  Handlers handlers;
-  Platform platform;
+  Core core;
   Demo demo;
+
+  Platform platform;
+  Systems systems;
   Utils utils;
   UI ui;
   Visuals visuals;

@@ -48,7 +48,7 @@ bool ETJump::CvarUpdateHandler::subscribe(
 
 bool ETJump::CvarUpdateHandler::unsubscribe(const vmCvar_t *target) {
   auto callback = callbacks.find(target->handle);
-  if (callback != end(callbacks)) {
+  if (callback == end(callbacks)) {
     return false;
   }
   callbacks.erase(callback);

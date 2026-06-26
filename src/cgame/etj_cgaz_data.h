@@ -24,38 +24,50 @@
 
 #pragma once
 
-#include <list>
-
-#include "../game/q_shared.h"
-#include "../game/bg_public.h"
+#include "etj_pmove_utils_v2.h"
 
 namespace ETJump {
-class AccelColor {
+class CGazData {
 public:
-  AccelColor() = default;
-  ~AccelColor() = default;
+  CGazData();
+  ~CGazData() = default;
 
-  struct StoredSpeed {
-    int time;
-    float speed;
+  struct State {
+    float gSquared;  // gravity squared, 0 when not on slick
+    float vSquared;  // velocity squared (before friction)
+    float vfSquared; // velocity final squared (after friction)
+    float aSquared;  // accel squared
+
+    float v;  // velocity (before friction)
+    float vf; // velocity final (after friction)
+    float a;  // accel
+
+    vec2_t wishvel;
+    float wishspeed;
+    float velAngle;
+
+    PmoveUtilsV2::PmoveSingleResult result;
+
+    playerState_t ps;
+    pmove_t pm;
+    pmoveExt_t pmext;
+    pml_t pml;
   };
 
-  enum Style { Simple = 1, Advanced = 2 };
-
-  static void popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds,
-                                 int time);
-  static void setAccelColor(int style, float speed, float alpha,
-                            const pmove_t *pm, const playerState_t *ps,
-                            std::list<StoredSpeed> &storedSpeeds,
-                            const vec3_t &accel, vec4_t &color);
-  static bool lowSpeedOnGround(float speed, int groundEntityNum);
+  void runFrame();
+  [[nodiscard]] const State &getState() const;
 
 private:
-  static constexpr int ACCEL_COLOR_SMOOTHING_TIME = 250;
-  static constexpr float ACCEL_FOR_SOLID_COLOR = 100;
+  void updateState(float wishspeed, float accel, float slickGravity);
 
-  static float calcAvgAccel(std::list<StoredSpeed> &storedSpeeds);
-  static void calcAccelColor(const pmove_t *pm, const playerState_t *ps,
-                             const vec3_t &accel, vec4_t &outColor);
+  void walkMove();
+  void airMove();
+  void friction() const;
+  void accelerate(float wishspeed, float accel, bool slick);
+
+  enum class CGazTrueness { UPMOVE = 1, GROUND = 2 };
+
+  State s{};
+  EnumBitset<PmoveUtilsV2::PmoveDefaultInput> defaultInput;
 };
 } // namespace ETJump

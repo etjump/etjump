@@ -407,6 +407,18 @@ typedef int fixed16_t;
   #define M_PI 3.14159265358979323846f // matches value in gcc v2 math.h
 #endif
 
+#ifndef M_PIf
+  #define M_PIf 3.14159265358979323846f // matches value in gcc math.h
+#endif
+
+#ifndef M_PI_2f
+  #define M_PI_2f 1.57079632679489661923f // pi/2, matches value in gcc math.h
+#endif
+
+#ifndef M_SQRT2
+  #define M_SQRT2 1.41421356237309504880 // sqrt(2), matches value in gcc math.h
+#endif
+
 inline constexpr int NUMVERTEXNORMALS = 162;
 extern vec3_t bytedirs[NUMVERTEXNORMALS];
 
@@ -1107,14 +1119,27 @@ inline constexpr int MAX_SOUNDS = 256; // so they cannot be blindly increased
 inline constexpr int MAX_CS_SKINS = 64;
 inline constexpr int MAX_CSSTRINGS = 32;
 
-inline constexpr int MAX_CS_SHADERS = 32;
+// Instead of wasting an entire shader index for a single shader, we pack
+// up to 15 shaders to each index. To store the state for all of these,
+// we use some of the existing indices that are normally reserved to shaders,
+// to store more state strings. 16 of the existing 'CS_SHADERS' indices are
+// used to store shaders. To store the states, we use the remaining indices
+// from 'CS_SHADERS', with 15 states per index. We could pack more states
+// to an index (up to 53 in fact), but I want to keep the network packets
+// for CS updates on remaps reasonable in size.
+inline constexpr int32_t MAX_CS_SHADERS = 16;
+// 1 extra to keep 'CS_SKINS' index intact
+inline constexpr int32_t MAX_CS_SHADERSTATES = 17;
 
-// shader index for some entities is transmitted in es->modelindex2,
-// which is 9 bits, so we can reasonably support up to 512 shader indices
-// with our extended shader index handler
-inline constexpr int32_t MAX_SHADER_INDEX = 512;
-inline constexpr int32_t EXT_SHADER_SET_COUNT =
-    (MAX_SHADER_INDEX - MAX_CS_SHADERS) / MAX_CS_SHADERS;
+inline constexpr int32_t MAX_SHADERS_PER_INDEX =
+    (MAX_STRING_CHARS - 1) / (MAX_QPATH + 1);
+inline constexpr int32_t MAX_SHADER_INDEX =
+    MAX_SHADERS_PER_INDEX * MAX_CS_SHADERS;
+
+inline constexpr int32_t MAX_SHADERSTATES_PER_INDEX = MAX_SHADERS_PER_INDEX;
+
+// for demo compatibility, to make the indices back to the old values
+inline constexpr int32_t MAX_CS_SHADERS_COMPAT = 32;
 
 inline constexpr int MAX_SERVER_TAGS = 256;
 inline constexpr int MAX_TAG_FILES = 64;

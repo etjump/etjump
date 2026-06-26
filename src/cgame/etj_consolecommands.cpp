@@ -189,25 +189,25 @@ getOptCommand(const std::string &commandPrefix,
 }
 
 void registerCommands() {
-  cgame.handlers.consoleCommands->subscribe(
+  cgame.core.consoleCommands->subscribe(
       "ftSaveLimitSet", [](const auto &) { ftSaveLimitSet(); }, false);
 
-  cgame.handlers.consoleCommands->subscribe(
+  cgame.core.consoleCommands->subscribe(
       "forceMaplistRefresh", [](const auto &) { forceMaplistRefresh(); },
       false);
 
-  cgame.handlers.consoleCommands->subscribe(
+  cgame.core.consoleCommands->subscribe(
       "forceCustomvoteRefresh", [](const auto &) { forceCustomvoteRefresh(); },
       false);
 
-  cgame.handlers.consoleCommands->subscribe(
+  cgame.core.consoleCommands->subscribe(
       "uiRequestCustomvotes", [](const auto &) { uiRequestCustomvotes(); },
       false);
 
-  cgame.handlers.consoleCommands->subscribe(
+  cgame.core.consoleCommands->subscribe(
       "uiChatMenuOpen", [](const auto &args) { uiChatMenuOpen(args); }, false);
 
-  cgame.handlers.consoleCommands->subscribe(
+  cgame.core.consoleCommands->subscribe(
       "printMapCustomizationInfo",
       [](const auto &) { printMapCustomizationInfo(); });
 }

@@ -6,7 +6,7 @@
 #define MENU_NAME "etjump_settings_hud2_jumpspeeds"
 #define GROUP_NAME "group_etjump_settings_hud2"
 
-#define NUM_SUBMENUS 9
+#define NUM_SUBMENUS 10
 #define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
 
 menuDef {
@@ -44,10 +44,11 @@ menuDef {
     SIDEBUTTON          (3, "CHS", close MENU_NAME; open etjump_settings_hud2_chs)
     SIDEBUTTON          (4, "CHS 1", close MENU_NAME; open etjump_settings_hud2_chs1)
     SIDEBUTTON          (5, "CHS 2", close MENU_NAME; open etjump_settings_hud2_chs2)
-    SIDEBUTTON          (6, "ACCEL SPEED", close MENU_NAME; open etjump_settings_hud2_accelspeed)
-    SIDEBUTTON_ACTIVE   (7, "JUMP SPEEDS", close MENU_NAME; open MENU_NAME)
-    SIDEBUTTON          (8, "STRAFE QUALITY", close MENU_NAME; open etjump_settings_hud2_strafequality)
-    SIDEBUTTON          (9, "UPMOVE METER", close MENU_NAME; open etjump_settings_hud2_upmove)
+    SIDEBUTTON          (6, "CHS 3", close MENU_NAME; open etjump_settings_hud2_chs3)
+    SIDEBUTTON          (7, "ACCEL SPEED", close MENU_NAME; open etjump_settings_hud2_accelspeed)
+    SIDEBUTTON_ACTIVE   (8, "JUMP SPEEDS", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (9, "STRAFE QUALITY", close MENU_NAME; open etjump_settings_hud2_strafequality)
+    SIDEBUTTON          (10, "UPMOVE METER", close MENU_NAME; open etjump_settings_hud2_upmove)
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "JUMP SPEEDS")
 
@@ -65,6 +66,12 @@ menuDef {
         COMBO               (SETTINGS_COMBO_POS(10), "Slower color:", 0.2, SETTINGS_ITEM_H, "etj_jumpSpeedsSlowerColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of slower jumps\netj_jumpSpeedsSlowerColor")
         CVARINTLABEL        (SETTINGS_ITEM_POS(11), "etj_jumpSpeedsMinSpeed", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(11), "Minimum speed:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsMinSpeed 0 0 500 1, "Color jumps below this value with the slower color value\netj_jumpSpeedsMinSpeed")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(12), "etj_jumpSpeedsMaxJumps", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(12), "Max jumps:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsMaxJumps 10 1 100 1, "Maximum number of jump speeds to display (max 100)\netj_jumpSpeedsMaxJumps")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(13), "etj_jumpSpeedsMaxJumpsPerColumn", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(13), "Max jumps per column:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsMaxJumpsPerColumn 5 1 100 1, "Maximum number of jump speeds on a column, when using vertical list style\netj_jumpSpeedsMaxJumpsPerColumn")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(14), "etj_jumpSpeedsMaxJumpsPerRow", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(14), "Max jumps per row:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsMaxJumpsPerRow 10 1 100 1, "Maximum number of jump speeds on a row, when using horizontal list style\netj_jumpSpeedsMaxJumpsPerRow")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

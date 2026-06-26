@@ -22,23 +22,23 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include "etj_command_complete_ext.h"
 
-#include <map>
+namespace ETJump::CommandCompletions {
+bool completeArgument() {
+  // TODO: implement this - look for commands that want additional completions
+  // in e.g. std::unordered_map<std::string, std::function>, where the key
+  // is the command, and value is a function pointer to the completion
+  // implementation. The implementation itself is responsible for providing
+  // valid arguments, and calling 'trap_CommandComplete' for all the arguments
+  // that are supported by the base command. The implementations may also call
+  // additional completion requests for commands which take more than one
+  // argument, and can do this contextually (e.g. if first argument is "foo",
+  // provide a different set of completions for second argument).
+  // The syscall itself does not give context on which command is requesting
+  // autocomplete, we must call 'CG_Argv' here first to see which completion
+  // we're looking for.
 
-#include "g_local.h"
-
-namespace ETJump {
-class ShaderIndexHandler {
-public:
-  int32_t getShaderIndexExt(std::string_view name);
-  void sendShadersExt(int32_t clientNum) const;
-
-private:
-  // we keep these separated to sets of 32,
-  // to keep the shader state strings reasonable in length
-  std::array<std::map<int32_t, std::string>, EXT_SHADER_SET_COUNT> shaderSets;
-
-  std::string buildShaderString();
-};
-} // namespace ETJump
+  return false;
+}
+} // namespace ETJump::CommandCompletions

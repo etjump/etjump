@@ -1545,13 +1545,9 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
     }
   }
 
-  // adjust freestanding events to account for ET_TOKEN_EASY/MEDIUM/HARD,
-  // ET_VELOCITY_PUSH_TRIGGER, ET_FAKEBRUSH and ET_TELEPORT_TRIGGER_CLIENT
+  // adjust freestanding events to account for any added entity types
   // freestanding events always have an eType > ET_EVENTS
-  if ((ETJump::cgame.demo.compatibility->flags.adjustEvVelocityPushTrigger ||
-       ETJump::cgame.demo.compatibility->flags
-           .adjustEvFakebrushAndClientTeleporter ||
-       ETJump::cgame.demo.compatibility->flags.adjustEvTokens) &&
+  if (ETJump::cgame.demo.compatibility->adjustEventNums &&
       es->eType > ET_EVENTS) {
     event = ETJump::cgame.demo.compatibility->adjustedEventNum(event);
   }
@@ -1839,7 +1835,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       trap_S_StartSound(nullptr, es->number, CHAN_VOICE,
                         CG_CustomSound(es->number, "*jump1.wav"));
       if (clientNum == cg.predictedPlayerState.clientNum) {
-        ETJump::cgame.handlers.entityEvents->check(EV_JUMP, cent);
+        ETJump::cgame.core.entityEvents->check(EV_JUMP, cent);
       }
       break;
     case EV_TAUNT:
@@ -2764,8 +2760,8 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       }
 
       // should refactor users to playereventshandler
-      ETJump::cgame.handlers.entityEvents->check(EV_LOAD_TELEPORT, cent);
-      ETJump::cgame.handlers.playerEvents->check("load", {});
+      ETJump::cgame.core.entityEvents->check(EV_LOAD_TELEPORT, cent);
+      ETJump::cgame.core.playerEvents->check("load", {});
       trap_SendConsoleCommand("resetJumpSpeeds\n");
       trap_SendConsoleCommand("resetStrafeQuality\n");
       trap_SendConsoleCommand("resetUpmoveMeter\n");

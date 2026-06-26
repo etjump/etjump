@@ -27,9 +27,10 @@
 
 namespace ETJump {
 inline constexpr int32_t SF_START_INVIS = 1 << 0;
-inline constexpr int32_t SF_GIB_INSIDE = 1 << 1;
-inline constexpr int32_t SF_FT_TEAMJUMP_SYNC = 1 << 2;
-inline constexpr int32_t SF_CONSUME_PORTALS = 1 << 3;
+inline constexpr int32_t SF_PAIN = 1 << 1;
+inline constexpr int32_t SF_GIB_INSIDE = 1 << 2;
+inline constexpr int32_t SF_FT_TEAMJUMP_SYNC = 1 << 3;
+inline constexpr int32_t SF_CONSUME_PORTALS = 1 << 4;
 
 /*
  * 'ent->s.effect1Time' and 'ent->s.effect2Time' are treated as boolean
@@ -58,6 +59,14 @@ void FuncStaticClient::spawn(gentity_t *ent) {
   if (ent->spawnflags & SF_START_INVIS) {
     ent->s.effect1Time = INT_MAX;
     ent->s.effect2Time = INT_MAX;
+  }
+
+  if (ent->spawnflags & SF_PAIN) {
+    ent->pain = pain;
+    ent->takedamage = qtrue;
+    // pretty sure this is useless but 'func_static' does it as well
+    ent->isProp = qtrue;
+    ent->health = FUNC_STATIC_PAIN_HEALTH;
   }
 
   char *s = nullptr;
@@ -94,14 +103,20 @@ void FuncStaticClient::use(gentity_t *self, [[maybe_unused]] gentity_t *other,
     COM_BitCheck(&self->s.effect2Time, clientNum) ? turnOn(self, clientNum)
                                                   : turnOff(self, clientNum);
   }
+}
 
-  self->activator = activator;
-
-  if (self->scriptName) {
-    G_Script_ScriptEvent(
-        self, "activate",
-        activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+void FuncStaticClient::pain(gentity_t *self, gentity_t *attacker,
+                            [[maybe_unused]] int32_t damage,
+                            [[maybe_unused]] vec_t *point) {
+  // do not error here, otherwise things like 'shooter_rocket'
+  // hitting the entity will crash the server
+  if (!attacker || !attacker->client) {
+    return;
   }
+
+  // reset the health so the entity never dies
+  self->health = FUNC_STATIC_PAIN_HEALTH;
+  self->activator = attacker;
 
   G_UseTargets(self, self->activator);
 }

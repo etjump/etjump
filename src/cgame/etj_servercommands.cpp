@@ -65,33 +65,9 @@ static void customvoteList(const Arguments &args) {
 static void pmFlashWindow() {
   if (etj_highlight.integer &
       static_cast<int>(ChatHighlightFlags::HIGHLIGHT_FLASH)) {
-    SyscallExt::trap_SysFlashWindowETLegacy(
+    SyscallExt::trap_SysFlashWindow(
         SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
   }
-}
-
-static void extShaderIndex(const Arguments &args) {
-  for (const auto &arg : args) {
-    const auto shaderKvp = StringUtils::split(arg, "|");
-
-    // sanity check, shouldn't happen,
-    // but just skip if the command is somehow malformed
-    if (shaderKvp.size() != 2) {
-      continue;
-    }
-
-    registerGameShader(Q_atoi(shaderKvp[0]), shaderKvp[1].c_str());
-  }
-
-  // request state once we've gotten the shaders
-  trap_SendClientCommand("getExtShaderState");
-}
-
-static void extShaderState(const Arguments &args) {
-  // this *should* be a single argument, but 'timeOffset' can have padding,
-  // introducing whitespace to the command, which breaks it into multiple args
-  // we don't need to preserve it, the parser will ignore it anyway
-  CG_ShaderStateChanged(StringUtils::join(args, ""));
 }
 
 static void resetStrafeQuality() {
@@ -142,35 +118,29 @@ static void callvote(const Arguments &args) {
 }
 
 void registerCommands() {
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "maplist", [](const auto &args) { maplist(args); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "forceCustomvoteRefresh", [](const auto &) { forceCustomvoteRefresh(); },
       false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "numcustomvotes", [](const auto &args) { numCustomvotes(args); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "customvotelist", [](const auto &args) { customvoteList(args); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "pmFlashWindow", [](const auto &) { pmFlashWindow(); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
-      "extShaderIndex", [](const auto &args) { extShaderIndex(args); }, false);
-
-  cgame.handlers.serverCommands->subscribe(
-      "extShaderState", [](const auto &args) { extShaderState(args); }, false);
-
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "resetStrafeQuality", [](const auto &) { resetStrafeQuality(); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "savePrint", [](const auto &args) { savePrint(args); }, false);
 
-  cgame.handlers.serverCommands->subscribe(
+  cgame.core.serverCommands->subscribe(
       "callvote", [](const auto &args) { callvote(args); }, false);
 }
 } // namespace ETJump::ServerCommands

@@ -25,8 +25,8 @@
 #pragma once
 
 #include "etj_irenderable.h"
-
 #include "etj_chs_data.h"
+#include "../../assets/ui/menudef.h"
 
 namespace ETJump {
 class CHS : public IRenderable {
@@ -39,6 +39,13 @@ public:
   void render() const override;
 
 private:
+  struct CHSHUD {
+    float x;
+    float y;
+    int32_t align;
+    bool hideLabels;
+  };
+
   void setupListeners();
   static bool canSkipDraw();
 
@@ -46,14 +53,20 @@ private:
   void setAlpha(const vmCvar_t *cvar);
   bool infoUsesExtraTrace(const vmCvar_t *cvar);
 
-  void drawCHS1() const;
-  void drawCHS2() const;
+  static void setupListCHS(CHSHUD &chs, float x, float y, bool rightAlign,
+                           bool hideLabels);
 
-  float x1{}; // CHS 1
-  float y1{}; // CHS 1
-  float x2{}; // CHS 2
-  float y2{}; // CHS 2
-  int32_t CHS2Align{};
+  void drawCHSCrosshair(
+      const CHSHUD &hud,
+      const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &cvars) const;
+  void drawCHSList(
+      const CHSHUD &hud,
+      const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &cvars) const;
+
+  CHSHUD chs1{};
+  CHSHUD chs2{};
+  CHSHUD chs3{};
+
   int32_t textStyle{};
   vec4_t color{};
 

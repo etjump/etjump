@@ -182,12 +182,38 @@ bool skipPortalDraw(const int selfNum, const int otherNum) {
   return true;
 }
 
-void registerGameShader(const int32_t index, const char *shader) {
+// compatibility version, for old shader index numbering (1 shader per index)
+static void registerGameShaderCompat(const int32_t index, const char *shader) {
   cgs.gameShaders[index] = shader[0] == '*'
                                ? trap_R_RegisterShader(shader + 1)
                                : trap_R_RegisterShaderNoMip(shader);
   Q_strncpyz(cgs.gameShaderNames[index], shader[0] == '*' ? shader + 1 : shader,
              MAX_QPATH);
+}
+
+void registerGameShader(const int32_t index, const char *shaderStr) {
+  if (cgame.demo.compatibility->flags.oldShaderIndexOrder) {
+    registerGameShaderCompat(index, shaderStr);
+    return;
+  }
+
+  const auto shaders = StringUtils::split(shaderStr, " ");
+  const int32_t start = index * MAX_SHADERS_PER_INDEX;
+
+  for (int32_t i = 0; i < shaders.size(); i++) {
+    // 1-indexed, index 0 is always empty (invalid)
+    const int32_t shaderNum = start + i + 1;
+    const std::string &shader = shaders[i];
+
+    if (StringUtils::startsWith(shaders[i], "*")) {
+      const char *s = shader.c_str() + 1;
+      cgs.gameShaders[shaderNum] = trap_R_RegisterShader(s);
+      Q_strncpyz(cgs.gameShaderNames[shaderNum], s, MAX_QPATH);
+    } else {
+      cgs.gameShaders[shaderNum] = trap_R_RegisterShaderNoMip(shader.c_str());
+      Q_strncpyz(cgs.gameShaderNames[shaderNum], shader.c_str(), MAX_QPATH);
+    }
+  }
 }
 
 void centerCursor() {
@@ -247,7 +273,7 @@ bool showingScores() {
 }
 
 void onPlayerRespawn(bool revived) {
-  cgame.handlers.playerEvents->check("respawn", {revived ? "1" : "0"});
+  cgame.core.playerEvents->check("respawn", {revived ? "1" : "0"});
 }
 
 playerState_t *getValidPlayerState() {
@@ -269,5 +295,25 @@ void resetCustomvoteInfo() {
   cg.numCustomvoteInfosRequested = 0;
 
   trap_SendConsoleCommand("uiResetCustomvotes\n");
+}
+
+void setPmoveMaxs(const playerState_t *ps) {
+  if (!ps) {
+    return;
+  }
+
+  // if we're not interpolating, 'cg_pmove.maxs' is setup correctly
+  if (!cg.demoPlayback && !(ps->pm_flags & PMF_FOLLOW)) {
+    VectorCopy(cg_pmove.maxs, cg.pmoveMaxs);
+    return;
+  }
+
+  VectorCopy(ps->maxs, cg.pmoveMaxs);
+
+  if (ps->eFlags & EF_CROUCHING) {
+    cg.pmoveMaxs[2] = CROUCH_MAXS_Z;
+  } else if (ps->eFlags & (EF_PRONE | EF_PRONE_MOVING)) {
+    cg.pmoveMaxs[2] = PRONE_MAXS_Z;
+  }
 }
 } // namespace ETJump

@@ -11,11 +11,10 @@
 #include "etj_timerun_entities.h"
 #include "etj_entity_utilities.h"
 #include "etj_rtv.h"
+#include "etj_shader_config_handler.h"
 #include "etj_syscall_ext_shared.h"
 #include "etj_target_spawn_relay.h"
 #include "etj_time_utilities.h"
-#include "etj_remapshader_handler.h"
-#include "etj_shader_index_handler.h"
 
 level_locals_t level;
 
@@ -42,8 +41,7 @@ std::shared_ptr<Database> database;
 std::shared_ptr<Session> session; // TODO: replace with v2
 std::shared_ptr<ProgressionTrackers> progressionTrackers;
 std::unique_ptr<SyscallExt> syscallExt;
-std::unique_ptr<RemapShaderHandler> remapShaderHandler;
-std::unique_ptr<ShaderIndexHandler> shaderIndexHandler;
+std::unique_ptr<ShaderConfigHandler> shaderConfigHandler;
 } // namespace ETJump
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,8 +70,7 @@ static void shutdownETJump() {
   ETJump::saveSystem = nullptr;
   ETJump::progressionTrackers = nullptr;
   ETJump::syscallExt = nullptr;
-  ETJump::shaderIndexHandler = nullptr;
-  ETJump::remapShaderHandler = nullptr;
+  ETJump::shaderConfigHandler = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -284,6 +281,8 @@ vmCvar_t g_adminChat;
 vmCvar_t g_chatReplay;
 vmCvar_t g_chatReplayMaxMessageAge;
 
+vmCvar_t g_mapAutoexecDir;
+
 // ETLegacy server browser integration
 // os support - this SERVERINFO cvar specifies supported client operating
 // systems on server
@@ -300,7 +299,7 @@ vmCvar_t g_oss; //   0  - vanilla/unknown/ET:L auto setup
 
 cvarTable_t gameCvarTable[] = {
     // don't override the cheat state set by the system
-    {&g_cheats, "sv_cheats", "", 0, qfalse},
+    {&g_cheats, "sv_cheats", "", CVAR_SYSTEMINFO | CVAR_ROM, 0, qfalse},
 
     // noset vars
     {NULL, "gamename", GAME_NAME, CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
@@ -544,6 +543,8 @@ cvarTable_t gameCvarTable[] = {
     {&g_chatReplay, "g_chatReplay", "1", CVAR_ARCHIVE},
     {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "5",
      CVAR_ARCHIVE | CVAR_LATCH},
+
+    {&g_mapAutoexecDir, "g_mapAutoexecDir", "", CVAR_ARCHIVE},
 };
 
 // bk001129 - made static to avoid aliasing
@@ -657,6 +658,10 @@ void QDECL G_DPrintf(const char *fmt, ...) {
   va_start(argptr, fmt);
   Q_vsnprintf(text, sizeof(text), fmt, argptr);
   va_end(argptr);
+
+  G_LogPrintf("==================================================\n");
+  G_LogPrintf("FATAL: %s\n", text);
+  G_LogPrintf("==================================================\n");
 
   trap_Error(text);
 }
@@ -1567,6 +1572,15 @@ void G_UpdateCvars(void) {
               }
             }
           }
+        } else if (cv->vmCvar == &g_mapScriptDir) {
+          // prevent admins from setting this to the directory where the game
+          // normally loads mapscripts from, so default mapscripts won't get
+          // loaded as "custom" mapscripts
+          if (!Q_stricmp(g_mapScriptDir.string, "maps")) {
+            G_Printf(S_COLOR_YELLOW "WARNING: ^7illegal ^3'g_mapScriptDir' "
+                                    "^7value, resetting to default\n");
+            trap_Cvar_Set(cv->cvarName, cv->defaultString);
+          }
         } else {
           fToggles =
               (G_checkServerToggle(cv->vmCvar) || fToggles) ? qtrue : qfalse;
@@ -1620,21 +1634,27 @@ void G_wipeCvars(void) {
 }
 
 void G_ExecMapSpecificConfig() {
-  int len;
-  fileHandle_t f;
+  int len = 0;
+  fileHandle_t f = 0;
+  const auto *const path = g_mapAutoexecDir.string[0] != '\0'
+                               ? va("%s/", g_mapAutoexecDir.string)
+                               : "";
 
-  len = trap_FS_FOpenFile(va("autoexec_%s.cfg", level.rawmapname), &f, FS_READ);
+  const char *filename = va("%sautoexec_%s.cfg", path, level.rawmapname);
+  len = trap_FS_FOpenFile(filename, &f, FS_READ);
+
   if (len > 0) {
     // autoexec_mapname.cfg file found
-    trap_SendConsoleCommand(EXEC_APPEND,
-                            va("exec autoexec_%s.cfg\n", level.rawmapname));
+    trap_SendConsoleCommand(EXEC_APPEND, va("exec %s\n", filename));
     return;
   }
 
-  len = trap_FS_FOpenFile("autoexec_default.cfg", &f, FS_READ);
+  filename = va("%sautoexec_default.cfg", path);
+  len = trap_FS_FOpenFile(filename, &f, FS_READ);
+
   if (len > 0) {
     // autoexec_default.cfg file found
-    trap_SendConsoleCommand(EXEC_APPEND, "exec autoexec_default.cfg\n");
+    trap_SendConsoleCommand(EXEC_APPEND, va("exec %s\n", filename));
   }
 }
 
@@ -1904,10 +1924,8 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   // Reset the amount of timerun timers
   level.timerunNamesCount = 0;
 
-  // me must register these before the mapscript is loaded,
-  // as it may contain remapshader calls
-  ETJump::shaderIndexHandler = std::make_unique<ETJump::ShaderIndexHandler>();
-  ETJump::remapShaderHandler = std::make_unique<ETJump::RemapShaderHandler>();
+  // before mapscript is loaded, so remapshaders from mapscripts work properly
+  ETJump::shaderConfigHandler = std::make_unique<ETJump::ShaderConfigHandler>();
 
   // load level script
   G_Script_ScriptLoad();

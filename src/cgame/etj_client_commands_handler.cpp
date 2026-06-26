@@ -63,7 +63,7 @@ bool ETJump::ClientCommandsHandler::subscribe(
 bool ETJump::ClientCommandsHandler::unsubscribe(const std::string &command) {
   auto lowercasedCommand = StringUtils::toLowerCase(command);
   auto callback = _callbacks.find(lowercasedCommand);
-  if (callback != end(_callbacks)) {
+  if (callback == end(_callbacks)) {
     return false;
   }
 

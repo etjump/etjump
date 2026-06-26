@@ -528,7 +528,7 @@ We should keep a local copy of the state, and compare the incoming state
 update against that, and remap only the parts that have been changed.
 =====================
 */
-void CG_ShaderStateChanged(const std::string &state) {
+void CG_ShaderStateChanged(const int32_t index) {
   char originalShader[MAX_QPATH];
   char newShader[MAX_QPATH];
   char timeOffset[16]{};
@@ -536,7 +536,7 @@ void CG_ShaderStateChanged(const std::string &state) {
   const char *n = nullptr;
   const char *t = nullptr;
 
-  o = state.empty() ? CG_ConfigString(CS_SHADERSTATE) : state.c_str();
+  o = CG_ConfigString(CS_SHADERSTATE + index);
 
   while (o && *o) {
     n = strstr(o, "=");
@@ -621,6 +621,16 @@ static void CG_ConfigStringModified(void) {
     }
   };
 
+  int32_t shaderCsMax = MAX_CS_SHADERS;
+  int32_t shaderStateCs = CS_SHADERSTATE;
+  int32_t shaderStateCsMax = MAX_CS_SHADERSTATES;
+
+  if (ETJump::cgame.demo.compatibility->flags.oldShaderIndexOrder) {
+    shaderCsMax = MAX_CS_SHADERS_COMPAT;
+    shaderStateCs = CS_SHADERS + MAX_CS_SHADERS_COMPAT;
+    shaderStateCsMax = 1;
+  }
+
   // do something with it if necessary
   if (num == CS_MUSIC) {
     CG_StartMusic();
@@ -654,7 +664,7 @@ static void CG_ConfigStringModified(void) {
   } else if (num == CS_VOTE_TIME) {
     cgs.voteTime = Q_atoi(str);
 
-    if (!ETJump::cgame.handlers.rtv->rtvVoteActive()) {
+    if (!ETJump::cgame.systems.rtv->rtvVoteActive()) {
       ETJump::ClientRtvHandler::resetRtvEventHandler();
     }
 
@@ -664,9 +674,9 @@ static void CG_ConfigStringModified(void) {
     // 'callvote rtv' command, the check for rtvVoteActive might return false
     // therefore also check if strlen > 13 (rtvMaps 'str' len should always be
     // higher)
-    if (ETJump::cgame.handlers.rtv->rtvVoteActive() || strlen(str) > 13) {
-      ETJump::cgame.handlers.rtv->setRtvConfigStrings(str);
-      ETJump::cgame.handlers.rtv->countRtvVotes();
+    if (ETJump::cgame.systems.rtv->rtvVoteActive() || strlen(str) > 13) {
+      ETJump::cgame.systems.rtv->setRtvConfigStrings(str);
+      ETJump::cgame.systems.rtv->countRtvVotes();
     } else {
       setVoteCounts();
     }
@@ -676,7 +686,7 @@ static void CG_ConfigStringModified(void) {
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_STRING) {
     Q_strncpyz(cgs.voteString, str, sizeof(cgs.voteString));
-    ETJump::cgame.handlers.rtv->setRtvVoteStatus();
+    ETJump::cgame.systems.rtv->setRtvVoteStatus();
   } else if (num == CS_INTERMISSION) {
     cg.intermissionStarted = Q_atoi(str) ? qtrue : qfalse;
   } else if (num == CS_SCREENFADE) {
@@ -703,7 +713,7 @@ static void CG_ConfigStringModified(void) {
                                                // compress flag?
       }
     }
-  } else if (num >= CS_SHADERS && num < CS_SHADERS + MAX_CS_SHADERS) {
+  } else if (num >= CS_SHADERS && num < CS_SHADERS + shaderCsMax) {
     ETJump::registerGameShader(num - CS_SHADERS, str);
   } else if (num >= CS_SKINS && num < CS_SKINS + MAX_CS_SKINS) {
     cgs.gameModelSkins[num - CS_SKINS] = trap_R_RegisterSkin(str);
@@ -724,11 +734,11 @@ static void CG_ConfigStringModified(void) {
     }
   } else if (num >= CS_PLAYERS && num < CS_PLAYERS + MAX_CLIENTS) {
     CG_NewClientInfo(num - CS_PLAYERS);
-    ETJump::SpectatorInfoData::updateSpectatorData(num - CS_PLAYERS);
+    ETJump::cgame.hud.spectatorInfoData->update(num - CS_PLAYERS);
   } else if (num >= CS_DLIGHTS && num < CS_DLIGHTS + MAX_DLIGHT_CONFIGSTRINGS) {
     CG_SetupDlightstyles();
-  } else if (num == CS_SHADERSTATE) {
-    CG_ShaderStateChanged();
+  } else if (num >= shaderStateCs && num < shaderStateCs + shaderStateCsMax) {
+    CG_ShaderStateChanged(num - CS_SHADERSTATE);
   } else if (num == CS_CHARGETIMES) {
     CG_ChargeTimesChanged();
   } else if (num >= CS_FIRETEAMS && num < CS_FIRETEAMS + MAX_FIRETEAMS) {
@@ -1036,7 +1046,7 @@ static void CG_MapRestart(void) {
   trap_Cvar_Set("cg_thirdPerson", "0");
 
   if (cg.hasTimerun) {
-    ETJump::cgame.handlers.timerun->reset();
+    ETJump::cgame.systems.timerun->reset();
   }
 }
 // NERVE - SMF
@@ -2148,7 +2158,7 @@ static const char *addChatModifications(char *text, const int clientNum,
 
     if (etj_highlight.integer &
         static_cast<int>(ChatHighlightFlags::HIGHLIGHT_FLASH)) {
-      SyscallExt::trap_SysFlashWindowETLegacy(
+      SyscallExt::trap_SysFlashWindow(
           SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
     }
   }
@@ -2229,13 +2239,13 @@ static void CG_ServerCommand(void) {
   }
   if (!strcmp(cmd, "sc0")) {
     CG_ParseScore(true);
-    ETJump::SpectatorInfoData::updateSpectatorData(std::nullopt);
+    ETJump::cgame.hud.spectatorInfoData->update(std::nullopt);
     return;
   }
 
   if (!strcmp(cmd, "sc1")) {
     CG_ParseScore(false);
-    ETJump::SpectatorInfoData::updateSpectatorData(std::nullopt);
+    ETJump::cgame.hud.spectatorInfoData->update(std::nullopt);
     return;
   }
 
@@ -2808,7 +2818,7 @@ static void CG_ServerCommand(void) {
     arguments.emplace_back(buf);
   }
 
-  if (ETJump::cgame.handlers.serverCommands->check(cmd, arguments)) {
+  if (ETJump::cgame.core.serverCommands->check(cmd, arguments)) {
     return;
   }
 

@@ -131,6 +131,8 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.adjustItemlistIndex = true;
     compatibilityStrings.emplace_back(
         "Adjusted item indices for removal of duplicate 'weapon_medic_heal'");
+
+    adjustEventNums = true;
   }
 
   if (!isCompatible({2, 3, 0})) {
@@ -141,6 +143,8 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.adjustEvVelocityPushTrigger = true;
     compatibilityStrings.emplace_back(
         "Adjusted event indices for ET_VELOCITY_PUSH_TRIGGER");
+
+    adjustEventNums = true;
   }
 
   if (!isCompatible({2, 5, 0})) {
@@ -170,6 +174,8 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.adjustEvFakebrushAndClientTeleporter = true;
     compatibilityStrings.emplace_back("Adjusted event indices for ET_FAKEBRUSH "
                                       "and ET_TELEPORT_TRIGGER_CLIENT");
+
+    adjustEventNums = true;
   }
 
   if (!isCompatible({3, 4, 0})) {
@@ -193,6 +199,16 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.noMapCustomizationHashes = true;
     compatibilityStrings.emplace_back(
         "Custom mapscript and entity file hashes not available");
+
+    flags.adjustEvFuncStaticClient = true;
+    compatibilityStrings.emplace_back(
+        "Adjusted event indices for ET_STATIC_CLIENT");
+
+    flags.oldShaderIndexOrder = true;
+    compatibilityStrings.emplace_back("Using old shader configstring indices "
+                                      "for game shaders and shaderstate");
+
+    adjustEventNums = true;
   }
 }
 
@@ -222,6 +238,10 @@ int DemoCompatibility::adjustedEventNum(const int event) const {
 
   if (flags.adjustEvFakebrushAndClientTeleporter) {
     adjust += 2;
+  }
+
+  if (flags.adjustEvFuncStaticClient) {
+    adjust += 1;
   }
 
   switch (event + adjust) {

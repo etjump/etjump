@@ -62,7 +62,7 @@ bool ETJump::EntityEventsHandler::subscribe(
 bool ETJump::EntityEventsHandler::unsubscribe(const std::string &eventName) {
   auto lowercasedCommand = StringUtils::toLowerCase(eventName);
   auto callback = _callbacks.find(lowercasedCommand);
-  if (callback != end(_callbacks)) {
+  if (callback == end(_callbacks)) {
     return false;
   }
 

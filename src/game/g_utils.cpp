@@ -7,11 +7,10 @@
 
 #include <unordered_map>
 
-#include "etj_printer.h"
 #include "g_local.h"
+#include "etj_printer.h"
+#include "etj_shader_config_handler.h"
 #include "etj_string_utilities.h"
-#include "etj_remapshader_handler.h"
-#include "etj_shader_index_handler.h"
 
 /*
 =========================================================================
@@ -25,7 +24,6 @@ static const std::unordered_map<int, std::pair<std::string, std::string>>
     csStrings = {
         {CS_MODELS, {"CS_MODELS", "MAX_MODELS"}},
         {CS_SOUNDS, {"CS_SOUNDS", "MAX_SOUNDS"}},
-        {CS_SHADERS, {"CS_SHADERS", "MAX_CS_SHADERS"}},
         {CS_SKINS, {"CS_SKINS", "MAX_CS_SKINS"}},
         {CS_CHARACTERS, {"CS_CHARACTERS", "MAX_CHARACTERS"}},
         {CS_DLIGHTS, {"CS_DLIGHTS", "MAX_DLIGHT_CONFIGSTRINGS"}},
@@ -63,13 +61,6 @@ int G_FindConfigstringIndex(const char *name, int start, int max,
   }
 
   if (i == max) {
-    // try extended shader index if we're overflowing CS_SHADERS
-    // this will eventually error if we overflow the extended index too,
-    // so we can just return this
-    if (start == CS_SHADERS) {
-      return ETJump::shaderIndexHandler->getShaderIndexExt(name);
-    }
-
     const auto it = csStrings.find(start);
     std::string err;
 
@@ -102,7 +93,7 @@ int G_SkinIndex(const char *name) {
 }
 
 int G_ShaderIndex(const char *name) {
-  return G_FindConfigstringIndex(name, CS_SHADERS, MAX_CS_SHADERS, qtrue);
+  return ETJump::shaderConfigHandler->getShaderIndex(name, true);
 }
 
 int G_CharacterIndex(const char *name) {
@@ -412,9 +403,9 @@ void G_UseTargets(gentity_t *ent, gentity_t *activator) {
   }
 
   if (ent->targetShaderName && ent->targetShaderNewName) {
-    ETJump::remapShaderHandler->addRemap(ent->targetShaderName,
-                                         ent->targetShaderNewName);
-    ETJump::remapShaderHandler->updateShaderState();
+    ETJump::shaderConfigHandler->addShaderRemap(ent->targetShaderName,
+                                                ent->targetShaderNewName);
+    ETJump::shaderConfigHandler->updateShaderState();
   }
 
   if (!ent->target) {

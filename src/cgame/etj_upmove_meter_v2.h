@@ -27,51 +27,82 @@
 #include "cg_local.h"
 #include "etj_irenderable.h"
 #include "etj_cvar_parser.h"
+#include "etj_pmove_utils_v2.h"
 
 namespace ETJump {
 class CvarUpdateHandler;
 class ClientCommandsHandler;
 class PlayerEventsHandler;
 
-class StrafeQuality : public IRenderable {
-  double totalFrames{};
-  double goodFrames{};
-  double strafeQuality{};
-  int lastUpdateTime{};
+class UpmoveMeterV2 : public IRenderable {
+public:
+  UpmoveMeterV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+                const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+                const std::shared_ptr<PlayerEventsHandler> &playerEvents);
+  ~UpmoveMeterV2() override;
 
-  float oldSpeed{};
-  int team{};
-  vec4_t color{};
+  bool beforeRender() override;
+  void render() const override;
 
-  // default absolute hud position
-  static constexpr float posX = 100;
-  static constexpr float posY = 100;
-  // amount of digits to show on hud
-  static constexpr std::size_t digits = 4;
-
-  CvarValue::Size size{};
-
+private:
   void startListeners();
-  void parseColor(const vmCvar_t *cvar);
-  void setSize(const vmCvar_t *cvar);
-  void resetStrafeQuality();
-  [[nodiscard]] bool canSkipDraw() const;
-  bool canSkipUpdate(usercmd_t cmd);
+  void setTextSize(const vmCvar_t &cvar);
+  void resetUpmoveMeter();
 
-  const pmove_t *pm{};
+  void updateJumpState();
+  void updateUpmoveMeter();
+
+  [[nodiscard]] bool canSkipDraw() const;
+  [[nodiscard]] bool canSkipUpdate(const PmoveUtilsV2::State &s) const;
+
+  enum class JumpState {
+    AIR_NOJUMP = 0,         // in air, not holding jump
+    AIR_JUMP = 1,           // in air, holding jump
+    GROUND_JUMP = 2,        // on ground, holding jump
+    GROUND_NOJUMP = 3,      // on ground, not holding jump
+    AIR_JUMP_NORELEASE = 4, // in air (post jump), holding jump
+  };
+
+  JumpState jumpState{};
+  JumpState lastJumpState{};
+
+  struct Graph {
+    int32_t preDelay;
+    int32_t postDelay;
+    int32_t fullDelay;
+
+    rectDef_t rect;
+    float upHeight;
+    float downHeight;
+
+    vec4_t colorBg;
+    vec4_t colorPreJump;
+    vec4_t colorPostJump;
+    vec4_t colorOnGround;
+    vec4_t colorOutline;
+  };
+
+  Graph graph{};
+  int32_t jumpPreGroundTime{};
+  int32_t groundTouchTime{};
+
+  float textX{};
+  float textH{};
+  float textHeightOffset{};
+  CvarValue::Size textSize{};
+  int32_t textStyle{};
+  vec4_t colorText{};
+
+  team_t team{};
+  int32_t lastUpdateTime{};
+
+  bool inAir{};
+  bool jumping{};
+
   const playerState_t *ps = &cg.predictedPlayerState;
 
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
   std::shared_ptr<ClientCommandsHandler> consoleCommands;
   std::shared_ptr<PlayerEventsHandler> playerEvents;
-
-public:
-  StrafeQuality(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
-                const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
-                const std::shared_ptr<PlayerEventsHandler> &playerEvents);
-  ~StrafeQuality() override;
-
-  bool beforeRender() override;
-  void render() const override;
 };
 } // namespace ETJump

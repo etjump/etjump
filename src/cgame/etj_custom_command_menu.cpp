@@ -85,9 +85,10 @@ void CustomCommandMenu::startListeners() {
       "readCustomCommands",
       [this](const std::vector<std::string> &) { parseCommands(); });
 
-  consoleCommands->subscribe(
-      "generateCustomCommandsFile",
-      [](const std::vector<std::string> &args) { generateExampleFile(args); });
+  consoleCommands->subscribe("generateCustomCommandsFile",
+                             [this](const std::vector<std::string> &args) {
+                               generateExampleFile(args);
+                             });
 }
 
 void CustomCommandMenu::setFilename(const vmCvar_t *cvar) {
@@ -163,6 +164,7 @@ void CustomCommandMenu::addCommand(const std::vector<std::string> &args) {
     /addCustomCommand --name <name> --command <command> --page <page> --slot <slot>
 
     Has a shorthand format of:
+    /addCustomCommand <command>
     /addCustomCommand <name> <command>
     /addCustomCommand <name> <command> <page>
     /addCustomCommand <name> <command> <page> <slot>)";
@@ -170,10 +172,11 @@ void CustomCommandMenu::addCommand(const std::vector<std::string> &args) {
   const auto optCommand = ConsoleCommands::getOptCommand(
       "addCustomCommand",
       CommandParser::CommandDefinition::create("addCustomCommand", desc)
-          .addOption("name", "n",
-                     "Name of the command, displayed in the custom command "
-                     "menu. Maximum displayed length is 28 characters.",
-                     CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption(
+              "name", "n",
+              "Name of the command, displayed in the custom command menu. If "
+              "not provided, the command will be displayed as the name.",
+              CommandParser::OptionDefinition::Type::MultiToken, false)
           .addOption(
               "command", "c",
               "The command to execute. If chaining multiple commands with "
@@ -242,8 +245,11 @@ bool CustomCommandMenu::validateAddCommand(
                      TEAM_SPECTATOR);
   };
 
-  if (optCommand.extraArgs.size() > 1) {
+  if (!optCommand.extraArgs.empty()) {
     switch (optCommand.extraArgs.size()) {
+      case 1:
+        cmd = optCommand.extraArgs[0];
+        break;
       case 2:
         name = optCommand.extraArgs[0];
         cmd = optCommand.extraArgs[1];
@@ -262,16 +268,6 @@ bool CustomCommandMenu::validateAddCommand(
     }
   }
 
-  if (name.empty()) {
-    if (!optName.has_value()) {
-      opFailedChatMsg();
-      CG_Printf("Required option `name` was not specified.\n");
-      return false;
-    }
-
-    name = optName.value().text;
-  }
-
   if (cmd.empty()) {
     if (!optCmd.has_value()) {
       opFailedChatMsg();
@@ -280,6 +276,10 @@ bool CustomCommandMenu::validateAddCommand(
     }
 
     cmd = optCmd.value().text;
+  }
+
+  if (name.empty()) {
+    name = optName.has_value() ? optName.value().text : "";
   }
 
   // if the user gave slot but no page, the command is invalid
@@ -328,8 +328,7 @@ bool CustomCommandMenu::validateAddCommand(
   }
 
   if (commands.find(page.value()) != commands.cend() &&
-      (!commands.at(page.value())[slot.value() - 1].name.empty() &&
-       !commands.at(page.value())[slot.value() - 1].command.empty())) {
+      !commands.at(page.value())[slot.value() - 1].command.empty()) {
     opFailedChatMsg();
     CG_Printf("Slot ^3%i ^7on page ^3%i ^7already contains a command.\n",
               slot.value(), page.value());
@@ -446,7 +445,6 @@ bool CustomCommandMenu::validateDeleteCommand(
     // make sure we actually have a command at this slot
     // we want to do this here, because the deletion fails silently otherwise
     if (commands.find(page.value()) != commands.cend() &&
-        commands.at(page.value())[slot.value() - 1].name.empty() &&
         commands.at(page.value())[slot.value() - 1].command.empty()) {
       opFailedChatMsg();
       CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n",
@@ -569,8 +567,7 @@ bool CustomCommandMenu::validateEditCommand(
     return false;
   }
 
-  if (commands.at(page)[slot - 1].name.empty() ||
-      commands.at(page)[slot - 1].command.empty()) {
+  if (commands.at(page)[slot - 1].command.empty()) {
     opFailedChatMsg();
     CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n", page, slot);
     return false;
@@ -642,8 +639,7 @@ void CustomCommandMenu::moveCommand(const std::vector<std::string> &args) {
 
   const bool targetPageEmpty = commands.find(toPage) == commands.cend();
   const bool swap = !targetPageEmpty &&
-                    (!commands.at(toPage)[toSlot.value() - 1].name.empty() ||
-                     !commands.at(toPage)[toSlot.value() - 1].command.empty());
+                    !commands.at(toPage)[toSlot.value() - 1].command.empty();
 
   try {
     const std::string fromPageStr = "page-" + std::to_string(fromPage);
@@ -733,8 +729,7 @@ bool CustomCommandMenu::validateMoveCommand(
     return false;
   }
 
-  if (commands.at(fromPage)[fromSlot - 1].name.empty() ||
-      commands.at(fromPage)[fromSlot - 1].command.empty()) {
+  if (commands.at(fromPage)[fromSlot - 1].command.empty()) {
     opFailedChatMsg();
     CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n", fromPage,
               fromSlot);
@@ -818,12 +813,15 @@ void CustomCommandMenu::listCommands(
         CG_Printf("^7[ Page %i ]\n", page);
 
         for (size_t i = 0; i < cmds.size(); i++) {
-          if (cmds[i].name.empty() || cmds[i].command.empty()) {
+          const auto &cmd = cmds[i];
+
+          if (cmd.command.empty()) {
             continue;
           }
 
           CG_Printf("^7%i. %s\n   ^7%s\n", static_cast<int32_t>(i + 1),
-                    cmds[i].name.c_str(), cmds[i].command.c_str());
+                    !cmd.name.empty() ? cmd.name.c_str() : "(empty name)",
+                    cmd.command.c_str());
         }
 
         CG_Printf("\n");
@@ -858,8 +856,7 @@ inline bool CustomCommandMenu::pageIsFull(const uint8_t page) const {
   assert(page > 0 && page <= CUSTOM_COMMAND_MENU_MAX_PAGES);
 
   for (uint8_t i = 0; i < CUSTOM_COMMAND_MENU_PAGE_SIZE; i++) {
-    if (commands.at(page)[i].name.empty() &&
-        commands.at(page)[i].command.empty()) {
+    if (commands.at(page)[i].command.empty()) {
       return false;
     }
   }
@@ -887,7 +884,7 @@ uint8_t CustomCommandMenu::findFreeSlot(const uint8_t page) const {
   for (uint8_t i = 0; i < CUSTOM_COMMAND_MENU_PAGE_SIZE; i++) {
     const auto &cmd = commands.at(page)[i];
 
-    if (cmd.name.empty() && cmd.command.empty()) {
+    if (cmd.command.empty()) {
       return i + 1;
     }
   }
@@ -906,7 +903,7 @@ uint8_t CustomCommandMenu::findSlotForDeletion(const uint8_t page) const {
   for (uint8_t i = CUSTOM_COMMAND_MENU_PAGE_SIZE; i > 0; i--) {
     const auto &cmd = commands.at(page)[i - 1];
 
-    if (!cmd.name.empty() && !cmd.command.empty()) {
+    if (!cmd.command.empty()) {
       return i;
     }
   }
@@ -957,56 +954,65 @@ void CustomCommandMenu::generateExampleFile(
     }
   }
 
-  constexpr char in[] = R"(# Example custom command file
-# This file may contain up to 5 pages, each with 8 slots worth of commands.
-# You may edit this file by hand, or use the following in-game commands:
-#
-# - addCustomCommand
-# - editCustomCommand
-# - moveCustomCommand
-# - deleteCustomCommand
-#
-# This is a TOML file, meaning it needs to follow the TOML language syntax.
-# Each page must be defined with a header, followed by key-value pairs, where the value is in quotes.
-# Below is a generated example file which contains pages 1, 2 and 4.
-# Note that the command ordering does not matter, only the key names matter, along with under which header they are.
-# The in-game commands will try to keep the commands in order as you add/edit/move/delete them however.
-# The pages do not need to appear in order from 1 to 5, nor do all of them have to be present.
-# You may add your own comments to this file as well by starting a line with #
+  toml::ordered_value root;
+  toml::ordered_value page1(toml::table{});
+  toml::ordered_value page2(toml::table{});
+  toml::ordered_value page4(toml::table{});
 
-[page-1]
-name-1 = "Example command 1"
-command-1 = "echo This is an example command 1"
-name-2 = "Example command 2"
-command-2 = "echo This is an example command 2"
-name-5 = "Example command 5"
-command-5 = "echo This is an example command 5; echo Note that the commands don't need to be defined sequentially!"
+  // clang-format off
+  root.comments().push_back("# Example custom command file");
+  root.comments().push_back("# This file may contain up to 5 pages, each with 8 slots worth of commands.");
+  root.comments().push_back("# Anything that you can type into console or bind to a key, can be a command.");
+  root.comments().push_back("# You may edit this file by hand, or use the following in-game commands:");
+  root.comments().push_back("#");
+  root.comments().push_back("# - addCustomCommand");
+  root.comments().push_back("# - editCustomCommand");
+  root.comments().push_back("# - moveCustomCommand");
+  root.comments().push_back("# - deleteCustomCommand");
+  root.comments().push_back("#");
+  root.comments().push_back("# This is a TOML file, meaning it needs to follow the TOML language syntax.");
+  root.comments().push_back("# Each page must be defined with a header, followed by key-value pairs, where the value is in quotes.");
+  root.comments().push_back("# Below is a generated example file which contains pages 1, 2 and 4.");
+  root.comments().push_back("# Note that the command ordering does not matter, only the key names matter, along with under which header they are.");
+  root.comments().push_back("# The in-game commands will try to keep the commands in order as you add/edit/move/delete them however.");
+  root.comments().push_back("# The pages do not need to appear in order from 1 to 5, nor do all of them have to be present.");
+  root.comments().push_back("# You may add your own comments to this file as well by starting a line with #");
 
-[page-2]
-name-2 = "Example command 2"
-command-2 = "echo This is an example command 2 on page 2; echo Note that it appears on slot 2 even though it's defined first!"
-name-1 = "Example command 1"
-command-1 = "echo This is an example command 1 on page 2"
+  page1["name-1"]    = toml::ordered_value("Example command 1");
+  page1["command-1"] = toml::ordered_value("echo This is an example command 1");
+  page1["name-2"]    = toml::ordered_value("Example command 2");
+  page1["command-2"] = toml::ordered_value("echo This is an example command 2");
+  page1["name-5"]    = toml::ordered_value("Example command 5");
+  page1["command-5"] = toml::ordered_value("echo This is an example command 5; echo Note that the commands don't need to be defined sequentially!");
 
-[page-4]
-name-1 = "Example command 1"
-command-1 = "echo This is an example command 1 on page 4; echo You can have blank pages too, and can choose which pages to use!"
-)";
+  page2["name-2"]    = toml::ordered_value("Example command 2");
+  page2["command-2"] = toml::ordered_value("echo This is an example command 2 on page 2; echo Note that it appears on slot 2 even though it's defined first inside the file!");
+  page2["name-1"]    = toml::ordered_value("Example command 1");
+  page2["command-1"] = toml::ordered_value("echo This is an example command 1 on page 2");
 
-  try {
-    const File fOut(DEFAULT_CUSTOM_COMMAND_FILE, File::Mode::Write);
-    fOut.write(in);
+  page4["name-1"]    = toml::ordered_value("Example command 1");
+  page4["command-1"] = toml::ordered_value("echo This is an example command 1 on page 4; echo You can have blank pages too, and can choose which pages to use!");
+  // clang-format on
 
-    CG_Printf("Wrote example custom command file ^3'%s'\n",
-              DEFAULT_CUSTOM_COMMAND_FILE);
+  root["page-1"] = std::move(page1);
+  root["page-2"] = std::move(page2);
+  root["page-4"] = std::move(page4);
 
-    // the file will not exist immediately after we call 'write', so calling
-    // 'parseCommands' here directly will fail to parse the generated file
-    // instead send a console command to queue the parsing to next frame
-    trap_SendConsoleCommand("readCustomCommands\n");
-  } catch (const File::FileIOException &e) {
-    CG_Printf("Failed to write example custom command file: %s\n", e.what());
+  std::string err;
+
+  // call the API directly here because we want to use the default filename
+  if (!TOMLUtils::writeFile(DEFAULT_CUSTOM_COMMAND_FILE, root, &err)) {
+    CG_Printf("%s\n", err.c_str());
+    return;
   }
+
+  CG_Printf("Wrote example custom command file ^3'%s'\n",
+            DEFAULT_CUSTOM_COMMAND_FILE);
+
+  // the file will not exist immediately after we call 'write', so calling
+  // 'parseCommands' here directly will fail to parse the generated file
+  // instead send a console command to queue the parsing to next frame
+  trap_SendConsoleCommand("readCustomCommands\n");
 }
 
 bool CustomCommandMenu::readFile(toml::ordered_value &table) const {
