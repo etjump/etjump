@@ -213,9 +213,9 @@ bool SessionV2::authenticate(const gentity_t *ent) {
   const int clientNum = ClientNum(ent);
   const std::string cleanName =
       StringUtils::sanitize(ent->client->pers.netname);
-  const std::string spoofAttempt = StringUtils::format(
-      "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
-      clientNum, cleanName, getIP(clientNum));
+  const std::string invalidResponse =
+      StringUtils::format("authentication: Invalid response from %i %s (%s)",
+                          clientNum, cleanName, getIP(clientNum));
 
   // auth response is 'auth <GUID> <OS> <HWIDs>'
   // the amount of HWIDs is dependent on OS
@@ -245,7 +245,7 @@ bool SessionV2::authenticate(const gentity_t *ent) {
   const int NUM_EXPECTED_ARGS = 3 + numHWIDs;
 
   if (argc != NUM_EXPECTED_ARGS) {
-    Printer::logAdminLn(spoofAttempt);
+    Printer::logAdminLn(invalidResponse);
     return false;
   }
 
@@ -263,10 +263,6 @@ bool SessionV2::authenticate(const gentity_t *ent) {
     if (!Crypto::isValidSHA2(hwidBuf)) {
       hwidValid = false;
       currentValid = false;
-
-      if (!g_allowInvalidHWID.integer) {
-        break;
-      }
     }
 
     // don't bother hashing invalid HWIDs
@@ -280,15 +276,22 @@ bool SessionV2::authenticate(const gentity_t *ent) {
   // it produces valid results
   if (g_allowInvalidHWID.integer) {
     Printer::logAdminLn(StringUtils::format(
-        "Invalid HWID response from client %i %s: %s", clientNum, cleanName,
-        StringUtils::join(hwid, " ")));
+        "authentication: Allowing bad HWID response due to server settings "
+        "from client %i %s: %s",
+        clientNum, cleanName, StringUtils::join(hwid, " ")));
   } else if (!hwidValid) {
-    Printer::logAdminLn(spoofAttempt);
+    Printer::logAdminLn(invalidResponse);
+    Printer::logAdminLn(StringUtils::format(
+        "authentication: Bad HWID response from client %i %s: %s", clientNum,
+        cleanName, StringUtils::join(hwid, " ")));
     return false;
   }
 
   if (!Crypto::isValidSHA2(guidBuf)) {
-    Printer::logAdminLn(spoofAttempt);
+    Printer::logAdminLn(invalidResponse);
+    Printer::logAdminLn(StringUtils::format(
+        "authentication: Bad GUID response from client %i %s: %s", clientNum,
+        cleanName, (guidBuf[0] == '\0' ? "empty guid" : guidBuf)));
     return false;
   }
 
