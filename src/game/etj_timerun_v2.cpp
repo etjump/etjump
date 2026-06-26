@@ -1544,6 +1544,141 @@ void TimerunV2::compareCheckpoints(
       });
 }
 
+class RecordDetailsResult : public SynchronizationContext::ResultBase {
+public:
+  RecordDetailsResult(std::vector<Timerun::Season> seasons,
+                      std::vector<Timerun::Record> records)
+      : seasons(std::move(seasons)), records(std::move(records)) {}
+
+  std::vector<Timerun::Season> seasons;
+  std::vector<Timerun::Record> records;
+};
+
+void TimerunV2::recordDetails(const Timerun::RecordDetailsParams &params) {
+  const std::string func = __func__;
+
+  const auto task = [this, params]() {
+    std::vector<Timerun::Record> records;
+    std::vector<Timerun::Season> seasons =
+        _repository->getSeasonsForName(params.season, false);
+
+    // TODO: resolve map/run name here, instead of in 'getRecordFromSeason',
+    // as we now run the same map/run matching code for each season
+    for (const auto &season : seasons) {
+      const auto seasonRecords = _repository->getRecordFromSeason(
+          season.id, params.map, params.run, params.rank, params.exactMap);
+
+      records.insert(records.end(), seasonRecords.cbegin(),
+                     seasonRecords.cend());
+    }
+
+    return std::make_unique<RecordDetailsResult>(seasons, records);
+  };
+
+  const auto callback = [this, params, func](const std::unique_ptr<
+                                             SynchronizationContext::ResultBase>
+                                                 result) {
+    const auto *const r = dynamic_cast<RecordDetailsResult *>(result.get());
+
+    if (r == nullptr) {
+      _logger->error("%s: failed to fetch details for record(s) for player %i: "
+                     "RecordDetailsResult is NULL",
+                     func, params.clientNum);
+      throw std::runtime_error(StringUtils::format(
+          "%s: unable to fetch details for record(s). This is a bug, "
+          "please report this to the developers.",
+          func));
+    }
+
+    // 'records' is empty in this case too, but by checking 'seasons' first,
+    // we can determine if the user provided incorrect season name
+    if (r->seasons.empty()) {
+      throw std::runtime_error(StringUtils::format(
+          "No seasons found matching '%s^7'.", params.season));
+    }
+
+    if (r->records.empty()) {
+      throw std::runtime_error("No records found matching given parameters.");
+    }
+
+    const auto seasonNameFromId = [this, &r, &func](const int32_t seasonId) {
+      for (const auto &season : r->seasons) {
+        if (season.id == seasonId) {
+          return season.name;
+        }
+      }
+
+      // this should never happen
+      _logger->error("%s: failed to find a name for season ID %i", func,
+                     seasonId);
+      throw std::runtime_error("Failed to find a valid season name. This is a "
+                               "bug, please report this to the developers.");
+    };
+
+    std::string msg;
+    constexpr int32_t MSG_PAD = 13;
+
+    const auto getRow = [MSG_PAD](const std::string_view k,
+                                  const std::string_view v) {
+      return StringUtils::format(" ^2%-*s ^7%s\n", MSG_PAD, k, v);
+    };
+
+    for (const auto &record : r->records) {
+      msg += "^2Detailed record information\n";
+      msg +=
+          "^g-------------------------------------------------------------\n";
+
+      msg += getRow("Player:", record.playerName);
+      msg += getRow("User ID:", std::to_string(record.userId));
+      msg += getRow("Season:", seasonNameFromId(record.seasonId));
+      msg += getRow("Map:", record.map);
+      msg += getRow("Run:", record.run);
+      msg += getRow("Rank", rankToString(params.rank));
+      msg += getRow("Time:", TimeUtils::millisToString(record.time));
+
+      if (record.checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
+        msg += getRow("Checkpoints:", "N/A");
+      } else {
+        for (size_t i = 0; i < record.checkpoints.size(); i++) {
+          if (record.checkpoints[i] == TIMERUN_CHECKPOINT_NOT_SET) {
+            break;
+          }
+
+          if (i == 0) {
+            msg += getRow("Checkpoints:",
+                          TimeUtils::millisToString(record.checkpoints[i]));
+          } else {
+            msg += getRow("", TimeUtils::millisToString(record.checkpoints[i]));
+          }
+        }
+      }
+
+      msg += getRow("Record date:", record.recordDate.toDateTimeString());
+
+      // NOTE: this obviously needs updating if more metadata is added
+      for (const auto &[name, data] : record.metadata) {
+        if (name == "mod_version") {
+          if (StringUtils::startsWith(data, "unknown")) {
+            msg += getRow("Mod version:", "N/A");
+          } else {
+            msg += getRow("Mod version:", "ETJump " + data);
+          }
+        }
+      }
+
+      msg += "\n";
+    }
+
+    Printer::console(params.clientNum, msg);
+  };
+
+  const auto error = [params, func](const std::runtime_error &e) {
+    Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
 int32_t TimerunV2::getRunStartTime(const int32_t clientNum) const {
   return _players[clientNum]->startTime.value_or(0);
 }

@@ -1549,6 +1549,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("times");
   trap_AddCommand("ranks");
   trap_AddCommand("top");
+  trap_AddCommand("record-details");
   trap_AddCommand("rankings");
   trap_AddCommand("seasons");
   trap_AddCommand("loadcheckpoints");
