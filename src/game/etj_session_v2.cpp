@@ -271,20 +271,22 @@ bool SessionV2::authenticate(const gentity_t *ent) {
 
   trap_Argv(1, guidBuf, sizeof(guidBuf));
 
-  // servers may allow invalid HWID until the new system is widely
-  // tested on larger variety of hardware, and we're confident that
-  // it produces valid results
-  if (g_allowInvalidHWID.integer) {
-    Printer::logAdminLn(StringUtils::format(
-        "authentication: Allowing bad HWID response due to server settings "
-        "from client %i %s: %s",
-        clientNum, cleanName, StringUtils::join(hwid, " ")));
-  } else if (!hwidValid) {
-    Printer::logAdminLn(invalidResponse);
-    Printer::logAdminLn(StringUtils::format(
-        "authentication: Bad HWID response from client %i %s: %s", clientNum,
-        cleanName, StringUtils::join(hwid, " ")));
-    return false;
+  if (!hwidValid) {
+    // servers may allow invalid HWID until the new system is widely
+    // tested on larger variety of hardware, and we're confident that
+    // it produces valid results
+    if (g_allowInvalidHWID.integer) {
+      Printer::logAdminLn(StringUtils::format(
+          "authentication: Allowing bad HWID response due to server settings "
+          "from client %i %s: %s",
+          clientNum, cleanName, StringUtils::join(hwid, " ")));
+    } else {
+      Printer::logAdminLn(invalidResponse);
+      Printer::logAdminLn(StringUtils::format(
+          "authentication: Bad HWID response from client %i %s: %s", clientNum,
+          cleanName, StringUtils::join(hwid, " ")));
+      return false;
+    }
   }
 
   if (!Crypto::isValidSHA2(guidBuf)) {
