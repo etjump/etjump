@@ -33,7 +33,7 @@
   #include "../game/etj_file.h"
   #include "../game/etj_filesystem.h"
   #include "../game/etj_string_utilities.h"
-  #include "../game/etj_json_utilities.h"
+  #include "../game/etj_toml_utilities.h"
 
   #include <uuid4.h>
 
@@ -173,10 +173,10 @@ std::vector<std::string> ClientAuth::getHwid() {
 }
 
 std::string ClientAuth::getGuid(const GUIDVersion version) {
-  Json::Value root;
+  toml::value root;
   std::string err;
 
-  if (!JsonUtils::readFile(AUTH_FILE, root, &err)) {
+  if (!TOMLUtils::readFile(AUTH_FILE, root, &err)) {
     CG_Printf("Unable to get GUID: %s\n", err.c_str());
 
     // we're not using a temporary GUID if we're trying to get old GUID
@@ -187,40 +187,47 @@ std::string ClientAuth::getGuid(const GUIDVersion version) {
     return "";
   }
 
-  std::string guid = version == GUIDVersion::GUID_V2
-                         ? root["GUID"]["v2"].asString()
-                         : root["GUID"]["v1"].asString();
-  return guid;
+  if (!root.contains("GUID")) {
+    CG_Printf("Unable to get GUID: auth file 'etjump/%s' does not contain a "
+              "'GUID' table.\nUsing temporary GUID.\n",
+              AUTH_FILE);
+    return "";
+  }
+
+  const auto guid = toml::find<std::optional<std::string>>(
+      root.at("GUID"), version == GUIDVersion::GUID_V2 ? "v2" : "v1");
+
+  return guid.value_or("");
 }
 
 void ClientAuth::createAuthFile() {
-  Json::Value root;
-  Json::Value guidArray;
+  toml::ordered_value root;
+  toml::ordered_value auth;
 
   char buf[UUID4_LEN]{};
   uuid4_init();
   uuid4_generate(buf);
 
   // we don't know if the old GUID exists yet, so leave this empty
-  guidArray["v1"] = "";
-  guidArray["v2"] = StringUtils::toUpperCase(buf);
+  auth["v1"] = toml::ordered_value("");
+  auth["v2"] = toml::ordered_value(StringUtils::toUpperCase(buf));
 
-  root["GUID"] = guidArray;
+  root["GUID"] = auth;
 
   std::string err;
 
-  if (!JsonUtils::writeFile(AUTH_FILE, root, &err)) {
+  if (!TOMLUtils::writeFile(AUTH_FILE, root, &err)) {
     CG_Printf("%s\nUsing temporary GUID.\n", err.c_str());
   }
 }
 
 void ClientAuth::migrateOldGuid() {
-  std::vector<char> contents{};
+  std::string contents{};
   const std::string failMsg = "Unable to migrate old GUID to a new file:\n%s\n";
 
   try {
     const File guidFile(GUID_FILE_OLD);
-    contents = guidFile.read();
+    contents = guidFile.readString();
   } catch (const File::FileIOException &e) {
     CG_Printf(failMsg.c_str(), e.what());
     return;
@@ -231,17 +238,17 @@ void ClientAuth::migrateOldGuid() {
     return;
   }
 
-  Json::Value root;
+  toml::ordered_value root;
   std::string err;
 
-  if (!JsonUtils::readFile(AUTH_FILE, root, &err)) {
+  if (!TOMLUtils::readFile(AUTH_FILE, root, &err)) {
     CG_Printf(failMsg.c_str(), err.c_str());
     return;
   }
 
-  root["GUID"]["v1"] = std::string(contents.begin(), contents.end());
+  root["GUID"]["v1"] = contents;
 
-  if (!JsonUtils::writeFile(AUTH_FILE, root, &err)) {
+  if (!TOMLUtils::writeFile(AUTH_FILE, root, &err)) {
     CG_Printf(failMsg.c_str(), err.c_str());
   }
 }
