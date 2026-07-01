@@ -2439,6 +2439,7 @@ extern vmCvar_t etj_popupPosY;
 // Feen: PGM client cvars
 // Enable/Disable viewing other player portals
 extern vmCvar_t etj_viewPlayerPortals;
+extern vmCvar_t etj_portalTrailTime;
 extern vmCvar_t etj_portalDebug;
 extern vmCvar_t etj_portalPredict;
 extern vmCvar_t etj_portalTeam;
@@ -3194,7 +3195,9 @@ void CG_AddDebris(vec3_t origin, vec3_t dir, int speed, int duration,
                   int count);
 //----(SA) done
 
-// void CG_ClientDamage( int entnum, int enemynum, int id );
+namespace ETJump {
+void portalTrail(const vec3_t start, const vec3_t end, const vec3_t color);
+}
 
 //
 // cg_marks.c
