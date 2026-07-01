@@ -1840,7 +1840,8 @@ typedef struct {
   qhandle_t portalBlueShader;   // Portal 1
   qhandle_t portalRedShader;    // Portal 2
   qhandle_t portalGreenShader;  // Portal 1 equivalent for other players
-  qhandle_t portalYellowShader; // Portal 2 equivalent for other players
+  qhandle_t portalYellowShader; // Portal 1 equivalent for other players
+  qhandle_t portalTrailShader;
 
   qhandle_t simplePlayersShader;
   qhandle_t saveIcon;
