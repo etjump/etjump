@@ -6633,6 +6633,7 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
 
 namespace ETJump {
 inline constexpr int32_t PORTAL_TRAIL_MAX_LIFETIME = 10000;
+inline constexpr float PORTAL_TRAIL_RADIUS = 16.0f;
 
 void portalTrail(const vec3_t start, const vec3_t end, const vec3_t color) {
   // clamp this so players do something stupid like setting the value
@@ -6654,7 +6655,8 @@ void portalTrail(const vec3_t start, const vec3_t end, const vec3_t color) {
 
   re->shaderTime = static_cast<float>(cg.time) / 1000.0f;
   re->reType = RT_RAIL_CORE;
-  re->customShader = cgs.media.railCoreShader;
+  re->customShader = cgs.media.portalTrailShader;
+  re->radius = PORTAL_TRAIL_RADIUS;
 
   VectorCopy(start, re->origin);
   VectorCopy(end, re->oldorigin);

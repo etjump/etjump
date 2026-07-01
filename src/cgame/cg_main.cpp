@@ -3235,6 +3235,7 @@ static void CG_RegisterGraphics(void) {
   cgs.media.portalGreenShader = trap_R_RegisterShader("gfx/misc/portal_green");
   cgs.media.portalYellowShader =
       trap_R_RegisterShader("gfx/misc/portal_yellow");
+  cgs.media.portalTrailShader = trap_R_RegisterShader("gfx/misc/portal_trail");
 
   cgs.media.simplePlayersShader = trap_R_RegisterShader("etjump/simple_player");
   cgs.media.saveIcon = trap_R_RegisterShader("gfx/2d/save_on");
