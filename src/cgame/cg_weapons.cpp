@@ -6630,3 +6630,38 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
     }
   }
 }
+
+namespace ETJump {
+inline constexpr int32_t PORTAL_TRAIL_MAX_LIFETIME = 10000;
+
+void portalTrail(const vec3_t start, const vec3_t end, const vec3_t color) {
+  // clamp this so players do something stupid like setting the value
+  // to 'INT32_MAX', and exhausting local entity buffer for no reason
+  const int32_t lifeTime =
+      std::clamp(etj_portalTrailTime.integer, 0, PORTAL_TRAIL_MAX_LIFETIME);
+
+  if (lifeTime == 0) {
+    return;
+  }
+
+  localEntity_t *le = CG_AllocLocalEntity();
+  refEntity_t *re = &le->refEntity;
+
+  le->leType = LE_FADE_RGB;
+  le->startTime = cg.time;
+  le->endTime = cg.time + lifeTime;
+  le->lifeRate = 1.0f / static_cast<float>(le->endTime - le->startTime);
+
+  re->shaderTime = static_cast<float>(cg.time) / 1000.0f;
+  re->reType = RT_RAIL_CORE;
+  re->customShader = cgs.media.railCoreShader;
+
+  VectorCopy(start, re->origin);
+  VectorCopy(end, re->oldorigin);
+
+  VectorCopy(color, le->color);
+  le->color[3] = 1.0f;
+
+  AxisClear(re->axis);
+}
+} // namespace ETJump
