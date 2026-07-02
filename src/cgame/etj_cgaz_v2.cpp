@@ -157,6 +157,7 @@ void CGazV2::updateCGaz2(const CGazData::State &s) {
   cgaz2.velAngle = AngleNormalize180(s.pm.ps->viewangles[YAW] -
                                      AngleNormalize180(RAD2DEG(s.velAngle)));
   cgaz2.velAngle = DEG2RAD(cgaz2.velAngle);
+  cgaz2.optAngle = updateOptAngle(s);
   cgaz2.velSize = etj_CGaz2FixedSpeed.value > 0
                       ? etj_CGaz2FixedSpeed.value / 5.0f
                       : std::min(s.vf / 5.0f, SCREEN_HEIGHT / 2.0f);
@@ -446,14 +447,14 @@ void CGazV2::renderCGaz2() const {
 
   if (cgaz2.drawSides) {
     const float velAngleSinL =
-        (cgaz2.velSize / 2) * std::sin(cgaz2.velAngle - cgaz1.optAngle);
+        (cgaz2.velSize / 2) * std::sin(cgaz2.velAngle - cgaz2.optAngle);
     const float velAngleCosL =
-        (cgaz2.velSize / 2) * std::cos(cgaz2.velAngle - cgaz1.optAngle);
+        (cgaz2.velSize / 2) * std::cos(cgaz2.velAngle - cgaz2.optAngle);
 
     const float velAngleSinR =
-        (cgaz2.velSize / 2) * std::sin(cgaz2.velAngle + cgaz1.optAngle);
+        (cgaz2.velSize / 2) * std::sin(cgaz2.velAngle + cgaz2.optAngle);
     const float velAngleCosR =
-        (cgaz2.velSize / 2) * std::cos(cgaz2.velAngle + cgaz1.optAngle);
+        (cgaz2.velSize / 2) * std::cos(cgaz2.velAngle + cgaz2.optAngle);
 
     if (cgaz2.highRes) {
       drawLineWu(x, cgaz2.y, x + velAngleSinL, cgaz2.y - velAngleCosL,

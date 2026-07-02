@@ -86,6 +86,7 @@ private:
 
   struct CGaz2 {
     float velAngle;
+    float optAngle;
     float velSize;
 
     float y;
