@@ -165,8 +165,18 @@ void CGazV2::updateCGaz2(const CGazData::State &s) {
   cgaz2.y =
       std::clamp(etj_CGaz2Y.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
 
-  cgaz2.forwardmove = s.pm.cmd.forwardmove;
-  cgaz2.rightmove = s.pm.cmd.rightmove;
+  // NOTE: check for stats here to determine whether we want to apply
+  // forward/ríghtmove values to CGaz 2 - unlike CGaz 1, we don't do
+  // "default input" in CGaz 2, so if we're not actually pressing anything,
+  // leave these at 0 so we don't draw wishdir line with no input
+  cgaz2.forwardmove =
+      s.pm.ps->stats[STAT_USERCMD_MOVE] & (UMOVE_FORWARD | UMOVE_BACKWARD)
+          ? s.pm.cmd.forwardmove
+          : 0;
+  cgaz2.rightmove =
+      s.pm.ps->stats[STAT_USERCMD_MOVE] & (UMOVE_RIGHT | UMOVE_LEFT)
+          ? s.pm.cmd.rightmove
+          : 0;
 
   cgaz2.highRes = etj_CGaz2HighRes.integer;
   cgaz2.drawSides = s.vf > s.wishspeed;
