@@ -12,7 +12,6 @@
 	loadMenu { "ui/profile_create_error.menu" }
 	loadMenu { "ui/playonline.menu" }
 	loadMenu { "ui/playonline_connecttoip.menu" }
-	loadMenu { "ui/playonline_serverinfo.menu" }
 	loadMenu { "ui/playonline_disablepb.menu" }
 	loadMenu { "ui/playonline_enablepb.menu" }
 	loadMenu { "ui/hostgame.menu" }
@@ -67,11 +66,14 @@
 	loadMenu { "ui/ingame_vote_disabled.menu" }
 	loadMenu { "ui/ingame_vote_map.menu" }
 	loadMenu { "ui/ingame_vote_customvote.menu" }
-	loadMenu { "ui/ingame_serverinfo.menu" }
 	loadMenu { "ui/ingame_disconnect.menu" }
 	loadMenu { "ui/ingame_messagemode.menu" }
 	loadMenu { "ui/ingame_tapout.menu" }
 	loadMenu { "ui/ingame_tapoutlms.menu" }
+
+  // NOTE: after in-game menus, otherwise 'ingame_main' will draw over
+  // the serverinfo popup on 4:3 resolutions, as they overlap
+	loadMenu { "ui/popup_serverinfo.menu"}
 
 	// ETJump
 	loadMenu { "ui/etjump.menu" }

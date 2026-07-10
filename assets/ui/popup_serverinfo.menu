@@ -6,37 +6,45 @@
 #define WINDOW_Y		0
 #define WINDOW_WIDTH	640
 #define WINDOW_HEIGHT	480
-#define GROUP_NAME		"grpPlayOnlineServerInfo"
+
+#define MENU_NAME "popup_serverinfo"
+#define GROUP_NAME		"grpPopupServerInfo"
 
 // Macros //
 
 #include "ui/menumacros.h"
-		
+
 // Server Info Menu //
-	
+
 menuDef {
-	name		"playonline_serverinfo"
+	name		MENU_NAME
 	visible		0
 	fullscreen	0
 	rect		WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
 	style		WINDOW_STYLE_FILLED
 	popup
-	
+
 	fadeClamp	0.5
 	fadeAmount  0.075
-	
+
 	onOpen {
 		setitemcolor background backcolor 0 0 0 0 ;
 		fadein background ;
+
+#ifdef FUI
 		setcvar ui_serverBrowser 1 ;
 		uiScript ServerStatus
+#else
+		setcvar ui_serverBrowser 0 ;
+		uiScript InGameServerStatus
+#endif
 	}
-	
+
 	onESC {
-		close playonline_serverinfo ;
-		open playonline
+		close MENU_NAME ;
+		uiScript uiPreviousMenu restore
 	}
-	
+
 // Background //
 
 	itemDef {
@@ -57,7 +65,7 @@ menuDef {
 #define SUBWINDOW_Y			.5*(WINDOW_HEIGHT-SUBWINDOW_HEIGHT)
 
 	SUBWINDOWBLACK( SUBWINDOW_X, SUBWINDOW_Y, SUBWINDOW_WIDTH, SUBWINDOW_HEIGHT, "SERVER INFO" )
-	
+
 	itemDef {
 		name			"serverInfo"
 		group			GROUP_NAME
@@ -78,8 +86,14 @@ menuDef {
 							135	40	20
 		visible			1
 	}
-	
-	BUTTON( (SUBWINDOW_X)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .33*((SUBWINDOW_WIDTH)-24), 18, "BACK", .3, 14, close playonline_serverinfo ; open playonline )
+
+#ifdef FUI
+	BUTTON( (SUBWINDOW_X)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .33*((SUBWINDOW_WIDTH)-24), 18, "BACK", .3, 14, close MENU_NAME ; uiScript uiPreviousMenu restore )
 	BUTTON( (SUBWINDOW_X)+6+.33*((SUBWINDOW_WIDTH)-24)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .34*((SUBWINDOW_WIDTH)-24), 18, "REFRESH", .3, 14, uiScript ServerStatus )
 	BUTTON( (SUBWINDOW_X)+6+.33*((SUBWINDOW_WIDTH)-24)+6+.34*((SUBWINDOW_WIDTH)-24)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .33*((SUBWINDOW_WIDTH)-24), 18, "JOIN SERVER", .3, 14, uiScript JoinServer )
+#else
+	BUTTON( (SUBWINDOW_X)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .25*((SUBWINDOW_WIDTH)-24), 18, "BACK", .3, 14, close MENU_NAME ; uiScript uiPreviousMenu restore )
+	BUTTON( (SUBWINDOW_X)+6+.25*((SUBWINDOW_WIDTH)-24)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .25*((SUBWINDOW_WIDTH)-24), 18, "REFRESH", .3, 14, uiScript ServerStatus )
+	BUTTON( (SUBWINDOW_X)+6+.25*((SUBWINDOW_WIDTH)-24)+6+.25*((SUBWINDOW_WIDTH)-24)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .5*((SUBWINDOW_WIDTH)-24), 18, "ADD TO FAVORITES", .3, 14, uiScript createFavoriteIngame )
+#endif
 }
