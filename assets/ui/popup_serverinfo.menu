@@ -83,7 +83,7 @@ menuDef {
 		columns			4	0	40	20
 							40	40	10
 							90	40	10
-							135	40	20
+							135	40	33 // TODO: don't limit the length and use text scrolling
 		visible			1
 	}
 
