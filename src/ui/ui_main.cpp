@@ -5404,7 +5404,30 @@ static int UI_GetServerStatusInfo(const char *serverAddress,
           break;
         }
         *p++ = '\0';
-        name = p;
+
+        // strip out the surrounding quotes from the player name
+        if (*p == '"') {
+          ++p; // skip opening quote
+          name = p;
+          p = strchr(p, '"');
+
+          if (!p) {
+            uiInfo.uiDC.Print(
+                S_COLOR_YELLOW
+                "WARNING: failed to parse players from server info - malformed "
+                "response format, no closing quote on player name!\n");
+            break;
+          }
+
+          *p++ = '\0'; // strip the closing quote
+        } else {
+          // shouldn't happen, names should always be quoted
+          uiInfo.uiDC.Print(S_COLOR_YELLOW
+                            "WARNING: non-standard server info response - no "
+                            "surrounding quotes in player name!\n");
+          name = p;
+        }
+
         Com_sprintf(&info->pings[len],
                     static_cast<int>(sizeof(info->pings)) - len, "%d", i);
         info->lines[info->numLines][0] = &info->pings[len];
