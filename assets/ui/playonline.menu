@@ -10,6 +10,10 @@
 #define MENU_NAME "playonline"
 #define GROUP_NAME		"grpPlayOnline"
 
+#define SETUP_SERVERSTATUS uiScript serverActionStatusType SERVERSTATUS_PLAYONLINE ; setcvar ui_serverBrowser 1 ; uiScript ServerStatus
+#define OPEN_SERVERINFO clearFocus ; uiScript uiPreviousMenu MENU_NAME; SETUP_SERVERSTATUS ; uiScript serverActionJoinType JOINSERVER_PLAYONLINE ; open popup_serverinfo
+#define JOIN_SERVER uiScript serverActionJoinType JOINSERVER_PLAYONLINE ; uiScript JoinServer
+
 // Macros //
 
 #include "ui/menumacros.h"
@@ -621,11 +625,11 @@ menuDef {
 		visible			1
 
 		doubleClick {
-			uiScript JoinServer
+			JOIN_SERVER
 		}
 
 		onEnter {
-			uiScript JoinServer
+			JOIN_SERVER
 		}
 	}
 
@@ -671,7 +675,7 @@ menuDef {
 	BUTTON( 12, 102+316-20, .25*((SUBWINDOW_WIDTH)-30), 14, "REFRESH LIST", .24, 11, uiScript RefreshServers )
 
 	BUTTON( 6+6+(.25*((SUBWINDOW_WIDTH)-30))+6, 102+316-20, .25*((SUBWINDOW_WIDTH)-30), 14, "CONNECT TO IP", .24, 11, clearFocus ; open playonline_connecttoip )
-	BUTTON( 6+6+(.25*((SUBWINDOW_WIDTH)-30))+6+(.25*((SUBWINDOW_WIDTH)-30))+6, 102+316-20, .25*((SUBWINDOW_WIDTH)-30), 14, "SERVER INFO", .24, 11, clearFocus ; uiScript uiPreviousMenu MENU_NAME; open popup_serverinfo )
+	BUTTON( 6+6+(.25*((SUBWINDOW_WIDTH)-30))+6+(.25*((SUBWINDOW_WIDTH)-30))+6, 102+316-20, .25*((SUBWINDOW_WIDTH)-30), 14, "SERVER INFO", .24, 11, OPEN_SERVERINFO )
 
 	NAMEDBUTTON( "bttn_pbenable", 6+6+(.25*((SUBWINDOW_WIDTH)-30))+6+(.25*((SUBWINDOW_WIDTH)-30))+6+(.25*((SUBWINDOW_WIDTH)-30))+6, 102+316-20, .25*((SUBWINDOW_WIDTH)-30), 14, "ENABLE PUNKBUSTER", .24, 11, clearFocus ; open playonline_enablepb )
 	NAMEDBUTTON( "bttn_pbdisable", 6+6+(.25*((SUBWINDOW_WIDTH)-30))+6+(.25*((SUBWINDOW_WIDTH)-30))+6+(.25*((SUBWINDOW_WIDTH)-30))+6, 102+316-20, .25*((SUBWINDOW_WIDTH)-30), 14, "DISABLE PUNKBUSTER", .24, 11, clearFocus ; open playonline_disablepb )
@@ -679,5 +683,5 @@ menuDef {
 // Buttons //
 
 	BUTTON( 6, WINDOW_HEIGHT-24, .5*(WINDOW_WIDTH-18), 18, "BACK", .3, 14, close playonline ; open main )
-	BUTTON( 6+.5*(WINDOW_WIDTH-18)+6, WINDOW_HEIGHT-24, .5*(WINDOW_WIDTH-18), 18, "JOIN SERVER", .3, 14, uiScript JoinServer )
+	BUTTON( 6+.5*(WINDOW_WIDTH-18)+6, WINDOW_HEIGHT-24, .5*(WINDOW_WIDTH-18), 18, "JOIN SERVER", .3, 14, JOIN_SERVER )
 }
