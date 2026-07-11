@@ -2831,32 +2831,31 @@ void CheckWolfMP() {
   }
 }
 
-int getNumPlayingClients() {
-  auto numPlayingClients = 0;
-  for (auto i = 0, len = level.numConnectedClients; i < len; ++i) {
-    auto clientNum = level.sortedClients[i];
-    if ((g_entities + clientNum)->client->sess.sessionTeam != TEAM_SPECTATOR) {
-      ++numPlayingClients;
-    }
-  }
-  return numPlayingClients;
-}
+static int32_t getNumValidVoters() {
+  int32_t count = 0;
 
-int getNumValidVoters() {
-  auto numValidPlayers = getNumPlayingClients();
-  auto numVotedSpecs = 0;
-  if (g_spectatorVote.integer > 0) {
-    for (auto i = 0, len = level.numConnectedClients; i < len; ++i) {
-      auto clientNum = level.sortedClients[i];
-      auto player = g_entities + clientNum;
-      if (player->client->sess.sessionTeam == TEAM_SPECTATOR &&
-          player->client->ps.eFlags & EF_VOTED) {
-        ++numVotedSpecs;
+  for (int32_t i = 0; i < level.numConnectedClients; i++) {
+    const gentity_t *const ent = g_entities + level.sortedClients[i];
+
+    // prevent connecting clients from affecting vote result, so if someone
+    // crashes while loading a map for example, players don't need to wait
+    // until the player times out for votes to function normally
+    if (ent->client->pers.connected != CON_CONNECTED) {
+      continue;
+    }
+
+    if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+      // don't count spectators that cannot vote, or have not voted yet
+      if (g_spectatorVote.integer == 0 ||
+          !(ent->client->ps.eFlags & EF_VOTED)) {
+        continue;
       }
     }
+
+    count++;
   }
 
-  return numValidPlayers + numVotedSpecs;
+  return count;
 }
 
 void resetVote() {

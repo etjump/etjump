@@ -739,7 +739,12 @@ void _UI_Refresh(int realtime) {
     // refresh find player list
     UI_BuildFindPlayerList(qfalse);
 
-    if (etj_drawQuickConnectMenu.integer) {
+    uiClientState_t cstate{};
+    trap_GetClientState(&cstate);
+
+    // only refresh quick connect servers when not connected to a server
+    if (etj_drawQuickConnectMenu.integer &&
+        cstate.connState <= CA_DISCONNECTED) {
       if (!ETJump::ui.quickConnect->initialRefreshDone) {
         ETJump::ui.quickConnect->initialRefreshDone = true;
         ETJump::ui.quickConnect->refreshServers(true);
@@ -751,17 +756,14 @@ void _UI_Refresh(int realtime) {
     if (!uiInfo.integrityCheckOk && uiInfo.uiDC.mainOrIngameMainMenuOpen) {
       ETJump::MenuIntegrityChecker::printIntegrityWatermark();
     }
-  }
 
-  // draw cursor
-  UI_SetColor(NULL);
-  if (Menu_Count() > 0) {
-    uiClientState_t cstate;
-    trap_GetClientState(&cstate);
+    // draw cursor if needed
     if (cstate.connState <= CA_DISCONNECTED || cstate.connState >= CA_ACTIVE) {
       uiInfo.uiDC.cursor.draw();
     }
   }
+
+  UI_SetColor(nullptr);
 }
 
 /*
