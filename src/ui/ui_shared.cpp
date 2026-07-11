@@ -2604,6 +2604,10 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down,
   int count = DC->feederCount(item->special);
   int max, viewmax;
 
+  if (count == 0) {
+    return qfalse;
+  }
+
   if (force || (Rect_ContainsPoint(&item->window.rect, DC->cursor.virtX,
                                    DC->cursor.virtY) &&
                 item->window.flags & WINDOW_HASFOCUS)) {
