@@ -5,12 +5,16 @@
 * `etj_ccMenu_showEmptyPages` cvar to toggle showing empty pages in custom command menu (default **0**) [#1918](https://github.com/etjump/etjump/pull/1918)
 * `etj_ccMenu_browseWithOpen` cvar to make `openCustomCommandMenu` command browse to next page when custom command menu is open [#1917](https://github.com/etjump/etjump/pull/1917)
 * left/right arrow navigation for previous/next page in custom command menu, respectively [#1917](https://github.com/etjump/etjump/pull/1917)
+* server info button in quick connect menu [#1933](https://github.com/etjump/etjump/pull/1933)
+* new portal trail shaders [#1928](https://github.com/etjump/etjump/pull/1928)
+* `record-details` command to view detailed information about a timerun record [#1927](https://github.com/etjump/etjump/pull/1927)
 * `etj_jumpSpeedsMaxJumps` cvar to set maximum number of jumps in jump speeds list (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj_jumpSpeedsMaxJumpsPerColumn` cvar to set maximum number of jumps in jump speeds list column (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj_jumpSpeedsMaxJumpsPerRow` cvar to set maximum number of jumps in jump speeds list row (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj_drawCHS3` + related cvars - same as CHS2, just a different set of data [#1924](https://github.com/etjump/etjump/pull/1924)
 * `etj_CHS2/3HideLabels` cvar to toggle drawing info labels on CHS2/3, respectively [#1924](https://github.com/etjump/etjump/pull/1924)
 * `etj_CHS1DistanceScale` cvar to scale the distance of CHS1 infos from crosshair (**0.25 - 10.0**) [#1924](https://github.com/etjump/etjump/pull/1924)
+* `etj_portalTrailTime` cvar to set lifetime of portal trails (in milliseconds, **0 - 10000**, default **400**) [#1928](https://github.com/etjump/etjump/pull/1928)
 * `etj/g_mapAutoexecDir` cvar to set directory to load map-specific autoexec files from (client/server, respectively) [#1916](https://github.com/etjump/etjump/pull/1916)
 
 ## Changed
@@ -24,6 +28,8 @@
   * only enabled if demo was recorded at `sv_fps/snaps 125`, and not spectating
 * snaphud shows proper zones for crouch/prone while on ground [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_drawspeed2` turns white if `etj_speedColorUsesAccel` is enabled while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
+* server info menu displays more characters for values/player names [#1933](https://github.com/etjump/etjump/pull/1933)
+* removed quotes from player names in server info menu [#1933](https://github.com/etjump/etjump/pull/1933)
 
 ## Fixed
 * CGaz was rendering 1 frame behind while playing [#1921](https://github.com/etjump/etjump/pull/1921)
@@ -35,10 +41,14 @@
 * first respawn after joining to a team after inactivity drop spawned players at the latest save slot [#1915](https://github.com/etjump/etjump/pull/1915)
 * jump speed list showed unrelated jump speeds when joining team/switching followed client [#1922](https://github.com/etjump/etjump/pull/1922)
 * jump speed list colors were not updating for existing jumps, and required a jump event to trigger color change [#1922](https://github.com/etjump/etjump/pull/1922)
+* disconnecting/connecting clients were counted as valid voters for vote checks [#1932](https://github.com/etjump/etjump/pull/1932)
+* selection rectangle for `vote no` was misaligned if spectator voting was disabled [#1932](https://github.com/etjump/etjump/pull/1932)
 * `etj_speedAlpha` and `etj_accelAlpha` were calculated incorrectly [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_accelColorUsesAccel` ignored `etj_accelAlpha` while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_drawAccel` showed incorrect accel values for 1 frame after noclip ended [#1921](https://github.com/etjump/etjump/pull/1921)
+* quick connect servers were refreshing in the background when in-game menus were open [#1934](https://github.com/etjump/etjump/pull/1934)
 * spectator info list could show old, outdated data in some scenarios [#1926](https://github.com/etjump/etjump/pull/1926)
+* server info menu could not be refreshed on localhost [#1933](https://github.com/etjump/etjump/pull/1933)
 
 # ETJump 3.5.2
 
