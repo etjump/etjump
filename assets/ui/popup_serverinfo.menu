@@ -30,14 +30,6 @@ menuDef {
 	onOpen {
 		setitemcolor background backcolor 0 0 0 0 ;
 		fadein background ;
-
-#ifdef FUI
-		setcvar ui_serverBrowser 1 ;
-		uiScript ServerStatus
-#else
-		setcvar ui_serverBrowser 0 ;
-		uiScript InGameServerStatus
-#endif
 	}
 
 	onESC {
@@ -93,7 +85,7 @@ menuDef {
 	BUTTON( (SUBWINDOW_X)+6+.33*((SUBWINDOW_WIDTH)-24)+6+.34*((SUBWINDOW_WIDTH)-24)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .33*((SUBWINDOW_WIDTH)-24), 18, "JOIN SERVER", .3, 14, uiScript JoinServer )
 #else
 	BUTTON( (SUBWINDOW_X)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .25*((SUBWINDOW_WIDTH)-24), 18, "BACK", .3, 14, close MENU_NAME ; uiScript uiPreviousMenu restore )
-	BUTTON( (SUBWINDOW_X)+6+.25*((SUBWINDOW_WIDTH)-24)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .25*((SUBWINDOW_WIDTH)-24), 18, "REFRESH", .3, 14, uiScript InGameServerStatus )
+	BUTTON( (SUBWINDOW_X)+6+.25*((SUBWINDOW_WIDTH)-24)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .25*((SUBWINDOW_WIDTH)-24), 18, "REFRESH", .3, 14, uiScript ServerStatus )
 	BUTTON( (SUBWINDOW_X)+6+.25*((SUBWINDOW_WIDTH)-24)+6+.25*((SUBWINDOW_WIDTH)-24)+6, (SUBWINDOW_Y)+(SUBWINDOW_HEIGHT)-24, .5*((SUBWINDOW_WIDTH)-24), 18, "ADD TO FAVORITES", .3, 14, uiScript createFavoriteIngame )
 #endif
 }

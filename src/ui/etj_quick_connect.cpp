@@ -488,4 +488,24 @@ std::string QuickConnect::buildConnectCommand(const int index) const {
 
   return command + '\n';
 }
+
+std::string QuickConnect::getServerAddress(const int32_t index) const {
+  // for safety
+  if (index < 0 || index >= MAX_QUICKCONNECT_SERVERS) {
+    uiInfo.uiDC.Print(S_COLOR_RED "%s: Unable to get server address for quick "
+                                  "connect server - index '%i' out of range!\n",
+                      __func__, index);
+    return "";
+  }
+
+  // + 1 for user-facing index
+  if (index > static_cast<int>(servers.size())) {
+    uiInfo.uiDC.Print(S_COLOR_RED
+                      "%s: No quick connect server saved at slot '%i'\n",
+                      __func__, index + 1);
+    return "";
+  }
+
+  return servers[index].ip;
+}
 } // namespace ETJump

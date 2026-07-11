@@ -24,9 +24,21 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 
 namespace ETJump {
+// These keeps track of how 'JoinServer' and 'ServerStatus' UI scripts work.
+// This let's us use a single script and .menu file for serverinfo panel,
+// without having to duplicate the functionality in 'main.menu',
+// 'playonline.menu' and 'ingame_main.menu'.
+// We use integers here instead of enums to easily use the constants
+// in the actual .menu files as well.
+struct ServerAction {
+  int8_t statusType = -1;
+  int8_t joinType = -1;
+};
+
 class SyscallExt;
 class ColorPicker;
 class DemoQueue;
@@ -39,5 +51,7 @@ struct UIContext {
   std::unique_ptr<DemoQueue> demoQueue;
   std::unique_ptr<QuickConnect> quickConnect;
   std::unique_ptr<ColorParser> colorParser;
+
+  ServerAction serverAction;
 };
 } // namespace ETJump
