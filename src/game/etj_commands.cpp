@@ -575,7 +575,7 @@ static bool recordDetails(gentity_t *ent, Arguments argv) {
     /record-details <map name> <run name> <rank>
     /record-details <season name> <map name> <run name> <rank>)";
 
-  const auto def =
+  const auto def = std::move(
       ETJump::CommandParser::CommandDefinition::create("record-details", desc)
           .addOption("season", "s",
                      "Season to print record details from. Default is the "
@@ -592,7 +592,7 @@ static bool recordDetails(gentity_t *ent, Arguments argv) {
           .addOption("rank", "rk",
                      "Rank to print record details from. Default is rank 1.",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
-                     false);
+                     false));
 
   const auto args = Container::skipFirstN(*argv, 1);
   const auto optCommand =

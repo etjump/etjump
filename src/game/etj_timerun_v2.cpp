@@ -1601,7 +1601,8 @@ void TimerunV2::recordDetails(const Timerun::RecordDetailsParams &params) {
       throw std::runtime_error("No records found matching given parameters.");
     }
 
-    const auto seasonNameFromId = [this, &r, &func](const int32_t seasonId) {
+    const auto seasonNameFromId =
+        [this, &r, &func](const int32_t seasonId) -> const std::string & {
       for (const auto &season : r->seasons) {
         if (season.id == seasonId) {
           return season.name;
