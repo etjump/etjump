@@ -209,28 +209,45 @@ std::string ETJump::OperatingSystem::getMachineID() {
   return Crypto::sha2(id);
 }
 
-// FIXME: this probably does not work on BTRFS or LVM
 std::string ETJump::OperatingSystem::getDiskInfo() {
   // to avoid this being easily changed by just mounting new partitions,
   // we only grab the root partition block device id, since that's
   // the most likely to stay consistent at all the times
-  std::ifstream mounts("/proc/mounts");
+  std::ifstream mountinfo("/proc/self/mountinfo");
 
-  if (!mounts) {
+  if (!mountinfo) {
     return NOHWID_DISK;
   }
 
   std::string line;
   std::string mountPath;
 
-  // the format for '/proc/mounts' is
-  // <device> <dir> <type> <options> <dump frequency> <fs check order>
-  // everything is space delimited, so the line with root partition
-  // will have ' / ' after the mount path
-  while (std::getline(mounts, line)) {
-    if (line.find(" / ") != std::string::npos) {
-      std::istringstream iss(line);
-      iss >> mountPath;
+  // https://www.man7.org/linux/man-pages/man5/proc_pid_mountinfo.5.html
+  while (std::getline(mountinfo, line)) {
+    // split from the separator as the amount of optional fields
+    // before it varies, to ease the parsing
+    const auto splits = StringUtils::split(line, " - ");
+
+    if (splits.size() != 2) {
+      continue;
+    }
+
+    // left half
+    std::istringstream iss(splits[0]);
+    std::string mountId;
+    std::string parentId;
+    std::string dev;
+    std::string root;
+    std::string mountPoint;
+
+    iss >> mountId >> parentId >> dev >> root >> mountPoint;
+
+    // this is the filesystem mounted at '/'
+    if (mountPoint == "/") {
+      std::istringstream iss(splits[1]);
+      std::string fsType;
+
+      iss >> fsType >> mountPath;
       break;
     }
   }
@@ -249,9 +266,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
     std::filesystem::path physicalDevicePath = "/sys/class/block/" + partition;
     physicalDevice =
         std::filesystem::read_symlink(physicalDevicePath).lexically_normal();
-  } catch (const std::bad_alloc &) {
-    return NOHWID_DISK;
-  } catch (const std::filesystem::filesystem_error &) {
+  } catch (const std::exception &) {
     return NOHWID_DISK;
   }
 
