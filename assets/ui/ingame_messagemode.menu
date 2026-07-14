@@ -108,7 +108,7 @@ menuDef
 		maxChars		200
 		maxPaintChars	200
 		visible			1
-		tooltip			"Enter text here - press ESCAPE twice to cancel"
+		tooltip			"Enter text here"
 		hOffset         "ui_mtOffset"
 		multiline
 		onEsc { close ingame_messagemode }
