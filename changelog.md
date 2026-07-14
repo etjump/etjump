@@ -38,17 +38,24 @@
 * strafe quality scored frames with upmove held with full score [#1921](https://github.com/etjump/etjump/pull/1921)
   * as a result, overall scores are now slightly lower, on average ~0.7% with a decent sample size
 * interpolated strafe quality broke non-interpolated CGaz [#1921](https://github.com/etjump/etjump/pull/1921)
-* first respawn after joining to a team after inactivity drop spawned players at the latest save slot [#1915](https://github.com/etjump/etjump/pull/1915)
 * jump speed list showed unrelated jump speeds when joining team/switching followed client [#1922](https://github.com/etjump/etjump/pull/1922)
 * jump speed list colors were not updating for existing jumps, and required a jump event to trigger color change [#1922](https://github.com/etjump/etjump/pull/1922)
-* disconnecting/connecting clients were counted as valid voters for vote checks [#1932](https://github.com/etjump/etjump/pull/1932)
-* selection rectangle for `vote no` was misaligned if spectator voting was disabled [#1932](https://github.com/etjump/etjump/pull/1932)
 * `etj_speedAlpha` and `etj_accelAlpha` were calculated incorrectly [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_accelColorUsesAccel` ignored `etj_accelAlpha` while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_drawAccel` showed incorrect accel values for 1 frame after noclip ended [#1921](https://github.com/etjump/etjump/pull/1921)
+* server info menu could not be refreshed on localhost [#1933](https://github.com/etjump/etjump/pull/1933)
+
+# ETJump 3.5.3
+
+## Fixed
+* first respawn after joining to a team after inactivity drop spawned players at the latest save slot [#1915](https://github.com/etjump/etjump/pull/1915)
+* disconnecting/connecting clients were counted as valid voters for vote checks [#1932](https://github.com/etjump/etjump/pull/1932)
+* selection rectangle for `vote no` was misaligned if spectator voting was disabled [#1932](https://github.com/etjump/etjump/pull/1932)
 * quick connect servers were refreshing in the background when in-game menus were open [#1934](https://github.com/etjump/etjump/pull/1934)
 * spectator info list could show old, outdated data in some scenarios [#1926](https://github.com/etjump/etjump/pull/1926)
-* server info menu could not be refreshed on localhost [#1933](https://github.com/etjump/etjump/pull/1933)
+* multiline text boxes (e.g. chat window) were drawing cursor when out of focus [#1937](https://github.com/etjump/etjump/pull/1937)
+* misleading tooltip in chat window [#1937](https://github.com/etjump/etjump/pull/1937)
+* potential crash when trying to browse an empty listbox menu item [#1935](https://github.com/etjump/etjump/pull/1935)
 
 # ETJump 3.5.2
 
