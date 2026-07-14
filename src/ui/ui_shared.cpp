@@ -4440,8 +4440,8 @@ static float GetCharWidth(const char *symbol, float scale, fontInfo_t *font) {
   return out * scale * font->glyphScale;
 }
 
-void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr,
-                               qboolean hasCursor) {
+static void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr,
+                                      bool hasCursor) {
   const char *p, *newLinePtr;
   char buff[1024], cursor;
   int len, newLine, cursorPos, startLine, previousLine;
@@ -4771,8 +4771,8 @@ void Item_Text_Paint(itemDef_t *item) {
                textPtr, 0, 0, item->textStyle);
 }
 
-void Item_TextMultiline_Paint(itemDef_t *item) {
-  char buff[1024];
+static void Item_TextMultiline_Paint(itemDef_t *item) {
+  char buff[MAX_CVAR_VALUE_STRING]{};
 
   if (!item->cvar) {
     return;
@@ -4785,7 +4785,8 @@ void Item_TextMultiline_Paint(itemDef_t *item) {
   DC->getCVarString(item->cvar, buff, sizeof(buff));
 
   // wraps texts and handles caret position
-  Item_Text_DrawAutoWrapped(item, buff, qtrue);
+  Item_Text_DrawAutoWrapped(
+      item, buff, ((item->window.flags & WINDOW_HASFOCUS) && g_editingField));
 }
 
 void Item_TextField_Paint(itemDef_t *item) {
