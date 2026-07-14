@@ -1,3 +1,15 @@
+# ETJump 3.5.3
+
+## Fixed
+* first respawn after joining to a team after inactivity drop spawned players at the latest save slot [#1915](https://github.com/etjump/etjump/pull/1915)
+* disconnecting/connecting clients were counted as valid voters for vote checks [#1932](https://github.com/etjump/etjump/pull/1932)
+* selection rectangle for `vote no` was misaligned if spectator voting was disabled [#1932](https://github.com/etjump/etjump/pull/1932)
+* quick connect servers were refreshing in the background when in-game menus were open [#1934](https://github.com/etjump/etjump/pull/1934)
+* spectator info list could show old, outdated data in some scenarios [#1926](https://github.com/etjump/etjump/pull/1926)
+* multiline text boxes (e.g. chat window) were drawing cursor when out of focus [#1937](https://github.com/etjump/etjump/pull/1937)
+* misleading tooltip in chat window [#1937](https://github.com/etjump/etjump/pull/1937)
+* potential crash when trying to browse an empty listbox menu item [#1935](https://github.com/etjump/etjump/pull/1935)
+
 # ETJump 3.5.2
 
 ## Fixed
