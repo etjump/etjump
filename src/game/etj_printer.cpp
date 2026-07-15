@@ -87,26 +87,29 @@ void Printer::consoleAll(const std::string &message) {
   }
 }
 
-void Printer::chat(int clientNum, const std::string &message) {
+void Printer::chat(int clientNum, const std::string &message, bool enc) {
   if (clientNum == CONSOLE_CLIENT_NUMBER) {
     G_Printf("%s\n", message.c_str());
   } else {
-    trap_SendServerCommand(clientNum, va("chat \"%s\"", message.c_str()));
+    trap_SendServerCommand(
+        clientNum, va("%s \"%s\"", enc ? "enc_chat" : "chat", message.c_str()));
   }
 }
 
-void Printer::chat(const gentity_t *ent, const std::string &message) {
+void Printer::chat(const gentity_t *ent, const std::string &message, bool enc) {
   const int clientNum = ent ? ClientNum(ent) : CONSOLE_CLIENT_NUMBER;
-  chat(clientNum, message);
+  chat(clientNum, message, enc);
 }
 
-void Printer::chat(const gclient_t *client, const std::string &message) {
+void Printer::chat(const gclient_t *client, const std::string &message,
+                   bool enc) {
   const int clientNum = client ? ClientNum(client) : CONSOLE_CLIENT_NUMBER;
-  chat(clientNum, message);
+  chat(clientNum, message, enc);
 }
 
-void Printer::chatAll(const std::string &message) {
-  trap_SendServerCommand(-1, va("chat \"%s\"", message.c_str()));
+void Printer::chatAll(const std::string &message, bool enc) {
+  trap_SendServerCommand(
+      -1, va("%s \"%s\"", enc ? "enc_chat" : "chat", message.c_str()));
 
   if (g_dedicated.integer) {
     G_Printf("%s\n", message.c_str());

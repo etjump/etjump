@@ -7376,9 +7376,11 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
 
     // ydnar: say, team say, etc
     case UIMENU_INGAME_MESSAGEMODE:
-      // trap_Cvar_Set( "cl_paused", "1" );
+    case UIMENU_INGAME_PRIVATE_MESSAGE:
       trap_Key_SetCatcher(KEYCATCH_UI);
-      Menus_OpenByName("ingame_messagemode");
+      Menus_OpenByName((menu == UIMENU_INGAME_MESSAGEMODE)
+                           ? "ingame_messagemode"
+                           : "ingame_privatemessage");
 
       // special case for chat, we don't really want the cursor to be
       // in the middle of the screen, it would be annoying to have the cursor

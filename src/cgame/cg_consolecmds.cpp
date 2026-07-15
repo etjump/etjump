@@ -455,17 +455,27 @@ inline constexpr int MSGTYPE_ALL = 1;
 inline constexpr int MSGTYPE_TEAM = 2;
 inline constexpr int MSGTYPE_BUDDY = 3;
 inline constexpr int MSGTYPE_ADMIN = 4;
+inline constexpr int MSGTYPE_PRIVATE = 5;
 
 // ydnar: say, team say, etc
-static void CG_MessageMode_f(void) {
-  char cmd[64];
+static void CG_MessageMode_f() {
+  char cmd[64]{};
 
   if (cgs.eventHandling != CGAME_EVENT_NONE) {
     return;
   }
 
   // get the actual command
-  trap_Argv(0, cmd, 64);
+  trap_Argv(0, cmd, sizeof(cmd));
+
+  // private message
+  if (!Q_stricmp(cmd, "privateMessage")) {
+    trap_Cvar_Set("cg_messageType", std::to_string(MSGTYPE_PRIVATE).c_str());
+    trap_Cvar_Set("cg_messageText", "");
+    trap_Cvar_Set("etj_privateMessageTo", "");
+    trap_UI_Popup(UIMENU_INGAME_PRIVATE_MESSAGE);
+    return;
+  }
 
   // team say
   if (!Q_stricmp(cmd, "messagemode2")) {
@@ -533,6 +543,16 @@ static void CG_MessageSend_f(void) {
     case MSGTYPE_ADMIN:
       trap_SendConsoleCommand(va("enc_say_admin \"%s\"\n", messageTextEncoded));
       break;
+    case MSGTYPE_PRIVATE: {
+      char messageTo[MAX_NAME_LENGTH]{};
+      trap_Cvar_VariableStringBuffer("etj_privateMessageTo", messageTo,
+                                     sizeof(messageTo));
+
+      trap_SendConsoleCommand(
+          va("enc_m \"%s\" \"%s\"\n", messageTo, messageTextEncoded));
+      trap_Cvar_Set("etj_privateMessageTo", "");
+      break;
+    }
     default:
       trap_SendConsoleCommand(va("enc_say \"%s\"\n", messageTextEncoded));
       break;
@@ -1277,6 +1297,7 @@ static const consoleCommand_t noDemoCommands[] = {
     {"messageMode2", CG_MessageMode_f},
     {"messageMode3", CG_MessageMode_f},
     {"adminChat", CG_MessageMode_f},
+    {"privateMessage", CG_MessageMode_f},
     {"messageSend", CG_MessageSend_f},
 
     {"openlimbomenu", CG_LimboMenu_f},
@@ -1574,4 +1595,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("generateMotd");
 
   trap_AddCommand("dumpEntities");
+
+  trap_AddCommand("m");
+  trap_AddCommand("enc_m");
 }
