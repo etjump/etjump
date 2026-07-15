@@ -1,5 +1,6 @@
 #include <memory>
 
+#include "etj_utilities.h"
 #include "g_local.h"
 #include "etj_deathrun_system.h"
 #include "etj_database.h"
@@ -1623,25 +1624,6 @@ void G_wipeCvars(void) {
   G_UpdateCvars();
 }
 
-void G_ExecMapSpecificConfig() {
-  int len;
-  fileHandle_t f;
-
-  len = trap_FS_FOpenFile(va("autoexec_%s.cfg", level.rawmapname), &f, FS_READ);
-  if (len > 0) {
-    // autoexec_mapname.cfg file found
-    trap_SendConsoleCommand(EXEC_APPEND,
-                            va("exec autoexec_%s.cfg\n", level.rawmapname));
-    return;
-  }
-
-  len = trap_FS_FOpenFile("autoexec_default.cfg", &f, FS_READ);
-  if (len > 0) {
-    // autoexec_default.cfg file found
-    trap_SendConsoleCommand(EXEC_APPEND, "exec autoexec_default.cfg\n");
-  }
-}
-
 // copies max num chars from beginning of dest into src and returns pointer to
 // new src
 char *strcut(char *dest, char *src, int num) {
@@ -1831,7 +1813,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   trap_Cvar_Set("mapname", mapName.c_str());
   Q_strncpyz(level.rawmapname, mapName.c_str(), sizeof(level.rawmapname));
 
-  G_ExecMapSpecificConfig();
+  Utilities::execMapAutoexec();
 
   trap_SetConfigstring(CS_SCRIPT_MOVER_NAMES, ""); // clear out
 

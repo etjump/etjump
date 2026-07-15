@@ -95,4 +95,9 @@ bool inNoNoclipArea(gentity_t *ent);
  * Copies the target clients stance (crouch/prone/stand)
  */
 void copyStanceFromClient(gentity_t *self, const gentity_t *target);
+
+/**
+ * Executes autoexec file for the current map, if present
+ */
+void execMapAutoexec();
 } // namespace Utilities

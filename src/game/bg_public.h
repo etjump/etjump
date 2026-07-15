@@ -2912,6 +2912,8 @@ inline constexpr char CUSTOMVOTE_CVTEXT[] = "cvtext";
 inline constexpr char CUSTOMVOTE_SERVERMAPS[] = "servermaps";
 inline constexpr char CUSTOMVOTE_OTHERMAPS[] = "othermaps";
 
+inline constexpr char AUTOEXEC_MAP_DEFAULT[] = "autoexec_default.cfg";
+
 enum class CheatCvarFlags {
   None = 0,
   LookYaw = 1,

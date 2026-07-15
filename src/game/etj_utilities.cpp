@@ -24,6 +24,7 @@
 
 #include "etj_utilities.h"
 #include "etj_entity_utilities.h"
+#include "etj_filesystem.h"
 #include "etj_map_statistics.h"
 #include "etj_timerun_v2.h"
 #include "etj_worldspawn.h"
@@ -221,5 +222,16 @@ void Utilities::copyStanceFromClient(gentity_t *self, const gentity_t *target) {
     self->client->ps.eFlags &= ~EF_PRONE;
     self->client->ps.eFlags &= ~EF_PRONE_MOVING;
     self->client->ps.pm_flags &= ~PMF_DUCKED;
+  }
+}
+
+void Utilities::execMapAutoexec() {
+  const char *filename = va("autoexec_%s.cfg", level.rawmapname);
+
+  if (FileSystem::exists(filename)) {
+    trap_SendConsoleCommand(EXEC_APPEND, va("exec %s\n", filename));
+  } else if (FileSystem::exists(ETJump::AUTOEXEC_MAP_DEFAULT)) {
+    trap_SendConsoleCommand(EXEC_APPEND,
+                            va("exec %s\n", ETJump::AUTOEXEC_MAP_DEFAULT));
   }
 }
