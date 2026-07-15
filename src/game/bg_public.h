@@ -2545,6 +2545,8 @@ typedef enum {
 
   // fireteam savelimit input box
   UIMENU_INGAME_FT_SAVELIMIT,
+
+  UIMENU_INGAME_PRIVATE_MESSAGE,
 } uiMenuCommand_t;
 
 void BG_AdjustAAGunMuzzleForBarrel(vec_t *origin, vec_t *forward, vec_t *right,

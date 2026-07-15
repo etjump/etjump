@@ -68,6 +68,7 @@
 	loadMenu { "ui/ingame_vote_customvote.menu" }
 	loadMenu { "ui/ingame_disconnect.menu" }
 	loadMenu { "ui/ingame_messagemode.menu" }
+	loadMenu { "ui/ingame_privatemessage.menu" }
 	loadMenu { "ui/ingame_tapout.menu" }
 	loadMenu { "ui/ingame_tapoutlms.menu" }
 

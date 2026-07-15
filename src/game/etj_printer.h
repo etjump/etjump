@@ -89,15 +89,17 @@ public:
    * @param clientNum The client to send the message to
    * @param message The message to be sent
    */
-  static void chat(int clientNum, const std::string &message);
-  static void chat(const gentity_t *ent, const std::string &message);
-  static void chat(const gclient_t *client, const std::string &message);
+  static void chat(int clientNum, const std::string &message, bool enc = false);
+  static void chat(const gentity_t *ent, const std::string &message,
+                   bool enc = false);
+  static void chat(const gclient_t *client, const std::string &message,
+                   bool enc = false);
 
   /**
    * Sends a chat message to everyone in server and to server console.
    * @param message The message to be sent
    */
-  static void chatAll(const std::string &message);
+  static void chatAll(const std::string &message, bool enc = false);
 
   /**
    * Prints a popup message. If client num is -1 sends to console

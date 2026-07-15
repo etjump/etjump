@@ -4573,8 +4573,11 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
   char *msg = nullptr;
   auto selfNum = ClientNum(ent);
 
+  trap_Argv(0, cmd, sizeof(cmd));
+
   if (trap_Argc() < 3) {
-    Printer::console(selfNum, "^7usage: ^3m ^7<name> <message>.\n");
+    Printer::console(selfNum, StringUtils::format(
+                                  "^7usage: ^3%s ^7<name> <message>\n", cmd));
     return;
   }
 
@@ -4582,6 +4585,8 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
     Printer::console(selfNum, "^3NOTE: ^7You are muted.\n");
     return;
   }
+
+  const bool enc = !Q_stricmp(cmd, "enc_m");
 
   trap_Argv(1, cmd, sizeof(cmd));
   if ((clientNum = ClientNumberFromString(ent, cmd)) == -1) {
@@ -4594,7 +4599,7 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
   if (!ent) {
     msg = ConcatArgs(2);
     Printer::chat(ClientNum(other),
-                  va("^7Private message from server console: ^3%s", msg));
+                  va("^7Private message from server console: ^3%s", msg), enc);
     trap_SendServerCommand(otherNum, "pmFlashWindow");
 
     G_Printf("Private message to %s^7: ^3%s\n", other->client->pers.netname,
@@ -4604,13 +4609,17 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
 
   if (!COM_BitCheck(other->client->sess.ignoreClients, ClientNum(ent))) {
     msg = ConcatArgs(2);
-    Printer::chat(otherNum, va("^7Private message from %s^7: ^3%s",
-                               ent->client->pers.netname, msg));
+    Printer::chat(
+        otherNum,
+        va("^7Private message from %s^7: ^3%s", ent->client->pers.netname, msg),
+        enc);
     trap_SendServerCommand(otherNum, "pmFlashWindow");
 
     if (ent) {
-      Printer::chat(selfNum, va("^7Private message to %s^7: ^3%s",
-                                other->client->pers.netname, msg));
+      Printer::chat(selfNum,
+                    va("^7Private message to %s^7: ^3%s",
+                       other->client->pers.netname, msg),
+                    enc);
 
       if (ent->client->sess.inactive) {
         ETJump::InactivityTimer::clearClientInactivity(ent);
@@ -4951,6 +4960,7 @@ static const command_t anyTimeCommands[] = {
     {"ws", qfalse, Cmd_WeaponStat_f},
     {"rs", qfalse, Cmd_ResetSetup_f},
     {"m", qtrue, Cmd_PrivateMessage_f},
+    {"enc_m", qtrue, Cmd_PrivateMessage_f},
     {"nogoto", qfalse, Cmd_noGoto_f},
     {"nocall", qfalse, Cmd_noCall_f},
     {"rtvVote", qfalse, Cmd_Vote_f},
