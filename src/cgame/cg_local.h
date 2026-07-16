@@ -2409,12 +2409,15 @@ extern vmCvar_t etj_speedSize;
 extern vmCvar_t etj_speedColor;
 extern vmCvar_t etj_speedAlpha;
 extern vmCvar_t etj_speedShadow;
+extern vmCvar_t etj_speedColorUsesAccel;
+extern vmCvar_t etj_speedAlign;
+extern vmCvar_t etj_speedPrecision;
+
 extern vmCvar_t etj_drawMaxSpeed;
 extern vmCvar_t etj_maxSpeedX;
 extern vmCvar_t etj_maxSpeedY;
 extern vmCvar_t etj_maxSpeedDuration;
-extern vmCvar_t etj_speedColorUsesAccel;
-extern vmCvar_t etj_speedAlign;
+extern vmCvar_t etj_maxSpeedPrecision;
 
 extern vmCvar_t etj_drawAccel;
 extern vmCvar_t etj_accelX;
