@@ -134,26 +134,34 @@ void DrawSpeed2::setupAccelColor(const PmoveUtilsV2::State &s,
 }
 
 std::string DrawSpeed2::getSpeedString() const {
+  const int32_t precision = std::clamp(etj_speedPrecision.integer, 0, 6);
+
   switch (static_cast<Style>(etj_drawSpeed2.integer)) {
     case Style::SPEED_MAX:
-      return StringUtils::format("%.0f %.0f", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f %.*f", precision, currentSpeed,
+                                 precision, maxSpeed);
     case Style::SPEED_MAX_COLOR:
-      return StringUtils::format("%.0f ^z%.0f", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f ^z%.*f", precision, currentSpeed,
+                                 precision, maxSpeed);
     case Style::SPEED_MAX_PARENTHESIS:
-      return StringUtils::format("%.0f (%.0f)", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f (%.*f)", precision, currentSpeed,
+                                 precision, maxSpeed);
     case Style::SPEED_MAX_COLOR_PARENTHESIS:
-      return StringUtils::format("%.0f ^z(%.0f)", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f ^z(%.*f)", precision, currentSpeed,
+                                 precision, maxSpeed);
     case Style::SPEED_MAX_COLOR_BRACKETS:
-      return StringUtils::format("%.0f ^z[%.0f]", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f ^z[%.*f]", precision, currentSpeed,
+                                 precision, maxSpeed);
     case Style::SPEED_MAX_PIPE:
-      return StringUtils::format("%.0f | %.0f", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f | %.*f", precision, currentSpeed,
+                                 precision, maxSpeed);
     case Style::SPEED_TEXT:
-      return StringUtils::format("Speed: %.0f", currentSpeed);
+      return StringUtils::format("Speed: %.*f", precision, currentSpeed);
     case Style::SPEED_TENS:
       return StringUtils::format("%02i",
                                  static_cast<int>(currentSpeed) / 10 % 10 * 10);
     default:
-      return StringUtils::format("%.0f", currentSpeed);
+      return StringUtils::format("%.*f", precision, currentSpeed);
   }
 }
 

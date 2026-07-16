@@ -95,7 +95,8 @@ void DisplayMaxSpeed::render() const {
   auto size = 0.1f;
   size *= etj_speedSize.value;
 
-  auto str = va("%0.f", displayMaxSpeed);
+  const int32_t precision = std::clamp(etj_maxSpeedPrecision.integer, 0, 6);
+  auto str = va("%.*f", precision, displayMaxSpeed);
   float w;
   switch (etj_speedAlign.integer) {
     case 1: // left align
