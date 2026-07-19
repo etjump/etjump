@@ -436,7 +436,7 @@ void Team_DroppedFlagThink(gentity_t *ent) {
                            "axis_object_returned");
     }
 
-    Printer::centerPriorityAll("Axis have returned the objective!", 2);
+    Printer::centerPriorityAll(2, "Axis have returned the objective!");
   } else if (ent->item->giTag == PW_BLUEFLAG) {
     G_Script_ScriptEvent(&g_entities[ent->s.otherEntityNum], "trigger",
                          "returned");
@@ -449,7 +449,7 @@ void Team_DroppedFlagThink(gentity_t *ent) {
                            "allied_object_returned");
     }
 
-    Printer::centerPriorityAll("Allies have returned the objective!", 2);
+    Printer::centerPriorityAll(2, "Allies have returned the objective!");
   }
   // Reset Flag will delete this entity
 }

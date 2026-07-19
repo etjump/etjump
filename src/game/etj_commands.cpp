@@ -713,7 +713,7 @@ bool GetChatReplay(gentity_t *ent, Arguments argv) {
 static bool sendMaplist(gentity_t *ent, Arguments argv) {
   std::string mapList = StringUtils::join(game.mapStatistics->getMaps(), " ");
   const std::string prefix = "maplist ";
-  const size_t msgLen = BYTES_PER_PACKET - prefix.length() - 1;
+  const size_t msgLen = Printer::BYTES_PER_PACKET - prefix.length() - 1;
 
   // split to multiple commands to ensure client gets the full list
   // each command is prefixed with 'maplist' so client recognizes
@@ -788,9 +788,11 @@ static bool sendCustomvoteInfo(gentity_t *ent, Arguments argv) {
 
   // we have to check if the combined string would be over max message length,
   // because we need to always attach the command prefix in front
-  if (serverMapsCmd.length() + serverMaps.length() > BYTES_PER_PACKET - 1) {
-    const auto splits = StringUtils::wrapWords(
-        serverMaps, ' ', BYTES_PER_PACKET - serverMapsCmd.length() - 1);
+  if (serverMapsCmd.length() + serverMaps.length() >
+      Printer::BYTES_PER_PACKET - 1) {
+    const auto splits = StringUtils::wrapWords(serverMaps, ' ',
+                                               Printer::BYTES_PER_PACKET -
+                                                   serverMapsCmd.length() - 1);
 
     for (const auto &split : splits) {
       trap_SendServerCommand(clientNum, (serverMapsCmd + split + '\n').c_str());
@@ -800,9 +802,9 @@ static bool sendCustomvoteInfo(gentity_t *ent, Arguments argv) {
                            (serverMapsCmd + serverMaps + '\n').c_str());
   }
 
-  if (otherMapsCmd.length() + otherMaps.length() > BYTES_PER_PACKET) {
+  if (otherMapsCmd.length() + otherMaps.length() > Printer::BYTES_PER_PACKET) {
     const auto splits = StringUtils::wrapWords(
-        otherMaps, ' ', BYTES_PER_PACKET - otherMapsCmd.length() - 1);
+        otherMaps, ' ', Printer::BYTES_PER_PACKET - otherMapsCmd.length() - 1);
 
     for (const auto &split : splits) {
       trap_SendServerCommand(clientNum, (otherMapsCmd + split + '\n').c_str());
