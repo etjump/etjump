@@ -1992,11 +1992,11 @@ void TimerunV2::checkRecord(Player *player) {
                 TimeUtils::diffToString(completionTime, previousTopRecordTime) +
                 "^7)";
 
-            Printer::bannerAll(StringUtils::format(
+            Printer::bannerAll(
                 "^7%s ^7broke the overall server record for ^3%s\n^7with ^3%s "
                 "%s ^7!!!\n",
                 playerName, StringUtils::sanitize(record.record.run),
-                TimeUtils::millisToString(record.record.time), diffString));
+                TimeUtils::millisToString(record.record.time), diffString);
           }
           Printer::commandAll(
               TimerunCommands::Record(clientNum, record.record.time,
@@ -2025,12 +2025,12 @@ void TimerunV2::checkRecord(Player *player) {
                 TimeUtils::diffToString(completionTime, previousTopRecordTime) +
                 "^7)";
 
-            Printer::bannerAll(StringUtils::format(
+            Printer::bannerAll(
                 "^7%s ^7broke the server record on ^3%s^7 season for "
                 "^3%s\n^7with ^3%s %s ^7!!!\n",
                 playerName, record.seasonName,
                 StringUtils::sanitize(record.record.run),
-                TimeUtils::millisToString(record.record.time), diffString));
+                TimeUtils::millisToString(record.record.time), diffString);
           }
 
           // Send a record only if we beat our old PB

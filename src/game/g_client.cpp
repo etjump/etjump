@@ -1711,16 +1711,14 @@ void G_NameChanged(gentity_t *ent) {
   }
 
   if (g_nameChangeLimit.integer - client->sess.nameChangeCount == 0) {
-    Printer::popup(
-        ent, va("^3WARNING: ^7You must wait at least %s before renaming.",
-                StringUtils::getSecondsString(g_nameChangeInterval.integer)
-                    .c_str()));
+    Printer::popup(ent,
+                   "^3WARNING: ^7You must wait at least %s before renaming.",
+                   StringUtils::getSecondsString(g_nameChangeInterval.integer));
   } else if (client->sess.nameChangeCount > g_nameChangeLimit.integer) {
     trap_DropClient(ClientNum(ent), "You were kicked for spamming rename.", 0);
   } else {
-    Printer::popup(
-        ent, va("^3WARNING: ^7You have %d name changes left",
-                (g_nameChangeLimit.integer - client->sess.nameChangeCount)));
+    Printer::popup(ent, "^3WARNING: ^7You have %d name changes left",
+                   (g_nameChangeLimit.integer - client->sess.nameChangeCount));
   }
 
   client->sess.nameChangeCount++;
@@ -1916,8 +1914,8 @@ void ClientUserinfoChanged(int clientNum) {
 
       ClientNameChanged(ent);
 
-      Printer::consoleAll(StringUtils::format("%s ^7renamed to %s\n", oldname,
-                                              client->pers.netname));
+      Printer::consoleAll("%s ^7renamed to %s\n", oldname,
+                          client->pers.netname);
 
       G_NameChanged(ent);
     }

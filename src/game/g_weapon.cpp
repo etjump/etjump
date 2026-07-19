@@ -549,12 +549,11 @@ qboolean ReviveEntity(gentity_t *ent, gentity_t *traceEnt) {
   trap_LinkEntity(ent);
 
   // DHM - Nerve :: Let the person being revived know about it
-  Printer::center(traceEnt, StringUtils::format(
-                                "You have been revived by %s %s!",
-                                ent->client->sess.sessionTeam == TEAM_ALLIES
-                                    ? rankNames_Allies[ent->client->sess.rank]
-                                    : rankNames_Axis[ent->client->sess.rank],
-                                ent->client->pers.netname));
+  Printer::center(traceEnt, "You have been revived by %s %s!",
+                  ent->client->sess.sessionTeam == TEAM_ALLIES
+                      ? rankNames_Allies[ent->client->sess.rank]
+                      : rankNames_Axis[ent->client->sess.rank],
+                  ent->client->pers.netname);
   traceEnt->props_frame_state = ent->s.number;
 
   // DHM - Nerve :: Mark that the medicine was indeed dispensed

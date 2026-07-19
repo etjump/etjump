@@ -1475,9 +1475,8 @@ void G_UpdateCvars(void) {
         cv->modificationCount = cv->vmCvar->modificationCount;
 
         if (cv->trackChange && !(cv->cvarFlags & CVAR_LATCH)) {
-          Printer::popupAll(
-              StringUtils::format("Server: ^3%s ^7changed to ^3%s",
-                                  cv->cvarName, cv->vmCvar->string));
+          Printer::popupAll("Server: ^3%s ^7changed to ^3%s", cv->cvarName,
+                            cv->vmCvar->string);
         }
 
         if (cv->teamShader) {
@@ -2936,9 +2935,7 @@ void CheckVote() {
   } else if (level.voteInfo.voteNo >=
                  level.numConnectedClients - requiredClients ||
              level.time - level.voteInfo.voteTime >= VOTE_TIME) {
-    std::string voteFailedMsg =
-        StringUtils::format("^3Vote FAILED! ^3(%s)", level.voteInfo.voteString);
-    Printer::popupAll(voteFailedMsg);
+    Printer::popupAll("^3Vote FAILED! ^3(%s)", level.voteInfo.voteString);
     G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
 
     level.voteInfo.voteTime = 0;

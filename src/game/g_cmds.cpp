@@ -298,14 +298,13 @@ int ClientNumberFromString(gentity_t *to, char *s) {
   if (fIsNumber) {
     idnum = Q_atoi(s);
     if (idnum < 0 || idnum >= level.maxclients) {
-      Printer::console(to, StringUtils::format("Bad client slot: %i\n", idnum));
+      Printer::console(to, "Bad client slot: %i\n", idnum);
       return -1;
     }
 
     cl = &level.clients[idnum];
     if (cl->pers.connected != CON_CONNECTED) {
-      Printer::console(to,
-                       StringUtils::format("Client %i is not active\n", idnum));
+      Printer::console(to, "Client %i is not active\n", idnum);
       return -1;
     }
     return (idnum);
@@ -319,8 +318,7 @@ int ClientNumberFromString(gentity_t *to, char *s) {
     return partialMatchId;
   }
 
-  Printer::console(to,
-                   StringUtils::format("User %s is not on the server\n", s));
+  Printer::console(to, "User %s is not on the server\n", s);
   return (-1);
 }
 
@@ -924,10 +922,8 @@ void decreaseNoclipCount(gentity_t *ent, const std::string &action) {
 
   if (ent->client->pers.noclipCount > 0) {
     --ent->client->pers.noclipCount;
-    Printer::center(
-        ClientNum(ent),
-        StringUtils::format("^7You may use ^3%s ^2%d^7 more times.\n", action,
-                            ent->client->pers.noclipCount));
+    Printer::center(ent, "^7You may use ^3%s ^2%d^7 more times.\n", action,
+                    ent->client->pers.noclipCount);
   }
 }
 
@@ -1179,11 +1175,9 @@ static void dumpEntities(gentity_t *ent) {
     }
 
     out.write(contents);
-    Printer::console(
-        ent, StringUtils::format("Dumped entities to ^3'%s'\n", filename));
+    Printer::console(ent, "Dumped entities to ^3'%s'\n", filename);
   } catch (const File::FileIOException &e) {
-    Printer::console(
-        ent, StringUtils::format("Failed to write file ^3'%s'\n", e.what()));
+    Printer::console(ent, "Failed to write file ^3'%s'\n", e.what());
   }
 }
 } // namespace ETJump
@@ -2121,9 +2115,9 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
       color = COLOR_YELLOW;
       break;
     case SAY_ADMIN:
-      Printer::logAdminLn(StringUtils::format(
-          "adminchat: %i %s: %s", ent->s.number,
-          StringUtils::sanitize(ent->client->pers.netname), chatText));
+      Printer::logAdminLn("adminchat: %i %s: %s", ent->s.number,
+                          StringUtils::sanitize(ent->client->pers.netname),
+                          chatText);
       Com_sprintf(name, sizeof(name),
                   "^A> ^7%s^7: ", ent->client->pers.netname);
       color = COLOR_LTORANGE;
@@ -2727,12 +2721,13 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   if ((i = G_voteCmdCheck(ent, arg1, arg2)) != G_OK) {
     if (i == G_NOTFOUND) {
       if (arg1[0]) {
-        std::string errorMessage = StringUtils::format(
-            "\n^3Unknown vote command: ^7%s %s\n", arg1, arg2);
-        Printer::console(clientNum, errorMessage);
+        Printer::console(clientNum, "\n^3Unknown vote command: ^7%s %s\n", arg1,
+                         arg2);
       }
+
       G_voteHelp(ent, qtrue);
     }
+
     return;
   }
 
@@ -3124,10 +3119,8 @@ void Cmd_Vote_f(gentity_t *ent) {
         // if vote timeout ever gets changed to other than 1s,
         // this will need to be adjusted!
         Printer::popup(
-            clientNum,
-            StringUtils::format(
-                "^7You must wait for ^3%s ^7before re-voting.",
-                StringUtils::getSecondsString(ETJump::VOTING_TIMEOUT / 1000)));
+            clientNum, "^7You must wait for ^3%s ^7before re-voting.",
+            StringUtils::getSecondsString(ETJump::VOTING_TIMEOUT / 1000));
       }
       return;
     }
@@ -3166,12 +3159,11 @@ void Cmd_Vote_f(gentity_t *ent) {
       }
     }
 
-    Printer::popup(clientNum, StringUtils::format(
-                                  "Vote cast, you can change your vote %s.",
-                                  StringUtils::getPluralizedString(
-                                      ETJump::VOTING_ATTEMPTS + 1 -
-                                          client->pers.votingInfo.attempts,
-                                      "time")));
+    Printer::popup(
+        clientNum, "Vote cast, you can change your vote %s.",
+        StringUtils::getPluralizedString(ETJump::VOTING_ATTEMPTS + 1 -
+                                             client->pers.votingInfo.attempts,
+                                         "time"));
     return;
   }
 
@@ -3827,10 +3819,7 @@ bool allowQuickFollow(gentity_t *ent, gentity_t *traceEnt) {
     return false;
   }
   if (!G_AllowFollow(ent, traceEnt)) {
-    auto clientNum = ClientNum(ent);
-    std::string specLockMsg = StringUtils::format(
-        "%s is speclocked.", traceEnt->client->pers.netname);
-    Printer::popup(clientNum, specLockMsg);
+    Printer::popup(ent, "%s is speclocked.", traceEnt->client->pers.netname);
     return false;
   }
   if (!ent->client->pers.quickFollow) {
@@ -4473,12 +4462,10 @@ void Cmd_Goto_f(gentity_t *ent) {
   VectorCopy(other->client->ps.origin, ent->client->ps.origin);
   VectorClear(ent->client->ps.velocity);
 
-  Printer::popup(ClientNum(ent),
-                 StringUtils::format("%s ^7-> %s", ent->client->pers.netname,
-                                     other->client->pers.netname));
-  Printer::popup(ClientNum(other),
-                 StringUtils::format("%s ^7-> %s", ent->client->pers.netname,
-                                     other->client->pers.netname));
+  Printer::popup(ent, "%s ^7-> %s", ent->client->pers.netname,
+                 other->client->pers.netname);
+  Printer::popup(other, "%s ^7-> %s", ent->client->pers.netname,
+                 other->client->pers.netname);
 }
 
 void Cmd_Call_f(gentity_t *ent) {
@@ -4558,12 +4545,10 @@ void Cmd_Call_f(gentity_t *ent) {
   VectorClear(other->client->ps.velocity);
   VectorCopy(ent->client->ps.origin, other->client->ps.origin);
 
-  Printer::popup(ClientNum(ent),
-                 StringUtils::format("%s ^7-> %s", other->client->pers.netname,
-                                     ent->client->pers.netname));
-  Printer::popup(ClientNum(other),
-                 StringUtils::format("%s ^7-> %s", other->client->pers.netname,
-                                     ent->client->pers.netname));
+  Printer::popup(ent, "%s ^7-> %s", other->client->pers.netname,
+                 ent->client->pers.netname);
+  Printer::popup(other, "%s ^7-> %s", other->client->pers.netname,
+                 ent->client->pers.netname);
 }
 
 void Cmd_PrivateMessage_f(gentity_t *ent) {
@@ -4640,8 +4625,8 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
     }
   } else {
     Printer::console(selfNum,
-                     va("Private message to %s was ignored by the player.\n",
-                        other->client->pers.netname));
+                     "Private message to %s was ignored by the player.\n",
+                     other->client->pers.netname);
   }
 }
 
@@ -4842,12 +4827,11 @@ static void Cmd_Class_f(gentity_t *ent) {
   // display center print message
   for (const auto &loadout : ETJump::availableLoadouts) {
     if (loadout.classId == classId && loadout.weaponSlot == weaponSlot) {
-      Printer::center(ent,
-                      StringUtils::format("You will spawn as an %s %s",
-                                          ETJump::getPlayerTeamName(
-                                              ent->client->sess.sessionTeam),
-                                          loadout.description),
-                      false);
+      Printer::centerNoLog(
+          ent, "You will spawn as an %s %s",
+          ETJump::getPlayerTeamName(ent->client->sess.sessionTeam),
+          loadout.description);
+
       break;
     }
   }
@@ -5156,12 +5140,12 @@ void ClientCommand(int clientNum) {
           clientNum,
           "You don't have permission to use adminchat on this server.");
     } else if (ClientIsFlooding(ent)) {
-      Printer::console(clientNum,
-                       StringUtils::format(
-                           "^1Spam Protection: ^7command %s ^7ignored\n", cmd));
+      Printer::console(clientNum, "^1Spam Protection: ^7command %s ^7ignored\n",
+                       cmd);
     } else if (!ent->client->sess.muted) {
       Cmd_Say_f(ent, SAY_ADMIN, qfalse, enc);
     }
+
     return;
   }
 
@@ -5227,8 +5211,7 @@ void ClientCommand(int clientNum) {
   }
 
   if (!Q_stricmp(cmd, "mod_information")) {
-    Printer::console(ent,
-                     va("%s %s %s", GAME_NAME, GAME_VERSION_DATED, __TIME__));
+    Printer::console(ent, "%s %s %s", GAME_NAME, GAME_VERSION_DATED, __TIME__);
     return;
   }
 
