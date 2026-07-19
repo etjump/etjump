@@ -27,6 +27,7 @@
 #include <optional>
 
 #include "etj_string_utilities.h"
+#include "etj_time_utilities.h"
 #include "g_local.h"
 
 class Printer {
@@ -100,7 +101,6 @@ public:
   /**
    * Logs message to the admin log, if one is specified.
    * @param message The message to be logged
-   * FIXME: 32-bit time
    */
   template <typename... Targs>
   static void logAdmin(const std::string &message, const Targs &...fargs) {
@@ -108,10 +108,9 @@ public:
       return;
     }
 
-    qtime_t tm;
-    trap_RealTime(&tm);
+    const auto tm = TimeUtils::getCurrentClock(false);
 
-    const char *msg = va("%02i:%02i:%02i %s", tm.tm_hour, tm.tm_min, tm.tm_sec,
+    const char *msg = va("%02i:%02i:%02i %s", tm.hours, tm.min, tm.sec,
                          StringUtils::format(message, fargs...).c_str());
     trap_FS_Write(msg, static_cast<int32_t>(std::strlen(msg)),
                   level.adminLogFile);
