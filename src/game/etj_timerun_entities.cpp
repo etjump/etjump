@@ -197,18 +197,18 @@ bool TimerunEntity::canStartTimerun(const gentity_t *self,
   }
 
   if (speed > self->velocityUpperLimit) {
-    Printer::center(clientNum, StringUtils::format(
-                                   "^3WARNING: ^7Timerun was not started. Too "
-                                   "high starting speed (%.2f > %.2f)\n",
-                                   speed, self->velocityUpperLimit));
+    Printer::center(clientNum,
+                    "^3WARNING: ^7Timerun was not started. Too high starting "
+                    "speed (%.2f > %.2f)\n",
+                    speed, self->velocityUpperLimit);
     return false;
   }
 
   if (client->ps.viewangles[ROLL] != 0) {
-    Printer::center(clientNum,
-                    StringUtils::format("^3WARNING: ^7Timerun was not started. "
-                                        "Illegal roll angles (%.2f != 0)",
-                                        client->ps.viewangles[ROLL]));
+    Printer::center(
+        clientNum,
+        "^3WARNING: ^7Timerun was not started. Illegal roll angles (%.2f != 0)",
+        client->ps.viewangles[ROLL]);
     return false;
   }
 

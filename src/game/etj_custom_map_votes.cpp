@@ -242,20 +242,20 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
         if (sanitizedName == lists.type) {
           Printer::chat(clientNum, "^3add-customvote: ^7operation failed, "
                                    "check console for more information.");
-          Printer::console(clientNum, StringUtils::format(
-                                          "^3add-customvote: ^7a list with the "
-                                          "name ^3'%s' ^7already exists.\n",
-                                          sanitizedName));
+          Printer::console(clientNum,
+                           "^3add-customvote: ^7a list with the name ^3'%s' "
+                           "^7already exists.\n",
+                           sanitizedName);
           return;
         }
       }
     } else {
       Printer::chat(clientNum, "^3add-customvote: ^7operation failed, check "
                                "console for more information.");
-      Printer::console(clientNum,
-                       StringUtils::format("^3add-customvote: ^7couldn't open "
-                                           "the file ^3'%s' ^7for reading:\n",
-                                           customVotesFile));
+      Printer::console(
+          clientNum,
+          "^3add-customvote: ^7couldn't open the file ^3'%s' ^7for reading:\n",
+          customVotesFile);
       Printer::console(clientNum, errors + '\n');
       return;
     }
@@ -277,19 +277,19 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
   if (!JsonUtils::writeFile(customVotesFile, root, &errors)) {
     Printer::chat(clientNum, "^3add-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::console(clientNum,
-                     StringUtils::format("^3add-customvote: ^7couldn't open "
-                                         "the file ^3'%s' ^7for writing:\n",
-                                         customVotesFile));
+    Printer::console(
+        clientNum,
+        "^3add-customvote: ^7couldn't open the file ^3'%s' ^7for writing:\n",
+        customVotesFile);
     Printer::console(clientNum, errors + '\n');
     return;
   }
 
   loadCustomvotes(false);
-  Printer::chat(clientNum,
-                StringUtils::format("^3add-customvote: ^7successfully added a "
-                                    "new custom vote list ^3'%s'",
-                                    sanitizedName));
+  Printer::chat(
+      clientNum,
+      "^3add-customvote: ^7successfully added a new custom vote list ^3'%s'",
+      sanitizedName);
 }
 
 void CustomMapVotes::deleteCustomvoteList(int clientNum,
@@ -300,10 +300,10 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
   if (!JsonUtils::readFile(customVotesFile, root, &errors)) {
     Printer::chat(clientNum, "^3delete-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::console(clientNum,
-                     StringUtils::format("^3delete-customvote: ^7couldn't open "
-                                         "the file ^3'%s' ^7for reading.\n",
-                                         customVotesFile));
+    Printer::console(
+        clientNum,
+        "^3delete-customvote: ^7couldn't open the file ^3'%s' ^7for reading.\n",
+        customVotesFile);
     Printer::console(clientNum, errors + '\n');
     return;
   }
@@ -320,20 +320,20 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
   }
 
   if (!found) {
-    Printer::chat(clientNum,
-                  StringUtils::format("^3delete-customvote: ^7a list with the "
-                                      "name ^3'%s' ^7was not found.\n",
-                                      name));
+    Printer::chat(
+        clientNum,
+        "^3delete-customvote: ^7a list with the name ^3'%s' ^7was not found.\n",
+        name);
     return;
   }
 
   if (!JsonUtils::writeFile(customVotesFile, root, &errors)) {
     Printer::chat(clientNum, "^3delete-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::console(clientNum,
-                     StringUtils::format("^3delete-customvote: ^7couldn't open "
-                                         "the file ^3'%s' ^7for writing.\n",
-                                         customVotesFile));
+    Printer::console(
+        clientNum,
+        "^3delete-customvote: ^7couldn't open the file ^3'%s' ^7for writing.\n",
+        customVotesFile);
     Printer::console(clientNum, errors + '\n');
     return;
   }
@@ -341,9 +341,8 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
   loadCustomvotes(false);
   Printer::chat(
       clientNum,
-      StringUtils::format(
-          "^3delete-customvote: ^7successfully deleted custom vote list ^3'%s'",
-          name));
+      "^3delete-customvote: ^7successfully deleted custom vote list ^3'%s'",
+      name);
 }
 
 void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
@@ -357,10 +356,10 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
   if (!JsonUtils::readFile(customVotesFile, root, &errors)) {
     Printer::chat(clientNum, "^3edit-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::console(clientNum,
-                     StringUtils::format("^3edit-customvote: ^7couldn't open "
-                                         "the file ^3'%s' ^7for reading.\n",
-                                         customVotesFile));
+    Printer::console(
+        clientNum,
+        "^3edit-customvote: ^7couldn't open the file ^3'%s' ^7for reading.\n",
+        customVotesFile);
     Printer::console(clientNum, errors + '\n');
     return;
   }
@@ -447,20 +446,20 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
   }
 
   if (!found) {
-    Printer::chat(clientNum,
-                  StringUtils::format("^3edit-customvote: ^7a list with the "
-                                      "name ^3'%s' ^7was not found.\n",
-                                      sanitizedList));
+    Printer::chat(
+        clientNum,
+        "^3edit-customvote: ^7a list with the name ^3'%s' ^7was not found.\n",
+        sanitizedList);
     return;
   }
 
   if (!JsonUtils::writeFile(customVotesFile, root, &errors)) {
     Printer::chat(clientNum, "^3edit-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::console(clientNum,
-                     StringUtils::format("^3edit-customvote: ^7couldn't open "
-                                         "the file ^3'%s' ^7for writing.\n",
-                                         customVotesFile));
+    Printer::console(
+        clientNum,
+        "^3edit-customvote: ^7couldn't open the file ^3'%s' ^7for writing.\n",
+        customVotesFile);
     Printer::console(clientNum, errors + '\n');
     return;
   }
@@ -468,9 +467,8 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
   loadCustomvotes(false);
   Printer::chat(
       clientNum,
-      StringUtils::format(
-          "^3edit-customvote: ^7successfully edited custom vote list ^3'%s'",
-          sanitizedList));
+      "^3edit-customvote: ^7successfully edited custom vote list ^3'%s'",
+      sanitizedList);
 }
 
 std::string CustomMapVotes::listInfo(const std::string &type) {

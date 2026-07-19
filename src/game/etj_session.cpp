@@ -159,9 +159,9 @@ bool Session::GuidReceived(gentity_t *ent) {
   // Client sends 'AUTHENTICATE guid hwid'
   constexpr int ARGC = 3;
   if (argc != ARGC) {
-    Printer::logAdminLn(StringUtils::format(
+    Printer::logAdminLn(
         "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
-        clientNum, cleanName, ClientIPAddr(ent)));
+        clientNum, cleanName, ClientIPAddr(ent));
     return false;
   }
 
@@ -169,9 +169,9 @@ bool Session::GuidReceived(gentity_t *ent) {
   trap_Argv(2, hwidBuf, sizeof(hwidBuf));
 
   if (!ValidGuid(guidBuf) || !ValidGuid(hwidBuf)) {
-    Printer::logAdminLn(StringUtils::format(
+    Printer::logAdminLn(
         "authentication: Potential GUID/HWID spoof attempt by %i %s (%s)",
-        clientNum, cleanName, ClientIPAddr(ent)));
+        clientNum, cleanName, ClientIPAddr(ent));
     return false;
   }
 
@@ -182,12 +182,12 @@ bool Session::GuidReceived(gentity_t *ent) {
             clients_[clientNum].guid.c_str(), clients_[clientNum].hwid.c_str());
 
   if (database_->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid)) {
-    Printer::logAdminLn(StringUtils::format(
-        "authentication: Banned player %s tried to connect with GUID '%s' and "
-        "HWID '%s'",
-        cleanName, clients_[clientNum].guid, clients_[clientNum].hwid));
-    Printer::popupAll(
-        va("Banned player %s ^7tried to connect.", ent->client->pers.netname));
+    Printer::logAdminLn("authentication: Banned player %s tried to connect "
+                        "with GUID '%s' and HWID '%s'",
+                        cleanName, clients_[clientNum].guid,
+                        clients_[clientNum].hwid);
+    Printer::popupAll("Banned player %s ^7tried to connect.",
+                      ent->client->pers.netname);
     trap_DropClient(clientNum, "You are banned.", 0);
     return false;
   }
@@ -245,9 +245,8 @@ void Session::GetUserAndLevelData(int clientNum) {
 
   if (ent->client->sess.firstTime) {
     PrintGreeting(ent);
-    Printer::popup(ent, "^5Your last visit was on " +
-                            clients_[clientNum].user->GetLastSeenString() +
-                            ".");
+    Printer::popup(ent, "^5Your last visit was on %s.",
+                   clients_[clientNum].user->GetLastSeenString());
   }
 
   if (!clients_[clientNum].user) {
@@ -454,16 +453,16 @@ void Session::PrintFinger(gentity_t *ent, gentity_t *target) {
 
   Printer::chat(ent, "^3finger: ^7check console for more information.");
 
-  const auto user = clients_[num].user;
+  const auto *const user = clients_[num].user;
   Printer::console(
-      ent, StringUtils::format(
-               "^7Name: %s\n"
-               "^7Original name: %s\n"
-               "^7ID: %d\n"
-               "^7Level: %d\n"
-               "^7Title: %s\n",
-               target->client->pers.netname, user->name, user->id, user->level,
-               user->title.empty() ? clients_[num].level->name : user->title));
+      ent,
+      "^7Name: %s\n"
+      "^7Original name: %s\n"
+      "^7ID: %d\n"
+      "^7Level: %d\n"
+      "^7Title: %s\n",
+      target->client->pers.netname, user->name, user->id, user->level,
+      user->title.empty() ? clients_[num].level->name : user->title);
 }
 
 void Session::PrintAdmintest(gentity_t *ent) {
@@ -476,14 +475,11 @@ void Session::PrintAdmintest(gentity_t *ent) {
   }
 
   if (ent && clients_[clientNum].user && clients_[clientNum].level) {
-    std::string message =
-        va("^3admintest: ^7%s^7 is a level %d user (%s^7).",
-           ent->client->pers.netname, clients_[clientNum].user->level,
-           clients_[clientNum].user->title.length() > 0
-               ? clients_[clientNum].user->title.c_str()
-               : clients_[clientNum].level->name.c_str());
-
-    Printer::chatAll(message);
+    Printer::chatAll("^3admintest: ^7%s^7 is a level %d user (%s^7).",
+                     ent->client->pers.netname, clients_[clientNum].user->level,
+                     clients_[clientNum].user->title.length() > 0
+                         ? clients_[clientNum].user->title
+                         : clients_[clientNum].level->name);
   }
 }
 

@@ -336,14 +336,14 @@ void Tokens::tokenTouch(gentity_t *self, gentity_t *other, trace_t *trace) {
   }
 
   *collected = qtrue;
-  Printer::popup(other, va("^7You collected %s ^7token ^5#%d", difficulty,
-                           self->tokenInformation->idx + 1));
+  Printer::popup(other, "^7You collected %s ^7token ^5#%d", difficulty,
+                 self->tokenInformation->idx + 1);
 
   if (allTokensCollected(other)) {
     const std::string &time = TimeUtils::millisToString(
         level.time - other->client->pers.tokenCollectionStartTime);
-    Printer::popupAll(va("%s ^7collected all tokens in %s",
-                         other->client->pers.netname, time.c_str()));
+    Printer::popupAll("%s ^7collected all tokens in %s",
+                      other->client->pers.netname, time);
   }
 }
 

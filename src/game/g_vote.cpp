@@ -648,10 +648,10 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
       const char *minutesStr = nextVoteTime == 1 ? "minute" : "minutes";
 
       Printer::popupAll(voteMsg);
+
       if (nextVoteTime > 0) {
-        Printer::popupAll(
-            StringUtils::format("^7Next vote will be called in ^3%i ^7%s.",
-                                nextVoteTime, minutesStr));
+        Printer::popupAll("^7Next vote will be called in ^3%i ^7%s.",
+                          nextVoteTime, minutesStr);
       }
     }
   }
