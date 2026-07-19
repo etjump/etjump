@@ -4598,10 +4598,15 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
 
   if (!ent) {
     msg = ConcatArgs(2);
-    Printer::chat(ClientNum(other),
-                  va("^7Private message from server console: ^3%s", msg), enc);
-    trap_SendServerCommand(otherNum, "pmFlashWindow");
 
+    if (enc) {
+      Printer::chatEnc(other, "^7Private message from server console: ^3%s",
+                       msg);
+    } else {
+      Printer::chat(other, "^7Private message from server console: ^3%s", msg);
+    }
+
+    trap_SendServerCommand(otherNum, "pmFlashWindow");
     G_Printf("Private message to %s^7: ^3%s\n", other->client->pers.netname,
              msg);
     return;
@@ -4609,17 +4614,25 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
 
   if (!COM_BitCheck(other->client->sess.ignoreClients, ClientNum(ent))) {
     msg = ConcatArgs(2);
-    Printer::chat(
-        otherNum,
-        va("^7Private message from %s^7: ^3%s", ent->client->pers.netname, msg),
-        enc);
+
+    if (enc) {
+      Printer::chatEnc(otherNum, "^7Private message from %s^7: ^3%s",
+                       ent->client->pers.netname, msg);
+    } else {
+      Printer::chat(otherNum, "^7Private message from %s^7: ^3%s",
+                    ent->client->pers.netname, msg);
+    }
+
     trap_SendServerCommand(otherNum, "pmFlashWindow");
 
     if (ent) {
-      Printer::chat(selfNum,
-                    va("^7Private message to %s^7: ^3%s",
-                       other->client->pers.netname, msg),
-                    enc);
+      if (enc) {
+        Printer::chatEnc(selfNum, "^7Private message to %s^7: ^3%s",
+                         other->client->pers.netname, msg);
+      } else {
+        Printer::chat(selfNum, "^7Private message to %s^7: ^3%s",
+                      other->client->pers.netname, msg);
+      }
 
       if (ent->client->sess.inactive) {
         ETJump::InactivityTimer::clearClientInactivity(ent);

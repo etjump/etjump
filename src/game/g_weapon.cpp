@@ -1815,7 +1815,7 @@ void Weapon_Engineer(gentity_t *ent) {
           }
 
           if (traceEnt->health >= 250) {
-            Printer::centerPriority(clientNum, "Landmine armed...", 1, false);
+            Printer::centerPriorityNoLog(clientNum, 1, "Landmine armed...");
           } else {
             return;
           }
@@ -1853,7 +1853,7 @@ void Weapon_Engineer(gentity_t *ent) {
           G_PrintClientSpammyCenterPrint(clientNum, "Defusing landmine");
 
           if (traceEnt->health >= 250) {
-            Printer::centerPriority(clientNum, "Landmine defused...", 1, false);
+            Printer::centerPriorityNoLog(clientNum, 1, "Landmine defused...");
 
             Add_Ammo(ent, WP_LANDMINE, 1, qfalse);
 
@@ -2015,9 +2015,9 @@ void Weapon_Engineer(gentity_t *ent) {
         // bani
         if (friendlyObj && !enemyObj) {
           G_FreeEntity(traceEnt);
-          Printer::centerPriority(
-              clientNum, "You cannot arm dynamite near a friendly objective!",
-              1, false);
+          Printer::centerPriorityNoLog(
+              clientNum, 1,
+              "You cannot arm dynamite near a friendly objective!");
           return;
         }
 
@@ -2043,9 +2043,8 @@ void Weapon_Engineer(gentity_t *ent) {
 
         // Gordon: moved down here to prevent two prints
         // when dynamite IS near objective
-        Printer::centerPriority(clientNum,
-                                "Dynamite is now armed with a 30 second timer!",
-                                1, false);
+        Printer::centerPriorityNoLog(
+            clientNum, 1, "Dynamite is now armed with a 30 second timer!");
 
         // check if player is in trigger objective field
         // NERVE - SMF - made this the actual bounding box of dynamite

@@ -1168,7 +1168,7 @@ void G_PrintClientSpammyCenterPrint(int entityNum, const char *text) {
     return;
   }
 
-  Printer::centerPriority(entityNum, text, 1, false);
+  Printer::centerPriorityNoLog(entityNum, 1, text);
   g_entities[entityNum].client->lastSpammyCentrePrintTime = level.time;
 }
 
