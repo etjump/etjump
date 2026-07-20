@@ -1438,8 +1438,10 @@ bool Kick(gentity_t *ent, Arguments argv) {
 
   int timeout = 0;
   if (argv->size() >= 3) {
-    if (!ToInt(argv->at(2), timeout)) {
-      Printer::chat(ent, "^3kick: ^7invalid timeout '" + argv->at(2) +
+    const std::string timeoutArg = StringUtils::sanitize(argv->at(2));
+
+    if (!ToInt(timeoutArg, timeout)) {
+      Printer::chat(ent, "^3kick: ^7invalid timeout '" + timeoutArg +
                              "' specified.");
       return false;
     }
@@ -1674,7 +1676,7 @@ static bool Map(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  std::string requestedMap = StringUtils::toLowerCase(argv->at(1));
+  const std::string requestedMap = StringUtils::sanitize(argv->at(1), true);
 
   if (!FileSystem::exists("maps/" + requestedMap + ".bsp")) {
     Printer::chat(ent, "^3map: ^7'" + requestedMap + "' is not on the server.");
@@ -2257,14 +2259,16 @@ bool deleteToken(gentity_t *ent, Arguments argv) {
     }
 
     auto num = 1;
+    const std::string numArg = StringUtils::sanitize((*argv)[3]);
+
     try {
-      num = std::stoi((*argv)[3]);
+      num = std::stoi(numArg);
     } catch (const std::invalid_argument &) {
-      Printer::chat(ent, "^3tokens: ^7" + (*argv)[3] + " is not a number.");
+      Printer::chat(ent, "^3tokens: ^7'" + numArg + "' is not a number.");
       return false;
     } catch (const std::out_of_range &) {
-      Printer::chat(ent, "^3tokens: ^7" + (*argv)[3] +
-                             " is out of range (too large).");
+      Printer::chat(ent, "^3tokens: ^7'" + numArg +
+                             "' is out of range (too large).");
       return false;
     }
 
