@@ -2866,6 +2866,8 @@ const char *findAndReplaceNametags(const char *text, const char *name);
 // returns an entity number for gentity_t or gclient_t pointer
 template <typename T>
 int32_t ClientNum(const T *p) {
+  assert(p);
+
   if constexpr (std::is_same_v<T, gentity_t>) {
     return static_cast<int32_t>(p - g_entities);
   }
