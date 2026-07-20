@@ -1448,8 +1448,10 @@ bool Kick(gentity_t *ent, Arguments argv) {
   }
 
   std::string reason;
+
   if (argv->size() >= 4) {
-    reason = argv->at(3);
+    const auto reasonArgs = Container::skipFirstN(*argv, 3);
+    reason = StringUtils::join(reasonArgs, " ");
   }
 
   trap_DropClient(ClientNum(target), reason.c_str(), timeout);
