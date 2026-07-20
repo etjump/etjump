@@ -2272,8 +2272,10 @@ bool deleteToken(gentity_t *ent, Arguments argv) {
       return false;
     }
 
-    if (num < 1 || num > 6) {
-      Printer::chat(ent, "^3tokens: ^7number should be between 1 and 6.");
+    if (num < 1 || num > ETJump::MAX_TOKENS_PER_DIFFICULTY) {
+      Printer::chat(ent, StringUtils::format(
+                             "^3tokens: ^7number should be between 1 and %i.",
+                             ETJump::MAX_TOKENS_PER_DIFFICULTY));
       return false;
     }
 
