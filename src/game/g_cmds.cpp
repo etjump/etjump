@@ -4556,7 +4556,7 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
   char cmd[MAX_TOKEN_CHARS] = "\0";
   gentity_t *other = nullptr;
   char *msg = nullptr;
-  auto selfNum = ClientNum(ent);
+  auto selfNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
 
   trap_Argv(0, cmd, sizeof(cmd));
 

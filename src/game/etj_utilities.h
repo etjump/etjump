@@ -98,4 +98,9 @@ void copyStanceFromClient(gentity_t *self, const gentity_t *target);
  * Returns team from a string, 'TEAM_FREE' is no match
  */
 team_t teamFromString(std::string_view team);
+
+/**
+ * Executes autoexec file for the current map, if present
+ */
+void execMapAutoexec();
 } // namespace Utilities
