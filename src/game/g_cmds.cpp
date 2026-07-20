@@ -3829,7 +3829,7 @@ bool allowQuickFollow(gentity_t *ent, gentity_t *traceEnt) {
   if (!G_AllowFollow(ent, traceEnt)) {
     auto clientNum = ClientNum(ent);
     std::string specLockMsg = StringUtils::format(
-        "%s is speclocked.", traceEnt->client->pers.netname);
+        "%s ^7is speclocked.", traceEnt->client->pers.netname);
     Printer::popup(clientNum, specLockMsg);
     return false;
   }
