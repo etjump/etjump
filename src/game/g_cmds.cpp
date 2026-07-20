@@ -4571,7 +4571,7 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
   char cmd[MAX_TOKEN_CHARS] = "\0";
   gentity_t *other = nullptr;
   char *msg = nullptr;
-  auto selfNum = ClientNum(ent);
+  auto selfNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
 
   if (trap_Argc() < 3) {
     Printer::console(selfNum, "^7usage: ^3m ^7<name> <message>.\n");
