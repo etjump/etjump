@@ -13,6 +13,9 @@
 * `etj_jumpSpeedsMaxJumpsPerRow` cvar to set maximum number of jumps in jump speeds list row (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj_drawCHS3` + related cvars - same as CHS2, just a different set of data [#1924](https://github.com/etjump/etjump/pull/1924)
 * `etj_CHS2/3HideLabels` cvar to toggle drawing info labels on CHS2/3, respectively [#1924](https://github.com/etjump/etjump/pull/1924)
+* in-game menu for sending private messages, opens with `privateMessage` console command [#1938](https://github.com/etjump/etjump/pull/1938)
+  * allows sending extended ASCII characters in private messages
+* `etj_speed/MaxSpeedPrecision` cvar to set the number of decimals on speed/max speed meter, respectively (**0-6**, default **0**) [#1940](https://github.com/etjump/etjump/pull/1940)
 * `etj_CHS1DistanceScale` cvar to scale the distance of CHS1 infos from crosshair (**0.25 - 10.0**) [#1924](https://github.com/etjump/etjump/pull/1924)
 * `etj_portalTrailTime` cvar to set lifetime of portal trails (in milliseconds, **0 - 10000**, default **400**) [#1928](https://github.com/etjump/etjump/pull/1928)
 * `etj/g_mapAutoexecDir` cvar to set directory to load map-specific autoexec files from (client/server, respectively) [#1916](https://github.com/etjump/etjump/pull/1916)
@@ -43,7 +46,9 @@
 * `etj_speedAlpha` and `etj_accelAlpha` were calculated incorrectly [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_accelColorUsesAccel` ignored `etj_accelAlpha` while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_drawAccel` showed incorrect accel values for 1 frame after noclip ended [#1921](https://github.com/etjump/etjump/pull/1921)
+* server side `autoexec_mapname.cfg` leaked a file handle [#1939](https://github.com/etjump/etjump/pull/1939)
 * server info menu could not be refreshed on localhost [#1933](https://github.com/etjump/etjump/pull/1933)
+* help print for private messages was not working if sent from server console [#1945](https://github.com/etjump/etjump/pull/1945)
 
 # ETJump 3.5.3
 
