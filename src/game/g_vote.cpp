@@ -416,7 +416,6 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
 // *** Map - simpleton: we don't verify map is allowed/exists ***
 int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
             const bool &cheats) {
-  const int clientNum = ClientNum(ent);
   // Vote request (vote is being initiated)
   if (arg) {
     char serverinfo[MAX_INFO_STRING];
@@ -432,7 +431,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 
     std::string map;
     if (!ETJump::matchMap(arg2, map, cheats)) {
-      Printer::console(clientNum, map);
+      Printer::console(ent, map);
       return G_INVALID;
     }
 
