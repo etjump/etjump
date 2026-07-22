@@ -1367,10 +1367,11 @@ bool ListUserNames(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  int id;
-  if (!ToInt(argv->at(1), id)) {
-    Printer::chat(
-        ent, va("^3listusernames: ^7%s is not an id", argv->at(1).c_str()));
+  int id = 0;
+  const std::string arg = StringUtils::sanitize(argv->at(1));
+
+  if (!ToInt(arg, id)) {
+    Printer::chat(ent, va("^3listusernames: ^7'%s' is not an id", arg.c_str()));
     return false;
   }
 
