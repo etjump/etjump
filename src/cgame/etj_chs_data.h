@@ -45,6 +45,7 @@ inline constexpr int32_t CHS_HUD_3 = 3;
 class CHSDataHandler {
 public:
   CHSDataHandler(
+      const std::shared_ptr<UpmoveMeterData> &upmoveMeterData,
       const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
       const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler);
   ~CHSDataHandler();
@@ -116,6 +117,12 @@ private:
     JUMP_XYZ = 50,
     PLANE_ANGLE_Z = 53,
     LAST_JUMP_SPEED = 55,
+
+    UPMOVE_PRE_DELAY = 70,
+    UPMOVE_POST_DELAY = 71,
+    UPMOVE_FULL_DELAY = 72,
+    UPMOVE_PRE_FULL_POST_DELAY = 73,
+    UPMOVE_POST_FULL_PRE_DELAY = 74,
   };
 
   enum class StatOpts {
@@ -179,6 +186,14 @@ private:
     VIEW_Z = 5,
   };
 
+  enum class UpmoveType {
+    PRE_DELAY = 0,
+    POST_DELAY = 1,
+    FULL_DELAY = 2,
+    PRE_FULL_POST_DELAY = 3,
+    POST_FULL_PRE_DELAY = 4,
+  };
+
   [[nodiscard]] std::string speed(SpeedType type) const;
   [[nodiscard]] std::string health() const;
   static std::string ammo();
@@ -189,11 +204,13 @@ private:
   [[nodiscard]] std::string lastJumpPos() const;
   std::string planeAngleZ();
   [[nodiscard]] std::string lastJumpSpeed() const;
+  std::string upmove(UpmoveType type);
 
   trace_t &getTraceResults(extraTraceOptions opt);
 
   std::map<Stats, StatData> stats;
 
+  std::shared_ptr<UpmoveMeterData> upMoveMeterData;
   std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
   std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
 };

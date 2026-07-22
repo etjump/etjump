@@ -26,15 +26,17 @@
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_cvar_update_handler.h"
+#include "etj_upmove_meter_data.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
 CHSDataHandler::CHSDataHandler(
+    const std::shared_ptr<UpmoveMeterData> &upmoveMeterData,
     const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
     const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler)
-    : cvarUpdateHandler(cvarUpdateHandler),
+    : upMoveMeterData(upmoveMeterData), cvarUpdateHandler(cvarUpdateHandler),
       consoleCommandsHandler(consoleCommandsHandler) {
   setupObjects();
   setupStats();
@@ -398,6 +400,27 @@ std::string CHSDataHandler::lastJumpSpeed() const {
   return std::to_string(ps->persistant[PERS_JUMP_SPEED]);
 }
 
+std::string CHSDataHandler::upmove(const UpmoveType type) {
+  const auto &s = upMoveMeterData->getState();
+
+  switch (type) {
+    case UpmoveType::PRE_DELAY:
+      return std::to_string(s.preDelay);
+    case UpmoveType::POST_DELAY:
+      return std::to_string(s.postDelay);
+    case UpmoveType::FULL_DELAY:
+      return std::to_string(s.fullDelay);
+    case UpmoveType::PRE_FULL_POST_DELAY:
+      return StringUtils::format("%i %i %i", s.preDelay, s.fullDelay,
+                                 s.postDelay);
+    case UpmoveType::POST_FULL_PRE_DELAY:
+      return StringUtils::format("%i %i %i", s.postDelay, s.fullDelay,
+                                 s.preDelay);
+    default:
+      return "";
+  }
+}
+
 trace_t &CHSDataHandler::getTraceResults(const extraTraceOptions opt) {
   if (etj_extraTrace.integer & (1 << opt)) {
     return extraTrace;
@@ -629,5 +652,25 @@ void CHSDataHandler::setupStats() {
 
   stats[Stats::LAST_JUMP_SPEED] = {[this]() { return lastJumpSpeed(); },
                                    "Jump speed", "last jump speed"};
+
+  stats[Stats::UPMOVE_PRE_DELAY] = {
+      [this]() { return upmove(UpmoveType::PRE_DELAY); }, "Upmove pre",
+      "upmove pre jump/on ground ms"};
+
+  stats[Stats::UPMOVE_POST_DELAY] = {
+      [this]() { return upmove(UpmoveType::POST_DELAY); }, "Upmove post",
+      "upmove post jump ms"};
+
+  stats[Stats::UPMOVE_FULL_DELAY] = {
+      [this]() { return upmove(UpmoveType::FULL_DELAY); }, "Upmove full",
+      "upmove full ms"};
+
+  stats[Stats::UPMOVE_PRE_FULL_POST_DELAY] = {
+      [this]() { return upmove(UpmoveType::PRE_FULL_POST_DELAY); },
+      "Upmove pre full post", "upmove all values (pre/full/post)"};
+
+  stats[Stats::UPMOVE_POST_FULL_PRE_DELAY] = {
+      [this]() { return upmove(UpmoveType::POST_FULL_PRE_DELAY); },
+      "Upmove post full pre", "upmove all values (post/full/pre)"};
 }
 } // namespace ETJump
