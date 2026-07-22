@@ -3627,7 +3627,8 @@ static void Scroll_Slider_ThumbFunc(void *p) {
   }
 
   if (scrollInfo.item->cacheCvar) {
-    scrollInfo.item->cacheCvarValue = va("%f", value);
+    Q_strncpyz(scrollInfo.item->cacheCvarValue, va("%f", value),
+               MAX_CVAR_VALUE_STRING);
     return;
   }
 
@@ -3767,7 +3768,7 @@ qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
 
   // always update cache cvar value on click if it exists
   if (item->cacheCvar) {
-    item->cacheCvarValue = va("%f", value);
+    Q_strncpyz(item->cacheCvarValue, va("%f", value), MAX_CVAR_VALUE_STRING);
   }
 
   if (item->cvar) {
@@ -3792,7 +3793,6 @@ qboolean Item_HandleKey(itemDef_t *item, int key, qboolean down) {
         itemCapture->cacheCvarValue && scrollInfo.item &&
         scrollInfo.item->cacheCvarValue) {
       DC->setCVar(scrollInfo.item->cvar, scrollInfo.item->cacheCvarValue);
-      scrollInfo.item->cacheCvarValue = nullptr;
     }
 
     itemCapture = nullptr;
@@ -7877,8 +7877,11 @@ qboolean ItemParse_tooltipAbove(itemDef_t *item, int handle) {
   return qtrue;
 }
 
-qboolean ItemParse_cacheCvar(itemDef_t *item, int handle) {
+static qboolean ItemParse_cacheCvar(itemDef_t *item, int handle) {
   item->cacheCvar = true;
+  // allocated this in the main UI memory pool, as the string pool
+  // is really intended for immutable, fixed width strings
+  item->cacheCvarValue = static_cast<char *>(UI_Alloc(MAX_CVAR_VALUE_STRING));
   return qtrue;
 }
 
