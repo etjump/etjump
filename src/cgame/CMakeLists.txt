@@ -99,6 +99,7 @@ add_library(cgame MODULE
 	"etj_strafe_quality_v2.cpp"
 	"etj_trace_utils.cpp"
 	"etj_upper_right_drawable.cpp"
+	"etj_upmove_meter_data.cpp"
 	"etj_upmove_meter_v2.cpp"
 	"etj_timerun.cpp"
 	"etj_timerun_view.cpp"

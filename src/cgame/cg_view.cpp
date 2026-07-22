@@ -12,6 +12,7 @@
 #include "etj_snaphud_data.h"
 #include "etj_trickjump_lines.h"
 #include "etj_utilities.h"
+#include "etj_upmove_meter_data.h"
 
 /*
 =============================================================================
@@ -2236,6 +2237,10 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
 
     if (etj_drawCGaz.integer) {
       ETJump::cgame.hud.cgazDataHandler->runFrame();
+    }
+
+    if (ETJump::UpmoveMeterData::check()) {
+      ETJump::cgame.hud.upmoveDataHandler->runFrame();
     }
 
     if (ETJump::CHSDataHandler::check()) {
