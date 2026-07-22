@@ -69,6 +69,7 @@
 #include "etj_timerun_view.h"
 #include "etj_trace_utils.h"
 #include "etj_trickjump_lines.h"
+#include "etj_upmove_meter_data.h"
 #include "etj_upmove_meter_v2.h"
 #include "etj_upper_right_drawable.h"
 
@@ -264,6 +265,8 @@ static void initHUD() {
       cgame.core.cvarUpdate, cgame.core.consoleCommands);
   cgame.hud.cgazDataHandler = std::make_shared<CGazData>();
   cgame.hud.snaphudDataHandler = std::make_shared<SnaphudData>();
+  cgame.hud.upmoveDataHandler = std::make_shared<UpmoveMeterData>(
+      cgame.core.consoleCommands, cgame.core.playerEvents);
   cgame.hud.spectatorInfoData = std::make_shared<SpectatorInfoData>();
 
   cgame.hud.renderables.emplace_back(
@@ -305,8 +308,7 @@ static void initHUD() {
 
   cgame.hud.renderables.emplace_back(std::make_unique<UpperRight>());
   cgame.hud.renderables.emplace_back(std::make_unique<UpmoveMeterV2>(
-      cgame.core.cvarUpdate, cgame.core.consoleCommands,
-      cgame.core.playerEvents));
+      cgame.hud.upmoveDataHandler, cgame.core.cvarUpdate));
 
   cgame.hud.renderables.emplace_back(
       std::make_unique<KeySetSystem>(&etj_drawKeys, cgame.core.cvarUpdate));

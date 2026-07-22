@@ -24,58 +24,60 @@
 
 #pragma once
 
-#include "etj_irenderable.h"
-#include "etj_cvar_parser.h"
+#include "cg_local.h"
 #include "etj_pmove_utils_v2.h"
 
-#include "../ui/ui_shared.h"
-
 namespace ETJump {
-class UpmoveMeterData;
-class CvarUpdateHandler;
-
-class UpmoveMeterV2 : public IRenderable {
-public:
-  UpmoveMeterV2(const std::shared_ptr<UpmoveMeterData> &upmoveMeterData,
-                const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
-  ~UpmoveMeterV2() override;
-
-  bool beforeRender() override;
-  void render() const override;
-
+class UpmoveMeterData {
 private:
-  void startListeners();
-  void setTextSize(const vmCvar_t &cvar);
+  enum class JumpState {
+    AIR_NOJUMP = 0,         // in air, not holding jump
+    AIR_JUMP = 1,           // in air, holding jump
+    GROUND_JUMP = 2,        // on ground, holding jump
+    GROUND_NOJUMP = 3,      // on ground, not holding jump
+    AIR_JUMP_NORELEASE = 4, // in air (post jump), holding jump
+  };
 
-  static bool canSkipDraw();
+  struct State {
+    JumpState jumpState;
+    JumpState lastJumpState;
 
-  struct Graph {
+    bool inAir;
+    bool jumping;
+
     int32_t preDelay;
     int32_t postDelay;
     int32_t fullDelay;
-    int32_t absMaxDelay;
 
-    rectDef_t rect;
-    float upHeight;
-    float downHeight;
+    int32_t jumpPreGroundTime;
+    int32_t groundTouchTime;
 
-    vec4_t colorBg;
-    vec4_t colorPreJump;
-    vec4_t colorPostJump;
-    vec4_t colorOnGround;
-    vec4_t colorOutline;
+    int32_t lastUpdateTime;
   };
 
-  Graph graph{};
+  void startListeners();
+  void updateJumpState();
+  void updateUpmoveValues();
+  void reset();
+  static bool canSkipUpdate(const PmoveUtilsV2::State &pmove);
 
-  float textX{};
-  float textH{};
-  float textHeightOffset{};
-  CvarValue::Size textSize{};
-  int32_t textStyle{};
-  vec4_t colorText{};
+  State s{};
+  team_t team{};
+  const playerState_t *ps = &cg.predictedPlayerState;
 
-  std::shared_ptr<UpmoveMeterData> upmoveMeterData;
-  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+  std::shared_ptr<ClientCommandsHandler> consoleCommands;
+  std::shared_ptr<PlayerEventsHandler> playerEvents;
+
+public:
+  UpmoveMeterData(const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+                  const std::shared_ptr<PlayerEventsHandler> &playerEvents);
+  ~UpmoveMeterData();
+
+  // the maximum abs value for pre/post jump delay for upmove meter data
+  static constexpr int32_t MAX_UPMOVE_TIME = 1000;
+
+  static bool check();
+  void runFrame();
+  [[nodiscard]] const State &getState() const;
 };
 } // namespace ETJump
