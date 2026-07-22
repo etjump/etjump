@@ -1463,9 +1463,11 @@ bool ListUserNames(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  int id;
-  if (!ToInt(argv->at(1), id)) {
-    Printer::chat(ent, "^3listusernames: ^7%s is not an id", argv->at(1));
+  int id = 0;
+  const std::string arg = StringUtils::sanitize(argv->at(1));
+
+  if (!ToInt(arg, id)) {
+    Printer::chat(ent, "^3listusernames: ^7'%s' is not an id", arg);
     return false;
   }
 
@@ -1533,16 +1535,19 @@ bool Kick(gentity_t *ent, Arguments argv) {
 
   int timeout = 0;
   if (argv->size() >= 3) {
-    if (!ToInt(argv->at(2), timeout)) {
+    const std::string timeoutArg = StringUtils::sanitize(argv->at(2));
+    if (!ToInt(timeoutArg, timeout)) {
       Printer::chat(ent, "^3kick: ^7invalid timeout '%s' specified.",
-                    argv->at(2));
+                    timeoutArg);
       return false;
     }
   }
 
   std::string reason;
+
   if (argv->size() >= 4) {
-    reason = argv->at(3);
+    const auto reasonArgs = Container::skipFirstN(*argv, 3);
+    reason = StringUtils::join(reasonArgs, " ");
   }
 
   trap_DropClient(ClientNum(target), reason.c_str(), timeout);
@@ -1765,7 +1770,7 @@ static bool Map(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  std::string requestedMap = StringUtils::toLowerCase(argv->at(1));
+  const std::string requestedMap = StringUtils::sanitize(argv->at(1), true);
 
   if (!FileSystem::exists("maps/" + requestedMap + ".bsp")) {
     Printer::chat(ent, "^3map: ^7%s is not on the server.", requestedMap);
@@ -2337,19 +2342,22 @@ bool deleteToken(gentity_t *ent, Arguments argv) {
     }
 
     auto num = 1;
+    const std::string numArg = StringUtils::sanitize((*argv)[3]);
+
     try {
-      num = std::stoi((*argv)[3]);
+      num = std::stoi(numArg);
     } catch (const std::invalid_argument &) {
-      Printer::chat(ent, "^3tokens: ^7%s is not a number.", (*argv)[3]);
+      Printer::chat(ent, "^3tokens: ^7%s is not a number.", numArg);
       return false;
     } catch (const std::out_of_range &) {
-      Printer::chat(ent, "^3tokens: ^7%s is out of range (too large).",
-                    (*argv)[3]);
+      Printer::chat(ent, "^3tokens: ^7%s is out of range (too large).", numArg);
       return false;
     }
 
-    if (num < 1 || num > 6) {
-      Printer::chat(ent, "^3tokens: ^7number should be between 1 and 6.");
+    if (num < 1 || num > ETJump::MAX_TOKENS_PER_DIFFICULTY) {
+      Printer::chat(ent, StringUtils::format(
+                             "^3tokens: ^7number should be between 1 and %i.",
+                             ETJump::MAX_TOKENS_PER_DIFFICULTY));
       return false;
     }
 

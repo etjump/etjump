@@ -3819,7 +3819,7 @@ bool allowQuickFollow(gentity_t *ent, gentity_t *traceEnt) {
     return false;
   }
   if (!G_AllowFollow(ent, traceEnt)) {
-    Printer::popup(ent, "%s is speclocked.", traceEnt->client->pers.netname);
+    Printer::popup(ent, "%s ^7is speclocked.", traceEnt->client->pers.netname);
     return false;
   }
   if (!ent->client->pers.quickFollow) {
