@@ -3318,6 +3318,12 @@ static void colorPickerStartCapture(itemDef_t *item, int key) {
   // std::function with captures to a C-style function pointer
   captureFunc = &colorPickerDragWrapper;
 }
+
+static void updateCacheCvar(const itemDef_t *item) {
+  if (item && item->cacheCvar && item->cacheCvarValue) {
+    DC->setCVar(item->cvar, item->cacheCvarValue);
+  }
+}
 } // namespace ETJump
 
 qboolean Item_TextField_HandleKey(itemDef_t *item, int key) {
@@ -3325,11 +3331,27 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key) {
   int len, charLen, textLen;
   itemDef_t *newItem = NULL;
   editFieldDef_t *editPtr = (editFieldDef_t *)item->typeData;
+  const char *func = __func__;
+
+  const auto updateCvarValue = [item, &func](const char *buf) {
+    if (item->cacheCvar && item->cacheCvarValue) {
+      // need to use the proper function here because we're inside a lambda
+      Q_strncpyz_fn(item->cacheCvarValue, buf, MAX_CVAR_VALUE_STRING, func,
+                    SRC_FILENAME, __LINE__);
+    } else {
+      DC->setCVar(item->cvar, buf);
+    }
+  };
 
   if (item->cvar) {
-
     memset(buff, 0, sizeof(buff));
-    DC->getCVarString(item->cvar, buff, sizeof(buff));
+
+    if (item->cacheCvar && item->cacheCvarValue) {
+      Q_strncpyz(buff, item->cacheCvarValue, sizeof(buff));
+    } else {
+      DC->getCVarString(item->cvar, buff, sizeof(buff));
+    }
+
     len = strlen(buff);
     textLen = etj_chatlen((unsigned char *)buff);
 
@@ -3358,7 +3380,8 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key) {
           }
           buff[textLen] = '\0';
         }
-        DC->setCVar(item->cvar, buff);
+
+        updateCvarValue(buff);
         return qtrue;
       }
 
@@ -3390,7 +3413,7 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key) {
 
       if (editPtr->maxChars >= textLen + charLen) {
         buff[item->cursorPos] = key;
-        DC->setCVar(item->cvar, buff);
+        updateCvarValue(buff);
 
         if (item->cursorPos < textLen + 1) {
           item->cursorPos++;
@@ -3400,16 +3423,15 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key) {
           }
         }
       }
-
     } else {
-
       if (key == K_DEL || key == K_KP_DEL) {
         if (item->cursorPos < len) {
           memmove(buff + item->cursorPos, buff + item->cursorPos + 1,
                   len - item->cursorPos);
           buff[len] = '\0';
-          DC->setCVar(item->cvar, buff);
+          updateCvarValue(buff);
         }
+
         return qtrue;
       }
 
@@ -3465,7 +3487,10 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key) {
 
     if (item->multiline) {
       if (key == K_TAB) {
-        newItem = Menu_SetNextCursorItem((menuDef_t *)item->parent);
+        ETJump::updateCacheCvar(g_editItem);
+        newItem =
+            Menu_SetNextCursorItem(static_cast<menuDef_t *>(item->parent));
+
         if (newItem && (newItem->type == ITEM_TYPE_EDITFIELD ||
                         newItem->type == ITEM_TYPE_NUMERICFIELD)) {
           g_editItem = newItem;
@@ -3481,7 +3506,10 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key) {
       }
     } else {
       if (key == K_TAB || key == K_DOWNARROW || key == K_KP_DOWNARROW) {
-        newItem = Menu_SetNextCursorItem((menuDef_t *)item->parent);
+        ETJump::updateCacheCvar(g_editItem);
+        newItem =
+            Menu_SetNextCursorItem(static_cast<menuDef_t *>(item->parent));
+
         if (newItem && (newItem->type == ITEM_TYPE_EDITFIELD ||
                         newItem->type == ITEM_TYPE_NUMERICFIELD)) {
           g_editItem = newItem;
@@ -3489,7 +3517,11 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key) {
       }
 
       if (key == K_UPARROW || key == K_KP_UPARROW) {
-        newItem = Menu_SetPrevCursorItem((menuDef_t *)item->parent);
+        ETJump::updateCacheCvar(g_editItem);
+
+        newItem =
+            Menu_SetPrevCursorItem(static_cast<menuDef_t *>(item->parent));
+
         if (newItem && (newItem->type == ITEM_TYPE_EDITFIELD ||
                         newItem->type == ITEM_TYPE_NUMERICFIELD)) {
           g_editItem = newItem;
@@ -4123,12 +4155,14 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
       }
     } else { // ITEM_TYPE_EDITFIELD || ITEM_TYPE_NUMERICFIELD
       if (!Item_TextField_HandleKey(g_editItem, key)) {
+        ETJump::updateCacheCvar(g_editItem);
         g_editingField = qfalse;
         g_editItem = nullptr;
         return;
       }
 
       if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3) {
+        ETJump::updateCacheCvar(g_editItem);
         g_editingField = qfalse;
         g_editItem = nullptr;
         Display_MouseMove(nullptr, DC->cursor.virtX, DC->cursor.virtY);
@@ -4287,6 +4321,12 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
             item->cursorPos = 0;
             g_editingField = qtrue;
             g_editItem = item;
+
+            if (item->cvar && item->cacheCvar && item->cacheCvarValue) {
+              char buf[MAX_CVAR_VALUE_STRING]{};
+              DC->getCVarString(item->cvar, buf, sizeof(buf));
+              Q_strncpyz(item->cacheCvarValue, buf, MAX_CVAR_VALUE_STRING);
+            }
           }
         } else if (item->type == ITEM_TYPE_COMBO) {
           if (Rect_ContainsPoint(&item->window.rect, cursorX, cursorY)) {
@@ -4782,7 +4822,12 @@ static void Item_TextMultiline_Paint(itemDef_t *item) {
     Item_Text_Paint(item);
   }
 
-  DC->getCVarString(item->cvar, buff, sizeof(buff));
+  if (g_editItem && g_editItem == item && item->cacheCvar &&
+      item->cacheCvarValue) {
+    Q_strncpyz(buff, item->cacheCvarValue, sizeof(buff));
+  } else {
+    DC->getCVarString(item->cvar, buff, sizeof(buff));
+  }
 
   // wraps texts and handles caret position
   Item_Text_DrawAutoWrapped(
@@ -4803,7 +4848,10 @@ void Item_TextField_Paint(itemDef_t *item) {
 
   Item_Text_Paint(item);
 
-  if (item->cvar) {
+  if (g_editItem && g_editItem == item && item->cacheCvar &&
+      item->cacheCvarValue) {
+    Q_strncpyz(buff, item->cacheCvarValue, sizeof(buff));
+  } else if (item->cvar) {
     DC->getCVarString(item->cvar, buff, sizeof(buff));
   }
 
