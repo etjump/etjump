@@ -258,6 +258,7 @@ void SnaphudData::airMove() {
 void SnaphudData::accelerate(const float wishspeed, const float accel) {
   const float a =
       std::min(accel * wishspeed * PmoveUtilsV2::PM_FRAMETIME, MAX_SNAP_ACCEL);
+  s.wishspeed = wishspeed;
 
   if (s.a != a) {
     updateState(a);

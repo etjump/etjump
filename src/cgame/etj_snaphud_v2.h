@@ -27,6 +27,7 @@
 #include <memory>
 #include <vector>
 
+#include "etj_cvar_parser.h"
 #include "etj_irenderable.h"
 #include "etj_pmove_utils_v2.h"
 #include "etj_snaphud_data.h"
@@ -45,6 +46,7 @@ public:
   void render() const override;
 
 private:
+  void parseCropOffset(const vmCvar_t *cvar);
   void updateSnaphud(const SnaphudData::State &s);
   void buildSnapZones(const SnaphudData::State &s);
 
@@ -59,6 +61,12 @@ private:
     NORMAL = 1,
     EDGE = 2,
     BORDER = 3,
+  };
+
+  enum class CropStyle {
+    OFF = 0,
+    IF_STRAFING = 1,
+    ALWAYS = 2,
   };
 
   struct Snapzone {
@@ -80,6 +88,11 @@ private:
     bool borderOnly;
     float borderThickness;
     float edgeThickness;
+
+    // val1 = center, val2 = edge
+    CvarValue::Pair cropOffset;
+    std::optional<float> minX;
+    std::optional<float> maxX;
 
     std::vector<Snapzone> zones;
     std::array<vec4_t, 4> colors;

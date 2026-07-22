@@ -14,6 +14,8 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
+#include <optional>
+
 #include "../game/q_shared.h"
 #include "../game/bg_public.h"
 #include "../ui/ui_shared.h"
@@ -2696,6 +2698,8 @@ extern vmCvar_t etj_snapHUDTrueness;
 extern vmCvar_t etj_snapHUDEdgeThickness;
 extern vmCvar_t etj_snapHUDBorderThickness;
 extern vmCvar_t etj_snapHUDActiveIsPrimary;
+extern vmCvar_t etj_snapHUDCrop;
+extern vmCvar_t etj_snapHUDCropOffsets;
 
 extern vmCvar_t etj_gunSway;
 extern vmCvar_t etj_drawScoreboardInactivity;
@@ -2842,6 +2846,12 @@ qboolean CG_GetWeaponTag(int clientNum, const char *tagname,
 void CG_EncodeQP(const char *in, char *out, int maxlen);
 void CG_DecodeQP(char *line);
 
+namespace ETJump {
+const char *cvarName(const vmCvar_t *cvar);
+const char *cvarDefaultString(const vmCvar_t *cvar);
+void resetCvar(const vmCvar_t *cvar);
+} // namespace ETJump
+
 //
 // cg_view.c
 //
@@ -2879,7 +2889,8 @@ void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
                      float fov, vec4_t const color);
 void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
                         float fov, vec4_t const color, bool borderOnly,
-                        float borderThickness);
+                        float borderThickness, std::optional<float> minX,
+                        std::optional<float> maxX);
 void drawLineDDA(float x0, float y0, float x1, float y1, const vec4_t color);
 void drawLineDDA(float x0, float y0, float x1, float y1, float w,
                  const vec4_t color);
