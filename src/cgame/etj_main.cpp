@@ -261,12 +261,13 @@ static void initVisuals() {
 static void initHUD() {
   assert(cgame.utils.pmoveV2 != nullptr);
 
-  cgame.hud.chsDataHandler = std::make_shared<CHSDataHandler>(
-      cgame.core.cvarUpdate, cgame.core.consoleCommands);
   cgame.hud.cgazDataHandler = std::make_shared<CGazData>();
   cgame.hud.snaphudDataHandler = std::make_shared<SnaphudData>();
   cgame.hud.upmoveDataHandler = std::make_shared<UpmoveMeterData>(
       cgame.core.consoleCommands, cgame.core.playerEvents);
+  cgame.hud.chsDataHandler = std::make_shared<CHSDataHandler>(
+      cgame.hud.upmoveDataHandler, cgame.core.cvarUpdate,
+      cgame.core.consoleCommands);
   cgame.hud.spectatorInfoData = std::make_shared<SpectatorInfoData>();
 
   cgame.hud.renderables.emplace_back(

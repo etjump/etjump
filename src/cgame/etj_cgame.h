@@ -113,10 +113,10 @@ class SpectatorInfoData;
 class TimerunView;
 
 struct HUD {
-  std::shared_ptr<CHSDataHandler> chsDataHandler;
   std::shared_ptr<CGazData> cgazDataHandler;
   std::shared_ptr<SnaphudData> snaphudDataHandler;
   std::shared_ptr<UpmoveMeterData> upmoveDataHandler;
+  std::shared_ptr<CHSDataHandler> chsDataHandler;
   std::shared_ptr<SpectatorInfoData> spectatorInfoData;
 
   std::vector<std::unique_ptr<IRenderable>> renderables;
