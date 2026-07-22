@@ -37,6 +37,7 @@ public:
   struct State {
     std::vector<float> snapAngles;
     float a;
+    float wishspeed;
     vec2_t wishvel;
 
     PmoveUtilsV2::PmoveSingleResult result;

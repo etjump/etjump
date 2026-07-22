@@ -109,6 +109,9 @@ bool contains(const std::string &str, const T &text) {
   return str.find(text) != std::string::npos;
 }
 
+// true if string is empty or contains just whitespace
+bool isWhiteSpace(std::string_view s);
+
 // case-insensitive string comparison, optionally with sanitized strings
 bool iEqual(std::string_view str1, std::string_view str2,
             bool sanitized = false);

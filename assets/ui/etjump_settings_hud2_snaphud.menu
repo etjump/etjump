@@ -70,6 +70,9 @@ menuDef {
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(12), "etj_snapHUDBorderThickness", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(12), "Border thickness:", 0.2, SETTINGS_ITEM_H, etj_snapHUDBorderThickness 1 0.1 10 0.1, "Thickness of snapzone borders when using border-only snaphud\netj_snapHUDBorderThickness")
         YESNO               (SETTINGS_ITEM_POS(13), "Color 1 is active zone:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDActiveIsPrimary", "Always use primary color for currently active snapzone and flip colors when switching zones\netj_snapHUDActiveIsPrimary")
+        MULTI               (SETTINGS_ITEM_POS(14), "Crop snaphud:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDCrop", cvarFloatList { "No" 0 "When strafing" 1 "Always" 2 }, "Crop snaphud drawing from crosshair against the current strafe direction\netj_snapHUDCrop")
+        // this should technically be a numericfield, but it does not allow for whitespace,	and I'm not sure if it's a good idea to allow that
+        CACHEDEDITFIELD_EXT (SETTINGS_EF_POS(15), "Crop offsets:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDCropOffsets", SETTINGS_EF_MAXCHARS, SETTINGS_EF_MAXPAINTCHARS, "Offset the cropping point from center/edge of the screen, respectively\nYou must give this cvar two values, separated by space\netj_snapHUDCropOffsets")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

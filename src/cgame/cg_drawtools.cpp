@@ -85,7 +85,8 @@ CG_FillAngleYawExt
 */
 void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
                         float fov, vec4_t const color, bool borderOnly,
-                        float borderThickness) {
+                        float borderThickness, std::optional<float> minX,
+                        std::optional<float> maxX) {
   // don't try to draw lines with no width
   if (start == end) {
     return;
@@ -100,21 +101,61 @@ void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
     return;
   }
 
+  const bool cropMin = minX.has_value();
+  const bool cropMax = maxX.has_value();
+
   if (!range.split) {
+    // quick early exit if everything is cropped
+    if ((cropMin && range.x2 < minX.value()) ||
+        (cropMax && range.x1 > maxX.value())) {
+      return;
+    }
+
+    const float x = cropMin ? std::max(minX.value(), range.x1) : range.x1;
+    const float w =
+        cropMax ? std::min(maxX.value(), range.x2) - x : range.x2 - x;
+
     if (borderOnly) {
-      CG_DrawRect_FixedBorder(range.x1, y, range.x2 - range.x1, h,
-                              borderThickness, color);
+      CG_DrawRect_FixedBorder(x, y, w, h, borderThickness, color);
     } else {
-      CG_FillRect(range.x1, y, range.x2 - range.x1, h, color);
+      CG_FillRect(x, y, w, h, color);
     }
   } else {
+    const bool drawStart = (!cropMin || (cropMin && minX.value() < range.x1));
+    const bool drawEnd = (!cropMax || (cropMax && maxX.value() < range.x2));
+
     if (borderOnly) {
-      CG_DrawRect_FixedBorder(0, y, range.x1, h, borderThickness, color);
-      CG_DrawRect_FixedBorder(range.x2, y, SCREEN_WIDTH - range.x2, h,
-                              borderThickness, color);
+      if (drawStart) {
+        const float x = cropMin ? std::max(minX.value(), 0.0f) : 0.0f;
+        const float w = cropMax ? std::min(maxX.value(), range.x1) : range.x1;
+
+        CG_DrawRect_FixedBorder(x, y, w, h, borderThickness, color);
+      }
+
+      if (drawEnd) {
+        const float x = cropMin ? std::max(minX.value(), range.x2) : range.x2;
+        const float w = cropMax
+                            ? SCREEN_WIDTH - std::min(maxX.value(), range.x2)
+                            : SCREEN_WIDTH - range.x2;
+
+        CG_DrawRect_FixedBorder(x, y, w, h, borderThickness, color);
+      }
     } else {
-      CG_FillRect(0, y, range.x1, h, color);
-      CG_FillRect(range.x2, y, SCREEN_WIDTH - range.x2, h, color);
+      if (drawStart) {
+        const float x = cropMin ? std::max(minX.value(), 0.0f) : 0.0f;
+        const float w = cropMax ? std::min(maxX.value(), range.x1) : range.x1;
+
+        CG_FillRect(x, y, w, h, color);
+      }
+
+      if (drawEnd) {
+        const float x = cropMin ? std::max(minX.value(), range.x2) : range.x2;
+        const float w = cropMax
+                            ? SCREEN_WIDTH - std::min(maxX.value(), range.x2)
+                            : SCREEN_WIDTH - range.x2;
+
+        CG_FillRect(x, y, w, h, color);
+      }
     }
   }
 }
@@ -126,7 +167,8 @@ CG_FillAngleYaw
 */
 void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
                      float fov, const vec4_t color) {
-  CG_FillAngleYawExt(start, end, yaw, y, h, fov, color, false, 1);
+  CG_FillAngleYawExt(start, end, yaw, y, h, fov, color, false, 1, std::nullopt,
+                     std::nullopt);
 }
 
 /*

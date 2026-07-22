@@ -669,9 +669,11 @@ void Vector4Scale(const vec4_t in, vec_t scale, vec4_t out);
 void VectorRotate(vec3_t in, vec3_t matrix[3], vec3_t out);
 int Q_log2(int val);
 float Q_atof(const char *str);
+float Q_atof(const std::string &str);
+float Q_atof(std::string_view str);
 int32_t Q_atoi(const char *str);
 int32_t Q_atoi(const std::string &str);
-int32_t Q_atoi(const std::string_view str);
+int32_t Q_atoi(std::string_view str);
 float Q_acos(float c);
 
 int Q_rand(int *seed);

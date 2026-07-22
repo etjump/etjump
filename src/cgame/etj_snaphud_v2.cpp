@@ -45,6 +45,8 @@ SnaphudV2::SnaphudV2(const std::shared_ptr<SnaphudData> &snaphudData,
                                             snaphud.colors[2]);
   cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor2.string,
                                             snaphud.colors[3]);
+
+  parseCropOffset(&etj_snapHUDCropOffsets);
   startListeners();
 }
 
@@ -53,6 +55,7 @@ SnaphudV2::~SnaphudV2() {
   cvarUpdate->unsubscribe(&etj_snapHUDColor2);
   cvarUpdate->unsubscribe(&etj_snapHUDHLColor1);
   cvarUpdate->unsubscribe(&etj_snapHUDHLColor2);
+  cvarUpdate->unsubscribe(&etj_snapHUDCropOffsets);
 }
 
 void SnaphudV2::startListeners() {
@@ -71,6 +74,55 @@ void SnaphudV2::startListeners() {
   cvarUpdate->subscribe(&etj_snapHUDHLColor2, [this](const vmCvar_t *cvar) {
     cgame.utils.colorParser->parseColorString(cvar->string, snaphud.colors[3]);
   });
+
+  cvarUpdate->subscribe(&etj_snapHUDCropOffsets, [this](const vmCvar_t *cvar) {
+    parseCropOffset(cvar);
+  });
+}
+
+void SnaphudV2::parseCropOffset(const vmCvar_t *cvar) {
+  // FIXME: THIS IS BAD
+  // this should not be here, it should be in 'etj_cvar_parser.h' - however,
+  // it's practically impossible to make cgame link properly in that case,
+  // because of 'ui_shared.cpp'. Therefore, this code is here now, until
+  // cvartable stuff is refactored to be shared between modules, or we need
+  // another cvar to take 2 values like this.
+  std::vector<std::string> components;
+  components.reserve(2);
+
+  const auto parserError = [&cvar]() {
+    Com_Printf(S_COLOR_YELLOW "Cvar '%s' requires at least two components, "
+                              "setting default value\n",
+               cvarName(cvar));
+    resetCvar(cvar);
+  };
+
+  if (cvar->string[0] == '\0' || StringUtils::isWhiteSpace(cvar->string)) {
+    parserError();
+    components = StringUtils::split(cvarDefaultString(cvar), " ");
+  } else {
+    components = StringUtils::split(cvar->string, " ");
+  }
+
+  // remove any empty components - if user inputs a string like "  2   3  ",
+  // 'split()' gives us empty elements
+  components.erase(
+      std::remove_if(components.begin(), components.end(),
+                     [](const std::string_view s) { return s.empty(); }),
+      components.end());
+
+  if (components.size() < 2) {
+    parserError();
+    components = StringUtils::split(cvarDefaultString(cvar), " ");
+  }
+
+  // cap to non-widescreen screen center and adjust to widescreen as
+  // necessary, so the cvar value makes more sense for the user
+  snaphud.cropOffset.val1 = std::clamp(Q_atof(components[0]), 0.0f, 320.0f);
+  snaphud.cropOffset.val2 = std::clamp(Q_atof(components[1]), 0.0f, 320.0f);
+
+  ETJump_AdjustPosition(&snaphud.cropOffset.val1);
+  ETJump_AdjustPosition(&snaphud.cropOffset.val2);
 }
 
 void SnaphudV2::updateSnaphud(const SnaphudData::State &s) {
@@ -102,6 +154,34 @@ void SnaphudV2::updateSnaphud(const SnaphudData::State &s) {
     default:
       snaphud.borderOnly = false;
       break;
+  }
+
+  switch (static_cast<CropStyle>(etj_snapHUDCrop.integer)) {
+    default:
+    case CropStyle::OFF:
+      snaphud.minX = std::nullopt;
+      snaphud.maxX = std::nullopt;
+      break;
+    case CropStyle::IF_STRAFING:
+      // NOTE: use stats to determine input, because snaphud has default input
+      if (!(s.pm.ps->stats[STAT_USERCMD_MOVE] &
+            (UMOVE_FORWARD | UMOVE_BACKWARD)) &&
+          !(s.pm.ps->stats[STAT_USERCMD_MOVE] & (UMOVE_RIGHT | UMOVE_LEFT))) {
+        snaphud.minX = std::nullopt;
+        snaphud.maxX = std::nullopt;
+        break;
+      }
+
+      [[fallthrough]];
+    case CropStyle::ALWAYS:
+      const bool rightStrafe = PmoveUtilsV2::rightStrafe(
+          PmoveUtilsV2::strafingForwards(s.pm, s.wishspeed, s.wishvel),
+          s.pm.cmd);
+
+      snaphud.minX = rightStrafe ? SCREEN_CENTER_X - snaphud.cropOffset.val1
+                                 : 0.0f + snaphud.cropOffset.val2;
+      snaphud.maxX = rightStrafe ? SCREEN_WIDTH - snaphud.cropOffset.val2
+                                 : SCREEN_CENTER_X + snaphud.cropOffset.val1;
   }
 
   buildSnapZones(s);
@@ -157,16 +237,19 @@ void SnaphudV2::render() const {
     }
 
     if (snaphud.style == SnaphudStyle::EDGE) {
-      CG_FillAngleYaw(zone.start, zone.start + snaphud.edgeThickness,
-                      snaphud.yaw, snaphud.y, snaphud.h, snaphud.fov,
-                      snaphud.colors[colorIndex]);
-      CG_FillAngleYaw(zone.end, zone.end - snaphud.edgeThickness, snaphud.yaw,
-                      snaphud.y, snaphud.h, snaphud.fov,
-                      snaphud.colors[colorIndex]);
+      CG_FillAngleYawExt(zone.start, zone.start + snaphud.edgeThickness,
+                         snaphud.yaw, snaphud.y, snaphud.h, snaphud.fov,
+                         snaphud.colors[colorIndex], false,
+                         snaphud.borderThickness, snaphud.minX, snaphud.maxX);
+      CG_FillAngleYawExt(zone.end, zone.end - snaphud.edgeThickness,
+                         snaphud.yaw, snaphud.y, snaphud.h, snaphud.fov,
+                         snaphud.colors[colorIndex], false,
+                         snaphud.borderThickness, snaphud.minX, snaphud.maxX);
     } else {
       CG_FillAngleYawExt(zone.start, zone.end, snaphud.yaw, snaphud.y,
                          snaphud.h, snaphud.fov, snaphud.colors[colorIndex],
-                         snaphud.borderOnly, snaphud.borderThickness);
+                         snaphud.borderOnly, snaphud.borderThickness,
+                         snaphud.minX, snaphud.maxX);
     }
   }
 }

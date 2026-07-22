@@ -634,6 +634,8 @@ vmCvar_t etj_snapHUDTrueness;
 vmCvar_t etj_snapHUDEdgeThickness;
 vmCvar_t etj_snapHUDBorderThickness;
 vmCvar_t etj_snapHUDActiveIsPrimary;
+vmCvar_t etj_snapHUDCrop;
+vmCvar_t etj_snapHUDCropOffsets;
 
 vmCvar_t etj_gunSway;
 vmCvar_t etj_drawScoreboardInactivity;
@@ -1274,6 +1276,8 @@ cvarTable_t cvarTable[] = {
      CVAR_ARCHIVE},
     {&etj_snapHUDActiveIsPrimary, "etj_snapHUDActiveIsPrimary", "0",
      CVAR_ARCHIVE},
+    {&etj_snapHUDCrop, "etj_snapHUDCrop", "0", CVAR_ARCHIVE},
+    {&etj_snapHUDCropOffsets, "etj_snapHUDCropOffsets", "0 0", CVAR_ARCHIVE},
 
     {&etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE},
     {&etj_drawScoreboardInactivity, "etj_drawScoreboardInactivity", "1",
@@ -4320,3 +4324,47 @@ void CG_DecodeQP(char *line) {
   }
   *o = '\0';
 }
+
+// TODO: these should be somewhere else but because the cvar table is here,
+// they are here for now. Relocate!
+namespace ETJump {
+static const cvarTable_t *findCvar(const vmCvar_t *cvar) {
+  const auto *const vmCvar = std::find_if(
+      std::begin(cvarTable), std::end(cvarTable),
+      [cvar](const cvarTable_t &entry) { return entry.vmCvar == cvar; });
+
+  if (vmCvar != std::end(cvarTable)) {
+    return vmCvar;
+  }
+
+  return nullptr;
+}
+
+const char *cvarName(const vmCvar_t *cvar) {
+  const cvarTable_t *vmCvar = findCvar(cvar);
+
+  if (vmCvar) {
+    return vmCvar->cvarName;
+  }
+
+  return "";
+}
+
+const char *cvarDefaultString(const vmCvar_t *cvar) {
+  const cvarTable_t *vmCvar = findCvar(cvar);
+
+  if (vmCvar) {
+    return vmCvar->defaultString;
+  }
+
+  return "";
+}
+
+void resetCvar(const vmCvar_t *cvar) {
+  const cvarTable_t *vmCvar = findCvar(cvar);
+
+  if (vmCvar) {
+    trap_Cvar_Set(vmCvar->cvarName, vmCvar->defaultString);
+  }
+}
+} // namespace ETJump
