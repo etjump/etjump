@@ -371,7 +371,7 @@ typedef struct itemDef_s {
 
   textScroll_t textScroll;
 
-  // update cvar value only when itemCapture ends
+  // sliders & editfields - update cvar value only when itemCapture/edit ends
   bool cacheCvar;
   // allocated if 'cacheCvar' is used on an item, 'MAX_CVAR_VALUE_STRING' bytes
   char *cacheCvarValue;
