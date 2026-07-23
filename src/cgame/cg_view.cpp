@@ -1943,6 +1943,29 @@ static void runFrameEnd() {
     }
   }
 }
+
+static void updateHUDData() {
+  if (ETJump::cgame.hudData.pmoveV2->check()) {
+    ETJump::cgame.hudData.pmoveV2->runFrame();
+  }
+
+  if (etj_drawSnapHUD.integer ||
+      ((etj_drawCGaz.integer & 1) && etj_CGaz1DrawSnapZone.integer)) {
+    ETJump::cgame.hudData.snaphud->runFrame();
+  }
+
+  if (etj_drawCGaz.integer) {
+    ETJump::cgame.hudData.cgaz->runFrame();
+  }
+
+  if (ETJump::UpmoveMeterData::check()) {
+    ETJump::cgame.hudData.upmove->runFrame();
+  }
+
+  if (ETJump::CHSData::check()) {
+    ETJump::cgame.hudData.chs->runFrame();
+  }
+}
 } // namespace ETJump
 
 // #define DEBUGTIME_ENABLED
@@ -2225,27 +2248,7 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
     trap_SetClientLerpOrigin(cg.refdef.vieworg[0], cg.refdef.vieworg[1],
                              cg.refdef.vieworg[2]);
 
-    // setup pmove for renderables
-    if (ETJump::cgame.utils.pmoveV2->check()) {
-      ETJump::cgame.utils.pmoveV2->runFrame();
-    }
-
-    if (etj_drawSnapHUD.integer ||
-        ((etj_drawCGaz.integer & 1) && etj_CGaz1DrawSnapZone.integer)) {
-      ETJump::cgame.hud.snaphudDataHandler->runFrame();
-    }
-
-    if (etj_drawCGaz.integer) {
-      ETJump::cgame.hud.cgazDataHandler->runFrame();
-    }
-
-    if (ETJump::UpmoveMeterData::check()) {
-      ETJump::cgame.hud.upmoveDataHandler->runFrame();
-    }
-
-    if (ETJump::CHSDataHandler::check()) {
-      ETJump::cgame.hud.chsDataHandler->runFrame();
-    }
+    ETJump::updateHUDData();
 
     // actually issue the rendering calls
     CG_DrawActive(stereoView);

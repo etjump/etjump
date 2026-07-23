@@ -58,7 +58,7 @@ bool UpmoveMeterData::check() {
 }
 
 void UpmoveMeterData::runFrame() {
-  const auto &pmove = cgame.utils.pmoveV2->getState();
+  const auto &pmove = cgame.hudData.pmoveV2->getState();
 
   if (!pmove.pm.ps) {
     return;

@@ -76,7 +76,6 @@ class CvarUnlocker;
 class SavePos;
 class ColorParser;
 class TraceUtils;
-class PmoveUtilsV2;
 
 struct Utils {
   std::unique_ptr<EventLoop> eventLoop;
@@ -84,7 +83,6 @@ struct Utils {
   std::unique_ptr<SavePos> savePos;
   std::unique_ptr<ColorParser> colorParser;
   std::unique_ptr<TraceUtils> trace;
-  std::unique_ptr<PmoveUtilsV2> pmoveV2;
 };
 
 class ConsoleShader;
@@ -105,20 +103,25 @@ struct Visuals {
   std::unique_ptr<TrickjumpLines> trickjumpLines;
 };
 
-class CHSDataHandler;
+class CHSData;
 class CGazData;
 class SnaphudData;
 class UpmoveMeterData;
 class SpectatorInfoData;
+class PmoveUtilsV2;
+
+struct HUDData {
+  std::shared_ptr<CGazData> cgaz;
+  std::shared_ptr<SnaphudData> snaphud;
+  std::shared_ptr<UpmoveMeterData> upmove;
+  std::shared_ptr<CHSData> chs;
+  std::shared_ptr<SpectatorInfoData> spectatorInfo;
+  std::unique_ptr<PmoveUtilsV2> pmoveV2;
+};
+
 class TimerunView;
 
 struct HUD {
-  std::shared_ptr<CGazData> cgazDataHandler;
-  std::shared_ptr<SnaphudData> snaphudDataHandler;
-  std::shared_ptr<UpmoveMeterData> upmoveDataHandler;
-  std::shared_ptr<CHSDataHandler> chsDataHandler;
-  std::shared_ptr<SpectatorInfoData> spectatorInfoData;
-
   std::vector<std::unique_ptr<IRenderable>> renderables;
   std::unique_ptr<TimerunView> timerunView;
 };
@@ -132,6 +135,7 @@ struct CGameContext {
   Utils utils;
   UI ui;
   Visuals visuals;
+  HUDData hudData;
   HUD hud;
 };
 } // namespace ETJump
