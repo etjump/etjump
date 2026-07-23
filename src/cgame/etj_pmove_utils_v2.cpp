@@ -79,6 +79,17 @@ void PmoveUtilsV2::setupPmove(pmove_t &pm) {
   pm.pmext->sprintTime = cg.pmext.sprintTime;
   pm.pmext->jumpDelayBug = cg.jumpDelayBug;
   pm.pmext->autoSprint = cg.pmext.autoSprint;
+
+  // On the first few frames after a map changes/restarts, we have a brief
+  // window during which we run the client side pmove code, before the server
+  // has run a client think for us. During this time, the client side
+  // playerstate is partially incomplete, as the server is the authority
+  // for certain fields. For our use case here, 'speed' and 'gravity'
+  // are such fields, so set them up manually during this period.
+  if (pm.ps->speed == 0 && pm.ps->gravity == 0) {
+    pm.ps->speed = G_SPEED;
+    pm.ps->gravity = G_GRAVITY;
+  }
 }
 
 void PmoveUtilsV2::setupUserCmd(const int8_t scale, pmove_t &pm) {
