@@ -23,7 +23,6 @@
  */
 
 #include "etj_chs_data.h"
-#include "cg_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_upmove_meter_data.h"
@@ -32,7 +31,7 @@
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
-CHSDataHandler::CHSDataHandler(
+CHSData::CHSData(
     const std::shared_ptr<UpmoveMeterData> &upmoveMeterData,
     const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
     const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler)
@@ -49,7 +48,7 @@ CHSDataHandler::CHSDataHandler(
   setupListeners();
 }
 
-CHSDataHandler::~CHSDataHandler() {
+CHSData::~CHSData() {
   consoleCommandsHandler->unsubscribe("chs");
 
   cvarUpdateHandler->unsubscribe(&etj_CHSUseFeet);
@@ -62,7 +61,7 @@ CHSDataHandler::~CHSDataHandler() {
   }
 }
 
-void CHSDataHandler::runFrame() {
+void CHSData::runFrame() {
   ps = getValidPlayerState();
 
   if (std::any_of(chsObjects.cbegin(), chsObjects.cend(),
@@ -76,11 +75,19 @@ void CHSDataHandler::runFrame() {
   }
 }
 
-bool CHSDataHandler::check() {
+bool CHSData::check() {
   return etj_drawCHS1.integer || etj_drawCHS2.integer || etj_drawCHS3.integer;
 }
 
-std::string CHSDataHandler::getStat(const vmCvar_t *cvar) const {
+bool CHSData::needPmove() const {
+  return std::any_of(chsObjects.cbegin(), chsObjects.cend(),
+                     [](const auto &obj) {
+                       const auto &[chs, object] = obj;
+                       return object.masterCvar->integer && object.needPmove;
+                     });
+}
+
+std::string CHSData::getStat(const vmCvar_t *cvar) const {
   const auto stat = static_cast<Stats>(cvar->integer);
 
   // this *should* be valid always, but let's be sure
@@ -93,7 +100,7 @@ std::string CHSDataHandler::getStat(const vmCvar_t *cvar) const {
   }
 }
 
-std::string CHSDataHandler::getStatName(const vmCvar_t *cvar) const {
+std::string CHSData::getStatName(const vmCvar_t *cvar) const {
   const auto stat = static_cast<Stats>(cvar->integer);
 
   // this *should* be valid always, but let's be sure
@@ -106,13 +113,13 @@ std::string CHSDataHandler::getStatName(const vmCvar_t *cvar) const {
   }
 }
 
-const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &
-CHSDataHandler::getCvars(const int32_t chs) const {
+const std::array<CHSData::CHSCvar, MAX_CHS_INFO> &
+CHSData::getCvars(const int32_t chs) const {
   assert(chs >= CHS_HUD_1 && chs <= CHS_HUD_3);
   return chsObjects.at(chs).cvars;
 }
 
-void CHSDataHandler::setupListeners() {
+void CHSData::setupListeners() {
   consoleCommandsHandler->subscribe("chs",
                                     [this](const auto &) { printInfo(); });
 
@@ -141,15 +148,16 @@ void CHSDataHandler::setupListeners() {
   }
 }
 
-void CHSDataHandler::setZOffset(const vmCvar_t *cvar) {
+void CHSData::setZOffset(const vmCvar_t *cvar) {
   // we can't use 'ps->mins' here as it's nullptr
   // when we call this initially from the constructor
   ZOffset = cvar->integer ? playerMins[2] : 0;
 }
 
-void CHSDataHandler::updateState(CHSObject &chsObject) {
+void CHSData::updateState(CHSObject &chsObject) {
   chsObject.needTrace = false;
   chsObject.needExtraTrace = false;
+  chsObject.needPmove = false;
 
   for (auto &chsCvar : chsObject.cvars) {
     const auto stat = static_cast<Stats>(chsCvar.cvar->integer);
@@ -167,11 +175,15 @@ void CHSDataHandler::updateState(CHSObject &chsObject) {
       chsObject.needExtraTrace = statNeedsExtraTrace(stat);
     }
 
+    if (!chsObject.needPmove && stats[stat].opts & StatOpts::PMOVE) {
+      chsObject.needPmove = true;
+    }
+
     chsCvar.valid = true;
   }
 }
 
-bool CHSDataHandler::statNeedsExtraTrace(const Stats stat) {
+bool CHSData::statNeedsExtraTrace(const Stats stat) {
   switch (stat) {
     case Stats::DISTANCE_XY:
     case Stats::DISTANCE_Z:
@@ -191,7 +203,7 @@ bool CHSDataHandler::statNeedsExtraTrace(const Stats stat) {
   }
 }
 
-void CHSDataHandler::viewTrace(trace_t *tr, const int32_t mask) {
+void CHSData::viewTrace(trace_t *tr, const int32_t mask) const {
   vec3_t start{};
   vec3_t end{};
 
@@ -201,7 +213,7 @@ void CHSDataHandler::viewTrace(trace_t *tr, const int32_t mask) {
   CG_Trace(tr, start, nullptr, nullptr, end, ps->clientNum, mask);
 }
 
-std::string CHSDataHandler::speed(const SpeedType type) const {
+std::string CHSData::speed(const SpeedType type) const {
   switch (type) {
     case SpeedType::X:
       return StringUtils::format("%.0f", ps->velocity[0]);
@@ -233,11 +245,11 @@ std::string CHSDataHandler::speed(const SpeedType type) const {
   }
 }
 
-std::string CHSDataHandler::health() const {
+std::string CHSData::health() const {
   return std::to_string(ps->stats[STAT_HEALTH]);
 }
 
-std::string CHSDataHandler::ammo() {
+std::string CHSData::ammo() {
   int32_t ammo{};
   int32_t clips{};
   int32_t akimboAmmo{};
@@ -259,7 +271,7 @@ std::string CHSDataHandler::ammo() {
   return "";
 }
 
-std::string CHSDataHandler::distance(const DistanceType type) {
+std::string CHSData::distance(const DistanceType type) {
   switch (type) {
     case DistanceType::XY: {
       const trace_t tr = getTraceResults(CHS_10_11);
@@ -332,7 +344,7 @@ std::string CHSDataHandler::distance(const DistanceType type) {
   }
 }
 
-std::string CHSDataHandler::lookXYZ() {
+std::string CHSData::lookXYZ() {
   const auto tr = getTraceResults(CHS_16);
 
   if (tr.fraction != 1.0f) {
@@ -344,7 +356,7 @@ std::string CHSDataHandler::lookXYZ() {
   return "- - -";
 }
 
-std::string CHSDataHandler::angle(const int32_t angle) const {
+std::string CHSData::angle(const int32_t angle) const {
   switch (angle) {
     case PITCH:
       return StringUtils::format("%.2f", ps->viewangles[PITCH]);
@@ -357,7 +369,7 @@ std::string CHSDataHandler::angle(const int32_t angle) const {
   }
 }
 
-std::string CHSDataHandler::position(const PositionType type) const {
+std::string CHSData::position(const PositionType type) const {
   switch (type) {
     case PositionType::X:
       return StringUtils::format("%.0f", ps->origin[0]);
@@ -376,13 +388,13 @@ std::string CHSDataHandler::position(const PositionType type) const {
   }
 }
 
-std::string CHSDataHandler::lastJumpPos() const {
+std::string CHSData::lastJumpPos() const {
   return StringUtils::format("%.0f %.0f %.0f", cg.etjLastJumpPos[0],
                              cg.etjLastJumpPos[1],
                              cg.etjLastJumpPos[2] + ZOffset);
 }
 
-std::string CHSDataHandler::planeAngleZ() {
+std::string CHSData::planeAngleZ() {
   const trace_t tr = getTraceResults(CHS_53);
 
   if (tr.fraction != 1.0f) {
@@ -396,11 +408,11 @@ std::string CHSDataHandler::planeAngleZ() {
   return "-";
 }
 
-std::string CHSDataHandler::lastJumpSpeed() const {
+std::string CHSData::lastJumpSpeed() const {
   return std::to_string(ps->persistant[PERS_JUMP_SPEED]);
 }
 
-std::string CHSDataHandler::upmove(const UpmoveType type) {
+std::string CHSData::upmove(const UpmoveType type) const {
   const auto &s = upMoveMeterData->getState();
 
   switch (type) {
@@ -421,7 +433,7 @@ std::string CHSDataHandler::upmove(const UpmoveType type) {
   }
 }
 
-trace_t &CHSDataHandler::getTraceResults(const extraTraceOptions opt) {
+trace_t &CHSData::getTraceResults(const extraTraceOptions opt) {
   if (etj_extraTrace.integer & (1 << opt)) {
     return extraTrace;
   }
@@ -429,52 +441,24 @@ trace_t &CHSDataHandler::getTraceResults(const extraTraceOptions opt) {
   return trace;
 }
 
-void CHSDataHandler::printInfo() const {
+void CHSData::printInfo() const {
   for (const auto &[key, info] : stats) {
     CG_Printf("%3i: %s\n", key, info.description.c_str());
   }
 }
 
-void CHSDataHandler::setupObjects() {
-  constexpr std::array<CHSCvar, MAX_CHS_INFO> CHS1Cvars = {{
-      {&etj_CHS1Info1},
-      {&etj_CHS1Info2},
-      {&etj_CHS1Info3},
-      {&etj_CHS1Info4},
-      {&etj_CHS1Info5},
-      {&etj_CHS1Info6},
-      {&etj_CHS1Info7},
-      {&etj_CHS1Info8},
-  }};
-
-  constexpr std::array<CHSCvar, MAX_CHS_INFO> CHS2Cvars = {{
-      {&etj_CHS2Info1},
-      {&etj_CHS2Info2},
-      {&etj_CHS2Info3},
-      {&etj_CHS2Info4},
-      {&etj_CHS2Info5},
-      {&etj_CHS2Info6},
-      {&etj_CHS2Info7},
-      {&etj_CHS2Info8},
-  }};
-
-  constexpr std::array<CHSCvar, MAX_CHS_INFO> CHS3Cvars = {{
-      {&etj_CHS3Info1},
-      {&etj_CHS3Info2},
-      {&etj_CHS3Info3},
-      {&etj_CHS3Info4},
-      {&etj_CHS3Info5},
-      {&etj_CHS3Info6},
-      {&etj_CHS3Info7},
-      {&etj_CHS3Info8},
-  }};
-
+void CHSData::setupObjects() {
+  chsObjects[CHS_HUD_1].masterCvar = &etj_drawCHS1;
   chsObjects[CHS_HUD_1].cvars = CHS1Cvars;
+
+  chsObjects[CHS_HUD_2].masterCvar = &etj_drawCHS2;
   chsObjects[CHS_HUD_2].cvars = CHS2Cvars;
+
+  chsObjects[CHS_HUD_3].masterCvar = &etj_drawCHS3;
   chsObjects[CHS_HUD_3].cvars = CHS3Cvars;
 }
 
-void CHSDataHandler::setupStats() {
+void CHSData::setupStats() {
   // TODO: in DeFRaG, this is XY speed only, make it XY here too?
   stats[Stats::SPEED] = {[this]() { return speed(SpeedType::XYZ); }, "Speed",
                          "player speed"};
@@ -654,23 +638,33 @@ void CHSDataHandler::setupStats() {
                                    "Jump speed", "last jump speed"};
 
   stats[Stats::UPMOVE_PRE_DELAY] = {
-      [this]() { return upmove(UpmoveType::PRE_DELAY); }, "Upmove pre",
-      "upmove pre jump/on ground ms"};
+      [this]() { return upmove(UpmoveType::PRE_DELAY); },
+      "Upmove pre",
+      "upmove pre jump/on ground ms",
+      {StatOpts::PMOVE}};
 
   stats[Stats::UPMOVE_POST_DELAY] = {
-      [this]() { return upmove(UpmoveType::POST_DELAY); }, "Upmove post",
-      "upmove post jump ms"};
+      [this]() { return upmove(UpmoveType::POST_DELAY); },
+      "Upmove post",
+      "upmove post jump ms",
+      {StatOpts::PMOVE}};
 
   stats[Stats::UPMOVE_FULL_DELAY] = {
-      [this]() { return upmove(UpmoveType::FULL_DELAY); }, "Upmove full",
-      "upmove full ms"};
+      [this]() { return upmove(UpmoveType::FULL_DELAY); },
+      "Upmove full",
+      "upmove full ms",
+      {StatOpts::PMOVE}};
 
   stats[Stats::UPMOVE_PRE_FULL_POST_DELAY] = {
       [this]() { return upmove(UpmoveType::PRE_FULL_POST_DELAY); },
-      "Upmove pre full post", "upmove all values (pre/full/post)"};
+      "Upmove pre full post",
+      "upmove all values (pre/full/post)",
+      {StatOpts::PMOVE}};
 
   stats[Stats::UPMOVE_POST_FULL_PRE_DELAY] = {
       [this]() { return upmove(UpmoveType::POST_FULL_PRE_DELAY); },
-      "Upmove post full pre", "upmove all values (post/full/pre)"};
+      "Upmove post full pre",
+      "upmove all values (post/full/pre)",
+      {StatOpts::PMOVE}};
 }
 } // namespace ETJump

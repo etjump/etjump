@@ -24,6 +24,7 @@
 
 #include "etj_pmove_utils_v2.h"
 #include "cg_local.h"
+#include "etj_chs_data.h"
 #include "etj_cvar_update_handler.h"
 
 namespace ETJump {
@@ -35,26 +36,57 @@ PmoveUtilsV2::PmoveUtilsV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
 }
 
 PmoveUtilsV2::~PmoveUtilsV2() {
-  for (const auto &cvar : cvars) {
+  for (const auto &cvar : hudCvars) {
+    cvarUpdate->unsubscribe(cvar);
+  }
+
+  for (const auto &cvar : chsCvars) {
     cvarUpdate->unsubscribe(cvar);
   }
 }
 
 void PmoveUtilsV2::initCvars() {
-  cvars.emplace_back(&etj_drawSpeed2);
-  cvars.emplace_back(&etj_drawAccel);
-  cvars.emplace_back(&etj_drawStrafeQuality);
-  cvars.emplace_back(&etj_drawUpmoveMeter);
+  hudCvars.emplace_back(&etj_drawSpeed2);
+  hudCvars.emplace_back(&etj_drawAccel);
+  hudCvars.emplace_back(&etj_drawStrafeQuality);
+  hudCvars.emplace_back(&etj_drawUpmoveMeter);
+
+  chsCvars.emplace_back(&etj_drawCHS1);
+
+  for (const auto &[cvar, valid] : CHSData::CHS1Cvars) {
+    chsCvars.emplace_back(cvar);
+  }
+
+  chsCvars.emplace_back(&etj_drawCHS2);
+
+  for (const auto &[cvar, valid] : CHSData::CHS2Cvars) {
+    chsCvars.emplace_back(cvar);
+  }
+
+  chsCvars.emplace_back(&etj_drawCHS3);
+
+  for (const auto &[cvar, valid] : CHSData::CHS3Cvars) {
+    chsCvars.emplace_back(cvar);
+  }
 }
 
 void PmoveUtilsV2::setupCallbacks() {
-  for (const auto &cvar : cvars) {
+  for (const auto &cvar : hudCvars) {
+    cvarUpdate->subscribe(cvar, [this](const vmCvar_t *) { setPmoveStatus(); });
+  }
+
+  for (const auto &cvar : chsCvars) {
     cvarUpdate->subscribe(cvar, [this](const vmCvar_t *) { setPmoveStatus(); });
   }
 }
 
 void PmoveUtilsV2::setPmoveStatus() {
-  for (const auto &cvar : cvars) {
+  if (cgame.hudData.chs->needPmove()) {
+    doPmove = true;
+    return;
+  }
+
+  for (const auto &cvar : hudCvars) {
     if (cvar->integer != 0) {
       doPmove = true;
       return;

@@ -215,7 +215,6 @@ static void initUtils() {
   cgame.utils.savePos = std::make_unique<SavePos>(cgame.systems.timerun);
   cgame.utils.colorParser = std::make_unique<ColorParser>();
   cgame.utils.trace = std::make_unique<TraceUtils>();
-  cgame.utils.pmoveV2 = std::make_unique<PmoveUtilsV2>(cgame.core.cvarUpdate);
 }
 
 static void initUserInterface() {
@@ -258,20 +257,25 @@ static void initVisuals() {
   initTrickjumpLines();
 }
 
-static void initHUD() {
-  assert(cgame.utils.pmoveV2 != nullptr);
-
-  cgame.hud.cgazDataHandler = std::make_shared<CGazData>();
-  cgame.hud.snaphudDataHandler = std::make_shared<SnaphudData>();
-  cgame.hud.upmoveDataHandler = std::make_shared<UpmoveMeterData>(
+static void initHUDData() {
+  cgame.hudData.cgaz = std::make_shared<CGazData>();
+  cgame.hudData.snaphud = std::make_shared<SnaphudData>();
+  cgame.hudData.upmove = std::make_shared<UpmoveMeterData>(
       cgame.core.consoleCommands, cgame.core.playerEvents);
-  cgame.hud.chsDataHandler = std::make_shared<CHSDataHandler>(
-      cgame.hud.upmoveDataHandler, cgame.core.cvarUpdate,
-      cgame.core.consoleCommands);
-  cgame.hud.spectatorInfoData = std::make_shared<SpectatorInfoData>();
+  cgame.hudData.chs = std::make_shared<CHSData>(
+      cgame.hudData.upmove, cgame.core.cvarUpdate, cgame.core.consoleCommands);
+  cgame.hudData.spectatorInfo = std::make_shared<SpectatorInfoData>();
+
+  cgame.hudData.pmoveV2 = std::make_unique<PmoveUtilsV2>(cgame.core.cvarUpdate);
+}
+
+static void initHUD() {
+  assert(cgame.hudData.cgaz && cgame.hudData.snaphud && cgame.hudData.upmove &&
+         cgame.hudData.chs && cgame.hudData.spectatorInfo &&
+         cgame.hudData.pmoveV2);
 
   cgame.hud.renderables.emplace_back(
-      std::make_unique<CHS>(cgame.core.cvarUpdate, cgame.hud.chsDataHandler));
+      std::make_unique<CHS>(cgame.core.cvarUpdate, cgame.hudData.chs));
   cgame.hud.renderables.emplace_back(std::make_unique<OverbounceWatcher>(
       cgame.core.consoleCommands, cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<OverbounceDetector>());
@@ -282,34 +286,32 @@ static void initHUD() {
   cgame.hud.renderables.emplace_back(
       std::make_unique<AccelMeterV2>(cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<StrafeQualityV2>(
-      cgame.hud.snaphudDataHandler, cgame.core.cvarUpdate,
-      cgame.core.consoleCommands, cgame.core.playerEvents));
+      cgame.hudData.snaphud, cgame.core.cvarUpdate, cgame.core.consoleCommands,
+      cgame.core.playerEvents));
   cgame.hud.renderables.emplace_back(std::make_unique<JumpSpeedsV2>(
       cgame.core.entityEvents, cgame.core.playerEvents,
       cgame.core.consoleCommands, cgame.core.serverCommands,
       cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(std::make_unique<QuickFollowDrawer>());
   cgame.hud.renderables.emplace_back(std::make_unique<SpectatorInfo>(
-      cgame.core.cvarUpdate, cgame.hud.spectatorInfoData));
+      cgame.core.cvarUpdate, cgame.hudData.spectatorInfo));
   cgame.hud.renderables.emplace_back(std::make_unique<AreaIndicator>());
 
   if (etj_CGazOnTop.integer) {
     cgame.hud.renderables.emplace_back(std::make_unique<SnaphudV2>(
-        cgame.hud.snaphudDataHandler, cgame.core.cvarUpdate));
+        cgame.hudData.snaphud, cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(std::make_unique<CGazV2>(
-        cgame.hud.cgazDataHandler, cgame.hud.snaphudDataHandler,
-        cgame.core.cvarUpdate));
+        cgame.hudData.cgaz, cgame.hudData.snaphud, cgame.core.cvarUpdate));
   } else {
     cgame.hud.renderables.emplace_back(std::make_unique<CGazV2>(
-        cgame.hud.cgazDataHandler, cgame.hud.snaphudDataHandler,
-        cgame.core.cvarUpdate));
+        cgame.hudData.cgaz, cgame.hudData.snaphud, cgame.core.cvarUpdate));
     cgame.hud.renderables.emplace_back(std::make_unique<SnaphudV2>(
-        cgame.hud.snaphudDataHandler, cgame.core.cvarUpdate));
+        cgame.hudData.snaphud, cgame.core.cvarUpdate));
   }
 
   cgame.hud.renderables.emplace_back(std::make_unique<UpperRight>());
   cgame.hud.renderables.emplace_back(std::make_unique<UpmoveMeterV2>(
-      cgame.hud.upmoveDataHandler, cgame.core.cvarUpdate));
+      cgame.hudData.upmove, cgame.core.cvarUpdate));
 
   cgame.hud.renderables.emplace_back(
       std::make_unique<KeySetSystem>(&etj_drawKeys, cgame.core.cvarUpdate));
@@ -336,6 +338,7 @@ void init() {
   initUtils();
   initUserInterface();
   initVisuals();
+  initHUDData();
   initHUD();
 
   ServerCommands::registerCommands();

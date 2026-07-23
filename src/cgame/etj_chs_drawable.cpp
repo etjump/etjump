@@ -40,7 +40,7 @@ inline constexpr float CHSCHAR_SIZEY = 0.2f;
 
 namespace ETJump {
 CHS::CHS(const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
-         const std::shared_ptr<CHSDataHandler> &dataHandler)
+         const std::shared_ptr<CHSData> &dataHandler)
     : cvarUpdateHandler(cvarUpdateHandler), data(dataHandler) {
   setupListeners();
 
@@ -133,7 +133,7 @@ void CHS::render() const {
 
 void CHS::drawCHSCrosshair(
     const CHSHUD &hud,
-    const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &cvars) const {
+    const std::array<CHSData::CHSCvar, MAX_CHS_INFO> &cvars) const {
   for (size_t i = 0; i < cvars.size(); i++) {
     if (!cvars[i].valid) {
       continue;
@@ -168,7 +168,7 @@ void CHS::drawCHSCrosshair(
 
 void CHS::drawCHSList(
     const CHSHUD &hud,
-    const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &cvars) const {
+    const std::array<CHSData::CHSCvar, MAX_CHS_INFO> &cvars) const {
   for (size_t i = 0; i < cvars.size(); i++) {
     if (!cvars[i].valid) {
       continue;

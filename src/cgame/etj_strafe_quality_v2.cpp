@@ -131,7 +131,7 @@ void StrafeQualityV2::updateStrafeQuality(const PmoveUtilsV2::State &s) {
 }
 
 bool StrafeQualityV2::beforeRender() {
-  const PmoveUtilsV2::State &s = cgame.utils.pmoveV2->getState();
+  const PmoveUtilsV2::State &s = cgame.hudData.pmoveV2->getState();
 
   // because we don't calculate the state if strafe quality drawing is disabled,
   // we get a null playerstate here

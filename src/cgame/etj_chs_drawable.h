@@ -32,7 +32,7 @@ namespace ETJump {
 class CHS : public IRenderable {
 public:
   CHS(const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
-      const std::shared_ptr<CHSDataHandler> &dataHandler);
+      const std::shared_ptr<CHSData> &dataHandler);
   ~CHS() override;
 
   bool beforeRender() override;
@@ -58,10 +58,10 @@ private:
 
   void drawCHSCrosshair(
       const CHSHUD &hud,
-      const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &cvars) const;
-  void drawCHSList(
-      const CHSHUD &hud,
-      const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &cvars) const;
+      const std::array<CHSData::CHSCvar, MAX_CHS_INFO> &cvars) const;
+  void
+  drawCHSList(const CHSHUD &hud,
+              const std::array<CHSData::CHSCvar, MAX_CHS_INFO> &cvars) const;
 
   CHSHUD chs1{};
   CHSHUD chs2{};
@@ -94,6 +94,6 @@ private:
   }};
 
   std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
-  std::shared_ptr<CHSDataHandler> data;
+  std::shared_ptr<CHSData> data;
 };
 } // namespace ETJump

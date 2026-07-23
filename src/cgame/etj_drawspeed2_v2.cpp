@@ -170,7 +170,7 @@ bool DrawSpeed2::beforeRender() {
     return false;
   }
 
-  const PmoveUtilsV2::State &s = cgame.utils.pmoveV2->getState();
+  const PmoveUtilsV2::State &s = cgame.hudData.pmoveV2->getState();
 
   // store the old last update time so we can re-check it for accel coloring
   int32_t oldLastUpdateTime = lastUpdateTime;

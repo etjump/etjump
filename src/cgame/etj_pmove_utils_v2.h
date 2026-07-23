@@ -28,6 +28,7 @@
 #include <optional>
 #include <vector>
 
+#include "etj_chs_data.h"
 #include "etj_local.h"
 
 #include "../game/bg_public.h"
@@ -151,7 +152,8 @@ private:
   State s{};
 
   bool doPmove{};
-  std::vector<const vmCvar_t *> cvars;
+  std::vector<const vmCvar_t *> hudCvars;
+  std::vector<const vmCvar_t *> chsCvars;
 
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };

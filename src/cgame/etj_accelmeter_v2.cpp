@@ -128,7 +128,7 @@ bool AccelMeterV2::beforeRender() {
     return false;
   }
 
-  const PmoveUtilsV2::State &s = cgame.utils.pmoveV2->getState();
+  const PmoveUtilsV2::State &s = cgame.hudData.pmoveV2->getState();
 
   // pps must be accurate in order to draw this accurately
   // TODO: revisit with 'g_synchronousClients'

@@ -27,7 +27,7 @@
 #include <functional>
 #include <map>
 
-#include "etj_local.h"
+#include "cg_local.h"
 
 #include "../game/etj_shared.h"
 
@@ -42,27 +42,62 @@ inline constexpr int32_t CHS_HUD_1 = 1;
 inline constexpr int32_t CHS_HUD_2 = 2;
 inline constexpr int32_t CHS_HUD_3 = 3;
 
-class CHSDataHandler {
+class CHSData {
 public:
-  CHSDataHandler(
-      const std::shared_ptr<UpmoveMeterData> &upmoveMeterData,
-      const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
-      const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler);
-  ~CHSDataHandler();
+  CHSData(const std::shared_ptr<UpmoveMeterData> &upmoveMeterData,
+          const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
+          const std::shared_ptr<ClientCommandsHandler> &consoleCommandsHandler);
+  ~CHSData();
 
   struct CHSCvar {
-    const vmCvar_t *cvar{};
-    bool valid = false;
+    const vmCvar_t *cvar;
+    bool valid;
   };
 
+  static constexpr std::array<CHSCvar, MAX_CHS_INFO> CHS1Cvars = {{
+      {&etj_CHS1Info1, false},
+      {&etj_CHS1Info2, false},
+      {&etj_CHS1Info3, false},
+      {&etj_CHS1Info4, false},
+      {&etj_CHS1Info5, false},
+      {&etj_CHS1Info6, false},
+      {&etj_CHS1Info7, false},
+      {&etj_CHS1Info8, false},
+  }};
+
+  static constexpr std::array<CHSCvar, MAX_CHS_INFO> CHS2Cvars = {{
+      {&etj_CHS2Info1, false},
+      {&etj_CHS2Info2, false},
+      {&etj_CHS2Info3, false},
+      {&etj_CHS2Info4, false},
+      {&etj_CHS2Info5, false},
+      {&etj_CHS2Info6, false},
+      {&etj_CHS2Info7, false},
+      {&etj_CHS2Info8, false},
+  }};
+
+  static constexpr std::array<CHSCvar, MAX_CHS_INFO> CHS3Cvars = {{
+      {&etj_CHS3Info1, false},
+      {&etj_CHS3Info2, false},
+      {&etj_CHS3Info3, false},
+      {&etj_CHS3Info4, false},
+      {&etj_CHS3Info5, false},
+      {&etj_CHS3Info6, false},
+      {&etj_CHS3Info7, false},
+      {&etj_CHS3Info8, false},
+  }};
+
   struct CHSObject {
+    const vmCvar_t *masterCvar = nullptr;
     std::array<CHSCvar, MAX_CHS_INFO> cvars{};
     bool needTrace{};
     bool needExtraTrace{};
+    bool needPmove{};
   };
 
   void runFrame();
   static bool check();
+  [[nodiscard]] bool needPmove() const;
   std::string getStat(const vmCvar_t *cvar) const;
   std::string getStatName(const vmCvar_t *cvar) const;
   [[nodiscard]] const std::array<CHSCvar, MAX_CHS_INFO> &
@@ -128,6 +163,7 @@ private:
   enum class StatOpts {
     TRACE = 1 << 0,
     EXTRA_TRACE = 1 << 1,
+    PMOVE = 1 << 2,
   };
 
   struct StatData {
@@ -145,7 +181,7 @@ private:
   void updateState(CHSObject &chsObject);
   static bool statNeedsExtraTrace(Stats stat);
 
-  void viewTrace(trace_t *tr, int32_t mask);
+  void viewTrace(trace_t *tr, int32_t mask) const;
 
   void printInfo() const;
 
@@ -204,7 +240,7 @@ private:
   [[nodiscard]] std::string lastJumpPos() const;
   std::string planeAngleZ();
   [[nodiscard]] std::string lastJumpSpeed() const;
-  std::string upmove(UpmoveType type);
+  [[nodiscard]] std::string upmove(UpmoveType type) const;
 
   trace_t &getTraceResults(extraTraceOptions opt);
 
