@@ -99,6 +99,7 @@ inline constexpr char ART_FX_YELLOW[] = "menu/art/fx_yel";
 
 inline constexpr char ASSET_GRADIENTBAR[] = "ui/assets/gradientbar2.tga";
 inline constexpr char ASSET_SCROLLBAR[] = "ui/assets/scrollbar.tga";
+
 inline constexpr char ASSET_SCROLLBAR_ARROWDOWN[] =
     "ui/assets/scrollbar_arrow_dwn_a.tga";
 inline constexpr char ASSET_SCROLLBAR_ARROWUP[] =
@@ -107,7 +108,18 @@ inline constexpr char ASSET_SCROLLBAR_ARROWLEFT[] =
     "ui/assets/scrollbar_arrow_left.tga";
 inline constexpr char ASSET_SCROLLBAR_ARROWRIGHT[] =
     "ui/assets/scrollbar_arrow_right.tga";
+
+inline constexpr char ASSET_SCROLLBAR_ARROWDOWN_ACTIVE[] =
+    "ui/assets/scrollbar_arrow_dwn_a_active.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWUP_ACTIVE[] =
+    "ui/assets/scrollbar_arrow_up_a_active.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWLEFT_ACTIVE[] =
+    "ui/assets/scrollbar_arrow_left_active.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWRIGHT_ACTIVE[] =
+    "ui/assets/scrollbar_arrow_right_active.tga";
+
 inline constexpr char ASSET_SCROLL_THUMB[] = "ui/assets/scrollbar_thumb.tga";
+
 inline constexpr char ASSET_SLIDER_BAR[] = "ui/assets/slider2.tga";
 inline constexpr char ASSET_SLIDER_THUMB[] = "ui/assets/sliderbutt_1.tga";
 inline constexpr char ASSET_CHECKBOX_CHECK[] = "ui/assets/check.tga";
@@ -121,7 +133,11 @@ inline constexpr char ASSET_REPLAY_UP[] = "gfx/2d/up";
 inline constexpr char ASSET_COLORPICKER_MASK[] = "gfx/2d/colorpicker_mask";
 
 inline constexpr float SCROLLBAR_SIZE = 16.0f;
+inline constexpr float SCROLLBAR_THUMB_HANDLE_WIDTH = SCROLLBAR_SIZE / 2.0f;
 inline constexpr float SCROLLBAR_SIZE_COMBO = 10.0f;
+inline constexpr float SCROLLBAR_COMBO_THUMB_HANDLE_WIDTH =
+    SCROLLBAR_SIZE_COMBO / 2.0f;
+
 inline constexpr float SLIDER_WIDTH = 96.0f;
 inline constexpr float SLIDER_HEIGHT = 10.0f;
 inline constexpr float SLIDER_THUMB_WIDTH = 12.0f;
@@ -180,6 +196,13 @@ typedef struct {
 } colorRangeDef_t;
 
 inline constexpr int MAX_LB_COLUMNS = 16;
+// these are hardcoded for now to match the images, doubt we'd ever need to
+// adjust the colors for these since the up/down arrows are images anyway
+inline constexpr vec4_t scrollbarThumbColor = {0.3f, 0.3f, 0.3f, 1.0f};
+inline constexpr vec4_t scrollbarThumbHlColor = {0.5f, 0.5f, 0.5f, 1.0f};
+inline constexpr vec4_t scrollBarThumbBorderColor = {0.15f, 0.15f, 0.15f, 1.0f};
+inline constexpr vec4_t scrollBarThumbBorderHlColor = {0.25f, 0.25f, 0.25f,
+                                                       1.0f};
 
 typedef struct columnInfo_s {
   int pos;
@@ -243,16 +266,16 @@ typedef struct modelDef_s {
   int frameTime;
 } modelDef_t;
 
-struct comboDef_t {
-  // note: rect height is NOT the dropdown height, it's merely the height of
+struct ComboDef {
+  // NOTE: rect height is NOT the dropdown height, it's merely the height of
   // the actual dropdown entry, comboData.height contains the dropdown height
   rectDef_t rect;
+  float height; // height of the dropdown part of the menu
   int maxItems;
+  int startPos;
   bool bitflag;  // is this a bitflag selection dropdown?
   bool reversed; // should we draw this bottom to top?
-  int startPos;
   bool scrollbar;
-  float height; // height of the dropdown part of the menu
 };
 
 struct colorSliderDef_t {
@@ -364,7 +387,7 @@ typedef struct itemDef_s {
   const char *hOffset;
   const char *yOffset;
 
-  comboDef_t comboData;
+  ComboDef comboData;
 
   colorSliderDef_t colorSliderData;
   bool tooltipAbove;
@@ -445,6 +468,10 @@ typedef struct {
   qhandle_t scrollBarArrowDown;
   qhandle_t scrollBarArrowLeft;
   qhandle_t scrollBarArrowRight;
+  qhandle_t scrollBarArrowUpActive;
+  qhandle_t scrollBarArrowDownActive;
+  qhandle_t scrollBarArrowLeftActive;
+  qhandle_t scrollBarArrowRightActive;
   qhandle_t scrollBar;
   qhandle_t scrollBarThumb;
   qhandle_t buttonMiddle;
