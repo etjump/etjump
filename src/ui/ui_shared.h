@@ -118,8 +118,6 @@ inline constexpr char ASSET_SCROLLBAR_ARROWLEFT_ACTIVE[] =
 inline constexpr char ASSET_SCROLLBAR_ARROWRIGHT_ACTIVE[] =
     "ui/assets/scrollbar_arrow_right_active.tga";
 
-inline constexpr char ASSET_SCROLL_THUMB[] = "ui/assets/scrollbar_thumb.tga";
-
 inline constexpr char ASSET_SLIDER_BAR[] = "ui/assets/slider2.tga";
 inline constexpr char ASSET_SLIDER_THUMB[] = "ui/assets/sliderbutt_1.tga";
 inline constexpr char ASSET_CHECKBOX_CHECK[] = "ui/assets/check.tga";
@@ -473,7 +471,6 @@ typedef struct {
   qhandle_t scrollBarArrowLeftActive;
   qhandle_t scrollBarArrowRightActive;
   qhandle_t scrollBar;
-  qhandle_t scrollBarThumb;
   qhandle_t buttonMiddle;
   qhandle_t buttonInside;
   qhandle_t solidBox;

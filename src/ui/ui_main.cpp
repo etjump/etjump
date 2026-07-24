@@ -203,9 +203,6 @@ void AssetCache() {
   uiInfo.uiDC.Assets.scrollBarArrowRightActive =
       trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWRIGHT_ACTIVE);
 
-  uiInfo.uiDC.Assets.scrollBarThumb =
-      trap_R_RegisterShaderNoMip(ASSET_SCROLL_THUMB);
-
   uiInfo.uiDC.Assets.sliderBar = trap_R_RegisterShaderNoMip(ASSET_SLIDER_BAR);
   uiInfo.uiDC.Assets.sliderThumb =
       trap_R_RegisterShaderNoMip(ASSET_SLIDER_THUMB);
