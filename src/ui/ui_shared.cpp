@@ -2289,6 +2289,15 @@ static float listboxThumbSize(const itemDef_t *item) {
   return std::clamp((maxScrollArea * visibleItems) / count, SCROLLBAR_SIZE,
                     maxScrollArea);
 }
+
+bool listboxNeedsScrollbar(const itemDef_t *item) {
+  const auto *const listPtr = static_cast<listBoxDef_t *>(item->typeData);
+  const auto count = static_cast<float>(DC->feederCount(item->special));
+
+  return item->window.flags & WINDOW_HORIZONTAL
+             ? item->window.rect.w < listPtr->elementWidth * count
+             : item->window.rect.h < listPtr->elementHeight * count;
+}
 } // namespace ETJump
 
 int Item_ListBox_MaxScroll(itemDef_t *item) {
@@ -2416,6 +2425,10 @@ int Item_Slider_OverSlider(itemDef_t *item, float x, float y) {
 }
 
 int Item_ListBox_OverLB(itemDef_t *item, float x, float y) {
+  if (!ETJump::listboxNeedsScrollbar(item)) {
+    return 0;
+  }
+
   rectDef_t r{};
   int thumbstart = 0;
   const float thumbSize = ETJump::listboxThumbSize(item);
@@ -2507,6 +2520,9 @@ void Item_ListBox_MouseEnter(itemDef_t *item, const float x, const float y,
         WINDOW_LB_PGUP | WINDOW_LB_PGDN | WINDOW_LB_SOMEWHERE);
   item->window.flags |= Item_ListBox_OverLB(item, x, y);
 
+  const float scrollbarSize =
+      ETJump::listboxNeedsScrollbar(item) ? SCROLLBAR_SIZE : 0.0f;
+
   // prevent listbox selection changing if we're dragging the scrollbar
   // and moving the cursor over the listbox
   if (Menus_CaptureFuncActive() || !click) {
@@ -2521,7 +2537,7 @@ void Item_ListBox_MouseEnter(itemDef_t *item, const float x, const float y,
       if (listPtr->elementStyle == LISTBOX_IMAGE) {
         r.x = item->window.rect.x;
         r.y = item->window.rect.y;
-        r.h = item->window.rect.h - SCROLLBAR_SIZE;
+        r.h = item->window.rect.h - scrollbarSize;
         r.w = item->window.rect.w - static_cast<float>(listPtr->drawPadding);
         if (Rect_ContainsPoint(&r, x, y)) {
           listPtr->cursorPos =
@@ -2538,7 +2554,7 @@ void Item_ListBox_MouseEnter(itemDef_t *item, const float x, const float y,
                 WINDOW_LB_PGUP | WINDOW_LB_PGDN | WINDOW_LB_SOMEWHERE))) {
     r.x = item->window.rect.x;
     r.y = item->window.rect.y;
-    r.w = item->window.rect.w - SCROLLBAR_SIZE;
+    r.w = item->window.rect.w - scrollbarSize;
     r.h = item->window.rect.h - static_cast<float>(listPtr->drawPadding);
     if (Rect_ContainsPoint(&r, x, y)) {
       listPtr->cursorPos =
@@ -6115,10 +6131,15 @@ void Item_ListBox_Paint(itemDef_t *item) {
   // used to size image elements there is no clipping available so only
   // the last completely visible item is painted
   count = DC->feederCount(item->special);
+  const bool needScrollbar = ETJump::listboxNeedsScrollbar(item);
+  const float scrollBarWidth = needScrollbar ? SCROLLBAR_SIZE : 0.0f;
   // default is vertical if horizontal flag is not here
   if (item->window.flags & WINDOW_HORIZONTAL) {
-    // draw scrollbar in bottom of the window bar
-    Item_DrawScrollbar(item, listPtr, isHorizontal);
+    // draw scrollbar in bottom of the window bar if needed
+    if (needScrollbar) {
+      Item_DrawScrollbar(item, listPtr, isHorizontal);
+    }
+
     listPtr->endPos = listPtr->startPos;
     size = fillRect.w - 2;
     // items
@@ -6139,8 +6160,8 @@ void Item_ListBox_Paint(itemDef_t *item) {
 
         if (i == item->cursorPos) {
           DC->drawRect(x, y, listPtr->elementWidth - 1,
-                       listPtr->elementHeight - 1, item->window.borderSize,
-                       item->window.borderColor);
+                       listPtr->elementHeight + scrollBarWidth - 1,
+                       item->window.borderSize, item->window.borderColor);
         }
 
         size -= listPtr->elementWidth;
@@ -6157,8 +6178,10 @@ void Item_ListBox_Paint(itemDef_t *item) {
       //
     }
   } else {
-    // draw scrollbar to right side of the window
-    Item_DrawScrollbar(item, listPtr, isHorizontal);
+    // draw scrollbar to right of the window bar if needed
+    if (needScrollbar) {
+      Item_DrawScrollbar(item, listPtr, isHorizontal);
+    }
 
     // adjust size for item painting
     size = fillRect.h /* - 2*/;
@@ -6168,7 +6191,7 @@ void Item_ListBox_Paint(itemDef_t *item) {
       y = fillRect.y + 1;
       for (i = listPtr->startPos; i < count; i++) {
         if (i == item->cursorPos) {
-          DC->fillRect(x, y, listPtr->elementWidth - 1,
+          DC->fillRect(x, y, listPtr->elementWidth - scrollBarWidth - 1,
                        listPtr->elementHeight - 1, item->window.outlineColor);
         }
 
@@ -6182,7 +6205,7 @@ void Item_ListBox_Paint(itemDef_t *item) {
         }
 
         if (i == item->cursorPos) {
-          DC->drawRect(x, y, listPtr->elementWidth - 1,
+          DC->drawRect(x, y, listPtr->elementWidth - scrollBarWidth - 1,
                        listPtr->elementHeight - 1, item->window.borderSize,
                        item->window.borderColor);
         }
@@ -6209,7 +6232,7 @@ void Item_ListBox_Paint(itemDef_t *item) {
         // too small for the element
 
         if (static_cast<int>(i) % 2 == 0 && hasAltBackground) {
-          DC->fillRect(x, y, fillRect.w - SCROLLBAR_SIZE - 2,
+          DC->fillRect(x, y, fillRect.w - scrollBarWidth - 2,
                        listPtr->elementHeight, item->window.backColorAlt);
         }
 
@@ -6278,7 +6301,7 @@ void Item_ListBox_Paint(itemDef_t *item) {
         }
 
         if (i == item->cursorPos) {
-          DC->fillRect(x, y, fillRect.w - SCROLLBAR_SIZE - 2,
+          DC->fillRect(x, y, fillRect.w - scrollBarWidth - 2,
                        listPtr->elementHeight /* -
                                                  1*/
                        ,
