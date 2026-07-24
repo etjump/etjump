@@ -27,8 +27,10 @@ typedef struct scrollInfo_s {
   int scrollKey;
   float xStart;
   float yStart;
+  float thumbStart;
   itemDef_t *item;
-  qboolean scrollDir;
+  bool scrollDir;
+  bool draggingThumb;
 } scrollInfo_t;
 
 static scrollInfo_t scrollInfo;
@@ -829,7 +831,7 @@ qboolean IsVisible(int flags) {
                                                                  : qfalse;
 }
 
-qboolean Rect_ContainsPoint(rectDef_t *rect, float x, float y) {
+static qboolean Rect_ContainsPoint(const rectDef_t *rect, float x, float y) {
   if (rect) {
     if (x >= rect->x && x < rect->x + rect->w && y >= rect->y &&
         y < rect->y + rect->h) {
@@ -837,6 +839,11 @@ qboolean Rect_ContainsPoint(rectDef_t *rect, float x, float y) {
     }
   }
   return qfalse;
+}
+
+static rectDef_t buildRect(const float x, const float y, const float w,
+                           const float h) {
+  return {x, y, w, h};
 }
 
 int Menu_ItemsMatchingGroup(menuDef_t *menu, const char *name) {
@@ -2240,6 +2247,50 @@ qboolean Item_SetFocus(itemDef_t *item, float x, float y) {
   return qtrue;
 }
 
+namespace ETJump {
+// returns the number of visible items on a list box
+static int32_t listboxVisibleItems(const itemDef_t *item) {
+  const auto *const listPtr = static_cast<listBoxDef_t *>(item->typeData);
+  float elementSize = 0.0f;
+  float maxSpace = 0.0f;
+
+  if (item->window.flags & WINDOW_HORIZONTAL) {
+    maxSpace = item->window.rect.w;
+    elementSize = listPtr->elementWidth;
+  } else {
+    maxSpace = item->window.rect.h;
+    elementSize = listPtr->elementHeight;
+  }
+
+  if (elementSize <= 0.0f) {
+    return 1;
+  }
+
+  return std::max(static_cast<int32_t>(maxSpace / elementSize), 1);
+}
+
+static float listboxMaxScrollArea(const itemDef_t *item) {
+  return std::max(item->window.flags & WINDOW_HORIZONTAL
+                      ? item->window.rect.w - (SCROLLBAR_SIZE * 2) - 2
+                      : item->window.rect.h - (SCROLLBAR_SIZE * 2) - 2,
+                  1.0f);
+}
+
+static float listboxThumbSize(const itemDef_t *item) {
+  // maximum space available for scroll bar handle
+  const int32_t count = DC->feederCount(item->special);
+  const float maxScrollArea = listboxMaxScrollArea(item);
+  const int32_t visibleItems = listboxVisibleItems(item);
+
+  if (count <= visibleItems) {
+    return maxScrollArea;
+  }
+
+  return std::clamp((maxScrollArea * visibleItems) / count, SCROLLBAR_SIZE,
+                    maxScrollArea);
+}
+} // namespace ETJump
+
 int Item_ListBox_MaxScroll(itemDef_t *item) {
   listBoxDef_t *listPtr = (listBoxDef_t *)item->typeData;
   int max = DC->feederCount(item->special);
@@ -2253,59 +2304,55 @@ int Item_ListBox_MaxScroll(itemDef_t *item) {
   return std::max(0, max);
 }
 
-int Item_ListBox_ThumbPosition(itemDef_t *item) {
-  float max, pos, size;
-  listBoxDef_t *listPtr = (listBoxDef_t *)item->typeData;
+static int Item_ListBox_ThumbPosition(itemDef_t *item) {
+  const auto max = static_cast<float>(Item_ListBox_MaxScroll(item));
+  const float thumbSize = ETJump::listboxThumbSize(item);
+  const float maxScrollArea = ETJump::listboxMaxScrollArea(item);
+  const auto *const listPtr = static_cast<listBoxDef_t *>(item->typeData);
+  float start = 0.0f;
+  float pos = 0.0f;
 
-  max = Item_ListBox_MaxScroll(item);
   if (item->window.flags & WINDOW_HORIZONTAL) {
-    size = item->window.rect.w - (SCROLLBAR_SIZE * 2) - 2;
-    if (max > 0) {
-      pos = (size - SCROLLBAR_SIZE) / (float)max;
-    } else {
-      pos = 0;
-    }
-    pos *= listPtr->startPos;
-    return item->window.rect.x + 1 + SCROLLBAR_SIZE + pos;
+    start = item->window.rect.x + 1 + SCROLLBAR_SIZE;
+    pos = max > 0 ? (maxScrollArea - thumbSize) / max : 0;
+    pos *= static_cast<float>(listPtr->startPos);
   } else {
-    size = item->window.rect.h - (SCROLLBAR_SIZE * 2) - 2;
-    if (max > 0) {
-      pos = (size - SCROLLBAR_SIZE) / (float)max;
-    } else {
-      pos = 0;
-    }
-    pos *= listPtr->startPos;
-
-    return item->window.rect.y + 1 + SCROLLBAR_SIZE + pos;
+    start = item->window.rect.y + 1 + SCROLLBAR_SIZE;
+    pos = max > 0 ? (maxScrollArea - thumbSize) / max : 0;
+    pos *= static_cast<float>(listPtr->startPos);
   }
+
+  return static_cast<int>(start + pos);
 }
 
-int Item_ListBox_ThumbDrawPosition(itemDef_t *item) {
-  int min, max;
+static int Item_ListBox_ThumbDrawPosition(itemDef_t *item) {
+  const float maxArea = ETJump::listboxMaxScrollArea(item);
+  const float thumbSize = ETJump::listboxThumbSize(item);
 
-  if (itemCapture == item) {
+  if (itemCapture == item && scrollInfo.draggingThumb) {
+    float min = 0.0f;
+    float dragPos = 0.0f;
+
     if (item->window.flags & WINDOW_HORIZONTAL) {
       min = item->window.rect.x + SCROLLBAR_SIZE + 1;
-      max = item->window.rect.x + item->window.rect.w - 2 * SCROLLBAR_SIZE - 1;
-      if (DC->cursor.virtX >= min + SCROLLBAR_SIZE / 2 &&
-          DC->cursor.virtX <= max + SCROLLBAR_SIZE / 2) {
-        return DC->cursor.virtX - SCROLLBAR_SIZE / 2;
-      } else {
-        return Item_ListBox_ThumbPosition(item);
-      }
+      dragPos = scrollInfo.thumbStart +
+                (static_cast<float>(DC->cursor.virtX) - scrollInfo.xStart);
     } else {
       min = item->window.rect.y + SCROLLBAR_SIZE + 1;
-      max = item->window.rect.y + item->window.rect.h - 2 * SCROLLBAR_SIZE - 1;
-      if (DC->cursor.virtY >= min + SCROLLBAR_SIZE / 2 &&
-          DC->cursor.virtY <= max + SCROLLBAR_SIZE / 2) {
-        return DC->cursor.virtY - SCROLLBAR_SIZE / 2;
-      } else {
-        return Item_ListBox_ThumbPosition(item);
-      }
+      dragPos = scrollInfo.thumbStart +
+                (static_cast<float>(DC->cursor.virtY) - scrollInfo.yStart);
     }
-  } else {
-    return Item_ListBox_ThumbPosition(item);
+
+    const float max = min + maxArea - thumbSize;
+
+    if (max < min) {
+      return static_cast<int>(min);
+    }
+
+    return static_cast<int>(std::clamp(dragPos, min, max));
   }
+
+  return Item_ListBox_ThumbPosition(item);
 }
 
 float Item_Slider_ThumbPosition(const itemDef_t *item) {
@@ -2369,8 +2416,9 @@ int Item_Slider_OverSlider(itemDef_t *item, float x, float y) {
 }
 
 int Item_ListBox_OverLB(itemDef_t *item, float x, float y) {
-  rectDef_t r;
-  int thumbstart;
+  rectDef_t r{};
+  int thumbstart = 0;
+  const float thumbSize = ETJump::listboxThumbSize(item);
 
   if (item->window.flags & WINDOW_HORIZONTAL) {
     // check if on left arrow
@@ -2389,6 +2437,7 @@ int Item_ListBox_OverLB(itemDef_t *item, float x, float y) {
     // thumbstart = Item_ListBox_ThumbPosition(item);
     thumbstart = Item_ListBox_ThumbDrawPosition(item);
     r.x = thumbstart;
+    r.w = thumbSize;
     if (Rect_ContainsPoint(&r, x, y)) {
       return WINDOW_LB_THUMB;
     }
@@ -2423,6 +2472,7 @@ int Item_ListBox_OverLB(itemDef_t *item, float x, float y) {
     // thumbstart = Item_ListBox_ThumbPosition(item);
     thumbstart = Item_ListBox_ThumbDrawPosition(item);
     r.y = thumbstart;
+    r.h = thumbSize;
     if (Rect_ContainsPoint(&r, x, y)) {
       return WINDOW_LB_THUMB;
     }
@@ -2708,6 +2758,10 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down,
     // mouse hit
     if (key == K_MOUSE1 || key == K_MOUSE2) {
       Item_ListBox_MouseEnter(item, DC->cursor.virtX, DC->cursor.virtY, qtrue);
+
+      if (itemCapture == item && scrollInfo.draggingThumb) {
+        return qtrue;
+      }
 
       if (item->window.flags & WINDOW_LB_LEFTARROW) {
         listPtr->startPos--;
@@ -3023,30 +3077,94 @@ inline constexpr int8_t DIRECTION_DOWN = -1;
 inline constexpr uint8_t SCROLL_SMALL = 1;
 inline constexpr uint8_t SCROLL_BIG = 3;
 
+static void drawScrollbarThumb(const rectDef_t &rect) {
+  if (Rect_ContainsPoint(&rect, DC->cursor.virtX, DC->cursor.virtY) ||
+      scrollInfo.draggingThumb) {
+    DC->fillRect(rect.x, rect.y, rect.w, rect.h, scrollbarThumbHlColor);
+    DC->drawRectFixed(rect.x, rect.y, rect.w, rect.h, 2,
+                      scrollBarThumbBorderHlColor);
+  } else {
+    DC->fillRect(rect.x, rect.y, rect.w, rect.h, scrollbarThumbColor);
+    DC->drawRectFixed(rect.x, rect.y, rect.w, rect.h, 2,
+                      scrollBarThumbBorderColor);
+  }
+}
+
+static qhandle_t scrollbarGetButtonAsset(const rectDef_t &rect,
+                                         const qhandle_t asset) {
+  const bool inBounds =
+      Rect_ContainsPoint(&rect, DC->cursor.virtX, DC->cursor.virtY) &&
+      !scrollInfo.draggingThumb;
+
+  if (asset == DC->Assets.scrollBarArrowLeft) {
+    return inBounds ? DC->Assets.scrollBarArrowLeftActive : asset;
+  }
+
+  if (asset == DC->Assets.scrollBarArrowRight) {
+    return inBounds ? DC->Assets.scrollBarArrowRightActive : asset;
+  }
+
+  if (asset == DC->Assets.scrollBarArrowUp) {
+    return inBounds ? DC->Assets.scrollBarArrowUpActive : asset;
+  }
+
+  if (asset == DC->Assets.scrollBarArrowDown) {
+    return inBounds ? DC->Assets.scrollBarArrowDownActive : asset;
+  }
+
+  return asset;
+}
+
+static float comboMaxScrollArea(const itemDef_t *item) {
+  return std::max(item->comboData.height - (SCROLLBAR_SIZE_COMBO * 2) - 2,
+                  1.0f);
+}
+
+static int32_t comboMaxScroll(const itemDef_t *item) {
+  const auto *const multiPtr = static_cast<multiDef_t *>(item->typeData);
+  return multiPtr->count - item->comboData.maxItems;
+}
+
+static float comboThumbSize(const itemDef_t *item) {
+  const auto *const multiPtr = static_cast<const multiDef_t *>(item->typeData);
+  const float maxScrollArea = comboMaxScrollArea(item);
+  const int32_t count = multiPtr->count;
+
+  if (count <= item->comboData.maxItems) {
+    return maxScrollArea;
+  }
+
+  return std::clamp((maxScrollArea * item->comboData.maxItems) / count,
+                    SCROLLBAR_SIZE_COMBO, maxScrollArea);
+}
+
 static float getComboThumbPosition(const itemDef_t *item,
                                    const rectDef_t *rect) {
-  float pos;
-  const float size = item->comboData.height - SCROLLBAR_SIZE_COMBO * 2 - 2;
-  const float posMin = rect->y + item->comboData.rect.h + SCROLLBAR_SIZE_COMBO;
-  const float posMax = rect->y + rect->h + size;
+  const auto maxScroll = static_cast<float>(comboMaxScroll(item));
+  const float thumbSize = comboThumbSize(item);
+  const float maxScrollArea = comboMaxScrollArea(item);
+  const float min = rect->y + item->comboData.rect.h + SCROLLBAR_SIZE_COMBO;
+  float pos = 0.0f;
 
   // we're dragging the thumb, use cursor position for smooth dragging
-  if (itemCapture == item && item->window.flags & WINDOW_LB_THUMB) {
-    pos = std::clamp(static_cast<float>(DC->cursor.virtY), posMin, posMax);
-  } else if (item->comboData.startPos == 0) {
-    pos = posMin;
-  } else {
-    const auto multi = static_cast<const multiDef_t *>(item->typeData);
-    const auto scrollRange =
-        static_cast<float>(multi->count - item->comboData.maxItems);
-    const auto frac =
-        static_cast<float>(item->comboData.startPos) / scrollRange;
-    pos = posMin + (frac * size);
+  if (itemCapture == item && scrollInfo.draggingThumb) {
+    const float dragPos =
+        scrollInfo.thumbStart +
+        (static_cast<float>(DC->cursor.virtY) - scrollInfo.yStart);
 
-    // cap to the bottom of the scrollable area
-    if (pos > posMax) {
-      pos = posMax;
+    const float max = min + maxScrollArea - thumbSize;
+
+    if (max < min) {
+      pos = min;
+    } else {
+      pos = std::clamp(dragPos, min, max);
     }
+  } else if (item->comboData.startPos == 0) {
+    pos = min;
+  } else {
+    pos = maxScroll > 0 ? (maxScrollArea - thumbSize) / maxScroll : 0;
+    pos *= static_cast<float>(item->comboData.startPos);
+    pos += min;
   }
 
   return pos;
@@ -3096,38 +3214,25 @@ static void comboAutoScroll(void *funcPtr) {
 
 static void comboDragThumb(void *funcPtr) {
   const auto si = static_cast<scrollInfo_t *>(funcPtr);
-  const auto cursorY = static_cast<float>(DC->cursor.virtY);
 
-  if (cursorY == si->yStart) {
+  if (static_cast<float>(DC->cursor.virtY) == si->yStart) {
     return;
   }
 
-  const int8_t scrollDir = cursorY > si->yStart ? DIRECTION_DOWN : DIRECTION_UP;
-  const float scrollHeight =
-      si->item->comboData.height - ((SCROLLBAR_SIZE_COMBO + 1) * 2);
+  const int32_t maxScroll = comboMaxScroll(si->item);
+  const float thumbSize = comboThumbSize(si->item);
+  const float thumbPos =
+      getComboThumbPosition(si->item, &si->item->comboData.rect);
+  const float scrollStart = si->item->comboData.rect.y +
+                            si->item->comboData.rect.h + SCROLLBAR_SIZE_COMBO;
+  const float maxScrollArea = comboMaxScrollArea(si->item);
+  const float maxDrag = maxScrollArea - thumbSize;
 
-  const rectDef_t rect = {si->item->comboData.rect.x +
-                              si->item->comboData.rect.w -
-                              SCROLLBAR_SIZE_COMBO - 1,
-                          si->item->comboData.rect.y + SCROLLBAR_SIZE_COMBO + 1,
-                          SCROLLBAR_SIZE_COMBO, scrollHeight};
-
-  const auto md = static_cast<multiDef_t *>(si->item->typeData);
-
-  si->item->comboData.startPos = std::clamp(
-      static_cast<int>(
-          (cursorY - rect.y) *
-          static_cast<float>(md->count - si->item->comboData.maxItems) /
-          scrollHeight),
-      0, md->count - si->item->comboData.maxItems);
-  si->yStart = cursorY;
-
-  // don't scroll if mouse is above or below scrollbar, otherwise when we
-  // over-drag the scrollbar above/below max position, we start scrolling
-  // as soon as the mouse is moved to other direction
-  if (si->yStart > rect.y && si->yStart < rect.y) {
-    comboScrollFunc(si, scrollDir);
-  }
+  const float pos =
+      maxDrag > 0 ? std::round((thumbPos - scrollStart) * maxScroll / maxDrag)
+                  : 0.0f;
+  si->item->comboData.startPos =
+      std::clamp(static_cast<int32_t>(pos), 0, maxScroll);
 }
 
 static void comboStartCapture(itemDef_t *item, int key, bool autoScroll) {
@@ -3139,6 +3244,8 @@ static void comboStartCapture(itemDef_t *item, int key, bool autoScroll) {
   } else {
     scrollInfo.xStart = static_cast<float>(DC->cursor.virtX);
     scrollInfo.yStart = static_cast<float>(DC->cursor.virtY);
+    scrollInfo.draggingThumb = true;
+    scrollInfo.thumbStart = getComboThumbPosition(item, &item->comboData.rect);
     captureFunc = &comboDragThumb;
   }
 
@@ -3170,10 +3277,9 @@ int comboMouseOverScrollbar(itemDef_t *item, float x, float y) {
   r.h = item->comboData.height;
 
   const float thumbstart = getComboThumbPosition(item, &r);
-
-  r.h = SCROLLBAR_SIZE_COMBO;
-
+  r.h = comboThumbSize(item);
   r.y = thumbstart;
+
   if (Rect_ContainsPoint(&r, x, y)) {
     return WINDOW_LB_THUMB;
   }
@@ -3566,9 +3672,13 @@ static void Scroll_ListBox_AutoFunc(void *p) {
 }
 
 static void Scroll_ListBox_ThumbFunc(void *p) {
-  scrollInfo_t *si = (scrollInfo_t *)p;
-  rectDef_t r;
-  int pos, max;
+  auto *si = static_cast<scrollInfo_t *>(p);
+  rectDef_t r{};
+  int max = 0;
+  int maxDrag = 0;
+  float pos = 0.0f;
+  const float thumbSize = ETJump::listboxThumbSize(si->item);
+  const int32_t thumbPos = Item_ListBox_ThumbDrawPosition(si->item);
 
   listBoxDef_t *listPtr = (listBoxDef_t *)si->item->typeData;
   if (si->item->window.flags & WINDOW_HORIZONTAL) {
@@ -3581,34 +3691,21 @@ static void Scroll_ListBox_ThumbFunc(void *p) {
     r.h = SCROLLBAR_SIZE;
     r.w = si->item->window.rect.w - (SCROLLBAR_SIZE * 2) - 2;
     max = Item_ListBox_MaxScroll(si->item);
-    //
-    pos = (DC->cursor.virtX - r.x - SCROLLBAR_SIZE / 2) * max /
-          (r.w - SCROLLBAR_SIZE);
-    if (pos < 0) {
-      pos = 0;
-    } else if (pos > max) {
-      pos = max;
-    }
-    listPtr->startPos = pos;
-    si->xStart = DC->cursor.virtX;
-  } else if (DC->cursor.virtY != si->yStart) {
+    maxDrag = static_cast<int32_t>(r.w - thumbSize);
 
+    pos = maxDrag > 0 ? std::round((thumbPos - r.x) * max / maxDrag) : 0.0f;
+    listPtr->startPos = std::clamp(static_cast<int32_t>(pos), 0, max);
+  } else if (DC->cursor.virtY != si->yStart) {
     r.x =
         si->item->window.rect.x + si->item->window.rect.w - SCROLLBAR_SIZE - 1;
     r.y = si->item->window.rect.y + SCROLLBAR_SIZE + 1;
     r.h = si->item->window.rect.h - (SCROLLBAR_SIZE * 2) - 2;
     r.w = SCROLLBAR_SIZE;
     max = Item_ListBox_MaxScroll(si->item);
-    //
-    pos = (DC->cursor.virtY - r.y - SCROLLBAR_SIZE / 2) * max /
-          (r.h - SCROLLBAR_SIZE);
-    if (pos < 0) {
-      pos = 0;
-    } else if (pos > max) {
-      pos = max;
-    }
-    listPtr->startPos = pos;
-    si->yStart = DC->cursor.virtY;
+    maxDrag = static_cast<int32_t>(r.h - thumbSize);
+
+    pos = maxDrag > 0 ? std::round((thumbPos - r.y) * max / maxDrag) : 0.0f;
+    listPtr->startPos = std::clamp(static_cast<int32_t>(pos), 0, max);
   }
 
   if (DC->realTime > si->nextScrollTime) {
@@ -3701,7 +3798,7 @@ void Item_StartCapture(itemDef_t *item, int key) {
         scrollInfo.nextAdjustTime = DC->realTime + SCROLL_TIME_ADJUST;
         scrollInfo.adjustValue = SCROLL_TIME_START;
         scrollInfo.scrollKey = key;
-        scrollInfo.scrollDir = (flags & WINDOW_LB_LEFTARROW) ? qtrue : qfalse;
+        scrollInfo.scrollDir = (flags & WINDOW_LB_LEFTARROW);
         scrollInfo.item = item;
         captureData = &scrollInfo;
         captureFunc = &Scroll_ListBox_AutoFunc;
@@ -3711,6 +3808,9 @@ void Item_StartCapture(itemDef_t *item, int key) {
         scrollInfo.item = item;
         scrollInfo.xStart = cursorX;
         scrollInfo.yStart = cursorY;
+        scrollInfo.draggingThumb = true;
+        scrollInfo.thumbStart =
+            static_cast<float>(Item_ListBox_ThumbPosition(item));
         captureData = &scrollInfo;
         captureFunc = &Scroll_ListBox_ThumbFunc;
         itemCapture = item;
@@ -3827,6 +3927,7 @@ qboolean Item_HandleKey(itemDef_t *item, int key, qboolean down) {
       DC->setCVar(scrollInfo.item->cvar, scrollInfo.item->cacheCvarValue);
     }
 
+    scrollInfo.draggingThumb = false;
     itemCapture = nullptr;
     captureFunc = nullptr;
     captureData = nullptr;
@@ -5595,22 +5696,42 @@ void Item_Image_Paint(itemDef_t *item) {
 
 namespace ETJump {
 static void comboDrawScrollbar(itemDef_t *item, const rectDef_t *rect) {
+  rectDef_t drawRect{};
   const float x = rect->x + rect->w - SCROLLBAR_SIZE_COMBO - 1;
   float y = rect->y + rect->h;
 
-  DC->drawHandlePic(x, y, SCROLLBAR_SIZE_COMBO, SCROLLBAR_SIZE_COMBO,
-                    DC->Assets.scrollBarArrowUp);
+  drawRect = buildRect(x, y, SCROLLBAR_SIZE_COMBO, SCROLLBAR_SIZE_COMBO);
+  DC->drawHandlePic(
+      drawRect.x, drawRect.y, drawRect.w, drawRect.h,
+      scrollbarGetButtonAsset(drawRect, DC->Assets.scrollBarArrowUp));
   y += SCROLLBAR_SIZE_COMBO - 1;
 
   const float size = item->comboData.height - (SCROLLBAR_SIZE_COMBO * 2);
-  DC->drawHandlePic(x, y, SCROLLBAR_SIZE_COMBO, size + 1, DC->Assets.scrollBar);
+
+  drawRect = buildRect(x, y, SCROLLBAR_SIZE_COMBO, size + 1);
+  DC->drawHandlePic(drawRect.x, drawRect.y, drawRect.w, drawRect.h,
+                    scrollbarGetButtonAsset(drawRect, DC->Assets.scrollBar));
+
   y += size - 1;
-  DC->drawHandlePic(x, y, SCROLLBAR_SIZE_COMBO, SCROLLBAR_SIZE_COMBO,
-                    DC->Assets.scrollBarArrowDown);
+
+  drawRect = buildRect(x, y, SCROLLBAR_SIZE_COMBO, SCROLLBAR_SIZE_COMBO);
+  DC->drawHandlePic(
+      drawRect.x, drawRect.y, drawRect.w, drawRect.h,
+      scrollbarGetButtonAsset(drawRect, DC->Assets.scrollBarArrowDown));
 
   const float thumb = getComboThumbPosition(item, rect);
-  DC->drawHandlePic(x, thumb, SCROLLBAR_SIZE_COMBO, SCROLLBAR_SIZE_COMBO,
-                    DC->Assets.scrollBarThumb);
+  const float thumbSize = comboThumbSize(item);
+  drawRect = buildRect(x, thumb, SCROLLBAR_SIZE_COMBO, thumbSize);
+  drawScrollbarThumb(drawRect);
+
+  const float thumbMid = thumb + (thumbSize / 2.0f) - 1.0f;
+
+  DC->fillRect(x + 2.5f, thumbMid - 3.0f, SCROLLBAR_COMBO_THUMB_HANDLE_WIDTH,
+               1.0f, scrollBarThumbBorderColor);
+  DC->fillRect(x + 2.5f, thumbMid, SCROLLBAR_COMBO_THUMB_HANDLE_WIDTH, 1.0f,
+               scrollBarThumbBorderColor);
+  DC->fillRect(x + 2.5f, thumbMid + 3.0f, SCROLLBAR_COMBO_THUMB_HANDLE_WIDTH,
+               1.0f, scrollBarThumbBorderColor);
 }
 
 static void comboPaint(itemDef_t *item) {
@@ -5621,7 +5742,7 @@ static void comboPaint(itemDef_t *item) {
     Item_Text_Paint(item);
   }
 
-  const auto multiPtr = static_cast<const multiDef_t *>(item->typeData);
+  const auto *const multiPtr = static_cast<const multiDef_t *>(item->typeData);
 
   // somebody forgot to define cvar list
   if (!multiPtr) {
@@ -5877,57 +5998,103 @@ static void formatChangelogHeaders(const itemDef_t *item, std::string &text,
 
 static void Item_DrawScrollbar(itemDef_t *item, listBoxDef_t *listPtr,
                                const bool horizontal) {
-  rectDef_t fillRect = item->window.rect;
-  float x, y, size, thumb;
+  const rectDef_t &rect = item->window.rect;
+  rectDef_t drawRect{};
+  float x = 0.0f;
+  float y = 0.0f;
+  float size = 0.0f;
+  auto thumb = Item_ListBox_ThumbDrawPosition(item);
+  const float thumbSize = ETJump::listboxThumbSize(item);
+  float thumbMid = 0.0f;
 
   if (horizontal) {
-    x = fillRect.x + 1;
-    y = fillRect.y + fillRect.h - SCROLLBAR_SIZE - 1;
+    x = rect.x + 1;
+    y = rect.y + rect.h - SCROLLBAR_SIZE - 1;
 
-    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarArrowLeft);
+    drawRect = buildRect(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE);
+    DC->drawHandlePic(drawRect.x, drawRect.y, drawRect.w, drawRect.h,
+                      ETJump::scrollbarGetButtonAsset(
+                          drawRect, DC->Assets.scrollBarArrowLeft));
+
     x += SCROLLBAR_SIZE - 1;
+    size = rect.w - (SCROLLBAR_SIZE * 2);
 
-    size = fillRect.w - (SCROLLBAR_SIZE * 2);
-    DC->drawHandlePic(x, y, size + 1, SCROLLBAR_SIZE, DC->Assets.scrollBar);
+    drawRect = buildRect(x, y, size + 1, SCROLLBAR_SIZE);
+    DC->drawHandlePic(drawRect.x, drawRect.y, drawRect.w, drawRect.h,
+                      DC->Assets.scrollBar);
     x += size - 1;
-    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarArrowRight);
+
+    drawRect = buildRect(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE);
+    DC->drawHandlePic(drawRect.x, drawRect.y, drawRect.w, drawRect.h,
+                      ETJump::scrollbarGetButtonAsset(
+                          drawRect, DC->Assets.scrollBarArrowRight));
 
     // thumb
-    thumb = static_cast<float>(Item_ListBox_ThumbDrawPosition(item));
-
     if (thumb > x - SCROLLBAR_SIZE - 1) {
       thumb = x - SCROLLBAR_SIZE - 1;
     }
 
-    DC->drawHandlePic(thumb, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarThumb);
+    drawRect = buildRect(static_cast<float>(thumb), y + 1, thumbSize,
+                         SCROLLBAR_SIZE - 2);
+    ETJump::drawScrollbarThumb(drawRect);
+
+    // grip handle
+    // HACK: I don't understand why this isn't quite centered with this math,
+    // it's like 1px too much to right, but I'm not sure why, so I'm just going
+    // to subtract 1px from the x coordinate here to properly center this
+    thumbMid = thumb + (thumbSize / 2.0f) - 1.0f;
+
+    DC->fillRect(thumbMid - 3.0f, y + 4.0f, 1.0f, SCROLLBAR_THUMB_HANDLE_WIDTH,
+                 scrollBarThumbBorderColor);
+    DC->fillRect(thumbMid, y + 4.0f, 1.0f, SCROLLBAR_THUMB_HANDLE_WIDTH,
+                 scrollBarThumbBorderColor);
+    DC->fillRect(thumbMid + 3.0f, y + 4.0f, 1.0f, SCROLLBAR_THUMB_HANDLE_WIDTH,
+                 scrollBarThumbBorderColor);
   } else {
-    x = fillRect.x + fillRect.w - SCROLLBAR_SIZE - 1;
-    y = fillRect.y + 1;
+    x = rect.x + rect.w - SCROLLBAR_SIZE - 1;
+    y = rect.y + 1;
 
-    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarArrowUp);
+    drawRect = buildRect(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE);
+    DC->drawHandlePic(
+        drawRect.x, drawRect.y, drawRect.w, drawRect.h,
+        ETJump::scrollbarGetButtonAsset(drawRect, DC->Assets.scrollBarArrowUp));
+
     y += SCROLLBAR_SIZE - 1;
-
     listPtr->endPos = listPtr->startPos;
+    size = rect.h - (SCROLLBAR_SIZE * 2);
 
-    size = fillRect.h - (SCROLLBAR_SIZE * 2);
-    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, size + 1, DC->Assets.scrollBar);
+    drawRect = buildRect(x, y, SCROLLBAR_SIZE, size + 1);
+    DC->drawHandlePic(drawRect.x, drawRect.y, drawRect.w, drawRect.h,
+                      DC->Assets.scrollBar);
+
     y += size - 1;
-    DC->drawHandlePic(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarArrowDown);
+
+    drawRect = buildRect(x, y, SCROLLBAR_SIZE, SCROLLBAR_SIZE);
+    DC->drawHandlePic(drawRect.x, drawRect.y, drawRect.w, drawRect.h,
+                      ETJump::scrollbarGetButtonAsset(
+                          drawRect, DC->Assets.scrollBarArrowDown));
 
     // thumb
-    thumb = static_cast<float>(Item_ListBox_ThumbDrawPosition(item));
-
     if (thumb > y - SCROLLBAR_SIZE - 1) {
       thumb = y - SCROLLBAR_SIZE - 1;
     }
 
-    DC->drawHandlePic(x, thumb, SCROLLBAR_SIZE, SCROLLBAR_SIZE,
-                      DC->Assets.scrollBarThumb);
+    drawRect = buildRect(x + 1, static_cast<float>(thumb), SCROLLBAR_SIZE - 2,
+                         thumbSize);
+    ETJump::drawScrollbarThumb(drawRect);
+
+    // grip handle
+    // HACK: I don't understand why this isn't quite centered with this math,
+    // it's like 1px too high, but I'm not sure why, so I'm just going to
+    // subtract 1px from the y coordinate here to properly center this
+    thumbMid = thumb + (thumbSize / 2.0f) - 1.0f;
+
+    DC->fillRect(x + 4.0f, thumbMid - 3.0f, SCROLLBAR_THUMB_HANDLE_WIDTH, 1.0f,
+                 scrollBarThumbBorderColor);
+    DC->fillRect(x + 4.0f, thumbMid, SCROLLBAR_THUMB_HANDLE_WIDTH, 1.0f,
+                 scrollBarThumbBorderColor);
+    DC->fillRect(x + 4.0f, thumbMid + 3.0f, SCROLLBAR_THUMB_HANDLE_WIDTH, 1.0f,
+                 scrollBarThumbBorderColor);
   }
 }
 

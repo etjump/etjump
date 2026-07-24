@@ -184,6 +184,7 @@ void AssetCache() {
   uiInfo.uiDC.Assets.fxPic[5] = trap_R_RegisterShaderNoMip(ART_FX_CYAN);
   uiInfo.uiDC.Assets.fxPic[6] = trap_R_RegisterShaderNoMip(ART_FX_WHITE);
   uiInfo.uiDC.Assets.scrollBar = trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR);
+
   uiInfo.uiDC.Assets.scrollBarArrowDown =
       trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWDOWN);
   uiInfo.uiDC.Assets.scrollBarArrowUp =
@@ -192,8 +193,19 @@ void AssetCache() {
       trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWLEFT);
   uiInfo.uiDC.Assets.scrollBarArrowRight =
       trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWRIGHT);
+
+  uiInfo.uiDC.Assets.scrollBarArrowDownActive =
+      trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWDOWN_ACTIVE);
+  uiInfo.uiDC.Assets.scrollBarArrowUpActive =
+      trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWUP_ACTIVE);
+  uiInfo.uiDC.Assets.scrollBarArrowLeftActive =
+      trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWLEFT_ACTIVE);
+  uiInfo.uiDC.Assets.scrollBarArrowRightActive =
+      trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWRIGHT_ACTIVE);
+
   uiInfo.uiDC.Assets.scrollBarThumb =
       trap_R_RegisterShaderNoMip(ASSET_SCROLL_THUMB);
+
   uiInfo.uiDC.Assets.sliderBar = trap_R_RegisterShaderNoMip(ASSET_SLIDER_BAR);
   uiInfo.uiDC.Assets.sliderThumb =
       trap_R_RegisterShaderNoMip(ASSET_SLIDER_THUMB);
