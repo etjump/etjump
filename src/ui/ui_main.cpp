@@ -4864,6 +4864,9 @@ void UI_RunMenuScript(const char **args) {
       std::string contents = uiInfo.changelogs[ui_currentChangelog.string];
 
       uiInfo.formattedChangelog = StringUtils::split(contents, "\n");
+      // FIXME: this does not account for whether the scrollbar is drawn or not,
+      // because for that we need to get the number of lines... when formatted,
+      // so we'd need to format everything twice
       uiInfo.formattedChangelog = ETJump::Utilities::fitChangelogLinesToWidth(
           uiInfo.formattedChangelog,
           static_cast<int>(item->window.rect.w - SCROLLBAR_SIZE - 10),

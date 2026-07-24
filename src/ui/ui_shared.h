@@ -679,6 +679,7 @@ void scaleMenuSensitivity(int x, int y, float *mdx, float *mdy);
 void computeCursorPosition(int dx, int dy);
 void drawCursor();
 qhandle_t shaderForCrosshair(int crosshairNum, bool isAltShader);
+bool listboxNeedsScrollbar(const itemDef_t *item);
 } // namespace ETJump
 
 int Menu_Count();
