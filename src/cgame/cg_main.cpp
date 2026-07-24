@@ -3901,7 +3901,6 @@ void CG_AssetCache() {
       trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWLEFT);
   cgDC.Assets.scrollBarArrowRight =
       trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWRIGHT);
-  cgDC.Assets.scrollBarThumb = trap_R_RegisterShaderNoMip(ASSET_SCROLL_THUMB);
   cgDC.Assets.sliderBar = trap_R_RegisterShaderNoMip(ASSET_SLIDER_BAR);
   cgDC.Assets.sliderThumb = trap_R_RegisterShaderNoMip(ASSET_SLIDER_THUMB);
 }
