@@ -67,6 +67,7 @@ private:
     // store a string representation as well so we don't need to perform
     // int -> string conversions every frame for all jumps when rendering
     std::string speedStr;
+    std::string upmoveStr;
     SpeedRelation relation{};
   };
 
@@ -76,6 +77,7 @@ private:
   void computeTextOffsets();
 
   void updateJumpSpeeds();
+  void updateCurrentUpmove();
   void setSpeedRelation();
   void setJumpColor(const Jump &jump, vec4_t color) const;
 
@@ -104,6 +106,15 @@ private:
   CvarValue::Size size{};
 
   bool resetQueued{};
+  // Because we update jump speeds on the 'EV_JUMP' event, we need to
+  // poll the state of upmove data each frame, and keep updating the
+  // value associated with the current jump, otherwise we'd lose any
+  // post-jump upmove frames. When a new jump is registered, this gets flipped
+  // to 'true', and while it's true, we poll the upmove data each frame,
+  // and update the current upmove value for the tip of the 'jumpSpeeds' deque.
+  // Once the upmove state flips 'jumping' (aka we aren't holding jump anymore)
+  // to 'false', we also flip this to 'false', and stop updating the value.
+  bool pollUpmove{};
 
   vec4_t colorBase{};
   vec4_t colorFaster{};

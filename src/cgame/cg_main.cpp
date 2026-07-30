@@ -656,6 +656,7 @@ vmCvar_t etj_jumpSpeedsTextSize;
 vmCvar_t etj_jumpSpeedsMaxJumps;
 vmCvar_t etj_jumpSpeedsMaxJumpsPerColumn;
 vmCvar_t etj_jumpSpeedsMaxJumpsPerRow;
+vmCvar_t etj_jumpSpeedsShowUpmove;
 
 // Strafe quality
 vmCvar_t etj_drawStrafeQuality;
@@ -1303,6 +1304,7 @@ cvarTable_t cvarTable[] = {
      CVAR_ARCHIVE},
     {&etj_jumpSpeedsMaxJumpsPerRow, "etj_jumpSpeedsMaxJumpsPerRow", "10",
      CVAR_ARCHIVE},
+    {&etj_jumpSpeedsShowUpmove, "etj_jumpSpeedsShowUpmove", "0", CVAR_ARCHIVE},
 
     // Strafe quality
     {&etj_drawStrafeQuality, "etj_drawStrafeQuality", "0", CVAR_ARCHIVE},

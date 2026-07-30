@@ -30,6 +30,7 @@
 #include "etj_demo_compatibility.h"
 #include "etj_entity_events_handler.h"
 #include "etj_player_events_handler.h"
+#include "etj_upmove_meter_data.h"
 #include "etj_utilities.h"
 
 inline constexpr size_t MAX_JUMPS = 100;
@@ -41,10 +42,6 @@ inline constexpr float TEXT_MIN_SIZE = 0.1f;
 inline constexpr float TEXT_MAX_SIZE = 10.0f;
 inline constexpr float DEFAULT_TEXT_SIZE = 0.2f;
 
-// base gap between speeds on horizontal layout
-inline constexpr float BASE_OFFSET_X = 30.0f;
-// base row height on vertical layout
-inline constexpr float BASE_OFFSET_Y = 12.0f;
 // offset for the first jump speed after label on horizontal layout
 inline constexpr float HOR_FIRSTJUMP_OFFSET = 5.0f;
 
@@ -77,6 +74,7 @@ JumpSpeedsV2::~JumpSpeedsV2() {
   cvarUpdate->unsubscribe(&etj_jumpSpeedsFasterColor);
   cvarUpdate->unsubscribe(&etj_jumpSpeedsSlowerColor);
   cvarUpdate->unsubscribe(&etj_jumpSpeedsTextSize);
+  cvarUpdate->unsubscribe(&etj_jumpSpeedsShowUpmove);
 }
 
 void JumpSpeedsV2::startListeners() {
@@ -109,6 +107,9 @@ void JumpSpeedsV2::startListeners() {
   cvarUpdate->subscribe(&etj_jumpSpeedsTextSize, [this](const vmCvar_t *cvar) {
     adjustTextSize(*cvar);
   });
+
+  cvarUpdate->subscribe(&etj_jumpSpeedsShowUpmove,
+                        [this](const vmCvar_t *) { computeTextOffsets(); });
 }
 
 void JumpSpeedsV2::parseColor(const std::string &colorStr, vec4_t &color) {
@@ -137,9 +138,20 @@ void JumpSpeedsV2::computeTextOffsets() {
   const int32_t currentTextHeight =
       CG_Text_Height_Ext(LABEL_TEXT, size.y, 0, &cgs.media.limboFont2);
 
+  static const auto baseOffsetX = static_cast<float>(
+      CG_Text_Width_Ext("99999", DEFAULT_TEXT_SIZE, 0, &cgs.media.limboFont2));
+  static const auto baseOffsetUpmoveX = static_cast<float>(CG_Text_Width_Ext(
+      "9999 (1000)", DEFAULT_TEXT_SIZE, 0, &cgs.media.limboFont2));
+  static const auto baseOffsetY =
+      static_cast<float>(CG_Text_Height_Ext("9", DEFAULT_TEXT_SIZE, 0,
+                                            &cgs.media.limboFont2)) *
+      2;
+
   textYAdjust = static_cast<float>(defaultTextHeight - currentTextHeight);
-  textOffsetX = BASE_OFFSET_X * (size.x / DEFAULT_TEXT_SIZE);
-  rowHeight = BASE_OFFSET_Y * (size.y / DEFAULT_TEXT_SIZE);
+  textOffsetX =
+      (etj_jumpSpeedsShowUpmove.integer ? baseOffsetUpmoveX : baseOffsetX) *
+      (size.x / DEFAULT_TEXT_SIZE);
+  rowHeight = baseOffsetY * (size.y / DEFAULT_TEXT_SIZE);
 
   firstJumpHorOffsetX = static_cast<float>(CG_Text_Width_Ext(
                             LABEL_TEXT, size.x, 0, &cgs.media.limboFont2)) +
@@ -179,6 +191,23 @@ void JumpSpeedsV2::updateJumpSpeeds() {
 
   if (etj_jumpSpeedsMinSpeed.integer > current.speed) {
     current.relation = SpeedRelation::SLOWER;
+  }
+
+  // start polling upmove value for the current jump
+  pollUpmove = true;
+}
+
+void JumpSpeedsV2::updateCurrentUpmove() {
+  // this shouldn't ever be true since events are processed before the HUD
+  // is rendered, therefore we should always have at least one jump
+  // when this gets called
+  assert(!jumpSpeeds.empty());
+
+  const auto &s = cgame.hudData.upmove->getState();
+  jumpSpeeds[jumpSpeeds.size() - 1].upmoveStr = std::to_string(s.fullDelay);
+
+  if (!s.jumping) {
+    pollUpmove = false;
   }
 }
 
@@ -247,6 +276,10 @@ bool JumpSpeedsV2::beforeRender() {
     return false;
   }
 
+  if (pollUpmove) {
+    updateCurrentUpmove();
+  }
+
   maxJumps = std::clamp(etj_jumpSpeedsMaxJumps.integer, 1,
                         static_cast<int32_t>(MAX_JUMPS));
   jumpsPerColumn =
@@ -294,10 +327,18 @@ void JumpSpeedsV2::render() const {
                           : std::max(numJumps - maxJumps, 0) + pos;
 
     setJumpColor(jumpSpeeds[i], color);
+    std::string text;
+
+    if (etj_jumpSpeedsShowUpmove.integer) {
+      text = StringUtils::format("%-4s (%s)", jumpSpeeds[i].speedStr,
+                                 jumpSpeeds[i].upmoveStr);
+    } else {
+      text = jumpSpeeds[i].speedStr;
+    }
 
     if (style & Style::HORIZONTAL) {
-      CG_Text_Paint_Ext(x, y, size.x, size.y, color, jumpSpeeds[i].speedStr, 0,
-                        0, textStyle, &cgs.media.limboFont2);
+      CG_Text_Paint_Ext(x, y, size.x, size.y, color, text, 0, 0, textStyle,
+                        &cgs.media.limboFont2);
 
       if ((pos + 1) % jumpsPerRow == 0) {
         y += rowHeight;
@@ -306,8 +347,8 @@ void JumpSpeedsV2::render() const {
         x += textOffsetX;
       }
     } else {
-      CG_Text_Paint_Ext(x, y, size.x, size.y, color, jumpSpeeds[i].speedStr, 0,
-                        0, textStyle, &cgs.media.limboFont2);
+      CG_Text_Paint_Ext(x, y, size.x, size.y, color, text, 0, 0, textStyle,
+                        &cgs.media.limboFont2);
 
       if ((pos + 1) % jumpsPerColumn == 0) {
         x += baseX + textOffsetX;

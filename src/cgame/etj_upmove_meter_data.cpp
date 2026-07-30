@@ -54,7 +54,8 @@ bool UpmoveMeterData::check() {
   // we're not checking for individual CHS info values here,
   // this is trivial enough the compute anyway
   return etj_drawUpmoveMeter.integer || etj_drawCHS1.integer ||
-         etj_drawCHS2.integer || etj_drawCHS3.integer;
+         etj_drawCHS2.integer || etj_drawCHS3.integer ||
+         etj_drawJumpSpeeds.integer;
 }
 
 void UpmoveMeterData::runFrame() {
