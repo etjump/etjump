@@ -703,6 +703,18 @@ vmCvar_t etj_altCursor;
 vmCvar_t etj_crosshairThickness;
 vmCvar_t etj_crosshairOutline;
 
+// custom crosshair, composed in the in-game crosshair editor
+vmCvar_t etj_customCrosshair;
+vmCvar_t etj_customCrosshairScale;
+vmCvar_t etj_crosshairElement1;
+vmCvar_t etj_crosshairElement2;
+vmCvar_t etj_crosshairElement3;
+vmCvar_t etj_crosshairElement4;
+vmCvar_t etj_crosshairElement5;
+vmCvar_t etj_crosshairElement6;
+vmCvar_t etj_crosshairElement7;
+vmCvar_t etj_crosshairElement8;
+
 vmCvar_t etj_ftSavelimit;
 
 vmCvar_t etj_noPanzerAutoswitch;
@@ -1359,6 +1371,21 @@ cvarTable_t cvarTable[] = {
 
     {&etj_crosshairThickness, "etj_crosshairThickness", "1.0", CVAR_ARCHIVE},
     {&etj_crosshairOutline, "etj_crosshairOutline", "1", CVAR_ARCHIVE},
+
+    // custom crosshair, composed in the in-game crosshair editor.
+    // each element is a ';' separated list of 'key=value' pairs - see
+    // etj_crosshair_definition.h for the field reference
+    {&etj_customCrosshair, "etj_customCrosshair", "0", CVAR_ARCHIVE},
+    {&etj_customCrosshairScale, "etj_customCrosshairScale", "1.0",
+     CVAR_ARCHIVE},
+    {&etj_crosshairElement1, "etj_crosshairElement1", "t=cross", CVAR_ARCHIVE},
+    {&etj_crosshairElement2, "etj_crosshairElement2", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement3, "etj_crosshairElement3", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement4, "etj_crosshairElement4", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement5, "etj_crosshairElement5", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement6, "etj_crosshairElement6", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement7, "etj_crosshairElement7", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement8, "etj_crosshairElement8", "", CVAR_ARCHIVE},
 
     // fireteam savelimit - added here to retain value it's set to
     // upon re-opening the fireteam savelimit menu
