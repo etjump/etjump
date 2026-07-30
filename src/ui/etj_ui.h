@@ -44,6 +44,7 @@ class ColorPicker;
 class DemoQueue;
 class QuickConnect;
 class ColorParser;
+class CrosshairEditor;
 
 struct UIContext {
   std::unique_ptr<SyscallExt> syscallExt;
@@ -51,6 +52,7 @@ struct UIContext {
   std::unique_ptr<DemoQueue> demoQueue;
   std::unique_ptr<QuickConnect> quickConnect;
   std::unique_ptr<ColorParser> colorParser;
+  std::unique_ptr<CrosshairEditor> crosshairEditor;
 
   ServerAction serverAction;
 };

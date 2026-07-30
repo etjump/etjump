@@ -2,6 +2,7 @@ file(GLOB UI_HEADERS "*.h" "*.hpp")
 
 add_library(ui MODULE
 	"etj_colorpicker.cpp"
+	"etj_crosshair_editor.cpp"
 	"etj_demo_queue.cpp"
 	"etj_main.cpp"
 	"etj_menu_integrity_checker.cpp"
@@ -20,6 +21,8 @@ add_library(ui MODULE
 	"../game/bg_sha1.cpp"
 	"../game/q_math.cpp"
 	"../game/q_shared.cpp"
+	"../cgame/etj_crosshair_definition.cpp"
+	"../cgame/etj_crosshair_renderer.cpp"
 	"../game/etj_file.cpp"
 	"../game/etj_filesystem.cpp"
 	"../game/etj_json_utilities.cpp"

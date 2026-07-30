@@ -75,6 +75,7 @@
 #define FEEDER_CUSTOMVOTES_MAPS_ONSERVER	0x11	// ETJump: maps available on server from customvote list
 #define FEEDER_CUSTOMVOTES_MAPS_UNAVAILABLE	0x12	// ETJump: maps not available on server from customvote list
 #define FEEDER_CHANGELOG			0x13	// ETJump: changelog
+#define FEEDER_CROSSHAIR_PRESETS	0x14	// ETJump: saved crosshair presets
 #define FEEDER_PROFILES				0x1c	// Arnout: profiles
 #define FEEDER_GLINFO				0x1d	// Arnout: glinfo
 
@@ -306,6 +307,9 @@
 
 #define UI_MAPNAME 306
 #define UI_LEVELSHOT_PREVIEW 307
+
+// ETJump: crosshair editor
+#define UI_CROSSHAIR_EDITOR_PREVIEW 308
 
 #define VOICECHAT_GETFLAG			"getflag"				// command someone to get the flag
 #define VOICECHAT_OFFENSE			"offense"				// command someone to go on offense

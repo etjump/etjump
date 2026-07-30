@@ -12,6 +12,7 @@ USER INTERFACE MAIN
 #include <memory>
 
 #include "etj_colorpicker.h"
+#include "etj_crosshair_editor.h"
 #include "etj_local.h"
 #include "etj_menu_integrity_checker.h"
 #include "etj_quick_connect.h"
@@ -2287,6 +2288,9 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x,
       break;
     case UI_LEVELSHOT_PREVIEW:
       ETJump::Utilities::drawLevelshotPreview(rect);
+      break;
+    case UI_CROSSHAIR_EDITOR_PREVIEW:
+      ETJump::ui.crosshairEditor->drawPreview(&rect);
       break;
     default:
       break;
@@ -4787,6 +4791,26 @@ void UI_RunMenuScript(const char **args) {
       return;
     }
 
+    if (!Q_stricmp(name, "crosshairSavePreset")) {
+      ETJump::ui.crosshairEditor->saveCurrentPreset();
+      return;
+    }
+
+    if (!Q_stricmp(name, "crosshairLoadPreset")) {
+      ETJump::ui.crosshairEditor->loadSelectedPreset();
+      return;
+    }
+
+    if (!Q_stricmp(name, "crosshairDeletePreset")) {
+      ETJump::ui.crosshairEditor->deleteSelectedPreset();
+      return;
+    }
+
+    if (!Q_stricmp(name, "crosshairRefreshPresets")) {
+      ETJump::ui.crosshairEditor->refreshPresets();
+      return;
+    }
+
     if (!Q_stricmp(name, "loadCustomvotes")) {
       // don't re-request custom votes if we already have everything processed
       if (static_cast<int>(uiInfo.customVotes.size()) !=
@@ -5829,6 +5853,8 @@ static int UI_FeederCount(const float feederID) {
       return uiInfo.modCount;
     case FEEDER_DEMOS:
       return static_cast<int>(uiInfo.demoObjects.size());
+    case FEEDER_CROSSHAIR_PRESETS:
+      return ETJump::ui.crosshairEditor->presetCount();
     case FEEDER_CUSTOMVOTES:
       // for displaying "Loading..." while we're still receiving custom votes
       if (static_cast<int>(uiInfo.customVotes.size()) !=
@@ -6136,6 +6162,8 @@ const char *UI_FeederItemText(float feederID, int index, int column,
     if (index >= 0 && index < uiInfo.movieCount) {
       return uiInfo.movieList[index];
     }
+  } else if (feederID == FEEDER_CROSSHAIR_PRESETS) {
+    return ETJump::ui.crosshairEditor->presetName(index);
   } else if (feederID == FEEDER_DEMOS) {
     if (index >= 0 && index < static_cast<int>(uiInfo.demoObjects.size())) {
       if (uiInfo.demoObjects[index].type == FileSystemObjectType::Folder) {
@@ -6310,6 +6338,8 @@ void UI_FeederSelection(float feederID, int index) {
       trap_CIN_StopCinematic(uiInfo.previewMovie);
     }
     uiInfo.previewMovie = -1;
+  } else if (feederID == FEEDER_CROSSHAIR_PRESETS) {
+    ETJump::ui.crosshairEditor->selectPreset(index);
   } else if (feederID == FEEDER_DEMOS) {
     uiInfo.demoIndex = index;
   } else if (feederID == FEEDER_PROFILES) {
@@ -7622,6 +7652,18 @@ vmCvar_t cg_crosshairColorAlt;
 vmCvar_t cg_crosshairAlpha;
 vmCvar_t cg_crosshairAlphaAlt;
 vmCvar_t cg_crosshairSize;
+// custom crosshair editor - mirrored from cgame so the editor can read and
+// draw the composition it is editing
+vmCvar_t etj_customCrosshair;
+vmCvar_t etj_customCrosshairScale;
+vmCvar_t etj_crosshairElement1;
+vmCvar_t etj_crosshairElement2;
+vmCvar_t etj_crosshairElement3;
+vmCvar_t etj_crosshairElement4;
+vmCvar_t etj_crosshairElement5;
+vmCvar_t etj_crosshairElement6;
+vmCvar_t etj_crosshairElement7;
+vmCvar_t etj_crosshairElement8;
 // OSP
 
 vmCvar_t cl_bypassMouseInput;
@@ -7824,6 +7866,19 @@ cvarTable_t cvarTable[] = {
     {&cg_crosshairColor, "cg_crosshairColor", "White", CVAR_ARCHIVE},
     {&cg_crosshairColorAlt, "cg_crosshairColorAlt", "White", CVAR_ARCHIVE},
     {&cg_crosshairSize, "cg_crosshairSize", "48", CVAR_ARCHIVE},
+    // custom crosshair editor - defaults must stay in sync with cgame's
+    // cvarTable in cg_main.cpp
+    {&etj_customCrosshair, "etj_customCrosshair", "0", CVAR_ARCHIVE},
+    {&etj_customCrosshairScale, "etj_customCrosshairScale", "1.0",
+     CVAR_ARCHIVE},
+    {&etj_crosshairElement1, "etj_crosshairElement1", "t=cross", CVAR_ARCHIVE},
+    {&etj_crosshairElement2, "etj_crosshairElement2", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement3, "etj_crosshairElement3", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement4, "etj_crosshairElement4", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement5, "etj_crosshairElement5", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement6, "etj_crosshairElement6", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement7, "etj_crosshairElement7", "", CVAR_ARCHIVE},
+    {&etj_crosshairElement8, "etj_crosshairElement8", "", CVAR_ARCHIVE},
     // game mappings (for create server option)
     {NULL, "bot_minplayers", "0", CVAR_ARCHIVE},
     {NULL, "g_ipcomplaintlimit", "3", CVAR_ARCHIVE},
