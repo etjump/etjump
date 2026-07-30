@@ -2720,6 +2720,7 @@ extern vmCvar_t etj_jumpSpeedsTextSize;
 extern vmCvar_t etj_jumpSpeedsMaxJumps;
 extern vmCvar_t etj_jumpSpeedsMaxJumpsPerColumn;
 extern vmCvar_t etj_jumpSpeedsMaxJumpsPerRow;
+extern vmCvar_t etj_jumpSpeedsShowUpmove;
 
 // Strafe quality
 extern vmCvar_t etj_drawStrafeQuality;

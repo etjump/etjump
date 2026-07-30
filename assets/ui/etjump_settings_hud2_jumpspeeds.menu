@@ -72,6 +72,7 @@ menuDef {
         SLIDER              (SETTINGS_ITEM_POS(13), "Max jumps per column:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsMaxJumpsPerColumn 5 1 100 1, "Maximum number of jump speeds on a column, when using vertical list style\netj_jumpSpeedsMaxJumpsPerColumn")
         CVARINTLABEL        (SETTINGS_ITEM_POS(14), "etj_jumpSpeedsMaxJumpsPerRow", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(14), "Max jumps per row:", 0.2, SETTINGS_ITEM_H, etj_jumpSpeedsMaxJumpsPerRow 10 1 100 1, "Maximum number of jump speeds on a row, when using horizontal list style\netj_jumpSpeedsMaxJumpsPerRow")
+        YESNO               (SETTINGS_ITEM_POS(15), "Show upmove:", 0.2, SETTINGS_ITEM_H, "etj_jumpSpeedsShowUpmove", "Show upmove times for each jump (full upmove time)\netj_jumpSpeedsShowUpmove")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
