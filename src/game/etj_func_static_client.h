@@ -33,10 +33,14 @@ public:
   static void use(gentity_t *self, gentity_t *other, gentity_t *activator);
   static void pain(gentity_t *self, gentity_t *attacker, int32_t damage,
                    vec3_t point);
+
+  static void syncToFireteamLeaderState(int32_t clientNum, int32_t leaderNum);
+
+private:
   static void turnOn(gentity_t *self, int32_t clientNum);
   static void turnOff(gentity_t *self, int32_t clientNum);
   static bool activatorIsInsideEnt(const gentity_t *self, int32_t clientNum);
-  static void syncToFireteamLeaderState(int32_t clientNum, int32_t leaderNum);
   static void deleteTouchingPortals(const gentity_t *self, int32_t clientNum);
+  static void scriptEvent(gentity_t *self, const char *trigger);
 };
 } // namespace ETJump

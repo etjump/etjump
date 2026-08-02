@@ -95,6 +95,7 @@ void FuncStaticClient::use(gentity_t *self, [[maybe_unused]] gentity_t *other,
   }
 
   const int32_t clientNum = ClientNum(activator);
+  self->activator = activator;
 
   if (clientNum < MAX_CLIENTS / 2) {
     COM_BitCheck(&self->s.effect1Time, clientNum) ? turnOn(self, clientNum)
@@ -137,6 +138,10 @@ void FuncStaticClient::turnOn(gentity_t *self, const int32_t clientNum) {
   if (self->spawnflags & SF_CONSUME_PORTALS) {
     deleteTouchingPortals(self, clientNum);
   }
+
+  if (self->scriptName) {
+    scriptEvent(self, "enabled");
+  }
 }
 
 void FuncStaticClient::turnOff(gentity_t *self, const int32_t clientNum) {
@@ -144,6 +149,10 @@ void FuncStaticClient::turnOff(gentity_t *self, const int32_t clientNum) {
     COM_BitSet(&self->s.effect1Time, clientNum);
   } else {
     COM_BitSet(&self->s.effect2Time, clientNum);
+  }
+
+  if (self->scriptName) {
+    scriptEvent(self, "disabled");
   }
 }
 
@@ -207,6 +216,18 @@ void FuncStaticClient::deleteTouchingPortals(const gentity_t *self,
       trap_EntityContact(activator->portalRed->r.currentOrigin,
                          activator->portalRed->r.currentOrigin, self)) {
     G_FreeEntity(activator->portalRed);
+  }
+}
+
+void FuncStaticClient::scriptEvent(gentity_t *self, const char *trigger) {
+  assert(self->activator);
+
+  const team_t team = self->activator->client->sess.sessionTeam;
+
+  if (team == TEAM_ALLIES || team == TEAM_AXIS) {
+    G_Script_ScriptEvent(self, trigger, team == TEAM_AXIS ? "axis" : "allies");
+  } else {
+    G_Script_ScriptEvent(self, trigger, nullptr);
   }
 }
 } // namespace ETJump

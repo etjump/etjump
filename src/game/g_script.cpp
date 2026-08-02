@@ -278,6 +278,10 @@ g_script_event_define_t gScriptEvents[] = {
     {"mg42", G_Script_EventMatch_StringEqual},
     {"message",
      G_Script_EventMatch_StringEqual}, // contains a sequence of VO in a message
+    // entity was enabled (turned on)
+    {"enabled", G_Script_EventMatch_StringEqual},
+    // entity was disabled (turned off)
+    {"disabled", G_Script_EventMatch_StringEqual},
 
     {NULL, NULL}};
 
