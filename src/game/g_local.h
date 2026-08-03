@@ -890,6 +890,8 @@ struct InactivityPos {
 };
 
 inline constexpr int MAX_TOKENS_PER_DIFFICULTY = 32;
+
+inline constexpr char BUNDLED_MAPSCRIPT_DIR[] = "bundled_mapscripts";
 } // namespace ETJump
 
 // client data that stays across multiple respawns, but is cleared

@@ -1568,9 +1568,11 @@ void G_UpdateCvars(void) {
           }
         } else if (cv->vmCvar == &g_mapScriptDir) {
           // prevent admins from setting this to the directory where the game
-          // normally loads mapscripts from, so default mapscripts won't get
-          // loaded as "custom" mapscripts
-          if (!Q_stricmp(g_mapScriptDir.string, "maps")) {
+          // normally loads mapscripts from (or to the bundled mapscript dir),
+          // so default mapscripts won't get loaded as "custom" mapscripts
+          if (!Q_stricmp(g_mapScriptDir.string, "maps") ||
+              !Q_stricmp(g_mapScriptDir.string,
+                         ETJump::BUNDLED_MAPSCRIPT_DIR)) {
             G_Printf(S_COLOR_YELLOW "WARNING: ^7illegal ^3'g_mapScriptDir' "
                                     "^7value, resetting to default\n");
             trap_Cvar_Set(cv->cvarName, cv->defaultString);

@@ -398,12 +398,23 @@ void G_Script_ScriptLoad(void) {
     }
   }
   if (!found) {
-    Q_strncpyz(filename, "maps/", sizeof(filename));
-    Q_strcat(filename, sizeof(filename), mapname.string);
-
-    Q_strcat(filename, sizeof(filename), ".script");
+    // try bundled mapscripts, before falling back to default script
+    Q_strncpyz(
+        filename,
+        va("%s/%s.script", ETJump::BUNDLED_MAPSCRIPT_DIR, mapname.string),
+        sizeof(filename));
     len = trap_FS_FOpenFile(filename, &f, FS_READ);
-    G_Printf("No custom mapscript was found, using default.\n");
+
+    if (len > 0) {
+      G_Printf("Custom mapscript loaded (mod bundled).\n");
+    } else {
+      Q_strncpyz(filename, "maps/", sizeof(filename));
+      Q_strcat(filename, sizeof(filename), mapname.string);
+
+      Q_strcat(filename, sizeof(filename), ".script");
+      len = trap_FS_FOpenFile(filename, &f, FS_READ);
+      G_Printf("No custom mapscript was found, using default.\n");
+    }
   }
 
   // make sure we clear out the temporary scriptname

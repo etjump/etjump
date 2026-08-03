@@ -69,6 +69,9 @@ static void computeCustomMapDataHashes() {
     return G_SHA1(contents.c_str());
   };
 
+  // we don't need to care about bundled mapscripts here, as those are
+  // consistent across servers, therefore not considered "custom",
+  // and if server overrides it, this will find the overridden file's hash
   if (g_mapScriptDir.string[0] != '\0') {
     try {
       mapscriptHash = computeHash(StringUtils::format(
