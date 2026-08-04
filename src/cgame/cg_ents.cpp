@@ -2570,6 +2570,12 @@ static void funcStaticClient(centity_t *cent) {
   VectorCopy(cent->lerpOrigin, ent.origin);
   VectorCopy(cent->lerpOrigin, ent.oldorigin);
 
+  // 'angle/angles' support only if 'model2' is used,
+  // inline models don't like when you set angles to them
+  if (es->modelindex2) {
+    VectorCopy(es->angles, cent->lerpAngles);
+  }
+
   // NOTE: this must be called before checking for 'modelscale',
   // so that we scale correct axis values!
   AnglesToAxis(cent->lerpAngles, ent.axis);
