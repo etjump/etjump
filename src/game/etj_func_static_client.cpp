@@ -71,7 +71,7 @@ void FuncStaticClient::spawn(gentity_t *ent) {
 
   char *s = nullptr;
 
-  // 'model2' support so we can also use models
+  // 'model2' support so we can also use models (set via 'InitMover')
   // NOTE: using 'ent->s.density' for both 'offModel' and 'offShader',
   // since they are mutually exclusive - client knows how to interpret this
   // by checking if 'ent->s.modelindex2' is set or not
@@ -79,6 +79,18 @@ void FuncStaticClient::spawn(gentity_t *ent) {
     // alternative model if 'model2' is set, when the brush is in "off" state
     if (G_SpawnString("offModel", "", &s)) {
       ent->s.density = G_ModelIndex(s);
+    }
+
+    vec3_t modelscale{};
+
+    // 'modelscale/modelscale_vec' support, stored in 'angles2'
+    // 'modelscale_vec' is preferred over regular 'modelscale'
+    if (G_SpawnVector("modelscale_vec", "1 1 1", modelscale)) {
+      VectorCopy(modelscale, ent->s.angles2);
+    } else if (G_SpawnFloat("modelscale", "1", &modelscale[0])) {
+      modelscale[1] = modelscale[0];
+      modelscale[2] = modelscale[0];
+      VectorCopy(modelscale, ent->s.angles2);
     }
   } else {
     // custom shader when the brush is in "off" state
