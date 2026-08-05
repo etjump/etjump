@@ -27,6 +27,7 @@
 #include "etj_portalgun.h"
 #include "etj_entity_utilities.h"
 #include "etj_entity_utilities_shared.h"
+#include "etj_func_static_client.h"
 #include "etj_local.h"
 #include "etj_portalgun_shared.h"
 #include "etj_trace_utils.h"
@@ -347,9 +348,8 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
   // End pos
   VectorMA(trace_start, MAX_PORTAL_RANGE, forward, trace_end);
 
-  ETJump::TraceUtils::filteredTrace(ent->s.number, &tr, trace_start, nullptr,
-                                    nullptr, trace_end, ent->s.number,
-                                    MASK_PORTAL);
+  TraceUtils::filteredTrace(ent->s.number, &tr, trace_start, nullptr, nullptr,
+                            trace_end, ent->s.number, MASK_PORTAL);
 
   if (tr.surfaceFlags & SURF_NOIMPACT || tr.fraction == 1.0f) {
     return;
@@ -370,27 +370,29 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
   }
 
   vectoangles(tr.plane.normal, t_portalAngles);
+  const gentity_t *const traceEnt = g_entities + tr.entityNum;
 
-  // we hit a 'func_portaltarget'
+  // we hit an entity that wants portals to be centered
   if (tr.entityNum > MAX_CLIENTS + BODY_QUEUE_SIZE &&
       tr.entityNum < ENTITYNUM_WORLD &&
-      !Q_stricmp(g_entities[tr.entityNum].classname, "func_portaltarget")) {
-    const gentity_t *brushEnt = &g_entities[tr.entityNum];
-
+      (!Q_stricmp(traceEnt->classname, "func_portaltarget") ||
+       (traceEnt->s.eType == ET_STATIC_CLIENT &&
+        traceEnt->spawnflags & FuncStaticClient::Spawnflags::PORTAL_TARGET))) {
     vec3_t be_position; // brush ent position
     vec3_t delta;       // delta between brushent position and trace end
     vec3_t
         normalScaled; // plane normal scaled by dotproduct of delta and itself
 
-    EntityUtilities::getOriginOrBmodelCenter(brushEnt, be_position);
+    EntityUtilities::getOriginOrBmodelCenter(traceEnt, be_position);
 
     VectorSubtract(be_position, tr.endpos, delta);
     const float dotProduct = DotProduct(delta, tr.plane.normal);
     VectorScale(tr.plane.normal, dotProduct, normalScaled);
     VectorSubtract(be_position, normalScaled, tr_end);
 
-    if (brushEnt->count > 0) {
-      scale = static_cast<float>(brushEnt->count) / (PORTAL_BBOX_RADIUS * 2);
+    // handle 'portalsize' key
+    if (traceEnt->count > 0) {
+      scale = static_cast<float>(traceEnt->count) / (PORTAL_BBOX_RADIUS * 2);
     }
   } else {
     VectorCopy(tr.endpos, tr_end);

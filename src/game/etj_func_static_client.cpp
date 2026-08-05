@@ -22,16 +22,12 @@
  * SOFTWARE.
  */
 
+#include <algorithm>
+
 #include "etj_func_static_client.h"
 #include "etj_entity_utilities_shared.h"
 
 namespace ETJump {
-inline constexpr int32_t SF_START_INVIS = 1 << 0;
-inline constexpr int32_t SF_PAIN = 1 << 1;
-inline constexpr int32_t SF_GIB_INSIDE = 1 << 2;
-inline constexpr int32_t SF_FT_TEAMJUMP_SYNC = 1 << 3;
-inline constexpr int32_t SF_CONSUME_PORTALS = 1 << 4;
-
 /*
  * 'ent->s.effect1Time' and 'ent->s.effect2Time' are treated as boolean
  * bitsets by this entity. Clients 0-31 map to 'effect1Time',
@@ -56,12 +52,12 @@ void FuncStaticClient::spawn(gentity_t *ent) {
   ent->s.eType = ET_STATIC_CLIENT;
 
   // hide by default for all clients if spawnflag 1 is set
-  if (ent->spawnflags & SF_START_INVIS) {
+  if (ent->spawnflags & Spawnflags::START_INVIS) {
     ent->s.effect1Time = INT_MAX;
     ent->s.effect2Time = INT_MAX;
   }
 
-  if (ent->spawnflags & SF_PAIN) {
+  if (ent->spawnflags & Spawnflags::PAIN) {
     ent->pain = pain;
     ent->takedamage = qtrue;
     // pretty sure this is useless but 'func_static' does it as well
@@ -97,6 +93,11 @@ void FuncStaticClient::spawn(gentity_t *ent) {
     if (G_SpawnString("offShader", "", &s)) {
       ent->s.density = G_ShaderIndex(s);
     }
+  }
+
+  if (ent->spawnflags & Spawnflags::PORTAL_TARGET &&
+      G_SpawnInt("portalsize", "0", &ent->count)) {
+    ent->count = std::clamp(ent->count, 0, 512);
   }
 }
 
@@ -141,13 +142,13 @@ void FuncStaticClient::turnOn(gentity_t *self, const int32_t clientNum) {
     COM_BitClear(&self->s.effect2Time, clientNum);
   }
 
-  if (self->spawnflags & SF_GIB_INSIDE &&
+  if (self->spawnflags & Spawnflags::GIB_INSIDE &&
       activatorIsInsideEnt(self, clientNum)) {
     G_Damage(g_entities + clientNum, self, self, nullptr, nullptr, 9999,
              DAMAGE_NO_PROTECTION, MOD_CRUSH);
   }
 
-  if (self->spawnflags & SF_CONSUME_PORTALS) {
+  if (self->spawnflags & Spawnflags::CONSUME_PORTALS) {
     deleteTouchingPortals(self, clientNum);
   }
 
@@ -199,7 +200,7 @@ void FuncStaticClient::syncToFireteamLeaderState(const int32_t clientNum,
       continue;
     }
 
-    if (!(ent->spawnflags & SF_FT_TEAMJUMP_SYNC)) {
+    if (!(ent->spawnflags & Spawnflags::FT_TEAMJUMP_SYNC)) {
       continue;
     }
 
