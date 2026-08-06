@@ -2768,6 +2768,17 @@ extern vmCvar_t etj_altCursor;
 extern vmCvar_t etj_crosshairThickness;
 extern vmCvar_t etj_crosshairOutline;
 
+extern vmCvar_t etj_customCrosshair;
+extern vmCvar_t etj_customCrosshairScale;
+extern vmCvar_t etj_crosshairElement1;
+extern vmCvar_t etj_crosshairElement2;
+extern vmCvar_t etj_crosshairElement3;
+extern vmCvar_t etj_crosshairElement4;
+extern vmCvar_t etj_crosshairElement5;
+extern vmCvar_t etj_crosshairElement6;
+extern vmCvar_t etj_crosshairElement7;
+extern vmCvar_t etj_crosshairElement8;
+
 extern vmCvar_t etj_noPanzerAutoswitch;
 
 extern vmCvar_t etj_autoPortalBinds;

@@ -1,0 +1,121 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_settings_crosshair_editor"
+#define GROUP_NAME "group_etjump_settings_crosshair"
+
+#define NUM_SUBMENUS 3
+#define NUM_SETTINGS 14 // required for bottom-up settings drawing
+#define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
+
+#define PREVIEW_SIZE 96
+#define PREVIEW_X (SETTINGS_SUBW_X + (SETTINGS_SUBW_W * 0.5 - (PREVIEW_SIZE * 0.5)))
+
+// save row goes in the gap between the preview and the settings block.
+// EDITFIELD_EXT puts its input box at X + .5*W + 6, width .5*TEXTBOX_W - 6, so
+// the button uses the same numbers and lines up under it
+#define SAVE_NAME_Y (SETTINGS_ITEM_Y + PREVIEW_SIZE + MAIN_ELEMENT_MARGIN)
+#define SAVE_BTN_Y (SAVE_NAME_Y + SETTINGS_EF_H + SETTINGS_ITEM_MARGIN)
+#define SAVE_BTN_X (SETTINGS_ITEM_X + (0.5 * SETTINGS_ITEM_W) + 6)
+#define SAVE_BTN_W ((0.5 * (SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN)) - 6)
+#define SAVE_BTN_H 12
+#define SAVE_BTN_TEXT_ALIGN 9
+
+menuDef {
+    name MENU_NAME
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+    centered
+
+    onOpen {
+        conditionalscript uiCheckBackground 2
+            ( BACKGROUND_ON )
+            ( BACKGROUND_OFF )
+    }
+
+    onESC {
+        close MENU_NAME; open etjump_settings_hud1_crosshair
+    }
+
+    WINDOW("ETJUMP SETTINGS", 90)
+
+    MAINBUTTON          (1, "GENERAL", close MENU_NAME; open etjump_settings_general_gameplay)
+    MAINBUTTON          (2, "GRAPHICS", close MENU_NAME; open etjump_settings_graphics_visuals)
+    MAINBUTTON_ACTIVE   (3, "BASIC HUD", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    MAINBUTTON          (4, "ADV HUD", close MENU_NAME; open etjump_settings_hud2_cgaz)
+    MAINBUTTON          (5, "AUDIO", close MENU_NAME; open etjump_settings_audio)
+    MAINBUTTON          (6, "TIMERUNS", close MENU_NAME; open etjump_settings_timeruns_runtimer)
+    MAINBUTTON          (7, "DEMOS", close MENU_NAME; open etjump_settings_demos_autodemo)
+
+    WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
+
+    SIDEBUTTON_ACTIVE   (1, "SHAPE", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (2, "COLORS", close MENU_NAME; open CROSSHAIR_COLORS_MENU)
+    SIDEBUTTON          (3, "PRESETS", close MENU_NAME; open CROSSHAIR_PRESETS_MENU)
+
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CROSSHAIR SHAPE")
+
+        // live preview. this ownerdraw is also what syncs the etj_ce* cvars
+        // with etj_crosshairElement1..8, so every editor page needs one
+        itemDef {
+            name            "crosshair_editor_preview"
+            group           GROUP_NAME
+            rect            $evalfloat(PREVIEW_X) $evalfloat(SETTINGS_ITEM_Y) PREVIEW_SIZE PREVIEW_SIZE
+            style           WINDOW_STYLE_FILLED
+            ownerdraw       UI_CROSSHAIR_EDITOR_PREVIEW
+            backcolor       .1 .1 .1 .9
+            border          WINDOW_BORDER_FULL
+            bordercolor     .5 .5 .5 .5
+            visible         1
+            tooltip         "Live preview of the crosshair you are building"
+        }
+
+        // name + save here so you can store a crosshair without leaving the
+        // page, PRESETS loads it back.
+        // keep macro args bare, EDITFIELD_EXT and BUTTON wrap them in $evalfloat
+        // themselves and nesting it fails to parse, which throws away the whole menu
+        EDITFIELD_EXT       (SETTINGS_ITEM_X, SAVE_NAME_Y, SETTINGS_ITEM_W, SETTINGS_EF_H, SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN, "Preset name:", 0.2, SETTINGS_ITEM_H, "etj_cePresetName", 64, 32, "Name to save this crosshair as, then load it from the PRESETS tab")
+        BUTTON              (SAVE_BTN_X, SAVE_BTN_Y, SAVE_BTN_W, SAVE_BTN_H, "SAVE PRESET", 0.2, SAVE_BTN_TEXT_ALIGN, uiScript crosshairSavePreset)
+
+        YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 1), "Use custom crosshair:", 0.2, SETTINGS_ITEM_H, "etj_customCrosshair", "Draw the crosshair composed here instead of the built-in ones\netj_customCrosshair")
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 2), "Overall scale:", 0.2, SETTINGS_ITEM_H, etj_customCrosshairScale 1.0 0.1 4.0 0.05, "Scales every element of the custom crosshair\netj_customCrosshairScale")
+        VALUEBOX            (NUM_SETTINGS - 2, "etj_customCrosshairScale")
+
+        COMBO               (SETTINGS_COMBO_POS_REVERSE(NUM_SETTINGS - 3), "Editing element:", 0.2, SETTINGS_ITEM_H, "etj_ceSlot", CROSSHAIR_SLOT_LIST, none, "Pick which of the 8 element slots the settings below apply to")
+        COMBO               (SETTINGS_COMBO_POS_REVERSE(NUM_SETTINGS - 4), "Shape:", 0.2, SETTINGS_ITEM_H, "etj_ceType", CROSSHAIR_ELEMENT_LIST, none, "Shape drawn by this element. 'Empty' frees the slot")
+        YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 5), "Element visible:", 0.2, SETTINGS_ITEM_H, "etj_ceEnabled", "Hide this element without clearing its settings")
+
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 6), "Width (X):", 0.2, SETTINGS_ITEM_H, etj_ceLength 6 0 320 0.5, "Horizontal size: arm length for lines and crosses, radius for circles, size for dots and squares")
+        VALUEBOX            (NUM_SETTINGS - 6, "etj_ceLength")
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 7), "Height (Y):", 0.2, SETTINGS_ITEM_H, etj_ceLengthY 0 0 320 0.5, "Vertical size, for stretching a shape into a rectangle or ellipse. 0 keeps it uniform with the width")
+        VALUEBOX            (NUM_SETTINGS - 7, "etj_ceLengthY")
+
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 8), "Gap (X):", 0.2, SETTINGS_ITEM_H, etj_ceGap 3 0 320 0.5, "Horizontal distance from the center at which the arms start")
+        VALUEBOX            (NUM_SETTINGS - 8, "etj_ceGap")
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 9), "Gap (Y):", 0.2, SETTINGS_ITEM_H, etj_ceGapY 0 0 320 0.5, "Vertical gap. 0 keeps it the same as the horizontal gap")
+        VALUEBOX            (NUM_SETTINGS - 9, "etj_ceGapY")
+
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 10), "Line thickness:", 0.2, SETTINGS_ITEM_H, etj_ceThickness 1 0 64 0.1, "Thickness of the lines making up this element")
+        VALUEBOX            (NUM_SETTINGS - 10, "etj_ceThickness")
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 11), "Rotation:", 0.2, SETTINGS_ITEM_H, etj_ceRotation 0 0 360 1, "Rotates this element around its own center, in degrees")
+        VALUEBOX            (NUM_SETTINGS - 11, "etj_ceRotation")
+
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 12), "Offset X:", 0.2, SETTINGS_ITEM_H, etj_ceOffsetX 0 -320 320 0.5, "Moves this element horizontally away from the crosshair center")
+        VALUEBOX            (NUM_SETTINGS - 12, "etj_ceOffsetX")
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 13), "Offset Y:", 0.2, SETTINGS_ITEM_H, etj_ceOffsetY 0 -320 320 0.5, "Moves this element vertically away from the crosshair center")
+        VALUEBOX            (NUM_SETTINGS - 13, "etj_ceOffsetY")
+
+        YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 14), "Filled:", 0.2, SETTINGS_ITEM_H, "etj_ceFill", "Fills circles, squares and triangles with the secondary color")
+
+    LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
+
+#ifndef FUI
+    LOWERBUTTON(3, "TOGGLE BACKGROUND", conditionalscript uiToggleBackground 2 ( BACKGROUND_OFF ) ( BACKGROUND_ON ) )
+#endif
+
+}

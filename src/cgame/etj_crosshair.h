@@ -28,6 +28,7 @@
 
 #include "etj_irenderable.h"
 
+#include "etj_crosshair_definition.h"
 #include "../game/q_shared.h"
 
 namespace ETJump {
@@ -39,6 +40,14 @@ class Crosshair : public IRenderable {
   void adjustSize();
   void adjustPosition();
   static bool canSkipDraw();
+
+  // reads etj_crosshairElement1..8 into definition. only runs when one of those
+  // cvars changes so we resolve colors once instead of every frame.
+  void parseDefinition();
+
+  // every slot cvar, so the listener setup and the parse loop share one list
+  static std::array<const vmCvar_t *, CrosshairLimits::maxElements>
+  elementCvars();
 
   enum class ETJumpCrosshairs {
     VerticalLine = 10,
@@ -67,6 +76,10 @@ protected:
   } crosshair_t;
 
   crosshair_t crosshair{};
+
+  // set in beforeRender so render() knows which path to take
+  bool customCrosshair{};
+  CrosshairDefinition definition{};
 
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 

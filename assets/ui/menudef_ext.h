@@ -93,6 +93,56 @@
 #define SLIDER_LABEL_X (SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN)
 #define COLOR_LIST cvarStrList { "Color picker..."; OPEN_COLOR_PICKER; "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }
 #define CHS_LIST cvarFloatList { "Off" 0 "Speed" 1 "Health" 2 "Ammo" 4 "Distance XY" 10 "Distance Z" 11 "Distance XYZ" 12 "Distance ViewXYZ" 13 "Distance XY Z XYZ" 14 "Distance XY Z ViewXYZ" 15 "Look XYZ" 16 "Speed X" 20 "Speed Y" 21 "Speed Z" 22 "Speed XY" 23 "Speed XYZ" 24 "Speed forward" 25 "Speed sideways" 26 "Speed forward sideways" 27 "Speed XY forward sideways" 28 "Pitch" 30 "Yaw" 31 "Roll" 32 "Position X" 33 "Position Y" 34 "Position Z" 35 "View position X" 36 "View position Y" 37 "View position Z" 38 "Pitch yaw" 40 "Player XYZ" 41 "Player XYZ pitch yaw" 42 "View position XYZ pitch yaw" 43 "Position XYZ" 44 "View position XYZ" 45 "Angles XYZ" 46 "Velocity XYZ" 47 "Jump XYZ" 50 "Plane Angle Z" 53 "Last Jump Speed" 55 "Upmove pre jump" 70 "Upmove post jump" 71 "Upmove full jump" 72 "Upmove pre/full/post jump" 73 "Upmove post/full/pre jump" 74 }
+// just the y of SETTINGS_ITEM_POS_REVERSE, for putting something extra on a row
+#define SETTINGS_ITEM_Y_REVERSE(pos) (SETTINGS_SUBW_Y + SETTINGS_SUBW_H - MAIN_ELEMENT_MARGIN + SETTINGS_ITEM_MARGIN - ((SETTINGS_ITEM_MARGIN + SETTINGS_ITEM_H) * (pos + 1)))
+
+// editable number at the right end of a slider row, for typing an exact value
+// that dragging can't reach. a slider only resolves (max - min) / 96 per pixel.
+//
+// must be declared AFTER its SLIDER: the slider's rect covers the whole row, and
+// Menu_HandleMouseMove gives the mouse to the LAST item whose rect is under the
+// cursor, so declaring it first would let the slider swallow the clicks.
+//
+// the empty 'text' is load bearing. Item_TextField_Paint calls Item_Text_Paint
+// first to draw the field's label, and Item_Text_Paint prints the cvar value
+// when an item has no text (that is how CVARFLOATLABEL works), so leaving it
+// out draws the number twice.
+#define VALUE_BOX_W 46
+#define VALUE_BOX_X (SETTINGS_ITEM_X + SETTINGS_ITEM_W - VALUE_BOX_W)
+#define VALUEBOX(pos, cvarname) \
+  itemDef { \
+    name            "valuebox"##cvarname \
+    group           GROUP_NAME \
+    rect            $evalfloat(VALUE_BOX_X) $evalfloat(SETTINGS_ITEM_Y_REVERSE(pos)) VALUE_BOX_W SETTINGS_ITEM_H \
+    type            ITEM_TYPE_EDITFIELD \
+    text            "" \
+    textfont        UI_FONT_COURBD_21 \
+    textstyle       ITEM_TEXTSTYLE_SHADOWED \
+    textscale       .2 \
+    textalign       ITEM_ALIGN_LEFT \
+    textalignx      3 \
+    textaligny      7 \
+    forecolor       .9 .9 .9 1 \
+    backcolor       .3 .3 .3 .4 \
+    style           WINDOW_STYLE_FILLED \
+    border          WINDOW_BORDER_FULL \
+    bordercolor     .1 .1 .1 .5 \
+    cvar            cvarname \
+    maxChars        8 \
+    maxPaintChars   7 \
+    visible         1 \
+    tooltip         "Click and type an exact value" \
+  }
+
+// crosshair editor
+#define CROSSHAIR_EDITOR_MENU "etjump_settings_crosshair_editor"
+#define CROSSHAIR_COLORS_MENU "etjump_settings_crosshair_colors"
+#define CROSSHAIR_PRESETS_MENU "etjump_settings_crosshair_presets"
+
+// values must match ETJump::CrosshairElementType in etj_crosshair_definition.h
+#define CROSSHAIR_ELEMENT_LIST cvarFloatList { "Empty" 0 "Cross" 1 "Horizontal line" 2 "Vertical line" 3 "Diagonal cross" 4 "Dot" 5 "Circle" 6 "Square" 7 "Triangle" 8 "T shape" 9 "V shape" 10 "Two vertical lines" 11 }
+#define CROSSHAIR_SLOT_LIST cvarFloatList { "Element 1" 1 "Element 2" 2 "Element 3" 3 "Element 4" 4 "Element 5" 5 "Element 6" 6 "Element 7" 7 "Element 8" 8 }
+
 #define EXTRATRACE_LIST cvarFloatList { "OB Detector" 1 "Slick Detector" 2 "NJD Detector" 4 "CHS 10-11" 8 "CHS 12" 16 "CHS 13-15" 32 "CHS 16" 64 "CHS 53" 128 }
 
 // 'subwindow*' will greedily match 'subwindowtitle' so we need to explicitly set those colors to keep the subwindow titles intact

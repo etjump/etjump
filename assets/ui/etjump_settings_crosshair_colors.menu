@@ -1,0 +1,90 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+#define MENU_NAME "etjump_settings_crosshair_colors"
+#define GROUP_NAME "group_etjump_settings_crosshair"
+
+#define NUM_SUBMENUS 3
+#define NUM_SETTINGS 9 // required for bottom-up settings drawing
+#define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
+
+#define PREVIEW_SIZE 96
+#define PREVIEW_X (SETTINGS_SUBW_X + (SETTINGS_SUBW_W * 0.5 - (PREVIEW_SIZE * 0.5)))
+
+menuDef {
+    name MENU_NAME
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+    centered
+
+    onOpen {
+        conditionalscript uiCheckBackground 2
+            ( BACKGROUND_ON )
+            ( BACKGROUND_OFF )
+    }
+
+    onESC {
+        close MENU_NAME; open etjump_settings_hud1_crosshair
+    }
+
+    WINDOW("ETJUMP SETTINGS", 90)
+
+    MAINBUTTON          (1, "GENERAL", close MENU_NAME; open etjump_settings_general_gameplay)
+    MAINBUTTON          (2, "GRAPHICS", close MENU_NAME; open etjump_settings_graphics_visuals)
+    MAINBUTTON_ACTIVE   (3, "BASIC HUD", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    MAINBUTTON          (4, "ADV HUD", close MENU_NAME; open etjump_settings_hud2_cgaz)
+    MAINBUTTON          (5, "AUDIO", close MENU_NAME; open etjump_settings_audio)
+    MAINBUTTON          (6, "TIMERUNS", close MENU_NAME; open etjump_settings_timeruns_runtimer)
+    MAINBUTTON          (7, "DEMOS", close MENU_NAME; open etjump_settings_demos_autodemo)
+
+    WINDOW_BLANK(SIDEBAR_X, SIDEBAR_Y, SIDEBAR_W, SIDEBAR_H)
+
+    SIDEBUTTON          (1, "SHAPE", close MENU_NAME; open CROSSHAIR_EDITOR_MENU)
+    SIDEBUTTON_ACTIVE   (2, "COLORS", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (3, "PRESETS", close MENU_NAME; open CROSSHAIR_PRESETS_MENU)
+
+    SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "CROSSHAIR COLORS")
+
+        itemDef {
+            name            "crosshair_editor_preview"
+            group           GROUP_NAME
+            rect            $evalfloat(PREVIEW_X) $evalfloat(SETTINGS_ITEM_Y) PREVIEW_SIZE PREVIEW_SIZE
+            style           WINDOW_STYLE_FILLED
+            ownerdraw       UI_CROSSHAIR_EDITOR_PREVIEW
+            backcolor       .1 .1 .1 .9
+            border          WINDOW_BORDER_FULL
+            bordercolor     .5 .5 .5 .5
+            visible         1
+            tooltip         "Live preview of the crosshair you are building"
+        }
+
+        // same slot picker as the SHAPE page, so you can retarget without going back
+        COMBO               (SETTINGS_COMBO_POS_REVERSE(NUM_SETTINGS - 1), "Editing element:", 0.2, SETTINGS_ITEM_H, "etj_ceSlot", CROSSHAIR_SLOT_LIST, none, "Pick which of the 8 element slots these colors apply to")
+
+        COMBO               (SETTINGS_COMBO_POS_REVERSE(NUM_SETTINGS - 2), "Primary color:", 0.2, SETTINGS_ITEM_H, "etj_ceColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Main color of this element\netj_ceColor")
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 3), "Primary opacity:", 0.2, SETTINGS_ITEM_H, etj_ceAlpha 1 0 1 0.05, "Transparency of the primary color")
+        VALUEBOX            (NUM_SETTINGS - 3, "etj_ceAlpha")
+
+        COMBO               (SETTINGS_COMBO_POS_REVERSE(NUM_SETTINGS - 4), "Secondary color:", 0.2, SETTINGS_ITEM_H, "etj_ceColorAlt", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Second half of a two-part shape (vertical arms of a cross, right arm of a V), and the fill of filled shapes\netj_ceColorAlt")
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 5), "Secondary opacity:", 0.2, SETTINGS_ITEM_H, etj_ceAlphaAlt 1 0 1 0.05, "Transparency of the secondary color")
+        VALUEBOX            (NUM_SETTINGS - 5, "etj_ceAlphaAlt")
+
+        YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 6), "Draw outline:", 0.2, SETTINGS_ITEM_H, "etj_ceOutline", "Draws an outline behind this element for contrast")
+        COMBO               (SETTINGS_COMBO_POS_REVERSE(NUM_SETTINGS - 7), "Outline color:", 0.2, SETTINGS_ITEM_H, "etj_ceOutlineColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Color of the outline. Black by default\netj_ceOutlineColor")
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 8), "Outline opacity:", 0.2, SETTINGS_ITEM_H, etj_ceOutlineAlpha 1 0 1 0.05, "Transparency of the outline")
+        VALUEBOX            (NUM_SETTINGS - 8, "etj_ceOutlineAlpha")
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 9), "Outline thickness:", 0.2, SETTINGS_ITEM_H, etj_ceOutlineThickness 1 0 32 0.1, "How far the outline extends past this element")
+        VALUEBOX            (NUM_SETTINGS - 9, "etj_ceOutlineThickness")
+
+    LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump_settings_hud1_crosshair)
+    LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)
+
+#ifndef FUI
+    LOWERBUTTON(3, "TOGGLE BACKGROUND", conditionalscript uiToggleBackground 2 ( BACKGROUND_OFF ) ( BACKGROUND_ON ) )
+#endif
+
+}
