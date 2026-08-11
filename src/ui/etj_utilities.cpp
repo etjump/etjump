@@ -315,6 +315,12 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
     fmtLines.emplace_back(line);
   }
 
+  // HACK: ensure last line never gets dropped, by inserting an empty line
+  // remove this once we have a dedicated changelog item type that handles
+  // maxscroll calculations correctly
+  // https://github.com/etjump/etjump/issues/1957
+  fmtLines.emplace_back(" ");
+
   return fmtLines;
 }
 
