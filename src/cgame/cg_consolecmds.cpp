@@ -1543,6 +1543,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("unload");
   trap_AddCommand("goto");
   trap_AddCommand("call");
+  trap_AddCommand("iwant");
   trap_AddCommand("nogoto");
   trap_AddCommand("nocall");
   trap_AddCommand("resetmaxspeed");
