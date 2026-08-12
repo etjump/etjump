@@ -77,6 +77,7 @@ add_library(cgame MODULE
 	"etj_keyset_keybind_drawer.cpp"
 	"etj_keyset_system.cpp"
 	"etj_leaves_remapper.cpp"
+	"etj_listinfo_completions.cpp"
 	"etj_main.cpp"
 	"etj_manual.cpp"
 	"etj_maxspeed.cpp"
