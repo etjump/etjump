@@ -27,6 +27,7 @@
 #include "etj_call_goto_completions.h"
 #include "etj_callvote_completions.h"
 #include "etj_fireteam_completions.h"
+#include "etj_ignore_completions.h"
 #include "etj_listinfo_completions.h"
 
 #include "../game/etj_string_utilities.h"
@@ -43,6 +44,12 @@ void CommandCompletions::setupCompletions() {
   completions.emplace_back("call", std::vector<std::string>{"iwant"},
                            std::make_unique<CallGotoCompletions>());
   completions.emplace_back("goto", std::make_unique<CallGotoCompletions>());
+  // add 'unignore' as an alias here - both target any connected client,
+  // but there's no way to know who is already ignored, only server has that
+  // information, so we can't target only ignored clients with 'unignore',
+  // or only unignored clients with 'ignore'
+  completions.emplace_back("ignore", std::vector<std::string>{"unignore"},
+                           std::make_unique<IgnoreCompletions>());
 }
 
 bool CommandCompletions::completeArgument() const {
