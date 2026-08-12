@@ -1089,9 +1089,9 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
   int targetNum = -1;
 
   if (trap_Argc() < 2) {
-    G_ClientPrintAndReturn(
-        selfNum,
-        "usage: fireteam <create|leave|apply|invite|rules|teamjump|countdown>");
+    G_ClientPrintAndReturn(selfNum, "usage: fireteam "
+                                    "<create|apply|leave|disband|invite|kick|"
+                                    "warn|propose|rules|teamjump|countdown>");
   }
 
   trap_Argv(1, command, sizeof(command));
