@@ -46,6 +46,7 @@ add_library(cgame MODULE
 	"etj_autodemo_recorder.cpp"
 	"etj_awaited_command_handler.cpp"
 	"etj_callvote_completions.cpp"
+	"etj_call_goto_completions.cpp"
 	"etj_cgaz_data.cpp"
 	"etj_cgaz_v2.cpp"
 	"etj_chs_data.cpp"

@@ -24,6 +24,7 @@
 
 #include "etj_command_complete_ext.h"
 #include "cg_local.h"
+#include "etj_call_goto_completions.h"
 #include "etj_callvote_completions.h"
 #include "etj_fireteam_completions.h"
 #include "etj_listinfo_completions.h"
@@ -39,6 +40,9 @@ void CommandCompletions::setupCompletions() {
                            std::make_unique<CallvoteCompletions>());
   completions.emplace_back("listinfo", std::vector<std::string>{"customvotes"},
                            std::make_unique<ListInfoCompletions>());
+  completions.emplace_back("call", std::vector<std::string>{"iwant"},
+                           std::make_unique<CallGotoCompletions>());
+  completions.emplace_back("goto", std::make_unique<CallGotoCompletions>());
 }
 
 bool CommandCompletions::completeArgument() const {
