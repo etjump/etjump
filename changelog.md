@@ -14,14 +14,22 @@
 * `etj_jumpSpeedsMaxJumps` cvar to set maximum number of jumps in jump speeds list (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj_jumpSpeedsMaxJumpsPerColumn` cvar to set maximum number of jumps in jump speeds list column (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj_jumpSpeedsMaxJumpsPerRow` cvar to set maximum number of jumps in jump speeds list row (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
+* `etj_jumpSpeedsShowUpmove` cvar to display full upmove values next to jump speeds [#1959](https://github.com/etjump/etjump/pull/1959)
 * `etj_drawCHS3` + related cvars - same as CHS2, just a different set of data [#1924](https://github.com/etjump/etjump/pull/1924)
 * `etj_CHS2/3HideLabels` cvar to toggle drawing info labels on CHS2/3, respectively [#1924](https://github.com/etjump/etjump/pull/1924)
 * CHS infos **70 - 74** to display upmove values [#1953](https://github.com/etjump/etjump/pull/1953)
+* `modelscale/modelscale_vec` support for `func_static_client` [#1965](https://github.com/etjump/etjump/pull/1965)
+* `angle/angles` support for `func_static_client` (sets model angle) [#1965](https://github.com/etjump/etjump/pull/1965)
+* `enabled/disabled` mapscript triggers for `func_static_client` [#1962](https://github.com/etjump/etjump/pull/1962)
+* spawnflag **32** for `func_static_client` to mimic behavior of `func_portaltarget` [#1966](https://github.com/etjump/etjump/pull/1966)
+  * if set, `portalsize`  key is also supported
 * in-game menu for sending private messages, opens with `privateMessage` console command [#1938](https://github.com/etjump/etjump/pull/1938)
   * allows sending extended ASCII characters in private messages
+* dynamically sized scrollbars for UI [#1958](https://github.com/etjump/etjump/pull/1958)
 * `etj_speed/MaxSpeedPrecision` cvar to set the number of decimals on speed/max speed meter, respectively (**0 - 6**, default **0**) [#1940](https://github.com/etjump/etjump/pull/1940)
 * `etj_CHS1DistanceScale` cvar to scale the distance of CHS1 infos from crosshair (**0.25 - 10.0**) [#1924](https://github.com/etjump/etjump/pull/1924)
 * `etj_portalTrailTime` cvar to set lifetime of portal trails (in milliseconds, **0 - 10000**, default **400**) [#1928](https://github.com/etjump/etjump/pull/1928)
+* tab completion support for arguments to some mod commands (ET: Legacy only) [#1958](https://github.com/etjump/etjump/pull/1968)
 * `etj/g_mapAutoexecDir` cvar to set directory to load map-specific autoexec files from (client/server, respectively) [#1916](https://github.com/etjump/etjump/pull/1916)
 
 ## Changed
@@ -35,8 +43,10 @@
   * only enabled if demo was recorded at `sv_fps/snaps 125`, and not spectating
 * snaphud shows proper zones for crouch/prone while on ground [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_drawspeed2` turns white if `etj_speedColorUsesAccel` is enabled while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
+* scrollbar no longer draws on listboxes if it's not needed [#1958](https://github.com/etjump/etjump/pull/1958)
 * server info menu displays more characters for values/player names [#1933](https://github.com/etjump/etjump/pull/1933)
 * removed quotes from player names in server info menu [#1933](https://github.com/etjump/etjump/pull/1933)
+* mod bundled mapscript fixes are now always loaded unless server overrides them [#1964](https://github.com/etjump/etjump/pull/1964)
 
 ## Fixed
 * CGaz was rendering 1 frame behind while playing [#1921](https://github.com/etjump/etjump/pull/1921)
@@ -47,6 +57,7 @@
 * interpolated strafe quality broke non-interpolated CGaz [#1921](https://github.com/etjump/etjump/pull/1921)
 * jump speed list showed unrelated jump speeds when joining team/switching followed client [#1922](https://github.com/etjump/etjump/pull/1922)
 * jump speed list colors were not updating for existing jumps, and required a jump event to trigger color change [#1922](https://github.com/etjump/etjump/pull/1922)
+* options -> game menu updated player name on every keypress, triggering kick for rename spam [#1956](https://github.com/etjump/etjump/pull/1956)
 * `etj_speedAlpha` and `etj_accelAlpha` were calculated incorrectly [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_accelColorUsesAccel` ignored `etj_accelAlpha` while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_drawAccel` showed incorrect accel values for 1 frame after noclip ended [#1921](https://github.com/etjump/etjump/pull/1921)
