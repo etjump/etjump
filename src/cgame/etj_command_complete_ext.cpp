@@ -23,22 +23,46 @@
  */
 
 #include "etj_command_complete_ext.h"
+#include "cg_local.h"
+#include "etj_fireteam_completions.h"
 
-namespace ETJump::CommandCompletions {
-bool completeArgument() {
-  // TODO: implement this - look for commands that want additional completions
-  // in e.g. std::unordered_map<std::string, std::function>, where the key
-  // is the command, and value is a function pointer to the completion
-  // implementation. The implementation itself is responsible for providing
-  // valid arguments, and calling 'trap_CommandComplete' for all the arguments
-  // that are supported by the base command. The implementations may also call
-  // additional completion requests for commands which take more than one
-  // argument, and can do this contextually (e.g. if first argument is "foo",
-  // provide a different set of completions for second argument).
-  // The syscall itself does not give context on which command is requesting
-  // autocomplete, we must call 'CG_Argv' here first to see which completion
-  // we're looking for.
+#include "../game/etj_string_utilities.h"
+
+namespace ETJump {
+CommandCompletions::CommandCompletions() { setupCompletions(); }
+
+void CommandCompletions::setupCompletions() {
+  completions.emplace_back("fireteam", std::make_unique<FireteamCompletions>());
+}
+
+bool CommandCompletions::completeArgument() const {
+  std::string cmd = StringUtils::toLowerCase(CG_Argv(0));
+
+  if (cmd[0] == '\\' || cmd[0] == '/') {
+    cmd.erase(0, 1);
+  }
+
+  for (const auto &completion : completions) {
+    if (cmd == completion.cmd || isAlias(cmd, completion.aliases)) {
+      const int32_t argc = trap_Argc();
+      std::vector<std::string> args;
+      args.reserve(argc);
+
+      for (int32_t i = 1; i < argc; i++) {
+        args.emplace_back(StringUtils::toLowerCase(CG_Argv(i)));
+      }
+
+      return completion.obj->complete(args);
+    }
+  }
 
   return false;
 }
-} // namespace ETJump::CommandCompletions
+
+bool CommandCompletions::isAlias(const std::string_view arg,
+                                 const std::vector<std::string> &aliases) {
+  return std::any_of(aliases.cbegin(), aliases.cend(),
+                     [&arg](const auto &alias) { return arg == alias; });
+};
+
+} // namespace ETJump

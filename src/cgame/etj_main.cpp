@@ -36,6 +36,7 @@
 #include "etj_client_commands_handler.h"
 #include "etj_client_rtv_handler.h"
 #include "etj_color_parser.h"
+#include "etj_command_complete_ext.h"
 #include "etj_console_shader.h"
 #include "etj_consolecommands.h"
 #include "etj_crosshair.h"
@@ -173,6 +174,8 @@ static void initSystems() {
 
   cgame.systems.timerun = std::make_shared<Timerun>(cgame.core.playerEvents,
                                                     cgame.core.serverCommands);
+
+  cgame.systems.commandCompletions = std::make_unique<CommandCompletions>();
 }
 
 void initDemo() {

@@ -81,7 +81,9 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
       return -1;
     case CG_CONSOLE_COMPLETE_ARGUMENT:
       // qboolean for API compatibility
-      return ETJump::CommandCompletions::completeArgument() ? qtrue : qfalse;
+      return ETJump::cgame.systems.commandCompletions->completeArgument()
+                 ? qtrue
+                 : qfalse;
     default:
       CG_Error("vmMain: unknown command %i", command);
       break;

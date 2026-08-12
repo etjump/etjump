@@ -43,6 +43,14 @@ struct Core {
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 
+class DemoCompatibility;
+class AutoDemoRecorder;
+
+struct Demo {
+  std::unique_ptr<DemoCompatibility> compatibility;
+  std::unique_ptr<AutoDemoRecorder> autoDemoRecorder;
+};
+
 class ClientAuthentication;
 class OperatingSystem;
 class SyscallExt;
@@ -56,19 +64,13 @@ struct Platform {
 class ClientRtvHandler;
 class CustomCommandMenu;
 class Timerun;
+class CommandCompletions;
 
 struct Systems {
   std::unique_ptr<ClientRtvHandler> rtv;
   std::unique_ptr<CustomCommandMenu> customCommandMenu;
   std::shared_ptr<Timerun> timerun;
-};
-
-class DemoCompatibility;
-class AutoDemoRecorder;
-
-struct Demo {
-  std::unique_ptr<DemoCompatibility> compatibility;
-  std::unique_ptr<AutoDemoRecorder> autoDemoRecorder;
+  std::unique_ptr<CommandCompletions> commandCompletions;
 };
 
 class EventLoop;
