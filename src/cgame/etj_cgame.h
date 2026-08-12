@@ -139,5 +139,10 @@ struct CGameContext {
   Visuals visuals;
   HUDData hudData;
   HUD hud;
+
+  // communicated by the server
+  std::vector<std::string> serverMapList;
+  // communicated by the server, only the strings needed for callvote commands
+  std::vector<std::string> customVoteLists;
 };
 } // namespace ETJump
