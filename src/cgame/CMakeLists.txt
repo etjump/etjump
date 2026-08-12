@@ -69,6 +69,7 @@ add_library(cgame MODULE
 	"etj_drawspeed2_v2.cpp"
 	"etj_entity_events_handler.cpp"
 	"etj_event_loop.cpp"
+	"etj_fireteam_completions.cpp"
 	"etj_inline_command_parser.cpp"
 	"etj_jump_speeds_v2.cpp"
 	"etj_keyset_drawer.cpp"

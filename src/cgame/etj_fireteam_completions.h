@@ -24,39 +24,27 @@
 
 #pragma once
 
-#include <memory>
-
 #include "etj_icompletion.h"
 
 namespace ETJump {
-
-class CommandCompletions {
+class FireteamCompletions : public ICompletion {
 public:
-  CommandCompletions();
-  ~CommandCompletions() = default;
+  FireteamCompletions();
 
-  [[nodiscard]] bool completeArgument() const;
-  static bool isAlias(std::string_view arg,
-                      const std::vector<std::string> &aliases);
+  [[nodiscard]] bool
+  complete(const std::vector<std::string> &args) const override;
 
 private:
-  struct CompletionObject {
-    CompletionObject(std::string cmd, std::unique_ptr<ICompletion> obj)
-        : cmd(std::move(cmd)), obj(std::move(obj)) {}
-
-    CompletionObject(std::string cmd, std::vector<std::string> aliases,
-                     std::unique_ptr<ICompletion> obj)
-        : cmd(std::move(cmd)), aliases(std::move(aliases)),
-          obj(std::move(obj)) {}
-
-    std::string cmd;
-    std::vector<std::string> aliases;
-    std::unique_ptr<ICompletion> obj;
-  };
-
   void setupCompletions();
 
-  std::vector<CompletionObject> completions;
-};
+  static bool apply(const std::vector<std::string> &args);
+  static bool invite(const std::vector<std::string> &args);
+  // kick and warn work on exact same code
+  static bool kickOrWarn(const std::vector<std::string> &args);
+  static bool propose(const std::vector<std::string> &args);
+  static bool rules(const std::vector<std::string> &args);
+  static bool teamjump(const std::vector<std::string> &args);
 
+  std::vector<ArgCompletion> argCompletions;
+};
 } // namespace ETJump
