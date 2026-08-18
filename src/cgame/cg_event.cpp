@@ -2773,12 +2773,12 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       }
 
       if (cg.snap->ps.clientNum == es->otherEntityNum2) {
-        CG_RailTrail(es->origin2, es->pos.trBase, es->dmgFlags, es->angles);
+        ETJump::portalTrail(es->origin2, es->pos.trBase, es->angles);
       } else {
-        CG_RailTrail(es->origin2, es->pos.trBase, es->dmgFlags,
-                     VectorCompare(es->angles, ETJump::portalBlueTrail)
-                         ? ETJump::portalGreenTrail
-                         : ETJump::portalYellowTrail);
+        ETJump::portalTrail(es->origin2, es->pos.trBase,
+                            VectorCompare(es->angles, ETJump::portalBlueTrail)
+                                ? ETJump::portalGreenTrail
+                                : ETJump::portalYellowTrail);
       }
 
       break;

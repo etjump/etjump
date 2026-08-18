@@ -65,9 +65,7 @@ getOptCommand(const std::string &commandPrefix, int clientNum,
   auto command = ETJump::CommandParser(def, *args).parse();
 
   if (command.helpRequested) {
-    Printer::chat(
-        clientNum,
-        StringUtils::format("^3%s: ^7check console for help.", commandPrefix));
+    Printer::chat(clientNum, "^3%s: ^7check console for help.", commandPrefix);
     Printer::console(clientNum, def.help());
     return std::nullopt;
   }
@@ -75,9 +73,8 @@ getOptCommand(const std::string &commandPrefix, int clientNum,
   if (!command.errors.empty()) {
     Printer::chat(
         clientNum,
-        StringUtils::format(
-            "^3%s: ^7operation failed. Check console for more information.",
-            commandPrefix));
+        "^3%s: ^7operation failed. Check console for more information.",
+        commandPrefix);
     Printer::console(clientNum, command.getErrorMessage() + "\n");
 
     return std::nullopt;
@@ -143,9 +140,8 @@ bool listCustomVotes(gentity_t *ent, Arguments argv) {
   const std::string maplist = game.customMapVotes->listInfo(type);
 
   if (maplist.empty()) {
-    Printer::console(
-        clientNum,
-        StringUtils::format("^3%s: ^7could not find list ^3'%s'\n", cmd, type));
+    Printer::console(clientNum, "^3%s: ^7could not find list ^3'%s'\n", cmd,
+                     type);
     return false;
   }
 
@@ -559,6 +555,111 @@ bool Records(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+static bool recordDetails(gentity_t *ent, Arguments argv) {
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const desc = R"(Prints details about a timerun record.
+    /record-details --season <season name> --map <map name --run <run name> --rank <rank>
+
+    Has a shorthand format of:
+    /record-details <run name>
+    /record-details <run name> <rank>
+    /record-details <map name> <run name> <rank>
+    /record-details <season name> <map name> <run name> <rank>)";
+
+  const auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create("record-details", desc)
+          .addOption("season", "s",
+                     "Season to print record details from. Default is the "
+                     "overall season.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "map", "m",
+              "Map to print record details from. Default is the current map.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("run", "r", "Run to print record details from.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("rank", "rk",
+                     "Rank to print record details from. Default is rank 1.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false));
+
+  const auto args = Container::skipFirstN(*argv, 1);
+  const auto optCommand =
+      ETJump::getOptCommand("record-details", clientNum, def, &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto &command = optCommand.value();
+
+  const auto optSeason = command.getOptional("season");
+  const auto optMap = command.getOptional("map");
+  const auto optRun = command.getOptional("run");
+  const auto optRank = command.getOptional("rank");
+
+  std::string season;
+  std::string map;
+  std::string run;
+  int32_t rank = 1;
+
+  if (command.extraArgs.size() >= 4) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+    rank = Q_atoi(command.extraArgs[3]);
+  } else if (command.extraArgs.size() >= 3) {
+    map = command.extraArgs[0];
+    run = command.extraArgs[1];
+    rank = Q_atoi(command.extraArgs[2]);
+  } else if (command.extraArgs.size() >= 2) {
+    run = command.extraArgs[0];
+    rank = Q_atoi(command.extraArgs[1]);
+  } else if (command.extraArgs.size() >= 1) {
+    run = command.extraArgs[0];
+  }
+
+  if (run.empty()) {
+    if (!optRun.has_value()) {
+      Printer::chat(clientNum, "^3record-details: ^7operation failed. Check "
+                               "console for more information.");
+      Printer::console(clientNum, "Required option `run` was not specified.\n");
+      return false;
+    }
+
+    run = optRun.value().text;
+  }
+
+  if (season.empty()) {
+    season = optSeason.has_value() ? optSeason.value().text : "default";
+  }
+
+  // if the user provided no map, we want to set the query to use exact
+  // map name, so no partial matches are implicitly done against the current map
+  bool exactMap = false;
+
+  if (map.empty()) {
+    map = optMap.has_value() ? optMap.value().text : level.rawmapname;
+    exactMap = !optMap.has_value();
+  }
+
+  if (optRank.has_value()) {
+    rank = optRank.value().integer;
+  }
+
+  game.timerunV2->recordDetails({clientNum, std::move(season), std::move(map),
+                                 std::move(run), rank, exactMap});
+
+  return true;
+}
+
 bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
   // these are console commands but to make them more accessible
   // they were also made admin commands
@@ -608,7 +709,7 @@ bool GetChatReplay(gentity_t *ent, Arguments argv) {
 static bool sendMaplist(gentity_t *ent, Arguments argv) {
   std::string mapList = StringUtils::join(game.mapStatistics->getMaps(), " ");
   const std::string prefix = "maplist ";
-  const size_t msgLen = BYTES_PER_PACKET - prefix.length() - 1;
+  const size_t msgLen = Printer::BYTES_PER_PACKET - prefix.length() - 1;
 
   // split to multiple commands to ensure client gets the full list
   // each command is prefixed with 'maplist' so client recognizes
@@ -631,19 +732,16 @@ static bool sendNumCustomvotes(gentity_t *ent, Arguments argv) {
 
 static bool sendCustomvoteInfo(gentity_t *ent, Arguments argv) {
   if (argv->size() < 2) {
-    Printer::console(
-        ent, StringUtils::format("^3%s: ^7no list given as an argument.\n",
-                                 __func__));
+    Printer::console(ent, "^3%s: ^7no list given as an argument.\n", __func__);
     return false;
   }
 
   const int index = Q_atoi(argv->at(1).c_str());
-  const auto list = game.customMapVotes->getVotelistByIndex(index);
+  const auto *const list = game.customMapVotes->getVotelistByIndex(index);
 
   if (list == nullptr) {
-    Printer::console(ent, StringUtils::format(
-                              "^3%s: ^7no list with a given index ^3'%i'^7.\n",
-                              __func__, index));
+    Printer::console(ent, "^3%s: ^7no list with a given index ^3'%i'^7.\n",
+                     __func__, index);
     return false;
   }
 
@@ -683,9 +781,11 @@ static bool sendCustomvoteInfo(gentity_t *ent, Arguments argv) {
 
   // we have to check if the combined string would be over max message length,
   // because we need to always attach the command prefix in front
-  if (serverMapsCmd.length() + serverMaps.length() > BYTES_PER_PACKET - 1) {
-    const auto splits = StringUtils::wrapWords(
-        serverMaps, ' ', BYTES_PER_PACKET - serverMapsCmd.length() - 1);
+  if (serverMapsCmd.length() + serverMaps.length() >
+      Printer::BYTES_PER_PACKET - 1) {
+    const auto splits = StringUtils::wrapWords(serverMaps, ' ',
+                                               Printer::BYTES_PER_PACKET -
+                                                   serverMapsCmd.length() - 1);
 
     for (const auto &split : splits) {
       trap_SendServerCommand(clientNum, (serverMapsCmd + split + '\n').c_str());
@@ -695,9 +795,9 @@ static bool sendCustomvoteInfo(gentity_t *ent, Arguments argv) {
                            (serverMapsCmd + serverMaps + '\n').c_str());
   }
 
-  if (otherMapsCmd.length() + otherMaps.length() > BYTES_PER_PACKET) {
+  if (otherMapsCmd.length() + otherMaps.length() > Printer::BYTES_PER_PACKET) {
     const auto splits = StringUtils::wrapWords(
-        otherMaps, ' ', BYTES_PER_PACKET - otherMapsCmd.length() - 1);
+        otherMaps, ' ', Printer::BYTES_PER_PACKET - otherMapsCmd.length() - 1);
 
     for (const auto &split : splits) {
       trap_SendServerCommand(clientNum, (otherMapsCmd + split + '\n').c_str());
@@ -734,8 +834,7 @@ static bool loadPos(gentity_t *ent, Arguments argv) {
 
 void PrintManual(gentity_t *ent, const std::string &command) {
   if (ent) {
-    Printer::chat(ent, va("^3%s: ^7check console for more information.",
-                          command.c_str()));
+    Printer::chat(ent, "^3%s: ^7check console for more information.", command);
     trap_SendServerCommand(ClientNum(ent), va("manual %s", command.c_str()));
   } else {
     int i = 0;
@@ -816,9 +915,7 @@ bool AddLevel(gentity_t *ent, Arguments argv) {
   std::string title;
 
   if (!ToInt(argv->at(1), level)) {
-    Printer::chat(ent,
-                  StringUtils::format("^3addlevel: ^7'%s^7' is not an integer.",
-                                      argv->at(1)));
+    Printer::chat(ent, "^3addlevel: ^7'%s^7' is not an integer.", argv->at(1));
     return false;
   }
 
@@ -835,8 +932,7 @@ bool AddLevel(gentity_t *ent, Arguments argv) {
       } else {
         switch (open) {
           case 0:
-            Printer::chat(
-                ent, va("^3addlevel: ^7ignored argument '%s^7'.", it->c_str()));
+            Printer::chat(ent, "^3addlevel: ^7ignored argument '%s^7'.", *it);
             break;
           case CMDS_OPEN:
             commands += *it;
@@ -865,7 +961,7 @@ bool AddLevel(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  Printer::chat(ent, va("^3addlevel: ^7added level %d.", level));
+  Printer::chat(ent, "^3addlevel: ^7added level %d.", level);
 
   return true;
 }
@@ -901,9 +997,9 @@ bool Ball8(gentity_t *ent, Arguments argv) {
   if (ent && ent->client->last8BallTime + DELAY_8BALL > level.time) {
     const int remainingSeconds = std::ceil(
         (ent->client->last8BallTime + DELAY_8BALL - level.time) / 1000.0);
-    Printer::chat(ent, "^3!8ball: ^7you must wait " +
-                           StringUtils::getSecondsString(remainingSeconds) +
-                           " before using !8ball again.");
+    Printer::chat(ent,
+                  "^3!8ball: ^7you must wait %s before using !8ball again.",
+                  StringUtils::getSecondsString(remainingSeconds));
     return false;
   }
 
@@ -1007,8 +1103,8 @@ bool DeleteLevel(gentity_t *ent, Arguments argv) {
 
   int level = 0;
   if (!ToInt(argv->at(1), level)) {
-    Printer::chat(ent, va("^3deletelevel: ^7'%s^7' is not an integer.",
-                          argv->at(1).c_str()));
+    Printer::chat(ent, "^3deletelevel: ^7'%s^7' is not an integer.",
+                  argv->at(1));
     return false;
   }
 
@@ -1019,10 +1115,8 @@ bool DeleteLevel(gentity_t *ent, Arguments argv) {
 
   int usersWithLevel = ETJump::session->LevelDeleted(level);
 
-  Printer::chat(ent,
-                "^3deletelevel: ^7deleted level. Set " +
-                    StringUtils::getPluralizedString(usersWithLevel, "user") +
-                    " to level 0.");
+  Printer::chat(ent, "^3deletelevel: ^7deleted level. Set %s to level 0.",
+                StringUtils::getPluralizedString(usersWithLevel, "user"));
   return true;
 }
 
@@ -1035,14 +1129,15 @@ bool EditCommands(gentity_t *ent, Arguments argv) {
 
   int level = 0;
   if (!ToInt(argv->at(1), level)) {
-    Printer::chat(ent, "^3editcommands: ^7defined level '" + (*argv)[1] +
-                           "' is not an integer.");
+    Printer::chat(ent,
+                  "^3editcommands: ^7defined level '%s' is not an integer.",
+                  (*argv)[1]);
     return false;
   }
 
   if (!game.levels->LevelExists(level)) {
-    Printer::chat(ent,
-                  "^3editcommands: ^7level " + (*argv)[1] + " does not exist.");
+    Printer::chat(ent, "^3editcommands: ^7level %s does not exist.",
+                  (*argv)[1]);
     return false;
   }
 
@@ -1068,8 +1163,10 @@ bool EditCommands(gentity_t *ent, Arguments argv) {
     }
     char flag = game.commands->FindCommandFlag(currentCommand);
     if (flag == 0) {
-      Printer::chat(ent, "^3editcommands: ^7command '" + currentCommand +
-                             "' doesn't match any known command.");
+      Printer::chat(
+          ent,
+          "^3editcommands: ^7command '%s' doesn't match any known command.",
+          currentCommand);
       continue;
     }
     if (add) {
@@ -1082,9 +1179,10 @@ bool EditCommands(gentity_t *ent, Arguments argv) {
   std::string duplicateFlags;
   for (char addCommand : addCommands) {
     if (deleteCommands.find(addCommand) != std::string::npos) {
-      Printer::chat(ent, va("^3editcommands: ^7ignoring command flag '%c'. Are "
-                            "you trying to add or delete it?",
-                            addCommand));
+      Printer::chat(ent,
+                    "^3editcommands: ^7ignoring command flag '%c'. Are you "
+                    "trying to add or delete it?",
+                    addCommand);
       duplicateFlags.push_back(addCommand);
     }
   }
@@ -1117,9 +1215,10 @@ bool EditCommands(gentity_t *ent, Arguments argv) {
   }
   game.levels->Edit(level, "", currentPermissions, "", 1);
 
-  Printer::chat(ent, "^3editcommands: ^7edited level " + (*argv)[1] +
-                         " permissions. New permissions are: " +
-                         game.levels->GetLevel(level)->commands);
+  Printer::chat(
+      ent,
+      "^3editcommands: ^7edited level %s permissions. New permissions are: %s",
+      (*argv)[1], game.levels->GetLevel(level)->commands);
   return true;
 }
 
@@ -1138,9 +1237,7 @@ bool EditLevel(gentity_t *ent, Arguments argv) {
   std::string title;
 
   if (!ToInt(argv->at(1), adminLevel)) {
-    Printer::chat(
-        ent, StringUtils::format("^3editlevel: ^7'%s^7' is not an integer.",
-                                 argv->at(1)));
+    Printer::chat(ent, "^3editlevel: ^7'%s^7' is not an integer.", argv->at(1));
     return false;
   }
 
@@ -1176,8 +1273,8 @@ bool EditLevel(gentity_t *ent, Arguments argv) {
         switch (open) {
           case 0:
             if (updated == 0) {
-              Printer::chat(ent, va("^3editlevel: ^7ignored argument '%s^7'.",
-                                    it->c_str()));
+              Printer::chat(ent, "^3editlevel: ^7ignored argument '%s^7'.",
+                            *it);
             }
 
             break;
@@ -1210,7 +1307,7 @@ bool EditLevel(gentity_t *ent, Arguments argv) {
     ETJump::session->ParsePermissions(num);
   }
 
-  Printer::chat(ent, va("^3editlevel: ^7updated level %d.", adminLevel));
+  Printer::chat(ent, "^3editlevel: ^7updated level %d.", adminLevel);
   return true;
 }
 
@@ -1265,8 +1362,7 @@ bool EditUser(gentity_t *ent, Arguments argv) {
     } else {
       switch (open) {
         case 0:
-          Printer::chat(
-              ent, va("^3edituser: ^7ignored argument '%s^7'.", it->c_str()));
+          Printer::chat(ent, "^3edituser: ^7ignored argument '%s^7'.", *it);
           break;
         case CMDS_OPEN:
           commands += *it;
@@ -1288,7 +1384,7 @@ bool EditUser(gentity_t *ent, Arguments argv) {
   greeting = StringUtils::trimEnd(greeting);
   title = StringUtils::trimEnd(title);
 
-  Printer::chat(ent, va("^3edituser: ^7updating user %d", id));
+  Printer::chat(ent, "^3edituser: ^7updating user %d", id);
   return ETJump::database->UpdateUser(ent, id, commands, greeting, title,
                                       updated);
 }
@@ -1357,7 +1453,7 @@ bool FindMap(gentity_t *ent, Arguments argv) {
 
   buffer += "\n";
 
-  Printer::console(ClientNum(ent), buffer);
+  Printer::console(ent, buffer);
   return true;
 }
 
@@ -1371,7 +1467,7 @@ bool ListUserNames(gentity_t *ent, Arguments argv) {
   const std::string arg = StringUtils::sanitize(argv->at(1));
 
   if (!ToInt(arg, id)) {
-    Printer::chat(ent, va("^3listusernames: ^7'%s' is not an id", arg.c_str()));
+    Printer::chat(ent, "^3listusernames: ^7'%s' is not an id", arg);
     return false;
   }
 
@@ -1440,10 +1536,9 @@ bool Kick(gentity_t *ent, Arguments argv) {
   int timeout = 0;
   if (argv->size() >= 3) {
     const std::string timeoutArg = StringUtils::sanitize(argv->at(2));
-
     if (!ToInt(timeoutArg, timeout)) {
-      Printer::chat(ent, "^3kick: ^7invalid timeout '" + timeoutArg +
-                             "' specified.");
+      Printer::chat(ent, "^3kick: ^7invalid timeout '%s' specified.",
+                    timeoutArg);
       return false;
     }
   }
@@ -1492,8 +1587,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv) {
     try {
       mapsToList = std::stoi(argv->at(1), nullptr, 10);
     } catch (const std::invalid_argument &) {
-      Printer::chat(ent, StringUtils::format(
-                             "^3Error: ^7'%s^7' is not a number", argv->at(1)));
+      Printer::chat(ent, "^3Error: ^7'%s^7' is not a number", argv->at(1));
       return false;
     } catch (const std::out_of_range &) {
       mapsToList = 10;
@@ -1530,7 +1624,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv) {
     ++listedMaps;
   }
 
-  Printer::console(ClientNum(ent), buffer);
+  Printer::console(ent, buffer);
   return true;
 }
 
@@ -1579,9 +1673,7 @@ bool ListMaps(gentity_t *ent, Arguments argv) {
     try {
       perRow = std::stoi(argv->at(1), nullptr, 10);
     } catch (const std::invalid_argument &) {
-      Printer::chat(ent,
-                    StringUtils::format("^3listmaps: ^7'%s^7' is not a number",
-                                        argv->at(1)));
+      Printer::chat(ent, "^3listmaps: ^7'%s^7' is not a number", argv->at(1));
       return false;
     } catch (const std::out_of_range &) {
       perRow = 5;
@@ -1651,9 +1743,8 @@ bool ListPlayers(gentity_t *ent, Arguments argv) {
   if (level.numConnectedClients == 1) {
     Printer::console(ent, "^7There is currently 1 connected player.\n");
   } else {
-    Printer::console(ent, StringUtils::format(
-                              "^7There are currently %d connected players.\n",
-                              level.numConnectedClients));
+    Printer::console(ent, "^7There are currently %d connected players.\n",
+                     level.numConnectedClients);
   }
 
   std::string msg = "#  ETJumpID  Level  Player\n";
@@ -1682,13 +1773,13 @@ static bool Map(gentity_t *ent, Arguments argv) {
   const std::string requestedMap = StringUtils::sanitize(argv->at(1), true);
 
   if (!FileSystem::exists("maps/" + requestedMap + ".bsp")) {
-    Printer::chat(ent, "^3map: ^7'" + requestedMap + "' is not on the server.");
+    Printer::chat(ent, "^3map: ^7%s is not on the server.", requestedMap);
     return false;
   }
 
   if (ETJump::MapStatistics::isBlockedMap(requestedMap)) {
-    Printer::chat(ent, "^3map: ^7'" + requestedMap +
-                           "' cannot be played on this server.");
+    Printer::chat(ent, "^3map: ^7%s cannot be played on this server.",
+                  requestedMap);
     return false;
   }
 
@@ -1748,8 +1839,7 @@ bool MostPlayed(gentity_t *ent, Arguments argv) {
     try {
       mapsToList = std::stoi(argv->at(1), nullptr, 10);
     } catch (const std::invalid_argument &) {
-      Printer::chat(ent, StringUtils::format(
-                             "^3Error: ^7'%s^7' is not a number", argv->at(1)));
+      Printer::chat(ent, "^3Error: ^7'%s^7' is not a number", argv->at(1));
       return false;
     } catch (const std::out_of_range &) {
       mapsToList = 10;
@@ -1786,7 +1876,7 @@ bool MostPlayed(gentity_t *ent, Arguments argv) {
     ++listedMaps;
   }
 
-  Printer::console(ClientNum(ent), buffer);
+  Printer::console(ent, buffer);
 
   return true;
 }
@@ -1831,15 +1921,14 @@ bool Mute(gentity_t *ent, Arguments argv) {
   }
 
   if (target->client->sess.muted == qtrue) {
-    Printer::chat(ent, "^3mute: " + std::string(target->client->pers.netname) +
-                           " ^7is already muted.");
+    Printer::chat(ent, "^3mute: %s ^7is already muted.",
+                  target->client->pers.netname);
     return false;
   }
 
   MutePlayer(target);
   Printer::center(target, "^5You've been muted");
-  Printer::chat(ent, std::string(target->client->pers.netname) +
-                         " ^7has been muted.");
+  Printer::chat(ent, "%s ^7has been muted.", target->client->pers.netname);
   return true;
 }
 
@@ -1882,18 +1971,17 @@ static bool Noclip(gentity_t *ent, Arguments argv) {
     }
 
     if (count > 1) {
-      Printer::chat(other,
-                    va("^3noclip: ^7you can use /noclip %d times.", count));
-      Printer::chat(ent, va("^3noclip: ^7%s^7 can use /noclip %d times.",
-                            other->client->pers.netname, count));
+      Printer::chat(other, "^3noclip: ^7you can use /noclip %d times.", count);
+      Printer::chat(ent, "^3noclip: ^7%s^7 can use /noclip %d times.",
+                    other->client->pers.netname, count);
     } else if (count < 0) {
       Printer::chat(other, "^3noclip: ^7you can use /noclip infinitely.");
-      Printer::chat(ent, va("^3noclip: ^7%s^7 can use /noclip infinitely.",
-                            other->client->pers.netname));
+      Printer::chat(ent, "^3noclip: ^7%s^7 can use /noclip infinitely.",
+                    other->client->pers.netname);
     } else {
       Printer::chat(other, "^3noclip: ^7you can use /noclip once.");
-      Printer::chat(ent, va("^3noclip: ^7%s^7 can use /noclip once.",
-                            other->client->pers.netname));
+      Printer::chat(ent, "^3noclip: ^7%s^7 can use /noclip once.",
+                    other->client->pers.netname);
     }
 
     other->client->pers.noclipCount = count;
@@ -1905,9 +1993,8 @@ static bool Noclip(gentity_t *ent, Arguments argv) {
 bool Passvote(gentity_t *ent, Arguments argv) {
   if (level.voteInfo.voteTime) {
     if (level.voteInfo.vote_fn == ETJump::G_RockTheVote_v) {
-      Printer::chat(
-          ent, StringUtils::format("^3passvote:^7 %s cannot be force passed.",
-                                   level.voteInfo.voteString));
+      Printer::chat(ent, "^3passvote:^7 %s cannot be force passed.",
+                    level.voteInfo.voteString);
     } else {
       level.voteInfo.forcePass = qtrue;
       Printer::chatAll("^3passvote:^7 vote has been passed.");
@@ -1953,9 +2040,8 @@ bool Rename(gentity_t *ent, Arguments argv) {
       StringUtils::join(Container::skipFirstN(*argv, 2), " ");
 
   if (newName.length() > MAX_NETNAME) {
-    Printer::chat(
-        ent, StringUtils::format("^3rename: ^7new name is too long (%i > %i)",
-                                 newName.length(), MAX_NETNAME));
+    Printer::chat(ent, "^3rename: ^7new name is too long (%i > %i)",
+                  newName.length(), MAX_NETNAME);
     return false;
   }
 
@@ -1964,8 +2050,7 @@ bool Rename(gentity_t *ent, Arguments argv) {
   trap_GetUserinfo(cn, userinfo, sizeof(userinfo));
 
   const char *oldName = Info_ValueForKey(userinfo, "name");
-  Printer::chatAll(
-      va("^3rename: ^7%s^7 has been renamed to %s", oldName, newName.c_str()));
+  Printer::chatAll("^3rename: ^7%s^7 has been renamed to %s", oldName, newName);
   Info_SetValueForKey(userinfo, "name", newName.c_str());
   trap_SetUserinfo(cn, userinfo);
   ClientUserinfoChanged(cn);
@@ -1993,7 +2078,7 @@ bool SetLevel(gentity_t *ent, Arguments argv) {
 
     int level = 0;
     if (!ToInt(argv->at(2), level)) {
-      Printer::chat(ent, "^3setlevel: ^7invalid level " + argv->at(2));
+      Printer::chat(ent, "^3setlevel: ^7invalid level %s", argv->at(2));
       return false;
     }
 
@@ -2017,15 +2102,13 @@ bool SetLevel(gentity_t *ent, Arguments argv) {
     }
 
     if (!ETJump::session->SetLevel(target, level)) {
-      Printer::chat(
-          ent, va("^3setlevel: ^7%s", ETJump::session->GetMessage().c_str()));
+      Printer::chat(ent, "^3setlevel: ^7%s", ETJump::session->GetMessage());
       return false;
     }
 
-    Printer::chat(ent, va("^3setlevel: ^7%s^7 is now a level %d user.",
-                          target->client->pers.netname, level));
-    Printer::chat(target,
-                  va("^3setlevel: ^7you are now a level %d user.", level));
+    Printer::chat(ent, "^3setlevel: ^7%s^7 is now a level %d user.",
+                  target->client->pers.netname, level);
+    Printer::chat(target, "^3setlevel: ^7you are now a level %d user.", level);
 
     return true;
   }
@@ -2033,19 +2116,19 @@ bool SetLevel(gentity_t *ent, Arguments argv) {
   if (argv->size() == 4) {
     unsigned id = 0;
     if (!ToUnsigned(argv->at(2), id)) {
-      Printer::chat(ent, "^3setlevel: ^7invalid id " + argv->at(2));
+      Printer::chat(ent, "^3setlevel: ^7invalid id %s", argv->at(2));
       return false;
     }
 
     if (!ETJump::session->UserExists(id)) {
-      Printer::chat(ent, "^3setlevel: ^7user with id " + argv->at(2) +
-                             " doesn't exist.");
+      Printer::chat(ent, "^3setlevel: ^7user with id %s doesn't exist.",
+                    argv->at(2));
       return false;
     }
 
     int level = 0;
     if (!ToInt(argv->at(3), level)) {
-      Printer::chat(ent, "^3setlevel: ^7invalid level " + argv->at(2));
+      Printer::chat(ent, "^3setlevel: ^7invalid level %s", argv->at(2));
       return false;
     }
 
@@ -2069,14 +2152,12 @@ bool SetLevel(gentity_t *ent, Arguments argv) {
     }
 
     if (!ETJump::session->SetLevel(id, level)) {
-      Printer::chat(
-          ent, va("^3setlevel: ^7%s", ETJump::session->GetMessage().c_str()));
+      Printer::chat(ent, "^3setlevel: ^7%s", ETJump::session->GetMessage());
       return false;
     }
 
-    Printer::chat(
-        ent,
-        va("^3setlevel: ^7user with id %d is now a level %d user.", id, level));
+    Printer::chat(ent, "^3setlevel: ^7user with id %d is now a level %d user.",
+                  id, level);
   }
 
   return true;
@@ -2112,8 +2193,8 @@ bool Spectate(gentity_t *ent, Arguments argv) {
   }
 
   if (!G_AllowFollow(ent, target)) {
-    Printer::chat(ent, va("^3!spectate: %s ^7is locked from spectators.",
-                          target->client->pers.netname));
+    Printer::chat(ent, "^3!spectate: %s ^7is locked from spectators.",
+                  target->client->pers.netname);
     return qfalse;
   }
 
@@ -2188,10 +2269,9 @@ bool createToken(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  Printer::chat(ent, StringUtils::format(
-                         "Creating a token at (%f, %f, %f) for difficulty '%s'",
-                         coordinates[0], coordinates[1], coordinates[2],
-                         ETJump::Tokens::tokenDifficultyToString(difficulty)));
+  Printer::chat(ent, "Creating a token at (%f, %f, %f) for difficulty '%s'",
+                coordinates[0], coordinates[1], coordinates[2],
+                ETJump::Tokens::tokenDifficultyToString(difficulty));
 
   auto result = game.tokens->createToken(difficulty, coordinates);
   if (!result.first) {
@@ -2267,11 +2347,10 @@ bool deleteToken(gentity_t *ent, Arguments argv) {
     try {
       num = std::stoi(numArg);
     } catch (const std::invalid_argument &) {
-      Printer::chat(ent, "^3tokens: ^7'" + numArg + "' is not a number.");
+      Printer::chat(ent, "^3tokens: ^7%s is not a number.", numArg);
       return false;
     } catch (const std::out_of_range &) {
-      Printer::chat(ent, "^3tokens: ^7'" + numArg +
-                             "' is out of range (too large).");
+      Printer::chat(ent, "^3tokens: ^7%s is out of range (too large).", numArg);
       return false;
     }
 
@@ -2282,8 +2361,7 @@ bool deleteToken(gentity_t *ent, Arguments argv) {
       return false;
     }
 
-    Printer::chat(
-        ent, va("^3tokens: ^7deleting token %s #%d", (*argv)[2].c_str(), num));
+    Printer::chat(ent, "^3tokens: ^7deleting token %s #%d", (*argv)[2], num);
     auto result = game.tokens->deleteToken(difficulty, num - 1);
 
     if (!result.first) {
@@ -2357,11 +2435,11 @@ bool Unban(gentity_t *ent, Arguments argv) {
   }
 
   if (!ETJump::database->Unban(ent, id)) {
-    Printer::chat(ent, "^3unban: ^7" + ETJump::database->GetMessage());
+    Printer::chat(ent, "^3unban: ^7%s", ETJump::database->GetMessage());
     return false;
   }
 
-  Printer::chat(ent, "^3unban: ^7removed ban with id " + argv->at(1));
+  Printer::chat(ent, "^3unban: ^7removed ban with id %s", argv->at(1));
   return true;
 }
 
@@ -2393,8 +2471,7 @@ bool Unmute(gentity_t *ent, Arguments argv) {
   G_RemoveIPMute(ip);
 
   Printer::center(target, "^5You've been unmuted.");
-  Printer::chatAll(target->client->pers.netname +
-                   std::string(" ^7has been unmuted."));
+  Printer::chatAll("%s ^7has been unmuted.", target->client->pers.netname);
 
   return true;
 }
@@ -2431,8 +2508,7 @@ bool MoverScale(gentity_t *ent, Arguments argv) {
     trap_Cvar_Set("g_moverScale", va("%f", moverScaleValue));
   }
 
-  Printer::chat(ent, "^3Mover scale is set to: ^7" +
-                         std::to_string(moverScaleValue));
+  Printer::chat(ent, "^3Mover scale is set to: ^7%f", moverScaleValue);
   return true;
 }
 
@@ -2442,17 +2518,14 @@ bool NewMaps(gentity_t *ent, Arguments argv) {
     try {
       numMaps = std::stoi(argv->at(1), nullptr, 10);
     } catch (const std::invalid_argument &) {
-      Printer::chat(ClientNum(ent),
-                    StringUtils::format("^3newmaps: ^7%s^7 is not a number",
-                                        argv->at(1)));
+      Printer::chat(ent, "^3newmaps: ^7%s^7 is not a number", argv->at(1));
       return false;
     } catch (const std::out_of_range &) {
       numMaps = 5;
     }
 
     if (numMaps <= 0) {
-      Printer::chat(ClientNum(ent),
-                    "^3newmaps: ^7second argument must be over 0");
+      Printer::chat(ent, "^3newmaps: ^7second argument must be over 0");
       return false;
     }
 
@@ -2479,7 +2552,7 @@ bool NewMaps(gentity_t *ent, Arguments argv) {
     lines++;
   }
 
-  Printer::console(ClientNum(ent), buffer);
+  Printer::console(ent, buffer);
   return true;
 }
 
@@ -2523,9 +2596,8 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
   if (end.has_value()) {
     if ((*end).date < start) {
       Printer::chat(clientNum,
-                    StringUtils::format(
-                        "^3addseason: ^7Start time `%s` is after end time `%s`",
-                        start.toDateString(), end.value().date.toDateString()));
+                    "^3addseason: ^7Start time `%s` is after end time `%s`",
+                    start.toDateString(), end.value().date.toDateString());
       return true;
     }
   }
@@ -2628,17 +2700,14 @@ bool validateCustomVoteCommand(const std::string &cmdName, const int &clientNum,
 
   for (const auto &op : command.options) {
     if (StringUtils::sanitize(op.second.text).empty()) {
-      Printer::chat(clientNum,
-                    StringUtils::format("^3%s: ^7'%s' cannot be empty.",
-                                        cmdName, op.first));
+      Printer::chat(clientNum, "^3%s: ^7'%s' cannot be empty.", cmdName,
+                    op.first);
       commandOk = false;
     }
 
     if (op.first == "name" && !ETJump::isValidVoteString(op.second.text)) {
-      Printer::chat(
-          clientNum,
-          StringUtils::format("^3%s: ^7%s '%s' contains invalid characters.",
-                              cmdName, op.first, op.second.text));
+      Printer::chat(clientNum, "^3%s: ^7%s '%s' contains invalid characters.",
+                    cmdName, op.first, op.second.text);
       commandOk = false;
     }
   }
@@ -2864,6 +2933,8 @@ Commands::Commands() {
       AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
   adminCommands_["top"] =
       AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
+  adminCommands_["record-details"] =
+      AdminCommandPair(ClientCommands::recordDetails, CommandFlags::BASIC);
   adminCommands_["rankings"] =
       AdminCommandPair(ClientCommands::Rankings, CommandFlags::BASIC);
   adminCommands_["loadcheckpoints"] =
@@ -2894,6 +2965,7 @@ Commands::Commands() {
   commands_["times"] = ClientCommands::Records;
   commands_["ranks"] = ClientCommands::Records;
   commands_["top"] = ClientCommands::Records;
+  commands_["record-details"] = ClientCommands::recordDetails;
   commands_["loadcheckpoints"] = ClientCommands::LoadCheckpoints;
   commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
   commands_["rankings"] = ClientCommands::Rankings;
@@ -3022,10 +3094,10 @@ bool Commands::AdminCommand(gentity_t *ent) {
       // skip the first arg because we might have partially matched the command
       const std::string cmdArgs =
           StringUtils::join(Container::skipFirstN(*argv, 1), " ");
-      Printer::logAdminLn(StringUtils::format(
-          "admincommand: %s%s used '%s%s'",
-          ent ? std::to_string(ent->s.number) + " " : "", name,
-          foundCommands[0]->first, cmdArgs.empty() ? "" : " " + cmdArgs));
+      Printer::logAdminLn("admincommand: %s%s used '%s%s'",
+                          ent ? std::to_string(ent->s.number) + " " : "", name,
+                          foundCommands[0]->first,
+                          cmdArgs.empty() ? "" : " " + cmdArgs);
     }
 
     return true;

@@ -24,51 +24,59 @@
 
 #pragma once
 
-#include <list>
-
-#include "etj_irenderable.h"
-#include "cg_local.h"
-#include "etj_accel_color.h"
+#include "etj_accel_color_v2.h"
 #include "etj_cvar_parser.h"
+#include "etj_irenderable.h"
+#include "etj_pmove_utils_v2.h"
+
+#include "../game/q_shared.h"
 
 namespace ETJump {
+class AccelColorV2;
 class CvarUpdateHandler;
 
-class AccelMeter : public IRenderable {
-  int textStyle{};
-  float y{};
-  float halfW{};
-  CvarValue::Size size{};
-  int accelColorStyle{};
-  std::vector<std::string> accelStr;
-  bool playing{};
-
-  std::list<AccelColor::StoredSpeed> storedSpeeds;
-
-  vec3_t accel{};
-  vec4_t accelColor{};
-  int lastUpdateTime{};
-  vec3_t lastSpeed{};
-
-  enum Alignment { Left = 1, Right = 2 };
-
-  static void parseColor(const std::string &color, vec4_t &out);
-  void setTextStyle(const vmCvar_t *cvar);
-  void setSize(const vmCvar_t *cvar);
-  void setAccelColorStyle(const vmCvar_t *cvar);
-  void startListeners();
-  static bool canSkipDraw();
-
-  const pmove_t *pm{};
-  playerState_t *ps = &cg.predictedPlayerState;
-
-  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
-
+class AccelMeterV2 : public IRenderable {
 public:
-  explicit AccelMeter(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
-  ~AccelMeter() override;
+  explicit AccelMeterV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~AccelMeterV2() override;
 
   bool beforeRender() override;
   void render() const override;
+
+private:
+  void parseColor(const std::string &colorStr);
+  void setSize(const vmCvar_t &cvar);
+  void setAccelColorStyle(const vmCvar_t &cvar);
+  void startListeners();
+
+  void setupAccelColor(const PmoveUtilsV2::State &s, float speed);
+
+  static bool canSkipDraw();
+
+  enum class Align {
+    CENTER = 0,
+    LEFT = 1,
+    RIGHT = 2,
+  };
+
+  AccelColorV2::Style accelColorStyle{};
+  int32_t textStyle{};
+
+  vec2_t lastSpeed{};
+  vec2_t accelVec{};
+  std::array<std::string, 2> accelStr = {"0", "0"};
+
+  float x{};
+  float y{};
+  CvarValue::Size size{};
+  float halfW{}; // for alignment
+
+  vec4_t color{};
+
+  pmtype_t lastPmType{};
+  int32_t lastUpdateTime{};
+  std::list<AccelColorV2::StoredSpeed> storedSpeeds;
+
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 } // namespace ETJump

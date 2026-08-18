@@ -38,7 +38,14 @@ using Arguments = std::vector<std::string>;
 // but now that we're always receiving a full map list from server,
 // we could use a local cache for map list instead of requesting it again.
 static void maplist(const Arguments &args) {
-  // we need to forward this command to UI to parse the list there,
+  cgame.serverMapList.insert(cgame.serverMapList.end(), args.cbegin(),
+                             args.cend());
+
+  // this gets called few times unnecessarily for an incomplete list,
+  // but it's fine, this only happens on initial cgame load
+  StringUtils::sortStrings(cgame.serverMapList, true);
+
+  // we need to forward this command to UI to parse the list there too,
   // so we can populate the map vote list
   trap_SendConsoleCommand(
       va("uiParseMaplist %s\n", StringUtils::join(args, " ").c_str()));
@@ -57,7 +64,12 @@ static void numCustomvotes(const Arguments &args) {
 }
 
 static void customvoteList(const Arguments &args) {
-  // forward to UI
+  // store the callvote name in cgame
+  if (args.size() > 2 && args[1] == "type") {
+    cgame.customVoteLists.emplace_back(args[2]);
+  }
+
+  // forward the full command to UI for parsing
   trap_SendConsoleCommand(
       va("uiParseCustomvote %s\n", StringUtils::join(args, " ").c_str()));
 }
@@ -65,7 +77,7 @@ static void customvoteList(const Arguments &args) {
 static void pmFlashWindow() {
   if (etj_highlight.integer &
       static_cast<int>(ChatHighlightFlags::HIGHLIGHT_FLASH)) {
-    SyscallExt::trap_SysFlashWindowETLegacy(
+    SyscallExt::trap_SysFlashWindow(
         SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
   }
 }

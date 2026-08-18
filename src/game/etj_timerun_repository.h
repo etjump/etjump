@@ -72,6 +72,10 @@ public:
                                                  bool exact);
   std::optional<Timerun::Record> getRecord(const std::string &map,
                                            const std::string &run, int rank);
+  std::vector<Timerun::Record> getRecordFromSeason(int32_t seasonId,
+                                                   const std::string &map,
+                                                   const std::string &run,
+                                                   int32_t rank, bool exactMap);
   std::vector<Timerun::Season> getSeasons();
   void deleteSeason(const std::string &name);
   std::vector<Timerun::Checkpoints>

@@ -284,6 +284,11 @@ bool endsWith(const std::string &str, const std::string &suffix) {
          0;
 }
 
+bool isWhiteSpace(const std::string_view s) {
+  return std::all_of(s.cbegin(), s.cend(),
+                     [](const char c) { return std::isspace(c); });
+}
+
 bool iEqual(const std::string_view str1, const std::string_view str2,
             bool sanitized) {
   if (sanitized) {

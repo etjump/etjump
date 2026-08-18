@@ -665,6 +665,88 @@ TimerunRepository::getRecord(const std::string &map, const std::string &run,
   return record;
 }
 
+std::vector<Timerun::Record> TimerunRepository::getRecordFromSeason(
+    const int32_t seasonId, const std::string &map, const std::string &run,
+    const int32_t rank, const bool exactMap) {
+  std::vector<Timerun::Record> records;
+
+  const auto maps = getMapsForName(map, exactMap);
+  bool exactMapFound = false;
+
+  if (maps.size() > 1) {
+    for (const auto &m : maps) {
+      if (m == map) {
+        exactMapFound = true;
+        break;
+      }
+    }
+
+    if (!exactMapFound) {
+      std::string error = StringUtils::format(
+          "^3record-details: ^7found %d maps matching ^3%s^7\n", maps.size(),
+          map);
+
+      const int perRow = 3;
+      int i = 0;
+      for (const auto &m : maps) {
+        if (i != 0 && i % perRow == 0) {
+          error += "\n";
+        }
+
+        error += StringUtils::format("%-22s", m);
+        ++i;
+      }
+
+      throw std::runtime_error(error);
+    }
+  }
+
+  const std::string resolvedMap = maps.empty() ? map : maps[0];
+
+  const std::string runPlaceHolder = "lsanitize(run) like ?";
+  const std::vector<std::string> runs =
+      getRunsForName(!maps.empty() ? maps[0] : map, run, false, true);
+  const std::string runBinder = runs.size() == 1 ? runs[0] : "%" + run + "%";
+
+  const std::string query = StringUtils::format(R"(
+  select *
+    from (
+      select
+        season_id,
+        map,
+        run,
+        user_id,
+        time,
+        checkpoints,
+        record_date,
+        player_name,
+        metadata,
+        rank() over (partition by season_id, map, run order by time asc) as record_rank
+      FROM record
+      where
+        season_id=? and map=? and %s
+    ) as ranked_records
+    where record_rank = ?;
+  )",
+                                                runPlaceHolder);
+
+  auto binder = _database->sql << query;
+  binder << seasonId << resolvedMap << runBinder << rank;
+
+  binder >> [&records](int32_t seasonId, const std::string &map,
+                       const std::string &runName, int32_t userId, int32_t time,
+                       const std::string &checkpointsString,
+                       const std::string &recordDate,
+                       const std::string &playerName,
+                       const std::string &metadataString) {
+    records.emplace_back(getRecordFromStandardQueryResult(
+        seasonId, map, runName, userId, time, checkpointsString, recordDate,
+        playerName, metadataString));
+  };
+
+  return records;
+}
+
 std::vector<Timerun::Season> TimerunRepository::getSeasons() {
   std::vector<Timerun::Season> seasons;
 

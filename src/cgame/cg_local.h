@@ -14,6 +14,8 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
+#include <optional>
+
 #include "../game/q_shared.h"
 #include "../game/bg_public.h"
 #include "../ui/ui_shared.h"
@@ -1840,7 +1842,8 @@ typedef struct {
   qhandle_t portalBlueShader;   // Portal 1
   qhandle_t portalRedShader;    // Portal 2
   qhandle_t portalGreenShader;  // Portal 1 equivalent for other players
-  qhandle_t portalYellowShader; // Portal 2 equivalent for other players
+  qhandle_t portalYellowShader; // Portal 1 equivalent for other players
+  qhandle_t portalTrailShader;
 
   qhandle_t simplePlayersShader;
   qhandle_t saveIcon;
@@ -2408,12 +2411,15 @@ extern vmCvar_t etj_speedSize;
 extern vmCvar_t etj_speedColor;
 extern vmCvar_t etj_speedAlpha;
 extern vmCvar_t etj_speedShadow;
+extern vmCvar_t etj_speedColorUsesAccel;
+extern vmCvar_t etj_speedAlign;
+extern vmCvar_t etj_speedPrecision;
+
 extern vmCvar_t etj_drawMaxSpeed;
 extern vmCvar_t etj_maxSpeedX;
 extern vmCvar_t etj_maxSpeedY;
 extern vmCvar_t etj_maxSpeedDuration;
-extern vmCvar_t etj_speedColorUsesAccel;
-extern vmCvar_t etj_speedAlign;
+extern vmCvar_t etj_maxSpeedPrecision;
 
 extern vmCvar_t etj_drawAccel;
 extern vmCvar_t etj_accelX;
@@ -2439,6 +2445,7 @@ extern vmCvar_t etj_popupPosY;
 // Feen: PGM client cvars
 // Enable/Disable viewing other player portals
 extern vmCvar_t etj_viewPlayerPortals;
+extern vmCvar_t etj_portalTrailTime;
 extern vmCvar_t etj_portalDebug;
 extern vmCvar_t etj_portalPredict;
 extern vmCvar_t etj_portalTeam;
@@ -2463,6 +2470,9 @@ extern vmCvar_t etj_CHS1Info5;
 extern vmCvar_t etj_CHS1Info6;
 extern vmCvar_t etj_CHS1Info7;
 extern vmCvar_t etj_CHS1Info8;
+
+extern vmCvar_t etj_CHS1DistanceScale;
+
 extern vmCvar_t etj_drawCHS2;
 extern vmCvar_t etj_CHS2Info1;
 extern vmCvar_t etj_CHS2Info2;
@@ -2472,9 +2482,27 @@ extern vmCvar_t etj_CHS2Info5;
 extern vmCvar_t etj_CHS2Info6;
 extern vmCvar_t etj_CHS2Info7;
 extern vmCvar_t etj_CHS2Info8;
+
 // chs2 position
 extern vmCvar_t etj_CHS2PosX;
 extern vmCvar_t etj_CHS2PosY;
+extern vmCvar_t etj_CHS2HideLabels;
+
+extern vmCvar_t etj_drawCHS3;
+extern vmCvar_t etj_CHS3Info1;
+extern vmCvar_t etj_CHS3Info2;
+extern vmCvar_t etj_CHS3Info3;
+extern vmCvar_t etj_CHS3Info4;
+extern vmCvar_t etj_CHS3Info5;
+extern vmCvar_t etj_CHS3Info6;
+extern vmCvar_t etj_CHS3Info7;
+extern vmCvar_t etj_CHS3Info8;
+
+// chs3 position
+extern vmCvar_t etj_CHS3PosX;
+extern vmCvar_t etj_CHS3PosY;
+extern vmCvar_t etj_CHS3HideLabels;
+
 // common CHS things
 extern vmCvar_t etj_CHSShadow;
 extern vmCvar_t etj_CHSAlpha;
@@ -2670,6 +2698,8 @@ extern vmCvar_t etj_snapHUDTrueness;
 extern vmCvar_t etj_snapHUDEdgeThickness;
 extern vmCvar_t etj_snapHUDBorderThickness;
 extern vmCvar_t etj_snapHUDActiveIsPrimary;
+extern vmCvar_t etj_snapHUDCrop;
+extern vmCvar_t etj_snapHUDCropOffsets;
 
 extern vmCvar_t etj_gunSway;
 extern vmCvar_t etj_drawScoreboardInactivity;
@@ -2687,6 +2717,10 @@ extern vmCvar_t etj_jumpSpeedsFasterColor;
 extern vmCvar_t etj_jumpSpeedsSlowerColor;
 extern vmCvar_t etj_jumpSpeedsMinSpeed;
 extern vmCvar_t etj_jumpSpeedsTextSize;
+extern vmCvar_t etj_jumpSpeedsMaxJumps;
+extern vmCvar_t etj_jumpSpeedsMaxJumpsPerColumn;
+extern vmCvar_t etj_jumpSpeedsMaxJumpsPerRow;
+extern vmCvar_t etj_jumpSpeedsShowUpmove;
 
 // Strafe quality
 extern vmCvar_t etj_drawStrafeQuality;
@@ -2765,12 +2799,16 @@ extern vmCvar_t etj_onDemoPlaybackEnd;
 extern vmCvar_t etj_HUD_noLerp;
 
 extern vmCvar_t etj_useExecQuiet;
+extern vmCvar_t etj_mapAutoexecDir;
 
 extern vmCvar_t etj_hideFlamethrowerEffects;
 
 extern vmCvar_t etj_ccMenu_filename;
 extern vmCvar_t etj_ccMenu_rememberPage;
 extern vmCvar_t etj_ccMenu_autoClose;
+extern vmCvar_t etj_ccMenu_width;
+extern vmCvar_t etj_ccMenu_browseWithOpen;
+extern vmCvar_t etj_ccMenu_showEmptyPages;
 
 //
 // cg_main.c
@@ -2809,6 +2847,12 @@ qboolean CG_GetWeaponTag(int clientNum, const char *tagname,
 void CG_EncodeQP(const char *in, char *out, int maxlen);
 void CG_DecodeQP(char *line);
 
+namespace ETJump {
+const char *cvarName(const vmCvar_t *cvar);
+const char *cvarDefaultString(const vmCvar_t *cvar);
+void resetCvar(const vmCvar_t *cvar);
+} // namespace ETJump
+
 //
 // cg_view.c
 //
@@ -2839,13 +2883,15 @@ void CG_SetupDlightstyles();
 // cg_drawtools.c
 //
 void CG_AdjustFrom640(float *x, float *y, float *w, float *h);
+void CG_FillRect(const rectDef_t &rect, const float *color);
 void CG_FillRect(float x, float y, float width, float height,
                  const float *color);
 void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
                      float fov, vec4_t const color);
 void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
                         float fov, vec4_t const color, bool borderOnly,
-                        float borderThickness);
+                        float borderThickness, std::optional<float> minX,
+                        std::optional<float> maxX);
 void drawLineDDA(float x0, float y0, float x1, float y1, const vec4_t color);
 void drawLineDDA(float x0, float y0, float x1, float y1, float w,
                  const vec4_t color);
@@ -2928,6 +2974,7 @@ void UI_DrawProportionalString(int x, int y, const char *str, int style,
                                vec4_t color);
 
 // new hud stuff
+void CG_DrawRect(const rectDef_t &rect, float size, const float *color);
 void CG_DrawRect(float x, float y, float width, float height, float size,
                  const float *color);
 void CG_DrawRect_FixedBorder(float x, float y, float width, float height,
@@ -3164,7 +3211,9 @@ void CG_AddDebris(vec3_t origin, vec3_t dir, int speed, int duration,
                   int count);
 //----(SA) done
 
-// void CG_ClientDamage( int entnum, int enemynum, int id );
+namespace ETJump {
+void portalTrail(const vec3_t start, const vec3_t end, const vec3_t color);
+}
 
 //
 // cg_marks.c

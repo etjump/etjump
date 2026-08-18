@@ -30,16 +30,11 @@
 #include <array>
 
 #include "etj_string_utilities.h"
+#include "q_shared.h"
 
 #ifdef GAMEDLL
-  #include "etj_printer.h"
+void QDECL G_LogPrintf(const char *fmt, ...);
 #else
-  #ifdef WIN32
-    #define QDECL __cdecl
-  #else
-    #define QDECL
-  #endif
-
 void QDECL Com_Printf(const char *msg, ...);
 #endif
 
@@ -207,7 +202,7 @@ struct Time {
           "format '%s', using default timestamp.",
           __func__, input, format);
 #ifdef GAMEDLL
-      Printer::logLn(err);
+      G_LogPrintf("%s\n", err.c_str());
 #else
       Com_Printf("%s\n", err.c_str());
 #endif

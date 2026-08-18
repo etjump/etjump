@@ -67,6 +67,11 @@ public:
     return *this;
   }
 
+  constexpr EnumBitset &reset() {
+    bits = 0;
+    return *this;
+  }
+
   constexpr EnumBitset &operator|=(EnumT flag) {
     bits |= static_cast<UnderlyingT>(flag);
     return *this;

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "bg_public.h"
+
 // can't walk on very steep slopes
 inline constexpr float MIN_WALK_NORMAL = 0.7f;
 
@@ -11,9 +13,14 @@ inline constexpr int STEPSIZE = 18;
 // pmove, just to make damn sure we don't have
 // any differences when running on client or server
 typedef struct {
+  vec3_t forward, right, up;
   float frametime;
 
   int msec;
+
+  qboolean walking;
+  qboolean groundPlane;
+  trace_t groundTrace;
 
   float impactSpeed;
 

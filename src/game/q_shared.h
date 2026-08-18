@@ -407,6 +407,18 @@ typedef int fixed16_t;
   #define M_PI 3.14159265358979323846f // matches value in gcc v2 math.h
 #endif
 
+#ifndef M_PIf
+  #define M_PIf 3.14159265358979323846f // matches value in gcc math.h
+#endif
+
+#ifndef M_PI_2f
+  #define M_PI_2f 1.57079632679489661923f // pi/2, matches value in gcc math.h
+#endif
+
+#ifndef M_SQRT2
+  #define M_SQRT2 1.41421356237309504880 // sqrt(2), matches value in gcc math.h
+#endif
+
 inline constexpr int NUMVERTEXNORMALS = 162;
 extern vec3_t bytedirs[NUMVERTEXNORMALS];
 
@@ -657,9 +669,11 @@ void Vector4Scale(const vec4_t in, vec_t scale, vec4_t out);
 void VectorRotate(vec3_t in, vec3_t matrix[3], vec3_t out);
 int Q_log2(int val);
 float Q_atof(const char *str);
+float Q_atof(const std::string &str);
+float Q_atof(std::string_view str);
 int32_t Q_atoi(const char *str);
 int32_t Q_atoi(const std::string &str);
-int32_t Q_atoi(const std::string_view str);
+int32_t Q_atoi(std::string_view str);
 float Q_acos(float c);
 
 int Q_rand(int *seed);

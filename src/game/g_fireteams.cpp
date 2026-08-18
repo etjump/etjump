@@ -1,3 +1,5 @@
+#include <optional>
+
 #include "etj_func_static_client.h"
 #include "g_local.h"
 #include "etj_printer.h"
@@ -6,6 +8,7 @@
 #include "etj_local.h"
 #include "etj_fireteam_countdown.h"
 #include "etj_portalgun_shared.h"
+#include "etj_utilities.h"
 #include "etj_worldspawn.h"
 
 // Gordon
@@ -421,7 +424,8 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update,
   }
 }
 
-// The only way a client should ever be invitied to join a team
+// This or 'inviteMultipleClientsToFireteam' are the only ways a client
+// should ever be invited to a fireteam
 void G_InviteToFireTeam(int entityNum, int otherEntityNum) {
   fireteamData_t *ft;
 
@@ -453,6 +457,80 @@ void G_InviteToFireTeam(int entityNum, int otherEntityNum) {
     g_entities[otherEntityNum].client->pers.invitationClient = entityNum;
     g_entities[otherEntityNum].client->pers.invitationEndTime =
         level.time + 20500;
+  }
+}
+
+static void inviteMultipleClientsToFireteam(const int32_t clientNum,
+                                            const std::optional<team_t> team) {
+  fireteamData_t *ft = nullptr;
+
+  if (!G_IsFireteamLeader(clientNum, &ft)) {
+    Printer::console(clientNum, "You are not the leader of a fireteam\n");
+    return;
+  }
+
+  bool anyoneInvited = false;
+
+  const auto inviteClient = [clientNum,
+                             &anyoneInvited](const int32_t otherNum) {
+    if (G_IsOnFireteam(otherNum, nullptr)) {
+      Printer::console(
+          clientNum,
+          StringUtils::format("Player %s ^7is already on a fireteam\n",
+                              g_entities[otherNum].client->pers.netname));
+      return;
+    }
+
+    trap_SendServerCommand(otherNum, va("invitation %i", clientNum));
+    g_entities[otherNum].client->pers.invitationClient = clientNum;
+    g_entities[otherNum].client->pers.invitationEndTime = level.time + 20500;
+    anyoneInvited = true;
+  };
+
+  for (int32_t i = 0; i < level.numConnectedClients; i++) {
+    const int32_t otherNum = level.sortedClients[i];
+
+    if (otherNum == clientNum) {
+      continue;
+    }
+
+    if (!team.has_value() ||
+        (g_entities + otherNum)->client->sess.sessionTeam == team.value()) {
+      inviteClient(otherNum);
+    }
+  }
+
+  if (!anyoneInvited) {
+    Printer::console(clientNum,
+                     "No invitations sent - no eligible players connected\n");
+    return;
+  }
+
+  // only send the invitation confirmation to the invitee once
+  trap_SendServerCommand(clientNum, va("invitation -1"));
+
+  if (!team.has_value()) {
+    Printer::console(clientNum, "Invited all players to the fireteam\n");
+  } else {
+    // this should not be called with 'TEAM_FREE'
+    assert(team.value() != TEAM_FREE);
+    std::string teamStr;
+
+    switch (team.value()) {
+      case TEAM_AXIS:
+        teamStr = "Axis players";
+        break;
+      case TEAM_ALLIES:
+        teamStr = "Allied players";
+        break;
+      default:
+        teamStr = "Spectators";
+        break;
+    }
+
+    Printer::console(
+        clientNum,
+        StringUtils::format("Invited all %s to the fireteam\n", teamStr));
   }
 }
 
@@ -1125,17 +1203,39 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(
-          selfNum, "usage: fireteam invite <clientname|clientnumber>");
+      const size_t pad = std::strlen("spectator/spectators/s");
+      Printer::console(selfNum, StringUtils::format(
+                                    "usage: fireteam invite <clients>\n\n"
+                                    "'clients' may be specified as follows:\n"
+                                    "- %-*s - invite a specific client\n"
+                                    "- %-*s - invite all Axis players\n"
+                                    "- %-*s - invite all Allied players\n"
+                                    "- %-*s - invite all Spectators\n"
+                                    "- %-*s - invite all connected clients\n",
+                                    pad, "client name or number", pad, "axis/r",
+                                    pad, "allies/allied/b", pad,
+                                    "spectator/spectators/s", pad, "all"));
+      return;
     }
+
     trap_Argv(2, numbuffer, sizeof(numbuffer));
 
-    targetNum = Q_atoi(numbuffer);
-    if (!validClientForFireteam(ent, &targetNum, numbuffer)) {
-      G_ClientPrintAndReturn(selfNum, "Invalid client selected");
-    }
+    if (!Q_stricmp(numbuffer, "all")) {
+      inviteMultipleClientsToFireteam(selfNum, std::nullopt);
+    } else {
+      const team_t team = Utilities::teamFromString(numbuffer);
 
-    G_InviteToFireTeam(selfNum, targetNum);
+      if (team != TEAM_FREE) {
+        inviteMultipleClientsToFireteam(selfNum, team);
+      } else {
+        targetNum = Q_atoi(numbuffer);
+        if (!validClientForFireteam(ent, &targetNum, numbuffer)) {
+          G_ClientPrintAndReturn(selfNum, "Invalid client selected");
+        }
+
+        G_InviteToFireTeam(selfNum, targetNum);
+      }
+    }
   } else if (!Q_stricmp(command, "warn")) {
     char numbuffer[MAX_NAME_LENGTH];
 

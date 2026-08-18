@@ -43,6 +43,14 @@ struct Core {
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 
+class DemoCompatibility;
+class AutoDemoRecorder;
+
+struct Demo {
+  std::unique_ptr<DemoCompatibility> compatibility;
+  std::unique_ptr<AutoDemoRecorder> autoDemoRecorder;
+};
+
 class ClientAuthentication;
 class OperatingSystem;
 class SyscallExt;
@@ -56,19 +64,13 @@ struct Platform {
 class ClientRtvHandler;
 class CustomCommandMenu;
 class Timerun;
+class CommandCompletions;
 
 struct Systems {
   std::unique_ptr<ClientRtvHandler> rtv;
   std::unique_ptr<CustomCommandMenu> customCommandMenu;
   std::shared_ptr<Timerun> timerun;
-};
-
-class DemoCompatibility;
-class AutoDemoRecorder;
-
-struct Demo {
-  std::unique_ptr<DemoCompatibility> compatibility;
-  std::unique_ptr<AutoDemoRecorder> autoDemoRecorder;
+  std::unique_ptr<CommandCompletions> commandCompletions;
 };
 
 class EventLoop;
@@ -76,7 +78,6 @@ class CvarUnlocker;
 class SavePos;
 class ColorParser;
 class TraceUtils;
-class PmoveUtils;
 
 struct Utils {
   std::unique_ptr<EventLoop> eventLoop;
@@ -84,7 +85,6 @@ struct Utils {
   std::unique_ptr<SavePos> savePos;
   std::unique_ptr<ColorParser> colorParser;
   std::unique_ptr<TraceUtils> trace;
-  std::unique_ptr<PmoveUtils> pmove;
 };
 
 class ConsoleShader;
@@ -105,16 +105,25 @@ struct Visuals {
   std::unique_ptr<TrickjumpLines> trickjumpLines;
 };
 
-class AccelColor;
-class CHSDataHandler;
+class CHSData;
+class CGazData;
+class SnaphudData;
+class UpmoveMeterData;
 class SpectatorInfoData;
+class PmoveUtilsV2;
+
+struct HUDData {
+  std::shared_ptr<CGazData> cgaz;
+  std::shared_ptr<SnaphudData> snaphud;
+  std::shared_ptr<UpmoveMeterData> upmove;
+  std::shared_ptr<CHSData> chs;
+  std::shared_ptr<SpectatorInfoData> spectatorInfo;
+  std::unique_ptr<PmoveUtilsV2> pmoveV2;
+};
+
 class TimerunView;
 
 struct HUD {
-  std::shared_ptr<AccelColor> accelColor;
-  std::shared_ptr<CHSDataHandler> chsDataHandler;
-  std::shared_ptr<SpectatorInfoData> spectatorInfoData;
-
   std::vector<std::unique_ptr<IRenderable>> renderables;
   std::unique_ptr<TimerunView> timerunView;
 };
@@ -128,6 +137,12 @@ struct CGameContext {
   Utils utils;
   UI ui;
   Visuals visuals;
+  HUDData hudData;
   HUD hud;
+
+  // communicated by the server
+  std::vector<std::string> serverMapList;
+  // communicated by the server, only the strings needed for callvote commands
+  std::vector<std::string> customVoteLists;
 };
 } // namespace ETJump

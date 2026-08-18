@@ -35,10 +35,12 @@ public:
 #ifdef CGAMEDLL
   const char *flashWindowETLegacy = "trap_SysFlashWindow_Legacy";
   const char *cmdBackupExt = "trap_CmdBackup_Ext_Legacy";
+  const char *commandComplete = "trap_CommandComplete_Legacy";
 
   std::unordered_map<const char *, int> cgameExtensions = {
       {flashWindowETLegacy, 0},
       {cmdBackupExt, 0},
+      {commandComplete, 0},
   };
 
   // defined by SDL2
@@ -48,8 +50,9 @@ public:
     SDL_FLASH_UNTIL_FOCUSED = 2,
   };
 
-  static void trap_SysFlashWindowETLegacy(FlashWindowState state);
+  static void trap_SysFlashWindow(FlashWindowState state);
   static void trap_CmdBackup_Ext();
+  static void trap_CommandComplete(const char *value);
 #endif
 
   // entry point for extensions

@@ -24,38 +24,23 @@
 
 #pragma once
 
-#include <list>
-
-#include "../game/q_shared.h"
-#include "../game/bg_public.h"
+#include "etj_icompletion.h"
 
 namespace ETJump {
-class AccelColor {
+class CallvoteCompletions : public ICompletion {
 public:
-  AccelColor() = default;
-  ~AccelColor() = default;
+  CallvoteCompletions();
 
-  struct StoredSpeed {
-    int time;
-    float speed;
-  };
-
-  enum Style { Simple = 1, Advanced = 2 };
-
-  static void popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds,
-                                 int time);
-  static void setAccelColor(int style, float speed, float alpha,
-                            const pmove_t *pm, const playerState_t *ps,
-                            std::list<StoredSpeed> &storedSpeeds,
-                            const vec3_t &accel, vec4_t &color);
-  static bool lowSpeedOnGround(float speed, int groundEntityNum);
+  [[nodiscard]] bool
+  complete(const std::vector<std::string> &args) const override;
 
 private:
-  static constexpr int ACCEL_COLOR_SMOOTHING_TIME = 250;
-  static constexpr float ACCEL_FOR_SOLID_COLOR = 100;
+  void setupCompletions();
 
-  static float calcAvgAccel(std::list<StoredSpeed> &storedSpeeds);
-  static void calcAccelColor(const pmove_t *pm, const playerState_t *ps,
-                             const vec3_t &accel, vec4_t &outColor);
+  static bool map(const std::vector<std::string> &args);
+  // both randommap and rtv want completions from custom vote names
+  static bool randomMapOrRtv(const std::vector<std::string> &args);
+
+  std::vector<ArgCompletion> argCompletions;
 };
 } // namespace ETJump

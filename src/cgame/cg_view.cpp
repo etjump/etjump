@@ -5,11 +5,14 @@
 
 #include "cg_local.h"
 #include "etj_awaited_command_handler.h"
+#include "etj_cgaz_data.h"
 #include "etj_chs_data.h"
 #include "etj_event_loop.h"
-#include "etj_pmove_utils.h"
+#include "etj_pmove_utils_v2.h"
+#include "etj_snaphud_data.h"
 #include "etj_trickjump_lines.h"
 #include "etj_utilities.h"
+#include "etj_upmove_meter_data.h"
 
 /*
 =============================================================================
@@ -1925,9 +1928,8 @@ static void runFrameEnd() {
     static int lastActivity = -minAutoSpecDelay;
 
     const auto *const ps = getValidPlayerState();
-    const usercmd_t *cmd = cgame.utils.pmove->getUserCmd();
     const auto team = cgs.clientinfo[cg.clientNum].team;
-    const bool moving = cmd->forwardmove || cmd->rightmove || cmd->upmove;
+    const bool moving = ps->stats[STAT_USERCMD_MOVE];
     const bool following = ps->pm_flags & PMF_FOLLOW;
 
     if (team != TEAM_SPECTATOR || (!following && moving) ||
@@ -1939,6 +1941,29 @@ static void runFrameEnd() {
       trap_SendClientCommand("follownext");
       lastActivity = cg.time;
     }
+  }
+}
+
+static void updateHUDData() {
+  if (ETJump::cgame.hudData.pmoveV2->check()) {
+    ETJump::cgame.hudData.pmoveV2->runFrame();
+  }
+
+  if (etj_drawSnapHUD.integer ||
+      ((etj_drawCGaz.integer & 1) && etj_CGaz1DrawSnapZone.integer)) {
+    ETJump::cgame.hudData.snaphud->runFrame();
+  }
+
+  if (etj_drawCGaz.integer) {
+    ETJump::cgame.hudData.cgaz->runFrame();
+  }
+
+  if (ETJump::UpmoveMeterData::check()) {
+    ETJump::cgame.hudData.upmove->runFrame();
+  }
+
+  if (ETJump::CHSData::check()) {
+    ETJump::cgame.hudData.chs->runFrame();
   }
 }
 } // namespace ETJump
@@ -2223,14 +2248,7 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
     trap_SetClientLerpOrigin(cg.refdef.vieworg[0], cg.refdef.vieworg[1],
                              cg.refdef.vieworg[2]);
 
-    // setup pmove for renderables
-    if (ETJump::cgame.utils.pmove->check()) {
-      ETJump::cgame.utils.pmove->runPmove();
-    }
-
-    if (etj_drawCHS1.integer || etj_drawCHS2.integer) {
-      ETJump::cgame.hud.chsDataHandler->runFrame();
-    }
+    ETJump::updateHUDData();
 
     // actually issue the rendering calls
     CG_DrawActive(stereoView);

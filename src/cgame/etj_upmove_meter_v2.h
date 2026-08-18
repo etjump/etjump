@@ -24,63 +24,58 @@
 
 #pragma once
 
-#include <list>
-
 #include "etj_irenderable.h"
-#include "etj_accel_color.h"
-#include "cg_local.h"
 #include "etj_cvar_parser.h"
+#include "etj_pmove_utils_v2.h"
+
+#include "../ui/ui_shared.h"
 
 namespace ETJump {
+class UpmoveMeterData;
 class CvarUpdateHandler;
-class ClientCommandsHandler;
 
-class DrawSpeed : public IRenderable {
-  std::list<AccelColor::StoredSpeed> storedSpeeds;
+class UpmoveMeterV2 : public IRenderable {
+public:
+  UpmoveMeterV2(const std::shared_ptr<UpmoveMeterData> &upmoveMeterData,
+                const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  ~UpmoveMeterV2() override;
 
-  float maxSpeed{0};
-  float currentSpeed{};
-  std::string speedStr;
-  float y{};
-  float w{};
-  CvarValue::Size size{};
+  bool beforeRender() override;
+  void render() const override;
 
-  enum Alignment {
-    Left = 1,
-    Right = 2,
-  };
-
-  vec3_t lastSpeed{};
-  vec3_t accel{};
-  vec4_t speedColor{};
-
-  const playerState_t *ps = &cg.predictedPlayerState;
-  const pmove_t *pm{};
-  int textStyle{};
-  int lastUpdateTime{0};
-  int accelColorStyle{};
-  bool playing{};
-
-  [[nodiscard]] std::string getSpeedString() const;
-
-  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
-  std::shared_ptr<ClientCommandsHandler> consoleCommands;
-
-  void resetMaxSpeed();
-  void setTextStyle(const vmCvar_t *cvar);
-  void setAccelColorStyle(const vmCvar_t *cvar);
-  void setSize(const vmCvar_t *cvar);
-
+private:
   void startListeners();
-  static void parseColor(const std::string &color, vec4_t &out);
+  void setTextSize(const vmCvar_t &cvar);
+
   static bool canSkipDraw();
 
-public:
-  DrawSpeed(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
-            const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
-  ~DrawSpeed() override;
+  struct Graph {
+    int32_t preDelay;
+    int32_t postDelay;
+    int32_t fullDelay;
+    int32_t absMaxDelay;
 
-  void render() const override;
-  bool beforeRender() override;
+    rectDef_t rect;
+    float upHeight;
+    float downHeight;
+
+    vec4_t colorBg;
+    vec4_t colorPreJump;
+    vec4_t colorPostJump;
+    vec4_t colorOnGround;
+    vec4_t colorOutline;
+  };
+
+  Graph graph{};
+
+  float textX{};
+  float textH{};
+  float textHeightOffset{};
+  CvarValue::Size textSize{};
+  int32_t textStyle{};
+  vec4_t colorText{};
+
+  std::shared_ptr<UpmoveMeterData> upmoveMeterData;
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };
 } // namespace ETJump

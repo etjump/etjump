@@ -41,6 +41,11 @@ public:
     float x;
     float y;
   };
+
+  struct Pair {
+    float val1;
+    float val2;
+  };
 };
 
 class CvarValueParser {

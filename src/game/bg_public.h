@@ -468,27 +468,6 @@ typedef struct {
   float noclipScale;
   bool isJumpLand;
 
-  // ETJump: exported values from pmove_t & pml_t for cgame drawing
-  int tracemask;
-  qboolean walking;
-  qboolean groundPlane;
-  trace_t groundTrace;
-  int waterlevel;
-  vec3_t mins, maxs;
-
-  vec3_t previous_velocity;
-  vec3_t forward, right, up;
-  float frametime;
-  qboolean ladder;
-
-  vec3_t velocity; // we need to store this before PM_Accelerate scales
-                   // it back to preserve the true effect friction has
-                   // on ground speed
-
-  float scale;
-  float scaleAlt; // cmdScale without upmove component
-  float accel;
-
   // timestamp adrenaline should expire at
   int adrenalineTime;
 
@@ -561,12 +540,6 @@ typedef struct {
   qboolean noActivateLean;
   bool noPanzerAutoswitch;
 
-  qboolean walking;
-  qboolean groundPlane;
-  trace_t groundTrace;
-
-  vec3_t forward, right, up;
-
   // callbacks to test the world
   // these will be different functions during game and cgame
   void (*trace)(trace_t *results, const vec3_t start, const vec3_t mins,
@@ -591,6 +564,15 @@ bool canFireWeapon(const playerState_t *ps);
 
 inline constexpr int8_t CMDSCALE_DEFAULT = 127;
 inline constexpr int8_t CMDSCALE_WALK = 64;
+
+// ms before jump is allowed again
+inline constexpr int JUMP_DELAY_TIME = 850;
+// ms before jump is allowed after standing up from prone
+inline constexpr int32_t PRONE_JUMP_DELAY_TIME = 650;
+// ms before player is allowed to stand up after going prone
+inline constexpr int32_t PRONE_DELAY_TIME = 750;
+
+inline constexpr float TRACE_LADDER_DIST = 48.0f;
 
 //===================================================================================
 
@@ -1975,7 +1957,8 @@ bool BG_DropItems(int contents, int shared);
 inline constexpr float OVERCLIP = 1.001f;
 
 //----(SA)	removed PM_ammoNeeded 11/27/00
-void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce);
+void PM_ClipVelocity(const vec3_t in, const vec3_t normal, vec3_t out,
+                     float overbounce);
 
 typedef enum {
   FOOTSTEP_NORMAL,
@@ -2562,6 +2545,8 @@ typedef enum {
 
   // fireteam savelimit input box
   UIMENU_INGAME_FT_SAVELIMIT,
+
+  UIMENU_INGAME_PRIVATE_MESSAGE,
 } uiMenuCommand_t;
 
 void BG_AdjustAAGunMuzzleForBarrel(vec_t *origin, vec_t *forward, vec_t *right,
@@ -2965,6 +2950,9 @@ enum class PlayerStance {
   Prone = 2,
 };
 } // namespace ETJump
+
+inline constexpr int32_t G_GRAVITY = 800;
+inline constexpr int32_t G_SPEED = 320;
 
 inline constexpr int JUMP_VELOCITY = 270;
 // FIXME: this is incorrect when ps.speed is modified

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../game/q_shared.h"
+#include "../game/etj_syscalls.h"
 
 // allow a lot of command backups for very fast systems
 // multiple commands may be combined into a single packet, so this
@@ -301,8 +302,7 @@ typedef enum {
   //	void (*CG_EventHandling)(int type, qboolean fForced);
 
   CG_GET_TAG,
-  //	qboolean CG_GetTag( int clientNum, char *tagname, orientation_t
-  //*or );
+  //	qboolean CG_GetTag( int clientNum, char *tagname, orientation_t *or );
 
   CG_CHECKEXECKEY,
 
@@ -310,10 +310,15 @@ typedef enum {
 
   // zinx
   CG_MESSAGERECEIVED,
-  //	void (*CG_MessageReceived)( const char *buf, int buflen, int
-  // serverTime
-  //);
-  // -zinx
+  //	void (*CG_MessageReceived)( const char *buf, int buflen, int serverTime
+  //); -zinx
+
+  // padding for engine extensions VM_Calls, matching ET: Legacy padding
+  // ETe does not currently have any extensions that add new exports to cgame
+  CG_ETJUMP_CUSTOM = MOD_EXPORT_PADDING,
+
+  CG_CONSOLE_COMPLETE_ARGUMENT,
+  // bool ETJump::CommandCompletions::completeArgument();
 
 } cgameExport_t;
 

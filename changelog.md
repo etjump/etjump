@@ -1,3 +1,75 @@
+# ETJump 3.6.0
+
+## Added
+* `etj_ccMenu_width` cvar to set width of custom command menu (**204 - 620**) [#1917](https://github.com/etjump/etjump/pull/1917)
+* `etj_ccMenu_showEmptyPages` cvar to toggle showing empty pages in custom command menu (default **0**) [#1918](https://github.com/etjump/etjump/pull/1918)
+* `etj_ccMenu_browseWithOpen` cvar to make `openCustomCommandMenu` command browse to next page when custom command menu is open [#1917](https://github.com/etjump/etjump/pull/1917)
+* left/right arrow navigation for previous/next page in custom command menu, respectively [#1917](https://github.com/etjump/etjump/pull/1917)
+* server info button in quick connect menu [#1933](https://github.com/etjump/etjump/pull/1933)
+* new portal trail shaders [#1928](https://github.com/etjump/etjump/pull/1928)
+* `etj_snapHUDCrop` cvar to crop snaphud drawing against the current strafe direction [#1952](https://github.com/etjump/etjump/pull/1952)
+  * **1** - crop when moving, **2** - crop always
+  * `etj_snapHUDCropOffsets <center> <edge>` offsets the cropping points (**0 - 320**, two values required)
+* `record-details` command to view detailed information about a timerun record [#1927](https://github.com/etjump/etjump/pull/1927)
+* `etj_jumpSpeedsMaxJumps` cvar to set maximum number of jumps in jump speeds list (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
+* `etj_jumpSpeedsMaxJumpsPerColumn` cvar to set maximum number of jumps in jump speeds list column (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
+* `etj_jumpSpeedsMaxJumpsPerRow` cvar to set maximum number of jumps in jump speeds list row (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
+* `etj_jumpSpeedsShowUpmove` cvar to display full upmove values next to jump speeds [#1959](https://github.com/etjump/etjump/pull/1959)
+* `etj_drawCHS3` + related cvars - same as CHS2, just a different set of data [#1924](https://github.com/etjump/etjump/pull/1924)
+* `etj_CHS2/3HideLabels` cvar to toggle drawing info labels on CHS2/3, respectively [#1924](https://github.com/etjump/etjump/pull/1924)
+* CHS infos **70 - 74** to display upmove values [#1953](https://github.com/etjump/etjump/pull/1953)
+* `modelscale/modelscale_vec` support for `func_static_client` [#1965](https://github.com/etjump/etjump/pull/1965)
+* `angle/angles` support for `func_static_client` (sets model angle) [#1965](https://github.com/etjump/etjump/pull/1965)
+* `enabled/disabled` mapscript triggers for `func_static_client` [#1962](https://github.com/etjump/etjump/pull/1962)
+* spawnflag **32** for `func_static_client` to mimic behavior of `func_portaltarget` [#1966](https://github.com/etjump/etjump/pull/1966)
+  * if set, `portalsize`  key is also supported
+* in-game menu for sending private messages, opens with `privateMessage` console command [#1938](https://github.com/etjump/etjump/pull/1938)
+  * allows sending extended ASCII characters in private messages
+* dynamically sized scrollbars for UI [#1958](https://github.com/etjump/etjump/pull/1958)
+* `etj_speed/MaxSpeedPrecision` cvar to set the number of decimals on speed/max speed meter, respectively (**0 - 6**, default **0**) [#1940](https://github.com/etjump/etjump/pull/1940)
+* `etj_CHS1DistanceScale` cvar to scale the distance of CHS1 infos from crosshair (**0.25 - 10.0**) [#1924](https://github.com/etjump/etjump/pull/1924)
+* `etj_portalTrailTime` cvar to set lifetime of portal trails (in milliseconds, **0 - 10000**, default **400**) [#1928](https://github.com/etjump/etjump/pull/1928)
+* tab completion support for arguments to some mod commands (ET: Legacy only) [#1958](https://github.com/etjump/etjump/pull/1968)
+* `etj/g_mapAutoexecDir` cvar to set directory to load map-specific autoexec files from (client/server, respectively) [#1916](https://github.com/etjump/etjump/pull/1916)
+
+## Changed
+* changing `etj_ccMenu_filename` resets custom command menu to first page [#1918](https://github.com/etjump/etjump/pull/1918)
+* `fireteam invite` accepts `all` or team name as an argument to invite multiple clients to fireteam [#1919](https://github.com/etjump/etjump/pull/1919)
+* `name` is now optional for custom command entries [#1923](https://github.com/etjump/etjump/pull/1923)
+  * the actual command is drawn as the name in the menu if `name` is empty
+* `etj_drawAccel` is disabled in spec/demo playback (in some scenarios) due to interpolation inaccuracy [#1921](https://github.com/etjump/etjump/pull/1921)
+  * demo playback drawing is enabled if demo was recorded at `sv_fps/snaps 125`, and not spectating
+* enabled advanced accel coloring for ETJump speed meter & accel meter on demo playback [#1921](https://github.com/etjump/etjump/pull/1921)
+  * only enabled if demo was recorded at `sv_fps/snaps 125`, and not spectating
+* snaphud shows proper zones for crouch/prone while on ground [#1921](https://github.com/etjump/etjump/pull/1921)
+* `etj_drawspeed2` turns white if `etj_speedColorUsesAccel` is enabled while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
+* scrollbar no longer draws on listboxes if it's not needed [#1958](https://github.com/etjump/etjump/pull/1958)
+* server info menu displays more characters for values/player names [#1933](https://github.com/etjump/etjump/pull/1933)
+* removed quotes from player names in server info menu [#1933](https://github.com/etjump/etjump/pull/1933)
+* mod bundled mapscript fixes are now always loaded unless server overrides them [#1964](https://github.com/etjump/etjump/pull/1964)
+
+## Fixed
+* CGaz was rendering 1 frame behind while playing [#1921](https://github.com/etjump/etjump/pull/1921)
+* snaphud had ~0.05 degree inaccuracy at snapzone edges [#1921](https://github.com/etjump/etjump/pull/1921)
+* `etj_CGaz1DrawSnap` was not fully accurate [#1921](https://github.com/etjump/etjump/pull/1921)
+* strafe quality scored frames with upmove held with full score [#1921](https://github.com/etjump/etjump/pull/1921)
+  * as a result, overall scores are now slightly lower, on average ~0.7% with a decent sample size
+* interpolated strafe quality broke non-interpolated CGaz [#1921](https://github.com/etjump/etjump/pull/1921)
+* jump speed list showed unrelated jump speeds when joining team/switching followed client [#1922](https://github.com/etjump/etjump/pull/1922)
+* jump speed list colors were not updating for existing jumps, and required a jump event to trigger color change [#1922](https://github.com/etjump/etjump/pull/1922)
+* options -> game menu updated player name on every keypress, triggering kick for rename spam [#1956](https://github.com/etjump/etjump/pull/1956)
+* `etj_speedAlpha` and `etj_accelAlpha` were calculated incorrectly [#1921](https://github.com/etjump/etjump/pull/1921)
+* `etj_accelColorUsesAccel` ignored `etj_accelAlpha` while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
+* `etj_drawAccel` showed incorrect accel values for 1 frame after noclip ended [#1921](https://github.com/etjump/etjump/pull/1921)
+* `!tokens delete` did not work for token indices > 6 [#1948](https://github.com/etjump/etjump/pull/1948)
+* `!kick` did not concatenate arguments for `reason` parameter [#1949](https://github.com/etjump/etjump/pull/1949)
+* server side `autoexec_mapname.cfg` leaked a file handle [#1939](https://github.com/etjump/etjump/pull/1939)
+* `fireteam` usage print was missing some options [#1969](https://github.com/etjump/etjump/pull/1969)
+* server info menu could not be refreshed on localhost [#1933](https://github.com/etjump/etjump/pull/1933)
+* help print for private messages was not working if sent from server console [#1945](https://github.com/etjump/etjump/pull/1945)
+* various feedback prints were colored by user input [#1947](https://github.com/etjump/etjump/pull/1947) [#1951](https://github.com/etjump/etjump/pull/1951)
+* potential crash when `callvote map` vote passed [#1954](https://github.com/etjump/etjump/pull/1954)
+
 # ETJump 3.5.3
 
 ## Fixed

@@ -2567,12 +2567,33 @@ static void funcStaticClient(centity_t *cent) {
 
   refEntity_t ent{};
 
+  VectorCopy(cent->lerpOrigin, ent.origin);
+  VectorCopy(cent->lerpOrigin, ent.oldorigin);
+
+  // 'angle/angles' support only if 'model2' is used,
+  // inline models don't like when you set angles to them
+  if (es->modelindex2) {
+    VectorCopy(es->angles, cent->lerpAngles);
+  }
+
+  // NOTE: this must be called before checking for 'modelscale',
+  // so that we scale correct axis values!
+  AnglesToAxis(cent->lerpAngles, ent.axis);
+
   // 'es->density' contains either model or shader index,
   // these are mutually exclusive so if 'es->modelindex2' is set,
   // it will be a model index, otherwise shader index
   if (es->modelindex2) {
     ent.hModel =
         hidden ? cgs.gameModels[es->density] : cgs.gameModels[es->modelindex2];
+
+    // apply 'modelscale/modelscale_vec' if set
+    if (!VectorCompare(es->angles2, vec3_origin)) {
+      VectorScale(ent.axis[0], es->angles2[0], ent.axis[0]);
+      VectorScale(ent.axis[1], es->angles2[1], ent.axis[1]);
+      VectorScale(ent.axis[2], es->angles2[2], ent.axis[2]);
+      ent.nonNormalizedAxes = qtrue;
+    }
   } else {
     ent.hModel = cgs.inlineDrawModel[es->modelindex];
 
@@ -2580,10 +2601,6 @@ static void funcStaticClient(centity_t *cent) {
       ent.customShader = cgs.gameShaders[es->density];
     }
   }
-
-  VectorCopy(cent->lerpOrigin, ent.origin);
-  VectorCopy(cent->lerpOrigin, ent.oldorigin);
-  AnglesToAxis(cent->lerpAngles, ent.axis);
 
   ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
   trap_R_AddRefEntityToScene(&ent);

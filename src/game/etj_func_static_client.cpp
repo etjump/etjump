@@ -22,16 +22,12 @@
  * SOFTWARE.
  */
 
+#include <algorithm>
+
 #include "etj_func_static_client.h"
 #include "etj_entity_utilities_shared.h"
 
 namespace ETJump {
-inline constexpr int32_t SF_START_INVIS = 1 << 0;
-inline constexpr int32_t SF_PAIN = 1 << 1;
-inline constexpr int32_t SF_GIB_INSIDE = 1 << 2;
-inline constexpr int32_t SF_FT_TEAMJUMP_SYNC = 1 << 3;
-inline constexpr int32_t SF_CONSUME_PORTALS = 1 << 4;
-
 /*
  * 'ent->s.effect1Time' and 'ent->s.effect2Time' are treated as boolean
  * bitsets by this entity. Clients 0-31 map to 'effect1Time',
@@ -56,12 +52,12 @@ void FuncStaticClient::spawn(gentity_t *ent) {
   ent->s.eType = ET_STATIC_CLIENT;
 
   // hide by default for all clients if spawnflag 1 is set
-  if (ent->spawnflags & SF_START_INVIS) {
+  if (ent->spawnflags & Spawnflags::START_INVIS) {
     ent->s.effect1Time = INT_MAX;
     ent->s.effect2Time = INT_MAX;
   }
 
-  if (ent->spawnflags & SF_PAIN) {
+  if (ent->spawnflags & Spawnflags::PAIN) {
     ent->pain = pain;
     ent->takedamage = qtrue;
     // pretty sure this is useless but 'func_static' does it as well
@@ -71,7 +67,7 @@ void FuncStaticClient::spawn(gentity_t *ent) {
 
   char *s = nullptr;
 
-  // 'model2' support so we can also use models
+  // 'model2' support so we can also use models (set via 'InitMover')
   // NOTE: using 'ent->s.density' for both 'offModel' and 'offShader',
   // since they are mutually exclusive - client knows how to interpret this
   // by checking if 'ent->s.modelindex2' is set or not
@@ -80,11 +76,28 @@ void FuncStaticClient::spawn(gentity_t *ent) {
     if (G_SpawnString("offModel", "", &s)) {
       ent->s.density = G_ModelIndex(s);
     }
+
+    vec3_t modelscale{};
+
+    // 'modelscale/modelscale_vec' support, stored in 'angles2'
+    // 'modelscale_vec' is preferred over regular 'modelscale'
+    if (G_SpawnVector("modelscale_vec", "1 1 1", modelscale)) {
+      VectorCopy(modelscale, ent->s.angles2);
+    } else if (G_SpawnFloat("modelscale", "1", &modelscale[0])) {
+      modelscale[1] = modelscale[0];
+      modelscale[2] = modelscale[0];
+      VectorCopy(modelscale, ent->s.angles2);
+    }
   } else {
     // custom shader when the brush is in "off" state
     if (G_SpawnString("offShader", "", &s)) {
       ent->s.density = G_ShaderIndex(s);
     }
+  }
+
+  if (ent->spawnflags & Spawnflags::PORTAL_TARGET &&
+      G_SpawnInt("portalsize", "0", &ent->count)) {
+    ent->count = std::clamp(ent->count, 0, 512);
   }
 }
 
@@ -95,6 +108,7 @@ void FuncStaticClient::use(gentity_t *self, [[maybe_unused]] gentity_t *other,
   }
 
   const int32_t clientNum = ClientNum(activator);
+  self->activator = activator;
 
   if (clientNum < MAX_CLIENTS / 2) {
     COM_BitCheck(&self->s.effect1Time, clientNum) ? turnOn(self, clientNum)
@@ -128,14 +142,18 @@ void FuncStaticClient::turnOn(gentity_t *self, const int32_t clientNum) {
     COM_BitClear(&self->s.effect2Time, clientNum);
   }
 
-  if (self->spawnflags & SF_GIB_INSIDE &&
+  if (self->spawnflags & Spawnflags::GIB_INSIDE &&
       activatorIsInsideEnt(self, clientNum)) {
     G_Damage(g_entities + clientNum, self, self, nullptr, nullptr, 9999,
              DAMAGE_NO_PROTECTION, MOD_CRUSH);
   }
 
-  if (self->spawnflags & SF_CONSUME_PORTALS) {
+  if (self->spawnflags & Spawnflags::CONSUME_PORTALS) {
     deleteTouchingPortals(self, clientNum);
+  }
+
+  if (self->scriptName) {
+    scriptEvent(self, "enabled");
   }
 }
 
@@ -144,6 +162,10 @@ void FuncStaticClient::turnOff(gentity_t *self, const int32_t clientNum) {
     COM_BitSet(&self->s.effect1Time, clientNum);
   } else {
     COM_BitSet(&self->s.effect2Time, clientNum);
+  }
+
+  if (self->scriptName) {
+    scriptEvent(self, "disabled");
   }
 }
 
@@ -178,7 +200,7 @@ void FuncStaticClient::syncToFireteamLeaderState(const int32_t clientNum,
       continue;
     }
 
-    if (!(ent->spawnflags & SF_FT_TEAMJUMP_SYNC)) {
+    if (!(ent->spawnflags & Spawnflags::FT_TEAMJUMP_SYNC)) {
       continue;
     }
 
@@ -207,6 +229,18 @@ void FuncStaticClient::deleteTouchingPortals(const gentity_t *self,
       trap_EntityContact(activator->portalRed->r.currentOrigin,
                          activator->portalRed->r.currentOrigin, self)) {
     G_FreeEntity(activator->portalRed);
+  }
+}
+
+void FuncStaticClient::scriptEvent(gentity_t *self, const char *trigger) {
+  assert(self->activator);
+
+  const team_t team = self->activator->client->sess.sessionTeam;
+
+  if (team == TEAM_ALLIES || team == TEAM_AXIS) {
+    G_Script_ScriptEvent(self, trigger, team == TEAM_AXIS ? "axis" : "allies");
+  } else {
+    G_Script_ScriptEvent(self, trigger, nullptr);
   }
 }
 } // namespace ETJump

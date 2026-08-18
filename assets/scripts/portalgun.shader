@@ -68,7 +68,7 @@ models/weapons2/portalgun/electricity
         rgbgen wave triangle .8 0.5 0 0.1
         tcMod scroll 0 0.8
         rgbGen const ( 1.0 0.3 0.1 )
-    }   
+    }
     {
         map models/weapons2/portalgun/zap_scroll.tga
         blendFunc GL_ONE GL_ONE
@@ -76,7 +76,7 @@ models/weapons2/portalgun/electricity
         tcMod scale  -1 1
         tcMod scroll 0 0.8
         rgbGen const ( 1.0 0.3 0.1 )
-    }   
+    }
     {
         map models/weapons2/portalgun/zap_scroll2a.tga
         blendFunc GL_ONE GL_ONE
@@ -84,14 +84,14 @@ models/weapons2/portalgun/electricity
         tcMod scale  -1 1
         tcMod scroll 4 0.8
         rgbGen const ( 1.0 0.3 0.1 )
-    }   
+    }
     {
         map models/weapons2/portalgun/zap_scroll2a.tga
         blendFunc GL_ONE GL_ONE
         rgbgen wave triangle 1 0.2 0 0.2
         tcMod scroll -1.2 0.8
         rgbGen const ( 1.0 0.3 0.1 )
-    }   
+    }
     }
 
 models/weapons2/portalgun/portalgun_3rdP
@@ -203,5 +203,18 @@ gfx/misc/portal_yellow
 		rgbGen identityLighting
 		tcMod rotate -100
 		tcMod stretch sin 1 0.05 1 0.7
+	}
+}
+
+gfx/misc/portal_trail
+{
+	nopicmip
+	cull none
+	sort nearest
+	{
+		map gfx/misc/portal_trail.tga
+		blendFunc GL_ONE GL_ONE
+		rgbGen vertex
+		tcMod scroll -4 0
 	}
 }

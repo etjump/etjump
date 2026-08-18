@@ -280,7 +280,7 @@ void CG_Respawn(qboolean revived) {
     // clear spectatorinfo lists on team switch, so we don't carry over
     // the data from the client we just spectated, if switching from spec
     if (oldTeam == TEAM_SPECTATOR) {
-      ETJump::cgame.hud.spectatorInfoData->clearData();
+      ETJump::cgame.hudData.spectatorInfo->clearData();
     }
 
     oldTeam = cgs.clientinfo[cg.clientNum].team;

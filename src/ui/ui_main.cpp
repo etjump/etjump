@@ -184,6 +184,7 @@ void AssetCache() {
   uiInfo.uiDC.Assets.fxPic[5] = trap_R_RegisterShaderNoMip(ART_FX_CYAN);
   uiInfo.uiDC.Assets.fxPic[6] = trap_R_RegisterShaderNoMip(ART_FX_WHITE);
   uiInfo.uiDC.Assets.scrollBar = trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR);
+
   uiInfo.uiDC.Assets.scrollBarArrowDown =
       trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWDOWN);
   uiInfo.uiDC.Assets.scrollBarArrowUp =
@@ -192,8 +193,16 @@ void AssetCache() {
       trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWLEFT);
   uiInfo.uiDC.Assets.scrollBarArrowRight =
       trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWRIGHT);
-  uiInfo.uiDC.Assets.scrollBarThumb =
-      trap_R_RegisterShaderNoMip(ASSET_SCROLL_THUMB);
+
+  uiInfo.uiDC.Assets.scrollBarArrowDownActive =
+      trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWDOWN_ACTIVE);
+  uiInfo.uiDC.Assets.scrollBarArrowUpActive =
+      trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWUP_ACTIVE);
+  uiInfo.uiDC.Assets.scrollBarArrowLeftActive =
+      trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWLEFT_ACTIVE);
+  uiInfo.uiDC.Assets.scrollBarArrowRightActive =
+      trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWRIGHT_ACTIVE);
+
   uiInfo.uiDC.Assets.sliderBar = trap_R_RegisterShaderNoMip(ASSET_SLIDER_BAR);
   uiInfo.uiDC.Assets.sliderThumb =
       trap_R_RegisterShaderNoMip(ASSET_SLIDER_THUMB);
@@ -3495,41 +3504,74 @@ void UI_RunMenuScript(const char **args) {
       return;
     }
     if (Q_stricmp(name, "ServerStatus") == 0) {
-      // the server info dialog has been turned into a modal thing
-      // it can be called in several situations
-      if (trap_Cvar_VariableValue("ui_serverBrowser") == 1) {
-        // legacy, from the server browser
-        trap_LAN_GetServerAddressString(
-            ui_netSource.integer,
-            uiInfo.serverStatus
-                .displayServers[uiInfo.serverStatus.currentServer],
-            uiInfo.serverStatusAddress, sizeof(uiInfo.serverStatusAddress));
-        UI_BuildServerStatus(qtrue);
-      } else {
-        // use com_errorDiagnoseIP otherwise
-        s = UI_Cvar_VariableString("com_errorDiagnoseIP");
-        if (strlen(s) && strcmp(s, "localhost") != 0) {
-          trap_Cvar_VariableStringBuffer("com_errorDiagnoseIP",
-                                         uiInfo.serverStatusAddress,
-                                         sizeof(uiInfo.serverStatusAddress));
-          // this is ugly, have to force a non-zero display server count
-          // to emit the query
-          uiInfo.serverStatus.numDisplayServers = 1;
-          UI_BuildServerStatus(qtrue);
-        } else {
-          // we can't close the menu from here, it's not open yet...
-          // (that's the onOpen script)
-          Com_Printf("Can't show Server Info (not found, or local server)\n");
+      switch (ETJump::ui.serverAction.statusType) {
+        case SERVERSTATUS_PLAYONLINE:
+          // the server info dialog has been turned into a modal thing
+          // it can be called in several situations
+          if (trap_Cvar_VariableValue("ui_serverBrowser") == 1) {
+            // legacy, from the server browser
+            trap_LAN_GetServerAddressString(
+                ui_netSource.integer,
+                uiInfo.serverStatus
+                    .displayServers[uiInfo.serverStatus.currentServer],
+                uiInfo.serverStatusAddress, sizeof(uiInfo.serverStatusAddress));
+            UI_BuildServerStatus(qtrue);
+          } else {
+            // use com_errorDiagnoseIP otherwise
+            s = UI_Cvar_VariableString("com_errorDiagnoseIP");
+            if (strlen(s) && strcmp(s, "localhost") != 0) {
+              trap_Cvar_VariableStringBuffer(
+                  "com_errorDiagnoseIP", uiInfo.serverStatusAddress,
+                  sizeof(uiInfo.serverStatusAddress));
+              // this is ugly, have to force a non-zero display server count
+              // to emit the query
+              uiInfo.serverStatus.numDisplayServers = 1;
+              UI_BuildServerStatus(qtrue);
+            } else {
+              // we can't close the menu from here, it's not open yet...
+              // (that's the onOpen script)
+              Com_Printf(
+                  "Can't show Server Info (not found, or local server)\n");
+            }
+          }
+
+          break;
+        case SERVERSTATUS_QUICKCONNECT: {
+          int32_t index = -1;
+
+          if (String_Parse(args, &name2)) {
+            // menu variables are 1-indexed
+            index = Q_atoi(name2) - 1;
+            ETJump::ui.quickConnect->selectedServer = index;
+          } else {
+            index = ETJump::ui.quickConnect->selectedServer;
+          }
+
+          std::string addr = ETJump::ui.quickConnect->getServerAddress(index);
+
+          if (!addr.empty()) {
+            Q_strncpyz(uiInfo.serverStatusAddress, addr.c_str(),
+                       sizeof(uiInfo.serverStatusAddress));
+            UI_BuildServerStatus(qtrue);
+          }
+
+          break;
         }
+        case SERVERSTATUS_INGAME:
+          uiClientState_t cstate;
+          trap_GetClientState(&cstate);
+          Q_strncpyz(uiInfo.serverStatusAddress, cstate.servername,
+                     sizeof(uiInfo.serverStatusAddress));
+          UI_BuildServerStatus(qtrue);
+          break;
+
+        default:
+          // time to panic, don't do anything unexpected
+          uiInfo.uiDC.Error(ERR_FATAL, "%s: bad server status type '%i'",
+                            __func__, ETJump::ui.serverAction.statusType);
+          break;
       }
-      return;
-    }
-    if (Q_stricmp(name, "InGameServerStatus") == 0) {
-      uiClientState_t cstate;
-      trap_GetClientState(&cstate);
-      Q_strncpyz(uiInfo.serverStatusAddress, cstate.servername,
-                 sizeof(uiInfo.serverStatusAddress));
-      UI_BuildServerStatus(qtrue);
+
       return;
     }
     if (Q_stricmp(name, "ServerStatus_diagnose") == 0) {
@@ -3575,19 +3617,49 @@ void UI_RunMenuScript(const char **args) {
       return;
     }
     if (Q_stricmp(name, "JoinServer") == 0) {
-      if (uiInfo.serverStatus.currentServer >= 0 &&
-          uiInfo.serverStatus.currentServer <
-              uiInfo.serverStatus.numDisplayServers) {
-        Menus_CloseAll();
-        trap_Cvar_Set("ui_connecting", "1");
-        trap_Cvar_Set("cg_thirdPerson", "0 ");
-        trap_Cvar_Set("cg_cameraOrbit", "0");
-        trap_LAN_GetServerAddressString(
-            ui_netSource.integer,
-            uiInfo.serverStatus
-                .displayServers[uiInfo.serverStatus.currentServer],
-            buff, 1024);
-        trap_Cmd_ExecuteText(EXEC_APPEND, va("connect %s\n", buff));
+      switch (ETJump::ui.serverAction.joinType) {
+        case JOINSERVER_PLAYONLINE:
+          if (uiInfo.serverStatus.currentServer >= 0 &&
+              uiInfo.serverStatus.currentServer <
+                  uiInfo.serverStatus.numDisplayServers) {
+            Menus_CloseAll();
+            trap_Cvar_Set("ui_connecting", "1");
+            trap_Cvar_Set("cg_thirdPerson", "0 ");
+            trap_Cvar_Set("cg_cameraOrbit", "0");
+            trap_LAN_GetServerAddressString(
+                ui_netSource.integer,
+                uiInfo.serverStatus
+                    .displayServers[uiInfo.serverStatus.currentServer],
+                buff, 1024);
+            trap_Cmd_ExecuteText(EXEC_APPEND, va("connect %s\n", buff));
+          }
+
+          break;
+        case JOINSERVER_QUICKCONNECT: {
+          int32_t index = -1;
+
+          if (String_Parse(args, &name2)) {
+            // menu variables are 1-indexed
+            index = Q_atoi(name2) - 1;
+            ETJump::ui.quickConnect->selectedServer = index;
+          } else {
+            index = ETJump::ui.quickConnect->selectedServer;
+          }
+
+          std::string command =
+              ETJump::ui.quickConnect->buildConnectCommand(index);
+
+          if (!command.empty()) {
+            trap_Cmd_ExecuteText(EXEC_APPEND, command.c_str());
+          }
+
+          break;
+        }
+        default:
+          // time to panic, don't do anything unexpected
+          uiInfo.uiDC.Error(ERR_FATAL, "%s: bad server join type '%i'",
+                            __func__, ETJump::ui.serverAction.joinType);
+          break;
       }
       return;
     }
@@ -4789,6 +4861,9 @@ void UI_RunMenuScript(const char **args) {
       std::string contents = uiInfo.changelogs[ui_currentChangelog.string];
 
       uiInfo.formattedChangelog = StringUtils::split(contents, "\n");
+      // FIXME: this does not account for whether the scrollbar is drawn or not,
+      // because for that we need to get the number of lines... when formatted,
+      // so we'd need to format everything twice
       uiInfo.formattedChangelog = ETJump::Utilities::fitChangelogLinesToWidth(
           uiInfo.formattedChangelog,
           static_cast<int>(item->window.rect.w - SCROLLBAR_SIZE - 10),
@@ -4822,18 +4897,23 @@ void UI_RunMenuScript(const char **args) {
       return;
     }
 
-    if (!Q_stricmp(name, "quickConnectToServer")) {
+    if (!Q_stricmp(name, "serverActionStatusType")) {
       if (String_Parse(args, &name2)) {
-        // menu variables are 1-indexed
-        std::string command =
-            ETJump::ui.quickConnect->buildConnectCommand(Q_atoi(name2) - 1);
-
-        if (!command.empty()) {
-          trap_Cmd_ExecuteText(EXEC_APPEND, command.c_str());
-        }
+        ETJump::ui.serverAction.statusType = static_cast<int8_t>(Q_atoi(name2));
       } else {
-        Com_Printf(S_COLOR_YELLOW "%s: '%s' called with no arguments!\n",
-                   __func__, name);
+        Com_Printf(S_COLOR_RED "%s: '%s' called with no arguments!\n", __func__,
+                   name);
+      }
+
+      return;
+    }
+
+    if (!Q_stricmp(name, "serverActionJoinType")) {
+      if (String_Parse(args, &name2)) {
+        ETJump::ui.serverAction.joinType = static_cast<int8_t>(Q_atoi(name2));
+      } else {
+        Com_Printf(S_COLOR_RED "%s: '%s' called with no arguments!\n", __func__,
+                   name);
       }
 
       return;
@@ -4876,12 +4956,13 @@ void UI_RunMenuScript(const char **args) {
       const auto toggleButtonState = [&menu](const int index,
                                              const qboolean show) {
         // menu entries are 1-indexed
-        const char *connectBtn =
-            va("btnQuickConnectServer%iConnect", index + 1);
+        const char *joinBtn = va("btnQuickConnectServer%iJoin", index + 1);
+        const char *infoBtn = va("btnQuickConnectServer%iInfo", index + 1);
         const char *editBtn = va("btnQuickConnectServer%iEdit", index + 1);
         const char *deleteBtn = va("btnQuickConnectServer%iDelete", index + 1);
 
-        Menu_ShowItemByName(menu, connectBtn, show);
+        Menu_ShowItemByName(menu, joinBtn, show);
+        Menu_ShowItemByName(menu, infoBtn, show);
         Menu_ShowItemByName(menu, editBtn, show);
         Menu_ShowItemByName(menu, deleteBtn, show);
       };
@@ -5406,7 +5487,30 @@ static int UI_GetServerStatusInfo(const char *serverAddress,
           break;
         }
         *p++ = '\0';
-        name = p;
+
+        // strip out the surrounding quotes from the player name
+        if (*p == '"') {
+          ++p; // skip opening quote
+          name = p;
+          p = strchr(p, '"');
+
+          if (!p) {
+            uiInfo.uiDC.Print(
+                S_COLOR_YELLOW
+                "WARNING: failed to parse players from server info - malformed "
+                "response format, no closing quote on player name!\n");
+            break;
+          }
+
+          *p++ = '\0'; // strip the closing quote
+        } else {
+          // shouldn't happen, names should always be quoted
+          uiInfo.uiDC.Print(S_COLOR_YELLOW
+                            "WARNING: non-standard server info response - no "
+                            "surrounding quotes in player name!\n");
+          name = p;
+        }
+
         Com_sprintf(&info->pings[len],
                     static_cast<int>(sizeof(info->pings)) - len, "%d", i);
         info->lines[info->numLines][0] = &info->pings[len];
@@ -5661,7 +5765,9 @@ static void UI_BuildServerStatus(qboolean force) {
     // reset all server status requests
     trap_LAN_ServerStatus(NULL, NULL, 0);
   }
-  if (cstate.connState < CA_CONNECTED) {
+
+  if (cstate.connState < CA_CONNECTED &&
+      ETJump::ui.serverAction.statusType == SERVERSTATUS_PLAYONLINE) {
     if (uiInfo.serverStatus.currentServer < 0 ||
         uiInfo.serverStatus.currentServer >
             uiInfo.serverStatus.numDisplayServers ||
@@ -7282,9 +7388,11 @@ void _UI_SetActiveMenu(const uiMenuCommand_t menu) {
 
     // ydnar: say, team say, etc
     case UIMENU_INGAME_MESSAGEMODE:
-      // trap_Cvar_Set( "cl_paused", "1" );
+    case UIMENU_INGAME_PRIVATE_MESSAGE:
       trap_Key_SetCatcher(KEYCATCH_UI);
-      Menus_OpenByName("ingame_messagemode");
+      Menus_OpenByName((menu == UIMENU_INGAME_MESSAGEMODE)
+                           ? "ingame_messagemode"
+                           : "ingame_privatemessage");
 
       // special case for chat, we don't really want the cursor to be
       // in the middle of the screen, it would be annoying to have the cursor

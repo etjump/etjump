@@ -84,12 +84,6 @@ inline constexpr int AAS_AREA_TEAM_ALLIES = 0x0040;
 inline constexpr int AAS_AREA_TEAM_AXIS_DISGUISED = 0x0080;
 inline constexpr int AAS_AREA_TEAM_ALLIES_DISGUISED = 0x0100;
 
-// I have no idea how I managed to forget these :D
-// Hopefully no1 will ever notice versions < 2.0.1 have the g_gravity
-// & g_speed cvars :p
-inline constexpr int G_GRAVITY = 800;
-inline constexpr int G_SPEED = 320;
-
 // TODO: relocate, this is a cvar bitflag for g_chatOptions
 inline constexpr int CHAT_OPTIONS_INTERPOLATE_NAME_TAGS = 0x000001;
 
@@ -896,6 +890,8 @@ struct InactivityPos {
 };
 
 inline constexpr int MAX_TOKENS_PER_DIFFICULTY = 32;
+
+inline constexpr char BUNDLED_MAPSCRIPT_DIR[] = "bundled_mapscripts";
 } // namespace ETJump
 
 // client data that stays across multiple respawns, but is cleared
@@ -2127,6 +2123,8 @@ extern vmCvar_t g_adminChat;
 extern vmCvar_t g_chatReplay;
 extern vmCvar_t g_chatReplayMaxMessageAge;
 
+extern vmCvar_t g_mapAutoexecDir;
+
 void trap_Printf(const char *fmt);
 [[noreturn]] void trap_Error(const char *fmt);
 int trap_Milliseconds(void);
@@ -2870,6 +2868,8 @@ const char *findAndReplaceNametags(const char *text, const char *name);
 // returns an entity number for gentity_t or gclient_t pointer
 template <typename T>
 int32_t ClientNum(const T *p) {
+  assert(p);
+
   if constexpr (std::is_same_v<T, gentity_t>) {
     return static_cast<int32_t>(p - g_entities);
   }
@@ -2989,7 +2989,5 @@ public:
 } // namespace ETJump
 
 ///////////////////////////////////////////////////////////////////////////////
-
-inline constexpr size_t BYTES_PER_PACKET = 998;
 
 #endif // G_LOCAL_H

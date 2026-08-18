@@ -24,17 +24,22 @@
 
 #pragma once
 
+#include <map>
+
 #include "etj_irenderable.h"
+#include "etj_custom_command_menu.h"
 
 #include "../ui/ui_shared.h"
 
 namespace ETJump {
 class ClientCommandsHandler;
+class CvarUpdateHandler;
 
 class CustomCommandMenuDrawable : public IRenderable {
 public:
-  explicit CustomCommandMenuDrawable(
-      const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
+  CustomCommandMenuDrawable(
+      const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+      const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~CustomCommandMenuDrawable() override;
 
   bool beforeRender() override;
@@ -48,13 +53,27 @@ public:
   static qboolean checkExecKey(int32_t key, qboolean doAction);
 
 private:
+  using CustomCommandMap =
+      std::map<uint8_t, std::array<CustomCommandMenu::CustomCommand,
+                                   CUSTOM_COMMAND_MENU_PAGE_SIZE>>;
+  enum class BrowseDirection {
+    PREVIOUS = -1,
+    NEXT = 1,
+  };
+
   static uint8_t currentPage;
+  static size_t maxChars;
 
   std::shared_ptr<ClientCommandsHandler> consoleCommands;
+  std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 
   void setupListeners();
   static void openMenu(uint8_t page);
   static void setupPanels();
+  static void resizePanels(float width);
+  static void computeMaxChars();
+  static void findNextPage(const CustomCommandMap &commands,
+                           BrowseDirection dir);
   static bool canSkipDraw();
 };
 } // namespace ETJump

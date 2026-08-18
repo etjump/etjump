@@ -734,7 +734,7 @@ static void CG_ConfigStringModified(void) {
     }
   } else if (num >= CS_PLAYERS && num < CS_PLAYERS + MAX_CLIENTS) {
     CG_NewClientInfo(num - CS_PLAYERS);
-    ETJump::cgame.hud.spectatorInfoData->update(num - CS_PLAYERS);
+    ETJump::cgame.hudData.spectatorInfo->update(num - CS_PLAYERS);
   } else if (num >= CS_DLIGHTS && num < CS_DLIGHTS + MAX_DLIGHT_CONFIGSTRINGS) {
     CG_SetupDlightstyles();
   } else if (num >= shaderStateCs && num < shaderStateCs + shaderStateCsMax) {
@@ -2158,7 +2158,7 @@ static const char *addChatModifications(char *text, const int clientNum,
 
     if (etj_highlight.integer &
         static_cast<int>(ChatHighlightFlags::HIGHLIGHT_FLASH)) {
-      SyscallExt::trap_SysFlashWindowETLegacy(
+      SyscallExt::trap_SysFlashWindow(
           SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
     }
   }
@@ -2239,13 +2239,13 @@ static void CG_ServerCommand(void) {
   }
   if (!strcmp(cmd, "sc0")) {
     CG_ParseScore(true);
-    ETJump::cgame.hud.spectatorInfoData->update(std::nullopt);
+    ETJump::cgame.hudData.spectatorInfo->update(std::nullopt);
     return;
   }
 
   if (!strcmp(cmd, "sc1")) {
     CG_ParseScore(false);
-    ETJump::cgame.hud.spectatorInfoData->update(std::nullopt);
+    ETJump::cgame.hudData.spectatorInfo->update(std::nullopt);
     return;
   }
 

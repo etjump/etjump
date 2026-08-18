@@ -48,6 +48,8 @@ public:
   // if index is invalid, returns an empty string
   [[nodiscard]] std::string buildConnectCommand(int index) const;
 
+  [[nodiscard]] std::string getServerAddress(int32_t index) const;
+
   static constexpr int32_t MAX_QUICKCONNECT_SERVERS = 5;
 
   // label texts are not fixed sized arrays, they are normally allocated
@@ -60,6 +62,8 @@ public:
       serverLabels{};
 
   bool initialRefreshDone;
+  // the currently selected server for menu interactions
+  int selectedServer;
 
 private:
   struct QuickConnectServer {
@@ -86,6 +90,5 @@ private:
   void buildLabelString(int index);
 
   std::vector<QuickConnectServer> servers;
-  int selectedServer; // the currently selected server for editing/deletion
 };
 } // namespace ETJump

@@ -279,6 +279,8 @@ vmCvar_t g_adminChat;
 vmCvar_t g_chatReplay;
 vmCvar_t g_chatReplayMaxMessageAge;
 
+vmCvar_t g_mapAutoexecDir;
+
 // ETLegacy server browser integration
 // os support - this SERVERINFO cvar specifies supported client operating
 // systems on server
@@ -536,6 +538,8 @@ cvarTable_t gameCvarTable[] = {
     {&g_chatReplay, "g_chatReplay", "1", CVAR_ARCHIVE},
     {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "5",
      CVAR_ARCHIVE | CVAR_LATCH},
+
+    {&g_mapAutoexecDir, "g_mapAutoexecDir", "", CVAR_ARCHIVE},
 };
 
 // bk001129 - made static to avoid aliasing
@@ -1472,9 +1476,8 @@ void G_UpdateCvars(void) {
         cv->modificationCount = cv->vmCvar->modificationCount;
 
         if (cv->trackChange && !(cv->cvarFlags & CVAR_LATCH)) {
-          Printer::popupAll(
-              StringUtils::format("Server: ^3%s ^7changed to ^3%s",
-                                  cv->cvarName, cv->vmCvar->string));
+          Printer::popupAll("Server: ^3%s ^7changed to ^3%s", cv->cvarName,
+                            cv->vmCvar->string);
         }
 
         if (cv->teamShader) {
@@ -1565,9 +1568,11 @@ void G_UpdateCvars(void) {
           }
         } else if (cv->vmCvar == &g_mapScriptDir) {
           // prevent admins from setting this to the directory where the game
-          // normally loads mapscripts from, so default mapscripts won't get
-          // loaded as "custom" mapscripts
-          if (!Q_stricmp(g_mapScriptDir.string, "maps")) {
+          // normally loads mapscripts from (or to the bundled mapscript dir),
+          // so default mapscripts won't get loaded as "custom" mapscripts
+          if (!Q_stricmp(g_mapScriptDir.string, "maps") ||
+              !Q_stricmp(g_mapScriptDir.string,
+                         ETJump::BUNDLED_MAPSCRIPT_DIR)) {
             G_Printf(S_COLOR_YELLOW "WARNING: ^7illegal ^3'g_mapScriptDir' "
                                     "^7value, resetting to default\n");
             trap_Cvar_Set(cv->cvarName, cv->defaultString);
@@ -2908,9 +2913,7 @@ void CheckVote() {
   } else if (level.voteInfo.voteNo >=
                  level.numConnectedClients - requiredClients ||
              level.time - level.voteInfo.voteTime >= VOTE_TIME) {
-    std::string voteFailedMsg =
-        StringUtils::format("^3Vote FAILED! ^3(%s)", level.voteInfo.voteString);
-    Printer::popupAll(voteFailedMsg);
+    Printer::popupAll("^3Vote FAILED! ^3(%s)", level.voteInfo.voteString);
     G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
 
     level.voteInfo.voteTime = 0;

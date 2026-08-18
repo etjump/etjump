@@ -29,7 +29,7 @@
 namespace ETJump {
 // portal trail colors
 inline constexpr vec3_t portalBlueTrail = {0.0f, 0.0f, 1.0f};
-inline constexpr vec3_t portalRedTrail = {1.0f, 0.0f, 0.0f};
+inline constexpr vec3_t portalRedTrail = {1.0f, 0.1f, 0.0f};
 inline constexpr vec3_t portalGreenTrail = {0.2f, 1.0f, 0.5f};
 inline constexpr vec3_t portalYellowTrail = {1.0f, 1.0f, 0.0f};
 

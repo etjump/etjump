@@ -6,7 +6,7 @@
 #define MENU_NAME "etjump_settings_hud2_accelspeed"
 #define GROUP_NAME "group_etjump_settings_hud2"
 
-#define NUM_SUBMENUS 9
+#define NUM_SUBMENUS 10
 #define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
 
 menuDef {
@@ -44,14 +44,15 @@ menuDef {
     SIDEBUTTON          (3, "CHS", close MENU_NAME; open etjump_settings_hud2_chs)
     SIDEBUTTON          (4, "CHS 1", close MENU_NAME; open etjump_settings_hud2_chs1)
     SIDEBUTTON          (5, "CHS 2", close MENU_NAME; open etjump_settings_hud2_chs2)
-    SIDEBUTTON_ACTIVE   (6, "ACCEL SPEED", close MENU_NAME; open MENU_NAME)
-    SIDEBUTTON          (7, "JUMP SPEEDS", close MENU_NAME; open etjump_settings_hud2_jumpspeeds)
-    SIDEBUTTON          (8, "STRAFE QUALITY", close MENU_NAME; open etjump_settings_hud2_strafequality)
-    SIDEBUTTON          (9, "UPMOVE METER", close MENU_NAME; open etjump_settings_hud2_upmove)
+    SIDEBUTTON          (6, "CHS 3", close MENU_NAME; open etjump_settings_hud2_chs3)
+    SIDEBUTTON_ACTIVE   (7, "ACCEL SPEED", close MENU_NAME; open MENU_NAME)
+    SIDEBUTTON          (8, "JUMP SPEEDS", close MENU_NAME; open etjump_settings_hud2_jumpspeeds)
+    SIDEBUTTON          (9, "STRAFE QUALITY", close MENU_NAME; open etjump_settings_hud2_strafequality)
+    SIDEBUTTON          (10, "UPMOVE METER", close MENU_NAME; open etjump_settings_hud2_upmove)
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "ACCEL SPEED")
 
-        YESNO               (SETTINGS_ITEM_POS(1), "Draw accel meter:", 0.2, SETTINGS_ITEM_H, "etj_drawAccel", "Draw per-vector acceleration meter\netj_drawAccel")
+        YESNO               (SETTINGS_ITEM_POS(1), "Draw accel meter:", 0.2, SETTINGS_ITEM_H, "etj_drawAccel", "Draw per-vector acceleration meter\nNote: unavailable while spectating\netj_drawAccel")
         CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_accelX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "Accel meter X:", 0.2, SETTINGS_ITEM_H, etj_accelX 320 0 640 10, "Sets X position of acceleration meter\netj_accelX")
         CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_accelY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
@@ -60,7 +61,7 @@ menuDef {
         COMBO               (SETTINGS_COMBO_POS(5), "Accel meter color:", 0.2, SETTINGS_ITEM_H, "etj_accelColor", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets color of acceleration meter\netj_accelColor")
         CVARFLOATLABEL      (SETTINGS_ITEM_POS(6), "etj_accelAlpha", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(6), "Accel meter alpha:", 0.2, SETTINGS_ITEM_H, etj_accelAlpha 1.0 0 1 0.05, "Sets transparency of acceleration meter\netj_speedAlpha")
-        MULTI               (SETTINGS_ITEM_POS(7), "Accel based color:", 0.2, SETTINGS_ITEM_H, "etj_accelColorUsesAccel", cvarFloatList { "Off" 0 "Simple" 1 "Advanced" 2 }, "Color acceleration meter based on accel/decel\nNote: advanced coloring is disabled on spec/demo playback\netj_accelColorUsesAccel")
+        MULTI               (SETTINGS_ITEM_POS(7), "Accel based color:", 0.2, SETTINGS_ITEM_H, "etj_accelColorUsesAccel", cvarFloatList { "Off" 0 "Simple" 1 "Advanced" 2 }, "Color acceleration meter based on accel/decel\nNote: advanced coloring is disabled while spectating\nand on demo playback if acceleration cannot be reliably measured\n(demo was recorded without sv_fps/snaps 125)\netj_accelColorUsesAccel")
         YESNO               (SETTINGS_ITEM_POS(8), "Accel meter shadow:", 0.2, SETTINGS_ITEM_H, "etj_accelShadow", "Draw shadow on acceleration meter\netj_accelShadow")
         MULTI               (SETTINGS_ITEM_POS(9), "Accel meter align:", 0.2, SETTINGS_ITEM_H, "etj_accelAlign", cvarFloatList { "Center" 0 "Left" 1 "Right" 2 }, "Sets alignment of acceleration meter\netj_accelAlign")
 
