@@ -204,13 +204,15 @@ void JumpSpeedsV2::updateJumpSpeeds() {
 }
 
 void JumpSpeedsV2::updateCurrentUpmove() {
-  // this shouldn't ever be true since events are processed before the HUD
-  // is rendered, therefore we should always have at least one jump
-  // when this gets called
-  assert(!jumpSpeeds.empty());
+  // this may be empty if we switch the spectated player,
+  // and they are currently holding jump
+  // early exit is fine here since we already missed the jump event anyway
+  if (jumpSpeeds.empty()) {
+    return;
+  }
 
   const auto &s = cgame.hudData.upmove->getState();
-  jumpSpeeds[jumpSpeeds.size() - 1].upmoveStr = std::to_string(s.fullDelay);
+  jumpSpeeds.back().upmoveStr = std::to_string(s.fullDelay);
 
   if (!s.jumping) {
     pollUpmove = false;
