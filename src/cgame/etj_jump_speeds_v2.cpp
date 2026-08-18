@@ -258,6 +258,7 @@ bool JumpSpeedsV2::beforeRender() {
     // otherwise just queue the reset to happen on next update
     if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR) {
       jumpSpeeds.clear();
+      pollUpmove = false;
     } else {
       resetQueued = true;
     }
@@ -266,9 +267,11 @@ bool JumpSpeedsV2::beforeRender() {
   // if 'clientNum' has switched, it means we're either spectating and changed
   // the followed client, or are joining from spectators (while following)
   // to a team -> instantly clear jump speeds so that unrelated speeds
-  // don't linger on the screen
+  // don't linger on the screen, and stop polling upmove, as any 'EV_JUMP'
+  // event that may have caused us to poll for it is no longer relevant
   if (clientNum != ps->clientNum) {
     jumpSpeeds.clear();
+    pollUpmove = false;
   }
 
   team = static_cast<team_t>(ps->persistant[PERS_TEAM]);
