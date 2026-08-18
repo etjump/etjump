@@ -64,6 +64,7 @@
 * `!tokens delete` did not work for token indices > 6 [#1948](https://github.com/etjump/etjump/pull/1948)
 * `!kick` did not concatenate arguments for `reason` parameter [#1949](https://github.com/etjump/etjump/pull/1949)
 * server side `autoexec_mapname.cfg` leaked a file handle [#1939](https://github.com/etjump/etjump/pull/1939)
+* `fireteam` usage print was missing some options [#1969](https://github.com/etjump/etjump/pull/1969)
 * server info menu could not be refreshed on localhost [#1933](https://github.com/etjump/etjump/pull/1933)
 * help print for private messages was not working if sent from server console [#1945](https://github.com/etjump/etjump/pull/1945)
 * various feedback prints were colored by user input [#1947](https://github.com/etjump/etjump/pull/1947) [#1951](https://github.com/etjump/etjump/pull/1951)
