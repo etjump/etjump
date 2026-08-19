@@ -27,6 +27,18 @@
 #include "g_local.h"
 
 namespace ETJump {
+struct FindEntitiesResult {
+  // false if 'value' is invalid for the given field
+  bool valid = true;
+
+  // true if the field type isn't supported, in which case
+  // parsing should stop entirely
+  bool stopParsing = false;
+
+  // entity numbers of all entities matching the given field/value
+  std::vector<int32_t> entities;
+};
+
 class EntityUtilities {
   static void drawRailBox(const gentity_t *ent,
                           const std::vector<float> &color);
@@ -56,5 +68,11 @@ public:
   // otherwise spawnVars are invalid
   static void storeParsedEntity();
   static const std::vector<std::string> &getParsedEntities();
+
+  // finds all entities matching the given field/value pair,
+  // 'func' is used as the function name prefix in error messages
+  static FindEntitiesResult findEntitiesByField(const std::string &key,
+                                                const std::string &value,
+                                                const char *func);
 };
 } // namespace ETJump
