@@ -1,19 +1,9 @@
 file(GLOB UI_HEADERS "*.h" "*.hpp")
+file(GLOB UI_SOURCES CONFIGURE_DEPENDS "*.cpp")
 
 add_library(ui MODULE
-	"etj_colorpicker.cpp"
-	"etj_demo_queue.cpp"
-	"etj_main.cpp"
-	"etj_menu_integrity_checker.cpp"
-	"etj_quick_connect.cpp"
-	"etj_utilities.cpp"
-	"ui_atoms.cpp"
-	"ui_gameinfo.cpp"
-	"ui_loadpanel.cpp"
-	"ui_main.cpp"
-	"ui_shared.cpp"
-	"ui_syscalls.cpp"
-	"ui_util.cpp"
+	${UI_HEADERS}
+	${UI_SOURCES}
 	"../cgame/etj_color_parser.cpp"
 	"../game/bg_classes.cpp"
 	"../game/bg_misc.cpp"
@@ -25,7 +15,6 @@ add_library(ui MODULE
 	"../game/etj_json_utilities.cpp"
 	"../game/etj_string_utilities.cpp"
 	"../game/etj_syscall_ext_shared.cpp"
-	${UI_HEADERS}
 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")

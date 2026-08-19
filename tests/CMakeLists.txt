@@ -7,7 +7,6 @@ add_executable(tests
 	"../src/cgame/etj_inline_command_parser.cpp"
 	"../src/game/etj_command_parser.cpp"
 	"../src/game/etj_deathrun_system.cpp"
-	"../src/game/etj_deathrun_system.cpp"
 	"../src/game/etj_savepos_shared.cpp"
 	"../src/game/etj_string_utilities.cpp"
 	"../src/game/etj_timerun_shared.cpp"
