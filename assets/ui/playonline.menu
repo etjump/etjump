@@ -11,7 +11,9 @@
 #define GROUP_NAME		"grpPlayOnline"
 
 #define SETUP_SERVERSTATUS uiScript serverActionStatusType SERVERSTATUS_PLAYONLINE ; setcvar ui_serverBrowser 1 ; uiScript ServerStatus
-#define OPEN_SERVERINFO clearFocus ; uiScript uiPreviousMenu MENU_NAME; SETUP_SERVERSTATUS ; uiScript serverActionJoinType JOINSERVER_PLAYONLINE ; open popup_serverinfo
+#define SETUP_JOINTYPE uiScript serverActionJoinType JOINSERVER_PLAYONLINE
+
+#define OPEN_SERVERINFO clearFocus ; uiScript uiPreviousMenu MENU_NAME; SETUP_SERVERSTATUS ; SETUP_JOINTYPE ; open popup_serverinfo
 #define JOIN_SERVER uiScript serverActionJoinType JOINSERVER_PLAYONLINE ; uiScript JoinServer
 
 // Macros //
