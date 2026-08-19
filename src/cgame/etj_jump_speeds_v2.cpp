@@ -193,8 +193,14 @@ void JumpSpeedsV2::updateJumpSpeeds() {
     current.relation = SpeedRelation::SLOWER;
   }
 
-  // start polling upmove value for the current jump
-  pollUpmove = true;
+  // start polling upmove if we're currently drawing the jump speeds
+  // this still gets called even if we don't render anything,
+  // as the event check happens separately from drawing
+  // if we were to unconditionally poll this, the latest jump would
+  // always show '0' as upmove after the drawing is enabled
+  if (etj_drawJumpSpeeds.integer) {
+    pollUpmove = true;
+  }
 }
 
 void JumpSpeedsV2::updateCurrentUpmove() {
