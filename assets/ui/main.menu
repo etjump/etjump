@@ -11,8 +11,10 @@
 #define GROUP_NAME		"grpMain"
 
 #define SETUP_SERVERSTATUS uiScript serverActionStatusType SERVERSTATUS_QUICKCONNECT ; setcvar ui_serverBrowser 0
-#define JOIN_SERVER(x) uiScript serverActionJoinType JOINSERVER_QUICKCONNECT ; uiScript JoinServer x
-#define SERVER_INFO(x) clearFocus ; uiScript uiPreviousMenu MENU_NAME ; SETUP_SERVERSTATUS ; uiScript ServerStatus x ; open popup_serverinfo
+#define SETUP_JOINTYPE uiScript serverActionJoinType JOINSERVER_QUICKCONNECT
+
+#define JOIN_SERVER(x) SETUP_JOINTYPE ; uiScript JoinServer x
+#define SERVER_INFO(x) clearFocus ; uiScript uiPreviousMenu MENU_NAME ; SETUP_SERVERSTATUS ; SETUP_JOINTYPE ; uiScript ServerStatus x ; open popup_serverinfo
 #define EDIT_SERVER(x) uiScript quickConnectSetEditData x ; open etjump_quickconnect_popup_edit
 #define DELETE_SERVER(x) uiScript quickConnectSetEditData x ; open etjump_quickconnect_popup_delete
 

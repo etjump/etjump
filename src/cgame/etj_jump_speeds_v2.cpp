@@ -193,18 +193,26 @@ void JumpSpeedsV2::updateJumpSpeeds() {
     current.relation = SpeedRelation::SLOWER;
   }
 
-  // start polling upmove value for the current jump
-  pollUpmove = true;
+  // start polling upmove if we're currently drawing the jump speeds
+  // this still gets called even if we don't render anything,
+  // as the event check happens separately from drawing
+  // if we were to unconditionally poll this, the latest jump would
+  // always show '0' as upmove after the drawing is enabled
+  if (etj_drawJumpSpeeds.integer) {
+    pollUpmove = true;
+  }
 }
 
 void JumpSpeedsV2::updateCurrentUpmove() {
-  // this shouldn't ever be true since events are processed before the HUD
-  // is rendered, therefore we should always have at least one jump
-  // when this gets called
-  assert(!jumpSpeeds.empty());
+  // this may be empty if we switch the spectated player,
+  // and they are currently holding jump
+  // early exit is fine here since we already missed the jump event anyway
+  if (jumpSpeeds.empty()) {
+    return;
+  }
 
   const auto &s = cgame.hudData.upmove->getState();
-  jumpSpeeds[jumpSpeeds.size() - 1].upmoveStr = std::to_string(s.fullDelay);
+  jumpSpeeds.back().upmoveStr = std::to_string(s.fullDelay);
 
   if (!s.jumping) {
     pollUpmove = false;
@@ -256,6 +264,7 @@ bool JumpSpeedsV2::beforeRender() {
     // otherwise just queue the reset to happen on next update
     if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR) {
       jumpSpeeds.clear();
+      pollUpmove = false;
     } else {
       resetQueued = true;
     }
@@ -264,9 +273,11 @@ bool JumpSpeedsV2::beforeRender() {
   // if 'clientNum' has switched, it means we're either spectating and changed
   // the followed client, or are joining from spectators (while following)
   // to a team -> instantly clear jump speeds so that unrelated speeds
-  // don't linger on the screen
+  // don't linger on the screen, and stop polling upmove, as any 'EV_JUMP'
+  // event that may have caused us to poll for it is no longer relevant
   if (clientNum != ps->clientNum) {
     jumpSpeeds.clear();
+    pollUpmove = false;
   }
 
   team = static_cast<team_t>(ps->persistant[PERS_TEAM]);

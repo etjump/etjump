@@ -209,12 +209,16 @@ bool DrawSpeed2::beforeRender() {
       }
     } else if (!PmoveUtilsV2::skipUpdate(oldLastUpdateTime, std::nullopt,
                                          s.pm)) {
+      // NOTE: only update the speed values used for accel calculations
+      // when we do an update, so accel values stay true without lerping,
+      // even if the speed meter itself is lerped
       Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
+      Vector2Copy(s.pm.ps->velocity, lastSpeed);
+
       setupAccelColor(s, currentSpeed);
     }
   }
 
-  Vector2Copy(s.pm.ps->velocity, lastSpeed);
   lastPmType = static_cast<pmtype_t>(s.pm.ps->pm_type);
 
   speedStr = getSpeedString();

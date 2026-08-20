@@ -59,7 +59,7 @@ private:
   };
 
   struct Jump {
-    explicit Jump(int32_t speed) : speed(speed) {
+    explicit Jump(int32_t speed) : speed(speed), upmoveStr("-") {
       this->speedStr = std::to_string(speed);
     }
 
