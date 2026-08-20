@@ -1,3 +1,13 @@
+# ETJump 3.6.1
+
+## Changed
+* unregistered upmove values in jump speeds list now show `-` as placeholder string [#1975](https://github.com/etjump/etjump/pull/1975)
+
+## Fixed
+* crash when switching spectated player while previous player was holding jump, and jump speed list was enabled [#1971](https://github.com/etjump/etjump/pull/1971)
+* latest jump speed showed **0** as upmove value if turning on jump speeds list mid-session [#1975](https://github.com/etjump/etjump/pull/1975)
+* `join server` button in quick connect server info menu was not working [#1974](https://github.com/etjump/etjump/pull/1974)
+
 # ETJump 3.6.0
 
 ## Added
