@@ -7,6 +7,7 @@
 * crash when switching spectated player while previous player was holding jump, and jump speed list was enabled [#1971](https://github.com/etjump/etjump/pull/1971)
 * latest jump speed showed **0** as upmove value if turning on jump speeds list mid-session [#1975](https://github.com/etjump/etjump/pull/1975)
 * `join server` button in quick connect server info menu was not working [#1974](https://github.com/etjump/etjump/pull/1974)
+* `etj_speedColorUsesAccel 2` broke on high frame rates with sub-optimal network settings [#1978](github.com/etjump/etjump/pull/1978)
 
 # ETJump 3.6.0
 
