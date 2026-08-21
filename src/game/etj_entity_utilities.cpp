@@ -25,6 +25,8 @@
 #include "etj_entity_utilities.h"
 #include "etj_string_utilities.h"
 
+extern field_t fields[];
+
 namespace ETJump {
 std::vector<std::string> EntityUtilities::parsedEntities;
 
@@ -186,5 +188,159 @@ void EntityUtilities::storeParsedEntity() {
 
 const std::vector<std::string> &EntityUtilities::getParsedEntities() {
   return parsedEntities;
+}
+
+FindEntitiesResult EntityUtilities::findEntitiesByField(
+    const std::string &key, const std::string &value, const char *func) {
+  FindEntitiesResult result;
+  int32_t fieldIndex = 0;
+
+  for (; fields[fieldIndex].name; fieldIndex++) {
+    if (!Q_stricmp(fields[fieldIndex].name, key.c_str())) {
+      break;
+    }
+  }
+
+  if (!fields[fieldIndex].name) {
+    G_Error("%s: non-existing key '%s'\n", func, key.c_str());
+  }
+
+  int32_t valueInt = 0;
+  float valueFloat = 0.0f;
+  vec3_t valueVec{};
+  std::vector<std::string> args = StringUtils::split(value, " ");
+
+  gentity_t *found = nullptr;
+
+  const auto invalidArgCount = [&](const int expectedArgs,
+                                   const size_t numArgs) {
+    G_Printf("%s: Invalid number of arguments for ^3'%s'^7, expected ^3%i^7, "
+             "got ^3%i\n",
+             func, key.c_str(), expectedArgs, static_cast<int>(numArgs));
+    result.valid = false;
+  };
+
+  const auto invalidArgType = [&](const std::string &expectedType,
+                                  const std::string &type) {
+    G_Printf("%s: Invalid argument for ^3'%s'^7, expected ^3%s^7, got ^3'%s'\n",
+             func, key.c_str(), expectedType.c_str(), type.c_str());
+    result.valid = false;
+  };
+
+  switch (fields[fieldIndex].type) {
+    case F_INT:
+      if (args.size() != 1) {
+        invalidArgCount(1, args.size());
+        break;
+      }
+
+      try {
+        valueInt = std::stoi(value);
+      } catch (const std::logic_error &) {
+        invalidArgType("number", args[0]);
+        break;
+      }
+
+      while ((found = G_FindInt(found, fields[fieldIndex].ofs, valueInt)) !=
+             nullptr) {
+        result.entities.emplace_back(found->s.number);
+      }
+
+      break;
+    case F_FLOAT:
+      if (args.size() != 1) {
+        invalidArgCount(1, args.size());
+        break;
+      }
+
+      try {
+        valueFloat = std::stof(value);
+      } catch (const std::logic_error &) {
+        invalidArgType("number", args[0]);
+        break;
+      }
+
+      while ((found = G_FindFloat(found, fields[fieldIndex].ofs, valueFloat)) !=
+             nullptr) {
+        result.entities.emplace_back(found->s.number);
+      }
+
+      break;
+    case F_LSTRING:
+    case F_GSTRING:
+      while ((found = G_Find(found, fields[fieldIndex].ofs, value.c_str())) !=
+             nullptr) {
+        result.entities.emplace_back(found->s.number);
+      }
+      break;
+
+    case F_VECTOR:
+      if (args.size() != 3) {
+        invalidArgCount(3, args.size());
+        break;
+      }
+
+      int j;
+
+      try {
+        for (j = 0; j < 3; j++) {
+          valueVec[j] = std::stof(args[j]);
+        }
+      } catch (const std::logic_error &) {
+        invalidArgType("number", args[j]);
+        break;
+      }
+
+      while ((found = G_FindVec(found, fields[fieldIndex].ofs, valueVec)) !=
+             nullptr) {
+        result.entities.emplace_back(found->s.number);
+      }
+
+      break;
+    case F_ANGLEHACK:
+      if (args.size() != 1) {
+        invalidArgCount(1, args.size());
+        break;
+      }
+
+      VectorClear(valueVec);
+
+      try {
+        valueVec[2] = std::stof(args[0]);
+      } catch (const std::logic_error &) {
+        invalidArgType("number", args[0]);
+        break;
+      }
+
+      while ((found = G_FindVec(found, fields[fieldIndex].ofs, valueVec)) !=
+             nullptr) {
+        result.entities.emplace_back(found->s.number);
+      }
+
+      break;
+    case F_CURSORHINT:
+      if (args.size() != 1) {
+        invalidArgCount(1, args.size());
+        break;
+      }
+
+      // set to end cap initially, so we don't find all entities
+      // with HINT_NONE if we don't find a match
+      valueInt = HINT_NUM_HINTS;
+      setCursorhintFromString(valueInt, value);
+
+      while ((found = G_FindInt(found, fields[fieldIndex].ofs, valueInt)) !=
+             nullptr) {
+        result.entities.emplace_back(found->s.number);
+      }
+
+      break;
+    default:
+      G_Printf(S_COLOR_YELLOW "%s: invalid key '%s'\n", func, key.c_str());
+      result.stopParsing = true;
+      break;
+  }
+
+  return result;
 }
 } // namespace ETJump

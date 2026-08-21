@@ -4403,7 +4403,8 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
 
     if (g_scriptDebug.integer) {
       G_Printf("%d : (%s) %s: set [%s] [%s] [%s]\n", level.time,
-               ent->scriptName, GAME_VERSION, ent->scriptName, key, value);
+               ent->scriptName ? ent->scriptName : "n/a", GAME_VERSION,
+               ent->scriptName ? ent->scriptName : "n/a", key, value);
     }
 
     if (!Q_stricmp(key, "classname_nospawn")) {
@@ -4467,7 +4468,6 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
   return qtrue;
 }
 
-extern field_t fields[];
 void G_SpawnGEntityFromSpawnVars();
 
 namespace ETJump::ScriptActions {
@@ -4480,6 +4480,8 @@ inline constexpr char createUsage[] =
     R"(create { "key1" "value1" "key2" "value2" .. })";
 inline constexpr char deleteUsage[] =
     R"(delete { "key1" "value1" "key2" "value2" .. })";
+inline constexpr char editentityUsage[] =
+    R"(editentity { match { "key1" "value1" .. } set { "key1" "value1" .. } })";
 inline constexpr char useTargetUsage[] = "usetarget <targetname>";
 inline constexpr char wmAnnouncePrivateUsage[] =
     "wm_announce_private <message>";
@@ -4488,10 +4490,38 @@ inline constexpr char changeSkinUsage[] = "changeskin <skinfile>";
 
 #define FMT_FUNC(x) StringUtils::format("ScriptActions::%s", x).c_str()
 
+namespace {
+struct EntityMatch {
+  // number of k/v pairs this entity has matched
+  uint8_t numMatched = 0;
+  // the matched k/v pairs, for printing
+  std::vector<std::string> paramsMatched;
+};
+
+// appends a "key value" pair to 'out', quoting 'value' if it contains spaces
+void appendKeyValue(std::string &out, const std::string &key,
+                    const std::string &value) {
+  if (!out.empty()) {
+    out += ' ';
+  }
+
+  out += key;
+
+  if (value.find(' ') != std::string::npos) {
+    out += " \"";
+    out += value;
+    out += '"';
+  } else {
+    out += ' ';
+    out += value;
+  }
+}
+
 enum class ScriptSpawnType {
   PLAYER_SPAWN = 1,
   PLAYER_AUTOSPAWN = 2,
 };
+} // namespace
 
 static qboolean scriptSetPlayerSpawn(gentity_t *ent, const char *params,
                                      ScriptSpawnType type,
@@ -4675,13 +4705,10 @@ qboolean deleteAction(gentity_t *ent, char *params) {
 
   // params may contain multiple k/v pairs for more precise targeting,
   // each of these values must match the entity before we delete it
-  std::array<std::pair<uint8_t, std::vector<std::string>>, MAX_GENTITIES>
-      pass{};
-  int count = 0; // number of valid k/v pairs in params
+  std::array<EntityMatch, MAX_GENTITIES> matches{};
+  int32_t count = 0; // number of valid k/v pairs in params
 
-  bool parse = true;
-
-  while (parse) {
+  while (true) {
     const char *token = COM_ParseExt(&p, qfalse);
 
     if (!token[0]) {
@@ -4699,165 +4726,25 @@ qboolean deleteAction(gentity_t *ent, char *params) {
 
     Q_strncpyz(value, token, sizeof(value));
 
-    // validate the key
-    int i;
-
-    for (i = 0; fields[i].name; ++i) {
-      if (!Q_stricmp(fields[i].name, key)) {
-        break;
-      }
-    }
-
-    if (!fields[i].name) {
-      G_Error("%s: non-existing key '%s'\n", FMT_FUNC(deleteFuncStr), key);
-    }
-
     // k/v pair parsed successfully, add it to count
     count++;
-    gentity_t *found = nullptr;
 
-    int valueInt{};
-    float valueFloat{};
-    vec3_t valueVec{};
-    std::vector<std::string> args = StringUtils::split(value, " ");
+    const auto result = ETJump::EntityUtilities::findEntitiesByField(
+        key, value, FMT_FUNC(deleteFuncStr));
 
-    const auto invalidArgCount = [&](const int expectedArgs,
-                                     const size_t numArgs) {
-      G_Printf("%s: Invalid number of arguments for ^3'%s'^7, expected ^3%i^7, "
-               "got ^3%i\n",
-               FMT_FUNC(deleteFuncStr), key, expectedArgs,
-               static_cast<int>(numArgs));
+    if (result.stopParsing) {
+      break;
+    }
+
+    if (!result.valid) {
       count--;
-    };
+      continue;
+    }
 
-    const auto invalidArgType = [&](const std::string &expectedType,
-                                    const std::string &type) {
-      G_Printf(
-          "%s: Invalid argument for ^3'%s'^7, expected ^3%s^7, got ^3'%s'\n",
-          FMT_FUNC(deleteFuncStr), key, expectedType.c_str(), type.c_str());
-      count--;
-    };
-
-    switch (fields[i].type) {
-      case F_INT:
-        if (args.size() != 1) {
-          invalidArgCount(1, args.size());
-          break;
-        }
-
-        try {
-          valueInt = std::stoi(value);
-        } catch (const std::logic_error &) {
-          invalidArgType("number", args[0]);
-          break;
-        }
-
-        while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-
-        break;
-      case F_FLOAT:
-        if (args.size() != 1) {
-          invalidArgCount(1, args.size());
-          break;
-        }
-
-        try {
-          valueFloat = std::stof(value);
-        } catch (const std::logic_error &) {
-          invalidArgType("number", args[0]);
-          break;
-        }
-
-        while ((found = G_FindFloat(found, fields[i].ofs, valueFloat)) !=
-               nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-
-        break;
-      case F_LSTRING:
-      case F_GSTRING:
-        while ((found = G_Find(found, fields[i].ofs, value)) != nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-        break;
-
-      case F_VECTOR:
-        if (args.size() != 3) {
-          invalidArgCount(3, args.size());
-          break;
-        }
-
-        int j;
-
-        try {
-          for (j = 0; j < 3; j++) {
-            valueVec[j] = std::stof(args[j]);
-          }
-        } catch (const std::logic_error &) {
-          invalidArgType("number", args[j]);
-          break;
-        }
-
-        while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-
-        break;
-      case F_ANGLEHACK:
-        if (args.size() != 1) {
-          invalidArgCount(1, args.size());
-          break;
-        }
-
-        VectorClear(valueVec);
-
-        try {
-          valueVec[2] = std::stof(args[0]);
-        } catch (const std::logic_error &) {
-          invalidArgType("number", args[0]);
-          break;
-        }
-
-        while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-
-        break;
-      case F_CURSORHINT:
-        if (args.size() != 1) {
-          invalidArgCount(1, args.size());
-          break;
-        }
-
-        // set to end cap initially, so we don't delete all entities
-        // with HINT_NONE if we don't find a match
-        valueInt = HINT_NUM_HINTS;
-        ETJump::EntityUtilities::setCursorhintFromString(valueInt, value);
-
-        while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-
-        break;
-      default:
-        G_Printf(S_COLOR_YELLOW "%s: invalid key '%s'\n",
-                 FMT_FUNC(deleteFuncStr), key);
-        parse = false;
-        break;
+    for (const int entity : result.entities) {
+      matches[entity].numMatched++;
+      matches[entity].paramsMatched.emplace_back(
+          StringUtils::format(R"(%s "%s")", key, value));
     }
   }
 
@@ -4870,9 +4757,10 @@ qboolean deleteAction(gentity_t *ent, char *params) {
 
   // delete all entities that passed the tests
   for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < ENTITYNUM_MAX_NORMAL; i++) {
-    if (pass[i].first == count) {
+    if (matches[i].numMatched == count) {
       numDeleted++;
-      const std::string paramsMatched = StringUtils::join(pass[i].second, ", ");
+      const std::string paramsMatched =
+          StringUtils::join(matches[i].paramsMatched, ", ");
       G_Printf("%s: deleted entity %i [^z%s^7], matched params: ^3'%s'\n",
                __func__, i, g_entities[i].classname, paramsMatched.c_str());
 
@@ -5098,6 +4986,134 @@ qboolean changeSkin(gentity_t *ent, char *params) {
     ent->s.effect1Time = G_SkinIndex(token);
   } else {
     ent->s.modelindex2 = G_SkinIndex(token);
+  }
+
+  return qtrue;
+}
+
+qboolean editEntity([[maybe_unused]] gentity_t *ent, char *params) {
+  const char *p = params;
+  std::string key;
+  std::string value;
+
+  // 'params' is encoded by the parser as two brace-delimited blocks:
+  // { <selector k/v pairs> } { <set k/v pairs> }
+  // the selector pairs target the entities to modify, the set pairs are
+  // applied to every matched entity
+  std::array<EntityMatch, MAX_GENTITIES> matches{};
+  int32_t count = 0; // number of valid selector k/v pairs in the match block
+
+  std::string matchParams; // for error messages
+  std::string setParams;
+
+  const char *token = COM_ParseExt(&p, qfalse);
+
+  if (token[0] != '{') {
+    G_Error("%s: expected a 'match' block\n\n%s\n", FMT_FUNC(__func__),
+            editentityUsage);
+  }
+
+  while (true) {
+    token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0]) {
+      G_Error("%s: unterminated 'match' block\n\n%s\n", FMT_FUNC(__func__),
+              editentityUsage);
+    }
+
+    if (token[0] == '}') {
+      break;
+    }
+
+    key = token;
+
+    token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0] || token[0] == '}') {
+      G_Error("%s: key '%s' has no value\n\n%s\n", FMT_FUNC(__func__),
+              key.c_str(), editentityUsage);
+    }
+
+    value = token;
+
+    // selector pair parsed successfully, add it to count
+    count++;
+
+    const auto result = ETJump::EntityUtilities::findEntitiesByField(
+        key, value, FMT_FUNC(__func__));
+
+    if (result.stopParsing) {
+      G_Error("%s: invalid field in 'match' block\n\n%s\n", FMT_FUNC(__func__),
+              editentityUsage);
+    }
+
+    if (!result.valid) {
+      count--;
+      continue;
+    }
+
+    for (const int entity : result.entities) {
+      matches[entity].numMatched++;
+      matches[entity].paramsMatched.emplace_back(
+          StringUtils::format(R"(%s "%s")", key, value));
+    }
+
+    appendKeyValue(matchParams, key, value);
+  }
+
+  // no selector k/v pairs found?
+  if (!count) {
+    G_Error("%s: no selector k/v pairs in the 'match' block\n\n%s\n",
+            FMT_FUNC(__func__), editentityUsage);
+  }
+
+  token = COM_ParseExt(&p, qfalse);
+
+  if (token[0] != '{') {
+    G_Error("%s: expected a 'set' block\n\n%s\n", FMT_FUNC(__func__),
+            editentityUsage);
+  }
+
+  while (true) {
+    token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0]) {
+      G_Error("%s: unterminated 'set' block\n\n%s\n", FMT_FUNC(__func__),
+              editentityUsage);
+    }
+
+    if (token[0] == '}') {
+      break;
+    }
+
+    key = token;
+
+    token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0] || token[0] == '}') {
+      G_Error("%s: key '%s' has no value\n\n%s\n", FMT_FUNC(__func__),
+              key.c_str(), editentityUsage);
+    }
+
+    value = token;
+
+    appendKeyValue(setParams, key, value);
+  }
+
+  int numChanged = 0;
+
+  // apply the new k/v pairs to all entities that matched every selector pair
+  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < ENTITYNUM_MAX_NORMAL; i++) {
+    if (matches[i].numMatched == count) {
+      numChanged++;
+      etpro_ScriptAction_SetValues(&g_entities[i], setParams.data());
+    }
+  }
+
+  // did we actually change anything?
+  if (!numChanged) {
+    G_Printf("%s: no entities found matching params ^3'%s'\n",
+             FMT_FUNC(__func__), matchParams.c_str());
   }
 
   return qtrue;
