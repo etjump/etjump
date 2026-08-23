@@ -47,20 +47,9 @@ Crosshair::~Crosshair() {
   cvarUpdate->unsubscribe(&cg_crosshairX);
   cvarUpdate->unsubscribe(&cg_crosshairY);
 
-  for (const auto *cvar : elementCvars()) {
+  for (const auto *cvar : elementCvars) {
     cvarUpdate->unsubscribe(cvar);
   }
-}
-
-std::array<const vmCvar_t *, CrosshairLimits::maxElements>
-Crosshair::elementCvars() {
-  static_assert(CrosshairLimits::maxElements == 8,
-                "element cvar list must cover every slot");
-
-  return {&etj_crosshairElement1, &etj_crosshairElement2,
-          &etj_crosshairElement3, &etj_crosshairElement4,
-          &etj_crosshairElement5, &etj_crosshairElement6,
-          &etj_crosshairElement7, &etj_crosshairElement8};
 }
 
 void Crosshair::startListeners() {
@@ -80,17 +69,15 @@ void Crosshair::startListeners() {
 
   // custom crosshair elements - reparsed as a set, since an element's slot
   // index is not carried in the callback
-  for (const auto *cvar : elementCvars()) {
+  for (const auto *cvar : elementCvars) {
     cvarUpdate->subscribe(cvar, [this](const vmCvar_t *) { parseDefinition(); });
   }
 }
 
 void Crosshair::parseDefinition() {
-  const auto cvars = elementCvars();
-
-  for (size_t i = 0; i < cvars.size(); i++) {
+  for (size_t i = 0; i < elementCvars.size(); i++) {
     auto &element = definition.elements[i];
-    element = parseCrosshairElement(cvars[i]->string);
+    element = parseCrosshairElement(elementCvars[i]->string);
     element.resolveColors([](const std::string &colorString, vec4_t &out) {
       cgame.utils.colorParser->parseColorString(colorString, out);
     });

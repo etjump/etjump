@@ -41,7 +41,6 @@ namespace {
 // diagonal arms get projected onto both axes so a diagonal cross ends up the
 // same visual size as a straight one with the same numbers
 constexpr float diagonalFactor = 0.70710678f; // sqrt(0.5)
-constexpr float pi = 3.14159265358979323846f;
 
 // the scanline fills lay down one rect per row, so a crosshair sized to cover
 // the screen would otherwise cost hundreds of draw calls a frame. rows are
@@ -70,7 +69,7 @@ Point rotatePoint(const Point p, const Point pivot, const float degrees) {
     return p;
   }
 
-  const auto radians = degrees * (pi / 180.0f);
+  const auto radians = DEG2RAD(degrees);
   const auto sinR = std::sin(radians);
   const auto cosR = std::cos(radians);
 
@@ -160,7 +159,7 @@ void drawEllipse(const CrosshairPainter &painter, const Point center,
   }
 
   const auto segments = circleSegments(std::max(radiusX, radiusY));
-  const auto angleStep = (2.0f * pi) / static_cast<float>(segments);
+  const auto angleStep = (2.0f * M_PI) / static_cast<float>(segments);
 
   for (int i = 0; i < segments; i++) {
     const auto a0 = angleStep * static_cast<float>(i);

@@ -28,6 +28,7 @@
 
 #include "etj_irenderable.h"
 
+#include "cg_local.h"
 #include "etj_crosshair_definition.h"
 #include "../game/q_shared.h"
 
@@ -44,10 +45,6 @@ class Crosshair : public IRenderable {
   // reads etj_crosshairElement1..8 into definition. only runs when one of those
   // cvars changes so we resolve colors once instead of every frame.
   void parseDefinition();
-
-  // every slot cvar, so the listener setup and the parse loop share one list
-  static std::array<const vmCvar_t *, CrosshairLimits::maxElements>
-  elementCvars();
 
   enum class ETJumpCrosshairs {
     VerticalLine = 10,
@@ -84,6 +81,16 @@ protected:
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 
 public:
+  // every slot cvar, so the listener setup and the parse loop share one list
+  static constexpr std::array<const vmCvar_t *, CrosshairLimits::maxElements>
+      elementCvars{&etj_crosshairElement1, &etj_crosshairElement2,
+                   &etj_crosshairElement3, &etj_crosshairElement4,
+                   &etj_crosshairElement5, &etj_crosshairElement6,
+                   &etj_crosshairElement7, &etj_crosshairElement8};
+
+  static_assert(CrosshairLimits::maxElements == 8,
+                "element cvar list must cover every slot");
+
   explicit Crosshair(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~Crosshair() override;
 
