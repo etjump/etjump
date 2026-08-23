@@ -362,7 +362,7 @@ void JumpSpeedsV2::render() const {
                         &cgs.media.limboFont2);
 
       if ((pos + 1) % jumpsPerColumn == 0) {
-        x += baseX + textOffsetX;
+        x += textOffsetX;
         y = baseY;
       } else {
         y += rowHeight;
