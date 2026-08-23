@@ -1135,12 +1135,20 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
 
       if (CG_CountPlayersNF() > (cgs.ftMenuModeEx + 1) * 8) {
         if (i == 9) {
-          cgs.ftMenuModeEx++;
+          if (doaction) {
+            cgs.ftMenuModeEx++;
+          }
+
+          return qtrue;
         }
       }
       if (cgs.ftMenuModeEx) {
         if (i == 8) {
-          cgs.ftMenuModeEx--;
+          if (doaction) {
+            cgs.ftMenuModeEx--;
+          }
+
+          return qtrue;
         }
       }
       x = CG_PlayerNFFromPos(i, &cgs.ftMenuModeEx);
@@ -1211,12 +1219,20 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
         case ETJump::FTMenuPos::FT_MENUPOS_WARN:
           if (CG_CountPlayersSF() > (cgs.ftMenuModeEx + 1) * 8) {
             if (i == 9) {
-              cgs.ftMenuModeEx++;
+              if (doaction) {
+                cgs.ftMenuModeEx++;
+              }
+
+              return qtrue;
             }
           }
           if (cgs.ftMenuModeEx) {
             if (i == 8) {
-              cgs.ftMenuModeEx--;
+              if (doaction) {
+                cgs.ftMenuModeEx--;
+              }
+
+              return qtrue;
             }
           }
           x = CG_PlayerSFFromPos(i, &cgs.ftMenuModeEx);
