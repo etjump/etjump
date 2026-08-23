@@ -200,6 +200,18 @@ void CrosshairEditor::loadSlot(const int slot) {
   lastWidgetValue = serializeCrosshairElement(elementFromWorkingCvars());
 }
 
+void CrosshairEditor::resetElement() {
+  // the shape is deliberately kept. the Shape combo already has 'Empty' for
+  // clearing a slot, so a reset that wiped the type too would leave no way to
+  // undo a size tweak without picking the shape again.
+  CrosshairElement fresh{};
+  fresh.type = elementFromWorkingCvars().type;
+
+  // update() folds the working cvars back into the slot on the next frame,
+  // which is also what repaints the preview
+  elementToWorkingCvars(fresh);
+}
+
 void CrosshairEditor::tidyWorkingCvars() {
   // the sliders write raw "%f", so a value box would sit there reading
   // "6.000000". rewrite anything that isn't already in its short form.

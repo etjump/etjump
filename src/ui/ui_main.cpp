@@ -4811,6 +4811,11 @@ void UI_RunMenuScript(const char **args) {
       return;
     }
 
+    if (!Q_stricmp(name, "crosshairResetElement")) {
+      ETJump::ui.crosshairEditor->resetElement();
+      return;
+    }
+
     if (!Q_stricmp(name, "loadCustomvotes")) {
       // don't re-request custom votes if we already have everything processed
       if (static_cast<int>(uiInfo.customVotes.size()) !=

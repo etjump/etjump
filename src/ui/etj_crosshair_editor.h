@@ -49,6 +49,9 @@ public:
   // copies a slot's element into the working cvars, slot is 1 based
   void loadSlot(int slot);
 
+  // puts the selected slot back to the default settings
+  void resetElement();
+
   // presets are plain text under presetDir(), one serialized element per line.
   // names get sanitized, empty ones are rejected.
   bool savePreset(const std::string &name);

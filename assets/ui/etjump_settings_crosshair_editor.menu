@@ -78,6 +78,8 @@ menuDef {
         // keep macro args bare, EDITFIELD_EXT and BUTTON wrap them in $evalfloat
         // themselves and nesting it fails to parse, which throws away the whole menu
         EDITFIELD_EXT       (SETTINGS_ITEM_X, SAVE_NAME_Y, SETTINGS_ITEM_W, SETTINGS_EF_H, SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN, "Preset name:", 0.2, SETTINGS_ITEM_H, "etj_cePresetName", 64, 32, "Name to save this crosshair as, then load it from the PRESETS tab")
+        // reset sits on the free left half of the save row
+        BUTTON              (SETTINGS_ITEM_X, SAVE_BTN_Y, SAVE_BTN_W, SAVE_BTN_H, "RESET ELEMENT", 0.2, SAVE_BTN_TEXT_ALIGN, uiScript crosshairResetElement)
         BUTTON              (SAVE_BTN_X, SAVE_BTN_Y, SAVE_BTN_W, SAVE_BTN_H, "SAVE PRESET", 0.2, SAVE_BTN_TEXT_ALIGN, uiScript crosshairSavePreset)
 
         YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 1), "Use custom crosshair:", 0.2, SETTINGS_ITEM_H, "etj_customCrosshair", "Draw the crosshair composed here instead of the built-in ones\netj_customCrosshair")
