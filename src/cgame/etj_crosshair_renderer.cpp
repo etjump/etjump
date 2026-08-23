@@ -82,14 +82,16 @@ Point rotatePoint(const Point p, const Point pivot, const float degrees) {
 
 // segment count for faking a circle, scaled with radius so a tiny dot doesn't
 // pay for 64 segments and a big ring still looks round
+constexpr int maxCircleSegments = 64;
+
 int circleSegments(const float radius) {
   const auto segments = static_cast<int>(std::lround(radius * 2.5f));
-  return std::clamp(segments, 8, 64);
+  return std::clamp(segments, 8, maxCircleSegments);
 }
 
-// shapes that put down a solid area instead of just strokes. their outline has
-// to be an expanded solid behind them, since fattening a stroke does nothing
-// once the fill covers it
+// shapes that put down a solid area instead of just strokes. their outline gets
+// stroked around a slightly grown silhouette, since fattening the shape's own
+// stroke does nothing once the fill covers it
 bool shapeIsFilled(const CrosshairElement &element) {
   switch (element.type) {
     case CrosshairElementType::Dot:
@@ -122,69 +124,25 @@ ElementGeometry resolveGeometry(const CrosshairElement &element,
   return geometry;
 }
 
-// radii are independent, so this handles circles and stretched ellipses both
-void drawEllipse(const CrosshairPainter &painter, const Point center,
-                 const float radiusX, const float radiusY,
-                 const float thickness, const float rotation, const bool fill,
-                 const vec4_t color) {
-  if (radiusX <= 0.0f || radiusY <= 0.0f) {
+// scanline fill for any convex polygon, so neither module needs polygon support.
+// one span per row rather than one per triangle: splitting a quad into two
+// triangles would draw the shared edge twice, which a translucent fill shows as
+// a seam.
+void fillConvex(const CrosshairPainter &painter, const Point *pts,
+                const size_t count, const vec4_t color) {
+  if (count < 3) {
     return;
   }
 
-  // scanline fill, one row per virtual unit is plenty at crosshair sizes and
-  // saves needing a real polygon path. rotating it would mean rotating the rows
-  // too, so a rotated ellipse just falls through to the segment ring below
-  if (fill && rotation == 0.0f) {
-    const auto rows = std::clamp(static_cast<int>(std::lround(radiusY * 2.0f)),
-                                 1, maxFillRows);
-    const auto step = (radiusY * 2.0f) / static_cast<float>(rows);
+  auto minY = pts[0].y;
+  auto maxY = pts[0].y;
 
-    for (int i = 0; i < rows; i++) {
-      const auto dy = -radiusY + (step * (static_cast<float>(i) + 0.5f));
-      // x = rx * sqrt(1 - (dy/ry)^2)
-      const auto normalized = dy / radiusY;
-      const auto halfWidth =
-          radiusX *
-          std::sqrt(std::max(1.0f - (normalized * normalized), 0.0f));
-
-      if (halfWidth <= 0.0f) {
-        continue;
-      }
-
-      painter.fillRect(center.x - halfWidth, center.y + dy - (step * 0.5f),
-                       halfWidth * 2.0f, step, color);
-    }
-
-    return;
+  for (size_t i = 1; i < count; i++) {
+    minY = std::min(minY, pts[i].y);
+    maxY = std::max(maxY, pts[i].y);
   }
 
-  const auto segments = circleSegments(std::max(radiusX, radiusY));
-  const auto angleStep = (2.0f * M_PI) / static_cast<float>(segments);
-
-  for (int i = 0; i < segments; i++) {
-    const auto a0 = angleStep * static_cast<float>(i);
-    const auto a1 = angleStep * static_cast<float>(i + 1);
-
-    const auto p0 = rotatePoint({center.x + (std::cos(a0) * radiusX),
-                                 center.y + (std::sin(a0) * radiusY)},
-                                center, rotation);
-    const auto p1 = rotatePoint({center.x + (std::cos(a1) * radiusX),
-                                 center.y + (std::sin(a1) * radiusY)},
-                                center, rotation);
-
-    painter.drawLine(p0.x, p0.y, p1.x, p1.y, thickness, color);
-  }
-}
-
-// scanline filled triangle from three arbitrary points, so neither module
-// needs polygon support
-void fillTriangle(const CrosshairPainter &painter, const Point a, const Point b,
-                  const Point c, const vec4_t color) {
-  std::array<Point, 3> pts{a, b, c};
-  std::sort(pts.begin(), pts.end(),
-            [](const Point &l, const Point &r) { return l.y < r.y; });
-
-  const auto height = pts[2].y - pts[0].y;
+  const auto height = maxY - minY;
 
   if (height <= 0.0f) {
     return;
@@ -194,25 +152,35 @@ void fillTriangle(const CrosshairPainter &painter, const Point a, const Point b,
       std::clamp(static_cast<int>(std::lround(height)), 1, maxFillRows);
   const auto step = height / static_cast<float>(rows);
 
-  const auto edgeX = [](const Point &p0, const Point &p1, const float y) {
-    if (p1.y == p0.y) {
-      return p1.x;
-    }
-    return p0.x + ((p1.x - p0.x) * ((y - p0.y) / (p1.y - p0.y)));
-  };
-
   for (int i = 0; i < rows; i++) {
-    const auto y = pts[0].y + (step * (static_cast<float>(i) + 0.5f));
+    const auto y = minY + (step * (static_cast<float>(i) + 0.5f));
+    auto x0 = 0.0f;
+    auto x1 = 0.0f;
+    auto hit = false;
 
-    // long edge spans the full height, the other two split at pts[1]
-    const auto xLong = edgeX(pts[0], pts[2], y);
-    const auto xShort =
-        y < pts[1].y ? edgeX(pts[0], pts[1], y) : edgeX(pts[1], pts[2], y);
+    // convex, so a row crosses the outline exactly twice and everything between
+    // those two crossings is inside the shape
+    for (size_t j = 0; j < count; j++) {
+      const auto &p0 = pts[j];
+      const auto &p1 = pts[(j + 1) % count];
 
-    const auto x0 = std::min(xLong, xShort);
-    const auto x1 = std::max(xLong, xShort);
+      if ((p0.y <= y) == (p1.y <= y)) {
+        continue;
+      }
 
-    if (x1 <= x0) {
+      const auto x = p0.x + ((p1.x - p0.x) * ((y - p0.y) / (p1.y - p0.y)));
+
+      if (!hit) {
+        x0 = x;
+        x1 = x;
+        hit = true;
+      } else {
+        x0 = std::min(x0, x);
+        x1 = std::max(x1, x);
+      }
+    }
+
+    if (!hit || x1 <= x0) {
       continue;
     }
 
@@ -220,8 +188,53 @@ void fillTriangle(const CrosshairPainter &painter, const Point a, const Point b,
   }
 }
 
-// outlinePass draws the element as a flat silhouette in the primary color so it
-// can sit behind the real shape as its outline
+// closed outline through the given points
+void strokePoly(const CrosshairPainter &painter, const Point *pts,
+                const size_t count, const float thickness, const vec4_t color) {
+  for (size_t i = 0; i < count; i++) {
+    const auto &p0 = pts[i];
+    const auto &p1 = pts[(i + 1) % count];
+    painter.drawLine(p0.x, p0.y, p1.x, p1.y, thickness, color);
+  }
+}
+
+// radii are independent, so this handles circles and stretched ellipses both
+void drawEllipse(const CrosshairPainter &painter, const Point center,
+                 const float radiusX, const float radiusY,
+                 const float thickness, const float rotation, const bool fill,
+                 const vec4_t color) {
+  if (radiusX <= 0.0f || radiusY <= 0.0f) {
+    return;
+  }
+
+  const auto segments = circleSegments(std::max(radiusX, radiusY));
+  const auto angleStep = (2.0f * M_PI) / static_cast<float>(segments);
+
+  // build the ring once so the fill and the stroke agree on the shape, and so
+  // a stretched ellipse can actually be rotated. the old fill walked rows of
+  // the unrotated ellipse, which meant rotation had to be ignored for it.
+  std::array<Point, maxCircleSegments> ring{};
+
+  for (int i = 0; i < segments; i++) {
+    const auto a = angleStep * static_cast<float>(i);
+    ring[i] = rotatePoint({center.x + (std::cos(a) * radiusX),
+                           center.y + (std::sin(a) * radiusY)},
+                          center, rotation);
+  }
+
+  const auto count = static_cast<size_t>(segments);
+
+  if (fill) {
+    fillConvex(painter, ring.data(), count, color);
+    return;
+  }
+
+  strokePoly(painter, ring.data(), count, thickness, color);
+}
+
+// outlinePass draws the element's outline in the primary color: a fattened
+// stroke for stroke based shapes, and a stroke around a slightly grown
+// silhouette for filled ones
 void drawShape(const CrosshairElement &element, const CrosshairPainter &painter,
                const ElementGeometry &geometry, const float thickness,
                const vec4_t primary, const vec4_t secondary,
@@ -274,17 +287,29 @@ void drawShape(const CrosshairElement &element, const CrosshairPainter &painter,
     }
 
     case CrosshairElementType::Dot: {
+      // a filled quad looks better than a tiny ellipse at these sizes
       const auto halfX = lenX * 0.5f;
       const auto halfY = lenY * 0.5f;
-      // a filled rect looks better than a tiny ellipse at these sizes
-      painter.fillRect(center.x - halfX, center.y - halfY, lenX, lenY,
-                       outlinePass ? primary : secondary);
+      const std::array<Point, 4> corners{
+          rotatePoint({center.x - halfX, center.y - halfY}, center, rot),
+          rotatePoint({center.x + halfX, center.y - halfY}, center, rot),
+          rotatePoint({center.x + halfX, center.y + halfY}, center, rot),
+          rotatePoint({center.x - halfX, center.y + halfY}, center, rot)};
+
+      if (outlinePass) {
+        strokePoly(painter, corners.data(), corners.size(), thickness,
+                   primary);
+        break;
+      }
+
+      fillConvex(painter, corners.data(), corners.size(), secondary);
       break;
     }
 
     case CrosshairElementType::Circle:
       if (outlinePass && filled) {
-        drawEllipse(painter, center, lenX, lenY, thickness, rot, true, primary);
+        drawEllipse(painter, center, lenX, lenY, thickness, rot, false,
+                    primary);
         break;
       }
 
@@ -297,6 +322,12 @@ void drawShape(const CrosshairElement &element, const CrosshairPainter &painter,
       break;
 
     case CrosshairElementType::Square: {
+      const std::array<Point, 4> corners{
+          rotatePoint({center.x - lenX, center.y - lenY}, center, rot),
+          rotatePoint({center.x + lenX, center.y - lenY}, center, rot),
+          rotatePoint({center.x + lenX, center.y + lenY}, center, rot),
+          rotatePoint({center.x - lenX, center.y + lenY}, center, rot)};
+
       const auto drawBox = [&](const vec4_t topBottom, const vec4_t leftRight) {
         arm(-lenX, -lenY, lenX, -lenY, topBottom);
         arm(-lenX, lenY, lenX, lenY, topBottom);
@@ -305,14 +336,13 @@ void drawShape(const CrosshairElement &element, const CrosshairPainter &painter,
       };
 
       if (outlinePass && filled) {
-        painter.fillRect(center.x - lenX, center.y - lenY, lenX * 2.0f,
-                         lenY * 2.0f, primary);
+        strokePoly(painter, corners.data(), corners.size(), thickness,
+                   primary);
         break;
       }
 
       if (filled) {
-        painter.fillRect(center.x - lenX, center.y - lenY, lenX * 2.0f,
-                         lenY * 2.0f, secondary);
+        fillConvex(painter, corners.data(), corners.size(), secondary);
       }
 
       drawBox(primary, primary);
@@ -326,18 +356,19 @@ void drawShape(const CrosshairElement &element, const CrosshairPainter &painter,
       const auto right =
           rotatePoint({center.x + lenX, center.y + lenY}, center, rot);
 
+      const std::array<Point, 3> corners{apex, left, right};
+
       if (outlinePass && filled) {
-        fillTriangle(painter, apex, left, right, primary);
+        strokePoly(painter, corners.data(), corners.size(), thickness,
+                   primary);
         break;
       }
 
       if (filled) {
-        fillTriangle(painter, apex, left, right, secondary);
+        fillConvex(painter, corners.data(), corners.size(), secondary);
       }
 
-      painter.drawLine(apex.x, apex.y, left.x, left.y, thickness, primary);
-      painter.drawLine(left.x, left.y, right.x, right.y, thickness, primary);
-      painter.drawLine(right.x, right.y, apex.x, apex.y, thickness, primary);
+      strokePoly(painter, corners.data(), corners.size(), thickness, primary);
       break;
     }
 
@@ -386,22 +417,27 @@ void drawCrosshairElement(const CrosshairElement &element,
     auto outlineGeometry = geometry;
 
     if (shapeIsFilled(element)) {
-      // fattening the stroke does nothing once the fill covers it, so grow the
-      // silhouette and draw it solid behind instead
-      outlineGeometry.lengthX += outlineWidth;
-      outlineGeometry.lengthY += outlineWidth;
+      // stroke the silhouette in the band just outside the fill instead of
+      // putting a solid copy behind it. a solid backing sits between the fill
+      // and the world, so lowering the fill's alpha would blend it towards the
+      // outline color rather than letting the world through.
+      outlineGeometry.lengthX += outlineWidth * 0.5f;
+      outlineGeometry.lengthY += outlineWidth * 0.5f;
 
       // dot's length is a full side, not a half-extent, so it needs double the
-      // growth to gain outlineWidth on each side
+      // growth to move its edge out by half the outline width
       if (element.type == CrosshairElementType::Dot) {
-        outlineGeometry.lengthX += outlineWidth;
-        outlineGeometry.lengthY += outlineWidth;
+        outlineGeometry.lengthX += outlineWidth * 0.5f;
+        outlineGeometry.lengthY += outlineWidth * 0.5f;
       }
-    }
 
-    drawShape(element, painter, outlineGeometry,
-              geometry.thickness + (outlineWidth * 2.0f), element.outlineColor,
-              element.outlineColor, true);
+      drawShape(element, painter, outlineGeometry, outlineWidth,
+                element.outlineColor, element.outlineColor, true);
+    } else {
+      drawShape(element, painter, outlineGeometry,
+                geometry.thickness + (outlineWidth * 2.0f),
+                element.outlineColor, element.outlineColor, true);
+    }
   }
 
   drawShape(element, painter, geometry, geometry.thickness, element.color,
