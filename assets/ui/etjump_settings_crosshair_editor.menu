@@ -10,13 +10,12 @@
 #define NUM_SETTINGS 14 // required for bottom-up settings drawing
 #define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
 
-#define PREVIEW_SIZE 96
-#define PREVIEW_X (SETTINGS_SUBW_X + (SETTINGS_SUBW_W * 0.5 - (PREVIEW_SIZE * 0.5)))
+#define PREVIEW_X (SETTINGS_SUBW_X + (SETTINGS_SUBW_W * 0.5 - (CROSSHAIR_PREVIEW_SIZE * 0.5)))
 
 // save row goes in the gap between the preview and the settings block.
 // EDITFIELD_EXT puts its input box at X + .5*W + 6, width .5*TEXTBOX_W - 6, so
 // the button uses the same numbers and lines up under it
-#define SAVE_NAME_Y (SETTINGS_ITEM_Y + PREVIEW_SIZE + MAIN_ELEMENT_MARGIN)
+#define SAVE_NAME_Y (SETTINGS_ITEM_Y + CROSSHAIR_PREVIEW_SIZE + MAIN_ELEMENT_MARGIN)
 #define SAVE_BTN_Y (SAVE_NAME_Y + SETTINGS_EF_H + SETTINGS_ITEM_MARGIN)
 #define SAVE_BTN_X (SETTINGS_ITEM_X + (0.5 * SETTINGS_ITEM_W) + 6)
 #define SAVE_BTN_W ((0.5 * (SETTINGS_ITEM_W - MAIN_ELEMENT_MARGIN)) - 6)
@@ -64,7 +63,7 @@ menuDef {
         itemDef {
             name            "crosshair_editor_preview"
             group           GROUP_NAME
-            rect            $evalfloat(PREVIEW_X) $evalfloat(SETTINGS_ITEM_Y) PREVIEW_SIZE PREVIEW_SIZE
+            rect            $evalfloat(PREVIEW_X) $evalfloat(SETTINGS_ITEM_Y) CROSSHAIR_PREVIEW_SIZE CROSSHAIR_PREVIEW_SIZE
             style           WINDOW_STYLE_FILLED
             ownerdraw       UI_CROSSHAIR_EDITOR_PREVIEW
             backcolor       .1 .1 .1 .9

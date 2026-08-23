@@ -743,3 +743,41 @@
     decoration                                                                 \
     autowrapped                                                                \
   }
+
+// editable number at the right end of a slider row, for typing an exact value
+// that dragging can't reach. a slider only resolves (max - min) / 96 per pixel.
+//
+// must be declared AFTER its SLIDER: the slider's rect covers the whole row, and
+// Menu_HandleMouseMove gives the mouse to the LAST item whose rect is under the
+// cursor, so declaring it first would let the slider swallow the clicks.
+//
+// the empty 'text' is load bearing. Item_TextField_Paint calls Item_Text_Paint
+// first to draw the field's label, and Item_Text_Paint prints the cvar value
+// when an item has no text (that is how CVARFLOATLABEL works), so leaving it
+// out draws the number twice.
+#define VALUEBOX( pos, cvarname )                                              \
+  itemDef {                                                                    \
+    name            "valuebox"##cvarname                                       \
+    group           GROUP_NAME                                                 \
+    rect            $evalfloat(VALUE_BOX_X)                                    \
+                    $evalfloat(SETTINGS_ITEM_Y_REVERSE(pos))                   \
+                    VALUE_BOX_W SETTINGS_ITEM_H                                \
+    type            ITEM_TYPE_EDITFIELD                                        \
+    text            ""                                                         \
+    textfont        UI_FONT_COURBD_21                                          \
+    textstyle       ITEM_TEXTSTYLE_SHADOWED                                    \
+    textscale       .2                                                         \
+    textalign       ITEM_ALIGN_LEFT                                            \
+    textalignx      3                                                          \
+    textaligny      7                                                          \
+    forecolor       .9 .9 .9 1                                                 \
+    backcolor       .3 .3 .3 .4                                                \
+    style           WINDOW_STYLE_FILLED                                        \
+    border          WINDOW_BORDER_FULL                                         \
+    bordercolor     .1 .1 .1 .5                                                \
+    cvar            cvarname                                                   \
+    maxChars        8                                                          \
+    maxPaintChars   7                                                          \
+    visible         1                                                          \
+    tooltip         "Click and type an exact value"                            \
+  }

@@ -10,8 +10,7 @@
 #define NUM_SETTINGS 9 // required for bottom-up settings drawing
 #define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
 
-#define PREVIEW_SIZE 96
-#define PREVIEW_X (SETTINGS_SUBW_X + (SETTINGS_SUBW_W * 0.5 - (PREVIEW_SIZE * 0.5)))
+#define PREVIEW_X (SETTINGS_SUBW_X + (SETTINGS_SUBW_W * 0.5 - (CROSSHAIR_PREVIEW_SIZE * 0.5)))
 
 menuDef {
     name MENU_NAME
@@ -52,7 +51,7 @@ menuDef {
         itemDef {
             name            "crosshair_editor_preview"
             group           GROUP_NAME
-            rect            $evalfloat(PREVIEW_X) $evalfloat(SETTINGS_ITEM_Y) PREVIEW_SIZE PREVIEW_SIZE
+            rect            $evalfloat(PREVIEW_X) $evalfloat(SETTINGS_ITEM_Y) CROSSHAIR_PREVIEW_SIZE CROSSHAIR_PREVIEW_SIZE
             style           WINDOW_STYLE_FILLED
             ownerdraw       UI_CROSSHAIR_EDITOR_PREVIEW
             backcolor       .1 .1 .1 .9

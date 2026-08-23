@@ -14,7 +14,7 @@
 #define EDITOR_BTN_W 150
 #define EDITOR_BTN_H 18
 #define EDITOR_BTN_X (SETTINGS_SUBW_X + ((SETTINGS_SUBW_W - EDITOR_BTN_W) * 0.5))
-#define EDITOR_BTN_Y (SETTINGS_ITEM_Y + 96 + 10) // 96: crosshair picker height
+#define EDITOR_BTN_Y (SETTINGS_ITEM_Y + CROSSHAIR_PREVIEW_SIZE + 10)
 
 menuDef {
     name MENU_NAME
@@ -65,7 +65,7 @@ menuDef {
         itemDef {
             name            "crosshair_select"
             group           GROUP_NAME
-            rect            $evalfloat(SETTINGS_SUBW_X + (SETTINGS_SUBW_W * 0.5 - 48)) $evalfloat(SETTINGS_ITEM_Y) 96 96
+            rect            $evalfloat(SETTINGS_SUBW_X + (SETTINGS_SUBW_W * 0.5 - (CROSSHAIR_PREVIEW_SIZE * 0.5))) $evalfloat(SETTINGS_ITEM_Y) CROSSHAIR_PREVIEW_SIZE CROSSHAIR_PREVIEW_SIZE
             style           WINDOW_STYLE_FILLED
             ownerdraw       UI_CROSSHAIR
             backcolor       .2 .2 .2 .9
