@@ -2364,15 +2364,44 @@ static int Item_ListBox_ThumbDrawPosition(itemDef_t *item) {
   return Item_ListBox_ThumbPosition(item);
 }
 
-float Item_Slider_ThumbPosition(const itemDef_t *item) {
-  float x;
-  const auto *editDef = static_cast<editFieldDef_t *>(item->typeData);
-
+// x where the slider track starts. a slider's rect covers the whole row, so the
+// track begins after the label instead of at the rect's left edge.
+static float Item_Slider_TrackStart(const itemDef_t *item) {
   if (item->text) {
-    x = item->textRect.x + item->textRect.w + 8;
-  } else {
-    x = item->window.rect.x;
+    return item->textRect.x + item->textRect.w + 8;
   }
+
+  return item->window.rect.x;
+}
+
+// maps a cursor x onto the slider's value range, clamped to the track and
+// snapped to the item's step. clicking and dragging both go through this, so
+// the two cannot produce different values for the same position.
+static float Item_Slider_ValueForCursor(const itemDef_t *item, float cursorX) {
+  const auto editDef = static_cast<editFieldDef_t *>(item->typeData);
+  const float x = Item_Slider_TrackStart(item);
+
+  if (cursorX < x) {
+    cursorX = x;
+  } else if (cursorX > x + SLIDER_WIDTH) {
+    cursorX = x + SLIDER_WIDTH;
+  }
+
+  float value = (cursorX - x) / SLIDER_WIDTH;
+  value *= editDef->maxVal - editDef->minVal;
+  value += editDef->minVal;
+
+  if (editDef->step > 0) {
+    // snap to nearest value
+    value = std::roundf(value / editDef->step) * editDef->step;
+  }
+
+  return value;
+}
+
+float Item_Slider_ThumbPosition(const itemDef_t *item) {
+  const auto *editDef = static_cast<editFieldDef_t *>(item->typeData);
+  float x = Item_Slider_TrackStart(item);
 
   if (editDef == nullptr && item->cvar) {
     return x;
@@ -3743,33 +3772,10 @@ static void Scroll_ListBox_ThumbFunc(void *p) {
 }
 
 static void Scroll_Slider_ThumbFunc(void *p) {
-  float x;
   const auto si = static_cast<scrollInfo_t *>(p);
-  const auto editDef = static_cast<editFieldDef_t *>(si->item->typeData);
 
-  if (si->item->text) {
-    x = si->item->textRect.x + si->item->textRect.w + 8;
-  } else {
-    x = si->item->window.rect.x;
-  }
-
-  auto cursorx = static_cast<float>(DC->cursor.virtX);
-
-  if (cursorx < x) {
-    cursorx = x;
-  } else if (cursorx > x + SLIDER_WIDTH) {
-    cursorx = x + SLIDER_WIDTH;
-  }
-
-  float value = cursorx - x;
-  value /= SLIDER_WIDTH;
-  value *= (editDef->maxVal - editDef->minVal);
-  value += editDef->minVal;
-
-  if (editDef->step > 0) {
-    // snap to nearest value
-    value = std::roundf(value / editDef->step) * editDef->step;
-  }
+  const float value =
+      Item_Slider_ValueForCursor(si->item, static_cast<float>(DC->cursor.virtX));
 
   if (scrollInfo.item->cacheCvar) {
     Q_strncpyz(scrollInfo.item->cacheCvarValue, va("%f", value),
@@ -3890,29 +3896,19 @@ qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
     return qfalse;
   }
 
-  float x;
-  rectDef_t testRect;
+  const float x = Item_Slider_TrackStart(item);
 
-  if (item->text) {
-    x = item->textRect.x + item->textRect.w + 8;
-  } else {
-    x = item->window.rect.x;
-  }
-
-  testRect = item->window.rect;
-  testRect.x = x;
-  float value = SLIDER_THUMB_WIDTH / 2;
-  testRect.x -= value;
-  testRect.w = SLIDER_WIDTH + SLIDER_THUMB_WIDTH / 2;
+  // the thumb hangs half its width over each end of the track, so the
+  // clickable area covers the track plus that overhang on both sides
+  rectDef_t testRect = item->window.rect;
+  testRect.x = x - (SLIDER_THUMB_WIDTH / 2);
+  testRect.w = SLIDER_WIDTH + SLIDER_THUMB_WIDTH;
 
   if (!Rect_ContainsPoint(&testRect, cursorX, cursorY)) {
     return qfalse;
   }
 
-  const float work = cursorX - x;
-  value = work / SLIDER_WIDTH;
-  value *= editDef->maxVal - editDef->minVal;
-  value += editDef->minVal;
+  const float value = Item_Slider_ValueForCursor(item, cursorX);
 
   // always update cache cvar value on click if it exists
   if (item->cacheCvar) {
