@@ -1,3 +1,11 @@
+# ETJump 3.6.2
+
+## Fixed
+* some HUD elements displayed incorrectly when traveling through nonsolid players [#1982](https://github.com/etjump/etjump/pull/1982)
+* `etj_jumpSpeedsX` shifted extra columns incorrectly to the right [#1980](https://github.com/etjump/etjump/pull/1980)
+* `previous/next` actions in fireteam `propose/kick/warn` menus executed keybinds while pressing the corresponding buttons [#1981](https://github.com/etjump/etjump/pull/1981)
+* crosshair names were not drawing through `func_static_client` entities that were in an off-state [#1983](https://github.com/etjump/etjump/pull/1983)
+
 # ETJump 3.6.1
 
 ## Changed
