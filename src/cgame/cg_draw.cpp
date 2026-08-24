@@ -1860,8 +1860,9 @@ static float CG_ScanForCrosshairEntity(float *zChange, qboolean *hitClient) {
 
   cg.crosshairClientNoShoot = qfalse;
 
-  CG_Trace(&trace, start, NULL, NULL, end, cg.snap->ps.clientNum,
-           CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_ITEM);
+  ETJump::cgame.utils.trace->filteredTraceIgnorePlayers(
+      cg.snap->ps.clientNum, &trace, start, nullptr, nullptr, end,
+      cg.snap->ps.clientNum, (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_ITEM));
 
   // How far from start to end of trace?
   dist = VectorDistance(start, trace.endpos);

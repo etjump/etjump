@@ -42,6 +42,19 @@ void TraceUtils::filteredTrace(const int32_t clientNum, trace_t *result,
   tempTraceIgnoredEnts.clear();
 }
 
+void TraceUtils::filteredTraceIgnorePlayers(const int32_t clientNum,
+                                            trace_t *result, const vec3_t start,
+                                            const vec3_t mins,
+                                            const vec3_t maxs, const vec3_t end,
+                                            const int32_t skipNumber,
+                                            const int32_t mask) {
+  setupIgnoredEntitiesIgnorePlayers(clientNum);
+
+  CG_Trace(result, start, mins, maxs, end, skipNumber, mask);
+
+  tempTraceIgnoredEnts.clear();
+}
+
 void TraceUtils::flamechunkTrace(const int32_t clientNum, trace_t *result,
                                  const vec3_t start, const vec3_t mins,
                                  const vec3_t maxs, const vec3_t end,
@@ -59,6 +72,7 @@ void TraceUtils::setupIgnoredEntities(const int32_t clientNum) {
   for (int32_t i = 0; i < cg.snap->numEntities; i++) {
     const entityState_t *es = &cg.snap->entities[i];
 
+    // add more entity handling as needed
     switch (es->eType) {
       case ET_PLAYER:
         if (!playerIsSolid(clientNum, es->number) ||
@@ -67,6 +81,24 @@ void TraceUtils::setupIgnoredEntities(const int32_t clientNum) {
         }
 
         break;
+      case ET_STATIC_CLIENT:
+        if (EntityUtilsShared::funcStaticClientIsHidden(es, clientNum)) {
+          tempTraceIgnoredEnts.emplace_back(es->number);
+        }
+
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+void TraceUtils::setupIgnoredEntitiesIgnorePlayers(const int32_t clientNum) {
+  for (int32_t i = 0; i < cg.snap->numEntities; i++) {
+    const entityState_t *es = &cg.snap->entities[i];
+
+    // add more entity handling as needed
+    switch (es->eType) {
       case ET_STATIC_CLIENT:
         if (EntityUtilsShared::funcStaticClientIsHidden(es, clientNum)) {
           tempTraceIgnoredEnts.emplace_back(es->number);

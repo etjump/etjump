@@ -38,6 +38,12 @@ public:
                      const vec3_t mins, const vec3_t maxs, const vec3_t end,
                      int32_t skipNumber, int32_t mask);
 
+  // does not filter solid/nonsolid players (all players considered solid)
+  void filteredTraceIgnorePlayers(int32_t clientNum, trace_t *result,
+                                  const vec3_t start, const vec3_t mins,
+                                  const vec3_t maxs, const vec3_t end,
+                                  int32_t skipNumber, int32_t mask);
+
   // flamechunks might be owned by players or 'props_flamethrower' entity,
   // which means we don't need to always do conditional filtering
   void flamechunkTrace(int32_t clientNum, trace_t *result, const vec3_t start,
@@ -53,6 +59,9 @@ public:
   bool entityIsIgnored(int32_t entityNum);
 
 private:
+  // only ignores non-player entities - all players considered solid
+  void setupIgnoredEntitiesIgnorePlayers(int32_t clientNum);
+
   std::vector<int32_t> tempTraceIgnoredEnts;
 };
 } // namespace ETJump
