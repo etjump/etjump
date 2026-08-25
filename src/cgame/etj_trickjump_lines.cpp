@@ -105,8 +105,11 @@ void TrickjumpLines::runFrame() {
     nextNearest = cg.time + (etj_tjlNearestInterval.integer * 1000);
   }
 
-  if (!(_enableLine && _enableMarker) || _routes.empty() ||
-      _currentRouteToRender == -1) {
+  if (!_enableLine && !_enableMarker) {
+    return;
+  }
+
+  if (_routes.empty() || _currentRouteToRender == -1) {
     return;
   }
 

@@ -1881,7 +1881,6 @@ namespace ETJump {
 static void runFrameEnd() {
   cgame.core.awaitedCommand->runFrame();
   cgame.utils.eventLoop->run();
-  cgame.visuals.trickjumpLines->runFrame();
 
   if (cg.clientFrame >= CGAME_INIT_DELAY_FRAMES) {
     delayedInit();
@@ -2176,6 +2175,10 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
       DEBUGTIME
 
       CG_AddAtmosphericEffects();
+
+      DEBUGTIME
+
+      ETJump::cgame.visuals.trickjumpLines->runFrame();
 
       DEBUGTIME
     }
