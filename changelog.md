@@ -1,9 +1,14 @@
 # ETJump 3.6.2
 
+## Changed
+* limited prints about failed timerun start conditions to one print per **200ms**, to avoid server command overflow with high ping [#1986](https://github.com/etjump/etjump/pull/1986)
+
 ## Fixed
 * some HUD elements displayed incorrectly when traveling through nonsolid players [#1982](https://github.com/etjump/etjump/pull/1982)
 * `etj_jumpSpeedsX` shifted extra columns incorrectly to the right [#1980](https://github.com/etjump/etjump/pull/1980)
+* packet loss broke some HUD elements [#1985](https://github.com/etjump/etjump/pull/1985)
 * `previous/next` actions in fireteam `propose/kick/warn` menus executed keybinds while pressing the corresponding buttons [#1981](https://github.com/etjump/etjump/pull/1981)
+* trickjump lines were not rendering [#1987](https://github.com/etjump/etjump/pull/1987)
 * crosshair names were not drawing through `func_static_client` entities that were in an off-state [#1983](https://github.com/etjump/etjump/pull/1983)
 
 # ETJump 3.6.1
