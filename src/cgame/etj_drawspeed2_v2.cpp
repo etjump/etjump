@@ -200,6 +200,12 @@ bool DrawSpeed2::beforeRender() {
     storedSpeeds.clear();
   }
 
+  // reset last speed if 'pm_type' changed (e.g. we exited noclip),
+  // to avoid nonsensical accel deltas
+  if (lastPmType != s.pm.ps->pm_type) {
+    Vector2Copy(s.pm.ps->velocity, lastSpeed);
+  }
+
   if (lastPmType != PM_NOCLIP) {
     if (s.pm.ps->pm_type == PM_NOCLIP) {
       if (accelColorStyle != AccelColorV2::Style::NONE) {
