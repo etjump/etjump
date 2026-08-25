@@ -157,31 +157,38 @@ bool TimerunEntity::canStartTimerun(const gentity_t *self,
     return true;
   }
 
+  const auto printError = [clientNum, client](const std::string &msg) {
+    // limit prints to 200ms intervals to avoid flooding the user with
+    // server commands if they stand inside a trigger which fires every frame
+    if (client->timerunLastStartFailPrintTime + (FRAMETIME * 2) > level.time) {
+      return;
+    }
+
+    Printer::center(clientNum, msg);
+    client->timerunLastStartFailPrintTime = level.time;
+  };
+
   if (client->noclip || activator->flags & FL_GODMODE) {
-    Printer::center(
-        clientNum,
-        "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
+    printError("^3WARNING: ^7Timerun was not started. Invalid playerstate!");
     return false;
   }
 
   if (client->noclipThisLife) {
-    Printer::center(clientNum, "^3WARNING: ^7Timerun was not started. ^3noclip "
-                               "^7activated this life, ^3/kill ^7required!");
+    printError("^3WARNING: ^7Timerun was not started. ^3noclip ^7activated "
+               "this life, ^3/kill ^7required!");
     return false;
   }
 
   if (client->setoffsetThisLife) {
-    Printer::center(clientNum,
-                    "^3WARNING: ^7Timerun was not started. ^3setoffset "
-                    "^7activated this life, ^3/kill ^7required!");
+    printError("^3WARNING: ^7Timerun was not started. ^3setoffset ^7activated "
+               "this life, ^3/kill ^7required!");
     return false;
   }
 
   if (client->ftNoGhostThisLife &&
       !(self->spawnflags &
         static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
-    Printer::center(
-        clientNum,
+    printError(
         "^3WARNING: ^7Timerun was not started. ^3fireteam noghost ^7enabled "
         "this life & run does not allow noghost, ^3/kill ^7required!");
     return false;
@@ -190,25 +197,22 @@ bool TimerunEntity::canStartTimerun(const gentity_t *self,
   if (client->pmoveOffThisLife &&
       (!self->spawnflags ||
        self->spawnflags & static_cast<int>(TimerunSpawnflags::ResetNoPmove))) {
-    Printer::center(clientNum,
-                    "^3WARNING: ^7Timerun was not started. ^3pmove_fixed 0 "
-                    "^7set this life, ^3/kill ^7required!");
+    printError("^3WARNING: ^7Timerun was not started. ^3pmove_fixed 0 ^7set "
+               "this life, ^3/kill ^7required!");
     return false;
   }
 
   if (speed > self->velocityUpperLimit) {
-    Printer::center(clientNum,
-                    "^3WARNING: ^7Timerun was not started. Too high starting "
-                    "speed (%.2f > %.2f)\n",
-                    speed, self->velocityUpperLimit);
+    printError(StringUtils::format("^3WARNING: ^7Timerun was not started. Too "
+                                   "high starting speed (%.2f > %.2f)\n",
+                                   speed, self->velocityUpperLimit));
     return false;
   }
 
   if (client->ps.viewangles[ROLL] != 0) {
-    Printer::center(
-        clientNum,
+    printError(StringUtils::format(
         "^3WARNING: ^7Timerun was not started. Illegal roll angles (%.2f != 0)",
-        client->ps.viewangles[ROLL]);
+        client->ps.viewangles[ROLL]));
     return false;
   }
 
@@ -284,9 +288,14 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
       client->sess.runSpawnflags &
           static_cast<int>(TimerunSpawnflags::ResetNoPmove)) {
     if (!client->pers.pmoveFixed) {
-      Printer::center(
-          clientNum,
-          "^3WARNING: ^7Timerun was not started. ^3pmove_fixed ^7is disabled!");
+      // prevent server command spam if standing inside triggers
+      if (level.time >
+          client->timerunLastStartFailPrintTime + (FRAMETIME * 2)) {
+        Printer::center(clientNum, "^3WARNING: ^7Timerun was not started. "
+                                   "^3pmove_fixed ^7is disabled!");
+        client->timerunLastStartFailPrintTime = level.time;
+      }
+
       return;
     }
   }

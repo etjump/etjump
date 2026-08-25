@@ -1199,6 +1199,11 @@ struct gclient_s {
 
   ETJump::InactivityPos inactivityPos;
 
+  // used to prevent timerun triggers that try to start every frame from
+  // spamming the user with server commands (prints) when they fail to
+  // meet the conditions for starting a timerun
+  int32_t timerunLastStartFailPrintTime;
+
   // to prevent teleport bit getting flipped multiple times per frame
   bool teleportBitFlipped;
 };
