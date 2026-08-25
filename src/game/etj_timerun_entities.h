@@ -23,11 +23,10 @@
  */
 
 #pragma once
-#include <array>
 #include <map>
 #include <set>
 
-#include "etj_log.h"
+#include "g_local.h"
 
 namespace ETJump {
 class TimerunEntity {

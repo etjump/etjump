@@ -22,12 +22,9 @@
  * SOFTWARE.
  */
 
-#include "g_local.h"
 #include "etj_timerun_entities.h"
 
-#include <stdexcept>
-
-#include "etj_container_utilities.h"
+#include "g_local.h"
 #include "etj_local.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
@@ -89,17 +86,17 @@ int TimerunEntity::getOrSetTimerunIndex(const std::string &runName) {
   return runIndices[runName];
 }
 
-struct TimerunEntityValidationResult {
-  bool hasStartTimer;
-  bool hasStopTimer;
-  bool hasCheckpoints;
-};
-
-std::vector<std::string> timerunEntities{
-    "target_startTimer", "trigger_startTimer", "target_stopTimer",
-    "trigger_stopTimer", "target_checkpoint",  "trigger_checkpoint"};
-
 void TimerunEntity::validateTimerunEntities() {
+  std::vector<std::string> timerunEntities{
+      "target_startTimer", "trigger_startTimer", "target_stopTimer",
+      "trigger_stopTimer", "target_checkpoint",  "trigger_checkpoint"};
+
+  struct TimerunEntityValidationResult {
+    bool hasStartTimer;
+    bool hasStopTimer;
+    bool hasCheckpoints;
+  };
+
   std::map<std::string, TimerunEntityValidationResult> validationResults;
 
   for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; ++i) {
@@ -146,7 +143,7 @@ void TimerunEntity::validateTimerunEntities() {
 bool TimerunEntity::canStartTimerun(const gentity_t *self,
                                     const gentity_t *activator,
                                     const int clientNum, const float speed) {
-  const auto client = activator->client;
+  auto *const client = activator->client;
 
   if (!client->pers.enableTimeruns || client->sess.timerunActive) {
     return false;
@@ -224,9 +221,8 @@ void TargetStartTimer::spawn(gentity_t *self) {
   level.hasTimerun = true;
   G_SpawnFloat("speed_limit", "700", &self->velocityUpperLimit);
 
-  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
-    use(self, activator);
-  };
+  self->use = [](gentity_t *self, [[maybe_unused]] gentity_t *other,
+                 gentity_t *activator) { use(self, activator); };
 }
 
 void TriggerStartTimer::spawn(gentity_t *self) {
@@ -234,12 +230,10 @@ void TriggerStartTimer::spawn(gentity_t *self) {
   level.hasTimerun = true;
   G_SpawnFloat("speed_limit", "700", &self->velocityUpperLimit);
 
-  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
-    use(self, activator);
-  };
-  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
-    use(self, other);
-  };
+  self->use = [](gentity_t *self, [[maybe_unused]] gentity_t *other,
+                 gentity_t *activator) { use(self, activator); };
+  self->touch = [](gentity_t *self, gentity_t *other,
+                   [[maybe_unused]] trace_t *t) { use(self, other); };
 
   self->s.eType = ET_TRIGGER_MULTIPLE;
   InitTrigger(self);
@@ -257,12 +251,10 @@ void TriggerStartTimerExt::spawn(gentity_t *self) {
     G_Error("'trigger_starttimer_ext' does not have maxs\n");
   }
 
-  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
-    use(self, activator);
-  };
-  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
-    use(self, other);
-  };
+  self->use = [](gentity_t *self, [[maybe_unused]] gentity_t *other,
+                 gentity_t *activator) { use(self, activator); };
+  self->touch = [](gentity_t *self, gentity_t *other,
+                   [[maybe_unused]] trace_t *t) { use(self, other); };
 
   self->s.eType = ET_TRIGGER_MULTIPLE;
   InitTrigger(self);
@@ -274,7 +266,7 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
     return;
   }
   const int clientNum = ClientNum(activator);
-  auto client = activator->client;
+  auto *const client = activator->client;
   const float speed = VectorLength(client->ps.velocity);
 
   if (!canStartTimerun(self, activator, clientNum, speed)) {
@@ -314,20 +306,17 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
 void TargetStopTimer::spawn(gentity_t *self) {
   setTimerunIndex(self);
 
-  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
-    use(self, activator);
-  };
+  self->use = [](gentity_t *self, [[maybe_unused]] gentity_t *other,
+                 gentity_t *activator) { use(self, activator); };
 }
 
 void TriggerStopTimer::spawn(gentity_t *self) {
   setTimerunIndex(self);
 
-  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
-    use(self, activator);
-  };
-  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
-    use(self, other);
-  };
+  self->use = [](gentity_t *self, [[maybe_unused]] gentity_t *other,
+                 gentity_t *activator) { use(self, activator); };
+  self->touch = [](gentity_t *self, gentity_t *other,
+                   [[maybe_unused]] trace_t *t) { use(self, other); };
 
   self->s.eType = ET_TRIGGER_MULTIPLE;
   InitTrigger(self);
@@ -343,12 +332,10 @@ void TriggerStopTimerExt::spawn(gentity_t *self) {
     G_Error("'trigger_stoptimer_ext' does not have maxs\n");
   }
 
-  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
-    use(self, activator);
-  };
-  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
-    use(self, other);
-  };
+  self->use = [](gentity_t *self, [[maybe_unused]] gentity_t *other,
+                 gentity_t *activator) { use(self, activator); };
+  self->touch = [](gentity_t *self, gentity_t *other,
+                   [[maybe_unused]] trace_t *t) { use(self, other); };
 
   self->s.eType = ET_TRIGGER_MULTIPLE;
   InitTrigger(self);
@@ -374,9 +361,8 @@ void TargetCheckpoint::spawn(gentity_t *self) {
   setTimerunIndex(self);
 
   self->checkpointIndex = level.checkpointsCount[self->runIndex]++;
-  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
-    use(self, activator);
-  };
+  self->use = [](gentity_t *self, [[maybe_unused]] gentity_t *other,
+                 gentity_t *activator) { use(self, activator); };
 }
 
 void TriggerCheckpoint::spawn(gentity_t *self) {
@@ -388,12 +374,10 @@ void TriggerCheckpoint::spawn(gentity_t *self) {
   setTimerunIndex(self);
 
   self->checkpointIndex = level.checkpointsCount[self->runIndex]++;
-  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
-    use(self, activator);
-  };
-  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
-    use(self, other);
-  };
+  self->use = [](gentity_t *self, [[maybe_unused]] gentity_t *other,
+                 gentity_t *activator) { use(self, activator); };
+  self->touch = [](gentity_t *self, gentity_t *other,
+                   [[maybe_unused]] trace_t *t) { use(self, other); };
   self->s.eType = ET_TRIGGER_MULTIPLE;
   InitTrigger(self);
 }
@@ -414,12 +398,10 @@ void TriggerCheckpointExt::spawn(gentity_t *self) {
   }
 
   self->checkpointIndex = level.checkpointsCount[self->runIndex]++;
-  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
-    use(self, activator);
-  };
-  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
-    use(self, other);
-  };
+  self->use = [](gentity_t *self, [[maybe_unused]] gentity_t *other,
+                 gentity_t *activator) { use(self, activator); };
+  self->touch = [](gentity_t *self, gentity_t *other,
+                   [[maybe_unused]] trace_t *t) { use(self, other); };
   self->s.eType = ET_TRIGGER_MULTIPLE;
   InitTrigger(self);
   trap_LinkEntity(self);
