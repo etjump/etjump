@@ -207,15 +207,25 @@ bool DrawSpeed2::beforeRender() {
       } else {
         parseColor(etj_speedColor.string);
       }
-    } else if (!cgame.hudData.pmoveV2->skipUpdate(oldLastUpdateTime,
-                                                  std::nullopt, s.pm)) {
-      // NOTE: only update the speed values used for accel calculations
-      // when we do an update, so accel values stay true without lerping,
-      // even if the speed meter itself is lerped
-      Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
-      Vector2Copy(s.pm.ps->velocity, lastSpeed);
+    } else {
+      // capture the previous real update time before 'skipUpdate' mutates it
+      const int32_t prevRealUpdateTime = oldLastUpdateTime;
 
-      setupAccelColor(s, currentSpeed);
+      if (!cgame.hudData.pmoveV2->skipUpdate(oldLastUpdateTime, std::nullopt,
+                                             s.pm)) {
+        // NOTE: only update the speed values used for accel calculations
+        // when we do an update, so accel values stay true without lerping,
+        // even if the speed meter itself is lerped
+        Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
+
+        // rescale to a single physics frame, as a sample interval can span
+        // multiple physics frames if FPS dips below 125
+        AccelColorV2::normalizeAccelVec(
+            accelVec, oldLastUpdateTime - prevRealUpdateTime, s.pm.pmove_msec);
+        Vector2Copy(s.pm.ps->velocity, lastSpeed);
+
+        setupAccelColor(s, currentSpeed);
+      }
     }
   }
 

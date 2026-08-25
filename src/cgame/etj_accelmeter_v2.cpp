@@ -136,6 +136,9 @@ bool AccelMeterV2::beforeRender() {
     return false;
   }
 
+  // store last update time so we can get the elapsed time since last update
+  int32_t oldLastUpdateTime = lastUpdateTime;
+
   // never lerp this, we want real acceleration values always
   if (cgame.hudData.pmoveV2->skipUpdate(lastUpdateTime, std::nullopt, s.pm)) {
     return true;
@@ -161,6 +164,10 @@ bool AccelMeterV2::beforeRender() {
       }
     } else {
       Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
+      // rescale to a single physics frame, as a sample interval can span
+      // multiple physics frames if FPS dips below 125
+      AccelColorV2::normalizeAccelVec(
+          accelVec, lastUpdateTime - oldLastUpdateTime, s.pm.pmove_msec);
       setupAccelColor(s, s.vf);
     }
   }

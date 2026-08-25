@@ -64,6 +64,21 @@ float AccelColorV2::calcAvgAccel(const std::list<StoredSpeed> &storedSpeeds) {
   return totalSpeedDelta / (timeDeltaMs / 1000.f);
 }
 
+void AccelColorV2::normalizeAccelVec(vec2_t accelVec, int32_t elapsedMs,
+                                     int32_t pmoveMsec) {
+  // velocity deltas between two samples normally span a single physics frame,
+  // but if the client's FPS dips below 125, the interval might be
+  // 2 or more physics frames, inflating the raw delta - rescale back
+  // to single frame accel, so values stay correct at low FPS
+  // this is a rather naive linear scaling, and may be incorrect at
+  // consistent low framerates, but it helps with the most common case
+  // reasonably well ('com_maxFPS 125' and slight framerate dip)
+  const float scale = static_cast<float>(pmoveMsec) /
+                      std::max(static_cast<float>(elapsedMs), 1.0f);
+  accelVec[0] *= scale;
+  accelVec[1] *= scale;
+}
+
 bool AccelColorV2::lowSpeedOnGround(const float speed,
                                     const int32_t groundEntityNum) {
   return speed <= MAX_GROUNDSTRAFE && groundEntityNum != ENTITYNUM_NONE;

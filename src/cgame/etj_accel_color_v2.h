@@ -48,6 +48,8 @@ public:
   static void popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds,
                                  int32_t time);
   static float calcAvgAccel(const std::list<StoredSpeed> &storedSpeeds);
+  static void normalizeAccelVec(vec2_t accelVec, int32_t elapsedMs,
+                                int32_t pmoveMsec);
   static void calcAdvancedAccelColor(const pmove_t &pm, const pml_t &pml,
                                      const vec2_t accelVec, float wishspeed,
                                      const vec2_t wishvel, float velAngle,
