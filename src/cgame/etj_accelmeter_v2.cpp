@@ -132,12 +132,12 @@ bool AccelMeterV2::beforeRender() {
 
   // pps must be accurate in order to draw this accurately
   // TODO: revisit with 'g_synchronousClients'
-  if (!PmoveUtilsV2::ppsIsAccurate(s.pm)) {
+  if (!cgame.hudData.pmoveV2->ppsIsAccurate(s.pm)) {
     return false;
   }
 
   // never lerp this, we want real acceleration values always
-  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, std::nullopt, s.pm)) {
+  if (cgame.hudData.pmoveV2->skipUpdate(lastUpdateTime, std::nullopt, s.pm)) {
     return true;
   }
 

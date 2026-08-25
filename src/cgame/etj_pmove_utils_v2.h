@@ -111,13 +111,13 @@ public:
 
   static bool rightStrafe(bool forwards, const usercmd_t &cmd);
 
-  static bool skipUpdate(int32_t &lastUpdateTime,
-                         std::optional<HUDLerpFlags> flag, const pmove_t &pm);
+  bool skipUpdate(int32_t &lastUpdateTime, std::optional<HUDLerpFlags> flag,
+                  const pmove_t &pm);
 
   // 'cg.predictedPlayerState' is considered accurate if:
   // - we are not following anyone
-  // - we are in demo playback (not following), and the snapshot intervals
-  //   match 'pmove_msec', meaning demo was recorded at 'sv_fps/snaps 125'
+  // - we are in demo playback (not following), and the snapshot cadence
+  //   matches 'pmove_msec', meaning demo was recorded at 'sv_fps/snaps 125'
   //
   // In any other scenario, we cannot fully trust it, because it has some form
   // of interpolation applied to it - most notably, velocity isn't snapped,
@@ -125,7 +125,7 @@ public:
   // TODO: all code that uses this needs to be revised once
   // 'g_synchronousClients' is implemented, because we no longer use
   // predicted playerstate with that, but rather 'cg.snap->ps'
-  static bool ppsIsAccurate(const pmove_t &pm);
+  bool ppsIsAccurate(const pmove_t &pm);
 
 private:
   void initCvars();
@@ -149,7 +149,13 @@ private:
   setDefaultInput(pmove_t &pm, int8_t scale,
                   const EnumBitset<PmoveDefaultInput> &defaultInput);
 
+  // true if snapshots arrive at physics framerate ('sv_fps 125' & 'snaps 125')
+  bool snapCadenceMatchesPmove();
+
   State s{};
+
+  int32_t prevSnapTime{};
+  int32_t snapInterval{};
 
   bool doPmove{};
   std::vector<const vmCvar_t *> hudCvars;

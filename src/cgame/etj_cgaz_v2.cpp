@@ -334,7 +334,8 @@ bool CGazV2::beforeRender() {
     return false;
   }
 
-  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, HUDLerpFlags::CGAZ, s.pm)) {
+  if (cgame.hudData.pmoveV2->skipUpdate(lastUpdateTime, HUDLerpFlags::CGAZ,
+                                        s.pm)) {
     return true;
   }
 

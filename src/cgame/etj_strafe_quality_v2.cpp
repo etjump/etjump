@@ -149,8 +149,8 @@ bool StrafeQualityV2::beforeRender() {
     return false;
   }
 
-  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, HUDLerpFlags::STRAFE_QUALITY,
-                               s.pm)) {
+  if (cgame.hudData.pmoveV2->skipUpdate(lastUpdateTime,
+                                        HUDLerpFlags::STRAFE_QUALITY, s.pm)) {
     return true;
   }
 

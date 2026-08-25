@@ -70,7 +70,8 @@ void UpmoveMeterData::runFrame() {
     reset();
   }
 
-  if (PmoveUtilsV2::skipUpdate(s.lastUpdateTime, std::nullopt, pmove.pm)) {
+  if (cgame.hudData.pmoveV2->skipUpdate(s.lastUpdateTime, std::nullopt,
+                                        pmove.pm)) {
     return;
   }
 

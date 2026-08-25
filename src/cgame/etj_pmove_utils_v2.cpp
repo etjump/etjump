@@ -1079,14 +1079,23 @@ bool PmoveUtilsV2::skipUpdate(int32_t &lastUpdateTime,
                               std::optional<HUDLerpFlags> flag,
                               const pmove_t &pm) {
   // no valid frames yet
-  if (!pm.ps || !cg.nextSnap) {
+  if (!pm.ps || !cg.snap) {
     return true;
   }
 
-  const int32_t frameTime =
-      cg.nextSnap->serverTime - cg.snap->serverTime == pm.pmove_msec
-          ? pm.ps->commandTime
-          : cg.time;
+  // use command time while playing, or if in spec/demo playback,
+  // and snapshot update rate matches 'pmove_msec'
+  const bool useCommandTime =
+      (pm.ps->clientNum == cg.clientNum && !cg.demoPlayback) ||
+      snapCadenceMatchesPmove();
+
+  // otherwise, fall back to 'cg.time'
+  // (less accurate, things might break a bit with unstable fps)
+  const int32_t frameTime = useCommandTime ? pm.ps->commandTime : cg.time;
+
+  // 'lastUpdateTime' should never be a static variable,
+  // as that makes it error prone with server time resets
+  assert(frameTime >= lastUpdateTime);
 
   const int now = frameTime - (frameTime % pm.pmove_msec);
 
@@ -1105,15 +1114,25 @@ bool PmoveUtilsV2::skipUpdate(int32_t &lastUpdateTime,
   return false;
 }
 
+bool PmoveUtilsV2::snapCadenceMatchesPmove() {
+  const int32_t snapTime = cg.snap->serverTime;
+
+  if (snapTime != prevSnapTime) {
+    snapInterval =
+        prevSnapTime && snapTime > prevSnapTime ? snapTime - prevSnapTime : 0;
+    prevSnapTime = snapTime;
+  }
+
+  return snapInterval == cgs.pmove_msec;
+}
+
 bool PmoveUtilsV2::ppsIsAccurate(const pmove_t &pm) {
-  if (!pm.ps || !cg.nextSnap) {
+  if (!pm.ps || !cg.snap) {
     return false;
   }
 
   if (pm.ps->clientNum == cg.clientNum) {
-    return cg.demoPlayback
-               ? cg.nextSnap->serverTime - cg.snap->serverTime == pm.pmove_msec
-               : true;
+    return cg.demoPlayback ? snapCadenceMatchesPmove() : true;
   }
 
   return false;

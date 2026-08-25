@@ -175,8 +175,8 @@ bool DrawSpeed2::beforeRender() {
   // store the old last update time so we can re-check it for accel coloring
   int32_t oldLastUpdateTime = lastUpdateTime;
 
-  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, HUDLerpFlags::DRAWSPEED2,
-                               s.pm)) {
+  if (cgame.hudData.pmoveV2->skipUpdate(lastUpdateTime,
+                                        HUDLerpFlags::DRAWSPEED2, s.pm)) {
     return true;
   }
 
@@ -185,7 +185,7 @@ bool DrawSpeed2::beforeRender() {
 
   // pps must be accurate in order to use advanced accel coloring
   // TODO: revisit with 'g_synchronousClients'
-  if (!PmoveUtilsV2::ppsIsAccurate(s.pm) &&
+  if (!cgame.hudData.pmoveV2->ppsIsAccurate(s.pm) &&
       accelColorStyle == AccelColorV2::Style::ADVANCED) {
     accelColorStyle = AccelColorV2::Style::SIMPLE;
   }
@@ -207,8 +207,8 @@ bool DrawSpeed2::beforeRender() {
       } else {
         parseColor(etj_speedColor.string);
       }
-    } else if (!PmoveUtilsV2::skipUpdate(oldLastUpdateTime, std::nullopt,
-                                         s.pm)) {
+    } else if (!cgame.hudData.pmoveV2->skipUpdate(oldLastUpdateTime,
+                                                  std::nullopt, s.pm)) {
       // NOTE: only update the speed values used for accel calculations
       // when we do an update, so accel values stay true without lerping,
       // even if the speed meter itself is lerped
