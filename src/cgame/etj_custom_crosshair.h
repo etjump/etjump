@@ -24,36 +24,18 @@
 
 #pragma once
 
-#include <cstdint>
-#include <memory>
+#include "etj_crosshair_renderer.h"
 
 namespace ETJump {
-// These keeps track of how 'JoinServer' and 'ServerStatus' UI scripts work.
-// This let's us use a single script and .menu file for serverinfo panel,
-// without having to duplicate the functionality in 'main.menu',
-// 'playonline.menu' and 'ingame_main.menu'.
-// We use integers here instead of enums to easily use the constants
-// in the actual .menu files as well.
-struct ServerAction {
-  int8_t statusType = -1;
-  int8_t joinType = -1;
-};
+// cgame side of the custom crosshair renderer, just hands over the cgame
+// drawing primitives. the shape maths is shared with ui so the editor preview
+// matches what actually gets drawn.
+class CustomCrosshairDrawer {
+public:
+  static void draw(const CrosshairDefinition &definition, float centerX,
+                   float centerY, float scale);
 
-class SyscallExt;
-class ColorPicker;
-class DemoQueue;
-class QuickConnect;
-class ColorParser;
-class CrosshairEditor;
-
-struct UIContext {
-  std::unique_ptr<SyscallExt> syscallExt;
-  std::unique_ptr<ColorPicker> colorPicker;
-  std::unique_ptr<DemoQueue> demoQueue;
-  std::unique_ptr<QuickConnect> quickConnect;
-  std::unique_ptr<ColorParser> colorParser;
-  std::unique_ptr<CrosshairEditor> crosshairEditor;
-
-  ServerAction serverAction;
+private:
+  static const CrosshairPainter &painter();
 };
 } // namespace ETJump

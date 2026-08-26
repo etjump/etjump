@@ -23,6 +23,7 @@
  */
 
 #include "etj_colorpicker.h"
+#include "etj_crosshair_editor.h"
 #include "etj_demo_queue.h"
 #include "etj_local.h"
 #include "etj_quick_connect.h"
@@ -208,6 +209,7 @@ void init(const int32_t legacyClient, const int32_t clientVersion) {
 
   initColorPicker();
   initDemoQueueHandler();
+  ui.crosshairEditor = std::make_unique<CrosshairEditor>();
 
   parseChangelogs();
 }

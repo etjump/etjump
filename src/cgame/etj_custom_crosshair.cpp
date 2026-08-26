@@ -22,38 +22,29 @@
  * SOFTWARE.
  */
 
-#pragma once
-
-#include <cstdint>
-#include <memory>
+#include "etj_custom_crosshair.h"
+#include "cg_local.h"
 
 namespace ETJump {
-// These keeps track of how 'JoinServer' and 'ServerStatus' UI scripts work.
-// This let's us use a single script and .menu file for serverinfo panel,
-// without having to duplicate the functionality in 'main.menu',
-// 'playonline.menu' and 'ingame_main.menu'.
-// We use integers here instead of enums to easily use the constants
-// in the actual .menu files as well.
-struct ServerAction {
-  int8_t statusType = -1;
-  int8_t joinType = -1;
-};
+const CrosshairPainter &CustomCrosshairDrawer::painter() {
+  // built once, the primitives are stateless and rebuilding two std::function's
+  // every frame would just be wasted work
+  static const CrosshairPainter painter{
+      [](const float x, const float y, const float w, const float h,
+         const vec4_t color) { CG_FillRect(x, y, w, h, color); },
+      [](const float x0, const float y0, const float x1, const float y1,
+         const float thickness, const vec4_t color) {
+        // drawLineDDA turns axis aligned lines into a single DrawPic and only
+        // walks pixel by pixel when the line is actually diagonal
+        drawLineDDA(x0, y0, x1, y1, thickness, color);
+      }};
 
-class SyscallExt;
-class ColorPicker;
-class DemoQueue;
-class QuickConnect;
-class ColorParser;
-class CrosshairEditor;
+  return painter;
+}
 
-struct UIContext {
-  std::unique_ptr<SyscallExt> syscallExt;
-  std::unique_ptr<ColorPicker> colorPicker;
-  std::unique_ptr<DemoQueue> demoQueue;
-  std::unique_ptr<QuickConnect> quickConnect;
-  std::unique_ptr<ColorParser> colorParser;
-  std::unique_ptr<CrosshairEditor> crosshairEditor;
-
-  ServerAction serverAction;
-};
+void CustomCrosshairDrawer::draw(const CrosshairDefinition &definition,
+                                 const float centerX, const float centerY,
+                                 const float scale) {
+  drawCrosshairDefinition(definition, painter(), centerX, centerY, scale);
+}
 } // namespace ETJump

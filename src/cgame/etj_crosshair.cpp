@@ -26,6 +26,7 @@
 #include "cg_local.h"
 #include "etj_color_parser.h"
 #include "etj_crosshair_drawer.h"
+#include "etj_custom_crosshair.h"
 #include "etj_cvar_parser.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
@@ -36,6 +37,7 @@ Crosshair::Crosshair(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
   startListeners();
   parseColor(&cg_crosshairColor, crosshair.color);
   parseColor(&cg_crosshairColorAlt, crosshair.colorAlt);
+  parseDefinition();
   adjustPosition();
 }
 
@@ -44,6 +46,10 @@ Crosshair::~Crosshair() {
   cvarUpdate->unsubscribe(&cg_crosshairColorAlt);
   cvarUpdate->unsubscribe(&cg_crosshairX);
   cvarUpdate->unsubscribe(&cg_crosshairY);
+
+  for (const auto *cvar : elementCvars) {
+    cvarUpdate->unsubscribe(cvar);
+  }
 }
 
 void Crosshair::startListeners() {
@@ -60,6 +66,22 @@ void Crosshair::startListeners() {
                         [this](const vmCvar_t *) { adjustPosition(); });
   cvarUpdate->subscribe(&cg_crosshairY,
                         [this](const vmCvar_t *) { adjustPosition(); });
+
+  // custom crosshair elements - reparsed as a set, since an element's slot
+  // index is not carried in the callback
+  for (const auto *cvar : elementCvars) {
+    cvarUpdate->subscribe(cvar, [this](const vmCvar_t *) { parseDefinition(); });
+  }
+}
+
+void Crosshair::parseDefinition() {
+  for (size_t i = 0; i < elementCvars.size(); i++) {
+    auto &element = definition.elements[i];
+    element = parseCrosshairElement(elementCvars[i]->string);
+    element.resolveColors([](const std::string &colorString, vec4_t &out) {
+      cgame.utils.colorParser->parseColorString(colorString, out);
+    });
+  }
 }
 
 void Crosshair::parseColor(const vmCvar_t *cvar, vec4_t &out) {
@@ -102,6 +124,14 @@ bool Crosshair::beforeRender() {
     return false;
   }
 
+  customCrosshair = etj_customCrosshair.integer != 0;
+
+  // the custom crosshair has its own per element colors and sizes, so none of
+  // the cg_crosshair* handling below applies to it
+  if (customCrosshair) {
+    return true;
+  }
+
   crosshair.current = cg_drawCrosshair.integer % NUM_CROSSHAIRS;
   adjustSize();
 
@@ -119,6 +149,12 @@ bool Crosshair::beforeRender() {
 }
 
 void Crosshair::render() const {
+  if (customCrosshair) {
+    CustomCrosshairDrawer::draw(definition, crosshair.x, crosshair.y,
+                                std::max(etj_customCrosshairScale.value, 0.0f));
+    return;
+  }
+
   const qhandle_t shader = cgs.media.crosshairShader[crosshair.current];
   const qhandle_t shaderAlt = cg.crosshairShaderAlt[crosshair.current];
 

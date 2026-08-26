@@ -127,6 +127,10 @@
 	loadMenu { "ui/etjump_settings_demos_autodemo.menu" }
 	loadMenu { "ui/etjump_settings_demos_playback.menu" }
 
+	loadMenu { "ui/etjump_settings_crosshair_editor.menu" }
+	loadMenu { "ui/etjump_settings_crosshair_colors.menu" }
+	loadMenu { "ui/etjump_settings_crosshair_presets.menu" }
+
 	loadMenu { "ui/etjump_settings_popup_writeconfig.menu" }
 	loadMenu { "ui/etjump_settings_popup_colorpicker.menu" }
 
