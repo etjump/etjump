@@ -54,17 +54,17 @@ menuDef {
     SIDEBUTTON          (13, "MISC", close MENU_NAME; open etjump_settings_hud1_misc)
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "INDICATORS")
-    
+
         MULTI               (SETTINGS_ITEM_POS(1), "Draw overbounce detector:", 0.2, SETTINGS_ITEM_H, "etj_drawOB", cvarFloatList { "No" 0 "Simple" 1 "Advanced" 2 }, "Draw overbounce detector\netj_drawOB")
         CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_OBX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(2), "OB detector X:", 0.2, SETTINGS_ITEM_H, etj_OBX 320 0 640 10, "Sets X position of overbounce detector\netj_OBX")
+        SLIDER              (SETTINGS_ITEM_POS(2), "OB detector X:", 0.2, SETTINGS_ITEM_H, etj_OBX 350 0 640 10, "Sets X position of overbounce detector\netj_OBX")
         CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_OBY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(3), "OB detector Y:", 0.2, SETTINGS_ITEM_H, etj_OBY 320 0 480 10, "Sets Y position of overbounce detector\netj_OBY")
+        SLIDER              (SETTINGS_ITEM_POS(3), "OB detector Y:", 0.2, SETTINGS_ITEM_H, etj_OBY 245 0 480 10, "Sets Y position of overbounce detector\netj_OBY")
         YESNO               (SETTINGS_ITEM_POS(4), "Draw slick detector:", 0.2, SETTINGS_ITEM_H, "etj_drawSlick", "Draw slick detector\netj_drawSlick")
         CVARINTLABEL        (SETTINGS_ITEM_POS(5), "etj_slickX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(5), "Slick detector X:", 0.2, SETTINGS_ITEM_H, etj_slickX 304 0 640 10, "Sets X position of slick detector\netj_slickX")
+        SLIDER              (SETTINGS_ITEM_POS(5), "Slick detector X:", 0.2, SETTINGS_ITEM_H, etj_slickX 301 0 640 10, "Sets X position of slick detector\netj_slickX")
         CVARINTLABEL        (SETTINGS_ITEM_POS(6), "etj_slickY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(6), "Slick detector Y:", 0.2, SETTINGS_ITEM_H, etj_slickY 220 0 480 10, "Sets Y position of slick detector\netj_slickY")
+        SLIDER              (SETTINGS_ITEM_POS(6), "Slick detector Y:", 0.2, SETTINGS_ITEM_H, etj_slickY 245 0 480 10, "Sets Y position of slick detector\netj_slickY")
         MULTI               (SETTINGS_ITEM_POS(7), "Draw save area indicator:", 0.2, SETTINGS_ITEM_H, "etj_drawSaveIndicator", cvarFloatList { "No" 0 "Always" 1 "Outside of volume" 2 "Inside of volume" 3 }, "Draw indicator for no save areas\netj_drawSaveIndicator")
         CVARINTLABEL        (SETTINGS_ITEM_POS(8), "etj_saveIndicatorX", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(8), "Save indicator X:", 0.2, SETTINGS_ITEM_H, etj_saveIndicatorX 615 0 640 10, "Sets X position of save area indicator\netj_saveIndicatorX")

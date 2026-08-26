@@ -56,7 +56,7 @@ menuDef {
         CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_snapHUDOffsetY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "Snaphud offset Y:", 0.2, SETTINGS_ITEM_H, etj_snapHUDOffsetY 0 -240 240 5, "Sets Y offset of snaphud\netj_snapHUDOffsetY")
         CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_snapHUDHeight", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(3), "Snaphud height:", 0.2, SETTINGS_ITEM_H, etj_snapHUDHeight 10 1 100 1, "Sets the height of snaphud\netj_snapHUDHeight")
+        SLIDER              (SETTINGS_ITEM_POS(3), "Snaphud height:", 0.2, SETTINGS_ITEM_H, etj_snapHUDHeight 6 1 100 1, "Sets the height of snaphud\netj_snapHUDHeight")
         CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_snapHUDFov", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(4), "Snaphud FOV:", 0.2, SETTINGS_ITEM_H, etj_snapHUDFov 0 0 179 5, "Sets FOV of snaphud, 0 to use your current FOV\netj_snapHUDFov")
         YESNO               (SETTINGS_ITEM_POS(5), "Highlight active zone:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDHLActive", "Highlight active snaphud zone HUD\netj_snapHUDHLActive")

@@ -60,7 +60,7 @@ menuDef {
         COMBO               (SETTINGS_COMBO_POS(6), "CGaz 2 color 1:", 0.2, SETTINGS_ITEM_H, "etj_CGaz2Color1", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets primary color of CGaz 2\netj_CGaz2Color1")
         COMBO               (SETTINGS_COMBO_POS(7), "CGaz 2 color 2:", 0.2, SETTINGS_ITEM_H, "etj_CGaz2Color2", COLOR_LIST, uiScript uiPreviousMenu MENU_NAME, "Sets secondary color of CGaz 2\netj_CGaz2Color2")
         CVARINTLABEL        (SETTINGS_ITEM_POS(8), "etj_CGazHeight", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(8), "CGaz height:", 0.2, SETTINGS_ITEM_H, etj_CGazHeight 20 1 100 1, "Sets height of CGaz 1\netj_CGazHeight")
+        SLIDER              (SETTINGS_ITEM_POS(8), "CGaz height:", 0.2, SETTINGS_ITEM_H, etj_CGazHeight 12 1 100 1, "Sets height of CGaz 1\netj_CGazHeight")
         CVARINTLABEL        (SETTINGS_ITEM_POS(9), "etj_CGazY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(9), "CGaz 1 Y position:", 0.2, SETTINGS_ITEM_H, etj_CGazY 240 0 480 10, "Sets Y position of CGaz 1\netj_CGazY")
         CVARINTLABEL        (SETTINGS_ITEM_POS(10), "etj_CGaz2Y", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)

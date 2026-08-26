@@ -78,7 +78,7 @@ menuDef {
         }
 
         CVARINTLABEL        (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 1), "cg_crosshairSize", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 1), "Crosshair size:", 0.2, SETTINGS_ITEM_H, cg_crosshairSize 48 0 96 1, "Sets the size of the crosshair\ncg_crosshairSize")
+        SLIDER              (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 1), "Crosshair size:", 0.2, SETTINGS_ITEM_H, cg_crosshairSize 40 0 96 1, "Sets the size of the crosshair\ncg_crosshairSize")
         YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 2), "Crosshair pulsing:", 0.2, SETTINGS_ITEM_H, "cg_crosshairPulse", "Toggles crosshair spread sizing while moving/firing\ncg_crosshairPulse")
         YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 3), "Crosshair health info:", 0.2, SETTINGS_ITEM_H, "cg_crosshairHealth", "Colors the crosshair based on current health (overrides crosshair color settings)\ncg_crosshairHealth")
         YESNO               (SETTINGS_ITEM_POS_REVERSE(NUM_SETTINGS - 4), "Crosshair name drawing:", 0.2, SETTINGS_ITEM_H, "cg_drawCrosshairNames", "Displays player info when the crosshair is over a teammate\ncg_drawCrosshairNames")

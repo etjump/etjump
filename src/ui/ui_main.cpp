@@ -7689,7 +7689,7 @@ cvarTable_t cvarTable[] = {
     {&ui_master, "ui_master", "0", CVAR_ARCHIVE},
 
     {&ui_brassTime, "cg_brassTime", "2500", CVAR_ARCHIVE}, // JPW NERVE
-    {&ui_drawCrosshair, "cg_drawCrosshair", "4", CVAR_ARCHIVE},
+    {&ui_drawCrosshair, "cg_drawCrosshair", "5", CVAR_ARCHIVE},
     {&ui_drawCrosshairNames, "cg_drawCrosshairNames", "1", CVAR_ARCHIVE},
     {&ui_drawCrosshairPickups, "cg_drawCrosshairPickups", "1",
      CVAR_ARCHIVE}, //----(SA) added
@@ -7777,7 +7777,6 @@ cvarTable_t cvarTable[] = {
 
     {&g_gameType, "g_gameType", "2", CVAR_SERVERINFO | CVAR_LATCH},
     {NULL, "cg_drawBuddies", "1", CVAR_ARCHIVE},
-    {NULL, "cg_drawRoundTimer", "0", CVAR_ARCHIVE},
     {NULL, "cg_showblood", "1", CVAR_ARCHIVE},
     {NULL, "cg_bloodFlash", "1.0", CVAR_ARCHIVE},
     {NULL, "cg_autoReload", "1", CVAR_ARCHIVE},
@@ -7792,10 +7791,10 @@ cvarTable_t cvarTable[] = {
     {NULL, "cg_useScreenshotJPEG", "1", CVAR_ARCHIVE},
     {NULL, "cg_drawGun", "1", CVAR_ARCHIVE},
     {NULL, "cg_drawCompass", "1", CVAR_ARCHIVE},
-    {NULL, "cg_drawRoundTimer", "0", CVAR_ARCHIVE},
+    {NULL, "cg_drawRoundTimer", "1", CVAR_ARCHIVE},
     {NULL, "cg_drawReinforcementTime", "0", CVAR_ARCHIVE},
     {NULL, "cg_cursorHints", "1", CVAR_ARCHIVE},
-    {NULL, "cg_crosshairPulse", "1", CVAR_ARCHIVE},
+    {NULL, "cg_crosshairPulse", "0", CVAR_ARCHIVE},
     {NULL, "cg_drawCrosshairNames", "1", CVAR_ARCHIVE},
     {NULL, "cg_crosshairColor", "White", CVAR_ARCHIVE},
     {NULL, "cg_crosshairAlpha", "1.0", CVAR_ARCHIVE},
@@ -7823,7 +7822,7 @@ cvarTable_t cvarTable[] = {
     {&cg_crosshairAlphaAlt, "cg_crosshairAlphaAlt", "1.0", CVAR_ARCHIVE},
     {&cg_crosshairColor, "cg_crosshairColor", "White", CVAR_ARCHIVE},
     {&cg_crosshairColorAlt, "cg_crosshairColorAlt", "White", CVAR_ARCHIVE},
-    {&cg_crosshairSize, "cg_crosshairSize", "48", CVAR_ARCHIVE},
+    {&cg_crosshairSize, "cg_crosshairSize", "40", CVAR_ARCHIVE},
     // game mappings (for create server option)
     {NULL, "bot_minplayers", "0", CVAR_ARCHIVE},
     {NULL, "g_ipcomplaintlimit", "3", CVAR_ARCHIVE},
