@@ -5,6 +5,8 @@
 // ahead the client's movement.
 // It also handles local physics interaction, like fragments bouncing off walls
 
+#include <algorithm>
+
 #include "cg_local.h"
 #include "etj_trace_utils.h"
 #include "etj_utilities.h"
@@ -509,6 +511,121 @@ static bool canUsePortal(const entityState_t *es) {
 
   return true;
 }
+
+static bool canBuildDisplayPlayerState(const playerState_t &current,
+                                       const playerState_t &prev) {
+  if (!etj_lerpPmove.integer || !cg_pmove.pmove_fixed) {
+    return false;
+  }
+
+  // not interpolating if there's nothing to interpolate between
+  if (current.commandTime <= prev.commandTime) {
+    return false;
+  }
+
+  // already interpolating
+  if (cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW) ||
+      cg_nopredict.integer) {
+    return false;
+  }
+
+  // views other than the normal first person one
+  if (cg.showGameView) {
+    return false;
+  }
+
+  // can't lerp teleports
+  // 'EF_TELEPORT_BIT' check is for client-side predicted teleports
+  if (cg.thisFrameTeleport || cg.nextFrameTeleport || cg.hyperspace ||
+      ((prev.eFlags ^ current.eFlags) & EF_TELEPORT_BIT)) {
+    return false;
+  }
+
+  // mounted/dead move cannot be lerped, requires pmove local variables
+  if (current.pm_type >= PM_DEAD || BG_PlayerMounted(current.eFlags)) {
+    return false;
+  }
+
+  return true;
+}
+
+static void lerpPlayerStateFields(playerState_t &out, const playerState_t &prev,
+                                  const playerState_t &current, const float f) {
+  int32_t currentBobCycle = current.bobCycle;
+  int32_t prevBobCycle = prev.bobCycle;
+
+  if (currentBobCycle < prevBobCycle) {
+    if (prevBobCycle > UINT8_MAX - 5) {
+      // genuine 255 -> 0 wraparound - sweep forward across the boundary
+      // (prev -> current + 256), mirroring 'CG_InterpolatePlayerState'
+      // bumping prev instead would sweep backward through ~2 full cycles
+      // and cause the bob/sway to jump around on the wrap frame
+      currentBobCycle += UINT8_MAX + 1;
+    } else {
+      // 'bobCycle' was reset (e.g. landing/idle) - snap instead of sweeping.
+      // Unlike 'CG_InterpolatePlayerState', which only ever handles a wrap,
+      // we interpolate between consecutive 8ms physics steps, so a drop in
+      // 'bobCycle' can only mean a reset (the bob advances at most ~4 units
+      // per step, so a wrap always starts above 'UINT8_MAX - 5').
+      // This is a genuine improvement over the 'CG_InterpolatePlayerState'
+      // code path, which always does a forward sweep, instead of snap.
+      prevBobCycle = currentBobCycle;
+    }
+  }
+
+  out.bobCycle = prevBobCycle + (f * (currentBobCycle - prevBobCycle));
+
+  for (int32_t i = 0; i < 3; i++) {
+    out.origin[i] = prev.origin[i] + (f * (current.origin[i] - prev.origin[i]));
+    out.velocity[i] =
+        prev.velocity[i] + (f * (current.velocity[i] - prev.velocity[i]));
+    out.viewangles[i] = LerpAngle(prev.viewangles[i], current.viewangles[i], f);
+  }
+
+  out.leanf = prev.leanf + (f * (current.leanf - prev.leanf));
+}
+
+/*
+=================
+updateDisplayPlayerState
+
+Builds the interpolated display state used for 'etj_lerpPmove'.
+With 'pmove_fixed' on, we take a copy of 'cg.predictedPlayerState' and
+lerp it between physics frames, effectively simulating what spectating/demo
+playback does already. This gives us a smooth origin, velocity, viewangles,
+bob cycle and lean interpolation between physics frames. This is purely
+for rendering, the actual predicted playerstate is never modified. Because
+the previous state is re-captured every time prediction runs, the
+interpolation never drifts from the real playerstate.
+=================
+*/
+static void updateDisplayPlayerState(const playerState_t &prev) {
+  const playerState_t &current = cg.predictedPlayerState;
+  cgame.displayStateValid = false;
+
+  if (!canBuildDisplayPlayerState(current, prev)) {
+    return;
+  }
+
+  const float f =
+      std::clamp(static_cast<float>(cg.time - prev.commandTime) /
+                     static_cast<float>(current.commandTime - prev.commandTime),
+                 0.0f, 1.0f);
+
+  cgame.displayPlayerState = current;
+  lerpPlayerStateFields(cgame.displayPlayerState, prev, current, f);
+  cgame.displayStateValid = true;
+}
+
+static void adjustDisplayPlayerStateForMover() {
+  if (!cgame.displayStateValid) {
+    return;
+  }
+
+  CG_AdjustPositionForMover(
+      cgame.displayPlayerState.origin, cgame.displayPlayerState.groundEntityNum,
+      cg.physicsTime, cg.time, cgame.displayPlayerState.origin, nullptr);
+}
 } // namespace ETJump
 
 /*
@@ -966,6 +1083,7 @@ void CG_PredictPlayerState() {
   usercmd_t latestCmd;
   vec3_t deltaAngles;
   pmoveExt_t pmext;
+  playerState_t previousPlayerState;
 
   // unlagged - optimized prediction
   int stateIndex = 0, predictCmd = 0;
@@ -973,6 +1091,10 @@ void CG_PredictPlayerState() {
   // END unlagged - optimized prediction
 
   cg.hyperspace = qfalse; // will be set if touching a trigger_teleport
+
+  // always invalidate interpolated display
+  // it can only be considered valid once we have run prediction
+  ETJump::cgame.displayStateValid = false;
 
   // if this is the first frame we must guarantee
   // predictedPlayerState is valid even if there is some
@@ -1381,6 +1503,10 @@ void CG_PredictPlayerState() {
 
     fflush(stdout);
 
+    // 'etj_lerpPmove' - save the state before Pmove runs, so we can lerp
+    // the rendered view between the last two physics steps at >125FPS
+    previousPlayerState = *cg_pmove.ps;
+
     ETJump::cgame.utils.trace->setupIgnoredEntities(cg.snap->ps.clientNum);
 
     // unlagged - optimized prediction
@@ -1429,13 +1555,6 @@ void CG_PredictPlayerState() {
 
     moved = true;
 
-    // after Pmove is run, sync playerstate viewangles with refdef angles
-    // if etj_smoothAngles is enabled, to apply any changes done in Pmove
-    if (etj_smoothAngles.integer && cg_pmove.pmove_fixed) {
-      VectorCopy(cg_pmove.ps->viewangles, cg.refdefViewAngles);
-      VectorCopy(cg_pmove.ps->delta_angles, cg.refdefDeltaAngles);
-    }
-
     // add push trigger movement effects
     CG_TouchTriggerPrediction();
   }
@@ -1465,6 +1584,12 @@ void CG_PredictPlayerState() {
     return;
   }
 
+  // build the interpolated display state for 'etj_lerpPmove'
+  // NOTE: only do this if this frame contained meaningful user commands
+  // ('moved' is true), otherwise 'previousPlayerState' would be
+  // uninitialized, as we skipped all user commands without running Pmove
+  ETJump::updateDisplayPlayerState(previousPlayerState);
+
   // restore pmext
   memcpy(&cg.pmext, &pmext, sizeof(pmoveExt_t));
 
@@ -1473,6 +1598,9 @@ void CG_PredictPlayerState() {
     CG_AdjustPositionForMover(
         cg.predictedPlayerState.origin, cg.predictedPlayerState.groundEntityNum,
         cg.physicsTime, cg.time, cg.predictedPlayerState.origin, deltaAngles);
+
+    // keep the interpolated display origin in sync with movers too
+    ETJump::adjustDisplayPlayerStateForMover();
 
     // add deltaAngles (fixes jittery view while riding on movers)
     // only do this if player is prone or using set mortar
@@ -1483,6 +1611,10 @@ void CG_PredictPlayerState() {
           ANGLE2SHORT(deltaAngles[YAW]);
       PM_UpdateViewAngles(&cg.predictedPlayerState, &cg.pmext, &cg_pmove.cmd,
                           cg_pmove.trace, cg_pmove.tracemask);
+
+      if (ETJump::cgame.displayStateValid) {
+        ETJump::cgame.displayPlayerState.viewangles[YAW] += deltaAngles[YAW];
+      }
     }
   }
 

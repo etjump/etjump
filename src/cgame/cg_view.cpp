@@ -278,20 +278,23 @@ void CG_OffsetThirdPersonView(void) {
   float focusDist;
   float forwardScale, sideScale;
 
-  cg.refdef_current->vieworg[2] += cg.predictedPlayerState.viewheight;
+  // use the interpolated display state when available ('etj_lerpPmove')
+  const playerState_t *ps = ETJump::cgame.displayStateValid
+                                ? &ETJump::cgame.displayPlayerState
+                                : &cg.predictedPlayerState;
+
+  cg.refdef_current->vieworg[2] += ps->viewheight;
 
   VectorCopy(cg.refdefViewAngles, focusAngles);
 
   // rain - if dead, look at medic or allow freelook if none in range
-  if (cg.predictedPlayerState.stats[STAT_HEALTH] <= 0) {
+  if (ps->stats[STAT_HEALTH] <= 0) {
     // rain - #254 - force yaw to 0 if we're tracking a medic
     if (cg.snap->ps.viewlocked !=
         static_cast<int>(ETJump::ViewlockState::Medic)) {
       // rain - do short2angle AFTER the network part
-      focusAngles[YAW] =
-          SHORT2ANGLE(cg.predictedPlayerState.stats[STAT_DEAD_YAW]);
-      cg.refdefViewAngles[YAW] =
-          SHORT2ANGLE(cg.predictedPlayerState.stats[STAT_DEAD_YAW]);
+      focusAngles[YAW] = SHORT2ANGLE(ps->stats[STAT_DEAD_YAW]);
+      cg.refdefViewAngles[YAW] = SHORT2ANGLE(ps->stats[STAT_DEAD_YAW]);
     }
   }
 
@@ -301,7 +304,7 @@ void CG_OffsetThirdPersonView(void) {
   AngleVectors(focusAngles, forward, NULL, NULL);
 
   if (cg_thirdPerson.integer == 2) {
-    VectorCopy(cg.predictedPlayerState.origin, focusPoint);
+    VectorCopy(ps->origin, focusPoint);
   } else {
     VectorMA(cg.refdef_current->vieworg, FOCUS_DISTANCE, forward, focusPoint);
   }
@@ -322,8 +325,8 @@ void CG_OffsetThirdPersonView(void) {
   // isn't in a solid block.  Use an 8 by 8 block to prevent the view
   // from near clipping anything
 
-  CG_Trace(&trace, cg.refdef_current->vieworg, mins, maxs, view,
-           cg.predictedPlayerState.clientNum, MASK_SOLID);
+  CG_Trace(&trace, cg.refdef_current->vieworg, mins, maxs, view, ps->clientNum,
+           MASK_SOLID);
 
   if (trace.fraction != 1.0) {
     VectorCopy(trace.endpos, view);
@@ -332,7 +335,7 @@ void CG_OffsetThirdPersonView(void) {
     // have the ceiling close enogh that this is poking out
 
     CG_Trace(&trace, cg.refdef_current->vieworg, mins, maxs, view,
-             cg.predictedPlayerState.clientNum, MASK_SOLID);
+             ps->clientNum, MASK_SOLID);
     VectorCopy(trace.endpos, view);
   }
 
@@ -349,19 +352,35 @@ void CG_OffsetThirdPersonView(void) {
   cg.refdefViewAngles[YAW] -= cg_thirdPersonAngle.value;
 }
 
-// this causes a compiler bug on mac MrC compiler
-static void CG_StepOffset(void) {
-  int timeDelta;
-
+static void CG_StepOffset() {
   // smooth out stair climbing
-  timeDelta = cg.time - cg.stepTime;
-  // Ridah
+  const int32_t timeDelta = cg.time - cg.stepTime;
+
   if (timeDelta < 0) {
     cg.stepTime = cg.time;
   }
+
   if (timeDelta < STEP_TIME) {
+    // with 'etj_lerpPmove' the vieworg base is the interpolated origin, which
+    // may still be mid-rise on the step frame. the step easing below assumes
+    // the origin is already at the final (stepped) height, so compensate for
+    // the portion not yet climbed to avoid the view dipping below the
+    // pre-step height.
+    // this is only needed on the frame(s) spanning the step's own physics
+    // tick ('pmove_msec'), while the interpolated display origin is still
+    // mid-rise toward the stepped height. once the display origin has
+    // caught up to the physics origin, the normal lerp between physics
+    // frames is sufficient and no compensation is needed.
+    if (ETJump::cgame.displayStateValid && timeDelta < cgs.pmove_msec) {
+      const float risen = cg.predictedPlayerState.origin[2] -
+                          ETJump::cgame.displayPlayerState.origin[2];
+      if (risen > 0) {
+        cg.refdef_current->vieworg[2] += risen;
+      }
+    }
+
     cg.refdef_current->vieworg[2] -=
-        cg.stepChange * (STEP_TIME - timeDelta) / STEP_TIME;
+        cg.stepChange * static_cast<float>(STEP_TIME - timeDelta) / STEP_TIME;
   }
 }
 
@@ -590,6 +609,11 @@ static void CG_OffsetFirstPersonView(void) {
   int timeDelta;
   qboolean useLastValidBob = qfalse;
 
+  // use the interpolated display state when available ('etj_lerpPmove')
+  const playerState_t *ps = ETJump::cgame.displayStateValid
+                                ? &ETJump::cgame.displayPlayerState
+                                : &cg.predictedPlayerState;
+
   if (cg.snap->ps.pm_type == PM_INTERMISSION) {
     return;
   }
@@ -654,7 +678,7 @@ static void CG_OffsetFirstPersonView(void) {
       angles[YAW] = SHORT2ANGLE(cg.snap->ps.stats[STAT_DEAD_YAW]);
     }
 
-    origin[2] += cg.predictedPlayerState.viewheight;
+    origin[2] += ps->viewheight;
     return;
   }
 
@@ -694,7 +718,7 @@ static void CG_OffsetFirstPersonView(void) {
 #endif
 
   // add angles based on velocity
-  VectorCopy(cg.predictedPlayerState.velocity, predictedVelocity);
+  VectorCopy(ps->velocity, predictedVelocity);
 
   delta = DotProduct(predictedVelocity, cg.refdef_current->viewaxis[0]);
   angles[PITCH] += delta * cg_runpitch.value;
@@ -716,13 +740,13 @@ static void CG_OffsetFirstPersonView(void) {
 
   delta = useLastValidBob ? cg.lastvalidBobfracsin * cg_bobpitch.value * speed
                           : cg.bobfracsin * cg_bobpitch.value * speed;
-  if (cg.predictedPlayerState.pm_flags & PMF_DUCKED) {
+  if (ps->pm_flags & PMF_DUCKED) {
     delta *= 3; // crouching
   }
   angles[PITCH] += delta;
   delta = useLastValidBob ? cg.lastvalidBobfracsin * cg_bobroll.value * speed
                           : cg.bobfracsin * cg_bobroll.value * speed;
-  if (cg.predictedPlayerState.pm_flags & PMF_DUCKED) {
+  if (ps->pm_flags & PMF_DUCKED) {
     delta *= 3; // crouching accentuates roll
   }
   if (useLastValidBob) {
@@ -747,11 +771,11 @@ static void CG_OffsetFirstPersonView(void) {
   //===================================
 
   // add view height
-  origin[2] += cg.predictedPlayerState.viewheight;
+  origin[2] += ps->viewheight;
 
   // smooth out duck height changes
   timeDelta = cg.time - cg.duckTime;
-  if (cg.predictedPlayerState.eFlags & EF_PRONE) {
+  if (ps->eFlags & EF_PRONE) {
     if (timeDelta < 0) // Ridah
     {
       cg.duckTime = cg.time - PRONE_TIME;
@@ -800,12 +824,12 @@ static void CG_OffsetFirstPersonView(void) {
   CG_ZoomSway();
 
   // adjust for 'lean'
-  if (cg.predictedPlayerState.leanf != 0) {
+  if (ps->leanf != 0) {
     // add leaning offset
     vec3_t right;
-    cg.refdefViewAngles[2] += cg.predictedPlayerState.leanf / 2.0f;
+    cg.refdefViewAngles[2] += ps->leanf / 2.0f;
     AngleVectors(cg.refdefViewAngles, NULL, right, NULL);
-    VectorMA(cg.refdef_current->vieworg, cg.predictedPlayerState.leanf, right,
+    VectorMA(cg.refdef_current->vieworg, ps->leanf, right,
              cg.refdef_current->vieworg);
   }
 
@@ -1215,20 +1239,17 @@ void updateRefdefAngles(const playerState_t *ps) {
   if (ps->eFlags & EF_PRONE || BG_PlayerMounted(ps->eFlags) ||
       ps->weapon == WP_MORTAR_SET || ps->weapon == WP_MOBILE_MG42_SET) {
     VectorCopy(ps->viewangles, cg.refdefViewAngles);
-    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
     return;
   }
 
   // DHM - Nerve :: Added support for PMF_TIME_LOCKPLAYER
   if (ps->pm_type == PM_INTERMISSION || ps->pm_flags & PMF_TIME_LOCKPLAYER) {
     VectorCopy(ps->viewangles, cg.refdefViewAngles);
-    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
     return;
   }
 
   if (ps->pm_type != PM_SPECTATOR && ps->stats[STAT_HEALTH] <= 0) {
     VectorCopy(ps->viewangles, cg.refdefViewAngles);
-    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
     return;
   }
 
@@ -1238,14 +1259,12 @@ void updateRefdefAngles(const playerState_t *ps) {
 
   // circularly clamp the angles with deltas
   for (int i = 0; i < 2; i++) {
-    auto temp = static_cast<int16_t>(cmd.angles[i] + cg.refdefDeltaAngles[i]);
+    auto temp = static_cast<int16_t>(cmd.angles[i] + ps->delta_angles[i]);
     if (i == PITCH) {
       // don't let the player look up or down more than 90 degrees
       if (temp > 16000) {
-        cg.refdefDeltaAngles[i] = 16000 - cmd.angles[i];
         temp = 16000;
       } else if (temp < -16000) {
-        cg.refdefDeltaAngles[i] = -16000 - cmd.angles[i];
         temp = -16000;
       }
     }
@@ -1270,7 +1289,11 @@ int CG_CalcViewValues() {
 
   // calculate size of 3D view
   CG_CalcVrect();
-  const playerState_t *ps = &cg.predictedPlayerState;
+  // use the interpolated display state for rendering when available
+  // ('etj_lerpPmove')
+  const playerState_t *ps = ETJump::cgame.displayStateValid
+                                ? &ETJump::cgame.displayPlayerState
+                                : &cg.predictedPlayerState;
 
   if (cg.cameraMode) {
     vec3_t origin, angles;
@@ -1315,7 +1338,6 @@ int CG_CalcViewValues() {
   if (ps->pm_type == PM_INTERMISSION) {
     VectorCopy(ps->origin, cg.refdef_current->vieworg);
     VectorCopy(ps->viewangles, cg.refdefViewAngles);
-    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
     AnglesToAxis(cg.refdefViewAngles, cg.refdef_current->viewaxis);
     return CG_CalcFov();
   }
@@ -1355,24 +1377,22 @@ int CG_CalcViewValues() {
              cg.refdef_current->vieworg);
     cg.refdef_current->vieworg[2] = ps->origin[2];
     VectorCopy(ps->viewangles, cg.refdefViewAngles);
-    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
   } else if (ps->eFlags & EF_MOUNTEDTANK) {
     const centity_t *tank =
         &cg_entities[cg_entities[cg.snap->ps.clientNum].tagParent];
 
     VectorCopy(tank->mountedMG42Player.origin, cg.refdef_current->vieworg);
     VectorCopy(ps->viewangles, cg.refdefViewAngles);
-    VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
   } else {
     if (!cgs.demoCam.renderingFreeCam) {
       VectorCopy(ps->origin, cg.refdef_current->vieworg);
 
-      if (!cg.demoPlayback && etj_smoothAngles.integer &&
-          cg_pmove.pmove_fixed && !(ps->pm_flags & PMF_FOLLOW)) {
+      if (!cg.demoPlayback && cg_pmove.pmove_fixed &&
+          !(ps->pm_flags & PMF_FOLLOW) &&
+          (etj_smoothAngles.integer || etj_lerpPmove.integer)) {
         ETJump::updateRefdefAngles(ps);
       } else {
         VectorCopy(ps->viewangles, cg.refdefViewAngles);
-        VectorCopy(ps->delta_angles, cg.refdefDeltaAngles);
       }
     }
   }
@@ -2184,7 +2204,9 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
     // Rafael mg42
     if (!cg.showGameView) {
       if (!cg.snap->ps.persistant[PERS_HWEAPON_USE]) {
-        CG_AddViewWeapon(&cg.predictedPlayerState);
+        CG_AddViewWeapon(ETJump::cgame.displayStateValid
+                             ? &ETJump::cgame.displayPlayerState
+                             : &cg.predictedPlayerState);
       } else {
         if (cg.time - cg.predictedPlayerEntity.overheatTime < 3000) {
           vec3_t muzzle;

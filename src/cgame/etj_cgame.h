@@ -27,6 +27,8 @@
 #include <memory>
 #include <vector>
 
+#include "../game/q_shared.h"
+
 namespace ETJump {
 class ClientCommandsHandler;
 class EntityEventsHandler;
@@ -144,5 +146,12 @@ struct CGameContext {
   std::vector<std::string> serverMapList;
   // communicated by the server, only the strings needed for callvote commands
   std::vector<std::string> customVoteLists;
+
+  // display state for 'etj_lerpPmove' - interpolated between the last two
+  // physics frames at the current frame rate, used for rendering only
+  // TODO: we might not need the entire playerstate here, this could be a
+  // slimmed down version, to save some memory - maybe explore in the future
+  playerState_t displayPlayerState;
+  bool displayStateValid{};
 };
 } // namespace ETJump
