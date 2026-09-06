@@ -2037,7 +2037,8 @@ static void CG_WeaponAnimation(playerState_t *ps, weaponInfo_t *weapon,
 CG_CalculateWeaponPosition
 ==============
 */
-static void CG_CalculateWeaponPosition(vec3_t origin, vec3_t angles) {
+static void CG_CalculateWeaponPosition(vec3_t origin, vec3_t angles,
+                                       const playerState_t *ps) {
   float scale;
   int delta;
   float fracsin;
@@ -2045,18 +2046,17 @@ static void CG_CalculateWeaponPosition(vec3_t origin, vec3_t angles) {
   VectorCopy(cg.refdef_current->vieworg, origin);
   VectorCopy(cg.refdefViewAngles, angles);
 
-  if (cg.predictedPlayerState.eFlags & EF_MOUNTEDTANK) {
+  if (ps->eFlags & EF_MOUNTEDTANK) {
     angles[PITCH] = cg.refdefViewAngles[PITCH] / 1.2;
   }
 
   if (!cg.renderingThirdPerson &&
-      (cg.predictedPlayerState.weapon == WP_MORTAR_SET ||
-       cg.predictedPlayerState.weapon == WP_MOBILE_MG42_SET) &&
-      cg.predictedPlayerState.weaponstate != WEAPON_RAISING) {
+      (ps->weapon == WP_MORTAR_SET || ps->weapon == WP_MOBILE_MG42_SET) &&
+      ps->weaponstate != WEAPON_RAISING) {
     angles[PITCH] = cg.pmext.mountedWeaponAngles[PITCH];
   }
 
-  if (cg.predictedPlayerState.eFlags & EF_PRONE_MOVING) {
+  if (ps->eFlags & EF_PRONE_MOVING) {
     int pronemovingtime = cg.time - cg.proneMovingTime;
     if (pronemovingtime > 0) // div by 0
     {
@@ -2078,11 +2078,11 @@ static void CG_CalculateWeaponPosition(vec3_t origin, vec3_t angles) {
   }
 
   // adjust 'lean' into weapon
-  if (cg.predictedPlayerState.leanf != 0) {
+  if (ps->leanf != 0) {
     vec3_t right, up;
     float myfrac = 1.0f;
 
-    switch (cg.predictedPlayerState.weapon) {
+    switch (ps->weapon) {
       case WP_FLAMETHROWER:
       case WP_KAR98:
       case WP_CARBINE:
@@ -2098,21 +2098,21 @@ static void CG_CalculateWeaponPosition(vec3_t origin, vec3_t angles) {
 
     // reverse the roll on the weapon so it stays relatively
     // level
-    if (cg.predictedPlayerState.viewangles[ROLL] == 0) {
-      angles[ROLL] -= cg.predictedPlayerState.leanf / (myfrac * 2.0f);
+    if (ps->viewangles[ROLL] == 0) {
+      angles[ROLL] -= ps->leanf / (myfrac * 2.0f);
       AngleVectors(angles, NULL, right, up);
       VectorMA(origin, angles[ROLL], right, origin);
     }
 
     // pitch the gun down a bit to show that firing is not
     // allowed when leaning
-    angles[PITCH] += (abs(cg.predictedPlayerState.leanf) / 2.0f);
+    angles[PITCH] += (abs(ps->leanf) / 2.0f);
 
     // this gives you some impression that the weapon stays in
     // relatively the same position while you lean, so you
     // appear to 'peek' over the weapon
     AngleVectors(cg.refdefViewAngles, NULL, right, NULL);
-    VectorMA(origin, -cg.predictedPlayerState.leanf / 4.0f, right, origin);
+    VectorMA(origin, -ps->leanf / 4.0f, right, origin);
   }
 
   // on odd legs, invert some angles
@@ -3010,7 +3010,7 @@ void CG_AddViewWeapon(playerState_t *ps) {
     // FIXME: Arnout: HACK dummy model to just draw _something_
     refEntity_t flash{};
 
-    CG_CalculateWeaponPosition(hand.origin, angles);
+    CG_CalculateWeaponPosition(hand.origin, angles, ps);
     AnglesToAxis(angles, hand.axis);
     hand.renderfx = RF_DEPTHHACK | RF_FIRST_PERSON | RF_MINLIGHT;
     ETJump_SetEntityRGBA(&hand, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -3086,7 +3086,7 @@ void CG_AddViewWeapon(playerState_t *ps) {
     weapon = &cg_weapons[ps->weapon];
 
     // set up gun position
-    CG_CalculateWeaponPosition(hand.origin, angles);
+    CG_CalculateWeaponPosition(hand.origin, angles, ps);
 
     gunoff[0] = cg_gun_x.value;
     gunoff[1] = cg_gun_y.value;
