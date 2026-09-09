@@ -114,6 +114,13 @@ private:
 
   static std::vector<Timerun::Record>
   getRecordsFromQuery(sqlite::database_binder &binder);
+  static std::vector<Timerun::Season>
+  getSeasonsFromQuery(sqlite::database_binder &binder);
+
+  std::string resolveMapName(const std::string &map, bool exact,
+                             const std::string &commandPrefix);
+  std::string resolveRunName(const std::string &map, const std::string &run,
+                             bool exact);
 
   std::string serializeMetadata(std::map<std::string, std::string> metadata);
   std::unique_ptr<DatabaseV2> _database;
