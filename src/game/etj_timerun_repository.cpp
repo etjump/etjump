@@ -791,8 +791,15 @@ void TimerunRepository::deleteSeason(const std::string &name) {
     throw std::runtime_error("Cannot delete default season.");
   }
 
+  DatabaseV2::TransactionGuard txn(*_database);
+
   _database->sql << "delete from record where season_id=?;" << id;
+  // make sure we also purge 'removed_records',
+  // so we don't leave records from any nonexistent seasons in the table
+  _database->sql << "delete from removed_records where season_id=?;" << id;
   _database->sql << "delete from season where id=?" << id;
+
+  txn.commit();
 }
 
 std::vector<Timerun::Record>

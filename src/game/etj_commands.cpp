@@ -2821,13 +2821,14 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
+static bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
   const int clientNum = ClientNum(ent);
 
   auto def = std::move(
       ETJump::CommandParser::CommandDefinition::create(
-          "delete-season", "Delete a season. This will delete all the "
-                           "records within the season.")
+          "delete-season", "Delete a season. This will delete all the records "
+                           "within the season, including the records that have "
+                           "been removed via /remove-record.")
           .addOption("name", "n", "Exact name of the season to delete",
                      ETJump::CommandParser::OptionDefinition::Type::MultiToken,
                      true));
