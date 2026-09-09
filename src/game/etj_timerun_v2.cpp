@@ -1678,6 +1678,173 @@ void TimerunV2::recordDetails(const Timerun::RecordDetailsParams &params) {
   _sc->postTask(task, callback, error);
 }
 
+namespace {
+class RemoveRecordResult : public SynchronizationContext::ResultBase {
+public:
+  RemoveRecordResult(std::vector<Timerun::Record> removedRecords,
+                     std::map<int32_t, std::string> seasonNames)
+      : removedRecords(std::move(removedRecords)),
+        seasonNames(std::move(seasonNames)) {}
+
+  std::vector<Timerun::Record> removedRecords;
+  std::map<int32_t, std::string> seasonNames;
+};
+} // namespace
+
+void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const std::string callerName = (g_entities + clientNum)->client->pers.netname;
+  const std::string func = __func__;
+  const bool isSelfRemoval = params.removedBy == params.userId;
+
+  const auto task = [this, params]() {
+    const auto removedAt = TimeUtils::getCurrentTime(false);
+    const auto removedRecords = _repository->removeRecord(params, removedAt);
+
+    // resolve season names for the confirmation output
+    std::map<int32_t, std::string> seasonNames;
+    for (const auto &season : _repository->getSeasons()) {
+      seasonNames[season.id] = season.name;
+    }
+
+    return std::make_unique<RemoveRecordResult>(removedRecords,
+                                                std::move(seasonNames));
+  };
+
+  const auto callback = [this, callerName, isSelfRemoval, func,
+                         params](const std::unique_ptr<
+                                 SynchronizationContext::ResultBase>
+                                     result) {
+    const auto *const r = dynamic_cast<RemoveRecordResult *>(result.get());
+
+    if (r == nullptr) {
+      _logger->error("%s: failed to remove record for client %i: "
+                     "RemoveRecordResult is NULL",
+                     func, params.clientNum);
+      throw std::runtime_error(
+          StringUtils::format("%s: unable to remove record(s). This is a bug, "
+                              "please report this to the developers.",
+                              func));
+    }
+
+    // Update the loaded records for the player who's record was removed
+    // if the record was removed from the current map. If the record is not
+    // from this map, see if they are connected, so we can notify them
+    // about the removal anyway.
+    int32_t targetClientNum = -1;
+
+    for (auto &player : _players) {
+      if (!player || player->userId != params.userId) {
+        continue;
+      }
+
+      targetClientNum = player->clientNum;
+
+      // record is not from this map, no need to purge cache
+      if (Q_stricmp(params.map.c_str(), level.rawmapname)) {
+        break;
+      }
+
+      const auto isRemoved = [&r](const Timerun::Record &cached) {
+        return std::any_of(r->removedRecords.begin(), r->removedRecords.end(),
+                           [&](const Timerun::Record &removed) {
+                             return cached.isSameRunAs(&removed);
+                           });
+      };
+
+      player->records.erase(std::remove_if(player->records.begin(),
+                                           player->records.end(), isRemoved),
+                            player->records.end());
+      break;
+    }
+
+    _logger->info(
+        "Record removed: %s for run '%s' on map '%s' (user ID "
+        "%i) removed by user ID %i%s",
+        StringUtils::getPluralizedString(r->removedRecords.size(), "record"),
+        params.run, params.map, params.userId, params.removedBy,
+        params.reason.has_value()
+            ? StringUtils::format(", reason: %s", params.reason.value().c_str())
+                  .c_str()
+            : "");
+
+    const auto numRemovedRecords =
+        static_cast<int32_t>(r->removedRecords.size());
+
+    // chat summary for the caller
+    std::string chatMsg = StringUtils::format(
+        "^3remove-record: ^7removed ^3%i ^7record%s%s^7, see console for "
+        "details",
+        numRemovedRecords, numRemovedRecords == 1 ? "" : "s",
+        isSelfRemoval ? ""
+                      : StringUtils::format(" from user ^3%i", params.userId));
+
+    Printer::chat(params.clientNum, chatMsg);
+
+    // list out the removed records in console
+    std::string consoleMsg =
+        StringUtils::format("The following record%s removed%s^7:\n",
+                            numRemovedRecords == 1 ? " was" : "s were",
+                            isSelfRemoval ? "" : " by you");
+    consoleMsg +=
+        "^g------------------------------------------------------------\n";
+
+    // because we can only target a specific record on a single map,
+    // the only difference between the records is the season name,
+    // so we just need to get those
+    std::vector<std::string> seasonNames;
+    seasonNames.reserve(numRemovedRecords);
+
+    for (const auto &record : r->removedRecords) {
+      const auto seasonIt = r->seasonNames.find(record.seasonId);
+      seasonNames.emplace_back(seasonIt != r->seasonNames.end()
+                                   ? seasonIt->second
+                                   : std::to_string(record.seasonId));
+    }
+
+    const std::string details = StringUtils::format(
+        " ^2Map: ^7%s\n ^2Run: ^7%s\n ^2Time: ^7%s\n ^2Season%s: ^7%s\n "
+        "^2Record date: ^7%s\n\n",
+        r->removedRecords[0].map, r->removedRecords[0].run,
+        TimeUtils::millisToString(r->removedRecords[0].time),
+        numRemovedRecords == 1 ? "" : "s", StringUtils::join(seasonNames, ", "),
+        r->removedRecords[0].recordDate.toDateTimeString());
+
+    Printer::console(params.clientNum, consoleMsg + details);
+
+    // notify the target if an admin removed their record
+    if (!isSelfRemoval && targetClientNum >= 0) {
+      std::string targetMsg = StringUtils::format(
+          "^3remove-record: ^7an administrator has removed ^3%i ^7of your "
+          "timerun records, see console for details",
+          numRemovedRecords);
+
+      // let them know why we removed the records
+      if (params.reason.has_value()) {
+        targetMsg +=
+            StringUtils::format(". Reason: %s", params.reason.value().c_str());
+      }
+
+      Printer::chat(targetClientNum, targetMsg);
+
+      // let the target also know the details of the removed records
+      consoleMsg = StringUtils::format(
+          "The following record%s removed by %s^7:\n",
+          numRemovedRecords == 1 ? " was" : "s were", callerName);
+
+      consoleMsg +=
+          "^g------------------------------------------------------------\n";
+      Printer::console(targetClientNum, consoleMsg + details);
+    }
+  };
+
+  const auto error = [clientNum](const std::runtime_error &e) {
+    Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
 int32_t TimerunV2::getRunStartTime(const int32_t clientNum) const {
   return _players[clientNum]->startTime.value_or(0);
 }

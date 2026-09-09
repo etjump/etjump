@@ -660,6 +660,169 @@ static bool recordDetails(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+static bool removeRecord(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const desc = R"(Removes a timerun record.
+    Removed records are archived in the timerun database, not completely removed.
+
+    Records are stored per season. When no season is given, the record is
+    removed from the overall season and from any other season that holds the
+    same completion. When a season is given, only that season's copy is
+    removed.
+
+    All parameters on this command must be an exact match,
+    partially matching the parameters is not supported.
+
+    /remove-record [--season <season name>] [--map <map name>] [--user <user ID>] [--reason <reason>] <run name>
+
+    Has a shorthand format of:
+    /remove-record <run name>
+    /remove-record <map name> <run name>
+    /remove-record <season name> <map name> <run name>
+
+    Administrators with the timerun management flag can remove another
+    player's record with:
+    /remove-record <run name> --user <user id> --reason <reason>
+    A reason is required when removing another player's record.)";
+
+  const auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create("remove-record", desc)
+          .addOption("season", "s",
+                     "Season to remove the record from. Default is the "
+                     "overall season, cascading into any other season which "
+                     "has the targeted record.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "map", "m",
+              "Map to remove the record from. Default is the current map.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("run", "r", "Run to remove the record from.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "user", "u",
+              "User ID of the record owner. Only administrators (flag 'T') "
+              "can remove other players' records. Default is your own user ID.",
+              ETJump::CommandParser::OptionDefinition::Type::Integer, false)
+          .addOption("reason", "re",
+                     "Reason for the removal. Optional when removing your own "
+                     "records, required when removing another player's record.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false));
+
+  const auto args = Container::skipFirstN(*argv, 1);
+  const auto optCommand =
+      ETJump::getOptCommand("remove-record", clientNum, def, &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto &command = optCommand.value();
+
+  const auto optSeason = command.getOptional("season");
+  const auto optMap = command.getOptional("map");
+  const auto optRun = command.getOptional("run");
+  const auto optUser = command.getOptional("user");
+  const auto optReason = command.getOptional("reason");
+
+  std::string season;
+  std::string map;
+  std::string run;
+
+  if (command.extraArgs.size() >= 3) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+  } else if (command.extraArgs.size() == 2) {
+    map = command.extraArgs[0];
+    run = command.extraArgs[1];
+  } else if (command.extraArgs.size() == 1) {
+    run = command.extraArgs[0];
+  }
+
+  if (run.empty()) {
+    if (!optRun.has_value()) {
+      Printer::chat(clientNum, "^3remove-record: ^7operation failed. Check "
+                               "console for more information.");
+      Printer::console(clientNum, "Required option 'run' was not specified.\n");
+      return false;
+    }
+
+    run = optRun.value().text;
+  }
+
+  if (season.empty()) {
+    season = optSeason.has_value() ? optSeason.value().text : "";
+  }
+
+  if (map.empty()) {
+    map = optMap.has_value() ? optMap.value().text : level.rawmapname;
+  }
+
+  const int32_t callerId = ETJump::session->GetId(ent);
+
+  // should not happen, console can't call this
+  if (callerId <= 0) {
+    Printer::chat(
+        clientNum,
+        "^3remove-record: ^7Failed to fetch user ID - try reconnecting. If the "
+        "problem persists, please report this to the developers.\n");
+    return false;
+  }
+
+  const bool isAdmin =
+      ETJump::session->HasPermission(ent, CommandFlags::TIMERUN_MANAGEMENT);
+
+  if (optUser.has_value() && optUser.value().integer != callerId && !isAdmin) {
+    Printer::chat(clientNum, "^3remove-record: ^7you must be an administrator "
+                             "to remove another player's record.");
+    return false;
+  }
+
+  int32_t userId = callerId;
+
+  if (optUser.has_value()) {
+    userId = optUser.value().integer;
+
+    if (userId <= 0) {
+      Printer::chat(clientNum,
+                    "^3remove-record: ^7user ID must be a positive number.");
+      return false;
+    }
+  }
+
+  std::optional<std::string> reason;
+
+  if (optReason.has_value()) {
+    const std::string text = StringUtils::trim(optReason.value().text);
+
+    if (!text.empty()) {
+      reason = text;
+    }
+  }
+
+  if (userId != callerId && !reason.has_value()) {
+    Printer::chat(clientNum, "^3remove-record: ^7a reason is required when "
+                             "removing another player's record.");
+    return false;
+  }
+
+  game.timerunV2->removeRecord({clientNum, std::move(season), std::move(map),
+                                std::move(run), userId, callerId, reason});
+
+  return true;
+}
+
 bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
   // these are console commands but to make them more accessible
   // they were also made admin commands
@@ -2935,6 +3098,8 @@ Commands::Commands() {
       AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
   adminCommands_["record-details"] =
       AdminCommandPair(ClientCommands::recordDetails, CommandFlags::BASIC);
+  adminCommands_["remove-record"] =
+      AdminCommandPair(ClientCommands::removeRecord, CommandFlags::BASIC);
   adminCommands_["rankings"] =
       AdminCommandPair(ClientCommands::Rankings, CommandFlags::BASIC);
   adminCommands_["loadcheckpoints"] =
@@ -2966,6 +3131,7 @@ Commands::Commands() {
   commands_["ranks"] = ClientCommands::Records;
   commands_["top"] = ClientCommands::Records;
   commands_["record-details"] = ClientCommands::recordDetails;
+  commands_["remove-record"] = ClientCommands::removeRecord;
   commands_["loadcheckpoints"] = ClientCommands::LoadCheckpoints;
   commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
   commands_["rankings"] = ClientCommands::Rankings;

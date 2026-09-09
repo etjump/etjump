@@ -1570,6 +1570,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("loadcheckpoints");
   trap_AddCommand("listcheckpoints");
   trap_AddCommand("comparecheckpoints");
+  trap_AddCommand("remove-record");
 
   trap_AddCommand("setoffset"); // autocompletion
   trap_AddCommand("interruptRun");

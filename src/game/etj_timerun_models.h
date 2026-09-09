@@ -128,4 +128,14 @@ struct RecordDetailsParams {
   int32_t rank{};
   bool exactMap;
 };
+
+struct RemoveRecordParams {
+  int32_t clientNum{};
+  std::string season;                // exact match if given
+  std::string map;                   // exact match only
+  std::string run;                   // exact match only
+  int32_t userId{};                  // id of the record owner
+  int32_t removedBy{};               // id of whoever issued the removal
+  std::optional<std::string> reason; // required when removing others' records
+};
 } // namespace ETJump::Timerun
