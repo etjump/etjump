@@ -795,6 +795,235 @@ void TimerunRepository::deleteSeason(const std::string &name) {
   _database->sql << "delete from season where id=?" << id;
 }
 
+std::vector<Timerun::Record>
+TimerunRepository::removeRecord(const Timerun::RemoveRecordParams &params,
+                                const TimeUtils::Time &removedAt) {
+  // If a record is present in multiple seasons, and the caller did not specify
+  // the season to target, we find the record on the overall season,
+  // and cascade the removal to every other season that contains that
+  // specific record, as identified by the record date. If season is explicitly
+  // targeted, we only remove the record from that season.
+  const bool cascade = params.season.empty();
+  static constexpr int32_t DEFAULT_SEASON_ID = 1;
+  static constexpr int32_t MATCH_ITEMS_PER_ROW = 3;
+
+  // resolve the targeted season name -> id
+  int32_t targetSeasonId = 0;
+
+  if (cascade) {
+    targetSeasonId = DEFAULT_SEASON_ID;
+  } else {
+    auto seasons = getSeasonsForName(params.season, true);
+
+    // if we don't get an exact match, we always fail, but give suggestions
+    // for partial matches to the user regardless
+    if (seasons.empty()) {
+      seasons = getSeasonsForName(params.season, false);
+
+      // this is always a partial match, so saying "no season found matching..."
+      // is correct - we didn't find the exact season we were looking for
+      if (seasons.size() <= 1) {
+        throw std::runtime_error(StringUtils::format(
+            "^3remove-record: ^7no season found matching ^3'%s'^7.",
+            params.season));
+      }
+
+      std::string error = StringUtils::format(
+          "^3remove-record: ^7found %i seasons matching ^3'%s'^7\n",
+          seasons.size(), params.season);
+
+      int32_t i = 0;
+      for (const auto &s : seasons) {
+        if (i != 0 && i % MATCH_ITEMS_PER_ROW == 0) {
+          error += "\n";
+        }
+
+        error += StringUtils::format("%-22s", s.name);
+        ++i;
+      }
+
+      throw std::runtime_error(error);
+    }
+
+    targetSeasonId = seasons[0].id;
+  }
+
+  const std::string resolvedMap = StringUtils::sanitize(params.map, true);
+
+  // if we don't get an exact match, we always fail, but give suggestions
+  // for partial matches to the user regardless
+  if (getMapsForName(resolvedMap, true).empty()) {
+    const auto maps = getMapsForName(resolvedMap, false);
+
+    // this is always a partial match, so saying "no map found matching..."
+    // is correct - we didn't find the exact map we were looking for
+    if (maps.size() <= 1) {
+      throw std::runtime_error(StringUtils::format(
+          "^3remove-record: ^7no map found matching ^3'%s'^7.", params.map));
+    }
+
+    std::string error = StringUtils::format(
+        "^3remove-record: ^7found %i maps matching ^3'%s'^7\n", maps.size(),
+        params.map);
+
+    int32_t i = 0;
+    for (const auto &m : maps) {
+      if (i != 0 && i % MATCH_ITEMS_PER_ROW == 0) {
+        error += "\n";
+      }
+
+      error += StringUtils::format("%-22s", m);
+      ++i;
+    }
+
+    throw std::runtime_error(error);
+  }
+
+  const std::string resolvedRun = StringUtils::sanitize(params.run, true);
+
+  if (getRunsForName(resolvedMap, resolvedRun, true, true).empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3remove-record: ^7no run found matching ^3'%s'^7 on map ^3'%s'^7.",
+        params.run, params.map));
+  }
+
+  // fetch the record(s) for the targeted season
+  const std::string basePredicate =
+      "map=? collate nocase and lsanitize(run)=? collate nocase and "
+      "user_id=?";
+
+  std::vector<Timerun::Record> targetRecords;
+  {
+    auto binder = _database->sql
+                  << StringUtils::format(
+                         "select %s from record where season_id=? and %s;",
+                         _defaultRecordFieldsStr, basePredicate)
+                  << targetSeasonId << resolvedMap << resolvedRun
+                  << params.userId;
+    targetRecords = getRecordsFromQuery(binder);
+  }
+
+  if (targetRecords.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3remove-record: ^7no record found for ^3'%s'^7 by user ID ^3'%i'^7.",
+        params.run, params.userId));
+  }
+
+  // expand to the set of season ids we will remove from
+  std::vector<int> seasonIds;
+
+  if (cascade) {
+    // the targeted row is the Default season copy; find every other season
+    // that holds a copy of the same completion (same record_date)
+    const auto dates = Container::map(targetRecords, [](const auto &r) {
+      return r.recordDate.toDateTimeString();
+    });
+
+    auto binder = _database->sql
+                  << StringUtils::format(
+                         "select distinct season_id from record "
+                         "where %s and record_date in (%s);",
+                         basePredicate,
+                         DatabaseV2::createPlaceholderString(dates))
+                  << resolvedMap << resolvedRun << params.userId;
+
+    for (const auto &date : dates) {
+      binder << date;
+    }
+
+    binder >> [&seasonIds](int seasonId) { seasonIds.push_back(seasonId); };
+  } else {
+    seasonIds.push_back(targetSeasonId);
+  }
+
+  // final predicate shared by insert-select / remove
+  const std::string predicate = StringUtils::format(
+      "season_id in (%s) and %s",
+      DatabaseV2::createPlaceholderString(seasonIds), basePredicate);
+
+  const std::string archiveQuery = StringUtils::format(
+      R"(
+    insert into removed_records (
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata,
+      removed_by,
+      removed_at,
+      reason
+    )
+    select
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata,
+      ?,
+      ?,
+      ?
+    from record
+    where %s
+  )",
+      predicate);
+
+  const std::string removeQuery = StringUtils::format(
+      R"(
+    delete from record
+    where %s
+  )",
+      predicate);
+
+  const auto bind = [&seasonIds, &resolvedMap, &resolvedRun,
+                     &params](auto &binder) {
+    for (const auto &seasonId : seasonIds) {
+      binder << seasonId;
+    }
+    binder << resolvedMap << resolvedRun << params.userId;
+  };
+
+  // fetch all records that are about to be removed, so the result
+  // reflects cascaded seasons too, not just the targeted season
+  std::vector<Timerun::Record> removedRecords;
+  {
+    auto binder = _database->sql
+                  << StringUtils::format("select %s from record where %s;",
+                                         _defaultRecordFieldsStr, predicate);
+    bind(binder);
+    removedRecords = getRecordsFromQuery(binder);
+  }
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  auto archiveBinder = _database->sql << archiveQuery;
+  archiveBinder << params.removedBy << removedAt.toDateTimeString();
+
+  if (params.reason.has_value()) {
+    archiveBinder << params.reason.value();
+  } else {
+    archiveBinder << nullptr;
+  }
+
+  bind(archiveBinder);
+  archiveBinder++; // execute the archive now, inside the transaction
+
+  auto removeBinder = _database->sql << removeQuery;
+  bind(removeBinder);
+  removeBinder++; // execute the removal now, inside the transaction
+
+  txn.commit();
+
+  return removedRecords;
+}
+
 // TODO: this shares a lot of logic with 'getRecords',
 // should maybe extract some of it to separate functions
 std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
@@ -993,6 +1222,28 @@ void TimerunRepository::migrate() {
        "create index idx_season_id_map on record(season_id, map);",
        "create index idx_season_id_map_run on record(season_id, map, run);",
        "create index idx_season_id_map_run_user_id on record(season_id, map, run, user_id);"});
+
+  _database->addMigration(
+      // clang-format off
+      "removed_records",
+      {R"(
+          create table removed_records (
+            id integer primary key autoincrement,
+            season_id integer not null,
+            map text not null,
+            run text not null,
+            user_id int not null,
+            time int not null,
+            checkpoints text not null,
+            record_date timestamp not null,
+            player_name text not null,
+            metadata text not null default '',
+            removed_by int not null,
+            removed_at timestamp not null,
+            reason text null
+          );
+        )",
+       "create index idx_removed_records_user_id on removed_records(user_id);"});
   // clang-format on
 
   _database->applyMigrations();

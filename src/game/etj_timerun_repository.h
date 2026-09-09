@@ -80,6 +80,9 @@ public:
   void deleteSeason(const std::string &name);
   std::vector<Timerun::Checkpoints>
   getCheckpoints(const Timerun::ListCheckpointsParams &params);
+  std::vector<Timerun::Record>
+  removeRecord(const Timerun::RemoveRecordParams &params,
+               const TimeUtils::Time &removedAt);
 
 private:
   void tryToMigrateRecords();

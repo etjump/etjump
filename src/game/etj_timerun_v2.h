@@ -112,6 +112,7 @@ public:
   void listCheckpoints(const Timerun::ListCheckpointsParams &params);
   void compareCheckpoints(const Timerun::CompareCheckpointsParams &params);
   void recordDetails(const Timerun::RecordDetailsParams &params);
+  void removeRecord(const Timerun::RemoveRecordParams &params);
 
   [[nodiscard]] int32_t getRunStartTime(int32_t clientNum) const;
 
