@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+#include <iterator>
+#include <tuple>
 #include <utility>
 
 #include "etj_timerun_repository.h"
@@ -943,6 +945,180 @@ TimerunRepository::removeRecord(const Timerun::RemoveRecordParams &params,
   txn.commit();
 
   return removedRecords;
+}
+
+Timerun::RemovedRecordsPage TimerunRepository::getRemovedRecords(
+    const Timerun::ListRemovedRecordsParams &params) {
+  std::vector<Timerun::Season> seasons;
+
+  if (!params.season.empty()) {
+    seasons = getSeasonsForName(params.season, false);
+
+    if (seasons.empty()) {
+      throw std::runtime_error(
+          StringUtils::format("No season matches name '%s'", params.season));
+    }
+  }
+
+  std::vector<std::string> whereClauses;
+
+  if (!params.season.empty()) {
+    whereClauses.emplace_back("(" + createSeasonPredicate(seasons) + ")");
+  }
+
+  if (!params.map.empty()) {
+    whereClauses.emplace_back("map like ? collate nocase");
+  }
+
+  if (!params.run.empty()) {
+    whereClauses.emplace_back("lsanitize(run) like ? collate nocase");
+  }
+
+  if (params.userId.has_value()) {
+    whereClauses.emplace_back("user_id=?");
+  }
+
+  if (params.removedBy.has_value()) {
+    whereClauses.emplace_back("removed_by=?");
+  }
+
+  const std::string whereString =
+      whereClauses.empty()
+          ? ""
+          : " where " + StringUtils::join(whereClauses, " and ");
+
+  const auto bindFilters = [&params, &seasons](auto &binder) {
+    if (!params.season.empty()) {
+      for (const auto &season : seasons) {
+        binder << season.id;
+      }
+    }
+
+    if (!params.map.empty()) {
+      binder << "%" + params.map + "%";
+    }
+
+    if (!params.run.empty()) {
+      binder << "%" + params.run + "%";
+    }
+
+    if (params.userId.has_value()) {
+      binder << params.userId.value();
+    }
+
+    if (params.removedBy.has_value()) {
+      binder << params.removedBy.value();
+    }
+  };
+
+  const std::string query = StringUtils::format(R"(
+    select
+      id,
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata,
+      removed_by,
+      removed_at,
+      reason
+    from removed_records%s
+    order by removed_at desc, id desc;
+  )",
+                                                whereString);
+
+  auto binder = _database->sql << query;
+  bindFilters(binder);
+
+  std::vector<Timerun::RemovedRecord> records;
+
+  binder >> [&records](int32_t id, int32_t seasonId, std::string map,
+                       std::string run, int32_t userId, int32_t time,
+                       std::string checkpointsString, std::string recordDate,
+                       std::string playerName, std::string metadataString,
+                       int32_t removedBy, const std::string &removedAt,
+                       std::unique_ptr<std::string> reason) {
+    Timerun::RemovedRecord removedRecord;
+
+    removedRecord.id = id;
+    removedRecord.record = getRecordFromStandardQueryResult(
+        seasonId, std::move(map), std::move(run), userId, time,
+        std::move(checkpointsString), std::move(recordDate),
+        std::move(playerName), std::move(metadataString));
+    removedRecord.removedBy = removedBy;
+    removedRecord.removedAt = TimeUtils::Time::fromString(removedAt);
+
+    if (reason) {
+      removedRecord.reason = *reason;
+    }
+
+    records.emplace_back(std::move(removedRecord));
+  };
+
+  // group the season copies of the same completion into a single entry,
+  // unless a season was explicitly targeted, in which case each record is
+  // listed on its own. rows are ordered by 'removed_at' desc, so the first
+  // time a group key appears also gives the most recently removed first.
+  std::vector<Timerun::RemovedRecordEntry> entries;
+
+  if (params.season.empty()) {
+    std::map<std::tuple<std::string, std::string, int32_t, std::string>, size_t>
+        groupIndex;
+
+    for (auto &record : records) {
+      const auto key = std::make_tuple(
+          record.record.map, record.record.run, record.record.userId,
+          record.record.recordDate.toDateTimeString());
+
+      const auto [it, inserted] = groupIndex.emplace(key, entries.size());
+
+      if (inserted) {
+        entries.emplace_back();
+      }
+
+      entries[it->second].records.emplace_back(std::move(record));
+    }
+  } else {
+    entries.reserve(records.size());
+
+    for (auto &record : records) {
+      entries.emplace_back();
+      entries.back().records.emplace_back(std::move(record));
+    }
+  }
+
+  // sort the season copies within each entry by season id, so the Default
+  // season is always first and 'entry.records[0]' is the representative
+  // "base" record for all the copies of a given record
+  for (auto &entry : entries) {
+    std::sort(entry.records.begin(), entry.records.end(),
+              [](const auto &a, const auto &b) {
+                return a.record.seasonId < b.record.seasonId;
+              });
+  }
+
+  // cap the requested page so we never return an empty page,
+  // and instead return the last page of entries
+  const auto totalCount = static_cast<int32_t>(entries.size());
+  const int32_t pageSize = std::max(params.pageSize, 1);
+  const int32_t numPages = std::max(1, (totalCount + pageSize - 1) / pageSize);
+  const int32_t page = std::clamp(params.page, 1, numPages);
+  const int32_t start = (page - 1) * pageSize;
+  const int32_t end =
+      std::min(start + pageSize, static_cast<int32_t>(entries.size()));
+
+  Timerun::RemovedRecordsPage result;
+  result.page = page;
+  result.numPages = numPages;
+  result.entries.insert(result.entries.end(),
+                        std::make_move_iterator(entries.begin() + start),
+                        std::make_move_iterator(entries.begin() + end));
+
+  return result;
 }
 
 std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(

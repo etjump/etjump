@@ -823,6 +823,151 @@ static bool removeRecord(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+static bool listRemovedRecords(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const desc = R"(Lists removed timerun records.
+
+    /list-removed-records [--user <user ID>] [--removed-by <user ID>] [--map <map>] [--run <run>] [--season <season>]
+
+    Has a shorthand format of:
+    /list-removed-records <user ID>
+    /list-removed-records <map> <user ID>
+    /list-removed-records <map> <run> <user ID>
+    /list-removed-records <season> <map> <run> <user ID>)";
+
+  const auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create("list-removed-records",
+                                                       desc)
+          .addOption(
+              "user", "u", "Only list the records belonging to this user ID.",
+              ETJump::CommandParser::OptionDefinition::Type::Integer, false)
+          .addOption("removed-by", "rb",
+                     "Only list the records removed by this user ID.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false)
+          .addOption("map", "m", "Only list removed records from given map.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("run", "r", "Only list removed records from given run.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "season", "s", "Only list removed records from given season.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("page", "p", "Which page of removed records to show.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false)
+          .addOption(
+              "page-size", "ps",
+              "How many records to show per page. Default is 10, max is 25.",
+              ETJump::CommandParser::OptionDefinition::Type::Integer, false));
+
+  const auto args = Container::skipFirstN(*argv, 1);
+  const auto optCommand =
+      ETJump::getOptCommand("list-removed-records", clientNum, def, &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto &command = optCommand.value();
+
+  const auto optSeason = command.getOptional("season");
+  const auto optMap = command.getOptional("map");
+  const auto optRun = command.getOptional("run");
+  const auto optUser = command.getOptional("user");
+  const auto optRemovedBy = command.getOptional("removed-by");
+  const auto optPage = command.getOptional("page");
+  const auto optPageSize = command.getOptional("page-size");
+
+  const int32_t callerId = ETJump::session->GetId(clientNum);
+
+  // should not happen, console can't call this
+  if (callerId <= 0) {
+    Printer::chat(
+        clientNum,
+        "^3list-removed-records: ^7Failed to fetch user ID - try reconnecting. "
+        "If the problem persists, please report this to the developers.\n");
+    return false;
+  }
+
+  std::string season;
+  std::string map;
+  std::string run;
+  std::optional<int32_t> userID;
+  std::optional<int32_t> removedBy;
+
+  if (command.extraArgs.size() >= 4) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+    userID = Q_atoi(command.extraArgs[3]);
+  } else if (command.extraArgs.size() == 3) {
+    map = command.extraArgs[0];
+    run = command.extraArgs[1];
+    userID = Q_atoi(command.extraArgs[2]);
+  } else if (command.extraArgs.size() == 2) {
+    map = command.extraArgs[0];
+    userID = Q_atoi(command.extraArgs[1]);
+  } else if (command.extraArgs.size() == 1) {
+    userID = Q_atoi(command.extraArgs[0]);
+  }
+
+  if (season.empty()) {
+    season = optSeason.has_value() ? optSeason.value().text : "";
+  }
+
+  if (map.empty()) {
+    map = optMap.has_value() ? optMap.value().text : "";
+  }
+
+  if (run.empty()) {
+    run = optRun.has_value() ? optRun.value().text : "";
+  }
+
+  if ((optUser.has_value() && optUser.value().integer <= 0) ||
+      (userID.has_value() && userID.value() <= 0)) {
+    Printer::chat(
+        clientNum,
+        "^3list-removed-records: ^7user ID must be a positive number.");
+    return false;
+  }
+
+  if (optUser.has_value()) {
+    userID = optUser.value().integer;
+  }
+
+  if (optRemovedBy.has_value()) {
+    removedBy = optRemovedBy.value().integer;
+
+    if (removedBy <= 0) {
+      Printer::chat(
+          clientNum,
+          "^3list-removed-records: ^7removed-by must be a positive number.");
+      return false;
+    }
+  }
+
+  const int32_t page =
+      std::max(optPage.has_value() ? optPage.value().integer : 1, 1);
+  const int32_t pageSize = std::clamp(
+      optPageSize.has_value() ? optPageSize.value().integer : 10, 1, 25);
+
+  game.timerunV2->listRemovedRecords({clientNum, callerId, std::move(season),
+                                      std::move(map), std::move(run), userID,
+                                      removedBy, page, pageSize});
+
+  return true;
+}
+
 bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
   // these are console commands but to make them more accessible
   // they were also made admin commands
@@ -3101,6 +3246,8 @@ Commands::Commands() {
       AdminCommandPair(ClientCommands::recordDetails, CommandFlags::BASIC);
   adminCommands_["remove-record"] =
       AdminCommandPair(ClientCommands::removeRecord, CommandFlags::BASIC);
+  adminCommands_["list-removed-records"] =
+      AdminCommandPair(ClientCommands::listRemovedRecords, CommandFlags::BASIC);
   adminCommands_["rankings"] =
       AdminCommandPair(ClientCommands::Rankings, CommandFlags::BASIC);
   adminCommands_["loadcheckpoints"] =
@@ -3133,6 +3280,7 @@ Commands::Commands() {
   commands_["top"] = ClientCommands::Records;
   commands_["record-details"] = ClientCommands::recordDetails;
   commands_["remove-record"] = ClientCommands::removeRecord;
+  commands_["list-removed-records"] = ClientCommands::listRemovedRecords;
   commands_["loadcheckpoints"] = ClientCommands::LoadCheckpoints;
   commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
   commands_["rankings"] = ClientCommands::Rankings;

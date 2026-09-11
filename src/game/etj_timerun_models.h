@@ -138,4 +138,36 @@ struct RemoveRecordParams {
   int32_t removedBy{};               // id of whoever issued the removal
   std::optional<std::string> reason; // required when removing others' records
 };
+
+struct RemovedRecord {
+  int32_t id{}; // id of the archived record in 'removed_records'
+  Record record;
+  int32_t removedBy{};
+  TimeUtils::Time removedAt;
+  std::optional<std::string> reason;
+};
+
+struct RemovedRecordEntry {
+  // the season copies of a single completion
+  // contains a single record when a season filter is applied
+  std::vector<RemovedRecord> records;
+};
+
+struct ListRemovedRecordsParams {
+  int32_t clientNum{};
+  int32_t callerId{};               // user ID of the client using the command
+  std::string season;               // empty = no filter
+  std::string map;                  // empty = no filter
+  std::string run;                  // empty = no filter
+  std::optional<int32_t> userId;    // only list records belonging to this user
+  std::optional<int32_t> removedBy; // only list records removed by this user
+  int32_t page{};
+  int32_t pageSize{};
+};
+
+struct RemovedRecordsPage {
+  std::vector<RemovedRecordEntry> entries;
+  int32_t page{}; // effective page, capped to the last page if out of range
+  int32_t numPages{};
+};
 } // namespace ETJump::Timerun
