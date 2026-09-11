@@ -83,6 +83,8 @@ public:
   std::vector<Timerun::Record>
   removeRecord(const Timerun::RemoveRecordParams &params,
                const TimeUtils::Time &removedAt);
+  Timerun::RemovedRecordsPage
+  getRemovedRecords(const Timerun::ListRemovedRecordsParams &params);
 
 private:
   void tryToMigrateRecords();

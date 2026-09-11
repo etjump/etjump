@@ -1845,6 +1845,166 @@ void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
   _sc->postTask(task, callback, error);
 }
 
+namespace {
+class ListRemovedRecordsResult : public SynchronizationContext::ResultBase {
+public:
+  ListRemovedRecordsResult(Timerun::RemovedRecordsPage result,
+                           std::map<int32_t, std::string> seasonNames)
+      : entries(std::move(result.entries)), seasonNames(std::move(seasonNames)),
+        page(result.page), numPages(result.numPages) {}
+
+  std::vector<Timerun::RemovedRecordEntry> entries;
+  std::map<int32_t, std::string> seasonNames;
+  int32_t page{};
+  int32_t numPages{};
+};
+} // namespace
+
+void TimerunV2::listRemovedRecords(
+    const Timerun::ListRemovedRecordsParams &params) {
+  const std::string func = __func__;
+
+  const auto task = [this, params]() {
+    std::map<int32_t, std::string> seasonNames;
+    for (const auto &season : _repository->getSeasons()) {
+      seasonNames[season.id] = season.name;
+    }
+
+    return std::make_unique<ListRemovedRecordsResult>(
+        _repository->getRemovedRecords(params), seasonNames);
+  };
+
+  const auto callback =
+      [this, params,
+       func](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        const auto *const r =
+            dynamic_cast<ListRemovedRecordsResult *>(result.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: failed to list removed records for client %i: "
+                         "ListRemovedRecordsResult is NULL",
+                         func, params.clientNum);
+          throw std::runtime_error(StringUtils::format(
+              "%s: unable to list removed records. This is a bug, please "
+              "report this to the developers.",
+              func));
+        }
+
+        if (r->entries.empty()) {
+          Printer::console(
+              params.clientNum,
+              "^3list-removed-records: ^7no removed records found.\n");
+          return;
+        }
+
+        // 94 chars
+        constexpr char divider[] =
+            "^g----------------------------------------------------------------"
+            "------------------------------\n";
+
+        static constexpr int32_t MRT_PAD = 50;
+        // user ID padding + 3 extra for divider
+        static constexpr int32_t REASON_PAD = MRT_PAD + 10 + 3;
+
+        const std::string header = StringUtils::format(
+            " ^2%-4s ^g| ^2%-10s ^g| ^2%-50s ^g| ^2%s\n"
+            "      ^g| ^2%-10s ^g| ^2%-50s ^g| ^2%s\n"
+            "      ^g| ^2%s\n",
+            "ID", "User", "Map/Run - Time", "Record date", "Removed by",
+            "Season(s)", "Removed at", "Reason");
+
+        const std::string line1 = " ^7%-4i ^g| ^7%-*s ^g| ^7%-*s ^g| ^7%s\n";
+        const std::string line2 = "      ^g| ^7%-*s ^g| ^7%-*s ^g| ^7%s\n";
+        const std::string line3 = "      ^g| ^7%-*s\n";
+
+        std::string message = StringUtils::format(
+            "Listing removed timerun records (^3* ^7= you)\n"
+            "Showing page ^3%i ^7of ^3%i\n\n",
+            r->page, r->numPages);
+        message += header + divider;
+        for (const auto &entry : r->entries) {
+          // every record in the entry is the same completion - they differ
+          // only in 'season_id', so the first one can be used to
+          // grab all the common data of a single entry
+          const auto &base = entry.records[0];
+
+          // combine the season names across the entry - no-op in case
+          // we're querying by season
+          auto seasonStrings = Container::map(
+              entry.records, [&](const Timerun::RemovedRecord &dr) {
+                return r->seasonNames.at(dr.record.seasonId);
+              });
+
+          const std::string seasons = StringUtils::join(seasonStrings, ", ");
+
+          // every other field name can be taken from the base record
+          const std::string mrt = StringUtils::format(
+              "%s/%s ^7- %s", StringUtils::sanitize(base.record.map),
+              base.record.run, TimeUtils::millisToString(base.record.time));
+          // TODO: this should maybe get similar treatment to the 'deleted_by'
+          // entry some day, since the reason may vary between entries, but this
+          // is such a niche situation that I won't bother now. Querying for
+          // season will show the reason for a given entry properly, if needed.
+          const std::string reason =
+              StringUtils::sanitize(base.reason.value_or("-"));
+          std::string userId = std::to_string(base.record.userId);
+
+          if (base.record.userId == params.callerId) {
+            userId += "^3*";
+          }
+
+          // an entry can hold copies removed by different users (e.g. the
+          // player removed some seasons, an admin removed others) - show
+          // 'mixed' instead of a single ID, and mark it with '*' if the caller
+          // is one of the removers, so they know they can still restore the
+          // records they removed themselves
+          const bool mixedRemovedBy =
+              std::any_of(entry.records.begin(), entry.records.end(),
+                          [&base](const Timerun::RemovedRecord &dr) {
+                            return dr.removedBy != base.removedBy;
+                          });
+
+          const bool callerIsRemover =
+              std::any_of(entry.records.begin(), entry.records.end(),
+                          [&params](const Timerun::RemovedRecord &dr) {
+                            return dr.removedBy == params.callerId;
+                          });
+
+          std::string removedById =
+              mixedRemovedBy ? "Mixed" : std::to_string(base.removedBy);
+
+          if (callerIsRemover) {
+            removedById += "^3*";
+          }
+
+          const int32_t userIdPad = StringUtils::countExtraPadding(userId, 10);
+          const int32_t removedByIdPad =
+              StringUtils::countExtraPadding(removedById, 10);
+
+          message += StringUtils::format(
+              line1, base.id, userIdPad, userId,
+              StringUtils::countExtraPadding(mrt, MRT_PAD), mrt,
+              base.record.recordDate.toDateTimeString());
+          message += StringUtils::format(
+              line2, removedByIdPad, removedById,
+              StringUtils::countExtraPadding(seasons, MRT_PAD), seasons,
+              base.removedAt.toDateTimeString());
+          message += StringUtils::format(
+              line3, StringUtils::countExtraPadding(reason, REASON_PAD),
+              reason);
+          message += divider;
+        }
+
+        Printer::console(params.clientNum, message + "\n");
+      };
+
+  const auto error = [params](const std::runtime_error &e) {
+    Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
 int32_t TimerunV2::getRunStartTime(const int32_t clientNum) const {
   return _players[clientNum]->startTime.value_or(0);
 }
