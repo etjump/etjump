@@ -968,6 +968,79 @@ static bool listRemovedRecords(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+static bool restoreRecord(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const desc = R"(Restores a removed timerun record.
+
+    When targeting a record that is present in multiple seasons, the restoration
+    cascades and restores all the copies of the record present in other seasons.
+
+    If restoration results in a conflict, using --force will restore the removed
+    record in place of the conflicting one(s), and moves the record(s) being replaced
+    to the removed records database.
+
+    You can only restore records you have removed yourself, unless you have the
+    timerun management admin flag.
+
+    /restore-record [--id <ID>] [--force]
+
+    Has a shorthand format of:
+    /restore-record <ID>)";
+
+  const auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create("restore-record", desc)
+          .addOption("id", "i", "The record ID to restore.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     true, 0)
+          .addOption("force", "f",
+                     "Force the restoration in case of a conflict, moving the "
+                     "conflicting record to the removed records in place of "
+                     "the restored one.",
+                     ETJump::CommandParser::OptionDefinition::Type::Boolean,
+                     false));
+
+  const auto args = Container::skipFirstN(*argv, 1);
+  const auto optCommand =
+      ETJump::getOptCommand("restore-record", clientNum, def, &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto &command = optCommand.value();
+
+  const int32_t recordId = command.getOptional("id").value().integer;
+  const auto optForce = command.getOptional("force");
+  const bool force = optForce.has_value() ? optForce.value().boolean : false;
+
+  const int32_t callerId = ETJump::session->GetId(clientNum);
+
+  // should not happen, console can't call this
+  if (callerId <= 0) {
+    Printer::chat(
+        clientNum,
+        "^3restore-record: ^7Failed to fetch user ID - try reconnecting. If "
+        "the problem persists, please report this to the developers.\n");
+    return false;
+  }
+
+  const bool isAdmin =
+      ETJump::session->HasPermission(ent, CommandFlags::TIMERUN_MANAGEMENT);
+
+  game.timerunV2->restoreRecord(
+      {clientNum, callerId, recordId, force, isAdmin});
+
+  return true;
+}
+
 bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
   // these are console commands but to make them more accessible
   // they were also made admin commands
@@ -3248,6 +3321,8 @@ Commands::Commands() {
       AdminCommandPair(ClientCommands::removeRecord, CommandFlags::BASIC);
   adminCommands_["list-removed-records"] =
       AdminCommandPair(ClientCommands::listRemovedRecords, CommandFlags::BASIC);
+  adminCommands_["restore-record"] =
+      AdminCommandPair(ClientCommands::restoreRecord, CommandFlags::BASIC);
   adminCommands_["rankings"] =
       AdminCommandPair(ClientCommands::Rankings, CommandFlags::BASIC);
   adminCommands_["loadcheckpoints"] =
@@ -3281,6 +3356,7 @@ Commands::Commands() {
   commands_["record-details"] = ClientCommands::recordDetails;
   commands_["remove-record"] = ClientCommands::removeRecord;
   commands_["list-removed-records"] = ClientCommands::listRemovedRecords;
+  commands_["restore-record"] = ClientCommands::restoreRecord;
   commands_["loadcheckpoints"] = ClientCommands::LoadCheckpoints;
   commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
   commands_["rankings"] = ClientCommands::Rankings;

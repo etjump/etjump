@@ -947,6 +947,236 @@ TimerunRepository::removeRecord(const Timerun::RemoveRecordParams &params,
   return removedRecords;
 }
 
+Timerun::RestoreRecordResult
+TimerunRepository::restoreRecord(const Timerun::RestoreRecordParams &params,
+                                 const TimeUtils::Time &restoredAt) {
+  // load the removed record the caller is targeting
+  std::vector<Timerun::RemovedRecord> removedRecords;
+  {
+    auto binder = _database->sql << R"(
+        select
+          id,
+          season_id,
+          map,
+          run,
+          user_id,
+          time,
+          checkpoints,
+          record_date,
+          player_name,
+          metadata,
+          removed_by,
+          removed_at,
+          reason
+        from removed_records
+        where id=?;
+      )" << params.recordId;
+    removedRecords = getRemovedRecordsFromQuery(binder);
+  }
+
+  if (removedRecords.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3restore-record: ^7no removed record found with ID ^3%i^7.",
+        params.recordId));
+  }
+
+  // the targeted record is a single season copy of a completion; find every
+  // other season copy of the same completion so the restoration cascades
+  const auto &base = removedRecords[0].record;
+  const std::string resolvedRun = StringUtils::sanitize(base.run, true);
+
+  {
+    auto binder = _database->sql << R"(
+        select
+          id,
+          season_id,
+          map,
+          run,
+          user_id,
+          time,
+          checkpoints,
+          record_date,
+          player_name,
+          metadata,
+          removed_by,
+          removed_at,
+          reason
+        from removed_records
+        where map=? collate nocase and lsanitize(run)=? collate nocase
+          and user_id=? and record_date=?
+        order by season_id;
+      )" << base.map << resolvedRun
+                                 << base.userId
+                                 << base.recordDate.toDateTimeString();
+    removedRecords = getRemovedRecordsFromQuery(binder);
+  }
+
+  // non-admins can only restore the records they removed themselves; any
+  // other season copies of the completion are skipped and stay archived
+  std::vector<Timerun::RemovedRecord> restorable;
+  std::vector<Timerun::RemovedRecord> skipped;
+
+  for (auto &removedRecord : removedRecords) {
+    if (params.isAdmin || removedRecord.removedBy == params.callerId) {
+      restorable.emplace_back(std::move(removedRecord));
+    } else {
+      skipped.emplace_back(std::move(removedRecord));
+    }
+  }
+
+  if (restorable.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3restore-record: ^7you do not have permission to restore %s.",
+        skipped.size() == 1 ? "this record" : "these records"));
+  }
+
+  Timerun::RestoreRecordResult result;
+  // the cascade set is the total number of records this restore targets
+  // 'removedRecords' still holds all of them, the split only moves them out
+  result.numTargeted = static_cast<int32_t>(removedRecords.size());
+  result.skipped = std::move(skipped);
+
+  // find the record currently occupying a given slot, if any
+  const auto findOccupant = [this](const Timerun::Record &record) {
+    const std::string run = StringUtils::sanitize(record.run, true);
+
+    std::vector<Timerun::Record> existing;
+    {
+      auto binder = _database->sql
+                    << StringUtils::format(
+                           "select %s from record where season_id=? and "
+                           "map=? collate nocase and lsanitize(run)=? "
+                           "collate nocase and user_id=?;",
+                           _defaultRecordFieldsStr)
+                    << record.seasonId << record.map << run << record.userId;
+      existing = getRecordsFromQuery(binder);
+    }
+
+    if (existing.empty()) {
+      return std::optional<Timerun::Record>{};
+    }
+
+    return std::optional<Timerun::Record>{std::move(existing[0])};
+  };
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  // detect all conflicts up front; if any exist and we're not forcing the
+  // restore, we abort without touching anything, so the same record ID can
+  // be used to retry the restore with --force
+  std::vector<Timerun::RestoreConflict> conflicts;
+
+  for (auto &removedRecord : restorable) {
+    const auto &record = removedRecord.record;
+    auto occupant = findOccupant(record);
+
+    if (occupant.has_value()) {
+      conflicts.emplace_back(
+          Timerun::RestoreConflict{std::move(*occupant), record});
+    }
+  }
+
+  if (!conflicts.empty() && !params.force) {
+    result.conflicts = std::move(conflicts);
+    return result;
+  }
+
+  for (auto &removedRecord : restorable) {
+    const auto &record = removedRecord.record;
+    const std::string run = StringUtils::sanitize(record.run, true);
+    auto occupant = findOccupant(record);
+
+    if (occupant.has_value()) {
+      // force: archive the occupant in place of the restored record
+      _database->sql
+          << R"(
+        insert into removed_records (
+          season_id,
+          map,
+          run,
+          user_id,
+          time,
+          checkpoints,
+          record_date,
+          player_name,
+          metadata,
+          removed_by,
+          removed_at,
+          reason
+        )
+        select
+          season_id,
+          map,
+          run,
+          user_id,
+          time,
+          checkpoints,
+          record_date,
+          player_name,
+          metadata,
+          ?,
+          ?,
+          ?
+        from record
+        where season_id=? and map=? collate nocase and lsanitize(run)=?
+          collate nocase and user_id=?;
+      )" << params.callerId
+          << restoredAt.toDateTimeString()
+          << "Automatically removed by 'restore-record' (conflict resolution)"
+          << record.seasonId << record.map << run << record.userId;
+
+      // free up the slot for the restored record
+      _database->sql << R"(
+        delete from record
+        where season_id=? and map=? collate nocase and lsanitize(run)=?
+          collate nocase and user_id=?;
+      )" << record.seasonId
+                     << record.map << run << record.userId;
+
+      result.swapped.emplace_back(std::move(*occupant));
+    }
+
+    // restore the record into 'record'
+    _database->sql << R"(
+      insert into record (
+        season_id,
+        map,
+        run,
+        user_id,
+        time,
+        checkpoints,
+        record_date,
+        player_name,
+        metadata
+      ) values (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
+      );
+    )" << record.seasonId
+                   << record.map << record.run << record.userId << record.time
+                   << StringUtils::join(record.checkpoints, ",")
+                   << record.recordDate.toDateTimeString() << record.playerName
+                   << serializeMetadata(record.metadata);
+
+    // remove the archived copy
+    _database->sql << "delete from removed_records where id=?;"
+                   << removedRecord.id;
+
+    result.restored.emplace_back(record);
+  }
+
+  txn.commit();
+
+  return result;
+}
+
 Timerun::RemovedRecordsPage TimerunRepository::getRemovedRecords(
     const Timerun::ListRemovedRecordsParams &params) {
   std::vector<Timerun::Season> seasons;
@@ -1340,6 +1570,36 @@ TimerunRepository::getRecordsFromQuery(sqlite::database_binder &binder) {
 
     records.push_back(record);
   };
+  return records;
+}
+
+std::vector<Timerun::RemovedRecord>
+TimerunRepository::getRemovedRecordsFromQuery(sqlite::database_binder &binder) {
+  std::vector<Timerun::RemovedRecord> records;
+
+  binder >> [&records](int32_t id, int32_t seasonId, std::string map,
+                       std::string run, int32_t userId, int32_t time,
+                       std::string checkpointsString, std::string recordDate,
+                       std::string playerName, std::string metadataString,
+                       int32_t removedBy, const std::string &removedAt,
+                       std::unique_ptr<std::string> reason) {
+    Timerun::RemovedRecord removedRecord;
+
+    removedRecord.id = id;
+    removedRecord.record = getRecordFromStandardQueryResult(
+        seasonId, std::move(map), std::move(run), userId, time,
+        std::move(checkpointsString), std::move(recordDate),
+        std::move(playerName), std::move(metadataString));
+    removedRecord.removedBy = removedBy;
+    removedRecord.removedAt = TimeUtils::Time::fromString(removedAt);
+
+    if (reason) {
+      removedRecord.reason = *reason;
+    }
+
+    records.emplace_back(std::move(removedRecord));
+  };
+
   return records;
 }
 } // namespace ETJump

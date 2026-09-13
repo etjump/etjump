@@ -114,6 +114,7 @@ public:
   void recordDetails(const Timerun::RecordDetailsParams &params);
   void removeRecord(const Timerun::RemoveRecordParams &params);
   void listRemovedRecords(const Timerun::ListRemovedRecordsParams &params);
+  void restoreRecord(const Timerun::RestoreRecordParams &params);
 
   [[nodiscard]] int32_t getRunStartTime(int32_t clientNum) const;
 
@@ -121,6 +122,16 @@ public:
   static std::vector<std::pair<Timerun::Checkpoints, Timerun::Checkpoints>>
   getCheckpointsForComparison(const std::vector<Timerun::Checkpoints> &base,
                               const std::vector<Timerun::Checkpoints> &cmp);
+
+  static std::string
+  buildRestoreRecordSummary(const std::vector<Timerun::Record> &restored,
+                            const std::vector<Timerun::Record> &swapped,
+                            const std::vector<Timerun::RemovedRecord> &skipped,
+                            const std::map<int32_t, std::string> &seasonNames);
+
+  static std::string buildRestoreRecordConflictMessage(
+      const std::vector<Timerun::RestoreConflict> &conflicts,
+      const std::map<int32_t, std::string> &seasonNames);
 
   static void removeDisallowedWeapons(gentity_t *ent);
   static void removePlayerProjectiles(gentity_t *ent);
@@ -155,6 +166,10 @@ private:
   static std::string
   getRankingsStringFor(const std::vector<Ranking> *vector,
                        const Timerun::PrintRankingsParams &params);
+
+  static std::string
+  getSeasonName(const std::map<int32_t, std::string> &seasonNames,
+                int32_t seasonId);
 
   std::string _currentMap;
   std::unique_ptr<TimerunRepository> _repository;
