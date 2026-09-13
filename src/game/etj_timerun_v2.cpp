@@ -241,8 +241,6 @@ void TimerunV2::initialize() {
 
     updateSeasonStates();
 
-    _mostRelevantSeason = getMostRelevantSeason();
-
     _logger->info(
         "Active seasons: %s",
         StringUtils::join(Container::map(_activeSeasons,
@@ -1790,9 +1788,11 @@ public:
   CheckRecordResult() : clientNum(-1) {}
 
   int clientNum;
+  // id of the most relevant (most recently started) active season
+  int32_t mostRelevantSeasonId{};
   // Most relevant season record
-  std::map<int, bool> isTopRecordPerSeason{};
-  std::map<int, NewRecord> newOwnRecordsPerSeason{};
+  std::map<int, bool> isTopRecordPerSeason;
+  std::map<int, NewRecord> newOwnRecordsPerSeason;
 
   // our previous overall record
   std::optional<Timerun::Record> playerPreviousOverallRecord;
@@ -1954,6 +1954,11 @@ void TimerunV2::checkRecord(Player *player) {
               *playerPreviousOverallRecordIt->second;
         }
 
+        // resolve most relevant season here, as '_activeSeasons' may be
+        // modified by the worker thread, which can result in the most relevant
+        // season being changed by the time we get to the callback
+        result->mostRelevantSeasonId = getMostRelevantSeason()->id;
+
         return std::move(result);
       },
       [this, completionTime, activeRunName, playerName,
@@ -2007,11 +2012,10 @@ void TimerunV2::checkRecord(Player *player) {
           isNewRecord = true;
         }
         // Relevant season record
-        else if (checkRecordResult
-                     ->isTopRecordPerSeason[_mostRelevantSeason->id]) {
-          const auto &record =
-              checkRecordResult
-                  ->newOwnRecordsPerSeason[_mostRelevantSeason->id];
+        else if (checkRecordResult->isTopRecordPerSeason
+                     [checkRecordResult->mostRelevantSeasonId]) {
+          const auto &record = checkRecordResult->newOwnRecordsPerSeason
+                                   [checkRecordResult->mostRelevantSeasonId];
 
           previousTopRecordTime =
               checkRecordResult->previousSeasonalRecord.has_value()
@@ -2049,7 +2053,7 @@ void TimerunV2::checkRecord(Player *player) {
         for (const auto &record : checkRecordResult->newOwnRecordsPerSeason) {
           const auto seasonId = record.first;
           if (seasonId == defaultSeasonId ||
-              seasonId == _mostRelevantSeason->id) {
+              seasonId == checkRecordResult->mostRelevantSeasonId) {
             continue;
           }
 
