@@ -1931,8 +1931,8 @@ void TimerunV2::listRemovedRecords(
           // combine the season names across the entry - no-op in case
           // we're querying by season
           auto seasonStrings = Container::map(
-              entry.records, [&](const Timerun::RemovedRecord &dr) {
-                return r->seasonNames.at(dr.record.seasonId);
+              entry.records, [&r](const Timerun::RemovedRecord &dr) {
+                return getSeasonName(r->seasonNames, dr.record.seasonId);
               });
 
           const std::string seasons = StringUtils::join(seasonStrings, ", ");
@@ -2005,6 +2005,140 @@ void TimerunV2::listRemovedRecords(
   _sc->postTask(task, callback, error);
 }
 
+namespace {
+class RestoreRecordResult : public SynchronizationContext::ResultBase {
+public:
+  RestoreRecordResult(Timerun::RestoreRecordResult result,
+                      std::map<int32_t, std::string> seasonNames)
+      : result(std::move(result)), seasonNames(std::move(seasonNames)) {}
+
+  Timerun::RestoreRecordResult result;
+  std::map<int32_t, std::string> seasonNames;
+};
+} // namespace
+
+void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
+  const std::string func = __func__;
+
+  const auto task = [this, params]() {
+    const auto restoredAt = TimeUtils::getCurrentTime(false);
+
+    std::map<int32_t, std::string> seasonNames;
+    for (const auto &season : _repository->getSeasons()) {
+      seasonNames[season.id] = season.name;
+    }
+
+    return std::make_unique<RestoreRecordResult>(
+        _repository->restoreRecord(params, restoredAt), seasonNames);
+  };
+
+  const auto callback =
+      [this, params,
+       func](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        const auto *const r = dynamic_cast<RestoreRecordResult *>(result.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: failed to restore removed record(s) for client "
+                         "%i: RestoreRecordResult is NULL",
+                         func, params.clientNum);
+          throw std::runtime_error(StringUtils::format(
+              "%s: unable to restore removed record(s). This is a bug, please "
+              "report this to the developers.",
+              func));
+        }
+
+        // any conflict will result in no changes to the database,
+        // so just print an error and exit
+        if (!r->result.conflicts.empty()) {
+          Printer::chat(params.clientNum,
+                        "^3restore-record: ^7conflicts found while trying to "
+                        "restore the record%s, see console for details",
+                        r->result.numTargeted == 1 ? "" : "s");
+          Printer::console(params.clientNum,
+                           buildRestoreRecordConflictMessage(
+                               r->result.conflicts, r->seasonNames));
+          return;
+        }
+
+        // repository throws an error if nothing can be restored, so if we
+        // reached this point, we should have successfully restored something
+        assert(!r->result.restored.empty());
+
+        const int32_t targetId = r->result.restored[0].userId;
+        // because we target a single record, the ID is always the same between
+        // them
+        const bool isSelfRestore = targetId == params.callerId;
+
+        Printer::chat(params.clientNum,
+                      "^3restore-record: ^7restored ^3%i ^7of ^3%i ^7requested "
+                      "records%s, see console for details",
+                      static_cast<int32_t>(r->result.restored.size()),
+                      r->result.numTargeted,
+                      isSelfRestore ? ""
+                                    : StringUtils::format(" for user ^3'%i'^7",
+                                                          targetId));
+
+        const std::string consoleMsg =
+            buildRestoreRecordSummary(r->result.restored, r->result.swapped,
+                                      r->result.skipped, r->seasonNames);
+        Printer::console(params.clientNum, consoleMsg);
+
+        // update the loaded records for the player whose record was restored,
+        // if the record is from the current map
+        int32_t targetClientNum = -1;
+
+        for (auto &player : _players) {
+          if (!player || player->userId != targetId) {
+            continue;
+          }
+
+          targetClientNum = player->clientNum;
+
+          // record is not from this map, no need to update cache
+          if (Q_stricmp(r->result.restored[0].map.c_str(), level.rawmapname)) {
+            break;
+          }
+
+          for (const auto &restored : r->result.restored) {
+            const auto it =
+                std::find_if(player->records.begin(), player->records.end(),
+                             [&restored](const Timerun::Record &cached) {
+                               return cached.isSameRunAs(&restored);
+                             });
+
+            if (it != player->records.end()) {
+              *it = restored;
+            } else {
+              player->records.push_back(restored);
+            }
+          }
+
+          break;
+        }
+
+        // if we're restoring our own records, we're done here
+        if (isSelfRestore) {
+          return;
+        }
+
+        // otherwise notify the target about the restoration
+        if (targetClientNum >= 0) {
+          Printer::chat(
+              targetClientNum,
+              "^3restore-record: ^7an administrator has restored ^3%i ^7of "
+              "your timerun records, see console for details",
+              static_cast<int32_t>(r->result.restored.size()));
+          Printer::console(targetClientNum, consoleMsg);
+        }
+      };
+
+  const auto error = [params](const std::runtime_error &e) {
+    Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
 int32_t TimerunV2::getRunStartTime(const int32_t clientNum) const {
   return _players[clientNum]->startTime.value_or(0);
 }
@@ -2037,6 +2171,178 @@ TimerunV2::getCheckpointsForComparison(
   }
 
   return processedRecords;
+}
+
+std::string TimerunV2::buildRestoreRecordSummary(
+    const std::vector<Timerun::Record> &restored,
+    const std::vector<Timerun::Record> &swapped,
+    const std::vector<Timerun::RemovedRecord> &skipped,
+    const std::map<int32_t, std::string> &seasonNames) {
+  std::string msg;
+  const auto numSkipped = static_cast<int32_t>(skipped.size());
+
+  // if we did not have to do any conflict resolution, the message is simple
+  if (swapped.empty()) {
+    const auto seasonStrings =
+        Container::map(restored, [&seasonNames](const Timerun::Record &r) {
+          return getSeasonName(seasonNames, r.seasonId);
+        });
+
+    const std::string seasons = StringUtils::join(seasonStrings, ", ");
+    // these are all the same run, just different seasons
+    const auto &rec = restored[0];
+
+    msg += StringUtils::format("The following record%s been restored for run "
+                               "^3'%s' ^7on map ^3'%s':\n\n",
+                               restored.size() == 1 ? " has" : "s have",
+                               rec.run, rec.map);
+
+    msg += StringUtils::format(
+        " ^2Season%s: ^7%s\n ^2Time: ^7%s\n ^2Record date: ^7%s\n\n",
+        restored.size() == 1 ? "" : "s", seasons,
+        TimeUtils::millisToString(rec.time), rec.recordDate.toDateTimeString());
+
+    if (numSkipped > 0) {
+      msg += StringUtils::format(
+          "^3%i ^7record%s not restored (removed by an administrator).\n",
+          numSkipped, numSkipped == 1 ? " was" : "s were");
+    }
+
+    return msg;
+  }
+
+  msg += StringUtils::format("The following record%s been restored for run "
+                             "^3'%s' ^7on map ^3'%s'^7.\nExisting record%s "
+                             "prior to the restore %s been removed.\n\n",
+                             restored.size() == 1 ? " has" : "s have",
+                             restored[0].run, restored[0].map,
+                             swapped.size() == 1 ? "" : "s",
+                             swapped.size() == 1 ? "has" : "have");
+
+  msg += StringUtils::format("               ^7%30s ^g| ^7%-30s\n",
+                             "Restored record", "Removed record");
+
+  const std::string line = " ^2%-11s ^g| ^7%30s ^g| ^z%-30s\n";
+
+  // map the restored <-> swapped records by season ID
+  std::map<int32_t, const Timerun::Record *> swappedBySeason;
+
+  for (const auto &s : swapped) {
+    swappedBySeason[s.seasonId] = &s;
+  }
+
+  for (const auto &rec : restored) {
+    const auto it = swappedBySeason.find(rec.seasonId);
+    const bool hasSwap = it != swappedBySeason.end();
+
+    msg += "^g-----------------------------------------------------------------"
+           "---------\n";
+
+    msg += StringUtils::format(
+        line, "Season", getSeasonName(seasonNames, rec.seasonId),
+        hasSwap ? getSeasonName(seasonNames, it->second->seasonId) : "-");
+    msg += StringUtils::format(
+        line, "Time", TimeUtils::millisToString(rec.time),
+        hasSwap ? TimeUtils::millisToString(it->second->time) : "-");
+    msg += StringUtils::format(
+        line, "Record date", rec.recordDate.toDateTimeString(),
+        hasSwap ? it->second->recordDate.toDateTimeString() : "-");
+  }
+
+  if (numSkipped > 0) {
+    msg += StringUtils::format(
+        "^3%i ^7record%s not restored (removed by an administrator).\n",
+        numSkipped, numSkipped == 1 ? " was" : "s were");
+  }
+
+  return msg;
+}
+
+std::string TimerunV2::buildRestoreRecordConflictMessage(
+    const std::vector<Timerun::RestoreConflict> &conflicts,
+    const std::map<int32_t, std::string> &seasonNames) {
+  const std::string headerPrefix = conflicts.size() == 1 ? "" : "s";
+  std::string msg = StringUtils::format(
+      "^3%i ^7record%s could not be restored due to a conflict.\nRun the "
+      "command again with ^3'--force' ^7option to remove the existing "
+      "record%s,\nand replace %s with the one%s you're trying to "
+      "restore.\n\n",
+      static_cast<int32_t>(conflicts.size()), headerPrefix, headerPrefix,
+      conflicts.size() == 1 ? "it" : "them", headerPrefix);
+
+  msg += StringUtils::format(
+      "Conflicting record%s on run ^3'%s' ^7in map ^3'%s':\n\n", headerPrefix,
+      conflicts[0].existing.run, conflicts[0].existing.map);
+
+  msg += StringUtils::format("               ^7%28s ^g| ^7%-28s\n",
+                             "Current record", "Record to restore");
+
+  constexpr int32_t columnPad = 28;
+  const std::string line = " ^2%-11s ^g| ^7%*s ^g| ^7%-*s\n";
+
+  for (const auto &[existing, toRestore] : conflicts) {
+    std::string timeStrExisting;
+    std::string timeStrToRestore;
+    std::string dateStrExisting;
+    std::string dateStrToRestore;
+
+    if (existing.time > toRestore.time) {
+      timeStrExisting =
+          "(^1slower^7) " + TimeUtils::millisToString(existing.time);
+      timeStrToRestore =
+          TimeUtils::millisToString(toRestore.time) + " (^2faster^7)";
+    } else if (toRestore.time > existing.time) {
+      timeStrExisting =
+          "(^2faster^7) " + TimeUtils::millisToString(existing.time);
+      timeStrToRestore =
+          TimeUtils::millisToString(toRestore.time) + " (^1slower^7)";
+    } else { // tied
+      timeStrExisting = "(tied) " + TimeUtils::millisToString(existing.time);
+      timeStrToRestore = TimeUtils::millisToString(toRestore.time) + " (tied)";
+    }
+
+    // dates cannot be "tied", otherwise they would be the same record
+    if (existing.recordDate > toRestore.recordDate) {
+      dateStrExisting = "(newer) " + existing.recordDate.toDateTimeString();
+      dateStrToRestore = toRestore.recordDate.toDateTimeString() + " (older) ";
+    } else {
+      dateStrExisting = "(older) " + existing.recordDate.toDateTimeString();
+      dateStrToRestore = toRestore.recordDate.toDateTimeString() + " (newer) ";
+    }
+
+    msg += "^g-----------------------------------------------------------------"
+           "---------\n";
+
+    msg += StringUtils::format(
+        line, "Season",
+        StringUtils::countExtraPadding(
+            getSeasonName(seasonNames, existing.seasonId), columnPad),
+        getSeasonName(seasonNames, existing.seasonId),
+        StringUtils::countExtraPadding(
+            getSeasonName(seasonNames, toRestore.seasonId), columnPad),
+        getSeasonName(seasonNames, toRestore.seasonId));
+    msg += StringUtils::format(
+        line, "Time",
+        StringUtils::countExtraPadding(timeStrExisting, columnPad),
+        timeStrExisting,
+        StringUtils::countExtraPadding(timeStrToRestore, columnPad),
+        timeStrToRestore);
+    msg += StringUtils::format(line, "Record date", columnPad, dateStrExisting,
+                               columnPad, dateStrToRestore);
+  }
+
+  return msg + "\nNo changes have been made due to the unresolved conflict.\n";
+}
+
+// resolves the season name for the given id, falling back to the raw id
+// if the season no longer exists, so a stale 'season_id' in the database
+// can never throw out of a callback
+std::string
+TimerunV2::getSeasonName(const std::map<int32_t, std::string> &seasonNames,
+                         int32_t seasonId) {
+  const auto it = seasonNames.find(seasonId);
+
+  return it != seasonNames.end() ? it->second : std::to_string(seasonId);
 }
 
 void TimerunV2::startNotify(Player *player) const {
@@ -2151,8 +2457,8 @@ void TimerunV2::checkRecord(Player *player) {
          *
          * If player makes a new overall record, it is broadcasted
          * If player makes a new relevant season record and there's no overall
-         * record, it is broadcasted If player makes a new season record, it is
-         * printed for the player but not for others
+         * record, it is broadcasted If player makes a new season record, it
+         * is printed for the player but not for others
          */
 
         const auto topRecords = _repository->getTopRecords(
@@ -2179,10 +2485,10 @@ void TimerunV2::checkRecord(Player *player) {
         std::map<int, Timerun::Record> playerNewTopRecordForSeason{};
         std::map<int, bool> isNewRecordForSeason{};
 
-        // go through active seasons and check if we beat any of the old records
-        // if we did, we store the record in playerNewTopRecordForSeason
-        // this only checks against our own personal previous times,
-        // not against other player's times
+        // go through active seasons and check if we beat any of the old
+        // records if we did, we store the record in
+        // playerNewTopRecordForSeason this only checks against our own
+        // personal previous times, not against other player's times
         for (auto seasonId : _activeSeasonsIds) {
           Timerun::Record record;
           record.seasonId = seasonId;
@@ -2325,7 +2631,8 @@ void TimerunV2::checkRecord(Player *player) {
                 "^7)";
 
             Printer::bannerAll(
-                "^7%s ^7broke the overall server record for ^3%s\n^7with ^3%s "
+                "^7%s ^7broke the overall server record for ^3%s\n^7with "
+                "^3%s "
                 "%s ^7!!!\n",
                 playerName, StringUtils::sanitize(record.record.run),
                 TimeUtils::millisToString(record.record.time), diffString);

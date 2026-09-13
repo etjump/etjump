@@ -170,4 +170,25 @@ struct RemovedRecordsPage {
   int32_t page{}; // effective page, capped to the last page if out of range
   int32_t numPages{};
 };
+
+struct RestoreRecordParams {
+  int32_t clientNum{};
+  int32_t callerId{};
+  int32_t recordId{};
+  bool force{};   // force restore in case of conflicts (swaps records)
+  bool isAdmin{}; // whether we have the 'TIMERUN_MANAGEMENT' admin flag
+};
+
+struct RestoreConflict {
+  Record existing;  // the record currently occupying the slot
+  Record toRestore; // the removed record that would be restored
+};
+
+struct RestoreRecordResult {
+  int32_t numTargeted{};                  // total targeted records
+  std::vector<Record> restored;           // records restored into 'record'
+  std::vector<Record> swapped;            // occupants archived by the swap
+  std::vector<RestoreConflict> conflicts; // unresolved conflicts (no --force)
+  std::vector<RemovedRecord> skipped;     // copies skipped due to permissions
+};
 } // namespace ETJump::Timerun

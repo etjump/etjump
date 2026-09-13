@@ -1572,6 +1572,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("comparecheckpoints");
   trap_AddCommand("remove-record");
   trap_AddCommand("list-removed-records");
+  trap_AddCommand("restore-record");
 
   trap_AddCommand("setoffset"); // autocompletion
   trap_AddCommand("interruptRun");

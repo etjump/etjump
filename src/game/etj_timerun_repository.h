@@ -85,6 +85,9 @@ public:
                const TimeUtils::Time &removedAt);
   Timerun::RemovedRecordsPage
   getRemovedRecords(const Timerun::ListRemovedRecordsParams &params);
+  Timerun::RestoreRecordResult
+  restoreRecord(const Timerun::RestoreRecordParams &params,
+                const TimeUtils::Time &restoredAt);
 
 private:
   void tryToMigrateRecords();
@@ -116,6 +119,8 @@ private:
 
   static std::vector<Timerun::Record>
   getRecordsFromQuery(sqlite::database_binder &binder);
+  static std::vector<Timerun::RemovedRecord>
+  getRemovedRecordsFromQuery(sqlite::database_binder &binder);
   static std::vector<Timerun::Season>
   getSeasonsFromQuery(sqlite::database_binder &binder);
 
