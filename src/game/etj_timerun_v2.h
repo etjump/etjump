@@ -167,7 +167,6 @@ private:
   std::vector<int> _upcomingSeasonsIds;
   std::vector<Timerun::Season> _upcomingSeasons;
 
-  const Timerun::Season *_mostRelevantSeason{};
   std::map<int, std::vector<Ranking>> _rankingsPerSeason;
 };
 } // namespace ETJump
