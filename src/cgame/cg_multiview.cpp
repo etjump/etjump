@@ -546,7 +546,6 @@ void CG_mvDraw(cg_window_t *sw) {
 
   if (!cg.hyperspace) {
     CG_AddPacketEntities();
-    CG_AddMarks();
     CG_AddParticles();
     CG_AddLocalEntities();
 

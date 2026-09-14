@@ -44,9 +44,6 @@ inline constexpr int PRONE_TIME = 500;
 
 inline constexpr int MAX_STEP_CHANGE = 32;
 
-inline constexpr int MAX_VERTS_ON_POLY = 10;
-inline constexpr int MAX_MARK_POLYS = 256; // JPW NERVE was 1024
-
 inline constexpr int TEAMCHAT_WIDTH = 200;
 inline constexpr int TEAMCHAT_HEIGHT = 64;
 
@@ -368,18 +365,6 @@ typedef struct centity_s {
 
 // local entities are created as a result of events or predicted actions,
 // and live independantly from all server transmitted entities
-
-typedef struct markPoly_s {
-  struct markPoly_s *prevMark, *nextMark;
-  int time;
-  qhandle_t markShader;
-  qboolean alphaFade; // fade alpha instead of rgb
-  float color[4];
-  poly_t poly;
-  polyVert_t verts[MAX_VERTS_ON_POLY];
-
-  int duration; // Ridah
-} markPoly_t;
 
 //----(SA)	moved in from cg_view.c
 typedef enum {
@@ -2158,7 +2143,6 @@ extern cg_t cg;
 extern centity_t cg_entities[MAX_GENTITIES];
 extern weaponInfo_t cg_weapons[MAX_WEAPONS];
 extern itemInfo_t cg_items[MAX_ITEMS];
-extern markPoly_t cg_markPolys[MAX_MARK_POLYS];
 
 extern vmCvar_t cg_centertime;
 extern vmCvar_t cg_runpitch;
@@ -3226,9 +3210,7 @@ void portalTrail(const vec3_t start, const vec3_t end, const vec3_t color);
 //
 // cg_marks.c
 //
-void CG_InitMarkPolys(void);
-void CG_AddMarks(void);
-void CG_ImpactMark(qhandle_t markShader, vec3_t origin, vec4_t projection,
+void CG_ImpactMark(qhandle_t markShader, const vec3_t origin, vec4_t projection,
                    float radius, float orientation, float r, float g, float b,
                    float a, int lifeTime);
 

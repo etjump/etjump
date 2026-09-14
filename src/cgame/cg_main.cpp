@@ -4131,8 +4131,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   BG_BuildSplinePaths();
 
-  CG_InitMarkPolys();
-
   // remove the last loading update
   cg.infoScreenText[0] = 0;
 
