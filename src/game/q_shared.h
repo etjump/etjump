@@ -750,7 +750,6 @@ void COM_SetCurrentParseLine(int line);
 int COM_GetCurrentParseLine(void);
 char *COM_Parse(const char **data_p);
 char *COM_ParseExt(const char **data_p, qboolean allowLineBreak);
-int COM_Compress(char *data_p);
 void COM_ParseError(const char *format, ...);
 void COM_ParseWarning(const char *format, ...);
 int Com_ParseInfos(char *buf, int max, char infos[][MAX_INFO_STRING]);

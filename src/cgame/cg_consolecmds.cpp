@@ -146,12 +146,6 @@ void CG_ScoresUp_f(void) {
   }
 }
 
-static void CG_LoadHud_f(void) {
-  //	String_Init();
-  //	Menu_Reset();
-  //	CG_LoadMenus("ui/hud.txt");
-}
-
 static void CG_LoadWeapons_f(void) {
   int i;
 
@@ -1279,7 +1273,6 @@ static const consoleCommand_t noDemoCommands[] = {
     {"tell_target", CG_TellTarget_f},
     {"tell_attacker", CG_TellAttacker_f},
     {"fade", CG_Fade_f}, // duffy
-    {"loadhud", CG_LoadHud_f},
     {"loadweapons", CG_LoadWeapons_f},
 
     {"mp_QuickMessage", CG_QuickMessage_f},
