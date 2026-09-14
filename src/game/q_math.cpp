@@ -209,27 +209,6 @@ unsigned ColorBytes4(float r, float g, float b, float a) {
   return i;
 }
 
-float NormalizeColor(const vec3_t in, vec3_t out) {
-  float max;
-
-  max = in[0];
-  if (in[1] > max) {
-    max = in[1];
-  }
-  if (in[2] > max) {
-    max = in[2];
-  }
-
-  if (!max) {
-    VectorClear(out);
-  } else {
-    out[0] = in[0] / max;
-    out[1] = in[1] / max;
-    out[2] = in[2] / max;
-  }
-  return max;
-}
-
 /*
 =====================
 PlaneFromPoints
