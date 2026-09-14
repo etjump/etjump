@@ -740,8 +740,6 @@ float DistanceFromVectorSquared(vec3_t p, vec3_t lp1, vec3_t lp2);
 
 //=============================================
 
-float Com_Clamp(float min, float max, float value);
-
 char *COM_SkipPath(char *pathname);
 void COM_FixPath(char *pathname);
 void COM_StripExtension(const char *in, char *out);

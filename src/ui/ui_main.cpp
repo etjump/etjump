@@ -2424,8 +2424,8 @@ qboolean UI_OwnerDrawVisible(int flags) {
 static qboolean UI_Handicap_HandleKey(int flags, float *special, int key) {
   if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_ENTER ||
       key == K_KP_ENTER) {
-    int h;
-    h = Com_Clamp(5, 100, trap_Cvar_VariableValue("handicap"));
+    int32_t h = std::clamp(
+        static_cast<int32_t>(trap_Cvar_VariableValue("handicap")), 5, 100);
     if (key == K_MOUSE2) {
       h -= 5;
     } else {
@@ -3285,8 +3285,10 @@ void UI_RunMenuScript(const char **args) {
       trap_Cvar_Set("ui_connecting", "1");
       trap_Cvar_Set("cg_thirdPerson", "0");
       trap_Cvar_Set("cg_cameraOrbit", "0");
-      trap_Cvar_SetValue("dedicated", Com_Clamp(0, 2, ui_dedicated.integer));
-      trap_Cvar_SetValue("g_gametype", Com_Clamp(0, 8, ui_netGameType.integer));
+      trap_Cvar_SetValue("dedicated", static_cast<float>(std::clamp(
+                                          ui_dedicated.integer, 0, 2)));
+      trap_Cvar_SetValue("g_gametype", static_cast<float>(std::clamp(
+                                           ui_netGameType.integer, 0, 8)));
 
       trap_Cmd_ExecuteText(
           EXEC_APPEND,
