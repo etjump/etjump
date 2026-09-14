@@ -240,6 +240,11 @@ void Session::GetUserAndLevelData(int clientNum) {
     }
   }
 
+  if (!clients_[clientNum].user) {
+    // Debugging purposes, should be never executed
+    G_Error("Client %i doesn't have db::user.\n", clientNum);
+  }
+
   clients_[clientNum].level =
       game.levels->GetLevel(clients_[clientNum].user->level);
 
@@ -247,11 +252,6 @@ void Session::GetUserAndLevelData(int clientNum) {
     PrintGreeting(ent);
     Printer::popup(ent, "^5Your last visit was on %s.",
                    clients_[clientNum].user->GetLastSeenString());
-  }
-
-  if (!clients_[clientNum].user) {
-    // Debugging purposes, should be never executed
-    G_Error("Client doesn't have db::user.\n");
   }
 
   ParsePermissions(clientNum);
