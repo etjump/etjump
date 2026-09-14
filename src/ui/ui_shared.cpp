@@ -3059,6 +3059,11 @@ qboolean Item_Multi_HandleKey(itemDef_t *item, int key) {
         int current = Item_Multi_FindCvarByValue(item);
         int max = Item_Multi_CountSettings(item);
 
+        // empty cvar list, nothing to cycle through
+        if (max <= 0) {
+          return qtrue;
+        }
+
         if (key == K_MOUSE2) {
           current--;
         } else {
