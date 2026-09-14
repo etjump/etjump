@@ -2152,8 +2152,6 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
       CG_AddPacketEntities(); // adter calcViewValues,
                               // so predicted player
                               // state is correct
-      CG_AddMarks();
-
       DEBUGTIME
 
       CG_AddScriptSpeakers();

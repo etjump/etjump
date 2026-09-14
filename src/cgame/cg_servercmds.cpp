@@ -979,7 +979,6 @@ static void CG_MapRestart(void) {
   CG_LoadObjectiveData();
 
   CG_InitLocalEntities();
-  CG_InitMarkPolys();
 
   cg.editingSpeakers = qfalse;
 
