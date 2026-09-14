@@ -3606,77 +3606,6 @@ static qboolean CG_Load_Menu(const char **p) {
   return qfalse;
 }
 
-void CG_LoadMenus(char *menuFile) {
-  const char *token;
-  const char *p;
-  int len, start;
-  fileHandle_t f;
-  static char buf[MAX_MENUDEFFILE];
-
-  start = trap_Milliseconds();
-
-  len = trap_FS_FOpenFile(menuFile, &f, FS_READ);
-  if (!f) {
-    trap_Error(va(S_COLOR_YELLOW "menu file not found: %s, using default\n",
-                  menuFile));
-    len = trap_FS_FOpenFile("ui/hud.txt", &f, FS_READ);
-    if (!f) {
-      trap_Error(S_COLOR_RED "default menu file not found: "
-                             "ui/hud.txt, unable to continue!\n");
-    }
-  }
-
-  if (len >= MAX_MENUDEFFILE) {
-    trap_Error(va(S_COLOR_RED
-                  "menu file too large: %s is %i, max allowed is %i",
-                  menuFile, len, MAX_MENUDEFFILE));
-    trap_FS_FCloseFile(f);
-    return;
-  }
-
-  trap_FS_Read(buf, len, f);
-  buf[len] = 0;
-  trap_FS_FCloseFile(f);
-
-  COM_Compress(buf);
-
-  Menu_Reset();
-
-  p = buf;
-
-  while (1) {
-    token = COM_ParseExt(&p, qtrue);
-    if (!token || token[0] == 0 || token[0] == '}') {
-      break;
-    }
-
-    // if ( Q_stricmp( token, "{" ) ) {
-    //	Com_Printf( "Missing { in menu file\n" );
-    //	break;
-    // }
-
-    // if ( menuCount == MAX_MENUS ) {
-    //	Com_Printf( "Too many menus!\n" );
-    //	break;
-    // }
-
-    if (Q_stricmp(token, "}") == 0) {
-      break;
-    }
-
-    if (Q_stricmp(token, "loadmenu") == 0) {
-      if (CG_Load_Menu(&p)) {
-        continue;
-      } else {
-        break;
-      }
-    }
-  }
-
-  Com_Printf("UI menu load time = %d milli seconds\n",
-             trap_Milliseconds() - start);
-}
-
 static qboolean CG_OwnerDrawHandleKey(int ownerDraw, int flags, float *special,
                                       int key) {
   return qfalse;
@@ -3896,8 +3825,6 @@ void CG_LoadHudMenu() {
   Init_Display(&cgDC);
 
   Menu_Reset();
-
-  //	CG_LoadMenus("ui/hud.txt");
 
   CG_Text_SetActiveFont(0);
 }
