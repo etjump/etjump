@@ -941,7 +941,8 @@ void TrickjumpLines::saveRoutes(const char *savename) {
                          std::string("/") + savename + std::string(".tjl"))
                             .c_str(),
                         &f, FS_WRITE) < 0) {
-    throw "ERROR: couldn't open file for saving tjlines";
+    CG_Printf("ERROR: couldn't open file for saving tjlines\n");
+    return;
   }
 
   auto writer = Json::FastWriter();
