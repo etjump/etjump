@@ -35,18 +35,15 @@ public:
   ~MapStatistics() = default;
 
   struct MapInformation {
-    MapInformation()
-        : id(0), secondsPlayed(0), callvoted(0), votesPassed(0), timesPlayed(0),
-          isOnServer(false), changed(true) {}
-    long long id;
+    int64_t id{};
     std::string name;
-    int secondsPlayed;
-    int callvoted;
-    int votesPassed;
-    int timesPlayed;
-    int lastPlayed;
-    bool isOnServer;
-    bool changed;
+    int32_t secondsPlayed{};
+    int32_t callvoted{};
+    int32_t votesPassed{};
+    int32_t timesPlayed{};
+    int32_t lastPlayed{};
+    bool isOnServer{};
+    bool changed = true;
   };
 
   const char *randomMap() const;
