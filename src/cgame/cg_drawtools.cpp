@@ -176,7 +176,7 @@ void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
 ProjectionX
 ==============
 */
-float ProjectionX(float angle, float fov) {
+static float ProjectionX(float angle, float fov) {
   float const half_fov_x = DEG2RAD(fov) / 2;
   if (angle >= half_fov_x) {
     return 0;
@@ -188,16 +188,12 @@ float ProjectionX(float angle, float fov) {
   switch (etj_projection.integer) {
     case 0: // rectilinear projection, breaks with fov >= 180
       return SCREEN_WIDTH / 2 * (1 - tanf(angle) / tanf(half_fov_x));
-      break;
     case 1: // cylindrical projection, breaks with fov > 360
       return SCREEN_WIDTH / 2 * (1 - angle / half_fov_x);
-      break;
     case 2: // panini projection, breaks with fov >= 360
       return SCREEN_WIDTH / 2 * (1 - tanf(angle / 2) / tanf(half_fov_x / 2));
-      break;
     default:
       return 0;
-      break;
   }
 }
 

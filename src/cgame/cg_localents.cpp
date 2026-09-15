@@ -1344,9 +1344,6 @@ void CG_AddLocalEntities(void) {
     switch (le->leType) {
       default:
         CG_Error("Bad leType: %i", le->leType);
-        break;
-
-      // Ridah
       case LE_MOVING_TRACER:
         CG_AddMovingTracer(le);
         break;
@@ -1362,12 +1359,6 @@ void CG_AddLocalEntities(void) {
       case LE_BLOOD:
         CG_AddBloodElements(le);
         break;
-        /*		case LE_ZOMBIE_SPIRIT:
-                case LE_ZOMBIE_BAT:
-                    CG_AddClientCritter( le );
-                    break;*/
-        // done.
-
       case LE_MARK:
         break;
 
