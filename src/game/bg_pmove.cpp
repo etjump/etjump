@@ -4330,16 +4330,8 @@ static void PM_Weapon(void) {
       vec3_t kvel;
       float mass = 200;
 
-      if (DotProduct(pml.forward, pm->ps->velocity) > 0) {
-        VectorScale(pml.forward, -1.f * (fwdmove_knockback / mass),
-                    kvel); // -1 as we get knocked
-                           // backwards
-      } else {
-        VectorScale(pml.forward, -1.f * (fwdmove_knockback / mass),
-                    kvel); // -1 as we get knocked
-                           // backwards
-      }
-
+      // -1 as we get knocked backwards
+      VectorScale(pml.forward, -1.0f * (fwdmove_knockback / mass), kvel);
       VectorAdd(pm->ps->velocity, kvel, pm->ps->velocity);
 
       if (!pm->ps->pm_time) {
