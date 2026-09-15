@@ -2743,9 +2743,6 @@ void PM_TraceAllLegs(trace_t *trace, float *legsOffset, vec3_t start,
                      vec3_t end);
 void PM_TraceAll(trace_t *trace, vec3_t start, vec3_t end);
 
-// Feen: Color Methods
-void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB);
-
 struct Manual {
   const char *cmd;
   const char *usage;
