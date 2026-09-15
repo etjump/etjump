@@ -1384,12 +1384,6 @@ typedef struct {
   // JPW NERVE
   qhandle_t fleshSmokePuffShader; // JPW NERVE for bullet hit flesh
                                   // smoke puffs
-  qhandle_t hud1Shader;
-  qhandle_t hud2Shader;
-  qhandle_t hud3Shader;
-  qhandle_t hud4Shader;
-  qhandle_t hud5Shader;
-  // jpw
   qhandle_t smokePuffShader;
   qhandle_t smokePuffRageProShader;
   qhandle_t shotgunSmokePuffShader;
