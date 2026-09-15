@@ -3059,6 +3059,11 @@ qboolean Item_Multi_HandleKey(itemDef_t *item, int key) {
         int current = Item_Multi_FindCvarByValue(item);
         int max = Item_Multi_CountSettings(item);
 
+        // empty cvar list, nothing to cycle through
+        if (max <= 0) {
+          return qtrue;
+        }
+
         if (key == K_MOUSE2) {
           current--;
         } else {
@@ -4074,14 +4079,19 @@ itemDef_t *Menu_SetNextCursorItem(menuDef_t *menu) {
   while (menu->cursorItem < menu->itemCount) {
 
     menu->cursorItem++;
-    if (menu->cursorItem >= menu->itemCount) // (SA) had a problem 'tabbing' in
-                                             // dialogs with only one possible
-                                             // button
-    {
+
+    // (SA) had a problem 'tabbing' in dialogs with only one possible button
+    if (menu->cursorItem >= menu->itemCount) {
       if (!wrapped) {
         wrapped = qtrue;
         menu->cursorItem = 0;
       } else {
+        // no items in the menu accepted focus
+        if (oldCursor < 0) {
+          menu->cursorItem = oldCursor;
+          return nullptr;
+        }
+
         return menu->items[oldCursor];
       }
     }
