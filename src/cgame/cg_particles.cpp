@@ -1381,9 +1381,9 @@ void CG_ParticleExplosion(const char *animStr, vec3_t origin, vec3_t vel,
       break;
     }
   }
+
   if (!shaderAnimNames[anim]) {
-    CG_Error("CG_ParticleExplosion: unknown animation string: %s\n", animStr);
-    return;
+    CG_Error("%s: unknown animation string: %s\n", __func__, animStr);
   }
 
   if (!free_particles) {
