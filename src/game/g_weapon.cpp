@@ -2833,38 +2833,13 @@ void Weapon_Artillery(gentity_t *ent) {
     return;
   }
 
-  if (ent->client->sess.sessionTeam == TEAM_AXIS) {
-    if (!G_AvailableAirstrikes(ent)) {
-      G_SayTo(ent, ent, 2, COLOR_YELLOW,
-              "Fire Mission: ", "Insufficient fire support.", qfalse);
-      ent->active = qfalse;
+  if (!G_AvailableAirstrikes(ent)) {
+    G_SayTo(ent, ent, 2, COLOR_YELLOW,
+            "Fire Mission: ", "Insufficient fire support.", qfalse);
+    ent->active = qfalse;
 
-      G_GlobalClientEvent(EV_ARTYMESSAGE, 0, ent - g_entities);
-
-      /*			te = G_TempEntity(
-         ent->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND );
-         te->s.eventParm = G_SoundIndex(
-         "axis_hq_airstrike_denied" ); te->s.teamNum =
-         ent-g_entities;*/
-
-      return;
-    }
-  } else {
-    if (!G_AvailableAirstrikes(ent)) {
-      G_SayTo(ent, ent, 2, COLOR_YELLOW,
-              "Fire Mission: ", "Insufficient fire support.", qfalse);
-      ent->active = qfalse;
-
-      G_GlobalClientEvent(EV_ARTYMESSAGE, 0, ent - g_entities);
-
-      /*			te = G_TempEntity(
-         ent->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND );
-         te->s.eventParm = G_SoundIndex(
-         "allies_hq_airstrike_denied" ); te->s.teamNum =
-         ent-g_entities;*/
-
-      return;
-    }
+    G_GlobalClientEvent(EV_ARTYMESSAGE, 0, ClientNum(ent));
+    return;
   }
 
   AngleVectors(ent->client->ps.viewangles, forward, right, up);
@@ -2890,18 +2865,7 @@ void Weapon_Artillery(gentity_t *ent) {
     G_SayTo(ent, ent, 2, COLOR_YELLOW,
             "Fire Mission: ", "Aborting, can't see target.", qfalse);
 
-    G_GlobalClientEvent(EV_ARTYMESSAGE, 1, ent - g_entities);
-
-    /*		te = G_TempEntity( ent->s.pos.trBase,
-       EV_GLOBAL_CLIENT_SOUND ); if (
-       ent->client->sess.sessionTeam == TEAM_ALLIES ) {
-                te->s.eventParm = G_SoundIndex(
-       "allies_hq_ffe_abort" ); } else { te->s.eventParm =
-       G_SoundIndex( "axis_hq_ffe_abort" );
-            }
-            te->s.teamNum = ent->s.clientNum;*/
-
-    //		te->s.effect1Time = 1;	// don't buffer
+    G_GlobalClientEvent(EV_ARTYMESSAGE, 1, ClientNum(ent));
     return;
   }
 
@@ -2910,17 +2874,7 @@ void Weapon_Artillery(gentity_t *ent) {
   G_SayTo(ent, ent, 2, COLOR_YELLOW, "Fire Mission: ", "Firing for effect!",
           qfalse);
 
-  G_GlobalClientEvent(EV_ARTYMESSAGE, 2, ent - g_entities);
-
-  /*	te = G_TempEntity( ent->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND );
-      if ( ent->client->sess.sessionTeam == TEAM_ALLIES ) {
-          te->s.eventParm = G_SoundIndex( "allies_hq_ffe" );
-      } else {
-          te->s.eventParm = G_SoundIndex( "axis_hq_ffe" );
-      }
-      te->s.teamNum = ent->s.clientNum;*/
-
-  //	te->s.effect1Time = 1;	// don't buffer
+  G_GlobalClientEvent(EV_ARTYMESSAGE, 2, ClientNum(ent));
 
   VectorCopy(trace.endpos, bomboffset);
   traceheight = bomboffset[2];
@@ -2959,11 +2913,8 @@ void Weapon_Artillery(gentity_t *ent) {
 
       bomb->think = artillerySpotterThink;
     } else {
-      if (ent->client->sess.skill[SK_SIGNALS] >= 3) {
-        bomb->nextthink = level.time + 8950 + 2000 * i + crandom() * 800;
-      } else {
-        bomb->nextthink = level.time + 8950 + 2000 * i + crandom() * 800;
-      }
+      bomb->nextthink = level.time + 8950 + (2000 * i) +
+                        (static_cast<float>(crandom()) * 800);
 
       // Gordon: for explosion type
       bomb->accuracy = 2;

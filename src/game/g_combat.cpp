@@ -596,17 +596,15 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
   }
 }
 
-qboolean IsHeadShotWeapon(int mod) {
+static qboolean IsHeadShotWeapon(int mod) {
   // players are allowed headshots from these weapons
   if (mod == MOD_LUGER || mod == MOD_COLT || mod == MOD_AKIMBO_COLT ||
       mod == MOD_AKIMBO_LUGER || mod == MOD_AKIMBO_SILENCEDCOLT ||
       mod == MOD_AKIMBO_SILENCEDLUGER || mod == MOD_MP40 ||
-      mod == MOD_THOMPSON || mod == MOD_STEN || mod == MOD_GARAND
-
-      || mod == MOD_KAR98 || mod == MOD_K43 || mod == MOD_K43_SCOPE ||
-      mod == MOD_CARBINE || mod == MOD_GARAND || mod == MOD_GARAND_SCOPE ||
-      mod == MOD_SILENCER || mod == MOD_SILENCED_COLT || mod == MOD_FG42 ||
-      mod == MOD_FG42SCOPE) {
+      mod == MOD_THOMPSON || mod == MOD_STEN || mod == MOD_GARAND ||
+      mod == MOD_KAR98 || mod == MOD_K43 || mod == MOD_K43_SCOPE ||
+      mod == MOD_CARBINE || mod == MOD_GARAND_SCOPE || mod == MOD_SILENCER ||
+      mod == MOD_SILENCED_COLT || mod == MOD_FG42 || mod == MOD_FG42SCOPE) {
     return qtrue;
   }
 
