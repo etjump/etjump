@@ -1016,8 +1016,6 @@ static void CG_MapRestart(void) {
   cg.latchAutoActions = qfalse;
   cg.latchVictorySound = qfalse; // NERVE - SMF
                                  // JPW NERVE -- reset render flags
-  cg_fxflags = 0;
-  // jpw
 
   // we really should clear more parts of cg here and stop sounds
   cg.v_dmg_time = 0;
