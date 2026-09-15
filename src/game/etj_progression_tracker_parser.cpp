@@ -24,6 +24,7 @@
 
 #include "etj_progression_tracker_parser.h"
 #include <algorithm>
+#include <cassert>
 #include <vector>
 #include <string>
 #include "etj_string_utilities.h"
@@ -98,10 +99,8 @@ ProgressionTrackerParser::parseIndexValuePair(
 
 std::vector<ProgressionTrackerParser::IndexValuePair>
 ProgressionTrackerParser::getParsedPairs() const {
-  if (_errors.size()) {
-    throw "Could not parse index-value pairs.";
-  }
-
+  // NOTE: check for errors before calling this!
+  assert(_errors.empty());
   return _parsedPairs;
 }
 
