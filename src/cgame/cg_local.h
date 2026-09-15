@@ -1384,8 +1384,6 @@ typedef struct {
   // JPW NERVE
   qhandle_t fleshSmokePuffShader; // JPW NERVE for bullet hit flesh
                                   // smoke puffs
-  qhandle_t nerveTestShader;
-  qhandle_t idTestShader;
   qhandle_t hud1Shader;
   qhandle_t hud2Shader;
   qhandle_t hud3Shader;
@@ -2978,8 +2976,6 @@ void CG_DrawTopBottom_NoScale(float x, float y, float w, float h, float size);
 //
 // cg_draw.c, cg_newDraw.c
 //
-extern char cg_fxflags; // JPW NERVE
-
 void CG_InitStatsDebug(void);
 void CG_StatsDebugAddText(const char *text);
 
@@ -3811,7 +3807,6 @@ void trap_SendMoveSpeedsToGame(int entnum, char *movespeeds);
 void trap_UI_Popup(int arg0);
 
 // NERVE - SMF
-qhandle_t getTestShader(void); // JPW NERVE shhh
 void trap_UI_ClosePopup(const char *arg0);
 void trap_Key_GetBindingBuf(int keynum, char *buf, int buflen);
 void trap_Key_SetBinding(int keynum, const char *binding);

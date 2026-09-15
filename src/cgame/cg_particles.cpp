@@ -711,14 +711,6 @@ void CG_AddParticleToScene(cparticle_t *p, vec3_t org, float alpha) {
     j = static_cast<int>(std::floor(ratio * shaderAnimCounts[p->shaderAnim]));
     p->pshader = shaderAnims[i][j];
 
-    // JPW NERVE more particle testing
-    if (cg_fxflags & 1) {
-      p->roll = 0;
-      p->pshader = getTestShader();
-      rotate_ang[ROLL] = 90;
-    }
-    // jpw
-
     if (p->roll) {
       vectoangles(cg.refdef_current->viewaxis[0], rotate_ang);
       rotate_ang[ROLL] += p->roll;
@@ -1355,12 +1347,6 @@ void CG_ParticleDirtBulletDebris_Core(vec3_t org, vec3_t vel, int duration,
   p->type = P_SMOKE;
 
   p->pshader = shader;
-  if (cg_fxflags & 1) {
-    p->pshader = getTestShader();
-    p->rotate = qfalse;
-    p->roll = 0;
-    p->type = P_SPRITE;
-  }
 
   VectorCopy(org, p->org);
   VectorCopy(vel, p->vel);

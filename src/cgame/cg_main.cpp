@@ -2392,8 +2392,6 @@ static void CG_RegisterGraphics(void) {
 
   cgs.media.fleshSmokePuffShader =
       trap_R_RegisterShader("fleshimpactsmokepuff"); // JPW NERVE
-  cgs.media.nerveTestShader = trap_R_RegisterShader("jpwtest1");
-  cgs.media.idTestShader = trap_R_RegisterShader("jpwtest2");
   cgs.media.hud1Shader = trap_R_RegisterShader("jpwhud1");
   cgs.media.hud2Shader = trap_R_RegisterShader("jpwhud2");
   cgs.media.hud3Shader = trap_R_RegisterShader("jpwhud3");
