@@ -1,0 +1,81 @@
+name: ETJump Snapshot
+
+on:
+  schedule:
+    - cron: "0 10 * * *"
+
+  workflow_dispatch:
+
+jobs:
+  check:
+    # skip check on manual feature branch builds
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-22.04
+    outputs:
+      run_build: ${{ steps.check.outputs.run_build }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for new commits since latest build
+        id: check
+        run: |
+          current_sha=$(git rev-parse HEAD)
+          latest_sha=$(git rev-list -n 1 latest 2>/dev/null || echo "none")
+
+          echo "Current HEAD: $current_sha"
+          echo "Latest tag: $latest_sha"
+
+          if [[ "$current_sha" == "$latest_sha" ]]; then
+            echo "No new commits since latest build."
+            echo "run_build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: check
+    # skipped 'check' means we still want to build,
+    # since we're running on a feature branch
+    if: ${{ !cancelled() && (needs.check.result == 'skipped' || needs.check.outputs.run_build == 'true') }}
+    uses: ./.github/workflows/build.yml
+
+  package:
+    needs: [check, build]
+    if: ${{ !cancelled() && needs.build.result == 'success' && github.ref == 'refs/heads/dev' && needs.check.outputs.run_build == 'true' }}
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: etjump-artifacts-*
+          merge-multiple: true
+          path: ${{ github.workspace }}/build/etjump
+
+      - name: Pack release zip
+        working-directory: ${{ github.workspace }}/build
+        run: |
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+          make mod_release
+
+      - name: Upload release
+        uses: actions/upload-artifact@v7
+        with:
+          name: etjump-snapshot-release
+          path: ${{ github.workspace }}/build/*.zip
+
+      - name: Create latest build
+        uses: czietz/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: "latest"
+          prerelease: false
+          title: Latest Build
+          files: ${{ github.workspace }}/build/*.zip
