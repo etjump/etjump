@@ -1,8 +1,6 @@
-name: ETJump CI/CD
+name: ETJump CI
 
 on:
-  workflow_dispatch:
-
   push:
     branches: [master, dev]
     tags-ignore:
@@ -32,41 +30,3 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/build.yml
-
-  package:
-    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-    runs-on: ubuntu-22.04
-    needs: build
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v8
-        with:
-          pattern: etjump-artifacts-*
-          merge-multiple: true
-          path: ${{ github.workspace }}/build/etjump
-
-      - name: Pack release zip
-        working-directory: ${{ github.workspace }}/build
-        run: |
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
-          make mod_release
-
-      - name: Upload release
-        uses: actions/upload-artifact@v7
-        with:
-          name: etjump-snapshot-release
-          path: ${{ github.workspace }}/build/*.zip
-
-      - name: Create latest build
-        uses: czietz/action-automatic-releases@latest
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: "latest"
-          prerelease: false
-          title: Latest Build
-          files: ${{ github.workspace }}/build/*.zip
