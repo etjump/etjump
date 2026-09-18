@@ -9,11 +9,13 @@ on:
 
 jobs:
   build:
+    name: Build
     uses: ./.github/workflows/build.yml
 
   package:
-    runs-on: ubuntu-22.04
+    name: Package
     needs: build
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v6

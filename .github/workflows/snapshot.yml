@@ -8,6 +8,7 @@ on:
 
 jobs:
   check:
+    name: Check
     # skip check on manual feature branch builds
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-22.04
@@ -36,6 +37,7 @@ jobs:
           fi
 
   build:
+    name: Build
     needs: check
     # skipped 'check' means we still want to build,
     # since we're running on a feature branch
@@ -43,6 +45,7 @@ jobs:
     uses: ./.github/workflows/build.yml
 
   package:
+    name: Package
     needs: [check, build]
     if: ${{ !cancelled() && needs.build.result == 'success' && github.ref == 'refs/heads/dev' && needs.check.outputs.run_build == 'true' }}
     runs-on: ubuntu-22.04
