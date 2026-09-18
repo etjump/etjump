@@ -74,11 +74,31 @@ jobs:
           name: etjump-snapshot-release
           path: ${{ github.workspace }}/build/*.zip
 
+      - name: Capture previous snapshot commit
+        id: previous
+        run: |
+          prev=$(git rev-list -n 1 latest 2>/dev/null || echo "")
+          echo "sha=$prev" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        run: |
+          if [[ -n "${{ steps.previous.outputs.sha }}" ]]; then
+            git log --format='- %h: %s (%an)' "${{ steps.previous.outputs.sha }}..HEAD" > release_body.md
+          else
+            echo "First snapshot build." > release_body.md
+          fi
+
+      - name: Delete previous snapshot release
+        run: gh release delete latest --cleanup-tag --yes || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Create latest build
-        uses: czietz/action-automatic-releases@latest
+        uses: softprops/action-gh-release@v3
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: "latest"
-          prerelease: false
-          title: Latest Build
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: latest
+          name: Latest Build
+          body_path: release_body.md
           files: ${{ github.workspace }}/build/*.zip
+          fail_on_unmatched_files: true
