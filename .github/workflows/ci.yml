@@ -5,25 +5,21 @@ on:
     branches: [master, dev]
     tags-ignore:
       - "*"
-    paths-ignore:
-      - docs/*
+    paths-ignore: &paths_ignore
+      - docs/**
+      - .editorconfig
       - .gitignore
       - .gitattributes
       - .clang-format
+      - .clang-tidy
       - README.md
+      - AGENTS.md
       - VERSION.txt
-      - release.sh
+      - scripts/release.sh
 
   pull_request:
     branches: [master, dev]
-    paths-ignore:
-      - docs/*
-      - .gitignore
-      - .gitattributes
-      - .clang-format
-      - README.md
-      - VERSION.txt
-      - release.sh
+    paths-ignore: *paths_ignore
 
   merge_group:
 
