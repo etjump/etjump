@@ -98,6 +98,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: latest
+          target_commitish: ${{ github.sha }}
           name: Latest Build
           body_path: release_body.md
           files: ${{ github.workspace }}/build/*.zip
