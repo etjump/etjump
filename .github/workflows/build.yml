@@ -90,6 +90,7 @@ jobs:
       matrix:
         arch: [x86_64, arm64]
         config: [Release]
+        generator: [Ninja]
         include:
           - osx-target: "10.15"
 
@@ -99,7 +100,7 @@ jobs:
           fetch-depth: 0
 
       - name: Configure CMake
-        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.osx-target }}
+        run: cmake -B ${{ github.workspace }}/build -G ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.osx-target }}
 
       - name: Build
         run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
