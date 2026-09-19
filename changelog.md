@@ -1,11 +1,30 @@
 # ETJump 3.7.0
 
 ## Added
+* `etj_lerpPmove` cvar to interpolate between physics frames when `pmove_fixed 1` is set [#1994](https://github.com/etjump/etjump/pull/1994)
+  * this should smooth out `pmove_fixed 1` gameplay, and bring the feeling closer to `pmove_fixed 0`
+  * physics are not interpolated, only the rendered view
+* `remove-record`, `restore-record` and `list-removed-records` commands for timerun records [#1997](https://github.com/etjump/etjump/pull/1997)
+  * removed records are archived in the timerun database
+  * anyone can remove/restore their own records, admins with `T` flag can remove/restore records from other players
+  * records removed by admins can only be restored by admins
 * `etj_drawYaw` to display an indicator when turning view left/right [#1390](https://github.com/etjump/etjump/pull/1390)
 * `editentity` script action to modify an entity without a `scriptname` via mapscripting [#1972](https://github.com/etjump/etjump/pull/1972)
+* bundled mapscripts for `dreamwork` and `the_biome_expedition` [#1992](https://github.com/etjump/etjump/pull/1992) [#2008](https://github.com/etjump/etjump/pull/2008)
 
 ## Changed
 * numerous tweaks to default cvar values to improve the out-of-box experience [#1990](https://github.com/etjump/etjump/pull/1990)
+
+## Deprecated
+* `etj_smoothAngles` is deprecated in favor of `etj_lerpPmove`, will be removed in a future version
+
+## Fixed
+* potential crash on timerun completion if active seasons changed during a map [#1996](https://github.com/etjump/etjump/pull/1996)
+* crash if trickjump line file writing failed for some reason [#2003](https://github.com/etjump/etjump/pull/2003)
+* potential crash when issuing timerun season or custom vote management commands from server console [#2009](https://github.com/etjump/etjump/pull/2009)
+* crash if fetching user data from database failed [#2004](https://github.com/etjump/etjump/pull/2004)
+* potential crash when trying to focus next item in a menu with keyboard in some scenarios [#2000](https://github.com/etjump/etjump/pull/2000)
+* potential crash when trying to iterate menu item with no options [#1999](https://github.com/etjump/etjump/pull/1999)
 
 # ETJump 3.6.2
 
