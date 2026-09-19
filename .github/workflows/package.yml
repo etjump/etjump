@@ -1,0 +1,40 @@
+name: ETJump Package
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "Git ref (tag/branch/SHA) to check out. Defaults to the ref that triggered the caller."
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  package:
+    name: Create mod package
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: etjump-artifacts-*
+          merge-multiple: true
+          path: ${{ github.workspace }}/build/etjump
+
+      - name: Pack release zip
+        working-directory: ${{ github.workspace }}/build
+        run: |
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+          make mod_release
+
+      - name: Upload package
+        uses: actions/upload-artifact@v7
+        with:
+          name: etjump-package
+          path: ${{ github.workspace }}/build/*.zip
