@@ -1,0 +1,126 @@
+name: ETJump Build
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "Git ref (tag/branch/SHA) to check out. Defaults to the ref that triggered the caller."
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  Windows:
+    name: Windows ${{ matrix.arch }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86, x64]
+        config: [Release]
+        include:
+          - arch: x86
+            platform: Win32
+
+          - arch: x64
+            platform: x64
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -G "Visual Studio 17 2022" -A ${{ matrix.platform }}
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest -C ${{ matrix.config }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: etjump-artifacts-win-${{ matrix.arch }}
+          path: ${{ github.workspace }}/build/etjump
+
+  Linux:
+    name: Linux ${{ matrix.arch }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86, x86_64]
+        config: [Release]
+        generator: [Ninja]
+
+    steps:
+      - name: Install dependencies
+        if: matrix.arch == 'x86'
+        run: |
+          sudo apt-get update
+          sudo apt-get install gcc-multilib g++-multilib
+
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Configure CMake
+        run: |
+          if [ ${{ matrix.arch }} == "x86" ]; then
+            cmake -B ${{ github.workspace }}/build -G ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-cross-x86-linux.cmake
+          else
+            cmake -B ${{ github.workspace }}/build -G ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+          fi
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest -C ${{ matrix.config }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: etjump-artifacts-linux-${{ matrix.arch }}
+          path: ${{ github.workspace }}/build/etjump
+
+  macOS:
+    name: macOS ${{ matrix.arch }}
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [universal]
+        config: [Release]
+        generator: [Ninja]
+        include:
+          - osx-target: "10.15"
+            platforms: '"x86_64;arm64"'
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build -G ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_OSX_ARCHITECTURES=${{ matrix.platforms }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.osx-target }}
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
+
+      - name: Test
+        working-directory: ${{ github.workspace }}/build
+        run: ctest -C ${{ matrix.config }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: etjump-artifacts-macos-${{ matrix.arch }}
+          path: ${{ github.workspace }}/build/etjump
