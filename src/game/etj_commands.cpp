@@ -2937,8 +2937,8 @@ bool NewMaps(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
-  const int clientNum = ClientNum(ent);
+static bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
+  const int clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
 
   // All commands should be refactored to use this but will do this like
   // this for now
@@ -2994,8 +2994,8 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
-  const int clientNum = ClientNum(ent);
+static bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
+  const int clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
 
   auto def = std::move(
       ETJump::CommandParser::CommandDefinition::create(
@@ -3040,7 +3040,7 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
 }
 
 static bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
-  const int clientNum = ClientNum(ent);
+  const int clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
 
   auto def = std::move(
       ETJump::CommandParser::CommandDefinition::create(
@@ -3064,7 +3064,11 @@ static bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-bool RockTheVote(gentity_t *ent, Arguments argv) {
+static bool RockTheVote(gentity_t *ent, Arguments argv) {
+  if (!ent) {
+    return false;
+  }
+
   std::string cmd = "callvote rtv";
 
   if (argv->size() > 1) {
@@ -3097,8 +3101,8 @@ bool validateCustomVoteCommand(const std::string &cmdName, const int &clientNum,
   return commandOk;
 }
 
-bool addCustomVote(gentity_t *ent, Arguments argv) {
-  const int clientNum = ClientNum(ent);
+static bool addCustomVote(gentity_t *ent, Arguments argv) {
+  const int clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
 
   const auto def = std::move(
       ETJump::CommandParser::CommandDefinition::create(
@@ -3133,8 +3137,8 @@ bool addCustomVote(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-bool deleteCustomVote(gentity_t *ent, Arguments argv) {
-  const int clientNum = ClientNum(ent);
+static bool deleteCustomVote(gentity_t *ent, Arguments argv) {
+  const int clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
 
   auto def = std::move(
       ETJump::CommandParser::CommandDefinition::create(
@@ -3157,8 +3161,8 @@ bool deleteCustomVote(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-bool editCustomVote(gentity_t *ent, Arguments argv) {
-  const int clientNum = ClientNum(ent);
+static bool editCustomVote(gentity_t *ent, Arguments argv) {
+  const int clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
 
   auto def = std::move(
       ETJump::CommandParser::CommandDefinition::create(
