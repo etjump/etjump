@@ -1264,30 +1264,8 @@ Timerun::RemovedRecordsPage TimerunRepository::getRemovedRecords(
   auto binder = _database->sql << query;
   bindFilters(binder);
 
-  std::vector<Timerun::RemovedRecord> records;
-
-  binder >> [&records](int32_t id, int32_t seasonId, std::string map,
-                       std::string run, int32_t userId, int32_t time,
-                       std::string checkpointsString, std::string recordDate,
-                       std::string playerName, std::string metadataString,
-                       int32_t removedBy, const std::string &removedAt,
-                       std::unique_ptr<std::string> reason) {
-    Timerun::RemovedRecord removedRecord;
-
-    removedRecord.id = id;
-    removedRecord.record = getRecordFromStandardQueryResult(
-        seasonId, std::move(map), std::move(run), userId, time,
-        std::move(checkpointsString), std::move(recordDate),
-        std::move(playerName), std::move(metadataString));
-    removedRecord.removedBy = removedBy;
-    removedRecord.removedAt = TimeUtils::Time::fromString(removedAt);
-
-    if (reason) {
-      removedRecord.reason = *reason;
-    }
-
-    records.emplace_back(std::move(removedRecord));
-  };
+  std::vector<Timerun::RemovedRecord> records =
+      getRemovedRecordsFromQuery(binder);
 
   // group the season copies of the same completion into a single entry,
   // unless a season was explicitly targeted, in which case each record is
