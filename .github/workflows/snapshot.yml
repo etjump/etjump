@@ -46,8 +46,14 @@ jobs:
 
   package:
     name: Package
-    needs: [check, build]
-    if: ${{ !cancelled() && needs.build.result == 'success' && github.ref == 'refs/heads/dev' && needs.check.outputs.run_build == 'true' }}
+    needs: build
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    uses: ./.github/workflows/package.yml
+
+  upload:
+    name: Upload
+    needs: [check, package]
+    if: ${{ !cancelled() && needs.package.result == 'success' && github.ref == 'refs/heads/dev' && needs.check.outputs.run_build == 'true' }}
     runs-on: ubuntu-22.04
 
     steps:
@@ -55,24 +61,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download artifacts
+      - name: Download package
         uses: actions/download-artifact@v8
         with:
-          pattern: etjump-artifacts-*
-          merge-multiple: true
-          path: ${{ github.workspace }}/build/etjump
-
-      - name: Pack release zip
-        working-directory: ${{ github.workspace }}/build
-        run: |
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
-          make mod_release
-
-      - name: Upload release
-        uses: actions/upload-artifact@v7
-        with:
-          name: etjump-snapshot-release
-          path: ${{ github.workspace }}/build/*.zip
+          name: etjump-package
+          path: ${{ github.workspace }}/build
 
       - name: Capture previous snapshot commit
         id: previous

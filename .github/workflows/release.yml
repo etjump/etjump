@@ -24,28 +24,23 @@ jobs:
   package:
     name: Package
     needs: build
+    uses: ./.github/workflows/package.yml
+    with:
+      ref: ${{ inputs.ref || github.sha }}
+
+  upload:
+    name: Upload
+    needs: package
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          ref: ${{ inputs.ref || github.sha }}
-
-      - name: Download artifacts
+      - name: Download package
         uses: actions/download-artifact@v8
         with:
-          pattern: etjump-artifacts-*
-          merge-multiple: true
-          path: ${{ github.workspace }}/build/etjump
+          name: etjump-package
+          path: ${{ github.workspace }}/build
 
-      - name: Pack release zip
-        working-directory: ${{ github.workspace }}/build
-        run: |
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
-          make mod_release
-
-      - name: Upload release
+      - name: Create release
         uses: softprops/action-gh-release@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
