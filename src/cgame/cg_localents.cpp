@@ -557,10 +557,8 @@ void CG_AddFragment(localEntity_t *le) {
   // if it is in a nodrop zone, remove it
   // this keeps gibs from waiting at the bottom of pits of death
   // and floating levels
-  // FIXME: static_cast to silence bogus clang-tidy warning
-  if (!BG_DropItems(
-          static_cast<int>(CG_PointContents(trace.endpos, 0) & CONTENTS_NODROP),
-          cgs.shared)) {
+  if (!BG_DropItems(CG_PointContents(trace.endpos, 0),
+                    ETJump::cgame.sharedWSKeys.noDrop)) {
     CG_FreeLocalEntity(le);
     return;
   }
@@ -1044,10 +1042,8 @@ void CG_AddShrapnel(localEntity_t *le) {
   // if it is in a nodrop zone, remove it
   // this keeps gibs from waiting at the bottom of pits of death
   // and floating levels
-  // FIXME: static_cast to silence bogus clang-tidy warning
-  if (!BG_DropItems(
-          static_cast<int>(CG_PointContents(trace.endpos, 0) & CONTENTS_NODROP),
-          cgs.shared)) {
+  if (!BG_DropItems(CG_PointContents(trace.endpos, 0),
+                    ETJump::cgame.sharedWSKeys.noDrop)) {
     CG_FreeLocalEntity(le);
     return;
   }

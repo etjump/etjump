@@ -5111,18 +5111,10 @@ int Q_vsnprintf(char *dest, int size, const char *fmt, va_list argptr) {
 /*
 ================
 BG_DropItems
-Checks shared for nodrop worldspawn key value and current content flags,
+Checks for nodrop worldspawn key value and current content flags,
 and returns whether we should drop items to floor or delete them
 ================
 */
-bool BG_DropItems(const int contents, const int shared) {
-  if (!(shared & BG_LEVEL_NO_DROP) && !(contents & CONTENTS_NODROP)) {
-    return true;
-  }
-
-  if ((shared & BG_LEVEL_NO_DROP) && (contents & CONTENTS_NODROP)) {
-    return true;
-  }
-
-  return false;
+bool BG_DropItems(const int contents, const bool noDrop) {
+  return noDrop ? (contents & CONTENTS_NODROP) : !(contents & CONTENTS_NODROP);
 }

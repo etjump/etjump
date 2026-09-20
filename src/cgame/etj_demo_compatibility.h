@@ -28,6 +28,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+
 namespace ETJump {
 class ClientCommandsHandler;
 
@@ -35,6 +36,20 @@ class ClientCommandsHandler;
 inline constexpr int32_t COMPAT_ET_VELOCITY_PUSH_TRIGGER_NUM = 9;
 // old array index of removed 'weapon_medic_heal' item
 inline constexpr int32_t COMPAT_WEAPON_MEDIC_HEAL_INDEX = 56;
+
+// old 'shared' cvar bits
+inline constexpr int32_t COMPAT_SHARED_NO_OVERBOUNCE = 1 << 0;
+inline constexpr int32_t COMPAT_SHARED_NO_JUMPDELAY = 1 << 1;
+inline constexpr int32_t COMPAT_SHARED_NO_SAVE = 1 << 2;
+inline constexpr int32_t COMPAT_SHARED_NO_FALLDAMAGE = 1 << 3;
+inline constexpr int32_t COMPAT_SHARED_NO_FALLDAMAGE_FORCE = 1 << 4;
+inline constexpr int32_t COMPAT_SHARED_NO_PRONE = 1 << 5;
+inline constexpr int32_t COMPAT_SHARED_NO_DROP = 1 << 6;
+inline constexpr int32_t COMPAT_SHARED_NO_WALLBUG = 1 << 7;
+inline constexpr int32_t COMPAT_SHARED_NO_NOCLIP = 1 << 8;
+inline constexpr int32_t COMPAT_SHARED_PORTAL_PREDICT = 1 << 9;
+inline constexpr int32_t COMPAT_SHARED_BODY_OB_ALWAYS = 1 << 10;
+inline constexpr int32_t COMPAT_SHARED_BODY_OB_NEVER = 1 << 11;
 
 class DemoCompatibility {
   struct Version {
@@ -83,6 +98,7 @@ public:
     bool noMapCustomizationHashes = false;
     bool adjustEvFuncStaticClient = false;
     bool oldShaderIndexOrder = false;
+    bool useSharedCvar = false;
   };
 
   // everything in here will be set to false unless we're on demo playback
@@ -96,6 +112,9 @@ public:
   // performs event number adjustments for events that are added freestanding
   // by setting event num to ET_EVENTS + event due to additional entity types
   [[nodiscard]] int adjustedEventNum(int event) const;
+
+  // maps old shared cvar bits to 'cgame.sharedWSKeys'
+  static void parseSharedCvarBits(int32_t shared);
 
   void printDemoInformation() const;
 

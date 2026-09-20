@@ -670,7 +670,7 @@ int G_PortalPredict_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       return G_INVALID;
     }
 
-    if (game.worldspawn->portalPredict) {
+    if (game.worldspawn->sharedKeys.portalPredict) {
       Printer::popup(
           ent, "Portalgun teleport prediction cannot be changed in this map.");
       return G_INVALID;

@@ -72,23 +72,21 @@ bool Overbounce::surfaceAllowsOverbounce(const trace_t *trace) {
   const bool onPlayer = trace->entityNum >= 0 && trace->entityNum < MAX_CLIENTS;
 
   if (onPlayer) {
-    if (cgs.shared & BG_LEVEL_BODY_OB_NEVER) {
+    if (cgame.sharedWSKeys.overbouncePlayers ==
+        OverbouncePlayersOpts::FORCE_OFF) {
       return false;
     }
 
-    if (cgs.shared & BG_LEVEL_BODY_OB_ALWAYS) {
+    if (cgame.sharedWSKeys.overbouncePlayers ==
+        OverbouncePlayersOpts::FORCE_ON) {
       return true;
     }
   }
 
-  if (cgs.shared & BG_LEVEL_NO_OVERBOUNCE) {
-    if (!(trace->surfaceFlags & SURF_OVERBOUNCE)) {
-      return false;
-    }
-  } else {
-    if (trace->surfaceFlags & SURF_OVERBOUNCE) {
-      return false;
-    }
+  if (cgame.sharedWSKeys.noOverbounce
+          ? !(trace->surfaceFlags & SURF_OVERBOUNCE)
+          : (trace->surfaceFlags & SURF_OVERBOUNCE)) {
+    return false;
   }
 
   return true;

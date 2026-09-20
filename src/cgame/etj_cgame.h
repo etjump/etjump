@@ -27,6 +27,7 @@
 #include <memory>
 #include <vector>
 
+#include "../game/bg_public.h"
 #include "../game/q_shared.h"
 
 namespace ETJump {
@@ -146,6 +147,10 @@ struct CGameContext {
   std::vector<std::string> serverMapList;
   // communicated by the server, only the strings needed for callvote commands
   std::vector<std::string> customVoteLists;
+
+  // communicated by the server, keys that are required
+  // on client side for movement prediction etc
+  SharedWorldspawnKeys sharedWSKeys;
 
   // display state for 'etj_lerpPmove' - interpolated between the last two
   // physics frames at the current frame rate, used for rendering only

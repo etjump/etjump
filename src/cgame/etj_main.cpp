@@ -131,6 +131,36 @@ void delayedInit() {
   }
 }
 
+void parseWorldspawnKeys() {
+  const char *s = CG_ConfigString(CS_ETJUMP_WS_KEYS);
+
+  // this won't be present in old demos
+  if (s[0] == '\0') {
+    return;
+  }
+
+  cgame.sharedWSKeys.noOverbounce =
+      Q_atoi(Info_ValueForKey(s, NO_OVERBOUNCE_CS));
+  cgame.sharedWSKeys.noJumpDelay =
+      Q_atoi(Info_ValueForKey(s, NO_JUMP_DELAY_CS));
+  cgame.sharedWSKeys.noSave = Q_atoi(Info_ValueForKey(s, NO_SAVE_CS));
+  cgame.sharedWSKeys.noProne = Q_atoi(Info_ValueForKey(s, NO_PRONE_CS));
+  cgame.sharedWSKeys.noDrop = Q_atoi(Info_ValueForKey(s, NO_DROP_CS));
+  cgame.sharedWSKeys.noWallbug = Q_atoi(Info_ValueForKey(s, NO_WALLBUG_CS));
+  cgame.sharedWSKeys.noNoclip = Q_atoi(Info_ValueForKey(s, NO_NOCLIP_CS));
+  cgame.sharedWSKeys.portalPredict =
+      Q_atoi(Info_ValueForKey(s, PORTAL_PREDICT_CS));
+
+  cgame.sharedWSKeys.noFallDamage =
+      std::clamp(static_cast<NoFallDamageOpts>(
+                     Q_atoi(Info_ValueForKey(s, NO_FALL_DAMAGE_CS))),
+                 NoFallDamageOpts::OFF, NoFallDamageOpts::FORCE_ON);
+  cgame.sharedWSKeys.overbouncePlayers = std::clamp(
+      static_cast<OverbouncePlayersOpts>(
+          Q_atoi(Info_ValueForKey(s, OVERBOUNCE_PLAYERS_CS))),
+      OverbouncePlayersOpts::INHERIT, OverbouncePlayersOpts::FORCE_OFF);
+}
+
 void initCore() {
   cgame.core.serverCommands = std::make_shared<ClientCommandsHandler>(nullptr);
   cgame.core.consoleCommands =

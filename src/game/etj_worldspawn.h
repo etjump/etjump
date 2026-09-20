@@ -24,10 +24,6 @@
 
 #pragma once
 
-#include <functional>
-#include <string>
-#include <vector>
-
 #include "etj_portalgun_shared.h"
 #include "etj_save_system.h"
 #include "etj_shared.h"
@@ -60,48 +56,29 @@ public:
     static constexpr char STRICT_SAVE_LOAD[] = "strictsaveload";
   };
 
-  enum class NoExplosives {
+  enum class NoExplosivesOpts {
     OFF = 0,
     NO_EXPLOSIVE_WEAPONS = 1,
     NO_DYNAMITE = 2,
   };
 
-  enum class NoFallDamage {
-    OFF = 0,
-    ON = 1,
-    FORCE_ON = 2,
-  };
-
-  enum class OverbouncePlayers {
-    OFF = 0,
-    ALWAYS = 1,
-    NEVER = 2,
-  };
-
-  NoExplosives noExplosives{};
-  NoFallDamage noFallDamage{};
-  OverbouncePlayers overbouncePlayers{};
-  PortalTeam portalTeam{};
+  NoExplosivesOpts noExplosives{};
+  PortalTeamOpts portalTeam{};
   EnumBitset<SaveSystem::SaveLoadRestrictions> strictSaveLoad;
 
   int32_t limitedSaves{};
 
-  bool noDrop{};
   bool noFTNoGhost{};
   bool noFTSaveLimit{};
   bool noFTTeamjumpMode{};
   bool noGhost{};
   bool noGod{};
   bool noGoto{};
-  bool noJumpDelay{};
-  bool noNoclip{};
-  bool noSave{};
-  bool noOverbounce{};
-  bool noProne{};
-  bool noWallbug{};
   bool portalgunSpawn{};
   bool portalSurfaces{};
-  bool portalPredict{};
+
+  // keys shared between server and client
+  SharedWorldspawnKeys sharedKeys;
 
   Worldspawn();
   ~Worldspawn() = default;
@@ -130,43 +107,8 @@ private:
   void initLimitedSaves(const char *key);
   void initStrictSaveLoad(const char *key);
 
+  void initKeys();
+  void setWorldspawnCS() const;
   static void printKeyValue(const std::string &key, const std::string &value);
-
-  std::vector<std::pair<std::string, std::function<void()>>> keys = {
-      {Keys::NO_DROP, [this]() { initNoDrop(Keys::NO_DROP); }},
-      {Keys::NO_EXPLOSIVES,
-       [this]() { initNoExplosives(Keys::NO_EXPLOSIVES); }},
-      {Keys::NO_FALL_DAMAGE,
-       [this]() { initNoFallDamage(Keys::NO_FALL_DAMAGE); }},
-      {Keys::NO_FT_NO_GHOST,
-       [this]() { initNoFTNoGhost(Keys::NO_FT_NO_GHOST); }},
-      {Keys::NO_FT_SAVE_LIMIT,
-       [this]() { initNoFTSaveLimit(Keys::NO_FT_SAVE_LIMIT); }},
-      {Keys::NO_FT_TJ_MODE,
-       [this]() { initNoFTTeamjumpMode(Keys::NO_FT_TJ_MODE); }},
-      {Keys::NO_GHOST, [this]() { initNoGhost(Keys::NO_GHOST); }},
-      {Keys::NO_GOD, [this]() { initNoGod(Keys::NO_GOD); }},
-      {Keys::NO_GOTO, [this]() { initNoGoto(Keys::NO_GOTO); }},
-      {Keys::NO_JUMP_DELAY, [this]() { initNoJumpDelay(Keys::NO_JUMP_DELAY); }},
-      {Keys::NO_NOCLIP, [this]() { initNoNoclip(Keys::NO_NOCLIP); }},
-      {Keys::NO_SAVE, [this]() { initNoSave(Keys::NO_SAVE); }},
-      {Keys::NO_OVERBOUNCE,
-       [this]() { initNoOverbounce(Keys::NO_OVERBOUNCE); }},
-      {Keys::NO_PRONE, [this]() { initNoProne(Keys::NO_PRONE); }},
-      {Keys::NO_WALLBUG, [this]() { initNoWallbug(Keys::NO_WALLBUG); }},
-      {Keys::OVERBOUCNE_PLAYERS,
-       [this]() { initOverbouncePlayers(Keys::OVERBOUCNE_PLAYERS); }},
-      {Keys::PORTALGUN_SPAWN,
-       [this]() { initPortalgunSpawn(Keys::PORTALGUN_SPAWN); }},
-      {Keys::PORTAL_SURFACES,
-       [this]() { initPortalSurfaces(Keys::PORTAL_SURFACES); }},
-      {Keys::PORTAL_PREDICT,
-       [this]() { initPortalPredict(Keys::PORTAL_PREDICT); }},
-      {Keys::PORTAL_TEAM, [this]() { initPortalTeam(Keys::PORTAL_TEAM); }},
-      {Keys::LIMITED_SAVES,
-       [this]() { initLimitedSaves(Keys::LIMITED_SAVES); }},
-      {Keys::STRICT_SAVE_LOAD,
-       [this]() { initStrictSaveLoad(Keys::STRICT_SAVE_LOAD); }},
-  };
 };
 } // namespace ETJump

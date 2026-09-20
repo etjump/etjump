@@ -125,5 +125,7 @@ void shutdown();
 // on the same frame as the module is initialized
 void delayedInit();
 
+void parseWorldspawnKeys();
+
 extern CGameContext cgame;
 } // namespace ETJump

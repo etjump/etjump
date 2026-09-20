@@ -42,7 +42,7 @@ class AreaIndicator : public IRenderable {
 
   struct Indicator {
     Indicator(vmCvar_t *controlCvar, vmCvar_t *controlCvarX,
-              vmCvar_t *controlCvarY, int contents, int shared,
+              vmCvar_t *controlCvarY, int contents, bool shared,
               qhandle_t iconShader);
 
     vmCvar_t *cvar;
@@ -53,7 +53,7 @@ class AreaIndicator : public IRenderable {
     float x;
     float y;
     int traceContents;
-    int sharedValue;
+    bool sharedWSKey;
     qhandle_t shader;
   };
 

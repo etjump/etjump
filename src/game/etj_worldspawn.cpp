@@ -35,32 +35,76 @@ Worldspawn::Worldspawn() {
            "^gETJump: ^7initializing worldspawn keys\n"
            "^g--------------------------------------------------\n");
 
-  shared.integer = 0;
-
-  for (const auto &[key, initFn] : keys) {
-    initFn();
-  }
+  initKeys();
 
   G_Printf("^g--------------------------------------------------\n");
-  trap_Cvar_Set("shared", std::to_string(shared.integer).c_str());
+
+  setWorldspawnCS();
+}
+
+void Worldspawn::initKeys() {
+  initNoDrop(Keys::NO_DROP);
+  initNoExplosives(Keys::NO_EXPLOSIVES);
+  initNoFallDamage(Keys::NO_FALL_DAMAGE);
+  initNoFTNoGhost(Keys::NO_FT_NO_GHOST);
+  initNoFTSaveLimit(Keys::NO_FT_SAVE_LIMIT);
+  initNoFTTeamjumpMode(Keys::NO_FT_TJ_MODE);
+  initNoGhost(Keys::NO_GHOST);
+  initNoGod(Keys::NO_GOD);
+  initNoGoto(Keys::NO_GOTO);
+  initNoJumpDelay(Keys::NO_JUMP_DELAY);
+  initNoNoclip(Keys::NO_NOCLIP);
+  initNoSave(Keys::NO_SAVE);
+  initNoOverbounce(Keys::NO_OVERBOUNCE);
+  initNoProne(Keys::NO_PRONE);
+  initNoWallbug(Keys::NO_WALLBUG);
+  initOverbouncePlayers(Keys::OVERBOUCNE_PLAYERS);
+  initPortalgunSpawn(Keys::PORTALGUN_SPAWN);
+  initPortalSurfaces(Keys::PORTAL_SURFACES);
+  initPortalPredict(Keys::PORTAL_PREDICT);
+  initPortalTeam(Keys::PORTAL_TEAM);
+  initLimitedSaves(Keys::LIMITED_SAVES);
+  initStrictSaveLoad(Keys::STRICT_SAVE_LOAD);
+}
+
+void Worldspawn::setWorldspawnCS() const {
+  std::string cs;
+
+  cs += StringUtils::format(R"(\%s\%i)", NO_OVERBOUNCE_CS,
+                            sharedKeys.noOverbounce ? 1 : 0);
+  cs += StringUtils::format(R"(\%s\%i)", NO_JUMP_DELAY_CS,
+                            sharedKeys.noJumpDelay ? 1 : 0);
+  cs += StringUtils::format(R"(\%s\%i)", NO_SAVE_CS, sharedKeys.noSave ? 1 : 0);
+  cs +=
+      StringUtils::format(R"(\%s\%i)", NO_PRONE_CS, sharedKeys.noProne ? 1 : 0);
+  cs += StringUtils::format(R"(\%s\%i)", NO_DROP_CS, sharedKeys.noDrop ? 1 : 0);
+  cs += StringUtils::format(R"(\%s\%i)", NO_WALLBUG_CS,
+                            sharedKeys.noWallbug ? 1 : 0);
+  cs += StringUtils::format(R"(\%s\%i)", NO_NOCLIP_CS,
+                            sharedKeys.noNoclip ? 1 : 0);
+  cs += StringUtils::format(R"(\%s\%i)", PORTAL_PREDICT_CS,
+                            sharedKeys.portalPredict ? 1 : 0);
+
+  cs += StringUtils::format(R"(\%s\%i)", NO_FALL_DAMAGE_CS,
+                            static_cast<int32_t>(sharedKeys.noFallDamage));
+  cs += StringUtils::format(R"(\%s\%i)", OVERBOUNCE_PLAYERS_CS,
+                            static_cast<int32_t>(sharedKeys.overbouncePlayers));
+
+  trap_SetConfigstring(CS_ETJUMP_WS_KEYS, cs.c_str());
 }
 
 void Worldspawn::initNoDrop(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  noDrop = value;
+  sharedKeys.noDrop = value;
 
-  if (noDrop) {
-    shared.integer |= BG_LEVEL_NO_DROP;
-  }
-
-  printKeyValue(key, noDrop ? "1" : "0");
+  printKeyValue(key, sharedKeys.noDrop ? "1" : "0");
 }
 
 void Worldspawn::initNoExplosives(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  noExplosives = static_cast<NoExplosives>(std::clamp(value, 0, 2));
+  noExplosives = static_cast<NoExplosivesOpts>(std::clamp(value, 0, 2));
 
   printKeyValue(key, std::to_string(static_cast<int32_t>(noExplosives)));
 }
@@ -68,15 +112,11 @@ void Worldspawn::initNoExplosives(const char *key) {
 void Worldspawn::initNoFallDamage(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  noFallDamage = static_cast<NoFallDamage>(std::clamp(value, 0, 2));
+  sharedKeys.noFallDamage =
+      static_cast<NoFallDamageOpts>(std::clamp(value, 0, 2));
 
-  if (noFallDamage == NoFallDamage::ON) {
-    shared.integer |= BG_LEVEL_NO_FALLDAMAGE;
-  } else if (noFallDamage == NoFallDamage::FORCE_ON) {
-    shared.integer |= BG_LEVEL_NO_FALLDAMAGE_FORCE;
-  }
-
-  printKeyValue(key, std::to_string(static_cast<int32_t>(noFallDamage)));
+  printKeyValue(key,
+                std::to_string(static_cast<int32_t>(sharedKeys.noFallDamage)));
 }
 
 void Worldspawn::initNoFTNoGhost(const char *key) {
@@ -153,87 +193,59 @@ void Worldspawn::initNoGoto(const char *key) {
 void Worldspawn::initNoJumpDelay(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  noJumpDelay = value;
+  sharedKeys.noJumpDelay = value;
 
-  if (noJumpDelay) {
-    shared.integer |= BG_LEVEL_NO_JUMPDELAY;
-  }
-
-  printKeyValue(key, noJumpDelay ? "1" : "0");
+  printKeyValue(key, sharedKeys.noJumpDelay ? "1" : "0");
 }
 
 void Worldspawn::initNoNoclip(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  noNoclip = value;
+  sharedKeys.noNoclip = value;
 
-  if (noNoclip) {
-    shared.integer |= BG_LEVEL_NO_NOCLIP;
-  }
-
-  printKeyValue(key, noNoclip ? "1" : "0");
+  printKeyValue(key, sharedKeys.noNoclip ? "1" : "0");
 }
 
 void Worldspawn::initNoSave(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  noSave = value;
+  sharedKeys.noSave = value;
 
-  if (noSave) {
-    shared.integer |= BG_LEVEL_NO_SAVE;
-  }
-
-  printKeyValue(key, noSave ? "1" : "0");
+  printKeyValue(key, sharedKeys.noSave ? "1" : "0");
 }
 
 void Worldspawn::initNoOverbounce(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  noOverbounce = value;
+  sharedKeys.noOverbounce = value;
 
-  if (noOverbounce) {
-    shared.integer |= BG_LEVEL_NO_OVERBOUNCE;
-  }
-
-  printKeyValue(key, noOverbounce ? "1" : "0");
+  printKeyValue(key, sharedKeys.noOverbounce ? "1" : "0");
 }
 
 void Worldspawn::initNoProne(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  noProne = value;
+  sharedKeys.noProne = value;
 
-  if (noProne) {
-    shared.integer |= BG_LEVEL_NO_PRONE;
-  }
-
-  printKeyValue(key, noProne ? "1" : "0");
+  printKeyValue(key, sharedKeys.noProne ? "1" : "0");
 }
 
 void Worldspawn::initNoWallbug(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  noWallbug = value;
+  sharedKeys.noWallbug = value;
 
-  if (noWallbug) {
-    shared.integer |= BG_LEVEL_NO_WALLBUG;
-  }
-
-  printKeyValue(key, noWallbug ? "1" : "0");
+  printKeyValue(key, sharedKeys.noWallbug ? "1" : "0");
 }
 
 void Worldspawn::initOverbouncePlayers(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  overbouncePlayers = static_cast<OverbouncePlayers>(std::clamp(value, 0, 2));
+  sharedKeys.overbouncePlayers =
+      static_cast<OverbouncePlayersOpts>(std::clamp(value, 0, 2));
 
-  if (overbouncePlayers == OverbouncePlayers::ALWAYS) {
-    shared.integer |= BG_LEVEL_BODY_OB_ALWAYS;
-  } else if (overbouncePlayers == OverbouncePlayers::NEVER) {
-    shared.integer |= BG_LEVEL_BODY_OB_NEVER;
-  }
-
-  printKeyValue(key, std::to_string(static_cast<int32_t>(overbouncePlayers)));
+  printKeyValue(
+      key, std::to_string(static_cast<int32_t>(sharedKeys.overbouncePlayers)));
 }
 
 void Worldspawn::initPortalgunSpawn(const char *key) {
@@ -257,19 +269,15 @@ void Worldspawn::initPortalSurfaces(const char *key) {
 void Worldspawn::initPortalPredict(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  portalPredict = value;
+  sharedKeys.portalPredict = value;
 
-  if (portalPredict) {
-    shared.integer |= BG_LEVEL_PORTAL_PREDICT;
-  }
-
-  printKeyValue(key, portalPredict ? "1" : "0");
+  printKeyValue(key, sharedKeys.portalPredict ? "1" : "0");
 }
 
 void Worldspawn::initPortalTeam(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  portalTeam = static_cast<PortalTeam>(std::clamp(value, 0, 2));
+  portalTeam = static_cast<PortalTeamOpts>(std::clamp(value, 0, 2));
 
   trap_Cvar_Set("g_portalTeam",
                 std::to_string(static_cast<int32_t>(portalTeam)).c_str());

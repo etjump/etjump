@@ -2112,7 +2112,6 @@ extern vmCvar_t g_tokensPath;
 
 extern vmCvar_t g_chatOptions;
 
-extern vmCvar_t shared;
 extern vmCvar_t g_moverScale;
 extern vmCvar_t g_debugTrackers;
 extern vmCvar_t g_spectatorVote;

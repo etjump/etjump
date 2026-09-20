@@ -323,7 +323,7 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
         }
       }
 
-      if (game.worldspawn->portalTeam == ETJump::PortalTeam::FIRETEAM &&
+      if (game.worldspawn->portalTeam == ETJump::PortalTeamOpts::FIRETEAM &&
           ETJump::EntityUtilities::clearPortals(otherEnt)) {
         Printer::center(otherEnt, "Your portal gun portals have been reset.");
         Printer::console(otherEnt,

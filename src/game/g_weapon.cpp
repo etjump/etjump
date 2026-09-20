@@ -44,7 +44,7 @@ bool weaponAllowedWithNoExplosives(const int weapon) {
     case WP_DYNAMITE:
     case WP_PLIERS:
       if (game.worldspawn->noExplosives ==
-          Worldspawn::NoExplosives::NO_DYNAMITE) {
+          Worldspawn::NoExplosivesOpts::NO_DYNAMITE) {
         return false;
       }
 

@@ -142,16 +142,10 @@ void SaveSystem::save(gentity_t *ent) {
                     client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
 
   if (!g_cheats.integer) {
-    if (game.worldspawn->noSave) {
-      if (trace.fraction == 1.0f) {
-        Printer::center(ent, "^7You can not ^3save ^7inside this area.");
-        return;
-      }
-    } else {
-      if (trace.fraction != 1.0f) {
-        Printer::center(ent, "^7You can not ^3save ^7inside this area.");
-        return;
-      }
+    if (game.worldspawn->sharedKeys.noSave ? trace.fraction == 1.0f
+                                           : trace.fraction != 1.0f) {
+      Printer::center(ent, "^7You can not ^3save ^7inside this area.");
+      return;
     }
 
     if (game.worldspawn->limitedSaves > 0) {
@@ -509,16 +503,10 @@ void SaveSystem::unload(gentity_t *ent) {
       trap_TraceCapsule(&trace, pos->origin, ent->r.mins, ent->r.maxs,
                         pos->origin, ent->s.number, CONTENTS_NOSAVE);
 
-      if (game.worldspawn->noSave) {
-        if (trace.fraction == 1.0f) {
-          Printer::center(ent, "^7You can not ^3unload ^7to this area.");
-          return;
-        }
-      } else {
-        if (trace.fraction != 1.0f) {
-          Printer::center(ent, "^7You can not ^3unload ^7to this area.");
-          return;
-        }
+      if (game.worldspawn->sharedKeys.noSave ? trace.fraction == 1.0f
+                                             : trace.fraction != 1.0f) {
+        Printer::center(ent, "^7You can not ^3unload ^7to this area.");
+        return;
       }
     }
 
