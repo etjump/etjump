@@ -1075,6 +1075,14 @@ These only do simple scaling or modulation before passing to the renderer
 =====================================================================
 */
 
+// local entity fade fractions are derived from cg.time, which the engine does
+// not guarantee to move forward - it can snap backwards when the server time
+// delta is reset. Converting an out of range float to byte is undefined
+// behavior, so clamp before narrowing.
+static byte fadeToByte(const float fade, const float alpha) {
+  return static_cast<byte>(std::clamp(0xff * fade * alpha, 0.0f, 255.0f));
+}
+
 /*
 ====================
 CG_AddFadeRGB
@@ -1082,12 +1090,11 @@ CG_AddFadeRGB
 */
 void CG_AddFadeRGB(localEntity_t *le) {
   refEntity_t *re = &le->refEntity;
-  const float c =
-      static_cast<float>(le->endTime - cg.time) * le->lifeRate * 0xff;
+  const float c = std::clamp(
+      static_cast<float>(le->endTime - cg.time) * le->lifeRate, 0.0f, 1.0f);
 
   for (int i = 0; i < 4; i++) {
-    re->shaderRGBA[i] =
-        static_cast<byte>(std::clamp(le->color[i] * c, 0.0f, 255.0f));
+    re->shaderRGBA[i] = fadeToByte(c, le->color[i]);
   }
 
   trap_R_AddRefEntityToScene(re);
@@ -1117,14 +1124,18 @@ static void CG_AddMoveScaleFade(localEntity_t *le) {
     c = (le->endTime - cg.time) * le->lifeRate;
   }
 
+  // cg.time can move backwards past le->startTime, which puts the fade
+  // fraction well outside the 0-1 range this math assumes
+  c = std::clamp(c, 0.0f, 1.0f);
+
   // Ridah, spark
   if (!(le->leFlags & LEF_NOFADEALPHA)) {
     // done.
-    re->shaderRGBA[3] = 0xff * c * le->color[3];
+    re->shaderRGBA[3] = fadeToByte(c, le->color[3]);
   }
 
   if (!(le->leFlags & LEF_PUFF_DONT_SCALE)) {
-    c = (le->endTime - cg.time) * le->lifeRate;
+    c = std::clamp((le->endTime - cg.time) * le->lifeRate, 0.0f, 1.0f);
     re->radius = le->radius * (1.0 - c) + 8;
   }
 
@@ -1160,9 +1171,9 @@ static void CG_AddScaleFade(localEntity_t *le) {
   re = &le->refEntity;
 
   // fade / grow time
-  c = (le->endTime - cg.time) * le->lifeRate;
+  c = std::clamp((le->endTime - cg.time) * le->lifeRate, 0.0f, 1.0f);
 
-  re->shaderRGBA[3] = 0xff * c * le->color[3];
+  re->shaderRGBA[3] = fadeToByte(c, le->color[3]);
   if (!(le->leFlags & LEF_PUFF_DONT_SCALE)) {
     re->radius = le->radius * (1.0 - c) + 8;
   }
@@ -1198,9 +1209,9 @@ static void CG_AddFallScaleFade(localEntity_t *le) {
   re = &le->refEntity;
 
   // fade time
-  c = (le->endTime - cg.time) * le->lifeRate;
+  c = std::clamp((le->endTime - cg.time) * le->lifeRate, 0.0f, 1.0f);
 
-  re->shaderRGBA[3] = 0xff * c * le->color[3];
+  re->shaderRGBA[3] = fadeToByte(c, le->color[3]);
 
   re->origin[2] = le->pos.trBase[2] - (1.0 - c) * le->pos.trDelta[2];
 
@@ -1264,15 +1275,14 @@ static void CG_AddSpriteExplosion(localEntity_t *le) {
 
   re = le->refEntity;
 
-  c = (le->endTime - cg.time) / (float)(le->endTime - le->startTime);
-  if (c > 1) {
-    c = 1.0; // can happen during connection problems
-  }
+  // can go out of range during connection problems
+  c = std::clamp((le->endTime - cg.time) / (float)(le->endTime - le->startTime),
+                 0.0f, 1.0f);
 
   re.shaderRGBA[0] = 0xff;
   re.shaderRGBA[1] = 0xff;
   re.shaderRGBA[2] = 0xff;
-  re.shaderRGBA[3] = 0xff * c * 0.33;
+  re.shaderRGBA[3] = fadeToByte(c, 0.33f);
 
   re.reType = RT_SPRITE;
   re.radius = 42 * (1.0 - c) + 30;
