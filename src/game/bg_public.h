@@ -431,6 +431,13 @@ inline constexpr int PMF_ALL_TIMES = PMF_TIME_WATERJUMP | PMF_TIME_LAND |
                                      PMF_TIME_KNOCKBACK | PMF_TIME_LOCKPLAYER;
 
 namespace ETJump {
+enum class AreaOpts {
+  FORBID_INSIDE = 0,
+  FORBID_OUTSIDE = 1,
+  ALLOW_EVERYWHERE = 2,
+  FORBID_EVERYWHERE = 3,
+};
+
 enum class NoFallDamageOpts {
   OFF = 0,
   ON = 1,
@@ -447,17 +454,30 @@ enum class OverbouncePlayersOpts {
 struct SharedWorldspawnKeys {
   bool noOverbounce{};
   bool noJumpDelay{};
-  bool noSave{};
-  bool noProne{};
   bool noDrop{};
   bool noWallbug{};
-  bool noNoclip{};
   bool portalPredict{};
+
+  AreaOpts noSave{};
+  AreaOpts noProne{};
+  AreaOpts noNoclip{};
 
   NoFallDamageOpts noFallDamage{};
   OverbouncePlayersOpts overbouncePlayers{};
 };
 
+inline bool areaAllowsAction(AreaOpts areaOpts, const trace_t &trace) {
+  switch (areaOpts) {
+    default: // AreaOpts::FORBID_INSIDE
+      return trace.fraction == 1.0f;
+    case AreaOpts::FORBID_OUTSIDE:
+      return trace.fraction != 1.0f;
+    case AreaOpts::ALLOW_EVERYWHERE:
+      return true;
+    case AreaOpts::FORBID_EVERYWHERE:
+      return false;
+  }
+}
 } // namespace ETJump
 
 typedef struct {

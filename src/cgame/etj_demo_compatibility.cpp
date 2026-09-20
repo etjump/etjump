@@ -304,7 +304,7 @@ void DemoCompatibility::parseSharedCvarBits(const int32_t shared) {
   }
 
   if (shared & COMPAT_SHARED_NO_SAVE) {
-    cgame.sharedWSKeys.noSave = true;
+    cgame.sharedWSKeys.noSave = AreaOpts::FORBID_OUTSIDE;
   }
 
   if (shared & COMPAT_SHARED_NO_FALLDAMAGE) {
@@ -314,7 +314,7 @@ void DemoCompatibility::parseSharedCvarBits(const int32_t shared) {
   }
 
   if (shared & COMPAT_SHARED_NO_PRONE) {
-    cgame.sharedWSKeys.noProne = true;
+    cgame.sharedWSKeys.noProne = AreaOpts::FORBID_OUTSIDE;
   }
 
   if (shared & COMPAT_SHARED_NO_DROP) {
@@ -326,7 +326,7 @@ void DemoCompatibility::parseSharedCvarBits(const int32_t shared) {
   }
 
   if (shared & COMPAT_SHARED_NO_NOCLIP) {
-    cgame.sharedWSKeys.noNoclip = true;
+    cgame.sharedWSKeys.noNoclip = AreaOpts::FORBID_OUTSIDE;
   }
 
   if (shared & COMPAT_SHARED_PORTAL_PREDICT) {

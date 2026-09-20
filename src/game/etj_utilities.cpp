@@ -110,29 +110,36 @@ bool Utilities::inNoNoclipArea(gentity_t *ent) {
   // if we're touching a no-noclip area, do another trace for solids
   // so that we don't get instantly stuck in a wall, unable to noclip
   // if we fly to a no-noclip area through a wall
-  if (game.worldspawn->sharedKeys.noNoclip) {
-    if (trace.fraction == 1.0f) {
-      trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins,
-                        ent->r.maxs, ent->client->ps.origin,
-                        ent->client->ps.clientNum, CONTENTS_SOLID);
+  switch (game.worldspawn->sharedKeys.noNoclip) {
+    default: // AreaOpts::FORBID_INSIDE
+      if (trace.fraction != 1.0f) {
+        trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins,
+                          ent->r.maxs, ent->client->ps.origin,
+                          ent->client->ps.clientNum, CONTENTS_SOLID);
 
-      if (!trace.allsolid) {
-        return true;
+        if (!trace.allsolid) {
+          return true;
+        }
       }
-    }
-  } else {
-    if (trace.fraction != 1.0f) {
-      trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins,
-                        ent->r.maxs, ent->client->ps.origin,
-                        ent->client->ps.clientNum, CONTENTS_SOLID);
 
-      if (!trace.allsolid) {
-        return true;
+      return false;
+    case ETJump::AreaOpts::FORBID_OUTSIDE:
+      if (trace.fraction == 1.0f) {
+        trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins,
+                          ent->r.maxs, ent->client->ps.origin,
+                          ent->client->ps.clientNum, CONTENTS_SOLID);
+
+        if (!trace.allsolid) {
+          return true;
+        }
       }
-    }
+
+      return false;
+    case ETJump::AreaOpts::ALLOW_EVERYWHERE:
+      return false;
+    case ETJump::AreaOpts::FORBID_EVERYWHERE:
+      return true;
   }
-
-  return false;
 }
 
 std::string Utilities::timestampToString(int timestamp, const char *format,

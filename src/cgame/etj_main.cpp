@@ -143,13 +143,20 @@ void parseWorldspawnKeys() {
       Q_atoi(Info_ValueForKey(s, NO_OVERBOUNCE_CS));
   cgame.sharedWSKeys.noJumpDelay =
       Q_atoi(Info_ValueForKey(s, NO_JUMP_DELAY_CS));
-  cgame.sharedWSKeys.noSave = Q_atoi(Info_ValueForKey(s, NO_SAVE_CS));
-  cgame.sharedWSKeys.noProne = Q_atoi(Info_ValueForKey(s, NO_PRONE_CS));
   cgame.sharedWSKeys.noDrop = Q_atoi(Info_ValueForKey(s, NO_DROP_CS));
   cgame.sharedWSKeys.noWallbug = Q_atoi(Info_ValueForKey(s, NO_WALLBUG_CS));
-  cgame.sharedWSKeys.noNoclip = Q_atoi(Info_ValueForKey(s, NO_NOCLIP_CS));
   cgame.sharedWSKeys.portalPredict =
       Q_atoi(Info_ValueForKey(s, PORTAL_PREDICT_CS));
+
+  cgame.sharedWSKeys.noSave =
+      std::clamp(static_cast<AreaOpts>(Q_atoi(Info_ValueForKey(s, NO_SAVE_CS))),
+                 AreaOpts::FORBID_INSIDE, AreaOpts::FORBID_EVERYWHERE);
+  cgame.sharedWSKeys.noProne = std::clamp(
+      static_cast<AreaOpts>(Q_atoi(Info_ValueForKey(s, NO_PRONE_CS))),
+      AreaOpts::FORBID_INSIDE, AreaOpts::FORBID_EVERYWHERE);
+  cgame.sharedWSKeys.noNoclip = std::clamp(
+      static_cast<AreaOpts>(Q_atoi(Info_ValueForKey(s, NO_NOCLIP_CS))),
+      AreaOpts::FORBID_INSIDE, AreaOpts::FORBID_EVERYWHERE);
 
   cgame.sharedWSKeys.noFallDamage =
       std::clamp(static_cast<NoFallDamageOpts>(

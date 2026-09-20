@@ -42,18 +42,20 @@ class AreaIndicator : public IRenderable {
 
   struct Indicator {
     Indicator(vmCvar_t *controlCvar, vmCvar_t *controlCvarX,
-              vmCvar_t *controlCvarY, int contents, bool shared,
-              qhandle_t iconShader);
+              vmCvar_t *controlCvarY, int contents, AreaOpts areaOpts,
+              qhandle_t iconShader)
+        : cvar(controlCvar), cvarX(controlCvarX), cvarY(controlCvarY),
+          traceContents(contents), areaOpts(areaOpts), shader(iconShader) {}
 
     vmCvar_t *cvar;
-    bool draw;
-    bool drawForbid;
+    bool draw{};
+    bool drawForbid{};
     vmCvar_t *cvarX;
     vmCvar_t *cvarY;
-    float x;
-    float y;
+    float x{};
+    float y{};
     int traceContents;
-    bool sharedWSKey;
+    AreaOpts areaOpts;
     qhandle_t shader;
   };
 

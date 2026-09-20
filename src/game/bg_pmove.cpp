@@ -810,8 +810,7 @@ static qboolean PM_CheckProne(void) {
             pm->ps->clientNum, CONTENTS_NOPRONE);
 
   if (!PM_Cheats &&
-      (pm->pmext->sharedWSKeys.noProne ? trace.fraction == 1.0f
-                                       : trace.fraction != 1.0f)) {
+      !ETJump::areaAllowsAction(pm->pmext->sharedWSKeys.noProne, trace)) {
     pm->ps->eFlags &= ~EF_PRONE;
     pm->ps->eFlags &= ~EF_PRONE_MOVING;
     return qfalse;

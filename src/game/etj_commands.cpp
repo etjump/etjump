@@ -2314,7 +2314,8 @@ bool Mute(gentity_t *ent, Arguments argv) {
 }
 
 static bool Noclip(gentity_t *ent, Arguments argv) {
-  if (!g_cheats.integer && game.worldspawn->sharedKeys.noNoclip) {
+  if (!g_cheats.integer && game.worldspawn->sharedKeys.noNoclip ==
+                               ETJump::AreaOpts::FORBID_EVERYWHERE) {
     Printer::chat(ent, "^3noclip: ^7noclip is disabled on this map.");
     return false;
   }
@@ -2324,10 +2325,17 @@ static bool Noclip(gentity_t *ent, Arguments argv) {
       return false;
     }
 
-    if (!g_cheats.integer && ent->client->sess.timerunActive) {
-      Printer::chat(ent,
-                    "^3noclip: ^7cheats are disabled while timerun is active.");
-      return false;
+    if (!g_cheats.integer) {
+      if (ent->client->sess.timerunActive) {
+        Printer::chat(
+            ent, "^3noclip: ^7cheats are disabled while timerun is active.");
+        return false;
+      }
+
+      if (Utilities::inNoNoclipArea(ent)) {
+        Printer::chat(ent, "^3noclip: ^7not allowed inside this area.\n");
+        return false;
+      }
     }
 
     ent->client->noclip = ent->client->noclip ? qfalse : qtrue;

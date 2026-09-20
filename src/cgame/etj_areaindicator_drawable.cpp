@@ -47,39 +47,32 @@ AreaIndicator::AreaIndicator() {
   printProneMessage = false;
 }
 
-AreaIndicator::Indicator::Indicator(vmCvar_t *controlCvar,
-                                    vmCvar_t *controlCvarX,
-                                    vmCvar_t *controlCvarY, const int contents,
-                                    const bool shared,
-                                    const qhandle_t iconShader) {
-  draw = false;
-  drawForbid = false;
-  cvar = controlCvar;
-  cvarX = controlCvarX;
-  cvarY = controlCvarY;
-  x = 0;
-  y = 0;
-  traceContents = contents;
-  sharedWSKey = shared;
-  shader = iconShader;
-}
-
 void AreaIndicator::checkPronePrint(trace_t &trace) {
   if (cgs.cheats || ci->team == TEAM_SPECTATOR) {
     printProneMessage = false;
     return;
   }
 
-  if (cgame.sharedWSKeys.noProne) {
-    if (trace.fraction != 1.0f) {
+  switch (cgame.sharedWSKeys.noProne) {
+    default:
+      if (trace.fraction == 1.0f) {
+        printProneMessage = false;
+        return;
+      }
+
+      break;
+    case AreaOpts::FORBID_OUTSIDE:
+      if (trace.fraction != 1.0f) {
+        printProneMessage = false;
+        return;
+      }
+
+      break;
+    case AreaOpts::ALLOW_EVERYWHERE:
       printProneMessage = false;
       return;
-    }
-  } else {
-    if (trace.fraction == 1.0f) {
-      printProneMessage = false;
-      return;
-    }
+    case AreaOpts::FORBID_EVERYWHERE:
+      break;
   }
 
   if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE) {
@@ -121,36 +114,28 @@ bool AreaIndicator::beforeRender() {
       checkPronePrint(trace);
     }
 
+    const bool inside = trace.fraction != 1.0f;
+    const bool forbidden = !areaAllowsAction(indicator.areaOpts, trace);
+
     switch (static_cast<DrawMode>(indicator.cvar->integer)) {
       case DrawMode::Always:
         indicator.draw = true;
         drawAny = true;
-
-        if (indicator.sharedWSKey ? trace.fraction == 1.0f
-                                  : trace.fraction != 1.0f) {
-          indicator.drawForbid = true;
-        }
-
+        indicator.drawForbid = forbidden;
         break;
       case DrawMode::Outside:
-        if (trace.fraction == 1.0f) {
+        if (!inside) {
           indicator.draw = true;
           drawAny = true;
-
-          if (indicator.sharedWSKey) {
-            indicator.drawForbid = true;
-          }
+          indicator.drawForbid = forbidden;
         }
 
         break;
       case DrawMode::Inside:
-        if (trace.fraction != 1.0f) {
+        if (inside) {
           indicator.draw = true;
           drawAny = true;
-
-          if (!indicator.sharedWSKey) {
-            indicator.drawForbid = true;
-          }
+          indicator.drawForbid = forbidden;
         }
 
         break;
