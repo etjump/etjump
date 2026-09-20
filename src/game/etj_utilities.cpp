@@ -110,7 +110,7 @@ bool Utilities::inNoNoclipArea(gentity_t *ent) {
   // if we're touching a no-noclip area, do another trace for solids
   // so that we don't get instantly stuck in a wall, unable to noclip
   // if we fly to a no-noclip area through a wall
-  if (game.worldspawn->noNoclip) {
+  if (game.worldspawn->sharedKeys.noNoclip) {
     if (trace.fraction == 1.0f) {
       trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins,
                         ent->r.maxs, ent->client->ps.origin,

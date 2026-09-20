@@ -34,7 +34,7 @@ inline constexpr vec3_t portalGreenTrail = {0.2f, 1.0f, 0.5f};
 inline constexpr vec3_t portalYellowTrail = {1.0f, 1.0f, 0.0f};
 
 // portalteam
-enum class PortalTeam {
+enum class PortalTeamOpts {
   OFF = 0,
   FIRETEAM = 1,
   ALL = 2,

@@ -7,6 +7,7 @@
 #include "etj_utilities.h"
 #include "etj_entity_utilities.h"
 #include "etj_trace_utils.h"
+#include "etj_worldspawn.h"
 
 /*
 ===============
@@ -1169,7 +1170,7 @@ void ClientThink_real(gentity_t *ent) {
 
   pm.pmove_fixed = client->pers.pmoveFixed;
   pm.pmove_msec = pmove_msec.integer;
-  pm.shared = shared.integer;
+  pm.pmext->sharedWSKeys = game.worldspawn->sharedKeys;
   pm.noActivateLean = client->pers.noActivateLean;
   pm.noPanzerAutoswitch = client->pers.noPanzerAutoswitch;
 

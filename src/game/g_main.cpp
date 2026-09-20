@@ -259,10 +259,6 @@ vmCvar_t g_tokensMode;
 vmCvar_t g_tokensPath;
 // end of tokens
 
-// ETJump client/server shared data
-// TODO: refactor ghostPlayers into this
-vmCvar_t shared;
-
 // minimum time to wait before vote result will be checked
 vmCvar_t vote_minVoteDuration;
 vmCvar_t g_moverScale;
@@ -521,7 +517,6 @@ cvarTable_t gameCvarTable[] = {
     {&g_tokensPath, "g_tokensPath", "tokens", CVAR_ARCHIVE | CVAR_LATCH},
     // end of tokens
 
-    {&shared, "shared", "0", CVAR_SYSTEMINFO | CVAR_ROM},
     {&vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE},
     {&g_moverScale, "g_moverScale", "1.0", 0},
     {&g_debugTrackers, "g_debugTrackers", "0", CVAR_ARCHIVE | CVAR_LATCH},

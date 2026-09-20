@@ -150,7 +150,10 @@ void CG_ParseServerinfo(void) {
 void CG_ParseSysteminfo(void) {
   const char *info = CG_ConfigString(CS_SYSTEMINFO);
 
-  cgs.shared = Q_atoi(Info_ValueForKey(info, "shared"));
+  if (ETJump::cgame.demo.compatibility->flags.useSharedCvar) {
+    ETJump::DemoCompatibility::parseSharedCvarBits(
+        Q_atoi(Info_ValueForKey(info, "shared")));
+  }
 
   cgs.pmove_msec = Q_atoi(Info_ValueForKey(info, "pmove_msec"));
   if (cgs.pmove_msec < 8) {

@@ -690,14 +690,11 @@ static qboolean PM_CheckJump(void) {
     if (ETJump::hasJustStoodUp()) {
       return qfalse;
     }
-    if (pm->shared & BG_LEVEL_NO_JUMPDELAY) {
-      if (pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY) {
-        return qfalse;
-      }
-    } else {
-      if (!(pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)) {
-        return qfalse;
-      }
+
+    if (pm->pmext->sharedWSKeys.noJumpDelay
+            ? (pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)
+            : !(pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)) {
+      return qfalse;
     }
   }
 
@@ -812,20 +809,12 @@ static qboolean PM_CheckProne(void) {
   pm->trace(&trace, pm->ps->origin, pm->ps->mins, pm->ps->maxs, pm->ps->origin,
             pm->ps->clientNum, CONTENTS_NOPRONE);
 
-  if (!PM_Cheats) {
-    if (pm->shared & BG_LEVEL_NO_PRONE) {
-      if (trace.fraction == 1.0f) {
-        pm->ps->eFlags &= ~EF_PRONE;
-        pm->ps->eFlags &= ~EF_PRONE_MOVING;
-        return qfalse;
-      }
-    } else {
-      if (trace.fraction != 1.0f) {
-        pm->ps->eFlags &= ~EF_PRONE;
-        pm->ps->eFlags &= ~EF_PRONE_MOVING;
-        return qfalse;
-      }
-    }
+  if (!PM_Cheats &&
+      (pm->pmext->sharedWSKeys.noProne ? trace.fraction == 1.0f
+                                       : trace.fraction != 1.0f)) {
+    pm->ps->eFlags &= ~EF_PRONE;
+    pm->ps->eFlags &= ~EF_PRONE_MOVING;
+    return qfalse;
   }
 
   if (!(pm->ps->eFlags & EF_PRONE)) {
@@ -1716,9 +1705,11 @@ static void PM_CrashLand(void) {
   // Aciz: moved fall damage and stepsound handling into
   // PM_CheckFallDamage to avoid very messy code when checking whether
   // nofalldamage is enabled/disabled.
-  if (pm->shared & BG_LEVEL_NO_FALLDAMAGE_FORCE) {
+  if (pm->pmext->sharedWSKeys.noFallDamage ==
+      ETJump::NoFallDamageOpts::FORCE_ON) {
     PM_AddCushionFootstep(delta);
-  } else if (pm->shared & BG_LEVEL_NO_FALLDAMAGE) {
+  } else if (pm->pmext->sharedWSKeys.noFallDamage ==
+             ETJump::NoFallDamageOpts::ON) {
     if (pml.groundTrace.surfaceFlags & SURF_NODAMAGE) {
       PM_CheckFallDamage(delta);
     } else {
@@ -1829,32 +1820,29 @@ static void PM_GroundTraceMissed(void) {
 }
 
 namespace ETJump {
-// this is rather verbose but I wanted to make this easy to read,
-// rather than making it as concise as possible
-static bool disableOverbounce(const trace_t &trace) {
+// TODO: this also exists in etj_overbounce_shared.cpp, should consolidate them
+static bool surfaceAllowsOverbounce(const trace_t &trace) {
   const bool onPlayer = trace.entityNum >= 0 && trace.entityNum < MAX_CLIENTS;
 
   if (onPlayer) {
-    if (pm->shared & BG_LEVEL_BODY_OB_NEVER) {
-      return true;
-    }
-
-    if (pm->shared & BG_LEVEL_BODY_OB_ALWAYS) {
+    if (pm->pmext->sharedWSKeys.overbouncePlayers ==
+        OverbouncePlayersOpts::FORCE_OFF) {
       return false;
     }
-  }
 
-  if (pm->shared & BG_LEVEL_NO_OVERBOUNCE) {
-    if (!(trace.surfaceFlags & SURF_OVERBOUNCE)) {
-      return true;
-    }
-  } else {
-    if (trace.surfaceFlags & SURF_OVERBOUNCE) {
+    if (pm->pmext->sharedWSKeys.overbouncePlayers ==
+        OverbouncePlayersOpts::FORCE_ON) {
       return true;
     }
   }
 
-  return false;
+  if (pm->pmext->sharedWSKeys.noOverbounce
+          ? !(trace.surfaceFlags & SURF_OVERBOUNCE)
+          : (trace.surfaceFlags & SURF_OVERBOUNCE)) {
+    return false;
+  }
+
+  return true;
 }
 } // namespace ETJump
 
@@ -1880,7 +1868,7 @@ static void PM_GroundTrace(void) {
   PM_TraceAllLegs(&trace, &pm->pmext->proneLegsOffset, pm->ps->origin, point);
   pml.groundTrace = trace;
 
-  if (pm->shared & BG_LEVEL_NO_WALLBUG) {
+  if (pm->pmext->sharedWSKeys.noWallbug) {
     if (trace.allsolid && pm->ps->pm_type != PM_NOCLIP) {
       VectorClear(pm->ps->velocity);
     }
@@ -1954,7 +1942,7 @@ static void PM_GroundTrace(void) {
 
     PM_CrashLand();
 
-    if (ETJump::disableOverbounce(trace)) {
+    if (!ETJump::surfaceAllowsOverbounce(trace)) {
       PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal,
                       pm->ps->velocity, OVERCLIP);
     }
@@ -1972,7 +1960,7 @@ static void PM_GroundTrace(void) {
   pm->ps->groundEntityNum = trace.entityNum;
 
   // prevent sticky overbounces
-  if (ETJump::disableOverbounce(trace) && trace.plane.normal[2] == 1) {
+  if (!ETJump::surfaceAllowsOverbounce(trace) && trace.plane.normal[2] == 1) {
     pm->ps->velocity[2] = 0;
 
     // axial surfaces only

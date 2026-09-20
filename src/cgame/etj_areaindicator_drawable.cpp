@@ -32,13 +32,13 @@ AreaIndicator::AreaIndicator() {
 
   indicators.emplace_back(&etj_drawSaveIndicator, &etj_saveIndicatorX,
                           &etj_saveIndicatorY, CONTENTS_NOSAVE,
-                          BG_LEVEL_NO_SAVE, cgs.media.saveIcon);
+                          cgame.sharedWSKeys.noSave, cgs.media.saveIcon);
   indicators.emplace_back(&etj_drawProneIndicator, &etj_proneIndicatorX,
                           &etj_proneIndicatorY, CONTENTS_NOPRONE,
-                          BG_LEVEL_NO_PRONE, cgs.media.proneIcon);
+                          cgame.sharedWSKeys.noProne, cgs.media.proneIcon);
   indicators.emplace_back(&etj_drawNoclipIndicator, &etj_noclipIndicatorX,
                           &etj_noclipIndicatorY, CONTENTS_NONOCLIP,
-                          BG_LEVEL_NO_NOCLIP, cgs.media.noclipIcon);
+                          cgame.sharedWSKeys.noNoclip, cgs.media.noclipIcon);
 
   ci = nullptr;
   ps = nullptr;
@@ -50,7 +50,7 @@ AreaIndicator::AreaIndicator() {
 AreaIndicator::Indicator::Indicator(vmCvar_t *controlCvar,
                                     vmCvar_t *controlCvarX,
                                     vmCvar_t *controlCvarY, const int contents,
-                                    const int shared,
+                                    const bool shared,
                                     const qhandle_t iconShader) {
   draw = false;
   drawForbid = false;
@@ -60,7 +60,7 @@ AreaIndicator::Indicator::Indicator(vmCvar_t *controlCvar,
   x = 0;
   y = 0;
   traceContents = contents;
-  sharedValue = shared;
+  sharedWSKey = shared;
   shader = iconShader;
 }
 
@@ -70,7 +70,7 @@ void AreaIndicator::checkPronePrint(trace_t &trace) {
     return;
   }
 
-  if (cgs.shared & BG_LEVEL_NO_PRONE) {
+  if (cgame.sharedWSKeys.noProne) {
     if (trace.fraction != 1.0f) {
       printProneMessage = false;
       return;
@@ -126,8 +126,8 @@ bool AreaIndicator::beforeRender() {
         indicator.draw = true;
         drawAny = true;
 
-        if (((cgs.shared & indicator.sharedValue) && trace.fraction == 1.0f) ||
-            (!(cgs.shared & indicator.sharedValue) && trace.fraction != 1.0f)) {
+        if (indicator.sharedWSKey ? trace.fraction == 1.0f
+                                  : trace.fraction != 1.0f) {
           indicator.drawForbid = true;
         }
 
@@ -137,7 +137,7 @@ bool AreaIndicator::beforeRender() {
           indicator.draw = true;
           drawAny = true;
 
-          if (cgs.shared & indicator.sharedValue) {
+          if (indicator.sharedWSKey) {
             indicator.drawForbid = true;
           }
         }
@@ -148,7 +148,7 @@ bool AreaIndicator::beforeRender() {
           indicator.draw = true;
           drawAny = true;
 
-          if (!(cgs.shared & indicator.sharedValue)) {
+          if (!indicator.sharedWSKey) {
             indicator.drawForbid = true;
           }
         }

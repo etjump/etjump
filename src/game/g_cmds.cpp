@@ -967,7 +967,7 @@ void setPlayerOffset(gentity_t *ent) {
                     CONTENTS_NONOCLIP);
 
   if (!g_cheats.integer &&
-      game.worldspawn->noNoclip == (trace.fraction == 1.0f)) {
+      game.worldspawn->sharedKeys.noNoclip == (trace.fraction == 1.0f)) {
     Printer::console(clientNum, "^7You cannot ^3setoffset ^7to this area.\n");
     return;
   }

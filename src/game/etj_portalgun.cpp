@@ -138,7 +138,7 @@ void Portal::think(gentity_t *self) {
     // add/remove destination to PVS via SVF_PORTAL flag,
     // so entities are loaded in instantly when we teleport
     // and prediction works if enabled
-    if (g_portalPredict.integer || game.worldspawn->portalPredict) {
+    if (g_portalPredict.integer || game.worldspawn->sharedKeys.portalPredict) {
       self->r.svFlags |= SVF_PORTAL;
     } else {
       self->r.svFlags &= ~SVF_PORTAL;
@@ -178,12 +178,12 @@ void Portal::touch(gentity_t *self, gentity_t *other) {
   // if this isn't our portal, and 'portalteam' isn't set to 2,
   // determine if we can use this portal at all
   if (self->r.ownerNum != other->s.number &&
-      game.worldspawn->portalTeam != PortalTeam::ALL) {
-    if (game.worldspawn->portalTeam == PortalTeam::OFF) {
+      game.worldspawn->portalTeam != PortalTeamOpts::ALL) {
+    if (game.worldspawn->portalTeam == PortalTeamOpts::OFF) {
       return;
     }
 
-    if (game.worldspawn->portalTeam == PortalTeam::FIRETEAM) {
+    if (game.worldspawn->portalTeam == PortalTeamOpts::FIRETEAM) {
       fireteamData_t *ftSelf{};
       fireteamData_t *ftOther{};
 
@@ -194,7 +194,7 @@ void Portal::touch(gentity_t *self, gentity_t *other) {
     }
   }
 
-  if (game.worldspawn->portalTeam == PortalTeam::OFF) {
+  if (game.worldspawn->portalTeam == PortalTeamOpts::OFF) {
     if (self->s.eType == ET_PORTAL_BLUE) {
       // Check that the 'other' portal exists and set it as dest
       if (other->portalRed != nullptr) {
@@ -212,8 +212,8 @@ void Portal::touch(gentity_t *self, gentity_t *other) {
                            "Please report this to the developers.\n");
       return;
     }
-  } else if (game.worldspawn->portalTeam == PortalTeam::FIRETEAM ||
-             game.worldspawn->portalTeam == PortalTeam::ALL) {
+  } else if (game.worldspawn->portalTeam == PortalTeamOpts::FIRETEAM ||
+             game.worldspawn->portalTeam == PortalTeamOpts::ALL) {
     if (self->linkedPortal != nullptr) {
       dest = self->linkedPortal;
     }
@@ -451,7 +451,7 @@ bool Portalgun::portalsOverlap(gentity_t *ent, Portal::Type type,
   }
 
   switch (game.worldspawn->portalTeam) {
-    case PortalTeam::FIRETEAM:
+    case PortalTeamOpts::FIRETEAM:
       if (!G_IsOnFireteam(ClientNum(ent), &ft)) {
         break;
       }
@@ -480,7 +480,7 @@ bool Portalgun::portalsOverlap(gentity_t *ent, Portal::Type type,
       }
 
       break;
-    case PortalTeam::ALL:
+    case PortalTeamOpts::ALL:
       for (int i = 0; i < level.numConnectedClients; i++) {
         auto *const other =
             static_cast<gentity_t *>(g_entities + level.sortedClients[i]);

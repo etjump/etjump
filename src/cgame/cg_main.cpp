@@ -547,8 +547,6 @@ vmCvar_t etj_realFov;
 vmCvar_t etj_stretchCgaz;
 vmCvar_t etj_noActivateLean;
 
-vmCvar_t shared;
-
 vmCvar_t etj_drawObWatcher;
 vmCvar_t etj_obWatcherX;
 vmCvar_t etj_obWatcherY;
@@ -1193,7 +1191,6 @@ cvarTable_t cvarTable[] = {
     {&etj_realFov, "etj_realFov", "1", CVAR_ARCHIVE},
     {&etj_stretchCgaz, "etj_stretchCgaz", "0", CVAR_ARCHIVE},
     {&etj_noActivateLean, "etj_noActivateLean", "0", CVAR_ARCHIVE},
-    {&shared, "shared", "0", CVAR_SYSTEMINFO | CVAR_ROM},
     {&etj_drawObWatcher, "etj_drawObWatcher", "1", CVAR_ARCHIVE},
     {&etj_obWatcherX, "etj_obWatcherX", "100", CVAR_ARCHIVE},
     {&etj_obWatcherY, "etj_obWatcherY", "100", CVAR_ARCHIVE},
@@ -3949,7 +3946,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   cg.warmupCount = -1;
 
   CG_ParseServerinfo();
-  CG_ParseSysteminfo();
 
   // NOTE: The core systems must be created before any ETJump objects
   // are created! All C++ modules should get these as constructor params
@@ -3961,6 +3957,12 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   // we need demo compatibility object asap, once server info is parsed,
   // so we can get the mod version
   ETJump::initDemo();
+
+  // early enough that 'shared' cvar parsing in systeminfo gets correct
+  // values, if we're playing back old demos
+  ETJump::parseWorldspawnKeys();
+
+  CG_ParseSysteminfo();
 
   if (cgs.gametype == ETJUMP_GAMETYPE) {
     CG_LocateArena();

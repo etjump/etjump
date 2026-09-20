@@ -315,6 +315,9 @@ inline constexpr int CS_FILTERCAMS = 37;
 // for now, this holds mapscript/entity file hashes, rename to something
 // more fitting if different data is added in the future
 inline constexpr int32_t CS_ETJUMP_MAPINFO = 40;
+// any worldspawn key-value pairs that need to be communicated to clients,
+// for prediction purposes
+inline constexpr int32_t CS_ETJUMP_WS_KEYS = 41;
 
 inline constexpr int CS_MODELS = 64;
 inline constexpr int CS_SOUNDS = CS_MODELS + MAX_MODELS;
@@ -427,6 +430,36 @@ inline constexpr int PMF_TIME_LOCKPLAYER = 32768;
 inline constexpr int PMF_ALL_TIMES = PMF_TIME_WATERJUMP | PMF_TIME_LAND |
                                      PMF_TIME_KNOCKBACK | PMF_TIME_LOCKPLAYER;
 
+namespace ETJump {
+enum class NoFallDamageOpts {
+  OFF = 0,
+  ON = 1,
+  FORCE_ON = 2,
+};
+
+enum class OverbouncePlayersOpts {
+  INHERIT = 0, // no special behavior, follows 'nooverbounce'
+  FORCE_ON = 1,
+  FORCE_OFF = 2,
+};
+
+// keys needed on both client and server
+struct SharedWorldspawnKeys {
+  bool noOverbounce{};
+  bool noJumpDelay{};
+  bool noSave{};
+  bool noProne{};
+  bool noDrop{};
+  bool noWallbug{};
+  bool noNoclip{};
+  bool portalPredict{};
+
+  NoFallDamageOpts noFallDamage{};
+  OverbouncePlayersOpts overbouncePlayers{};
+};
+
+} // namespace ETJump
+
 typedef struct {
   qboolean bAutoReload; // do we predict autoreload of weapons
 
@@ -479,6 +512,8 @@ typedef struct {
   // enable buggy nojumpdelay behavior on solstice and stonehalls2,
   // where jump time does not get updated when a player jumps on a NJD surface
   bool jumpDelayBug;
+
+  ETJump::SharedWorldspawnKeys sharedWSKeys;
 } pmoveExt_t; // data used both in client and server - store it here
               // instead of playerstate to prevent different engine versions of
               // playerstate between XP and MP
@@ -534,8 +569,6 @@ typedef struct {
   int pmove_fixed;
   int pmove_msec;
 
-  // ETJump: shared values between client & server
-  int shared;
   // ETJump: enable/disable strafe + activate = lean
   qboolean noActivateLean;
   bool noPanzerAutoswitch;
@@ -1952,7 +1985,7 @@ qboolean BG_CheckMagicAmmo(const playerState_t *ps, int *skill, int teamNum);
 qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
                          int numOfClips);
 
-bool BG_DropItems(int contents, int shared);
+bool BG_DropItems(int contents, bool noDrop);
 
 inline constexpr float OVERCLIP = 1.001f;
 
@@ -2863,32 +2896,18 @@ typedef struct {
   float random;     // recieve random from the server
 } vsayCmd_t;
 
-// Overbounce is disabled on current map
-inline constexpr int BG_LEVEL_NO_OVERBOUNCE = 1 << 0;
-// jump delay is disabled
-inline constexpr int BG_LEVEL_NO_JUMPDELAY = 1 << 1;
-// Save is disabled
-inline constexpr int BG_LEVEL_NO_SAVE = 1 << 2;
-// Fall damage is disabled
-inline constexpr int BG_LEVEL_NO_FALLDAMAGE = 1 << 3;
-// Fall damage is disabled (force)
-inline constexpr int BG_LEVEL_NO_FALLDAMAGE_FORCE = 1 << 4;
-// Prone is disabled
-inline constexpr int BG_LEVEL_NO_PRONE = 1 << 5;
-// Nodrop is enabled
-inline constexpr int BG_LEVEL_NO_DROP = 1 << 6;
-// Wallbugging is disabled
-inline constexpr int BG_LEVEL_NO_WALLBUG = 1 << 7;
-// Noclip is disabled
-inline constexpr int BG_LEVEL_NO_NOCLIP = 1 << 8;
-// portalgun prediction is force-enabled
-inline constexpr int BG_LEVEL_PORTAL_PREDICT = 1 << 9;
-// overbounces are always allowed on CONTENTS_BODY
-inline constexpr int32_t BG_LEVEL_BODY_OB_ALWAYS = 1 << 10;
-// overbounces are never allowed on CONTENTS_BODY
-inline constexpr int32_t BG_LEVEL_BODY_OB_NEVER = 1 << 11;
-
 namespace ETJump {
+inline constexpr char NO_OVERBOUNCE_CS[] = "ob";
+inline constexpr char NO_JUMP_DELAY_CS[] = "njd";
+inline constexpr char NO_SAVE_CS[] = "save";
+inline constexpr char NO_PRONE_CS[] = "prone";
+inline constexpr char NO_DROP_CS[] = "drop";
+inline constexpr char NO_WALLBUG_CS[] = "wbug";
+inline constexpr char NO_NOCLIP_CS[] = "noclip";
+inline constexpr char PORTAL_PREDICT_CS[] = "ppred";
+inline constexpr char NO_FALL_DAMAGE_CS[] = "fdmg";
+inline constexpr char OVERBOUNCE_PLAYERS_CS[] = "obp";
+
 inline constexpr char CUSTOMVOTE_TYPE[] = "type";
 inline constexpr char CUSTOMVOTE_CVTEXT[] = "cvtext";
 inline constexpr char CUSTOMVOTE_SERVERMAPS[] = "servermaps";

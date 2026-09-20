@@ -1928,7 +1928,6 @@ typedef struct {
   gametype_t gametype;
   int antilag;
 
-  int shared;
   int pmove_msec;
   int cheats;
 #ifdef ALLOW_GSYNC
@@ -2579,8 +2578,6 @@ extern vmCvar_t etj_explosivesShake;
 extern vmCvar_t etj_realFov;
 extern vmCvar_t etj_stretchCgaz;
 extern vmCvar_t etj_noActivateLean;
-
-extern vmCvar_t shared;
 
 extern vmCvar_t etj_drawObWatcher;
 extern vmCvar_t etj_obWatcherX;

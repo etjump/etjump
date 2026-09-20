@@ -495,15 +495,15 @@ static bool canUsePortal(const entityState_t *es) {
   // we can always use our own portals,
   // and can use anyone's portals if 'portalteam' is set to 2
   if (cg.snap->ps.clientNum == es->otherEntityNum ||
-      es->teamNum == static_cast<int32_t>(ETJump::PortalTeam::ALL)) {
+      es->teamNum == static_cast<int32_t>(ETJump::PortalTeamOpts::ALL)) {
     return true;
   }
 
-  if (es->teamNum == static_cast<int32_t>(ETJump::PortalTeam::OFF)) {
+  if (es->teamNum == static_cast<int32_t>(ETJump::PortalTeamOpts::OFF)) {
     return false;
   }
 
-  if (es->teamNum == static_cast<int32_t>(ETJump::PortalTeam::FIRETEAM)) {
+  if (es->teamNum == static_cast<int32_t>(ETJump::PortalTeamOpts::FIRETEAM)) {
     if (!CG_IsOnSameFireteam(cg.snap->ps.clientNum, es->otherEntityNum)) {
       return false;
     }
@@ -817,7 +817,7 @@ static void CG_TouchTriggerPrediction() {
       } else if (ent->eType == ET_PORTAL_BLUE || ent->eType == ET_PORTAL_RED) {
         // if prediction is disabled, don't handle teleports on client
         if (!etj_portalPredict.integer &&
-            !(shared.integer & BG_LEVEL_PORTAL_PREDICT)) {
+            !ETJump::cgame.sharedWSKeys.portalPredict) {
           continue;
         }
 
@@ -1226,6 +1226,7 @@ void CG_PredictPlayerState() {
   }
 
   cg.pmext.jumpDelayBug = cg.jumpDelayBug;
+  cg.pmext.sharedWSKeys = ETJump::cgame.sharedWSKeys;
 
   memcpy(&oldpmext[current & cg.cmdMask], &cg.pmext, sizeof(pmoveExt_t));
 
@@ -1268,9 +1269,6 @@ void CG_PredictPlayerState() {
 
   cg_pmove.pmove_fixed = pmove_fixed.integer;
   cg_pmove.pmove_msec = cgs.pmove_msec;
-
-  // Zero: shared values between server & client
-  cg_pmove.shared = cgs.shared;
 
   // unlagged - optimized prediction
   //  Like the comments described above, a player's state is entirely
