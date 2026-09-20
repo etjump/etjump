@@ -74,16 +74,18 @@ void Worldspawn::setWorldspawnCS() const {
                             sharedKeys.noOverbounce ? 1 : 0);
   cs += StringUtils::format(R"(\%s\%i)", NO_JUMP_DELAY_CS,
                             sharedKeys.noJumpDelay ? 1 : 0);
-  cs += StringUtils::format(R"(\%s\%i)", NO_SAVE_CS, sharedKeys.noSave ? 1 : 0);
-  cs +=
-      StringUtils::format(R"(\%s\%i)", NO_PRONE_CS, sharedKeys.noProne ? 1 : 0);
   cs += StringUtils::format(R"(\%s\%i)", NO_DROP_CS, sharedKeys.noDrop ? 1 : 0);
   cs += StringUtils::format(R"(\%s\%i)", NO_WALLBUG_CS,
                             sharedKeys.noWallbug ? 1 : 0);
-  cs += StringUtils::format(R"(\%s\%i)", NO_NOCLIP_CS,
-                            sharedKeys.noNoclip ? 1 : 0);
   cs += StringUtils::format(R"(\%s\%i)", PORTAL_PREDICT_CS,
                             sharedKeys.portalPredict ? 1 : 0);
+
+  cs += StringUtils::format(R"(\%s\%i)", NO_SAVE_CS,
+                            static_cast<int32_t>(sharedKeys.noSave));
+  cs += StringUtils::format(R"(\%s\%i)", NO_PRONE_CS,
+                            static_cast<int32_t>(sharedKeys.noProne));
+  cs += StringUtils::format(R"(\%s\%i)", NO_NOCLIP_CS,
+                            static_cast<int32_t>(sharedKeys.noNoclip));
 
   cs += StringUtils::format(R"(\%s\%i)", NO_FALL_DAMAGE_CS,
                             static_cast<int32_t>(sharedKeys.noFallDamage));
@@ -201,17 +203,21 @@ void Worldspawn::initNoJumpDelay(const char *key) {
 void Worldspawn::initNoNoclip(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  sharedKeys.noNoclip = value;
+  sharedKeys.noNoclip =
+      std::clamp(static_cast<AreaOpts>(value), AreaOpts::FORBID_INSIDE,
+                 AreaOpts::FORBID_EVERYWHERE);
 
-  printKeyValue(key, sharedKeys.noNoclip ? "1" : "0");
+  printKeyValue(key, std::to_string(static_cast<int32_t>(sharedKeys.noNoclip)));
 }
 
 void Worldspawn::initNoSave(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  sharedKeys.noSave = value;
+  sharedKeys.noSave =
+      std::clamp(static_cast<AreaOpts>(value), AreaOpts::FORBID_INSIDE,
+                 AreaOpts::FORBID_EVERYWHERE);
 
-  printKeyValue(key, sharedKeys.noSave ? "1" : "0");
+  printKeyValue(key, std::to_string(static_cast<int32_t>(sharedKeys.noSave)));
 }
 
 void Worldspawn::initNoOverbounce(const char *key) {
@@ -225,9 +231,11 @@ void Worldspawn::initNoOverbounce(const char *key) {
 void Worldspawn::initNoProne(const char *key) {
   int32_t value = 0;
   G_SpawnInt(key, "0", &value);
-  sharedKeys.noProne = value;
+  sharedKeys.noProne =
+      std::clamp(static_cast<AreaOpts>(value), AreaOpts::FORBID_INSIDE,
+                 AreaOpts::FORBID_EVERYWHERE);
 
-  printKeyValue(key, sharedKeys.noProne ? "1" : "0");
+  printKeyValue(key, std::to_string(static_cast<int32_t>(sharedKeys.noProne)));
 }
 
 void Worldspawn::initNoWallbug(const char *key) {
