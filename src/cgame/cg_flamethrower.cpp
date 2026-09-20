@@ -6,6 +6,8 @@
 //
 // NOTE: some AI's are treated different, mostly for aesthetical reasons.
 
+#include <algorithm>
+
 #include "cg_local.h"
 #include "etj_trace_utils.h"
 #include "etj_utilities.h"
@@ -70,6 +72,9 @@ typedef struct centFlameInfo_s {
                                 // flamethrower
   vec3_t lastAngles;            // angles at last firing
   vec3_t lastOrigin;            // origin at last firing
+  int lastOriginTime;           // cg.time when lastOrigin/lastAngles
+                                // were last updated
+  int lastTeleportBit;          // EF_TELEPORT_BIT state at last firing
   flameChunk_t *lastFlameChunk; // flame chunk we last spawned
   int lastSoundUpdate;
 
@@ -135,6 +140,15 @@ inline constexpr int FLAME_BLUE_LIFE =
 #define GET_FLAME_BLUE_SIZE_SPEED(x)                                           \
   (((float)x / FLAME_LIFETIME) / 1.0) // x is the current sizeMax
 
+// how much of the owner's velocity acts as headwind on the pilot flame,
+// as a fraction of the chunk's own speed - keeps the flame from ever
+// losing its forward motion no matter how fast the player moves
+inline constexpr float FLAME_PILOT_WIND_MAX_FRAC = 0.5f;
+
+// if the muzzle moves further than this between calls without a teleport
+// bit flip, treat it as a discontinuity and restart the chunk chain
+inline constexpr float FLAME_DISCONTINUITY_DIST = 1024.0f;
+
 // disable this to stop rotating flames (this is variable so we can change it at
 // run-time)
 int rotatingFlames = qtrue;
@@ -156,6 +170,53 @@ static bool drawFlamethrowerEffect(const flameChunk_t *f) {
   return true;
 }
 } // namespace ETJump
+
+/*
+===============
+CG_FlameApplyPilotWind
+
+Tilts a pilot chunk's flight vector against the owner's velocity, so the
+nozzle flame blows back in the apparent wind at high speeds. The wind is
+capped relative to the chunk's own speed, so the flame always keeps enough
+forward motion to stay attached to the muzzle. Only for pilot chunks -
+firing chunks are world objects that must match the server's flame.
+===============
+*/
+static void CG_FlameApplyPilotWind(flameChunk_t *f, centity_t *cent) {
+  vec3_t wind, effVel;
+  float windSpeed;
+
+  if (cent->currentState.number == cg.snap->ps.clientNum) {
+    VectorCopy(cg.predictedPlayerState.velocity, wind);
+  } else {
+    // pos.trDelta normally holds the player's velocity, but fall back to
+    // estimating it from how far the muzzle moved since the last call
+    // whenever it's empty (e.g. snapped-to-zero when nearly stationary)
+    VectorCopy(cent->currentState.pos.trDelta, wind);
+
+    if (VectorLengthSquared(wind) < 1.0f) {
+      const centFlameInfo_t *info = &centFlameInfo[cent->currentState.number];
+      const int timeDelta = cg.time - info->lastOriginTime;
+
+      if (timeDelta > 0) {
+        VectorSubtract(f->baseOrg, info->lastOrigin, wind);
+        VectorScale(wind, 1000.0f / (float)timeDelta, wind);
+      }
+    }
+  }
+
+  windSpeed = VectorNormalize(wind);
+  if (windSpeed < 1.0f) {
+    return;
+  }
+  if (windSpeed > FLAME_PILOT_WIND_MAX_FRAC * f->velSpeed) {
+    windSpeed = FLAME_PILOT_WIND_MAX_FRAC * f->velSpeed;
+  }
+
+  VectorScale(f->velDir, f->velSpeed, effVel);
+  VectorMA(effVel, -windSpeed, wind, effVel);
+  f->velSpeed = VectorNormalize2(effVel, f->velDir);
+}
 
 /*
 ===============
@@ -199,7 +260,7 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
   vec3_t lastUp, thisUp, up;
   vec3_t lastRight, thisRight, right;
   vec3_t thisOrg, lastOrg, org;
-  double timeInc, backLerp, fracInc;
+  double timeInc, backLerp;
   int t, numFrameChunks;
   double ft;
   trace_t trace;
@@ -207,6 +268,26 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
   // float frametime, dot;
 
   centInfo = &centFlameInfo[cent->currentState.number];
+
+  // never interpolate or re-anchor the chunk chain across a teleport -
+  // orphan it instead, so it expires at the old location while a fresh
+  // chain starts at the new muzzle position
+  const int teleportBit = cent->currentState.eFlags & EF_TELEPORT_BIT;
+  qboolean discontinuity =
+      teleportBit != centInfo->lastTeleportBit ? qtrue : qfalse;
+  centInfo->lastTeleportBit = teleportBit;
+
+  // fallback for origin jumps without a bit flip (demo seeks,
+  // dropped snapshots)
+  if (!discontinuity && centInfo->lastFlameChunk &&
+      DistanceSquared(origin, centInfo->lastOrigin) >
+          Square(FLAME_DISCONTINUITY_DIST)) {
+    discontinuity = qtrue;
+  }
+
+  if (discontinuity) {
+    centInfo->lastFlameChunk = NULL;
+  }
 
   // for any other character or in 3rd person view, use entity angles
   // for friction
@@ -228,37 +309,90 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
     VectorCopy(centInfo->lastOrigin, lastOrg);
     centInfo->lastFiring = firing;
 
+    // the pilot flame has no server counterpart and should stay glued
+    // to the muzzle, so translate the existing chain by however much
+    // the muzzle moved since the last frame. Firing chunks are world
+    // objects (they must match the server's flame position), so those
+    // are left alone.
+    if (!firing) {
+      vec3_t muzzleDelta, newOrg;
+      VectorSubtract(thisOrg, lastOrg, muzzleDelta);
+      for (f = centInfo->lastFlameChunk; f; f = f->nextFlameChunk) {
+        VectorAdd(f->baseOrg, muzzleDelta, newOrg);
+        // translate with a trace so chunks aren't shoved into geometry
+        // when the muzzle slides along a wall
+        ETJump::cgame.utils.trace->flamechunkTrace(
+            cent->currentState.number, &trace, f->baseOrg, flameChunkMins,
+            flameChunkMaxs, newOrg, cent->currentState.number,
+            MASK_SHOT | MASK_WATER);
+
+        // fix for engine bug where trace sometimes starts in solid even
+        // if the entity that it starts in is nonsolid
+        if (trace.startsolid && trace.entityNum == ENTITYNUM_NONE) {
+          trace.startsolid = qfalse;
+        }
+
+        if (!trace.startsolid) {
+          VectorCopy(trace.endpos, f->baseOrg);
+        }
+      }
+    }
+
     of = centInfo->lastFlameChunk;
     timeInc = 1000.0 * (firing ? 1.0 : 0.5) *
               (FLAME_CHUNK_DIST / (FLAME_START_SPEED * speedScale));
     ft = ((double)of->timeStart + timeInc);
     t = (int)ft;
 
-    // this is supposed to be roughly cg.time - cg.oldTime but
-    // cgame timers are garbage and this leads to div by 0 sometimes
-    const double fracDiv = std::max(1, cg.time - of->timeStart);
-
-    fracInc = timeInc / fracDiv;
-    backLerp = 1.0 - fracInc;
+    // real time span covered by [lastOrg, thisOrg] - lastOriginTime is
+    // updated on every call, so unlike of->timeStart this stays correct
+    // on frames that spawn no chunks (high fps)
+    const double frameDelta = std::max(1, cg.time - centInfo->lastOriginTime);
 
     numFrameChunks = 0; // CHANGE: id
 
     while (t <= cg.time) {
-      // spawn a new chunk
-      CG_FlameLerpVec(lastOrg, thisOrg, backLerp, org);
-      ETJump::cgame.utils.trace->flamechunkTrace(
-          cent->currentState.number, &trace, org, flameChunkMins,
-          flameChunkMaxs, org, cent->currentState.number,
-          MASK_SHOT | MASK_WATER);
+      // lerp fraction for a chunk spawned at time t; chunks owed from
+      // before the last origin update clamp to the old origin
+      double frac = (double)(t - centInfo->lastOriginTime) / frameDelta;
+      frac = std::clamp(frac, 0.0, 1.0);
+      backLerp = 1.0 - frac;
 
-      // fix for engine bug where trace sometimes starts in solid even if
-      // the entity that it starts in is nonsolid
-      if (trace.startsolid && trace.entityNum == ENTITYNUM_NONE) {
-        trace.startsolid = qfalse;
+      // spawn a new chunk
+      if (!firing) {
+        // pilot chunks are muzzle relative: spawn at the current muzzle
+        // so the chain carries no memory of the player's movement path.
+        // A position lerped between the old and new muzzle would skew
+        // the nozzle flame along the movement direction at high speeds,
+        // and can collapse the nozzle trail juncs onto each other,
+        // making the flame flicker. Direction still lerps below so the
+        // flame fans smoothly when the view swings.
+        VectorCopy(thisOrg, org);
+      } else {
+        CG_FlameLerpVec(lastOrg, thisOrg, backLerp, org);
       }
 
-      if (trace.startsolid) {
-        return; // don't spawn inside a wall
+      // pilot chunks all spawn at the same spot, so the first
+      // iteration's trace covers every chunk spawned this frame
+      if (firing || numFrameChunks == 0) {
+        ETJump::cgame.utils.trace->flamechunkTrace(
+            cent->currentState.number, &trace, org, flameChunkMins,
+            flameChunkMaxs, org, cent->currentState.number,
+            MASK_SHOT | MASK_WATER);
+
+        // fix for engine bug where trace sometimes starts in solid even
+        // if the entity that it starts in is nonsolid
+        if (trace.startsolid && trace.entityNum == ENTITYNUM_NONE) {
+          trace.startsolid = qfalse;
+        }
+
+        if (trace.startsolid) {
+          // don't spawn inside a wall - bump timeStart so the chunks
+          // owed for this frame aren't spawned as one big burst once
+          // the muzzle clears the wall
+          centInfo->lastFlameChunk->timeStart = cg.time;
+          break;
+        }
       }
       f = CG_SpawnFlameChunk(of);
 
@@ -269,7 +403,7 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
         //  to add more and more chunks
         centInfo->lastFlameChunk->timeStart = cg.time;
         // end CHANGE: id
-        return;
+        break;
       }
 
       CG_FlameLerpVec(lastFwd, thisFwd, backLerp, fwd);
@@ -301,6 +435,9 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
       VectorNormalize(f->velDir);
       f->velSpeed =
           FLAME_START_SPEED * (0.5 + 0.5 * speedScale) * (firing ? 1.0 : 4.5);
+      if (!firing) {
+        CG_FlameApplyPilotWind(f, cent);
+      }
       f->ownerCent = cent->currentState.number;
       f->rollAngle = crandom() * 179;
       f->ignitionOnly = !firing ? qtrue : qfalse;
@@ -320,11 +457,8 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
       // always spawn a chunk right on the current time
       if ((int)ft > cg.time && t < cg.time) {
         ft = (double)cg.time;
-        backLerp = fracInc; // so it'll get set to zero
-                            // a few lines down
       }
       t = (int)ft;
-      backLerp -= fracInc;
       centInfo->lastFlameChunk = of = f;
       // CHANGE: id
       // don't spawn too many chunks each frame
@@ -368,6 +502,9 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
     VectorCopy(fwd, f->velDir);
     VectorCopy(fwd, f->startVelDir);
     f->velSpeed = FLAME_START_SPEED * (0.5 + 0.5 * speedScale);
+    if (!firing) {
+      CG_FlameApplyPilotWind(f, cent);
+    }
     f->ownerCent = cent->currentState.number;
     f->rollAngle = crandom() * 179;
     f->ignitionOnly = !firing ? qtrue : qfalse;
@@ -409,6 +546,7 @@ void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
 
   VectorCopy(angles, centInfo->lastAngles);
   VectorCopy(origin, centInfo->lastOrigin);
+  centInfo->lastOriginTime = cg.time;
   centInfo->lastClientFrame = cent->currentState.frame;
 }
 
