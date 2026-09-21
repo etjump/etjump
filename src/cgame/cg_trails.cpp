@@ -1,5 +1,7 @@
 // Ridah, cg_trails.c - draws a trail using multiple junction points
 
+#include <algorithm>
+
 #include "cg_local.h"
 
 typedef struct trailJunc_s {
@@ -262,6 +264,9 @@ int CG_AddSparkJunc(int headJuncIndex, void *usedby, qhandle_t shader,
   }
 
   j->usedby = usedby;
+
+  alphaStart = std::clamp(alphaStart, 0.0f, 1.0f);
+  alphaEnd = std::clamp(alphaEnd, 0.0f, 1.0f);
 
   // setup the trail junction
   j->shader = shader;
@@ -786,8 +791,9 @@ void CG_AddTrails(void) {
   // update the settings for each junc
   j = activeTrails;
   while (j) {
-    lifeFrac =
-        (float)(cg.time - j->spawnTime) / (float)(j->endTime - j->spawnTime);
+    lifeFrac = std::clamp(static_cast<float>(cg.time - j->spawnTime) /
+                              static_cast<float>(j->endTime - j->spawnTime),
+                          0.0f, 1.0f);
     if (lifeFrac >= 1.0) {
       j->inuse = qfalse; // flag it as dead
       j->width = j->widthEnd;
