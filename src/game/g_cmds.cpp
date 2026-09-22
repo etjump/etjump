@@ -2058,7 +2058,7 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
   }
 
   if (mode == SAY_BUDDY) {
-    if (ent->s.clientNum != other->s.clientNum) {
+    if (ent != other) {
       fireteamData_t *ft1, *ft2;
       if (!G_IsOnFireteam(otherClientNum, &ft1)) {
         return;
@@ -2210,7 +2210,7 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay,
 
   // send only to people who have the sender on their buddy list
   if (mode == SAY_BUDDY) {
-    if (ent->s.clientNum != other->s.clientNum) {
+    if (ent != other) {
       fireteamData_t *ft1, *ft2;
       if (!G_IsOnFireteam(other - g_entities, &ft1)) {
         return;
