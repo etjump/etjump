@@ -5,7 +5,8 @@
 G_PushMapEntityToBuffer
 ===================
 */
-void G_PushMapEntityToBuffer(char *buffer, int size, mapEntityData_t *mEnt) {
+static void G_PushMapEntityToBuffer(char *buffer, int size,
+                                    const mapEntityData_t *mEnt) {
   char buf[32];
 
   if (level.ccLayers) {
@@ -117,7 +118,7 @@ mapEntityData_t *G_AllocMapEntityData(mapEntityData_Team_t *teamList) {
 G_FindMapEntityData
 ===================
 */
-mapEntityData_t *G_FindMapEntityData(mapEntityData_Team_t *teamList,
+mapEntityData_t *G_FindMapEntityData(const mapEntityData_Team_t *teamList,
                                      int entNum) {
   mapEntityData_t *mEnt;
 
@@ -140,9 +141,10 @@ mapEntityData_t *G_FindMapEntityData(mapEntityData_Team_t *teamList,
 G_FindMapEntityDataSingleClient
 ===============================
 */
-mapEntityData_t *G_FindMapEntityDataSingleClient(mapEntityData_Team_t *teamList,
-                                                 mapEntityData_t *start,
-                                                 int entNum, int clientNum) {
+mapEntityData_t *
+G_FindMapEntityDataSingleClient(const mapEntityData_Team_t *teamList,
+                                const mapEntityData_t *start, int entNum,
+                                int clientNum) {
   mapEntityData_t *mEnt;
 
   if (start) {
@@ -183,7 +185,7 @@ static plane_t frustum[4];
 G_SetupFrustum
 ========================
 */
-void G_SetupFrustum(gentity_t *ent) {
+void G_SetupFrustum(const gentity_t *ent) {
   int i;
   float xs, xc;
   float ang;
@@ -220,7 +222,7 @@ void G_SetupFrustum(gentity_t *ent) {
   }
 }
 
-void G_SetupFrustum_ForBinoculars(gentity_t *ent) {
+void G_SetupFrustum_ForBinoculars(const gentity_t *ent) {
   // TAT 12/26/2002 - Give bots a larger view angle through binoculars than
   // players get - this should help the
   //		landmine detection...
@@ -274,7 +276,7 @@ void G_SetupFrustum_ForBinoculars(gentity_t *ent) {
 G_CullPointAndRadius - returns true if not culled
 ========================
 */
-static qboolean G_CullPointAndRadius(vec3_t pt, float radius) {
+static qboolean G_CullPointAndRadius(const vec3_t pt, float radius) {
   int i;
   float dist;
   plane_t *frust;
@@ -292,7 +294,7 @@ static qboolean G_CullPointAndRadius(vec3_t pt, float radius) {
   return (qtrue);
 }
 
-qboolean G_VisibleFromBinoculars(gentity_t *viewer, gentity_t *ent,
+qboolean G_VisibleFromBinoculars(const gentity_t *viewer, const gentity_t *ent,
                                  vec3_t origin) {
   vec3_t vieworg;
   trace_t trace;
@@ -334,7 +336,7 @@ void G_ResetTeamMapData() {
   G_InitMapEntityData(&mapEntityData[1]);
 }
 
-void G_UpdateTeamMapData_Construct(gentity_t *ent) {
+static void G_UpdateTeamMapData_Construct(const gentity_t *ent) {
   int num = ent - g_entities;
   mapEntityData_Team_t *teamList;
   mapEntityData_t *mEnt;
@@ -398,7 +400,7 @@ void G_UpdateTeamMapData_Construct(gentity_t *ent) {
   }
 }
 
-void G_UpdateTeamMapData_Tank(gentity_t *ent) {
+static void G_UpdateTeamMapData_Tank(const gentity_t *ent) {
   int num = ent - g_entities;
   mapEntityData_Team_t *teamList;
   mapEntityData_t *mEnt;
@@ -436,7 +438,7 @@ void G_UpdateTeamMapData_Tank(gentity_t *ent) {
   mEnt->yaw = 0;
 }
 
-void G_UpdateTeamMapData_Destruct(gentity_t *ent) {
+static void G_UpdateTeamMapData_Destruct(const gentity_t *ent) {
   int num = ent - g_entities;
   mapEntityData_Team_t *teamList;
   mapEntityData_t *mEnt;
@@ -506,8 +508,9 @@ void G_UpdateTeamMapData_Destruct(gentity_t *ent) {
   }
 }
 
-void G_UpdateTeamMapData_Player(gentity_t *ent, qboolean forceAllied,
-                                qboolean forceAxis) {
+static void G_UpdateTeamMapData_Player(const gentity_t *ent,
+                                       qboolean forceAllied,
+                                       qboolean forceAxis) {
   int num = ent - g_entities;
   mapEntityData_Team_t *teamList;
   mapEntityData_t *mEnt;
@@ -568,8 +571,8 @@ void G_UpdateTeamMapData_Player(gentity_t *ent, qboolean forceAllied,
   }
 }
 
-static void G_UpdateTeamMapData_DisguisedPlayer(gentity_t *spotter,
-                                                gentity_t *ent,
+static void G_UpdateTeamMapData_DisguisedPlayer(const gentity_t *spotter,
+                                                const gentity_t *ent,
                                                 qboolean forceAllied,
                                                 qboolean forceAxis) {
   int num = ent - g_entities;
@@ -627,8 +630,9 @@ static void G_UpdateTeamMapData_DisguisedPlayer(gentity_t *spotter,
   }
 }
 
-void G_UpdateTeamMapData_LandMine(gentity_t *ent, qboolean forceAllied,
-                                  qboolean forceAxis) {
+static void G_UpdateTeamMapData_LandMine(const gentity_t *ent,
+                                         qboolean forceAllied,
+                                         qboolean forceAxis) {
   // void G_UpdateTeamMapData_LandMine(gentity_t* ent) {
   int num = ent - g_entities;
   mapEntityData_Team_t *teamList;
@@ -682,7 +686,7 @@ void G_UpdateTeamMapData_LandMine(gentity_t *ent, qboolean forceAllied,
   }
 }
 
-void G_UpdateTeamMapData_CommandmapMarker(gentity_t *ent) {
+static void G_UpdateTeamMapData_CommandmapMarker(const gentity_t *ent) {
   int num = ent - g_entities;
   mapEntityData_Team_t *teamList;
   mapEntityData_t *mEnt;
@@ -724,7 +728,7 @@ void G_UpdateTeamMapData_CommandmapMarker(gentity_t *ent) {
   }
 }
 
-void G_SendSpectatorMapEntityInfo(gentity_t *e) {
+static void G_SendSpectatorMapEntityInfo(const gentity_t *e) {
   // special version, sends different set of ents - only the objectives,
   // but also team info (string is split in two basically)
   mapEntityData_t *mEnt;
@@ -812,7 +816,7 @@ void G_SendSpectatorMapEntityInfo(gentity_t *e) {
   trap_SendServerCommand(e - g_entities, buffer);
 }
 
-void G_SendMapEntityInfo(gentity_t *e) {
+void G_SendMapEntityInfo(const gentity_t *e) {
   mapEntityData_t *mEnt;
   mapEntityData_Team_t *teamList;
   char buffer[2048];
