@@ -19,10 +19,15 @@
 * `etj_smoothAngles` is deprecated in favor of `etj_lerpPmove`, will be removed in a future version
 
 ## Fixed
+* fireteam chat could be visible to players who were not in the senders fireteam [#2014](https://github.com/etjump/etjump/pull/2014)
 * potential crash on timerun completion if active seasons changed during a map [#1996](https://github.com/etjump/etjump/pull/1996)
 * crash if trickjump line file writing failed for some reason [#2003](https://github.com/etjump/etjump/pull/2003)
 * potential crash when issuing timerun season or custom vote management commands from server console [#2009](https://github.com/etjump/etjump/pull/2009)
+* timerun start or `target_init` could force a non-existing weapon for the player [#2017](https://github.com/etjump/etjump/pull/2017)
 * crash if fetching user data from database failed [#2004](https://github.com/etjump/etjump/pull/2004)
+* HUD calculations broke inside `noprone` brushes when cheats were enabled [#2013](https://github.com/etjump/etjump/pull/2013)
+* potential crash when viewing particle effects or trails with extreme lag [#2012](https://github.com/etjump/etjump/pull/2012)
+* flamethower nozzle was flickering on high speeds [#2011](https://github.com/etjump/etjump/pull/2011)
 * potential crash when trying to focus next item in a menu with keyboard in some scenarios [#2000](https://github.com/etjump/etjump/pull/2000)
 * potential crash when trying to iterate menu item with no options [#1999](https://github.com/etjump/etjump/pull/1999)
 
