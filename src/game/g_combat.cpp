@@ -22,7 +22,7 @@ AddScore
 Adds score to both the client and his team
 ============
 */
-void AddScore(gentity_t *ent, int score) {
+void AddScore(const gentity_t *ent, int score) {
   if (!ent || !ent->client) {
     return;
   }

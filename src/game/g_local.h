@@ -1770,7 +1770,7 @@ void InitBodyQue(void);
 void ClientSpawn(gentity_t *ent, qboolean revived);
 void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
                 int damage, int mod);
-void AddScore(gentity_t *ent, int score);
+void AddScore(const gentity_t *ent, int score);
 void CalculateRanks(void);
 void G_StartPlayerAppropriateSound(gentity_t *ent, char *soundType);
 void SetWolfSpawnWeapons(gclient_t *client);
@@ -2495,18 +2495,19 @@ void G_InitMapEntityData(mapEntityData_Team_t *teamList);
 mapEntityData_t *G_FreeMapEntityData(mapEntityData_Team_t *teamList,
                                      mapEntityData_t *mEnt);
 mapEntityData_t *G_AllocMapEntityData(mapEntityData_Team_t *teamList);
-mapEntityData_t *G_FindMapEntityData(mapEntityData_Team_t *teamList,
+mapEntityData_t *G_FindMapEntityData(const mapEntityData_Team_t *teamList,
                                      int entNum);
-mapEntityData_t *G_FindMapEntityDataSingleClient(mapEntityData_Team_t *teamList,
-                                                 mapEntityData_t *start,
-                                                 int entNum, int clientNum);
+mapEntityData_t *
+G_FindMapEntityDataSingleClient(const mapEntityData_Team_t *teamList,
+                                const mapEntityData_t *start, int entNum,
+                                int clientNum);
 
 void G_ResetTeamMapData();
 void G_UpdateTeamMapData();
 
-void G_SetupFrustum(gentity_t *ent);
-void G_SetupFrustum_ForBinoculars(gentity_t *ent);
-qboolean G_VisibleFromBinoculars(gentity_t *viewer, gentity_t *ent,
+void G_SetupFrustum(const gentity_t *ent);
+void G_SetupFrustum_ForBinoculars(const gentity_t *ent);
+qboolean G_VisibleFromBinoculars(const gentity_t *viewer, const gentity_t *ent,
                                  vec3_t origin);
 
 void G_LogTeamKill(gentity_t *ent, weapon_t weap);
@@ -2548,7 +2549,7 @@ typedef enum {
   SM_NUM_SYS_MSGS,
 } sysMsg_t;
 
-void G_SendMapEntityInfo(gentity_t *e);
+void G_SendMapEntityInfo(const gentity_t *e);
 void G_SendSystemMessage(sysMsg_t message, int team);
 int G_GetSysMessageNumber(const char *sysMsg);
 int G_CountTeamLandmines(team_t team);
