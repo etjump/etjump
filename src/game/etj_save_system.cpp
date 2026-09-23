@@ -142,7 +142,8 @@ void SaveSystem::save(gentity_t *ent) {
                     client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
 
   if (!g_cheats.integer) {
-    if (!areaAllowsAction(game.worldspawn->sharedKeys.noSave, trace)) {
+    if (!WorldspawnShared::areaAllowsAction(
+            game.worldspawn->resolvedKeysForClient(ent).noSave, trace)) {
       Printer::center(ent, "^7You can not ^3save ^7inside this area.");
       return;
     }
@@ -502,7 +503,8 @@ void SaveSystem::unload(gentity_t *ent) {
       trap_TraceCapsule(&trace, pos->origin, ent->r.mins, ent->r.maxs,
                         pos->origin, ent->s.number, CONTENTS_NOSAVE);
 
-      if (!areaAllowsAction(game.worldspawn->sharedKeys.noSave, trace)) {
+      if (!WorldspawnShared::areaAllowsAction(
+              game.worldspawn->resolvedKeysForClient(ent).noSave, trace)) {
         Printer::center(ent, "^7You can not ^3unload ^7to this area.");
         return;
       }

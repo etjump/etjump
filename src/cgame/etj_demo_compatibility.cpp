@@ -296,47 +296,49 @@ int DemoCompatibility::adjustedEventNum(const int event) const {
 
 void DemoCompatibility::parseSharedCvarBits(const int32_t shared) {
   if (shared & COMPAT_SHARED_NO_OVERBOUNCE) {
-    cgame.sharedWSKeys.noOverbounce = true;
+    cgame.sharedWSKeysGlobal.noOverbounce = true;
   }
 
   if (shared & COMPAT_SHARED_NO_JUMPDELAY) {
-    cgame.sharedWSKeys.noJumpDelay = true;
+    cgame.sharedWSKeysGlobal.noJumpDelay = true;
   }
 
   if (shared & COMPAT_SHARED_NO_SAVE) {
-    cgame.sharedWSKeys.noSave = AreaOpts::FORBID_OUTSIDE;
+    cgame.sharedWSKeysGlobal.noSave = AreaOpts::FORBID_OUTSIDE;
   }
 
   if (shared & COMPAT_SHARED_NO_FALLDAMAGE) {
-    cgame.sharedWSKeys.noFallDamage = NoFallDamageOpts::ON;
+    cgame.sharedWSKeysGlobal.noFallDamage = NoFallDamageOpts::ON;
   } else if (shared & COMPAT_SHARED_NO_FALLDAMAGE_FORCE) {
-    cgame.sharedWSKeys.noFallDamage = NoFallDamageOpts::FORCE_ON;
+    cgame.sharedWSKeysGlobal.noFallDamage = NoFallDamageOpts::FORCE_ON;
   }
 
   if (shared & COMPAT_SHARED_NO_PRONE) {
-    cgame.sharedWSKeys.noProne = AreaOpts::FORBID_OUTSIDE;
+    cgame.sharedWSKeysGlobal.noProne = AreaOpts::FORBID_OUTSIDE;
   }
 
   if (shared & COMPAT_SHARED_NO_DROP) {
-    cgame.sharedWSKeys.noDrop = true;
+    cgame.sharedWSKeysGlobal.noDrop = true;
   }
 
   if (shared & COMPAT_SHARED_NO_WALLBUG) {
-    cgame.sharedWSKeys.noWallbug = true;
+    cgame.sharedWSKeysGlobal.noWallbug = true;
   }
 
   if (shared & COMPAT_SHARED_NO_NOCLIP) {
-    cgame.sharedWSKeys.noNoclip = AreaOpts::FORBID_OUTSIDE;
+    cgame.sharedWSKeysGlobal.noNoclip = AreaOpts::FORBID_OUTSIDE;
   }
 
   if (shared & COMPAT_SHARED_PORTAL_PREDICT) {
-    cgame.sharedWSKeys.portalPredict = true;
+    cgame.sharedWSKeysGlobal.portalPredict = true;
   }
 
   if (shared & COMPAT_SHARED_BODY_OB_ALWAYS) {
-    cgame.sharedWSKeys.overbouncePlayers = OverbouncePlayersOpts::FORCE_ON;
+    cgame.sharedWSKeysGlobal.overbouncePlayers =
+        OverbouncePlayersOpts::FORCE_ON;
   } else if (shared & COMPAT_SHARED_BODY_OB_NEVER) {
-    cgame.sharedWSKeys.overbouncePlayers = OverbouncePlayersOpts::FORCE_OFF;
+    cgame.sharedWSKeysGlobal.overbouncePlayers =
+        OverbouncePlayersOpts::FORCE_OFF;
   }
 }
 

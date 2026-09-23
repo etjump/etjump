@@ -32,13 +32,13 @@ AreaIndicator::AreaIndicator() {
 
   indicators.emplace_back(&etj_drawSaveIndicator, &etj_saveIndicatorX,
                           &etj_saveIndicatorY, CONTENTS_NOSAVE,
-                          cgame.sharedWSKeys.noSave, cgs.media.saveIcon);
+                          &cgame.sharedWSKeys.noSave, cgs.media.saveIcon);
   indicators.emplace_back(&etj_drawProneIndicator, &etj_proneIndicatorX,
                           &etj_proneIndicatorY, CONTENTS_NOPRONE,
-                          cgame.sharedWSKeys.noProne, cgs.media.proneIcon);
+                          &cgame.sharedWSKeys.noProne, cgs.media.proneIcon);
   indicators.emplace_back(&etj_drawNoclipIndicator, &etj_noclipIndicatorX,
                           &etj_noclipIndicatorY, CONTENTS_NONOCLIP,
-                          cgame.sharedWSKeys.noNoclip, cgs.media.noclipIcon);
+                          &cgame.sharedWSKeys.noNoclip, cgs.media.noclipIcon);
 
   ci = nullptr;
   ps = nullptr;
@@ -115,7 +115,8 @@ bool AreaIndicator::beforeRender() {
     }
 
     const bool inside = trace.fraction != 1.0f;
-    const bool forbidden = !areaAllowsAction(indicator.areaOpts, trace);
+    const bool forbidden =
+        !WorldspawnShared::areaAllowsAction(*indicator.areaOpts, trace);
 
     switch (static_cast<DrawMode>(indicator.cvar->integer)) {
       case DrawMode::Always:

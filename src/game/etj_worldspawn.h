@@ -27,35 +27,11 @@
 #include "etj_portalgun_shared.h"
 #include "etj_save_system.h"
 #include "etj_shared.h"
+#include "etj_worldspawn_shared.h"
 
 namespace ETJump {
 class Worldspawn {
 public:
-  struct Keys {
-    static constexpr char NO_DROP[] = "nodrop";
-    static constexpr char NO_EXPLOSIVES[] = "noexplosives";
-    static constexpr char NO_FALL_DAMAGE[] = "nofalldamage";
-    static constexpr char NO_FT_NO_GHOST[] = "noftnoghost";
-    static constexpr char NO_FT_SAVE_LIMIT[] = "noftsavelimit";
-    static constexpr char NO_FT_TJ_MODE[] = "noftteamjumpmode";
-    static constexpr char NO_GHOST[] = "noghost";
-    static constexpr char NO_GOD[] = "nogod";
-    static constexpr char NO_GOTO[] = "nogoto";
-    static constexpr char NO_JUMP_DELAY[] = "nojumpdelay";
-    static constexpr char NO_NOCLIP[] = "nonoclip";
-    static constexpr char NO_SAVE[] = "nosave";
-    static constexpr char NO_OVERBOUNCE[] = "nooverbounce";
-    static constexpr char NO_PRONE[] = "noprone";
-    static constexpr char NO_WALLBUG[] = "nowallbug";
-    static constexpr char OVERBOUCNE_PLAYERS[] = "overbounce_players";
-    static constexpr char PORTALGUN_SPAWN[] = "portalgun_spawn";
-    static constexpr char PORTAL_SURFACES[] = "portalsurfaces";
-    static constexpr char PORTAL_PREDICT[] = "portalpredict";
-    static constexpr char PORTAL_TEAM[] = "portalteam";
-    static constexpr char LIMITED_SAVES[] = "limitedsaves";
-    static constexpr char STRICT_SAVE_LOAD[] = "strictsaveload";
-  };
-
   enum class NoExplosivesOpts {
     OFF = 0,
     NO_EXPLOSIVE_WEAPONS = 1,
@@ -79,9 +55,14 @@ public:
 
   // keys shared between server and client
   SharedWorldspawnKeys sharedKeys;
+  std::vector<WorldspawnShared::KeyOverride> keyOverrides;
 
   Worldspawn();
   ~Worldspawn() = default;
+
+  void setKeyOverrideCS() const;
+  void addKeyOverride(const WorldspawnShared::KeyOverride &newOverride);
+  SharedWorldspawnKeys resolvedKeysForClient(const gentity_t *ent) const;
 
 private:
   void initNoDrop(const char *key);

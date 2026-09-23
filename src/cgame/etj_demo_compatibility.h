@@ -113,7 +113,7 @@ public:
   // by setting event num to ET_EVENTS + event due to additional entity types
   [[nodiscard]] int adjustedEventNum(int event) const;
 
-  // maps old shared cvar bits to 'cgame.sharedWSKeys'
+  // maps old shared cvar bits to 'cgame.sharedWSKeysGlobal'
   static void parseSharedCvarBits(int32_t shared);
 
   void printDemoInformation() const;

@@ -318,6 +318,8 @@ inline constexpr int32_t CS_ETJUMP_MAPINFO = 40;
 // any worldspawn key-value pairs that need to be communicated to clients,
 // for prediction purposes
 inline constexpr int32_t CS_ETJUMP_WS_KEYS = 41;
+// \key:value:flags\key:value:flags\...
+inline constexpr int32_t CS_ETJUMP_WS_KEY_OVERRIDES = 42;
 
 inline constexpr int CS_MODELS = 64;
 inline constexpr int CS_SOUNDS = CS_MODELS + MAX_MODELS;
@@ -465,19 +467,6 @@ struct SharedWorldspawnKeys {
   NoFallDamageOpts noFallDamage{};
   OverbouncePlayersOpts overbouncePlayers{};
 };
-
-inline bool areaAllowsAction(AreaOpts areaOpts, const trace_t &trace) {
-  switch (areaOpts) {
-    default: // AreaOpts::FORBID_INSIDE
-      return trace.fraction == 1.0f;
-    case AreaOpts::FORBID_OUTSIDE:
-      return trace.fraction != 1.0f;
-    case AreaOpts::ALLOW_EVERYWHERE:
-      return true;
-    case AreaOpts::FORBID_EVERYWHERE:
-      return false;
-  }
-}
 } // namespace ETJump
 
 typedef struct {
@@ -2917,17 +2906,6 @@ typedef struct {
 } vsayCmd_t;
 
 namespace ETJump {
-inline constexpr char NO_OVERBOUNCE_CS[] = "ob";
-inline constexpr char NO_JUMP_DELAY_CS[] = "njd";
-inline constexpr char NO_SAVE_CS[] = "save";
-inline constexpr char NO_PRONE_CS[] = "prone";
-inline constexpr char NO_DROP_CS[] = "drop";
-inline constexpr char NO_WALLBUG_CS[] = "wbug";
-inline constexpr char NO_NOCLIP_CS[] = "noclip";
-inline constexpr char PORTAL_PREDICT_CS[] = "ppred";
-inline constexpr char NO_FALL_DAMAGE_CS[] = "fdmg";
-inline constexpr char OVERBOUNCE_PLAYERS_CS[] = "obp";
-
 inline constexpr char CUSTOMVOTE_TYPE[] = "type";
 inline constexpr char CUSTOMVOTE_CVTEXT[] = "cvtext";
 inline constexpr char CUSTOMVOTE_SERVERMAPS[] = "servermaps";

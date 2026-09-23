@@ -91,6 +91,7 @@ add_library(qagame MODULE
 	"etj_target_init.cpp"
 	"etj_target_random.cpp"
 	"etj_target_spawn_relay.cpp"
+	"etj_target_wskey_overrides.cpp"
 	"etj_trace_utils.cpp"
 	"etj_time_utilities.cpp"
 	"etj_timerun_repository.cpp"

@@ -23,6 +23,7 @@
 #include "etj_entity_utilities.h"
 #include "etj_progression_tracker.h"
 #include "etj_target_random.h"
+#include "etj_target_wskey_overrides.h"
 #include "etj_func_static_client.h"
 #include "etj_worldspawn.h"
 
@@ -732,6 +733,7 @@ spawn_t spawns[] = {
     {"target_spawn_relay", ETJump::TargetSpawnRelay::spawn},
     {"target_random", ETJump::TargetRandom::spawn},
     {"func_static_client", ETJump::FuncStaticClient::spawn},
+    {"target_wskey_overrides", ETJump::TargetWSKeyOverrides::spawn},
     {nullptr, nullptr},
 };
 

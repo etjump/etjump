@@ -12,6 +12,7 @@
 
 #include "bg_local.h"
 #include "etj_string_utilities.h"
+#include "etj_worldspawn_shared.h"
 
 #ifdef CGAMEDLL
   #define PM_Cheats cgs.cheats
@@ -809,8 +810,8 @@ static qboolean PM_CheckProne(void) {
   pm->trace(&trace, pm->ps->origin, pm->ps->mins, pm->ps->maxs, pm->ps->origin,
             pm->ps->clientNum, CONTENTS_NOPRONE);
 
-  if (!PM_Cheats &&
-      !ETJump::areaAllowsAction(pm->pmext->sharedWSKeys.noProne, trace)) {
+  if (!PM_Cheats && !ETJump::WorldspawnShared::areaAllowsAction(
+                        pm->pmext->sharedWSKeys.noProne, trace)) {
     pm->ps->eFlags &= ~EF_PRONE;
     pm->ps->eFlags &= ~EF_PRONE_MOVING;
     return qfalse;

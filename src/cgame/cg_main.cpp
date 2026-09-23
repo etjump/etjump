@@ -3960,6 +3960,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   // early enough that 'shared' cvar parsing in systeminfo gets correct
   // values, if we're playing back old demos
   ETJump::parseWorldspawnKeys();
+  ETJump::parseWorldspawnKeyOverrides();
 
   CG_ParseSysteminfo();
 
