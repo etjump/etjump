@@ -48,6 +48,7 @@
 #include "etj_drawspeed2_v2.h"
 #include "etj_entity_events_handler.h"
 #include "etj_event_loop.h"
+#include "etj_falldamage_detector.h"
 #include "etj_jump_speeds_v2.h"
 #include "etj_keyset_system.h"
 #include "etj_leaves_remapper.h"
@@ -419,6 +420,7 @@ static void initHUD() {
       std::make_unique<KeySetSystem>(&etj_drawKeys, cgame.core.cvarUpdate));
   cgame.hud.renderables.emplace_back(
       std::make_unique<DrawYaw>(cgame.core.cvarUpdate));
+  cgame.hud.renderables.emplace_back(std::make_unique<FalldamageDetector>());
 
   // FIXME: move to renderables
   ETJump_ClearDrawables();

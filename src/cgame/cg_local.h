@@ -2789,6 +2789,10 @@ extern vmCvar_t etj_yawShadow;
 extern vmCvar_t etj_yawSize;
 extern vmCvar_t etj_yawWidth;
 
+extern vmCvar_t etj_drawFallDamageDetector;
+extern vmCvar_t etj_fallDamageDetectorX;
+extern vmCvar_t etj_fallDamageDetectorY;
+
 //
 // cg_main.c
 //
