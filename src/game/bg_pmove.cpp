@@ -1599,34 +1599,34 @@ Creates a local entity event to play the sound
 =============
 */
 static void PM_CheckFallDamage(const float delta) {
-  if (delta > 77) {
+  if (delta > DELTA_FALL_NDIE) {
     PM_AddEventExt(EV_FALL_NDIE, PM_FootstepForSurface());
-  } else if (delta > 67) {
+  } else if (delta > DELTA_FALL_DMG_50) {
     pm->ps->pm_time = 1000;
     pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
     PM_AddEventExt(EV_FALL_DMG_50, PM_FootstepForSurface());
-  } else if (delta > 58) {
+  } else if (delta > DELTA_FALL_DMG_25) {
     // this is a pain grunt, so don't play it if dead
     if (pm->ps->stats[STAT_HEALTH] > 0) {
       pm->ps->pm_time = 250;
       pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
       PM_AddEventExt(EV_FALL_DMG_25, PM_FootstepForSurface());
     }
-  } else if (delta > 48) {
+  } else if (delta > DELTA_FALL_DMG_15) {
     // this is a pain grunt, so don't play it if dead
     if (pm->ps->stats[STAT_HEALTH] > 0) {
       pm->ps->pm_time = 1000;
       pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
       PM_AddEventExt(EV_FALL_DMG_15, PM_FootstepForSurface());
     }
-  } else if (delta > 38.75) {
+  } else if (delta > DELTA_FALL_DMG_10) {
     // this is a pain grunt, so don't play it if dead
     if (pm->ps->stats[STAT_HEALTH] > 0) {
       pm->ps->pm_time = 1000;
       pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
       PM_AddEventExt(EV_FALL_DMG_10, PM_FootstepForSurface());
     }
-  } else if (delta > 7) {
+  } else if (delta > DELTA_FALL_SHORT) {
     PM_AddEventExt(EV_FALL_SHORT, PM_FootstepForSurface());
   }
   // ETJump uphill step sounds
@@ -1637,7 +1637,7 @@ static void PM_CheckFallDamage(const float delta) {
   // rain - when falling damage happens, velocity is cleared, but
   // this needs to happen in pmove, not g_active!  (prediction will be
   // wrong, otherwise.)
-  if (delta > 38.75) {
+  if (delta > DELTA_FALL_DMG_10) {
     VectorClear(pm->ps->velocity);
   }
 }

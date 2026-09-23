@@ -9,6 +9,13 @@ inline constexpr float MIN_WALK_NORMAL = 0.7f;
 
 inline constexpr int STEPSIZE = 18;
 
+inline constexpr float DELTA_FALL_NDIE = 77.0f;
+inline constexpr float DELTA_FALL_DMG_50 = 67.0f;
+inline constexpr float DELTA_FALL_DMG_25 = 58.0f;
+inline constexpr float DELTA_FALL_DMG_15 = 48.0f;
+inline constexpr float DELTA_FALL_DMG_10 = 38.75f;
+inline constexpr float DELTA_FALL_SHORT = 7.0f; // no damage, just step sound
+
 // all of the locals will be zeroed before each
 // pmove, just to make damn sure we don't have
 // any differences when running on client or server

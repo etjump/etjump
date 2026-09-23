@@ -755,6 +755,10 @@ vmCvar_t etj_yawShadow;
 vmCvar_t etj_yawSize;
 vmCvar_t etj_yawWidth;
 
+vmCvar_t etj_drawFallDamageDetector;
+vmCvar_t etj_fallDamageDetectorX;
+vmCvar_t etj_fallDamageDetectorY;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1429,6 +1433,11 @@ cvarTable_t cvarTable[] = {
     {&etj_yawShadow, "etj_yawShadow", "1", CVAR_ARCHIVE},
     {&etj_yawSize, "etj_yawSize", "3", CVAR_ARCHIVE},
     {&etj_yawWidth, "etj_yawWidth", "10", CVAR_ARCHIVE},
+
+    {&etj_drawFallDamageDetector, "etj_drawFallDamageDetector", "0",
+     CVAR_ARCHIVE},
+    {&etj_fallDamageDetectorX, "etj_fallDamageDetectorX", "380", CVAR_ARCHIVE},
+    {&etj_fallDamageDetectorY, "etj_fallDamageDetectorY", "245", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
