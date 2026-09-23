@@ -90,10 +90,14 @@ void Utilities::stopRun(int clientNum) {
 }
 
 void Utilities::selectValidWeapon(const gentity_t *ent) {
+  const weapon_t primary = G_GetPrimaryWeaponForClient(ent->client);
+
   // primary > secondary > knife
-  if (BG_WeaponHasAmmo(&ent->client->ps, ent->client->sess.playerWeapon)) {
-    ent->client->ps.weapon = ent->client->sess.playerWeapon;
-  } else if (BG_WeaponHasAmmo(&ent->client->ps,
+  if (primary != WP_NONE && BG_WeaponHasAmmo(&ent->client->ps, primary)) {
+    ent->client->ps.weapon = primary;
+  } else if (COM_BitCheck(ent->client->ps.weapons,
+                          ent->client->sess.playerWeapon2) &&
+             BG_WeaponHasAmmo(&ent->client->ps,
                               ent->client->sess.playerWeapon2)) {
     ent->client->ps.weapon = ent->client->sess.playerWeapon2;
   } else {
