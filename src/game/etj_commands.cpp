@@ -2314,8 +2314,9 @@ bool Mute(gentity_t *ent, Arguments argv) {
 }
 
 static bool Noclip(gentity_t *ent, Arguments argv) {
-  if (!g_cheats.integer && game.worldspawn->sharedKeys.noNoclip ==
-                               ETJump::AreaOpts::FORBID_EVERYWHERE) {
+  if (!g_cheats.integer &&
+      game.worldspawn->resolvedKeysForClient(ent).noNoclip ==
+          ETJump::AreaOpts::FORBID_EVERYWHERE) {
     Printer::chat(ent, "^3noclip: ^7noclip is disabled on this map.");
     return false;
   }

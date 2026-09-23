@@ -43,56 +43,152 @@ Worldspawn::Worldspawn() {
 }
 
 void Worldspawn::initKeys() {
-  initNoDrop(Keys::NO_DROP);
-  initNoExplosives(Keys::NO_EXPLOSIVES);
-  initNoFallDamage(Keys::NO_FALL_DAMAGE);
-  initNoFTNoGhost(Keys::NO_FT_NO_GHOST);
-  initNoFTSaveLimit(Keys::NO_FT_SAVE_LIMIT);
-  initNoFTTeamjumpMode(Keys::NO_FT_TJ_MODE);
-  initNoGhost(Keys::NO_GHOST);
-  initNoGod(Keys::NO_GOD);
-  initNoGoto(Keys::NO_GOTO);
-  initNoJumpDelay(Keys::NO_JUMP_DELAY);
-  initNoNoclip(Keys::NO_NOCLIP);
-  initNoSave(Keys::NO_SAVE);
-  initNoOverbounce(Keys::NO_OVERBOUNCE);
-  initNoProne(Keys::NO_PRONE);
-  initNoWallbug(Keys::NO_WALLBUG);
-  initOverbouncePlayers(Keys::OVERBOUCNE_PLAYERS);
-  initPortalgunSpawn(Keys::PORTALGUN_SPAWN);
-  initPortalSurfaces(Keys::PORTAL_SURFACES);
-  initPortalPredict(Keys::PORTAL_PREDICT);
-  initPortalTeam(Keys::PORTAL_TEAM);
-  initLimitedSaves(Keys::LIMITED_SAVES);
-  initStrictSaveLoad(Keys::STRICT_SAVE_LOAD);
+  const auto &descs = WorldspawnShared::keyDescriptors;
+  using Key = WorldspawnShared::Keys;
+
+  initNoDrop(descs[Key::NO_DROP].keyName);
+  initNoExplosives(descs[Key::NO_EXPLOSIVES].keyName);
+  initNoFallDamage(descs[Key::NO_FALL_DAMAGE].keyName);
+  initNoFTNoGhost(descs[Key::NO_FT_NO_GHOST].keyName);
+  initNoFTSaveLimit(descs[Key::NO_FT_SAVE_LIMIT].keyName);
+  initNoFTTeamjumpMode(descs[Key::NO_FT_TJ_MODE].keyName);
+  initNoGhost(descs[Key::NO_GHOST].keyName);
+  initNoGod(descs[Key::NO_GOD].keyName);
+  initNoGoto(descs[Key::NO_GOTO].keyName);
+  initNoJumpDelay(descs[Key::NO_JUMP_DELAY].keyName);
+  initNoNoclip(descs[Key::NO_NOCLIP].keyName);
+  initNoSave(descs[Key::NO_SAVE].keyName);
+  initNoOverbounce(descs[Key::NO_OVERBOUNCE].keyName);
+  initNoProne(descs[Key::NO_PRONE].keyName);
+  initNoWallbug(descs[Key::NO_WALLBUG].keyName);
+  initOverbouncePlayers(descs[Key::OVERBOUCNE_PLAYERS].keyName);
+  initPortalgunSpawn(descs[Key::PORTALGUN_SPAWN].keyName);
+  initPortalSurfaces(descs[Key::PORTAL_SURFACES].keyName);
+  initPortalPredict(descs[Key::PORTAL_PREDICT].keyName);
+  initPortalTeam(descs[Key::PORTAL_TEAM].keyName);
+  initLimitedSaves(descs[Key::LIMITED_SAVES].keyName);
+  initStrictSaveLoad(descs[Key::STRICT_SAVE_LOAD].keyName);
 }
 
 void Worldspawn::setWorldspawnCS() const {
   std::string cs;
 
-  cs += StringUtils::format(R"(\%s\%i)", NO_OVERBOUNCE_CS,
+  cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::NO_OVERBOUNCE_CS,
                             sharedKeys.noOverbounce ? 1 : 0);
-  cs += StringUtils::format(R"(\%s\%i)", NO_JUMP_DELAY_CS,
+  cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::NO_JUMP_DELAY_CS,
                             sharedKeys.noJumpDelay ? 1 : 0);
-  cs += StringUtils::format(R"(\%s\%i)", NO_DROP_CS, sharedKeys.noDrop ? 1 : 0);
-  cs += StringUtils::format(R"(\%s\%i)", NO_WALLBUG_CS,
+  cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::NO_DROP_CS,
+                            sharedKeys.noDrop ? 1 : 0);
+  cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::NO_WALLBUG_CS,
                             sharedKeys.noWallbug ? 1 : 0);
-  cs += StringUtils::format(R"(\%s\%i)", PORTAL_PREDICT_CS,
+  cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::PORTAL_PREDICT_CS,
                             sharedKeys.portalPredict ? 1 : 0);
 
-  cs += StringUtils::format(R"(\%s\%i)", NO_SAVE_CS,
+  cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::NO_SAVE_CS,
                             static_cast<int32_t>(sharedKeys.noSave));
-  cs += StringUtils::format(R"(\%s\%i)", NO_PRONE_CS,
+  cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::NO_PRONE_CS,
                             static_cast<int32_t>(sharedKeys.noProne));
-  cs += StringUtils::format(R"(\%s\%i)", NO_NOCLIP_CS,
+  cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::NO_NOCLIP_CS,
                             static_cast<int32_t>(sharedKeys.noNoclip));
 
-  cs += StringUtils::format(R"(\%s\%i)", NO_FALL_DAMAGE_CS,
+  cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::NO_FALL_DAMAGE_CS,
                             static_cast<int32_t>(sharedKeys.noFallDamage));
-  cs += StringUtils::format(R"(\%s\%i)", OVERBOUNCE_PLAYERS_CS,
-                            static_cast<int32_t>(sharedKeys.overbouncePlayers));
+  cs +=
+      StringUtils::format(R"(\%s\%i)", WorldspawnShared::OVERBOUNCE_PLAYERS_CS,
+                          static_cast<int32_t>(sharedKeys.overbouncePlayers));
 
   trap_SetConfigstring(CS_ETJUMP_WS_KEYS, cs.c_str());
+}
+
+void Worldspawn::setKeyOverrideCS() const {
+  std::string cs;
+
+  for (const auto &ko : keyOverrides) {
+    cs += StringUtils::format(R"(\%s:%i:%i)",
+                              WorldspawnShared::keyDescriptors[ko.key].csName,
+                              ko.value, static_cast<int32_t>(ko.flags));
+  }
+
+  trap_SetConfigstring(CS_ETJUMP_WS_KEY_OVERRIDES, cs.c_str());
+}
+
+void Worldspawn::addKeyOverride(
+    const WorldspawnShared::KeyOverride &newOverride) {
+  const auto teamsOverlap =
+      [](const EnumBitset<WorldspawnShared::KeyOverrideFlags> &a,
+         const EnumBitset<WorldspawnShared::KeyOverrideFlags> &b) {
+        // mask away the timerun state bits, we only care about teams here
+        constexpr EnumBitset<WorldspawnShared::KeyOverrideFlags> TEAM_MASK = {
+            WorldspawnShared::KeyOverrideFlags::AXIS,
+            WorldspawnShared::KeyOverrideFlags::ALLIES,
+            WorldspawnShared::KeyOverrideFlags::SPECTATORS};
+
+        return ((a & b) & TEAM_MASK);
+      };
+
+  const auto timerunScopesMatch =
+      [](const EnumBitset<WorldspawnShared::KeyOverrideFlags> &a,
+         const EnumBitset<WorldspawnShared::KeyOverrideFlags> &b) {
+        if ((a & WorldspawnShared::KeyOverrideFlags::TIMERUN_ONLY) &&
+            (b & WorldspawnShared::KeyOverrideFlags::TIMERUN_ONLY)) {
+          return true;
+        }
+
+        if ((a & WorldspawnShared::KeyOverrideFlags::NO_TIMERUN) &&
+            (b & WorldspawnShared::KeyOverrideFlags::NO_TIMERUN)) {
+          return true;
+        }
+
+        if ((!(a & WorldspawnShared::KeyOverrideFlags::TIMERUN_ONLY) &&
+             !(a & WorldspawnShared::KeyOverrideFlags::NO_TIMERUN)) &&
+            (!(b & WorldspawnShared::KeyOverrideFlags::TIMERUN_ONLY) &&
+             !(b & WorldspawnShared::KeyOverrideFlags::NO_TIMERUN))) {
+          return true;
+        }
+
+        return false;
+      };
+
+  for (const auto &existing : keyOverrides) {
+    // An override conflicts if it targets a key that already has an override,
+    // and the following conditions are true:
+    // - override targets same team(s) as the existing one
+    // - override has the same scope for timerun state as the existing one
+    // - override has a different value than the existing one
+    //
+    // All conditions must be true to be considered a conflict - any other state
+    // is unique and can co-exist with other overrides. In case of a conflict,
+    // we cannot reliably determine which override should take precedence (as
+    // entity number order is not deterministic), so error loudly.
+    if (existing.key == newOverride.key &&
+        teamsOverlap(existing.flags, newOverride.flags) &&
+        timerunScopesMatch(existing.flags, newOverride.flags) &&
+        existing.value != newOverride.value) {
+      G_Error(
+          "target_wskey_overrides: conflicting override '%s: %i (spawnflags "
+          "%i)' - an override with '%s: %i (spawnflags %i) already exists",
+          WorldspawnShared::keyDescriptors[newOverride.key].keyName,
+          newOverride.value, static_cast<int32_t>(newOverride.flags),
+          WorldspawnShared::keyDescriptors[existing.key].keyName,
+          existing.value, static_cast<int32_t>(existing.flags));
+    }
+  }
+
+  // all good, add an override
+  keyOverrides.emplace_back(newOverride);
+}
+
+SharedWorldspawnKeys
+Worldspawn::resolvedKeysForClient(const gentity_t *ent) const {
+  // !noclip on server console, this is only used as a check to see whether
+  // noclip is outright disabled globally (AreaOpts::FORBID_EVERYWHERE)
+  if (!ent || !ent->client) {
+    return sharedKeys;
+  }
+
+  return WorldspawnShared::resolveSharedWSKeys(sharedKeys, keyOverrides,
+                                               ent->client->sess.sessionTeam,
+                                               ent->client->sess.timerunActive);
 }
 
 void Worldspawn::initNoDrop(const char *key) {

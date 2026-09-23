@@ -477,7 +477,8 @@ bool PmoveUtilsV2::checkProne(pmove_t &pm) {
   pm.trace(&trace, pm.ps->origin, pm.ps->mins, pm.ps->maxs, pm.ps->origin,
            pm.ps->clientNum, CONTENTS_NOPRONE);
 
-  if (!cgs.cheats && !areaAllowsAction(pm.pmext->sharedWSKeys.noProne, trace)) {
+  if (!cgs.cheats && !WorldspawnShared::areaAllowsAction(
+                         pm.pmext->sharedWSKeys.noProne, trace)) {
     pm.ps->eFlags &= ~EF_PRONE;
     pm.ps->eFlags &= ~EF_PRONE_MOVING;
     return false;

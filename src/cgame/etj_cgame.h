@@ -29,6 +29,7 @@
 
 #include "../game/bg_public.h"
 #include "../game/q_shared.h"
+#include "../game/etj_worldspawn_shared.h"
 
 namespace ETJump {
 class ClientCommandsHandler;
@@ -150,6 +151,11 @@ struct CGameContext {
 
   // communicated by the server, keys that are required
   // on client side for movement prediction etc
+  SharedWorldspawnKeys sharedWSKeysGlobal;
+  // communicated by the server, active worldspawn key overrides
+  // for the current map
+  std::vector<WorldspawnShared::KeyOverride> wsKeyOverrides;
+  // actual active worldspawn key value, after overrides
   SharedWorldspawnKeys sharedWSKeys;
 
   // display state for 'etj_lerpPmove' - interpolated between the last two

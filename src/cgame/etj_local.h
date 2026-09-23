@@ -126,6 +126,7 @@ void shutdown();
 void delayedInit();
 
 void parseWorldspawnKeys();
+void parseWorldspawnKeyOverrides();
 
 extern CGameContext cgame;
 } // namespace ETJump

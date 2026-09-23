@@ -13,6 +13,7 @@
 
 #include "../game/etj_entity_utilities_shared.h"
 #include "../game/etj_portalgun_shared.h"
+#include "../game/etj_worldspawn_shared.h"
 
 /*static*/ pmove_t cg_pmove;
 
@@ -1103,6 +1104,12 @@ void CG_PredictPlayerState() {
     cg.validPPS = qtrue;
     cg.predictedPlayerState = cg.snap->ps;
   }
+
+  // before interpolation check, so spec/demo gets correct keys
+  const auto &ci = cgs.clientinfo[cg.snap->ps.clientNum];
+  ETJump::cgame.sharedWSKeys = ETJump::WorldspawnShared::resolveSharedWSKeys(
+      ETJump::cgame.sharedWSKeysGlobal, ETJump::cgame.wsKeyOverrides, ci.team,
+      ci.timerunActive);
 
   // demo playback just copies the moves
   if ((cg.demoPlayback) || (cg.snap->ps.pm_flags & PMF_FOLLOW)) {

@@ -1170,7 +1170,9 @@ void ClientThink_real(gentity_t *ent) {
 
   pm.pmove_fixed = client->pers.pmoveFixed;
   pm.pmove_msec = pmove_msec.integer;
-  pm.pmext->sharedWSKeys = game.worldspawn->sharedKeys;
+  pm.pmext->sharedWSKeys = ETJump::WorldspawnShared::resolveSharedWSKeys(
+      game.worldspawn->sharedKeys, game.worldspawn->keyOverrides,
+      client->sess.sessionTeam, client->sess.timerunActive);
   pm.noActivateLean = client->pers.noActivateLean;
   pm.noPanzerAutoswitch = client->pers.noPanzerAutoswitch;
 
