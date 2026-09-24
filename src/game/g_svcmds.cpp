@@ -158,10 +158,10 @@ static void UpdateIPBans(ipFilterList_t *ipFilterList) {
 G_FilterPacket
 =================
 */
-qboolean G_FilterPacket(ipFilterList_t *ipFilterList, const char *from) {
+static qboolean G_FilterPacket(ipFilterList_t *ipFilterList, const char *from) {
   int i;
   unsigned in;
-  byte m[4];
+  byte m[4]{};
   const char *p;
 
   i = 0;
