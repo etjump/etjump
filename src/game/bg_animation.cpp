@@ -1695,7 +1695,7 @@ int BG_AnimScriptAnimation(playerState_t *ps, animModelInfo_t *animModelInfo,
 
 #ifdef DBGANIMS
   Com_Printf("script anim: cl %i, mt %s, ", ps->clientNum,
-             animMoveTypesStr[movetype]);
+             animMoveTypesStr[movetype].string);
 #endif
 
   // xkan, 1/10/2003 - adapted from original SP source
@@ -1814,7 +1814,7 @@ int BG_AnimScriptEvent(playerState_t *ps, animModelInfo_t *animModelInfo,
 
 #ifdef DBGANIMEVENTS
   Com_Printf("script event: cl %i, ev %s, ", ps->clientNum,
-             animEventTypesStr[event]);
+             animEventTypesStr[event].string);
 #endif
 
   script = &animModelInfo->scriptEvents[event];
