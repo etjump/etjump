@@ -1102,6 +1102,9 @@ void G_SpawnEntitiesFromString(void) {
   level.spawning = qtrue;
   level.numSpawnVars = 0;
 
+  // filled by G_ParseSpawnVars
+  ETJump::EntityUtilities::clearParsedEntities();
+
   // the worldspawn is not an actual entity, but it still
   // has a "spawn" function to perform any global setup
   // needed by a level (setting configstrings or cvars, etc)

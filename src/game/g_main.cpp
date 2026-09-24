@@ -1,3 +1,4 @@
+#include <array>
 #include <memory>
 
 #include "etj_utilities.h"
@@ -11,6 +12,8 @@
 #include "etj_progression_tracker.h"
 #include "etj_timerun_entities.h"
 #include "etj_entity_utilities.h"
+#include "etj_fatal_error_shared.h"
+#include "etj_game_failure.h"
 #include "etj_rtv.h"
 #include "etj_shader_config_handler.h"
 #include "etj_syscall_ext_shared.h"
@@ -558,24 +561,14 @@ qboolean G_SnapshotCallback(int entityNum, int clientNum) {
   return qtrue;
 }
 
-/*
-================
-vmMain
-
-This is the only way control passes into the module.
-This must be the very first function compiled into the .q3vm file
-================
-*/
-
-extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
-                                     intptr_t arg2, intptr_t arg3,
-                                     intptr_t arg4, intptr_t arg5,
-                                     intptr_t arg6) {
+static intptr_t dispatchCommand(const int command, const intptr_t arg0,
+                                const intptr_t arg1, const intptr_t arg2) {
   switch (command) {
     case GAME_INIT:
       G_InitGame(arg0, arg1, arg2);
       return 0;
     case GAME_SHUTDOWN:
+      ETJump::FatalErrorBoundary::protectActiveFrames();
       G_ShutdownGame(arg0);
       return 0;
     case GAME_CLIENT_CONNECT:
@@ -616,6 +609,213 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
   return -1;
 }
 
+namespace ETJump {
+static GameFailure gameFailure;
+
+static bool isDedicatedServer() {
+  // not through 'g_dedicated', the game might have failed before
+  // registering its cvars
+  return trap_Cvar_VariableIntegerValue("dedicated") != 0;
+}
+
+// writes an unexpected error (an unhandled exception) to the game log in the
+// format G_Error uses, G_Error already logged its own errors when they were
+// raised, and G_LogPrintf only echoes to the console on dedicated servers
+static void logUnexpectedError(const char *message, const bool unexpected) {
+  if (!unexpected) {
+    return;
+  }
+
+  G_LogPrintf("==================================================\n");
+  G_LogPrintf("FATAL: %s\n", message);
+  G_LogPrintf("==================================================\n");
+}
+
+static bool failGame(const char *message, const bool unexpected,
+                     const bool dropClients) {
+  gameFailure.activate(message, unexpected, dropClients, trap_Milliseconds());
+
+  logUnexpectedError(message, unexpected);
+  G_Printf(S_COLOR_RED
+           "Fatal error, dropping all clients and shutting down: %s\n",
+           message);
+  return true;
+}
+
+// during map load, the engine drops the clients from the previous map
+// itself, as the game denies their reconnect
+static bool failGameOnInit(const char *message, const bool unexpected) {
+  return failGame(message, unexpected, false);
+}
+
+// at runtime, the clients are dropped in the next server frame, as the
+// failed command might be one the engine runs while it handles a client
+// (e.g. building its snapshot, or dropping it), where that isn't expected
+static bool failGameAtRuntime(const char *message, const bool unexpected) {
+  // no game code runs once the game failed, so the only error then is the
+  // one thrown on purpose for the local client of a listen server, which
+  // is raised (see handleFailedGame)
+  if (gameFailure.isActive()) {
+    return false;
+  }
+
+  return failGame(message, unexpected, true);
+}
+
+static bool ignoreShutdownError(const char *message, const bool) {
+  // G_ShutdownGame still ran its remaining steps
+  G_Printf(S_COLOR_RED "Ignoring fatal error during shutdown: %s\n", message);
+  return true;
+}
+
+static FatalErrorBoundary::DeferFunction getDeferFunction(const int command) {
+  switch (command) {
+    case GAME_INIT:
+      return failGameOnInit;
+    case GAME_SHUTDOWN:
+      return ignoreShutdownError;
+    default:
+      return failGameAtRuntime;
+  }
+}
+
+// returned to the engine when a command fails, and for every command while
+// the game is inert after a failure
+static intptr_t getFailureResult(const int command) {
+  switch (command) {
+    case GAME_CLIENT_CONNECT:
+      // denies the connection, and clients that were connected before a
+      // map change get dropped by the engine with this as the reason
+      return reinterpret_cast<intptr_t>(gameFailure.getDenialMessage());
+    case GAME_CONSOLE_COMMAND:
+      // still counts as handled, so the engine doesn't pass it on
+      return qtrue;
+    default:
+      return 0;
+  }
+}
+
+// the engine always sets 'ip' itself, to 'localhost' for the local client
+// of a listen server (not through pers.localClient, the game never sets it,
+// and setting it would exempt the local client from inactivity handling)
+static bool isLocalClient(const int clientNum) {
+  std::array<char, MAX_INFO_STRING> userinfo{};
+  trap_GetUserinfo(clientNum, userinfo.data(),
+                   static_cast<int>(userinfo.size()));
+
+  return strcmp(Info_ValueForKey(userinfo.data(), "ip"), "localhost") == 0;
+}
+
+static void dropConnectedClients() {
+  // clients that are still connecting are disconnected by the shutdown
+  for (int i = 0; i < level.maxclients; i++) {
+    if (g_clients[i].pers.connected != CON_CONNECTED) {
+      continue;
+    }
+
+    if (isLocalClient(i)) {
+      gameFailure.setLocalClientDropped();
+    }
+
+    trap_DropClient(i, gameFailure.getDenialMessage(), 0);
+  }
+}
+
+// runs from the command buffer, so unlike trap_Error, the engine doesn't
+// longjmp over this module's frames, and the command only expands a cvar,
+// so a map loaded before the command buffer runs it (e.g. through rcon)
+// cancels the shutdown by clearing the cvar on GAME_INIT
+static void queueShutdown() {
+  trap_Cvar_Set(GAME_FAILURE_SHUTDOWN_CVAR, "killserver");
+  trap_SendConsoleCommand(EXEC_APPEND,
+                          va("vstr %s\n", GAME_FAILURE_SHUTDOWN_CVAR));
+}
+
+// handles every command except GAME_INIT and GAME_SHUTDOWN after a failure
+static intptr_t handleFailedGame(const int command) {
+  // server frames are the point where dropping clients is expected, note
+  // that e.g. ETe doesn't run them on a paused listen server, in which
+  // case this waits until the game is unpaused
+  if (command == GAME_RUN_FRAME) {
+    const int time = trap_Milliseconds();
+
+    if (gameFailure.takeClientDrops(time)) {
+      dropConnectedClients();
+    }
+
+    if (gameFailure.takeShutdown(time)) {
+      // the local client of a listen server might need an engine error to
+      // recover (see GameFailure), the boundary raises it once this call
+      // ended, and the engine shuts the server down as well
+      if (gameFailure.shutsDownThroughError(isDedicatedServer())) {
+        FatalErrorBoundary::throwFatal(gameFailure.getMessage());
+      }
+
+      queueShutdown();
+    }
+  }
+
+  if (command == GAME_CONSOLE_COMMAND) {
+    // the engine asks the game before cgame and ui, so on a listen server,
+    // the local client's commands are passed on as if the game didn't know
+    // them, which only leaves the game's own commands without a response
+    if (!isDedicatedServer()) {
+      return qfalse;
+    }
+
+    // it counts as handled (see getFailureResult), so the engine doesn't
+    // print anything for it either, which would leave an admin guessing
+    std::array<char, MAX_TOKEN_CHARS> name{};
+    trap_Argv(0, name.data(), static_cast<int>(name.size()));
+
+    G_Printf("Ignoring '%s', the game is shutting down after a fatal error\n",
+             name.data());
+  }
+
+  // the game might be only partially initialized or in the middle of a
+  // frame, so no game code runs at all
+  return getFailureResult(command);
+}
+} // namespace ETJump
+
+/*
+================
+vmMain
+
+This is the only way control passes into the module.
+This must be the very first function compiled into the .q3vm file
+================
+*/
+
+extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
+                                     intptr_t arg2, intptr_t arg3,
+                                     intptr_t arg4, intptr_t arg5,
+                                     intptr_t arg6) {
+  if (command == GAME_INIT) {
+    // cancels a shutdown that's still queued from a previous failure
+    trap_Cvar_Set(ETJump::GAME_FAILURE_SHUTDOWN_CVAR, "");
+  }
+
+  if (ETJump::gameFailure.isActive() &&
+      (command == GAME_INIT || command == GAME_SHUTDOWN)) {
+    ETJump::gameFailure.reset();
+  }
+
+  // through the boundary even while the game is inert after a failure, so an
+  // error raised then comes from the same stack position as every other call,
+  // which the boundary relies on to tell apart the calls the engine makes
+  // while handling the error from the ones after it
+  return ETJump::FatalErrorBoundary::run(
+      [&] {
+        if (ETJump::gameFailure.isActive()) {
+          return ETJump::handleFailedGame(command);
+        }
+
+        return dispatchCommand(command, arg0, arg1, arg2);
+      },
+      ETJump::getFailureResult(command), ETJump::getDeferFunction(command));
+}
+
 void QDECL G_Printf(const char *fmt, ...) {
   va_list argptr;
   char text[1024];
@@ -654,7 +854,9 @@ void QDECL G_DPrintf(const char *fmt, ...) {
   G_LogPrintf("FATAL: %s\n", text);
   G_LogPrintf("==================================================\n");
 
-  trap_Error(text);
+  // unwinds the stack up to vmMain, which then shuts the server down
+  // (see GameFailure), instead of calling trap_Error
+  ETJump::FatalErrorBoundary::throwFatal(text);
 }
 
 /*
@@ -1890,6 +2092,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
   // Reset the amount of timerun timers
   level.timerunNamesCount = 0;
+  ETJump::TimerunEntity::resetTimerunIndices();
 
   // before mapscript is loaded, so remapshaders from mapscripts work properly
   ETJump::shaderConfigHandler = std::make_unique<ETJump::ShaderConfigHandler>();
@@ -2001,40 +2204,65 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
 void ETJump_ShutdownGame(int restart);
 
+namespace ETJump {
+// the steps that run while the game log is still open
+static void shutdownGameSystems(const int restart) {
+  // every step runs even if an earlier one fails,
+  // the first error is rethrown afterwards
+  ETJump::runEachStep(
+      [] { OnGameShutdown(); }, [restart] { ETJump_ShutdownGame(restart); },
+      [] {
+        if (g_gametype.integer != ETJUMP_GAMETYPE) {
+          trap_Cvar_Set("g_gametype", va("%i", ETJUMP_GAMETYPE));
+          trap_Cvar_Update(&g_gametype);
+        }
+
+        G_Printf("==== ShutdownGame ====\n");
+
+        G_DebugCloseSkillLog();
+      },
+      [] { shutdownETJump(); });
+}
+} // namespace ETJump
+
 /*
 =================
 G_ShutdownGame
 =================
 */
 void G_ShutdownGame(int restart) {
-
-  OnGameShutdown();
-  ETJump_ShutdownGame(restart);
-
-  if (g_gametype.integer != ETJUMP_GAMETYPE) {
-    trap_Cvar_Set("g_gametype", va("%i", ETJUMP_GAMETYPE));
-    trap_Cvar_Update(&g_gametype);
-  }
-
-  G_Printf("==== ShutdownGame ====\n");
-
-  G_DebugCloseSkillLog();
-
-  shutdownETJump();
-  if (level.logFile) {
-    G_LogPrintf("ShutdownGame:\n");
-    G_LogPrintf("----------------------------------------------"
-                "--------------\n");
-    trap_FS_FCloseFile(level.logFile);
-    level.logFile = 0;
-  }
-  if (level.adminLogFile) {
-    trap_FS_FCloseFile(level.adminLogFile);
-    level.adminLogFile = 0;
-  }
-
-  // write all the client session data so we can get it back
-  G_WriteSessionData(restart ? qtrue : qfalse);
+  // every step runs even if an earlier one fails,
+  // the first error is rethrown afterwards
+  ETJump::runEachStep(
+      [restart] {
+        // the error only reaches the boundary after the log has been closed
+        // by the next step, so it's logged here while the log is still open
+        try {
+          ETJump::shutdownGameSystems(restart);
+        } catch (...) {
+          const ETJump::FatalErrorBoundary::CaughtError error =
+              ETJump::FatalErrorBoundary::describeCaughtException();
+          ETJump::logUnexpectedError(error.message.data(), error.unexpected);
+          throw;
+        }
+      },
+      [] {
+        if (level.logFile) {
+          G_LogPrintf("ShutdownGame:\n");
+          G_LogPrintf("----------------------------------------------"
+                      "--------------\n");
+          trap_FS_FCloseFile(level.logFile);
+          level.logFile = 0;
+        }
+        if (level.adminLogFile) {
+          trap_FS_FCloseFile(level.adminLogFile);
+          level.adminLogFile = 0;
+        }
+      },
+      [restart] {
+        // write all the client session data so we can get it back
+        G_WriteSessionData(restart ? qtrue : qfalse);
+      });
 }
 
 //===================================================================
