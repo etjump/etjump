@@ -49,7 +49,7 @@ void ProgressionTrackerParser::parse() {
   for (const auto &pair : pairs) {
     std::vector<std::string> indexValuePair = StringUtils::split(pair, ",");
 
-    _parsedPairs.push_back(parseIndexValuePair(indexValuePair));
+    _parsedPairs.push_back(parseIndexValuePair(std::move(indexValuePair)));
   }
 }
 

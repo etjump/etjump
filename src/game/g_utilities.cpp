@@ -215,15 +215,15 @@ const char *EscapeString(const char *in) {
   return out;
 }
 
-std::vector<std::string> getNames(const std::vector<int> &ids) {
+static std::vector<std::string> getNames(const std::vector<int> &ids) {
   std::vector<std::string> names;
 
-  for (auto &id : ids) {
+  for (const auto &id : ids) {
     std::string name = (g_entities + id)->client->pers.netname;
 
     // escape '=' for QP-encoding
     StringUtils::replaceAll(name, "=", "\x19=");
-    names.push_back(name);
+    names.push_back(std::move(name));
   }
 
   return names;

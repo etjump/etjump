@@ -28,13 +28,17 @@
 #include "../game/etj_string_utilities.h"
 #include <uuid4.h>
 
+#include <utility>
+
 ETJump::ClientAuthentication::ClientAuthentication(
     std::function<void(const std::string &)> sendClientCommand,
     std::function<void(const std::string &)> print,
     std::function<std::string()> getHwid,
     std::shared_ptr<ClientCommandsHandler> serverCommandsHandler)
-    : _sendClientCommand(sendClientCommand), _print(print), _getHwid(getHwid),
-      _serverCommandsHandler(serverCommandsHandler), GUID_FILE("etguid.dat") {
+    : _sendClientCommand(std::move(sendClientCommand)),
+      _print(std::move(print)), _getHwid(std::move(getHwid)),
+      _serverCommandsHandler(std::move(serverCommandsHandler)),
+      GUID_FILE("etguid.dat") {
   _serverCommandsHandler->subscribe(
       Constants::Authentication::GUID_REQUEST,
       [&](const std::vector<std::string> &args) { login(); });

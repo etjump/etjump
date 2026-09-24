@@ -29,6 +29,7 @@
 #include "etj_printer.h"
 #include "etj_session.h"
 #include <iostream>
+#include <utility>
 
 Database::Database() {}
 
@@ -74,7 +75,7 @@ bool Database::BindString(sqlite3_stmt *stmt, int index,
 }
 
 bool Database::AddBanToSQLite(Ban ban) {
-  AddBanOperation *addBan = new AddBanOperation(ban);
+  auto *addBan = new AddBanOperation(std::move(ban));
   addBan->RunAndDeleteObject();
   return true;
   //    int rc = 0;
@@ -114,7 +115,7 @@ bool Database::AddBanToSQLite(Ban ban) {
 }
 
 bool Database::AddUserToSQLite(User user) {
-  InsertUserOperation *insert = new InsertUserOperation(user);
+  auto *insert = new InsertUserOperation(std::move(user));
   insert->RunAndDeleteObject();
   return true;
   //    int rc = 0;
@@ -416,7 +417,7 @@ bool Database::BanUser(std::string const &name, std::string const &guid,
   //        }
   //    }
 
-  bans_.push_back(newBan);
+  bans_.push_back(std::move(newBan));
 
   return true;
 }
@@ -469,8 +470,7 @@ void Database::FindUser(gentity_t *ent, std::string const &user) {
 }
 
 bool Database::UpdateLastSeenToSQLite(User user) {
-  UpdateLastSeenOperation *updateLastSeenOperation =
-      new UpdateLastSeenOperation(user);
+  auto *updateLastSeenOperation = new UpdateLastSeenOperation(std::move(user));
   updateLastSeenOperation->RunAndDeleteObject();
   return true;
   //    sqlite3_stmt *stmt = NULL;
@@ -536,7 +536,7 @@ bool Database::SetLevel(int id, int level) {
 }
 
 bool Database::Save(User user, unsigned updated) {
-  AsyncSaveUserOperation *op = new AsyncSaveUserOperation(user, updated);
+  auto *op = new AsyncSaveUserOperation(std::move(user), updated);
   op->RunAndDeleteObject();
   return true;
   //    std::vector<std::string> queryOptions;
@@ -964,7 +964,8 @@ bool Database::InitDatabase(char const *config) {
   return true;
 }
 
-Database::InsertUserOperation::InsertUserOperation(User user) : user_(user) {}
+Database::InsertUserOperation::InsertUserOperation(User user)
+    : user_(std::move(user)) {}
 
 Database::InsertUserOperation::~InsertUserOperation() {}
 
@@ -1007,7 +1008,7 @@ void Database::InsertUserOperation::Execute() {
 }
 
 Database::InsertNewHardwareIdOperation::InsertNewHardwareIdOperation(User user)
-    : user_(user) {}
+    : user_(std::move(user)) {}
 
 Database::InsertNewHardwareIdOperation::~InsertNewHardwareIdOperation() {}
 
@@ -1043,7 +1044,7 @@ void Database::InsertNewHardwareIdOperation::Execute() {
 }
 
 Database::AsyncSaveUserOperation::AsyncSaveUserOperation(User user, int updated)
-    : user_(user), updated_(updated) {}
+    : user_(std::move(user)), updated_(updated) {}
 
 Database::AsyncSaveUserOperation::~AsyncSaveUserOperation() {}
 
@@ -1164,7 +1165,7 @@ void Database::AsyncSaveUserOperation::Execute() {
   return;
 }
 
-Database::AddBanOperation::AddBanOperation(Ban ban) : ban_(ban) {}
+Database::AddBanOperation::AddBanOperation(Ban ban) : ban_(std::move(ban)) {}
 
 Database::AddBanOperation::~AddBanOperation() {}
 
@@ -1230,7 +1231,7 @@ void Database::RemoveBanOperation::Execute() {
 }
 
 Database::UpdateLastSeenOperation::UpdateLastSeenOperation(User user)
-    : user_(user) {}
+    : user_(std::move(user)) {}
 
 Database::UpdateLastSeenOperation::~UpdateLastSeenOperation() {}
 
@@ -1289,7 +1290,7 @@ void Database::FindUserOperation::Execute() {
     user.first = sqlite3_column_int(stmt, 0);
     const char *val = (const char *)sqlite3_column_text(stmt, 1);
     user.second = val ? val : "";
-    users.push_back(user);
+    users.push_back(std::move(user));
   }
 
   if (users.empty()) {

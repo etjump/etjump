@@ -23,6 +23,7 @@
  */
 
 #include <string>
+#include <utility>
 
 #include "etj_utilities.h"
 #include "cg_local.h"
@@ -61,7 +62,7 @@ std::string composeShader(const char *name, ShaderStages stages) {
 }
 
 int setTimeout(std::function<void()> fun, int delay) {
-  return cgame.utils.eventLoop->schedule(fun, delay);
+  return cgame.utils.eventLoop->schedule(std::move(fun), delay);
 }
 
 bool clearTimeout(int handle) {
@@ -69,7 +70,7 @@ bool clearTimeout(int handle) {
 }
 
 int setInterval(std::function<void()> fun, int delay) {
-  return cgame.utils.eventLoop->schedulePersistent(fun, delay);
+  return cgame.utils.eventLoop->schedulePersistent(std::move(fun), delay);
 }
 
 bool clearInterval(int handle) {
@@ -77,7 +78,8 @@ bool clearInterval(int handle) {
 }
 
 int setImmediate(std::function<void()> fun) {
-  return cgame.utils.eventLoop->schedule(fun, 0, TaskPriorities::Immediate);
+  return cgame.utils.eventLoop->schedule(std::move(fun), 0,
+                                         TaskPriorities::Immediate);
 }
 
 bool clearImmediate(int handle) {

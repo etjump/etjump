@@ -318,7 +318,7 @@ void TrickjumpLines::addPosition(vec3_t pos) {
       _currentTrail.push_back(trail[trail.size() - 1]);
 
       // Add trail to route.
-      _currentRoute.trails.push_back(trail);
+      _currentRoute.trails.push_back(std::move(trail));
     } else if ((cg.predictedPlayerState.stats[STAT_USERCMD_MOVE] & UMOVE_UP) &&
                (!_jumpRelease)) {
       // Still pressing the jump key.
@@ -371,7 +371,7 @@ void TrickjumpLines::stopRecord() {
   std::vector<Node> trail;
   trail = std::move(_currentTrail);
   _currentTrail.clear();
-  _currentRoute.trails.push_back(trail);
+  _currentRoute.trails.push_back(std::move(trail));
   _recording = false;
   _routes.push_back(_currentRoute);
 
@@ -879,10 +879,10 @@ void TrickjumpLines::loadRoutes(const char *loadname) {
           loadNode.speed = k["speed"].asFloat();
           trailVec.push_back(loadNode); // Add node to trail.
         }
-        routeVec.push_back(trailVec); // Add trail to route.
+        routeVec.push_back(std::move(trailVec)); // Add trail to route.
       }
       loadRoute.trails = std::move(routeVec);
-      _routes.push_back(loadRoute); // Add route to object
+      _routes.push_back(std::move(loadRoute)); // Add route to object
     }
   } catch (...) {
     CG_Printf("There was a read error in %s parser\n", map.c_str());

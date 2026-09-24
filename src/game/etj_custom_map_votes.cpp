@@ -141,9 +141,9 @@ void CustomMapVotes::loadCustomvotes(const bool init) {
 
       if (std::binary_search(_currentMapsOnServer->begin(),
                              _currentMapsOnServer->end(), mapName)) {
-        uniqueMapsOnServer.insert(mapName);
+        uniqueMapsOnServer.insert(std::move(mapName));
       } else {
-        uniqueMapsOther.insert(mapName);
+        uniqueMapsOther.insert(std::move(mapName));
       }
     }
 

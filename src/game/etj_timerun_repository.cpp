@@ -208,10 +208,11 @@ TimerunRepository::getRecordsForPlayer(const std::vector<int> &activeSeasons,
                  std::string recordDate, std::string playerName,
                  std::string metadataString) {
         auto record = getRecordFromStandardQueryResult(
-            seasonId, map, runName, userId, time, checkpointsString, recordDate,
-            playerName, metadataString);
+            seasonId, std::move(map), std::move(runName), userId, time,
+            std::move(checkpointsString), std::move(recordDate),
+            std::move(playerName), std::move(metadataString));
 
-        records.push_back(record);
+        records.push_back(std::move(record));
       };
 
   return records;
@@ -304,8 +305,9 @@ TimerunRepository::getTopRecord(int seasonId, const std::string &map,
                 int time, std::string checkpointsString, std::string recordDate,
                 std::string playerName, std::string metadataString) {
         record = Timerun::Record(getRecordFromStandardQueryResult(
-            seasonId, map, runName, userId, time, checkpointsString, recordDate,
-            playerName, metadataString));
+            seasonId, std::move(map), std::move(runName), userId, time,
+            std::move(checkpointsString), std::move(recordDate),
+            std::move(playerName), std::move(metadataString)));
       };
 
   return record;
@@ -352,8 +354,9 @@ TimerunRepository::getTopRecords(const std::vector<int> &seasonIds,
                        std::string recordDate, std::string playerName,
                        std::string metadataString, int rank) {
     records.push_back(getRecordFromStandardQueryResult(
-        seasonId, map, runName, userId, time, checkpointsString, recordDate,
-        playerName, metadataString));
+        seasonId, std::move(map), std::move(runName), userId, time,
+        std::move(checkpointsString), std::move(recordDate),
+        std::move(playerName), std::move(metadataString)));
   };
 
   return records;
@@ -390,8 +393,8 @@ void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
   std::vector<std::string> updatedParams;
   bool anythingToUpdate = false;
 
-  TimeUtils::Time newStartTime = startTime;
-  std::optional<TimeUtils::Time> newEndTime = endTime;
+  TimeUtils::Time newStartTime = std::move(startTime);
+  std::optional<TimeUtils::Time> newEndTime = std::move(endTime);
 
   if (params.startTime.has_value()) {
     newStartTime = params.startTime.value();
@@ -648,8 +651,9 @@ TimerunRepository::getRecord(const std::string &map, const std::string &run,
                 int time, std::string checkpointsString, std::string recordDate,
                 std::string playerName, std::string metadataString, int rank) {
         record = getRecordFromStandardQueryResult(
-            seasonId, map, runName, userId, time, checkpointsString, recordDate,
-            playerName, metadataString);
+            seasonId, std::move(map), std::move(runName), userId, time,
+            std::move(checkpointsString), std::move(recordDate),
+            std::move(playerName), std::move(metadataString));
       };
 
   return record;
@@ -1427,16 +1431,16 @@ void TimerunRepository::tryToMigrateRecords() {
                     std::string run, int userId, std::string playerName) {
         Timerun::Record r{};
         r.seasonId = 1;
-        r.map = map;
-        r.run = run;
+        r.map = std::move(map);
+        r.run = std::move(run);
         r.time = time;
         r.recordDate = TimeUtils::Time::fromInt(recordDate);
         r.userId = userId;
-        r.playerName = playerName;
+        r.playerName = std::move(playerName);
         r.checkpoints = std::vector<int>(MAX_TIMERUN_CHECKPOINTS,
                                          TIMERUN_CHECKPOINT_NOT_SET);
         r.metadata = {{"mod_version", "unknown(imported)"}};
-        oldRecords.push_back(r);
+        oldRecords.push_back(std::move(r));
       };
 
   _database->sql << "begin;";
@@ -1543,11 +1547,13 @@ TimerunRepository::getRecordsFromQuery(sqlite::database_binder &binder) {
                        std::string recordDate, std::string playerName,
                        std::string metadataString) {
     auto record = getRecordFromStandardQueryResult(
-        seasonId, map, runName, userId, time, checkpointsString, recordDate,
-        playerName, metadataString);
+        seasonId, std::move(map), std::move(runName), userId, time,
+        std::move(checkpointsString), std::move(recordDate),
+        std::move(playerName), std::move(metadataString));
 
-    records.push_back(record);
+    records.push_back(std::move(record));
   };
+
   return records;
 }
 
