@@ -16,6 +16,7 @@
 #include "etj_rtv_drawable.h"
 #include "etj_custom_command_menu_drawable.h"
 
+#include "../game/etj_fatal_error_shared.h"
 #include "../game/etj_syscalls.h"
 
 displayContextDef_t cgDC;
@@ -27,24 +28,18 @@ qboolean CG_CheckExecKey(int key);
 extern itemDef_t *g_bindItem;
 extern qboolean g_waitingForKey;
 
-/*
-================
-vmMain
-
-This is the only way control passes into the module.
-This must be the very first function compiled into the .q3vm file
-================
-*/
-extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
-                                     intptr_t arg2, intptr_t arg3,
-                                     intptr_t arg4, intptr_t arg5,
-                                     intptr_t arg6) {
+static intptr_t dispatchCommand(const int command, const intptr_t arg0,
+                                const intptr_t arg1, const intptr_t arg2,
+                                const intptr_t arg3) {
   switch (command) {
     case CG_INIT:
       CG_Init(arg0, arg1, arg2, arg3 ? qtrue : qfalse);
       cgs.initing = qfalse;
       return 0;
     case CG_SHUTDOWN:
+      // e.g. the server disconnected us, which the engine
+      // handles while cgame is fetching server commands
+      ETJump::FatalErrorBoundary::protectActiveFrames();
       CG_Shutdown();
       return 0;
     case CG_CONSOLE_COMMAND:
@@ -87,6 +82,25 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
     default:
       CG_Error("vmMain: unknown command %i", command);
   }
+}
+
+/*
+================
+vmMain
+
+This is the only way control passes into the module.
+This must be the very first function compiled into the .q3vm file
+================
+*/
+extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
+                                     intptr_t arg2, intptr_t arg3,
+                                     intptr_t arg4, intptr_t arg5,
+                                     intptr_t arg6) {
+  // a failed console command still counts as handled,
+  // so the engine doesn't pass it on
+  return ETJump::FatalErrorBoundary::run(
+      [&] { return dispatchCommand(command, arg0, arg1, arg2, arg3); },
+      command == CG_CONSOLE_COMMAND ? qtrue : qfalse);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1649,7 +1663,8 @@ void QDECL CG_Printf(const char *msg, ...) {
   Q_vsnprintf(text, sizeof(text), msg, argptr);
   va_end(argptr);
 
-  trap_Error(text);
+  // unwinds the stack up to vmMain, which then calls trap_Error
+  ETJump::FatalErrorBoundary::throwFatal(text);
 }
 
 #ifndef CGAME_HARD_LINKED

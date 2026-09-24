@@ -11,6 +11,8 @@
 #include "etj_progression_tracker.h"
 #include "etj_timerun_entities.h"
 #include "etj_entity_utilities.h"
+#include "etj_fatal_error_shared.h"
+#include "etj_game_init_failure.h"
 #include "etj_rtv.h"
 #include "etj_shader_config_handler.h"
 #include "etj_syscall_ext_shared.h"
@@ -562,24 +564,14 @@ qboolean G_SnapshotCallback(int entityNum, int clientNum) {
   return qtrue;
 }
 
-/*
-================
-vmMain
-
-This is the only way control passes into the module.
-This must be the very first function compiled into the .q3vm file
-================
-*/
-
-extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
-                                     intptr_t arg2, intptr_t arg3,
-                                     intptr_t arg4, intptr_t arg5,
-                                     intptr_t arg6) {
+static intptr_t dispatchCommand(const int command, const intptr_t arg0,
+                                const intptr_t arg1, const intptr_t arg2) {
   switch (command) {
     case GAME_INIT:
       G_InitGame(arg0, arg1, arg2);
       return 0;
     case GAME_SHUTDOWN:
+      ETJump::FatalErrorBoundary::protectActiveFrames();
       G_ShutdownGame(arg0);
       return 0;
     case GAME_CLIENT_CONNECT:
@@ -620,6 +612,68 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
   return -1;
 }
 
+static ETJump::GameInitFailure gameInitFailure;
+
+static bool deferInitError(const char *message, const bool unexpected) {
+  gameInitFailure.activate(message, unexpected, trap_Milliseconds());
+
+  G_Printf(S_COLOR_RED "Map failed to load, dropping all clients: %s\n",
+           message);
+  return true;
+}
+
+// handles every command except GAME_INIT and GAME_SHUTDOWN while active
+static intptr_t handleFailedInit(const int command) {
+  switch (command) {
+    case GAME_CLIENT_CONNECT:
+      // denies new connections, and clients that were connected before the
+      // map change get dropped by the engine with this as the reason
+      return reinterpret_cast<intptr_t>(gameInitFailure.getDenialMessage());
+    case GAME_RUN_FRAME:
+      if (gameInitFailure.shouldRaise(trap_Milliseconds())) {
+        // the engine calls GAME_SHUTDOWN while handling the error,
+        // which must run normally
+        gameInitFailure.reset();
+        ETJump::FatalErrorBoundary::raiseError(gameInitFailure.getMessage());
+      }
+
+      return 0;
+    default:
+      // the game is only partially initialized, so nothing else must run
+      return 0;
+  }
+}
+
+/*
+================
+vmMain
+
+This is the only way control passes into the module.
+This must be the very first function compiled into the .q3vm file
+================
+*/
+
+extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
+                                     intptr_t arg2, intptr_t arg3,
+                                     intptr_t arg4, intptr_t arg5,
+                                     intptr_t arg6) {
+  if (gameInitFailure.isActive()) {
+    if (command != GAME_INIT && command != GAME_SHUTDOWN) {
+      return handleFailedInit(command);
+    }
+
+    gameInitFailure.reset();
+  }
+
+  // a failed console command still counts as handled, so the engine doesn't
+  // pass it on, and fatal errors during map load are raised once clients
+  // have been dropped
+  return ETJump::FatalErrorBoundary::run(
+      [&] { return dispatchCommand(command, arg0, arg1, arg2); },
+      command == GAME_CONSOLE_COMMAND ? qtrue : qfalse,
+      command == GAME_INIT ? deferInitError : nullptr);
+}
+
 void QDECL G_Printf(const char *fmt, ...) {
   va_list argptr;
   char text[1024];
@@ -658,7 +712,8 @@ void QDECL G_DPrintf(const char *fmt, ...) {
   G_LogPrintf("FATAL: %s\n", text);
   G_LogPrintf("==================================================\n");
 
-  trap_Error(text);
+  // unwinds the stack up to vmMain, which then calls trap_Error
+  ETJump::FatalErrorBoundary::throwFatal(text);
 }
 
 /*
