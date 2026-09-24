@@ -325,7 +325,7 @@ static void CG_RainParticleRender(cg_atmosphericParticle_t *particle) {
   verts[1].st[1] = 1;
   verts[1].modulate[0] = particle->colour[0];
   verts[1].modulate[1] = particle->colour[1];
-  verts[2].modulate[2] = particle->colour[2];
+  verts[1].modulate[2] = particle->colour[2];
   verts[1].modulate[3] = 200 * dist;
 
   VectorMA(start, particle->weight, right, verts[2].xyz);
