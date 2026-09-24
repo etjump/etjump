@@ -1,5 +1,6 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 #include "g_local.h"
+#include "etj_fatal_error_shared.h"
 #include "etj_syscall_ext_shared.h"
 
 // this file is only included when building a dll
@@ -15,6 +16,8 @@ intptr_t(QDECL *vmSyscall)(intptr_t arg,
 extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
                                                                ...)) {
   vmSyscall = syscallptr;
+
+  ETJump::FatalErrorBoundary::initialize(trap_Error, trap_Printf);
 }
 
 #if defined(__MACOS__) && !defined(__GNUC__)
