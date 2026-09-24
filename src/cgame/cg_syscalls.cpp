@@ -4,6 +4,7 @@
 #include "etj_local.h"
 
 #include "../game/etj_syscalls.h"
+#include "../game/etj_fatal_error_shared.h"
 #include "../game/etj_syscall_ext_shared.h"
 
 intptr_t(QDECL *vmSyscall)(intptr_t arg,
@@ -16,6 +17,12 @@ intptr_t(QDECL *vmSyscall)(intptr_t arg,
 extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
                                                                ...)) {
   vmSyscall = syscallptr;
+
+  // on Windows, cgame keeps itself mapped after an error, and ui releases
+  // it once the error is handled, so a server's pk3 can replace the file
+  ETJump::FatalErrorBoundary::initialize(trap_Error, trap_Print, [] {
+    trap_Cvar_Set(ETJump::FatalErrorBoundary::CGAME_KEEP_ALIVE_CVAR, "1");
+  });
 }
 
 #if defined(__MACOS__) && !defined(__GNUC__)

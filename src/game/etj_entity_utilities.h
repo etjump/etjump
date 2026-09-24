@@ -69,6 +69,11 @@ public:
   static void storeParsedEntity();
   static const std::vector<std::string> &getParsedEntities();
 
+  // must be called before the entities of a map are parsed, the module might
+  // be loaded again into the same image, which keeps them (see
+  // FatalErrorBoundary), and some builds never unload it at all
+  static void clearParsedEntities();
+
   // finds all entities matching the given field/value pair,
   // 'func' is used as the function name prefix in error messages
   static FindEntitiesResult findEntitiesByField(const std::string &key,
