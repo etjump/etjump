@@ -3423,6 +3423,7 @@ void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result,
     case TR_SPLINE:
       pSpline = BG_GetSplineData(splinePath, &backwards);
       if (!pSpline) {
+        VectorCopy(tr->trBase, result);
         return;
       }
 
@@ -3527,6 +3528,7 @@ void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result,
     case TR_LINEAR_PATH:
       pSpline = BG_GetSplineData(splinePath, &backwards);
       if (!pSpline) {
+        VectorCopy(tr->trBase, result);
         return;
       }
 
