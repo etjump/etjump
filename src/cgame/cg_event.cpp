@@ -1417,8 +1417,8 @@ void CG_Debris(centity_t *cent, vec3_t origin, vec3_t dir) {
   le->angles.trTime = cg.time;
   le->angles.trBase[2] = rand() & 31;
 
-  le->angles.trDelta[2] = (100 + (rand() & 500)) - 300;
-  le->angles.trDelta[2] = (50 + (rand() & 400)) - 100;
+  le->angles.trDelta[0] = (100 + (rand() & 500)) - 300;
+  le->angles.trDelta[1] = (50 + (rand() & 400)) - 100;
   le->angles.trDelta[2] = (50 + (rand() & 400)) - 100;
 }
 // ===================
