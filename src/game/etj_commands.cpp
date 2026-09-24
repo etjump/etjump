@@ -818,7 +818,8 @@ static bool removeRecord(gentity_t *ent, Arguments argv) {
   }
 
   game.timerunV2->removeRecord({clientNum, std::move(season), std::move(map),
-                                std::move(run), userId, callerId, reason});
+                                std::move(run), userId, callerId,
+                                std::move(reason)});
 
   return true;
 }
@@ -2986,7 +2987,7 @@ static bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
   ETJump::Timerun::AddSeasonParams params{};
   params.clientNum = clientNum;
   params.startTime = TimeUtils::Time::fromDate(start);
-  params.endTime = end;
+  params.endTime = std::move(end);
   params.name = name;
 
   game.timerunV2->addSeason(params);

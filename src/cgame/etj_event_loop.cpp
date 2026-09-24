@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <chrono>
 #include <stdexcept>
+#include <utility>
 #include "cg_local.h"
 #include "etj_event_loop.h"
 
@@ -41,13 +42,15 @@ void ETJump::EventLoop::run() {
 
 int ETJump::EventLoop::schedule(function<void()> fn, int delay,
                                 TaskPriorities priority) {
-  Task task{fn, ++eventCounter, delay, getNow() + delay, false, false};
+  Task task{std::move(fn),    ++eventCounter, delay,
+            getNow() + delay, false,          false};
   return scheduleEvent(task, priority);
 }
 
 int ETJump::EventLoop::schedulePersistent(function<void()> fn, int delay,
                                           TaskPriorities priority) {
-  Task task{fn, ++eventCounter, delay, getNow() + delay, true, false};
+  Task task{std::move(fn),    ++eventCounter, delay,
+            getNow() + delay, true,           false};
   return scheduleEvent(task, priority);
 }
 

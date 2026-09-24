@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <ctime>
+#include <utility>
 
 #include "etj_session.h"
 #include "utilities.hpp"
@@ -34,7 +35,7 @@
 #include "etj_progression_tracker.h"
 
 Session::Session(std::shared_ptr<IAuthentication> database)
-    : database_(database) {
+    : database_(std::move(database)) {
   for (unsigned i = 0; i < MAX_CLIENTS; i++) {
     ResetClient(i);
   }

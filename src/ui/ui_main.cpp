@@ -3063,8 +3063,8 @@ static void UI_LoadDemos() {
     beginning.name = "..";
     beginning.displayName = "^7demos";
 
-    uiInfo.demoObjects.push_back(beginning);
-    uiInfo.demoObjects.push_back(back);
+    uiInfo.demoObjects.push_back(std::move(beginning));
+    uiInfo.demoObjects.push_back(std::move(back));
   }
 
   std::copy(std::begin(directories), std::end(directories),
