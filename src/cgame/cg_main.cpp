@@ -86,9 +86,7 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
                  : qfalse;
     default:
       CG_Error("vmMain: unknown command %i", command);
-      break;
   }
-  return -1;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
