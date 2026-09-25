@@ -94,6 +94,9 @@ private:
   void seedRecordHistory();
   void migrate();
 
+  void insertRecordRow(const Timerun::Record &record);
+  void insertRecordHistory(const Timerun::Record &record);
+
   const std::vector<std::string> _defaultSeasonFields{"id", "name",
                                                       "start_time", "end_time"};
   const std::string _defaultSeasonFieldsStr =
