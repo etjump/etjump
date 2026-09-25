@@ -24,6 +24,7 @@
 
 #include "etj_cgaz_data.h"
 #include "cg_local.h"
+#include "etj_local.h"
 #include "etj_pmove_utils_v2.h"
 
 namespace ETJump {
@@ -68,7 +69,7 @@ void CGazData::updateState(const float wishspeed, const float accel,
   s.a = accel * wishspeed * PmoveUtilsV2::PM_FRAMETIME;
   s.aSquared = std::pow(s.a, 2.0f);
 
-  if (!(etj_CGazTrueness.integer &
+  if (!(effectiveHudCvarInt(&etj_CGazTrueness) &
         static_cast<int32_t>(CGazTrueness::GROUND)) ||
       s.vSquared - s.vfSquared >= (2 * s.a * s.wishspeed) - s.aSquared) {
     s.vSquared = s.vfSquared;
@@ -123,7 +124,8 @@ void CGazData::walkMove() {
 
   const float scale = PmoveUtilsV2::cmdScale(
       s.pm, s.pm.cmd,
-      etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
+      effectiveHudCvarInt(&etj_CGazTrueness) &
+          static_cast<int32_t>(CGazTrueness::UPMOVE));
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;
@@ -187,7 +189,8 @@ void CGazData::airMove() {
 
   const float scale = PmoveUtilsV2::cmdScale(
       s.pm, s.pm.cmd,
-      etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
+      effectiveHudCvarInt(&etj_CGazTrueness) &
+          static_cast<int32_t>(CGazTrueness::UPMOVE));
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;

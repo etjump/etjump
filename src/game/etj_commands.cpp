@@ -84,6 +84,117 @@ getOptCommand(const std::string &commandPrefix, int clientNum,
 }
 } // namespace ETJump
 
+namespace {
+inline std::string encodeHudValue(const char *value) {
+  std::string encoded = value;
+  StringUtils::replaceAll(encoded, " ", "~");
+  return encoded;
+}
+
+inline std::string decodeHudValue(const std::string &value) {
+  std::string decoded = value;
+  StringUtils::replaceAll(decoded, "~", " ");
+  return decoded;
+}
+
+template <size_t N>
+void clearHudValues(std::array<std::array<char, MAX_CVAR_VALUE_STRING>, N> &out) {
+  for (auto &entry : out) {
+    entry[0] = '\0';
+  }
+}
+
+template <size_t N>
+void parseHudPayload(const std::string &payload,
+                     std::array<std::array<char, MAX_CVAR_VALUE_STRING>, N>
+                         &out,
+                     const bool fullUpdate) {
+  if (fullUpdate) {
+    clearHudValues(out);
+  }
+
+  if (payload.empty() || payload == "-") {
+    return;
+  }
+
+  const auto entries = StringUtils::split(
+      payload, std::string(1, ETJump::Constants::SpectatorHudSync::FieldSeparator));
+
+  for (const auto &entry : entries) {
+    if (entry.empty()) {
+      continue;
+    }
+
+    const auto separatorPos =
+        entry.find(ETJump::Constants::SpectatorHudSync::KvSeparator);
+    if (separatorPos == std::string::npos) {
+      continue;
+    }
+
+    const int index = Q_atoi(entry.substr(0, separatorPos).c_str());
+    if (index < 0 || static_cast<size_t>(index) >= out.size()) {
+      continue;
+    }
+
+    const std::string decoded = decodeHudValue(entry.substr(separatorPos + 1));
+    Q_strncpyz(out[index].data(), decoded.c_str(), out[index].size());
+  }
+}
+
+template <size_t N>
+std::string buildFullHudPayload(
+    const std::array<std::array<char, MAX_CVAR_VALUE_STRING>, N> &values) {
+  std::string payload;
+
+  for (size_t i = 0; i < values.size(); ++i) {
+    if (values[i][0] == '\0') {
+      continue;
+    }
+
+    if (!payload.empty()) {
+      payload += ETJump::Constants::SpectatorHudSync::FieldSeparator;
+    }
+
+    payload += std::to_string(i);
+    payload += ETJump::Constants::SpectatorHudSync::KvSeparator;
+    payload += encodeHudValue(values[i].data());
+  }
+
+  return payload;
+}
+
+inline bool isValidClientNum(const int clientNum) {
+  return clientNum >= 0 && clientNum < level.maxclients;
+}
+
+inline bool isConnectedClient(const int clientNum) {
+  if (!isValidClientNum(clientNum)) {
+    return false;
+  }
+
+  const auto &client = level.clients[clientNum];
+  return client.pers.connected == CON_CONNECTED ||
+         client.pers.connected == CON_CONNECTING;
+}
+
+inline bool allowsSpectatorHudSharing(const clientPersistant_t &pers) {
+  return (pers.clientFlags & CGF_SPEC_HUD_ALLOW) != 0;
+}
+
+inline void sendHudSyncToClient(const int receiverClientNum,
+                                const int sourceClientNum,
+                                const bool fullUpdate,
+                                const std::string &cgazPayload,
+                                const std::string &snaphudPayload) {
+  trap_SendServerCommand(
+      receiverClientNum,
+      va("%s %d %d %s %s",
+         ETJump::Constants::SpectatorHudSync::ServerCommand.data(),
+         sourceClientNum, fullUpdate ? 1 : 0, cgazPayload.c_str(),
+         snaphudPayload.c_str()));
+}
+} // namespace
+
 namespace ClientCommands {
 
 bool BackupLoad(gentity_t *ent, Arguments argv) {
@@ -103,6 +214,99 @@ bool Save(gentity_t *ent, Arguments argv) {
 
 bool Unload(gentity_t *ent, Arguments argv) {
   ETJump::saveSystem->unload(ent);
+  return true;
+}
+
+bool uploadHudSync(gentity_t *ent, Arguments argv) {
+  if (!ent || !ent->client || argv->size() < 4) {
+    return false;
+  }
+
+  auto &pers = ent->client->pers;
+  if (level.time - pers.hudSyncLastUploadTime <
+      ETJump::Constants::SpectatorHudSync::UploadMinIntervalMs) {
+    return true;
+  }
+
+  const bool fullUpdate = Q_atoi(argv->at(1).c_str()) > 0;
+  parseHudPayload(argv->at(2), pers.cgazHudValues, fullUpdate);
+  parseHudPayload(argv->at(3), pers.snaphudHudValues, fullUpdate);
+
+  if (fullUpdate) {
+    pers.hasFullHudSync = true;
+  }
+
+  if (!pers.hasFullHudSync) {
+    return true;
+  }
+
+  pers.hudSyncLastUploadTime = level.time;
+
+  if (!allowsSpectatorHudSharing(pers)) {
+    return true;
+  }
+
+  const int sourceClientNum = ClientNum(ent);
+  for (int i = 0; i < level.numConnectedClients; ++i) {
+    const int receiverClientNum = level.sortedClients[i];
+    if (!isValidClientNum(receiverClientNum) || receiverClientNum == sourceClientNum) {
+      continue;
+    }
+
+    auto &receiver = level.clients[receiverClientNum];
+    if (receiver.pers.hudSyncWatchedTarget != sourceClientNum) {
+      continue;
+    }
+
+    if (level.time - receiver.pers.hudSyncLastForwardTime <
+        ETJump::Constants::SpectatorHudSync::ServerForwardMinIntervalMs) {
+      continue;
+    }
+
+    receiver.pers.hudSyncLastForwardTime = level.time;
+    sendHudSyncToClient(receiverClientNum, sourceClientNum, fullUpdate,
+                        argv->at(2), argv->at(3));
+  }
+
+  return true;
+}
+
+bool requestHudSync(gentity_t *ent, Arguments argv) {
+  if (!ent || !ent->client || argv->size() < 2) {
+    return false;
+  }
+
+  auto &pers = ent->client->pers;
+  if (level.time - pers.hudSyncLastRequestTime <
+      ETJump::Constants::SpectatorHudSync::RequestMinIntervalMs) {
+    return true;
+  }
+
+  const int targetClientNum = Q_atoi(argv->at(1).c_str());
+  pers.hudSyncLastRequestTime = level.time;
+
+  if (!isConnectedClient(targetClientNum)) {
+    pers.hudSyncWatchedTarget = -1;
+    return true;
+  }
+
+  const auto &targetPers = level.clients[targetClientNum].pers;
+  if (!allowsSpectatorHudSharing(targetPers)) {
+    pers.hudSyncWatchedTarget = -1;
+    return true;
+  }
+
+  pers.hudSyncWatchedTarget = targetClientNum;
+  pers.hudSyncLastForwardTime = 0;
+
+  if (!targetPers.hasFullHudSync) {
+    return true;
+  }
+
+  sendHudSyncToClient(ClientNum(ent), targetClientNum, true,
+                      buildFullHudPayload(targetPers.cgazHudValues),
+                      buildFullHudPayload(targetPers.snaphudHudValues));
+
   return true;
 }
 
@@ -3382,6 +3586,10 @@ Commands::Commands() {
   commands_["requestnumcustomvotes"] = ClientCommands::sendNumCustomvotes;
   commands_["requestcustomvoteinfo"] = ClientCommands::sendCustomvoteInfo;
   commands_["loadpos"] = ClientCommands::loadPos;
+  commands_[ETJump::Constants::SpectatorHudSync::UploadCommand.data()] =
+      ClientCommands::uploadHudSync;
+  commands_[ETJump::Constants::SpectatorHudSync::RequestCommand.data()] =
+      ClientCommands::requestHudSync;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {
