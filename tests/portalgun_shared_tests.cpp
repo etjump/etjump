@@ -145,9 +145,11 @@ TEST_F(PortalgunSharedTests, PortalsOverlap) {
                                               wallAngles, defaultSize));
 
   // close, but not overlapping
+  // NOTE: keep a margin from the exact threshold, results exactly at the
+  // boundary vary between platforms (e.g. '-ffast-math' + x87 on 32-bit Linux)
   vec3_t farOrigin;
   VectorCopy(placement.origin, farOrigin);
-  farOrigin[1] += MIN_PORTALS_DIST * 2;
+  farOrigin[1] += MIN_PORTALS_DIST * 2 + 1.0f;
   EXPECT_FALSE(PortalgunShared::portalsOverlap(placement, farOrigin,
                                                wallAngles, defaultSize));
 
