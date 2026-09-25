@@ -11,6 +11,7 @@ USER INTERFACE MAIN
 #include <cmath>
 #include <memory>
 
+#include "etj_cgame_keep_alive.h"
 #include "etj_colorpicker.h"
 #include "etj_local.h"
 #include "etj_menu_integrity_checker.h"
@@ -21,6 +22,7 @@ USER INTERFACE MAIN
 #include "../cgame/etj_color_parser.h"
 #include "../cgame/etj_cvar_parser.h"
 
+#include "../game/etj_fatal_error_shared.h"
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_filesystem.h"
 
@@ -111,10 +113,8 @@ void _UI_MouseEvent(int dx, int dy);
 void _UI_Refresh(int realtime);
 qboolean _UI_IsFullscreen(void);
 
-extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
-                                     intptr_t arg2, intptr_t arg3,
-                                     intptr_t arg4, intptr_t arg5,
-                                     intptr_t arg6) {
+static intptr_t dispatchCommand(const int command, const intptr_t arg0,
+                                const intptr_t arg1, const intptr_t arg2) {
   switch (command) {
     case UI_GETAPIVERSION:
       return UI_API_VERSION;
@@ -124,6 +124,7 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
       return 0;
 
     case UI_SHUTDOWN:
+      ETJump::FatalErrorBoundary::protectActiveFrames();
       _UI_Shutdown();
       return 0;
 
@@ -136,6 +137,7 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
       return 0;
 
     case UI_REFRESH:
+      ETJump::releaseCgameAfterError(static_cast<int>(arg0));
       _UI_Refresh(arg0);
       return 0;
 
@@ -165,6 +167,17 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
   }
 
   return -1;
+}
+
+extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
+                                     intptr_t arg2, intptr_t arg3,
+                                     intptr_t arg4, intptr_t arg5,
+                                     intptr_t arg6) {
+  // a failed console command still counts as handled,
+  // so the engine doesn't pass it on
+  return ETJump::FatalErrorBoundary::run(
+      [&] { return dispatchCommand(command, arg0, arg1, arg2); },
+      command == UI_CONSOLE_COMMAND ? qtrue : qfalse);
 }
 
 void AssetCache() {
@@ -1080,10 +1093,10 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
     handle = trap_PC_LoadSource(DEFAULT_MENU_FILE);
 
     if (!handle) {
-      trap_Error(
-          va(S_COLOR_RED
-             "%s: default menu file '%s' not found, unable to continue!\n",
-             __func__, DEFAULT_MENU_FILE));
+      Com_Error(ERR_DROP,
+                S_COLOR_RED
+                "%s: default menu file '%s' not found, unable to continue!\n",
+                __func__, DEFAULT_MENU_FILE);
     }
   }
 

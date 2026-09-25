@@ -127,6 +127,7 @@ add_library(cgame MODULE
 	"../game/q_shared.cpp"
 	"../game/etj_command_parser.cpp"
 	"../game/etj_entity_utilities_shared.cpp"
+	"../game/etj_fatal_error_shared.cpp"
 	"../game/etj_file.cpp"
 	"../game/etj_filesystem.cpp"
 	"../game/etj_json_utilities.cpp"

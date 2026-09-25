@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "etj_cgame_keep_alive.h"
 #include "etj_colorpicker.h"
 #include "etj_demo_queue.h"
 #include "etj_local.h"
@@ -180,7 +181,7 @@ static void parseChangelogs() {
       }
 
       uiInfo.changelogs[file] = StringUtils::join(lines, "\n");
-    } catch (...) {
+    } catch (const std::exception &) {
       Com_Printf(S_COLOR_RED
                  "%s: failed to open changelog '%s.txt' for reading.\n",
                  __func__, file.c_str());
@@ -208,6 +209,7 @@ void init(const int32_t legacyClient, const int32_t clientVersion) {
 
   initColorPicker();
   initDemoQueueHandler();
+  initCgameKeepAlive();
 
   parseChangelogs();
 }

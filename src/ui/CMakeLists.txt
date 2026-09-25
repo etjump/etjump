@@ -1,6 +1,7 @@
 file(GLOB UI_HEADERS "*.h" "*.hpp")
 
 add_library(ui MODULE
+	"etj_cgame_keep_alive.cpp"
 	"etj_colorpicker.cpp"
 	"etj_demo_queue.cpp"
 	"etj_main.cpp"
@@ -20,6 +21,7 @@ add_library(ui MODULE
 	"../game/bg_sha1.cpp"
 	"../game/q_math.cpp"
 	"../game/q_shared.cpp"
+	"../game/etj_fatal_error_shared.cpp"
 	"../game/etj_file.cpp"
 	"../game/etj_filesystem.cpp"
 	"../game/etj_json_utilities.cpp"
