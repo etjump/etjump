@@ -1679,6 +1679,174 @@ void TimerunV2::recordDetails(const Timerun::RecordDetailsParams &params) {
 }
 
 namespace {
+// the repository returns history ordered by season, map and run, so records
+// belonging to a single run are contiguous and can be grouped in one pass
+std::vector<Timerun::HistoricalSeasonGroup>
+groupHistoricalRecords(std::vector<Timerun::HistoricalRecord> records) {
+  std::vector<Timerun::HistoricalSeasonGroup> seasons;
+
+  for (auto &record : records) {
+    if (seasons.empty() || seasons.back().seasonId != record.r.seasonId) {
+      seasons.push_back({record.r.seasonId, {}});
+    }
+
+    auto &runs = seasons.back().runs;
+
+    if (runs.empty() || runs.back().map != record.r.map ||
+        runs.back().run != record.r.run) {
+      runs.push_back({record.r.map, record.r.run, {}});
+    }
+
+    runs.back().records.push_back(std::move(record));
+  }
+
+  return seasons;
+}
+
+class RecordHistoryResult : public SynchronizationContext::ResultBase {
+public:
+  RecordHistoryResult(std::vector<Timerun::HistoricalSeasonGroup> seasons,
+                      std::map<int32_t, std::string> seasonNames)
+      : seasons(std::move(seasons)), seasonNames(std::move(seasonNames)) {}
+
+  std::vector<Timerun::HistoricalSeasonGroup> seasons;
+  std::map<int32_t, std::string> seasonNames;
+};
+} // namespace
+
+void TimerunV2::recordHistory(const Timerun::RecordHistoryParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const std::string func = __func__;
+
+  const auto task = [this, params]() {
+    auto records = _repository->getHistoricalRecords(params);
+    auto seasons = groupHistoricalRecords(std::move(records));
+
+    // filter the results to display the requested amount of records
+    for (auto &season : seasons) {
+      for (auto &run : season.runs) {
+        if (params.maxRecords > 0 &&
+            run.records.size() > static_cast<size_t>(params.maxRecords)) {
+          run.numHidden =
+              static_cast<int32_t>(run.records.size()) - params.maxRecords;
+          run.records.resize(params.maxRecords);
+        }
+      }
+    }
+
+    // resolve season names for the listing
+    std::map<int32_t, std::string> seasonNames;
+    for (const auto &season : _repository->getSeasons()) {
+      seasonNames[season.id] = season.name;
+    }
+
+    return std::make_unique<RecordHistoryResult>(std::move(seasons),
+                                                 std::move(seasonNames));
+  };
+
+  const auto callback =
+      [this, func, params](
+          const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        const auto *const r = dynamic_cast<RecordHistoryResult *>(result.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: failed to fetch historical records for client "
+                         "%i: RecordHistoryResult is NULL",
+                         func, params.clientNum);
+          throw std::runtime_error(StringUtils::format(
+              "%s: unable to fetch historical records. This is a bug, please "
+              "report this to the developers.",
+              func));
+        }
+
+        if (r->seasons.empty()) {
+          Printer::console(
+              params.clientNum,
+              "^7No historical records found matching given parameters.\n");
+          return;
+        }
+
+        const std::string separator =
+            "^g-------------------------------------------------------------\n";
+        constexpr int32_t rankWidth = 4;
+
+        std::string msg;
+
+        for (const auto &season : r->seasons) {
+          if (season.runs.empty()) {
+            continue;
+          }
+
+          const auto &map = season.runs.front().map;
+
+          if (season.seasonId == defaultSeasonId) {
+            msg += StringUtils::format(
+                "^2Overall record history for map ^7%s\n", map);
+          } else {
+            msg += StringUtils::format(
+                "^2Record history for map ^7%s ^2on season ^7%s\n", map,
+                getSeasonName(r->seasonNames, season.seasonId));
+          }
+
+          for (const auto &run : season.runs) {
+            if (run.records.empty()) {
+              continue;
+            }
+
+            msg += separator;
+            msg += StringUtils::format(" ^2User ID: ^7%i\n ^2Run: ^7%s\n\n",
+                                       run.records.front().r.userId, run.run);
+
+            msg += StringUtils::format(" ^2%-10s ^g| ^2%*s ^g| ^2%s\n", "Time",
+                                       rankWidth, "Rank", "Record date");
+            msg += separator;
+
+            for (const auto &record : run.records) {
+              // 'rank' is 0 when it's null in the database, which happens for
+              // records seeded from 'removed_records'
+              std::string rank;
+
+              if (record.rank == 0) {
+                rank = "N/A";
+              } else if (record.removed) {
+                // don't colorize removed records, so the whole row stays grey
+                rank = "#" + std::to_string(record.rank);
+              } else {
+                rank = rankToString(record.rank);
+              }
+
+              const std::string rowColor = record.removed ? "^z" : "^7";
+              const int32_t rankPadding =
+                  StringUtils::countExtraPadding(rank, rankWidth);
+
+              msg +=
+                  StringUtils::format(" %s%-10s ^g| %s%*s ^g| %s%s\n", rowColor,
+                                      TimeUtils::millisToString(record.r.time),
+                                      rowColor, rankPadding, rank, rowColor,
+                                      record.r.recordDate.toDateTimeString());
+            }
+
+            if (run.numHidden > 0) {
+              msg += StringUtils::format(
+                  "\n ^7Showing ^2%i ^7of ^2%i ^7total records\n",
+                  params.maxRecords, params.maxRecords + run.numHidden);
+            }
+
+            msg += "\n";
+          }
+        }
+
+        Printer::console(params.clientNum, msg);
+      };
+
+  const auto error = [clientNum](const std::runtime_error &e) {
+    Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
+namespace {
 class RemoveRecordResult : public SynchronizationContext::ResultBase {
 public:
   RemoveRecordResult(std::vector<Timerun::Record> removedRecords,
@@ -2588,8 +2756,8 @@ void TimerunV2::checkRecord(Player *player) {
         }
 
         // resolve most relevant season here, as '_activeSeasons' may be
-        // modified by the worker thread, which can result in the most relevant
-        // season being changed by the time we get to the callback
+        // modified by the worker thread, which can result in the most
+        // relevant season being changed by the time we get to the callback
         result->mostRelevantSeasonId = getMostRelevantSeason()->id;
 
         return std::move(result);
