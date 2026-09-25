@@ -8,7 +8,12 @@
   * removed records are archived in the timerun database
   * anyone can remove/restore their own records, admins with `T` flag can remove/restore records from other players
   * records removed by admins can only be restored by admins
+* `target_wskey_overrides` entity to override effective worldspawn keys under specific circumstances [#2015](https://github.com/etjump/etjump/pull/2015)
+* new supported values for `nonoclip/noprone/nosave` worldspawn keys
+  * **2** - always allow, regardless of area brushes
+  * **3** - never allow, regardless of area brushes
 * `etj_drawYaw` to display an indicator when turning view left/right [#1390](https://github.com/etjump/etjump/pull/1390)
+* `etj_drawFallDamageDetector` to display fall damage the player would take if falling/jumping to the aimed surface [#2016](https://github.com/etjump/etjump/pull/2016)
 * `editentity` script action to modify an entity without a `scriptname` via mapscripting [#1972](https://github.com/etjump/etjump/pull/1972)
 * bundled mapscripts for `dreamwork` and `the_biome_expedition` [#1992](https://github.com/etjump/etjump/pull/1992) [#2008](https://github.com/etjump/etjump/pull/2008)
 
@@ -27,7 +32,9 @@
 * crash if fetching user data from database failed [#2004](https://github.com/etjump/etjump/pull/2004)
 * HUD calculations broke inside `noprone` brushes when cheats were enabled [#2013](https://github.com/etjump/etjump/pull/2013)
 * potential crash when viewing particle effects or trails with extreme lag [#2012](https://github.com/etjump/etjump/pull/2012)
-* flamethower nozzle was flickering on high speeds [#2011](https://github.com/etjump/etjump/pull/2011)
+* flamethrower nozzle was flickering on high speeds [#2011](https://github.com/etjump/etjump/pull/2011)
+* rain particles were calculating the blue color channel for top left vertex incorrectly [#2019](https://github.com/etjump/etjump/pull/2019)
+* debris spawned by `spawnrubble` script command was not rotating correctly [#2019](https://github.com/etjump/etjump/pull/2019)
 * potential crash when trying to focus next item in a menu with keyboard in some scenarios [#2000](https://github.com/etjump/etjump/pull/2000)
 * potential crash when trying to iterate menu item with no options [#1999](https://github.com/etjump/etjump/pull/1999)
 
