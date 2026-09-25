@@ -224,7 +224,7 @@ TimerunRepository::getRecordsForRun(const std::string &map,
   throw std::runtime_error("Not implemented");
 }
 
-void TimerunRepository::insertRecord(const Timerun::Record &record) {
+void TimerunRepository::insertRecordRow(const Timerun::Record &record) {
   _database->sql << R"(
     insert into record (
       season_id,
@@ -254,7 +254,60 @@ void TimerunRepository::insertRecord(const Timerun::Record &record) {
                  << serializeMetadata(record.metadata);
 }
 
+void TimerunRepository::insertRecordHistory(const Timerun::Record &record) {
+  _database->sql << R"(
+    insert into record_history (
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      rank,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata
+    )
+    select
+      r.season_id,
+      r.map,
+      r.run,
+      r.user_id,
+      r.time,
+      (select count(*) + 1
+        from record r2
+        where r2.season_id = r.season_id
+          and r2.map = r.map
+          and r2.run = r.run
+          and (r2.time < r.time
+            or (r2.time = r.time and r2.record_date < r.record_date)
+            or (r2.time = r.time and r2.record_date = r.record_date and r2.user_id < r.user_id))),
+      r.checkpoints,
+      r.record_date,
+      r.player_name,
+      r.metadata
+    from record r
+    where
+      r.season_id = ? and
+      r.map = ? and
+      r.run = ? and
+      r.user_id = ?;
+  )" << record.seasonId
+                 << record.map << record.run << record.userId;
+}
+
+void TimerunRepository::insertRecord(const Timerun::Record &record) {
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  insertRecordRow(record);
+  insertRecordHistory(record);
+
+  txn.commit();
+}
+
 void TimerunRepository::updateRecord(const Timerun::Record &record) {
+  DatabaseV2::TransactionGuard txn(*_database);
+
   _database->sql << R"(
     update
       record
@@ -274,6 +327,10 @@ void TimerunRepository::updateRecord(const Timerun::Record &record) {
                  << record.recordDate.toDateTimeString() << record.playerName
                  << serializeMetadata(record.metadata) << record.seasonId
                  << record.map << record.run << record.userId;
+
+  insertRecordHistory(record);
+
+  txn.commit();
 }
 
 std::optional<Timerun::Record>
@@ -1454,13 +1511,13 @@ void TimerunRepository::tryToMigrateRecords() {
         oldRecords.push_back(std::move(r));
       };
 
-  _database->sql << "begin;";
+  DatabaseV2::TransactionGuard txn(*_database);
 
   for (const auto &r : oldRecords) {
-    insertRecord(r);
+    insertRecordRow(r);
   }
 
-  _database->sql << "commit;";
+  txn.commit();
 }
 
 void TimerunRepository::seedRecordHistory() {
