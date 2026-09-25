@@ -535,7 +535,7 @@ std::vector<Timerun::Record> TimerunRepository::getRecords() {
       player_name,
       metadata
     from record
-    order by season_id, map, run, time;
+    order by season_id, map, run, time asc, record_date asc, user_id asc;
   )";
 
   return getRecordsFromQuery(binder);
@@ -590,7 +590,7 @@ TimerunRepository::getRecords(const Timerun::PrintRecordsParams &params) {
       map=?
       %s
     collate nocase
-    order by season_id, map, run, time asc, record_date asc
+    order by season_id, map, run, time asc, record_date asc, user_id asc
   )",
                           seasonPlaceholders, runPlaceholder);
 
@@ -1406,11 +1406,21 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
 }
 
 void TimerunRepository::tryToMigrateRecords() {
-  int count = 0;
+  int32_t existingRecords = 0;
+
+  _database->sql << "select exists(select 1 from record);" >> existingRecords;
+
+  // records already migrated
+  if (existingRecords > 0) {
+    return;
+  }
+
   _oldDatabase->sql
-          << "select count(*) from sqlite_master where tbl_name='records'" >>
-      count;
-  if (count == 0) {
+          << R"(select exists(select 1 from sqlite_master where tbl_name='records');)" >>
+      existingRecords;
+
+  // no old records to migrate
+  if (existingRecords == 0) {
     return;
   }
 
@@ -1521,12 +1531,7 @@ void TimerunRepository::migrate() {
 
   _database->applyMigrations();
 
-  int count = 0;
-  _database->sql << "select count(*) from record" >> count;
-
-  if (count == 0) {
-    tryToMigrateRecords();
-  }
+  tryToMigrateRecords();
 }
 
 std::string TimerunRepository::serializeMetadata(
