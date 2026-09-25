@@ -91,6 +91,7 @@ public:
 
 private:
   void tryToMigrateRecords();
+  void seedRecordHistory();
   void migrate();
 
   const std::vector<std::string> _defaultSeasonFields{"id", "name",

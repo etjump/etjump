@@ -738,9 +738,10 @@ void TimerunRepository::deleteSeason(const std::string &name) {
   DatabaseV2::TransactionGuard txn(*_database);
 
   _database->sql << "delete from record where season_id=?;" << id;
-  // make sure we also purge 'removed_records',
+  // make sure we also purge 'removed_records' and 'record_history',
   // so we don't leave records from any nonexistent seasons in the table
   _database->sql << "delete from removed_records where season_id=?;" << id;
+  _database->sql << "delete from record_history where season_id=?;" << id;
   _database->sql << "delete from season where id=?" << id;
 
   txn.commit();
@@ -1462,6 +1463,84 @@ void TimerunRepository::tryToMigrateRecords() {
   _database->sql << "commit;";
 }
 
+void TimerunRepository::seedRecordHistory() {
+  int32_t haveHistory = 0;
+
+  _database->sql << "select exists(select 1 from record_history)" >>
+      haveHistory;
+
+  // history already seeded
+  if (haveHistory > 0) {
+    return;
+  }
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  _database->sql << R"(
+    insert into record_history (
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      rank,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata
+    )
+    select
+      r.season_id,
+      r.map,
+      r.run,
+      r.user_id,
+      r.time,
+      (select count(*) + 1
+        from record r2
+        where r2.season_id = r.season_id
+          and r2.map = r.map
+          and r2.run = r.run
+          and (r2.time < r.time
+            or (r2.time = r.time and r2.record_date < r.record_date)
+            or (r2.time = r.time and r2.record_date = r.record_date and r2.user_id < r.user_id))),
+      r.checkpoints,
+      r.record_date,
+      r.player_name,
+      r.metadata
+    from record r
+    where not exists (
+      select 1 from record_history h
+       where h.season_id = r.season_id
+         and h.map = r.map
+         and h.run = r.run
+         and h.user_id = r.user_id
+         and h.record_date = r.record_date
+    );
+  )";
+
+  _database->sql << R"(
+    insert into record_history (
+      season_id, map, run, user_id, time, rank,
+      checkpoints, record_date, player_name, metadata
+    )
+    select
+      rr.season_id, rr.map, rr.run, rr.user_id, rr.time,
+      null,
+      rr.checkpoints, rr.record_date, rr.player_name, rr.metadata
+    from removed_records rr
+    where not exists (
+      select 1 from record_history h
+       where h.season_id = rr.season_id
+         and h.map = rr.map
+         and h.run = rr.run
+         and h.user_id = rr.user_id
+         and h.record_date = rr.record_date
+    );
+  )";
+
+  txn.commit();
+}
+
 void TimerunRepository::migrate() {
   _database->addMigration(
       // clang-format off
@@ -1529,9 +1608,31 @@ void TimerunRepository::migrate() {
        "create index idx_removed_records_user_id on removed_records(user_id);"});
   // clang-format on
 
+  _database->addMigration(
+      "record_history",
+      {R"(
+        create table record_history (
+          id integer primary key autoincrement,
+          season_id integer not null,
+          map text not null,
+          run text not null,
+          user_id int not null,
+          time int not null,
+          rank int null,
+          checkpoints text not null,
+          record_date timestamp not null,
+          player_name text not null,
+          metadata text not null default '',
+          foreign key (season_id) references season(id)
+        );
+      )",
+       R"(create index idx_record_history_user on record_history(user_id, season_id, map, run, record_date);)",
+       R"(create index idx_record_history_lookup on record_history(season_id, map, run, record_date);)"});
+
   _database->applyMigrations();
 
   tryToMigrateRecords();
+  seedRecordHistory();
 }
 
 std::string TimerunRepository::serializeMetadata(
