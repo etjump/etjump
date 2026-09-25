@@ -219,6 +219,7 @@ inline constexpr int CGF_QUICK_FOLLOW = 1 << 12;
 inline constexpr int CGF_SNAPHUD = 1 << 13;
 inline constexpr int CGF_NOPANZERSWITCH = 1 << 14;
 inline constexpr int CGF_AUTOSPRINT = 1 << 15;
+inline constexpr int CGF_SPEC_HUD_ALLOW = 1 << 16;
 
 inline constexpr int MAX_MOTDLINES = 6;
 

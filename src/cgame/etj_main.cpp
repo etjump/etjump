@@ -80,6 +80,378 @@
 #include "../game/etj_worldspawn_shared.h"
 
 namespace ETJump {
+namespace {
+using CgazValues = std::array<std::string,
+                              Constants::SpectatorHudSync::CgazCvarNames.size()>;
+using SnaphudValues =
+    std::array<std::string,
+               Constants::SpectatorHudSync::SnaphudCvarNames.size() + 1>;
+
+struct SpectatorHudSyncState {
+  bool fullSent = false;
+  int32_t lastUploadTime = 0;
+  int32_t lastRequestTime = 0;
+  int32_t watchedClient = -1;
+  int32_t overrideClient = -1;
+  CgazValues lastSentCgazValues;
+  SnaphudValues lastSentSnaphudValues;
+};
+
+SpectatorHudSyncState hudSyncState;
+
+const auto &cgazCvars() {
+  static const std::array<vmCvar_t *, Constants::SpectatorHudSync::CgazCvarNames
+                                           .size()>
+      values = {
+          &etj_drawCGaz,
+          &etj_CGazY,
+          &etj_CGaz2Y,
+          &etj_CGazHeight,
+          &etj_CGaz2Color1,
+          &etj_CGaz2Color2,
+          &etj_CGaz1Color1,
+          &etj_CGaz1Color2,
+          &etj_CGaz1Color3,
+          &etj_CGaz1Color4,
+          &etj_CGazFov,
+          &etj_CGazTrueness,
+          &etj_CGazOnTop,
+          &etj_CGaz2FixedSpeed,
+          &etj_CGaz2NoVelocityDir,
+          &etj_CGaz1DrawSnapZone,
+          &etj_CGaz2WishDirFixedSpeed,
+          &etj_CGaz2WishDirUniformLength,
+          &etj_CGaz1DrawMidLine,
+          &etj_CGaz1MidlineColor,
+          &etj_CGaz2HighRes,
+          &etj_CGaz2Thickness1,
+          &etj_CGaz2Thickness2,
+          &etj_stretchCgaz,
+      };
+
+  return values;
+}
+
+const auto &snaphudCvars() {
+  static const std::array<vmCvar_t *,
+                          Constants::SpectatorHudSync::SnaphudCvarNames.size() +
+                              1>
+      values = {
+          &etj_drawSnapHUD,
+          &etj_snapHUDOffsetY,
+          &etj_snapHUDHeight,
+          &etj_snapHUDColor1,
+          &etj_snapHUDColor2,
+          &etj_snapHUDHLColor1,
+          &etj_snapHUDHLColor2,
+          &etj_snapHUDFov,
+          &etj_snapHUDHLActive,
+          &etj_snapHUDTrueness,
+          &etj_snapHUDEdgeThickness,
+          &etj_snapHUDBorderThickness,
+          &etj_snapHUDActiveIsPrimary,
+          &etj_snapHUDCrop,
+          &etj_snapHUDCropOffsets,
+      };
+
+  return values;
+}
+
+template <size_t N>
+std::array<std::string, N>
+collectHudValues(const std::array<vmCvar_t *, N> &cvars) {
+  std::array<std::string, N> values;
+  for (size_t i = 0; i < cvars.size(); ++i) {
+    values[i] = cvars[i]->string;
+  }
+
+  return values;
+}
+
+inline std::string encodeHudValue(const std::string &value) {
+  std::string encoded = value;
+  for (auto &ch : encoded) {
+    if (ch == ' ') {
+      ch = '~';
+    }
+  }
+  return encoded;
+}
+
+inline std::string decodeHudValue(const std::string &value) {
+  std::string decoded = value;
+  for (auto &ch : decoded) {
+    if (ch == '~') {
+      ch = ' ';
+    }
+  }
+  return decoded;
+}
+
+std::vector<std::string> splitHudPayload(const std::string &payload,
+                                         const char separator) {
+  std::vector<std::string> parts;
+  size_t start = 0;
+
+  while (start <= payload.size()) {
+    const auto pos = payload.find(separator, start);
+
+    if (pos == std::string::npos) {
+      parts.push_back(payload.substr(start));
+      break;
+    }
+
+    parts.push_back(payload.substr(start, pos - start));
+    start = pos + 1;
+  }
+
+  return parts;
+}
+
+template <size_t N>
+std::string buildHudPayload(const std::array<std::string, N> &values,
+                            const std::array<std::string, N> &reference,
+                            bool fullUpdate) {
+  std::string payload;
+
+  for (size_t i = 0; i < values.size(); ++i) {
+    if (!fullUpdate && values[i] == reference[i]) {
+      continue;
+    }
+
+    if (!payload.empty()) {
+      payload += Constants::SpectatorHudSync::FieldSeparator;
+    }
+
+    payload += std::to_string(i);
+    payload += Constants::SpectatorHudSync::KvSeparator;
+    payload += encodeHudValue(values[i]);
+  }
+
+  return payload.empty() ? "-" : payload;
+}
+
+template <size_t N>
+bool parseHudPayloadToClientInfo(
+    const std::string &payload,
+    std::array<std::array<char, MAX_CVAR_VALUE_STRING>, N> &values,
+    bool fullUpdate) {
+  bool changed = false;
+
+  if (fullUpdate) {
+    for (auto &entry : values) {
+      entry[0] = '\0';
+    }
+  }
+
+  if (payload.empty() || payload == "-") {
+    return false;
+  }
+
+  const auto fields =
+      splitHudPayload(payload, Constants::SpectatorHudSync::FieldSeparator);
+
+  for (const auto &field : fields) {
+    if (field.empty()) {
+      continue;
+    }
+
+    const auto pos = field.find(Constants::SpectatorHudSync::KvSeparator);
+    if (pos == std::string::npos) {
+      continue;
+    }
+
+    const int index = Q_atoi(field.substr(0, pos).c_str());
+    if (index < 0 || static_cast<size_t>(index) >= values.size()) {
+      continue;
+    }
+
+    const std::string decoded = decodeHudValue(field.substr(pos + 1));
+    if (Q_stricmp(values[index].data(), decoded.c_str()) != 0) {
+      Q_strncpyz(values[index].data(), decoded.c_str(), values[index].size());
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+bool hasValidCropOffsetValue(const char *value);
+
+int getFollowedClient() {
+  if (cg.mvTotalClients > 0 && cg.mvCurrentActive) {
+    const int mvClient = (cg.mvCurrentActive->mvInfo & MV_PID);
+    if (mvClient >= 0 && mvClient < MAX_CLIENTS && mvClient != cg.clientNum) {
+      return mvClient;
+    }
+  }
+
+  if (!cg.snap || !(cg.snap->ps.pm_flags & PMF_FOLLOW) ||
+      cg.snap->ps.clientNum == cg.clientNum) {
+    return -1;
+  }
+
+  return cg.snap->ps.clientNum;
+}
+
+bool showSpectatedHud() { return etj_specHudShow.integer != 0; }
+
+bool allowSpectatingMyHud() { return etj_specHudAllow.integer != 0; }
+
+bool hasValidCropOffsetValue(const char *value) {
+  if (!value || value[0] == '\0') {
+    return false;
+  }
+
+  const std::string_view str(value);
+  if (str.find_first_not_of(" \t\r\n") == std::string_view::npos) {
+    return false;
+  }
+
+  return str.find_first_of(" \t") != std::string_view::npos;
+}
+
+const char *getOverrideHudString(const vmCvar_t *cvar) {
+  const int clientNum = hudSyncState.overrideClient;
+  if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
+    return nullptr;
+  }
+
+  const auto &clientInfo = cgs.clientinfo[clientNum];
+  if (!clientInfo.hasFullHudSync) {
+    return nullptr;
+  }
+
+  for (size_t i = 0; i < cgazCvars().size(); ++i) {
+    if (cvar == cgazCvars()[i] && clientInfo.cgazHudValues[i][0] != '\0') {
+      return clientInfo.cgazHudValues[i].data();
+    }
+  }
+
+  for (size_t i = 0; i < Constants::SpectatorHudSync::SnaphudCvarNames.size();
+       ++i) {
+    if (cvar == snaphudCvars()[i] && clientInfo.snaphudHudValues[i][0] != '\0') {
+      return clientInfo.snaphudHudValues[i].data();
+    }
+  }
+
+  if (cvar == snaphudCvars().back() &&
+      hasValidCropOffsetValue(clientInfo.snaphudHudValues.back().data())) {
+    return clientInfo.snaphudHudValues.back().data();
+  }
+
+  return nullptr;
+}
+
+void requestFollowedHudSync(const int followedClient) {
+  if (followedClient < 0 ||
+      cg.time - hudSyncState.lastRequestTime <
+          Constants::SpectatorHudSync::RequestMinIntervalMs) {
+    return;
+  }
+
+  hudSyncState.lastRequestTime = cg.time;
+  trap_SendClientCommand(
+      va("%s %d", Constants::SpectatorHudSync::RequestCommand.data(),
+         followedClient));
+}
+
+void sendLocalHudSync() {
+  const bool fullUpdate = !hudSyncState.fullSent;
+  if (!fullUpdate &&
+      cg.time - hudSyncState.lastUploadTime <
+          Constants::SpectatorHudSync::UploadMinIntervalMs) {
+    return;
+  }
+
+  const auto currentCgazValues = collectHudValues(cgazCvars());
+  const auto currentSnaphudValues = collectHudValues(snaphudCvars());
+
+  const std::string cgazPayload = buildHudPayload(
+      currentCgazValues, hudSyncState.lastSentCgazValues, fullUpdate);
+  const std::string snaphudPayload =
+      buildHudPayload(currentSnaphudValues, hudSyncState.lastSentSnaphudValues,
+                      fullUpdate);
+
+  if (!fullUpdate && cgazPayload == "-" && snaphudPayload == "-") {
+    return;
+  }
+
+  trap_SendClientCommand(
+      va("%s %d %s %s", Constants::SpectatorHudSync::UploadCommand.data(),
+         fullUpdate ? 1 : 0, cgazPayload.c_str(), snaphudPayload.c_str()));
+
+  hudSyncState.fullSent = true;
+  hudSyncState.lastUploadTime = cg.time;
+  hudSyncState.lastSentCgazValues = currentCgazValues;
+  hudSyncState.lastSentSnaphudValues = currentSnaphudValues;
+}
+} // namespace
+
+const char *effectiveHudCvarString(const vmCvar_t *cvar) {
+  const char *overrideValue = getOverrideHudString(cvar);
+  return overrideValue ? overrideValue : cvar->string;
+}
+
+int32_t effectiveHudCvarInt(const vmCvar_t *cvar) {
+  return Q_atoi(effectiveHudCvarString(cvar));
+}
+
+float effectiveHudCvarFloat(const vmCvar_t *cvar) {
+  return Q_atof(effectiveHudCvarString(cvar));
+}
+
+void runSpectatorHudSyncFrame() {
+  if (cg.demoPlayback) {
+    return;
+  }
+
+  const int followedClient = getFollowedClient();
+  if (followedClient != hudSyncState.watchedClient) {
+    hudSyncState.watchedClient = followedClient;
+    hudSyncState.lastRequestTime = 0;
+  }
+
+  hudSyncState.overrideClient = -1;
+
+  if (followedClient >= 0 && followedClient < MAX_CLIENTS && showSpectatedHud()) {
+    requestFollowedHudSync(followedClient);
+
+    const auto &clientInfo = cgs.clientinfo[followedClient];
+    if (clientInfo.specHudAllowed && clientInfo.hasFullHudSync) {
+      hudSyncState.overrideClient = followedClient;
+    }
+  }
+
+  sendLocalHudSync();
+}
+
+void onSpectatorHudSyncCommand(int targetClientNum, bool fullUpdate,
+                               const std::string &cgazPayload,
+                               const std::string &snaphudPayload) {
+  if (targetClientNum < 0 || targetClientNum >= MAX_CLIENTS) {
+    return;
+  }
+
+  auto &clientInfo = cgs.clientinfo[targetClientNum];
+
+  bool changed = false;
+  changed |= parseHudPayloadToClientInfo(cgazPayload, clientInfo.cgazHudValues,
+                                         fullUpdate);
+  changed |= parseHudPayloadToClientInfo(snaphudPayload,
+                                         clientInfo.snaphudHudValues,
+                                         fullUpdate);
+
+  if (fullUpdate) {
+    clientInfo.hasFullHudSync = true;
+    changed = true;
+  }
+
+  if (clientInfo.hasFullHudSync && changed) {
+    clientInfo.hudSyncRevision++;
+  }
+}
+
 void delayedInit() {
   // force original cvars to match the shadow values, as ETe and ETL
   // reset cheat cvars to original values after the 'CG_INIT' VMCall
@@ -131,6 +503,8 @@ void delayedInit() {
         va("requestcustomvoteinfo %i", cg.numCustomvoteInfosRequested));
     cg.numCustomvoteInfosRequested++;
   }
+
+  runSpectatorHudSyncFrame();
 }
 
 void parseWorldspawnKeys() {
