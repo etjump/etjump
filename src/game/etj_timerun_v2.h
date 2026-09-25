@@ -112,6 +112,7 @@ public:
   void listCheckpoints(const Timerun::ListCheckpointsParams &params);
   void compareCheckpoints(const Timerun::CompareCheckpointsParams &params);
   void recordDetails(const Timerun::RecordDetailsParams &params);
+  void recordHistory(const Timerun::RecordHistoryParams &params);
   void removeRecord(const Timerun::RemoveRecordParams &params);
   void listRemovedRecords(const Timerun::ListRemovedRecordsParams &params);
   void restoreRecord(const Timerun::RestoreRecordParams &params);

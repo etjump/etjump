@@ -496,7 +496,9 @@ void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
 }
 
 std::vector<std::string>
-TimerunRepository::getMapsForName(const std::string &map, bool exact) {
+TimerunRepository::getMapsForName(const std::string &map, bool exact,
+                                  bool fromHistory) {
+  const std::string table = fromHistory ? "record_history" : "record";
 
   std::string mapFilter = exact ? "map=?" : "map like ?";
   std::string mapSearchString = exact ? map : "%" + map + "%";
@@ -505,11 +507,11 @@ TimerunRepository::getMapsForName(const std::string &map, bool exact) {
   _database->sql << StringUtils::format(R"(
     select
       distinct map
-    from record
+    from %s
     where %s
     collate nocase
   )",
-                                        mapFilter)
+                                        table, mapFilter)
                  << mapSearchString >>
       [&maps](std::string map) { maps.push_back(map); };
   return maps;
@@ -518,7 +520,8 @@ TimerunRepository::getMapsForName(const std::string &map, bool exact) {
 std::vector<std::string>
 TimerunRepository::getRunsForName(const std::string &map,
                                   const std::string &run, bool exact,
-                                  bool sanitizeResults) {
+                                  bool sanitizeResults, bool fromHistory) {
+  const std::string table = fromHistory ? "record_history" : "record";
 
   std::string runFilter = exact ? "lsanitize(run)=?" : "lsanitize(run) like ?";
   std::string runSearchString = exact ? run : "%" + run + "%";
@@ -527,12 +530,12 @@ TimerunRepository::getRunsForName(const std::string &map,
   _database->sql << StringUtils::format(R"(
     select
       distinct run
-    from record
+    from %s
     where %s
       and map = ?
     collate nocase
   )",
-                                        runFilter)
+                                        table, runFilter)
                  << runSearchString << map >>
       [&runs, sanitizeResults](const std::string &run) {
         runs.push_back(sanitizeResults ? StringUtils::sanitize(run, true)
@@ -541,10 +544,11 @@ TimerunRepository::getRunsForName(const std::string &map,
   return runs;
 }
 
-std::string
-TimerunRepository::resolveMapName(const std::string &map, bool exact,
-                                  const std::string &commandPrefix) {
-  const auto maps = getMapsForName(map, exact);
+std::string TimerunRepository::resolveMapName(const std::string &map,
+                                              bool exact,
+                                              const std::string &commandPrefix,
+                                              bool fromHistory) {
+  const auto maps = getMapsForName(map, exact, fromHistory);
 
   if (maps.size() > 1 && !Container::isIn(maps, map)) {
     throw std::runtime_error(
@@ -556,8 +560,8 @@ TimerunRepository::resolveMapName(const std::string &map, bool exact,
 
 std::string TimerunRepository::resolveRunName(const std::string &map,
                                               const std::string &run,
-                                              bool exact) {
-  const auto runs = getRunsForName(map, run, exact, true);
+                                              bool exact, bool fromHistory) {
+  const auto runs = getRunsForName(map, run, exact, true, fromHistory);
 
   return runs.size() == 1 ? runs[0] : "%" + run + "%";
 }
@@ -761,6 +765,87 @@ std::vector<Timerun::Record> TimerunRepository::getRecordFromSeason(
     records.emplace_back(getRecordFromStandardQueryResult(
         seasonId, map, runName, userId, time, checkpointsString, recordDate,
         playerName, metadataString));
+  };
+
+  return records;
+}
+
+std::vector<Timerun::HistoricalRecord> TimerunRepository::getHistoricalRecords(
+    const Timerun::RecordHistoryParams &params) {
+  const auto seasons = getSeasonsForName(params.season, false);
+
+  if (seasons.empty()) {
+    throw std::runtime_error(
+        StringUtils::format("No season matches name `%s`", params.season));
+  }
+
+  const std::string resolvedMap =
+      resolveMapName(params.map, params.exactMap, "record-history", true);
+
+  // match runs the same way '/records' does: prefer a single exact match,
+  // otherwise fall back to partial matches
+  const std::string runPlaceholder = "lsanitize(run) like ?";
+  const std::string runBinder =
+      resolveRunName(resolvedMap, params.run, true, true);
+
+  const std::string seasonPlaceholders = createSeasonPredicate(seasons);
+
+  const std::string query =
+      StringUtils::format(R"(
+    select
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      rank,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata,
+      exists(select 1 from removed_records rr
+              where rr.season_id = rh.season_id
+                and rr.map = rh.map
+                and rr.run = rh.run
+                and rr.user_id = rh.user_id
+                and rr.record_date = rh.record_date) as removed
+    from record_history rh
+    where
+      (%s) and
+      map=? collate nocase and
+      %s and
+      user_id=?
+    order by season_id, map, run, time asc, record_date asc, id asc;
+  )",
+                          seasonPlaceholders, runPlaceholder);
+
+  auto binder = _database->sql << query;
+
+  for (const auto &s : seasons) {
+    binder << s.id;
+  }
+
+  binder << StringUtils::toLowerCase(resolvedMap);
+  binder << runBinder;
+  binder << params.userId;
+
+  std::vector<Timerun::HistoricalRecord> records;
+
+  binder >> [&records](int32_t seasonId, const std::string &map,
+                       const std::string &runName, int32_t userId, int32_t time,
+                       int32_t rank, const std::string &checkpointsString,
+                       const std::string &recordDate,
+                       const std::string &playerName,
+                       const std::string &metadataString, int32_t removed) {
+    Timerun::HistoricalRecord historicalRecord;
+    historicalRecord.r = getRecordFromStandardQueryResult(
+        seasonId, map, runName, userId, time, checkpointsString, recordDate,
+        playerName, metadataString);
+    // 'rank' is null for records seeded from 'removed_records', which
+    // sqlite_modern_cpp reads as 0
+    historicalRecord.rank = rank;
+    historicalRecord.removed = removed != 0;
+    records.emplace_back(std::move(historicalRecord));
   };
 
   return records;
