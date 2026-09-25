@@ -14,6 +14,8 @@
   * **3** - never allow, regardless of area brushes
 * `etj_drawYaw` to display an indicator when turning view left/right [#1390](https://github.com/etjump/etjump/pull/1390)
 * `etj_drawFallDamageDetector` to display fall damage the player would take if falling/jumping to the aimed surface [#2016](https://github.com/etjump/etjump/pull/2016)
+* client-side prediction for portal gun portal spawning, when portal prediction is enabled via `g_portalPredict` or `portalpredict` worldspawn key
+  * portals appear immediately when fired, rather than after a round trip to the server
 * `editentity` script action to modify an entity without a `scriptname` via mapscripting [#1972](https://github.com/etjump/etjump/pull/1972)
 * bundled mapscripts for `dreamwork` and `the_biome_expedition` [#1992](https://github.com/etjump/etjump/pull/1992) [#2008](https://github.com/etjump/etjump/pull/2008)
 

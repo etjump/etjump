@@ -34,18 +34,12 @@
 #include "etj_worldspawn.h"
 
 namespace ETJump {
-// max range where you can place next portal gate
-inline constexpr float MAX_PORTAL_RANGE = 2 << 16;
-// min angle difference between two portals, used to avoid overlapping
-inline constexpr float MIN_ANGLES_DIFF = 100.0f;
-// min distance between two portal center points, used to avoid overlapping
-inline constexpr float MIN_PORTALS_DIST = 75.0f / 2;
-
-void Portal::spawn(gentity_t *ent, const float scale, const Type type,
-                   const trace_t &tr, vec3_t end, const vec3_t angles) {
+void Portal::spawn(gentity_t *ent, const Type type,
+                   const PortalgunShared::Placement &placement,
+                   const int32_t hitEntityNum) {
   gentity_t *portal = G_Spawn();
   portal->classname = "portal_gate";
-  portal->s.onFireStart = static_cast<int>(PORTAL_BBOX_RADIUS * 2 * scale);
+  portal->s.onFireStart = PortalgunShared::sizeFromScale(placement.scale);
 
   // save the spawn timestamp so client can animate the spawning
   portal->s.effect1Time = level.time;
@@ -74,13 +68,21 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
   }
 
   // Set origin (obviously)
-  G_SetOrigin(portal, end);
+  vec3_t origin;
+  VectorCopy(placement.origin, origin);
+  G_SetOrigin(portal, origin);
 
-  VectorCopy(end, portal->s.origin);
-  VectorCopy(end, portal->r.currentOrigin);
+  VectorCopy(origin, portal->s.origin);
+  VectorCopy(origin, portal->r.currentOrigin);
 
-  EntityUtilsShared::setPortalBBox(portal->r.mins, portal->r.maxs, angles,
-                                   scale);
+  // angles are based on the normal of the plane
+  // NOTE: these must be set before the initial think below,
+  // otherwise the linked portal would get zero destination angles
+  VectorCopy(placement.angles, portal->s.angles);
+  VectorCopy(placement.angles, portal->r.currentAngles);
+
+  EntityUtilsShared::setPortalBBox(portal->r.mins, portal->r.maxs,
+                                   placement.angles, placement.scale);
 
   portal->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
   portal->clipmask =
@@ -110,17 +112,12 @@ void Portal::spawn(gentity_t *ent, const float scale, const Type type,
   portal->s.otherEntityNum =
       ent->s.clientNum; // HACK: Using this for render checks.....
 
-  // Set angle of entity based on normal of plane....
-  vectoangles(tr.plane.normal,
-              portal->s.angles); // NOTE: RE-Enable angles...
-  vectoangles(tr.plane.normal, portal->r.currentAngles);
-
   // rather than using the shared cvar, we can simply set 'portalteam'
   // value to an entitystate field that we can check on client
   portal->s.teamNum = static_cast<int32_t>(game.worldspawn->portalTeam);
 
-  if (tr.entityNum < ENTITYNUM_MAX_NORMAL) {
-    portal->portalParentEntity = &g_entities[tr.entityNum];
+  if (hitEntityNum < ENTITYNUM_MAX_NORMAL) {
+    portal->portalParentEntity = &g_entities[hitEntityNum];
   }
 
   trap_LinkEntity(portal);
@@ -316,102 +313,41 @@ void Portalgun::touch(gentity_t *self, gentity_t *other, trace_t *trace) {
   Touch_Item_Give(self, other, trace);
 }
 
-void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
-                     vec3_t right, vec3_t up, vec3_t muzzleEffect) {
-  float scale = 1.0f;
+void Portalgun::fire(gentity_t *ent, const Portal::Type type,
+                     vec3_t muzzleEffect) {
+  vec3_t traceStart;
+  vec3_t traceEnd;
+  trace_t tr;
 
-  vec3_t t_endpos;
+  PortalgunShared::traceEndpoints(ent->r.currentOrigin,
+                                  ent->client->ps.viewheight,
+                                  ent->client->ps.viewangles, traceStart,
+                                  traceEnd);
 
-  // trace vars
-  vec3_t start;       // Muzzle location
-  vec3_t trace_start; // Actual trace start
-  vec3_t trace_end;   // trace end point
-  trace_t tr;         // trace results..
-  vec3_t tr_end;      // trace end adjusted for possible func_portaltarget
+  TraceUtils::filteredTrace(ent->s.number, &tr, traceStart, nullptr, nullptr,
+                            traceEnd, ent->s.number, MASK_PORTAL);
 
-  // BBox info
-  vec3_t t_portalAngles; // Could be used for all angles conversions...
-
-  // NOTE: NEW trace setup.... pulled from flamethrower
-  // NOTE: Need this for +attack2 call...
-  AngleVectors(ent->client->ps.viewangles, forward, right, up);
-
-  VectorCopy(ent->r.currentOrigin, start);
-  start[2] += static_cast<float>(ent->client->ps.viewheight);
-  VectorCopy(start, trace_start);
-
-  // Muzzle position
-  VectorMA(start, -4, forward, start);
-  VectorMA(start, 6, right, start);
-  VectorMA(start, -4, up, start);
-
-  // End pos
-  VectorMA(trace_start, MAX_PORTAL_RANGE, forward, trace_end);
-
-  TraceUtils::filteredTrace(ent->s.number, &tr, trace_start, nullptr, nullptr,
-                            trace_end, ent->s.number, MASK_PORTAL);
-
-  if (tr.surfaceFlags & SURF_NOIMPACT || tr.fraction == 1.0f) {
+  if (!PortalgunShared::surfaceAllowsPortal(
+          tr, game.worldspawn->sharedKeys.portalSurfaces)) {
     return;
   }
 
-  // portalclip or player = no portal
-  if (tr.contents & (CONTENTS_PORTALCLIP | CONTENTS_BODY)) {
-    return;
-  }
+  PortalgunShared::PortalTarget target{};
+  const bool hitTarget = getPortalTarget(tr.entityNum, target);
 
-  if (game.worldspawn->portalSurfaces && tr.surfaceFlags & SURF_PORTALSURFACE) {
-    return;
-  }
+  PortalgunShared::Placement placement{};
+  PortalgunShared::computePlacement(tr, hitTarget ? &target : nullptr,
+                                    placement);
 
-  if (!game.worldspawn->portalSurfaces &&
-      !(tr.surfaceFlags & SURF_PORTALSURFACE)) {
-    return;
-  }
-
-  vectoangles(tr.plane.normal, t_portalAngles);
-  const gentity_t *const traceEnt = g_entities + tr.entityNum;
-
-  // we hit an entity that wants portals to be centered
-  if (tr.entityNum > MAX_CLIENTS + BODY_QUEUE_SIZE &&
-      tr.entityNum < ENTITYNUM_WORLD &&
-      (!Q_stricmp(traceEnt->classname, "func_portaltarget") ||
-       (traceEnt->s.eType == ET_STATIC_CLIENT &&
-        traceEnt->spawnflags & FuncStaticClient::Spawnflags::PORTAL_TARGET))) {
-    vec3_t be_position; // brush ent position
-    vec3_t delta;       // delta between brushent position and trace end
-    vec3_t
-        normalScaled; // plane normal scaled by dotproduct of delta and itself
-
-    EntityUtilities::getOriginOrBmodelCenter(traceEnt, be_position);
-
-    VectorSubtract(be_position, tr.endpos, delta);
-    const float dotProduct = DotProduct(delta, tr.plane.normal);
-    VectorScale(tr.plane.normal, dotProduct, normalScaled);
-    VectorSubtract(be_position, normalScaled, tr_end);
-
-    // handle 'portalsize' key
-    if (traceEnt->count > 0) {
-      scale = static_cast<float>(traceEnt->count) / (PORTAL_BBOX_RADIUS * 2);
-    }
-  } else {
-    VectorCopy(tr.endpos, tr_end);
-  }
-
-  VectorMA(tr_end, 5, tr.plane.normal, t_endpos);
-
-  if (portalsOverlap(ent, type, scale, t_portalAngles, t_endpos)) {
+  if (portalsOverlap(ent, type, placement)) {
     return;
   }
 
   // Free any previous instances of each portal if any
   if (type == Portal::Type::PORTAL_BLUE && ent->portalBlue) {
-
     G_FreeEntity(ent->portalBlue);
     ent->portalBlue = nullptr;
-
   } else if (type == Portal::Type::PORTAL_RED && ent->portalRed) {
-
     G_FreeEntity(ent->portalRed);
     ent->portalRed = nullptr;
   }
@@ -424,20 +360,44 @@ void Portalgun::fire(gentity_t *ent, const Portal::Type type, vec3_t forward,
       ? VectorCopy(portalBlueTrail, tent->s.angles)
       : VectorCopy(portalRedTrail, tent->s.angles);
 
-  SnapVectorTowards(tr_end, start);
-  VectorCopy(tr_end, tent->s.origin2);
+  vec3_t trailEnd;
+  VectorCopy(placement.surfacePoint, trailEnd);
+  SnapVectorTowards(trailEnd, muzzleEffect);
+  VectorCopy(trailEnd, tent->s.origin2);
   tent->s.otherEntityNum2 = ent->s.number;
   // END - Rail
 
   // portal fired correctly, increment portal count
   ent->client->numPortals++;
 
-  Portal::spawn(ent, scale, type, tr, t_endpos, t_portalAngles);
+  Portal::spawn(ent, type, placement, tr.entityNum);
 }
 
-bool Portalgun::portalsOverlap(gentity_t *ent, Portal::Type type,
-                               const float scale, vec3_t portalAngles,
-                               vec3_t endPos) {
+bool Portalgun::getPortalTarget(const int32_t entityNum,
+                                PortalgunShared::PortalTarget &target) {
+  if (entityNum <= MAX_CLIENTS + BODY_QUEUE_SIZE ||
+      entityNum >= ENTITYNUM_WORLD) {
+    return false;
+  }
+
+  const gentity_t *traceEnt = g_entities + entityNum;
+
+  // we hit an entity that wants portals to be centered
+  if (Q_stricmp(traceEnt->classname, "func_portaltarget") != 0 &&
+      !(traceEnt->s.eType == ET_STATIC_CLIENT &&
+        traceEnt->spawnflags & FuncStaticClient::Spawnflags::PORTAL_TARGET)) {
+    return false;
+  }
+
+  EntityUtilities::getOriginOrBmodelCenter(traceEnt, target.center);
+  // 'portalsize' key
+  target.size = traceEnt->count;
+
+  return true;
+}
+
+bool Portalgun::portalsOverlap(gentity_t *ent, const Portal::Type type,
+                               const PortalgunShared::Placement &placement) {
   std::vector<const gentity_t *> otherPortals;
   // * 2 for 2 portals per client
   otherPortals.reserve(level.numConnectedClients * 2L);
@@ -504,18 +464,11 @@ bool Portalgun::portalsOverlap(gentity_t *ent, Portal::Type type,
       break;
   }
 
-  return std::any_of(
-      otherPortals.cbegin(), otherPortals.cend(),
-      [scale, portalAngles, endPos](const gentity_t *otherPortal) {
-        const float otherScale =
-            static_cast<float>(otherPortal->s.onFireStart) /
-            (PORTAL_BBOX_RADIUS * 2);
-        const float min_dist =
-            (MIN_PORTALS_DIST * scale) + (MIN_PORTALS_DIST * otherScale);
-
-        return (Distance(portalAngles, otherPortal->s.angles) <
-                    MIN_ANGLES_DIFF &&
-                Distance(endPos, otherPortal->s.origin) < min_dist);
-      });
+  return std::any_of(otherPortals.cbegin(), otherPortals.cend(),
+                     [&placement](const gentity_t *otherPortal) {
+                       return PortalgunShared::portalsOverlap(
+                           placement, otherPortal->s.origin,
+                           otherPortal->s.angles, otherPortal->s.onFireStart);
+                     });
 }
 } // namespace ETJump

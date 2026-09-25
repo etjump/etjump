@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "etj_portal_prediction.h"
 #include "etj_trace_utils.h"
 #include "etj_utilities.h"
 
@@ -627,6 +628,72 @@ static void adjustDisplayPlayerStateForMover() {
       cgame.displayPlayerState.origin, cgame.displayPlayerState.groundEntityNum,
       cg.physicsTime, cg.time, cgame.displayPlayerState.origin, nullptr);
 }
+
+// 'origin' is the portal's lerped origin, 'lastRailboxTime' is for debug draw
+static void touchPortal(const entityState_t &es, const vec3_t origin,
+                        int &lastRailboxTime) {
+  vec3_t mins, maxs, pmins, pmaxs;
+
+  // portals have a pre-defined bounding box, which we can calculate here
+  // rather than transmitting it over network, since we need
+  // origin2/angles2 to store the destination and don't really have any
+  // fields which we could use to transmit mins/maxs
+  // 'onFireStart' contains the portal size, which might be adjusted
+  // by 'func_portaltarget', so derive scale from that
+  const float scale = PortalgunShared::scaleFromSize(es.onFireStart);
+  EntityUtilsShared::setPortalBBox(mins, maxs, es.angles, scale);
+
+  VectorAdd(origin, mins, mins);
+  VectorAdd(origin, maxs, maxs);
+
+  // TODO: this is kinda annoying as railtrails fade as they approach
+  //  the end of their lifetime, we should probably add a version
+  //  that does not fade at all since it's more pleasant on eyes
+  if (!skipPortalDraw(cg.snap->ps.clientNum, es.otherEntityNum) &&
+      etj_portalDebug.integer &&
+      cg.time > lastRailboxTime + cg_railTrailTime.integer) {
+    vec3_t boxColor{};
+
+    if (cg.snap->ps.clientNum == es.otherEntityNum) {
+      VectorCopy(es.eType == ET_PORTAL_BLUE ? portalBlueTrail : portalRedTrail,
+                 boxColor);
+    } else {
+      VectorCopy(es.eType == ET_PORTAL_BLUE ? portalGreenTrail
+                                            : portalYellowTrail,
+                 boxColor);
+    }
+
+    CG_RailTrail(mins, maxs, true, boxColor);
+    lastRailboxTime = cg.time;
+  }
+
+  VectorAdd(cg.predictedPlayerState.origin, cg_pmove.mins, pmins);
+  VectorAdd(cg.predictedPlayerState.origin, cg_pmove.maxs, pmaxs);
+
+  if (!BG_BBoxCollision(pmins, pmaxs, mins, maxs)) {
+    return;
+  }
+
+  // if prediction is disabled, don't handle teleports on client
+  if (!etj_portalPredict.integer && !cgame.sharedWSKeys.portalPredict) {
+    return;
+  }
+
+  // don't try to teleport if we only have one portal
+  if (VectorCompare(es.origin2, vec3_origin) &&
+      VectorCompare(es.angles2, vec3_origin)) {
+    return;
+  }
+
+  if (!canUsePortal(&es)) {
+    return;
+  }
+
+  entityState_t *playerEs = &cg_entities[cg.snap->ps.clientNum].currentState;
+  EntityUtilsShared::portalTeleport(&cg.predictedPlayerState, playerEs, &es,
+                                    &cg_pmove.cmd, cg.physicsTime,
+                                    cg.teleportBitFlipped);
+}
 } // namespace ETJump
 
 /*
@@ -660,6 +727,8 @@ static void CG_TouchTriggerPrediction() {
 
   cg.teleportBitFlipped = false;
 
+  const auto &portalPrediction = ETJump::cgame.systems.portalPrediction;
+
   for (i = 0; i < cg_numTriggerEntities; i++) {
     cent = cg_triggerEntities[i];
     ent = &cent->currentState;
@@ -670,23 +739,32 @@ static void CG_TouchTriggerPrediction() {
     }
 
     // portals don't have bmodels
-    if (ent->eType != ET_PORTAL_BLUE && ent->eType != ET_PORTAL_RED) {
-      if (ent->solid != SOLID_BMODEL) {
-        continue;
+    if (ent->eType == ET_PORTAL_BLUE || ent->eType == ET_PORTAL_RED) {
+      entityState_t portalEs;
+
+      // our portal might be superseded by a predicted portal,
+      // or its destination might be one
+      if (portalPrediction->resolveServerPortal(*ent, portalEs)) {
+        ETJump::touchPortal(portalEs, cent->lerpOrigin, cent->lastRailboxTime);
       }
 
-      // Gordon: er, this lookup was wrong...
-      cmodel = cgs.inlineDrawModel[ent->modelindex];
-      if (!cmodel) {
-        continue;
-      }
+      continue;
+    }
+
+    if (ent->solid != SOLID_BMODEL) {
+      continue;
+    }
+
+    // Gordon: er, this lookup was wrong...
+    cmodel = cgs.inlineDrawModel[ent->modelindex];
+    if (!cmodel) {
+      continue;
     }
 
     if (ent->eType == ET_CONSTRUCTIBLE || ent->eType == ET_OID_TRIGGER ||
         ent->eType == ET_PUSH_TRIGGER ||
         ent->eType == ET_VELOCITY_PUSH_TRIGGER ||
-        ent->eType == ET_TELEPORT_TRIGGER_CLIENT ||
-        ent->eType == ET_PORTAL_BLUE || ent->eType == ET_PORTAL_RED
+        ent->eType == ET_TELEPORT_TRIGGER_CLIENT
 #ifdef VISIBLE_TRIGGERS
         || ent->eType == ET_TRIGGER_MULTIPLE ||
         ent->eType == ET_TRIGGER_FLAGONLY ||
@@ -699,52 +777,10 @@ static void CG_TouchTriggerPrediction() {
         continue;
       }
 
-      // portals have a pre-defined bounding box, which we can calculate here
-      // rather than transmitting it over network, since we need
-      // origin2/angles2 to store the destination and don't really have any
-      // fields which we could use to transmit mins/maxs
-      if (ent->eType == ET_PORTAL_BLUE || ent->eType == ET_PORTAL_RED) {
-        // 'onFireStart' contains the portal size, which might be adjusted
-        // by 'func_portaltarget', so derive scale from that
-        const float scale = static_cast<float>(cent->currentState.onFireStart) /
-                            (ETJump::PORTAL_BBOX_RADIUS * 2);
-        ETJump::EntityUtilsShared::setPortalBBox(
-            mins, maxs, cent->currentState.angles, scale);
+      trap_R_ModelBounds(cmodel, mins, maxs);
 
-        VectorAdd(cent->lerpOrigin, mins, mins);
-        VectorAdd(cent->lerpOrigin, maxs, maxs);
-
-        // TODO: this is kinda annoying as railtrails fade as they approach
-        //  the end of their lifetime, we should probably add a version
-        //  that does not fade at all since it's more pleasant on eyes
-        if (!ETJump::skipPortalDraw(cg.snap->ps.clientNum,
-                                    cent->currentState.otherEntityNum) &&
-            etj_portalDebug.integer &&
-            cg.time > cent->lastRailboxTime + cg_railTrailTime.integer) {
-
-          vec3_t boxColor{};
-
-          if (cg.snap->ps.clientNum == cent->currentState.otherEntityNum) {
-            VectorCopy(cent->currentState.eType == ET_PORTAL_BLUE
-                           ? ETJump::portalBlueTrail
-                           : ETJump::portalRedTrail,
-                       boxColor);
-          } else {
-            VectorCopy(cent->currentState.eType == ET_PORTAL_BLUE
-                           ? ETJump::portalGreenTrail
-                           : ETJump::portalYellowTrail,
-                       boxColor);
-          }
-
-          CG_RailTrail(mins, maxs, true, boxColor);
-          cent->lastRailboxTime = cg.time;
-        }
-      } else {
-        trap_R_ModelBounds(cmodel, mins, maxs);
-
-        VectorAdd(cent->lerpOrigin, mins, mins);
-        VectorAdd(cent->lerpOrigin, maxs, maxs);
-      }
+      VectorAdd(cent->lerpOrigin, mins, mins);
+      VectorAdd(cent->lerpOrigin, maxs, maxs);
 
 #ifdef VISIBLE_TRIGGERS
       if (ent->eType == ET_TRIGGER_MULTIPLE ||
@@ -755,8 +791,7 @@ static void CG_TouchTriggerPrediction() {
       {
         if (ent->eType != ET_PUSH_TRIGGER &&
             ent->eType != ET_VELOCITY_PUSH_TRIGGER &&
-            ent->eType != ET_TELEPORT_TRIGGER_CLIENT &&
-            ent->eType != ET_PORTAL_BLUE && ent->eType != ET_PORTAL_RED) {
+            ent->eType != ET_TELEPORT_TRIGGER_CLIENT) {
           // expand the bbox a bit
           VectorSet(mins, mins[0] - 48, mins[1] - 48, mins[2] - 48);
           VectorSet(maxs, maxs[0] + 48, maxs[1] + 48, maxs[2] + 48);
@@ -815,31 +850,15 @@ static void CG_TouchTriggerPrediction() {
           ETJump::EntityUtilsShared::touchPusher(&cg.predictedPlayerState,
                                                  cg.physicsTime, ent);
         }
-      } else if (ent->eType == ET_PORTAL_BLUE || ent->eType == ET_PORTAL_RED) {
-        // if prediction is disabled, don't handle teleports on client
-        if (!etj_portalPredict.integer &&
-            !ETJump::cgame.sharedWSKeys.portalPredict) {
-          continue;
-        }
-
-        // don't try to teleport if we only have one portal
-        if (VectorCompare(ent->origin2, vec3_origin) &&
-            VectorCompare(ent->angles2, vec3_origin)) {
-          continue;
-        }
-
-        if (!ETJump::canUsePortal(ent)) {
-          continue;
-        }
-
-        entityState_t *playerEs =
-            &cg_entities[cg.snap->ps.clientNum].currentState;
-        ETJump::EntityUtilsShared::portalTeleport(
-            &cg.predictedPlayerState, playerEs, ent, &cg_pmove.cmd,
-            cg.physicsTime, cg.teleportBitFlipped);
       }
     }
   }
+
+  // predicted portals only exist for commands after the one that fired them
+  portalPrediction->forEachPortal(
+      [](const entityState_t &es, int32_t &lastRailboxTime) {
+        ETJump::touchPortal(es, es.origin, lastRailboxTime);
+      });
 }
 
 const char *predictionStrings[] = {
@@ -1113,6 +1132,7 @@ void CG_PredictPlayerState() {
 
   // demo playback just copies the moves
   if ((cg.demoPlayback) || (cg.snap->ps.pm_flags & PMF_FOLLOW)) {
+    ETJump::cgame.systems.portalPrediction->clear();
     CG_InterpolatePlayerState(qfalse);
     return;
   }
@@ -1148,6 +1168,7 @@ void CG_PredictPlayerState() {
           AngleNormalize180(cg.pmext.centerangles[ROLL]);
     }
 
+    ETJump::cgame.systems.portalPrediction->clear();
     CG_InterpolatePlayerState(qtrue);
     return;
   }
@@ -1366,6 +1387,9 @@ void CG_PredictPlayerState() {
   }
   // END unlagged - optimized prediction
 
+  // predicted portals are rebuilt from the commands we replay
+  ETJump::cgame.systems.portalPrediction->beginPrediction();
+
   // run cmds
   moved = false;
   predictError = true;
@@ -1562,9 +1586,14 @@ void CG_PredictPlayerState() {
 
     // add push trigger movement effects
     CG_TouchTriggerPrediction();
+
+    // server fires weapons after touching triggers
+    ETJump::cgame.systems.portalPrediction->checkFire(
+        previousPlayerState, *cg_pmove.ps, cg_pmove.cmd);
   }
 
   ETJump::cgame.utils.trace->resetIgnoredEntities();
+  ETJump::cgame.systems.portalPrediction->endPrediction();
 
   // unlagged - optimized prediction
   //  do a /condump after a few seconds of this

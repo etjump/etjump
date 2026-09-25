@@ -8,6 +8,7 @@
 
 #include "g_local.h"
 #include "etj_entity_utilities.h"
+#include "etj_portalgun_shared.h"
 
 /*
 ===============================================================================
@@ -3778,13 +3779,21 @@ void SP_func_portaltarget(gentity_t *ent) {
   int portalSize = 0;
   G_SpawnInt("portalsize", "0", &portalSize);
 
-  if (portalSize > 512) {
-    portalSize = 512;
+  if (portalSize > ETJump::MAX_PORTAL_TARGET_SIZE) {
+    portalSize = ETJump::MAX_PORTAL_TARGET_SIZE;
   }
 
   if (portalSize > 0) {
     ent->count = portalSize;
   }
+
+  // network the portal target info so client can predict portal placement
+  // link first so bmodel bounds are valid for the center calculation
+  trap_LinkEntity(ent);
+
+  vec3_t center;
+  ETJump::EntityUtilities::getOriginOrBmodelCenter(ent, center);
+  ETJump::PortalgunShared::setPortalTarget(ent->s, ent->count, center);
 }
 
 /*

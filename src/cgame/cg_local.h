@@ -3120,6 +3120,8 @@ qboolean CG_AddLinkedEntity(centity_t *cent, qboolean ignoreframe, int atTime);
 void CG_PositionEntityOnTag(refEntity_t *entity, const refEntity_t *parent,
                             const char *tagName, int startIndex,
                             vec3_t *offset);
+// 'spawnTime' is the start time of the portal spawn animation
+void CG_DrawPortalGate(const entityState_t *es, int spawnTime);
 void CG_PositionRotatedEntityOnTag(refEntity_t *entity,
                                    const refEntity_t *parent,
                                    const char *tagName);

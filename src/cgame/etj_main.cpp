@@ -59,6 +59,7 @@
 #include "etj_overbounce_watcher.h"
 #include "etj_player_bbox.h"
 #include "etj_player_events_handler.h"
+#include "etj_portal_prediction.h"
 #include "etj_quick_follow_drawable.h"
 #include "etj_rtv_drawable.h"
 #include "etj_savepos.h"
@@ -151,6 +152,12 @@ void parseWorldspawnKeys() {
       Q_atoi(Info_ValueForKey(s, WorldspawnShared::NO_WALLBUG_CS));
   cgame.sharedWSKeysGlobal.portalPredict =
       Q_atoi(Info_ValueForKey(s, WorldspawnShared::PORTAL_PREDICT_CS));
+
+  // defaults to 1 on server, so treat a missing value the same way
+  const char *portalSurfaces =
+      Info_ValueForKey(s, WorldspawnShared::PORTAL_SURFACES_CS);
+  cgame.sharedWSKeysGlobal.portalSurfaces =
+      portalSurfaces[0] == '\0' || Q_atoi(portalSurfaces);
 
   cgame.sharedWSKeysGlobal.noSave =
       std::clamp(static_cast<AreaOpts>(
@@ -276,6 +283,7 @@ static void initSystems() {
                                                     cgame.core.serverCommands);
 
   cgame.systems.commandCompletions = std::make_unique<CommandCompletions>();
+  cgame.systems.portalPrediction = std::make_unique<PortalPrediction>();
 }
 
 void initDemo() {
