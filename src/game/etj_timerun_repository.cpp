@@ -463,7 +463,7 @@ std::vector<Timerun::Record> TimerunRepository::getRecords() {
       player_name,
       metadata
     from record
-    order by season_id, map, run, time;
+    order by season_id, map, run, time asc, record_date asc, user_id asc;
   )";
 
   return getRecordsFromQuery(binder);
@@ -549,7 +549,7 @@ TimerunRepository::getRecords(const Timerun::PrintRecordsParams &params) {
       map=?
       %s
     collate nocase
-    order by season_id, map, run, time asc, record_date asc
+    order by season_id, map, run, time asc, record_date asc, user_id asc
   )",
                           seasonPlaceholders, runPlaceholder);
 
