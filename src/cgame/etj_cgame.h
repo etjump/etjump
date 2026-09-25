@@ -69,12 +69,14 @@ class ClientRtvHandler;
 class CustomCommandMenu;
 class Timerun;
 class CommandCompletions;
+class PortalPrediction;
 
 struct Systems {
   std::unique_ptr<ClientRtvHandler> rtv;
   std::unique_ptr<CustomCommandMenu> customCommandMenu;
   std::shared_ptr<Timerun> timerun;
   std::unique_ptr<CommandCompletions> commandCompletions;
+  std::unique_ptr<PortalPrediction> portalPrediction;
 };
 
 class EventLoop;
