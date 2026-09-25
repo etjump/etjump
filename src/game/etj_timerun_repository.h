@@ -61,10 +61,12 @@ public:
                                              const std::string &map,
                                              const std::string &run) const;
   void editSeason(const Timerun::EditSeasonParams &params);
-  std::vector<std::string> getMapsForName(const std::string &map, bool exact);
+  std::vector<std::string> getMapsForName(const std::string &map, bool exact,
+                                          bool fromHistory = false);
   std::vector<std::string> getRunsForName(const std::string &map,
                                           const std::string &run, bool exact,
-                                          bool sanitizeResults);
+                                          bool sanitizeResults,
+                                          bool fromHistory = false);
   std::vector<Timerun::Record> getRecords();
   std::vector<Timerun::Record>
   getRecords(const Timerun::PrintRecordsParams &params);
@@ -76,6 +78,8 @@ public:
                                                    const std::string &map,
                                                    const std::string &run,
                                                    int32_t rank, bool exactMap);
+  std::vector<Timerun::HistoricalRecord>
+  getHistoricalRecords(const Timerun::RecordHistoryParams &params);
   std::vector<Timerun::Season> getSeasons();
   void deleteSeason(const std::string &name);
   std::vector<Timerun::Checkpoints>
@@ -129,9 +133,10 @@ private:
   getSeasonsFromQuery(sqlite::database_binder &binder);
 
   std::string resolveMapName(const std::string &map, bool exact,
-                             const std::string &commandPrefix);
+                             const std::string &commandPrefix,
+                             bool fromHistory = false);
   std::string resolveRunName(const std::string &map, const std::string &run,
-                             bool exact);
+                             bool exact, bool fromHistory = false);
 
   std::string serializeMetadata(std::map<std::string, std::string> metadata);
   std::unique_ptr<DatabaseV2> _database;

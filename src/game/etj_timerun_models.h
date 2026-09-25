@@ -191,4 +191,30 @@ struct RestoreRecordResult {
   std::vector<RestoreConflict> conflicts; // unresolved conflicts (no --force)
   std::vector<RemovedRecord> skipped;     // copies skipped due to permissions
 };
+
+struct RecordHistoryParams {
+  int32_t clientNum{};
+  int32_t userId{};
+  std::string season;
+  std::string map;
+  std::string run;
+  bool exactMap{};
+};
+
+struct HistoricalRecord {
+  Record r{};
+  int32_t rank{};
+  bool removed{};
+};
+
+struct HistoricalRunGroup {
+  std::string map;
+  std::string run;
+  std::vector<HistoricalRecord> records;
+};
+
+struct HistoricalSeasonGroup {
+  int32_t seasonId{};
+  std::vector<HistoricalRunGroup> runs;
+};
 } // namespace ETJump::Timerun
