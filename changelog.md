@@ -4,12 +4,15 @@
 * `etj_lerpPmove` cvar to interpolate between physics frames when `pmove_fixed 1` is set [#1994](https://github.com/etjump/etjump/pull/1994)
   * this should smooth out `pmove_fixed 1` gameplay, and bring the feeling closer to `pmove_fixed 0`
   * physics are not interpolated, only the rendered view
+* historical timerun record tracking [#2028](https://github.com/etjump/etjump/pull/2028)
+  * every PB improvement is now preserved in the timerun database, rather than just the latest record
+  * record progression can be viewed with `record-history` command
 * `remove-record`, `restore-record` and `list-removed-records` commands for timerun records [#1997](https://github.com/etjump/etjump/pull/1997)
   * removed records are archived in the timerun database
   * anyone can remove/restore their own records, admins with `T` flag can remove/restore records from other players
   * records removed by admins can only be restored by admins
 * `target_wskey_overrides` entity to override effective worldspawn keys under specific circumstances [#2015](https://github.com/etjump/etjump/pull/2015)
-* new supported values for `nonoclip/noprone/nosave` worldspawn keys
+* new supported values for `nonoclip/noprone/nosave` worldspawn keys [#2015](https://github.com/etjump/etjump/pull/2015)
   * **2** - always allow, regardless of area brushes
   * **3** - never allow, regardless of area brushes
 * `etj_drawYaw` to display an indicator when turning view left/right [#1390](https://github.com/etjump/etjump/pull/1390)
