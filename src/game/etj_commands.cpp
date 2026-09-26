@@ -563,7 +563,7 @@ static bool recordDetails(gentity_t *ent, Arguments argv) {
   const int32_t clientNum = ClientNum(ent);
 
   const auto *const desc = R"(Prints details about a timerun record.
-    /record-details --season <season name> --map <map name --run <run name> --rank <rank>
+    /record-details --season <season name> --map <map name> --run <run name> --rank <rank>
 
     Has a shorthand format of:
     /record-details <run name>
