@@ -224,7 +224,7 @@ TimerunRepository::getRecordsForRun(const std::string &map,
   throw std::runtime_error("Not implemented");
 }
 
-void TimerunRepository::insertRecord(const Timerun::Record &record) {
+void TimerunRepository::insertRecordRow(const Timerun::Record &record) {
   _database->sql << R"(
     insert into record (
       season_id,
@@ -254,7 +254,60 @@ void TimerunRepository::insertRecord(const Timerun::Record &record) {
                  << serializeMetadata(record.metadata);
 }
 
+void TimerunRepository::insertRecordHistory(const Timerun::Record &record) {
+  _database->sql << R"(
+    insert into record_history (
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      rank,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata
+    )
+    select
+      r.season_id,
+      r.map,
+      r.run,
+      r.user_id,
+      r.time,
+      (select count(*) + 1
+        from record r2
+        where r2.season_id = r.season_id
+          and r2.map = r.map
+          and r2.run = r.run
+          and (r2.time < r.time
+            or (r2.time = r.time and r2.record_date < r.record_date)
+            or (r2.time = r.time and r2.record_date = r.record_date and r2.user_id < r.user_id))),
+      r.checkpoints,
+      r.record_date,
+      r.player_name,
+      r.metadata
+    from record r
+    where
+      r.season_id = ? and
+      r.map = ? and
+      r.run = ? and
+      r.user_id = ?;
+  )" << record.seasonId
+                 << record.map << record.run << record.userId;
+}
+
+void TimerunRepository::insertRecord(const Timerun::Record &record) {
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  insertRecordRow(record);
+  insertRecordHistory(record);
+
+  txn.commit();
+}
+
 void TimerunRepository::updateRecord(const Timerun::Record &record) {
+  DatabaseV2::TransactionGuard txn(*_database);
+
   _database->sql << R"(
     update
       record
@@ -274,6 +327,10 @@ void TimerunRepository::updateRecord(const Timerun::Record &record) {
                  << record.recordDate.toDateTimeString() << record.playerName
                  << serializeMetadata(record.metadata) << record.seasonId
                  << record.map << record.run << record.userId;
+
+  insertRecordHistory(record);
+
+  txn.commit();
 }
 
 std::optional<Timerun::Record>
@@ -439,7 +496,9 @@ void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
 }
 
 std::vector<std::string>
-TimerunRepository::getMapsForName(const std::string &map, bool exact) {
+TimerunRepository::getMapsForName(const std::string &map, bool exact,
+                                  bool fromHistory) {
+  const std::string table = fromHistory ? "record_history" : "record";
 
   std::string mapFilter = exact ? "map=?" : "map like ?";
   std::string mapSearchString = exact ? map : "%" + map + "%";
@@ -448,11 +507,11 @@ TimerunRepository::getMapsForName(const std::string &map, bool exact) {
   _database->sql << StringUtils::format(R"(
     select
       distinct map
-    from record
+    from %s
     where %s
     collate nocase
   )",
-                                        mapFilter)
+                                        table, mapFilter)
                  << mapSearchString >>
       [&maps](std::string map) { maps.push_back(map); };
   return maps;
@@ -461,7 +520,8 @@ TimerunRepository::getMapsForName(const std::string &map, bool exact) {
 std::vector<std::string>
 TimerunRepository::getRunsForName(const std::string &map,
                                   const std::string &run, bool exact,
-                                  bool sanitizeResults) {
+                                  bool sanitizeResults, bool fromHistory) {
+  const std::string table = fromHistory ? "record_history" : "record";
 
   std::string runFilter = exact ? "lsanitize(run)=?" : "lsanitize(run) like ?";
   std::string runSearchString = exact ? run : "%" + run + "%";
@@ -470,12 +530,12 @@ TimerunRepository::getRunsForName(const std::string &map,
   _database->sql << StringUtils::format(R"(
     select
       distinct run
-    from record
+    from %s
     where %s
       and map = ?
     collate nocase
   )",
-                                        runFilter)
+                                        table, runFilter)
                  << runSearchString << map >>
       [&runs, sanitizeResults](const std::string &run) {
         runs.push_back(sanitizeResults ? StringUtils::sanitize(run, true)
@@ -484,10 +544,11 @@ TimerunRepository::getRunsForName(const std::string &map,
   return runs;
 }
 
-std::string
-TimerunRepository::resolveMapName(const std::string &map, bool exact,
-                                  const std::string &commandPrefix) {
-  const auto maps = getMapsForName(map, exact);
+std::string TimerunRepository::resolveMapName(const std::string &map,
+                                              bool exact,
+                                              const std::string &commandPrefix,
+                                              bool fromHistory) {
+  const auto maps = getMapsForName(map, exact, fromHistory);
 
   if (maps.size() > 1 && !Container::isIn(maps, map)) {
     throw std::runtime_error(
@@ -499,8 +560,8 @@ TimerunRepository::resolveMapName(const std::string &map, bool exact,
 
 std::string TimerunRepository::resolveRunName(const std::string &map,
                                               const std::string &run,
-                                              bool exact) {
-  const auto runs = getRunsForName(map, run, exact, true);
+                                              bool exact, bool fromHistory) {
+  const auto runs = getRunsForName(map, run, exact, true, fromHistory);
 
   return runs.size() == 1 ? runs[0] : "%" + run + "%";
 }
@@ -709,6 +770,87 @@ std::vector<Timerun::Record> TimerunRepository::getRecordFromSeason(
   return records;
 }
 
+std::vector<Timerun::HistoricalRecord> TimerunRepository::getHistoricalRecords(
+    const Timerun::RecordHistoryParams &params) {
+  const auto seasons = getSeasonsForName(params.season, false);
+
+  if (seasons.empty()) {
+    throw std::runtime_error(
+        StringUtils::format("No season matches name `%s`", params.season));
+  }
+
+  const std::string resolvedMap =
+      resolveMapName(params.map, params.exactMap, "record-history", true);
+
+  // match runs the same way '/records' does: prefer a single exact match,
+  // otherwise fall back to partial matches
+  const std::string runPlaceholder = "lsanitize(run) like ?";
+  const std::string runBinder =
+      resolveRunName(resolvedMap, params.run, true, true);
+
+  const std::string seasonPlaceholders = createSeasonPredicate(seasons);
+
+  const std::string query =
+      StringUtils::format(R"(
+    select
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      rank,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata,
+      exists(select 1 from removed_records rr
+              where rr.season_id = rh.season_id
+                and rr.map = rh.map
+                and rr.run = rh.run
+                and rr.user_id = rh.user_id
+                and rr.record_date = rh.record_date) as removed
+    from record_history rh
+    where
+      (%s) and
+      map=? collate nocase and
+      %s and
+      user_id=?
+    order by season_id, map, run, time asc, record_date asc, id asc;
+  )",
+                          seasonPlaceholders, runPlaceholder);
+
+  auto binder = _database->sql << query;
+
+  for (const auto &s : seasons) {
+    binder << s.id;
+  }
+
+  binder << StringUtils::toLowerCase(resolvedMap);
+  binder << runBinder;
+  binder << params.userId;
+
+  std::vector<Timerun::HistoricalRecord> records;
+
+  binder >> [&records](int32_t seasonId, const std::string &map,
+                       const std::string &runName, int32_t userId, int32_t time,
+                       int32_t rank, const std::string &checkpointsString,
+                       const std::string &recordDate,
+                       const std::string &playerName,
+                       const std::string &metadataString, int32_t removed) {
+    Timerun::HistoricalRecord historicalRecord;
+    historicalRecord.r = getRecordFromStandardQueryResult(
+        seasonId, map, runName, userId, time, checkpointsString, recordDate,
+        playerName, metadataString);
+    // 'rank' is null for records seeded from 'removed_records', which
+    // sqlite_modern_cpp reads as 0
+    historicalRecord.rank = rank;
+    historicalRecord.removed = removed != 0;
+    records.emplace_back(std::move(historicalRecord));
+  };
+
+  return records;
+}
+
 std::vector<Timerun::Season> TimerunRepository::getSeasons() {
   auto binder = _database->sql
                 << R"(select id, name, start_time, end_time from season;)";
@@ -738,9 +880,10 @@ void TimerunRepository::deleteSeason(const std::string &name) {
   DatabaseV2::TransactionGuard txn(*_database);
 
   _database->sql << "delete from record where season_id=?;" << id;
-  // make sure we also purge 'removed_records',
+  // make sure we also purge 'removed_records' and 'record_history',
   // so we don't leave records from any nonexistent seasons in the table
   _database->sql << "delete from removed_records where season_id=?;" << id;
+  _database->sql << "delete from record_history where season_id=?;" << id;
   _database->sql << "delete from season where id=?" << id;
 
   txn.commit();
@@ -1453,13 +1596,91 @@ void TimerunRepository::tryToMigrateRecords() {
         oldRecords.push_back(std::move(r));
       };
 
-  _database->sql << "begin;";
+  DatabaseV2::TransactionGuard txn(*_database);
 
   for (const auto &r : oldRecords) {
-    insertRecord(r);
+    insertRecordRow(r);
   }
 
-  _database->sql << "commit;";
+  txn.commit();
+}
+
+void TimerunRepository::seedRecordHistory() {
+  int32_t haveHistory = 0;
+
+  _database->sql << "select exists(select 1 from record_history)" >>
+      haveHistory;
+
+  // history already seeded
+  if (haveHistory > 0) {
+    return;
+  }
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  _database->sql << R"(
+    insert into record_history (
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      rank,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata
+    )
+    select
+      r.season_id,
+      r.map,
+      r.run,
+      r.user_id,
+      r.time,
+      (select count(*) + 1
+        from record r2
+        where r2.season_id = r.season_id
+          and r2.map = r.map
+          and r2.run = r.run
+          and (r2.time < r.time
+            or (r2.time = r.time and r2.record_date < r.record_date)
+            or (r2.time = r.time and r2.record_date = r.record_date and r2.user_id < r.user_id))),
+      r.checkpoints,
+      r.record_date,
+      r.player_name,
+      r.metadata
+    from record r
+    where not exists (
+      select 1 from record_history h
+       where h.season_id = r.season_id
+         and h.map = r.map
+         and h.run = r.run
+         and h.user_id = r.user_id
+         and h.record_date = r.record_date
+    );
+  )";
+
+  _database->sql << R"(
+    insert into record_history (
+      season_id, map, run, user_id, time, rank,
+      checkpoints, record_date, player_name, metadata
+    )
+    select
+      rr.season_id, rr.map, rr.run, rr.user_id, rr.time,
+      null,
+      rr.checkpoints, rr.record_date, rr.player_name, rr.metadata
+    from removed_records rr
+    where not exists (
+      select 1 from record_history h
+       where h.season_id = rr.season_id
+         and h.map = rr.map
+         and h.run = rr.run
+         and h.user_id = rr.user_id
+         and h.record_date = rr.record_date
+    );
+  )";
+
+  txn.commit();
 }
 
 void TimerunRepository::migrate() {
@@ -1529,9 +1750,31 @@ void TimerunRepository::migrate() {
        "create index idx_removed_records_user_id on removed_records(user_id);"});
   // clang-format on
 
+  _database->addMigration(
+      "record_history",
+      {R"(
+        create table record_history (
+          id integer primary key autoincrement,
+          season_id integer not null,
+          map text not null,
+          run text not null,
+          user_id int not null,
+          time int not null,
+          rank int null,
+          checkpoints text not null,
+          record_date timestamp not null,
+          player_name text not null,
+          metadata text not null default '',
+          foreign key (season_id) references season(id)
+        );
+      )",
+       R"(create index idx_record_history_user on record_history(user_id, season_id, map, run, record_date);)",
+       R"(create index idx_record_history_lookup on record_history(season_id, map, run, record_date);)"});
+
   _database->applyMigrations();
 
   tryToMigrateRecords();
+  seedRecordHistory();
 }
 
 std::string TimerunRepository::serializeMetadata(

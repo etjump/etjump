@@ -660,6 +660,135 @@ static bool recordDetails(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+static bool recordHistory(gentity_t *ent, Arguments argv) {
+  if (!ent || !ent->client) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const desc = R"(Prints historical details for a timerun record.
+    /record-history --season <season name> --map <map name> --run <run name> --user <user ID>
+
+    Has a shorthand format of:
+    /record-history <run name>
+    /record-history <map name> <run name>
+    /record-history <season name> <map name> <run name>
+    /record-history <season name> <map name> <run name> <user ID>
+  )";
+
+  const auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create("record-history", desc)
+          .addOption("season", "s",
+                     "Season to print record history from. Default is the "
+                     "overall season.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "map", "m",
+              "Map to print record history from. Default is the current map.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("run", "r", "Run to print record details from.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("user", "u",
+                     "User ID to print record history from. Default is your "
+                     "own user ID.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false));
+
+  const auto args = Container::skipFirstN(*argv, 1);
+  const auto optCommand =
+      ETJump::getOptCommand("record-history", clientNum, def, &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto &command = optCommand.value();
+
+  const auto optSeason = command.getOptional("season");
+  const auto optMap = command.getOptional("map");
+  const auto optRun = command.getOptional("run");
+  const auto optUser = command.getOptional("user");
+
+  std::string season;
+  std::string map;
+  std::string run;
+
+  std::optional<int32_t> userId;
+
+  if (command.extraArgs.size() >= 4) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+    userId = Q_atoi(command.extraArgs[3]);
+  } else if (command.extraArgs.size() >= 3) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+  } else if (command.extraArgs.size() >= 2) {
+    map = command.extraArgs[0];
+    run = command.extraArgs[1];
+  } else if (command.extraArgs.size() >= 1) {
+    run = command.extraArgs[0];
+  }
+
+  if (run.empty()) {
+    if (!optRun.has_value()) {
+      Printer::chat(clientNum, "^3record-history: ^7operation failed. Check "
+                               "console for more information.");
+      Printer::console(clientNum,
+                       "^7Required option ^3'run' ^7was not specified.\n");
+      return false;
+    }
+
+    run = optRun.value().text;
+  }
+
+  if (season.empty()) {
+    season = optSeason.has_value() ? optSeason.value().text : "default";
+  }
+
+  // if the user provided no map, we want to set the query to use exact
+  // map name, so no partial matches are implicitly done against the current map
+  bool exactMap = false;
+
+  if (map.empty()) {
+    map = optMap.has_value() ? optMap.value().text : level.rawmapname;
+    exactMap = !optMap.has_value();
+  }
+
+  if (optUser.has_value()) {
+    userId = optUser.value().integer;
+  }
+
+  if (!userId.has_value()) {
+    const int32_t callerId = ETJump::session->GetId(ent);
+
+    if (callerId <= 0) {
+      Printer::chat(
+          clientNum,
+          "^3record-history: ^7Failed to fetch user ID - try reconnecting. If "
+          "the problem persists, please report this to the developers.\n");
+      return false;
+    }
+
+    userId = callerId;
+  }
+
+  if (userId.value() <= 0) {
+    Printer::chat(clientNum,
+                  "^3record-history: ^7user ID must be a positive number.");
+    return false;
+  }
+
+  game.timerunV2->recordHistory({clientNum, userId.value(), std::move(season),
+                                 std::move(map), std::move(run), exactMap});
+
+  return true;
+}
+
 static bool removeRecord(gentity_t *ent, Arguments argv) {
   // these are console commands but to make them more accessible
   // they were also made admin commands
@@ -3331,6 +3460,8 @@ Commands::Commands() {
       AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
   adminCommands_["record-details"] =
       AdminCommandPair(ClientCommands::recordDetails, CommandFlags::BASIC);
+  adminCommands_["record-history"] =
+      AdminCommandPair(ClientCommands::recordHistory, CommandFlags::BASIC);
   adminCommands_["remove-record"] =
       AdminCommandPair(ClientCommands::removeRecord, CommandFlags::BASIC);
   adminCommands_["list-removed-records"] =
@@ -3368,6 +3499,7 @@ Commands::Commands() {
   commands_["ranks"] = ClientCommands::Records;
   commands_["top"] = ClientCommands::Records;
   commands_["record-details"] = ClientCommands::recordDetails;
+  commands_["record-history"] = ClientCommands::recordHistory;
   commands_["remove-record"] = ClientCommands::removeRecord;
   commands_["list-removed-records"] = ClientCommands::listRemovedRecords;
   commands_["restore-record"] = ClientCommands::restoreRecord;
