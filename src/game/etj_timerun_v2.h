@@ -131,6 +131,7 @@ private:
   void startNotify(Player *player) const;
   static bool isDebugging(int clientNum);
   void checkRecord(Player *player);
+  void ensureInitialized() const;
 
   /*
    * returns nullptr if player object is unavailable,
@@ -154,6 +155,7 @@ private:
   getRankingsStringFor(const std::vector<Ranking> *vector,
                        const Timerun::PrintRankingsParams &params);
 
+  bool initialized{};
   std::string _currentMap;
   std::unique_ptr<TimerunRepository> _repository;
   std::unique_ptr<Log> _logger;
