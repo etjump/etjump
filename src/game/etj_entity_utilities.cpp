@@ -190,6 +190,8 @@ const std::vector<std::string> &EntityUtilities::getParsedEntities() {
   return parsedEntities;
 }
 
+void EntityUtilities::clearParsedEntities() { parsedEntities.clear(); }
+
 FindEntitiesResult EntityUtilities::findEntitiesByField(
     const std::string &key, const std::string &value, const char *func) {
   FindEntitiesResult result;

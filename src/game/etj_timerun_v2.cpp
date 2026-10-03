@@ -260,9 +260,10 @@ void TimerunV2::initialize() {
 }
 
 void TimerunV2::shutdown() {
+  // tasks that are still running on the worker threads use the repository
+  _sc->stopWorkerThreads();
   _repository->shutdown();
   _repository = nullptr;
-  _sc->stopWorkerThreads();
 }
 
 void TimerunV2::runFrame() { _sc->processCompletedTasks(); }

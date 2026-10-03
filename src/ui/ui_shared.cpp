@@ -309,6 +309,20 @@ void String_Init() {
   strPoolIndex = 0;
   menuCount = 0;
   modalMenuCount = 0;
+
+  // The menus are parsed again after this, so an interaction in progress
+  // refers to an item that no longer exists. This happens when an error
+  // interrupted it, and the module is loaded again into the same image
+  // (see FatalErrorBoundary), which keeps the state from before.
+  g_waitingForKey = qfalse;
+  g_editingField = qfalse;
+  g_bindItem = nullptr;
+  g_editItem = nullptr;
+  itemCapture = nullptr;
+  captureFunc = nullptr;
+  captureData = nullptr;
+  scrollInfo = {};
+
   UI_InitMemory();
   Item_SetupKeywordHash();
   Menu_SetupKeywordHash();
