@@ -3788,9 +3788,6 @@ void SP_func_portaltarget(gentity_t *ent) {
   }
 
   // network the portal target info so client can predict portal placement
-  // link first so bmodel bounds are valid for the center calculation
-  trap_LinkEntity(ent);
-
   vec3_t center;
   ETJump::EntityUtilities::getOriginOrBmodelCenter(ent, center);
   ETJump::PortalgunShared::setPortalTarget(ent->s, ent->count, center);

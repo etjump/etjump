@@ -115,7 +115,7 @@ float scaleFromSize(const int32_t size) {
 
 void setPortalTarget(entityState_t &es, const int32_t size,
                      const vec3_t center) {
-  es.onFireEnd = encodePortalTarget(size);
+  es.frame = encodePortalTarget(size);
   VectorCopy(center, es.origin2);
 }
 
@@ -130,11 +130,11 @@ int32_t encodePortalTarget(const int32_t size) {
 
 bool isPortalTarget(const entityState_t &es) {
   return (es.eType == ET_MOVER || es.eType == ET_STATIC_CLIENT) &&
-         es.onFireEnd > 0 && (es.onFireEnd & PORTAL_TARGET_FLAG);
+         (es.frame & PORTAL_TARGET_FLAG);
 }
 
 int32_t portalTargetSize(const entityState_t &es) {
-  return std::clamp(es.onFireEnd & ~PORTAL_TARGET_FLAG, 0,
+  return std::clamp(es.frame & ~PORTAL_TARGET_FLAG, 0,
                     MAX_PORTAL_TARGET_SIZE);
 }
 } // namespace ETJump::PortalgunShared

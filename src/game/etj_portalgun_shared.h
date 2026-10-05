@@ -116,13 +116,11 @@ void computePlacement(const trace_t &tr, const PortalTarget *target,
 
 // Portal target entities ('func_portaltarget' and 'func_static_client' with
 // portal target spawnflag) network their info in the entity state:
-// - 'onFireEnd' - 'PORTAL_TARGET_FLAG' | 'portalsize'
+// - 'frame' - 'PORTAL_TARGET_FLAG' | 'portalsize'
 // - 'origin2' - origin or bmodel center of the entity
-// A flag is used rather than any non-zero value, because 'trigger_heal' and
-// 'trigger_ammo' write their charge into 'onFireEnd' of the entity they target.
 // This is only used by the client for prediction,
 // server uses the entity itself to determine portal targets.
-inline constexpr int32_t PORTAL_TARGET_FLAG = 1 << 24;
+inline constexpr int32_t PORTAL_TARGET_FLAG = 1 << 15;
 
 void setPortalTarget(entityState_t &es, int32_t size, const vec3_t center);
 [[nodiscard]] bool isPortalTarget(const entityState_t &es);

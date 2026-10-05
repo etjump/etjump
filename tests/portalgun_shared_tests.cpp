@@ -167,21 +167,21 @@ TEST_F(PortalgunSharedTests, PortalTargetEncoding) {
   es.eType = ET_MOVER;
   EXPECT_FALSE(PortalgunShared::isPortalTarget(es));
 
-  // 'trigger_heal' charge written to the targeted entity
-  es.onFireEnd = 100;
-  EXPECT_FALSE(PortalgunShared::isPortalTarget(es));
-  es.onFireEnd = -1;
+  es.frame = 100;
   EXPECT_FALSE(PortalgunShared::isPortalTarget(es));
 
-  es.onFireEnd = PortalgunShared::encodePortalTarget(0);
+  es.frame = PortalgunShared::encodePortalTarget(0);
   EXPECT_TRUE(PortalgunShared::isPortalTarget(es));
   EXPECT_EQ(PortalgunShared::portalTargetSize(es), 0);
 
-  es.onFireEnd = PortalgunShared::encodePortalTarget(256);
+  es.frame = PortalgunShared::encodePortalTarget(256);
   EXPECT_EQ(PortalgunShared::portalTargetSize(es), 256);
 
-  es.onFireEnd = PortalgunShared::encodePortalTarget(10000);
+  es.frame = PortalgunShared::encodePortalTarget(10000);
   EXPECT_EQ(PortalgunShared::portalTargetSize(es), MAX_PORTAL_TARGET_SIZE);
+
+  EXPECT_LE(PortalgunShared::encodePortalTarget(MAX_PORTAL_TARGET_SIZE),
+            0xFFFF);
 
   es.eType = ET_STATIC_CLIENT;
   EXPECT_TRUE(PortalgunShared::isPortalTarget(es));

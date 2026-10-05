@@ -80,6 +80,12 @@ void PortalPrediction::endPrediction() {
     confirmedPortals[i] = confirmed;
   }
 
+  for (int32_t i = 0; i < NUM_PORTAL_TYPES; i++) {
+    if (!serverPortals[i]) {
+      confirmedPortals[i] = std::nullopt;
+    }
+  }
+
   prevPortals = {};
 }
 
@@ -294,17 +300,6 @@ bool PortalPrediction::getOwnPortalPosition(const int32_t eType,
   if (serverPortals[index]) {
     VectorCopy(serverPortals[index]->origin, origin);
     VectorCopy(serverPortals[index]->angles, angles);
-    return true;
-  }
-
-  // the portal might be outside our PVS, but our other portal
-  // in the snapshot still knows where it is, since it's the destination
-  const auto &other = serverPortals[typeIndex(otherType(eType))];
-
-  if (other && (!VectorCompare(other->origin2, vec3_origin) ||
-                !VectorCompare(other->angles2, vec3_origin))) {
-    VectorCopy(other->origin2, origin);
-    VectorCopy(other->angles2, angles);
     return true;
   }
 
