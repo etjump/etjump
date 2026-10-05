@@ -254,8 +254,20 @@ void TimerunRepository::insertRecordRow(const Timerun::Record &record) {
                  << serializeMetadata(record.metadata);
 }
 
+// the rank a record holds among the current records of the same run, stored
+// when the record is written: the number of strictly faster times plus one,
+// so records that share a time share a rank, matching how '/records' displays
+// tied records
+static constexpr const char *RECORD_RANK_SQL =
+    "      (select count(*) + 1\n"
+    "        from record r2\n"
+    "        where r2.season_id = r.season_id\n"
+    "          and r2.map = r.map\n"
+    "          and r2.run = r.run\n"
+    "          and r2.time < r.time)";
+
 void TimerunRepository::insertRecordHistory(const Timerun::Record &record) {
-  _database->sql << R"(
+  _database->sql << StringUtils::format(R"(
     insert into record_history (
       season_id,
       map,
@@ -274,14 +286,7 @@ void TimerunRepository::insertRecordHistory(const Timerun::Record &record) {
       r.run,
       r.user_id,
       r.time,
-      (select count(*) + 1
-        from record r2
-        where r2.season_id = r.season_id
-          and r2.map = r.map
-          and r2.run = r.run
-          and (r2.time < r.time
-            or (r2.time = r.time and r2.record_date < r.record_date)
-            or (r2.time = r.time and r2.record_date = r.record_date and r2.user_id < r.user_id))),
+%s,
       r.checkpoints,
       r.record_date,
       r.player_name,
@@ -292,8 +297,10 @@ void TimerunRepository::insertRecordHistory(const Timerun::Record &record) {
       r.map = ? and
       r.run = ? and
       r.user_id = ?;
-  )" << record.seasonId
-                 << record.map << record.run << record.userId;
+  )",
+                                        RECORD_RANK_SQL)
+                 << record.seasonId << record.map << record.run
+                 << record.userId;
 }
 
 void TimerunRepository::insertRecord(const Timerun::Record &record) {
@@ -1606,6 +1613,9 @@ void TimerunRepository::tryToMigrateRecords() {
 }
 
 void TimerunRepository::seedRecordHistory() {
+  // this must run after tryToMigrateRecords(), which imports the legacy
+  // 'records' table into 'record'. as a plain migration statement it would run
+  // during applyMigrations(), before that import, and seed an empty table
   int32_t haveHistory = 0;
 
   _database->sql << "select exists(select 1 from record_history)" >>
@@ -1618,7 +1628,7 @@ void TimerunRepository::seedRecordHistory() {
 
   DatabaseV2::TransactionGuard txn(*_database);
 
-  _database->sql << R"(
+  _database->sql << StringUtils::format(R"(
     insert into record_history (
       season_id,
       map,
@@ -1637,14 +1647,7 @@ void TimerunRepository::seedRecordHistory() {
       r.run,
       r.user_id,
       r.time,
-      (select count(*) + 1
-        from record r2
-        where r2.season_id = r.season_id
-          and r2.map = r.map
-          and r2.run = r.run
-          and (r2.time < r.time
-            or (r2.time = r.time and r2.record_date < r.record_date)
-            or (r2.time = r.time and r2.record_date = r.record_date and r2.user_id < r.user_id))),
+%s,
       r.checkpoints,
       r.record_date,
       r.player_name,
@@ -1658,7 +1661,8 @@ void TimerunRepository::seedRecordHistory() {
          and h.user_id = r.user_id
          and h.record_date = r.record_date
     );
-  )";
+  )",
+                                        RECORD_RANK_SQL);
 
   _database->sql << R"(
     insert into record_history (
