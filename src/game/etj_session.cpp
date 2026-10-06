@@ -400,7 +400,7 @@ gentity_t *Session::gentityFromId(unsigned id) {
   for (int i = 0; i < level.numConnectedClients; i++) {
     const int clientNum = level.sortedClients[i];
 
-    if (GetId(clientNum) == id) {
+    if (GetId(clientNum) == static_cast<int>(id)) {
       return g_entities + clientNum;
     }
   }

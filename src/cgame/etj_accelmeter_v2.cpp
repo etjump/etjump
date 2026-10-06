@@ -145,8 +145,8 @@ bool AccelMeterV2::beforeRender() {
   }
 
   if (accelColorStyle == AccelColorV2::Style::SIMPLE ||
-      (accelColorStyle == AccelColorV2::Style::ADVANCED) &&
-          AccelColorV2::lowSpeedOnGround(s.vf, s.pm.ps->groundEntityNum)) {
+      ((accelColorStyle == AccelColorV2::Style::ADVANCED) &&
+       AccelColorV2::lowSpeedOnGround(s.vf, s.pm.ps->groundEntityNum))) {
     storedSpeeds.push_back({lastUpdateTime, s.vf});
     AccelColorV2::popOldStoredSpeeds(storedSpeeds, lastUpdateTime);
   } else if (!storedSpeeds.empty()) {

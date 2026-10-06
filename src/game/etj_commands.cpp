@@ -80,7 +80,7 @@ getOptCommand(const std::string &commandPrefix, int clientNum,
     return std::nullopt;
   }
 
-  return std::move(command);
+  return command;
 }
 } // namespace ETJump
 
