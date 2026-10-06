@@ -113,8 +113,14 @@ target_link_libraries(libsha1 PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libuuid4 PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsqlite PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(fmt PRIVATE cxx_compiler_opts_w0)
-target_link_libraries(libsqlite_modern_cpp INTERFACE cxx_compiler_opts_w0)
-target_link_libraries(toml11 INTERFACE cxx_compiler_opts_w0)
+# Header-only dependencies must NOT be silenced by linking cxx_compiler_opts_w0
+# (WARN 0 -> -w, /W0 on MSVC) with INTERFACE. On an INTERFACE library that puts the
+# option into the consumer's link interface, silently disabling every warning for
+# qagame and cgame. Warnings from a dependency's headers are suppressed with SYSTEM
+# includes instead - libsqlite_modern_cpp declares its own, toml11 declares a plain
+# one, so it is re-declared as system here.
+target_include_directories(toml11 SYSTEM INTERFACE
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/toml11/include>")
 
 # setup directories for IDEs that use them (Visual Studio, XCode...)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
