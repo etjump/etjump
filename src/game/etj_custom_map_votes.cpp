@@ -484,7 +484,7 @@ std::string CustomMapVotes::listInfo(const std::string &type) {
         buffer += StringUtils::format("^7%-30s", mapOnServer);
 
         ++count;
-        if (count % 3 == 0 || count == numMapsOnServer) {
+        if (count % 3 == 0 || count == static_cast<int>(numMapsOnServer)) {
           buffer += "\n";
         }
       }
@@ -497,7 +497,7 @@ std::string CustomMapVotes::listInfo(const std::string &type) {
           buffer += StringUtils::format("^9%-30s", mapNotOnServer);
 
           ++count;
-          if (count % 3 == 0 || count == numMapsNotOnServer) {
+          if (count % 3 == 0 || count == static_cast<int>(numMapsNotOnServer)) {
             buffer += "\n";
           }
         }
@@ -527,7 +527,7 @@ size_t CustomMapVotes::getNumVotelists() const {
 }
 
 CustomMapVotes::MapType *CustomMapVotes::getVotelistByIndex(const int index) {
-  if (index < 0 || index >= customMapVotes_.size()) {
+  if (index < 0 || index >= static_cast<int>(customMapVotes_.size())) {
     return nullptr;
   }
 

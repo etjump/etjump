@@ -454,18 +454,18 @@ enum class OverbouncePlayersOpts {
 
 // keys needed on both client and server
 struct SharedWorldspawnKeys {
-  bool noOverbounce{};
-  bool noJumpDelay{};
-  bool noDrop{};
-  bool noWallbug{};
-  bool portalPredict{};
+  bool noOverbounce;
+  bool noJumpDelay;
+  bool noDrop;
+  bool noWallbug;
+  bool portalPredict;
 
-  AreaOpts noSave{};
-  AreaOpts noProne{};
-  AreaOpts noNoclip{};
+  AreaOpts noSave;
+  AreaOpts noProne;
+  AreaOpts noNoclip;
 
-  NoFallDamageOpts noFallDamage{};
-  OverbouncePlayersOpts overbouncePlayers{};
+  NoFallDamageOpts noFallDamage;
+  OverbouncePlayersOpts overbouncePlayers;
 };
 } // namespace ETJump
 

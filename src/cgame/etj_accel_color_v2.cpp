@@ -85,7 +85,7 @@ bool AccelColorV2::lowSpeedOnGround(const float speed,
 }
 
 void AccelColorV2::calcAdvancedAccelColor(
-    const pmove_t &pm, const pml_t &pml, const vec3_t accelVec,
+    const pmove_t &pm, const pml_t &pml, const vec2_t accelVec,
     const float wishspeed, const vec2_t wishvel, const float velAngle,
     const float optAngle, float accel, vec4_t outColor) {
   const bool forwards = PmoveUtilsV2::strafingForwards(pm, wishspeed, wishvel);

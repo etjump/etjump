@@ -226,7 +226,6 @@ typedef struct stringDef_s {
 static int strPoolIndex = 0;
 static char strPool[STRING_POOL_SIZE];
 
-static int strHandleCount = 0;
 static stringDef_t *strHandle[HASH_TABLE_SIZE];
 
 const char *String_Alloc(const char *p) {
@@ -305,7 +304,6 @@ void String_Init() {
   for (i = 0; i < HASH_TABLE_SIZE; i++) {
     strHandle[i] = 0;
   }
-  strHandleCount = 0;
   strPoolIndex = 0;
   menuCount = 0;
   modalMenuCount = 0;

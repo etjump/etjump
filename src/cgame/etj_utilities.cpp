@@ -203,7 +203,7 @@ void registerGameShader(const int32_t index, const char *shaderStr) {
   const auto shaders = StringUtils::split(shaderStr, " ");
   const int32_t start = index * MAX_SHADERS_PER_INDEX;
 
-  for (int32_t i = 0; i < shaders.size(); i++) {
+  for (int32_t i = 0; i < static_cast<int32_t>(shaders.size()); i++) {
     // 1-indexed, index 0 is always empty (invalid)
     const int32_t shaderNum = start + i + 1;
     const std::string &shader = shaders[i];

@@ -277,7 +277,7 @@ public:
 
 void TimerunV2::clientConnect(int clientNum, int userId) {
   _sc->postTask(
-      [this, clientNum, userId] {
+      [this, userId] {
         auto parameters = StringUtils::join(
             Container::map(_activeSeasonsIds,
                            [](int season) { return std::to_string(season); }),
@@ -467,14 +467,12 @@ void TimerunV2::addSeason(const Timerun::AddSeasonParams &season) {
           return std::make_unique<AddSeasonResult>(e.what());
         }
       },
-      [this,
-       season](std::unique_ptr<SynchronizationContext::ResultBase> result) {
+      [season](std::unique_ptr<SynchronizationContext::ResultBase> result) {
         auto addSeasonResult = dynamic_cast<AddSeasonResult *>(result.get());
 
         Printer::console(season.clientNum, addSeasonResult->message + "\n");
       },
-      [this, season](const std::runtime_error &e) {
-        const char *what = e.what();
+      [season](const std::runtime_error &e) {
         Printer::console(
             season.clientNum,
             StringUtils::format("Unable to add season: %s\n", e.what()));
@@ -501,11 +499,11 @@ void TimerunV2::editSeason(const Timerun::EditSeasonParams &params) {
           return std::make_unique<EditSeasonResult>(e.what());
         }
       },
-      [this, params](auto r) {
+      [params](auto r) {
         auto editSeasonResult = dynamic_cast<EditSeasonResult *>(r.get());
         Printer::console(params.clientNum, editSeasonResult->message + "\n");
       },
-      [this, params](const std::runtime_error &e) {
+      [params](const std::runtime_error &e) {
         Printer::console(
             params.clientNum,
             StringUtils::format("Unable to edit season: %s\n", e.what()));
@@ -736,7 +734,7 @@ void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
                   auto millisString = TimeUtils::millisToString(r->time);
 
                   const std::string diffString =
-                      ownRecord || !haveOwnTime && rank == 1
+                      ownRecord || (!haveOwnTime && rank == 1)
                           ? ""
                           : TimeUtils::diffToString(ownTime, r->time);
 
@@ -801,7 +799,7 @@ void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
 
         Printer::console(params.clientNum, message);
       },
-      [this, params](const std::runtime_error &e) {
+      [params](const std::runtime_error &e) {
         Printer::console(params.clientNum, e.what() + std::string("\n"));
       });
 }
@@ -941,8 +939,9 @@ TimerunV2::getRankingsStringFor(const std::vector<Ranking> *rankings,
   for (size_t i = 0, len = rankings->size(); i < len; ++i) {
     unsigned rank = i + 1;
     const auto *r = &(*rankings)[i];
-    auto isOnVisiblePage = rank > (params.page) * params.pageSize &&
-                           rank <= (params.page + 1) * params.pageSize;
+    auto isOnVisiblePage =
+        static_cast<int32_t>(rank) > (params.page) * params.pageSize &&
+        static_cast<int32_t>(rank) <= (params.page + 1) * params.pageSize;
     auto isOwnRanking = r->userId == params.userId;
     constexpr int32_t rankWidth = 5;
     constexpr int32_t youWidth = 5; // '(you)' appended to your name
@@ -1170,15 +1169,13 @@ void TimerunV2::deleteSeason(int clientNum, const std::string &name) {
           return std::make_unique<DeleteSeasonResult>(e.what());
         }
       },
-      [this,
-       clientNum](std::unique_ptr<SynchronizationContext::ResultBase> result) {
+      [clientNum](std::unique_ptr<SynchronizationContext::ResultBase> result) {
         auto deleteSeasonResult =
             dynamic_cast<DeleteSeasonResult *>(result.get());
 
         Printer::console(clientNum, deleteSeasonResult->message + "\n");
       },
-      [this, clientNum](const std::runtime_error &e) {
-        const char *what = e.what();
+      [clientNum](const std::runtime_error &e) {
         Printer::console(
             clientNum,
             StringUtils::format("Unable to delete season: %s\n", e.what()));
@@ -1319,7 +1316,7 @@ void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
           Printer::console(clientNum, s);
         }
       },
-      [this, clientNum](const std::runtime_error &e) {
+      [clientNum](const std::runtime_error &e) {
         Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
       });
 }
@@ -1537,7 +1534,7 @@ void TimerunV2::compareCheckpoints(
           Printer::console(clientNum, s);
         }
       },
-      [this, clientNum](const std::runtime_error &e) {
+      [clientNum](const std::runtime_error &e) {
         Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
       });
 }
@@ -2592,7 +2589,7 @@ void TimerunV2::checkRecord(Player *player) {
         // season being changed by the time we get to the callback
         result->mostRelevantSeasonId = getMostRelevantSeason()->id;
 
-        return std::move(result);
+        return result;
       },
       [this, completionTime, activeRunName, playerName,
        clientNum](std::unique_ptr<SynchronizationContext::ResultBase> result) {
