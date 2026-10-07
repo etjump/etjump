@@ -1750,6 +1750,8 @@ void TimerunV2::recordHistory(const Timerun::RecordHistoryParams &params) {
   const std::string func = __func__;
 
   const auto task = [this, params]() {
+    ensureInitialized();
+
     auto records = _repository->getHistoricalRecords(params);
     auto seasons = groupHistoricalRecords(std::move(records));
 
@@ -1897,6 +1899,8 @@ void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
   const bool isSelfRemoval = params.removedBy == params.userId;
 
   const auto task = [this, params]() {
+    ensureInitialized();
+
     const auto removedAt = TimeUtils::getCurrentTime(false);
     const auto removedRecords = _repository->removeRecord(params, removedAt);
 
@@ -2064,6 +2068,8 @@ void TimerunV2::listRemovedRecords(
   const std::string func = __func__;
 
   const auto task = [this, params]() {
+    ensureInitialized();
+
     std::map<int32_t, std::string> seasonNames;
     for (const auto &season : _repository->getSeasons()) {
       seasonNames[season.id] = season.name;
@@ -2220,6 +2226,8 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
   const std::string func = __func__;
 
   const auto task = [this, params]() {
+    ensureInitialized();
+
     const auto restoredAt = TimeUtils::getCurrentTime(false);
 
     std::map<int32_t, std::string> seasonNames;
