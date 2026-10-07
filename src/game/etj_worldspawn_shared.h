@@ -41,6 +41,7 @@ inline constexpr char NO_DROP_CS[] = "drop";
 inline constexpr char NO_WALLBUG_CS[] = "wbug";
 inline constexpr char NO_NOCLIP_CS[] = "noclip";
 inline constexpr char PORTAL_PREDICT_CS[] = "ppred";
+inline constexpr char PORTAL_SURFACES_CS[] = "psurf";
 inline constexpr char NO_FALL_DAMAGE_CS[] = "fdmg";
 inline constexpr char OVERBOUNCE_PLAYERS_CS[] = "obp";
 
@@ -110,7 +111,8 @@ inline constexpr KeyDescriptors keyDescriptors = {{{
     {WorldspawnShared::Keys::OVERBOUCNE_PLAYERS, "overbounce_players",
      OVERBOUNCE_PLAYERS_CS},
     {WorldspawnShared::Keys::PORTALGUN_SPAWN, "portalgun_spawn", nullptr},
-    {WorldspawnShared::Keys::PORTAL_SURFACES, "portalsurfaces", nullptr},
+    {WorldspawnShared::Keys::PORTAL_SURFACES, "portalsurfaces",
+     PORTAL_SURFACES_CS},
     {WorldspawnShared::Keys::PORTAL_PREDICT, "portalpredict",
      PORTAL_PREDICT_CS},
     {WorldspawnShared::Keys::PORTAL_TEAM, "portalteam", nullptr},

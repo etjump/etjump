@@ -4491,7 +4491,7 @@ void FireWeapon(gentity_t *ent) {
                               ent->client->wbuttons & WBUTTON_ATTACK2
                                   ? ETJump::Portal::Type::PORTAL_RED
                                   : ETJump::Portal::Type::PORTAL_BLUE,
-                              forward, right, up, muzzleEffect);
+                              muzzleEffect);
       break;
 
     default:

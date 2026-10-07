@@ -83,6 +83,8 @@ void Worldspawn::setWorldspawnCS() const {
                             sharedKeys.noWallbug ? 1 : 0);
   cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::PORTAL_PREDICT_CS,
                             sharedKeys.portalPredict ? 1 : 0);
+  cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::PORTAL_SURFACES_CS,
+                            sharedKeys.portalSurfaces ? 1 : 0);
 
   cs += StringUtils::format(R"(\%s\%i)", WorldspawnShared::NO_SAVE_CS,
                             static_cast<int32_t>(sharedKeys.noSave));
@@ -365,9 +367,9 @@ void Worldspawn::initPortalSurfaces(const char *key) {
   int32_t value = 0;
 
   G_SpawnInt(key, "1", &value);
-  portalSurfaces = value;
+  sharedKeys.portalSurfaces = value;
 
-  printKeyValue(key, portalSurfaces ? "1" : "0");
+  printKeyValue(key, sharedKeys.portalSurfaces ? "1" : "0");
 }
 
 void Worldspawn::initPortalPredict(const char *key) {

@@ -51,7 +51,6 @@ public:
   bool noGod{};
   bool noGoto{};
   bool portalgunSpawn{};
-  bool portalSurfaces{};
 
   // keys shared between server and client
   SharedWorldspawnKeys sharedKeys;

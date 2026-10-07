@@ -459,6 +459,7 @@ struct SharedWorldspawnKeys {
   bool noDrop;
   bool noWallbug;
   bool portalPredict;
+  bool portalSurfaces;
 
   AreaOpts noSave;
   AreaOpts noProne;
