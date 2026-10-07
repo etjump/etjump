@@ -4488,7 +4488,7 @@ inline constexpr char wmAnnouncePrivateUsage[] =
 inline constexpr char trackerUsage[] = "tracker [index] <command> <value>";
 inline constexpr char changeSkinUsage[] = "changeskin <skinfile>";
 
-#define FMT_FUNC(x) StringUtils::format("ScriptActions::%s", x).c_str()
+#define FORMAT_FUNC_NAME(x) StringUtils::format("ScriptActions::%s", x).c_str()
 
 namespace {
 struct EntityMatch {
@@ -4529,7 +4529,8 @@ static qboolean scriptSetPlayerSpawn(gentity_t *ent, const char *params,
   const auto *activator = ent->activator;
 
   if (!activator || !activator->client) {
-    G_Printf(S_COLOR_RED "%s: activator must be a client\n", FMT_FUNC(func));
+    G_Printf(S_COLOR_RED "%s: activator must be a client\n",
+             FORMAT_FUNC_NAME(func));
     return qfalse;
   }
 
@@ -4542,7 +4543,7 @@ static qboolean scriptSetPlayerSpawn(gentity_t *ent, const char *params,
                                      : setPlayerSpawnUsage;
     G_Error("%s: required parameter 'objective description' was not "
             "provided\n\n%s\n",
-            FMT_FUNC(func), usageStr);
+            FORMAT_FUNC_NAME(func), usageStr);
   }
 
   // get objective entity
@@ -4552,7 +4553,7 @@ static qboolean scriptSetPlayerSpawn(gentity_t *ent, const char *params,
 
   if (!targetSpawn) {
     G_Error("%s: couldn't find a spawnpoint matching name '%s'\n",
-            FMT_FUNC(func), spawnname);
+            FORMAT_FUNC_NAME(func), spawnname);
   }
 
   if (!targetSpawn->count) {
@@ -4603,7 +4604,7 @@ qboolean damagePlayer(gentity_t *ent, char *params) {
 
   if (!activator || !activator->client) {
     G_Printf(S_COLOR_RED "%s: activator must be a client\n",
-             FMT_FUNC(__func__));
+             FORMAT_FUNC_NAME(__func__));
     return qfalse;
   }
 
@@ -4612,7 +4613,7 @@ qboolean damagePlayer(gentity_t *ent, char *params) {
 
   if (!token[0]) {
     G_Error("%s: required parameter 'damage' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), damagePlayerUsage);
+            FORMAT_FUNC_NAME(__func__), damagePlayerUsage);
   }
 
   const int32_t damage = Q_atoi(token);
@@ -4631,7 +4632,7 @@ qboolean killPlayer(gentity_t *ent, char *params) {
 
   if (!activator || !activator->client) {
     G_Printf(S_COLOR_RED "%s: activator must be a client\n",
-             FMT_FUNC(__func__));
+             FORMAT_FUNC_NAME(__func__));
     return qfalse;
   }
 
@@ -4672,14 +4673,14 @@ qboolean create(gentity_t *ent, char *params) {
     token = COM_ParseExt(&p, qfalse);
 
     if (!token[0]) {
-      G_Error("%s: key '%s' has no value\n\n%s\n", FMT_FUNC(__func__), key,
-              createUsage);
+      G_Error("%s: key '%s' has no value\n\n%s\n", FORMAT_FUNC_NAME(__func__),
+              key, createUsage);
     }
 
     // add spawn var so that spawn functions can use them
     if (level.numSpawnVars == MAX_SPAWN_VARS) {
       G_Error("%s: MAX_SPAWN_VARS (%i) reached, too many keys in an entity",
-              FMT_FUNC(__func__), MAX_SPAWN_VARS);
+              FORMAT_FUNC_NAME(__func__), MAX_SPAWN_VARS);
     }
 
     level.spawnVars[level.numSpawnVars][0] = G_AddSpawnVarToken(key);
@@ -4720,8 +4721,8 @@ qboolean deleteAction(gentity_t *ent, char *params) {
     token = COM_ParseExt(&p, qfalse);
 
     if (!token[0]) {
-      G_Error("%s: key '%s' has no value\n\n%s\n", FMT_FUNC(deleteFuncStr), key,
-              deleteUsage);
+      G_Error("%s: key '%s' has no value\n\n%s\n",
+              FORMAT_FUNC_NAME(deleteFuncStr), key, deleteUsage);
     }
 
     Q_strncpyz(value, token, sizeof(value));
@@ -4730,7 +4731,7 @@ qboolean deleteAction(gentity_t *ent, char *params) {
     count++;
 
     const auto result = ETJump::EntityUtilities::findEntitiesByField(
-        key, value, FMT_FUNC(deleteFuncStr));
+        key, value, FORMAT_FUNC_NAME(deleteFuncStr));
 
     if (result.stopParsing) {
       break;
@@ -4775,7 +4776,7 @@ qboolean deleteAction(gentity_t *ent, char *params) {
   // did we actually delete anything?
   if (!numDeleted) {
     G_Printf("%s: no entities found matching params ^3'%s'\n",
-             FMT_FUNC(deleteFuncStr), params);
+             FORMAT_FUNC_NAME(deleteFuncStr), params);
   }
 
   return qtrue;
@@ -4789,12 +4790,12 @@ qboolean useTarget(gentity_t *ent, char *params) {
   if (!ent || !ent->activator) {
     G_Error("%s: activator must be a client, consider using 'alertentity' "
             "instead\n",
-            FMT_FUNC(__func__));
+            FORMAT_FUNC_NAME(__func__));
   }
 
   if (!params || !*params) {
     G_Error("%s: required parameter 'targetname' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), useTargetUsage);
+            FORMAT_FUNC_NAME(__func__), useTargetUsage);
   }
 
   const auto hash = static_cast<int32_t>(BG_StringHashValue(params));
@@ -4806,7 +4807,7 @@ qboolean useTarget(gentity_t *ent, char *params) {
     if (!alertent) {
       if (!foundalertent) {
         G_Error("%s: cannot find an entity with targetname '%s'\n",
-                FMT_FUNC(__func__), params);
+                FORMAT_FUNC_NAME(__func__), params);
       } else {
         break;
       }
@@ -4816,7 +4817,7 @@ qboolean useTarget(gentity_t *ent, char *params) {
 
     if (!alertent->use) {
       G_Error("%s: \"%s\" (classname = %s) doesn't have a \"use\" function\n",
-              FMT_FUNC(__func__), params, alertent->classname);
+              FORMAT_FUNC_NAME(__func__), params, alertent->classname);
     }
 
     G_UseEntity(alertent, nullptr, ent->activator);
@@ -4838,7 +4839,7 @@ qboolean wmAnnouncePrivate(gentity_t *ent, char *params) {
   if (!activator || !activator->client) {
     // if we don't error out here, script execution hangs in the block where
     // this gets called, so better to error out to avoid any confusion
-    G_Error("%s: activator must be a client\n", FMT_FUNC(__func__));
+    G_Error("%s: activator must be a client\n", FORMAT_FUNC_NAME(__func__));
   }
 
   pString = params;
@@ -4846,7 +4847,7 @@ qboolean wmAnnouncePrivate(gentity_t *ent, char *params) {
 
   if (!token[0]) {
     G_Error("%s: required parameter 'message' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), wmAnnouncePrivateUsage);
+            FORMAT_FUNC_NAME(__func__), wmAnnouncePrivateUsage);
   }
 
   std::string str = token;
@@ -4869,7 +4870,7 @@ qboolean tracker(gentity_t *ent, char *params) {
   if (!activator || !activator->client) {
     // if we don't error out here, script execution hangs in the block where
     // this gets called, so better to error out to avoid any confusion
-    G_Error("%s: activator must be a client\n", FMT_FUNC(__func__));
+    G_Error("%s: activator must be a client\n", FORMAT_FUNC_NAME(__func__));
   }
 
   auto *const progression = activator->client->pers.progression;
@@ -4890,7 +4891,7 @@ qboolean tracker(gentity_t *ent, char *params) {
 
   if (!token[0]) {
     G_Error("%s: required parameter 'command' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), trackerUsage);
+            FORMAT_FUNC_NAME(__func__), trackerUsage);
   }
 
   int trackerIndex = 0;
@@ -4902,7 +4903,8 @@ qboolean tracker(gentity_t *ent, char *params) {
 
     if (trackerIndex < 0 || trackerIndex >= MAX_PROGRESSION_TRACKERS) {
       G_Error("%s: invalid tracker index '%i', valid range is 1 - %i\n",
-              FMT_FUNC(__func__), trackerIndex + 1, MAX_PROGRESSION_TRACKERS);
+              FORMAT_FUNC_NAME(__func__), trackerIndex + 1,
+              MAX_PROGRESSION_TRACKERS);
     }
 
     // parse next arg as command instead
@@ -4911,7 +4913,7 @@ qboolean tracker(gentity_t *ent, char *params) {
 
   if (!token[0]) {
     G_Error("%s: required parameter 'command' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), trackerUsage);
+            FORMAT_FUNC_NAME(__func__), trackerUsage);
   }
 
   // TODO: we should validate the parsed command before doing this, so invalid
@@ -4923,7 +4925,7 @@ qboolean tracker(gentity_t *ent, char *params) {
 
   if (!token[0]) {
     G_Error("%s: required parameter 'value' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), trackerUsage);
+            FORMAT_FUNC_NAME(__func__), trackerUsage);
   }
 
   const int trackerValue = Q_atoi(token);
@@ -4953,7 +4955,8 @@ qboolean tracker(gentity_t *ent, char *params) {
   } else if (!Q_stricmp(command, "set")) {
     progression[trackerIndex] = trackerValue;
   } else {
-    G_Error("%s: unknown tracker command '%s'\n", FMT_FUNC(__func__), command);
+    G_Error("%s: unknown tracker command '%s'\n", FORMAT_FUNC_NAME(__func__),
+            command);
   }
 
   if (abort) {
@@ -4977,7 +4980,7 @@ qboolean changeSkin(gentity_t *ent, char *params) {
 
   if (!token[0]) {
     G_Error("%s: required parameter 'skinfile' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), changeSkinUsage);
+            FORMAT_FUNC_NAME(__func__), changeSkinUsage);
   }
 
   // misc_constructiblemarker holds the .skin in ent->s.effect1Time,
@@ -5009,7 +5012,7 @@ qboolean editEntity([[maybe_unused]] gentity_t *ent, char *params) {
   const char *token = COM_ParseExt(&p, qfalse);
 
   if (token[0] != '{') {
-    G_Error("%s: expected a 'match' block\n\n%s\n", FMT_FUNC(__func__),
+    G_Error("%s: expected a 'match' block\n\n%s\n", FORMAT_FUNC_NAME(__func__),
             editentityUsage);
   }
 
@@ -5017,8 +5020,8 @@ qboolean editEntity([[maybe_unused]] gentity_t *ent, char *params) {
     token = COM_ParseExt(&p, qfalse);
 
     if (!token[0]) {
-      G_Error("%s: unterminated 'match' block\n\n%s\n", FMT_FUNC(__func__),
-              editentityUsage);
+      G_Error("%s: unterminated 'match' block\n\n%s\n",
+              FORMAT_FUNC_NAME(__func__), editentityUsage);
     }
 
     if (token[0] == '}') {
@@ -5030,7 +5033,7 @@ qboolean editEntity([[maybe_unused]] gentity_t *ent, char *params) {
     token = COM_ParseExt(&p, qfalse);
 
     if (!token[0] || token[0] == '}') {
-      G_Error("%s: key '%s' has no value\n\n%s\n", FMT_FUNC(__func__),
+      G_Error("%s: key '%s' has no value\n\n%s\n", FORMAT_FUNC_NAME(__func__),
               key.c_str(), editentityUsage);
     }
 
@@ -5040,11 +5043,11 @@ qboolean editEntity([[maybe_unused]] gentity_t *ent, char *params) {
     count++;
 
     const auto result = ETJump::EntityUtilities::findEntitiesByField(
-        key, value, FMT_FUNC(__func__));
+        key, value, FORMAT_FUNC_NAME(__func__));
 
     if (result.stopParsing) {
-      G_Error("%s: invalid field in 'match' block\n\n%s\n", FMT_FUNC(__func__),
-              editentityUsage);
+      G_Error("%s: invalid field in 'match' block\n\n%s\n",
+              FORMAT_FUNC_NAME(__func__), editentityUsage);
     }
 
     if (!result.valid) {
@@ -5064,13 +5067,13 @@ qboolean editEntity([[maybe_unused]] gentity_t *ent, char *params) {
   // no selector k/v pairs found?
   if (!count) {
     G_Error("%s: no selector k/v pairs in the 'match' block\n\n%s\n",
-            FMT_FUNC(__func__), editentityUsage);
+            FORMAT_FUNC_NAME(__func__), editentityUsage);
   }
 
   token = COM_ParseExt(&p, qfalse);
 
   if (token[0] != '{') {
-    G_Error("%s: expected a 'set' block\n\n%s\n", FMT_FUNC(__func__),
+    G_Error("%s: expected a 'set' block\n\n%s\n", FORMAT_FUNC_NAME(__func__),
             editentityUsage);
   }
 
@@ -5078,8 +5081,8 @@ qboolean editEntity([[maybe_unused]] gentity_t *ent, char *params) {
     token = COM_ParseExt(&p, qfalse);
 
     if (!token[0]) {
-      G_Error("%s: unterminated 'set' block\n\n%s\n", FMT_FUNC(__func__),
-              editentityUsage);
+      G_Error("%s: unterminated 'set' block\n\n%s\n",
+              FORMAT_FUNC_NAME(__func__), editentityUsage);
     }
 
     if (token[0] == '}') {
@@ -5091,7 +5094,7 @@ qboolean editEntity([[maybe_unused]] gentity_t *ent, char *params) {
     token = COM_ParseExt(&p, qfalse);
 
     if (!token[0] || token[0] == '}') {
-      G_Error("%s: key '%s' has no value\n\n%s\n", FMT_FUNC(__func__),
+      G_Error("%s: key '%s' has no value\n\n%s\n", FORMAT_FUNC_NAME(__func__),
               key.c_str(), editentityUsage);
     }
 
@@ -5113,7 +5116,7 @@ qboolean editEntity([[maybe_unused]] gentity_t *ent, char *params) {
   // did we actually change anything?
   if (!numChanged) {
     G_Printf("%s: no entities found matching params ^3'%s'\n",
-             FMT_FUNC(__func__), matchParams.c_str());
+             FORMAT_FUNC_NAME(__func__), matchParams.c_str());
   }
 
   return qtrue;

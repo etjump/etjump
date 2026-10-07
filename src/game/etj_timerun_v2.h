@@ -112,6 +112,7 @@ public:
   void listCheckpoints(const Timerun::ListCheckpointsParams &params);
   void compareCheckpoints(const Timerun::CompareCheckpointsParams &params);
   void recordDetails(const Timerun::RecordDetailsParams &params);
+  void recordHistory(const Timerun::RecordHistoryParams &params);
   void removeRecord(const Timerun::RemoveRecordParams &params);
   void listRemovedRecords(const Timerun::ListRemovedRecordsParams &params);
   void restoreRecord(const Timerun::RestoreRecordParams &params);
@@ -144,6 +145,7 @@ private:
   void startNotify(Player *player) const;
   static bool isDebugging(int clientNum);
   void checkRecord(Player *player);
+  void ensureInitialized() const;
 
   /*
    * returns nullptr if player object is unavailable,
@@ -171,6 +173,7 @@ private:
   getSeasonName(const std::map<int32_t, std::string> &seasonNames,
                 int32_t seasonId);
 
+  bool initialized{};
   std::string _currentMap;
   std::unique_ptr<TimerunRepository> _repository;
   std::unique_ptr<Log> _logger;

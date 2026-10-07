@@ -65,7 +65,7 @@ void DatabaseV2::applyMigrations() {
 
   std::vector<std::string> migrations;
 
-  sql << "begin;";
+  TransactionGuard txn(*this);
 
   sql << R"(
       select name from migrations;
@@ -97,7 +97,7 @@ void DatabaseV2::applyMigrations() {
       )" << migration.name;
   }
 
-  sql << "commit;";
+  txn.commit();
 
   if (!appliedMigration) {
     std::string latestMigration = "no migration available";

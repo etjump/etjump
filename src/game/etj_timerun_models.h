@@ -34,6 +34,7 @@ inline constexpr int32_t DEFAULT_PAGE_SIZE_ALL_RUNS = 3;
 inline constexpr int32_t DEFAULT_PAGE_SIZE_SINGLE_RUN = 20;
 inline constexpr int32_t MAX_PAGE_SIZE_SINGLE_RUN = 100;
 inline constexpr int32_t MAX_PAGE_SIZE_ALL_RUNS = 10;
+inline constexpr int32_t RECORD_HISTORY_DEFAULT_SIZE = 20;
 
 struct Season {
   int id;
@@ -190,5 +191,33 @@ struct RestoreRecordResult {
   std::vector<Record> swapped;            // occupants archived by the swap
   std::vector<RestoreConflict> conflicts; // unresolved conflicts (no --force)
   std::vector<RemovedRecord> skipped;     // copies skipped due to permissions
+};
+
+struct RecordHistoryParams {
+  int32_t clientNum{};
+  int32_t userId{};
+  std::string season;
+  std::string map;
+  std::string run;
+  int32_t maxRecords{};
+  bool exactMap{};
+};
+
+struct HistoricalRecord {
+  Record r{};
+  int32_t rank{};
+  bool removed{};
+};
+
+struct HistoricalRunGroup {
+  std::string map;
+  std::string run;
+  std::vector<HistoricalRecord> records;
+  int32_t numHidden{};
+};
+
+struct HistoricalSeasonGroup {
+  int32_t seasonId{};
+  std::vector<HistoricalRunGroup> runs;
 };
 } // namespace ETJump::Timerun

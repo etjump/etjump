@@ -4448,7 +4448,6 @@ void use_invisible_user(gentity_t *ent, gentity_t *other,
 }
 
 void SP_func_invisible_user(gentity_t *ent) {
-  int i;
   char *sound;
   char *cursorhint;
 

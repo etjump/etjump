@@ -215,7 +215,7 @@ void ProgressionTrackers::printTrackerChanges(
     const std::array<int32_t, MAX_PROGRESSION_TRACKERS> &oldValues) {
   const auto clientNum = ClientNum(activator);
 
-  for (int i = 0; i < oldValues.size(); i++) {
+  for (int i = 0; i < static_cast<int>(oldValues.size()); i++) {
     if (oldValues[i] != activator->client->pers.progression[i]) {
       const std::string &trackerChangeMsg = StringUtils::format(
           "^7Tracker change - index: ^3%i ^7value: ^2%i ^7from: ^9%i^7\n",

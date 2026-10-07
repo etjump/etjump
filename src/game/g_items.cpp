@@ -389,8 +389,8 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
   // and ammo packs picked up by field ops don't disappear once picked up
   const bool alreadyHave =
       COM_BitCheck(other->client->ps.weapons, ent->item->giTag) ||
-      other->client->ps.stats[STAT_PLAYER_CLASS] == PC_FIELDOPS &&
-          ent->item->giTag == WP_AMMO;
+      (other->client->ps.stats[STAT_PLAYER_CLASS] == PC_FIELDOPS &&
+       ent->item->giTag == WP_AMMO);
 
   // JPW NERVE  prevents drop/pickup weapon "quick reload" exploit
   if (alreadyHave) {

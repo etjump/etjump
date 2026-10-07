@@ -86,7 +86,6 @@ static float shaderAnimSTRatio[MAX_SHADER_ANIMS] = {
     1, // NERVE - SMF - changed from 1.405 to 1
     1, 1, 1, 1, 1, 1,
 };
-static int numShaderAnims;
 // done.
 
 inline constexpr int PARTICLE_GRAVITY = 40;
@@ -131,7 +130,6 @@ void CG_ClearParticles() {
           trap_R_RegisterShader(va("%s%i", shaderAnimNames[i], j + 1));
     }
   }
-  numShaderAnims = i;
   // done.
 
   initparticles = qtrue;

@@ -18,7 +18,6 @@ If the start position is targeting an entity, the players camera will start out
 facing that ent (like an info_notnull)
 */
 void SP_info_player_deathmatch(gentity_t *ent) {
-  int i;
   vec3_t dir;
 
   ent->enemy = G_PickTarget(ent->target);
@@ -1750,7 +1749,8 @@ const char *GetParsedIP(const char *ipadd) {
   if (strspn(ipadd, "0123456789.:") < strlen(ipadd)) {
     return NULL;
   }
-  sprintf(ipge, "%u.%u.%u.%u", b1, b2, b3, b4);
+
+  Com_sprintf(ipge, sizeof(ipge), "%u.%u.%u.%u", b1, b2, b3, b4);
   return ipge;
 }
 
@@ -1854,7 +1854,7 @@ void ClientUserinfoChanged(int clientNum) {
   // TODO: Check for hardware info spoofing
 
   s = Info_ValueForKey(userinfo, "cg_uinfo");
-  sscanf(s, "%u %u %u %u %f %i", &client->pers.clientFlags,
+  sscanf(s, "%u %u %u %i %f %i", &client->pers.clientFlags,
          &client->pers.clientTimeNudge, &client->pers.clientMaxPackets,
          &client->pers.maxFPS, &client->pers.noclipScale,
          &client->pers.touchPickupWeapons);

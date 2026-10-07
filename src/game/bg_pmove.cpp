@@ -1322,7 +1322,7 @@ static void PM_WalkMove(void) {
   float fmove, smove;
   vec3_t wishdir;
   float wishspeed;
-  float scale, scaleAlt;
+  float scale;
   usercmd_t cmd;
   float accelerate;
   float vel;

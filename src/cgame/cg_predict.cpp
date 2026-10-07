@@ -1102,7 +1102,7 @@ void CG_PredictPlayerState() {
   usercmd_t oldestCmd;
   usercmd_t latestCmd;
   vec3_t deltaAngles;
-  pmoveExt_t pmext;
+  pmoveExt_t pmext{};
   playerState_t previousPlayerState;
 
   // unlagged - optimized prediction
