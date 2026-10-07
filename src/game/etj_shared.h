@@ -23,7 +23,9 @@
  */
 
 #pragma once
+#include <array>
 #include <string>
+#include <string_view>
 #include <stdexcept>
 
 namespace ETJump {
@@ -32,6 +34,67 @@ namespace Authentication {
 const std::string GUID_REQUEST = "guid_request";
 const std::string AUTHENTICATE = "authenticate";
 } // namespace Authentication
+
+namespace SpectatorHudSync {
+inline constexpr int32_t UploadMinIntervalMs = 300;
+inline constexpr int32_t RequestMinIntervalMs = 300;
+inline constexpr int32_t ServerForwardMinIntervalMs = 200;
+inline constexpr char FieldSeparator = ',';
+inline constexpr char ValueSeparator = ';';
+inline constexpr char KvSeparator = ':';
+
+inline constexpr std::array<const char *, 24> CgazCvarNames = {
+    "etj_drawCGaz",
+    "etj_CGazY",
+    "etj_CGaz2Y",
+    "etj_CGazHeight",
+    "etj_CGaz2Color1",
+    "etj_CGaz2Color2",
+    "etj_CGaz1Color1",
+    "etj_CGaz1Color2",
+    "etj_CGaz1Color3",
+    "etj_CGaz1Color4",
+    "etj_CGazFov",
+    "etj_CGazTrueness",
+    "etj_CGazOnTop",
+    "etj_CGaz2FixedSpeed",
+    "etj_CGaz2NoVelocityDir",
+    "etj_CGaz1DrawSnapZone",
+    "etj_CGaz2WishDirFixedSpeed",
+    "etj_CGaz2WishDirUniformLength",
+    "etj_CGaz1DrawMidLine",
+    "etj_CGaz1MidlineColor",
+    "etj_CGaz2HighRes",
+    "etj_CGaz2Thickness1",
+    "etj_CGaz2Thickness2",
+    "etj_stretchCgaz",
+};
+
+inline constexpr std::array<const char *, 14> SnaphudCvarNames = {
+    "etj_drawSnapHUD",
+    "etj_snapHUDOffsetY",
+    "etj_snapHUDHeight",
+    "etj_snapHUDColor1",
+    "etj_snapHUDColor2",
+    "etj_snapHUDHLColor1",
+    "etj_snapHUDHLColor2",
+    "etj_snapHUDFov",
+    "etj_snapHUDHLActive",
+    "etj_snapHUDTrueness",
+    "etj_snapHUDEdgeThickness",
+    "etj_snapHUDBorderThickness",
+    "etj_snapHUDActiveIsPrimary",
+    "etj_snapHUDCrop",
+};
+
+// handled separately because it is a multi-token parser-style cvar value
+inline constexpr const char *SnaphudCropOffsetCvarName =
+    "etj_snapHUDCropOffsets";
+
+inline constexpr std::string_view UploadCommand = "hudsync_upload";
+inline constexpr std::string_view RequestCommand = "hudsync_request";
+inline constexpr std::string_view ServerCommand = "hudsync";
+} // namespace SpectatorHudSync
 } // namespace Constants
 
 // template class for a bitset that uses 'enum class' as values for the bits

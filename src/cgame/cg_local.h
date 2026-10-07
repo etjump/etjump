@@ -14,8 +14,11 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
+#include <array>
 #include <optional>
+#include <string>
 
+#include "../game/etj_shared.h"
 #include "../game/q_shared.h"
 #include "../game/bg_public.h"
 #include "../ui/ui_shared.h"
@@ -568,7 +571,17 @@ typedef struct clientInfo_s {
   qboolean specLocked;
   qboolean timerunActive;
   bool snaphud;
+  bool specHudAllowed;
   bool clientIsInactive;
+
+  std::array<std::array<char, MAX_CVAR_VALUE_STRING>,
+             ETJump::Constants::SpectatorHudSync::CgazCvarNames.size()>
+      cgazHudValues;
+  std::array<std::array<char, MAX_CVAR_VALUE_STRING>,
+             ETJump::Constants::SpectatorHudSync::SnaphudCvarNames.size() + 1>
+      snaphudHudValues;
+  bool hasFullHudSync;
+  int32_t hudSyncRevision;
 } clientInfo_t;
 
 typedef enum {
@@ -2670,6 +2683,10 @@ extern vmCvar_t etj_snapHUDBorderThickness;
 extern vmCvar_t etj_snapHUDActiveIsPrimary;
 extern vmCvar_t etj_snapHUDCrop;
 extern vmCvar_t etj_snapHUDCropOffsets;
+
+// Spectator HUD
+extern vmCvar_t etj_specHudShow;
+extern vmCvar_t etj_specHudAllow;
 
 extern vmCvar_t etj_gunSway;
 extern vmCvar_t etj_drawScoreboardInactivity;

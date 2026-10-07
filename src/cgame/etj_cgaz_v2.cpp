@@ -25,6 +25,7 @@
 #include "etj_cgaz_v2.h"
 #include "cg_local.h"
 #include "etj_color_parser.h"
+#include "etj_local.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_snaphud_data.h"
 #include "etj_utilities.h"
@@ -132,7 +133,7 @@ void CGazV2::updateCGaz1(const CGazData::State &s) {
   assert(cgaz1.maxCosAngle <= cgaz1.maxAngle);
 
   // no need to update this unless we're drawing midline
-  if (etj_CGaz1DrawMidLine.integer) {
+  if (effectiveHudCvarInt(&etj_CGaz1DrawMidLine)) {
     cgaz1.midlineStart =
         cgaz1.optAngle + ((cgaz1.maxCosAngle - cgaz1.optAngle) / 2);
     cgaz1.midLineEnd =
@@ -143,14 +144,15 @@ void CGazV2::updateCGaz1(const CGazData::State &s) {
 
   cgaz1.yaw = std::atan2(s.wishvel[1], s.wishvel[0]) - s.velAngle;
 
-  cgaz1.y =
-      std::clamp(etj_CGazY.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
-  cgaz1.h =
-      std::clamp(etj_CGazHeight.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
+  const float cgazY = effectiveHudCvarFloat(&etj_CGazY);
+  const float cgazHeight = effectiveHudCvarFloat(&etj_CGazHeight);
+  const float cgazFov = effectiveHudCvarFloat(&etj_CGazFov);
 
-  cgaz1.fov = etj_CGazFov.value > 0
-                  ? std::clamp(etj_CGazFov.value, CGAZ_FOV_MIN, CGAZ_FOV_MAX)
-                  : cg.refdef.fov_x;
+  cgaz1.y = std::clamp(cgazY, 0.0f, static_cast<float>(SCREEN_HEIGHT));
+  cgaz1.h = std::clamp(cgazHeight, 0.0f, static_cast<float>(SCREEN_HEIGHT));
+
+  cgaz1.fov = cgazFov > 0 ? std::clamp(cgazFov, CGAZ_FOV_MIN, CGAZ_FOV_MAX)
+                          : cg.refdef.fov_x;
 }
 
 void CGazV2::updateCGaz2(const CGazData::State &s) {
@@ -158,12 +160,13 @@ void CGazV2::updateCGaz2(const CGazData::State &s) {
                                      AngleNormalize180(RAD2DEG(s.velAngle)));
   cgaz2.velAngle = DEG2RAD(cgaz2.velAngle);
   cgaz2.optAngle = updateOptAngle(s);
-  cgaz2.velSize = etj_CGaz2FixedSpeed.value > 0
-                      ? etj_CGaz2FixedSpeed.value / 5.0f
-                      : std::min(s.vf / 5.0f, SCREEN_HEIGHT / 2.0f);
 
-  cgaz2.y =
-      std::clamp(etj_CGaz2Y.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
+  const float fixedSpeed = effectiveHudCvarFloat(&etj_CGaz2FixedSpeed);
+  cgaz2.velSize = fixedSpeed > 0 ? fixedSpeed / 5.0f
+                                 : std::min(s.vf / 5.0f, SCREEN_HEIGHT / 2.0f);
+
+  cgaz2.y = std::clamp(effectiveHudCvarFloat(&etj_CGaz2Y), 0.0f,
+                       static_cast<float>(SCREEN_HEIGHT));
 
   // NOTE: check for stats here to determine whether we want to apply
   // forward/ríghtmove values to CGaz 2 - unlike CGaz 1, we don't do
@@ -178,7 +181,7 @@ void CGazV2::updateCGaz2(const CGazData::State &s) {
           ? s.pm.cmd.rightmove
           : 0;
 
-  cgaz2.highRes = etj_CGaz2HighRes.integer;
+  cgaz2.highRes = effectiveHudCvarInt(&etj_CGaz2HighRes) != 0;
   cgaz2.drawSides = s.vf > s.wishspeed;
 }
 
@@ -330,6 +333,26 @@ float CGazV2::updateMaxAngle(const CGazData::State &s,
 bool CGazV2::beforeRender() {
   const CGazData::State &s = cgazData->getState();
 
+  cgame.utils.colorParser->parseColorString(effectiveHudCvarString(&etj_CGaz1Color1),
+                                            cgaz1.colors[0]);
+  cgame.utils.colorParser->parseColorString(effectiveHudCvarString(&etj_CGaz1Color2),
+                                            cgaz1.colors[1]);
+  cgame.utils.colorParser->parseColorString(effectiveHudCvarString(&etj_CGaz1Color3),
+                                            cgaz1.colors[2]);
+  cgame.utils.colorParser->parseColorString(effectiveHudCvarString(&etj_CGaz1Color4),
+                                            cgaz1.colors[3]);
+  cgame.utils.colorParser->parseColorString(
+      effectiveHudCvarString(&etj_CGaz1MidlineColor), cgaz1.midlineColor);
+
+  cgame.utils.colorParser->parseColorString(effectiveHudCvarString(&etj_CGaz2Color1),
+                                            cgaz2.colors[0]);
+  cgame.utils.colorParser->parseColorString(effectiveHudCvarString(&etj_CGaz2Color2),
+                                            cgaz2.colors[1]);
+  cgaz2.thickness[0] =
+      std::clamp(effectiveHudCvarFloat(&etj_CGaz2Thickness1), 0.5f, 100.0f);
+  cgaz2.thickness[1] =
+      std::clamp(effectiveHudCvarFloat(&etj_CGaz2Thickness2), 0.5f, 100.0f);
+
   if (canSkipDraw(s)) {
     return false;
   }
@@ -339,15 +362,17 @@ bool CGazV2::beforeRender() {
     return true;
   }
 
-  if (etj_drawCGaz.integer & 1) {
+  const int drawCGaz = effectiveHudCvarInt(&etj_drawCGaz);
+
+  if (drawCGaz & 1) {
     updateCGaz1(s);
 
-    if (etj_CGaz1DrawSnapZone.integer) {
+    if (effectiveHudCvarInt(&etj_CGaz1DrawSnapZone)) {
       updateDrawSnap(s);
     }
   }
 
-  if (etj_drawCGaz.integer & 2) {
+  if (drawCGaz & 2) {
     updateCGaz2(s);
   }
 
@@ -355,17 +380,19 @@ bool CGazV2::beforeRender() {
 }
 
 void CGazV2::render() const {
-  if (etj_drawCGaz.integer & 1) {
+  const int drawCGaz = effectiveHudCvarInt(&etj_drawCGaz);
+
+  if (drawCGaz & 1) {
     renderCGaz1();
   }
 
-  if (etj_drawCGaz.integer & 2) {
+  if (drawCGaz & 2) {
     renderCGaz2();
   }
 }
 
 void CGazV2::renderCGaz1() const {
-  if (etj_CGaz1DrawSnapZone.integer && cgaz1.drawSnap.has_value()) {
+  if (effectiveHudCvarInt(&etj_CGaz1DrawSnapZone) && cgaz1.drawSnap.has_value()) {
     CG_FillAngleYaw(+cgaz1.minAngle, +cgaz1.drawSnap.value(), cgaz1.yaw,
                     cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
     CG_FillAngleYaw(-cgaz1.drawSnap.value(), -cgaz1.minAngle, cgaz1.yaw,
@@ -393,7 +420,7 @@ void CGazV2::renderCGaz1() const {
     CG_FillAngleYaw(-cgaz1.maxAngle, -cgaz1.maxCosAngle, cgaz1.yaw, cgaz1.y,
                     cgaz1.h, cgaz1.fov, cgaz1.colors[3]);
 
-    if (etj_CGaz1DrawMidLine.integer) {
+    if (effectiveHudCvarInt(&etj_CGaz1DrawMidLine)) {
       CG_FillAngleYaw(+cgaz1.midlineStart, +cgaz1.midLineEnd, cgaz1.yaw,
                       cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.midlineColor);
       CG_FillAngleYaw(-cgaz1.midlineStart, -cgaz1.midLineEnd, cgaz1.yaw,
@@ -405,7 +432,7 @@ void CGazV2::renderCGaz1() const {
 void CGazV2::renderCGaz2() const {
   float x = SCREEN_CENTER_X;
 
-  if (etj_stretchCgaz.integer) {
+  if (effectiveHudCvarInt(&etj_stretchCgaz)) {
     ETJump_EnableWidthScale(false);
     x -= SCREEN_OFFSET_X;
   }
@@ -413,12 +440,13 @@ void CGazV2::renderCGaz2() const {
   if (cgaz2.forwardmove || cgaz2.rightmove) {
     float mult = 1.0f;
 
-    if (etj_CGaz2WishDirFixedSpeed.value > 0) {
+    const float wishDirFixedSpeed = effectiveHudCvarFloat(&etj_CGaz2WishDirFixedSpeed);
+    if (wishDirFixedSpeed > 0) {
       constexpr float wishDirScale = 2.0f * 5.0f * CMDSCALE_DEFAULT;
-      mult = etj_CGaz2WishDirFixedSpeed.value / wishDirScale;
+      mult = wishDirFixedSpeed / wishDirScale;
     }
 
-    if (etj_CGaz2WishDirUniformLength.integer && cgaz2.rightmove &&
+    if (effectiveHudCvarInt(&etj_CGaz2WishDirUniformLength) && cgaz2.rightmove &&
         cgaz2.forwardmove) {
       mult /= M_SQRT2;
     }
@@ -435,12 +463,12 @@ void CGazV2::renderCGaz2() const {
   }
 
   // draw velocity direction if requested
-  if (!etj_CGaz2NoVelocityDir.integer ||
-      (!cgaz2.drawSides && etj_CGaz2NoVelocityDir.integer == 2)) {
+  const int noVelDir = effectiveHudCvarInt(&etj_CGaz2NoVelocityDir);
+  if (!noVelDir || (!cgaz2.drawSides && noVelDir == 2)) {
     float dirSize = cgaz2.velSize;
 
     // prevent comically long velocity direction lines on fixed speeds
-    if (!cgaz2.drawSides && etj_CGaz2FixedSpeed.value > 0) {
+    if (!cgaz2.drawSides && effectiveHudCvarFloat(&etj_CGaz2FixedSpeed) > 0) {
       dirSize = std::min(static_cast<float>(CMDSCALE_DEFAULT), dirSize);
     }
 
@@ -480,13 +508,13 @@ void CGazV2::renderCGaz2() const {
     }
   }
 
-  if (etj_stretchCgaz.integer) {
+  if (effectiveHudCvarInt(&etj_stretchCgaz)) {
     ETJump_EnableWidthScale(true);
   }
 }
 
 bool CGazV2::canSkipDraw(const CGazData::State &s) {
-  if (!etj_drawCGaz.integer) {
+  if (!effectiveHudCvarInt(&etj_drawCGaz)) {
     return true;
   }
 

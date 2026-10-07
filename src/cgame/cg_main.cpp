@@ -635,6 +635,10 @@ vmCvar_t etj_snapHUDActiveIsPrimary;
 vmCvar_t etj_snapHUDCrop;
 vmCvar_t etj_snapHUDCropOffsets;
 
+// Spectator HUD
+vmCvar_t etj_specHudShow;
+vmCvar_t etj_specHudAllow;
+
 vmCvar_t etj_gunSway;
 vmCvar_t etj_drawScoreboardInactivity;
 vmCvar_t etj_drawBanners;
@@ -1290,6 +1294,10 @@ cvarTable_t cvarTable[] = {
     {&etj_snapHUDCrop, "etj_snapHUDCrop", "0", CVAR_ARCHIVE},
     {&etj_snapHUDCropOffsets, "etj_snapHUDCropOffsets", "0 0", CVAR_ARCHIVE},
 
+    // Spectator HUD
+    {&etj_specHudShow, "etj_specHudShow", "1", CVAR_ARCHIVE},
+    {&etj_specHudAllow, "etj_specHudAllow", "1", CVAR_ARCHIVE},
+
     {&etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE},
     {&etj_drawScoreboardInactivity, "etj_drawScoreboardInactivity", "1",
      CVAR_ARCHIVE},
@@ -1516,6 +1524,7 @@ void CG_UpdateCvars(void) {
             cv->vmCvar == &etj_touchPickupWeapons ||
             cv->vmCvar == &etj_autoLoad || cv->vmCvar == &etj_quickFollow ||
             cv->vmCvar == &etj_drawSnapHUD ||
+            cv->vmCvar == &etj_specHudAllow ||
             cv->vmCvar == &etj_noPanzerAutoswitch ||
             cv->vmCvar == &etj_autoSprint) {
           fSetFlags = qtrue;
@@ -1595,7 +1604,8 @@ void CG_setClientFlags() {
           ((etj_quickFollow.integer > 0) ? CGF_QUICK_FOLLOW : 0) |
           ((etj_drawSnapHUD.integer > 0) ? CGF_SNAPHUD : 0) |
           ((etj_noPanzerAutoswitch.integer > 0) ? CGF_NOPANZERSWITCH : 0) |
-          (etj_autoSprint.integer ? CGF_AUTOSPRINT : 0)
+          (etj_autoSprint.integer ? CGF_AUTOSPRINT : 0) |
+          (etj_specHudAllow.integer ? CGF_SPEC_HUD_ALLOW : 0)
           // Add more in here, as needed
           ),
 
