@@ -55,6 +55,7 @@ public:
                                                 const std::string &run) const;
   void insertRecord(const Timerun::Record &record);
   void updateRecord(const Timerun::Record &record);
+  void updateBestSegments(const Timerun::Record &record);
   std::optional<Timerun::Record>
   getTopRecord(int seasonId, const std::string &map, const std::string &run);
   std::vector<Timerun::Record> getTopRecords(const std::vector<int> &seasonIds,
