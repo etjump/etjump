@@ -96,6 +96,7 @@ public:
 private:
   void tryToMigrateRecords();
   void seedRecordHistory();
+  void seedBestSegments();
   void migrate();
 
   void insertRecordRow(const Timerun::Record &record);
