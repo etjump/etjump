@@ -2733,6 +2733,12 @@ void TimerunV2::checkRecord(Player *player) {
             } else {
               _repository->updateRecord(record);
             }
+          }
+
+          // every completion feeds the best segments, new record or not
+          _repository->updateBestSegments(record);
+
+          if (isNewRecord) {
             playerNewTopRecordForSeason[seasonId] = std::move(record);
           }
         }

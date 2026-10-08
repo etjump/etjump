@@ -379,6 +379,126 @@ void TimerunRepository::updateRecord(const Timerun::Record &record) {
   txn.commit();
 }
 
+void TimerunRepository::updateBestSegments(const Timerun::Record &record) {
+  const auto segments = computeSegmentTimes(record.checkpoints, record.time);
+
+  // a run with no usable checkpoint data has no segments to record
+  if (segments.empty()) {
+    return;
+  }
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  const auto recordDate = record.recordDate.toDateTimeString();
+
+  for (size_t i = 0; i < segments.size(); ++i) {
+    // 1-based: segment i is the leg ending at checkpoint i, and the finish is
+    // the last segment
+    const auto segment = static_cast<int32_t>(i) + 1;
+
+    // improve-only: the new time must beat the stored one, ties going to the
+    // earlier record date (and, for the global, the lower user ID), so the
+    // holder matches what the seed would have picked
+    _database->sql << R"(
+      insert into player_best_segments (
+        season_id,
+        map,
+        run,
+        user_id,
+        segment,
+        time,
+        record_date,
+        player_name
+      ) values (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
+      )
+      on conflict (season_id, map, run, user_id, segment) do update
+      set
+        time = excluded.time,
+        record_date = excluded.record_date,
+        player_name = excluded.player_name
+      where
+        excluded.time < time or
+        (excluded.time = time and excluded.record_date < record_date);
+    )" << record.seasonId
+                   << record.map << record.run << record.userId << segment
+                   << segments[i] << recordDate << record.playerName;
+
+    const bool personal = _database->sql.rows_modified() > 0;
+
+    // a personal improvement is also the next step in the progression
+    if (personal) {
+      _database->sql << R"(
+        insert into player_best_segments_history (
+          season_id,
+          map,
+          run,
+          user_id,
+          segment,
+          time,
+          record_date,
+          player_name
+        ) values (
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?
+        );
+      )" << record.seasonId
+                     << record.map << record.run << record.userId << segment
+                     << segments[i] << recordDate << record.playerName;
+    }
+
+    _database->sql << R"(
+      insert into best_segments (
+        season_id,
+        map,
+        run,
+        segment,
+        time,
+        user_id,
+        record_date,
+        player_name
+      ) values (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
+      )
+      on conflict (season_id, map, run, segment) do update
+      set
+        time = excluded.time,
+        user_id = excluded.user_id,
+        record_date = excluded.record_date,
+        player_name = excluded.player_name
+      where
+        excluded.time < time or
+        (excluded.time = time and
+         (excluded.record_date < record_date or
+          (excluded.record_date = record_date and excluded.user_id < user_id)));
+    )" << record.seasonId
+                   << record.map << record.run << segment << segments[i]
+                   << record.userId << recordDate << record.playerName;
+  }
+
+  txn.commit();
+}
+
 std::optional<Timerun::Record>
 TimerunRepository::getTopRecord(int seasonId, const std::string &map,
                                 const std::string &run) {
