@@ -2699,6 +2699,10 @@ void TimerunV2::checkRecord(Player *player) {
         // records if we did, we store the record in
         // playerNewTopRecordForSeason this only checks against our own
         // personal previous times, not against other player's times
+        // one timestamp for the whole completion: every active season's copy of
+        // this run, and the segments derived from it, must share a record date
+        const auto recordDate = TimeUtils::getCurrentTime(false);
+
         for (auto seasonId : _activeSeasonsIds) {
           Timerun::Record record;
           record.seasonId = seasonId;
@@ -2707,7 +2711,7 @@ void TimerunV2::checkRecord(Player *player) {
           record.userId = userId;
           record.time = completionTime;
           record.checkpoints = checkpoints;
-          record.recordDate = TimeUtils::getCurrentTime(false);
+          record.recordDate = recordDate;
           record.playerName = playerName;
           record.metadata = metadata;
 
