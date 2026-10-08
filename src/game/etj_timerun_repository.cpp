@@ -23,6 +23,7 @@
  */
 
 #include <iterator>
+#include <set>
 #include <tuple>
 #include <utility>
 
@@ -33,14 +34,12 @@
 #include "q_shared.h"
 
 namespace ETJump {
-Timerun::Record getRecordFromStandardQueryResult(
-    int seasonId, std::string map, std::string runName, int userId, int time,
-    std::string checkpointsString, std::string recordDate,
-    std::string playerName, std::string metadataString) {
-  auto checkpoints = Container::map(
+static std::vector<int32_t>
+parseCheckpoints(const std::string &checkpointsString) {
+  return Container::map(
       Container::filter(StringUtils::split(checkpointsString, ","),
                         [](const std::string &input) {
-                          return StringUtils::trim(input).length() > 0;
+                          return !StringUtils::trim(input).empty();
                         }),
       [](const std::string &checkpoint) {
         try {
@@ -49,6 +48,46 @@ Timerun::Record getRecordFromStandardQueryResult(
           return TIMERUN_CHECKPOINT_NOT_SET;
         }
       });
+}
+
+// Segment durations for a completed run: segment i is the time from the
+// previous checkpoint (the run start, for the first) to checkpoint i, and the
+// final segment runs from the last checkpoint to the finish. A run with no
+// checkpoints has no splits at all, so it produces no segments - its best is
+// already the record. Stops at the first unset checkpoint, or a non-increasing
+// checkpoint, since such a segment cannot represent a real run and a zero or
+// negative time would otherwise win every comparison and sit as permanent,
+// unremovable gold segment.
+static std::vector<int32_t>
+computeSegmentTimes(const std::vector<int32_t> &checkpoints,
+                    int32_t completionTime) {
+  std::vector<int32_t> segments;
+  int32_t previous = 0;
+
+  for (const int32_t checkpoint : checkpoints) {
+    if (checkpoint == TIMERUN_CHECKPOINT_NOT_SET || checkpoint <= previous) {
+      break;
+    }
+
+    segments.push_back(checkpoint - previous);
+    previous = checkpoint;
+  }
+
+  // the finish closes the run, but only for a run that has checkpoints:
+  // a completion time at or before the last checkpoint means the finish was
+  // itself a checkpoint, so there is nothing to add
+  if (!segments.empty() && completionTime > previous) {
+    segments.push_back(completionTime - previous);
+  }
+
+  return segments;
+}
+
+Timerun::Record getRecordFromStandardQueryResult(
+    int seasonId, std::string map, std::string runName, int userId, int time,
+    std::string checkpointsString, std::string recordDate,
+    std::string playerName, std::string metadataString) {
+  auto checkpoints = parseCheckpoints(checkpointsString);
   TimeUtils::Time recordDateTime = TimeUtils::Time::fromString(recordDate);
 
   std::map<std::string, std::string> metadata;
@@ -1687,6 +1726,243 @@ void TimerunRepository::seedRecordHistory() {
   txn.commit();
 }
 
+void TimerunRepository::seedBestSegments() {
+  // Guarded by an "is the table empty?" check, the same sentinel the other
+  // seeds use: the best segments are derived, and a server whose runs have no
+  // checkpoints simply has nothing to seed, so re-deriving is a no-op there.
+  // The tables only stay empty until the first checkpointed completion lands,
+  // after which this skips forever.
+  //
+  // Seeds the personal and global tables and the initial history rows, from
+  // 'record_history' minus removed runs ('removed_records') minus individually
+  // removed splits ('removed_segments').
+  int32_t haveBest = 0;
+
+  _database->sql << "select exists(select 1 from player_best_segments);" >>
+      haveBest;
+
+  if (haveBest > 0) {
+    return;
+  }
+
+  // Per-player bests, keyed by (season_id, map, run, user_id), each holding a
+  // map of segment index -> the fastest time seen for that segment and the run
+  // that set it. Held in memory while we scan history, so the tables are never
+  // read and written through the same open cursor. Removed runs and removed
+  // splits never contribute - history is immutable, so removal is a filter here
+  // rather than a mutation.
+  struct SegmentBest {
+    int32_t time;
+    std::string recordDate;
+    std::string playerName;
+  };
+
+  using PlayerKey = std::tuple<int32_t, std::string, std::string, int32_t>;
+  std::map<PlayerKey, std::map<int32_t, SegmentBest>> personal;
+
+  // Splits removed standalone are excluded per segment. Whole removed runs are
+  // filtered out of the history scan below through 'removed_records'; this
+  // covers the other archive, so a rebuild cannot re-admit a voided split.
+  using RemovedSegmentKey = std::tuple<int32_t, std::string, std::string,
+                                       int32_t, std::string, int32_t>;
+  std::set<RemovedSegmentKey> removedSegments;
+
+  _database->sql << R"(
+    select season_id, map, run, user_id, record_date, segment
+    from removed_segments;
+  )" >>
+      [&removedSegments](int32_t seasonId, std::string map, std::string run,
+                         int32_t userId, std::string recordDate,
+                         int32_t segment) {
+        removedSegments.emplace(seasonId, std::move(map), std::move(run),
+                                userId, std::move(recordDate), segment);
+      };
+
+  _database->sql << R"(
+    select
+      h.season_id,
+      h.map,
+      h.run,
+      h.user_id,
+      h.checkpoints,
+      h.time,
+      h.record_date,
+      h.player_name
+    from record_history h
+    where not exists (
+      select 1 from removed_records rr
+      where rr.season_id = h.season_id
+        and rr.map = h.map
+        and rr.run = h.run
+        and rr.user_id = h.user_id
+        and rr.record_date = h.record_date
+    );
+  )" >>
+      [&personal, &removedSegments](
+          int32_t seasonId, std::string map, std::string run, int32_t userId,
+          const std::string &checkpointsString, int32_t completionTime,
+          const std::string &recordDate, const std::string &playerName) {
+        const auto segments = computeSegmentTimes(
+            parseCheckpoints(checkpointsString), completionTime);
+
+        // a run with no usable checkpoint data contributes no segments - bail
+        // before touching 'personal', since operator[] would otherwise create
+        // an entry for it, and the fold would then write rows with no segments
+        if (segments.empty()) {
+          return;
+        }
+
+        auto &playerSegments =
+            personal[std::make_tuple(seasonId, map, run, userId)];
+
+        for (size_t i = 0; i < segments.size(); ++i) {
+          // 1-based: segment i is the leg ending at checkpoint i, and the
+          // finish is the last segment
+          const auto segment = static_cast<int32_t>(i) + 1;
+
+          // a split removed standalone never contributes, whatever the run
+          // that set it
+          if (removedSegments.find(RemovedSegmentKey{seasonId, map, run, userId,
+                                                     recordDate, segment}) !=
+              removedSegments.end()) {
+            continue;
+          }
+
+          const auto it = playerSegments.find(segment);
+
+          // lower time wins; ties break to the earlier record date, so the
+          // source run is deterministic
+          if (it == playerSegments.end() || segments[i] < it->second.time ||
+              (segments[i] == it->second.time &&
+               recordDate < it->second.recordDate)) {
+            playerSegments[segment] = {segments[i], recordDate, playerName};
+          }
+        }
+      };
+
+  // The global best is a materialised min over the per-player bests: for each
+  // segment, whichever player holds the fastest time, breaking ties by the
+  // earlier record date and then the lower user ID.
+  struct GlobalBest {
+    int32_t time;
+    int32_t userId;
+    std::string recordDate;
+    std::string playerName;
+  };
+
+  using RunKey = std::tuple<int32_t, std::string, std::string>;
+  std::map<RunKey, std::map<int32_t, GlobalBest>> global;
+
+  for (const auto &[playerKey, playerSegments] : personal) {
+    const auto &[seasonId, map, run, userId] = playerKey;
+    auto &runSegments = global[std::make_tuple(seasonId, map, run)];
+
+    for (const auto &[segment, best] : playerSegments) {
+      const auto it = runSegments.find(segment);
+      const bool better =
+          it == runSegments.end() || best.time < it->second.time ||
+          (best.time == it->second.time &&
+           std::tie(best.recordDate, userId) <
+               std::tie(it->second.recordDate, it->second.userId));
+
+      if (better) {
+        runSegments[segment] = {best.time, userId, best.recordDate,
+                                best.playerName};
+      }
+    }
+  }
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  for (const auto &[key, segments] : personal) {
+    const auto &[seasonId, map, run, userId] = key;
+
+    for (const auto &[segment, best] : segments) {
+      _database->sql << R"(
+        insert into player_best_segments (
+          season_id,
+          map,
+          run,
+          user_id,
+          segment,
+          time,
+          record_date,
+          player_name
+        ) values (
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?
+        );
+      )" << seasonId << map
+                     << run << userId << segment << best.time << best.recordDate
+                     << best.playerName;
+
+      // the initial bests become the initial history rows, so the progression
+      // starts from what the live tables started from
+      _database->sql << R"(
+        insert into player_best_segments_history (
+          season_id,
+          map,
+          run,
+          user_id,
+          segment,
+          time,
+          record_date,
+          player_name
+        ) values (
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?
+        );
+      )" << seasonId << map
+                     << run << userId << segment << best.time << best.recordDate
+                     << best.playerName;
+    }
+  }
+
+  for (const auto &[key, segments] : global) {
+    const auto &[seasonId, map, run] = key;
+
+    for (const auto &[segment, best] : segments) {
+      _database->sql << R"(
+        insert into best_segments (
+          season_id,
+          map,
+          run,
+          segment,
+          time,
+          user_id,
+          record_date,
+          player_name
+        ) values (
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?
+        );
+      )" << seasonId << map
+                     << run << segment << best.time << best.userId
+                     << best.recordDate << best.playerName;
+    }
+  }
+
+  txn.commit();
+}
+
 void TimerunRepository::migrate() {
   _database->addMigration(
       // clang-format off
@@ -1775,10 +2051,88 @@ void TimerunRepository::migrate() {
        R"(create index idx_record_history_user on record_history(user_id, season_id, map, run, record_date);)",
        R"(create index idx_record_history_lookup on record_history(season_id, map, run, record_date);)"});
 
+  _database->addMigration(
+      // clang-format off
+      "best_segments",
+      {R"(
+        create table player_best_segments (
+          season_id integer not null,
+          map text not null,
+          run text not null,
+          user_id int not null,
+          segment integer not null,
+          time int not null,
+          record_date timestamp not null,
+          player_name text not null,
+          primary key (season_id, map, run, user_id, segment),
+          foreign key (season_id) references season(id)
+        );
+      )",
+       R"(
+        create table player_best_segments_history (
+          id integer primary key autoincrement,
+          season_id integer not null,
+          map text not null,
+          run text not null,
+          user_id int not null,
+          segment integer not null,
+          time int not null,
+          record_date timestamp not null,
+          player_name text not null
+        );
+      )",
+       R"(
+        create index idx_player_best_segments_history_user
+          on player_best_segments_history(user_id, season_id, map, run, segment, record_date);
+      )",
+       R"(
+        create index idx_player_best_segments_history_lookup
+          on player_best_segments_history(season_id, map, run, segment, record_date);
+      )",
+       R"(
+        create table best_segments (
+          season_id integer not null,
+          map text not null,
+          run text not null,
+          segment integer not null,
+          time int not null,
+          user_id int not null,
+          record_date timestamp not null,
+          player_name text not null,
+          primary key (season_id, map, run, segment),
+          foreign key (season_id) references season(id)
+        );
+      )",
+       R"(
+        create table removed_segments (
+          id integer primary key autoincrement,
+          season_id integer not null,
+          map text not null,
+          run text not null,
+          user_id int not null,
+          segment integer not null,
+          time int not null,
+          record_date timestamp not null,
+          player_name text not null,
+          removed_by int not null,
+          removed_at timestamp not null,
+          reason text null
+        );
+      )",
+       R"(
+        create unique index idx_removed_segments_identity
+          on removed_segments(season_id, map, run, user_id, record_date, segment);
+      )",
+       R"(
+        create index idx_removed_segments_user_id on removed_segments(user_id);
+      )"});
+  // clang-format on
+
   _database->applyMigrations();
 
   tryToMigrateRecords();
   seedRecordHistory();
+  seedBestSegments();
 }
 
 std::string TimerunRepository::serializeMetadata(
