@@ -47,12 +47,15 @@ public:
             std::unique_ptr<SynchronizationContext> synchronizationContext);
 
   struct Player {
-    Player(int clientNum, int userId, const std::vector<Timerun::Record> &runs)
-        : clientNum(clientNum), userId(userId), records(runs) {}
+    Player(int clientNum, int userId, const std::vector<Timerun::Record> &runs,
+           const std::map<std::string, std::vector<int32_t>> &bestSegments)
+        : clientNum(clientNum), userId(userId), records(runs),
+          bestSegments(bestSegments) {}
 
     int clientNum;
     int userId;
     std::vector<Timerun::Record> records;
+    std::map<std::string, std::vector<int32_t>> bestSegments;
     bool running{};
     std::string name;
     std::optional<int> startTime;
@@ -145,6 +148,7 @@ private:
   void startNotify(Player *player) const;
   static bool isDebugging(int clientNum);
   void checkRecord(Player *player);
+  void loadBestSegments();
   void ensureInitialized() const;
 
   /*
@@ -188,5 +192,6 @@ private:
   std::vector<Timerun::Season> _upcomingSeasons;
 
   std::map<int, std::vector<Ranking>> _rankingsPerSeason;
+  std::map<std::string, std::vector<int32_t>> bestSegments;
 };
 } // namespace ETJump

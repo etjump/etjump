@@ -263,6 +263,64 @@ TimerunRepository::getRecordsForRun(const std::string &map,
   throw std::runtime_error("Not implemented");
 }
 
+// assembles (run, segment, time) rows into a run -> segment durations map;
+// segment numbers are 1-based, so segment N lands at index N - 1
+static std::map<std::string, std::vector<int32_t>>
+bestSegmentsFromRows(sqlite::database_binder &binder) {
+  std::map<std::string, std::vector<int32_t>> bestSegments;
+
+  binder >> [&bestSegments](std::string run, int32_t segment, int32_t time) {
+    auto &runSegments = bestSegments[std::move(run)];
+
+    if (runSegments.size() < static_cast<size_t>(segment)) {
+      runSegments.resize(segment);
+    }
+
+    runSegments[segment - 1] = time;
+  };
+
+  return bestSegments;
+}
+
+// assembles (segment, time) rows into a segment durations map
+static std::map<int32_t, int32_t>
+segmentTimesFromRows(sqlite::database_binder &binder) {
+  std::map<int32_t, int32_t> segmentTimes;
+
+  binder >> [&segmentTimes](int32_t segment, int32_t time) {
+    segmentTimes[segment] = time;
+  };
+
+  return segmentTimes;
+}
+
+std::map<std::string, std::vector<int32_t>>
+TimerunRepository::getBestSegments(int32_t seasonId,
+                                   const std::string &map) const {
+  auto binder = _database->sql << R"(
+    select run, segment, time
+    from best_segments
+    where season_id = ? and map = ?
+    order by run, segment;
+  )" << seasonId << map;
+
+  return bestSegmentsFromRows(binder);
+}
+
+std::map<std::string, std::vector<int32_t>>
+TimerunRepository::getPlayerBestSegments(int32_t seasonId,
+                                         const std::string &map,
+                                         int userId) const {
+  auto binder = _database->sql << R"(
+    select run, segment, time
+    from player_best_segments
+    where season_id = ? and map = ? and user_id = ?
+    order by run, segment;
+  )" << seasonId << map << userId;
+
+  return bestSegmentsFromRows(binder);
+}
+
 void TimerunRepository::insertRecordRow(const Timerun::Record &record) {
   _database->sql << R"(
     insert into record (
@@ -379,17 +437,47 @@ void TimerunRepository::updateRecord(const Timerun::Record &record) {
   txn.commit();
 }
 
-void TimerunRepository::updateBestSegments(const Timerun::Record &record) {
+std::vector<Timerun::BestSegmentUpdate>
+TimerunRepository::updateBestSegments(const Timerun::Record &record) {
+  std::vector<Timerun::BestSegmentUpdate> updates;
+
   const auto segments = computeSegmentTimes(record.checkpoints, record.time);
 
   // a run with no usable checkpoint data has no segments to record
   if (segments.empty()) {
-    return;
+    return updates;
   }
 
   DatabaseV2::TransactionGuard txn(*_database);
 
   const auto recordDate = record.recordDate.toDateTimeString();
+
+  // Read what these segments are about to beat, before the upserts overwrite
+  // it, so a completion can report what it improved (and stay quiet about
+  // segments it set for the first time, which beat nothing). Scoped so the
+  // binders are closed before the upserts run.
+  std::map<int32_t, int32_t> personalPriors;
+  std::map<int32_t, int32_t> globalPriors;
+
+  {
+    auto binder = _database->sql << R"(
+      select segment, time
+      from player_best_segments
+      where season_id = ? and map = ? and run = ? and user_id = ?;
+    )" << record.seasonId << record.map
+                                 << record.run << record.userId;
+    personalPriors = segmentTimesFromRows(binder);
+  }
+
+  {
+    auto binder = _database->sql << R"(
+      select segment, time
+      from best_segments
+      where season_id = ? and map = ? and run = ?;
+    )" << record.seasonId << record.map
+                                 << record.run;
+    globalPriors = segmentTimesFromRows(binder);
+  }
 
   for (size_t i = 0; i < segments.size(); ++i) {
     // 1-based: segment i is the leg ending at checkpoint i, and the finish is
@@ -494,9 +582,29 @@ void TimerunRepository::updateBestSegments(const Timerun::Record &record) {
     )" << record.seasonId
                    << record.map << record.run << segment << segments[i]
                    << record.userId << recordDate << record.playerName;
+
+    const bool global = _database->sql.rows_modified() > 0;
+
+    if (personal || global) {
+      Timerun::BestSegmentUpdate update{segment, segments[i], personal, global};
+
+      const auto personalIt = personalPriors.find(segment);
+      if (personalIt != personalPriors.end()) {
+        update.previousPersonal = personalIt->second;
+      }
+
+      const auto globalIt = globalPriors.find(segment);
+      if (globalIt != globalPriors.end()) {
+        update.previousGlobal = globalIt->second;
+      }
+
+      updates.push_back(std::move(update));
+    }
   }
 
   txn.commit();
+
+  return updates;
 }
 
 std::optional<Timerun::Record>

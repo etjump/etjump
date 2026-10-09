@@ -260,6 +260,7 @@ void TimerunV2::initialize() {
   _sc->startWorkerThreads(1);
 
   if (initialized) {
+    loadBestSegments();
     computeRanks();
   }
 }
@@ -282,10 +283,12 @@ void TimerunV2::ensureInitialized() const {
 
 class ClientConnectResult : public SynchronizationContext::ResultBase {
 public:
-  explicit ClientConnectResult(std::vector<Timerun::Record> runs)
-      : runs(std::move(runs)) {}
+  ClientConnectResult(std::vector<Timerun::Record> runs,
+                      std::map<std::string, std::vector<int32_t>> bestSegments)
+      : runs(std::move(runs)), bestSegments(std::move(bestSegments)) {}
 
   std::vector<Timerun::Record> runs;
+  std::map<std::string, std::vector<int32_t>> bestSegments;
 };
 
 void TimerunV2::clientConnect(int clientNum, int userId) {
@@ -293,19 +296,17 @@ void TimerunV2::clientConnect(int clientNum, int userId) {
       [this, userId] {
         ensureInitialized();
 
-        auto parameters = StringUtils::join(
-            Container::map(_activeSeasonsIds,
-                           [](int season) { return std::to_string(season); }),
-            ", ");
-
         auto runs = _repository->getRecordsForPlayer(_activeSeasonsIds,
                                                      _currentMap, userId);
+        auto playerBestSegments = _repository->getPlayerBestSegments(
+            defaultSeasonId, _currentMap, userId);
 
-        return std::make_unique<ClientConnectResult>(runs);
+        return std::make_unique<ClientConnectResult>(
+            std::move(runs), std::move(playerBestSegments));
       },
       [this, clientNum,
        userId](std::unique_ptr<SynchronizationContext::ResultBase> result) {
-        auto clientConnectResult =
+        const auto *const clientConnectResult =
             dynamic_cast<ClientConnectResult *>(result.get());
 
         if (!clientConnectResult) {
@@ -313,7 +314,8 @@ void TimerunV2::clientConnect(int clientNum, int userId) {
         }
 
         _players[clientNum] = std::make_unique<Player>(
-            clientNum, userId, clientConnectResult->runs);
+            clientNum, userId, clientConnectResult->runs,
+            clientConnectResult->bestSegments);
       },
       [this, clientNum, userId](const std::runtime_error &error) {
         _logger->info("Unable to load player information for clientNum: `%d` "
@@ -325,6 +327,38 @@ void TimerunV2::clientConnect(int clientNum, int userId) {
                       "github.com/etjump/etjump.");
         Printer::console(clientNum,
                          StringUtils::format("cause: %s\n", error.what()));
+      });
+}
+
+class BestSegmentsResult : public SynchronizationContext::ResultBase {
+public:
+  explicit BestSegmentsResult(
+      std::map<std::string, std::vector<int32_t>> segments)
+      : segments(std::move(segments)) {}
+
+  std::map<std::string, std::vector<int32_t>> segments;
+};
+
+void TimerunV2::loadBestSegments() {
+  _sc->postTask(
+      [this] {
+        ensureInitialized();
+
+        return std::make_unique<BestSegmentsResult>(
+            _repository->getBestSegments(defaultSeasonId, _currentMap));
+      },
+      [this](std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        const auto *const r = dynamic_cast<BestSegmentsResult *>(result.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("BestSegmentsResult is NULL");
+        }
+
+        bestSegments = r->segments;
+      },
+      [this](const std::runtime_error &e) {
+        _logger->error("Unable to load best segments for `%s`: %s", _currentMap,
+                       e.what());
       });
 }
 
@@ -2634,6 +2668,8 @@ public:
   // Most relevant season record
   std::map<int, bool> isTopRecordPerSeason;
   std::map<int, NewRecord> newOwnRecordsPerSeason;
+  // segments this completion improved, per season
+  std::map<int32_t, std::vector<Timerun::BestSegmentUpdate>> bestSegmentUpdates;
 
   // our previous overall record
   std::optional<Timerun::Record> playerPreviousOverallRecord;
@@ -2694,6 +2730,8 @@ void TimerunV2::checkRecord(Player *player) {
 
         std::map<int, Timerun::Record> playerNewTopRecordForSeason{};
         std::map<int, bool> isNewRecordForSeason{};
+        std::map<int32_t, std::vector<Timerun::BestSegmentUpdate>>
+            bestSegmentUpdates;
 
         // go through active seasons and check if we beat any of the old
         // records if we did, we store the record in
@@ -2736,7 +2774,11 @@ void TimerunV2::checkRecord(Player *player) {
           }
 
           // every completion feeds the best segments, new record or not
-          _repository->updateBestSegments(record);
+          auto updates = _repository->updateBestSegments(record);
+
+          if (!updates.empty()) {
+            bestSegmentUpdates[seasonId] = std::move(updates);
+          }
 
           if (isNewRecord) {
             playerNewTopRecordForSeason[seasonId] = std::move(record);
@@ -2745,6 +2787,7 @@ void TimerunV2::checkRecord(Player *player) {
 
         auto result = std::make_unique<CheckRecordResult>();
         result->clientNum = clientNum;
+        result->bestSegmentUpdates = std::move(bestSegmentUpdates);
 
         // go through old records and update any records we might have beaten
         for (const auto &s : isNewRecordForSeason) {
@@ -2947,6 +2990,115 @@ void TimerunV2::checkRecord(Player *player) {
 
           if (!foundCachedRecord) {
             _players[clientNum]->records.push_back(newRecord.second.record);
+          }
+        }
+
+        // Patch the in-memory best segments with whatever this completion
+        // improved. Only the default season feeds the caches, since that is
+        // what the server command sends.
+        const auto updatesIt =
+            checkRecordResult->bestSegmentUpdates.find(defaultSeasonId);
+
+        if (updatesIt != checkRecordResult->bestSegmentUpdates.end()) {
+          auto &globalSegments = bestSegments[activeRunName];
+          auto &personalSegments =
+              _players[clientNum]->bestSegments[activeRunName];
+
+          for (const auto &update : updatesIt->second) {
+            const auto size = static_cast<size_t>(update.segment);
+
+            if (globalSegments.size() < size) {
+              globalSegments.resize(size);
+            }
+
+            if (personalSegments.size() < size) {
+              personalSegments.resize(size);
+            }
+
+            if (update.global) {
+              globalSegments[update.segment - 1] = update.time;
+            }
+
+            if (update.personal) {
+              personalSegments[update.segment - 1] = update.time;
+            }
+          }
+        }
+
+        // Announce the best segments this completion beat, one line per scope
+        // rather than one per segment: a record run improves nearly every
+        // segment by construction, so per-segment lines are noisiest exactly
+        // where they say least. The updates carry every write, first sets
+        // included, so filter on a prior existing - a segment set for the
+        // first time beat nothing, the same rule the record announcements
+        // follow. A global best is necessarily also a personal best, so it
+        // counts in both the server-best popup and the player's own line.
+        const auto runName = StringUtils::sanitize(activeRunName);
+
+        const auto segmentList = [](const std::vector<int32_t> &segments) {
+          return StringUtils::join(
+              Container::map(
+                  segments,
+                  [](int32_t segment) { return std::to_string(segment); }),
+              ", ");
+        };
+
+        // The updates are keyed by active season, so walk the seasons for the
+        // names and pull each one's updates; a season with nothing improved is
+        // simply skipped.
+        for (const auto &activeSeason : _activeSeasons) {
+          const auto seasonUpdatesIt =
+              checkRecordResult->bestSegmentUpdates.find(activeSeason.id);
+
+          if (seasonUpdatesIt == checkRecordResult->bestSegmentUpdates.end()) {
+            continue;
+          }
+
+          const bool isDefaultSeason = activeSeason.id == defaultSeasonId;
+
+          std::vector<int32_t> globalSegments;
+          std::vector<int32_t> personalSegments;
+
+          for (const auto &update : seasonUpdatesIt->second) {
+            if (update.global && update.previousGlobal.has_value()) {
+              globalSegments.push_back(update.segment);
+            }
+
+            if (update.personal && update.previousPersonal.has_value()) {
+              personalSegments.push_back(update.segment);
+            }
+          }
+
+          if (isDefaultSeason && !globalSegments.empty()) {
+            const auto count = static_cast<int>(globalSegments.size());
+
+            Printer::popupAll(
+                "^3%s ^7set ^3%d^7 new server-best segment%s on ^3%s^7 (%s)!",
+                playerName, count, count == 1 ? "" : "s", runName,
+                segmentList(globalSegments));
+          }
+
+          if (personalSegments.empty()) {
+            continue;
+          }
+
+          const auto count = static_cast<int>(personalSegments.size());
+          const std::string plural = count == 1 ? "" : "s";
+          const auto list = segmentList(personalSegments);
+
+          // the default season is the overall best, so its line stays bare;
+          // the others name themselves, the way their record lines do
+          if (isDefaultSeason) {
+            Printer::console(
+                clientNum,
+                "^7You beat your best on ^3%d^7 segment%s of ^7^3%s^7 (%s)!\n",
+                count, plural, runName, list);
+          } else {
+            Printer::console(
+                clientNum,
+                "^7You beat your best on ^3%d^7 segment%s of ^7^3%s^7 on "
+                "season ^3%s^7 (%s)!\n",
+                count, plural, runName, activeSeason.name, list);
           }
         }
 
