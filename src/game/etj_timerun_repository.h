@@ -53,9 +53,15 @@ public:
                       int userId);
   std::vector<Timerun::Record> getRecordsForRun(const std::string &map,
                                                 const std::string &run) const;
+  std::map<std::string, std::vector<int32_t>>
+  getBestSegments(int32_t seasonId, const std::string &map) const;
+  std::map<std::string, std::vector<int32_t>>
+  getPlayerBestSegments(int32_t seasonId, const std::string &map,
+                        int userId) const;
   void insertRecord(const Timerun::Record &record);
   void updateRecord(const Timerun::Record &record);
-  void updateBestSegments(const Timerun::Record &record);
+  std::vector<Timerun::BestSegmentUpdate>
+  updateBestSegments(const Timerun::Record &record);
   std::optional<Timerun::Record>
   getTopRecord(int seasonId, const std::string &map, const std::string &run);
   std::vector<Timerun::Record> getTopRecords(const std::vector<int> &seasonIds,

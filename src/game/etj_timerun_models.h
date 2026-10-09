@@ -69,6 +69,19 @@ struct Checkpoints {
   std::vector<int32_t> checkpoints;
 };
 
+// a segment whose best time a completion improved; personal and global say
+// which tables the improvement landed in, and the previous times say what it
+// beat. A previous time is absent when that table had no entry for the
+// segment, meaning this completion set it rather than beat it.
+struct BestSegmentUpdate {
+  int32_t segment{};                       // 1-based segment number
+  int32_t time{};                          // the new best duration
+  bool personal{};                         // improved the player's own best
+  bool global{};                           // improved the server-wide best
+  std::optional<int32_t> previousPersonal; // the personal time it beat
+  std::optional<int32_t> previousGlobal;   // the global time it beat
+};
+
 struct AddSeasonParams {
   int clientNum;
   std::string name;
