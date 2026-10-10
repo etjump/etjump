@@ -3369,6 +3369,12 @@ static bool comboHandleKey(itemDef_t *item, int key) {
 
   if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_ENTER ||
       key == K_KP_ENTER) {
+    // nothing is highlighted (cursor is outside of the dropdown),
+    // close the dropdown without changing the value
+    if (item->cursorPos < 0) {
+      return true;
+    }
+
     if (multi->strDef) {
       if (!Q_stricmp(multi->cvarStr[item->cursorPos], OPEN_COLOR_PICKER)) {
         Menu_ClearFocus(static_cast<menuDef_t *>(item->parent));
