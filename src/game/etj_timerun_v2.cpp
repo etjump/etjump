@@ -395,6 +395,8 @@ TimerunV2::Player *TimerunV2::setupPlayerData(const int clientNum,
       level.checkpointsCount[indexForRunname(runName)] != 0;
   player->checkpointTimes.fill(TIMERUN_CHECKPOINT_NOT_SET);
   player->checkpointIndicesHit.fill(false);
+  player->bestPersonalSegments.fill(false);
+  player->bestGlobalSegments.fill(false);
   player->nextCheckpointIdx = 0;
 
   return player;
@@ -434,6 +436,31 @@ void TimerunV2::startSaveposTimer(int clientNum, const std::string &playerName,
   Utilities::startRun(clientNum);
 }
 
+// Whether a segment's duration beats the best on record for it, personal and
+// global. A zero-length segment, or one with no recorded best, never counts,
+// so callers need no guard of their own.
+static std::pair<bool, bool> bestSegmentBeaten(
+    const std::map<std::string, std::vector<int32_t>> &personalBestSegments,
+    const std::map<std::string, std::vector<int32_t>> &globalBestSegments,
+    const std::string &runName, const int32_t segmentIdx,
+    const int32_t duration) {
+  if (duration <= 0) {
+    return {false, false};
+  }
+
+  const auto beaten =
+      [&runName, &segmentIdx,
+       &duration](const std::map<std::string, std::vector<int32_t>> &cache) {
+        const auto it = cache.find(runName);
+
+        return it != cache.end() &&
+               segmentIdx < static_cast<int32_t>(it->second.size()) &&
+               duration <= it->second[segmentIdx];
+      };
+
+  return {beaten(personalBestSegments), beaten(globalBestSegments)};
+}
+
 void TimerunV2::checkpoint(const std::string &runName, const int clientNum,
                            const int checkpointIndex,
                            const int currentTimeMs) const {
@@ -457,14 +484,27 @@ void TimerunV2::checkpoint(const std::string &runName, const int clientNum,
 
   player->checkpointIndicesHit[checkpointIndex] = true;
 
-  player->checkpointTimes[player->nextCheckpointIdx++] =
-      currentTimeMs - player->startTime.value();
+  const auto checkpointTime = currentTimeMs - player->startTime.value();
+  const auto previousTime =
+      player->nextCheckpointIdx > 0
+          ? player->checkpointTimes[player->nextCheckpointIdx - 1]
+          : 0;
+
+  const auto [beatPersonal, beatGlobal] = bestSegmentBeaten(
+      player->bestSegments, bestSegments, player->activeRunName,
+      player->nextCheckpointIdx, checkpointTime - previousTime);
+
+  // remember the verdict for this split, so a mid-run resync can replay it
+  player->bestPersonalSegments[player->nextCheckpointIdx] = beatPersonal;
+  player->bestGlobalSegments[player->nextCheckpointIdx] = beatGlobal;
+
+  player->checkpointTimes[player->nextCheckpointIdx++] = checkpointTime;
 
   Printer::commandAll(
       TimerunCommands::Checkpoint(
           clientNum, player->nextCheckpointIdx - 1,
           player->checkpointTimes[player->nextCheckpointIdx - 1],
-          player->activeRunName, checkpointIndex)
+          player->activeRunName, checkpointIndex, beatPersonal, beatGlobal)
           .serialize());
 }
 
@@ -489,11 +529,24 @@ void TimerunV2::stopTimer(const std::string &runName, int clientNum,
 
   player->running = false;
 
-  Printer::commandAll(
-      TimerunCommands::Stop(clientNum, millis, player->activeRunName)
-          .serialize());
+  // the finish closes the run, so its gold split verdict is sent here.
+  // The last checkpoint time is still live here - no checkpoints means no
+  // finish segment, and a zero-length one falls out as "not beaten"
+  const auto finishDuration =
+      player->nextCheckpointIdx > 0
+          ? millis - player->checkpointTimes[player->nextCheckpointIdx - 1]
+          : 0;
 
-  player->activeRunName = "";
+  const auto [beatPersonal, beatGlobal] = bestSegmentBeaten(
+      player->bestSegments, bestSegments, player->activeRunName,
+      player->nextCheckpointIdx, finishDuration);
+
+  Printer::commandAll(TimerunCommands::Stop(clientNum, millis,
+                                            player->activeRunName, beatPersonal,
+                                            beatGlobal)
+                          .serialize());
+
+  player->activeRunName.clear();
   Utilities::stopRun(clientNum);
 }
 
@@ -603,11 +656,13 @@ void TimerunV2::connectNotify(int clientNum) {
       }
 
       Printer::command(
-          clientNum, TimerunCommands::Start(
-                         idx, player->startTime.value(), player->activeRunName,
-                         fastestCompletionTime, player->runHasCheckpoints,
-                         checkpoints, player->checkpointTimes)
-                         .serialize());
+          clientNum,
+          TimerunCommands::Start(
+              idx, player->startTime.value(), player->activeRunName,
+              fastestCompletionTime, player->runHasCheckpoints, checkpoints,
+              player->checkpointTimes, player->bestPersonalSegments,
+              player->bestGlobalSegments)
+              .serialize());
     }
   }
 }
@@ -2607,12 +2662,13 @@ void TimerunV2::startNotify(Player *player) const {
     checkpoints = player->checkpointTimes;
   }
 
-  Printer::commandAll(
-      TimerunCommands::Start(player->clientNum, player->startTime.value(),
-                             player->activeRunName, fastestCompletionTime,
-                             player->runHasCheckpoints, checkpoints,
-                             player->checkpointTimes)
-          .serialize());
+  Printer::commandAll(TimerunCommands::Start(
+                          player->clientNum, player->startTime.value(),
+                          player->activeRunName, fastestCompletionTime,
+                          player->runHasCheckpoints, checkpoints,
+                          player->checkpointTimes, player->bestPersonalSegments,
+                          player->bestGlobalSegments)
+                          .serialize());
 }
 
 bool TimerunV2::isDebugging(const int clientNum) {

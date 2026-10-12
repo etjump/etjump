@@ -69,17 +69,23 @@ TimerunCommands::Start::Start(
     int clientNum, int startTime, const std::string &runName,
     const std::optional<int> &previousRecord, bool runHasCheckpoints,
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
-    std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints)
+    std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints,
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> currentRunBestPersonalSegments,
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> currentRunBestGlobalSegments)
     : clientNum(clientNum), startTime(startTime), runName(runName),
       previousRecord(previousRecord), runHasCheckpoints(runHasCheckpoints),
-      checkpoints(checkpoints), currentRunCheckpoints(currentRunCheckpoints) {}
+      checkpoints(checkpoints), currentRunCheckpoints(currentRunCheckpoints),
+      currentRunBestPersonalSegments(currentRunBestPersonalSegments),
+      currentRunBestGlobalSegments(currentRunBestGlobalSegments) {}
 
 std::string TimerunCommands::Start::serialize() const {
-  return StringUtils::format("timerun start %d %d \"%s\" %d %d \"%s\" \"%s\"",
-                             clientNum, startTime, runName,
-                             previousRecord.value_or(-1), runHasCheckpoints,
-                             StringUtils::join(checkpoints, ","),
-                             StringUtils::join(currentRunCheckpoints, ","));
+  return StringUtils::format(
+      "timerun start %d %d \"%s\" %d %d \"%s\" \"%s\" \"%s\" \"%s\"", clientNum,
+      startTime, runName, previousRecord.value_or(-1), runHasCheckpoints,
+      StringUtils::join(checkpoints, ","),
+      StringUtils::join(currentRunCheckpoints, ","),
+      StringUtils::join(currentRunBestPersonalSegments, ","),
+      StringUtils::join(currentRunBestGlobalSegments, ","));
 }
 
 std::optional<TimerunCommands::Start>
@@ -153,6 +159,37 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
     idx++;
   }
 
+  // ETJump 3.7.0 onwards - the run's gold verdicts. Absent from old commands
+  // in demo playback. Default filled to false, so no gold splits ever show
+  // in old demos, since they were never tracked to begin with
+  if (args.size() >= numExpectedFields + 2) {
+    idx = 0;
+    for (const auto &v :
+         Container::map(StringUtils::split(args[9], ","),
+                        [](const auto &c) { return std::stoi(c); })) {
+      if (idx >= start.currentRunBestPersonalSegments.size()) {
+        break;
+      }
+
+      start.currentRunBestPersonalSegments[idx] = v != 0;
+
+      idx++;
+    }
+
+    idx = 0;
+    for (const auto &v :
+         Container::map(StringUtils::split(args[10], ","),
+                        [](const auto &c) { return std::stoi(c); })) {
+      if (idx >= start.currentRunBestGlobalSegments.size()) {
+        break;
+      }
+
+      start.currentRunBestGlobalSegments[idx] = v != 0;
+
+      idx++;
+    }
+  }
+
   return start;
 }
 
@@ -174,9 +211,10 @@ std::string TimerunCommands::SavePosStart::serialize() const {
 }
 
 std::string TimerunCommands::Checkpoint::serialize() const {
-  return StringUtils::format("timerun checkpoint %d %d %d \"%s\" %d", clientNum,
-                             checkpointNum, checkpointTime, runName,
-                             checkpointIndex);
+  return StringUtils::format("timerun checkpoint %d %d %d \"%s\" %d %d %d",
+                             clientNum, checkpointNum, checkpointTime, runName,
+                             checkpointIndex, bestPersonalSegment,
+                             bestGlobalSegment);
 }
 
 std::optional<TimerunCommands::Checkpoint>
@@ -228,6 +266,13 @@ TimerunCommands::Checkpoint::deserialize(const std::vector<std::string> &args) {
   }
 
   cp.checkpointIndex = cpi.value();
+
+  // ETJump 3.7.0 onwards, best segment verdicts - absent from older demos,
+  // which simply never render gold
+  if (args.size() >= 9) {
+    cp.bestPersonalSegment = parseInteger(args[7]).value_or(0) != 0;
+    cp.bestGlobalSegment = parseInteger(args[8]).value_or(0) != 0;
+  }
 
   return cp;
 }
@@ -318,8 +363,8 @@ TimerunCommands::Record::deserialize(const std::vector<std::string> &args) {
 }
 
 std::string TimerunCommands::Stop::serialize() const {
-  return StringUtils::format("timerun stop %d %d \"%s\"", clientNum,
-                             completionTime, runName);
+  return StringUtils::format("timerun stop %d %d \"%s\" %d %d", clientNum,
+                             completionTime, runName, beatPersonal, beatGlobal);
 }
 
 std::optional<TimerunCommands::Stop>
@@ -342,6 +387,13 @@ TimerunCommands::Stop::deserialize(const std::vector<std::string> &args) {
   stop.completionTime = completionTime.value();
 
   stop.runName = args[4];
+
+  // ETJump 3.7.0 onwards, best segment verdict - absent from older demos,
+  // which simply never render gold
+  if (args.size() >= 7) {
+    stop.beatPersonal = parseInteger(args[5]).value_or(0) != 0;
+    stop.beatGlobal = parseInteger(args[6]).value_or(0) != 0;
+  }
 
   return stop;
 }
