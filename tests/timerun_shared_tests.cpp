@@ -16,17 +16,30 @@ public:
   std::array<int, MAX_TIMERUN_CHECKPOINTS> CreateDefaultCurrentCheckpoints() {
     return {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -1, -1, -1, -1, -1, -1};
   }
+
+  std::array<bool, MAX_TIMERUN_CHECKPOINTS> CreateDefaultRunBestPersonal() {
+    return {true,  true,  false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false};
+  }
+
+  std::array<bool, MAX_TIMERUN_CHECKPOINTS> CreateDefaultRunBestGlobal() {
+    return {true,  false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false};
+  }
 };
 
 TEST_F(TimerunSharedTests, Start_ShouldSerialize) {
-  auto start =
-      TimerunCommands::Start(1, 2, "3", 4, 1, CreateDefaultCheckpoints(),
-                             CreateDefaultCurrentCheckpoints());
+  auto start = TimerunCommands::Start(
+      1, 2, "3", 4, 1, CreateDefaultCheckpoints(),
+      CreateDefaultCurrentCheckpoints(), CreateDefaultRunBestPersonal(),
+      CreateDefaultRunBestGlobal());
 
   ASSERT_EQ(
       start.serialize(),
       "timerun start 1 2 \"3\" 4 1 \"1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1\" "
-      "\"1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1\"");
+      "\"1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1\" "
+      "\"1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0\" "
+      "\"1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\"");
 }
 
 TEST_F(TimerunSharedTests, Start_ShouldDeserialize) {
@@ -49,17 +62,44 @@ TEST_F(TimerunSharedTests, Start_ShouldDeserialize) {
   ASSERT_EQ(deserialized.value().runHasCheckpoints, 1);
   ASSERT_EQ(deserialized.value().checkpoints[10], 11);
   ASSERT_EQ(deserialized.value().currentRunCheckpoints[10], -1);
+  // this stream predates the run's verdicts, so both arrays stay false
+  ASSERT_FALSE(deserialized.value().currentRunBestPersonalSegments[0]);
+  ASSERT_FALSE(deserialized.value().currentRunBestGlobalSegments[0]);
+}
+
+TEST_F(TimerunSharedTests, Start_ShouldDeserialize_BestSegments) {
+  auto args = std::vector<std::string>{"timerun",
+                                       "start",
+                                       "1",
+                                       "2",
+                                       "3",
+                                       "4",
+                                       "1",
+                                       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1",
+                                       "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1",
+                                       "1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+                                       "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"};
+  auto deserialized = TimerunCommands::Start::deserialize(args);
+
+  ASSERT_TRUE(deserialized.value().currentRunBestPersonalSegments[0]);
+  ASSERT_TRUE(deserialized.value().currentRunBestPersonalSegments[1]);
+  ASSERT_FALSE(deserialized.value().currentRunBestPersonalSegments[2]);
+  ASSERT_TRUE(deserialized.value().currentRunBestGlobalSegments[0]);
+  ASSERT_FALSE(deserialized.value().currentRunBestGlobalSegments[1]);
 }
 
 TEST_F(TimerunSharedTests, Start_ShouldSerialize_IfNoPreviousRecord) {
-  auto start = TimerunCommands::Start(1, 2, "3", std::nullopt, true,
-                                      CreateDefaultCheckpoints(),
-                                      CreateDefaultCurrentCheckpoints());
+  auto start = TimerunCommands::Start(
+      1, 2, "3", std::nullopt, true, CreateDefaultCheckpoints(),
+      CreateDefaultCurrentCheckpoints(), CreateDefaultRunBestPersonal(),
+      CreateDefaultRunBestGlobal());
 
   ASSERT_EQ(
       start.serialize(),
       "timerun start 1 2 \"3\" -1 1 \"1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1\" "
-      "\"1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1\"");
+      "\"1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1\" "
+      "\"1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0\" "
+      "\"1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\"");
 }
 
 TEST_F(TimerunSharedTests, Start_ShouldDeserialize_IfNoPreviousRecord) {
@@ -79,9 +119,9 @@ TEST_F(TimerunSharedTests, Start_ShouldDeserialize_IfNoPreviousRecord) {
 }
 
 TEST_F(TimerunSharedTests, Checkpoint_ShouldSerialize) {
-  auto checkpoint = TimerunCommands::Checkpoint(1, 2, 3, "4", 5);
+  auto checkpoint = TimerunCommands::Checkpoint(1, 2, 3, "4", 5, true, false);
 
-  ASSERT_EQ(checkpoint.serialize(), "timerun checkpoint 1 2 3 \"4\" 5");
+  ASSERT_EQ(checkpoint.serialize(), "timerun checkpoint 1 2 3 \"4\" 5 1 0");
 }
 
 TEST_F(TimerunSharedTests, Checkpoint_ShouldDeserialize) {
@@ -90,6 +130,19 @@ TEST_F(TimerunSharedTests, Checkpoint_ShouldDeserialize) {
   auto checkpoint = TimerunCommands::Checkpoint::deserialize(args);
 
   ASSERT_EQ(checkpoint.value().checkpointIndex, 5);
+  // this stream predates the best segment verdicts, so they stay false
+  ASSERT_FALSE(checkpoint.value().bestPersonalSegment);
+  ASSERT_FALSE(checkpoint.value().bestGlobalSegment);
+}
+
+TEST_F(TimerunSharedTests, Checkpoint_ShouldDeserialize_BestSegments) {
+  auto args = std::vector<std::string>{"timerun", "checkpoint", "1", "2", "3",
+                                       "4",       "5",          "1", "1"};
+  auto checkpoint = TimerunCommands::Checkpoint::deserialize(args);
+
+  ASSERT_EQ(checkpoint.value().checkpointIndex, 5);
+  ASSERT_TRUE(checkpoint.value().bestPersonalSegment);
+  ASSERT_TRUE(checkpoint.value().bestGlobalSegment);
 }
 
 TEST_F(TimerunSharedTests, Checkpoint_ShouldDeserializeWithoutCheckpointIndex) {
@@ -101,9 +154,9 @@ TEST_F(TimerunSharedTests, Checkpoint_ShouldDeserializeWithoutCheckpointIndex) {
 }
 
 TEST_F(TimerunSharedTests, Stop_ShouldSerialize) {
-  auto stop = TimerunCommands::Stop(1, 2, "run");
+  auto stop = TimerunCommands::Stop(1, 2, "run", false, true);
 
-  ASSERT_EQ(stop.serialize(), "timerun stop 1 2 \"run\"");
+  ASSERT_EQ(stop.serialize(), "timerun stop 1 2 \"run\" 0 1");
 }
 
 TEST_F(TimerunSharedTests, Stop_ShouldDeserialize) {
@@ -111,6 +164,19 @@ TEST_F(TimerunSharedTests, Stop_ShouldDeserialize) {
   auto stop = TimerunCommands::Stop::deserialize(args);
 
   ASSERT_EQ(stop.value().runName, "run");
+  // this stream predates the best segment verdicts, so they stay false
+  ASSERT_FALSE(stop.value().beatPersonal);
+  ASSERT_FALSE(stop.value().beatGlobal);
+}
+
+TEST_F(TimerunSharedTests, Stop_ShouldDeserialize_BestSegments) {
+  auto args =
+      std::vector<std::string>{"timerun", "stop", "1", "2", "run", "1", "0"};
+  auto stop = TimerunCommands::Stop::deserialize(args);
+
+  ASSERT_EQ(stop.value().completionTime, 2);
+  ASSERT_TRUE(stop.value().beatPersonal);
+  ASSERT_FALSE(stop.value().beatGlobal);
 }
 
 TEST_F(TimerunSharedTests, Interrupt_ShouldSerialize) {

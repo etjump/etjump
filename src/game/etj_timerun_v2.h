@@ -65,6 +65,10 @@ public:
     int nextCheckpointIdx{};
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointTimes{};
     std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
+    // whether each of checkpointTimes' segments was gold when it was hit, kept
+    // so a mid-run resync can be handed the run's verdicts so far
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> bestPersonalSegments{};
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> bestGlobalSegments{};
     // /loadcheckpoints stores checkpoints here
     std::map<std::string, std::array<int, MAX_TIMERUN_CHECKPOINTS>>
         overriddenCheckpoints;
