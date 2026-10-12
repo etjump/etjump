@@ -2535,6 +2535,7 @@ extern vmCvar_t etj_checkpointsSize;
 extern vmCvar_t etj_checkpointsShadow;
 extern vmCvar_t etj_checkpointsStyle;
 extern vmCvar_t etj_checkpointsCount;
+extern vmCvar_t etj_checkpointsShowGold;
 
 extern vmCvar_t etj_checkpointsPopup;
 extern vmCvar_t etj_checkpointsPopupX;
@@ -4177,7 +4178,8 @@ const char *G_SHA1(const char *str);
 void ETJump_DrawDrawables();
 void ETJump_ClearDrawables();
 
-void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
+void ETJump_LerpColors(const vec4_t *from, const vec4_t *to, vec4_t *color,
+                       float step);
 void ETJump_AdjustPosition(float *x);
 float ETJump_AdjustPosition(float x);
 void ETJump_EnableWidthScale(bool enable);
