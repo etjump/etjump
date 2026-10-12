@@ -41,10 +41,13 @@ std::optional<int> parseInteger(const std::string &arg);
 class Start {
 public:
   Start() = default;
-  Start(int clientNum, int startTime, const std::string &runName,
-        const std::optional<int> &previousRecord, bool runHasCheckpoints,
-        std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
-        std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
+  Start(
+      int clientNum, int startTime, const std::string &runName,
+      const std::optional<int> &previousRecord, bool runHasCheckpoints,
+      std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
+      std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints,
+      std::array<bool, MAX_TIMERUN_CHECKPOINTS> currentRunBestPersonalSegments,
+      std::array<bool, MAX_TIMERUN_CHECKPOINTS> currentRunBestGlobalSegments);
 
   int clientNum{};
   int startTime{};
@@ -53,6 +56,11 @@ public:
   bool runHasCheckpoints = false;
   std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
   std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints{};
+  // which of currentRunCheckpoints' segments were gold when they were hit, so
+  // a client that resyncs mid-run (e.g. after 'vid_restart') gets its
+  // verdicts back. All false on a fresh start - only the hits so far are set.
+  std::array<bool, MAX_TIMERUN_CHECKPOINTS> currentRunBestPersonalSegments{};
+  std::array<bool, MAX_TIMERUN_CHECKPOINTS> currentRunBestGlobalSegments{};
 
   [[nodiscard]] std::string serialize() const;
 
@@ -85,16 +93,23 @@ public:
 
   Checkpoint(const int clientNum, const int checkpointNum,
              const int checkpointTime, std::string runName,
-             const int checkpointIndex)
+             const int checkpointIndex, const bool beatPersonal,
+             const bool beatGlobal)
       : clientNum(clientNum), checkpointNum(checkpointNum),
         checkpointTime(checkpointTime), runName(std::move(runName)),
-        checkpointIndex(checkpointIndex) {}
+        checkpointIndex(checkpointIndex), bestPersonalSegment(beatPersonal),
+        bestGlobalSegment(beatGlobal) {}
 
   int clientNum{};
   int checkpointNum{}; // sequential counter, how many checkpoints we've hit
   int checkpointTime{};
   std::string runName;
   int checkpointIndex{}; // index for Player.checkpointIndexesHit
+  // whether this segment beat the best on record when it was hit, so the
+  // client can render gold without knowing the best times.
+  // Only present in server commands since ETJump 3.7.0
+  bool bestPersonalSegment{};
+  bool bestGlobalSegment{};
 
   [[nodiscard]] std::string serialize() const;
 
@@ -160,13 +175,18 @@ class Stop {
 public:
   Stop() = default;
 
-  Stop(int clientNum, int time, std::string runName)
-      : clientNum(clientNum), completionTime(time),
-        runName(std::move(runName)) {}
+  Stop(int clientNum, int time, std::string runName, const bool beatPersonal,
+       const bool beatGlobal)
+      : clientNum(clientNum), completionTime(time), runName(std::move(runName)),
+        beatPersonal(beatPersonal), beatGlobal(beatGlobal) {}
 
   int clientNum{};
   int completionTime{};
   std::string runName;
+  // the finish segment's verdict - the finish closes the run,
+  // so we transmit the verdict on the end command, rather than checkpoint
+  bool beatPersonal{};
+  bool beatGlobal{};
 
   [[nodiscard]] std::string serialize() const;
 
