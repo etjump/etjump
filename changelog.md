@@ -12,13 +12,15 @@
   * anyone can remove/restore their own records, admins with `T` flag can remove/restore records from other players
   * records removed by admins can only be restored by admins
 * `target_wskey_overrides` entity to override effective worldspawn keys under specific circumstances [#2015](https://github.com/etjump/etjump/pull/2015)
+* client-side prediction for portal gun portal spawning [#2025](https://github.com/etjump/etjump/pull/2025)
+  * portals appear immediately when fired, rather than after a round trip to the server
+  * requires portal prediction to be enabled via `g_portalPredict` or `portalpredict` worldspawn key
 * new supported values for `nonoclip/noprone/nosave` worldspawn keys [#2015](https://github.com/etjump/etjump/pull/2015)
   * **2** - always allow, regardless of area brushes
   * **3** - never allow, regardless of area brushes
+* left/right arrow key & mouse wheel support for adjusting slider values [#2033](https://github.com/etjump/etjump/pull/2033)
 * `etj_drawYaw` to display an indicator when turning view left/right [#1390](https://github.com/etjump/etjump/pull/1390)
 * `etj_drawFallDamageDetector` to display fall damage the player would take if falling/jumping to the aimed surface [#2016](https://github.com/etjump/etjump/pull/2016)
-* client-side prediction for portal gun portal spawning, when portal prediction is enabled via `g_portalPredict` or `portalpredict` worldspawn key
-  * portals appear immediately when fired, rather than after a round trip to the server
 * `editentity` script action to modify an entity without a `scriptname` via mapscripting [#1972](https://github.com/etjump/etjump/pull/1972)
 * bundled mapscripts for `dreamwork` and `the_biome_expedition` [#1992](https://github.com/etjump/etjump/pull/1992) [#2008](https://github.com/etjump/etjump/pull/2008)
 
@@ -34,12 +36,17 @@
 * crash if trickjump line file writing failed for some reason [#2003](https://github.com/etjump/etjump/pull/2003)
 * potential crash when issuing timerun season or custom vote management commands from server console [#2009](https://github.com/etjump/etjump/pull/2009)
 * timerun start or `target_init` could force a non-existing weapon for the player [#2017](https://github.com/etjump/etjump/pull/2017)
+* rankings were calculated with different tie-break rules than records [#2023](https://github.com/etjump/etjump/pull/2023)
 * crash if fetching user data from database failed [#2004](https://github.com/etjump/etjump/pull/2004)
 * HUD calculations broke inside `noprone` brushes when cheats were enabled [#2013](https://github.com/etjump/etjump/pull/2013)
+* `record-details` help text was missing an angle bracket on `map name` field [#2027](https://github.com/etjump/etjump/pull/2027)
 * potential crash when viewing particle effects or trails with extreme lag [#2012](https://github.com/etjump/etjump/pull/2012)
 * flamethrower nozzle was flickering on high speeds [#2011](https://github.com/etjump/etjump/pull/2011)
 * rain particles were calculating the blue color channel for top left vertex incorrectly [#2019](https://github.com/etjump/etjump/pull/2019)
 * debris spawned by `spawnrubble` script command was not rotating correctly [#2019](https://github.com/etjump/etjump/pull/2019)
+* unexpected behavior could occur with timerun events if the database failed to initialize [#2029](https://github.com/etjump/etjump/pull/2029) [#2032](https://github.com/etjump/etjump/pull/2032)
+* sped up timerun database migration check that ran on every map load [#2024](https://github.com/etjump/etjump/pull/2024)
+* potential crash on `ENTER/KP_ENTER` when a dropdown menu was open with no highlighted item [#2034](https://github.com/etjump/etjump/pull/2034)
 * potential crash when trying to focus next item in a menu with keyboard in some scenarios [#2000](https://github.com/etjump/etjump/pull/2000)
 * potential crash when trying to iterate menu item with no options [#1999](https://github.com/etjump/etjump/pull/1999)
 
