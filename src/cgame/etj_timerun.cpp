@@ -93,10 +93,13 @@ void Timerun::reset() {
 }
 
 void Timerun::onStop(const TimerunCommands::Stop *stop) {
-  playersTimerunInformation[stop->clientNum].completionTime =
-      stop->completionTime;
-  playersTimerunInformation[stop->clientNum].running = false;
-  playersTimerunInformation[stop->clientNum].lastRunTimer = cg.time;
+  auto &info = playersTimerunInformation[stop->clientNum];
+
+  info.completionTime = stop->completionTime;
+  info.running = false;
+  info.lastRunTimer = cg.time;
+  info.bestPersonalSegment[info.numCheckpointsHit] = stop->beatPersonal;
+  info.bestGlobalSegment[info.numCheckpointsHit] = stop->beatGlobal;
 
   playerEventsHandler->check("timerun:stop",
                              {std::to_string(stop->clientNum), stop->runName,
@@ -116,30 +119,42 @@ void Timerun::onInterrupt(const TimerunCommands::Interrupt *interrupt) {
 }
 
 void Timerun::onCheckpoint(const TimerunCommands::Checkpoint *cp) {
-  playersTimerunInformation[cp->clientNum].checkpoints[cp->checkpointNum] =
-      cp->checkpointTime;
-  playersTimerunInformation[cp->clientNum].numCheckpointsHit =
-      cp->checkpointNum + 1;
-  playersTimerunInformation[cp->clientNum].lastCheckpointTimestamp = cg.time;
-  playersTimerunInformation[cp->clientNum]
-      .checkpointIndicesHit[cp->checkpointIndex] = true;
+  auto &info = playersTimerunInformation[cp->clientNum];
+
+  info.checkpoints[cp->checkpointNum] = cp->checkpointTime;
+  info.numCheckpointsHit = cp->checkpointNum + 1;
+  info.lastCheckpointTimestamp = cg.time;
+  info.checkpointIndicesHit[cp->checkpointIndex] = true;
+  info.bestPersonalSegment[cp->checkpointNum] = cp->bestPersonalSegment;
+  info.bestGlobalSegment[cp->checkpointNum] = cp->bestGlobalSegment;
 }
 
 void Timerun::onStart(const TimerunCommands::Start *start) {
-  playersTimerunInformation[start->clientNum].startTime = start->startTime;
-  playersTimerunInformation[start->clientNum].runName = start->runName;
-  playersTimerunInformation[start->clientNum].previousRecord =
-      start->previousRecord.value_or(-1);
-  playersTimerunInformation[start->clientNum].running = true;
-  playersTimerunInformation[start->clientNum].checkpoints =
-      start->currentRunCheckpoints;
-  playersTimerunInformation[start->clientNum].runHasCheckpoints =
-      start->runHasCheckpoints;
-  playersTimerunInformation[start->clientNum].numCheckpointsHit =
+  auto &info = playersTimerunInformation[start->clientNum];
+
+  info.startTime = start->startTime;
+  info.runName = start->runName;
+  info.previousRecord = start->previousRecord.value_or(-1);
+  info.running = true;
+  info.checkpoints = start->currentRunCheckpoints;
+  info.runHasCheckpoints = start->runHasCheckpoints;
+  info.numCheckpointsHit =
       Timerun::getNumCheckpointsHit(start->currentRunCheckpoints);
-  playersTimerunInformation[start->clientNum].previousRecordCheckpoints =
-      start->checkpoints;
-  playersTimerunInformation[start->clientNum].checkpointIndicesHit.fill(false);
+  info.previousRecordCheckpoints = start->checkpoints;
+  info.checkpointIndicesHit.fill(false);
+
+  // info holds 17 checkpoints to include cp 16 -> end segment,
+  // but the start command only includes the checkpoints themselves
+  // the last segment is sent with the stop command
+  info.bestPersonalSegment.fill(false);
+  info.bestGlobalSegment.fill(false);
+
+  std::copy(start->currentRunBestPersonalSegments.cbegin(),
+            start->currentRunBestPersonalSegments.cend(),
+            info.bestPersonalSegment.begin());
+  std::copy(start->currentRunBestGlobalSegments.cbegin(),
+            start->currentRunBestGlobalSegments.cend(),
+            info.bestGlobalSegment.begin());
 
   playerEventsHandler->check(
       "timerun:start", {std::to_string(start->clientNum), start->runName,
