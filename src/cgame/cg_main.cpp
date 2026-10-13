@@ -18,6 +18,7 @@
 
 #include "../game/etj_fatal_error_shared.h"
 #include "../game/etj_syscalls.h"
+#include "../game/etj_test_fault.h"
 
 displayContextDef_t cgDC;
 
@@ -32,22 +33,30 @@ static intptr_t dispatchCommand(const int command, const intptr_t arg0,
                                 const intptr_t arg1, const intptr_t arg2,
                                 const intptr_t arg3) {
   switch (command) {
-    case CG_INIT:
+    case CG_INIT: {
+      ETJ_TEST_FAULT_SCOPE("CG_INIT");
       CG_Init(arg0, arg1, arg2, arg3 ? qtrue : qfalse);
       cgs.initing = qfalse;
       return 0;
-    case CG_SHUTDOWN:
+    }
+    case CG_SHUTDOWN: {
+      ETJ_TEST_FAULT_SCOPE("CG_SHUTDOWN");
       // e.g. the server disconnected us, which the engine
       // handles while cgame is fetching server commands
       ETJump::FatalErrorBoundary::protectActiveFrames();
       CG_Shutdown();
       return 0;
-    case CG_CONSOLE_COMMAND:
+    }
+    case CG_CONSOLE_COMMAND: {
+      ETJ_TEST_FAULT_SCOPE("CG_CONSOLE_COMMAND");
       return CG_ConsoleCommand();
-    case CG_DRAW_ACTIVE_FRAME:
+    }
+    case CG_DRAW_ACTIVE_FRAME: {
+      ETJ_TEST_FAULT_SCOPE("CG_DRAW_ACTIVE_FRAME");
       CG_DrawActiveFrame(arg0, static_cast<stereoFrame_t>(arg1),
                          arg2 ? qtrue : qfalse);
       return 0;
+    }
     case CG_CROSSHAIR_PLAYER:
       return CG_CrosshairPlayer();
     case CG_LAST_ATTACKER:

@@ -109,6 +109,12 @@ add_library(qagame MODULE
 	${GAME_HEADERS}
 )
 target_compile_definitions(qagame PRIVATE GAMEDLL)
+
+if (USE_TEST_FAULTS)
+	target_sources(qagame PRIVATE "etj_test_fault.cpp")
+	target_compile_definitions(qagame PRIVATE USE_TEST_FAULTS)
+endif ()
+
 target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt::fmt toml11::toml11)
 target_link_libraries(qagame PRIVATE $<IF:$<CXX_COMPILER_ID:MSVC>,,pthread>)
 set_target_properties(qagame PROPERTIES

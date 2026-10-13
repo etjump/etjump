@@ -36,6 +36,12 @@ include(GenerateMenuHashes)
 generate_menu_hashes(ui)
 
 target_compile_definitions(ui PRIVATE UIDLL)
+
+if (USE_TEST_FAULTS)
+	target_sources(ui PRIVATE "../game/etj_test_fault.cpp")
+	target_compile_definitions(ui PRIVATE USE_TEST_FAULTS)
+endif ()
+
 target_link_libraries(ui PRIVATE cxx_compiler_opts libjson libsha1 fmt::fmt)
 set_target_properties(ui PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"

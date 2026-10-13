@@ -39,6 +39,10 @@ option(USE_ASAN "Enable address sanitizer on supported compilers" OFF)
 option(USE_LSAN "Enable leak sanitizer on supported compilers" OFF)
 option(USE_UBSAN "Enable undefined behavior sanitizer on supported compilers" OFF)
 
+# developer-only: injectable test faults ('etj_testFault') for testing the
+# error handling paths; never enabled for CI/CD builds
+option(USE_TEST_FAULTS "Enable injectable test faults for the error handling" OFF)
+
 # provide options for Visual Studio to automatically setup debugger paths
 if (CMAKE_GENERATOR MATCHES "Visual Studio")
 	set(ET_PATH "" CACHE STRING "Path to ET installation used during development")
