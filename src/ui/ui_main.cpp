@@ -25,6 +25,7 @@ USER INTERFACE MAIN
 #include "../game/etj_fatal_error_shared.h"
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_filesystem.h"
+#include "../game/etj_test_fault.h"
 
 // NERVE - SMF
 inline constexpr int AXIS_TEAM = 0;
@@ -119,14 +120,18 @@ static intptr_t dispatchCommand(const int command, const intptr_t arg0,
     case UI_GETAPIVERSION:
       return UI_API_VERSION;
 
-    case UI_INIT:
+    case UI_INIT: {
+      ETJ_TEST_FAULT_SCOPE("UI_INIT");
       _UI_Init(arg1, arg2);
       return 0;
+    }
 
-    case UI_SHUTDOWN:
+    case UI_SHUTDOWN: {
+      ETJ_TEST_FAULT_SCOPE("UI_SHUTDOWN");
       ETJump::FatalErrorBoundary::protectActiveFrames();
       _UI_Shutdown();
       return 0;
+    }
 
     case UI_KEY_EVENT:
       _UI_KeyEvent(arg0, arg1 ? qtrue : qfalse);
@@ -136,10 +141,12 @@ static intptr_t dispatchCommand(const int command, const intptr_t arg0,
       _UI_MouseEvent(arg0, arg1);
       return 0;
 
-    case UI_REFRESH:
+    case UI_REFRESH: {
+      ETJ_TEST_FAULT_SCOPE("UI_REFRESH");
       ETJump::releaseKeptModules(static_cast<int>(arg0));
       _UI_Refresh(arg0);
       return 0;
+    }
 
     case UI_IS_FULLSCREEN:
       return _UI_IsFullscreen();
@@ -151,8 +158,10 @@ static intptr_t dispatchCommand(const int command, const intptr_t arg0,
     case UI_GET_ACTIVE_MENU:
       return _UI_GetActiveMenu();
 
-    case UI_CONSOLE_COMMAND:
+    case UI_CONSOLE_COMMAND: {
+      ETJ_TEST_FAULT_SCOPE("UI_CONSOLE_COMMAND");
       return UI_ConsoleCommand(arg0);
+    }
 
     case UI_DRAW_CONNECT_SCREEN:
       UI_DrawConnectScreen(arg0 ? qtrue : qfalse);

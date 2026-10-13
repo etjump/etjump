@@ -142,6 +142,12 @@ add_library(cgame MODULE
 	${CGAME_HEADERS}
 )
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
+
+if (USE_TEST_FAULTS)
+	target_sources(cgame PRIVATE "../game/etj_test_fault.cpp")
+	target_compile_definitions(cgame PRIVATE USE_TEST_FAULTS)
+endif ()
+
 target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 libuuid4 fmt::fmt toml11::toml11)
 
 set_target_properties(cgame PROPERTIES

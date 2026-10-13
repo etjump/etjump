@@ -195,6 +195,36 @@ Install the [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms
     ```
 * There are many more useful commands you can learn at [https://www.tutorialspoint.com/gnu_debugger/index.htm](https://www.tutorialspoint.com/gnu_debugger/index.htm).
 
+### Injecting test faults
+
+For testing the error handling paths (the fatal error boundary, client drops
+and server shutdown), a build can be configured with injectable faults:
+
+```sh
+cmake -B build -DUSE_TEST_FAULTS=ON
+```
+
+This is a developer-only option, enabled explicitly - CI/CD builds never carry
+it. When enabled, the vmMain entry points label the call they are dispatching
+(the GAME_*, CG_* and UI_* commands listed in `src/game/etj_test_fault.h`). A
+fault is injected by placing a call to `ETJ_TEST_FAULT()` at the point where
+the error should be raised, and setting the cvar to the vm call under test -
+the logs name the enclosing function, or a custom label passed to the call
+(`ETJ_TEST_FAULT("kick path")`):
+
+```sh
+etj_testFault GAME_RUN_FRAME
+```
+
+The fault is raised, once, the next time that code runs while the labeled vm
+call matches the cvar. Place such calls ad hoc for a test run and remove them
+again afterwards - only the labels at the vmMain entry points are permanent.
+Appending `:ex` raises an unexpected C++ exception instead of a fatal error,
+e.g. `etj_testFault GAME_RUN_FRAME:ex`. The injected error logs a marker when
+the stack unwinds past the injection point, proving the error was raised with
+normal C++ semantics; a missing marker means the error skipped the mod's C++
+destructors.
+
 ## Adding new files to the project
 
 When you add a new source file, it is not automatically part of the build - you must register it in the module's `CMakeLists.txt` and reload the project so the build system picks it up.

@@ -18,6 +18,7 @@
 #include "etj_shader_config_handler.h"
 #include "etj_syscall_ext_shared.h"
 #include "etj_target_spawn_relay.h"
+#include "etj_test_fault.h"
 #include "etj_time_utilities.h"
 #include "etj_worldspawn.h"
 
@@ -564,44 +565,66 @@ qboolean G_SnapshotCallback(int entityNum, int clientNum) {
 static intptr_t dispatchCommand(const int command, const intptr_t arg0,
                                 const intptr_t arg1, const intptr_t arg2) {
   switch (command) {
-    case GAME_INIT:
+    case GAME_INIT: {
+      ETJ_TEST_FAULT_SCOPE("GAME_INIT");
       G_InitGame(arg0, arg1, arg2);
       return 0;
-    case GAME_SHUTDOWN:
+    }
+    case GAME_SHUTDOWN: {
+      ETJ_TEST_FAULT_SCOPE("GAME_SHUTDOWN");
       ETJump::FatalErrorBoundary::protectActiveFrames();
       G_ShutdownGame(arg0);
       return 0;
-    case GAME_CLIENT_CONNECT:
+    }
+    case GAME_CLIENT_CONNECT: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_CONNECT");
       return (intptr_t)ClientConnect(arg0, arg1 ? qtrue : qfalse,
                                      arg2 ? qtrue : qfalse);
-    case GAME_CLIENT_THINK:
+    }
+    case GAME_CLIENT_THINK: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_THINK");
       ClientThink(arg0);
       return 0;
-    case GAME_CLIENT_USERINFO_CHANGED:
+    }
+    case GAME_CLIENT_USERINFO_CHANGED: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_USERINFO_CHANGED");
       ClientUserinfoChanged(arg0);
       return 0;
-    case GAME_CLIENT_DISCONNECT:
+    }
+    case GAME_CLIENT_DISCONNECT: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_DISCONNECT");
       ClientDisconnect(arg0);
       return 0;
-    case GAME_CLIENT_BEGIN:
+    }
+    case GAME_CLIENT_BEGIN: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_BEGIN");
       ClientBegin(arg0);
       return 0;
-    case GAME_CLIENT_COMMAND:
+    }
+    case GAME_CLIENT_COMMAND: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_COMMAND");
       ClientCommand(arg0);
       return 0;
-    case GAME_RUN_FRAME:
+    }
+    case GAME_RUN_FRAME: {
+      ETJ_TEST_FAULT_SCOPE("GAME_RUN_FRAME");
       G_RunFrame(arg0);
       return 0;
-    case GAME_CONSOLE_COMMAND:
+    }
+    case GAME_CONSOLE_COMMAND: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CONSOLE_COMMAND");
       return ConsoleCommand();
+    }
     case BOTAI_START_FRAME:
       return 0;
     case BOT_VISIBLEFROMPOS:
       return qfalse;
     case BOT_CHECKATTACKATPOS:
       return qfalse;
-    case GAME_SNAPSHOT_CALLBACK:
+    case GAME_SNAPSHOT_CALLBACK: {
+      ETJ_TEST_FAULT_SCOPE("GAME_SNAPSHOT_CALLBACK");
       return G_SnapshotCallback(arg0, arg1);
+    }
     case GAME_MESSAGERECEIVED:
       return -1;
   }
