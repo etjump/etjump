@@ -2,11 +2,14 @@
 #define G_LOCAL_H
 // g_local.h -- local definitions for game module
 
+#include <array>
 #include <climits>
 #include <memory>
 #include <string>
 #include <vector>
 #include <stdint.h>
+
+#include "etj_shared.h"
 
 #include "q_shared.h"
 #include "bg_public.h"
@@ -1004,6 +1007,18 @@ typedef struct {
   bool autoSprintAux;
 
   bool jumpDelayBug;
+
+  std::array<std::array<char, MAX_CVAR_VALUE_STRING>,
+             ETJump::Constants::SpectatorHudSync::CgazCvarNames.size()>
+      cgazHudValues;
+  std::array<std::array<char, MAX_CVAR_VALUE_STRING>,
+             ETJump::Constants::SpectatorHudSync::SnaphudCvarNames.size() + 1>
+      snaphudHudValues;
+  bool hasFullHudSync;
+  int32_t hudSyncLastUploadTime;
+  int32_t hudSyncLastRequestTime;
+  int32_t hudSyncWatchedTarget;
+  int32_t hudSyncLastForwardTime;
 
   // target/trigger_tracker progression value
   int32_t progression[MAX_PROGRESSION_TRACKERS];

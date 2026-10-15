@@ -241,6 +241,12 @@ void CG_NewClientInfo(int clientNum) {
   v = Info_ValueForKey(configstring, "vs");
   newInfo.snaphud = Q_atoi(v);
 
+  newInfo.specHudAllowed = true;
+  v = Info_ValueForKey(configstring, "sha");
+  if (*v) {
+    newInfo.specHudAllowed = Q_atoi(v) > 0;
+  }
+
   v = Info_ValueForKey(configstring, "i");
   newInfo.clientIsInactive = Q_atoi(v);
 

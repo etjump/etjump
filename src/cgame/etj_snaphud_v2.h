@@ -25,6 +25,7 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 #include <vector>
 
 #include "etj_cvar_parser.h"
@@ -47,6 +48,7 @@ public:
 
 private:
   void parseCropOffset(const vmCvar_t *cvar);
+  void parseCropOffsetValue(std::string_view value);
   void updateSnaphud(const SnaphudData::State &s);
   void buildSnapZones(const SnaphudData::State &s);
 

@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "cg_public.h"
 #include "etj_cgame.h"
 
@@ -124,6 +126,14 @@ void shutdown();
 // to work around issues that certain actions have when they are performed
 // on the same frame as the module is initialized
 void delayedInit();
+void runSpectatorHudSyncFrame();
+void onSpectatorHudSyncCommand(int targetClientNum, bool fullUpdate,
+                               const std::string &cgazPayload,
+                               const std::string &snaphudPayload);
+
+const char *effectiveHudCvarString(const vmCvar_t *cvar);
+int32_t effectiveHudCvarInt(const vmCvar_t *cvar);
+float effectiveHudCvarFloat(const vmCvar_t *cvar);
 
 void parseWorldspawnKeys();
 void parseWorldspawnKeyOverrides();
