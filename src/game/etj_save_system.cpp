@@ -562,6 +562,13 @@ void SaveSystem::clearTimerunSaves(gentity_t *ent) {
     }
   }
 
+  // 'etj_autoLoad' uses a separate copy for the autoload save
+  for (auto &autoSave : _clients[guid].quickDeployPositions) {
+    if (autoSave.isTimerunSave) {
+      autoSave.isValid = false;
+    }
+  }
+
   bool backupsHaveTimerunSaves = false;
 
   // check if we actually need to delete any old backups
