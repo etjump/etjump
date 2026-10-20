@@ -85,7 +85,7 @@ std::vector<char> File::read(const int bytes) const {
   }
 
   const int readBytes =
-      bytes == READ_ALL_BYTES ? length : std::max(bytes, length);
+      bytes == READ_ALL_BYTES ? length : std::min(bytes, length);
   auto buffer = std::vector<char>(readBytes);
 
   trap_FS_Read(buffer.data(), readBytes, handle);
