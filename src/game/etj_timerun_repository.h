@@ -87,6 +87,10 @@ public:
                                                    int32_t rank, bool exactMap);
   std::vector<Timerun::HistoricalRecord>
   getHistoricalRecords(const Timerun::RecordHistoryParams &params);
+  std::vector<Timerun::BestSegmentDetails>
+  getBestSegmentDetails(const Timerun::BestSegmentsParams &params);
+  std::vector<Timerun::BestSegmentHistoryEntry>
+  getBestSegmentHistory(const Timerun::BestSegmentHistoryParams &params);
   std::vector<Timerun::Season> getSeasons();
   void deleteSeason(const std::string &name);
   std::vector<Timerun::Checkpoints>
@@ -145,6 +149,9 @@ private:
                              bool fromHistory = false);
   std::string resolveRunName(const std::string &map, const std::string &run,
                              bool exact, bool fromHistory = false);
+  std::string resolveSegmentRunName(const std::string &map,
+                                    const std::string &run,
+                                    const std::string &commandPrefix);
 
   std::string serializeMetadata(std::map<std::string, std::string> metadata);
   std::unique_ptr<DatabaseV2> _database;
