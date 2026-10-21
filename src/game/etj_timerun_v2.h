@@ -120,6 +120,8 @@ public:
   void compareCheckpoints(const Timerun::CompareCheckpointsParams &params);
   void recordDetails(const Timerun::RecordDetailsParams &params);
   void recordHistory(const Timerun::RecordHistoryParams &params);
+  void printBestSegments(const Timerun::BestSegmentsParams &params);
+  void printBestSegmentHistory(const Timerun::BestSegmentHistoryParams &params);
   void removeRecord(const Timerun::RemoveRecordParams &params);
   void listRemovedRecords(const Timerun::ListRemovedRecordsParams &params);
   void restoreRecord(const Timerun::RestoreRecordParams &params);

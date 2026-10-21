@@ -216,6 +216,56 @@ struct RecordHistoryParams {
   bool exactMap{};
 };
 
+struct BestSegmentsParams {
+  int32_t clientNum{};
+  std::string season;
+  std::string map;
+  std::string run;
+  int32_t userId{};
+  bool global{}; // server-wide bests when true, personal bests otherwise
+  bool exactMap{};
+};
+
+struct BestSegmentHistoryParams {
+  int32_t clientNum{};
+  std::string season;
+  std::string map;
+  std::string run;
+  int32_t userId{};
+  int32_t segment{};
+  int32_t maxRecords{};
+  bool exactMap{};
+};
+
+// one row of a best-segment listing; 'userId' is the holder for the global
+// listing, and the owning player for a personal listing. A partial season
+// match can return rows from more than one season, so each row carries its
+// 'seasonId'
+struct BestSegmentDetails {
+  int32_t seasonId{};
+  std::string map;
+  std::string run;
+  int32_t segment{};
+  int32_t time{};
+  int32_t userId{};
+  std::string playerName;
+  TimeUtils::Time recordDate;
+};
+
+// one improvement row from 'player_best_segments_history'. 'removed' is
+// computed at query time: either the source run or the split itself has been
+// removed, and history rows are never deleted
+struct BestSegmentHistoryEntry {
+  int32_t seasonId{};
+  std::string map;
+  std::string run;
+  int32_t segment{};
+  int32_t time{};
+  std::string playerName;
+  TimeUtils::Time recordDate;
+  bool removed{};
+};
+
 struct HistoricalRecord {
   Record r{};
   int32_t rank{};

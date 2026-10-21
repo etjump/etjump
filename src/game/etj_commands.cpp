@@ -555,6 +555,314 @@ bool Records(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+static bool bestSegments(gentity_t *ent, Arguments argv) {
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const desc = R"(Prints the best segments for a timerun.
+
+    /best-segments --season <season name> --map <map name> --run <run name>
+                   --user <user ID> [--global]
+
+    Has a shorthand format of:
+    /best-segments <run name>
+    /best-segments <map name> <run name>
+    /best-segments <season name> <map name> <run name>)";
+
+  const auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create("best-segments", desc)
+          .addOption(
+              "season", "s",
+              "Season to print the best segments from. A partial match "
+              "prints every matching season. Default is the overall season.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("map", "m",
+                     "Map to print the best segments from. Default is the "
+                     "current map.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("run", "r", "Run to print the best segments from.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("user", "u",
+                     "User ID to print the best segments for. Default is your "
+                     "own user ID. Ignored if --global is given.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false)
+          .addOption("global", "g",
+                     "Print the server-wide best segments instead of your own.",
+                     ETJump::CommandParser::OptionDefinition::Type::Boolean,
+                     false));
+
+  const auto args = Container::skipFirstN(*argv, 1);
+  const auto optCommand =
+      ETJump::getOptCommand("best-segments", clientNum, def, &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto &command = optCommand.value();
+
+  const auto optSeason = command.getOptional("season");
+  const auto optMap = command.getOptional("map");
+  const auto optRun = command.getOptional("run");
+  const auto optUser = command.getOptional("user");
+  const auto optGlobal = command.getOptional("global");
+
+  std::string season;
+  std::string map;
+  std::optional<std::string> run;
+
+  if (command.extraArgs.size() >= 3) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+  } else if (command.extraArgs.size() >= 2) {
+    map = command.extraArgs[0];
+    run = command.extraArgs[1];
+  } else if (!command.extraArgs.empty()) {
+    run = command.extraArgs[0];
+  }
+
+  if (season.empty()) {
+    season = optSeason.has_value() ? optSeason.value().text : "Default";
+  }
+
+  bool exactMap{};
+
+  if (map.empty()) {
+    map = optMap.has_value() ? optMap.value().text : level.rawmapname;
+    exactMap = !optMap.has_value();
+  }
+
+  if (!run.has_value()) {
+    run = optRun.has_value()
+              ? std::make_optional<std::string>(optRun.value().text)
+              : std::nullopt;
+  }
+
+  if (!run.has_value() || run.value().empty()) {
+    Printer::chat(clientNum, "^3best-segments: ^7operation failed. Check "
+                             "console for more information.");
+    Printer::console(clientNum, "Required option 'run' was not specified.\n");
+    return false;
+  }
+
+  const int32_t callerId = ETJump::session->GetId(ent);
+
+  if (callerId <= 0) {
+    Printer::chat(
+        clientNum,
+        "^3best-segments: ^7Failed to fetch user ID - try reconnecting. If "
+        "the problem persists, please report this to the developers.\n");
+    return false;
+  }
+
+  int32_t userId = callerId;
+
+  if (optUser.has_value()) {
+    if (optUser.value().integer <= 0) {
+      Printer::chat(clientNum,
+                    "^3best-segments: ^7user ID must be a positive number.");
+      return false;
+    }
+
+    userId = optUser.value().integer;
+  }
+
+  const bool global = optGlobal.has_value() && optGlobal.value().boolean;
+
+  if (global && optUser.has_value()) {
+    Printer::chat(clientNum, "^3best-segments: ^7'--user' is ignored when "
+                             "'--global' is specified.");
+  }
+
+  ETJump::Timerun::BestSegmentsParams params;
+  params.clientNum = clientNum;
+  params.season = std::move(season);
+  params.map = std::move(map);
+  params.exactMap = exactMap;
+  params.run = std::move(run.value());
+  params.userId = userId;
+  params.global = global;
+
+  game.timerunV2->printBestSegments(params);
+
+  return true;
+}
+
+static bool bestSegmentHistory(gentity_t *ent, Arguments argv) {
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const desc = R"(Prints the history of a single best segment.
+
+    /best-segments-history --season <season name> --map <map name> --run <run name> --segment <segment number>
+                           --user <user ID> --max-records <amount>
+
+    Has a shorthand format of:
+    /best-segments-history <run name> <segment>
+    /best-segments-history <map name> <run name> <segment>
+    /best-segments-history <season name> <map name> <run name> <segment>)";
+
+  const auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create("best-segments-history",
+                                                       desc)
+          .addOption("season", "s",
+                     "Season to print the history from. A partial match prints "
+                     "every matching season. Default is the overall season.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "map", "m",
+              "Map to print the history from. Default is the current map.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("run", "r", "Run to print the history from.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("segment", "sg", "The segment to print the history from.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false)
+          .addOption(
+              "user", "u",
+              "User ID to print the history for. Default is your own user ID.",
+              ETJump::CommandParser::OptionDefinition::Type::Integer, false)
+          .addOption("max-records", "mr",
+                     "Maximum number of records to show. Default is 20, use 0 "
+                     "to show all records.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false));
+
+  const auto args = Container::skipFirstN(*argv, 1);
+  const auto optCommand =
+      ETJump::getOptCommand("best-segments-history", clientNum, def, &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto &command = optCommand.value();
+
+  const auto optSeason = command.getOptional("season");
+  const auto optMap = command.getOptional("map");
+  const auto optRun = command.getOptional("run");
+  const auto optSegment = command.getOptional("segment");
+  const auto optUser = command.getOptional("user");
+  const auto optMaxRecords = command.getOptional("max-records");
+
+  std::string season;
+  std::string map;
+  std::optional<std::string> run;
+  std::optional<int32_t> segment;
+
+  if (command.extraArgs.size() >= 4) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+    segment = Q_atoi(command.extraArgs[3]);
+  } else if (command.extraArgs.size() >= 3) {
+    map = command.extraArgs[0];
+    run = command.extraArgs[1];
+    segment = Q_atoi(command.extraArgs[2]);
+  } else if (command.extraArgs.size() >= 2) {
+    run = command.extraArgs[0];
+    segment = Q_atoi(command.extraArgs[1]);
+  } else if (!command.extraArgs.empty()) {
+    run = command.extraArgs[0];
+  }
+
+  if (season.empty()) {
+    season = optSeason.has_value() ? optSeason.value().text : "Default";
+  }
+
+  bool exactMap{};
+
+  if (map.empty()) {
+    map = optMap.has_value() ? optMap.value().text : level.rawmapname;
+    exactMap = !optMap.has_value();
+  }
+
+  if (!run.has_value()) {
+    run = optRun.has_value()
+              ? std::make_optional<std::string>(optRun.value().text)
+              : std::nullopt;
+  }
+
+  if (!segment.has_value()) {
+    segment = optSegment.has_value()
+                  ? std::make_optional<int32_t>(optSegment.value().integer)
+                  : std::nullopt;
+  }
+
+  if (!run.has_value() || run.value().empty()) {
+    Printer::chat(clientNum, "^3best-segments-history: ^7operation failed. "
+                             "Check console for more information.");
+    Printer::console(clientNum, "Required option 'run' was not specified.\n");
+    return false;
+  }
+
+  if (!segment.has_value()) {
+    Printer::chat(clientNum, "^3best-segments-history: ^7operation failed. "
+                             "Check console for more information.");
+    Printer::console(clientNum,
+                     "Required option 'segment' was not specified.\n");
+    return false;
+  }
+
+  if (segment.value() <= 0) {
+    Printer::chat(clientNum, "^3best-segments-history: ^7segment must be a "
+                             "positive number.");
+    return false;
+  }
+
+  const int32_t callerId = ETJump::session->GetId(ent);
+
+  if (callerId <= 0) {
+    Printer::chat(
+        clientNum,
+        "^3best-segments-history: ^7Failed to fetch user ID - try "
+        "reconnecting. If the problem persists, please report this to the "
+        "developers.\n");
+    return false;
+  }
+
+  int32_t userId = callerId;
+
+  if (optUser.has_value()) {
+    if (optUser.value().integer <= 0) {
+      Printer::chat(clientNum,
+                    "^3best-segments-history: ^7user ID must be a positive "
+                    "number.");
+      return false;
+    }
+
+    userId = optUser.value().integer;
+  }
+
+  ETJump::Timerun::BestSegmentHistoryParams params;
+  params.clientNum = clientNum;
+  params.season = std::move(season);
+  params.map = std::move(map);
+  params.exactMap = exactMap;
+  params.run = std::move(run.value());
+  params.userId = userId;
+  params.segment = segment.value();
+  params.maxRecords = optMaxRecords.has_value()
+                          ? std::max(optMaxRecords.value().integer, 0)
+                          : ETJump::Timerun::RECORD_HISTORY_DEFAULT_SIZE;
+
+  game.timerunV2->printBestSegmentHistory(params);
+
+  return true;
+}
+
 static bool recordDetails(gentity_t *ent, Arguments argv) {
   if (!ent) {
     return false;
@@ -3481,6 +3789,10 @@ Commands::Commands() {
       AdminCommandPair(ClientCommands::recordDetails, CommandFlags::BASIC);
   adminCommands_["record-history"] =
       AdminCommandPair(ClientCommands::recordHistory, CommandFlags::BASIC);
+  adminCommands_["best-segments"] =
+      AdminCommandPair(ClientCommands::bestSegments, CommandFlags::BASIC);
+  adminCommands_["best-segments-history"] =
+      AdminCommandPair(ClientCommands::bestSegmentHistory, CommandFlags::BASIC);
   adminCommands_["remove-record"] =
       AdminCommandPair(ClientCommands::removeRecord, CommandFlags::BASIC);
   adminCommands_["list-removed-records"] =
@@ -3519,6 +3831,8 @@ Commands::Commands() {
   commands_["top"] = ClientCommands::Records;
   commands_["record-details"] = ClientCommands::recordDetails;
   commands_["record-history"] = ClientCommands::recordHistory;
+  commands_["best-segments"] = ClientCommands::bestSegments;
+  commands_["best-segments-history"] = ClientCommands::bestSegmentHistory;
   commands_["remove-record"] = ClientCommands::removeRecord;
   commands_["list-removed-records"] = ClientCommands::listRemovedRecords;
   commands_["restore-record"] = ClientCommands::restoreRecord;
