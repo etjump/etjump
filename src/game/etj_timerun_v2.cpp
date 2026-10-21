@@ -1161,6 +1161,344 @@ void TimerunV2::printRankings(const Timerun::PrintRankingsParams &params) {
       });
 }
 
+namespace {
+class BestSegmentsListingResult : public SynchronizationContext::ResultBase {
+public:
+  BestSegmentsListingResult(std::vector<Timerun::BestSegmentDetails> segments,
+                            std::vector<Timerun::Season> seasons)
+      : segments(std::move(segments)), seasons(std::move(seasons)) {}
+
+  std::vector<Timerun::BestSegmentDetails> segments;
+  std::vector<Timerun::Season> seasons;
+};
+} // namespace
+
+void TimerunV2::printBestSegments(const Timerun::BestSegmentsParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const std::string func = __func__;
+  const bool global = params.global;
+  const int32_t userId = params.userId;
+
+  const auto task = [this, params]() {
+    ensureInitialized();
+
+    auto segments = _repository->getBestSegmentDetails(params);
+    auto seasons = _repository->getSeasonsForName(params.season, false);
+
+    return std::make_unique<BestSegmentsListingResult>(std::move(segments),
+                                                       std::move(seasons));
+  };
+
+  const auto callback =
+      [this, func, clientNum, global, userId](
+          const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        const auto *const r =
+            dynamic_cast<BestSegmentsListingResult *>(result.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: failed to fetch best segments for client %i: "
+                         "BestSegmentsListingResult is NULL",
+                         func, clientNum);
+          throw std::runtime_error(StringUtils::format(
+              "%s: unable to fetch best segments. This is a bug, please "
+              "report this to the developers.",
+              func));
+        }
+
+        if (r->segments.empty()) {
+          Printer::console(
+              clientNum,
+              "^7No best segments found matching given parameters.\n");
+          return;
+        }
+
+        const std::string &map = r->segments.front().map;
+        const std::string &run = r->segments.front().run;
+
+        constexpr int32_t PLAYER_MAX_CHARS = 32;
+        constexpr int32_t RANK_WIDTH = 4;
+        constexpr const char *SEPARATOR =
+            "^g----------------------------------------------------------------"
+            "------------------------\n";
+
+        std::string tableHeader;
+        std::string rowFmtStr;
+
+        if (global) {
+          tableHeader = StringUtils::format(
+              " ^2Segment ^g| ^2%-9s ^g| ^2%-7s ^g| ^2%-*s ^g| ^2Date\n%s",
+              "Time", "User ID", PLAYER_MAX_CHARS, "Player", SEPARATOR);
+          rowFmtStr = " ^7%7i ^g| ^7%s ^g| ^7%-7i ^g| ^7%-*s ^g| ^7%s\n";
+        } else {
+          tableHeader = StringUtils::format(
+              " ^2Segment ^g| ^2%-9s ^g| ^2Rank ^g| ^2Date\n%s", "Time",
+              SEPARATOR);
+          rowFmtStr = " ^7%7i ^g| ^7%s ^g| %*s ^g| ^7%s\n";
+        }
+
+        std::map<int32_t, std::string> seasonNames;
+
+        for (const auto &season : r->seasons) {
+          seasonNames[season.id] = season.name;
+        }
+
+        std::map<int32_t, int32_t> seasonTotals;
+
+        for (const auto &seg : r->segments) {
+          seasonTotals[seg.seasonId] += seg.time;
+        }
+
+        int32_t currentSeason = -1;
+        std::string msg;
+
+        for (const auto &seg : r->segments) {
+          const std::string &seasonName =
+              getSeasonName(seasonNames, seg.seasonId);
+
+          if (seg.seasonId != currentSeason) {
+            // end of season, end of rows - add an extra newline
+            if (currentSeason != -1) {
+              msg += '\n';
+            }
+
+            currentSeason = seg.seasonId;
+
+            if (currentSeason == defaultSeasonId) {
+              msg += StringUtils::format(
+                  "^2Overall best segments for map ^7%s\n", map);
+            } else {
+              msg += StringUtils::format(
+                  "^2Best segments for map ^7%s ^2on season ^7%s\n", map,
+                  seasonName);
+            }
+
+            msg += SEPARATOR;
+
+            if (global) {
+              msg += StringUtils::format(
+                  " ^2Run: ^7%s\n ^2Sum of bests: ^7%s\n\n", run,
+                  TimeUtils::millisToString(seasonTotals[seg.seasonId]));
+            } else {
+              msg += StringUtils::format(
+                  " ^2User ID: ^7%i\n ^2Run: ^7%s\n ^2Sum of bests: ^7%s\n\n",
+                  userId, run,
+                  TimeUtils::millisToString(seasonTotals[seg.seasonId]));
+            }
+
+            msg += tableHeader;
+          }
+
+          if (global) {
+            const std::string name = (seg.userId == userId)
+                                         ? seg.playerName + " ^g(You)"
+                                         : seg.playerName;
+
+            msg += StringUtils::format(
+                rowFmtStr, seg.segment, TimeUtils::millisToString(seg.time),
+                seg.userId,
+                StringUtils::countExtraPadding(name, PLAYER_MAX_CHARS), name,
+                seg.recordDate.toDateTimeString());
+          } else {
+            const std::string rank = rankToString(seg.rank);
+
+            msg += StringUtils::format(
+                rowFmtStr, seg.segment, TimeUtils::millisToString(seg.time),
+                StringUtils::countExtraPadding(rank, RANK_WIDTH), rank,
+                seg.recordDate.toDateTimeString());
+          }
+        }
+
+        msg += '\n';
+        Printer::console(clientNum, msg);
+      };
+
+  const auto error = [clientNum, func](const std::runtime_error &e) {
+    Printer::console(clientNum,
+                     StringUtils::format("%s: %s\n", func, e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
+namespace {
+class BestSegmentHistoryListingResult
+    : public SynchronizationContext::ResultBase {
+public:
+  BestSegmentHistoryListingResult(
+      std::vector<Timerun::BestSegmentHistoryEntry> entries,
+      std::vector<Timerun::Season> seasons,
+      std::map<int32_t, int32_t> hiddenPerSeason)
+      : entries(std::move(entries)), seasons(std::move(seasons)),
+        hiddenPerSeason(std::move(hiddenPerSeason)) {}
+
+  std::vector<Timerun::BestSegmentHistoryEntry> entries;
+  std::vector<Timerun::Season> seasons;
+  std::map<int32_t, int32_t> hiddenPerSeason;
+};
+} // namespace
+
+void TimerunV2::printBestSegmentHistory(
+    const Timerun::BestSegmentHistoryParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const std::string func = __func__;
+  const int32_t userId = params.userId;
+  const int32_t segment = params.segment;
+
+  const auto task = [this, params]() {
+    ensureInitialized();
+
+    auto entries = _repository->getBestSegmentHistory(params);
+    auto seasons = _repository->getSeasonsForName(params.season, false);
+
+    // 'maxRecords' is applied per season: a partial season match can return
+    // several seasons, and truncating the flat list would drop whole seasons
+    std::map<int32_t, int32_t> perSeason;
+    std::map<int32_t, int32_t> hiddenPerSeason;
+    std::vector<Timerun::BestSegmentHistoryEntry> limited;
+
+    for (auto &entry : entries) {
+      auto &count = perSeason[entry.seasonId];
+
+      if (params.maxRecords > 0 && count >= params.maxRecords) {
+        ++hiddenPerSeason[entry.seasonId];
+        continue;
+      }
+
+      ++count;
+      limited.push_back(std::move(entry));
+    }
+
+    entries = std::move(limited);
+
+    return std::make_unique<BestSegmentHistoryListingResult>(
+        std::move(entries), std::move(seasons), std::move(hiddenPerSeason));
+  };
+
+  const auto callback =
+      [this, func, clientNum, userId, segment](
+          const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        const auto *const r =
+            dynamic_cast<BestSegmentHistoryListingResult *>(result.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: failed to fetch best segment history for client "
+                         "%i: BestSegmentHistoryListingResult is NULL",
+                         func, clientNum);
+          throw std::runtime_error(StringUtils::format(
+              "%s: unable to fetch best segment history. This is a bug, "
+              "please report this to the developers.",
+              func));
+        }
+
+        if (r->entries.empty()) {
+          Printer::console(
+              clientNum,
+              StringUtils::format(
+                  "^7No history found for segment %i on the given run.\n",
+                  segment));
+          return;
+        }
+
+        const std::string &map = r->entries.front().map;
+        const std::string &run = r->entries.front().run;
+        const int32_t entrySegment = r->entries.front().segment;
+
+        constexpr int32_t TIME_WIDTH = 10;
+        constexpr int32_t RANK_WIDTH = 4;
+        constexpr const char *SEPARATOR =
+            "^g------------------------------------------------------------\n";
+
+        const std::string tableHeader =
+            StringUtils::format(" ^2%-*s ^g| ^2%-*s ^g| ^2Date\n%s", TIME_WIDTH,
+                                "Time", RANK_WIDTH, "Rank", SEPARATOR);
+
+        std::map<int32_t, std::string> seasonNames;
+
+        for (const auto &season : r->seasons) {
+          seasonNames[season.id] = season.name;
+        }
+
+        int32_t currentSeason = -1;
+        int32_t seasonShown = 0;
+        std::string msg;
+
+        const auto printHidden = [&](int32_t seasonId) {
+          const auto it = r->hiddenPerSeason.find(seasonId);
+
+          if (it == r->hiddenPerSeason.end()) {
+            return;
+          }
+
+          msg += StringUtils::format(
+              "\n ^7Showing ^2%i ^7of ^2%i ^7improvements\n", seasonShown,
+              seasonShown + it->second);
+        };
+
+        for (const auto &entry : r->entries) {
+          if (entry.seasonId != currentSeason) {
+            if (currentSeason != -1) {
+              printHidden(currentSeason);
+              msg += '\n';
+            }
+
+            currentSeason = entry.seasonId;
+            seasonShown = 0;
+
+            const std::string &seasonName =
+                getSeasonName(seasonNames, entry.seasonId);
+
+            if (currentSeason == defaultSeasonId) {
+              msg += StringUtils::format(
+                  "^2Overall best segment history for map ^7%s\n", map);
+            } else {
+              msg += StringUtils::format(
+                  "^2Best segment history for map ^7%s ^2on "
+                  "season ^7%s\n",
+                  map, seasonName);
+            }
+
+            msg += SEPARATOR;
+            msg += StringUtils::format(
+                " ^2User ID: ^7%i\n ^2Run: ^7%s\n ^2Segment: ^7%i\n\n", userId,
+                run, entrySegment);
+            msg += tableHeader;
+          }
+
+          ++seasonShown;
+
+          const char *rowColor = entry.removed ? "^z" : "^7";
+          std::string rank;
+
+          if (entry.rank == 0) {
+            rank = "N/A";
+          } else if (entry.removed) {
+            // don't colorize removed records, so the whole row stays grey
+            rank = "#" + std::to_string(entry.rank);
+          } else {
+            rank = rankToString(entry.rank);
+          }
+
+          msg += StringUtils::format(
+              " %s%-*s ^g| %s%*s ^g| %s%s\n", rowColor, TIME_WIDTH,
+              TimeUtils::millisToString(entry.time), rowColor,
+              StringUtils::countExtraPadding(rank, RANK_WIDTH), rank, rowColor,
+              entry.recordDate.toDateTimeString());
+        }
+
+        printHidden(currentSeason);
+
+        msg += '\n';
+        Printer::console(clientNum, msg);
+      };
+
+  const auto error = [clientNum, func](const std::runtime_error &e) {
+    Printer::console(clientNum,
+                     StringUtils::format("%s: %s\n", func, e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
 void TimerunV2::printSeasons(int clientNum) {
   _sc->postTask(
       [this] {
