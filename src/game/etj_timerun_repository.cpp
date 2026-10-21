@@ -1174,13 +1174,27 @@ void TimerunRepository::deleteSeason(const std::string &name) {
     throw std::runtime_error("Cannot delete default season.");
   }
 
+  constexpr std::array<const char *, 7> purgedTables = {
+      "record",
+      "record_history",
+      "removed_records",
+      "best_segments",
+      "player_best_segments",
+      "player_best_segments_history",
+      "removed_segments",
+  };
+
   DatabaseV2::TransactionGuard txn(*_database);
 
-  _database->sql << "delete from record where season_id=?;" << id;
-  // make sure we also purge 'removed_records' and 'record_history',
-  // so we don't leave records from any nonexistent seasons in the table
-  _database->sql << "delete from removed_records where season_id=?;" << id;
-  _database->sql << "delete from record_history where season_id=?;" << id;
+  // delete season is a destructive operation - we purge all records from all
+  // tables that match the season ID, leaving nothing behind
+  for (const auto &table : purgedTables) {
+    _database->sql << StringUtils::format("delete from %s where season_id=?;",
+                                          table)
+                   << id;
+  }
+
+  // all tables purged, finally delete the actual season
   _database->sql << "delete from season where id=?" << id;
 
   txn.commit();
