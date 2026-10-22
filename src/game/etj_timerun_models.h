@@ -61,6 +61,16 @@ struct Record {
   }
 };
 
+// one season's copy of a completed run, with everything the write path needs
+// to know about it: whether it improves the player's record, and whether the
+// player had no record for this run yet. All copies of a completion are
+// written together in one transaction.
+struct RecordCompletion {
+  Record record;
+  bool isNewRecord{};
+  bool insert{};
+};
+
 struct Checkpoints {
   int32_t seasonID;
   int32_t runTime;

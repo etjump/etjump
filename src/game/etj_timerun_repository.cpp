@@ -371,18 +371,7 @@ void TimerunRepository::insertRecordHistory(const Timerun::Record &record) {
                  << record.userId;
 }
 
-void TimerunRepository::insertRecord(const Timerun::Record &record) {
-  DatabaseV2::TransactionGuard txn(*_database);
-
-  insertRecordRow(record);
-  insertRecordHistory(record);
-
-  txn.commit();
-}
-
-void TimerunRepository::updateRecord(const Timerun::Record &record) {
-  DatabaseV2::TransactionGuard txn(*_database);
-
+void TimerunRepository::updateRecordRow(const Timerun::Record &record) {
   _database->sql << R"(
     update
       record
@@ -402,10 +391,39 @@ void TimerunRepository::updateRecord(const Timerun::Record &record) {
                  << record.recordDate.toDateTimeString() << record.playerName
                  << serializeMetadata(record.metadata) << record.seasonId
                  << record.map << record.run << record.userId;
+}
 
-  insertRecordHistory(record);
+std::map<int32_t, std::vector<Timerun::BestSegmentUpdate>>
+TimerunRepository::recordCompletion(
+    const std::vector<Timerun::RecordCompletion> &completions) {
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  std::map<int32_t, std::vector<Timerun::BestSegmentUpdate>> updates;
+
+  for (const auto &completion : completions) {
+    if (completion.isNewRecord) {
+      if (completion.insert) {
+        insertRecordRow(completion.record);
+      } else {
+        updateRecordRow(completion.record);
+      }
+
+      insertRecordHistory(completion.record);
+    }
+
+    // every completion feeds the best segments, new record or not
+    auto segmentUpdates =
+        applyBestSegments(completion.record, /*appendHistory=*/true,
+                          /*skipRemovedSegments=*/false);
+
+    if (!segmentUpdates.empty()) {
+      updates[completion.record.seasonId] = std::move(segmentUpdates);
+    }
+  }
 
   txn.commit();
+
+  return updates;
 }
 
 std::vector<Timerun::BestSegmentUpdate>
@@ -608,15 +626,6 @@ TimerunRepository::applyBestSegments(const Timerun::Record &record,
       updates.push_back(std::move(update));
     }
   }
-
-  return updates;
-}
-
-std::vector<Timerun::BestSegmentUpdate>
-TimerunRepository::updateBestSegments(const Timerun::Record &record) {
-  DatabaseV2::TransactionGuard txn(*_database);
-  auto updates = applyBestSegments(record, true, false);
-  txn.commit();
 
   return updates;
 }
