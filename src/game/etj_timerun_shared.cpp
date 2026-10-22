@@ -29,6 +29,52 @@
 #include "etj_string_utilities.h"
 
 namespace ETJump {
+std::vector<int32_t>
+TimerunSegments::computeSegmentTimes(const std::vector<int32_t> &checkpoints,
+                                     int32_t completionTime) {
+  std::vector<int32_t> segments;
+  int32_t previous = 0;
+
+  for (const int32_t checkpoint : checkpoints) {
+    if (checkpoint == TIMERUN_CHECKPOINT_NOT_SET || checkpoint <= previous) {
+      break;
+    }
+
+    segments.push_back(checkpoint - previous);
+    previous = checkpoint;
+  }
+
+  // the finish closes the run, but only for a run that has checkpoints:
+  // a completion time at or before the last checkpoint means the finish was
+  // itself a checkpoint, so there is nothing to add
+  if (!segments.empty() && completionTime > previous) {
+    segments.push_back(completionTime - previous);
+  }
+
+  return segments;
+}
+
+std::pair<bool, bool> TimerunSegments::bestSegmentBeaten(
+    const std::map<std::string, std::vector<int32_t>> &personalBestSegments,
+    const std::map<std::string, std::vector<int32_t>> &globalBestSegments,
+    const std::string &runName, int32_t segmentIdx, int32_t duration) {
+  if (duration <= 0) {
+    return {false, false};
+  }
+
+  const auto beaten =
+      [&runName, segmentIdx,
+       duration](const std::map<std::string, std::vector<int32_t>> &cache) {
+        const auto it = cache.find(runName);
+
+        return it != cache.end() &&
+               segmentIdx < static_cast<int32_t>(it->second.size()) &&
+               duration <= it->second[segmentIdx];
+      };
+
+  return {beaten(personalBestSegments), beaten(globalBestSegments)};
+}
+
 int TimerunCommands::parseClientNum(const std::string &arg) {
   try {
     const auto clientNum = std::stoi(arg);

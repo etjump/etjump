@@ -24,11 +24,31 @@
 
 #pragma once
 #include <array>
+#include <map>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "q_shared.h"
+
+namespace ETJump::TimerunSegments {
+// Segment durations for a completed run: segment i is the time from the
+// previous checkpoint (the run start, for the first) to checkpoint i, and the
+// final segment runs from the last checkpoint to the finish. A run with no
+// usable checkpoint data yields no segments.
+std::vector<int32_t>
+computeSegmentTimes(const std::vector<int32_t> &checkpoints,
+                    int32_t completionTime);
+
+// Whether a segment's duration beats the best on record for it, personal and
+// global. A zero-length segment, or one with no recorded best, never counts,
+// so callers need no guard of their own.
+std::pair<bool, bool> bestSegmentBeaten(
+    const std::map<std::string, std::vector<int32_t>> &personalBestSegments,
+    const std::map<std::string, std::vector<int32_t>> &globalBestSegments,
+    const std::string &runName, int32_t segmentIdx, int32_t duration);
+} // namespace ETJump::TimerunSegments
 
 namespace ETJump::TimerunCommands {
 constexpr int INVALID_CLIENT_NUM = -1;

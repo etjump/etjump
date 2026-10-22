@@ -31,6 +31,7 @@
 
 #include "etj_container_utilities.h"
 #include "etj_database_v2.h"
+#include "etj_timerun_shared.h"
 #include "q_shared.h"
 
 namespace ETJump {
@@ -50,38 +51,8 @@ parseCheckpoints(const std::string &checkpointsString) {
       });
 }
 
-// Segment durations for a completed run: segment i is the time from the
-// previous checkpoint (the run start, for the first) to checkpoint i, and the
-// final segment runs from the last checkpoint to the finish. A run with no
-// checkpoints has no splits at all, so it produces no segments - its best is
-// already the record. Stops at the first unset checkpoint, or a non-increasing
-// checkpoint, since such a segment cannot represent a real run and a zero or
-// negative time would otherwise win every comparison and sit as permanent,
-// unremovable gold segment.
-static std::vector<int32_t>
-computeSegmentTimes(const std::vector<int32_t> &checkpoints,
-                    int32_t completionTime) {
-  std::vector<int32_t> segments;
-  int32_t previous = 0;
-
-  for (const int32_t checkpoint : checkpoints) {
-    if (checkpoint == TIMERUN_CHECKPOINT_NOT_SET || checkpoint <= previous) {
-      break;
-    }
-
-    segments.push_back(checkpoint - previous);
-    previous = checkpoint;
-  }
-
-  // the finish closes the run, but only for a run that has checkpoints:
-  // a completion time at or before the last checkpoint means the finish was
-  // itself a checkpoint, so there is nothing to add
-  if (!segments.empty() && completionTime > previous) {
-    segments.push_back(completionTime - previous);
-  }
-
-  return segments;
-}
+// Segment durations for a completed run: see
+// TimerunSegments::computeSegmentTimes.
 
 Timerun::Record getRecordFromStandardQueryResult(
     int seasonId, std::string map, std::string runName, int userId, int time,
@@ -441,7 +412,8 @@ std::vector<Timerun::BestSegmentUpdate>
 TimerunRepository::updateBestSegments(const Timerun::Record &record) {
   std::vector<Timerun::BestSegmentUpdate> updates;
 
-  const auto segments = computeSegmentTimes(record.checkpoints, record.time);
+  const auto segments =
+      TimerunSegments::computeSegmentTimes(record.checkpoints, record.time);
 
   // a run with no usable checkpoint data has no segments to record
   if (segments.empty()) {
@@ -2238,7 +2210,7 @@ void TimerunRepository::seedBestSegments() {
           int32_t seasonId, std::string map, std::string run, int32_t userId,
           const std::string &checkpointsString, int32_t completionTime,
           const std::string &recordDate, const std::string &playerName) {
-        const auto segments = computeSegmentTimes(
+        const auto segments = TimerunSegments::computeSegmentTimes(
             parseCheckpoints(checkpointsString), completionTime);
 
         // a run with no usable checkpoint data contributes no segments - bail
