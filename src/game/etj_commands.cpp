@@ -1499,6 +1499,428 @@ static bool restoreRecord(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+static bool removeSegment(gentity_t *ent, Arguments argv) {
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const desc = R"(Removes a recorded best timerun segment.
+    Removed segments are archived in the timerun database, not completely removed.
+
+    Segments are stored per season. When no season is given, the segment is
+    removed from the default season and from any other season that holds a copy
+    of the same split. When a season is given, only that season's copy is
+    removed.
+
+    /remove-segment --season <season name> --map <map name> --run <run name> --segment <segment>
+    --user <user ID> --reason <reason>
+
+    Map and run names are matched exactly when possible. A partial name is
+    accepted when it resolves to a single map or run.
+
+    Has a shorthand format of:
+    /remove-segment <run name> <segment>
+    /remove-segment <map name> <run name> <segment>
+    /remove-segment <season name> <map name> <run name> <segment>
+
+    Administrators with the timerun management flag can remove another
+    player's segment with:
+    /remove-segment <run name> <segment> --user <user id> --reason <reason>
+    A reason is required when removing another player's segment.)";
+
+  const auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create("remove-segment", desc)
+          .addOption("season", "s",
+                     "Season to remove the segment from. Default is the "
+                     "overall season, cascading the removal to any season that "
+                     "also holds a copy of the same segment.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "map", "m",
+              "Map to remove the segment from. Default is the current map.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("run", "r", "Run to remove the segment from.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("user", "u",
+                     "User ID of the segment owner. Only administrators (flag "
+                     "'T') can remove other players' segments. Default is your "
+                     "own user ID.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false)
+          .addOption(
+              "reason", "re",
+              "Reason for the removal. Optional when removing your own "
+              "segments, required when removing another player's segment.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("segment", "sg", "The segment to remove.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false));
+
+  const auto args = Container::skipFirstN(*argv, 1);
+  const auto optCommand =
+      ETJump::getOptCommand("remove-segment", clientNum, def, &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto &command = optCommand.value();
+
+  const auto optSeason = command.getOptional("season");
+  const auto optMap = command.getOptional("map");
+  const auto optRun = command.getOptional("run");
+  const auto optUser = command.getOptional("user");
+  const auto optReason = command.getOptional("reason");
+  const auto optSegment = command.getOptional("segment");
+
+  std::string season;
+  std::string map;
+  std::string run;
+  std::optional<int32_t> segment;
+
+  if (command.extraArgs.size() >= 4) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+    segment = Q_atoi(command.extraArgs[3]);
+  } else if (command.extraArgs.size() == 3) {
+    map = command.extraArgs[0];
+    run = command.extraArgs[1];
+    segment = Q_atoi(command.extraArgs[2]);
+  } else if (command.extraArgs.size() == 2) {
+    run = command.extraArgs[0];
+    segment = Q_atoi(command.extraArgs[1]);
+  } else if (command.extraArgs.size() == 1) {
+    run = command.extraArgs[0];
+  }
+
+  if (season.empty()) {
+    season = optSeason.has_value() ? optSeason.value().text : "";
+  }
+
+  bool exactMap{};
+
+  if (map.empty()) {
+    map = optMap.has_value() ? optMap.value().text : level.rawmapname;
+    exactMap = !optMap.has_value();
+  }
+
+  if (run.empty() && optRun.has_value()) {
+    run = optRun.value().text;
+  }
+
+  if (!segment.has_value() && optSegment.has_value()) {
+    segment = optSegment.value().integer;
+  }
+
+  if (run.empty()) {
+    Printer::chat(clientNum, "^3remove-segment: ^7operation failed. Check "
+                             "console for more information.");
+    Printer::console(clientNum, "Required option 'run' was not specified.\n");
+    return false;
+  }
+
+  if (!segment.has_value()) {
+    Printer::chat(clientNum, "^3remove-segment: ^7operation failed. Check "
+                             "console for more information.");
+    Printer::console(clientNum,
+                     "Required option 'segment' was not specified.\n");
+    return false;
+  }
+
+  if (segment.value() <= 0) {
+    Printer::chat(clientNum,
+                  "^3remove-segment: ^7segment must be a positive number.");
+    return false;
+  }
+
+  const int32_t callerId = ETJump::session->GetId(ent);
+
+  if (callerId <= 0) {
+    Printer::chat(
+        clientNum,
+        "^3remove-segment: ^7Failed to fetch user ID - try reconnecting. If "
+        "the problem persists, please report this to the developers.\n");
+    return false;
+  }
+
+  const bool isAdmin =
+      ETJump::session->HasPermission(ent, CommandFlags::TIMERUN_MANAGEMENT);
+
+  if (optUser.has_value() && optUser.value().integer != callerId && !isAdmin) {
+    Printer::chat(clientNum, "^3remove-segment: ^7you must be an administrator "
+                             "to remove another player's segment.");
+    return false;
+  }
+
+  int32_t userId = callerId;
+
+  if (optUser.has_value()) {
+    userId = optUser.value().integer;
+
+    if (userId <= 0) {
+      Printer::chat(clientNum,
+                    "^3remove-segment: ^7user ID must be a positive number.");
+      return false;
+    }
+  }
+
+  std::optional<std::string> reason;
+
+  if (optReason.has_value()) {
+    const std::string text = StringUtils::trim(optReason.value().text);
+
+    if (!text.empty()) {
+      reason = text;
+    }
+  }
+
+  if (userId != callerId && !reason.has_value()) {
+    Printer::chat(clientNum, "^3remove-segment: ^7a reason is required when "
+                             "removing another player's segment.");
+    return false;
+  }
+
+  game.timerunV2->removeSegment({clientNum, std::move(season), std::move(map),
+                                 std::move(run), userId, segment.value(),
+                                 callerId, std::move(reason), exactMap});
+
+  return true;
+}
+
+static bool restoreSegment(gentity_t *ent, Arguments argv) {
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const desc = R"(Restores a removed best timerun segment.
+
+    Restoring the default season's copy cascades and restores the copies of that
+    same split present in other seasons. Targeting a specific season's copy
+    restores only that season.
+
+    If restoration results in a conflict, using --force will restore the removed
+    segment in place of the conflicting one(s), and moves the segment being
+    replaced to the removed segments database.
+
+    You can only restore segments you have removed yourself, unless you have the
+    timerun management admin flag.
+
+    /restore-segment --id <ID> --force
+
+    Has a shorthand format of:
+    /restore-segment <ID>)";
+
+  const auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create("restore-segment", desc)
+          .addOption("id", "i", "The segment ID to restore.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     true, 0)
+          .addOption("force", "f",
+                     "Force the restoration in case of a conflict, moving the "
+                     "conflicting segment to the removed segments database in "
+                     "place of the restored one.",
+                     ETJump::CommandParser::OptionDefinition::Type::Boolean,
+                     false));
+
+  const auto args = Container::skipFirstN(*argv, 1);
+  const auto optCommand =
+      ETJump::getOptCommand("restore-segment", clientNum, def, &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto &command = optCommand.value();
+
+  const int32_t segmentId = command.getOptional("id").value().integer;
+  const auto optForce = command.getOptional("force");
+  const bool force = optForce.has_value() ? optForce.value().boolean : false;
+
+  const int32_t callerId = ETJump::session->GetId(clientNum);
+
+  if (callerId <= 0) {
+    Printer::chat(
+        clientNum,
+        "^3restore-segment: ^7Failed to fetch user ID - try reconnecting. If "
+        "the problem persists, please report this to the developers.\n");
+    return false;
+  }
+
+  const bool isAdmin =
+      ETJump::session->HasPermission(ent, CommandFlags::TIMERUN_MANAGEMENT);
+
+  game.timerunV2->restoreSegment(
+      {clientNum, callerId, segmentId, force, isAdmin});
+
+  return true;
+}
+
+static bool listRemovedSegments(gentity_t *ent, Arguments argv) {
+  if (!ent) {
+    return false;
+  }
+
+  const int32_t clientNum = ClientNum(ent);
+
+  const auto *const desc = R"(Lists removed best timerun segments.
+
+    /list-removed-segments --season <season>  --map <map name> --run <run name> --segment <segment>
+    --user <user ID> --removed-by <user ID>
+
+    Has a shorthand format of:
+    /list-removed-segments <user ID>
+    /list-removed-segments <map> <user ID>
+    /list-removed-segments <map> <run> <user ID>
+    /list-removed-segments <season> <map> <run> <user ID>)";
+
+  const auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create("list-removed-segments",
+                                                       desc)
+          .addOption(
+              "user", "u", "Only list the segments belonging to this user ID.",
+              ETJump::CommandParser::OptionDefinition::Type::Integer, false)
+          .addOption("removed-by", "rb",
+                     "Only list the segments removed by this user ID.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false)
+          .addOption("map", "m", "Only list removed segments from given map.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("run", "r", "Only list removed segments from given run.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "season", "s", "Only list removed segments from given season.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("segment", "sg", "Only list this segment.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false)
+          .addOption("page", "p", "Which page of removed segments to show.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false)
+          .addOption(
+              "page-size", "ps",
+              "How many segments to show per page. Default is 10, max is 25.",
+              ETJump::CommandParser::OptionDefinition::Type::Integer, false));
+
+  const auto args = Container::skipFirstN(*argv, 1);
+  const auto optCommand =
+      ETJump::getOptCommand("list-removed-segments", clientNum, def, &args);
+
+  if (!optCommand.has_value()) {
+    return false;
+  }
+
+  const auto &command = optCommand.value();
+
+  const auto optSeason = command.getOptional("season");
+  const auto optMap = command.getOptional("map");
+  const auto optRun = command.getOptional("run");
+  const auto optUser = command.getOptional("user");
+  const auto optRemovedBy = command.getOptional("removed-by");
+  const auto optSegment = command.getOptional("segment");
+  const auto optPage = command.getOptional("page");
+  const auto optPageSize = command.getOptional("page-size");
+
+  const int32_t callerId = ETJump::session->GetId(clientNum);
+
+  if (callerId <= 0) {
+    Printer::chat(
+        clientNum,
+        "^3list-removed-segments: ^7Failed to fetch user ID - try "
+        "reconnecting. "
+        "If the problem persists, please report this to the developers.\n");
+    return false;
+  }
+
+  std::string season;
+  std::string map;
+  std::string run;
+  std::optional<int32_t> userId;
+  std::optional<int32_t> removedBy;
+  std::optional<int32_t> segment;
+
+  if (command.extraArgs.size() >= 4) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+    userId = Q_atoi(command.extraArgs[3]);
+  } else if (command.extraArgs.size() == 3) {
+    map = command.extraArgs[0];
+    run = command.extraArgs[1];
+    userId = Q_atoi(command.extraArgs[2]);
+  } else if (command.extraArgs.size() == 2) {
+    map = command.extraArgs[0];
+    userId = Q_atoi(command.extraArgs[1]);
+  } else if (command.extraArgs.size() == 1) {
+    userId = Q_atoi(command.extraArgs[0]);
+  }
+
+  if (season.empty()) {
+    season = optSeason.has_value() ? optSeason.value().text : "";
+  }
+
+  if (map.empty()) {
+    map = optMap.has_value() ? optMap.value().text : "";
+  }
+
+  if (run.empty()) {
+    run = optRun.has_value() ? optRun.value().text : "";
+  }
+
+  if ((optUser.has_value() && optUser.value().integer <= 0) ||
+      (userId.has_value() && userId.value() <= 0)) {
+    Printer::chat(
+        clientNum,
+        "^3list-removed-segments: ^7user ID must be a positive number.");
+    return false;
+  }
+
+  if (optUser.has_value()) {
+    userId = optUser.value().integer;
+  }
+
+  if (optRemovedBy.has_value()) {
+    removedBy = optRemovedBy.value().integer;
+
+    if (removedBy <= 0) {
+      Printer::chat(
+          clientNum,
+          "^3list-removed-segments: ^7removed-by must be a positive number.");
+      return false;
+    }
+  }
+
+  if (optSegment.has_value()) {
+    segment = optSegment.value().integer;
+
+    if (segment <= 0) {
+      Printer::chat(
+          clientNum,
+          "^3list-removed-segments: ^7segment must be a positive number.");
+      return false;
+    }
+  }
+
+  const int32_t page =
+      std::max(optPage.has_value() ? optPage.value().integer : 1, 1);
+  const int32_t pageSize = std::clamp(
+      optPageSize.has_value() ? optPageSize.value().integer : 10, 1, 25);
+
+  game.timerunV2->listRemovedSegments({clientNum, callerId, std::move(season),
+                                       std::move(map), std::move(run), userId,
+                                       removedBy, segment, page, pageSize});
+
+  return true;
+}
+
 bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
   // these are console commands but to make them more accessible
   // they were also made admin commands
@@ -3800,6 +4222,12 @@ Commands::Commands() {
       AdminCommandPair(ClientCommands::listRemovedRecords, CommandFlags::BASIC);
   adminCommands_["restore-record"] =
       AdminCommandPair(ClientCommands::restoreRecord, CommandFlags::BASIC);
+  adminCommands_["remove-segment"] =
+      AdminCommandPair(ClientCommands::removeSegment, CommandFlags::BASIC);
+  adminCommands_["list-removed-segments"] = AdminCommandPair(
+      ClientCommands::listRemovedSegments, CommandFlags::BASIC);
+  adminCommands_["restore-segment"] =
+      AdminCommandPair(ClientCommands::restoreSegment, CommandFlags::BASIC);
   adminCommands_["rankings"] =
       AdminCommandPair(ClientCommands::Rankings, CommandFlags::BASIC);
   adminCommands_["loadcheckpoints"] =
@@ -3837,6 +4265,9 @@ Commands::Commands() {
   commands_["remove-record"] = ClientCommands::removeRecord;
   commands_["list-removed-records"] = ClientCommands::listRemovedRecords;
   commands_["restore-record"] = ClientCommands::restoreRecord;
+  commands_["remove-segment"] = ClientCommands::removeSegment;
+  commands_["list-removed-segments"] = ClientCommands::listRemovedSegments;
+  commands_["restore-segment"] = ClientCommands::restoreSegment;
   commands_["loadcheckpoints"] = ClientCommands::LoadCheckpoints;
   commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
   commands_["rankings"] = ClientCommands::Rankings;

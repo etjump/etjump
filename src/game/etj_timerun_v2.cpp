@@ -2354,7 +2354,7 @@ void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
     ensureInitialized();
 
     const auto removedAt = TimeUtils::getCurrentTime(false);
-    const auto removedRecords = _repository->removeRecord(params, removedAt);
+    auto removedRecords = _repository->removeRecord(params, removedAt);
 
     // resolve season names for the confirmation output
     std::map<int32_t, std::string> seasonNames;
@@ -2803,6 +2803,384 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
   _sc->postTask(task, callback, error);
 }
 
+namespace {
+class RemoveSegmentResult : public SynchronizationContext::ResultBase {
+public:
+  RemoveSegmentResult(std::vector<Timerun::RemovedSegment> removedSegments,
+                      std::map<int32_t, std::string> seasonNames,
+                      Timerun::SegmentCacheSnapshot segmentCaches)
+      : removedSegments(std::move(removedSegments)),
+        seasonNames(std::move(seasonNames)),
+        segmentCaches(std::move(segmentCaches)) {}
+
+  std::vector<Timerun::RemovedSegment> removedSegments;
+  std::map<int32_t, std::string> seasonNames;
+  Timerun::SegmentCacheSnapshot segmentCaches;
+};
+} // namespace
+
+void TimerunV2::removeSegment(const Timerun::RemoveSegmentParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const std::string func = __func__;
+  const bool isSelfRemoval = params.removedBy == params.userId;
+  const std::string callerName = (g_entities + clientNum)->client->pers.netname;
+
+  const auto task = [this, params]() {
+    ensureInitialized();
+
+    const auto removedAt = TimeUtils::getCurrentTime(false);
+    auto removedSegments = _repository->removeSegment(params, removedAt);
+
+    std::map<int32_t, std::string> seasonNames;
+    for (const auto &season : _repository->getSeasons()) {
+      seasonNames[season.id] = season.name;
+    }
+
+    const auto map =
+        removedSegments.empty() ? std::string{} : removedSegments.front().map;
+    auto segmentCaches = readSegmentCaches(map, params.userId);
+
+    return std::make_unique<RemoveSegmentResult>(std::move(removedSegments),
+                                                 std::move(seasonNames),
+                                                 std::move(segmentCaches));
+  };
+
+  const auto callback =
+      [this, params, func, clientNum, isSelfRemoval, callerName](
+          const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        const auto *const r = dynamic_cast<RemoveSegmentResult *>(result.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: failed to remove segment for client %i: "
+                         "RemoveSegmentResult is NULL",
+                         func, clientNum);
+          throw std::runtime_error(StringUtils::format(
+              "%s: unable to remove segment(s). This is a bug, please report "
+              "this to the developers.",
+              func));
+        }
+
+        const int32_t targetClientNum =
+            applySegmentCaches(r->segmentCaches, params.userId);
+
+        const auto numRemoved = static_cast<int32_t>(r->removedSegments.size());
+        const auto segment = r->removedSegments.front().segment;
+
+        std::string chatMsg = StringUtils::format(
+            "^3remove-segment: ^7removed segment ^3%i^7 from ^3%i^7 "
+            "season%s%s^7, see console for details",
+            segment, numRemoved, numRemoved == 1 ? "" : "s",
+            isSelfRemoval
+                ? ""
+                : StringUtils::format(" for user ^3%i", params.userId).c_str());
+        Printer::chat(clientNum, chatMsg);
+
+        std::string consoleMsg =
+            StringUtils::format("The following segment%s removed%s^7:\n",
+                                numRemoved == 1 ? " was" : "s were",
+                                isSelfRemoval ? "" : " by you");
+        consoleMsg +=
+            buildRemovedSegmentSummary(r->removedSegments, r->seasonNames);
+        Printer::console(clientNum, consoleMsg);
+
+        if (!isSelfRemoval && targetClientNum >= 0) {
+          std::string targetMsg = StringUtils::format(
+              "^3remove-segment: ^7an administrator has removed ^3%i ^7of your "
+              "best segments, see console for details",
+              numRemoved);
+
+          if (params.reason.has_value()) {
+            targetMsg += StringUtils::format(". Reason: %s",
+                                             params.reason.value().c_str());
+          }
+
+          Printer::chat(targetClientNum, targetMsg);
+
+          consoleMsg = StringUtils::format(
+              "The following segment%s removed by %s^7:\n",
+              numRemoved == 1 ? " was" : "s were", callerName);
+          consoleMsg +=
+              buildRemovedSegmentSummary(r->removedSegments, r->seasonNames);
+          Printer::console(targetClientNum, consoleMsg);
+        }
+      };
+
+  const auto error = [clientNum](const std::runtime_error &e) {
+    Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
+namespace {
+class RestoreSegmentResult : public SynchronizationContext::ResultBase {
+public:
+  RestoreSegmentResult(Timerun::RestoreSegmentResult result,
+                       std::map<int32_t, std::string> seasonNames,
+                       Timerun::SegmentCacheSnapshot segmentCaches)
+      : result(std::move(result)), seasonNames(std::move(seasonNames)),
+        segmentCaches(std::move(segmentCaches)) {}
+
+  Timerun::RestoreSegmentResult result;
+  std::map<int32_t, std::string> seasonNames;
+  Timerun::SegmentCacheSnapshot segmentCaches;
+};
+} // namespace
+
+void TimerunV2::restoreSegment(const Timerun::RestoreSegmentParams &params) {
+  const std::string func = __func__;
+
+  const auto task = [this, params]() {
+    ensureInitialized();
+
+    const auto restoredAt = TimeUtils::getCurrentTime(false);
+    auto restoreResult = _repository->restoreSegment(params, restoredAt);
+
+    std::map<int32_t, std::string> seasonNames;
+    for (const auto &season : _repository->getSeasons()) {
+      seasonNames[season.id] = season.name;
+    }
+
+    Timerun::SegmentCacheSnapshot segmentCaches;
+
+    if (!restoreResult.restored.empty()) {
+      const auto &restored = restoreResult.restored.front();
+      segmentCaches = readSegmentCaches(restored.map, restored.userId);
+    }
+
+    return std::make_unique<RestoreSegmentResult>(std::move(restoreResult),
+                                                  std::move(seasonNames),
+                                                  std::move(segmentCaches));
+  };
+
+  const auto callback = [this, params, func](const std::unique_ptr<
+                                             SynchronizationContext::ResultBase>
+                                                 result) {
+    const auto *const r = dynamic_cast<RestoreSegmentResult *>(result.get());
+
+    if (r == nullptr) {
+      _logger->error("%s: failed to restore segment(s) for client %i: "
+                     "RestoreSegmentResult is NULL",
+                     func, params.clientNum);
+      throw std::runtime_error(StringUtils::format(
+          "%s: unable to restore segment(s). This is a bug, please report "
+          "this to the developers.",
+          func));
+    }
+
+    if (!r->result.conflicts.empty()) {
+      Printer::chat(
+          params.clientNum,
+          StringUtils::format("^3restore-segment: ^7conflicts found while "
+                              "trying to restore the segment%s, see console "
+                              "for details",
+                              r->result.numTargeted == 1 ? "" : "s"));
+
+      Printer::console(params.clientNum,
+                       buildRestoreSegmentConflictMessage(r->result.conflicts,
+                                                          r->seasonNames));
+      return;
+    }
+
+    if (r->result.restored.empty()) {
+      Printer::console(params.clientNum,
+                       "^3restore-segment: ^7nothing was restored.\n");
+      return;
+    }
+
+    const auto &target = r->result.restored.front();
+    const auto numRestored = static_cast<int32_t>(r->result.restored.size());
+    const auto numSwapped = static_cast<int32_t>(r->result.swapped.size());
+    const bool isSelfRestore = target.userId == params.callerId;
+
+    const int32_t targetClientNum =
+        applySegmentCaches(r->segmentCaches, target.userId);
+
+    std::string chatMsg = StringUtils::format(
+        "^3restore-segment: ^7restored ^3%i ^7of ^3%i ^7requested segment%s",
+        numRestored, r->result.numTargeted,
+        r->result.numTargeted == 1 ? "" : "s");
+
+    if (numSwapped > 0) {
+      chatMsg += StringUtils::format(" (^3%i^7 displaced)", numSwapped);
+    }
+
+    if (!isSelfRestore) {
+      chatMsg += StringUtils::format(" for user ^3'%i'^7", target.userId);
+    }
+
+    chatMsg += "^7, see console for details";
+    Printer::chat(params.clientNum, chatMsg);
+
+    const std::string consoleMsg =
+        buildRestoreSegmentSummary(r->result.restored, r->result.swapped,
+                                   r->result.skipped, r->seasonNames);
+    Printer::console(params.clientNum, consoleMsg);
+
+    if (!isSelfRestore && targetClientNum >= 0) {
+      Printer::chat(
+          targetClientNum,
+          StringUtils::format("^3restore-segment: ^7an administrator has "
+                              "restored ^3%i ^7of your best segments, see "
+                              "console for details",
+                              numRestored));
+      Printer::console(targetClientNum, consoleMsg);
+    }
+  };
+
+  const auto error = [params](const std::runtime_error &e) {
+    Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
+namespace {
+class ListRemovedSegmentsResult : public SynchronizationContext::ResultBase {
+public:
+  ListRemovedSegmentsResult(Timerun::RemovedSegmentsPage page,
+                            std::map<int32_t, std::string> seasonNames)
+      : page(std::move(page)), seasonNames(std::move(seasonNames)) {}
+
+  Timerun::RemovedSegmentsPage page;
+  std::map<int32_t, std::string> seasonNames;
+};
+} // namespace
+
+void TimerunV2::listRemovedSegments(
+    const Timerun::ListRemovedSegmentsParams &params) {
+  const std::string func = __func__;
+
+  const auto task = [this, params]() {
+    ensureInitialized();
+
+    std::map<int32_t, std::string> seasonNames;
+    for (const auto &season : _repository->getSeasons()) {
+      seasonNames[season.id] = season.name;
+    }
+
+    return std::make_unique<ListRemovedSegmentsResult>(
+        _repository->getRemovedSegments(params), std::move(seasonNames));
+  };
+
+  const auto callback = [this, params, func](const std::unique_ptr<
+                                             SynchronizationContext::ResultBase>
+                                                 result) {
+    const auto *const r =
+        dynamic_cast<ListRemovedSegmentsResult *>(result.get());
+
+    if (r == nullptr) {
+      _logger->error("%s: failed to list removed segments for client %i: "
+                     "ListRemovedSegmentsResult is NULL",
+                     func, params.clientNum);
+      throw std::runtime_error(StringUtils::format(
+          "%s: unable to list removed segments. This is a bug, please report "
+          "this to the developers.",
+          func));
+    }
+
+    if (r->page.entries.empty()) {
+      Printer::console(
+          params.clientNum,
+          "^3list-removed-segments: ^7no removed segments found.\n");
+      return;
+    }
+
+    constexpr const char *DIVIDER =
+        "^g----------------------------------------------------------------"
+        "------------------------------\n";
+
+    static constexpr int32_t MRT_PAD = 50;
+    static constexpr int32_t REASON_PAD = MRT_PAD + 10 + 3;
+
+    const std::string header = StringUtils::format(
+        " ^2%-4s ^g| ^2%-10s ^g| ^2%-50s ^g| ^2%s\n"
+        "      ^g| ^2%-10s ^g| ^2%-50s ^g| ^2%s\n"
+        "      ^g| ^2%s\n",
+        "ID", "User", "Map/Run - Time (Segment)", "Record date", "Removed by",
+        "Season(s)", "Removed at", "Reason");
+
+    const std::string line1 = " ^7%-4i ^g| ^7%-*s ^g| ^7%-*s ^g| ^7%s\n";
+    const std::string line2 = "      ^g| ^7%-*s ^g| ^7%-*s ^g| ^7%s\n";
+    const std::string line3 = "      ^g| ^7%-*s\n";
+
+    std::string message =
+        StringUtils::format("Listing removed timerun segments (^3* ^7= you)\n"
+                            "Showing page ^3%i ^7of ^3%i\n\n",
+                            r->page.page, r->page.numPages);
+
+    message += header + DIVIDER;
+
+    for (const auto &entry : r->page.entries) {
+      // every segment in the entry is the same split - they differ only in
+      // 'season_id', so the first one (Default, when present) is the base
+      const auto &base = entry.segments[0];
+
+      std::string userId = std::to_string(base.userId);
+
+      if (base.userId == params.callerId) {
+        userId += "^3*";
+      }
+
+      const bool mixedRemovedBy =
+          std::any_of(entry.segments.begin(), entry.segments.end(),
+                      [&base](const Timerun::RemovedSegment &s) {
+                        return s.removedBy != base.removedBy;
+                      });
+
+      const bool callerIsRemover =
+          std::any_of(entry.segments.begin(), entry.segments.end(),
+                      [&params](const Timerun::RemovedSegment &s) {
+                        return s.removedBy == params.callerId;
+                      });
+
+      std::string removedById =
+          mixedRemovedBy ? "Mixed" : std::to_string(base.removedBy);
+
+      if (callerIsRemover) {
+        removedById += "^3*";
+      }
+
+      const auto seasonStrings = Container::map(
+          entry.segments, [&r](const Timerun::RemovedSegment &s) {
+            return getSeasonName(r->seasonNames, s.seasonId);
+          });
+      const std::string seasons = StringUtils::join(seasonStrings, ", ");
+
+      const std::string mrt = StringUtils::format(
+          "%s/%s ^7- %s (%i)", StringUtils::sanitize(base.map),
+          StringUtils::sanitize(base.run), TimeUtils::millisToString(base.time),
+          base.segment);
+      const std::string reason =
+          StringUtils::sanitize(base.reason.value_or("-"));
+
+      const int32_t userIdPad = StringUtils::countExtraPadding(userId, 10);
+      const int32_t removedByIdPad =
+          StringUtils::countExtraPadding(removedById, 10);
+      const int32_t mrtPad = StringUtils::countExtraPadding(mrt, MRT_PAD);
+      const int32_t seasonPad =
+          StringUtils::countExtraPadding(seasons, MRT_PAD);
+
+      message += StringUtils::format(line1, base.id, userIdPad, userId, mrtPad,
+                                     mrt, base.recordDate.toDateTimeString());
+      message +=
+          StringUtils::format(line2, removedByIdPad, removedById, seasonPad,
+                              seasons, base.removedAt.toDateTimeString());
+      message += StringUtils::format(
+          line3, StringUtils::countExtraPadding(reason, REASON_PAD), reason);
+      message += DIVIDER;
+    }
+
+    Printer::console(params.clientNum, message + "\n");
+  };
+
+  const auto error = [params](const std::runtime_error &e) {
+    Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
 int32_t TimerunV2::getRunStartTime(const int32_t clientNum) const {
   return _players[clientNum]->startTime.value_or(0);
 }
@@ -2836,6 +3214,73 @@ TimerunV2::getCheckpointsForComparison(
 
   return processedRecords;
 }
+
+namespace {
+struct ConflictComparisonRow {
+  std::string label;
+  std::string current;
+  std::string restore;
+};
+
+// renders one header and then a divider-prefixed block of rows per group,
+// so multi-copy conflicts share a single table header
+std::string buildConflictComparisonTable(
+    const std::string &currentHeader, const std::string &restoreHeader,
+    const std::vector<std::vector<ConflictComparisonRow>> &groups) {
+  constexpr int32_t columnPad = 28;
+  const std::string line = " ^2%-11s ^g| ^7%*s ^g| ^7%-*s\n";
+
+  std::string msg = StringUtils::format("               ^7%28s ^g| ^7%-28s\n",
+                                        currentHeader, restoreHeader);
+
+  for (const auto &rows : groups) {
+    msg += "^g-----------------------------------------------------------------"
+           "---------\n";
+
+    for (const auto &row : rows) {
+      msg += StringUtils::format(
+          line, row.label,
+          StringUtils::countExtraPadding(row.current, columnPad), row.current,
+          StringUtils::countExtraPadding(row.restore, columnPad), row.restore);
+    }
+  }
+
+  return msg;
+}
+
+std::pair<std::string, std::string> annotateConflictTime(int32_t current,
+                                                         int32_t restore) {
+  if (current > restore) {
+    return {"(^1slower^7) " + TimeUtils::millisToString(current),
+            TimeUtils::millisToString(restore) + " (^2faster^7)"};
+  }
+
+  if (restore > current) {
+    return {"(^2faster^7) " + TimeUtils::millisToString(current),
+            TimeUtils::millisToString(restore) + " (^1slower^7)"};
+  }
+
+  return {"(tied) " + TimeUtils::millisToString(current),
+          TimeUtils::millisToString(restore) + " (tied)"};
+}
+
+std::pair<std::string, std::string>
+annotateConflictDate(const TimeUtils::Time &current,
+                     const TimeUtils::Time &restore) {
+  if (current > restore) {
+    return {"(newer) " + current.toDateTimeString(),
+            restore.toDateTimeString() + " (older) "};
+  }
+
+  if (restore > current) {
+    return {"(older) " + current.toDateTimeString(),
+            restore.toDateTimeString() + " (newer) "};
+  }
+
+  return {"(same) " + current.toDateTimeString(),
+          restore.toDateTimeString() + " (same)"};
+}
+} // namespace
 
 std::string TimerunV2::buildRestoreRecordSummary(
     const std::vector<Timerun::Record> &restored,
@@ -2938,64 +3383,177 @@ std::string TimerunV2::buildRestoreRecordConflictMessage(
       "Conflicting record%s on run ^3'%s' ^7in map ^3'%s':\n\n", headerPrefix,
       conflicts[0].existing.run, conflicts[0].existing.map);
 
-  msg += StringUtils::format("               ^7%28s ^g| ^7%-28s\n",
-                             "Current record", "Record to restore");
-
-  constexpr int32_t columnPad = 28;
-  const std::string line = " ^2%-11s ^g| ^7%*s ^g| ^7%-*s\n";
+  std::vector<std::vector<ConflictComparisonRow>> groups;
 
   for (const auto &[existing, toRestore] : conflicts) {
-    std::string timeStrExisting;
-    std::string timeStrToRestore;
-    std::string dateStrExisting;
-    std::string dateStrToRestore;
+    const auto [timeCurrent, timeRestore] =
+        annotateConflictTime(existing.time, toRestore.time);
+    const auto [dateCurrent, dateRestore] =
+        annotateConflictDate(existing.recordDate, toRestore.recordDate);
 
-    if (existing.time > toRestore.time) {
-      timeStrExisting =
-          "(^1slower^7) " + TimeUtils::millisToString(existing.time);
-      timeStrToRestore =
-          TimeUtils::millisToString(toRestore.time) + " (^2faster^7)";
-    } else if (toRestore.time > existing.time) {
-      timeStrExisting =
-          "(^2faster^7) " + TimeUtils::millisToString(existing.time);
-      timeStrToRestore =
-          TimeUtils::millisToString(toRestore.time) + " (^1slower^7)";
-    } else { // tied
-      timeStrExisting = "(tied) " + TimeUtils::millisToString(existing.time);
-      timeStrToRestore = TimeUtils::millisToString(toRestore.time) + " (tied)";
+    groups.push_back({
+        {"Season", getSeasonName(seasonNames, existing.seasonId),
+         getSeasonName(seasonNames, toRestore.seasonId)},
+        {"Time", timeCurrent, timeRestore},
+        {"Record date", dateCurrent, dateRestore},
+    });
+  }
+
+  msg += buildConflictComparisonTable("Current record", "Record to restore",
+                                      groups);
+
+  return msg + "\nNo changes have been made due to the unresolved conflict.\n";
+}
+
+std::string TimerunV2::buildRestoreSegmentSummary(
+    const std::vector<Timerun::RemovedSegment> &restored,
+    const std::vector<Timerun::BestSegmentDetails> &swapped,
+    const std::vector<Timerun::RemovedSegment> &skipped,
+    const std::map<int32_t, std::string> &seasonNames) {
+  std::string msg;
+  const auto numSkipped = static_cast<int32_t>(skipped.size());
+  const auto &first = restored[0];
+
+  if (swapped.empty()) {
+    msg += StringUtils::format(
+        "The following segment%s been restored for segment ^3%i^7 on run "
+        "^3'%s' ^7on map ^3'%s':\n\n",
+        restored.size() == 1 ? " has" : "s have", first.segment, first.run,
+        first.map);
+
+    const auto seasonStrings = Container::map(
+        restored, [&seasonNames](const Timerun::RemovedSegment &r) {
+          return getSeasonName(seasonNames, r.seasonId);
+        });
+    const std::string seasons = StringUtils::join(seasonStrings, ", ");
+
+    // every restored copy comes from the same split value, so the time and
+    // record date are identical across seasons
+    msg += StringUtils::format(
+        " ^2Season%s: ^7%s\n ^2Time: ^7%s\n ^2Record date: ^7%s\n\n",
+        restored.size() == 1 ? "" : "s", seasons,
+        TimeUtils::millisToString(first.time),
+        first.recordDate.toDateTimeString());
+
+    if (numSkipped > 0) {
+      msg += StringUtils::format(
+          "\n^3%i ^7segment%s not restored (removed by an administrator).\n",
+          numSkipped, numSkipped == 1 ? " was" : "s were");
     }
 
-    // dates cannot be "tied", otherwise they would be the same record
-    if (existing.recordDate > toRestore.recordDate) {
-      dateStrExisting = "(newer) " + existing.recordDate.toDateTimeString();
-      dateStrToRestore = toRestore.recordDate.toDateTimeString() + " (older) ";
-    } else {
-      dateStrExisting = "(older) " + existing.recordDate.toDateTimeString();
-      dateStrToRestore = toRestore.recordDate.toDateTimeString() + " (newer) ";
-    }
+    return msg;
+  }
+
+  msg += StringUtils::format(
+      "The following segment%s been restored for segment ^3%i^7 on run "
+      "^3'%s' ^7on map ^3'%s'^7.\nExisting segment%s prior to the restore %s "
+      "been removed.\n\n",
+      restored.size() == 1 ? " has" : "s have", first.segment, first.run,
+      first.map, swapped.size() == 1 ? "" : "s",
+      swapped.size() == 1 ? "has" : "have");
+
+  msg += StringUtils::format("               ^7%30s ^g| ^7%-30s\n",
+                             "Restored segment", "Removed segment");
+
+  const std::string line = " ^2%-11s ^g| ^7%30s ^g| ^z%-30s\n";
+
+  std::map<int32_t, const Timerun::BestSegmentDetails *> swappedBySeason;
+
+  for (const auto &s : swapped) {
+    swappedBySeason[s.seasonId] = &s;
+  }
+
+  for (const auto &r : restored) {
+    const auto it = swappedBySeason.find(r.seasonId);
+    const bool hasSwap = it != swappedBySeason.end();
 
     msg += "^g-----------------------------------------------------------------"
            "---------\n";
 
     msg += StringUtils::format(
-        line, "Season",
-        StringUtils::countExtraPadding(
-            getSeasonName(seasonNames, existing.seasonId), columnPad),
-        getSeasonName(seasonNames, existing.seasonId),
-        StringUtils::countExtraPadding(
-            getSeasonName(seasonNames, toRestore.seasonId), columnPad),
-        getSeasonName(seasonNames, toRestore.seasonId));
+        line, "Season", getSeasonName(seasonNames, r.seasonId),
+        hasSwap ? getSeasonName(seasonNames, it->second->seasonId) : "-");
     msg += StringUtils::format(
-        line, "Time",
-        StringUtils::countExtraPadding(timeStrExisting, columnPad),
-        timeStrExisting,
-        StringUtils::countExtraPadding(timeStrToRestore, columnPad),
-        timeStrToRestore);
-    msg += StringUtils::format(line, "Record date", columnPad, dateStrExisting,
-                               columnPad, dateStrToRestore);
+        line, "Time", TimeUtils::millisToString(r.time),
+        hasSwap ? TimeUtils::millisToString(it->second->time) : "-");
+    msg += StringUtils::format(
+        line, "Record date", r.recordDate.toDateTimeString(),
+        hasSwap ? it->second->recordDate.toDateTimeString() : "-");
   }
 
+  if (numSkipped > 0) {
+    msg += StringUtils::format(
+        "\n^3%i ^7segment%s not restored (removed by an administrator).\n",
+        numSkipped, numSkipped == 1 ? " was" : "s were");
+  }
+
+  return msg;
+}
+
+std::string TimerunV2::buildRestoreSegmentConflictMessage(
+    const std::vector<Timerun::RestoreSegmentConflict> &conflicts,
+    const std::map<int32_t, std::string> &seasonNames) {
+  const std::string headerPrefix = conflicts.size() == 1 ? "" : "s";
+  const auto &first = conflicts[0];
+
+  std::string msg = StringUtils::format(
+      "^3%i ^7segment%s could not be restored due to a conflict.\nRun the "
+      "command again with ^3'--force' ^7option to remove the existing "
+      "segment%s,\nand replace %s with the one%s you're trying to "
+      "restore.\n\n",
+      static_cast<int32_t>(conflicts.size()), headerPrefix, headerPrefix,
+      conflicts.size() == 1 ? "it" : "them", headerPrefix);
+
+  msg += StringUtils::format(
+      "Conflicting segment ^3%i^7 on run ^3'%s' ^7in map ^3'%s':\n\n",
+      first.toRestore.segment, first.toRestore.run, first.toRestore.map);
+
+  std::vector<std::vector<ConflictComparisonRow>> groups;
+
+  for (const auto &conflict : conflicts) {
+    const auto &current = conflict.occupant;
+    const auto &restore = conflict.toRestore;
+    const auto [timeCurrent, timeRestore] =
+        annotateConflictTime(current.time, restore.time);
+    const auto [dateCurrent, dateRestore] =
+        annotateConflictDate(current.recordDate, restore.recordDate);
+
+    groups.push_back({
+        {"Season", getSeasonName(seasonNames, current.seasonId),
+         getSeasonName(seasonNames, restore.seasonId)},
+        {"Time", timeCurrent, timeRestore},
+        {"Record date", dateCurrent, dateRestore},
+    });
+  }
+
+  msg += buildConflictComparisonTable("Current segment", "Segment to restore",
+                                      groups);
+
   return msg + "\nNo changes have been made due to the unresolved conflict.\n";
+}
+
+std::string TimerunV2::buildRemovedSegmentSummary(
+    const std::vector<Timerun::RemovedSegment> &removed,
+    const std::map<int32_t, std::string> &seasonNames) {
+  // remove-segment always removes one segment's value,
+  // the archived copies differ only by season
+  const auto seasonStrings =
+      Container::map(removed, [&seasonNames](const Timerun::RemovedSegment &r) {
+        return getSeasonName(seasonNames, r.seasonId);
+      });
+  const std::string seasons = StringUtils::join(seasonStrings, ", ");
+  const auto &base = removed[0];
+
+  std::string msg =
+      "^g------------------------------------------------------------\n";
+  msg += StringUtils::format(
+      " ^2Map: ^7%s\n ^2Run: ^7%s\n ^2Segment: ^7%i\n ^2Time: ^7%s\n "
+      "^2Season%s: ^7%s\n ^2Record date: ^7%s\n\n",
+      base.map, base.run, base.segment, TimeUtils::millisToString(base.time),
+      removed.size() == 1 ? "" : "s", seasons,
+      base.recordDate.toDateTimeString());
+
+  return msg;
 }
 
 // resolves the season name for the given id, falling back to the raw id

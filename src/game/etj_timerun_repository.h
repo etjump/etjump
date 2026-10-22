@@ -102,9 +102,20 @@ public:
                const TimeUtils::Time &removedAt);
   Timerun::RemovedRecordsPage
   getRemovedRecords(const Timerun::ListRemovedRecordsParams &params);
+  std::vector<Timerun::RemovedSegment>
+  removeSegment(const Timerun::RemoveSegmentParams &params,
+                const TimeUtils::Time &removedAt);
+  Timerun::RemovedSegmentsPage
+  getRemovedSegments(const Timerun::ListRemovedSegmentsParams &params);
+  Timerun::RestoreSegmentResult
+  restoreSegment(const Timerun::RestoreSegmentParams &params,
+                 const TimeUtils::Time &restoredAt);
   Timerun::RestoreRecordResult
   restoreRecord(const Timerun::RestoreRecordParams &params,
                 const TimeUtils::Time &restoredAt);
+
+  static std::map<std::string, std::string>
+  deserializeMetadata(const std::string &metadata);
 
 private:
   void tryToMigrateRecords();
@@ -153,6 +164,9 @@ private:
   getBestSegmentRow(int32_t seasonId, const std::string &map,
                     const std::string &run, int32_t userId, int32_t segment);
 
+  static std::vector<Timerun::RemovedSegment>
+  getRemovedSegmentsFromQuery(sqlite::database_binder &binder);
+
   const std::vector<std::string> _defaultSeasonFields{"id", "name",
                                                       "start_time", "end_time"};
   const std::string _defaultSeasonFieldsStr =
@@ -195,7 +209,8 @@ private:
   int32_t resolveSeasonForRemoval(const std::string &season,
                                   const std::string &commandPrefix);
 
-  std::string serializeMetadata(std::map<std::string, std::string> metadata);
+  static std::string
+  serializeMetadata(const std::map<std::string, std::string> &metadata);
   std::unique_ptr<DatabaseV2> _database;
   std::unique_ptr<DatabaseV2> _oldDatabase;
 };
