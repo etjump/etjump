@@ -11,6 +11,14 @@
   * removed records are archived in the timerun database
   * anyone can remove/restore their own records, admins with `T` flag can remove/restore records from other players
   * records removed by admins can only be restored by admins
+* best segment tracking for timeruns [#2038](https://github.com/etjump/etjump/pull/2038)
+  * every completion records its best segments, both personal and server-wide
+  * gold splits are shown on the checkpoint timer, configurable with `etj_checkpointsShowGold`
+  * best segments can be viewed with `best-segments` and `best-segments-history`
+* `remove-segment`, `restore-segment` and `list-removed-segments` commands for timerun best segments [#2038](https://github.com/etjump/etjump/pull/2038)
+  * removed segments are archived in the timerun database
+  * anyone can remove/restore their own segments, admins with `T` flag can remove/restore segments from other players
+  * segments removed by admins can only be restored by admins
 * `target_wskey_overrides` entity to override effective worldspawn keys under specific circumstances [#2015](https://github.com/etjump/etjump/pull/2015)
 * client-side prediction for portal gun portal spawning [#2025](https://github.com/etjump/etjump/pull/2025)
   * portals appear immediately when fired, rather than after a round trip to the server
