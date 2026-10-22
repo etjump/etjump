@@ -275,6 +275,79 @@ struct BestSegmentHistoryEntry {
   bool removed{};
 };
 
+struct RemoveSegmentParams {
+  int32_t clientNum{};
+  std::string season; // empty = default season + cascade
+  std::string map;    // exact match only
+  std::string run;    // exact match only
+  int32_t userId{};
+  int32_t segment{};
+  int32_t removedBy{};
+  std::optional<std::string> reason; // required when removing others' splits
+  bool exactMap{};
+};
+
+struct RemovedSegment {
+  int32_t id{}; // id of the archived split in 'removed_segments'
+  int32_t seasonId{};
+  std::string map;
+  std::string run;
+  int32_t userId{};
+  int32_t segment{};
+  int32_t time{};
+  TimeUtils::Time recordDate;
+  std::string playerName;
+  int32_t removedBy{};
+  TimeUtils::Time removedAt;
+  std::optional<std::string> reason;
+};
+
+struct RestoreSegmentParams {
+  int32_t clientNum{};
+  int32_t callerId{};
+  int32_t segmentId{};
+  bool force{};   // force restore in case of conflicts (displaces the occupant)
+  bool isAdmin{}; // whether we have the 'TIMERUN_MANAGEMENT' admin flag
+};
+
+struct RestoreSegmentConflict {
+  RemovedSegment toRestore;
+  BestSegmentDetails occupant;
+};
+
+struct RestoreSegmentResult {
+  int32_t numTargeted{}; // total targeted archived copies
+  std::vector<RemovedSegment> restored;
+  std::vector<BestSegmentDetails> swapped;
+  std::vector<RestoreSegmentConflict> conflicts;
+  std::vector<RemovedSegment> skipped;
+};
+
+struct ListRemovedSegmentsParams {
+  int32_t clientNum{};
+  int32_t callerId{};
+  std::string season;               // empty = no filter
+  std::string map;                  // empty = no filter
+  std::string run;                  // empty = no filter
+  std::optional<int32_t> userId;    // only list splits belonging to this user
+  std::optional<int32_t> removedBy; // only list splits removed by this user
+  std::optional<int32_t> segment;   // only list this segment
+  int32_t page{};
+  int32_t pageSize{};
+};
+
+struct RemovedSegmentEntry {
+  // the season copies of one split value from one run; contains one segment
+  // when a season filter is applied
+  std::vector<RemovedSegment> segments;
+};
+
+struct RemovedSegmentsPage {
+  std::vector<RemovedSegmentEntry> entries;
+  int32_t page{}; // effective page, capped to the last page if out of range
+  int32_t numPages{};
+};
+
 struct HistoricalRecord {
   Record r{};
   int32_t rank{};

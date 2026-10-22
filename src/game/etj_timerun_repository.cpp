@@ -1464,6 +1464,34 @@ TimerunRepository::getBestSegmentHistory(
   return entries;
 }
 
+std::optional<Timerun::BestSegmentDetails>
+TimerunRepository::getBestSegmentRow(int32_t seasonId, const std::string &map,
+                                     const std::string &run, int32_t userId,
+                                     int32_t segment) {
+  auto binder = _database->sql << R"(
+    select map, run, time, record_date, player_name
+    from player_best_segments
+    where season_id=? and map=? collate nocase
+      and lsanitize(run)=? collate nocase
+      and user_id=? and segment=?;
+  )" << seasonId << StringUtils::toLowerCase(map)
+                               << StringUtils::sanitize(run, true) << userId
+                               << segment;
+
+  std::optional<Timerun::BestSegmentDetails> result;
+
+  binder >> [&result, seasonId, userId,
+             segment](const std::string &mapName, const std::string &runName,
+                      int32_t time, const std::string &recordDate,
+                      const std::string &playerName) {
+    result = Timerun::BestSegmentDetails{
+        seasonId, mapName, runName,    segment,
+        time,     userId,  playerName, TimeUtils::Time::fromString(recordDate)};
+  };
+
+  return result;
+}
+
 std::vector<Timerun::Season> TimerunRepository::getSeasons() {
   auto binder = _database->sql
                 << R"(select id, name, start_time, end_time from season;)";
@@ -1939,8 +1967,15 @@ TimerunRepository::restoreRecord(const Timerun::RestoreRecordParams &params,
     _database->sql << "delete from removed_records where id=?;"
                    << removedRecord.id;
 
+    // re-derive the restored run's splits, excluding independently removed
+    // segments and without appending to the progression
+    applyBestSegments(record, /*appendHistory=*/false,
+                      /*skipRemovedSegments=*/true);
+
     result.restored.emplace_back(record);
   }
+
+  recomputeAffectedSegments(affectedSegments);
 
   txn.commit();
 
@@ -2095,6 +2130,461 @@ Timerun::RemovedRecordsPage TimerunRepository::getRemovedRecords(
   result.entries.insert(result.entries.end(),
                         std::make_move_iterator(entries.begin() + start),
                         std::make_move_iterator(entries.begin() + end));
+
+  return result;
+}
+
+std::vector<Timerun::RemovedSegment>
+TimerunRepository::removeSegment(const Timerun::RemoveSegmentParams &params,
+                                 const TimeUtils::Time &removedAt) {
+  const std::string resolvedMap =
+      resolveMapName(params.map, params.exactMap, "remove-segment");
+  const std::string resolvedRun =
+      resolveSegmentRunName(resolvedMap, params.run, "remove-segment");
+
+  using Timerun::DEFAULT_SEASON_ID;
+
+  int32_t targetSeasonId = DEFAULT_SEASON_ID;
+
+  if (!params.season.empty()) {
+    targetSeasonId = resolveSeasonForRemoval(params.season, "remove-segment");
+  }
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  // the default-season row anchors a no-season cascade; an explicit season
+  // targets only that season's row
+  const auto target = getBestSegmentRow(
+      targetSeasonId, resolvedMap, resolvedRun, params.userId, params.segment);
+
+  if (!target.has_value()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3remove-segment: ^7no segment ^3%i^7 found for user ID ^3%i^7 on "
+        "^3'%s'^7 of run ^3'%s'^7.",
+        params.segment, params.userId, resolvedMap, resolvedRun));
+  }
+
+  std::vector<int32_t> seasonIds;
+
+  if (params.season.empty()) {
+    // cascade to every season holding a copy of this same split value
+    _database->sql << R"(
+      select distinct season_id from player_best_segments
+      where map=? collate nocase and lsanitize(run)=? collate nocase
+        and user_id=? and segment=? and record_date=?
+      order by season_id;
+    )" << resolvedMap
+                   << StringUtils::sanitize(resolvedRun, true) << params.userId
+                   << params.segment << target->recordDate.toDateTimeString() >>
+        [&seasonIds](int32_t seasonId) { seasonIds.push_back(seasonId); };
+  } else {
+    seasonIds.push_back(targetSeasonId);
+  }
+
+  std::vector<Timerun::RemovedSegment> removed;
+  AffectedSegments affectedSegments;
+
+  for (const int32_t seasonId : seasonIds) {
+    const auto row = getBestSegmentRow(seasonId, resolvedMap, resolvedRun,
+                                       params.userId, params.segment);
+
+    if (!row.has_value()) {
+      if (params.season.empty()) {
+        continue;
+      }
+
+      throw std::runtime_error(StringUtils::format(
+          "^3remove-segment: ^7no segment ^3%i^7 found for user ID ^3%i^7.",
+          params.segment, params.userId));
+    }
+
+    {
+      auto binder = _database->sql << R"(
+        insert into removed_segments (
+          season_id, map, run, user_id, segment, time, record_date,
+          player_name, removed_by, removed_at, reason
+        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+      )";
+
+      binder << row->seasonId << row->map << row->run << row->userId
+             << row->segment << row->time << row->recordDate.toDateTimeString()
+             << row->playerName << params.removedBy
+             << removedAt.toDateTimeString();
+
+      if (params.reason.has_value()) {
+        binder << params.reason.value();
+      } else {
+        binder << nullptr;
+      }
+
+      binder++;
+    }
+
+    int32_t id = 0;
+    _database->sql << "select last_insert_rowid();" >> id;
+
+    _database->sql << R"(
+      delete from player_best_segments
+      where season_id=? and map=? collate nocase
+        and lsanitize(run)=? collate nocase
+        and user_id=? and segment=?;
+    )" << row->seasonId
+                   << row->map << row->run << row->userId << row->segment;
+
+    Timerun::RemovedSegment archived;
+    archived.id = id;
+    archived.seasonId = row->seasonId;
+    archived.map = row->map;
+    archived.run = row->run;
+    archived.userId = row->userId;
+    archived.segment = row->segment;
+    archived.time = row->time;
+    archived.recordDate = row->recordDate;
+    archived.playerName = row->playerName;
+    archived.removedBy = params.removedBy;
+    archived.removedAt = removedAt;
+    archived.reason = params.reason;
+
+    removed.emplace_back(std::move(archived));
+
+    affectedSegments[std::make_tuple(row->seasonId, row->map, row->run)].insert(
+        row->segment);
+  }
+
+  if (removed.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3remove-segment: ^7no segment ^3%i^7 found for user ID ^3%i^7.",
+        params.segment, params.userId));
+  }
+
+  recomputeAffectedSegments(affectedSegments);
+
+  txn.commit();
+
+  return removed;
+}
+
+Timerun::RemovedSegmentsPage TimerunRepository::getRemovedSegments(
+    const Timerun::ListRemovedSegmentsParams &params) {
+  std::vector<Timerun::Season> seasons;
+
+  if (!params.season.empty()) {
+    seasons = getSeasonsForName(params.season, false);
+
+    if (seasons.empty()) {
+      throw std::runtime_error(
+          StringUtils::format("No season matches name '%s'", params.season));
+    }
+  }
+
+  std::vector<std::string> whereClauses;
+
+  if (!params.season.empty()) {
+    whereClauses.emplace_back("(" + createSeasonPredicate(seasons) + ")");
+  }
+
+  if (!params.map.empty()) {
+    whereClauses.emplace_back("map like ? collate nocase");
+  }
+
+  if (!params.run.empty()) {
+    whereClauses.emplace_back("lsanitize(run) like ? collate nocase");
+  }
+
+  if (params.userId.has_value()) {
+    whereClauses.emplace_back("user_id=?");
+  }
+
+  if (params.removedBy.has_value()) {
+    whereClauses.emplace_back("removed_by=?");
+  }
+
+  if (params.segment.has_value()) {
+    whereClauses.emplace_back("segment=?");
+  }
+
+  const std::string whereString =
+      whereClauses.empty()
+          ? ""
+          : " where " + StringUtils::join(whereClauses, " and ");
+
+  auto binder = _database->sql << StringUtils::format(R"(
+    select
+      id,
+      season_id,
+      map,
+      run,
+      user_id,
+      segment,
+      time,
+      record_date,
+      player_name,
+      removed_by,
+      removed_at,
+      reason
+    from removed_segments%s
+    order by removed_at desc, id desc;
+  )",
+                                                      whereString);
+
+  if (!params.season.empty()) {
+    for (const auto &season : seasons) {
+      binder << season.id;
+    }
+  }
+
+  if (!params.map.empty()) {
+    binder << "%" + params.map + "%";
+  }
+
+  if (!params.run.empty()) {
+    binder << "%" + params.run + "%";
+  }
+
+  if (params.userId.has_value()) {
+    binder << params.userId.value();
+  }
+
+  if (params.removedBy.has_value()) {
+    binder << params.removedBy.value();
+  }
+
+  if (params.segment.has_value()) {
+    binder << params.segment.value();
+  }
+
+  auto segments = getRemovedSegmentsFromQuery(binder);
+
+  std::vector<Timerun::RemovedSegmentEntry> entries;
+
+  if (params.season.empty()) {
+    std::map<
+        std::tuple<std::string, std::string, int32_t, int32_t, std::string>,
+        size_t>
+        groupIndex;
+
+    for (auto &segment : segments) {
+      const auto key = std::make_tuple(segment.map, segment.run, segment.userId,
+                                       segment.segment,
+                                       segment.recordDate.toDateTimeString());
+      const auto [it, inserted] = groupIndex.emplace(key, entries.size());
+
+      if (inserted) {
+        entries.emplace_back();
+      }
+
+      entries[it->second].segments.emplace_back(std::move(segment));
+    }
+  } else {
+    entries.reserve(segments.size());
+
+    for (auto &segment : segments) {
+      entries.emplace_back();
+      entries.back().segments.emplace_back(std::move(segment));
+    }
+  }
+
+  // sort the season copies within each entry by season id, so the Default
+  // season is always first and 'entry.segments[0]' is the representative
+  // base segment for the group
+  for (auto &entry : entries) {
+    std::sort(
+        entry.segments.begin(), entry.segments.end(),
+        [](const auto &a, const auto &b) { return a.seasonId < b.seasonId; });
+  }
+
+  const auto totalCount = static_cast<int32_t>(entries.size());
+  const int32_t pageSize = std::max(params.pageSize, 1);
+  const int32_t numPages = std::max(1, (totalCount + pageSize - 1) / pageSize);
+  const int32_t page = std::clamp(params.page, 1, numPages);
+  const int32_t start = (page - 1) * pageSize;
+  const int32_t end = std::min(start + pageSize, totalCount);
+
+  Timerun::RemovedSegmentsPage result;
+  result.page = page;
+  result.numPages = numPages;
+  result.entries.insert(result.entries.end(),
+                        std::make_move_iterator(entries.begin() + start),
+                        std::make_move_iterator(entries.begin() + end));
+
+  return result;
+}
+
+Timerun::RestoreSegmentResult
+TimerunRepository::restoreSegment(const Timerun::RestoreSegmentParams &params,
+                                  const TimeUtils::Time &restoredAt) {
+  std::vector<Timerun::RemovedSegment> removedSegments;
+  {
+    auto binder = _database->sql << R"(
+      select
+        id, season_id, map, run, user_id, segment, time, record_date,
+        player_name, removed_by, removed_at, reason
+      from removed_segments
+      where id=?;
+    )" << params.segmentId;
+    removedSegments = getRemovedSegmentsFromQuery(binder);
+  }
+
+  if (removedSegments.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3restore-segment: ^7no removed segment found with ID ^3%i^7.",
+        params.segmentId));
+  }
+
+  const auto base = removedSegments[0];
+
+  // only a default-season copy cascades to every season holding the same
+  // split value (same source run date); targeting a specific season restores
+  // only that season's copy
+  using Timerun::DEFAULT_SEASON_ID;
+
+  if (base.seasonId == DEFAULT_SEASON_ID) {
+    auto binder = _database->sql << R"(
+      select
+        id, season_id, map, run, user_id, segment, time, record_date,
+        player_name, removed_by, removed_at, reason
+      from removed_segments
+      where map=? collate nocase and run=? collate nocase
+        and user_id=? and segment=? and record_date=?
+      order by season_id;
+    )" << base.map << base.run << base.userId
+                                 << base.segment
+                                 << base.recordDate.toDateTimeString();
+    removedSegments = getRemovedSegmentsFromQuery(binder);
+  }
+
+  // non-admins can only restore the splits they removed themselves,
+  // any other season copies stay archived
+  std::vector<Timerun::RemovedSegment> restorable;
+  std::vector<Timerun::RemovedSegment> skipped;
+
+  for (auto &removed : removedSegments) {
+    if (params.isAdmin || removed.removedBy == params.callerId) {
+      restorable.emplace_back(std::move(removed));
+    } else {
+      skipped.emplace_back(std::move(removed));
+    }
+  }
+
+  if (restorable.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3restore-segment: ^7you do not have permission to restore %s.",
+        skipped.size() == 1 ? "this segment" : "these segments"));
+  }
+
+  // a segment cannot be restored while its source run is archived. only
+  // copies that are actually being restored are checked: a skipped copy is
+  // left archived for an admin to handle and must not block this restore
+  for (const auto &removed : restorable) {
+    int32_t blocked = 0;
+
+    _database->sql << R"(
+      select exists(select 1 from removed_records
+        where season_id=? and map=? collate nocase
+          and run=? collate nocase
+          and user_id=? and record_date=?);
+    )" << removed.seasonId
+                   << removed.map << removed.run << removed.userId
+                   << removed.recordDate.toDateTimeString() >>
+        blocked;
+
+    if (blocked != 0) {
+      throw std::runtime_error(StringUtils::format(
+          "^3restore-segment: ^7the run that set segment ^3%i^7 is still "
+          "removed. Restore the record first.",
+          removed.segment));
+    }
+  }
+
+  Timerun::RestoreSegmentResult result;
+  result.numTargeted = static_cast<int32_t>(removedSegments.size());
+  result.skipped = std::move(skipped);
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  // detect all conflicts up front; if any exist and we're not forcing the
+  // restore, abort without touching anything, so the same archive ID can be
+  // used to retry the restore with --force
+  std::vector<Timerun::RestoreSegmentConflict> conflicts;
+
+  for (const auto &removed : restorable) {
+    auto occupant =
+        getBestSegmentRow(removed.seasonId, removed.map, removed.run,
+                          removed.userId, removed.segment);
+
+    if (occupant.has_value()) {
+      conflicts.emplace_back(
+          Timerun::RestoreSegmentConflict{removed, *occupant});
+    }
+  }
+
+  if (!conflicts.empty() && !params.force) {
+    result.conflicts = std::move(conflicts);
+    return result;
+  }
+
+  AffectedSegments affectedSegments;
+
+  for (auto &removed : restorable) {
+    auto occupant =
+        getBestSegmentRow(removed.seasonId, removed.map, removed.run,
+                          removed.userId, removed.segment);
+
+    if (occupant.has_value()) {
+      // force: archive the occupant in place of the restored split
+      {
+        auto binder = _database->sql << R"(
+          insert into removed_segments (
+            season_id, map, run, user_id, segment, time, record_date,
+            player_name, removed_by, removed_at, reason
+          ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        )";
+
+        binder << occupant->seasonId << occupant->map << occupant->run
+               << occupant->userId << occupant->segment << occupant->time
+               << occupant->recordDate.toDateTimeString()
+               << occupant->playerName << params.callerId
+               << restoredAt.toDateTimeString()
+               << std::string("Automatically removed by 'restore-segment' "
+                              "(conflict resolution)");
+        binder++;
+      }
+
+      _database->sql << R"(
+        delete from player_best_segments
+        where season_id=? and map=? collate nocase
+          and lsanitize(run)=? collate nocase
+          and user_id=? and segment=?;
+      )" << occupant->seasonId
+                     << occupant->map << occupant->run << occupant->userId
+                     << occupant->segment;
+
+      result.swapped.emplace_back(std::move(*occupant));
+    }
+
+    // install the archived split
+    _database->sql << R"(
+      insert into player_best_segments (
+        season_id, map, run, user_id, segment, time, record_date, player_name
+      ) values (?, ?, ?, ?, ?, ?, ?, ?);
+    )" << removed.seasonId
+                   << removed.map << removed.run << removed.userId
+                   << removed.segment << removed.time
+                   << removed.recordDate.toDateTimeString()
+                   << removed.playerName;
+
+    _database->sql << "delete from removed_segments where id=?;" << removed.id;
+
+    affectedSegments[std::make_tuple(removed.seasonId, removed.map,
+                                     removed.run)]
+        .insert(removed.segment);
+
+    result.restored.emplace_back(removed);
+  }
+
+  recomputeAffectedSegments(affectedSegments);
+
+  txn.commit();
 
   return result;
 }
@@ -2768,5 +3258,40 @@ TimerunRepository::getRemovedRecordsFromQuery(sqlite::database_binder &binder) {
   };
 
   return records;
+}
+
+std::vector<Timerun::RemovedSegment>
+TimerunRepository::getRemovedSegmentsFromQuery(
+    sqlite::database_binder &binder) {
+  std::vector<Timerun::RemovedSegment> segments;
+
+  binder >> [&segments](int32_t id, int32_t seasonId, std::string map,
+                        std::string run, int32_t userId, int32_t segment,
+                        int32_t time, const std::string &recordDate,
+                        std::string playerName, int32_t removedBy,
+                        const std::string &removedAt,
+                        std::unique_ptr<std::string> reason) {
+    Timerun::RemovedSegment removed;
+
+    removed.id = id;
+    removed.seasonId = seasonId;
+    removed.map = std::move(map);
+    removed.run = std::move(run);
+    removed.userId = userId;
+    removed.segment = segment;
+    removed.time = time;
+    removed.recordDate = TimeUtils::Time::fromString(recordDate);
+    removed.playerName = std::move(playerName);
+    removed.removedBy = removedBy;
+    removed.removedAt = TimeUtils::Time::fromString(removedAt);
+
+    if (reason) {
+      removed.reason = *reason;
+    }
+
+    segments.emplace_back(std::move(removed));
+  };
+
+  return segments;
 }
 } // namespace ETJump

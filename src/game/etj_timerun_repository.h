@@ -102,6 +102,14 @@ public:
                const TimeUtils::Time &removedAt);
   Timerun::RemovedRecordsPage
   getRemovedRecords(const Timerun::ListRemovedRecordsParams &params);
+  std::vector<Timerun::RemovedSegment>
+  removeSegment(const Timerun::RemoveSegmentParams &params,
+                const TimeUtils::Time &removedAt);
+  Timerun::RemovedSegmentsPage
+  getRemovedSegments(const Timerun::ListRemovedSegmentsParams &params);
+  Timerun::RestoreSegmentResult
+  restoreSegment(const Timerun::RestoreSegmentParams &params,
+                 const TimeUtils::Time &restoredAt);
   Timerun::RestoreRecordResult
   restoreRecord(const Timerun::RestoreRecordParams &params,
                 const TimeUtils::Time &restoredAt);
@@ -152,6 +160,9 @@ private:
   std::optional<Timerun::BestSegmentDetails>
   getBestSegmentRow(int32_t seasonId, const std::string &map,
                     const std::string &run, int32_t userId, int32_t segment);
+
+  static std::vector<Timerun::RemovedSegment>
+  getRemovedSegmentsFromQuery(sqlite::database_binder &binder);
 
   const std::vector<std::string> _defaultSeasonFields{"id", "name",
                                                       "start_time", "end_time"};
