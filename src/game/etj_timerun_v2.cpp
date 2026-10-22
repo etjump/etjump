@@ -362,6 +362,52 @@ void TimerunV2::loadBestSegments() {
       });
 }
 
+Timerun::SegmentCacheSnapshot
+TimerunV2::readSegmentCaches(const std::string &map, int32_t userId) const {
+  Timerun::SegmentCacheSnapshot snapshot;
+
+  // the global cache is always for the map we're currently on
+  snapshot.global = _repository->getBestSegments(defaultSeasonId, _currentMap);
+
+  // the player cache only covers the current map, so there's nothing to
+  // re-read when the mutation happened elsewhere
+  if (StringUtils::iEqual(map, _currentMap)) {
+    snapshot.player = _repository->getPlayerBestSegments(defaultSeasonId,
+                                                         _currentMap, userId);
+    snapshot.hasPlayer = true;
+  }
+
+  return snapshot;
+}
+
+int32_t
+TimerunV2::applySegmentCaches(const Timerun::SegmentCacheSnapshot &snapshot,
+                              int32_t userId) {
+  bestSegments = snapshot.global;
+
+  auto *const player = findPlayerByUserId(userId);
+
+  if (player == nullptr) {
+    return -1;
+  }
+
+  if (snapshot.hasPlayer) {
+    player->bestSegments = snapshot.player;
+  }
+
+  return player->clientNum;
+}
+
+TimerunV2::Player *TimerunV2::findPlayerByUserId(int32_t userId) {
+  for (auto &player : _players) {
+    if (player && player->userId == userId) {
+      return player.get();
+    }
+  }
+
+  return nullptr;
+}
+
 void TimerunV2::clientDisconnect(int clientNum) {
   _players[clientNum] = nullptr;
 }
@@ -2286,12 +2332,15 @@ namespace {
 class RemoveRecordResult : public SynchronizationContext::ResultBase {
 public:
   RemoveRecordResult(std::vector<Timerun::Record> removedRecords,
-                     std::map<int32_t, std::string> seasonNames)
+                     std::map<int32_t, std::string> seasonNames,
+                     Timerun::SegmentCacheSnapshot segmentCaches)
       : removedRecords(std::move(removedRecords)),
-        seasonNames(std::move(seasonNames)) {}
+        seasonNames(std::move(seasonNames)),
+        segmentCaches(std::move(segmentCaches)) {}
 
   std::vector<Timerun::Record> removedRecords;
   std::map<int32_t, std::string> seasonNames;
+  Timerun::SegmentCacheSnapshot segmentCaches;
 };
 } // namespace
 
@@ -2313,8 +2362,15 @@ void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
       seasonNames[season.id] = season.name;
     }
 
-    return std::make_unique<RemoveRecordResult>(removedRecords,
-                                                std::move(seasonNames));
+    // re-read the segment caches rather than trying to patch them, since the
+    // removal can cascade across seasons
+    const auto map =
+        removedRecords.empty() ? std::string{} : removedRecords.front().map;
+    auto segmentCaches = readSegmentCaches(map, params.userId);
+
+    return std::make_unique<RemoveRecordResult>(std::move(removedRecords),
+                                                std::move(seasonNames),
+                                                std::move(segmentCaches));
   };
 
   const auto callback = [this, callerName, isSelfRemoval, func,
@@ -2337,20 +2393,14 @@ void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
     // if the record was removed from the current map. If the record is not
     // from this map, see if they are connected, so we can notify them
     // about the removal anyway.
-    int32_t targetClientNum = -1;
+    const int32_t targetClientNum =
+        applySegmentCaches(r->segmentCaches, params.userId);
 
-    for (auto &player : _players) {
-      if (!player || player->userId != params.userId) {
-        continue;
-      }
+    auto *const player = findPlayerByUserId(params.userId);
 
-      targetClientNum = player->clientNum;
-
-      // record is not from this map, no need to purge cache
-      if (Q_stricmp(params.map.c_str(), level.rawmapname)) {
-        break;
-      }
-
+    // record is not from this map, no need to purge cache
+    if (player != nullptr && !r->removedRecords.empty() &&
+        StringUtils::iEqual(r->removedRecords.front().map, _currentMap)) {
       const auto isRemoved = [&r](const Timerun::Record &cached) {
         return std::any_of(r->removedRecords.begin(), r->removedRecords.end(),
                            [&](const Timerun::Record &removed) {
@@ -2361,7 +2411,6 @@ void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
       player->records.erase(std::remove_if(player->records.begin(),
                                            player->records.end(), isRemoved),
                             player->records.end());
-      break;
     }
 
     _logger->info(
@@ -2617,11 +2666,14 @@ namespace {
 class RestoreRecordResult : public SynchronizationContext::ResultBase {
 public:
   RestoreRecordResult(Timerun::RestoreRecordResult result,
-                      std::map<int32_t, std::string> seasonNames)
-      : result(std::move(result)), seasonNames(std::move(seasonNames)) {}
+                      std::map<int32_t, std::string> seasonNames,
+                      Timerun::SegmentCacheSnapshot segmentCaches)
+      : result(std::move(result)), seasonNames(std::move(seasonNames)),
+        segmentCaches(std::move(segmentCaches)) {}
 
   Timerun::RestoreRecordResult result;
   std::map<int32_t, std::string> seasonNames;
+  Timerun::SegmentCacheSnapshot segmentCaches;
 };
 } // namespace
 
@@ -2638,8 +2690,19 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
       seasonNames[season.id] = season.name;
     }
 
-    return std::make_unique<RestoreRecordResult>(
-        _repository->restoreRecord(params, restoredAt), seasonNames);
+    auto restoreResult = _repository->restoreRecord(params, restoredAt);
+
+    // re-read the segment caches rather than trying to patch them
+    Timerun::SegmentCacheSnapshot segmentCaches;
+
+    if (!restoreResult.restored.empty()) {
+      const auto &restored = restoreResult.restored.front();
+      segmentCaches = readSegmentCaches(restored.map, restored.userId);
+    }
+
+    return std::make_unique<RestoreRecordResult>(std::move(restoreResult),
+                                                 std::move(seasonNames),
+                                                 std::move(segmentCaches));
   };
 
   const auto callback =
@@ -2695,20 +2758,13 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
 
         // update the loaded records for the player whose record was restored,
         // if the record is from the current map
-        int32_t targetClientNum = -1;
+        const int32_t targetClientNum =
+            applySegmentCaches(r->segmentCaches, targetId);
 
-        for (auto &player : _players) {
-          if (!player || player->userId != targetId) {
-            continue;
-          }
+        auto *const player = findPlayerByUserId(targetId);
 
-          targetClientNum = player->clientNum;
-
-          // record is not from this map, no need to update cache
-          if (Q_stricmp(r->result.restored[0].map.c_str(), level.rawmapname)) {
-            break;
-          }
-
+        if (player != nullptr &&
+            StringUtils::iEqual(r->result.restored[0].map, _currentMap)) {
           for (const auto &restored : r->result.restored) {
             const auto it =
                 std::find_if(player->records.begin(), player->records.end(),
@@ -2722,8 +2778,6 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
               player->records.push_back(restored);
             }
           }
-
-          break;
         }
 
         // if we're restoring our own records, we're done here

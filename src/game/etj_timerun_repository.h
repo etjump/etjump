@@ -25,8 +25,10 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <sqlite_modern_cpp.h>
 #include <string>
+#include <tuple>
 
 #include "etj_synchronization_context.h"
 #include "etj_timerun_models.h"
@@ -111,7 +113,45 @@ private:
   void migrate();
 
   void insertRecordRow(const Timerun::Record &record);
+  void updateRecordRow(const Timerun::Record &record);
   void insertRecordHistory(const Timerun::Record &record);
+
+  // writes a run's segments into the live tables, improve-only. No transaction
+  // of its own - the caller must provide one. 'appendHistory' controls whether
+  // a personal improvement is appended to 'player_best_segments_history', and
+  // 'skipRemovedSegments' excludes splits listed in 'removed_segments'
+  std::vector<Timerun::BestSegmentUpdate>
+  applyBestSegments(const Timerun::Record &record, bool appendHistory,
+                    bool skipRemovedSegments);
+
+  // re-derives the global row for each affected segment from the surviving
+  // personal rows, deleting the global row when none remain. Must be called
+  // inside the caller's transaction. 'map' and 'run' are the stored values
+  // from the record, not resolved user input.
+  void recomputeGlobalSegments(int32_t seasonId, const std::string &map,
+                               const std::string &run,
+                               const std::vector<int32_t> &segments);
+
+  // global segments that need re-deriving, grouped by season, map and run
+  using AffectedSegments =
+      std::map<std::tuple<int32_t, std::string, std::string>,
+               std::set<int32_t>>;
+
+  // voids the personal splits held by one exact run, identified by its
+  // record date, and records the affected global segments for a later
+  // re-derive. Must be called inside the caller's transaction.
+  void voidBestSegments(AffectedSegments &affected, int32_t seasonId,
+                        const std::string &map, const std::string &run,
+                        int32_t userId, const TimeUtils::Time &recordDate);
+
+  // re-derives the global rows for every segment collected in 'affected'.
+  // Must be called inside the caller's transaction.
+  void recomputeAffectedSegments(const AffectedSegments &affected);
+
+  // fetches the live personal split for an exact season/map/run/user/segment
+  std::optional<Timerun::BestSegmentDetails>
+  getBestSegmentRow(int32_t seasonId, const std::string &map,
+                    const std::string &run, int32_t userId, int32_t segment);
 
   const std::vector<std::string> _defaultSeasonFields{"id", "name",
                                                       "start_time", "end_time"};
@@ -152,6 +192,8 @@ private:
   std::string resolveSegmentRunName(const std::string &map,
                                     const std::string &run,
                                     const std::string &commandPrefix);
+  int32_t resolveSeasonForRemoval(const std::string &season,
+                                  const std::string &commandPrefix);
 
   std::string serializeMetadata(std::map<std::string, std::string> metadata);
   std::unique_ptr<DatabaseV2> _database;

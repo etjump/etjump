@@ -35,6 +35,7 @@ inline constexpr int32_t DEFAULT_PAGE_SIZE_SINGLE_RUN = 20;
 inline constexpr int32_t MAX_PAGE_SIZE_SINGLE_RUN = 100;
 inline constexpr int32_t MAX_PAGE_SIZE_ALL_RUNS = 10;
 inline constexpr int32_t RECORD_HISTORY_DEFAULT_SIZE = 20;
+inline constexpr int32_t DEFAULT_SEASON_ID = 1;
 
 struct Season {
   int id;
@@ -80,6 +81,14 @@ struct BestSegmentUpdate {
   bool global{};                           // improved the server-wide best
   std::optional<int32_t> previousPersonal; // the personal time it beat
   std::optional<int32_t> previousGlobal;   // the global time it beat
+};
+
+// the default-season segment caches for the current map; 'player' is only
+// populated when the command targets the current map
+struct SegmentCacheSnapshot {
+  std::map<std::string, std::vector<int32_t>> global;
+  std::map<std::string, std::vector<int32_t>> player;
+  bool hasPlayer{};
 };
 
 struct AddSeasonParams {
