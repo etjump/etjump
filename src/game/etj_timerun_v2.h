@@ -39,7 +39,7 @@ class TimerunRepository;
 
 class TimerunV2 {
 public:
-  static constexpr int defaultSeasonId = 1;
+  static constexpr int defaultSeasonId = Timerun::DEFAULT_SEASON_ID;
 
   TimerunV2(std::string currentMap,
             std::unique_ptr<TimerunRepository> repository,
@@ -155,6 +155,11 @@ private:
   static bool isDebugging(int clientNum);
   void checkRecord(Player *player);
   void loadBestSegments();
+  Timerun::SegmentCacheSnapshot readSegmentCaches(const std::string &map,
+                                                  int32_t userId) const;
+  int32_t applySegmentCaches(const Timerun::SegmentCacheSnapshot &snapshot,
+                             int32_t userId);
+  Player *findPlayerByUserId(int32_t userId);
   void ensureInitialized() const;
 
   /*
