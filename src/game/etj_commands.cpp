@@ -36,6 +36,7 @@
 #include "etj_tokens.h"
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
+#include "etj_spectator_hud_sync.h"
 #include "etj_timerun_v2.h"
 #include "etj_chat_replay.h"
 #include "etj_filesystem.h"
@@ -84,6 +85,7 @@ getOptCommand(const std::string &commandPrefix, int clientNum,
 }
 } // namespace ETJump
 
+
 namespace ClientCommands {
 
 bool BackupLoad(gentity_t *ent, Arguments argv) {
@@ -104,6 +106,14 @@ bool Save(gentity_t *ent, Arguments argv) {
 bool Unload(gentity_t *ent, Arguments argv) {
   ETJump::saveSystem->unload(ent);
   return true;
+}
+
+bool uploadHudSync(gentity_t *ent, Arguments argv) {
+  return ETJump::SpectatorHudSync::upload(ent, argv);
+}
+
+bool watchHudSync(gentity_t *ent, Arguments argv) {
+  return ETJump::SpectatorHudSync::watch(ent, argv);
 }
 
 bool listCustomVotes(gentity_t *ent, Arguments argv) {
@@ -3533,6 +3543,10 @@ Commands::Commands() {
   commands_["requestnumcustomvotes"] = ClientCommands::sendNumCustomvotes;
   commands_["requestcustomvoteinfo"] = ClientCommands::sendCustomvoteInfo;
   commands_["loadpos"] = ClientCommands::loadPos;
+  commands_[ETJump::Constants::SpectatorHudSync::UploadCommand.data()] =
+      ClientCommands::uploadHudSync;
+  commands_[ETJump::Constants::SpectatorHudSync::WatchCommand.data()] =
+      ClientCommands::watchHudSync;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {

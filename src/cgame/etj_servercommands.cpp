@@ -129,6 +129,19 @@ static void callvote(const Arguments &args) {
   trap_SendConsoleCommand(command.c_str());
 }
 
+static void hudsync(const Arguments &args) {
+  if (args.size() < 5) {
+    return;
+  }
+
+  const int targetClientNum = Q_atoi(args[0]);
+  const bool fullUpdate = Q_atoi(args[1]) > 0;
+  const int32_t revision = Q_atoi(args[2]);
+
+  onSpectatorHudSyncCommand(targetClientNum, fullUpdate, revision, args[3],
+                            args[4]);
+}
+
 void registerCommands() {
   cgame.core.serverCommands->subscribe(
       "maplist", [](const auto &args) { maplist(args); }, false);
@@ -154,5 +167,9 @@ void registerCommands() {
 
   cgame.core.serverCommands->subscribe(
       "callvote", [](const auto &args) { callvote(args); }, false);
+
+  cgame.core.serverCommands->subscribe(
+      Constants::SpectatorHudSync::ServerCommand.data(),
+      [](const auto &args) { hudsync(args); }, false);
 }
 } // namespace ETJump::ServerCommands

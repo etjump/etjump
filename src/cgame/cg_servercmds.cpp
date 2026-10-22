@@ -662,6 +662,7 @@ static void CG_ConfigStringModified(void) {
         str); // OSP - set reinforcement times for each team
   } else if (num == CS_LEVEL_START_TIME) {
     cgs.levelStartTime = Q_atoi(str);
+    ETJump::resetHudSyncState();
   } else if (num == CS_INTERMISSION_START_TIME) {
     cgs.intermissionStartTime = Q_atoi(str);
   } else if (num == CS_VOTE_TIME) {

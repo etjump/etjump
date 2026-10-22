@@ -5,6 +5,7 @@
 #include "etj_rtv.h"
 #include "etj_entity_utilities.h"
 #include "etj_progression_tracker.h"
+#include "etj_spectator_hud_sync.h"
 #include "etj_worldspawn.h"
 
 // g_client.c -- client functions that don't happen every frame
@@ -1783,7 +1784,7 @@ bool UpdateClientConfigString(const gentity_t &gent) {
       va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%"
          "i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%"
          "i\\sl\\%"
-         "i\\tr\\%i\\vs\\%i\\i\\%i",
+         "i\\tr\\%i\\vs\\%i\\sha\\%i\\i\\%i",
          gent.client->pers.netname, gent.client->sess.sessionTeam,
          gent.client->sess.playerType, gent.client->sess.rank, medalStr,
          skillStr, gent.client->disguiseNetname, gent.client->disguiseRank,
@@ -1794,7 +1795,9 @@ bool UpdateClientConfigString(const gentity_t &gent) {
          gent.client->pers.hideMe > 0 ? gent.client->pers.hideMe : 0,
          gent.client->sess.specLocked ? 1 : 0,
          gent.client->sess.timerunActive ? 1 : 0,
-         gent.client->pers.snaphud ? 1 : 0, gent.client->sess.inactive ? 1 : 0);
+         gent.client->pers.snaphud ? 1 : 0,
+         (gent.client->pers.clientFlags & CGF_SPEC_HUD_ALLOW) ? 1 : 0,
+         gent.client->sess.inactive ? 1 : 0);
 
   trap_GetConfigstring(CS_PLAYERS + ClientNum(&gent), oldcs, sizeof(oldcs));
 
@@ -2080,6 +2083,8 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   client = ent->client;
 
   memset(client, 0, sizeof(*client));
+
+  ETJump::SpectatorHudSync::resetWatchState(ent);
 
   client->pers.connected = CON_CONNECTING;
   client->pers.connectTime = level.time; // DHM - Nerve
@@ -2742,6 +2747,11 @@ void ClientDisconnect(int clientNum) {
         flag->client->sess.spectatorClient == clientNum) {
       Cmd_FollowCycle_f(flag, 1);
     }
+
+    if (flag->client->pers.hudSyncWatchedTarget == clientNum) {
+      ETJump::SpectatorHudSync::resetWatchState(flag);
+    }
+
     // invalidate our specinvites
     COM_BitClear(flag->client->sess.specInvitedClients, clientNum);
   }

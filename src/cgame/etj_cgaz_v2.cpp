@@ -25,6 +25,7 @@
 #include "etj_cgaz_v2.h"
 #include "cg_local.h"
 #include "etj_color_parser.h"
+#include "etj_local.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_snaphud_data.h"
 #include "etj_utilities.h"
@@ -37,25 +38,7 @@ CGazV2::CGazV2(const std::shared_ptr<CGazData> &cgazData,
                const std::shared_ptr<SnaphudData> &snaphudData,
                const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
     : cgazData(cgazData), snaphudData(snaphudData), cvarUpdate(cvarUpdate) {
-
-  // CGaz 1
-  cgame.utils.colorParser->parseColorString(etj_CGaz1Color1.string,
-                                            cgaz1.colors[0]);
-  cgame.utils.colorParser->parseColorString(etj_CGaz1Color2.string,
-                                            cgaz1.colors[1]);
-  cgame.utils.colorParser->parseColorString(etj_CGaz1Color3.string,
-                                            cgaz1.colors[2]);
-  cgame.utils.colorParser->parseColorString(etj_CGaz1Color4.string,
-                                            cgaz1.colors[3]);
-
-  cgame.utils.colorParser->parseColorString(etj_CGaz1MidlineColor.string,
-                                            cgaz1.midlineColor);
-
-  // CGaz 2
-  cgame.utils.colorParser->parseColorString(etj_CGaz2Color1.string,
-                                            cgaz2.colors[0]);
-  cgame.utils.colorParser->parseColorString(etj_CGaz2Color2.string,
-                                            cgaz2.colors[1]);
+  updateColors();
 
   setThickness(&etj_CGaz2Thickness1);
   setThickness(&etj_CGaz2Thickness2);
@@ -77,34 +60,22 @@ CGazV2::~CGazV2() {
 
 void CGazV2::startListeners() {
   // CGaz 1
-  cvarUpdate->subscribe(&etj_CGaz1Color1, [this](const vmCvar_t *cvar) {
-    cgame.utils.colorParser->parseColorString(cvar->string, cgaz1.colors[0]);
-  });
-
-  cvarUpdate->subscribe(&etj_CGaz1Color2, [this](const vmCvar_t *cvar) {
-    cgame.utils.colorParser->parseColorString(cvar->string, cgaz1.colors[1]);
-  });
-
-  cvarUpdate->subscribe(&etj_CGaz1Color3, [this](const vmCvar_t *cvar) {
-    cgame.utils.colorParser->parseColorString(cvar->string, cgaz1.colors[2]);
-  });
-
-  cvarUpdate->subscribe(&etj_CGaz1Color4, [this](const vmCvar_t *cvar) {
-    cgame.utils.colorParser->parseColorString(cvar->string, cgaz1.colors[3]);
-  });
-
-  cvarUpdate->subscribe(&etj_CGaz1MidlineColor, [this](const vmCvar_t *cvar) {
-    cgame.utils.colorParser->parseColorString(cvar->string, cgaz1.midlineColor);
-  });
+  cvarUpdate->subscribe(&etj_CGaz1Color1,
+                        [this](const vmCvar_t *) { updateColors(); });
+  cvarUpdate->subscribe(&etj_CGaz1Color2,
+                        [this](const vmCvar_t *) { updateColors(); });
+  cvarUpdate->subscribe(&etj_CGaz1Color3,
+                        [this](const vmCvar_t *) { updateColors(); });
+  cvarUpdate->subscribe(&etj_CGaz1Color4,
+                        [this](const vmCvar_t *) { updateColors(); });
+  cvarUpdate->subscribe(&etj_CGaz1MidlineColor,
+                        [this](const vmCvar_t *) { updateColors(); });
 
   // CGaz 2
-  cvarUpdate->subscribe(&etj_CGaz2Color1, [this](const vmCvar_t *cvar) {
-    cgame.utils.colorParser->parseColorString(cvar->string, cgaz2.colors[0]);
-  });
-
-  cvarUpdate->subscribe(&etj_CGaz2Color2, [this](const vmCvar_t *cvar) {
-    cgame.utils.colorParser->parseColorString(cvar->string, cgaz2.colors[1]);
-  });
+  cvarUpdate->subscribe(&etj_CGaz2Color1,
+                        [this](const vmCvar_t *) { updateColors(); });
+  cvarUpdate->subscribe(&etj_CGaz2Color2,
+                        [this](const vmCvar_t *) { updateColors(); });
 
   cvarUpdate->subscribe(&etj_CGaz2Thickness1,
                         [this](const vmCvar_t *cvar) { setThickness(cvar); });
@@ -113,12 +84,85 @@ void CGazV2::startListeners() {
                         [this](const vmCvar_t *cvar) { setThickness(cvar); });
 }
 
+void CGazV2::updateColors() {
+  const auto cgaz1Color1 = effectiveHudCvarString(&etj_CGaz1Color1);
+  if (cgaz1ColorStrings[0] != cgaz1Color1) {
+    cgaz1ColorStrings[0] = cgaz1Color1;
+    cgame.utils.colorParser->parseColorString(cgaz1ColorStrings[0],
+                                              cgaz1.colors[0]);
+  }
+
+  const auto cgaz1Color2 = effectiveHudCvarString(&etj_CGaz1Color2);
+  if (cgaz1ColorStrings[1] != cgaz1Color2) {
+    cgaz1ColorStrings[1] = cgaz1Color2;
+    cgame.utils.colorParser->parseColorString(cgaz1ColorStrings[1],
+                                              cgaz1.colors[1]);
+  }
+
+  const auto cgaz1Color3 = effectiveHudCvarString(&etj_CGaz1Color3);
+  if (cgaz1ColorStrings[2] != cgaz1Color3) {
+    cgaz1ColorStrings[2] = cgaz1Color3;
+    cgame.utils.colorParser->parseColorString(cgaz1ColorStrings[2],
+                                              cgaz1.colors[2]);
+  }
+
+  const auto cgaz1Color4 = effectiveHudCvarString(&etj_CGaz1Color4);
+  if (cgaz1ColorStrings[3] != cgaz1Color4) {
+    cgaz1ColorStrings[3] = cgaz1Color4;
+    cgame.utils.colorParser->parseColorString(cgaz1ColorStrings[3],
+                                              cgaz1.colors[3]);
+  }
+
+  const auto cgaz1MidlineColor = effectiveHudCvarString(&etj_CGaz1MidlineColor);
+  if (cgaz1MidlineColorString != cgaz1MidlineColor) {
+    cgaz1MidlineColorString = cgaz1MidlineColor;
+    cgame.utils.colorParser->parseColorString(cgaz1MidlineColorString,
+                                              cgaz1.midlineColor);
+  }
+
+  const auto cgaz2Color1 = effectiveHudCvarString(&etj_CGaz2Color1);
+  if (cgaz2ColorStrings[0] != cgaz2Color1) {
+    cgaz2ColorStrings[0] = cgaz2Color1;
+    cgame.utils.colorParser->parseColorString(cgaz2ColorStrings[0],
+                                              cgaz2.colors[0]);
+  }
+
+  const auto cgaz2Color2 = effectiveHudCvarString(&etj_CGaz2Color2);
+  if (cgaz2ColorStrings[1] != cgaz2Color2) {
+    cgaz2ColorStrings[1] = cgaz2Color2;
+    cgame.utils.colorParser->parseColorString(cgaz2ColorStrings[1],
+                                              cgaz2.colors[1]);
+  }
+}
+
 void CGazV2::setThickness(const vmCvar_t *cvar) {
   if (cvar == &etj_CGaz2Thickness1) {
     cgaz2.thickness[0] = std::clamp(cvar->value, 0.5f, 100.0f);
   } else if (cvar == &etj_CGaz2Thickness2) {
     cgaz2.thickness[1] = std::clamp(cvar->value, 0.5f, 100.0f);
   }
+}
+
+void CGazV2::refreshRenderSettings() {
+  settings.drawCgaz = effectiveHudCvarInt(&etj_drawCGaz);
+  settings.drawSnapZone = effectiveHudCvarInt(&etj_CGaz1DrawSnapZone) != 0;
+  settings.drawMidLine = effectiveHudCvarInt(&etj_CGaz1DrawMidLine) != 0;
+  settings.cgazY = effectiveHudCvarFloat(&etj_CGazY);
+  settings.cgazHeight = effectiveHudCvarFloat(&etj_CGazHeight);
+  settings.cgazFov = effectiveHudCvarFloat(&etj_CGazFov);
+  settings.cgaz2Y = effectiveHudCvarFloat(&etj_CGaz2Y);
+  settings.cgaz2FixedSpeed = effectiveHudCvarFloat(&etj_CGaz2FixedSpeed);
+  settings.cgaz2HighRes = effectiveHudCvarInt(&etj_CGaz2HighRes) != 0;
+  settings.cgaz2Thickness1 =
+      std::clamp(effectiveHudCvarFloat(&etj_CGaz2Thickness1), 0.5f, 100.0f);
+  settings.cgaz2Thickness2 =
+      std::clamp(effectiveHudCvarFloat(&etj_CGaz2Thickness2), 0.5f, 100.0f);
+  settings.stretchCgaz = effectiveHudCvarInt(&etj_stretchCgaz) != 0;
+  settings.cgaz2WishDirFixedSpeed =
+      effectiveHudCvarFloat(&etj_CGaz2WishDirFixedSpeed);
+  settings.cgaz2WishDirUniformLength =
+      effectiveHudCvarInt(&etj_CGaz2WishDirUniformLength) != 0;
+  settings.cgaz2NoVelocityDir = effectiveHudCvarInt(&etj_CGaz2NoVelocityDir);
 }
 
 void CGazV2::updateCGaz1(const CGazData::State &s) {
@@ -132,7 +176,7 @@ void CGazV2::updateCGaz1(const CGazData::State &s) {
   assert(cgaz1.maxCosAngle <= cgaz1.maxAngle);
 
   // no need to update this unless we're drawing midline
-  if (etj_CGaz1DrawMidLine.integer) {
+  if (settings.drawMidLine) {
     cgaz1.midlineStart =
         cgaz1.optAngle + ((cgaz1.maxCosAngle - cgaz1.optAngle) / 2);
     cgaz1.midLineEnd =
@@ -143,13 +187,12 @@ void CGazV2::updateCGaz1(const CGazData::State &s) {
 
   cgaz1.yaw = std::atan2(s.wishvel[1], s.wishvel[0]) - s.velAngle;
 
-  cgaz1.y =
-      std::clamp(etj_CGazY.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
+  cgaz1.y = std::clamp(settings.cgazY, 0.0f, static_cast<float>(SCREEN_HEIGHT));
   cgaz1.h =
-      std::clamp(etj_CGazHeight.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
+      std::clamp(settings.cgazHeight, 0.0f, static_cast<float>(SCREEN_HEIGHT));
 
-  cgaz1.fov = etj_CGazFov.value > 0
-                  ? std::clamp(etj_CGazFov.value, CGAZ_FOV_MIN, CGAZ_FOV_MAX)
+  cgaz1.fov = settings.cgazFov > 0
+                  ? std::clamp(settings.cgazFov, CGAZ_FOV_MIN, CGAZ_FOV_MAX)
                   : cg.refdef.fov_x;
 }
 
@@ -158,12 +201,13 @@ void CGazV2::updateCGaz2(const CGazData::State &s) {
                                      AngleNormalize180(RAD2DEG(s.velAngle)));
   cgaz2.velAngle = DEG2RAD(cgaz2.velAngle);
   cgaz2.optAngle = updateOptAngle(s);
-  cgaz2.velSize = etj_CGaz2FixedSpeed.value > 0
-                      ? etj_CGaz2FixedSpeed.value / 5.0f
+
+  cgaz2.velSize = settings.cgaz2FixedSpeed > 0
+                      ? settings.cgaz2FixedSpeed / 5.0f
                       : std::min(s.vf / 5.0f, SCREEN_HEIGHT / 2.0f);
 
   cgaz2.y =
-      std::clamp(etj_CGaz2Y.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
+      std::clamp(settings.cgaz2Y, 0.0f, static_cast<float>(SCREEN_HEIGHT));
 
   // NOTE: check for stats here to determine whether we want to apply
   // forward/ríghtmove values to CGaz 2 - unlike CGaz 1, we don't do
@@ -178,7 +222,7 @@ void CGazV2::updateCGaz2(const CGazData::State &s) {
           ? s.pm.cmd.rightmove
           : 0;
 
-  cgaz2.highRes = etj_CGaz2HighRes.integer;
+  cgaz2.highRes = settings.cgaz2HighRes;
   cgaz2.drawSides = s.vf > s.wishspeed;
 }
 
@@ -330,6 +374,11 @@ float CGazV2::updateMaxAngle(const CGazData::State &s,
 bool CGazV2::beforeRender() {
   const CGazData::State &s = cgazData->getState();
 
+  refreshRenderSettings();
+  updateColors();
+  cgaz2.thickness[0] = settings.cgaz2Thickness1;
+  cgaz2.thickness[1] = settings.cgaz2Thickness2;
+
   if (canSkipDraw(s)) {
     return false;
   }
@@ -339,15 +388,15 @@ bool CGazV2::beforeRender() {
     return true;
   }
 
-  if (etj_drawCGaz.integer & 1) {
+  if (settings.drawCgaz & 1) {
     updateCGaz1(s);
 
-    if (etj_CGaz1DrawSnapZone.integer) {
+    if (settings.drawSnapZone) {
       updateDrawSnap(s);
     }
   }
 
-  if (etj_drawCGaz.integer & 2) {
+  if (settings.drawCgaz & 2) {
     updateCGaz2(s);
   }
 
@@ -355,17 +404,17 @@ bool CGazV2::beforeRender() {
 }
 
 void CGazV2::render() const {
-  if (etj_drawCGaz.integer & 1) {
+  if (settings.drawCgaz & 1) {
     renderCGaz1();
   }
 
-  if (etj_drawCGaz.integer & 2) {
+  if (settings.drawCgaz & 2) {
     renderCGaz2();
   }
 }
 
 void CGazV2::renderCGaz1() const {
-  if (etj_CGaz1DrawSnapZone.integer && cgaz1.drawSnap.has_value()) {
+  if (settings.drawSnapZone && cgaz1.drawSnap.has_value()) {
     CG_FillAngleYaw(+cgaz1.minAngle, +cgaz1.drawSnap.value(), cgaz1.yaw,
                     cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.colors[1]);
     CG_FillAngleYaw(-cgaz1.drawSnap.value(), -cgaz1.minAngle, cgaz1.yaw,
@@ -393,7 +442,7 @@ void CGazV2::renderCGaz1() const {
     CG_FillAngleYaw(-cgaz1.maxAngle, -cgaz1.maxCosAngle, cgaz1.yaw, cgaz1.y,
                     cgaz1.h, cgaz1.fov, cgaz1.colors[3]);
 
-    if (etj_CGaz1DrawMidLine.integer) {
+    if (settings.drawMidLine) {
       CG_FillAngleYaw(+cgaz1.midlineStart, +cgaz1.midLineEnd, cgaz1.yaw,
                       cgaz1.y, cgaz1.h, cgaz1.fov, cgaz1.midlineColor);
       CG_FillAngleYaw(-cgaz1.midlineStart, -cgaz1.midLineEnd, cgaz1.yaw,
@@ -405,7 +454,7 @@ void CGazV2::renderCGaz1() const {
 void CGazV2::renderCGaz2() const {
   float x = SCREEN_CENTER_X;
 
-  if (etj_stretchCgaz.integer) {
+  if (settings.stretchCgaz) {
     ETJump_EnableWidthScale(false);
     x -= SCREEN_OFFSET_X;
   }
@@ -413,12 +462,12 @@ void CGazV2::renderCGaz2() const {
   if (cgaz2.forwardmove || cgaz2.rightmove) {
     float mult = 1.0f;
 
-    if (etj_CGaz2WishDirFixedSpeed.value > 0) {
+    if (settings.cgaz2WishDirFixedSpeed > 0) {
       constexpr float wishDirScale = 2.0f * 5.0f * CMDSCALE_DEFAULT;
-      mult = etj_CGaz2WishDirFixedSpeed.value / wishDirScale;
+      mult = settings.cgaz2WishDirFixedSpeed / wishDirScale;
     }
 
-    if (etj_CGaz2WishDirUniformLength.integer && cgaz2.rightmove &&
+    if (settings.cgaz2WishDirUniformLength && cgaz2.rightmove &&
         cgaz2.forwardmove) {
       mult /= M_SQRT2;
     }
@@ -435,12 +484,12 @@ void CGazV2::renderCGaz2() const {
   }
 
   // draw velocity direction if requested
-  if (!etj_CGaz2NoVelocityDir.integer ||
-      (!cgaz2.drawSides && etj_CGaz2NoVelocityDir.integer == 2)) {
+  const int noVelDir = settings.cgaz2NoVelocityDir;
+  if (!noVelDir || (!cgaz2.drawSides && noVelDir == 2)) {
     float dirSize = cgaz2.velSize;
 
     // prevent comically long velocity direction lines on fixed speeds
-    if (!cgaz2.drawSides && etj_CGaz2FixedSpeed.value > 0) {
+    if (!cgaz2.drawSides && settings.cgaz2FixedSpeed > 0) {
       dirSize = std::min(static_cast<float>(CMDSCALE_DEFAULT), dirSize);
     }
 
@@ -480,13 +529,13 @@ void CGazV2::renderCGaz2() const {
     }
   }
 
-  if (etj_stretchCgaz.integer) {
+  if (settings.stretchCgaz) {
     ETJump_EnableWidthScale(true);
   }
 }
 
-bool CGazV2::canSkipDraw(const CGazData::State &s) {
-  if (!etj_drawCGaz.integer) {
+bool CGazV2::canSkipDraw(const CGazData::State &s) const {
+  if (!settings.drawCgaz) {
     return true;
   }
 
@@ -519,5 +568,40 @@ bool CGazV2::canSkipDraw(const CGazData::State &s) {
   }
 
   return false;
+}
+
+std::array<std::string, Constants::SpectatorHudSync::CgazCvarNames.size()>
+CGazV2::getHudSyncValues() const {
+  const_cast<CGazV2 *>(this)->refreshRenderSettings();
+
+  std::array<std::string, Constants::SpectatorHudSync::CgazCvarNames.size()>
+      values{};
+
+  values[0] = std::to_string(settings.drawCgaz);
+  values[1] = std::to_string(settings.cgazY);
+  values[2] = std::to_string(settings.cgaz2Y);
+  values[3] = std::to_string(settings.cgazHeight);
+  values[4] = etj_CGaz2Color1.string;
+  values[5] = etj_CGaz2Color2.string;
+  values[6] = etj_CGaz1Color1.string;
+  values[7] = etj_CGaz1Color2.string;
+  values[8] = etj_CGaz1Color3.string;
+  values[9] = etj_CGaz1Color4.string;
+  values[10] = std::to_string(settings.cgazFov);
+  values[11] = std::to_string(etj_CGazTrueness.integer);
+  values[12] = std::to_string(etj_CGazOnTop.integer);
+  values[13] = std::to_string(settings.cgaz2FixedSpeed);
+  values[14] = std::to_string(settings.cgaz2NoVelocityDir);
+  values[15] = std::to_string(settings.drawSnapZone ? 1 : 0);
+  values[16] = std::to_string(settings.cgaz2WishDirFixedSpeed);
+  values[17] = std::to_string(settings.cgaz2WishDirUniformLength ? 1 : 0);
+  values[18] = std::to_string(settings.drawMidLine ? 1 : 0);
+  values[19] = etj_CGaz1MidlineColor.string;
+  values[20] = std::to_string(settings.cgaz2HighRes ? 1 : 0);
+  values[21] = std::to_string(settings.cgaz2Thickness1);
+  values[22] = std::to_string(settings.cgaz2Thickness2);
+  values[23] = std::to_string(settings.stretchCgaz ? 1 : 0);
+
+  return values;
 }
 } // namespace ETJump
