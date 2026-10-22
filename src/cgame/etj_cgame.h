@@ -24,10 +24,13 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "../game/bg_public.h"
+#include "../game/etj_shared.h"
 #include "../game/q_shared.h"
 #include "../game/etj_worldspawn_shared.h"
 
@@ -115,6 +118,8 @@ class SnaphudData;
 class UpmoveMeterData;
 class SpectatorInfoData;
 class PmoveUtilsV2;
+class CGazV2;
+class SnaphudV2;
 
 struct HUDData {
   std::shared_ptr<CGazData> cgaz;
@@ -130,6 +135,23 @@ class TimerunView;
 struct HUD {
   std::vector<std::unique_ptr<IRenderable>> renderables;
   std::unique_ptr<TimerunView> timerunView;
+  CGazV2 *cgazV2{};
+  SnaphudV2 *snaphudV2{};
+};
+
+struct SpectatorHudSync {
+  bool localBaselineSent{};
+  bool watchRegistered{};
+  int32_t watchedClient{-1};
+  int32_t overrideClient{-1};
+  int32_t watchedRevision{-1};
+  int32_t lastWatchRequestTime{};
+  int32_t localRevision{};
+
+  std::array<std::string, Constants::SpectatorHudSync::CgazCvarNames.size()>
+      lastSentCgazValues;
+  std::array<std::string, Constants::SpectatorHudSync::SnaphudCvarNames.size() + 1>
+      lastSentSnaphudValues;
 };
 
 struct CGameContext {
@@ -143,6 +165,7 @@ struct CGameContext {
   Visuals visuals;
   HUDData hudData;
   HUD hud;
+  SpectatorHudSync spectatorHudSync;
 
   // communicated by the server
   std::vector<std::string> serverMapList;

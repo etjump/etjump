@@ -24,7 +24,9 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -32,6 +34,7 @@
 #include "etj_irenderable.h"
 #include "etj_pmove_utils_v2.h"
 #include "etj_snaphud_data.h"
+#include "../game/etj_shared.h"
 
 namespace ETJump {
 class SnaphudData;
@@ -46,13 +49,20 @@ public:
   bool beforeRender() override;
   void render() const override;
 
+  [[nodiscard]] std::array<std::string,
+                           Constants::SpectatorHudSync::SnaphudCvarNames.size() +
+                               1>
+  getHudSyncValues() const;
+
 private:
   void parseCropOffset(const vmCvar_t *cvar);
   void parseCropOffsetValue(std::string_view value);
+  void updateColors();
   void updateSnaphud(const SnaphudData::State &s);
   void buildSnapZones(const SnaphudData::State &s);
 
   void startListeners();
+  void refreshRenderSettings();
 
   [[nodiscard]] bool canSkipDraw(const SnaphudData::State &s) const;
 
@@ -101,6 +111,17 @@ private:
   };
 
   Snaphud snaphud{};
+  std::array<std::string, 4> snaphudColorStrings{};
+
+  struct RenderSettings {
+    float offsetY{};
+    float height{};
+    float fov{};
+    int style{};
+    int edgeThickness{};
+    float borderThickness{};
+    int cropStyle{};
+  } settings;
 
   int32_t lastUpdateTime{};
 

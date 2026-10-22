@@ -126,8 +126,10 @@ void shutdown();
 // to work around issues that certain actions have when they are performed
 // on the same frame as the module is initialized
 void delayedInit();
+void resetHudSyncState();
 void runSpectatorHudSyncFrame();
 void onSpectatorHudSyncCommand(int targetClientNum, bool fullUpdate,
+                               int32_t revision,
                                const std::string &cgazPayload,
                                const std::string &snaphudPayload);
 

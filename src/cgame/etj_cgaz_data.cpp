@@ -69,7 +69,7 @@ void CGazData::updateState(const float wishspeed, const float accel,
   s.a = accel * wishspeed * PmoveUtilsV2::PM_FRAMETIME;
   s.aSquared = std::pow(s.a, 2.0f);
 
-  if (!(effectiveHudCvarInt(&etj_CGazTrueness) &
+  if (!(etj_CGazTrueness.integer &
         static_cast<int32_t>(CGazTrueness::GROUND)) ||
       s.vSquared - s.vfSquared >= (2 * s.a * s.wishspeed) - s.aSquared) {
     s.vSquared = s.vfSquared;
@@ -124,7 +124,7 @@ void CGazData::walkMove() {
 
   const float scale = PmoveUtilsV2::cmdScale(
       s.pm, s.pm.cmd,
-      effectiveHudCvarInt(&etj_CGazTrueness) &
+      etj_CGazTrueness.integer &
           static_cast<int32_t>(CGazTrueness::UPMOVE));
 
   // project moves down to flat plane
@@ -189,8 +189,7 @@ void CGazData::airMove() {
 
   const float scale = PmoveUtilsV2::cmdScale(
       s.pm, s.pm.cmd,
-      effectiveHudCvarInt(&etj_CGazTrueness) &
-          static_cast<int32_t>(CGazTrueness::UPMOVE));
+      etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;

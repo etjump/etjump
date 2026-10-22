@@ -5,6 +5,7 @@
 #include "etj_rtv.h"
 #include "etj_entity_utilities.h"
 #include "etj_progression_tracker.h"
+#include "etj_spectator_hud_sync.h"
 #include "etj_worldspawn.h"
 
 // g_client.c -- client functions that don't happen every frame
@@ -2083,7 +2084,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
 
   memset(client, 0, sizeof(*client));
 
-  client->pers.hudSyncWatchedTarget = -1;
+  ETJump::SpectatorHudSync::resetWatchState(ent);
 
   client->pers.connected = CON_CONNECTING;
   client->pers.connectTime = level.time; // DHM - Nerve
@@ -2748,7 +2749,7 @@ void ClientDisconnect(int clientNum) {
     }
 
     if (flag->client->pers.hudSyncWatchedTarget == clientNum) {
-      flag->client->pers.hudSyncWatchedTarget = -1;
+      ETJump::SpectatorHudSync::resetWatchState(flag);
     }
 
     // invalidate our specinvites

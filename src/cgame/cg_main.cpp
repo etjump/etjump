@@ -1295,8 +1295,8 @@ cvarTable_t cvarTable[] = {
     {&etj_snapHUDCropOffsets, "etj_snapHUDCropOffsets", "0 0", CVAR_ARCHIVE},
 
     // Spectator HUD
-    {&etj_specHudShow, "etj_specHudShow", "1", CVAR_ARCHIVE},
-    {&etj_specHudAllow, "etj_specHudAllow", "1", CVAR_ARCHIVE},
+    {&etj_specHudShow, "etj_specHudShow", "0", CVAR_ARCHIVE},
+    {&etj_specHudAllow, "etj_specHudAllow", "0", CVAR_ARCHIVE},
 
     {&etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE},
     {&etj_drawScoreboardInactivity, "etj_drawScoreboardInactivity", "1",
@@ -4005,6 +4005,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   s = CG_ConfigString(CS_LEVEL_START_TIME);
   cgs.levelStartTime = Q_atoi(s);
+  ETJump::resetHudSyncState();
 
   s = CG_ConfigString(CS_INTERMISSION_START_TIME);
   cgs.intermissionStartTime = Q_atoi(s);

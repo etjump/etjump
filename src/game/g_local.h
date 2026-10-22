@@ -1015,10 +1015,9 @@ typedef struct {
              ETJump::Constants::SpectatorHudSync::SnaphudCvarNames.size() + 1>
       snaphudHudValues;
   bool hasFullHudSync;
-  int32_t hudSyncLastUploadTime;
-  int32_t hudSyncLastRequestTime;
+  int32_t hudSyncRevision;
   int32_t hudSyncWatchedTarget;
-  int32_t hudSyncLastForwardTime;
+  int32_t hudSyncWatchedRevision;
 
   // target/trigger_tracker progression value
   int32_t progression[MAX_PROGRESSION_TRACKERS];

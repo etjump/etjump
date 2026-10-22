@@ -166,7 +166,7 @@ void SnaphudData::walkMove() {
 
   const float scale = PmoveUtilsV2::cmdScale(
       s.pm, s.pm.cmd,
-      effectiveHudCvarInt(&etj_snapHUDTrueness) &
+      etj_snapHUDTrueness.integer &
           static_cast<int32_t>(SnapTrueness::UPMOVE));
 
   // project moves down to flat plane
@@ -218,7 +218,7 @@ void SnaphudData::walkMove() {
 
   // when a player gets hit, they temporarily lose
   // full control, which allows them to be moved a bit
-  if (effectiveHudCvarInt(&etj_snapHUDTrueness) &
+  if (etj_snapHUDTrueness.integer &
       static_cast<int32_t>(SnapTrueness::GROUND)) {
     if ((s.pml.groundTrace.surfaceFlags & SURF_SLICK) ||
         s.pm.ps->pm_flags & PMF_TIME_KNOCKBACK) {
@@ -234,8 +234,7 @@ void SnaphudData::walkMove() {
 void SnaphudData::airMove() {
   const float scale = PmoveUtilsV2::cmdScale(
       s.pm, s.pm.cmd,
-      effectiveHudCvarInt(&etj_snapHUDTrueness) &
-          static_cast<int32_t>(SnapTrueness::UPMOVE));
+      etj_snapHUDTrueness.integer & static_cast<int32_t>(SnapTrueness::UPMOVE));
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;

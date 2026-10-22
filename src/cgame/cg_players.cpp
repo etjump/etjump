@@ -145,6 +145,12 @@ void CG_NewClientInfo(int clientNum) {
   newInfo.selected = ci->selected;
   newInfo.totalWeapAcc = ci->totalWeapAcc;
 
+  // preserve spectator HUD sync cache/revision across clientinfo refreshes
+  newInfo.cgazHudValues = ci->cgazHudValues;
+  newInfo.snaphudHudValues = ci->snaphudHudValues;
+  newInfo.hasFullHudSync = ci->hasFullHudSync;
+  newInfo.hudSyncRevision = ci->hudSyncRevision;
+
   // isolate the player's name
   v = Info_ValueForKey(configstring, "n");
   Q_strncpyz(newInfo.name, v, sizeof(newInfo.name));

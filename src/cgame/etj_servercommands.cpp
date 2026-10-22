@@ -130,14 +130,16 @@ static void callvote(const Arguments &args) {
 }
 
 static void hudsync(const Arguments &args) {
-  if (args.size() < 4) {
+  if (args.size() < 5) {
     return;
   }
 
   const int targetClientNum = Q_atoi(args[0]);
   const bool fullUpdate = Q_atoi(args[1]) > 0;
+  const int32_t revision = Q_atoi(args[2]);
 
-  onSpectatorHudSyncCommand(targetClientNum, fullUpdate, args[2], args[3]);
+  onSpectatorHudSyncCommand(targetClientNum, fullUpdate, revision, args[3],
+                            args[4]);
 }
 
 void registerCommands() {

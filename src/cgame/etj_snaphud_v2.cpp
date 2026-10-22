@@ -36,17 +36,7 @@ namespace ETJump {
 SnaphudV2::SnaphudV2(const std::shared_ptr<SnaphudData> &snaphudData,
                      const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
     : snaphudData(snaphudData), cvarUpdate(cvarUpdate) {
-
-  cgame.utils.colorParser->parseColorString(etj_snapHUDColor1.string,
-                                            snaphud.colors[0]);
-  cgame.utils.colorParser->parseColorString(etj_snapHUDColor2.string,
-                                            snaphud.colors[1]);
-
-  cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor1.string,
-                                            snaphud.colors[2]);
-  cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor2.string,
-                                            snaphud.colors[3]);
-
+  updateColors();
   parseCropOffset(&etj_snapHUDCropOffsets);
   startListeners();
 }
@@ -60,21 +50,17 @@ SnaphudV2::~SnaphudV2() {
 }
 
 void SnaphudV2::startListeners() {
-  cvarUpdate->subscribe(&etj_snapHUDColor1, [this](const vmCvar_t *cvar) {
-    cgame.utils.colorParser->parseColorString(cvar->string, snaphud.colors[0]);
-  });
+  cvarUpdate->subscribe(&etj_snapHUDColor1,
+                        [this](const vmCvar_t *) { updateColors(); });
 
-  cvarUpdate->subscribe(&etj_snapHUDColor2, [this](const vmCvar_t *cvar) {
-    cgame.utils.colorParser->parseColorString(cvar->string, snaphud.colors[1]);
-  });
+  cvarUpdate->subscribe(&etj_snapHUDColor2,
+                        [this](const vmCvar_t *) { updateColors(); });
 
-  cvarUpdate->subscribe(&etj_snapHUDHLColor1, [this](const vmCvar_t *cvar) {
-    cgame.utils.colorParser->parseColorString(cvar->string, snaphud.colors[2]);
-  });
+  cvarUpdate->subscribe(&etj_snapHUDHLColor1,
+                        [this](const vmCvar_t *) { updateColors(); });
 
-  cvarUpdate->subscribe(&etj_snapHUDHLColor2, [this](const vmCvar_t *cvar) {
-    cgame.utils.colorParser->parseColorString(cvar->string, snaphud.colors[3]);
-  });
+  cvarUpdate->subscribe(&etj_snapHUDHLColor2,
+                        [this](const vmCvar_t *) { updateColors(); });
 
   cvarUpdate->subscribe(&etj_snapHUDCropOffsets, [this](const vmCvar_t *cvar) {
     parseCropOffset(cvar);
@@ -127,39 +113,35 @@ void SnaphudV2::parseCropOffset(const vmCvar_t *cvar) {
 void SnaphudV2::updateSnaphud(const SnaphudData::State &s) {
   snaphud.yaw = std::atan2(s.wishvel[1], s.wishvel[0]);
 
-  const float offsetY = effectiveHudCvarFloat(&etj_snapHUDOffsetY);
-  const float height = effectiveHudCvarFloat(&etj_snapHUDHeight);
-  const float fov = effectiveHudCvarFloat(&etj_snapHUDFov);
-
   snaphud.y = SCREEN_CENTER_Y +
-              std::clamp(offsetY, -SCREEN_CENTER_Y, SCREEN_CENTER_Y);
-  snaphud.h = std::clamp(height, 0.0f, static_cast<float>(SCREEN_HEIGHT));
+              std::clamp(settings.offsetY, -SCREEN_CENTER_Y, SCREEN_CENTER_Y);
+  snaphud.h =
+      std::clamp(settings.height, 0.0f, static_cast<float>(SCREEN_HEIGHT));
   snaphud.fov =
-      fov > 0 ? std::clamp(fov, SNAPHUD_MIN_FOV, SNAPHUD_MAX_FOV)
-              : cg.refdef.fov_x;
+      settings.fov > 0
+          ? std::clamp(settings.fov, SNAPHUD_MIN_FOV, SNAPHUD_MAX_FOV)
+          : cg.refdef.fov_x;
 
-  snaphud.style =
-      static_cast<SnaphudStyle>(effectiveHudCvarInt(&etj_drawSnapHUD));
+  snaphud.style = static_cast<SnaphudStyle>(settings.style);
 
   switch (snaphud.style) {
     case SnaphudStyle::EDGE:
       // FIXME: the unit of this cvar no longer really makes sense,
       // but by doing SHORT2RAD here, it behaves the same as with old hud
-      snaphud.edgeThickness = SHORT2RAD(
-          std::clamp(effectiveHudCvarInt(&etj_snapHUDEdgeThickness), 0, 128));
+      snaphud.edgeThickness = SHORT2RAD(std::clamp(settings.edgeThickness, 0, 128));
       break;
     case SnaphudStyle::BORDER:
       snaphud.borderOnly = true;
       snaphud.borderThickness =
-          std::clamp(effectiveHudCvarFloat(&etj_snapHUDBorderThickness), 0.1f,
-                     std::min(height * 2, 10.0f));
+          std::clamp(settings.borderThickness, 0.1f,
+                     std::min(settings.height * 2, 10.0f));
       break;
     default:
       snaphud.borderOnly = false;
       break;
   }
 
-  switch (static_cast<CropStyle>(effectiveHudCvarInt(&etj_snapHUDCrop))) {
+  switch (static_cast<CropStyle>(settings.cropStyle)) {
     default:
     case CropStyle::OFF:
       snaphud.minX = std::nullopt;
@@ -211,17 +193,51 @@ void SnaphudV2::buildSnapZones(const SnaphudData::State &s) {
   }
 }
 
+void SnaphudV2::updateColors() {
+  const auto snapHUDColor1 = effectiveHudCvarString(&etj_snapHUDColor1);
+  if (snaphudColorStrings[0] != snapHUDColor1) {
+    snaphudColorStrings[0] = snapHUDColor1;
+    cgame.utils.colorParser->parseColorString(snaphudColorStrings[0],
+                                              snaphud.colors[0]);
+  }
+
+  const auto snapHUDColor2 = effectiveHudCvarString(&etj_snapHUDColor2);
+  if (snaphudColorStrings[1] != snapHUDColor2) {
+    snaphudColorStrings[1] = snapHUDColor2;
+    cgame.utils.colorParser->parseColorString(snaphudColorStrings[1],
+                                              snaphud.colors[1]);
+  }
+
+  const auto snapHUDHLColor1 = effectiveHudCvarString(&etj_snapHUDHLColor1);
+  if (snaphudColorStrings[2] != snapHUDHLColor1) {
+    snaphudColorStrings[2] = snapHUDHLColor1;
+    cgame.utils.colorParser->parseColorString(snaphudColorStrings[2],
+                                              snaphud.colors[2]);
+  }
+
+  const auto snapHUDHLColor2 = effectiveHudCvarString(&etj_snapHUDHLColor2);
+  if (snaphudColorStrings[3] != snapHUDHLColor2) {
+    snaphudColorStrings[3] = snapHUDHLColor2;
+    cgame.utils.colorParser->parseColorString(snaphudColorStrings[3],
+                                              snaphud.colors[3]);
+  }
+}
+
+void SnaphudV2::refreshRenderSettings() {
+  settings.offsetY = effectiveHudCvarFloat(&etj_snapHUDOffsetY);
+  settings.height = effectiveHudCvarFloat(&etj_snapHUDHeight);
+  settings.fov = effectiveHudCvarFloat(&etj_snapHUDFov);
+  settings.style = effectiveHudCvarInt(&etj_drawSnapHUD);
+  settings.edgeThickness = effectiveHudCvarInt(&etj_snapHUDEdgeThickness);
+  settings.borderThickness = effectiveHudCvarFloat(&etj_snapHUDBorderThickness);
+  settings.cropStyle = effectiveHudCvarInt(&etj_snapHUDCrop);
+}
+
 bool SnaphudV2::beforeRender() {
   const SnaphudData::State &s = snaphudData->getState();
 
-  cgame.utils.colorParser->parseColorString(effectiveHudCvarString(&etj_snapHUDColor1),
-                                            snaphud.colors[0]);
-  cgame.utils.colorParser->parseColorString(effectiveHudCvarString(&etj_snapHUDColor2),
-                                            snaphud.colors[1]);
-  cgame.utils.colorParser->parseColorString(
-      effectiveHudCvarString(&etj_snapHUDHLColor1), snaphud.colors[2]);
-  cgame.utils.colorParser->parseColorString(
-      effectiveHudCvarString(&etj_snapHUDHLColor2), snaphud.colors[3]);
+  refreshRenderSettings();
+  updateColors();
   parseCropOffsetValue(effectiveHudCvarString(&etj_snapHUDCropOffsets));
 
   if (canSkipDraw(s)) {
@@ -239,14 +255,18 @@ bool SnaphudV2::beforeRender() {
 }
 
 void SnaphudV2::render() const {
+  const bool activeIsPrimary =
+      effectiveHudCvarInt(&etj_snapHUDActiveIsPrimary) != 0;
+  const bool highlightActive = effectiveHudCvarInt(&etj_snapHUDHLActive) != 0;
+
   for (const auto &zone : snaphud.zones) {
     int8_t colorIndex = zone.alt ? 1 : 0;
 
-    if (effectiveHudCvarInt(&etj_snapHUDActiveIsPrimary) && snaphud.isCurrentAlt) {
+    if (activeIsPrimary && snaphud.isCurrentAlt) {
       colorIndex ^= 1;
     }
 
-    if (effectiveHudCvarInt(&etj_snapHUDHLActive) && zone.active) {
+    if (highlightActive && zone.active) {
       colorIndex += 2;
     }
 
@@ -268,8 +288,36 @@ void SnaphudV2::render() const {
   }
 }
 
+std::array<std::string,
+           Constants::SpectatorHudSync::SnaphudCvarNames.size() + 1>
+SnaphudV2::getHudSyncValues() const {
+  const_cast<SnaphudV2 *>(this)->refreshRenderSettings();
+
+  std::array<std::string,
+             Constants::SpectatorHudSync::SnaphudCvarNames.size() + 1>
+      values{};
+
+  values[0] = std::to_string(settings.style);
+  values[1] = std::to_string(settings.offsetY);
+  values[2] = std::to_string(settings.height);
+  values[3] = etj_snapHUDColor1.string;
+  values[4] = etj_snapHUDColor2.string;
+  values[5] = etj_snapHUDHLColor1.string;
+  values[6] = etj_snapHUDHLColor2.string;
+  values[7] = std::to_string(settings.fov);
+  values[8] = std::to_string(etj_snapHUDHLActive.integer);
+  values[9] = std::to_string(etj_snapHUDTrueness.integer);
+  values[10] = std::to_string(settings.edgeThickness);
+  values[11] = std::to_string(settings.borderThickness);
+  values[12] = std::to_string(etj_snapHUDActiveIsPrimary.integer);
+  values[13] = std::to_string(settings.cropStyle);
+  values[14] = etj_snapHUDCropOffsets.string;
+
+  return values;
+}
+
 bool SnaphudV2::canSkipDraw(const SnaphudData::State &s) const {
-  if (!effectiveHudCvarInt(&etj_drawSnapHUD)) {
+  if (!settings.style) {
     return true;
   }
 
