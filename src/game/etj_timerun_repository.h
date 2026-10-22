@@ -60,10 +60,11 @@ public:
   std::map<std::string, std::vector<int32_t>>
   getPlayerBestSegments(int32_t seasonId, const std::string &map,
                         int userId) const;
-  void insertRecord(const Timerun::Record &record);
-  void updateRecord(const Timerun::Record &record);
-  std::vector<Timerun::BestSegmentUpdate>
-  updateBestSegments(const Timerun::Record &record);
+  // writes every season copy of a completion (record + history + best
+  // segments) in a single transaction, returning the segment improvements
+  // grouped by season
+  std::map<int32_t, std::vector<Timerun::BestSegmentUpdate>>
+  recordCompletion(const std::vector<Timerun::RecordCompletion> &completions);
   std::optional<Timerun::Record>
   getTopRecord(int seasonId, const std::string &map, const std::string &run);
   std::vector<Timerun::Record> getTopRecords(const std::vector<int> &seasonIds,

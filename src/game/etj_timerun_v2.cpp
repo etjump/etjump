@@ -3711,8 +3711,7 @@ void TimerunV2::checkRecord(Player *player) {
 
         std::map<int, Timerun::Record> playerNewTopRecordForSeason{};
         std::map<int, bool> isNewRecordForSeason{};
-        std::map<int32_t, std::vector<Timerun::BestSegmentUpdate>>
-            bestSegmentUpdates;
+        std::vector<Timerun::RecordCompletion> completions;
 
         // go through active seasons and check if we beat any of the old
         // records if we did, we store the record in
@@ -3747,24 +3746,16 @@ void TimerunV2::checkRecord(Player *player) {
           isNewRecordForSeason[seasonId] = isNewRecord;
 
           if (isNewRecord) {
-            if (insert) {
-              _repository->insertRecord(record);
-            } else {
-              _repository->updateRecord(record);
-            }
+            playerNewTopRecordForSeason[seasonId] = record;
           }
 
-          // every completion feeds the best segments, new record or not
-          auto updates = _repository->updateBestSegments(record);
-
-          if (!updates.empty()) {
-            bestSegmentUpdates[seasonId] = std::move(updates);
-          }
-
-          if (isNewRecord) {
-            playerNewTopRecordForSeason[seasonId] = std::move(record);
-          }
+          completions.emplace_back(Timerun::RecordCompletion{
+              std::move(record), isNewRecord, insert});
         }
+
+        // record, history and segment writes for every season copy of this
+        // completion are one transaction
+        auto bestSegmentUpdates = _repository->recordCompletion(completions);
 
         auto result = std::make_unique<CheckRecordResult>();
         result->clientNum = clientNum;
