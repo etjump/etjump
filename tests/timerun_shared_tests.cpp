@@ -225,3 +225,72 @@ TEST_F(TimerunSharedTests, Completion_ShouldDeserialize) {
   ASSERT_EQ(interrupt.value().previousRecordTime.value(), 3);
   ASSERT_EQ(interrupt.value().runName, "run");
 }
+
+TEST_F(TimerunSharedTests, ComputeSegmentTimes_NoCheckpointsYieldsNothing) {
+  EXPECT_TRUE(TimerunSegments::computeSegmentTimes({}, 5000).empty());
+}
+
+TEST_F(TimerunSharedTests, ComputeSegmentTimes_IncludesFinishSegment) {
+  const auto segments =
+      TimerunSegments::computeSegmentTimes({100, 250, 400}, 600);
+
+  EXPECT_EQ(segments, (std::vector<int32_t>{100, 150, 150, 200}));
+}
+
+TEST_F(TimerunSharedTests, ComputeSegmentTimes_FinishAtLastCheckpoint) {
+  const auto segments = TimerunSegments::computeSegmentTimes({100, 200}, 200);
+
+  EXPECT_EQ(segments, (std::vector<int32_t>{100, 100}));
+}
+
+TEST_F(TimerunSharedTests, ComputeSegmentTimes_StopsAtUnsetCheckpoint) {
+  const auto segments = TimerunSegments::computeSegmentTimes(
+      {100, TIMERUN_CHECKPOINT_NOT_SET, 300}, 400);
+
+  EXPECT_EQ(segments, (std::vector<int32_t>{100, 300}));
+}
+
+TEST_F(TimerunSharedTests, ComputeSegmentTimes_StopsAtNonIncreasingCheckpoint) {
+  const auto segments =
+      TimerunSegments::computeSegmentTimes({100, 100, 300}, 400);
+
+  EXPECT_EQ(segments, (std::vector<int32_t>{100, 300}));
+}
+
+TEST_F(TimerunSharedTests, BestSegmentBeaten_TiesAreNotGold) {
+  const std::map<std::string, std::vector<int32_t>> personal{
+      {"run", {100, 200}}};
+  const std::map<std::string, std::vector<int32_t>> global{{"run", {90, 210}}};
+
+  EXPECT_EQ(TimerunSegments::bestSegmentBeaten(personal, global, "run", 0, 100),
+            (std::pair<bool, bool>{false, false}));
+  EXPECT_EQ(TimerunSegments::bestSegmentBeaten(personal, global, "run", 0, 90),
+            (std::pair<bool, bool>{true, false}));
+}
+
+TEST_F(TimerunSharedTests, BestSegmentBeaten_SlowerThanBestIsNotGold) {
+  const std::map<std::string, std::vector<int32_t>> personal{
+      {"run", {100, 200}}};
+  const std::map<std::string, std::vector<int32_t>> global{{"run", {90, 210}}};
+
+  EXPECT_EQ(TimerunSegments::bestSegmentBeaten(personal, global, "run", 0, 101),
+            (std::pair<bool, bool>{false, false}));
+  EXPECT_EQ(TimerunSegments::bestSegmentBeaten(personal, global, "run", 1, 211),
+            (std::pair<bool, bool>{false, false}));
+}
+
+TEST_F(TimerunSharedTests, BestSegmentBeaten_MissingValuesAreNotGold) {
+  const std::map<std::string, std::vector<int32_t>> personal{{"run", {100}}};
+  const std::map<std::string, std::vector<int32_t>> global{};
+
+  // zero duration never counts
+  EXPECT_EQ(TimerunSegments::bestSegmentBeaten(personal, global, "run", 0, 0),
+            (std::pair<bool, bool>{false, false}));
+  // segment out of range for the personal cache, absent from the global cache
+  EXPECT_EQ(TimerunSegments::bestSegmentBeaten(personal, global, "run", 1, 50),
+            (std::pair<bool, bool>{false, false}));
+  // unknown run
+  EXPECT_EQ(
+      TimerunSegments::bestSegmentBeaten(personal, global, "other", 0, 50),
+      (std::pair<bool, bool>{false, false}));
+}
