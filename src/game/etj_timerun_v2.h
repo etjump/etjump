@@ -125,6 +125,9 @@ public:
   void removeRecord(const Timerun::RemoveRecordParams &params);
   void listRemovedRecords(const Timerun::ListRemovedRecordsParams &params);
   void restoreRecord(const Timerun::RestoreRecordParams &params);
+  void removeSegment(const Timerun::RemoveSegmentParams &params);
+  void listRemovedSegments(const Timerun::ListRemovedSegmentsParams &params);
+  void restoreSegment(const Timerun::RestoreSegmentParams &params);
 
   [[nodiscard]] int32_t getRunStartTime(int32_t clientNum) const;
 
@@ -141,6 +144,20 @@ public:
 
   static std::string buildRestoreRecordConflictMessage(
       const std::vector<Timerun::RestoreConflict> &conflicts,
+      const std::map<int32_t, std::string> &seasonNames);
+
+  static std::string buildRestoreSegmentSummary(
+      const std::vector<Timerun::RemovedSegment> &restored,
+      const std::vector<Timerun::BestSegmentDetails> &swapped,
+      const std::vector<Timerun::RemovedSegment> &skipped,
+      const std::map<int32_t, std::string> &seasonNames);
+
+  static std::string buildRestoreSegmentConflictMessage(
+      const std::vector<Timerun::RestoreSegmentConflict> &conflicts,
+      const std::map<int32_t, std::string> &seasonNames);
+
+  static std::string buildRemovedSegmentSummary(
+      const std::vector<Timerun::RemovedSegment> &removed,
       const std::map<int32_t, std::string> &seasonNames);
 
   static void removeDisallowedWeapons(gentity_t *ent);
