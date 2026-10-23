@@ -822,7 +822,7 @@ std::vector<Timerun::HistoricalRecord> TimerunRepository::getHistoricalRecords(
       map=? collate nocase and
       %s and
       user_id=?
-    order by season_id, map, run, time asc, record_date asc, id asc;
+    order by season_id, map, run, record_date desc, id desc;
   )",
                           seasonPlaceholders, runPlaceholder);
 
