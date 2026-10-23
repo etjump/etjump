@@ -35,13 +35,34 @@ TimerunSegments::computeSegmentTimes(const std::vector<int32_t> &checkpoints,
   std::vector<int32_t> segments;
   int32_t previous = 0;
 
-  for (const int32_t checkpoint : checkpoints) {
-    if (checkpoint == TIMERUN_CHECKPOINT_NOT_SET || checkpoint <= previous) {
+  for (size_t i = 0; i < checkpoints.size(); ++i) {
+    const int32_t checkpoint = checkpoints[i];
+
+    // writers only ever store checkpoints densely, with unset entries at the
+    // end, so a gap can only come from a corrupt or hand-edited row. Not
+    // reachable through the game; kept as defense-in-depth, because the
+    // positions after a gap cannot be trusted, so the prefix is kept and the
+    // tail dropped rather than recording a segment under the wrong number
+    if (checkpoint == TIMERUN_CHECKPOINT_NOT_SET) {
+      if (std::any_of((checkpoints.cbegin() + static_cast<int32_t>(i) + 1),
+                      checkpoints.cend(), [](const auto cp) {
+                        return cp != TIMERUN_CHECKPOINT_NOT_SET;
+                      })) {
+        return segments;
+      }
+
       break;
     }
 
-    segments.push_back(checkpoint - previous);
-    previous = checkpoint;
+    // a checkpoint hit on the same command time as the previous one is a
+    // zero-length leg. Keep its slot, so the following segments keep their
+    // numbers, but leave it as 0, which no writer records as a best
+    const int32_t duration = checkpoint - previous;
+    segments.push_back(duration > 0 ? duration : 0);
+
+    if (duration > 0) {
+      previous = checkpoint;
+    }
   }
 
   // the finish closes the run, but only for a run that has checkpoints:

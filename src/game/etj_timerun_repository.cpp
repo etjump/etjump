@@ -492,6 +492,12 @@ TimerunRepository::applyBestSegments(const Timerun::Record &record,
     // the last segment
     const auto segment = static_cast<int32_t>(i) + 1;
 
+    // a leg that could not be measured is a placeholder for its segment
+    // number, and has no meaningful best
+    if (segments[i] <= 0) {
+      continue;
+    }
+
     if (excludedSegments.count(segment) > 0) {
       continue;
     }
@@ -2972,6 +2978,11 @@ void TimerunRepository::seedBestSegments() {
           // 1-based: segment i is the leg ending at checkpoint i, and the
           // finish is the last segment
           const auto segment = static_cast<int32_t>(i) + 1;
+
+          // a leg that could not be measured has no meaningful best
+          if (segments[i] <= 0) {
+            continue;
+          }
 
           // a split removed standalone never contributes, whatever the run
           // that set it

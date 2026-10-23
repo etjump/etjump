@@ -36,7 +36,12 @@ namespace ETJump::TimerunSegments {
 // Segment durations for a completed run: segment i is the time from the
 // previous checkpoint (the run start, for the first) to checkpoint i, and the
 // final segment runs from the last checkpoint to the finish. A run with no
-// usable checkpoint data yields no segments.
+// usable checkpoint data yields no segments. A leg that could not be measured,
+// such as checkpoints hit on the same command time, is returned as 0 to keep
+// the numbering of the segments that follow it, and must not be recorded as a
+// best. A gap in the checkpoint data is truncated without the finish segment;
+// that only guards against corrupt or hand-edited rows, as the writers always
+// store checkpoints densely.
 std::vector<int32_t>
 computeSegmentTimes(const std::vector<int32_t> &checkpoints,
                     int32_t completionTime);
