@@ -3627,6 +3627,10 @@ public:
   int clientNum;
   // id of the most relevant (most recently started) active season
   int32_t mostRelevantSeasonId{};
+  // Active seasons when the completion was processed. Stored on the worker
+  // thread and passed along with the result object, since '_activeSeasons'
+  // may be mutated by a worker thread while the callback is being executed.
+  std::vector<Timerun::Season> activeSeasons;
   // Most relevant season record
   std::map<int, bool> isTopRecordPerSeason;
   std::map<int, NewRecord> newOwnRecordsPerSeason;
@@ -3813,6 +3817,7 @@ void TimerunV2::checkRecord(Player *player) {
         }
 
         result->mostRelevantSeasonId = mostRelevantSeason->id;
+        result->activeSeasons = _activeSeasons;
 
         return result;
       },
@@ -4001,7 +4006,7 @@ void TimerunV2::checkRecord(Player *player) {
         // The updates are keyed by active season, so walk the seasons for the
         // names and pull each one's updates; a season with nothing improved is
         // simply skipped.
-        for (const auto &activeSeason : _activeSeasons) {
+        for (const auto &activeSeason : checkRecordResult->activeSeasons) {
           const auto seasonUpdatesIt =
               checkRecordResult->bestSegmentUpdates.find(activeSeason.id);
 
