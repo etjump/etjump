@@ -243,18 +243,63 @@ TEST_F(TimerunSharedTests, ComputeSegmentTimes_FinishAtLastCheckpoint) {
   EXPECT_EQ(segments, (std::vector<int32_t>{100, 100}));
 }
 
-TEST_F(TimerunSharedTests, ComputeSegmentTimes_StopsAtUnsetCheckpoint) {
+TEST_F(TimerunSharedTests, ComputeSegmentTimes_CheckpointGapDropsTail) {
   const auto segments = TimerunSegments::computeSegmentTimes(
       {100, TIMERUN_CHECKPOINT_NOT_SET, 300}, 400);
 
-  EXPECT_EQ(segments, (std::vector<int32_t>{100, 300}));
+  // malformed input that the writers cannot produce: the positions after the
+  // gap cannot be trusted, so no finish is appended
+  EXPECT_EQ(segments, (std::vector<int32_t>{100}));
 }
 
-TEST_F(TimerunSharedTests, ComputeSegmentTimes_StopsAtNonIncreasingCheckpoint) {
+TEST_F(TimerunSharedTests,
+       ComputeSegmentTimes_TrailingUnsetStillAppendsFinish) {
+  const auto segments = TimerunSegments::computeSegmentTimes(
+      {100, TIMERUN_CHECKPOINT_NOT_SET, TIMERUN_CHECKPOINT_NOT_SET}, 250);
+
+  // this is the normal shape of a run with fewer than the maximum checkpoints
+  EXPECT_EQ(segments, (std::vector<int32_t>{100, 150}));
+}
+
+TEST_F(TimerunSharedTests,
+       ComputeSegmentTimes_TrailingUnsetAfterGapStillAppendsFinish) {
+  const auto segments = TimerunSegments::computeSegmentTimes(
+      {100, 200, TIMERUN_CHECKPOINT_NOT_SET, TIMERUN_CHECKPOINT_NOT_SET}, 400);
+
+  // with two checkpoints before the gap, the gap scan must start after the
+  // gap itself - scanning from the front finds an earlier checkpoint and
+  // drops the finish segment for every run with 2-15 checkpoints
+  EXPECT_EQ(segments, (std::vector<int32_t>{100, 100, 200}));
+}
+
+TEST_F(TimerunSharedTests,
+       ComputeSegmentTimes_GapAfterTwoCheckpointsDropsTail) {
+  const auto segments = TimerunSegments::computeSegmentTimes(
+      {100, 200, TIMERUN_CHECKPOINT_NOT_SET, 400}, 500);
+
+  // a set value after the gap means the tail cannot be trusted, so the
+  // prefix is kept and no finish is appended
+  EXPECT_EQ(segments, (std::vector<int32_t>{100, 100}));
+}
+
+TEST_F(TimerunSharedTests,
+       ComputeSegmentTimes_ZeroLengthCheckpointKeepsNumbering) {
   const auto segments =
       TimerunSegments::computeSegmentTimes({100, 100, 300}, 400);
 
-  EXPECT_EQ(segments, (std::vector<int32_t>{100, 300}));
+  // the second checkpoint was hit on the same command time as the first, so
+  // its leg is unmeasurable - it stays as a 0 placeholder so the following
+  // segments keep their numbers
+  EXPECT_EQ(segments, (std::vector<int32_t>{100, 0, 200, 100}));
+}
+
+TEST_F(TimerunSharedTests, ComputeSegmentTimes_CheckpointsOnSameTick) {
+  // a run where checkpoints 1 and 2 triggered simultaneously, then 3, then the
+  // finish - the merged tail must not be attributed to segment 2
+  const auto segments =
+      TimerunSegments::computeSegmentTimes({1280, 1280, 2888}, 4064);
+
+  EXPECT_EQ(segments, (std::vector<int32_t>{1280, 0, 1608, 1176}));
 }
 
 TEST_F(TimerunSharedTests, BestSegmentBeaten_TiesAreNotGold) {
