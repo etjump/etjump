@@ -1568,13 +1568,12 @@ TimerunRepository::removeRecord(const Timerun::RemoveRecordParams &params,
   // specific record, as identified by the record date. If season is explicitly
   // targeted, we only remove the record from that season.
   const bool cascade = params.season.empty();
-  using Timerun::DEFAULT_SEASON_ID;
 
   // resolve the targeted season name -> id
   int32_t targetSeasonId = 0;
 
   if (cascade) {
-    targetSeasonId = DEFAULT_SEASON_ID;
+    targetSeasonId = Timerun::DEFAULT_SEASON_ID;
   } else {
     targetSeasonId = resolveSeasonForRemoval(params.season, "remove-record");
   }
@@ -2157,9 +2156,7 @@ TimerunRepository::removeSegment(const Timerun::RemoveSegmentParams &params,
   const std::string resolvedRun =
       resolveSegmentRunName(resolvedMap, params.run, "remove-segment");
 
-  using Timerun::DEFAULT_SEASON_ID;
-
-  int32_t targetSeasonId = DEFAULT_SEASON_ID;
+  int32_t targetSeasonId = Timerun::DEFAULT_SEASON_ID;
 
   if (!params.season.empty()) {
     targetSeasonId = resolveSeasonForRemoval(params.season, "remove-segment");
@@ -2451,9 +2448,7 @@ TimerunRepository::restoreSegment(const Timerun::RestoreSegmentParams &params,
   // only a default-season copy cascades to every season holding the same
   // split value (same source run date); targeting a specific season restores
   // only that season's copy
-  using Timerun::DEFAULT_SEASON_ID;
-
-  if (base.seasonId == DEFAULT_SEASON_ID) {
+  if (base.seasonId == Timerun::DEFAULT_SEASON_ID) {
     auto binder = _database->sql << R"(
       select
         id, season_id, map, run, user_id, segment, time, record_date,

@@ -299,7 +299,7 @@ void TimerunV2::clientConnect(int clientNum, int userId) {
         auto runs = _repository->getRecordsForPlayer(_activeSeasonsIds,
                                                      _currentMap, userId);
         auto playerBestSegments = _repository->getPlayerBestSegments(
-            defaultSeasonId, _currentMap, userId);
+            Timerun::DEFAULT_SEASON_ID, _currentMap, userId);
 
         return std::make_unique<ClientConnectResult>(
             std::move(runs), std::move(playerBestSegments));
@@ -345,7 +345,8 @@ void TimerunV2::loadBestSegments() {
         ensureInitialized();
 
         return std::make_unique<BestSegmentsResult>(
-            _repository->getBestSegments(defaultSeasonId, _currentMap));
+            _repository->getBestSegments(Timerun::DEFAULT_SEASON_ID,
+                                         _currentMap));
       },
       [this](std::unique_ptr<SynchronizationContext::ResultBase> result) {
         const auto *const r = dynamic_cast<BestSegmentsResult *>(result.get());
@@ -367,13 +368,14 @@ TimerunV2::readSegmentCaches(const std::string &map, int32_t userId) const {
   Timerun::SegmentCacheSnapshot snapshot;
 
   // the global cache is always for the map we're currently on
-  snapshot.global = _repository->getBestSegments(defaultSeasonId, _currentMap);
+  snapshot.global =
+      _repository->getBestSegments(Timerun::DEFAULT_SEASON_ID, _currentMap);
 
   // the player cache only covers the current map, so there's nothing to
   // re-read when the mutation happened elsewhere
   if (StringUtils::iEqual(map, _currentMap)) {
-    snapshot.player = _repository->getPlayerBestSegments(defaultSeasonId,
-                                                         _currentMap, userId);
+    snapshot.player = _repository->getPlayerBestSegments(
+        Timerun::DEFAULT_SEASON_ID, _currentMap, userId);
     snapshot.hasPlayer = true;
   }
 
@@ -656,7 +658,7 @@ void TimerunV2::connectNotify(int clientNum) {
     auto player = _players[idx].get();
     if (player && player->activeRunName.length() > 0) {
       auto previousRecord =
-          player->getRecord(defaultSeasonId, player->activeRunName);
+          player->getRecord(Timerun::DEFAULT_SEASON_ID, player->activeRunName);
 
       int fastestCompletionTime = -1;
       if (previousRecord) {
@@ -785,7 +787,7 @@ void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
           auto seasonIt = seasonIdToName.find(skvp.first);
           const Timerun::Season *season = &seasonIt->second;
 
-          if (seasonIt->first == defaultSeasonId) {
+          if (seasonIt->first == Timerun::DEFAULT_SEASON_ID) {
             message += StringUtils::format("^2Overall records for map ^7%s\n",
                                            result->records[0].map);
           } else {
@@ -1145,7 +1147,7 @@ void TimerunV2::printRankings(const Timerun::PrintRankingsParams &params) {
           }
 
         } else {
-          if (_rankingsPerSeason.count(defaultSeasonId) == 0) {
+          if (_rankingsPerSeason.count(Timerun::DEFAULT_SEASON_ID) == 0) {
             message += "No overall records\n";
           } else {
             // clang-format off
@@ -1155,7 +1157,7 @@ void TimerunV2::printRankings(const Timerun::PrintRankingsParams &params) {
                 "^g=============================================================\n";
             // clang-format on
             message += this->getRankingsStringFor(
-                &_rankingsPerSeason[defaultSeasonId], params);
+                &_rankingsPerSeason[Timerun::DEFAULT_SEASON_ID], params);
           }
         }
 
@@ -1282,7 +1284,7 @@ void TimerunV2::printBestSegments(const Timerun::BestSegmentsParams &params) {
 
             currentSeason = seg.seasonId;
 
-            if (currentSeason == defaultSeasonId) {
+            if (currentSeason == Timerun::DEFAULT_SEASON_ID) {
               msg += StringUtils::format(
                   "^2Overall best segments for map ^7%s\n", map);
             } else {
@@ -1458,7 +1460,7 @@ void TimerunV2::printBestSegmentHistory(
             const std::string &seasonName =
                 getSeasonName(seasonNames, entry.seasonId);
 
-            if (currentSeason == defaultSeasonId) {
+            if (currentSeason == Timerun::DEFAULT_SEASON_ID) {
               msg += StringUtils::format(
                   "^2Overall best segment history for map ^7%s\n", map);
             } else {
@@ -1526,7 +1528,7 @@ void TimerunV2::printSeasons(int clientNum) {
           for (const auto &s : _activeSeasons) {
             // default season is always active and cannot be deleted,
             // don't bother listing it
-            if (s.id == defaultSeasonId) {
+            if (s.id == Timerun::DEFAULT_SEASON_ID) {
               continue;
             }
 
@@ -1735,7 +1737,7 @@ void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
           const Timerun::Season season = seasonIt->second;
           std::string s = "\n";
 
-          if (data.seasonID == defaultSeasonId) {
+          if (data.seasonID == Timerun::DEFAULT_SEASON_ID) {
             s += StringUtils::format("^2Checkpoint times for map ^7%s\n",
                                      data.map);
           } else {
@@ -1889,7 +1891,7 @@ void TimerunV2::compareCheckpoints(
           const Timerun::Season season = seasonIt->second;
           std::string s = "\n";
 
-          if (base.seasonID == defaultSeasonId) {
+          if (base.seasonID == Timerun::DEFAULT_SEASON_ID) {
             s += StringUtils::format("^2Comparing checkpoints for map ^7%s\n",
                                      base.map);
           } else {
@@ -2240,7 +2242,7 @@ void TimerunV2::recordHistory(const Timerun::RecordHistoryParams &params) {
 
           const auto &map = season.runs.front().map;
 
-          if (season.seasonId == defaultSeasonId) {
+          if (season.seasonId == Timerun::DEFAULT_SEASON_ID) {
             msg += StringUtils::format(
                 "^2Overall record history for map ^7%s\n", map);
           } else {
@@ -3548,7 +3550,7 @@ TimerunV2::getSeasonName(const std::map<int32_t, std::string> &seasonNames,
 
 void TimerunV2::startNotify(Player *player) const {
   auto previousRecord =
-      player->getRecord(defaultSeasonId, player->activeRunName);
+      player->getRecord(Timerun::DEFAULT_SEASON_ID, player->activeRunName);
 
   int fastestCompletionTime = -1;
   if (previousRecord) {
@@ -3772,7 +3774,7 @@ void TimerunV2::checkRecord(Player *player) {
             auto topTime = topRecordIt->second.time;
 
             // store the old record
-            if (seasonId == defaultSeasonId) {
+            if (seasonId == Timerun::DEFAULT_SEASON_ID) {
               result->previousOverallRecord = topRecordIt->second;
             } else {
               result->previousSeasonalRecord = topRecordIt->second;
@@ -3793,7 +3795,7 @@ void TimerunV2::checkRecord(Player *player) {
         }
 
         auto playerPreviousOverallRecordIt =
-            playerTopRecordForSeason.find(defaultSeasonId);
+            playerTopRecordForSeason.find(Timerun::DEFAULT_SEASON_ID);
 
         // store our own previous overall record
         if (playerPreviousOverallRecordIt != end(playerTopRecordForSeason)) {
@@ -3834,9 +3836,11 @@ void TimerunV2::checkRecord(Player *player) {
                 : 0;
 
         // Overall record
-        if (checkRecordResult->isTopRecordPerSeason[defaultSeasonId]) {
+        if (checkRecordResult
+                ->isTopRecordPerSeason[Timerun::DEFAULT_SEASON_ID]) {
           const auto record =
-              checkRecordResult->newOwnRecordsPerSeason[defaultSeasonId];
+              checkRecordResult
+                  ->newOwnRecordsPerSeason[Timerun::DEFAULT_SEASON_ID];
 
           previousTopRecordTime =
               checkRecordResult->previousOverallRecord.has_value()
@@ -3906,7 +3910,7 @@ void TimerunV2::checkRecord(Player *player) {
         // By default, print the other seasons to console
         for (const auto &record : checkRecordResult->newOwnRecordsPerSeason) {
           const auto seasonId = record.first;
-          if (seasonId == defaultSeasonId ||
+          if (seasonId == Timerun::DEFAULT_SEASON_ID ||
               seasonId == checkRecordResult->mostRelevantSeasonId) {
             continue;
           }
@@ -3947,8 +3951,8 @@ void TimerunV2::checkRecord(Player *player) {
         // Patch the in-memory best segments with whatever this completion
         // improved. Only the default season feeds the caches, since that is
         // what the server command sends.
-        const auto updatesIt =
-            checkRecordResult->bestSegmentUpdates.find(defaultSeasonId);
+        const auto updatesIt = checkRecordResult->bestSegmentUpdates.find(
+            Timerun::DEFAULT_SEASON_ID);
 
         if (updatesIt != checkRecordResult->bestSegmentUpdates.end()) {
           auto &globalSegments = bestSegments[activeRunName];
@@ -4005,7 +4009,8 @@ void TimerunV2::checkRecord(Player *player) {
             continue;
           }
 
-          const bool isDefaultSeason = activeSeason.id == defaultSeasonId;
+          const bool isDefaultSeason =
+              activeSeason.id == Timerun::DEFAULT_SEASON_ID;
 
           std::vector<int32_t> globalSegments;
           std::vector<int32_t> personalSegments;
