@@ -39,8 +39,6 @@ class TimerunRepository;
 
 class TimerunV2 {
 public:
-  static constexpr int defaultSeasonId = Timerun::DEFAULT_SEASON_ID;
-
   TimerunV2(std::string currentMap,
             std::unique_ptr<TimerunRepository> repository,
             std::unique_ptr<Log> logger,
