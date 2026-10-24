@@ -522,6 +522,7 @@ vmCvar_t etj_checkpointsSize;
 vmCvar_t etj_checkpointsShadow;
 vmCvar_t etj_checkpointsStyle;
 vmCvar_t etj_checkpointsCount;
+vmCvar_t etj_checkpointsShowGold;
 
 vmCvar_t etj_checkpointsPopup;
 vmCvar_t etj_checkpointsPopupX;
@@ -1171,6 +1172,7 @@ cvarTable_t cvarTable[] = {
     {&etj_checkpointsShadow, "etj_checkpointsShadow", "1", CVAR_ARCHIVE},
     {&etj_checkpointsStyle, "etj_checkpointsStyle", "0", CVAR_ARCHIVE},
     {&etj_checkpointsCount, "etj_checkpointsCount", "3", CVAR_ARCHIVE},
+    {&etj_checkpointsShowGold, "etj_checkpointsShowGold", "1", CVAR_ARCHIVE},
 
     {&etj_checkpointsPopup, "etj_checkpointsPopup", "1", CVAR_ARCHIVE},
     {&etj_checkpointsPopupX, "etj_checkpointsPopupX", "320", CVAR_ARCHIVE},

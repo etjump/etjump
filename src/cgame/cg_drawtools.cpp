@@ -34,7 +34,8 @@ void ETJump_EnableWidthScale(bool enable) {
   }
 }
 
-void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step) {
+void ETJump_LerpColors(const vec4_t *from, const vec4_t *to, vec4_t *color,
+                       float step) {
   for (auto i = 0; i < 4; i++) {
     (*color)[i] = (*to)[i] * step + (*from)[i] * (1.f - step);
   }

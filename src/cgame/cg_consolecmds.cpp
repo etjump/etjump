@@ -1574,6 +1574,11 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("remove-record");
   trap_AddCommand("list-removed-records");
   trap_AddCommand("restore-record");
+  trap_AddCommand("remove-segment");
+  trap_AddCommand("list-removed-segments");
+  trap_AddCommand("restore-segment");
+  trap_AddCommand("best-segments");
+  trap_AddCommand("best-segments-history");
 
   trap_AddCommand("setoffset"); // autocompletion
   trap_AddCommand("interruptRun");

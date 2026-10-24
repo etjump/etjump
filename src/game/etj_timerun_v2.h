@@ -39,20 +39,21 @@ class TimerunRepository;
 
 class TimerunV2 {
 public:
-  static constexpr int defaultSeasonId = 1;
-
   TimerunV2(std::string currentMap,
             std::unique_ptr<TimerunRepository> repository,
             std::unique_ptr<Log> logger,
             std::unique_ptr<SynchronizationContext> synchronizationContext);
 
   struct Player {
-    Player(int clientNum, int userId, const std::vector<Timerun::Record> &runs)
-        : clientNum(clientNum), userId(userId), records(runs) {}
+    Player(int clientNum, int userId, const std::vector<Timerun::Record> &runs,
+           const std::map<std::string, std::vector<int32_t>> &bestSegments)
+        : clientNum(clientNum), userId(userId), records(runs),
+          bestSegments(bestSegments) {}
 
     int clientNum;
     int userId;
     std::vector<Timerun::Record> records;
+    std::map<std::string, std::vector<int32_t>> bestSegments;
     bool running{};
     std::string name;
     std::optional<int> startTime;
@@ -62,6 +63,10 @@ public:
     int nextCheckpointIdx{};
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointTimes{};
     std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
+    // whether each of checkpointTimes' segments was gold when it was hit, kept
+    // so a mid-run resync can be handed the run's verdicts so far
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> bestPersonalSegments{};
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS> bestGlobalSegments{};
     // /loadcheckpoints stores checkpoints here
     std::map<std::string, std::array<int, MAX_TIMERUN_CHECKPOINTS>>
         overriddenCheckpoints;
@@ -113,9 +118,14 @@ public:
   void compareCheckpoints(const Timerun::CompareCheckpointsParams &params);
   void recordDetails(const Timerun::RecordDetailsParams &params);
   void recordHistory(const Timerun::RecordHistoryParams &params);
+  void printBestSegments(const Timerun::BestSegmentsParams &params);
+  void printBestSegmentHistory(const Timerun::BestSegmentHistoryParams &params);
   void removeRecord(const Timerun::RemoveRecordParams &params);
   void listRemovedRecords(const Timerun::ListRemovedRecordsParams &params);
   void restoreRecord(const Timerun::RestoreRecordParams &params);
+  void removeSegment(const Timerun::RemoveSegmentParams &params);
+  void listRemovedSegments(const Timerun::ListRemovedSegmentsParams &params);
+  void restoreSegment(const Timerun::RestoreSegmentParams &params);
 
   [[nodiscard]] int32_t getRunStartTime(int32_t clientNum) const;
 
@@ -134,6 +144,20 @@ public:
       const std::vector<Timerun::RestoreConflict> &conflicts,
       const std::map<int32_t, std::string> &seasonNames);
 
+  static std::string buildRestoreSegmentSummary(
+      const std::vector<Timerun::RemovedSegment> &restored,
+      const std::vector<Timerun::BestSegmentDetails> &swapped,
+      const std::vector<Timerun::RemovedSegment> &skipped,
+      const std::map<int32_t, std::string> &seasonNames);
+
+  static std::string buildRestoreSegmentConflictMessage(
+      const std::vector<Timerun::RestoreSegmentConflict> &conflicts,
+      const std::map<int32_t, std::string> &seasonNames);
+
+  static std::string buildRemovedSegmentSummary(
+      const std::vector<Timerun::RemovedSegment> &removed,
+      const std::map<int32_t, std::string> &seasonNames);
+
   static void removeDisallowedWeapons(gentity_t *ent);
   static void removePlayerProjectiles(gentity_t *ent);
 
@@ -145,6 +169,12 @@ private:
   void startNotify(Player *player) const;
   static bool isDebugging(int clientNum);
   void checkRecord(Player *player);
+  void loadBestSegments();
+  Timerun::SegmentCacheSnapshot readSegmentCaches(const std::string &map,
+                                                  int32_t userId) const;
+  int32_t applySegmentCaches(const Timerun::SegmentCacheSnapshot &snapshot,
+                             int32_t userId);
+  Player *findPlayerByUserId(int32_t userId);
   void ensureInitialized() const;
 
   /*
@@ -188,5 +218,6 @@ private:
   std::vector<Timerun::Season> _upcomingSeasons;
 
   std::map<int, std::vector<Ranking>> _rankingsPerSeason;
+  std::map<std::string, std::vector<int32_t>> bestSegments;
 };
 } // namespace ETJump

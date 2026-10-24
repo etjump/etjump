@@ -260,6 +260,7 @@ void TimerunV2::initialize() {
   _sc->startWorkerThreads(1);
 
   if (initialized) {
+    loadBestSegments();
     computeRanks();
   }
 }
@@ -282,10 +283,12 @@ void TimerunV2::ensureInitialized() const {
 
 class ClientConnectResult : public SynchronizationContext::ResultBase {
 public:
-  explicit ClientConnectResult(std::vector<Timerun::Record> runs)
-      : runs(std::move(runs)) {}
+  ClientConnectResult(std::vector<Timerun::Record> runs,
+                      std::map<std::string, std::vector<int32_t>> bestSegments)
+      : runs(std::move(runs)), bestSegments(std::move(bestSegments)) {}
 
   std::vector<Timerun::Record> runs;
+  std::map<std::string, std::vector<int32_t>> bestSegments;
 };
 
 void TimerunV2::clientConnect(int clientNum, int userId) {
@@ -293,19 +296,17 @@ void TimerunV2::clientConnect(int clientNum, int userId) {
       [this, userId] {
         ensureInitialized();
 
-        auto parameters = StringUtils::join(
-            Container::map(_activeSeasonsIds,
-                           [](int season) { return std::to_string(season); }),
-            ", ");
-
         auto runs = _repository->getRecordsForPlayer(_activeSeasonsIds,
                                                      _currentMap, userId);
+        auto playerBestSegments = _repository->getPlayerBestSegments(
+            Timerun::DEFAULT_SEASON_ID, _currentMap, userId);
 
-        return std::make_unique<ClientConnectResult>(runs);
+        return std::make_unique<ClientConnectResult>(
+            std::move(runs), std::move(playerBestSegments));
       },
       [this, clientNum,
        userId](std::unique_ptr<SynchronizationContext::ResultBase> result) {
-        auto clientConnectResult =
+        const auto *const clientConnectResult =
             dynamic_cast<ClientConnectResult *>(result.get());
 
         if (!clientConnectResult) {
@@ -313,7 +314,8 @@ void TimerunV2::clientConnect(int clientNum, int userId) {
         }
 
         _players[clientNum] = std::make_unique<Player>(
-            clientNum, userId, clientConnectResult->runs);
+            clientNum, userId, clientConnectResult->runs,
+            clientConnectResult->bestSegments);
       },
       [this, clientNum, userId](const std::runtime_error &error) {
         _logger->info("Unable to load player information for clientNum: `%d` "
@@ -326,6 +328,86 @@ void TimerunV2::clientConnect(int clientNum, int userId) {
         Printer::console(clientNum,
                          StringUtils::format("cause: %s\n", error.what()));
       });
+}
+
+class BestSegmentsResult : public SynchronizationContext::ResultBase {
+public:
+  explicit BestSegmentsResult(
+      std::map<std::string, std::vector<int32_t>> segments)
+      : segments(std::move(segments)) {}
+
+  std::map<std::string, std::vector<int32_t>> segments;
+};
+
+void TimerunV2::loadBestSegments() {
+  _sc->postTask(
+      [this] {
+        ensureInitialized();
+
+        return std::make_unique<BestSegmentsResult>(
+            _repository->getBestSegments(Timerun::DEFAULT_SEASON_ID,
+                                         _currentMap));
+      },
+      [this](std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        const auto *const r = dynamic_cast<BestSegmentsResult *>(result.get());
+
+        if (r == nullptr) {
+          throw std::runtime_error("BestSegmentsResult is NULL");
+        }
+
+        bestSegments = r->segments;
+      },
+      [this](const std::runtime_error &e) {
+        _logger->error("Unable to load best segments for `%s`: %s", _currentMap,
+                       e.what());
+      });
+}
+
+Timerun::SegmentCacheSnapshot
+TimerunV2::readSegmentCaches(const std::string &map, int32_t userId) const {
+  Timerun::SegmentCacheSnapshot snapshot;
+
+  // the global cache is always for the map we're currently on
+  snapshot.global =
+      _repository->getBestSegments(Timerun::DEFAULT_SEASON_ID, _currentMap);
+
+  // the player cache only covers the current map, so there's nothing to
+  // re-read when the mutation happened elsewhere
+  if (StringUtils::iEqual(map, _currentMap)) {
+    snapshot.player = _repository->getPlayerBestSegments(
+        Timerun::DEFAULT_SEASON_ID, _currentMap, userId);
+    snapshot.hasPlayer = true;
+  }
+
+  return snapshot;
+}
+
+int32_t
+TimerunV2::applySegmentCaches(const Timerun::SegmentCacheSnapshot &snapshot,
+                              int32_t userId) {
+  bestSegments = snapshot.global;
+
+  auto *const player = findPlayerByUserId(userId);
+
+  if (player == nullptr) {
+    return -1;
+  }
+
+  if (snapshot.hasPlayer) {
+    player->bestSegments = snapshot.player;
+  }
+
+  return player->clientNum;
+}
+
+TimerunV2::Player *TimerunV2::findPlayerByUserId(int32_t userId) {
+  for (auto &player : _players) {
+    if (player && player->userId == userId) {
+      return player.get();
+    }
+  }
+
+  return nullptr;
 }
 
 void TimerunV2::clientDisconnect(int clientNum) {
@@ -361,6 +443,8 @@ TimerunV2::Player *TimerunV2::setupPlayerData(const int clientNum,
       level.checkpointsCount[indexForRunname(runName)] != 0;
   player->checkpointTimes.fill(TIMERUN_CHECKPOINT_NOT_SET);
   player->checkpointIndicesHit.fill(false);
+  player->bestPersonalSegments.fill(false);
+  player->bestGlobalSegments.fill(false);
   player->nextCheckpointIdx = 0;
 
   return player;
@@ -423,14 +507,27 @@ void TimerunV2::checkpoint(const std::string &runName, const int clientNum,
 
   player->checkpointIndicesHit[checkpointIndex] = true;
 
-  player->checkpointTimes[player->nextCheckpointIdx++] =
-      currentTimeMs - player->startTime.value();
+  const auto checkpointTime = currentTimeMs - player->startTime.value();
+  const auto previousTime =
+      player->nextCheckpointIdx > 0
+          ? player->checkpointTimes[player->nextCheckpointIdx - 1]
+          : 0;
+
+  const auto [beatPersonal, beatGlobal] = TimerunSegments::bestSegmentBeaten(
+      player->bestSegments, bestSegments, player->activeRunName,
+      player->nextCheckpointIdx, checkpointTime - previousTime);
+
+  // remember the verdict for this split, so a mid-run resync can replay it
+  player->bestPersonalSegments[player->nextCheckpointIdx] = beatPersonal;
+  player->bestGlobalSegments[player->nextCheckpointIdx] = beatGlobal;
+
+  player->checkpointTimes[player->nextCheckpointIdx++] = checkpointTime;
 
   Printer::commandAll(
       TimerunCommands::Checkpoint(
           clientNum, player->nextCheckpointIdx - 1,
           player->checkpointTimes[player->nextCheckpointIdx - 1],
-          player->activeRunName, checkpointIndex)
+          player->activeRunName, checkpointIndex, beatPersonal, beatGlobal)
           .serialize());
 }
 
@@ -455,11 +552,24 @@ void TimerunV2::stopTimer(const std::string &runName, int clientNum,
 
   player->running = false;
 
-  Printer::commandAll(
-      TimerunCommands::Stop(clientNum, millis, player->activeRunName)
-          .serialize());
+  // the finish closes the run, so its gold split verdict is sent here.
+  // The last checkpoint time is still live here - no checkpoints means no
+  // finish segment, and a zero-length one falls out as "not beaten"
+  const auto finishDuration =
+      player->nextCheckpointIdx > 0
+          ? millis - player->checkpointTimes[player->nextCheckpointIdx - 1]
+          : 0;
 
-  player->activeRunName = "";
+  const auto [beatPersonal, beatGlobal] = TimerunSegments::bestSegmentBeaten(
+      player->bestSegments, bestSegments, player->activeRunName,
+      player->nextCheckpointIdx, finishDuration);
+
+  Printer::commandAll(TimerunCommands::Stop(clientNum, millis,
+                                            player->activeRunName, beatPersonal,
+                                            beatGlobal)
+                          .serialize());
+
+  player->activeRunName.clear();
   Utilities::stopRun(clientNum);
 }
 
@@ -548,7 +658,7 @@ void TimerunV2::connectNotify(int clientNum) {
     auto player = _players[idx].get();
     if (player && player->activeRunName.length() > 0) {
       auto previousRecord =
-          player->getRecord(defaultSeasonId, player->activeRunName);
+          player->getRecord(Timerun::DEFAULT_SEASON_ID, player->activeRunName);
 
       int fastestCompletionTime = -1;
       if (previousRecord) {
@@ -569,11 +679,13 @@ void TimerunV2::connectNotify(int clientNum) {
       }
 
       Printer::command(
-          clientNum, TimerunCommands::Start(
-                         idx, player->startTime.value(), player->activeRunName,
-                         fastestCompletionTime, player->runHasCheckpoints,
-                         checkpoints, player->checkpointTimes)
-                         .serialize());
+          clientNum,
+          TimerunCommands::Start(
+              idx, player->startTime.value(), player->activeRunName,
+              fastestCompletionTime, player->runHasCheckpoints, checkpoints,
+              player->checkpointTimes, player->bestPersonalSegments,
+              player->bestGlobalSegments)
+              .serialize());
     }
   }
 }
@@ -675,7 +787,7 @@ void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
           auto seasonIt = seasonIdToName.find(skvp.first);
           const Timerun::Season *season = &seasonIt->second;
 
-          if (seasonIt->first == defaultSeasonId) {
+          if (seasonIt->first == Timerun::DEFAULT_SEASON_ID) {
             message += StringUtils::format("^2Overall records for map ^7%s\n",
                                            result->records[0].map);
           } else {
@@ -1035,7 +1147,7 @@ void TimerunV2::printRankings(const Timerun::PrintRankingsParams &params) {
           }
 
         } else {
-          if (_rankingsPerSeason.count(defaultSeasonId) == 0) {
+          if (_rankingsPerSeason.count(Timerun::DEFAULT_SEASON_ID) == 0) {
             message += "No overall records\n";
           } else {
             // clang-format off
@@ -1045,7 +1157,7 @@ void TimerunV2::printRankings(const Timerun::PrintRankingsParams &params) {
                 "^g=============================================================\n";
             // clang-format on
             message += this->getRankingsStringFor(
-                &_rankingsPerSeason[defaultSeasonId], params);
+                &_rankingsPerSeason[Timerun::DEFAULT_SEASON_ID], params);
           }
         }
 
@@ -1070,6 +1182,323 @@ void TimerunV2::printRankings(const Timerun::PrintRankingsParams &params) {
             params.clientNum,
             StringUtils::format("Unable to print rankings: %s\n", e.what()));
       });
+}
+
+namespace {
+class BestSegmentsListingResult : public SynchronizationContext::ResultBase {
+public:
+  BestSegmentsListingResult(std::vector<Timerun::BestSegmentDetails> segments,
+                            std::vector<Timerun::Season> seasons)
+      : segments(std::move(segments)), seasons(std::move(seasons)) {}
+
+  std::vector<Timerun::BestSegmentDetails> segments;
+  std::vector<Timerun::Season> seasons;
+};
+} // namespace
+
+void TimerunV2::printBestSegments(const Timerun::BestSegmentsParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const std::string func = __func__;
+  const bool global = params.global;
+  const int32_t userId = params.userId;
+
+  const auto task = [this, params]() {
+    ensureInitialized();
+
+    auto segments = _repository->getBestSegmentDetails(params);
+    auto seasons = _repository->getSeasonsForName(params.season, false);
+
+    return std::make_unique<BestSegmentsListingResult>(std::move(segments),
+                                                       std::move(seasons));
+  };
+
+  const auto callback =
+      [this, func, clientNum, global, userId](
+          const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        const auto *const r =
+            dynamic_cast<BestSegmentsListingResult *>(result.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: failed to fetch best segments for client %i: "
+                         "BestSegmentsListingResult is NULL",
+                         func, clientNum);
+          throw std::runtime_error(StringUtils::format(
+              "%s: unable to fetch best segments. This is a bug, please "
+              "report this to the developers.",
+              func));
+        }
+
+        if (r->segments.empty()) {
+          Printer::console(
+              clientNum,
+              "^7No best segments found matching given parameters.\n");
+          return;
+        }
+
+        const std::string &map = r->segments.front().map;
+        const std::string &run = r->segments.front().run;
+
+        constexpr int32_t PLAYER_MAX_CHARS = 26;
+        constexpr const char *SEPARATOR =
+            "^g----------------------------------------------------------------"
+            "------------------\n";
+
+        std::string tableHeader;
+        std::string rowFmtStr;
+
+        if (global) {
+          tableHeader = StringUtils::format(
+              " ^2Segment ^g| ^2%-9s ^g| ^2%-7s ^g| ^2%-*s ^g| ^2Date\n%s",
+              "Time", "User ID", PLAYER_MAX_CHARS, "Player", SEPARATOR);
+          rowFmtStr = " ^7%7i ^g| ^7%s ^g| ^7%-7i ^g| ^7%-*s ^g| ^7%s\n";
+        } else {
+          tableHeader = StringUtils::format(
+              " ^2Segment ^g| ^2%-9s ^g| ^2Date\n%s", "Time", SEPARATOR);
+          rowFmtStr = " ^7%7i ^g| ^7%s ^g| ^7%s\n";
+        }
+
+        std::map<int32_t, std::string> seasonNames;
+
+        for (const auto &season : r->seasons) {
+          seasonNames[season.id] = season.name;
+        }
+
+        std::map<int32_t, int32_t> seasonTotals;
+
+        for (const auto &seg : r->segments) {
+          seasonTotals[seg.seasonId] += seg.time;
+        }
+
+        int32_t currentSeason = -1;
+        std::string msg;
+
+        for (const auto &seg : r->segments) {
+          const std::string &seasonName =
+              getSeasonName(seasonNames, seg.seasonId);
+
+          if (seg.seasonId != currentSeason) {
+            // end of season, end of rows - add an extra newline
+            if (currentSeason != -1) {
+              msg += '\n';
+            }
+
+            currentSeason = seg.seasonId;
+
+            if (currentSeason == Timerun::DEFAULT_SEASON_ID) {
+              msg += StringUtils::format(
+                  "^2Overall best segments for map ^7%s\n", map);
+            } else {
+              msg += StringUtils::format(
+                  "^2Best segments for map ^7%s ^2on season ^7%s\n", map,
+                  seasonName);
+            }
+
+            msg += SEPARATOR;
+
+            if (global) {
+              msg += StringUtils::format(
+                  " ^2Run: ^7%s\n ^2Sum of bests: ^7%s\n\n", run,
+                  TimeUtils::millisToString(seasonTotals[seg.seasonId]));
+            } else {
+              msg += StringUtils::format(
+                  " ^2User ID: ^7%i\n ^2Run: ^7%s\n ^2Sum of bests: ^7%s\n\n",
+                  userId, run,
+                  TimeUtils::millisToString(seasonTotals[seg.seasonId]));
+            }
+
+            msg += tableHeader;
+          }
+
+          if (global) {
+            msg += StringUtils::format(
+                rowFmtStr, seg.segment, TimeUtils::millisToString(seg.time),
+                seg.userId,
+                StringUtils::countExtraPadding(seg.playerName,
+                                               PLAYER_MAX_CHARS),
+                seg.playerName, seg.recordDate.toDateTimeString());
+          } else {
+            msg += StringUtils::format(rowFmtStr, seg.segment,
+                                       TimeUtils::millisToString(seg.time),
+                                       seg.recordDate.toDateTimeString());
+          }
+        }
+
+        msg += '\n';
+        Printer::console(clientNum, msg);
+      };
+
+  const auto error = [clientNum, func](const std::runtime_error &e) {
+    Printer::console(clientNum,
+                     StringUtils::format("%s: %s\n", func, e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
+namespace {
+class BestSegmentHistoryListingResult
+    : public SynchronizationContext::ResultBase {
+public:
+  BestSegmentHistoryListingResult(
+      std::vector<Timerun::BestSegmentHistoryEntry> entries,
+      std::vector<Timerun::Season> seasons,
+      std::map<int32_t, int32_t> hiddenPerSeason)
+      : entries(std::move(entries)), seasons(std::move(seasons)),
+        hiddenPerSeason(std::move(hiddenPerSeason)) {}
+
+  std::vector<Timerun::BestSegmentHistoryEntry> entries;
+  std::vector<Timerun::Season> seasons;
+  std::map<int32_t, int32_t> hiddenPerSeason;
+};
+} // namespace
+
+void TimerunV2::printBestSegmentHistory(
+    const Timerun::BestSegmentHistoryParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const std::string func = __func__;
+  const int32_t userId = params.userId;
+  const int32_t segment = params.segment;
+
+  const auto task = [this, params]() {
+    ensureInitialized();
+
+    auto entries = _repository->getBestSegmentHistory(params);
+    auto seasons = _repository->getSeasonsForName(params.season, false);
+
+    // 'maxRecords' is applied per season: a partial season match can return
+    // several seasons, and truncating the flat list would drop whole seasons
+    std::map<int32_t, int32_t> perSeason;
+    std::map<int32_t, int32_t> hiddenPerSeason;
+    std::vector<Timerun::BestSegmentHistoryEntry> limited;
+
+    for (auto &entry : entries) {
+      auto &count = perSeason[entry.seasonId];
+
+      if (params.maxRecords > 0 && count >= params.maxRecords) {
+        ++hiddenPerSeason[entry.seasonId];
+        continue;
+      }
+
+      ++count;
+      limited.push_back(std::move(entry));
+    }
+
+    entries = std::move(limited);
+
+    return std::make_unique<BestSegmentHistoryListingResult>(
+        std::move(entries), std::move(seasons), std::move(hiddenPerSeason));
+  };
+
+  const auto callback =
+      [this, func, clientNum, userId, segment](
+          const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        const auto *const r =
+            dynamic_cast<BestSegmentHistoryListingResult *>(result.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: failed to fetch best segment history for client "
+                         "%i: BestSegmentHistoryListingResult is NULL",
+                         func, clientNum);
+          throw std::runtime_error(StringUtils::format(
+              "%s: unable to fetch best segment history. This is a bug, "
+              "please report this to the developers.",
+              func));
+        }
+
+        if (r->entries.empty()) {
+          Printer::console(
+              clientNum,
+              StringUtils::format(
+                  "^7No history found for segment %i on the given run.\n",
+                  segment));
+          return;
+        }
+
+        const std::string &map = r->entries.front().map;
+        const std::string &run = r->entries.front().run;
+        const int32_t entrySegment = r->entries.front().segment;
+
+        constexpr int32_t TIME_WIDTH = 10;
+        constexpr const char *SEPARATOR =
+            "^g------------------------------------------------------------\n";
+
+        const std::string tableHeader = StringUtils::format(
+            " ^2%-*s ^g| ^2Date\n%s", TIME_WIDTH, "Time", SEPARATOR);
+
+        std::map<int32_t, std::string> seasonNames;
+
+        for (const auto &season : r->seasons) {
+          seasonNames[season.id] = season.name;
+        }
+
+        int32_t currentSeason = -1;
+        int32_t seasonShown = 0;
+        std::string msg;
+
+        const auto printHidden = [&](int32_t seasonId) {
+          const auto it = r->hiddenPerSeason.find(seasonId);
+
+          if (it == r->hiddenPerSeason.end()) {
+            return;
+          }
+
+          msg += StringUtils::format(
+              "\n ^7Showing ^2%i ^7of ^2%i ^7improvements\n", seasonShown,
+              seasonShown + it->second);
+        };
+
+        for (const auto &entry : r->entries) {
+          if (entry.seasonId != currentSeason) {
+            if (currentSeason != -1) {
+              printHidden(currentSeason);
+              msg += '\n';
+            }
+
+            currentSeason = entry.seasonId;
+            seasonShown = 0;
+
+            const std::string &seasonName =
+                getSeasonName(seasonNames, entry.seasonId);
+
+            if (currentSeason == Timerun::DEFAULT_SEASON_ID) {
+              msg += StringUtils::format(
+                  "^2Overall best segment history for map ^7%s\n", map);
+            } else {
+              msg += StringUtils::format(
+                  "^2Best segment history for map ^7%s ^2on "
+                  "season ^7%s\n",
+                  map, seasonName);
+            }
+
+            msg += SEPARATOR;
+            msg += StringUtils::format(
+                " ^2User ID: ^7%i\n ^2Run: ^7%s\n ^2Segment: ^7%i\n\n", userId,
+                run, entrySegment);
+            msg += tableHeader;
+          }
+
+          ++seasonShown;
+
+          const char *rowColor = entry.removed ? "^z" : "^7";
+
+          msg += StringUtils::format(" %s%-*s ^g| %s%s\n", rowColor, TIME_WIDTH,
+                                     TimeUtils::millisToString(entry.time),
+                                     rowColor,
+                                     entry.recordDate.toDateTimeString());
+        }
+
+        printHidden(currentSeason);
+
+        msg += '\n';
+        Printer::console(clientNum, msg);
+      };
+
+  const auto error = [clientNum, func](const std::runtime_error &e) {
+    Printer::console(clientNum,
+                     StringUtils::format("%s: %s\n", func, e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
 }
 
 void TimerunV2::printSeasons(int clientNum) {
@@ -1099,7 +1528,7 @@ void TimerunV2::printSeasons(int clientNum) {
           for (const auto &s : _activeSeasons) {
             // default season is always active and cannot be deleted,
             // don't bother listing it
-            if (s.id == defaultSeasonId) {
+            if (s.id == Timerun::DEFAULT_SEASON_ID) {
               continue;
             }
 
@@ -1308,7 +1737,7 @@ void TimerunV2::listCheckpoints(const Timerun::ListCheckpointsParams &params) {
           const Timerun::Season season = seasonIt->second;
           std::string s = "\n";
 
-          if (data.seasonID == defaultSeasonId) {
+          if (data.seasonID == Timerun::DEFAULT_SEASON_ID) {
             s += StringUtils::format("^2Checkpoint times for map ^7%s\n",
                                      data.map);
           } else {
@@ -1462,7 +1891,7 @@ void TimerunV2::compareCheckpoints(
           const Timerun::Season season = seasonIt->second;
           std::string s = "\n";
 
-          if (base.seasonID == defaultSeasonId) {
+          if (base.seasonID == Timerun::DEFAULT_SEASON_ID) {
             s += StringUtils::format("^2Comparing checkpoints for map ^7%s\n",
                                      base.map);
           } else {
@@ -1813,7 +2242,7 @@ void TimerunV2::recordHistory(const Timerun::RecordHistoryParams &params) {
 
           const auto &map = season.runs.front().map;
 
-          if (season.seasonId == defaultSeasonId) {
+          if (season.seasonId == Timerun::DEFAULT_SEASON_ID) {
             msg += StringUtils::format(
                 "^2Overall record history for map ^7%s\n", map);
           } else {
@@ -1884,12 +2313,15 @@ namespace {
 class RemoveRecordResult : public SynchronizationContext::ResultBase {
 public:
   RemoveRecordResult(std::vector<Timerun::Record> removedRecords,
-                     std::map<int32_t, std::string> seasonNames)
+                     std::map<int32_t, std::string> seasonNames,
+                     Timerun::SegmentCacheSnapshot segmentCaches)
       : removedRecords(std::move(removedRecords)),
-        seasonNames(std::move(seasonNames)) {}
+        seasonNames(std::move(seasonNames)),
+        segmentCaches(std::move(segmentCaches)) {}
 
   std::vector<Timerun::Record> removedRecords;
   std::map<int32_t, std::string> seasonNames;
+  Timerun::SegmentCacheSnapshot segmentCaches;
 };
 } // namespace
 
@@ -1903,7 +2335,7 @@ void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
     ensureInitialized();
 
     const auto removedAt = TimeUtils::getCurrentTime(false);
-    const auto removedRecords = _repository->removeRecord(params, removedAt);
+    auto removedRecords = _repository->removeRecord(params, removedAt);
 
     // resolve season names for the confirmation output
     std::map<int32_t, std::string> seasonNames;
@@ -1911,8 +2343,15 @@ void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
       seasonNames[season.id] = season.name;
     }
 
-    return std::make_unique<RemoveRecordResult>(removedRecords,
-                                                std::move(seasonNames));
+    // re-read the segment caches rather than trying to patch them, since the
+    // removal can cascade across seasons
+    const auto map =
+        removedRecords.empty() ? std::string{} : removedRecords.front().map;
+    auto segmentCaches = readSegmentCaches(map, params.userId);
+
+    return std::make_unique<RemoveRecordResult>(std::move(removedRecords),
+                                                std::move(seasonNames),
+                                                std::move(segmentCaches));
   };
 
   const auto callback = [this, callerName, isSelfRemoval, func,
@@ -1935,20 +2374,14 @@ void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
     // if the record was removed from the current map. If the record is not
     // from this map, see if they are connected, so we can notify them
     // about the removal anyway.
-    int32_t targetClientNum = -1;
+    const int32_t targetClientNum =
+        applySegmentCaches(r->segmentCaches, params.userId);
 
-    for (auto &player : _players) {
-      if (!player || player->userId != params.userId) {
-        continue;
-      }
+    auto *const player = findPlayerByUserId(params.userId);
 
-      targetClientNum = player->clientNum;
-
-      // record is not from this map, no need to purge cache
-      if (Q_stricmp(params.map.c_str(), level.rawmapname)) {
-        break;
-      }
-
+    // record is not from this map, no need to purge cache
+    if (player != nullptr && !r->removedRecords.empty() &&
+        StringUtils::iEqual(r->removedRecords.front().map, _currentMap)) {
       const auto isRemoved = [&r](const Timerun::Record &cached) {
         return std::any_of(r->removedRecords.begin(), r->removedRecords.end(),
                            [&](const Timerun::Record &removed) {
@@ -1959,7 +2392,6 @@ void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
       player->records.erase(std::remove_if(player->records.begin(),
                                            player->records.end(), isRemoved),
                             player->records.end());
-      break;
     }
 
     _logger->info(
@@ -2215,11 +2647,14 @@ namespace {
 class RestoreRecordResult : public SynchronizationContext::ResultBase {
 public:
   RestoreRecordResult(Timerun::RestoreRecordResult result,
-                      std::map<int32_t, std::string> seasonNames)
-      : result(std::move(result)), seasonNames(std::move(seasonNames)) {}
+                      std::map<int32_t, std::string> seasonNames,
+                      Timerun::SegmentCacheSnapshot segmentCaches)
+      : result(std::move(result)), seasonNames(std::move(seasonNames)),
+        segmentCaches(std::move(segmentCaches)) {}
 
   Timerun::RestoreRecordResult result;
   std::map<int32_t, std::string> seasonNames;
+  Timerun::SegmentCacheSnapshot segmentCaches;
 };
 } // namespace
 
@@ -2236,8 +2671,19 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
       seasonNames[season.id] = season.name;
     }
 
-    return std::make_unique<RestoreRecordResult>(
-        _repository->restoreRecord(params, restoredAt), seasonNames);
+    auto restoreResult = _repository->restoreRecord(params, restoredAt);
+
+    // re-read the segment caches rather than trying to patch them
+    Timerun::SegmentCacheSnapshot segmentCaches;
+
+    if (!restoreResult.restored.empty()) {
+      const auto &restored = restoreResult.restored.front();
+      segmentCaches = readSegmentCaches(restored.map, restored.userId);
+    }
+
+    return std::make_unique<RestoreRecordResult>(std::move(restoreResult),
+                                                 std::move(seasonNames),
+                                                 std::move(segmentCaches));
   };
 
   const auto callback =
@@ -2293,20 +2739,13 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
 
         // update the loaded records for the player whose record was restored,
         // if the record is from the current map
-        int32_t targetClientNum = -1;
+        const int32_t targetClientNum =
+            applySegmentCaches(r->segmentCaches, targetId);
 
-        for (auto &player : _players) {
-          if (!player || player->userId != targetId) {
-            continue;
-          }
+        auto *const player = findPlayerByUserId(targetId);
 
-          targetClientNum = player->clientNum;
-
-          // record is not from this map, no need to update cache
-          if (Q_stricmp(r->result.restored[0].map.c_str(), level.rawmapname)) {
-            break;
-          }
-
+        if (player != nullptr &&
+            StringUtils::iEqual(r->result.restored[0].map, _currentMap)) {
           for (const auto &restored : r->result.restored) {
             const auto it =
                 std::find_if(player->records.begin(), player->records.end(),
@@ -2320,8 +2759,6 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
               player->records.push_back(restored);
             }
           }
-
-          break;
         }
 
         // if we're restoring our own records, we're done here
@@ -2339,6 +2776,384 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
           Printer::console(targetClientNum, consoleMsg);
         }
       };
+
+  const auto error = [params](const std::runtime_error &e) {
+    Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
+namespace {
+class RemoveSegmentResult : public SynchronizationContext::ResultBase {
+public:
+  RemoveSegmentResult(std::vector<Timerun::RemovedSegment> removedSegments,
+                      std::map<int32_t, std::string> seasonNames,
+                      Timerun::SegmentCacheSnapshot segmentCaches)
+      : removedSegments(std::move(removedSegments)),
+        seasonNames(std::move(seasonNames)),
+        segmentCaches(std::move(segmentCaches)) {}
+
+  std::vector<Timerun::RemovedSegment> removedSegments;
+  std::map<int32_t, std::string> seasonNames;
+  Timerun::SegmentCacheSnapshot segmentCaches;
+};
+} // namespace
+
+void TimerunV2::removeSegment(const Timerun::RemoveSegmentParams &params) {
+  const int32_t clientNum = params.clientNum;
+  const std::string func = __func__;
+  const bool isSelfRemoval = params.removedBy == params.userId;
+  const std::string callerName = (g_entities + clientNum)->client->pers.netname;
+
+  const auto task = [this, params]() {
+    ensureInitialized();
+
+    const auto removedAt = TimeUtils::getCurrentTime(false);
+    auto removedSegments = _repository->removeSegment(params, removedAt);
+
+    std::map<int32_t, std::string> seasonNames;
+    for (const auto &season : _repository->getSeasons()) {
+      seasonNames[season.id] = season.name;
+    }
+
+    const auto map =
+        removedSegments.empty() ? std::string{} : removedSegments.front().map;
+    auto segmentCaches = readSegmentCaches(map, params.userId);
+
+    return std::make_unique<RemoveSegmentResult>(std::move(removedSegments),
+                                                 std::move(seasonNames),
+                                                 std::move(segmentCaches));
+  };
+
+  const auto callback =
+      [this, params, func, clientNum, isSelfRemoval, callerName](
+          const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        const auto *const r = dynamic_cast<RemoveSegmentResult *>(result.get());
+
+        if (r == nullptr) {
+          _logger->error("%s: failed to remove segment for client %i: "
+                         "RemoveSegmentResult is NULL",
+                         func, clientNum);
+          throw std::runtime_error(StringUtils::format(
+              "%s: unable to remove segment(s). This is a bug, please report "
+              "this to the developers.",
+              func));
+        }
+
+        const int32_t targetClientNum =
+            applySegmentCaches(r->segmentCaches, params.userId);
+
+        const auto numRemoved = static_cast<int32_t>(r->removedSegments.size());
+        const auto segment = r->removedSegments.front().segment;
+
+        std::string chatMsg = StringUtils::format(
+            "^3remove-segment: ^7removed segment ^3%i^7 from ^3%i^7 "
+            "season%s%s^7, see console for details",
+            segment, numRemoved, numRemoved == 1 ? "" : "s",
+            isSelfRemoval
+                ? ""
+                : StringUtils::format(" for user ^3%i", params.userId).c_str());
+        Printer::chat(clientNum, chatMsg);
+
+        std::string consoleMsg =
+            StringUtils::format("The following segment%s removed%s^7:\n",
+                                numRemoved == 1 ? " was" : "s were",
+                                isSelfRemoval ? "" : " by you");
+        consoleMsg +=
+            buildRemovedSegmentSummary(r->removedSegments, r->seasonNames);
+        Printer::console(clientNum, consoleMsg);
+
+        if (!isSelfRemoval && targetClientNum >= 0) {
+          std::string targetMsg = StringUtils::format(
+              "^3remove-segment: ^7an administrator has removed ^3%i ^7of your "
+              "best segments, see console for details",
+              numRemoved);
+
+          if (params.reason.has_value()) {
+            targetMsg += StringUtils::format(". Reason: %s",
+                                             params.reason.value().c_str());
+          }
+
+          Printer::chat(targetClientNum, targetMsg);
+
+          consoleMsg = StringUtils::format(
+              "The following segment%s removed by %s^7:\n",
+              numRemoved == 1 ? " was" : "s were", callerName);
+          consoleMsg +=
+              buildRemovedSegmentSummary(r->removedSegments, r->seasonNames);
+          Printer::console(targetClientNum, consoleMsg);
+        }
+      };
+
+  const auto error = [clientNum](const std::runtime_error &e) {
+    Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
+namespace {
+class RestoreSegmentResult : public SynchronizationContext::ResultBase {
+public:
+  RestoreSegmentResult(Timerun::RestoreSegmentResult result,
+                       std::map<int32_t, std::string> seasonNames,
+                       Timerun::SegmentCacheSnapshot segmentCaches)
+      : result(std::move(result)), seasonNames(std::move(seasonNames)),
+        segmentCaches(std::move(segmentCaches)) {}
+
+  Timerun::RestoreSegmentResult result;
+  std::map<int32_t, std::string> seasonNames;
+  Timerun::SegmentCacheSnapshot segmentCaches;
+};
+} // namespace
+
+void TimerunV2::restoreSegment(const Timerun::RestoreSegmentParams &params) {
+  const std::string func = __func__;
+
+  const auto task = [this, params]() {
+    ensureInitialized();
+
+    const auto restoredAt = TimeUtils::getCurrentTime(false);
+    auto restoreResult = _repository->restoreSegment(params, restoredAt);
+
+    std::map<int32_t, std::string> seasonNames;
+    for (const auto &season : _repository->getSeasons()) {
+      seasonNames[season.id] = season.name;
+    }
+
+    Timerun::SegmentCacheSnapshot segmentCaches;
+
+    if (!restoreResult.restored.empty()) {
+      const auto &restored = restoreResult.restored.front();
+      segmentCaches = readSegmentCaches(restored.map, restored.userId);
+    }
+
+    return std::make_unique<RestoreSegmentResult>(std::move(restoreResult),
+                                                  std::move(seasonNames),
+                                                  std::move(segmentCaches));
+  };
+
+  const auto callback = [this, params, func](const std::unique_ptr<
+                                             SynchronizationContext::ResultBase>
+                                                 result) {
+    const auto *const r = dynamic_cast<RestoreSegmentResult *>(result.get());
+
+    if (r == nullptr) {
+      _logger->error("%s: failed to restore segment(s) for client %i: "
+                     "RestoreSegmentResult is NULL",
+                     func, params.clientNum);
+      throw std::runtime_error(StringUtils::format(
+          "%s: unable to restore segment(s). This is a bug, please report "
+          "this to the developers.",
+          func));
+    }
+
+    if (!r->result.conflicts.empty()) {
+      Printer::chat(
+          params.clientNum,
+          StringUtils::format("^3restore-segment: ^7conflicts found while "
+                              "trying to restore the segment%s, see console "
+                              "for details",
+                              r->result.numTargeted == 1 ? "" : "s"));
+
+      Printer::console(params.clientNum,
+                       buildRestoreSegmentConflictMessage(r->result.conflicts,
+                                                          r->seasonNames));
+      return;
+    }
+
+    if (r->result.restored.empty()) {
+      Printer::console(params.clientNum,
+                       "^3restore-segment: ^7nothing was restored.\n");
+      return;
+    }
+
+    const auto &target = r->result.restored.front();
+    const auto numRestored = static_cast<int32_t>(r->result.restored.size());
+    const auto numSwapped = static_cast<int32_t>(r->result.swapped.size());
+    const bool isSelfRestore = target.userId == params.callerId;
+
+    const int32_t targetClientNum =
+        applySegmentCaches(r->segmentCaches, target.userId);
+
+    std::string chatMsg = StringUtils::format(
+        "^3restore-segment: ^7restored ^3%i ^7of ^3%i ^7requested segment%s",
+        numRestored, r->result.numTargeted,
+        r->result.numTargeted == 1 ? "" : "s");
+
+    if (numSwapped > 0) {
+      chatMsg += StringUtils::format(" (^3%i^7 displaced)", numSwapped);
+    }
+
+    if (!isSelfRestore) {
+      chatMsg += StringUtils::format(" for user ^3'%i'^7", target.userId);
+    }
+
+    chatMsg += "^7, see console for details";
+    Printer::chat(params.clientNum, chatMsg);
+
+    const std::string consoleMsg =
+        buildRestoreSegmentSummary(r->result.restored, r->result.swapped,
+                                   r->result.skipped, r->seasonNames);
+    Printer::console(params.clientNum, consoleMsg);
+
+    if (!isSelfRestore && targetClientNum >= 0) {
+      Printer::chat(
+          targetClientNum,
+          StringUtils::format("^3restore-segment: ^7an administrator has "
+                              "restored ^3%i ^7of your best segments, see "
+                              "console for details",
+                              numRestored));
+      Printer::console(targetClientNum, consoleMsg);
+    }
+  };
+
+  const auto error = [params](const std::runtime_error &e) {
+    Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
+  };
+
+  _sc->postTask(task, callback, error);
+}
+
+namespace {
+class ListRemovedSegmentsResult : public SynchronizationContext::ResultBase {
+public:
+  ListRemovedSegmentsResult(Timerun::RemovedSegmentsPage page,
+                            std::map<int32_t, std::string> seasonNames)
+      : page(std::move(page)), seasonNames(std::move(seasonNames)) {}
+
+  Timerun::RemovedSegmentsPage page;
+  std::map<int32_t, std::string> seasonNames;
+};
+} // namespace
+
+void TimerunV2::listRemovedSegments(
+    const Timerun::ListRemovedSegmentsParams &params) {
+  const std::string func = __func__;
+
+  const auto task = [this, params]() {
+    ensureInitialized();
+
+    std::map<int32_t, std::string> seasonNames;
+    for (const auto &season : _repository->getSeasons()) {
+      seasonNames[season.id] = season.name;
+    }
+
+    return std::make_unique<ListRemovedSegmentsResult>(
+        _repository->getRemovedSegments(params), std::move(seasonNames));
+  };
+
+  const auto callback = [this, params, func](const std::unique_ptr<
+                                             SynchronizationContext::ResultBase>
+                                                 result) {
+    const auto *const r =
+        dynamic_cast<ListRemovedSegmentsResult *>(result.get());
+
+    if (r == nullptr) {
+      _logger->error("%s: failed to list removed segments for client %i: "
+                     "ListRemovedSegmentsResult is NULL",
+                     func, params.clientNum);
+      throw std::runtime_error(StringUtils::format(
+          "%s: unable to list removed segments. This is a bug, please report "
+          "this to the developers.",
+          func));
+    }
+
+    if (r->page.entries.empty()) {
+      Printer::console(
+          params.clientNum,
+          "^3list-removed-segments: ^7no removed segments found.\n");
+      return;
+    }
+
+    constexpr const char *DIVIDER =
+        "^g----------------------------------------------------------------"
+        "------------------------------\n";
+
+    static constexpr int32_t MRT_PAD = 50;
+    static constexpr int32_t REASON_PAD = MRT_PAD + 10 + 3;
+
+    const std::string header = StringUtils::format(
+        " ^2%-4s ^g| ^2%-10s ^g| ^2%-50s ^g| ^2%s\n"
+        "      ^g| ^2%-10s ^g| ^2%-50s ^g| ^2%s\n"
+        "      ^g| ^2%s\n",
+        "ID", "User", "Map/Run - Time (Segment)", "Record date", "Removed by",
+        "Season(s)", "Removed at", "Reason");
+
+    const std::string line1 = " ^7%-4i ^g| ^7%-*s ^g| ^7%-*s ^g| ^7%s\n";
+    const std::string line2 = "      ^g| ^7%-*s ^g| ^7%-*s ^g| ^7%s\n";
+    const std::string line3 = "      ^g| ^7%-*s\n";
+
+    std::string message =
+        StringUtils::format("Listing removed timerun segments (^3* ^7= you)\n"
+                            "Showing page ^3%i ^7of ^3%i\n\n",
+                            r->page.page, r->page.numPages);
+
+    message += header + DIVIDER;
+
+    for (const auto &entry : r->page.entries) {
+      // every segment in the entry is the same split - they differ only in
+      // 'season_id', so the first one (Default, when present) is the base
+      const auto &base = entry.segments[0];
+
+      std::string userId = std::to_string(base.userId);
+
+      if (base.userId == params.callerId) {
+        userId += "^3*";
+      }
+
+      const bool mixedRemovedBy =
+          std::any_of(entry.segments.begin(), entry.segments.end(),
+                      [&base](const Timerun::RemovedSegment &s) {
+                        return s.removedBy != base.removedBy;
+                      });
+
+      const bool callerIsRemover =
+          std::any_of(entry.segments.begin(), entry.segments.end(),
+                      [&params](const Timerun::RemovedSegment &s) {
+                        return s.removedBy == params.callerId;
+                      });
+
+      std::string removedById =
+          mixedRemovedBy ? "Mixed" : std::to_string(base.removedBy);
+
+      if (callerIsRemover) {
+        removedById += "^3*";
+      }
+
+      const auto seasonStrings = Container::map(
+          entry.segments, [&r](const Timerun::RemovedSegment &s) {
+            return getSeasonName(r->seasonNames, s.seasonId);
+          });
+      const std::string seasons = StringUtils::join(seasonStrings, ", ");
+
+      const std::string mrt = StringUtils::format(
+          "%s/%s ^7- %s (%i)", StringUtils::sanitize(base.map),
+          StringUtils::sanitize(base.run), TimeUtils::millisToString(base.time),
+          base.segment);
+      const std::string reason =
+          StringUtils::sanitize(base.reason.value_or("-"));
+
+      const int32_t userIdPad = StringUtils::countExtraPadding(userId, 10);
+      const int32_t removedByIdPad =
+          StringUtils::countExtraPadding(removedById, 10);
+      const int32_t mrtPad = StringUtils::countExtraPadding(mrt, MRT_PAD);
+      const int32_t seasonPad =
+          StringUtils::countExtraPadding(seasons, MRT_PAD);
+
+      message += StringUtils::format(line1, base.id, userIdPad, userId, mrtPad,
+                                     mrt, base.recordDate.toDateTimeString());
+      message +=
+          StringUtils::format(line2, removedByIdPad, removedById, seasonPad,
+                              seasons, base.removedAt.toDateTimeString());
+      message += StringUtils::format(
+          line3, StringUtils::countExtraPadding(reason, REASON_PAD), reason);
+      message += DIVIDER;
+    }
+
+    Printer::console(params.clientNum, message + "\n");
+  };
 
   const auto error = [params](const std::runtime_error &e) {
     Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
@@ -2380,6 +3195,73 @@ TimerunV2::getCheckpointsForComparison(
 
   return processedRecords;
 }
+
+namespace {
+struct ConflictComparisonRow {
+  std::string label;
+  std::string current;
+  std::string restore;
+};
+
+// renders one header and then a divider-prefixed block of rows per group,
+// so multi-copy conflicts share a single table header
+std::string buildConflictComparisonTable(
+    const std::string &currentHeader, const std::string &restoreHeader,
+    const std::vector<std::vector<ConflictComparisonRow>> &groups) {
+  constexpr int32_t columnPad = 28;
+  const std::string line = " ^2%-11s ^g| ^7%*s ^g| ^7%-*s\n";
+
+  std::string msg = StringUtils::format("               ^7%28s ^g| ^7%-28s\n",
+                                        currentHeader, restoreHeader);
+
+  for (const auto &rows : groups) {
+    msg += "^g-----------------------------------------------------------------"
+           "---------\n";
+
+    for (const auto &row : rows) {
+      msg += StringUtils::format(
+          line, row.label,
+          StringUtils::countExtraPadding(row.current, columnPad), row.current,
+          StringUtils::countExtraPadding(row.restore, columnPad), row.restore);
+    }
+  }
+
+  return msg;
+}
+
+std::pair<std::string, std::string> annotateConflictTime(int32_t current,
+                                                         int32_t restore) {
+  if (current > restore) {
+    return {"(^1slower^7) " + TimeUtils::millisToString(current),
+            TimeUtils::millisToString(restore) + " (^2faster^7)"};
+  }
+
+  if (restore > current) {
+    return {"(^2faster^7) " + TimeUtils::millisToString(current),
+            TimeUtils::millisToString(restore) + " (^1slower^7)"};
+  }
+
+  return {"(tied) " + TimeUtils::millisToString(current),
+          TimeUtils::millisToString(restore) + " (tied)"};
+}
+
+std::pair<std::string, std::string>
+annotateConflictDate(const TimeUtils::Time &current,
+                     const TimeUtils::Time &restore) {
+  if (current > restore) {
+    return {"(newer) " + current.toDateTimeString(),
+            restore.toDateTimeString() + " (older) "};
+  }
+
+  if (restore > current) {
+    return {"(older) " + current.toDateTimeString(),
+            restore.toDateTimeString() + " (newer) "};
+  }
+
+  return {"(same) " + current.toDateTimeString(),
+          restore.toDateTimeString() + " (same)"};
+}
+} // namespace
 
 std::string TimerunV2::buildRestoreRecordSummary(
     const std::vector<Timerun::Record> &restored,
@@ -2482,64 +3364,177 @@ std::string TimerunV2::buildRestoreRecordConflictMessage(
       "Conflicting record%s on run ^3'%s' ^7in map ^3'%s':\n\n", headerPrefix,
       conflicts[0].existing.run, conflicts[0].existing.map);
 
-  msg += StringUtils::format("               ^7%28s ^g| ^7%-28s\n",
-                             "Current record", "Record to restore");
-
-  constexpr int32_t columnPad = 28;
-  const std::string line = " ^2%-11s ^g| ^7%*s ^g| ^7%-*s\n";
+  std::vector<std::vector<ConflictComparisonRow>> groups;
 
   for (const auto &[existing, toRestore] : conflicts) {
-    std::string timeStrExisting;
-    std::string timeStrToRestore;
-    std::string dateStrExisting;
-    std::string dateStrToRestore;
+    const auto [timeCurrent, timeRestore] =
+        annotateConflictTime(existing.time, toRestore.time);
+    const auto [dateCurrent, dateRestore] =
+        annotateConflictDate(existing.recordDate, toRestore.recordDate);
 
-    if (existing.time > toRestore.time) {
-      timeStrExisting =
-          "(^1slower^7) " + TimeUtils::millisToString(existing.time);
-      timeStrToRestore =
-          TimeUtils::millisToString(toRestore.time) + " (^2faster^7)";
-    } else if (toRestore.time > existing.time) {
-      timeStrExisting =
-          "(^2faster^7) " + TimeUtils::millisToString(existing.time);
-      timeStrToRestore =
-          TimeUtils::millisToString(toRestore.time) + " (^1slower^7)";
-    } else { // tied
-      timeStrExisting = "(tied) " + TimeUtils::millisToString(existing.time);
-      timeStrToRestore = TimeUtils::millisToString(toRestore.time) + " (tied)";
+    groups.push_back({
+        {"Season", getSeasonName(seasonNames, existing.seasonId),
+         getSeasonName(seasonNames, toRestore.seasonId)},
+        {"Time", timeCurrent, timeRestore},
+        {"Record date", dateCurrent, dateRestore},
+    });
+  }
+
+  msg += buildConflictComparisonTable("Current record", "Record to restore",
+                                      groups);
+
+  return msg + "\nNo changes have been made due to the unresolved conflict.\n";
+}
+
+std::string TimerunV2::buildRestoreSegmentSummary(
+    const std::vector<Timerun::RemovedSegment> &restored,
+    const std::vector<Timerun::BestSegmentDetails> &swapped,
+    const std::vector<Timerun::RemovedSegment> &skipped,
+    const std::map<int32_t, std::string> &seasonNames) {
+  std::string msg;
+  const auto numSkipped = static_cast<int32_t>(skipped.size());
+  const auto &first = restored[0];
+
+  if (swapped.empty()) {
+    msg += StringUtils::format(
+        "The following segment%s been restored for segment ^3%i^7 on run "
+        "^3'%s' ^7on map ^3'%s':\n\n",
+        restored.size() == 1 ? " has" : "s have", first.segment, first.run,
+        first.map);
+
+    const auto seasonStrings = Container::map(
+        restored, [&seasonNames](const Timerun::RemovedSegment &r) {
+          return getSeasonName(seasonNames, r.seasonId);
+        });
+    const std::string seasons = StringUtils::join(seasonStrings, ", ");
+
+    // every restored copy comes from the same split value, so the time and
+    // record date are identical across seasons
+    msg += StringUtils::format(
+        " ^2Season%s: ^7%s\n ^2Time: ^7%s\n ^2Record date: ^7%s\n\n",
+        restored.size() == 1 ? "" : "s", seasons,
+        TimeUtils::millisToString(first.time),
+        first.recordDate.toDateTimeString());
+
+    if (numSkipped > 0) {
+      msg += StringUtils::format(
+          "\n^3%i ^7segment%s not restored (removed by an administrator).\n",
+          numSkipped, numSkipped == 1 ? " was" : "s were");
     }
 
-    // dates cannot be "tied", otherwise they would be the same record
-    if (existing.recordDate > toRestore.recordDate) {
-      dateStrExisting = "(newer) " + existing.recordDate.toDateTimeString();
-      dateStrToRestore = toRestore.recordDate.toDateTimeString() + " (older) ";
-    } else {
-      dateStrExisting = "(older) " + existing.recordDate.toDateTimeString();
-      dateStrToRestore = toRestore.recordDate.toDateTimeString() + " (newer) ";
-    }
+    return msg;
+  }
+
+  msg += StringUtils::format(
+      "The following segment%s been restored for segment ^3%i^7 on run "
+      "^3'%s' ^7on map ^3'%s'^7.\nExisting segment%s prior to the restore %s "
+      "been removed.\n\n",
+      restored.size() == 1 ? " has" : "s have", first.segment, first.run,
+      first.map, swapped.size() == 1 ? "" : "s",
+      swapped.size() == 1 ? "has" : "have");
+
+  msg += StringUtils::format("               ^7%30s ^g| ^7%-30s\n",
+                             "Restored segment", "Removed segment");
+
+  const std::string line = " ^2%-11s ^g| ^7%30s ^g| ^z%-30s\n";
+
+  std::map<int32_t, const Timerun::BestSegmentDetails *> swappedBySeason;
+
+  for (const auto &s : swapped) {
+    swappedBySeason[s.seasonId] = &s;
+  }
+
+  for (const auto &r : restored) {
+    const auto it = swappedBySeason.find(r.seasonId);
+    const bool hasSwap = it != swappedBySeason.end();
 
     msg += "^g-----------------------------------------------------------------"
            "---------\n";
 
     msg += StringUtils::format(
-        line, "Season",
-        StringUtils::countExtraPadding(
-            getSeasonName(seasonNames, existing.seasonId), columnPad),
-        getSeasonName(seasonNames, existing.seasonId),
-        StringUtils::countExtraPadding(
-            getSeasonName(seasonNames, toRestore.seasonId), columnPad),
-        getSeasonName(seasonNames, toRestore.seasonId));
+        line, "Season", getSeasonName(seasonNames, r.seasonId),
+        hasSwap ? getSeasonName(seasonNames, it->second->seasonId) : "-");
     msg += StringUtils::format(
-        line, "Time",
-        StringUtils::countExtraPadding(timeStrExisting, columnPad),
-        timeStrExisting,
-        StringUtils::countExtraPadding(timeStrToRestore, columnPad),
-        timeStrToRestore);
-    msg += StringUtils::format(line, "Record date", columnPad, dateStrExisting,
-                               columnPad, dateStrToRestore);
+        line, "Time", TimeUtils::millisToString(r.time),
+        hasSwap ? TimeUtils::millisToString(it->second->time) : "-");
+    msg += StringUtils::format(
+        line, "Record date", r.recordDate.toDateTimeString(),
+        hasSwap ? it->second->recordDate.toDateTimeString() : "-");
   }
 
+  if (numSkipped > 0) {
+    msg += StringUtils::format(
+        "\n^3%i ^7segment%s not restored (removed by an administrator).\n",
+        numSkipped, numSkipped == 1 ? " was" : "s were");
+  }
+
+  return msg;
+}
+
+std::string TimerunV2::buildRestoreSegmentConflictMessage(
+    const std::vector<Timerun::RestoreSegmentConflict> &conflicts,
+    const std::map<int32_t, std::string> &seasonNames) {
+  const std::string headerPrefix = conflicts.size() == 1 ? "" : "s";
+  const auto &first = conflicts[0];
+
+  std::string msg = StringUtils::format(
+      "^3%i ^7segment%s could not be restored due to a conflict.\nRun the "
+      "command again with ^3'--force' ^7option to remove the existing "
+      "segment%s,\nand replace %s with the one%s you're trying to "
+      "restore.\n\n",
+      static_cast<int32_t>(conflicts.size()), headerPrefix, headerPrefix,
+      conflicts.size() == 1 ? "it" : "them", headerPrefix);
+
+  msg += StringUtils::format(
+      "Conflicting segment ^3%i^7 on run ^3'%s' ^7in map ^3'%s':\n\n",
+      first.toRestore.segment, first.toRestore.run, first.toRestore.map);
+
+  std::vector<std::vector<ConflictComparisonRow>> groups;
+
+  for (const auto &conflict : conflicts) {
+    const auto &current = conflict.occupant;
+    const auto &restore = conflict.toRestore;
+    const auto [timeCurrent, timeRestore] =
+        annotateConflictTime(current.time, restore.time);
+    const auto [dateCurrent, dateRestore] =
+        annotateConflictDate(current.recordDate, restore.recordDate);
+
+    groups.push_back({
+        {"Season", getSeasonName(seasonNames, current.seasonId),
+         getSeasonName(seasonNames, restore.seasonId)},
+        {"Time", timeCurrent, timeRestore},
+        {"Record date", dateCurrent, dateRestore},
+    });
+  }
+
+  msg += buildConflictComparisonTable("Current segment", "Segment to restore",
+                                      groups);
+
   return msg + "\nNo changes have been made due to the unresolved conflict.\n";
+}
+
+std::string TimerunV2::buildRemovedSegmentSummary(
+    const std::vector<Timerun::RemovedSegment> &removed,
+    const std::map<int32_t, std::string> &seasonNames) {
+  // remove-segment always removes one segment's value,
+  // the archived copies differ only by season
+  const auto seasonStrings =
+      Container::map(removed, [&seasonNames](const Timerun::RemovedSegment &r) {
+        return getSeasonName(seasonNames, r.seasonId);
+      });
+  const std::string seasons = StringUtils::join(seasonStrings, ", ");
+  const auto &base = removed[0];
+
+  std::string msg =
+      "^g------------------------------------------------------------\n";
+  msg += StringUtils::format(
+      " ^2Map: ^7%s\n ^2Run: ^7%s\n ^2Segment: ^7%i\n ^2Time: ^7%s\n "
+      "^2Season%s: ^7%s\n ^2Record date: ^7%s\n\n",
+      base.map, base.run, base.segment, TimeUtils::millisToString(base.time),
+      removed.size() == 1 ? "" : "s", seasons,
+      base.recordDate.toDateTimeString());
+
+  return msg;
 }
 
 // resolves the season name for the given id, falling back to the raw id
@@ -2555,7 +3550,7 @@ TimerunV2::getSeasonName(const std::map<int32_t, std::string> &seasonNames,
 
 void TimerunV2::startNotify(Player *player) const {
   auto previousRecord =
-      player->getRecord(defaultSeasonId, player->activeRunName);
+      player->getRecord(Timerun::DEFAULT_SEASON_ID, player->activeRunName);
 
   int fastestCompletionTime = -1;
   if (previousRecord) {
@@ -2573,12 +3568,13 @@ void TimerunV2::startNotify(Player *player) const {
     checkpoints = player->checkpointTimes;
   }
 
-  Printer::commandAll(
-      TimerunCommands::Start(player->clientNum, player->startTime.value(),
-                             player->activeRunName, fastestCompletionTime,
-                             player->runHasCheckpoints, checkpoints,
-                             player->checkpointTimes)
-          .serialize());
+  Printer::commandAll(TimerunCommands::Start(
+                          player->clientNum, player->startTime.value(),
+                          player->activeRunName, fastestCompletionTime,
+                          player->runHasCheckpoints, checkpoints,
+                          player->checkpointTimes, player->bestPersonalSegments,
+                          player->bestGlobalSegments)
+                          .serialize());
 }
 
 bool TimerunV2::isDebugging(const int clientNum) {
@@ -2631,9 +3627,15 @@ public:
   int clientNum;
   // id of the most relevant (most recently started) active season
   int32_t mostRelevantSeasonId{};
+  // Active seasons when the completion was processed. Stored on the worker
+  // thread and passed along with the result object, since '_activeSeasons'
+  // may be mutated by a worker thread while the callback is being executed.
+  std::vector<Timerun::Season> activeSeasons;
   // Most relevant season record
   std::map<int, bool> isTopRecordPerSeason;
   std::map<int, NewRecord> newOwnRecordsPerSeason;
+  // segments this completion improved, per season
+  std::map<int32_t, std::vector<Timerun::BestSegmentUpdate>> bestSegmentUpdates;
 
   // our previous overall record
   std::optional<Timerun::Record> playerPreviousOverallRecord;
@@ -2694,11 +3696,16 @@ void TimerunV2::checkRecord(Player *player) {
 
         std::map<int, Timerun::Record> playerNewTopRecordForSeason{};
         std::map<int, bool> isNewRecordForSeason{};
+        std::vector<Timerun::RecordCompletion> completions;
 
         // go through active seasons and check if we beat any of the old
         // records if we did, we store the record in
         // playerNewTopRecordForSeason this only checks against our own
         // personal previous times, not against other player's times
+        // one timestamp for the whole completion: every active season's copy of
+        // this run, and the segments derived from it, must share a record date
+        const auto recordDate = TimeUtils::getCurrentTime(false);
+
         for (auto seasonId : _activeSeasonsIds) {
           Timerun::Record record;
           record.seasonId = seasonId;
@@ -2707,7 +3714,7 @@ void TimerunV2::checkRecord(Player *player) {
           record.userId = userId;
           record.time = completionTime;
           record.checkpoints = checkpoints;
-          record.recordDate = TimeUtils::getCurrentTime(false);
+          record.recordDate = recordDate;
           record.playerName = playerName;
           record.metadata = metadata;
 
@@ -2724,17 +3731,20 @@ void TimerunV2::checkRecord(Player *player) {
           isNewRecordForSeason[seasonId] = isNewRecord;
 
           if (isNewRecord) {
-            if (insert) {
-              _repository->insertRecord(record);
-            } else {
-              _repository->updateRecord(record);
-            }
-            playerNewTopRecordForSeason[seasonId] = std::move(record);
+            playerNewTopRecordForSeason[seasonId] = record;
           }
+
+          completions.emplace_back(Timerun::RecordCompletion{
+              std::move(record), isNewRecord, insert});
         }
+
+        // record, history and segment writes for every season copy of this
+        // completion are one transaction
+        auto bestSegmentUpdates = _repository->recordCompletion(completions);
 
         auto result = std::make_unique<CheckRecordResult>();
         result->clientNum = clientNum;
+        result->bestSegmentUpdates = std::move(bestSegmentUpdates);
 
         // go through old records and update any records we might have beaten
         for (const auto &s : isNewRecordForSeason) {
@@ -2768,7 +3778,7 @@ void TimerunV2::checkRecord(Player *player) {
             auto topTime = topRecordIt->second.time;
 
             // store the old record
-            if (seasonId == defaultSeasonId) {
+            if (seasonId == Timerun::DEFAULT_SEASON_ID) {
               result->previousOverallRecord = topRecordIt->second;
             } else {
               result->previousSeasonalRecord = topRecordIt->second;
@@ -2789,7 +3799,7 @@ void TimerunV2::checkRecord(Player *player) {
         }
 
         auto playerPreviousOverallRecordIt =
-            playerTopRecordForSeason.find(defaultSeasonId);
+            playerTopRecordForSeason.find(Timerun::DEFAULT_SEASON_ID);
 
         // store our own previous overall record
         if (playerPreviousOverallRecordIt != end(playerTopRecordForSeason)) {
@@ -2807,6 +3817,7 @@ void TimerunV2::checkRecord(Player *player) {
         }
 
         result->mostRelevantSeasonId = mostRelevantSeason->id;
+        result->activeSeasons = _activeSeasons;
 
         return result;
       },
@@ -2830,9 +3841,11 @@ void TimerunV2::checkRecord(Player *player) {
                 : 0;
 
         // Overall record
-        if (checkRecordResult->isTopRecordPerSeason[defaultSeasonId]) {
+        if (checkRecordResult
+                ->isTopRecordPerSeason[Timerun::DEFAULT_SEASON_ID]) {
           const auto record =
-              checkRecordResult->newOwnRecordsPerSeason[defaultSeasonId];
+              checkRecordResult
+                  ->newOwnRecordsPerSeason[Timerun::DEFAULT_SEASON_ID];
 
           previousTopRecordTime =
               checkRecordResult->previousOverallRecord.has_value()
@@ -2902,7 +3915,7 @@ void TimerunV2::checkRecord(Player *player) {
         // By default, print the other seasons to console
         for (const auto &record : checkRecordResult->newOwnRecordsPerSeason) {
           const auto seasonId = record.first;
-          if (seasonId == defaultSeasonId ||
+          if (seasonId == Timerun::DEFAULT_SEASON_ID ||
               seasonId == checkRecordResult->mostRelevantSeasonId) {
             continue;
           }
@@ -2937,6 +3950,116 @@ void TimerunV2::checkRecord(Player *player) {
 
           if (!foundCachedRecord) {
             _players[clientNum]->records.push_back(newRecord.second.record);
+          }
+        }
+
+        // Patch the in-memory best segments with whatever this completion
+        // improved. Only the default season feeds the caches, since that is
+        // what the server command sends.
+        const auto updatesIt = checkRecordResult->bestSegmentUpdates.find(
+            Timerun::DEFAULT_SEASON_ID);
+
+        if (updatesIt != checkRecordResult->bestSegmentUpdates.end()) {
+          auto &globalSegments = bestSegments[activeRunName];
+          auto &personalSegments =
+              _players[clientNum]->bestSegments[activeRunName];
+
+          for (const auto &update : updatesIt->second) {
+            const auto size = static_cast<size_t>(update.segment);
+
+            if (globalSegments.size() < size) {
+              globalSegments.resize(size);
+            }
+
+            if (personalSegments.size() < size) {
+              personalSegments.resize(size);
+            }
+
+            if (update.global) {
+              globalSegments[update.segment - 1] = update.time;
+            }
+
+            if (update.personal) {
+              personalSegments[update.segment - 1] = update.time;
+            }
+          }
+        }
+
+        // Announce the best segments this completion beat, one line per scope
+        // rather than one per segment: a record run improves nearly every
+        // segment by construction, so per-segment lines are noisiest exactly
+        // where they say least. The updates carry every write, first sets
+        // included, so filter on a prior existing - a segment set for the
+        // first time beat nothing, the same rule the record announcements
+        // follow. A global best is necessarily also a personal best, so it
+        // counts in both the server-best popup and the player's own line.
+        const auto runName = StringUtils::sanitize(activeRunName);
+
+        const auto segmentList = [](const std::vector<int32_t> &segments) {
+          return StringUtils::join(
+              Container::map(
+                  segments,
+                  [](int32_t segment) { return std::to_string(segment); }),
+              ", ");
+        };
+
+        // The updates are keyed by active season, so walk the seasons for the
+        // names and pull each one's updates; a season with nothing improved is
+        // simply skipped.
+        for (const auto &activeSeason : checkRecordResult->activeSeasons) {
+          const auto seasonUpdatesIt =
+              checkRecordResult->bestSegmentUpdates.find(activeSeason.id);
+
+          if (seasonUpdatesIt == checkRecordResult->bestSegmentUpdates.end()) {
+            continue;
+          }
+
+          const bool isDefaultSeason =
+              activeSeason.id == Timerun::DEFAULT_SEASON_ID;
+
+          std::vector<int32_t> globalSegments;
+          std::vector<int32_t> personalSegments;
+
+          for (const auto &update : seasonUpdatesIt->second) {
+            if (update.global && update.previousGlobal.has_value()) {
+              globalSegments.push_back(update.segment);
+            }
+
+            if (update.personal && update.previousPersonal.has_value()) {
+              personalSegments.push_back(update.segment);
+            }
+          }
+
+          if (isDefaultSeason && !globalSegments.empty()) {
+            const auto count = static_cast<int>(globalSegments.size());
+
+            Printer::popupAll(
+                "^3%s ^7set ^3%d^7 new server-best segment%s on ^3%s^7 (%s)!",
+                playerName, count, count == 1 ? "" : "s", runName,
+                segmentList(globalSegments));
+          }
+
+          if (personalSegments.empty()) {
+            continue;
+          }
+
+          const auto count = static_cast<int>(personalSegments.size());
+          const std::string plural = count == 1 ? "" : "s";
+          const auto list = segmentList(personalSegments);
+
+          // the default season is the overall best, so its line stays bare;
+          // the others name themselves, the way their record lines do
+          if (isDefaultSeason) {
+            Printer::console(
+                clientNum,
+                "^7You beat your best on ^3%d^7 segment%s of ^7^3%s^7 (%s)!\n",
+                count, plural, runName, list);
+          } else {
+            Printer::console(
+                clientNum,
+                "^7You beat your best on ^3%d^7 segment%s of ^7^3%s^7 on "
+                "season ^3%s^7 (%s)!\n",
+                count, plural, runName, activeSeason.name, list);
           }
         }
 
