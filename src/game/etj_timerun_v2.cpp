@@ -3842,8 +3842,8 @@ void TimerunV2::checkRecord(Player *player) {
 
         return result;
       },
-      [this, completionTime, activeRunName, playerName,
-       clientNum](std::unique_ptr<SynchronizationContext::ResultBase> result) {
+      [this, completionTime, activeRunName, playerName, clientNum,
+       userId](std::unique_ptr<SynchronizationContext::ResultBase> result) {
         const auto checkRecordResult =
             dynamic_cast<CheckRecordResult *>(result.get());
 
@@ -3958,19 +3958,26 @@ void TimerunV2::checkRecord(Player *player) {
                   diffString));
         }
 
-        for (const auto &newRecord :
-             checkRecordResult->newOwnRecordsPerSeason) {
-          bool foundCachedRecord = false;
+        // It's possible that the player may have disconnected right after
+        // the run ends, thus '_players[clientNum]' may be a null slot.
+        // Resolve by user ID so we target a valid slot.
+        auto *const player = findPlayerByUserId(userId);
 
-          for (auto &cachedRecord : _players[clientNum]->records) {
-            if (cachedRecord.isSameRunAs(&newRecord.second.record)) {
-              cachedRecord = newRecord.second.record;
-              foundCachedRecord = true;
+        if (player) {
+          for (const auto &newRecord :
+               checkRecordResult->newOwnRecordsPerSeason) {
+            bool foundCachedRecord = false;
+
+            for (auto &cachedRecord : player->records) {
+              if (cachedRecord.isSameRunAs(&newRecord.second.record)) {
+                cachedRecord = newRecord.second.record;
+                foundCachedRecord = true;
+              }
             }
-          }
 
-          if (!foundCachedRecord) {
-            _players[clientNum]->records.push_back(newRecord.second.record);
+            if (!foundCachedRecord) {
+              player->records.push_back(newRecord.second.record);
+            }
           }
         }
 
@@ -3982,8 +3989,6 @@ void TimerunV2::checkRecord(Player *player) {
 
         if (updatesIt != checkRecordResult->bestSegmentUpdates.end()) {
           auto &globalSegments = bestSegments[activeRunName];
-          auto &personalSegments =
-              _players[clientNum]->bestSegments[activeRunName];
 
           for (const auto &update : updatesIt->second) {
             const auto size = static_cast<size_t>(update.segment);
@@ -3992,16 +3997,24 @@ void TimerunV2::checkRecord(Player *player) {
               globalSegments.resize(size);
             }
 
-            if (personalSegments.size() < size) {
-              personalSegments.resize(size);
-            }
-
             if (update.global) {
               globalSegments[update.segment - 1] = update.time;
             }
+          }
 
-            if (update.personal) {
-              personalSegments[update.segment - 1] = update.time;
+          if (player) {
+            auto &personalSegments = player->bestSegments[activeRunName];
+
+            for (const auto &update : updatesIt->second) {
+              const auto size = static_cast<size_t>(update.segment);
+
+              if (personalSegments.size() < size) {
+                personalSegments.resize(size);
+              }
+
+              if (update.personal) {
+                personalSegments[update.segment - 1] = update.time;
+              }
             }
           }
         }
