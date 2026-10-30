@@ -145,6 +145,12 @@ void CG_NewClientInfo(int clientNum) {
   newInfo.selected = ci->selected;
   newInfo.totalWeapAcc = ci->totalWeapAcc;
 
+  // preserve spectator HUD sync cache/revision across clientinfo refreshes
+  newInfo.cgazHudValues = ci->cgazHudValues;
+  newInfo.snaphudHudValues = ci->snaphudHudValues;
+  newInfo.hasFullHudSync = ci->hasFullHudSync;
+  newInfo.hudSyncRevision = ci->hudSyncRevision;
+
   // isolate the player's name
   v = Info_ValueForKey(configstring, "n");
   Q_strncpyz(newInfo.name, v, sizeof(newInfo.name));
@@ -240,6 +246,12 @@ void CG_NewClientInfo(int clientNum) {
 
   v = Info_ValueForKey(configstring, "vs");
   newInfo.snaphud = Q_atoi(v);
+
+  newInfo.specHudAllowed = true;
+  v = Info_ValueForKey(configstring, "sha");
+  if (*v) {
+    newInfo.specHudAllowed = Q_atoi(v) > 0;
+  }
 
   v = Info_ValueForKey(configstring, "i");
   newInfo.clientIsInactive = Q_atoi(v);

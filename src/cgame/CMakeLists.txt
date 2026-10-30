@@ -102,6 +102,7 @@ add_library(cgame MODULE
 	"etj_servercommands.cpp"
 	"etj_snaphud_data.cpp"
 	"etj_snaphud_v2.cpp"
+	"etj_spectator_hud_sync.cpp"
 	"etj_spectatorinfo_data.cpp"
 	"etj_spectatorinfo_drawable.cpp"
 	"etj_strafe_quality_v2.cpp"

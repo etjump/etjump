@@ -24,11 +24,14 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
 #include <optional>
+#include <string>
 
 #include "etj_cgaz_data.h"
 #include "etj_irenderable.h"
+#include "../game/etj_shared.h"
 
 namespace ETJump {
 class CvarUpdateHandler;
@@ -44,6 +47,10 @@ public:
   bool beforeRender() override;
   void render() const override;
 
+  [[nodiscard]] std::array<std::string,
+                           Constants::SpectatorHudSync::CgazCvarNames.size()>
+  getHudSyncValues() const;
+
 private:
   void updateCGaz1(const CGazData::State &s);
   void updateCGaz2(const CGazData::State &s);
@@ -55,12 +62,14 @@ private:
   static float updateMaxAngle(const CGazData::State &s, float angleMaxCos);
 
   void startListeners();
+  void updateColors();
   void setThickness(const vmCvar_t *cvar);
 
   void renderCGaz1() const;
   void renderCGaz2() const;
 
-  static bool canSkipDraw(const CGazData::State &s);
+  bool canSkipDraw(const CGazData::State &s) const;
+  void refreshRenderSettings();
 
   struct CGaz1 {
     float minAngle;
@@ -83,6 +92,8 @@ private:
   };
 
   CGaz1 cgaz1{};
+  std::array<std::string, 4> cgaz1ColorStrings{};
+  std::string cgaz1MidlineColorString;
 
   struct CGaz2 {
     float velAngle;
@@ -102,6 +113,25 @@ private:
   };
 
   CGaz2 cgaz2{};
+  std::array<std::string, 2> cgaz2ColorStrings{};
+
+  struct RenderSettings {
+    int drawCgaz{};
+    bool drawSnapZone{};
+    bool drawMidLine{};
+    float cgazY{};
+    float cgazHeight{};
+    float cgazFov{};
+    float cgaz2Y{};
+    float cgaz2FixedSpeed{};
+    bool cgaz2HighRes{};
+    float cgaz2Thickness1{};
+    float cgaz2Thickness2{};
+    bool stretchCgaz{};
+    float cgaz2WishDirFixedSpeed{};
+    bool cgaz2WishDirUniformLength{};
+    int cgaz2NoVelocityDir{};
+  } settings;
 
   int32_t lastUpdateTime{};
 
