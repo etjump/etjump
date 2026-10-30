@@ -23,6 +23,8 @@
  */
 
 #include "etj_levels.h"
+
+#include <memory>
 #include "etj_local.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
@@ -49,8 +51,8 @@ bool Levels::Add(int level, std::string const name, std::string const commands,
     return false;
   }
 
-  std::shared_ptr<Level> levelPtr(new Level(level, name, greeting, commands));
-  levels_.push_back(levelPtr);
+  auto levelPtr = std::make_shared<Level>(level, name, greeting, commands);
+  levels_.push_back(std::move(levelPtr));
 
   if (!WriteToConfig()) {
     return false;
@@ -104,19 +106,19 @@ bool Levels::CreateDefaultLevels() {
 
   auto tempLevel = std::make_shared<Level>(
       0, "Visitor", "Welcome Visitor [n]^7! Your last visit was on [t]!", "a");
-  levels_.push_back(tempLevel);
+  levels_.push_back(std::move(tempLevel));
 
   tempLevel = std::make_shared<Level>(
       1, "Friend", "Welcome Friend [n]^7! Your last visit was [d] ago!", "a");
-  levels_.push_back(tempLevel);
+  levels_.push_back(std::move(tempLevel));
 
   tempLevel = std::make_shared<Level>(2, "Moderator",
                                       "Welcome Moderator [n]^7!", "*-Asv");
-  levels_.push_back(tempLevel);
+  levels_.push_back(std::move(tempLevel));
 
   tempLevel = std::make_shared<Level>(3, "Administrator",
                                       "Welcome Administrator [n]^7!", "*");
-  levels_.push_back(tempLevel);
+  levels_.push_back(std::move(tempLevel));
 
   if (!WriteToConfig()) {
     return false;
@@ -358,7 +360,7 @@ bool Levels::ReadFromConfig() {
   }
 
   if (levelOpen) {
-    levels_.push_back(tempLevel);
+    levels_.push_back(std::move(tempLevel));
   }
   return true;
 }

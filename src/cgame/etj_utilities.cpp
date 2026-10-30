@@ -23,6 +23,7 @@
  */
 
 #include <string>
+#include <utility>
 
 #include "etj_utilities.h"
 #include "cg_local.h"
@@ -61,7 +62,7 @@ std::string composeShader(const char *name, ShaderStages stages) {
 }
 
 int setTimeout(std::function<void()> fun, int delay) {
-  return cgame.utils.eventLoop->schedule(fun, delay);
+  return cgame.utils.eventLoop->schedule(std::move(fun), delay);
 }
 
 bool clearTimeout(int handle) {
@@ -69,7 +70,7 @@ bool clearTimeout(int handle) {
 }
 
 int setInterval(std::function<void()> fun, int delay) {
-  return cgame.utils.eventLoop->schedulePersistent(fun, delay);
+  return cgame.utils.eventLoop->schedulePersistent(std::move(fun), delay);
 }
 
 bool clearInterval(int handle) {
@@ -77,7 +78,8 @@ bool clearInterval(int handle) {
 }
 
 int setImmediate(std::function<void()> fun) {
-  return cgame.utils.eventLoop->schedule(fun, 0, TaskPriorities::Immediate);
+  return cgame.utils.eventLoop->schedule(std::move(fun), 0,
+                                         TaskPriorities::Immediate);
 }
 
 bool clearImmediate(int handle) {
@@ -169,12 +171,13 @@ bool skipPortalDraw(const int selfNum, const int otherNum) {
     return false;
   }
 
-  if (etj_portalTeam.integer == static_cast<int32_t>(PortalTeam::ALL) ||
+  if (etj_portalTeam.integer == static_cast<int32_t>(PortalTeamOpts::ALL) ||
       (etj_viewPlayerPortals.integer && !cgs.clientinfo[otherNum].hideMe)) {
     return false;
   }
 
-  if (etj_portalTeam.integer == static_cast<int32_t>(PortalTeam::FIRETEAM) &&
+  if (etj_portalTeam.integer ==
+          static_cast<int32_t>(PortalTeamOpts::FIRETEAM) &&
       CG_IsOnSameFireteam(selfNum, otherNum)) {
     return false;
   }
@@ -200,7 +203,7 @@ void registerGameShader(const int32_t index, const char *shaderStr) {
   const auto shaders = StringUtils::split(shaderStr, " ");
   const int32_t start = index * MAX_SHADERS_PER_INDEX;
 
-  for (int32_t i = 0; i < shaders.size(); i++) {
+  for (int32_t i = 0; i < static_cast<int32_t>(shaders.size()); i++) {
     // 1-indexed, index 0 is always empty (invalid)
     const int32_t shaderNum = start + i + 1;
     const std::string &shader = shaders[i];

@@ -8,6 +8,7 @@
 
 #include "g_local.h"
 #include "etj_entity_utilities.h"
+#include "etj_portalgun_shared.h"
 
 /*
 ===============================================================================
@@ -3778,13 +3779,18 @@ void SP_func_portaltarget(gentity_t *ent) {
   int portalSize = 0;
   G_SpawnInt("portalsize", "0", &portalSize);
 
-  if (portalSize > 512) {
-    portalSize = 512;
+  if (portalSize > ETJump::MAX_PORTAL_TARGET_SIZE) {
+    portalSize = ETJump::MAX_PORTAL_TARGET_SIZE;
   }
 
   if (portalSize > 0) {
     ent->count = portalSize;
   }
+
+  // network the portal target info so client can predict portal placement
+  vec3_t center;
+  ETJump::EntityUtilities::getOriginOrBmodelCenter(ent, center);
+  ETJump::PortalgunShared::setPortalTarget(ent->s, ent->count, center);
 }
 
 /*
@@ -4442,7 +4448,6 @@ void use_invisible_user(gentity_t *ent, gentity_t *other,
 }
 
 void SP_func_invisible_user(gentity_t *ent) {
-  int i;
   char *sound;
   char *cursorhint;
 
@@ -4489,51 +4494,6 @@ void SP_func_invisible_user(gentity_t *ent) {
   G_SpawnInt("volume", "255", &ent->s.onFireStart);
   if (!ent->s.onFireStart) {
     ent->s.onFireStart = 255;
-  }
-}
-
-/*
-==========
-G_Activate
-
-  Generic activation routine for doors
-==========
-*/
-void G_Activate(gentity_t *ent, gentity_t *activator) {
-  if ((ent->s.apos.trType == TR_STATIONARY &&
-       ent->s.pos.trType == TR_STATIONARY) &&
-      ent->active == qfalse) {
-    // trigger the ent if possible, if not, then we'll just wait
-    // at the marker until it opens, which could be never(!?)
-    if (ent->key < 0) // ent force locked
-    {
-      return;
-    }
-
-    if (!Q_stricmp(ent->classname,
-                   "script_mover")) // RF, dont activate script_mover's
-    {
-      return;
-    }
-
-    // hack fix for bigdoor1 on tram1_21
-
-    if (!(ent->teammaster)) {
-      ent->active = qtrue;
-      Use_BinaryMover(ent, activator, activator);
-      G_UseTargets(ent->teammaster, activator);
-      return;
-    }
-
-    if (ent->team && ent != ent->teammaster) {
-      ent->teammaster->active = qtrue;
-      Use_BinaryMover(ent->teammaster, activator, activator);
-      G_UseTargets(ent->teammaster, activator);
-    } else {
-      ent->active = qtrue;
-      Use_BinaryMover(ent, activator, activator);
-      G_UseTargets(ent->teammaster, activator);
-    }
   }
 }
 

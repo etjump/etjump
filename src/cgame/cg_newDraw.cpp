@@ -155,12 +155,7 @@ void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted,
           8) {
     icon = cgs.media.browningIcon;
   } else {
-    if (drawHighlighted) {
-      // icon = cg_weapons[ realweap ].weaponIcon[1];
-      icon = cg_weapons[realweap].weaponIcon[1]; // we don't have icon[0];
-    } else {
-      icon = cg_weapons[realweap].weaponIcon[1];
-    }
+    icon = cg_weapons[realweap].weaponIcon[1]; // we don't have icon[0];
   }
 
   // pulsing grenade icon to help the player 'count' in their head

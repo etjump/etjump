@@ -168,7 +168,6 @@ Called on a reconnect
 */
 void G_ReadSessionData(gclient_t *client) {
   char s[MAX_STRING_CHARS];
-  qboolean test;
   auto clientNum = ClientNum(client);
 
   trap_Cvar_VariableStringBuffer(va("session%i", clientNum), s, sizeof(s));

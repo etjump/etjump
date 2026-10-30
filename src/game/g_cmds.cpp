@@ -967,7 +967,8 @@ void setPlayerOffset(gentity_t *ent) {
                     CONTENTS_NONOCLIP);
 
   if (!g_cheats.integer &&
-      game.worldspawn->noNoclip == (trace.fraction == 1.0f)) {
+      !WorldspawnShared::areaAllowsAction(
+          game.worldspawn->resolvedKeysForClient(ent).noNoclip, trace)) {
     Printer::console(clientNum, "^7You cannot ^3setoffset ^7to this area.\n");
     return;
   }
@@ -2128,7 +2129,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
 
   // if chat message is too long, e.g. being sent from console
   // cut it and put ellipsis at the end
-  if (Q_strnlen(chatText, MAX_SAY_TEXT) > len) {
+  if (Q_strnlen(chatText, MAX_SAY_TEXT) > static_cast<size_t>(len)) {
     text[len - 2] = '.';
     text[len - 3] = '.';
     text[len - 4] = '.';
@@ -3042,7 +3043,8 @@ void Cmd_Vote_f(gentity_t *ent) {
   const size_t maxMaps = game.rtv->getRtvMaps()->size() - 1;
 
   if (isRtvVote && isRtvVoteCmd) {
-    if (!std::isdigit(voteArg[0]) || mapNum < 0 || mapNum > maxMaps) {
+    if (!std::isdigit(voteArg[0]) || mapNum < 0 ||
+        static_cast<size_t>(mapNum) > maxMaps) {
       printRtvVoteMsgs();
       return;
     }
@@ -4690,22 +4692,6 @@ static int getPlayerClassId(const std::string &string) {
     case 's':
     default:
       return PC_SOLDIER;
-  }
-}
-
-static char getPlayerClassSymbol(const int num) {
-  switch (num) {
-    case PC_MEDIC:
-      return 'm';
-    case PC_ENGINEER:
-      return 'e';
-    case PC_FIELDOPS:
-      return 'f';
-    case PC_COVERTOPS:
-      return 'c';
-    case PC_SOLDIER:
-    default:
-      return 's';
   }
 }
 

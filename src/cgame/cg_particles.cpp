@@ -86,7 +86,6 @@ static float shaderAnimSTRatio[MAX_SHADER_ANIMS] = {
     1, // NERVE - SMF - changed from 1.405 to 1
     1, 1, 1, 1, 1, 1,
 };
-static int numShaderAnims;
 // done.
 
 inline constexpr int PARTICLE_GRAVITY = 40;
@@ -131,7 +130,6 @@ void CG_ClearParticles() {
           trap_R_RegisterShader(va("%s%i", shaderAnimNames[i], j + 1));
     }
   }
-  numShaderAnims = i;
   // done.
 
   initparticles = qtrue;
@@ -710,14 +708,6 @@ void CG_AddParticleToScene(cparticle_t *p, vec3_t org, float alpha) {
     i = p->shaderAnim;
     j = static_cast<int>(std::floor(ratio * shaderAnimCounts[p->shaderAnim]));
     p->pshader = shaderAnims[i][j];
-
-    // JPW NERVE more particle testing
-    if (cg_fxflags & 1) {
-      p->roll = 0;
-      p->pshader = getTestShader();
-      rotate_ang[ROLL] = 90;
-    }
-    // jpw
 
     if (p->roll) {
       vectoangles(cg.refdef_current->viewaxis[0], rotate_ang);
@@ -1355,12 +1345,6 @@ void CG_ParticleDirtBulletDebris_Core(vec3_t org, vec3_t vel, int duration,
   p->type = P_SMOKE;
 
   p->pshader = shader;
-  if (cg_fxflags & 1) {
-    p->pshader = getTestShader();
-    p->rotate = qfalse;
-    p->roll = 0;
-    p->type = P_SPRITE;
-  }
 
   VectorCopy(org, p->org);
   VectorCopy(vel, p->vel);
@@ -1395,9 +1379,9 @@ void CG_ParticleExplosion(const char *animStr, vec3_t origin, vec3_t vel,
       break;
     }
   }
+
   if (!shaderAnimNames[anim]) {
-    CG_Error("CG_ParticleExplosion: unknown animation string: %s\n", animStr);
-    return;
+    CG_Error("%s: unknown animation string: %s\n", __func__, animStr);
   }
 
   if (!free_particles) {

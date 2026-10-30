@@ -12,6 +12,7 @@ USER INTERFACE MAIN
 #include <memory>
 
 #include "etj_colorpicker.h"
+#include "etj_keep_alive.h"
 #include "etj_local.h"
 #include "etj_menu_integrity_checker.h"
 #include "etj_quick_connect.h"
@@ -21,8 +22,10 @@ USER INTERFACE MAIN
 #include "../cgame/etj_color_parser.h"
 #include "../cgame/etj_cvar_parser.h"
 
+#include "../game/etj_fatal_error_shared.h"
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_filesystem.h"
+#include "../game/etj_test_fault.h"
 
 // NERVE - SMF
 inline constexpr int AXIS_TEAM = 0;
@@ -111,21 +114,24 @@ void _UI_MouseEvent(int dx, int dy);
 void _UI_Refresh(int realtime);
 qboolean _UI_IsFullscreen(void);
 
-extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
-                                     intptr_t arg2, intptr_t arg3,
-                                     intptr_t arg4, intptr_t arg5,
-                                     intptr_t arg6) {
+static intptr_t dispatchCommand(const int command, const intptr_t arg0,
+                                const intptr_t arg1, const intptr_t arg2) {
   switch (command) {
     case UI_GETAPIVERSION:
       return UI_API_VERSION;
 
-    case UI_INIT:
+    case UI_INIT: {
+      ETJ_TEST_FAULT_SCOPE("UI_INIT");
       _UI_Init(arg1, arg2);
       return 0;
+    }
 
-    case UI_SHUTDOWN:
+    case UI_SHUTDOWN: {
+      ETJ_TEST_FAULT_SCOPE("UI_SHUTDOWN");
+      ETJump::FatalErrorBoundary::protectActiveFrames();
       _UI_Shutdown();
       return 0;
+    }
 
     case UI_KEY_EVENT:
       _UI_KeyEvent(arg0, arg1 ? qtrue : qfalse);
@@ -135,9 +141,12 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
       _UI_MouseEvent(arg0, arg1);
       return 0;
 
-    case UI_REFRESH:
+    case UI_REFRESH: {
+      ETJ_TEST_FAULT_SCOPE("UI_REFRESH");
+      ETJump::releaseKeptModules(static_cast<int>(arg0));
       _UI_Refresh(arg0);
       return 0;
+    }
 
     case UI_IS_FULLSCREEN:
       return _UI_IsFullscreen();
@@ -149,8 +158,10 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
     case UI_GET_ACTIVE_MENU:
       return _UI_GetActiveMenu();
 
-    case UI_CONSOLE_COMMAND:
+    case UI_CONSOLE_COMMAND: {
+      ETJ_TEST_FAULT_SCOPE("UI_CONSOLE_COMMAND");
       return UI_ConsoleCommand(arg0);
+    }
 
     case UI_DRAW_CONNECT_SCREEN:
       UI_DrawConnectScreen(arg0 ? qtrue : qfalse);
@@ -165,6 +176,17 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
   }
 
   return -1;
+}
+
+extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
+                                     intptr_t arg2, intptr_t arg3,
+                                     intptr_t arg4, intptr_t arg5,
+                                     intptr_t arg6) {
+  // a failed console command still counts as handled,
+  // so the engine doesn't pass it on
+  return ETJump::FatalErrorBoundary::run(
+      [&] { return dispatchCommand(command, arg0, arg1, arg2); },
+      command == UI_CONSOLE_COMMAND ? qtrue : qfalse);
 }
 
 void AssetCache() {
@@ -1080,10 +1102,10 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
     handle = trap_PC_LoadSource(DEFAULT_MENU_FILE);
 
     if (!handle) {
-      trap_Error(
-          va(S_COLOR_RED
-             "%s: default menu file '%s' not found, unable to continue!\n",
-             __func__, DEFAULT_MENU_FILE));
+      Com_Error(ERR_DROP,
+                S_COLOR_RED
+                "%s: default menu file '%s' not found, unable to continue!\n",
+                __func__, DEFAULT_MENU_FILE);
     }
   }
 
@@ -2424,8 +2446,8 @@ qboolean UI_OwnerDrawVisible(int flags) {
 static qboolean UI_Handicap_HandleKey(int flags, float *special, int key) {
   if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_ENTER ||
       key == K_KP_ENTER) {
-    int h;
-    h = Com_Clamp(5, 100, trap_Cvar_VariableValue("handicap"));
+    int32_t h = std::clamp(
+        static_cast<int32_t>(trap_Cvar_VariableValue("handicap")), 5, 100);
     if (key == K_MOUSE2) {
       h -= 5;
     } else {
@@ -3063,8 +3085,8 @@ static void UI_LoadDemos() {
     beginning.name = "..";
     beginning.displayName = "^7demos";
 
-    uiInfo.demoObjects.push_back(beginning);
-    uiInfo.demoObjects.push_back(back);
+    uiInfo.demoObjects.push_back(std::move(beginning));
+    uiInfo.demoObjects.push_back(std::move(back));
   }
 
   std::copy(std::begin(directories), std::end(directories),
@@ -3285,8 +3307,10 @@ void UI_RunMenuScript(const char **args) {
       trap_Cvar_Set("ui_connecting", "1");
       trap_Cvar_Set("cg_thirdPerson", "0");
       trap_Cvar_Set("cg_cameraOrbit", "0");
-      trap_Cvar_SetValue("dedicated", Com_Clamp(0, 2, ui_dedicated.integer));
-      trap_Cvar_SetValue("g_gametype", Com_Clamp(0, 8, ui_netGameType.integer));
+      trap_Cvar_SetValue("dedicated", static_cast<float>(std::clamp(
+                                          ui_dedicated.integer, 0, 2)));
+      trap_Cvar_SetValue("g_gametype", static_cast<float>(std::clamp(
+                                           ui_netGameType.integer, 0, 8)));
 
       trap_Cmd_ExecuteText(
           EXEC_APPEND,
@@ -7689,7 +7713,7 @@ cvarTable_t cvarTable[] = {
     {&ui_master, "ui_master", "0", CVAR_ARCHIVE},
 
     {&ui_brassTime, "cg_brassTime", "2500", CVAR_ARCHIVE}, // JPW NERVE
-    {&ui_drawCrosshair, "cg_drawCrosshair", "4", CVAR_ARCHIVE},
+    {&ui_drawCrosshair, "cg_drawCrosshair", "5", CVAR_ARCHIVE},
     {&ui_drawCrosshairNames, "cg_drawCrosshairNames", "1", CVAR_ARCHIVE},
     {&ui_drawCrosshairPickups, "cg_drawCrosshairPickups", "1",
      CVAR_ARCHIVE}, //----(SA) added
@@ -7777,7 +7801,6 @@ cvarTable_t cvarTable[] = {
 
     {&g_gameType, "g_gameType", "2", CVAR_SERVERINFO | CVAR_LATCH},
     {NULL, "cg_drawBuddies", "1", CVAR_ARCHIVE},
-    {NULL, "cg_drawRoundTimer", "0", CVAR_ARCHIVE},
     {NULL, "cg_showblood", "1", CVAR_ARCHIVE},
     {NULL, "cg_bloodFlash", "1.0", CVAR_ARCHIVE},
     {NULL, "cg_autoReload", "1", CVAR_ARCHIVE},
@@ -7792,10 +7815,10 @@ cvarTable_t cvarTable[] = {
     {NULL, "cg_useScreenshotJPEG", "1", CVAR_ARCHIVE},
     {NULL, "cg_drawGun", "1", CVAR_ARCHIVE},
     {NULL, "cg_drawCompass", "1", CVAR_ARCHIVE},
-    {NULL, "cg_drawRoundTimer", "0", CVAR_ARCHIVE},
+    {NULL, "cg_drawRoundTimer", "1", CVAR_ARCHIVE},
     {NULL, "cg_drawReinforcementTime", "0", CVAR_ARCHIVE},
     {NULL, "cg_cursorHints", "1", CVAR_ARCHIVE},
-    {NULL, "cg_crosshairPulse", "1", CVAR_ARCHIVE},
+    {NULL, "cg_crosshairPulse", "0", CVAR_ARCHIVE},
     {NULL, "cg_drawCrosshairNames", "1", CVAR_ARCHIVE},
     {NULL, "cg_crosshairColor", "White", CVAR_ARCHIVE},
     {NULL, "cg_crosshairAlpha", "1.0", CVAR_ARCHIVE},
@@ -7823,7 +7846,7 @@ cvarTable_t cvarTable[] = {
     {&cg_crosshairAlphaAlt, "cg_crosshairAlphaAlt", "1.0", CVAR_ARCHIVE},
     {&cg_crosshairColor, "cg_crosshairColor", "White", CVAR_ARCHIVE},
     {&cg_crosshairColorAlt, "cg_crosshairColorAlt", "White", CVAR_ARCHIVE},
-    {&cg_crosshairSize, "cg_crosshairSize", "48", CVAR_ARCHIVE},
+    {&cg_crosshairSize, "cg_crosshairSize", "40", CVAR_ARCHIVE},
     // game mappings (for create server option)
     {NULL, "bot_minplayers", "0", CVAR_ARCHIVE},
     {NULL, "g_ipcomplaintlimit", "3", CVAR_ARCHIVE},

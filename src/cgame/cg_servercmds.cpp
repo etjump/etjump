@@ -150,7 +150,10 @@ void CG_ParseServerinfo(void) {
 void CG_ParseSysteminfo(void) {
   const char *info = CG_ConfigString(CS_SYSTEMINFO);
 
-  cgs.shared = Q_atoi(Info_ValueForKey(info, "shared"));
+  if (ETJump::cgame.demo.compatibility->flags.useSharedCvar) {
+    ETJump::DemoCompatibility::parseSharedCvarBits(
+        Q_atoi(Info_ValueForKey(info, "shared")));
+  }
 
   cgs.pmove_msec = Q_atoi(Info_ValueForKey(info, "pmove_msec"));
   if (cgs.pmove_msec < 8) {
@@ -979,7 +982,6 @@ static void CG_MapRestart(void) {
   CG_LoadObjectiveData();
 
   CG_InitLocalEntities();
-  CG_InitMarkPolys();
 
   cg.editingSpeakers = qfalse;
 
@@ -1017,8 +1019,6 @@ static void CG_MapRestart(void) {
   cg.latchAutoActions = qfalse;
   cg.latchVictorySound = qfalse; // NERVE - SMF
                                  // JPW NERVE -- reset render flags
-  cg_fxflags = 0;
-  // jpw
 
   // we really should clear more parts of cg here and stop sounds
   cg.v_dmg_time = 0;

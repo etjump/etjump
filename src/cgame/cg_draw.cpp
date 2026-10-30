@@ -2678,7 +2678,7 @@ static void CG_DrawJumpDelay(void) {
   CG_Trace(&trace, start, nullptr, nullptr, end, ps->clientNum, traceContents);
 
   if (trace.surfaceFlags & SURF_NOJUMPDELAY) {
-    if (cgs.shared & BG_LEVEL_NO_JUMPDELAY) {
+    if (ETJump::cgame.sharedWSKeys.noJumpDelay) {
       CG_DrawStringExt(x, y, "D", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH,
                        TINYCHAR_HEIGHT, 0);
     } else {

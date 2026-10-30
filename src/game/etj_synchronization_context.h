@@ -33,6 +33,7 @@
 #include <condition_variable>
 #include <atomic>
 #include <thread>
+#include <utility>
 
 #include "etj_shared.h"
 #include "etj_utilities.h"
@@ -68,9 +69,11 @@ private:
     Operation() = delete;
 
     explicit Operation(TaskFn task, CallbackFn callback, ErrorFn errorCallback)
-        : status(Status::Incomplete), task(task), callback(callback),
-          errorCallback(errorCallback), result(std::unique_ptr<ResultBase>()),
-          error(std::runtime_error("")) {}
+        : status(Status::Incomplete), task(std::move(task)),
+          callback(std::move(callback)),
+          errorCallback(std::move(errorCallback)),
+          result(std::unique_ptr<ResultBase>()), error(std::runtime_error("")) {
+    }
   };
 
   void worker();

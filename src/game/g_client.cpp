@@ -18,7 +18,6 @@ If the start position is targeting an entity, the players camera will start out
 facing that ent (like an info_notnull)
 */
 void SP_info_player_deathmatch(gentity_t *ent) {
-  int i;
   vec3_t dir;
 
   ent->enemy = G_PickTarget(ent->target);
@@ -301,7 +300,7 @@ void CopyToBodyQue(gentity_t *ent) {
 
   // if client is in a nodrop area, don't leave the body
   contents = trap_PointContents(ent->client->ps.origin, -1);
-  if (!BG_DropItems(contents, shared.integer)) {
+  if (!BG_DropItems(contents, game.worldspawn->sharedKeys.noDrop)) {
     return;
   }
 
@@ -471,7 +470,8 @@ void limbo(gentity_t *ent, qboolean makeCorpse) {
     contents = trap_PointContents(ent->r.currentOrigin, -1);
     // stored in player_die()
     ent->s.weapon = ent->client->limboDropWeapon;
-    if (makeCorpse && BG_DropItems(contents, shared.integer) &&
+    if (makeCorpse &&
+        BG_DropItems(contents, game.worldspawn->sharedKeys.noDrop) &&
         !ent->client->sess.timerunActive) {
       TossClientItems(ent);
     }
@@ -762,20 +762,20 @@ void ResetPlayerAmmo(gclient_t *client, gentity_t *ent) {
 
       if ((i == WP_DYNAMITE || i == WP_PLIERS) &&
           game.worldspawn->noExplosives !=
-              ETJump::Worldspawn::NoExplosives::NO_DYNAMITE) {
+              ETJump::Worldspawn::NoExplosivesOpts::NO_DYNAMITE) {
         AddWeaponToPlayer(client, static_cast<weapon_t>(i), 0, 1, qfalse);
         continue;
       }
 
       if (i == WP_SATCHEL && game.worldspawn->noExplosives ==
-                                 ETJump::Worldspawn::NoExplosives::OFF) {
+                                 ETJump::Worldspawn::NoExplosivesOpts::OFF) {
         AddWeaponToPlayer(client, WP_SATCHEL, 0, 1, qfalse);
         AddWeaponToPlayer(client, WP_SATCHEL_DET, 0, 0, qfalse);
         continue;
       }
 
       if (game.worldspawn->noExplosives !=
-              ETJump::Worldspawn::NoExplosives::OFF &&
+              ETJump::Worldspawn::NoExplosivesOpts::OFF &&
           !ETJump::weaponAllowedWithNoExplosives(i)) {
         continue;
       }
@@ -800,7 +800,8 @@ void ResetPlayerAmmo(gclient_t *client, gentity_t *ent) {
   }
 
   // no nades if explosives are disabled or timerun is active
-  if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosives::OFF &&
+  if (game.worldspawn->noExplosives ==
+          ETJump::Worldspawn::NoExplosivesOpts::OFF &&
       !client->sess.timerunActive) {
     weapon_t nadeType;
     switch (client->sess.sessionTeam) {
@@ -861,7 +862,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
     // Engineer gets dynamite
     if (pc == PC_ENGINEER) {
       if (game.worldspawn->noExplosives !=
-              ETJump::Worldspawn::NoExplosives::NO_DYNAMITE &&
+              ETJump::Worldspawn::NoExplosivesOpts::NO_DYNAMITE &&
           !client->sess.timerunActive) {
         AddWeaponToPlayer(client, WP_DYNAMITE, 0, 1, qfalse);
         AddWeaponToPlayer(client, WP_PLIERS, 0, 1, qfalse);
@@ -876,7 +877,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                                 GetAmmoTableData(WP_KAR98)->defaultStartingClip,
                                 qtrue);
               if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+                      ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_GPG40,
@@ -901,7 +902,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
               break;
           }
           if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+                  ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
             AddWeaponToPlayer(
                 client, WP_LANDMINE,
@@ -917,7 +918,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
                   GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
                   GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
               if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+                      ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_M7, GetAmmoTableData(WP_M7)->defaultStartingAmmo,
@@ -943,7 +944,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
               break;
           }
           if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+                  ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
             AddWeaponToPlayer(
                 client, WP_LANDMINE,
@@ -995,7 +996,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
               break;
           }
           if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+                  ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
           }
@@ -1026,7 +1027,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
               break;
           }
           if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+                  ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 1, qfalse);
           }
@@ -1072,7 +1073,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
               break;
           }
           if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+                  ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
           }
@@ -1102,7 +1103,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
               break;
           }
           if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+                  ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 1, qfalse);
           }
@@ -1118,7 +1119,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
               break;
             case WP_PANZERFAUST:
               if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+                      ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   team_maxPanzers.integer && !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_PANZERFAUST,
@@ -1149,7 +1150,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
               break;
             case WP_MORTAR:
               if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+                      ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_MORTAR,
@@ -1188,7 +1189,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
               break;
             case WP_PANZERFAUST:
               if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+                      ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   team_maxPanzers.integer && !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_PANZERFAUST,
@@ -1219,7 +1220,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
               break;
             case WP_MORTAR:
               if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+                      ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   !client->sess.timerunActive) {
                 AddWeaponToPlayer(
                     client, WP_MORTAR,
@@ -1319,7 +1320,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         // to change this so the thing voids on
         // death
         if (game.worldspawn->noExplosives ==
-                ETJump::Worldspawn::NoExplosives::OFF &&
+                ETJump::Worldspawn::NoExplosivesOpts::OFF &&
             !client->sess.timerunActive) {
           if (G_FindSatchel(&g_entities[client->ps.clientNum])) {
             AddWeaponToPlayer(client, WP_SATCHEL, 0, 0,
@@ -1504,7 +1505,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
 
       if (pc == PC_SOLDIER &&
           (game.worldspawn->noExplosives ==
-           ETJump::Worldspawn::NoExplosives::OFF) &&
+           ETJump::Worldspawn::NoExplosivesOpts::OFF) &&
           !client->sess.timerunActive) {
         if (client->sess.sessionTeam == TEAM_AXIS) {
           AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 4, qfalse);
@@ -1514,7 +1515,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
       }
       if (pc == PC_COVERTOPS &&
           (game.worldspawn->noExplosives ==
-           ETJump::Worldspawn::NoExplosives::OFF) &&
+           ETJump::Worldspawn::NoExplosivesOpts::OFF) &&
           !client->sess.timerunActive) {
         if (client->sess.sessionTeam == TEAM_AXIS) {
           AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 2, qfalse);
@@ -1748,7 +1749,8 @@ const char *GetParsedIP(const char *ipadd) {
   if (strspn(ipadd, "0123456789.:") < strlen(ipadd)) {
     return NULL;
   }
-  sprintf(ipge, "%u.%u.%u.%u", b1, b2, b3, b4);
+
+  Com_sprintf(ipge, sizeof(ipge), "%u.%u.%u.%u", b1, b2, b3, b4);
   return ipge;
 }
 
@@ -1852,7 +1854,7 @@ void ClientUserinfoChanged(int clientNum) {
   // TODO: Check for hardware info spoofing
 
   s = Info_ValueForKey(userinfo, "cg_uinfo");
-  sscanf(s, "%u %u %u %u %f %i", &client->pers.clientFlags,
+  sscanf(s, "%u %u %u %i %f %i", &client->pers.clientFlags,
          &client->pers.clientTimeNudge, &client->pers.clientMaxPackets,
          &client->pers.maxFPS, &client->pers.noclipScale,
          &client->pers.touchPickupWeapons);

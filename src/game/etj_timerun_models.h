@@ -34,6 +34,8 @@ inline constexpr int32_t DEFAULT_PAGE_SIZE_ALL_RUNS = 3;
 inline constexpr int32_t DEFAULT_PAGE_SIZE_SINGLE_RUN = 20;
 inline constexpr int32_t MAX_PAGE_SIZE_SINGLE_RUN = 100;
 inline constexpr int32_t MAX_PAGE_SIZE_ALL_RUNS = 10;
+inline constexpr int32_t RECORD_HISTORY_DEFAULT_SIZE = 20;
+inline constexpr int32_t DEFAULT_SEASON_ID = 1;
 
 struct Season {
   int id;
@@ -59,6 +61,16 @@ struct Record {
   }
 };
 
+// one season's copy of a completed run, with everything the write path needs
+// to know about it: whether it improves the player's record, and whether the
+// player had no record for this run yet. All copies of a completion are
+// written together in one transaction.
+struct RecordCompletion {
+  Record record;
+  bool isNewRecord{};
+  bool insert{};
+};
+
 struct Checkpoints {
   int32_t seasonID;
   int32_t runTime;
@@ -66,6 +78,27 @@ struct Checkpoints {
   std::string map;
   std::string run;
   std::vector<int32_t> checkpoints;
+};
+
+// a segment whose best time a completion improved; personal and global say
+// which tables the improvement landed in, and the previous times say what it
+// beat. A previous time is absent when that table had no entry for the
+// segment, meaning this completion set it rather than beat it.
+struct BestSegmentUpdate {
+  int32_t segment{};                       // 1-based segment number
+  int32_t time{};                          // the new best duration
+  bool personal{};                         // improved the player's own best
+  bool global{};                           // improved the server-wide best
+  std::optional<int32_t> previousPersonal; // the personal time it beat
+  std::optional<int32_t> previousGlobal;   // the global time it beat
+};
+
+// the default-season segment caches for the current map; 'player' is only
+// populated when the command targets the current map
+struct SegmentCacheSnapshot {
+  std::map<std::string, std::vector<int32_t>> global;
+  std::map<std::string, std::vector<int32_t>> player;
+  bool hasPlayer{};
 };
 
 struct AddSeasonParams {
@@ -127,5 +160,223 @@ struct RecordDetailsParams {
   std::string run;
   int32_t rank{};
   bool exactMap;
+};
+
+struct RemoveRecordParams {
+  int32_t clientNum{};
+  std::string season;                // exact match if given
+  std::string map;                   // exact match only
+  std::string run;                   // exact match only
+  int32_t userId{};                  // id of the record owner
+  int32_t removedBy{};               // id of whoever issued the removal
+  std::optional<std::string> reason; // required when removing others' records
+};
+
+struct RemovedRecord {
+  int32_t id{}; // id of the archived record in 'removed_records'
+  Record record;
+  int32_t removedBy{};
+  TimeUtils::Time removedAt;
+  std::optional<std::string> reason;
+};
+
+struct RemovedRecordEntry {
+  // the season copies of a single completion
+  // contains a single record when a season filter is applied
+  std::vector<RemovedRecord> records;
+};
+
+struct ListRemovedRecordsParams {
+  int32_t clientNum{};
+  int32_t callerId{};               // user ID of the client using the command
+  std::string season;               // empty = no filter
+  std::string map;                  // empty = no filter
+  std::string run;                  // empty = no filter
+  std::optional<int32_t> userId;    // only list records belonging to this user
+  std::optional<int32_t> removedBy; // only list records removed by this user
+  int32_t page{};
+  int32_t pageSize{};
+};
+
+struct RemovedRecordsPage {
+  std::vector<RemovedRecordEntry> entries;
+  int32_t page{}; // effective page, capped to the last page if out of range
+  int32_t numPages{};
+};
+
+struct RestoreRecordParams {
+  int32_t clientNum{};
+  int32_t callerId{};
+  int32_t recordId{};
+  bool force{};   // force restore in case of conflicts (swaps records)
+  bool isAdmin{}; // whether we have the 'TIMERUN_MANAGEMENT' admin flag
+};
+
+struct RestoreConflict {
+  Record existing;  // the record currently occupying the slot
+  Record toRestore; // the removed record that would be restored
+};
+
+struct RestoreRecordResult {
+  int32_t numTargeted{};                  // total targeted records
+  std::vector<Record> restored;           // records restored into 'record'
+  std::vector<Record> swapped;            // occupants archived by the swap
+  std::vector<RestoreConflict> conflicts; // unresolved conflicts (no --force)
+  std::vector<RemovedRecord> skipped;     // copies skipped due to permissions
+};
+
+struct RecordHistoryParams {
+  int32_t clientNum{};
+  int32_t userId{};
+  std::string season;
+  std::string map;
+  std::string run;
+  int32_t maxRecords{};
+  bool exactMap{};
+};
+
+struct BestSegmentsParams {
+  int32_t clientNum{};
+  std::string season;
+  std::string map;
+  std::string run;
+  int32_t userId{};
+  bool global{}; // server-wide bests when true, personal bests otherwise
+  bool exactMap{};
+};
+
+struct BestSegmentHistoryParams {
+  int32_t clientNum{};
+  std::string season;
+  std::string map;
+  std::string run;
+  int32_t userId{};
+  int32_t segment{};
+  int32_t maxRecords{};
+  bool exactMap{};
+};
+
+// one row of a best-segment listing; 'userId' is the holder for the global
+// listing, and the owning player for a personal listing. A partial season
+// match can return rows from more than one season, so each row carries its
+// 'seasonId'
+struct BestSegmentDetails {
+  int32_t seasonId{};
+  std::string map;
+  std::string run;
+  int32_t segment{};
+  int32_t time{};
+  int32_t userId{};
+  std::string playerName;
+  TimeUtils::Time recordDate;
+  std::map<std::string, std::string> metadata;
+  int32_t rank{};
+};
+
+// one improvement row from 'player_best_segments_history'. 'removed' is
+// computed at query time: either the source run or the split itself has been
+// removed, and history rows are never deleted
+struct BestSegmentHistoryEntry {
+  int32_t seasonId{};
+  std::string map;
+  std::string run;
+  int32_t segment{};
+  int32_t time{};
+  int32_t rank{};
+  std::string playerName;
+  TimeUtils::Time recordDate;
+  bool removed{};
+};
+
+struct RemoveSegmentParams {
+  int32_t clientNum{};
+  std::string season; // empty = default season + cascade
+  std::string map;    // exact match only
+  std::string run;    // exact match only
+  int32_t userId{};
+  int32_t segment{};
+  int32_t removedBy{};
+  std::optional<std::string> reason; // required when removing others' splits
+  bool exactMap{};
+};
+
+struct RemovedSegment {
+  int32_t id{}; // id of the archived split in 'removed_segments'
+  int32_t seasonId{};
+  std::string map;
+  std::string run;
+  int32_t userId{};
+  int32_t segment{};
+  int32_t time{};
+  TimeUtils::Time recordDate;
+  std::string playerName;
+  std::map<std::string, std::string> metadata;
+  int32_t removedBy{};
+  TimeUtils::Time removedAt;
+  std::optional<std::string> reason;
+};
+
+struct RestoreSegmentParams {
+  int32_t clientNum{};
+  int32_t callerId{};
+  int32_t segmentId{};
+  bool force{};   // force restore in case of conflicts (displaces the occupant)
+  bool isAdmin{}; // whether we have the 'TIMERUN_MANAGEMENT' admin flag
+};
+
+struct RestoreSegmentConflict {
+  RemovedSegment toRestore;
+  BestSegmentDetails occupant;
+};
+
+struct RestoreSegmentResult {
+  int32_t numTargeted{}; // total targeted archived copies
+  std::vector<RemovedSegment> restored;
+  std::vector<BestSegmentDetails> swapped;
+  std::vector<RestoreSegmentConflict> conflicts;
+  std::vector<RemovedSegment> skipped;
+};
+
+struct ListRemovedSegmentsParams {
+  int32_t clientNum{};
+  int32_t callerId{};
+  std::string season;               // empty = no filter
+  std::string map;                  // empty = no filter
+  std::string run;                  // empty = no filter
+  std::optional<int32_t> userId;    // only list splits belonging to this user
+  std::optional<int32_t> removedBy; // only list splits removed by this user
+  std::optional<int32_t> segment;   // only list this segment
+  int32_t page{};
+  int32_t pageSize{};
+};
+
+struct RemovedSegmentEntry {
+  // the season copies of one split value from one run; contains one segment
+  // when a season filter is applied
+  std::vector<RemovedSegment> segments;
+};
+
+struct RemovedSegmentsPage {
+  std::vector<RemovedSegmentEntry> entries;
+  int32_t page{}; // effective page, capped to the last page if out of range
+  int32_t numPages{};
+};
+
+struct HistoricalRecord {
+  Record r{};
+  int32_t rank{};
+  bool removed{};
+};
+
+struct HistoricalRunGroup {
+  std::string map;
+  std::string run;
+  std::vector<HistoricalRecord> records;
+  int32_t numHidden{};
+};
+
+struct HistoricalSeasonGroup {
+  int32_t seasonId{};
+  std::vector<HistoricalRunGroup> runs;
 };
 } // namespace ETJump::Timerun

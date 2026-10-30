@@ -61,10 +61,12 @@ add_library(qagame MODULE
 	"etj_deathrun_system.cpp"
 	"etj_entity_utilities.cpp"
 	"etj_entity_utilities_shared.cpp"
+	"etj_fatal_error_shared.cpp"
 	"etj_file.cpp"
 	"etj_filesystem.cpp"
 	"etj_fireteam_countdown.cpp"
 	"etj_func_static_client.cpp"
+	"etj_game_failure.cpp"
 	"etj_inactivity_timer.cpp"
 	"etj_json_utilities.cpp"
 	"etj_levels.cpp"
@@ -75,6 +77,7 @@ add_library(qagame MODULE
 	"etj_missilepad.cpp"
 	"etj_motd.cpp"
 	"etj_portalgun.cpp"
+	"etj_portalgun_shared.cpp"
 	"etj_progression_tracker.cpp"
 	"etj_progression_tracker_parser.cpp"
 	"etj_result_set_formatter.cpp"
@@ -91,6 +94,7 @@ add_library(qagame MODULE
 	"etj_target_init.cpp"
 	"etj_target_random.cpp"
 	"etj_target_spawn_relay.cpp"
+	"etj_target_wskey_overrides.cpp"
 	"etj_trace_utils.cpp"
 	"etj_time_utilities.cpp"
 	"etj_timerun_repository.cpp"
@@ -105,6 +109,12 @@ add_library(qagame MODULE
 	${GAME_HEADERS}
 )
 target_compile_definitions(qagame PRIVATE GAMEDLL)
+
+if (USE_TEST_FAULTS)
+	target_sources(qagame PRIVATE "etj_test_fault.cpp")
+	target_compile_definitions(qagame PRIVATE USE_TEST_FAULTS)
+endif ()
+
 target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt::fmt toml11::toml11)
 target_link_libraries(qagame PRIVATE $<IF:$<CXX_COMPILER_ID:MSVC>,,pthread>)
 set_target_properties(qagame PROPERTIES

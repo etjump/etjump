@@ -148,41 +148,40 @@ int CG_SoundPickOldestRandomSound(soundScript_t *sound, vec3_t org,
 
   oldestSound = nullptr;
   scriptSound = sound->soundList;
+
   while (scriptSound) {
     if (!oldestSound || (scriptSound->lastPlayed < oldestTime)) {
       oldestTime = scriptSound->lastPlayed;
       oldestSound = scriptSound;
     }
+
     scriptSound = scriptSound->next;
   }
 
-  if (oldestSound) {
-    int pos = rand() % oldestSound->numsounds;
-
-    // play this sound
-    if (!sound->streaming) {
-      if (!oldestSound->sounds[pos].sfxHandle) {
-        oldestSound->sounds[pos].sfxHandle =
-            trap_S_RegisterSound(oldestSound->sounds[pos].filename,
-                                 qfalse); // FIXME: make compressed
-                                          // settable through the
-                                          // soundscript
-      }
-      trap_S_StartSound(org, entnum, sound->channel,
-                        oldestSound->sounds[pos].sfxHandle);
-      return trap_S_GetSoundLength(oldestSound->sounds[pos].sfxHandle);
-    } else {
-      return trap_S_StartStreamingSound(
-          oldestSound->sounds[pos].filename,
-          sound->looping ? oldestSound->sounds[pos].filename : nullptr, entnum,
-          sound->channel, sound->attenuation);
-    }
-  } else {
-    CG_Error("Unable to locate a valid sound for soundScript: %s\n",
-             sound->name);
+  if (!oldestSound) {
+    CG_Error("%s: Unable to locate a valid sound for soundScript: %s\n",
+             __func__, sound->name);
   }
 
-  return 0;
+  int pos = rand() % oldestSound->numsounds;
+
+  // play this sound
+  if (!sound->streaming) {
+    if (!oldestSound->sounds[pos].sfxHandle) {
+      // FIXME: make compressed settable through the soundscript
+      oldestSound->sounds[pos].sfxHandle =
+          trap_S_RegisterSound(oldestSound->sounds[pos].filename, qfalse);
+    }
+
+    trap_S_StartSound(org, entnum, sound->channel,
+                      oldestSound->sounds[pos].sfxHandle);
+    return trap_S_GetSoundLength(oldestSound->sounds[pos].sfxHandle);
+  }
+
+  return trap_S_StartStreamingSound(
+      oldestSound->sounds[pos].filename,
+      sound->looping ? oldestSound->sounds[pos].filename : nullptr, entnum,
+      sound->channel, sound->attenuation);
 }
 
 void CG_AddBufferedSoundScript(soundScript_t *sound) {

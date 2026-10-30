@@ -67,6 +67,10 @@ public:
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
     int lastCheckpointTimestamp{};
     std::array<bool, MAX_TIMERUN_CHECKPOINTS> checkpointIndicesHit{};
+    // gold segment tracking - includes the last checkpoint -> end,
+    // therefore the array needs to be +1 to max checkpoint count
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS + 1> bestPersonalSegment{};
+    std::array<bool, MAX_TIMERUN_CHECKPOINTS + 1> bestGlobalSegment{};
   };
 
   Timerun(const std::shared_ptr<PlayerEventsHandler> &playerEventsHandler,

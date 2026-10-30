@@ -4,16 +4,6 @@
 #include "q_shared.h"
 #include <cstring>
 
-float Com_Clamp(float min, float max, float value) {
-  if (value < min) {
-    return min;
-  }
-  if (value > max) {
-    return max;
-  }
-  return value;
-}
-
 /*
 COM_FixPath()
 unixifies a pathname
@@ -352,45 +342,6 @@ static const char *SkipWhitespace(const char *data, qboolean *hasNewLines) {
   }
 
   return data;
-}
-
-int COM_Compress(char *data_p) {
-  char *datai, *datao;
-  int c, size;
-
-  size = 0;
-  datai = datao = data_p;
-  if (datai) {
-    while ((c = static_cast<unsigned char>(*datai)) != 0) {
-      if (c == 13 || c == 10) {
-        *datao = static_cast<char>(c);
-        datao++;
-        datai++;
-        size++;
-        // skip double slash comments
-      } else if (c == '/' && datai[1] == '/') {
-        while (*datai && *datai != '\n') {
-          datai++;
-        }
-        // skip /* */ comments
-      } else if (c == '/' && datai[1] == '*') {
-        datai += 2; // Arnout: skip over '/*'
-        while (*datai && (*datai != '*' || datai[1] != '/')) {
-          datai++;
-        }
-        if (*datai) {
-          datai += 2;
-        }
-      } else {
-        *datao = static_cast<char>(c);
-        datao++;
-        datai++;
-        size++;
-      }
-    }
-  }
-  *datao = 0;
-  return size;
 }
 
 char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {

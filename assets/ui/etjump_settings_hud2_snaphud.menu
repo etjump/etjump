@@ -6,7 +6,7 @@
 #define MENU_NAME "etjump_settings_hud2_snaphud"
 #define GROUP_NAME "group_etjump_settings_hud2"
 
-#define NUM_SUBMENUS 10
+#define NUM_SUBMENUS 11
 #define SIDEBAR_BTN_Y (SIDEBAR_Y + (SIDEBAR_H * 0.5) - (((NUM_SUBMENUS * SIDEBAR_BTN_H) + (MAIN_ELEMENT_MARGIN * (NUM_SUBMENUS - 1))) * 0.5))
 
 menuDef {
@@ -49,6 +49,7 @@ menuDef {
     SIDEBUTTON          (8, "JUMP SPEEDS", close MENU_NAME; open etjump_settings_hud2_jumpspeeds)
     SIDEBUTTON          (9, "STRAFE QUALITY", close MENU_NAME; open etjump_settings_hud2_strafequality)
     SIDEBUTTON          (10, "UPMOVE METER", close MENU_NAME; open etjump_settings_hud2_upmove)
+    SIDEBUTTON          (11, "YAW", close MENU_NAME; open etjump_settings_hud2_yaw)
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "SNAPHUD")
 
@@ -56,7 +57,7 @@ menuDef {
         CVARINTLABEL        (SETTINGS_ITEM_POS(2), "etj_snapHUDOffsetY", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(2), "Snaphud offset Y:", 0.2, SETTINGS_ITEM_H, etj_snapHUDOffsetY 0 -240 240 5, "Sets Y offset of snaphud\netj_snapHUDOffsetY")
         CVARINTLABEL        (SETTINGS_ITEM_POS(3), "etj_snapHUDHeight", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
-        SLIDER              (SETTINGS_ITEM_POS(3), "Snaphud height:", 0.2, SETTINGS_ITEM_H, etj_snapHUDHeight 10 1 100 1, "Sets the height of snaphud\netj_snapHUDHeight")
+        SLIDER              (SETTINGS_ITEM_POS(3), "Snaphud height:", 0.2, SETTINGS_ITEM_H, etj_snapHUDHeight 6 1 100 1, "Sets the height of snaphud\netj_snapHUDHeight")
         CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_snapHUDFov", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
         SLIDER              (SETTINGS_ITEM_POS(4), "Snaphud FOV:", 0.2, SETTINGS_ITEM_H, etj_snapHUDFov 0 0 179 5, "Sets FOV of snaphud, 0 to use your current FOV\netj_snapHUDFov")
         YESNO               (SETTINGS_ITEM_POS(5), "Highlight active zone:", 0.2, SETTINGS_ITEM_H, "etj_snapHUDHLActive", "Highlight active snaphud zone HUD\netj_snapHUDHLActive")

@@ -130,6 +130,7 @@ qboolean useTarget(gentity_t *ent, char *params);
 qboolean wmAnnouncePrivate(gentity_t *ent, char *params);
 qboolean tracker(gentity_t *ent, char *params);
 qboolean changeSkin(gentity_t *ent, char *params);
+qboolean editEntity(gentity_t *ent, char *params);
 } // namespace ETJump::ScriptActions
 
 // these are the actions that each event can call
@@ -248,6 +249,7 @@ g_script_stack_action_t gScriptActions[] = {
     {"wm_announce_private", ETJump::ScriptActions::wmAnnouncePrivate},
     {"tracker", ETJump::ScriptActions::tracker},
     {"changeskin", ETJump::ScriptActions::changeSkin},
+    {"editentity", ETJump::ScriptActions::editEntity},
     {nullptr, nullptr}};
 
 qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event,
@@ -672,6 +674,101 @@ void G_Script_ScriptParse(gentity_t *ent) {
 
           for (token = COM_Parse(&pScript); token && token[0] != '}';
                token = COM_Parse(&pScript)) {
+            // add a space between each param
+            if (strlen(params)) {
+              Q_strcat(params, sizeof(params), " ");
+            }
+
+            // need to wrap this param in quotes since it has more than one word
+            if (strrchr(token, ' ')) {
+              Q_strcat(params, sizeof(params), "\"");
+            }
+
+            Q_strcat(params, sizeof(params), token);
+
+            // need to wrap this param in quotes since it has more than one word
+            if (strrchr(token, ' ')) {
+              Q_strcat(params, sizeof(params), "\"");
+            }
+          }
+        } else if (!Q_stricmp(action->actionString, "editentity")) {
+          /*
+           * 'editentity' finds entities matching the k/v pairs in its 'match'
+           * block, and applies the k/v pairs in its 'set' block to each of
+           * them:
+           *
+           * editentity
+           * {
+           *   match
+           *   {
+           *     <selector k/v pairs>
+           *   }
+           *
+           *   set
+           *   {
+           *     <edited k/v pairs>
+           *   }
+           * }
+           *
+           * the whole block is captured into 'params' as two brace-delimited
+           * blocks: '{ <match pairs> } { <set pairs> }'. brace depth must be
+           * tracked to find the end of the outer block without being fooled
+           * by the nested braces. the 'match'/'set' keywords are only skipped
+           * at the top level of the outer block, so a selector value that
+           * happens to equal 'set' or 'match' is preserved.
+           */
+          token = COM_Parse(&pScript);
+
+          if (token[0] != '{') {
+            COM_ParseError("'{' expected, found: %s.\n", token);
+          }
+
+          int32_t depth = 1;
+
+          while (depth > 0) {
+            token = COM_Parse(&pScript);
+
+            if (!token[0]) {
+              G_Error("%s: Error (line %d): '}' expected, end of script "
+                      "found.\n",
+                      __func__, COM_GetCurrentParseLine());
+            }
+
+            if (token[0] == '{') {
+              // nested block opener, preserved as the structural delimiter
+              depth++;
+              if (strlen(params)) {
+                Q_strcat(params, sizeof(params), " ");
+              }
+
+              Q_strcat(params, sizeof(params), "{");
+              continue;
+            }
+
+            if (token[0] == '}') {
+              depth--;
+              // the outer block's closing brace terminates the block,
+              // everything else is a nested block's closing brace
+              if (depth == 0) {
+                break;
+              }
+
+              if (strlen(params)) {
+                Q_strcat(params, sizeof(params), " ");
+              }
+
+              Q_strcat(params, sizeof(params), "}");
+              continue;
+            }
+
+            // skip the 'match'/'set' block keywords at the top level of the
+            // outer block; inside the nested blocks these are preserved as
+            // regular selector/set values
+            if (depth == 1 &&
+                (!Q_stricmp(token, "match") || !Q_stricmp(token, "set"))) {
+              continue;
+            }
+
             // add a space between each param
             if (strlen(params)) {
               Q_strcat(params, sizeof(params), " ");

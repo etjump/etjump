@@ -42,18 +42,22 @@ class AreaIndicator : public IRenderable {
 
   struct Indicator {
     Indicator(vmCvar_t *controlCvar, vmCvar_t *controlCvarX,
-              vmCvar_t *controlCvarY, int contents, int shared,
-              qhandle_t iconShader);
+              vmCvar_t *controlCvarY, int contents, const AreaOpts *areaOpts,
+              qhandle_t iconShader)
+        : cvar(controlCvar), cvarX(controlCvarX), cvarY(controlCvarY),
+          traceContents(contents), areaOpts(areaOpts), shader(iconShader) {}
 
     vmCvar_t *cvar;
-    bool draw;
-    bool drawForbid;
+    bool draw{};
+    bool drawForbid{};
     vmCvar_t *cvarX;
     vmCvar_t *cvarY;
-    float x;
-    float y;
+    float x{};
+    float y{};
     int traceContents;
-    int sharedValue;
+    // this is a pointer to make sure it updates correctly based on
+    // team/timerun state, for worldspawn key overrides
+    const AreaOpts *areaOpts;
     qhandle_t shader;
   };
 

@@ -6,6 +6,7 @@
 #include "etj_demo_compatibility.h"
 #include "etj_entity_events_handler.h"
 #include "etj_player_events_handler.h"
+#include "etj_portal_prediction.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
@@ -2769,6 +2770,12 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       break;
     case EV_PORTAL_TRAIL:
       if (ETJump::skipPortalDraw(cg.snap->ps.clientNum, es->otherEntityNum2)) {
+        break;
+      }
+
+      // trail for our own shot was already drawn when it was predicted
+      if (cg.snap->ps.clientNum == es->otherEntityNum2 &&
+          ETJump::cgame.systems.portalPrediction->isActive()) {
         break;
       }
 

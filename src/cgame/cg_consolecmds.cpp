@@ -146,12 +146,6 @@ void CG_ScoresUp_f(void) {
   }
 }
 
-static void CG_LoadHud_f(void) {
-  //	String_Init();
-  //	Menu_Reset();
-  //	CG_LoadMenus("ui/hud.txt");
-}
-
 static void CG_LoadWeapons_f(void) {
   int i;
 
@@ -1279,7 +1273,6 @@ static const consoleCommand_t noDemoCommands[] = {
     {"tell_target", CG_TellTarget_f},
     {"tell_attacker", CG_TellAttacker_f},
     {"fade", CG_Fade_f}, // duffy
-    {"loadhud", CG_LoadHud_f},
     {"loadweapons", CG_LoadWeapons_f},
 
     {"mp_QuickMessage", CG_QuickMessage_f},
@@ -1572,11 +1565,20 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("ranks");
   trap_AddCommand("top");
   trap_AddCommand("record-details");
+  trap_AddCommand("record-history");
   trap_AddCommand("rankings");
   trap_AddCommand("seasons");
   trap_AddCommand("loadcheckpoints");
   trap_AddCommand("listcheckpoints");
   trap_AddCommand("comparecheckpoints");
+  trap_AddCommand("remove-record");
+  trap_AddCommand("list-removed-records");
+  trap_AddCommand("restore-record");
+  trap_AddCommand("remove-segment");
+  trap_AddCommand("list-removed-segments");
+  trap_AddCommand("restore-segment");
+  trap_AddCommand("best-segments");
+  trap_AddCommand("best-segments-history");
 
   trap_AddCommand("setoffset"); // autocompletion
   trap_AddCommand("interruptRun");

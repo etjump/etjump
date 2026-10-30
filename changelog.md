@@ -1,3 +1,63 @@
+# ETJump 3.7.0
+
+## Added
+* `etj_lerpPmove` cvar to interpolate between physics frames when `pmove_fixed 1` is set [#1994](https://github.com/etjump/etjump/pull/1994)
+  * this should smooth out `pmove_fixed 1` gameplay, and bring the feeling closer to `pmove_fixed 0`
+  * physics are not interpolated, only the rendered view
+* historical timerun record tracking [#2028](https://github.com/etjump/etjump/pull/2028)
+  * every PB improvement is now preserved in the timerun database, rather than just the latest record
+  * record progression can be viewed with `record-history` command
+* `remove-record`, `restore-record` and `list-removed-records` commands for timerun records [#1997](https://github.com/etjump/etjump/pull/1997)
+  * removed records are archived in the timerun database
+  * anyone can remove/restore their own records, admins with `T` flag can remove/restore records from other players
+  * records removed by admins can only be restored by admins
+* best segment tracking for timeruns [#2038](https://github.com/etjump/etjump/pull/2038)
+  * every completion records its best segments, both personal and server-wide
+  * gold splits are shown on the checkpoint timer, configurable with `etj_checkpointsShowGold`
+  * best segments can be viewed with `best-segments` and `best-segments-history`
+* `remove-segment`, `restore-segment` and `list-removed-segments` commands for timerun best segments [#2038](https://github.com/etjump/etjump/pull/2038)
+  * removed segments are archived in the timerun database
+  * anyone can remove/restore their own segments, admins with `T` flag can remove/restore segments from other players
+  * segments removed by admins can only be restored by admins
+* `target_wskey_overrides` entity to override effective worldspawn keys under specific circumstances [#2015](https://github.com/etjump/etjump/pull/2015)
+* client-side prediction for portal gun portal spawning [#2025](https://github.com/etjump/etjump/pull/2025)
+  * portals appear immediately when fired, rather than after a round trip to the server
+  * requires portal prediction to be enabled via `g_portalPredict` or `portalpredict` worldspawn key
+* new supported values for `nonoclip/noprone/nosave` worldspawn keys [#2015](https://github.com/etjump/etjump/pull/2015)
+  * **2** - always allow, regardless of area brushes
+  * **3** - never allow, regardless of area brushes
+* left/right arrow key & mouse wheel support for adjusting slider values [#2033](https://github.com/etjump/etjump/pull/2033)
+* `etj_drawYaw` to display an indicator when turning view left/right [#1390](https://github.com/etjump/etjump/pull/1390)
+* `etj_drawFallDamageDetector` to display fall damage the player would take if falling/jumping to the aimed surface [#2016](https://github.com/etjump/etjump/pull/2016)
+* `editentity` script action to modify an entity without a `scriptname` via mapscripting [#1972](https://github.com/etjump/etjump/pull/1972)
+* bundled mapscripts for `dreamwork` and `the_biome_expedition` [#1992](https://github.com/etjump/etjump/pull/1992) [#2008](https://github.com/etjump/etjump/pull/2008)
+
+## Changed
+* numerous tweaks to default cvar values to improve the out-of-box experience [#1990](https://github.com/etjump/etjump/pull/1990)
+
+## Deprecated
+* `etj_smoothAngles` is deprecated in favor of `etj_lerpPmove`, will be removed in a future version
+
+## Fixed
+* fireteam chat could be visible to players who were not in the senders fireteam [#2014](https://github.com/etjump/etjump/pull/2014)
+* potential crash on timerun completion if active seasons changed during a map [#1996](https://github.com/etjump/etjump/pull/1996)
+* crash if trickjump line file writing failed for some reason [#2003](https://github.com/etjump/etjump/pull/2003)
+* potential crash when issuing timerun season or custom vote management commands from server console [#2009](https://github.com/etjump/etjump/pull/2009)
+* timerun start or `target_init` could force a non-existing weapon for the player [#2017](https://github.com/etjump/etjump/pull/2017)
+* rankings were calculated with different tie-break rules than records [#2023](https://github.com/etjump/etjump/pull/2023)
+* crash if fetching user data from database failed [#2004](https://github.com/etjump/etjump/pull/2004)
+* HUD calculations broke inside `noprone` brushes when cheats were enabled [#2013](https://github.com/etjump/etjump/pull/2013)
+* `record-details` help text was missing an angle bracket on `map name` field [#2027](https://github.com/etjump/etjump/pull/2027)
+* potential crash when viewing particle effects or trails with extreme lag [#2012](https://github.com/etjump/etjump/pull/2012)
+* flamethrower nozzle was flickering on high speeds [#2011](https://github.com/etjump/etjump/pull/2011)
+* rain particles were calculating the blue color channel for top left vertex incorrectly [#2019](https://github.com/etjump/etjump/pull/2019)
+* debris spawned by `spawnrubble` script command was not rotating correctly [#2019](https://github.com/etjump/etjump/pull/2019)
+* unexpected behavior could occur with timerun events if the database failed to initialize [#2029](https://github.com/etjump/etjump/pull/2029) [#2032](https://github.com/etjump/etjump/pull/2032)
+* sped up timerun database migration check that ran on every map load [#2024](https://github.com/etjump/etjump/pull/2024)
+* potential crash on `ENTER/KP_ENTER` when a dropdown menu was open with no highlighted item [#2034](https://github.com/etjump/etjump/pull/2034)
+* potential crash when trying to focus next item in a menu with keyboard in some scenarios [#2000](https://github.com/etjump/etjump/pull/2000)
+* potential crash when trying to iterate menu item with no options [#1999](https://github.com/etjump/etjump/pull/1999)
+
 # ETJump 3.6.2
 
 ## Changed

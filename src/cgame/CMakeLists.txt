@@ -67,10 +67,12 @@ add_library(cgame MODULE
 	"etj_cvar_update_handler.cpp"
 	"etj_demo_compatibility.cpp"
 	"etj_demo_recorder.cpp"
+	"etj_draw_yaw.cpp"
 	"etj_drawable.cpp"
 	"etj_drawspeed2_v2.cpp"
 	"etj_entity_events_handler.cpp"
 	"etj_event_loop.cpp"
+	"etj_falldamage_detector.cpp"
 	"etj_fireteam_completions.cpp"
 	"etj_ignore_completions.cpp"
 	"etj_inline_command_parser.cpp"
@@ -93,6 +95,7 @@ add_library(cgame MODULE
 	"etj_player_bbox.cpp"
 	"etj_player_events_handler.cpp"
 	"etj_pmove_utils_v2.cpp"
+	"etj_portal_prediction.cpp"
 	"etj_quick_follow_drawable.cpp"
 	"etj_rtv_drawable.cpp"
 	"etj_savepos.cpp"
@@ -125,9 +128,11 @@ add_library(cgame MODULE
 	"../game/q_shared.cpp"
 	"../game/etj_command_parser.cpp"
 	"../game/etj_entity_utilities_shared.cpp"
+	"../game/etj_fatal_error_shared.cpp"
 	"../game/etj_file.cpp"
 	"../game/etj_filesystem.cpp"
 	"../game/etj_json_utilities.cpp"
+	"../game/etj_portalgun_shared.cpp"
 	"../game/etj_savepos_shared.cpp"
 	"../game/etj_string_utilities.cpp"
 	"../game/etj_time_utilities.cpp"
@@ -137,6 +142,12 @@ add_library(cgame MODULE
 	${CGAME_HEADERS}
 )
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
+
+if (USE_TEST_FAULTS)
+	target_sources(cgame PRIVATE "../game/etj_test_fault.cpp")
+	target_compile_definitions(cgame PRIVATE USE_TEST_FAULTS)
+endif ()
+
 target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 libuuid4 fmt::fmt toml11::toml11)
 
 set_target_properties(cgame PROPERTIES

@@ -10,8 +10,24 @@ on:
         default: ""
 
 jobs:
+  prebuild:
+    name: Pre-build checks
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Assert warnings are enabled for first-party targets
+        run: python3 scripts/check-warnings-enabled.py ${{ github.workspace }}/build/compile_commands.json
+
   Windows:
     name: Windows ${{ matrix.arch }}
+    needs: prebuild
     runs-on: windows-2022
     strategy:
       fail-fast: false
@@ -49,6 +65,7 @@ jobs:
 
   Linux:
     name: Linux ${{ matrix.arch }}
+    needs: prebuild
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -92,6 +109,7 @@ jobs:
 
   macOS:
     name: macOS ${{ matrix.arch }}
+    needs: prebuild
     runs-on: macos-14
     strategy:
       fail-fast: false

@@ -32,13 +32,13 @@ AreaIndicator::AreaIndicator() {
 
   indicators.emplace_back(&etj_drawSaveIndicator, &etj_saveIndicatorX,
                           &etj_saveIndicatorY, CONTENTS_NOSAVE,
-                          BG_LEVEL_NO_SAVE, cgs.media.saveIcon);
+                          &cgame.sharedWSKeys.noSave, cgs.media.saveIcon);
   indicators.emplace_back(&etj_drawProneIndicator, &etj_proneIndicatorX,
                           &etj_proneIndicatorY, CONTENTS_NOPRONE,
-                          BG_LEVEL_NO_PRONE, cgs.media.proneIcon);
+                          &cgame.sharedWSKeys.noProne, cgs.media.proneIcon);
   indicators.emplace_back(&etj_drawNoclipIndicator, &etj_noclipIndicatorX,
                           &etj_noclipIndicatorY, CONTENTS_NONOCLIP,
-                          BG_LEVEL_NO_NOCLIP, cgs.media.noclipIcon);
+                          &cgame.sharedWSKeys.noNoclip, cgs.media.noclipIcon);
 
   ci = nullptr;
   ps = nullptr;
@@ -47,39 +47,32 @@ AreaIndicator::AreaIndicator() {
   printProneMessage = false;
 }
 
-AreaIndicator::Indicator::Indicator(vmCvar_t *controlCvar,
-                                    vmCvar_t *controlCvarX,
-                                    vmCvar_t *controlCvarY, const int contents,
-                                    const int shared,
-                                    const qhandle_t iconShader) {
-  draw = false;
-  drawForbid = false;
-  cvar = controlCvar;
-  cvarX = controlCvarX;
-  cvarY = controlCvarY;
-  x = 0;
-  y = 0;
-  traceContents = contents;
-  sharedValue = shared;
-  shader = iconShader;
-}
-
 void AreaIndicator::checkPronePrint(trace_t &trace) {
   if (cgs.cheats || ci->team == TEAM_SPECTATOR) {
     printProneMessage = false;
     return;
   }
 
-  if (cgs.shared & BG_LEVEL_NO_PRONE) {
-    if (trace.fraction != 1.0f) {
+  switch (cgame.sharedWSKeys.noProne) {
+    default:
+      if (trace.fraction == 1.0f) {
+        printProneMessage = false;
+        return;
+      }
+
+      break;
+    case AreaOpts::FORBID_OUTSIDE:
+      if (trace.fraction != 1.0f) {
+        printProneMessage = false;
+        return;
+      }
+
+      break;
+    case AreaOpts::ALLOW_EVERYWHERE:
       printProneMessage = false;
       return;
-    }
-  } else {
-    if (trace.fraction == 1.0f) {
-      printProneMessage = false;
-      return;
-    }
+    case AreaOpts::FORBID_EVERYWHERE:
+      break;
   }
 
   if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE) {
@@ -121,36 +114,29 @@ bool AreaIndicator::beforeRender() {
       checkPronePrint(trace);
     }
 
+    const bool inside = trace.fraction != 1.0f;
+    const bool forbidden =
+        !WorldspawnShared::areaAllowsAction(*indicator.areaOpts, trace);
+
     switch (static_cast<DrawMode>(indicator.cvar->integer)) {
       case DrawMode::Always:
         indicator.draw = true;
         drawAny = true;
-
-        if (((cgs.shared & indicator.sharedValue) && trace.fraction == 1.0f) ||
-            (!(cgs.shared & indicator.sharedValue) && trace.fraction != 1.0f)) {
-          indicator.drawForbid = true;
-        }
-
+        indicator.drawForbid = forbidden;
         break;
       case DrawMode::Outside:
-        if (trace.fraction == 1.0f) {
+        if (!inside) {
           indicator.draw = true;
           drawAny = true;
-
-          if (cgs.shared & indicator.sharedValue) {
-            indicator.drawForbid = true;
-          }
+          indicator.drawForbid = forbidden;
         }
 
         break;
       case DrawMode::Inside:
-        if (trace.fraction != 1.0f) {
+        if (inside) {
           indicator.draw = true;
           drawAny = true;
-
-          if (!(cgs.shared & indicator.sharedValue)) {
-            indicator.drawForbid = true;
-          }
+          indicator.drawForbid = forbidden;
         }
 
         break;

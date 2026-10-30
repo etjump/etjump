@@ -25,7 +25,9 @@
 #include <algorithm>
 
 #include "etj_func_static_client.h"
+#include "etj_entity_utilities.h"
 #include "etj_entity_utilities_shared.h"
+#include "etj_portalgun_shared.h"
 
 namespace ETJump {
 /*
@@ -95,9 +97,15 @@ void FuncStaticClient::spawn(gentity_t *ent) {
     }
   }
 
-  if (ent->spawnflags & Spawnflags::PORTAL_TARGET &&
-      G_SpawnInt("portalsize", "0", &ent->count)) {
-    ent->count = std::clamp(ent->count, 0, 512);
+  if (ent->spawnflags & Spawnflags::PORTAL_TARGET) {
+    if (G_SpawnInt("portalsize", "0", &ent->count)) {
+      ent->count = std::clamp(ent->count, 0, MAX_PORTAL_TARGET_SIZE);
+    }
+
+    // network the portal target info so client can predict portal placement
+    vec3_t center;
+    EntityUtilities::getOriginOrBmodelCenter(ent, center);
+    PortalgunShared::setPortalTarget(ent->s, ent->count, center);
   }
 }
 

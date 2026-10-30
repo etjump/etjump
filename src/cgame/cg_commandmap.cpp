@@ -5,7 +5,6 @@
 
 static mapEntityData_t mapEntities[MAX_GENTITIES];
 static int mapEntityCount = 0;
-static int mapEntityTime = 0;
 static qboolean expanded = qfalse;
 
 extern playerInfo_t pi;
@@ -198,7 +197,6 @@ void CG_ParseMapEntityInfo(int axis_number, int allied_number) {
   int i, offset;
 
   mapEntityCount = 0;
-  mapEntityTime = cg.time;
 
   offset = 3;
 

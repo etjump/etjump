@@ -44,9 +44,11 @@
 #include "etj_custom_command_menu_drawable.h"
 #include "etj_cvar_unlocker.h"
 #include "etj_demo_compatibility.h"
+#include "etj_draw_yaw.h"
 #include "etj_drawspeed2_v2.h"
 #include "etj_entity_events_handler.h"
 #include "etj_event_loop.h"
+#include "etj_falldamage_detector.h"
 #include "etj_jump_speeds_v2.h"
 #include "etj_keyset_system.h"
 #include "etj_leaves_remapper.h"
@@ -57,6 +59,7 @@
 #include "etj_overbounce_watcher.h"
 #include "etj_player_bbox.h"
 #include "etj_player_events_handler.h"
+#include "etj_portal_prediction.h"
 #include "etj_quick_follow_drawable.h"
 #include "etj_rtv_drawable.h"
 #include "etj_savepos.h"
@@ -75,6 +78,7 @@
 #include "etj_upper_right_drawable.h"
 
 #include "../game/etj_syscall_ext_shared.h"
+#include "../game/etj_worldspawn_shared.h"
 
 namespace ETJump {
 void delayedInit() {
@@ -130,6 +134,109 @@ void delayedInit() {
   }
 }
 
+void parseWorldspawnKeys() {
+  const char *s = CG_ConfigString(CS_ETJUMP_WS_KEYS);
+
+  // this won't be present in old demos
+  if (s[0] == '\0') {
+    return;
+  }
+
+  cgame.sharedWSKeysGlobal.noOverbounce =
+      Q_atoi(Info_ValueForKey(s, WorldspawnShared::NO_OVERBOUNCE_CS));
+  cgame.sharedWSKeysGlobal.noJumpDelay =
+      Q_atoi(Info_ValueForKey(s, WorldspawnShared::NO_JUMP_DELAY_CS));
+  cgame.sharedWSKeysGlobal.noDrop =
+      Q_atoi(Info_ValueForKey(s, WorldspawnShared::NO_DROP_CS));
+  cgame.sharedWSKeysGlobal.noWallbug =
+      Q_atoi(Info_ValueForKey(s, WorldspawnShared::NO_WALLBUG_CS));
+  cgame.sharedWSKeysGlobal.portalPredict =
+      Q_atoi(Info_ValueForKey(s, WorldspawnShared::PORTAL_PREDICT_CS));
+
+  // defaults to 1 on server, so treat a missing value the same way
+  const char *portalSurfaces =
+      Info_ValueForKey(s, WorldspawnShared::PORTAL_SURFACES_CS);
+  cgame.sharedWSKeysGlobal.portalSurfaces =
+      portalSurfaces[0] == '\0' || Q_atoi(portalSurfaces);
+
+  cgame.sharedWSKeysGlobal.noSave =
+      std::clamp(static_cast<AreaOpts>(
+                     Q_atoi(Info_ValueForKey(s, WorldspawnShared::NO_SAVE_CS))),
+                 AreaOpts::FORBID_INSIDE, AreaOpts::FORBID_EVERYWHERE);
+  cgame.sharedWSKeysGlobal.noProne =
+      std::clamp(static_cast<AreaOpts>(Q_atoi(
+                     Info_ValueForKey(s, WorldspawnShared::NO_PRONE_CS))),
+                 AreaOpts::FORBID_INSIDE, AreaOpts::FORBID_EVERYWHERE);
+  cgame.sharedWSKeysGlobal.noNoclip =
+      std::clamp(static_cast<AreaOpts>(Q_atoi(
+                     Info_ValueForKey(s, WorldspawnShared::NO_NOCLIP_CS))),
+                 AreaOpts::FORBID_INSIDE, AreaOpts::FORBID_EVERYWHERE);
+
+  cgame.sharedWSKeysGlobal.noFallDamage =
+      std::clamp(static_cast<NoFallDamageOpts>(Q_atoi(
+                     Info_ValueForKey(s, WorldspawnShared::NO_FALL_DAMAGE_CS))),
+                 NoFallDamageOpts::OFF, NoFallDamageOpts::FORCE_ON);
+  cgame.sharedWSKeysGlobal.overbouncePlayers = std::clamp(
+      static_cast<OverbouncePlayersOpts>(
+          Q_atoi(Info_ValueForKey(s, WorldspawnShared::OVERBOUNCE_PLAYERS_CS))),
+      OverbouncePlayersOpts::INHERIT, OverbouncePlayersOpts::FORCE_OFF);
+}
+
+void parseWorldspawnKeyOverrides() {
+  cgame.wsKeyOverrides.clear();
+  const char *s = CG_ConfigString(CS_ETJUMP_WS_KEY_OVERRIDES);
+
+  // no overrides for the current map
+  if (s[0] == '\0') {
+    return;
+  }
+
+  auto splits = StringUtils::split(s, "\\");
+
+  for (const auto &split : splits) {
+    // first entry should be empty since the string starts with '\'
+    if (split.empty()) {
+      continue;
+    }
+
+    const auto values = StringUtils::split(split, ":");
+
+    if (values.size() != 3) {
+      CG_Printf(S_COLOR_RED "%s: malformed value in configstring: %s\n",
+                __func__, StringUtils::join(values, ":").c_str());
+      continue;
+    }
+
+    std::optional<WorldspawnShared::Keys> key;
+
+    for (const auto &desc : WorldspawnShared::keyDescriptors) {
+      if (!desc.csName || !desc.allowOverride) {
+        continue;
+      }
+
+      if (StringUtils::iEqual(desc.csName, values[0])) {
+        key = desc.key;
+        break;
+      }
+    }
+
+    if (!key.has_value()) {
+      CG_Printf(S_COLOR_RED
+                "%s: failed to find key for configstring value '%s'\n",
+                __func__, values[0].c_str());
+      continue;
+    }
+
+    WorldspawnShared::KeyOverride keyOverride{};
+    keyOverride.key = key.value();
+    keyOverride.value = Q_atoi(values[1]);
+    keyOverride.flags =
+        EnumBitset<WorldspawnShared::KeyOverrideFlags>(Q_atoi(values[2]));
+
+    cgame.wsKeyOverrides.emplace_back(keyOverride);
+  }
+}
+
 void initCore() {
   cgame.core.serverCommands = std::make_shared<ClientCommandsHandler>(nullptr);
   cgame.core.consoleCommands =
@@ -176,6 +283,7 @@ static void initSystems() {
                                                     cgame.core.serverCommands);
 
   cgame.systems.commandCompletions = std::make_unique<CommandCompletions>();
+  cgame.systems.portalPrediction = std::make_unique<PortalPrediction>();
 }
 
 void initDemo() {
@@ -318,6 +426,9 @@ static void initHUD() {
 
   cgame.hud.renderables.emplace_back(
       std::make_unique<KeySetSystem>(&etj_drawKeys, cgame.core.cvarUpdate));
+  cgame.hud.renderables.emplace_back(
+      std::make_unique<DrawYaw>(cgame.core.cvarUpdate));
+  cgame.hud.renderables.emplace_back(std::make_unique<FalldamageDetector>());
 
   // FIXME: move to renderables
   ETJump_ClearDrawables();

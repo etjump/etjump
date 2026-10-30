@@ -24,11 +24,36 @@
 
 #pragma once
 #include <array>
+#include <map>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "q_shared.h"
+
+namespace ETJump::TimerunSegments {
+// Segment durations for a completed run: segment i is the time from the
+// previous checkpoint (the run start, for the first) to checkpoint i, and the
+// final segment runs from the last checkpoint to the finish. A run with no
+// usable checkpoint data yields no segments. A leg that could not be measured,
+// such as checkpoints hit on the same command time, is returned as 0 to keep
+// the numbering of the segments that follow it, and must not be recorded as a
+// best. A gap in the checkpoint data is truncated without the finish segment;
+// that only guards against corrupt or hand-edited rows, as the writers always
+// store checkpoints densely.
+std::vector<int32_t>
+computeSegmentTimes(const std::vector<int32_t> &checkpoints,
+                    int32_t completionTime);
+
+// Whether a segment's duration beats the best on record for it, personal and
+// global. A zero-length segment, or one with no recorded best, never counts,
+// so callers need no guard of their own.
+std::pair<bool, bool> bestSegmentBeaten(
+    const std::map<std::string, std::vector<int32_t>> &personalBestSegments,
+    const std::map<std::string, std::vector<int32_t>> &globalBestSegments,
+    const std::string &runName, int32_t segmentIdx, int32_t duration);
+} // namespace ETJump::TimerunSegments
 
 namespace ETJump::TimerunCommands {
 constexpr int INVALID_CLIENT_NUM = -1;
@@ -41,10 +66,13 @@ std::optional<int> parseInteger(const std::string &arg);
 class Start {
 public:
   Start() = default;
-  Start(int clientNum, int startTime, const std::string &runName,
-        const std::optional<int> &previousRecord, bool runHasCheckpoints,
-        std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
-        std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
+  Start(
+      int clientNum, int startTime, const std::string &runName,
+      const std::optional<int> &previousRecord, bool runHasCheckpoints,
+      std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
+      std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints,
+      std::array<bool, MAX_TIMERUN_CHECKPOINTS> currentRunBestPersonalSegments,
+      std::array<bool, MAX_TIMERUN_CHECKPOINTS> currentRunBestGlobalSegments);
 
   int clientNum{};
   int startTime{};
@@ -53,6 +81,11 @@ public:
   bool runHasCheckpoints = false;
   std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
   std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints{};
+  // which of currentRunCheckpoints' segments were gold when they were hit, so
+  // a client that resyncs mid-run (e.g. after 'vid_restart') gets its
+  // verdicts back. All false on a fresh start - only the hits so far are set.
+  std::array<bool, MAX_TIMERUN_CHECKPOINTS> currentRunBestPersonalSegments{};
+  std::array<bool, MAX_TIMERUN_CHECKPOINTS> currentRunBestGlobalSegments{};
 
   [[nodiscard]] std::string serialize() const;
 
@@ -85,16 +118,23 @@ public:
 
   Checkpoint(const int clientNum, const int checkpointNum,
              const int checkpointTime, std::string runName,
-             const int checkpointIndex)
+             const int checkpointIndex, const bool beatPersonal,
+             const bool beatGlobal)
       : clientNum(clientNum), checkpointNum(checkpointNum),
         checkpointTime(checkpointTime), runName(std::move(runName)),
-        checkpointIndex(checkpointIndex) {}
+        checkpointIndex(checkpointIndex), bestPersonalSegment(beatPersonal),
+        bestGlobalSegment(beatGlobal) {}
 
   int clientNum{};
   int checkpointNum{}; // sequential counter, how many checkpoints we've hit
   int checkpointTime{};
   std::string runName;
   int checkpointIndex{}; // index for Player.checkpointIndexesHit
+  // whether this segment beat the best on record when it was hit, so the
+  // client can render gold without knowing the best times.
+  // Only present in server commands since ETJump 3.7.0
+  bool bestPersonalSegment{};
+  bool bestGlobalSegment{};
 
   [[nodiscard]] std::string serialize() const;
 
@@ -160,13 +200,18 @@ class Stop {
 public:
   Stop() = default;
 
-  Stop(int clientNum, int time, std::string runName)
-      : clientNum(clientNum), completionTime(time),
-        runName(std::move(runName)) {}
+  Stop(int clientNum, int time, std::string runName, const bool beatPersonal,
+       const bool beatGlobal)
+      : clientNum(clientNum), completionTime(time), runName(std::move(runName)),
+        beatPersonal(beatPersonal), beatGlobal(beatGlobal) {}
 
   int clientNum{};
   int completionTime{};
   std::string runName;
+  // the finish segment's verdict - the finish closes the run,
+  // so we transmit the verdict on the end command, rather than checkpoint
+  bool beatPersonal{};
+  bool beatGlobal{};
 
   [[nodiscard]] std::string serialize() const;
 

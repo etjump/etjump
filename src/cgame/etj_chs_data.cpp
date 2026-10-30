@@ -141,9 +141,10 @@ void CHSData::setupListeners() {
 
   for (const auto &[chs, obj] : chsObjects) {
     for (const auto &cvar : obj.cvars) {
-      cvarUpdateHandler->subscribe(cvar.cvar, [this, chs](const vmCvar_t *) {
-        updateState(chsObjects.at(chs));
-      });
+      cvarUpdateHandler->subscribe(cvar.cvar,
+                                   [this, chs = chs](const vmCvar_t *) {
+                                     updateState(chsObjects.at(chs));
+                                   });
     }
   }
 }

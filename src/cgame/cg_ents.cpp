@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "etj_portal_prediction.h"
 #include "etj_utilities.h"
 #include "../game/etj_portalgun_shared.h"
 #include "../game/etj_entity_utilities_shared.h"
@@ -2378,35 +2379,30 @@ void CG_CalcEntityLerpPositions(centity_t *cent) {
 }
 
 // Feen: PGM - Drawing the portals....
-static void CG_PortalGate(const centity_t *cent) {
+// 'spawnTime' is the start time of the spawn animation
+void CG_DrawPortalGate(const entityState_t *es, const int spawnTime) {
   polyVert_t polyVerts[4];
   vec3_t verts[4];
   vec3_t pushedOrigin, angleInverse;
   vec3_t axis[3];
 
-  if (ETJump::skipPortalDraw(cg.snap->ps.clientNum,
-                             cent->currentState.otherEntityNum)) {
+  if (ETJump::skipPortalDraw(cg.snap->ps.clientNum, es->otherEntityNum)) {
     return;
   }
 
-  VectorCopy(cent->currentState.angles, angleInverse);
+  VectorCopy(es->angles, angleInverse);
 
   AnglesToAxis(angleInverse, axis);
 
   /* push the origin out a bit */
-  VectorMA(cent->currentState.origin, (-5.0f + 1.0f) /*(-12.0f + 1)*/, axis[0],
-           pushedOrigin);
+  VectorMA(es->origin, (-5.0f + 1.0f) /*(-12.0f + 1)*/, axis[0], pushedOrigin);
 
-  float radius = !cent->currentState.onFireStart
-                     ? ETJump::PORTAL_DRAW_RADIUS
-                     : static_cast<float>(cent->currentState.onFireStart) *
-                           ETJump::PORTAL_DRAW_SCALAR;
+  float radius = !es->onFireStart ? ETJump::PORTAL_DRAW_RADIUS
+                                  : static_cast<float>(es->onFireStart) *
+                                        ETJump::PORTAL_DRAW_SCALAR;
 
-  if (cent->currentState.effect1Time &&
-      cent->currentState.effect1Time + ETJump::PORTAL_SPAWN_ANIM_DURATION >=
-          cg.time) {
-    const auto elapsedTime =
-        static_cast<float>(cg.time - cent->currentState.effect1Time);
+  if (spawnTime && spawnTime + ETJump::PORTAL_SPAWN_ANIM_DURATION >= cg.time) {
+    const auto elapsedTime = static_cast<float>(cg.time - spawnTime);
     float progress = std::clamp(
         elapsedTime / ETJump::PORTAL_SPAWN_ANIM_DURATION, 0.0f, 1.0f);
 
@@ -2446,24 +2442,36 @@ static void CG_PortalGate(const centity_t *cent) {
   polyVerts[3].st[1] = 1;
 
   // our or spectated player's portals
-  if (cent->currentState.otherEntityNum == cg.snap->ps.clientNum) {
-    if (cent->currentState.eType == ET_PORTAL_BLUE) {
+  if (es->otherEntityNum == cg.snap->ps.clientNum) {
+    if (es->eType == ET_PORTAL_BLUE) {
       trap_R_AddPolyToScene(cgs.media.portalBlueShader, 4, polyVerts);
     }
 
-    if (cent->currentState.eType == ET_PORTAL_RED) {
+    if (es->eType == ET_PORTAL_RED) {
       trap_R_AddPolyToScene(cgs.media.portalRedShader, 4, polyVerts);
     }
   } else // others portals
   {
-    if (cent->currentState.eType == ET_PORTAL_BLUE) {
+    if (es->eType == ET_PORTAL_BLUE) {
       trap_R_AddPolyToScene(cgs.media.portalGreenShader, 4, polyVerts);
     }
 
-    if (cent->currentState.eType == ET_PORTAL_RED) {
+    if (es->eType == ET_PORTAL_RED) {
       trap_R_AddPolyToScene(cgs.media.portalYellowShader, 4, polyVerts);
     }
   }
+}
+
+static void CG_PortalGate(const centity_t *cent) {
+  const auto &portalPrediction = ETJump::cgame.systems.portalPrediction;
+
+  // our own portal which we've already replaced with a predicted one
+  if (portalPrediction->isSuperseded(cent->currentState)) {
+    return;
+  }
+
+  CG_DrawPortalGate(&cent->currentState,
+                    portalPrediction->spawnAnimTime(cent->currentState));
 }
 
 // TODO: This is just a straight copy from tjl addIndicator
@@ -3089,6 +3097,9 @@ void CG_AddPacketEntities(void) {
       CG_Mover_PostProcess(&cg_entities[cg.snap->entities[num].number]);
     }
   }
+
+  // predicted portals are not part of the snapshot
+  ETJump::cgame.systems.portalPrediction->addToScene();
 
   // Ridah, add the flamethrower sounds
   CG_UpdateFlamethrowerSounds();
