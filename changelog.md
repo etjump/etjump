@@ -39,6 +39,8 @@
 * `etj_smoothAngles` is deprecated in favor of `etj_lerpPmove`, will be removed in a future version
 
 ## Fixed
+* error messages should now correctly display on Windows instead of crashing the game to desktop [#2022](https://github.com/etjump/etjump/pull/2022)
+* autoload slots were not correctly invalidated on timerun start [#2037](https://github.com/etjump/etjump/pull/2037)
 * fireteam chat could be visible to players who were not in the senders fireteam [#2014](https://github.com/etjump/etjump/pull/2014)
 * potential crash on timerun completion if active seasons changed during a map [#1996](https://github.com/etjump/etjump/pull/1996)
 * crash if trickjump line file writing failed for some reason [#2003](https://github.com/etjump/etjump/pull/2003)
