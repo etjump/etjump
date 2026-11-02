@@ -694,9 +694,18 @@ int Q_isforfilename(int c) {
   return (0);
 }
 
+inline constexpr uint32_t FLOAT_MAGNITUDE_MASK = 0x7FFFFFFFu;
+inline constexpr uint32_t FLOAT_INFINITY_BITS = 0xFFu << 23;
+
 float Q_atof(const char *str) {
   const float f = std::strtof(str, nullptr);
-  return (std::isfinite(f) ? f : 0);
+
+  // we can't use 'std::isfinite()' to check for infinity here because release
+  // builds use fast math, so check the magnitude against infinity bit
+  // pattern instead
+  uint32_t bits = 0;
+  std::memcpy(&bits, &f, sizeof(bits));
+  return (bits & FLOAT_MAGNITUDE_MASK) < FLOAT_INFINITY_BITS ? f : 0;
 }
 
 float Q_atof(const std::string &str) { return Q_atof(str.c_str()); }
