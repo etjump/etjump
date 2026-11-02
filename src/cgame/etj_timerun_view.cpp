@@ -128,7 +128,8 @@ void TimerunView::draw() {
     return;
   }
 
-  vec4_t *color = &colorDefault;
+  vec4_t color{};
+  Vector4Copy(COLOR_DEFAULT, color);
 
   // figure out the timing variable we can use for the run timer
   int timeVar;
@@ -150,7 +151,7 @@ void TimerunView::draw() {
     if (millis == -1) {
       millis = 0;
     }
-    color = &inactiveTimerColor;
+    Vector4Copy(inactiveTimerColor, color);
   }
 
   vec4_t colorTemp;
@@ -160,7 +161,7 @@ void TimerunView::draw() {
 
   if (run->previousRecord > 0) {
     if (millis > run->previousRecord) {
-      color = &colorFail;
+      Vector4Copy(COLOR_FAIL, color);
     }
     // add timer color transition when player gets closer to their pb
     else if (millis + range >= run->previousRecord) {
@@ -168,17 +169,17 @@ void TimerunView::draw() {
       const auto step = static_cast<float>(millis - start) /
                         static_cast<float>(run->previousRecord - start);
 
-      ETJump_LerpColors(&colorDefault, &colorFail, &colorTemp, step / 2);
-      color = &colorTemp;
+      ETJump_LerpColors(&COLOR_DEFAULT, &COLOR_FAIL, &colorTemp, step / 2);
+      Vector4Copy(colorTemp, color);
     }
   }
 
   // set green color for pb time, white for tied/new time
   if (!running && millis) {
     if (run->previousRecord == millis || run->previousRecord == -1) {
-      color = &colorDefault;
+      Vector4Copy(COLOR_DEFAULT, color);
     } else if (run->previousRecord > millis) {
-      color = &colorSuccess;
+      Vector4Copy(COLOR_SUCCESS, color);
     }
   }
 
@@ -188,14 +189,14 @@ void TimerunView::draw() {
   const auto y = etj_runTimerY.value;
   ETJump_AdjustPosition(&x);
 
-  (*color)[3] =
+  color[3] =
       getTimerAlpha(running, autoHide, lastRunTimer + FADE_HOLD, FADE_TIME);
-  if ((*color)[3] == 0) {
+  if (color[3] == 0) {
     return;
   }
 
   CG_Text_Paint_Centred_Ext(x, y, runtimerSize.x * 0.1f, runtimerSize.y * 0.1f,
-                            *color, text, 0, 0, style, font);
+                            color, text, 0, 0, style, font);
 
   if (run->runHasCheckpoints &&
       (etj_drawCheckpoints.integer || etj_checkpointsPopup.integer)) {
@@ -203,7 +204,7 @@ void TimerunView::draw() {
   }
 
   if (running && run->previousRecord != -1 && millis > run->previousRecord) {
-    pastRecordAnimation(color, text.c_str(), millis, run->previousRecord);
+    pastRecordAnimation(&color, text.c_str(), millis, run->previousRecord);
   }
 }
 
@@ -262,29 +263,43 @@ void TimerunView::drawCheckpoints(
                                      : currentCheckpointTime;
 
     std::string dir;
-    vec4_t *checkpointColor = nullptr;
+    vec4_t checkpointColor{};
 
-    // if we don't have a next checkpoint set, we can't compare to anything
-    // so render checkpoint as white
-    if (noRecordCheckpoint || relativeTime == 0 ||
-        comparisonTime == currentRunTime) {
-      checkpointColor = &colorDefault;
+    bool isFasterCheckpoint = false;
+
+    // if we've hit max checkpoints, checkpointTime will be 0,
+    // so we need to compare currentTime against the comparisonTime,
+    // which will be previously set record in this scenario
+    if (isLastCheckpoint) {
+      isFasterCheckpoint = currentRunTime < comparisonTime;
     } else {
-      bool isFasterCheckpoint = false;
+      isFasterCheckpoint =
+          (noCheckpointTimeSet ? currentRunTime : currentCheckpointTime) <
+          comparisonTime;
+    }
 
-      // if we've hit max checkpoints, checkpointTime will be 0,
-      // so we need to compare currentTime against the comparisonTime,
-      // which will be previously set record in this scenario
-      if (isLastCheckpoint) {
-        isFasterCheckpoint = currentRunTime < comparisonTime;
-      } else {
-        isFasterCheckpoint =
-            (noCheckpointTimeSet ? currentRunTime : currentCheckpointTime) <
-            comparisonTime;
+    if (isGoldSplit(i, run)) {
+      Vector4Copy(COLOR_GOLD, checkpointColor);
+
+      // add prefix only if we already have a time, otherwise a player who
+      // doesn't have a record on a run beating the global best time for
+      // a split would get a '+' as a prefix
+      if (!noRecordCheckpoint) {
+        dir = isFasterCheckpoint ? "-" : "+";
       }
-
-      checkpointColor = isFasterCheckpoint ? &colorSuccess : &colorFail;
-      dir = isFasterCheckpoint ? "-" : "+";
+    } else if (noRecordCheckpoint || relativeTime == 0 ||
+               comparisonTime == currentRunTime) {
+      // if we don't have a next checkpoint set, we can't compare to anything so
+      // render checkpoint as white
+      Vector4Copy(COLOR_DEFAULT, checkpointColor);
+    } else {
+      if (isFasterCheckpoint) {
+        Vector4Copy(COLOR_SUCCESS, checkpointColor);
+        dir = "-";
+      } else {
+        Vector4Copy(COLOR_FAIL, checkpointColor);
+        dir = "+";
+      }
     }
 
     const std::string checkpointStr =
@@ -294,20 +309,20 @@ void TimerunView::drawCheckpoints(
     // we do not need to check for alpha being 0 here because checkpoints
     // follow same fading as runtimer, and if runtimer alpha is 0,
     // we early out before ever reaching this part
-    (*checkpointColor)[3] =
+    checkpointColor[3] =
         getTimerAlpha(running, autoHide, lastRunTimer + FADE_HOLD, FADE_TIME);
 
     // check if we actually want to draw the regular checkpoint timer,
     // so we can only draw the popups if desired
     if (etj_drawCheckpoints.integer) {
       CG_Text_Paint_Centred_Ext(x, y, checkpointSizeX, checkpointSizeY,
-                                *checkpointColor, checkpointStr, 0, 0,
-                                textStyle, font);
+                                checkpointColor, checkpointStr, 0, 0, textStyle,
+                                font);
     }
 
     if (etj_checkpointsPopup.integer && i == startIndex - 1) {
       vec4_t cpPopupColor;
-      Vector4Copy(*checkpointColor, cpPopupColor);
+      Vector4Copy(checkpointColor, cpPopupColor);
 
       const int32_t popupTime =
           run.lastCheckpointTimestamp + etj_checkpointsPopupDuration.integer;
@@ -370,6 +385,19 @@ int32_t TimerunView::getRelativeCheckpointTimer(
   return run.checkpoints[currentCPIndex] == TIMERUN_CHECKPOINT_NOT_SET
              ? currentTime - relTimerOffset
              : run.checkpoints[currentCPIndex] - relTimerOffset;
+}
+
+bool TimerunView::isGoldSplit(int32_t currentCPIndex,
+                              const Timerun::PlayerTimerunInformation &run) {
+  if (!etj_checkpointsShowGold.integer) {
+    return false;
+  }
+
+  if (etj_checkpointsShowGold.integer == 1) {
+    return run.bestPersonalSegment[currentCPIndex];
+  }
+
+  return run.bestGlobalSegment[currentCPIndex];
 }
 
 float TimerunView::getTimerAlpha(bool running, bool autoHide, int fadeStart,

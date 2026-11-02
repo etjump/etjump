@@ -210,6 +210,12 @@ void DemoCompatibility::setupCompatibilityFlags() {
 
     adjustEventNums = true;
   }
+
+  if (!isCompatible({3, 7, 0})) {
+    flags.useSharedCvar = true;
+    compatibilityStrings.emplace_back(
+        "Reading shared cvar value from CS_SYSTEMINFO");
+  }
 }
 
 void DemoCompatibility::printCompatibilityInfo() {
@@ -285,6 +291,54 @@ int DemoCompatibility::adjustedEventNum(const int event) const {
       return event + adjust;
     default:
       return event;
+  }
+}
+
+void DemoCompatibility::parseSharedCvarBits(const int32_t shared) {
+  if (shared & COMPAT_SHARED_NO_OVERBOUNCE) {
+    cgame.sharedWSKeysGlobal.noOverbounce = true;
+  }
+
+  if (shared & COMPAT_SHARED_NO_JUMPDELAY) {
+    cgame.sharedWSKeysGlobal.noJumpDelay = true;
+  }
+
+  if (shared & COMPAT_SHARED_NO_SAVE) {
+    cgame.sharedWSKeysGlobal.noSave = AreaOpts::FORBID_OUTSIDE;
+  }
+
+  if (shared & COMPAT_SHARED_NO_FALLDAMAGE) {
+    cgame.sharedWSKeysGlobal.noFallDamage = NoFallDamageOpts::ON;
+  } else if (shared & COMPAT_SHARED_NO_FALLDAMAGE_FORCE) {
+    cgame.sharedWSKeysGlobal.noFallDamage = NoFallDamageOpts::FORCE_ON;
+  }
+
+  if (shared & COMPAT_SHARED_NO_PRONE) {
+    cgame.sharedWSKeysGlobal.noProne = AreaOpts::FORBID_OUTSIDE;
+  }
+
+  if (shared & COMPAT_SHARED_NO_DROP) {
+    cgame.sharedWSKeysGlobal.noDrop = true;
+  }
+
+  if (shared & COMPAT_SHARED_NO_WALLBUG) {
+    cgame.sharedWSKeysGlobal.noWallbug = true;
+  }
+
+  if (shared & COMPAT_SHARED_NO_NOCLIP) {
+    cgame.sharedWSKeysGlobal.noNoclip = AreaOpts::FORBID_OUTSIDE;
+  }
+
+  if (shared & COMPAT_SHARED_PORTAL_PREDICT) {
+    cgame.sharedWSKeysGlobal.portalPredict = true;
+  }
+
+  if (shared & COMPAT_SHARED_BODY_OB_ALWAYS) {
+    cgame.sharedWSKeysGlobal.overbouncePlayers =
+        OverbouncePlayersOpts::FORCE_ON;
+  } else if (shared & COMPAT_SHARED_BODY_OB_NEVER) {
+    cgame.sharedWSKeysGlobal.overbouncePlayers =
+        OverbouncePlayersOpts::FORCE_OFF;
   }
 }
 

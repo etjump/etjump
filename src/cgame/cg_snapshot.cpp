@@ -154,8 +154,6 @@ void CG_SetInitialSnapshot(snapshot_t *snap) {
     CG_CheckEvents(cent);
   }
 
-  cg_fxflags = 0;
-
   trap_Cvar_VariableStringBuffer("r_oldMode", buff, sizeof(buff));
   if (Q_atoi(buff)) {
     // Arnout: confirmation screen

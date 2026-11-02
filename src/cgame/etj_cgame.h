@@ -27,6 +27,10 @@
 #include <memory>
 #include <vector>
 
+#include "../game/bg_public.h"
+#include "../game/q_shared.h"
+#include "../game/etj_worldspawn_shared.h"
+
 namespace ETJump {
 class ClientCommandsHandler;
 class EntityEventsHandler;
@@ -65,12 +69,14 @@ class ClientRtvHandler;
 class CustomCommandMenu;
 class Timerun;
 class CommandCompletions;
+class PortalPrediction;
 
 struct Systems {
   std::unique_ptr<ClientRtvHandler> rtv;
   std::unique_ptr<CustomCommandMenu> customCommandMenu;
   std::shared_ptr<Timerun> timerun;
   std::unique_ptr<CommandCompletions> commandCompletions;
+  std::unique_ptr<PortalPrediction> portalPrediction;
 };
 
 class EventLoop;
@@ -144,5 +150,21 @@ struct CGameContext {
   std::vector<std::string> serverMapList;
   // communicated by the server, only the strings needed for callvote commands
   std::vector<std::string> customVoteLists;
+
+  // communicated by the server, keys that are required
+  // on client side for movement prediction etc
+  SharedWorldspawnKeys sharedWSKeysGlobal;
+  // communicated by the server, active worldspawn key overrides
+  // for the current map
+  std::vector<WorldspawnShared::KeyOverride> wsKeyOverrides;
+  // actual active worldspawn key value, after overrides
+  SharedWorldspawnKeys sharedWSKeys;
+
+  // display state for 'etj_lerpPmove' - interpolated between the last two
+  // physics frames at the current frame rate, used for rendering only
+  // TODO: we might not need the entire playerstate here, this could be a
+  // slimmed down version, to save some memory - maybe explore in the future
+  playerState_t displayPlayerState;
+  bool displayStateValid{};
 };
 } // namespace ETJump

@@ -16,7 +16,9 @@
 #include "etj_rtv_drawable.h"
 #include "etj_custom_command_menu_drawable.h"
 
+#include "../game/etj_fatal_error_shared.h"
 #include "../game/etj_syscalls.h"
+#include "../game/etj_test_fault.h"
 
 displayContextDef_t cgDC;
 
@@ -27,32 +29,34 @@ qboolean CG_CheckExecKey(int key);
 extern itemDef_t *g_bindItem;
 extern qboolean g_waitingForKey;
 
-/*
-================
-vmMain
-
-This is the only way control passes into the module.
-This must be the very first function compiled into the .q3vm file
-================
-*/
-extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
-                                     intptr_t arg2, intptr_t arg3,
-                                     intptr_t arg4, intptr_t arg5,
-                                     intptr_t arg6) {
+static intptr_t dispatchCommand(const int command, const intptr_t arg0,
+                                const intptr_t arg1, const intptr_t arg2,
+                                const intptr_t arg3) {
   switch (command) {
-    case CG_INIT:
+    case CG_INIT: {
+      ETJ_TEST_FAULT_SCOPE("CG_INIT");
       CG_Init(arg0, arg1, arg2, arg3 ? qtrue : qfalse);
       cgs.initing = qfalse;
       return 0;
-    case CG_SHUTDOWN:
+    }
+    case CG_SHUTDOWN: {
+      ETJ_TEST_FAULT_SCOPE("CG_SHUTDOWN");
+      // e.g. the server disconnected us, which the engine
+      // handles while cgame is fetching server commands
+      ETJump::FatalErrorBoundary::protectActiveFrames();
       CG_Shutdown();
       return 0;
-    case CG_CONSOLE_COMMAND:
+    }
+    case CG_CONSOLE_COMMAND: {
+      ETJ_TEST_FAULT_SCOPE("CG_CONSOLE_COMMAND");
       return CG_ConsoleCommand();
-    case CG_DRAW_ACTIVE_FRAME:
+    }
+    case CG_DRAW_ACTIVE_FRAME: {
+      ETJ_TEST_FAULT_SCOPE("CG_DRAW_ACTIVE_FRAME");
       CG_DrawActiveFrame(arg0, static_cast<stereoFrame_t>(arg1),
                          arg2 ? qtrue : qfalse);
       return 0;
+    }
     case CG_CROSSHAIR_PLAYER:
       return CG_CrosshairPlayer();
     case CG_LAST_ATTACKER:
@@ -87,6 +91,25 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
     default:
       CG_Error("vmMain: unknown command %i", command);
   }
+}
+
+/*
+================
+vmMain
+
+This is the only way control passes into the module.
+This must be the very first function compiled into the .q3vm file
+================
+*/
+extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
+                                     intptr_t arg2, intptr_t arg3,
+                                     intptr_t arg4, intptr_t arg5,
+                                     intptr_t arg6) {
+  // a failed console command still counts as handled,
+  // so the engine doesn't pass it on
+  return ETJump::FatalErrorBoundary::run(
+      [&] { return dispatchCommand(command, arg0, arg1, arg2, arg3); },
+      command == CG_CONSOLE_COMMAND ? qtrue : qfalse);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -499,6 +522,7 @@ vmCvar_t etj_checkpointsSize;
 vmCvar_t etj_checkpointsShadow;
 vmCvar_t etj_checkpointsStyle;
 vmCvar_t etj_checkpointsCount;
+vmCvar_t etj_checkpointsShowGold;
 
 vmCvar_t etj_checkpointsPopup;
 vmCvar_t etj_checkpointsPopupX;
@@ -545,8 +569,6 @@ vmCvar_t etj_explosivesShake;
 vmCvar_t etj_realFov;
 vmCvar_t etj_stretchCgaz;
 vmCvar_t etj_noActivateLean;
-
-vmCvar_t shared;
 
 vmCvar_t etj_drawObWatcher;
 vmCvar_t etj_obWatcherX;
@@ -726,6 +748,7 @@ vmCvar_t etj_drawRecordingStatus;
 vmCvar_t etj_recordingStatusX;
 vmCvar_t etj_recordingStatusY;
 
+vmCvar_t etj_lerpPmove;
 vmCvar_t etj_smoothAngles;
 vmCvar_t etj_autoSprint;
 
@@ -747,6 +770,18 @@ vmCvar_t etj_ccMenu_autoClose;
 vmCvar_t etj_ccMenu_width;
 vmCvar_t etj_ccMenu_browseWithOpen;
 vmCvar_t etj_ccMenu_showEmptyPages;
+
+vmCvar_t etj_drawYaw;
+vmCvar_t etj_yawX;
+vmCvar_t etj_yawY;
+vmCvar_t etj_yawColor;
+vmCvar_t etj_yawShadow;
+vmCvar_t etj_yawSize;
+vmCvar_t etj_yawWidth;
+
+vmCvar_t etj_drawFallDamageDetector;
+vmCvar_t etj_fallDamageDetectorX;
+vmCvar_t etj_fallDamageDetectorY;
 
 typedef struct {
   vmCvar_t *vmCvar;
@@ -784,14 +819,14 @@ cvarTable_t cvarTable[] = {
     {&cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE},
     {&cg_drawFPS, "cg_drawFPS", "0", CVAR_ARCHIVE},
     {&cg_drawSnapshot, "cg_drawSnapshot", "0", CVAR_ARCHIVE},
-    {&cg_drawCrosshair, "cg_drawCrosshair", "1", CVAR_ARCHIVE},
+    {&cg_drawCrosshair, "cg_drawCrosshair", "5", CVAR_ARCHIVE},
     {&cg_drawCrosshairNames, "cg_drawCrosshairNames", "1", CVAR_ARCHIVE},
     {&cg_drawCrosshairPickups, "cg_drawCrosshairPickups", "1", CVAR_ARCHIVE},
     {&cg_useWeapsForZoom, "cg_useWeapsForZoom", "1", CVAR_ARCHIVE},
     {&cg_weaponCycleDelay, "cg_weaponCycleDelay", "150",
      CVAR_CHEAT}, //----(SA)	added
     {&cg_cycleAllWeaps, "cg_cycleAllWeaps", "1", CVAR_ARCHIVE},
-    {&cg_crosshairSize, "cg_crosshairSize", "48", CVAR_ARCHIVE},
+    {&cg_crosshairSize, "cg_crosshairSize", "40", CVAR_ARCHIVE},
     {&cg_crosshairHealth, "cg_crosshairHealth", "0", CVAR_ARCHIVE},
     {&cg_crosshairX, "cg_crosshairX", "0", CVAR_ARCHIVE},
     {&cg_crosshairY, "cg_crosshairY", "0", CVAR_ARCHIVE},
@@ -884,13 +919,13 @@ cvarTable_t cvarTable[] = {
     {&cg_autoAction, "cg_autoAction", "0", CVAR_ARCHIVE},
     {&cg_autoReload, "cg_autoReload", "1", CVAR_ARCHIVE},
     {&cg_bloodDamageBlend, "cg_bloodDamageBlend", "1.0", CVAR_ARCHIVE},
-    {&cg_bloodFlash, "cg_bloodFlash", "1.0", CVAR_ARCHIVE},
+    {&cg_bloodFlash, "cg_bloodFlash", "0.0", CVAR_ARCHIVE},
     {&cg_complaintPopUp, "cg_complaintPopUp", "1", CVAR_ARCHIVE},
     {&cg_crosshairAlpha, "cg_crosshairAlpha", "1.0", CVAR_ARCHIVE},
     {&cg_crosshairAlphaAlt, "cg_crosshairAlphaAlt", "1.0", CVAR_ARCHIVE},
     {&cg_crosshairColor, "cg_crosshairColor", "White", CVAR_ARCHIVE},
     {&cg_crosshairColorAlt, "cg_crosshairColorAlt", "White", CVAR_ARCHIVE},
-    {&cg_crosshairPulse, "cg_crosshairPulse", "1", CVAR_ARCHIVE},
+    {&cg_crosshairPulse, "cg_crosshairPulse", "0", CVAR_ARCHIVE},
     {&cg_drawReinforcementTime, "cg_drawReinforcementTime", "1", CVAR_ARCHIVE},
     {&cg_drawWeaponIconFlash, "cg_drawWeaponIconFlash", "0", CVAR_ARCHIVE},
     {&cg_noAmmoAutoSwitch, "cg_noAmmoAutoSwitch", "1", CVAR_ARCHIVE},
@@ -923,7 +958,7 @@ cvarTable_t cvarTable[] = {
     {&cg_debugSkills, "cg_debugSkills", "0", 0},
     {NULL, "cg_etVersion", "", CVAR_USERINFO | CVAR_ROM},
     {&cg_drawFireteamOverlay, "cg_drawFireteamOverlay", "1", CVAR_ARCHIVE},
-    {&cg_drawSmallPopupIcons, "cg_drawSmallPopupIcons", "0", CVAR_ARCHIVE},
+    {&cg_drawSmallPopupIcons, "cg_drawSmallPopupIcons", "1", CVAR_ARCHIVE},
 
     // bani - demo recording cvars
     {&cl_demorecording, "cl_demorecording", "0", CVAR_ROM},
@@ -943,17 +978,17 @@ cvarTable_t cvarTable[] = {
     {&com_hunkmegs, "com_hunkmegs", "128", CVAR_ARCHIVE},
 
     {&etj_drawCGaz, "etj_drawCGaz", "0", CVAR_ARCHIVE},
-    {&etj_drawOB, "etj_drawOB", "0", CVAR_ARCHIVE},
-    {&etj_OBX, "etj_OBX", "320", CVAR_ARCHIVE},
-    {&etj_OBY, "etj_OBY", "220", CVAR_ARCHIVE},
+    {&etj_drawOB, "etj_drawOB", "1", CVAR_ARCHIVE},
+    {&etj_OBX, "etj_OBX", "350", CVAR_ARCHIVE},
+    {&etj_OBY, "etj_OBY", "245", CVAR_ARCHIVE},
     {&etj_CGazY, "etj_CGazY", "240", CVAR_ARCHIVE},
     {&etj_CGaz2Y, "etj_CGaz2Y", "240", CVAR_ARCHIVE},
-    {&etj_CGazHeight, "etj_CGazHeight", "20", CVAR_ARCHIVE},
+    {&etj_CGazHeight, "etj_CGazHeight", "12", CVAR_ARCHIVE},
     {&etj_CGaz2Color1, "etj_CGaz2Color1", "1.0 0.0 0.0 1.0", CVAR_ARCHIVE},
     {&etj_CGaz2Color2, "etj_CGaz2Color2", "0.0 1.0 1.0 1.0", CVAR_ARCHIVE},
-    {&etj_CGaz1Color1, "etj_CGaz1Color1", "0.75 0.75 0.75 0.75", CVAR_ARCHIVE},
+    {&etj_CGaz1Color1, "etj_CGaz1Color1", "0.0 0.0 0.0 0.0", CVAR_ARCHIVE},
     {&etj_CGaz1Color2, "etj_CGaz1Color2", "0.0 1.0 0.0 0.75", CVAR_ARCHIVE},
-    {&etj_CGaz1Color3, "etj_CGaz1Color3", "0.0 0.2 0.0 0.75", CVAR_ARCHIVE},
+    {&etj_CGaz1Color3, "etj_CGaz1Color3", "0.1 0.1 0.1 0.75", CVAR_ARCHIVE},
     {&etj_CGaz1Color4, "etj_CGaz1Color4", "1.0 1.0 0.0 0.75", CVAR_ARCHIVE},
     {&etj_CGazFov, "etj_CGazFov", "0", CVAR_ARCHIVE},
     {&etj_CGazTrueness, "etj_CGazTrueness", "2", CVAR_ARCHIVE},
@@ -981,7 +1016,7 @@ cvarTable_t cvarTable[] = {
     {&etj_keysY, "etj_keysY", "220", CVAR_ARCHIVE},
     {&etj_keysShadow, "etj_keysShadow", "0", CVAR_ARCHIVE},
     {&etj_loadviewangles, "etj_loadviewangles", "1", CVAR_ARCHIVE},
-    {&etj_drawspeed, "etj_drawspeed", "1", CVAR_ARCHIVE},
+    {&etj_drawspeed, "etj_drawspeed", "0", CVAR_ARCHIVE},
     {&etj_speedXYonly, "etj_speedXYonly", "1", CVAR_ARCHIVE},
     {&etj_speedinterval, "etj_speedinterval", "100", CVAR_ARCHIVE},
     {&etj_speedunit, "etj_speedunit", "0", CVAR_ARCHIVE},
@@ -992,7 +1027,7 @@ cvarTable_t cvarTable[] = {
     {&etj_speedSize, "etj_speedSize", "3", CVAR_ARCHIVE},
     {&etj_speedColor, "etj_speedColor", "White", CVAR_ARCHIVE},
     {&etj_speedAlpha, "etj_speedAlpha", "1.0", CVAR_ARCHIVE},
-    {&etj_speedShadow, "etj_speedShadow", "0", CVAR_ARCHIVE},
+    {&etj_speedShadow, "etj_speedShadow", "1", CVAR_ARCHIVE},
     {&etj_speedColorUsesAccel, "etj_speedColorUsesAccel", "0", CVAR_ARCHIVE},
     {&etj_speedAlign, "etj_speedAlign", "0", CVAR_ARCHIVE},
     {&etj_speedPrecision, "etj_speedPrecision", "0", CVAR_ARCHIVE},
@@ -1013,14 +1048,14 @@ cvarTable_t cvarTable[] = {
     {&etj_accelShadow, "etj_accelShadow", "1", CVAR_ARCHIVE},
     {&etj_accelAlign, "etj_accelAlign", "0", CVAR_ARCHIVE},
 
-    {&etj_popupTime, "etj_popupTime", "1000", CVAR_ARCHIVE},
+    {&etj_popupTime, "etj_popupTime", "0", CVAR_ARCHIVE},
     {&etj_popupStayTime, "etj_popupStayTime", "2000", CVAR_ARCHIVE},
     {&etj_popupFadeTime, "etj_popupFadeTime", "2500", CVAR_ARCHIVE},
     {&etj_numPopups, "etj_numPopups", "5", CVAR_ARCHIVE},
 
     {&etj_HUD_popup, "etj_HUD_popup", "1", CVAR_ARCHIVE},
     {&etj_popupGrouped, "etj_popupGrouped", "1", CVAR_ARCHIVE},
-    {&etj_popupShadow, "etj_popupShadow", "0", CVAR_ARCHIVE},
+    {&etj_popupShadow, "etj_popupShadow", "1", CVAR_ARCHIVE},
     {&etj_popupAlpha, "etj_popupAlpha", "1.0", CVAR_ARCHIVE},
     {&etj_popupPosX, "etj_popupPosX", "0", CVAR_ARCHIVE},
     {&etj_popupPosY, "etj_popupPosY", "0", CVAR_ARCHIVE},
@@ -1038,7 +1073,7 @@ cvarTable_t cvarTable[] = {
     {&etj_chatPosY, "etj_chatPosY", "0", CVAR_ARCHIVE},
     {&etj_chatBackgroundAlpha, "etj_chatBackgroundAlpha", "0.33", CVAR_ARCHIVE},
     {&etj_chatFlags, "etj_chatFlags", "1", CVAR_ARCHIVE},
-    {&etj_chatShadow, "etj_chatShadow", "0", CVAR_ARCHIVE},
+    {&etj_chatShadow, "etj_chatShadow", "1", CVAR_ARCHIVE},
     {&etj_chatAlpha, "etj_chatAlpha", "1.0", CVAR_ARCHIVE},
     {&etj_chatReplay, "etj_chatReplay", "1", CVAR_ARCHIVE},
 
@@ -1083,7 +1118,7 @@ cvarTable_t cvarTable[] = {
     {&etj_CHS3PosY, "etj_CHS3PosY", "0", CVAR_ARCHIVE},
     {&etj_CHS3HideLabels, "etj_CHS3HideLabels", "0", CVAR_ARCHIVE},
 
-    {&etj_CHSShadow, "etj_CHSShadow", "0", CVAR_ARCHIVE},
+    {&etj_CHSShadow, "etj_CHSShadow", "1", CVAR_ARCHIVE},
     {&etj_CHSAlpha, "etj_CHSAlpha", "1.0", CVAR_ARCHIVE},
     {&etj_CHSColor, "etj_CHSColor", "1.0 1.0 1.0", CVAR_ARCHIVE},
     {&etj_CHSUseFeet, "etj_CHSUseFeet", "0", CVAR_ARCHIVE},
@@ -1109,8 +1144,8 @@ cvarTable_t cvarTable[] = {
     {&etj_footstepVolume, "etj_footstepVolume", "1.0", CVAR_ARCHIVE},
     {&etj_noclipScale, "etj_noclipScale", "1", CVAR_ARCHIVE},
     {&etj_drawSlick, "etj_drawSlick", "1", CVAR_ARCHIVE},
-    {&etj_slickX, "etj_slickX", "304", CVAR_ARCHIVE},
-    {&etj_slickY, "etj_slickY", "220", CVAR_ARCHIVE},
+    {&etj_slickX, "etj_slickX", "301", CVAR_ARCHIVE},
+    {&etj_slickY, "etj_slickY", "245", CVAR_ARCHIVE},
     {&etj_altScoreboard, "etj_altScoreboard", "0", CVAR_ARCHIVE},
     {&etj_drawSpectatorInfo, "etj_drawSpectatorInfo", "0", CVAR_ARCHIVE},
     {&etj_spectatorInfoX, "etj_spectatorInfoX", "320", CVAR_ARCHIVE},
@@ -1125,7 +1160,7 @@ cvarTable_t cvarTable[] = {
     {&etj_runTimerX, "etj_runTimerX", "320", CVAR_ARCHIVE},
     {&etj_runTimerY, "etj_runTimerY", "360", CVAR_ARCHIVE},
     {&etj_runTimerSize, "etj_runTimerSize", "3", CVAR_ARCHIVE},
-    {&etj_runTimerShadow, "etj_runTimerShadow", "0", CVAR_ARCHIVE},
+    {&etj_runTimerShadow, "etj_runTimerShadow", "1", CVAR_ARCHIVE},
     {&etj_runTimerAutoHide, "etj_runTimerAutoHide", "1", CVAR_ARCHIVE},
     {&etj_runTimerInactiveColor, "etj_runTimerInactiveColor", "mdgrey",
      CVAR_ARCHIVE},
@@ -1134,9 +1169,10 @@ cvarTable_t cvarTable[] = {
     {&etj_checkpointsX, "etj_checkpointsX", "320", CVAR_ARCHIVE},
     {&etj_checkpointsY, "etj_checkpointsY", "380", CVAR_ARCHIVE},
     {&etj_checkpointsSize, "etj_checkpointsSize", "2", CVAR_ARCHIVE},
-    {&etj_checkpointsShadow, "etj_checkpointsShadow", "0", CVAR_ARCHIVE},
+    {&etj_checkpointsShadow, "etj_checkpointsShadow", "1", CVAR_ARCHIVE},
     {&etj_checkpointsStyle, "etj_checkpointsStyle", "0", CVAR_ARCHIVE},
     {&etj_checkpointsCount, "etj_checkpointsCount", "3", CVAR_ARCHIVE},
+    {&etj_checkpointsShowGold, "etj_checkpointsShowGold", "1", CVAR_ARCHIVE},
 
     {&etj_checkpointsPopup, "etj_checkpointsPopup", "1", CVAR_ARCHIVE},
     {&etj_checkpointsPopupX, "etj_checkpointsPopupX", "320", CVAR_ARCHIVE},
@@ -1177,13 +1213,12 @@ cvarTable_t cvarTable[] = {
     {&etj_playerOpacity, "etj_playerOpacity", "1.0", CVAR_ARCHIVE},
     {&etj_simplePlayersColor, "etj_simplePlayersColor", "1.0 1.0 1.0",
      CVAR_ARCHIVE},
-    {&etj_hideFadeRange, "etj_hideFadeRange", "200", CVAR_ARCHIVE},
+    {&etj_hideFadeRange, "etj_hideFadeRange", "128", CVAR_ARCHIVE},
     {&etj_drawSimplePlayers, "etj_drawSimplePlayers", "0", CVAR_ARCHIVE},
     {&etj_explosivesShake, "etj_explosivesShake", "3", CVAR_ARCHIVE},
-    {&etj_realFov, "etj_realFov", "0", CVAR_ARCHIVE},
-    {&etj_stretchCgaz, "etj_stretchCgaz", "1", CVAR_ARCHIVE},
+    {&etj_realFov, "etj_realFov", "1", CVAR_ARCHIVE},
+    {&etj_stretchCgaz, "etj_stretchCgaz", "0", CVAR_ARCHIVE},
     {&etj_noActivateLean, "etj_noActivateLean", "0", CVAR_ARCHIVE},
-    {&shared, "shared", "0", CVAR_SYSTEMINFO | CVAR_ROM},
     {&etj_drawObWatcher, "etj_drawObWatcher", "1", CVAR_ARCHIVE},
     {&etj_obWatcherX, "etj_obWatcherX", "100", CVAR_ARCHIVE},
     {&etj_obWatcherY, "etj_obWatcherY", "100", CVAR_ARCHIVE},
@@ -1251,7 +1286,7 @@ cvarTable_t cvarTable[] = {
     {&etj_spectatorVote, "", "0", 0},
     {&etj_extraTrace, "etj_extraTrace", "0", CVAR_ARCHIVE},
     // Autodemo
-    {&etj_autoDemo, "etj_autoDemo", "0", CVAR_ARCHIVE},
+    {&etj_autoDemo, "etj_autoDemo", "1", CVAR_ARCHIVE},
     {&etj_ad_savePBOnly, "etj_ad_savePBOnly", "0", CVAR_ARCHIVE},
     {&etj_ad_stopDelay, "etj_ad_stopDelay", "2000", CVAR_ARCHIVE},
     {&etj_ad_targetPath, "etj_ad_targetPath", "autodemo", CVAR_ARCHIVE},
@@ -1261,16 +1296,16 @@ cvarTable_t cvarTable[] = {
     // Snaphud
     {&etj_drawSnapHUD, "etj_drawSnapHUD", "0", CVAR_ARCHIVE},
     {&etj_snapHUDOffsetY, "etj_snapHUDOffsetY", "0", CVAR_ARCHIVE},
-    {&etj_snapHUDHeight, "etj_snapHUDHeight", "10", CVAR_ARCHIVE},
+    {&etj_snapHUDHeight, "etj_snapHUDHeight", "6", CVAR_ARCHIVE},
     {&etj_snapHUDColor1, "etj_snapHUDColor1", "0.0 1.0 1.0 0.75", CVAR_ARCHIVE},
     {&etj_snapHUDColor2, "etj_snapHUDColor2", "0.05 0.05 0.05 0.1",
      CVAR_ARCHIVE},
-    {&etj_snapHUDHLColor1, "etj_snapHUDHLColor1", "1.0 0.5 1.0 0.75",
+    {&etj_snapHUDHLColor1, "etj_snapHUDHLColor1", "0.0 1.0 1.0 0.25",
      CVAR_ARCHIVE},
-    {&etj_snapHUDHLColor2, "etj_snapHUDHLColor2", "1.0 0.5 1.0 0.1",
+    {&etj_snapHUDHLColor2, "etj_snapHUDHLColor2", "0.0 0.0 0.0 0.0",
      CVAR_ARCHIVE},
     {&etj_snapHUDFov, "etj_snapHUDFov", "0", CVAR_ARCHIVE},
-    {&etj_snapHUDHLActive, "etj_snapHUDHLActive", "0", CVAR_ARCHIVE},
+    {&etj_snapHUDHLActive, "etj_snapHUDHLActive", "1", CVAR_ARCHIVE},
     {&etj_snapHUDTrueness, "etj_snapHUDTrueness", "0", CVAR_ARCHIVE},
     {&etj_snapHUDEdgeThickness, "etj_snapHUDEdgeThickness", "10", CVAR_ARCHIVE},
     {&etj_snapHUDBorderThickness, "etj_snapHUDBorderThickness", "1",
@@ -1390,6 +1425,7 @@ cvarTable_t cvarTable[] = {
     {&etj_recordingStatusX, "etj_recordingStatusX", "2", CVAR_ARCHIVE},
     {&etj_recordingStatusY, "etj_recordingStatusY", "9", CVAR_ARCHIVE},
 
+    {&etj_lerpPmove, "etj_lerpPmove", "0", CVAR_ARCHIVE},
     {&etj_smoothAngles, "etj_smoothAngles", "1", CVAR_ARCHIVE},
     {&etj_autoSprint, "etj_autoSprint", "0", CVAR_ARCHIVE},
 
@@ -1414,6 +1450,19 @@ cvarTable_t cvarTable[] = {
      CVAR_ARCHIVE},
     {&etj_ccMenu_showEmptyPages, "etj_ccMenu_showEmptyPages", "0",
      CVAR_ARCHIVE},
+
+    {&etj_drawYaw, "etj_drawYaw", "0", CVAR_ARCHIVE},
+    {&etj_yawX, "etj_yawX", "320", CVAR_ARCHIVE},
+    {&etj_yawY, "etj_yawY", "300", CVAR_ARCHIVE},
+    {&etj_yawColor, "etj_yawColor", "White", CVAR_ARCHIVE},
+    {&etj_yawShadow, "etj_yawShadow", "1", CVAR_ARCHIVE},
+    {&etj_yawSize, "etj_yawSize", "3", CVAR_ARCHIVE},
+    {&etj_yawWidth, "etj_yawWidth", "10", CVAR_ARCHIVE},
+
+    {&etj_drawFallDamageDetector, "etj_drawFallDamageDetector", "0",
+     CVAR_ARCHIVE},
+    {&etj_fallDamageDetectorX, "etj_fallDamageDetectorX", "380", CVAR_ARCHIVE},
+    {&etj_fallDamageDetectorY, "etj_fallDamageDetectorY", "245", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -1631,7 +1680,8 @@ void QDECL CG_Printf(const char *msg, ...) {
   Q_vsnprintf(text, sizeof(text), msg, argptr);
   va_end(argptr);
 
-  trap_Error(text);
+  // unwinds the stack up to vmMain, which then calls trap_Error
+  ETJump::FatalErrorBoundary::throwFatal(text);
 }
 
 #ifndef CGAME_HARD_LINKED
@@ -2374,13 +2424,6 @@ static void CG_RegisterGraphics(void) {
 
   cgs.media.fleshSmokePuffShader =
       trap_R_RegisterShader("fleshimpactsmokepuff"); // JPW NERVE
-  cgs.media.nerveTestShader = trap_R_RegisterShader("jpwtest1");
-  cgs.media.idTestShader = trap_R_RegisterShader("jpwtest2");
-  cgs.media.hud1Shader = trap_R_RegisterShader("jpwhud1");
-  cgs.media.hud2Shader = trap_R_RegisterShader("jpwhud2");
-  cgs.media.hud3Shader = trap_R_RegisterShader("jpwhud3");
-  cgs.media.hud4Shader = trap_R_RegisterShader("jpwhud4");
-  cgs.media.hud5Shader = trap_R_RegisterShader("jpwhud5");
   cgs.media.smokePuffShader = trap_R_RegisterShader("smokePuff");
 
   // RF, blood cloud
@@ -3349,316 +3392,11 @@ void CG_QueueMusic(void) {
       -2); // '-2' for 'queue looping track' (QUEUED_PLAY_LOOPED)
 }
 
-#if 0 // DAJ unused
-char *CG_GetMenuBuffer(const char *filename)
-{
-	int          len;
-	fileHandle_t f;
-	static char  buf[MAX_MENUFILE];
-
-	len = trap_FS_FOpenFile(filename, &f, FS_READ);
-	if (!f)
-	{
-		trap_Print(va(S_COLOR_RED "menu file not found: %s, using default\n", filename));
-		return NULL;
-	}
-	if (len >= MAX_MENUFILE)
-	{
-		trap_Print(va(S_COLOR_RED "menu file too large: %s is %i, max allowed is %i", filename, len, MAX_MENUFILE));
-		trap_FS_FCloseFile(f);
-		return NULL;
-	}
-
-	trap_FS_Read(buf, len, f);
-	buf[len] = 0;
-	trap_FS_FCloseFile(f);
-
-	return buf;
-}
-#endif
 //
 // ==============================
 // new hud stuff ( mission pack )
 // ==============================
 //
-qboolean CG_Asset_Parse(int handle) {
-  pc_token_t token;
-  const char *tempStr;
-
-  if (!trap_PC_ReadToken(handle, &token)) {
-    return qfalse;
-  }
-  if (Q_stricmp(token.string, "{") != 0) {
-    return qfalse;
-  }
-
-  while (1) {
-    if (!trap_PC_ReadToken(handle, &token)) {
-      return qfalse;
-    }
-
-    if (Q_stricmp(token.string, "}") == 0) {
-      return qtrue;
-    }
-
-    // font
-    if (Q_stricmp(token.string, "font") == 0) {
-      int pointSize, fontIndex;
-      if (!PC_Int_Parse(handle, &fontIndex) ||
-          !PC_String_Parse(handle, &tempStr) ||
-          !PC_Int_Parse(handle, &pointSize)) {
-        return qfalse;
-      }
-      if (fontIndex < 0 || fontIndex >= 6) {
-        return qfalse;
-      }
-      cgDC.registerFont(tempStr, pointSize, &cgDC.Assets.fonts[fontIndex]);
-      continue;
-    }
-
-    // gradientbar
-    if (Q_stricmp(token.string, "gradientbar") == 0) {
-      if (!PC_String_Parse(handle, &tempStr)) {
-        return qfalse;
-      }
-      cgDC.Assets.gradientBar = trap_R_RegisterShaderNoMip(tempStr);
-      continue;
-    }
-
-    // enterMenuSound
-    if (Q_stricmp(token.string, "menuEnterSound") == 0) {
-      if (!PC_String_Parse(handle, &tempStr)) {
-        return qfalse;
-      }
-      cgDC.Assets.menuEnterSound = trap_S_RegisterSound(tempStr, qtrue);
-      continue;
-    }
-
-    // exitMenuSound
-    if (Q_stricmp(token.string, "menuExitSound") == 0) {
-      if (!PC_String_Parse(handle, &tempStr)) {
-        return qfalse;
-      }
-      cgDC.Assets.menuExitSound = trap_S_RegisterSound(tempStr, qtrue);
-      continue;
-    }
-
-    // itemFocusSound
-    if (Q_stricmp(token.string, "itemFocusSound") == 0) {
-      if (!PC_String_Parse(handle, &tempStr)) {
-        return qfalse;
-      }
-      cgDC.Assets.itemFocusSound = trap_S_RegisterSound(tempStr, qtrue);
-      continue;
-    }
-
-    // menuBuzzSound
-    if (Q_stricmp(token.string, "menuBuzzSound") == 0) {
-      if (!PC_String_Parse(handle, &tempStr)) {
-        return qfalse;
-      }
-      cgDC.Assets.menuBuzzSound = trap_S_RegisterSound(tempStr, qtrue);
-      continue;
-    }
-
-    // only overrides default cursor
-    if (Q_stricmp(token.string, "cursor") == 0) {
-      if (!PC_String_Parse(handle, &cgDC.cursor.cursorStr)) {
-        return qfalse;
-      }
-      cgDC.cursor.defaultShader =
-          trap_R_RegisterShaderNoMip(cgDC.cursor.cursorStr);
-      continue;
-    }
-
-    if (Q_stricmp(token.string, "fadeClamp") == 0) {
-      if (!PC_Float_Parse(handle, &cgDC.Assets.fadeClamp)) {
-        return qfalse;
-      }
-      continue;
-    }
-
-    if (Q_stricmp(token.string, "fadeCycle") == 0) {
-      if (!PC_Int_Parse(handle, &cgDC.Assets.fadeCycle)) {
-        return qfalse;
-      }
-      continue;
-    }
-
-    if (Q_stricmp(token.string, "fadeAmount") == 0) {
-      if (!PC_Float_Parse(handle, &cgDC.Assets.fadeAmount)) {
-        return qfalse;
-      }
-      continue;
-    }
-
-    if (Q_stricmp(token.string, "shadowX") == 0) {
-      if (!PC_Float_Parse(handle, &cgDC.Assets.shadowX)) {
-        return qfalse;
-      }
-      continue;
-    }
-
-    if (Q_stricmp(token.string, "shadowY") == 0) {
-      if (!PC_Float_Parse(handle, &cgDC.Assets.shadowY)) {
-        return qfalse;
-      }
-      continue;
-    }
-
-    if (Q_stricmp(token.string, "shadowColor") == 0) {
-      if (!PC_Color_Parse(handle, &cgDC.Assets.shadowColor)) {
-        return qfalse;
-      }
-      cgDC.Assets.shadowFadeClamp = cgDC.Assets.shadowColor[3];
-      continue;
-    }
-  }
-  // return qfalse;
-}
-
-void CG_ParseMenu(const char *menuFile) {
-  pc_token_t token;
-  int handle;
-
-  handle = trap_PC_LoadSource(menuFile);
-  if (!handle) {
-    handle = trap_PC_LoadSource("ui/testhud.menu");
-  }
-  if (!handle) {
-    return;
-  }
-
-  while (1) {
-    if (!trap_PC_ReadToken(handle, &token)) {
-      break;
-    }
-
-    // if ( Q_stricmp( token, "{" ) ) {
-    //	Com_Printf( "Missing { in menu file\n" );
-    //	break;
-    // }
-
-    // if ( menuCount == MAX_MENUS ) {
-    //	Com_Printf( "Too many menus!\n" );
-    //	break;
-    // }
-
-    if (token.string[0] == '}') {
-      break;
-    }
-
-    if (Q_stricmp(token.string, "assetGlobalDef") == 0) {
-      if (CG_Asset_Parse(handle)) {
-        continue;
-      } else {
-        break;
-      }
-    }
-
-    if (Q_stricmp(token.string, "menudef") == 0) {
-      // start a new menu
-      Menu_New(handle);
-    }
-  }
-  trap_PC_FreeSource(handle);
-}
-
-static qboolean CG_Load_Menu(const char **p) {
-  const char *token = COM_ParseExt(p, qtrue);
-
-  if (token[0] != '{') {
-    return qfalse;
-  }
-
-  while (1) {
-
-    token = COM_ParseExt(p, qtrue);
-
-    if (Q_stricmp(token, "}") == 0) {
-      return qtrue;
-    }
-
-    if (!token || token[0] == 0) {
-      return qfalse;
-    }
-
-    CG_ParseMenu(token);
-  }
-  return qfalse;
-}
-
-void CG_LoadMenus(char *menuFile) {
-  const char *token;
-  const char *p;
-  int len, start;
-  fileHandle_t f;
-  static char buf[MAX_MENUDEFFILE];
-
-  start = trap_Milliseconds();
-
-  len = trap_FS_FOpenFile(menuFile, &f, FS_READ);
-  if (!f) {
-    trap_Error(va(S_COLOR_YELLOW "menu file not found: %s, using default\n",
-                  menuFile));
-    len = trap_FS_FOpenFile("ui/hud.txt", &f, FS_READ);
-    if (!f) {
-      trap_Error(S_COLOR_RED "default menu file not found: "
-                             "ui/hud.txt, unable to continue!\n");
-    }
-  }
-
-  if (len >= MAX_MENUDEFFILE) {
-    trap_Error(va(S_COLOR_RED
-                  "menu file too large: %s is %i, max allowed is %i",
-                  menuFile, len, MAX_MENUDEFFILE));
-    trap_FS_FCloseFile(f);
-    return;
-  }
-
-  trap_FS_Read(buf, len, f);
-  buf[len] = 0;
-  trap_FS_FCloseFile(f);
-
-  COM_Compress(buf);
-
-  Menu_Reset();
-
-  p = buf;
-
-  while (1) {
-    token = COM_ParseExt(&p, qtrue);
-    if (!token || token[0] == 0 || token[0] == '}') {
-      break;
-    }
-
-    // if ( Q_stricmp( token, "{" ) ) {
-    //	Com_Printf( "Missing { in menu file\n" );
-    //	break;
-    // }
-
-    // if ( menuCount == MAX_MENUS ) {
-    //	Com_Printf( "Too many menus!\n" );
-    //	break;
-    // }
-
-    if (Q_stricmp(token, "}") == 0) {
-      break;
-    }
-
-    if (Q_stricmp(token, "loadmenu") == 0) {
-      if (CG_Load_Menu(&p)) {
-        continue;
-      } else {
-        break;
-      }
-    }
-  }
-
-  Com_Printf("UI menu load time = %d milli seconds\n",
-             trap_Milliseconds() - start);
-}
-
 static qboolean CG_OwnerDrawHandleKey(int ownerDraw, int flags, float *special,
                                       int key) {
   return qfalse;
@@ -3879,8 +3617,6 @@ void CG_LoadHudMenu() {
 
   Menu_Reset();
 
-  //	CG_LoadMenus("ui/hud.txt");
-
   CG_Text_SetActiveFont(0);
 }
 
@@ -4010,7 +3746,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   cg.warmupCount = -1;
 
   CG_ParseServerinfo();
-  CG_ParseSysteminfo();
 
   // NOTE: The core systems must be created before any ETJump objects
   // are created! All C++ modules should get these as constructor params
@@ -4022,6 +3757,13 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   // we need demo compatibility object asap, once server info is parsed,
   // so we can get the mod version
   ETJump::initDemo();
+
+  // early enough that 'shared' cvar parsing in systeminfo gets correct
+  // values, if we're playing back old demos
+  ETJump::parseWorldspawnKeys();
+  ETJump::parseWorldspawnKeyOverrides();
+
+  CG_ParseSysteminfo();
 
   if (cgs.gametype == ETJUMP_GAMETYPE) {
     CG_LocateArena();
@@ -4112,8 +3854,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   CG_InitLocalEntities();
 
   BG_BuildSplinePaths();
-
-  CG_InitMarkPolys();
 
   // remove the last loading update
   cg.infoScreenText[0] = 0;

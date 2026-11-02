@@ -44,6 +44,11 @@ protected:
 
 public:
   static void validateTimerunEntities();
+
+  // must be called before the entities of a map are spawned, as the module
+  // might be loaded again into the same image, which keeps these (see
+  // FatalErrorBoundary), and some builds never unload it at all
+  static void resetTimerunIndices();
 };
 
 /**

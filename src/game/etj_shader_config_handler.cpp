@@ -71,7 +71,7 @@ void ShaderConfigHandler::addShaderRemap(const char *oldShader,
   const float timeOffset = static_cast<float>(level.time) * 0.001f;
 
   // check for an existing entry first, and just update it if found
-  for (int32_t i = 0; i < shaderRemaps.size(); i++) {
+  for (int32_t i = 0; i < static_cast<int32_t>(shaderRemaps.size()); i++) {
     if (StringUtils::iEqual(shaderRemaps[i].originalShader, oldShader)) {
       shaderRemaps[i].currentShader = newShader;
       shaderRemaps[i].timeOffset = timeOffset;

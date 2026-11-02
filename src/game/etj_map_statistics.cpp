@@ -408,7 +408,7 @@ bool MapStatistics::loadMaps() {
     mi.lastPlayed = sqlite3_column_int(stmt, 6);
     mi.isOnServer = false;
 
-    _maps.push_back(mi);
+    _maps.push_back(std::move(mi));
     rc = sqlite3_step(stmt);
   }
 

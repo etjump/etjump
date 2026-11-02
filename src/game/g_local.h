@@ -1693,7 +1693,6 @@ void G_RunMover(gentity_t *ent);
 qboolean G_MoverPush(gentity_t *pusher, vec3_t move, vec3_t amove,
                      gentity_t **obstacle);
 void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator);
-void G_Activate(gentity_t *ent, gentity_t *activator);
 
 void G_TryDoor(gentity_t *ent, gentity_t *other,
                gentity_t *activator); //----(SA)	added
@@ -2113,7 +2112,6 @@ extern vmCvar_t g_tokensPath;
 
 extern vmCvar_t g_chatOptions;
 
-extern vmCvar_t shared;
 extern vmCvar_t g_moverScale;
 extern vmCvar_t g_debugTrackers;
 extern vmCvar_t g_spectatorVote;

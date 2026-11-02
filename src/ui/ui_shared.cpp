@@ -226,7 +226,6 @@ typedef struct stringDef_s {
 static int strPoolIndex = 0;
 static char strPool[STRING_POOL_SIZE];
 
-static int strHandleCount = 0;
 static stringDef_t *strHandle[HASH_TABLE_SIZE];
 
 const char *String_Alloc(const char *p) {
@@ -305,10 +304,23 @@ void String_Init() {
   for (i = 0; i < HASH_TABLE_SIZE; i++) {
     strHandle[i] = 0;
   }
-  strHandleCount = 0;
   strPoolIndex = 0;
   menuCount = 0;
   modalMenuCount = 0;
+
+  // The menus are parsed again after this, so an interaction in progress
+  // refers to an item that no longer exists. This happens when an error
+  // interrupted it, and the module is loaded again into the same image
+  // (see FatalErrorBoundary), which keeps the state from before.
+  g_waitingForKey = qfalse;
+  g_editingField = qfalse;
+  g_bindItem = nullptr;
+  g_editItem = nullptr;
+  itemCapture = nullptr;
+  captureFunc = nullptr;
+  captureData = nullptr;
+  scrollInfo = {};
+
   UI_InitMemory();
   Item_SetupKeywordHash();
   Menu_SetupKeywordHash();
@@ -2364,6 +2376,65 @@ static int Item_ListBox_ThumbDrawPosition(itemDef_t *item) {
   return Item_ListBox_ThumbPosition(item);
 }
 
+static float Item_Slider_GetValue(const itemDef_t *item) {
+  if (item->cvar) {
+    return DC->getCVarValue(item->cvar);
+  }
+
+  if (item->colorSliderData.colorVar) {
+    return DC->getColorSliderValue(item->colorSliderData.colorVar);
+  }
+
+  return 0.0f;
+}
+
+static void Item_Slider_SetValue(itemDef_t *item, float value,
+                                 const bool cacheOnly = false) {
+  const auto editDef = static_cast<editFieldDef_t *>(item->typeData);
+
+  if (!editDef) {
+    return;
+  }
+
+  if (editDef->step > 0) {
+    const float snapped = std::roundf(value / editDef->step) * editDef->step;
+
+    // min/max aren't necessarily multiples of step, so they count as valid
+    // values too, otherwise rounding away from them leaves them unreachable
+    if (std::abs(value - editDef->minVal) < std::abs(value - snapped)) {
+      value = editDef->minVal;
+    } else if (std::abs(value - editDef->maxVal) < std::abs(value - snapped)) {
+      value = editDef->maxVal;
+    } else {
+      value = snapped;
+    }
+  }
+
+  // snapping can still end up out of range, e.g. when min/max are
+  // multiples of step but float error puts the snapped value just past them
+  value = std::clamp(value, editDef->minVal, editDef->maxVal);
+
+  if (item->cacheCvar) {
+    Q_strncpyz(item->cacheCvarValue, va("%f", value), MAX_CVAR_VALUE_STRING);
+
+    if (cacheOnly) {
+      return;
+    }
+  }
+
+  // don't spam cvar updates if the value didn't change
+  if (value == Item_Slider_GetValue(item)) {
+    return;
+  }
+
+  if (item->cvar) {
+    DC->setCVar(item->cvar, va("%f", value));
+  } else if (item->colorSliderData.colorVar) {
+    DC->setColorSliderValue(item->colorSliderData.colorVar, value);
+    DC->updateSliderState(item);
+  }
+}
+
 float Item_Slider_ThumbPosition(const itemDef_t *item) {
   float x;
   const auto *editDef = static_cast<editFieldDef_t *>(item->typeData);
@@ -2385,14 +2456,12 @@ float Item_Slider_ThumbPosition(const itemDef_t *item) {
     Com_Error(ERR_FATAL, "Item_Slider_ThumbPosition: NULL editDef\n");
   }
 
-  float value = 0.0f;
+  float value;
 
   if (itemCapture && itemCapture == item && item->cacheCvarValue) {
     value = Q_atof(item->cacheCvarValue);
-  } else if (item->cvar) {
-    value = DC->getCVarValue(item->cvar);
-  } else if (item->colorSliderData.colorVar) {
-    value = DC->getColorSliderValue(item->colorSliderData.colorVar);
+  } else {
+    value = Item_Slider_GetValue(item);
   }
 
   if (value < editDef->minVal) {
@@ -3371,6 +3440,12 @@ static bool comboHandleKey(itemDef_t *item, int key) {
 
   if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_ENTER ||
       key == K_KP_ENTER) {
+    // nothing is highlighted (cursor is outside of the dropdown),
+    // close the dropdown without changing the value
+    if (item->cursorPos < 0) {
+      return true;
+    }
+
     if (multi->strDef) {
       if (!Q_stricmp(multi->cvarStr[item->cursorPos], OPEN_COLOR_PICKER)) {
         Menu_ClearFocus(static_cast<menuDef_t *>(item->parent));
@@ -3771,37 +3846,8 @@ static void Scroll_Slider_ThumbFunc(void *p) {
   value *= (editDef->maxVal - editDef->minVal);
   value += editDef->minVal;
 
-  if (editDef->step > 0) {
-    // snap to nearest value
-    value = std::roundf(value / editDef->step) * editDef->step;
-  }
-
-  if (scrollInfo.item->cacheCvar) {
-    Q_strncpyz(scrollInfo.item->cacheCvarValue, va("%f", value),
-               MAX_CVAR_VALUE_STRING);
-    return;
-  }
-
-  float oldValue = value;
-
-  if (si->item->cvar) {
-    oldValue = DC->getCVarValue(si->item->cvar);
-  } else if (si->item->colorSliderData.colorVar) {
-    oldValue = DC->getColorSliderValue(si->item->colorSliderData.colorVar);
-  }
-
-  // if we haven't moved the mouse enough to update the cvar value,
-  // don't spam cvar updates for no reason
-  if (oldValue == value) {
-    return;
-  }
-
-  if (si->item->cvar) {
-    DC->setCVar(si->item->cvar, va("%f", value));
-  } else {
-    DC->setColorSliderValue(si->item->colorSliderData.colorVar, value);
-    DC->updateSliderState(si->item);
-  }
+  // cached sliders only set the cvar once the item capture ends
+  Item_Slider_SetValue(si->item, value, true);
 }
 
 void Item_StartCapture(itemDef_t *item, int key) {
@@ -3875,6 +3921,75 @@ void Item_StartCapture(itemDef_t *item, int key) {
   }
 }
 
+// returns the index of the next grid point from 'pos' (given in grid units)
+// in the pressed direction, so values that are off the grid don't skip
+// a point
+static float Item_Slider_NextGridIndex(const float pos, const int dir) {
+  float index = std::roundf(pos);
+
+  // nearest grid point isn't ahead of us (1% tolerance for float error)
+  if ((index - pos) * static_cast<float>(dir) < 0.01f) {
+    index += static_cast<float>(dir);
+  }
+
+  return index;
+}
+
+static qboolean Item_Slider_HandleStepKey(itemDef_t *item,
+                                          const editFieldDef_t *editDef,
+                                          int key, int dir, float cursorX,
+                                          float cursorY) {
+  // keyboard stepping only requires focus so it works with tab navigation,
+  // mouse wheel additionally requires the cursor to be over the item
+  if (!(item->window.flags & WINDOW_HASFOCUS)) {
+    return qfalse;
+  }
+
+  if ((key == K_MWHEELUP || key == K_MWHEELDOWN) &&
+      !Rect_ContainsPoint(&item->window.rect, cursorX, cursorY)) {
+    return qfalse;
+  }
+
+  if (!item->cvar && !item->colorSliderData.colorVar) {
+    return qfalse;
+  }
+
+  const float oldValue =
+      std::clamp(Item_Slider_GetValue(item), editDef->minVal, editDef->maxVal);
+  float value;
+
+  if (editDef->step > 0) {
+    value = Item_Slider_NextGridIndex(oldValue / editDef->step, dir) *
+            editDef->step;
+  } else {
+    // fall back to 5% of the range if the menu doesn't define a step
+    static constexpr float FALLBACK_STEPS = 20.0f;
+    const float range = editDef->maxVal - editDef->minVal;
+
+    if (range <= 0) {
+      return qtrue;
+    }
+
+    const float pos = (oldValue - editDef->minVal) / range * FALLBACK_STEPS;
+    const float frac = std::clamp(
+        Item_Slider_NextGridIndex(pos, dir) / FALLBACK_STEPS, 0.0f, 1.0f);
+
+    // interpolate this way so that min/max are hit exactly at the ends
+    value = editDef->minVal * (1.0f - frac) + editDef->maxVal * frac;
+  }
+
+  value = std::clamp(value, editDef->minVal, editDef->maxVal);
+
+  // already at min/max, consume the key but leave the value alone,
+  // this also keeps an out of range value (e.g. set from console)
+  // from being moved against the pressed direction
+  if (value != oldValue) {
+    Item_Slider_SetValue(item, value);
+  }
+
+  return qtrue;
+}
+
 qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
   const auto cursorX = static_cast<float>(DC->cursor.virtX);
   const auto cursorY = static_cast<float>(DC->cursor.virtY);
@@ -3885,13 +4000,26 @@ qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
     return qfalse;
   }
 
-  if (key != K_MOUSE1 && key != K_ENTER && key != K_MOUSE2 && key != K_MOUSE3) {
-    return qfalse;
-  }
-
   const auto editDef = static_cast<editFieldDef_t *>(item->typeData);
 
   if (!editDef) {
+    return qfalse;
+  }
+
+  int dir = 0;
+
+  if (key == K_LEFTARROW || key == K_KP_LEFTARROW || key == K_MWHEELDOWN) {
+    dir = -1;
+  } else if (key == K_RIGHTARROW || key == K_KP_RIGHTARROW ||
+             key == K_MWHEELUP) {
+    dir = 1;
+  }
+
+  if (dir != 0) {
+    return Item_Slider_HandleStepKey(item, editDef, key, dir, cursorX, cursorY);
+  }
+
+  if (key != K_MOUSE1 && key != K_ENTER && key != K_MOUSE2 && key != K_MOUSE3) {
     return qfalse;
   }
 
@@ -3919,17 +4047,7 @@ qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
   value *= editDef->maxVal - editDef->minVal;
   value += editDef->minVal;
 
-  // always update cache cvar value on click if it exists
-  if (item->cacheCvar) {
-    Q_strncpyz(item->cacheCvarValue, va("%f", value), MAX_CVAR_VALUE_STRING);
-  }
-
-  if (item->cvar) {
-    DC->setCVar(item->cvar, va("%f", value));
-  } else if (item->colorSliderData.colorVar) {
-    DC->setColorSliderValue(item->colorSliderData.colorVar, value);
-    DC->updateSliderState(item);
-  }
+  Item_Slider_SetValue(item, value);
 
   return qtrue;
 }

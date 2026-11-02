@@ -46,7 +46,7 @@ ETJump::InlineCommandParser::parse(const std::vector<std::string> &args) {
   }
 
   if (currentCommand.length() > 0) {
-    commands.push_back(currentCommand);
+    commands.push_back(std::move(currentCommand));
   }
 
   return commands;

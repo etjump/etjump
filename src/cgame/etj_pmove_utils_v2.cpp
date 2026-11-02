@@ -51,6 +51,7 @@ void PmoveUtilsV2::initCvars() {
   hudCvars.emplace_back(&etj_drawStrafeQuality);
   hudCvars.emplace_back(&etj_drawUpmoveMeter);
   hudCvars.emplace_back(&etj_drawJumpSpeeds);
+  hudCvars.emplace_back(&etj_drawYaw);
 
   chsCvars.emplace_back(&etj_drawCHS1);
 
@@ -105,13 +106,13 @@ void PmoveUtilsV2::setupPmove(pmove_t &pm) {
                                            : MASK_PLAYERSOLID;
   pm.pointcontents = CG_PointContents;
   pm.skill = cgs.clientinfo[pm.ps->clientNum].skill;
-  pm.shared = cgs.shared;
   pm.pmove_msec = cgs.pmove_msec;
 
   // NOTE: incorrect in spec/demo playback, 'sprintTime' is local
   pm.pmext->sprintTime = cg.pmext.sprintTime;
   pm.pmext->jumpDelayBug = cg.jumpDelayBug;
   pm.pmext->autoSprint = cg.pmext.autoSprint;
+  pm.pmext->sharedWSKeys = cgame.sharedWSKeys;
 
   // On the first few frames after a map changes/restarts, we have a brief
   // window during which we run the client side pmove code, before the server
@@ -476,9 +477,8 @@ bool PmoveUtilsV2::checkProne(pmove_t &pm) {
   pm.trace(&trace, pm.ps->origin, pm.ps->mins, pm.ps->maxs, pm.ps->origin,
            pm.ps->clientNum, CONTENTS_NOPRONE);
 
-  if (!cgs.cheats &&
-      ((pm.shared & BG_LEVEL_NO_PRONE) ? trace.fraction == 1.0f
-                                       : trace.fraction != 1.0f)) {
+  if (!cgs.cheats && !WorldspawnShared::areaAllowsAction(
+                         pm.pmext->sharedWSKeys.noProne, trace)) {
     pm.ps->eFlags &= ~EF_PRONE;
     pm.ps->eFlags &= ~EF_PRONE_MOVING;
     return false;
@@ -646,7 +646,7 @@ void PmoveUtilsV2::groundTrace(pmove_t &pm, pml_t &pml) {
   traceAllLegs(trace, &pm.pmext->proneLegsOffset, pm.ps->origin, point, pm);
   pml.groundTrace = trace;
 
-  if (pm.shared & BG_LEVEL_NO_WALLBUG) {
+  if (pm.pmext->sharedWSKeys.noWallbug) {
     if (trace.allsolid && pm.ps->pm_type != PM_NOCLIP) {
       VectorClear(pm.ps->velocity);
     }
@@ -881,7 +881,7 @@ bool PmoveUtilsV2::checkJump(pmove_t &pm, pml_t &pml, const bool isLerpFrame) {
       return false;
     }
 
-    if ((pm.shared & BG_LEVEL_NO_JUMPDELAY)
+    if (pm.pmext->sharedWSKeys.noJumpDelay
             ? (pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)
             : !(pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)) {
       return false;

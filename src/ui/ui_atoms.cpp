@@ -11,6 +11,8 @@
 #include "etj_local.h"
 #include "etj_utilities.h"
 
+#include "../game/etj_fatal_error_shared.h"
+
 uiStatic_t uis;
 qboolean m_entersound; // after a frame, so caching won't disrupt the sound
 
@@ -44,7 +46,8 @@ void QDECL Com_DPrintf(const char *fmt, ...) {
   Q_vsnprintf(text, sizeof(text), error, argptr);
   va_end(argptr);
 
-  trap_Error(va("%s", text));
+  // unwinds the stack up to vmMain, which then calls trap_Error
+  ETJump::FatalErrorBoundary::throwFatal(text);
 }
 
 void QDECL Com_Printf(const char *msg, ...) {

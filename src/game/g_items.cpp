@@ -10,7 +10,9 @@
  */
 
 #include "g_local.h"
+#include "etj_local.h"
 #include "etj_timerun_v2.h"
+#include "etj_worldspawn.h"
 
 inline constexpr int RESPAWN_SP = -1;
 inline constexpr int RESPAWN_AMMO = 40;
@@ -387,8 +389,8 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
   // and ammo packs picked up by field ops don't disappear once picked up
   const bool alreadyHave =
       COM_BitCheck(other->client->ps.weapons, ent->item->giTag) ||
-      other->client->ps.stats[STAT_PLAYER_CLASS] == PC_FIELDOPS &&
-          ent->item->giTag == WP_AMMO;
+      (other->client->ps.stats[STAT_PLAYER_CLASS] == PC_FIELDOPS &&
+       ent->item->giTag == WP_AMMO);
 
   // JPW NERVE  prevents drop/pickup weapon "quick reload" exploit
   if (alreadyHave) {
@@ -1216,7 +1218,7 @@ void G_RunItem(gentity_t *ent) {
 
   // if it is in a nodrop volume, remove it
   contents = trap_PointContents(ent->r.currentOrigin, -1);
-  if (!BG_DropItems(contents, shared.integer)) {
+  if (!BG_DropItems(contents, game.worldspawn->sharedKeys.noDrop)) {
     if (ent->item && ent->item->giType == IT_TEAM) {
       Team_ReturnFlag(ent);
     } else {

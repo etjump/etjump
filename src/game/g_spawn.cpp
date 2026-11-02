@@ -23,6 +23,7 @@
 #include "etj_entity_utilities.h"
 #include "etj_progression_tracker.h"
 #include "etj_target_random.h"
+#include "etj_target_wskey_overrides.h"
 #include "etj_func_static_client.h"
 #include "etj_worldspawn.h"
 
@@ -732,6 +733,7 @@ spawn_t spawns[] = {
     {"target_spawn_relay", ETJump::TargetSpawnRelay::spawn},
     {"target_random", ETJump::TargetRandom::spawn},
     {"func_static_client", ETJump::FuncStaticClient::spawn},
+    {"target_wskey_overrides", ETJump::TargetWSKeyOverrides::spawn},
     {nullptr, nullptr},
 };
 
@@ -1099,6 +1101,9 @@ void G_SpawnEntitiesFromString(void) {
   G_Printf("Enable spawning!\n");
   level.spawning = qtrue;
   level.numSpawnVars = 0;
+
+  // filled by G_ParseSpawnVars
+  ETJump::EntityUtilities::clearParsedEntities();
 
   // the worldspawn is not an actual entity, but it still
   // has a "spawn" function to perform any global setup

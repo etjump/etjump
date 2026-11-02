@@ -558,7 +558,7 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     game.rtv->clearRtvMaps();
 
     // just copy all the maps if we don't have more maps than requested
-    if (numMaps <= maxMaps) {
+    if (static_cast<size_t>(numMaps) <= maxMaps) {
       std::copy(maps.begin(), maps.end(),
                 std::inserter(uniqueMaps, uniqueMaps.begin()));
       uniqueMaps.erase(level.rawmapname);
@@ -670,7 +670,7 @@ int G_PortalPredict_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       return G_INVALID;
     }
 
-    if (game.worldspawn->portalPredict) {
+    if (game.worldspawn->sharedKeys.portalPredict) {
       Printer::popup(
           ent, "Portalgun teleport prediction cannot be changed in this map.");
       return G_INVALID;

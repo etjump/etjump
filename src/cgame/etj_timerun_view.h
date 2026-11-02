@@ -73,11 +73,15 @@ private:
                              int currentCPIndex,
                              const Timerun::PlayerTimerunInformation &run);
 
+  static bool isGoldSplit(int32_t currentCPIndex,
+                          const Timerun::PlayerTimerunInformation &run);
+
   vec4_t inactiveTimerColor{};
 
-  vec4_t colorDefault = {1.0f, 1.0f, 1.0f, 1.0f};
-  vec4_t colorSuccess = {0.627f, 0.941f, 0.349f, 1.0f};
-  vec4_t colorFail = {0.976f, 0.262f, 0.262f, 1.0f};
+  static constexpr vec4_t COLOR_DEFAULT = {1.0f, 1.0f, 1.0f, 1.0f};
+  static constexpr vec4_t COLOR_SUCCESS = {0.627f, 0.941f, 0.349f, 1.0f};
+  static constexpr vec4_t COLOR_FAIL = {0.976f, 0.262f, 0.262f, 1.0f};
+  static constexpr vec4_t COLOR_GOLD = {1.0f, 0.867f, 0.263f, 1.0f};
 
   fontInfo_t *font;
   bool autoHide;

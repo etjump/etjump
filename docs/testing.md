@@ -43,10 +43,6 @@ Alternatively, in `Solution Explorer` (File list):
 
 Use `Test Explorer` from the `Test` menu, this gives better overview on discovered tests and provides a way to run only certain set of tests or debug failed tests. It takes time to discover all tests.
 
-### QtCreator
-
-_TODO_
-
 ## Adding new tests
 
 To add new test:

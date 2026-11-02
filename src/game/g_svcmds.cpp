@@ -331,7 +331,7 @@ static void Svcmd_EntityList_f() {
     } else {
       l = std::strlen(eventnames[check->s.eType - ET_EVENTS]);
     }
-    if (l > max_type_length) {
+    if (l > static_cast<size_t>(max_type_length)) {
       max_type_length = static_cast<int>(l);
     }
   }
