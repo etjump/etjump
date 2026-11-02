@@ -66,6 +66,7 @@
 #include "etj_servercommands.h"
 #include "etj_snaphud_data.h"
 #include "etj_snaphud_v2.h"
+#include "etj_spectator_hud_sync.h"
 #include "etj_spectatorinfo_data.h"
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_strafe_quality_v2.h"
@@ -81,6 +82,31 @@
 #include "../game/etj_worldspawn_shared.h"
 
 namespace ETJump {
+
+const char *effectiveHudCvarString(const vmCvar_t *cvar) {
+  return spectatorHudSyncEffectiveHudCvarString(cvar);
+}
+
+int32_t effectiveHudCvarInt(const vmCvar_t *cvar) {
+  return spectatorHudSyncEffectiveHudCvarInt(cvar);
+}
+
+float effectiveHudCvarFloat(const vmCvar_t *cvar) {
+  return spectatorHudSyncEffectiveHudCvarFloat(cvar);
+}
+
+void resetHudSyncState() { spectatorHudSyncReset(); }
+
+void runSpectatorHudSyncFrame() { spectatorHudSyncRunFrame(); }
+
+void onSpectatorHudSyncCommand(int targetClientNum, bool fullUpdate,
+                               int32_t revision,
+                               const std::string &cgazPayload,
+                               const std::string &snaphudPayload) {
+  spectatorHudSyncOnServerCommand(targetClientNum, fullUpdate, revision,
+                                  cgazPayload, snaphudPayload);
+}
+
 void delayedInit() {
   // force original cvars to match the shadow values, as ETe and ETL
   // reset cheat cvars to original values after the 'CG_INIT' VMCall
@@ -132,6 +158,8 @@ void delayedInit() {
         va("requestcustomvoteinfo %i", cg.numCustomvoteInfosRequested));
     cg.numCustomvoteInfosRequested++;
   }
+
+  runSpectatorHudSyncFrame();
 }
 
 void parseWorldspawnKeys() {
@@ -409,15 +437,25 @@ static void initHUD() {
   cgame.hud.renderables.emplace_back(std::make_unique<AreaIndicator>());
 
   if (etj_CGazOnTop.integer) {
-    cgame.hud.renderables.emplace_back(std::make_unique<SnaphudV2>(
-        cgame.hudData.snaphud, cgame.core.cvarUpdate));
-    cgame.hud.renderables.emplace_back(std::make_unique<CGazV2>(
-        cgame.hudData.cgaz, cgame.hudData.snaphud, cgame.core.cvarUpdate));
+    auto snaphudV2 =
+        std::make_unique<SnaphudV2>(cgame.hudData.snaphud, cgame.core.cvarUpdate);
+    cgame.hud.snaphudV2 = snaphudV2.get();
+    cgame.hud.renderables.emplace_back(std::move(snaphudV2));
+
+    auto cgazV2 = std::make_unique<CGazV2>(
+        cgame.hudData.cgaz, cgame.hudData.snaphud, cgame.core.cvarUpdate);
+    cgame.hud.cgazV2 = cgazV2.get();
+    cgame.hud.renderables.emplace_back(std::move(cgazV2));
   } else {
-    cgame.hud.renderables.emplace_back(std::make_unique<CGazV2>(
-        cgame.hudData.cgaz, cgame.hudData.snaphud, cgame.core.cvarUpdate));
-    cgame.hud.renderables.emplace_back(std::make_unique<SnaphudV2>(
-        cgame.hudData.snaphud, cgame.core.cvarUpdate));
+    auto cgazV2 = std::make_unique<CGazV2>(
+        cgame.hudData.cgaz, cgame.hudData.snaphud, cgame.core.cvarUpdate);
+    cgame.hud.cgazV2 = cgazV2.get();
+    cgame.hud.renderables.emplace_back(std::move(cgazV2));
+
+    auto snaphudV2 =
+        std::make_unique<SnaphudV2>(cgame.hudData.snaphud, cgame.core.cvarUpdate);
+    cgame.hud.snaphudV2 = snaphudV2.get();
+    cgame.hud.renderables.emplace_back(std::move(snaphudV2));
   }
 
   cgame.hud.renderables.emplace_back(std::make_unique<UpperRight>());
