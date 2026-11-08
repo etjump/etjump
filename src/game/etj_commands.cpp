@@ -706,7 +706,7 @@ static bool bestSegmentHistory(gentity_t *ent, Arguments argv) {
   const auto *const desc = R"(Prints the history of a single best segment.
 
     /best-segments-history --season <season name> --map <map name> --run <run name> --segment <segment number>
-                           --user <user ID> --max-records <amount>
+                           --user <user ID> --page <page> --page-size <page size>
 
     Has a shorthand format of:
     /best-segments-history <run name> <segment>
@@ -735,9 +735,12 @@ static bool bestSegmentHistory(gentity_t *ent, Arguments argv) {
               "user", "u",
               "User ID to print the history for. Default is your own user ID.",
               ETJump::CommandParser::OptionDefinition::Type::Integer, false)
-          .addOption("max-records", "mr",
-                     "Maximum number of records to show. Default is 20, use 0 "
-                     "to show all records.",
+          .addOption(
+              "page", "p", "Which page of history to show, starting at 1.",
+              ETJump::CommandParser::OptionDefinition::Type::Integer, false)
+          .addOption("page-size", "ps",
+                     "How many records to show per page for each season. "
+                     "Default is 20, max is 100.",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
                      false));
 
@@ -756,7 +759,8 @@ static bool bestSegmentHistory(gentity_t *ent, Arguments argv) {
   const auto optRun = command.getOptional("run");
   const auto optSegment = command.getOptional("segment");
   const auto optUser = command.getOptional("user");
-  const auto optMaxRecords = command.getOptional("max-records");
+  const auto optPage = command.getOptional("page");
+  const auto optPageSize = command.getOptional("page-size");
 
   std::string season;
   std::string map;
@@ -855,9 +859,11 @@ static bool bestSegmentHistory(gentity_t *ent, Arguments argv) {
   params.run = std::move(run.value());
   params.userId = userId;
   params.segment = segment.value();
-  params.maxRecords = optMaxRecords.has_value()
-                          ? std::max(optMaxRecords.value().integer, 0)
-                          : ETJump::Timerun::RECORD_HISTORY_DEFAULT_SIZE;
+  params.page = optPage.has_value() ? std::max(optPage.value().integer, 1) : 1;
+  params.pageSize = optPageSize.has_value()
+                        ? std::clamp(optPageSize.value().integer, 1,
+                                     ETJump::Timerun::MAX_PAGE_SIZE_HISTORY)
+                        : ETJump::Timerun::DEFAULT_PAGE_SIZE_HISTORY;
 
   game.timerunV2->printBestSegmentHistory(params);
 
@@ -978,7 +984,7 @@ static bool recordHistory(gentity_t *ent, Arguments argv) {
 
   const auto *const desc = R"(Prints historical details for a timerun record.
     /record-history --season <season name> --map <map name> --run <run name> --user <user ID>
-                    --max-records <amount>
+                    --page <page> --page-size <page size>
 
     Has a shorthand format of:
     /record-history <run name>
@@ -1006,9 +1012,12 @@ static bool recordHistory(gentity_t *ent, Arguments argv) {
                      "own user ID.",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
                      false)
-          .addOption("max-records", "mr",
-                     "Maximum number of records to show. Default is 20, use 0 "
-                     "to show all records.",
+          .addOption(
+              "page", "p", "Which page of history to show, starting at 1.",
+              ETJump::CommandParser::OptionDefinition::Type::Integer, false)
+          .addOption("page-size", "ps",
+                     "How many records to show per page for each run. Default "
+                     "is 20, max is 100.",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
                      false));
 
@@ -1026,14 +1035,21 @@ static bool recordHistory(gentity_t *ent, Arguments argv) {
   const auto optMap = command.getOptional("map");
   const auto optRun = command.getOptional("run");
   const auto optUser = command.getOptional("user");
-  const auto optMaxRecords = command.getOptional("max-records");
+  const auto optPage = command.getOptional("page");
+  const auto optPageSize = command.getOptional("page-size");
 
   std::string season;
   std::string map;
   std::string run;
 
   std::optional<int32_t> userId;
-  int32_t maxRecords = ETJump::Timerun::RECORD_HISTORY_DEFAULT_SIZE;
+  const int32_t page =
+      optPage.has_value() ? std::max(optPage.value().integer, 1) : 1;
+  const int32_t pageSize =
+      optPageSize.has_value()
+          ? std::clamp(optPageSize.value().integer, 1,
+                       ETJump::Timerun::MAX_PAGE_SIZE_HISTORY)
+          : ETJump::Timerun::DEFAULT_PAGE_SIZE_HISTORY;
 
   if (command.extraArgs.size() >= 4) {
     season = command.extraArgs[0];
@@ -1100,18 +1116,8 @@ static bool recordHistory(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  if (optMaxRecords.has_value()) {
-    maxRecords = optMaxRecords.value().integer;
-
-    if (maxRecords < 0) {
-      Printer::chat(clientNum,
-                    "^3record-history: ^7max records cannot be negative.");
-      return false;
-    }
-  }
-
   game.timerunV2->recordHistory({clientNum, userId.value(), std::move(season),
-                                 std::move(map), std::move(run), maxRecords,
+                                 std::move(map), std::move(run), page, pageSize,
                                  exactMap});
 
   return true;
