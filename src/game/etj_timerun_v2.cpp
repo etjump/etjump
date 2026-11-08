@@ -26,6 +26,7 @@
 #include <utility>
 #include <chrono>
 #include <unordered_set>
+#include <algorithm>
 
 #include "etj_timerun_v2.h"
 
@@ -713,6 +714,23 @@ std::string rankToString(int rank) {
   }
 }
 
+namespace {
+struct PageWindow {
+  int32_t start; // zero-based, inclusive
+  int32_t end;   // zero-based, exclusive
+};
+
+PageWindow getPageWindow(const int32_t total, const int32_t page,
+                         const int32_t pageSize) {
+  const int32_t size = std::max(pageSize, 1);
+  const int32_t numPages = std::max(1, (total + size - 1) / size);
+  const int32_t effectivePage = std::clamp(page, 1, numPages);
+  const int32_t start = (effectivePage - 1) * size;
+
+  return {start, std::min(start + size, total)};
+}
+} // namespace
+
 void TimerunV2::printRecords(const Timerun::PrintRecordsParams &params) {
   _sc->postTask(
       [this, params] {
@@ -1373,22 +1391,31 @@ void TimerunV2::printBestSegmentHistory(
     auto entries = _repository->getBestSegmentHistory(params);
     auto seasons = _repository->getSeasonsForName(params.season, false);
 
-    // 'maxRecords' is applied per season: a partial season match can return
-    // several seasons, and truncating the flat list would drop whole seasons
-    std::map<int32_t, int32_t> perSeason;
+    // paging is applied per season: a partial season match can return several
+    // seasons, and each season gets its own page
+    std::map<int32_t, int32_t> totalPerSeason;
+    for (const auto &entry : entries) {
+      ++totalPerSeason[entry.seasonId];
+    }
+
+    std::map<int32_t, PageWindow> windows;
+    for (const auto &[seasonId, total] : totalPerSeason) {
+      windows[seasonId] = getPageWindow(total, params.page, params.pageSize);
+    }
+
+    std::map<int32_t, int32_t> indexPerSeason;
     std::map<int32_t, int32_t> hiddenPerSeason;
     std::vector<Timerun::BestSegmentHistoryEntry> limited;
 
     for (auto &entry : entries) {
-      auto &count = perSeason[entry.seasonId];
+      const auto &window = windows[entry.seasonId];
+      const int32_t index = indexPerSeason[entry.seasonId]++;
 
-      if (params.maxRecords > 0 && count >= params.maxRecords) {
+      if (index >= window.start && index < window.end) {
+        limited.push_back(std::move(entry));
+      } else {
         ++hiddenPerSeason[entry.seasonId];
-        continue;
       }
-
-      ++count;
-      limited.push_back(std::move(entry));
     }
 
     entries = std::move(limited);
@@ -1398,7 +1425,7 @@ void TimerunV2::printBestSegmentHistory(
   };
 
   const auto callback =
-      [this, func, clientNum, userId, segment](
+      [this, func, clientNum, userId, segment, params](
           const std::unique_ptr<SynchronizationContext::ResultBase> result) {
         const auto *const r =
             dynamic_cast<BestSegmentHistoryListingResult *>(result.get());
@@ -1445,22 +1472,28 @@ void TimerunV2::printBestSegmentHistory(
         int32_t seasonShown = 0;
         std::string msg;
 
-        const auto printHidden = [&](int32_t seasonId) {
+        const auto printPaging = [&](const int32_t seasonId) {
           const auto it = r->hiddenPerSeason.find(seasonId);
+          const int32_t hidden =
+              it != r->hiddenPerSeason.end() ? it->second : 0;
+          const int32_t total = seasonShown + hidden;
 
-          if (it == r->hiddenPerSeason.end()) {
+          if (total <= std::max(params.pageSize, 1)) {
             return;
           }
 
+          const auto window =
+              getPageWindow(total, params.page, params.pageSize);
+
           msg += StringUtils::format(
-              "\n ^7Showing ^2%i ^7of ^2%i ^7improvements\n", seasonShown,
-              seasonShown + it->second);
+              "\n ^7Showing ^2%i-%i ^7of ^2%i ^7improvements\n",
+              window.start + 1, window.end, total);
         };
 
         for (const auto &entry : r->entries) {
           if (entry.seasonId != currentSeason) {
             if (currentSeason != -1) {
-              printHidden(currentSeason);
+              printPaging(currentSeason);
               msg += '\n';
             }
 
@@ -1508,7 +1541,7 @@ void TimerunV2::printBestSegmentHistory(
               entry.recordDate.toDateTimeString());
         }
 
-        printHidden(currentSeason);
+        printPaging(currentSeason);
 
         msg += '\n';
         Printer::console(clientNum, msg);
@@ -2206,15 +2239,17 @@ void TimerunV2::recordHistory(const Timerun::RecordHistoryParams &params) {
     auto records = _repository->getHistoricalRecords(params);
     auto seasons = groupHistoricalRecords(std::move(records));
 
-    // filter the results to display the requested amount of records
+    // paging is applied per run: a partial run match can return several runs,
+    // and each run gets its own page
     for (auto &season : seasons) {
       for (auto &run : season.runs) {
-        if (params.maxRecords > 0 &&
-            run.records.size() > static_cast<size_t>(params.maxRecords)) {
-          run.numHidden =
-              static_cast<int32_t>(run.records.size()) - params.maxRecords;
-          run.records.resize(params.maxRecords);
-        }
+        const auto total = static_cast<int32_t>(run.records.size());
+        const auto window = getPageWindow(total, params.page, params.pageSize);
+
+        run.numHidden = total - (window.end - window.start);
+        run.records.erase(run.records.begin() + window.end, run.records.end());
+        run.records.erase(run.records.begin(),
+                          run.records.begin() + window.start);
       }
     }
 
@@ -2310,10 +2345,16 @@ void TimerunV2::recordHistory(const Timerun::RecordHistoryParams &params) {
                                       record.r.recordDate.toDateTimeString());
             }
 
-            if (run.numHidden > 0) {
+            const auto total =
+                static_cast<int32_t>(run.records.size()) + run.numHidden;
+
+            if (total > std::max(params.pageSize, 1)) {
+              const auto window =
+                  getPageWindow(total, params.page, params.pageSize);
+
               msg += StringUtils::format(
-                  "\n ^7Showing ^2%i ^7of ^2%i ^7total records\n",
-                  params.maxRecords, params.maxRecords + run.numHidden);
+                  "\n ^7Showing ^2%i-%i ^7of ^2%i ^7total records\n",
+                  window.start + 1, window.end, total);
             }
 
             msg += "\n";

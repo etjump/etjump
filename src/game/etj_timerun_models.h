@@ -34,7 +34,8 @@ inline constexpr int32_t DEFAULT_PAGE_SIZE_ALL_RUNS = 3;
 inline constexpr int32_t DEFAULT_PAGE_SIZE_SINGLE_RUN = 20;
 inline constexpr int32_t MAX_PAGE_SIZE_SINGLE_RUN = 100;
 inline constexpr int32_t MAX_PAGE_SIZE_ALL_RUNS = 10;
-inline constexpr int32_t RECORD_HISTORY_DEFAULT_SIZE = 20;
+inline constexpr int32_t DEFAULT_PAGE_SIZE_HISTORY = 20;
+inline constexpr int32_t MAX_PAGE_SIZE_HISTORY = 100;
 inline constexpr int32_t DEFAULT_SEASON_ID = 1;
 
 struct Season {
@@ -231,7 +232,8 @@ struct RecordHistoryParams {
   std::string season;
   std::string map;
   std::string run;
-  int32_t maxRecords{};
+  int32_t page{1};
+  int32_t pageSize{DEFAULT_PAGE_SIZE_HISTORY};
   bool exactMap{};
 };
 
@@ -252,7 +254,8 @@ struct BestSegmentHistoryParams {
   std::string run;
   int32_t userId{};
   int32_t segment{};
-  int32_t maxRecords{};
+  int32_t page{1};
+  int32_t pageSize{DEFAULT_PAGE_SIZE_HISTORY};
   bool exactMap{};
 };
 
