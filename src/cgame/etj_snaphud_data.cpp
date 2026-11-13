@@ -26,6 +26,7 @@
 
 #include "etj_snaphud_data.h"
 #include "cg_local.h"
+#include "etj_local.h"
 
 // wishspeed may be modified by 'target_scale_velocity' up to 3x
 // (wishspeed * 3) / 125 * pm_accelerate = 84.48
@@ -165,7 +166,8 @@ void SnaphudData::walkMove() {
 
   const float scale = PmoveUtilsV2::cmdScale(
       s.pm, s.pm.cmd,
-      etj_snapHUDTrueness.integer & static_cast<int32_t>(SnapTrueness::UPMOVE));
+      etj_snapHUDTrueness.integer &
+          static_cast<int32_t>(SnapTrueness::UPMOVE));
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;

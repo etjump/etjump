@@ -60,6 +60,8 @@ menuDef {
         SLIDER              (SETTINGS_ITEM_POS(9), "Custom command menu width:", 0.2, SETTINGS_ITEM_H, etj_ccMenu_width 204 204 620 2, "Sets the width of the custom command menu\netj_ccMenu_width")
         YESNO               (SETTINGS_ITEM_POS(10), "Browse custom commands with 'open':", 0.2, SETTINGS_ITEM_H, etj_ccMenu_browseWithOpen, "Browse to next page of custom command menu instead of closing it when\nit's already open, and 'openCustomCommandMenu' is executed again\netj_ccMenu_browseWithOpen")
         YESNO               (SETTINGS_ITEM_POS(11), "Show empty cust. command menu pages:", 0.2, SETTINGS_ITEM_H, etj_ccMenu_showEmptyPages, "Include empty pages when browsing custom command menu\netj_ccMenu_showEmptyPages")
+				YESNO               (SETTINGS_ITEM_POS(12), "Show spectated player's HUD:", 0.2, SETTINGS_ITEM_H, etj_specHudShow, "When spectating, use the followed player's CGaz/SnapHUD configuration\netj_specHudShow")
+				YESNO               (SETTINGS_ITEM_POS(13), "Allow spectating my HUD:", 0.2, SETTINGS_ITEM_H, etj_specHudAllow, "Allow spectators to see your CGaz/SnapHUD configuration\netj_specHudAllow")
 
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)

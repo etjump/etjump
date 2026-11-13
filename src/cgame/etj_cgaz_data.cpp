@@ -24,6 +24,7 @@
 
 #include "etj_cgaz_data.h"
 #include "cg_local.h"
+#include "etj_local.h"
 #include "etj_pmove_utils_v2.h"
 
 namespace ETJump {
@@ -123,7 +124,8 @@ void CGazData::walkMove() {
 
   const float scale = PmoveUtilsV2::cmdScale(
       s.pm, s.pm.cmd,
-      etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
+      etj_CGazTrueness.integer &
+          static_cast<int32_t>(CGazTrueness::UPMOVE));
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;
