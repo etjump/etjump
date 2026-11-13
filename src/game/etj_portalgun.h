@@ -25,6 +25,7 @@
 #pragma once
 
 #include "g_local.h"
+#include "etj_portalgun_shared.h"
 
 namespace ETJump {
 class Portal {
@@ -34,8 +35,9 @@ public:
     PORTAL_RED = 2,
   };
 
-  static void spawn(gentity_t *ent, float scale, Type type, const trace_t &tr,
-                    vec3_t end, const vec3_t angles);
+  static void spawn(gentity_t *ent, Type type,
+                    const PortalgunShared::Placement &placement,
+                    int32_t hitEntityNum);
   static void think(gentity_t *self);
   static void touch(gentity_t *self, gentity_t *other);
   static void free(gentity_t *self);
@@ -46,11 +48,12 @@ public:
   static void spawn(gentity_t *ent);
   static void touch(gentity_t *self, gentity_t *other, trace_t *trace);
 
-  static void fire(gentity_t *ent, Portal::Type type, vec3_t forward,
-                   vec3_t right, vec3_t up, vec3_t muzzleEffect);
+  static void fire(gentity_t *ent, Portal::Type type, vec3_t muzzleEffect);
 
 private:
-  static bool portalsOverlap(gentity_t *ent, Portal::Type type, float scale,
-                             vec3_t portalAngles, vec3_t endPos);
+  static bool getPortalTarget(int32_t entityNum,
+                              PortalgunShared::PortalTarget &target);
+  static bool portalsOverlap(gentity_t *ent, Portal::Type type,
+                             const PortalgunShared::Placement &placement);
 };
 } // namespace ETJump

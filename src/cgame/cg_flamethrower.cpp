@@ -60,10 +60,6 @@ inline constexpr int MAX_FLAME_CHUNKS = 1024;
 static flameChunk_t flameChunks[MAX_FLAME_CHUNKS];
 static flameChunk_t *freeFlameChunks, *activeFlameChunks, *headFlameChunks;
 
-static qboolean initFlameChunks = qfalse;
-
-static int numFlameChunksInuse;
-
 // this structure stores information relevant to each cent in the game, this way
 // we keep the flamethrower data seperate to the rest of the code, which helps
 // if we decide against using this weapon in the game
@@ -577,9 +573,6 @@ void CG_ClearFlameChunks(void) {
     flameChunks[i].inuse = qfalse;
   }
   flameChunks[MAX_FLAME_CHUNKS - 1].nextGlobal = NULL;
-
-  initFlameChunks = qtrue;
-  numFlameChunksInuse = 0;
 }
 
 /*
@@ -644,8 +637,6 @@ flameChunk_t *CG_SpawnFlameChunk(flameChunk_t *headFlameChunk) {
   f->nextFlameChunk = headFlameChunk; // if headJunc is NULL, then we'll
                                       // just be the end of the list
 
-  numFlameChunksInuse++;
-
   return f;
 }
 
@@ -694,8 +685,6 @@ void CG_FreeFlameChunk(flameChunk_t *f) {
     freeFlameChunks->prevGlobal = f;
   }
   freeFlameChunks = f;
-
-  numFlameChunksInuse--;
 }
 
 /*
@@ -860,10 +849,6 @@ inline constexpr int NUM_NOZZLE_SPRITES = 8;
 
 static qhandle_t flameShaders[NUM_FLAME_SPRITES];
 static qhandle_t nozzleShaders[NUM_NOZZLE_SPRITES];
-static qboolean initFlameShaders = qtrue;
-
-static int numClippedFlames;
-
 void CG_FlameDamage(int owner, vec3_t org, float radius) { return; }
 
 void CG_AddFlameSpriteToScene(flameChunk_t *f, float lifeFrac, float alpha) {
@@ -904,8 +889,7 @@ void CG_AddFlameSpriteToScene(flameChunk_t *f, float lifeFrac, float alpha) {
     frameNum = NUM_FLAME_SPRITES - 1;
   }
 
-  pPolyBuffer = CG_PB_FindFreePolyBuffer(
-      cg_fxflags & 1 ? getTestShader() : flameShaders[frameNum], 4, 6);
+  pPolyBuffer = CG_PB_FindFreePolyBuffer(flameShaders[frameNum], 4, 6);
 
   pPolyBuffer->color[pPolyBuffer->numVerts + 0][0] = alphaChar;
   pPolyBuffer->color[pPolyBuffer->numVerts + 0][1] = alphaChar;
@@ -935,12 +919,11 @@ void CG_AddFlameSpriteToScene(flameChunk_t *f, float lifeFrac, float alpha) {
     return;
   }
 
-  if ((rotatingFlames) &&
-      (!(cg_fxflags & 1))) // JPW NERVE no rotate for alt flame shaders
-  {
+  // JPW NERVE no rotate for alt flame shaders
+  if (rotatingFlames) {
     vectoangles(cg.refdef_current->viewaxis[0], rotate_ang);
     rotate_ang[ROLL] += f->rollAngle;
-    AngleVectors(rotate_ang, NULL, rright, rup);
+    AngleVectors(rotate_ang, nullptr, rright, rup);
   } else {
     VectorCopy(vright, rright);
     VectorCopy(vup, rup);
@@ -1361,7 +1344,6 @@ void CG_InitFlameChunks(void) {
     Com_sprintf(filename, MAX_QPATH, "nozzleFlame%i", i + 1);
     nozzleShaders[i] = trap_R_RegisterShader(filename);
   }
-  initFlameShaders = qfalse;
 }
 
 /*
@@ -1378,8 +1360,6 @@ void CG_AddFlameChunks(void) {
 
   // clear out the volumes so we can rebuild them
   memset(centFlameStatus, 0, sizeof(centFlameStatus));
-
-  numClippedFlames = 0;
 
   // age them
   f = activeFlameChunks;

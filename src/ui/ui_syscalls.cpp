@@ -1,5 +1,7 @@
 #include "ui_local.h"
+#include "etj_keep_alive.h"
 #include "etj_local.h"
+#include "../game/etj_fatal_error_shared.h"
 #include "../game/etj_syscall_ext_shared.h"
 
 // this file is only included when building a dll
@@ -15,6 +17,14 @@ intptr_t(QDECL *vmSyscall)(intptr_t arg,
 extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
                                                                ...)) {
   vmSyscall = syscallptr;
+
+  // on Windows, ui stays mapped after an error until the engine is done
+  // handling it, which loads ui again while doing so, possibly more than
+  // once (see ETJump::releaseKeptModules)
+  ETJump::FatalErrorBoundary::initialize(
+      trap_Error, trap_Print, nullptr,
+      ETJump::FatalErrorBoundary::KeepAliveRelease::Manual);
+  ETJump::resetKeepAlive();
 }
 
 #if defined(__MACOS__) && !defined(__GNUC__)

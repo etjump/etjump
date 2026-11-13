@@ -143,7 +143,7 @@ void CustomCommandMenu::parseCommands() {
         command.command = cmd.value();
 
         // we are looping 1-indexed to match the field names
-        commands[i][j - 1] = command;
+        commands[i][j - 1] = std::move(command);
       }
     } catch (const toml::type_error &e) {
       CG_Printf("Skipping custom command parsing for page ^3%i^7: %s\n", i,
@@ -217,8 +217,8 @@ void CustomCommandMenu::addCommand(const std::vector<std::string> &args) {
   const std::string slotName = "name-" + std::to_string(slot.value());
   const std::string slotCmd = "command-" + std::to_string(slot.value());
 
-  table[pageStr][slotName] = name;
-  table[pageStr][slotCmd] = cmd;
+  table[pageStr][slotName] = std::move(name);
+  table[pageStr][slotCmd] = std::move(cmd);
 
   // we might not be inserting to last slot, so sort the table again
   sortTable(table, pageStr);
@@ -930,7 +930,7 @@ void CustomCommandMenu::sortTable(toml::ordered_value &table,
     }
   }
 
-  table[key] = toml::ordered_value(sortedPage);
+  table[key] = toml::ordered_value(std::move(sortedPage));
 }
 
 const std::map<uint8_t, std::array<CustomCommandMenu::CustomCommand,

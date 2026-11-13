@@ -52,6 +52,40 @@ public:
         Container::map(input, [](const auto &e) { return "?"; }), ",");
   }
 
+  // RAII guard for a transaction. Begins a transaction on construction,
+  // and rolls it back on destruction unless commit() was called.
+  class TransactionGuard {
+  public:
+    explicit TransactionGuard(DatabaseV2 &db) : db(&db) { db.sql << "begin;"; }
+
+    TransactionGuard(const TransactionGuard &) = delete;
+    TransactionGuard &operator=(const TransactionGuard &) = delete;
+    TransactionGuard(TransactionGuard &&) = delete;
+    TransactionGuard &operator=(TransactionGuard &&) = delete;
+
+    ~TransactionGuard() {
+      if (!committed) {
+        try {
+          db->sql << "rollback;";
+        } catch (const std::exception &e) {
+          // Nothing we can do here: the rollback failed while the stack is
+          // already unwinding, and throwing from a destructor would terminate
+          // the process. The caller is already handling the original error.
+          (void)e;
+        }
+      }
+    }
+
+    void commit() {
+      db->sql << "commit;";
+      committed = true;
+    }
+
+  private:
+    DatabaseV2 *db;
+    bool committed = false;
+  };
+
   // expose the database object directly
   // as it provides a reasonable interface
   // to database

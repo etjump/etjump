@@ -191,7 +191,7 @@ void SnaphudV2::buildSnapZones(const SnaphudData::State &s) {
   snaphud.zones.clear();
   snaphud.isCurrentAlt = false;
 
-  for (int32_t i = 0; i < s.snapAngles.size() - 1; i++) {
+  for (int32_t i = 0; i + 1 < static_cast<int32_t>(s.snapAngles.size()); i++) {
     for (int32_t q = 0; q < 4; q++) {
       const float offset = static_cast<float>(q) * M_PI_2f;
       const float start = s.snapAngles[i] + offset;

@@ -22,23 +22,25 @@
  * SOFTWARE.
  */
 
+#include <iterator>
+#include <set>
+#include <tuple>
 #include <utility>
 
 #include "etj_timerun_repository.h"
 
 #include "etj_container_utilities.h"
 #include "etj_database_v2.h"
+#include "etj_timerun_shared.h"
 #include "q_shared.h"
 
 namespace ETJump {
-Timerun::Record getRecordFromStandardQueryResult(
-    int seasonId, std::string map, std::string runName, int userId, int time,
-    std::string checkpointsString, std::string recordDate,
-    std::string playerName, std::string metadataString) {
-  auto checkpoints = Container::map(
+static std::vector<int32_t>
+parseCheckpoints(const std::string &checkpointsString) {
+  return Container::map(
       Container::filter(StringUtils::split(checkpointsString, ","),
                         [](const std::string &input) {
-                          return StringUtils::trim(input).length() > 0;
+                          return !StringUtils::trim(input).empty();
                         }),
       [](const std::string &checkpoint) {
         try {
@@ -47,19 +49,17 @@ Timerun::Record getRecordFromStandardQueryResult(
           return TIMERUN_CHECKPOINT_NOT_SET;
         }
       });
+}
+
+// Segment durations for a completed run: see
+// TimerunSegments::computeSegmentTimes.
+
+Timerun::Record getRecordFromStandardQueryResult(
+    int seasonId, std::string map, std::string runName, int userId, int time,
+    std::string checkpointsString, std::string recordDate,
+    std::string playerName, std::string metadataString) {
+  auto checkpoints = parseCheckpoints(checkpointsString);
   TimeUtils::Time recordDateTime = TimeUtils::Time::fromString(recordDate);
-
-  std::map<std::string, std::string> metadata;
-  for (const auto &kvp : Container::map(StringUtils::split(metadataString, ","),
-                                        [](const std::string &kvp) {
-                                          return StringUtils::split(kvp, "=");
-                                        })) {
-    if (kvp.size() != 2) {
-      continue;
-    }
-
-    metadata[kvp[0]] = kvp[1];
-  }
 
   Timerun::Record record;
   record.seasonId = seasonId;
@@ -70,9 +70,38 @@ Timerun::Record getRecordFromStandardQueryResult(
   record.recordDate = std::move(recordDateTime);
   record.checkpoints = std::move(checkpoints);
   record.playerName = std::move(playerName);
-  record.metadata = std::move(metadata);
+  record.metadata = TimerunRepository::deserializeMetadata(metadataString);
 
   return record;
+}
+
+static std::string buildMatchSuggestionsError(
+    const std::string &commandPrefix, const std::string &matchItem,
+    const std::string &searchTerm, const std::vector<std::string> &matches) {
+  static constexpr int32_t MATCH_ITEMS_PER_ROW = 3;
+
+  std::string error = StringUtils::format(
+      "^3%s: ^7found %i %ss matching ^3'%s'^7\n", commandPrefix,
+      static_cast<int>(matches.size()), matchItem, searchTerm);
+
+  int32_t i = 0;
+  for (const auto &match : matches) {
+    if (i != 0 && i % MATCH_ITEMS_PER_ROW == 0) {
+      error += "\n";
+    }
+
+    error += StringUtils::format("%-22s", match);
+    ++i;
+  }
+
+  return error;
+}
+
+static std::string
+createSeasonPredicate(const std::vector<Timerun::Season> &seasons) {
+  return StringUtils::join(
+      Container::map(seasons, [](const auto &) { return "season_id=?"; }),
+      " or ");
 }
 
 void TimerunRepository::initialize() { migrate(); }
@@ -177,10 +206,11 @@ TimerunRepository::getRecordsForPlayer(const std::vector<int> &activeSeasons,
                  std::string recordDate, std::string playerName,
                  std::string metadataString) {
         auto record = getRecordFromStandardQueryResult(
-            seasonId, map, runName, userId, time, checkpointsString, recordDate,
-            playerName, metadataString);
+            seasonId, std::move(map), std::move(runName), userId, time,
+            std::move(checkpointsString), std::move(recordDate),
+            std::move(playerName), std::move(metadataString));
 
-        records.push_back(record);
+        records.push_back(std::move(record));
       };
 
   return records;
@@ -192,7 +222,65 @@ TimerunRepository::getRecordsForRun(const std::string &map,
   throw std::runtime_error("Not implemented");
 }
 
-void TimerunRepository::insertRecord(const Timerun::Record &record) {
+// assembles (run, segment, time) rows into a run -> segment durations map;
+// segment numbers are 1-based, so segment N lands at index N - 1
+static std::map<std::string, std::vector<int32_t>>
+bestSegmentsFromRows(sqlite::database_binder &binder) {
+  std::map<std::string, std::vector<int32_t>> bestSegments;
+
+  binder >> [&bestSegments](std::string run, int32_t segment, int32_t time) {
+    auto &runSegments = bestSegments[std::move(run)];
+
+    if (runSegments.size() < static_cast<size_t>(segment)) {
+      runSegments.resize(segment);
+    }
+
+    runSegments[segment - 1] = time;
+  };
+
+  return bestSegments;
+}
+
+// assembles (segment, time) rows into a segment durations map
+static std::map<int32_t, int32_t>
+segmentTimesFromRows(sqlite::database_binder &binder) {
+  std::map<int32_t, int32_t> segmentTimes;
+
+  binder >> [&segmentTimes](int32_t segment, int32_t time) {
+    segmentTimes[segment] = time;
+  };
+
+  return segmentTimes;
+}
+
+std::map<std::string, std::vector<int32_t>>
+TimerunRepository::getBestSegments(int32_t seasonId,
+                                   const std::string &map) const {
+  auto binder = _database->sql << R"(
+    select run, segment, time
+    from best_segments
+    where season_id = ? and map = ?
+    order by run, segment;
+  )" << seasonId << map;
+
+  return bestSegmentsFromRows(binder);
+}
+
+std::map<std::string, std::vector<int32_t>>
+TimerunRepository::getPlayerBestSegments(int32_t seasonId,
+                                         const std::string &map,
+                                         int userId) const {
+  auto binder = _database->sql << R"(
+    select run, segment, time
+    from player_best_segments
+    where season_id = ? and map = ? and user_id = ?
+    order by run, segment;
+  )" << seasonId << map << userId;
+
+  return bestSegmentsFromRows(binder);
+}
+
+void TimerunRepository::insertRecordRow(const Timerun::Record &record) {
   _database->sql << R"(
     insert into record (
       season_id,
@@ -222,7 +310,56 @@ void TimerunRepository::insertRecord(const Timerun::Record &record) {
                  << serializeMetadata(record.metadata);
 }
 
-void TimerunRepository::updateRecord(const Timerun::Record &record) {
+// the rank a record holds among the current records of the same run, stored
+// when the record is written: the number of strictly faster times plus one,
+// so records that share a time share a rank, matching how '/records' displays
+// tied records
+static constexpr const char *RECORD_RANK_SQL =
+    "      (select count(*) + 1\n"
+    "        from record r2\n"
+    "        where r2.season_id = r.season_id\n"
+    "          and r2.map = r.map\n"
+    "          and r2.run = r.run\n"
+    "          and r2.time < r.time)";
+
+void TimerunRepository::insertRecordHistory(const Timerun::Record &record) {
+  _database->sql << StringUtils::format(R"(
+    insert into record_history (
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      rank,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata
+    )
+    select
+      r.season_id,
+      r.map,
+      r.run,
+      r.user_id,
+      r.time,
+%s,
+      r.checkpoints,
+      r.record_date,
+      r.player_name,
+      r.metadata
+    from record r
+    where
+      r.season_id = ? and
+      r.map = ? and
+      r.run = ? and
+      r.user_id = ?;
+  )",
+                                        RECORD_RANK_SQL)
+                 << record.seasonId << record.map << record.run
+                 << record.userId;
+}
+
+void TimerunRepository::updateRecordRow(const Timerun::Record &record) {
   _database->sql << R"(
     update
       record
@@ -242,6 +379,379 @@ void TimerunRepository::updateRecord(const Timerun::Record &record) {
                  << record.recordDate.toDateTimeString() << record.playerName
                  << serializeMetadata(record.metadata) << record.seasonId
                  << record.map << record.run << record.userId;
+}
+
+std::map<int32_t, std::vector<Timerun::BestSegmentUpdate>>
+TimerunRepository::recordCompletion(
+    const std::vector<Timerun::RecordCompletion> &completions) {
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  std::map<int32_t, std::vector<Timerun::BestSegmentUpdate>> updates;
+
+  for (const auto &completion : completions) {
+    if (completion.isNewRecord) {
+      if (completion.insert) {
+        insertRecordRow(completion.record);
+      } else {
+        updateRecordRow(completion.record);
+      }
+
+      insertRecordHistory(completion.record);
+    }
+
+    // every completion feeds the best segments, new record or not
+    auto segmentUpdates =
+        applyBestSegments(completion.record, /*appendHistory=*/true,
+                          /*skipRemovedSegments=*/false);
+
+    if (!segmentUpdates.empty()) {
+      updates[completion.record.seasonId] = std::move(segmentUpdates);
+    }
+  }
+
+  txn.commit();
+
+  return updates;
+}
+
+std::vector<Timerun::BestSegmentUpdate>
+TimerunRepository::applyBestSegments(const Timerun::Record &record,
+                                     const bool appendHistory,
+                                     const bool skipRemovedSegments) {
+  std::vector<Timerun::BestSegmentUpdate> updates;
+
+  const auto segments =
+      TimerunSegments::computeSegmentTimes(record.checkpoints, record.time);
+
+  // a run with no usable checkpoint data has no segments to record
+  if (segments.empty()) {
+    return updates;
+  }
+
+  const auto recordDate = record.recordDate.toDateTimeString();
+
+  // splits removed standalone are excluded when re-deriving a run on restore,
+  // so a restore cannot resurrect a split that was independently removed
+  std::set<int32_t> excludedSegments;
+
+  if (skipRemovedSegments) {
+    _database->sql << R"(
+      select
+        segment
+      from removed_segments
+      where
+        season_id=? and
+        map=? and
+        run=? and
+        user_id=? and
+        record_date=?;
+    )" << record.seasonId
+                   << record.map << record.run << record.userId << recordDate >>
+        [&excludedSegments](const int32_t segment) {
+          excludedSegments.insert(segment);
+        };
+  }
+
+  // Read what these segments are about to beat, before the upserts overwrite
+  // it, so a completion can report what it improved (and stay quiet about
+  // segments it set for the first time, which beat nothing). Scoped so the
+  // binders are closed before the upserts run.
+  std::map<int32_t, int32_t> personalPriors;
+  std::map<int32_t, int32_t> globalPriors;
+
+  {
+    auto binder = _database->sql << R"(
+      select
+        segment, time
+      from player_best_segments where
+        season_id=? and
+        map=? and
+        run=? and
+        user_id=?;
+    )" << record.seasonId << record.map
+                                 << record.run << record.userId;
+    personalPriors = segmentTimesFromRows(binder);
+  }
+
+  {
+    auto binder = _database->sql << R"(
+      select
+        segment, time
+      from best_segments
+      where
+        season_id=? and
+        map=? and
+        run=?;
+    )" << record.seasonId << record.map
+                                 << record.run;
+    globalPriors = segmentTimesFromRows(binder);
+  }
+
+  for (size_t i = 0; i < segments.size(); ++i) {
+    // 1-based: segment i is the leg ending at checkpoint i, and the finish is
+    // the last segment
+    const auto segment = static_cast<int32_t>(i) + 1;
+
+    // a leg that could not be measured is a placeholder for its segment
+    // number, and has no meaningful best
+    if (segments[i] <= 0) {
+      continue;
+    }
+
+    if (excludedSegments.count(segment) > 0) {
+      continue;
+    }
+
+    // improve-only: the new time must beat the stored one, ties going to the
+    // earlier record date (and, for the global, the lower user ID), so the
+    // holder matches what the seed would have picked
+    _database->sql << R"(
+      insert into player_best_segments (
+        season_id,
+        map,
+        run,
+        run_sanitized,
+        user_id,
+        segment,
+        time,
+        record_date,
+        player_name,
+        metadata
+      ) values (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
+      )
+      on conflict (season_id, map, run, user_id, segment) do update
+      set
+        time = excluded.time,
+        record_date = excluded.record_date,
+        player_name = excluded.player_name,
+        metadata = excluded.metadata
+      where
+        excluded.time < time or
+        (excluded.time = time and excluded.record_date < record_date);
+    )" << record.seasonId
+                   << record.map << record.run
+                   << StringUtils::sanitize(record.run, true) << record.userId
+                   << segment << segments[i] << recordDate << record.playerName
+                   << serializeMetadata(record.metadata);
+
+    const bool personal = _database->sql.rows_modified() > 0;
+
+    // a personal improvement is also the next step in the progression, but a
+    // restore re-admits a value without writing history
+    if (appendHistory && personal) {
+      _database->sql << R"(
+        insert into player_best_segments_history (
+          season_id,
+          map,
+          run,
+          run_sanitized,
+          user_id,
+          segment,
+          time,
+          rank,
+          record_date,
+          player_name,
+          metadata
+        ) values (
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          (select count(*) + 1
+             from player_best_segments
+            where season_id = ? and map = ? and run = ? and segment = ?
+              and time < ?),
+          ?,
+          ?,
+          ?
+        );
+      )" << record.seasonId
+                     << record.map << record.run
+                     << StringUtils::sanitize(record.run, true) << record.userId
+                     << segment << segments[i] << record.seasonId << record.map
+                     << record.run << segment << segments[i] << recordDate
+                     << record.playerName << serializeMetadata(record.metadata);
+    }
+
+    _database->sql << R"(
+      insert into best_segments (
+        season_id,
+        map,
+        run,
+        run_sanitized,
+        segment,
+        time,
+        user_id,
+        record_date,
+        player_name
+      ) values (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
+      )
+      on conflict (season_id, map, run, segment) do update
+      set
+        time = excluded.time,
+        user_id = excluded.user_id,
+        record_date = excluded.record_date,
+        player_name = excluded.player_name
+      where
+        excluded.time < time or
+        (excluded.time = time and
+         (excluded.record_date < record_date or
+          (excluded.record_date = record_date and excluded.user_id < user_id)));
+    )" << record.seasonId
+                   << record.map << record.run
+                   << StringUtils::sanitize(record.run, true) << segment
+                   << segments[i] << record.userId << recordDate
+                   << record.playerName;
+
+    const bool global = _database->sql.rows_modified() > 0;
+
+    if (personal || global) {
+      Timerun::BestSegmentUpdate update{segment, segments[i], personal, global};
+
+      const auto personalIt = personalPriors.find(segment);
+      if (personalIt != personalPriors.end()) {
+        update.previousPersonal = personalIt->second;
+      }
+
+      const auto globalIt = globalPriors.find(segment);
+      if (globalIt != globalPriors.end()) {
+        update.previousGlobal = globalIt->second;
+      }
+
+      updates.push_back(std::move(update));
+    }
+  }
+
+  return updates;
+}
+
+void TimerunRepository::recomputeGlobalSegments(
+    int32_t seasonId, const std::string &map, const std::string &run,
+    const std::vector<int32_t> &segments) {
+  for (const int32_t segment : segments) {
+    // delete first, so a segment with no surviving personal row loses its
+    // global entry entirely instead of keeping the removed time
+    _database->sql << R"(
+      delete from best_segments
+      where
+        season_id=? and
+        map=? and
+        run=? and
+        segment=?;
+    )" << seasonId << map
+                   << run << segment;
+
+    // re-materialise the global from the fastest surviving personal row,
+    // using the same tie-break as the completion path and the seed
+    _database->sql << R"(
+      insert into best_segments (
+        season_id,
+        map,
+        run,
+        run_sanitized,
+        segment,
+        time,
+        user_id,
+        record_date,
+        player_name
+      )
+      select
+        season_id,
+        map,
+        run,
+        run_sanitized,
+        segment,
+        time,
+        user_id,
+        record_date,
+        player_name
+      from player_best_segments
+      where
+        season_id=? and
+        map=? and
+        run=? and
+        segment=?
+      order by time asc, record_date asc, user_id asc
+      limit 1;
+    )" << seasonId << map
+                   << run << segment;
+  }
+}
+
+void TimerunRepository::voidBestSegments(AffectedSegments &affected,
+                                         int32_t seasonId,
+                                         const std::string &map,
+                                         const std::string &run, int32_t userId,
+                                         const TimeUtils::Time &recordDate) {
+  const auto date = recordDate.toDateTimeString();
+
+  std::vector<int32_t> segments;
+
+  _database->sql << R"(
+    select distinct segment from player_best_segments
+    where
+      season_id=? and
+      map=? and
+      run=? and
+      user_id=? and
+      record_date=?;
+  )" << seasonId << map
+                 << run << userId << date >>
+      [&segments](int32_t segment) { segments.push_back(segment); };
+
+  if (segments.empty()) {
+    return;
+  }
+
+  _database->sql << R"(
+    delete from player_best_segments
+    where
+      season_id=? and
+      map=? and
+      run=? and
+      user_id=? and
+      record_date=?;
+  )" << seasonId << map
+                 << run << userId << date;
+
+  auto &affectedSegments = affected[std::make_tuple(seasonId, map, run)];
+
+  for (const int32_t segment : segments) {
+    affectedSegments.insert(segment);
+  }
+}
+
+void TimerunRepository::recomputeAffectedSegments(
+    const AffectedSegments &affected) {
+  for (const auto &[key, segments] : affected) {
+    const auto &[seasonId, map, run] = key;
+
+    recomputeGlobalSegments(
+        seasonId, map, run,
+        std::vector<int32_t>(segments.begin(), segments.end()));
+  }
 }
 
 std::optional<Timerun::Record>
@@ -273,8 +783,9 @@ TimerunRepository::getTopRecord(int seasonId, const std::string &map,
                 int time, std::string checkpointsString, std::string recordDate,
                 std::string playerName, std::string metadataString) {
         record = Timerun::Record(getRecordFromStandardQueryResult(
-            seasonId, map, runName, userId, time, checkpointsString, recordDate,
-            playerName, metadataString));
+            seasonId, std::move(map), std::move(runName), userId, time,
+            std::move(checkpointsString), std::move(recordDate),
+            std::move(playerName), std::move(metadataString)));
       };
 
   return record;
@@ -321,8 +832,9 @@ TimerunRepository::getTopRecords(const std::vector<int> &seasonIds,
                        std::string recordDate, std::string playerName,
                        std::string metadataString, int rank) {
     records.push_back(getRecordFromStandardQueryResult(
-        seasonId, map, runName, userId, time, checkpointsString, recordDate,
-        playerName, metadataString));
+        seasonId, std::move(map), std::move(runName), userId, time,
+        std::move(checkpointsString), std::move(recordDate),
+        std::move(playerName), std::move(metadataString)));
   };
 
   return records;
@@ -359,8 +871,8 @@ void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
   std::vector<std::string> updatedParams;
   bool anythingToUpdate = false;
 
-  TimeUtils::Time newStartTime = startTime;
-  std::optional<TimeUtils::Time> newEndTime = endTime;
+  TimeUtils::Time newStartTime = std::move(startTime);
+  std::optional<TimeUtils::Time> newEndTime = std::move(endTime);
 
   if (params.startTime.has_value()) {
     newStartTime = params.startTime.value();
@@ -405,7 +917,9 @@ void TimerunRepository::editSeason(const Timerun::EditSeasonParams &params) {
 }
 
 std::vector<std::string>
-TimerunRepository::getMapsForName(const std::string &map, bool exact) {
+TimerunRepository::getMapsForName(const std::string &map, bool exact,
+                                  bool fromHistory) {
+  const std::string table = fromHistory ? "record_history" : "record";
 
   std::string mapFilter = exact ? "map=?" : "map like ?";
   std::string mapSearchString = exact ? map : "%" + map + "%";
@@ -414,11 +928,11 @@ TimerunRepository::getMapsForName(const std::string &map, bool exact) {
   _database->sql << StringUtils::format(R"(
     select
       distinct map
-    from record
+    from %s
     where %s
     collate nocase
   )",
-                                        mapFilter)
+                                        table, mapFilter)
                  << mapSearchString >>
       [&maps](std::string map) { maps.push_back(map); };
   return maps;
@@ -427,7 +941,8 @@ TimerunRepository::getMapsForName(const std::string &map, bool exact) {
 std::vector<std::string>
 TimerunRepository::getRunsForName(const std::string &map,
                                   const std::string &run, bool exact,
-                                  bool sanitizeResults) {
+                                  bool sanitizeResults, bool fromHistory) {
+  const std::string table = fromHistory ? "record_history" : "record";
 
   std::string runFilter = exact ? "lsanitize(run)=?" : "lsanitize(run) like ?";
   std::string runSearchString = exact ? run : "%" + run + "%";
@@ -436,18 +951,150 @@ TimerunRepository::getRunsForName(const std::string &map,
   _database->sql << StringUtils::format(R"(
     select
       distinct run
-    from record
+    from %s
     where %s
       and map = ?
     collate nocase
   )",
-                                        runFilter)
+                                        table, runFilter)
                  << runSearchString << map >>
       [&runs, sanitizeResults](const std::string &run) {
         runs.push_back(sanitizeResults ? StringUtils::sanitize(run, true)
                                        : run);
       };
   return runs;
+}
+
+std::string TimerunRepository::resolveMapName(const std::string &map,
+                                              bool exact,
+                                              const std::string &commandPrefix,
+                                              bool fromHistory) {
+  const auto maps = getMapsForName(map, exact, fromHistory);
+
+  if (maps.size() > 1 && !Container::isIn(maps, map)) {
+    throw std::runtime_error(
+        buildMatchSuggestionsError(commandPrefix, "map", map, maps));
+  }
+
+  return maps.empty() ? map : maps[0];
+}
+
+std::string TimerunRepository::resolveRunName(const std::string &map,
+                                              const std::string &run,
+                                              bool exact, bool fromHistory) {
+  const auto runs = getRunsForName(map, run, exact, true, fromHistory);
+
+  return runs.size() == 1 ? runs[0] : "%" + run + "%";
+}
+
+// resolves a run name for the segment listings, where a required run must
+// resolve to exactly one match: exact first, then a unique partial match.
+// Searches the segment tables rather than 'record', since a run can hold a
+// best segment without holding a record or appearing in record history
+std::string
+TimerunRepository::resolveSegmentRunName(const std::string &map,
+                                         const std::string &run,
+                                         const std::string &commandPrefix) {
+  const std::string sanitizedRun = StringUtils::sanitize(run, true);
+
+  const auto findRuns = [this, &map, &sanitizedRun](bool exact) {
+    const std::string runFilter =
+        exact ? "run_sanitized=?" : "run_sanitized like ?";
+    const std::string runSearch =
+        exact ? sanitizedRun : "%" + sanitizedRun + "%";
+
+    std::vector<std::string> runs;
+
+    _database->sql << StringUtils::format(R"(
+      select distinct run_sanitized as run
+      from player_best_segments
+      where
+        map=? and
+        %s
+      union
+      select distinct run_sanitized
+      from best_segments
+      where
+        map=? and
+        %s
+      union
+      select distinct run_sanitized
+      from player_best_segments_history
+      where
+        map=? and
+        %s;
+    )",
+                                          runFilter, runFilter, runFilter)
+                   << map << runSearch << map << runSearch << map
+                   << runSearch >>
+        [&runs](const std::string &runName) { runs.push_back(runName); };
+
+    return runs;
+  };
+
+  auto runs = findRuns(true);
+
+  if (!runs.empty()) {
+    return runs[0];
+  }
+
+  runs = findRuns(false);
+
+  if (runs.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3%s: ^7no run found matching ^3'%s'^7 on map ^3'%s'^7.",
+        commandPrefix, run, map));
+  }
+
+  if (runs.size() > 1) {
+    throw std::runtime_error(
+        buildMatchSuggestionsError(commandPrefix, "run", run, runs));
+  }
+
+  return runs[0];
+}
+
+int32_t
+TimerunRepository::resolveSeasonForRemoval(const std::string &season,
+                                           const std::string &commandPrefix) {
+  const auto seasons = getSeasonsForName(season, true);
+
+  if (!seasons.empty()) {
+    return seasons[0].id;
+  }
+
+  // no exact match: fail, but give suggestions for partial matches. A single
+  // partial match is still not the season the caller asked for, so it is an
+  // error too.
+  const auto partial = getSeasonsForName(season, false);
+
+  if (partial.size() <= 1) {
+    throw std::runtime_error(StringUtils::format(
+        "^3%s: ^7no season found matching ^3'%s'^7.", commandPrefix, season));
+  }
+
+  const auto seasonNames =
+      Container::map(partial, [](const Timerun::Season &s) { return s.name; });
+
+  throw std::runtime_error(
+      buildMatchSuggestionsError(commandPrefix, "season", season, seasonNames));
+}
+
+std::vector<Timerun::Season>
+TimerunRepository::getSeasonsFromQuery(sqlite::database_binder &binder) {
+  std::vector<Timerun::Season> seasons;
+
+  binder >> [&seasons](int id, const std::string &name,
+                       const std::string &startTime,
+                       std::unique_ptr<std::string> endTime) {
+    seasons.push_back(
+        Timerun::Season{id, name, TimeUtils::Time::fromString(startTime),
+                        endTime ? std::make_optional<TimeUtils::Time>(
+                                      TimeUtils::Time::fromString(*endTime))
+                                : std::nullopt});
+  };
+
+  return seasons;
 }
 
 std::vector<Timerun::Record> TimerunRepository::getRecords() {
@@ -483,53 +1130,22 @@ TimerunRepository::getRecords(const Timerun::PrintRecordsParams &params) {
         StringUtils::format("No season matches name `%s`", season));
   }
 
-  const auto maps = getMapsForName(map, params.exactMap);
-  bool exactMapFound = false;
-
-  if (maps.size() > 1) {
-    for (const auto &m : maps) {
-      if (m == map) {
-        exactMapFound = true;
-        break;
-      }
-    }
-
-    if (!exactMapFound) {
-      std::string error = StringUtils::format(
-          "^3records: ^7found %d maps matching ^3%s^7\n", maps.size(), map);
-
-      const int perRow = 3;
-      int i = 0;
-      for (const auto &m : maps) {
-        if (i != 0 && i % perRow == 0) {
-          error += "\n";
-        }
-
-        error += StringUtils::format("%-22s", m);
-        ++i;
-      }
-
-      throw std::runtime_error(error);
-    }
-  }
+  const std::string resolvedMap =
+      resolveMapName(map, params.exactMap, "records");
 
   // try to match a single run, so in scenarios where a map has runs
   // 'foo' and 'foobar' and query has 'foo' as the run param,
   // we get the exact match for the run 'foo' instead of exact and
   // partial matches to both 'foo' and 'foobar'
-  std::vector<std::string> runs{};
   std::string runPlaceholder;
   std::string runBinder;
 
   if (runSpecified) {
     runPlaceholder = "and lsanitize(run) like ?";
-    runs = getRunsForName(!maps.empty() ? maps[0] : map, run, true, true);
-    runBinder = runs.size() == 1 ? runs[0] : "%" + run + "%";
+    runBinder = resolveRunName(resolvedMap, run, true);
   }
 
-  const std::string seasonPlaceholders = StringUtils::join(
-      Container::map(seasons, [](const auto &s) { return "season_id=?"; }),
-      " or ");
+  const std::string seasonPlaceholders = createSeasonPredicate(seasons);
 
   const std::string query =
       StringUtils::format(R"(
@@ -559,74 +1175,26 @@ TimerunRepository::getRecords(const Timerun::PrintRecordsParams &params) {
     binder << s.id;
   }
 
-  binder << StringUtils::toLowerCase(!maps.empty() ? maps[0] : map);
+  binder << StringUtils::toLowerCase(resolvedMap);
 
   if (runSpecified) {
     binder << runBinder;
   }
 
-  auto records = getRecordsFromQuery(binder);
-
-  binder >> [&records](int seasonId, std::string map, std::string runName,
-                       int userId, int time, std::string checkpointsString,
-                       std::string recordDate, std::string playerName,
-                       std::string metadataString) {
-    const auto record = getRecordFromStandardQueryResult(
-        seasonId, std::move(map), std::move(runName), userId, time,
-        std::move(checkpointsString), std::move(recordDate),
-        std::move(playerName), std::move(metadataString));
-
-    records.push_back(record);
-  };
-
-  return records;
+  return getRecordsFromQuery(binder);
 }
 
 std::vector<Timerun::Season>
 TimerunRepository::getSeasonsForName(const std::string &name, bool exact) {
-  std::string query;
+  const std::string query =
+      exact
+          ? R"(select id, name, start_time, end_time from season where name=? collate nocase;)"
+          : R"(select id, name, start_time, end_time from season where name like ? collate nocase;)";
+  const std::string searchString = exact ? name : "%" + name + "%";
 
-  std::vector<Timerun::Season> seasons;
+  auto binder = _database->sql << query << searchString;
 
-  auto handler = [&seasons](int id, const std::string &name,
-                            const std::string &startTime,
-                            std::unique_ptr<std::string> endTime) {
-    seasons.push_back(
-        Timerun::Season{id, name, TimeUtils::Time::fromString(startTime),
-                        (endTime ? std::make_optional<TimeUtils::Time>(
-                                       TimeUtils::Time::fromString(*endTime))
-                                 : std::nullopt)});
-  };
-
-  if (exact) {
-    query = R"(
-      select
-        id,
-        name,
-        start_time,
-        end_time
-      from season
-      where name=?
-      collate nocase
-    )";
-
-    _database->sql << query << name >> handler;
-  } else {
-    query = R"(
-      select
-        id,
-        name,
-        start_time,
-        end_time
-      from season
-      where name like ?
-      collate nocase
-    )";
-
-    _database->sql << query << "%" + name + "%" >> handler;
-  }
-
-  return seasons;
+  return getSeasonsFromQuery(binder);
 }
 
 std::optional<Timerun::Record>
@@ -658,8 +1226,9 @@ TimerunRepository::getRecord(const std::string &map, const std::string &run,
                 int time, std::string checkpointsString, std::string recordDate,
                 std::string playerName, std::string metadataString, int rank) {
         record = getRecordFromStandardQueryResult(
-            seasonId, map, runName, userId, time, checkpointsString, recordDate,
-            playerName, metadataString);
+            seasonId, std::move(map), std::move(runName), userId, time,
+            std::move(checkpointsString), std::move(recordDate),
+            std::move(playerName), std::move(metadataString));
       };
 
   return record;
@@ -670,43 +1239,11 @@ std::vector<Timerun::Record> TimerunRepository::getRecordFromSeason(
     const int32_t rank, const bool exactMap) {
   std::vector<Timerun::Record> records;
 
-  const auto maps = getMapsForName(map, exactMap);
-  bool exactMapFound = false;
-
-  if (maps.size() > 1) {
-    for (const auto &m : maps) {
-      if (m == map) {
-        exactMapFound = true;
-        break;
-      }
-    }
-
-    if (!exactMapFound) {
-      std::string error = StringUtils::format(
-          "^3record-details: ^7found %d maps matching ^3%s^7\n", maps.size(),
-          map);
-
-      const int perRow = 3;
-      int i = 0;
-      for (const auto &m : maps) {
-        if (i != 0 && i % perRow == 0) {
-          error += "\n";
-        }
-
-        error += StringUtils::format("%-22s", m);
-        ++i;
-      }
-
-      throw std::runtime_error(error);
-    }
-  }
-
-  const std::string resolvedMap = maps.empty() ? map : maps[0];
+  const std::string resolvedMap =
+      resolveMapName(map, exactMap, "record-details");
 
   const std::string runPlaceHolder = "lsanitize(run) like ?";
-  const std::vector<std::string> runs =
-      getRunsForName(!maps.empty() ? maps[0] : map, run, false, true);
-  const std::string runBinder = runs.size() == 1 ? runs[0] : "%" + run + "%";
+  const std::string runBinder = resolveRunName(resolvedMap, run, false);
 
   const std::string query = StringUtils::format(R"(
   select *
@@ -747,29 +1284,300 @@ std::vector<Timerun::Record> TimerunRepository::getRecordFromSeason(
   return records;
 }
 
-std::vector<Timerun::Season> TimerunRepository::getSeasons() {
-  std::vector<Timerun::Season> seasons;
+std::vector<Timerun::HistoricalRecord> TimerunRepository::getHistoricalRecords(
+    const Timerun::RecordHistoryParams &params) {
+  const auto seasons = getSeasonsForName(params.season, false);
 
-  _database->sql << R"(
+  if (seasons.empty()) {
+    throw std::runtime_error(
+        StringUtils::format("No season matches name `%s`", params.season));
+  }
+
+  const std::string resolvedMap =
+      resolveMapName(params.map, params.exactMap, "record-history", true);
+
+  // match runs the same way '/records' does: prefer a single exact match,
+  // otherwise fall back to partial matches
+  const std::string runPlaceholder = "lsanitize(run) like ?";
+  const std::string runBinder =
+      resolveRunName(resolvedMap, params.run, true, true);
+
+  const std::string seasonPlaceholders = createSeasonPredicate(seasons);
+
+  const std::string query =
+      StringUtils::format(R"(
     select
-      id,
-      name,
-      start_time,
-      end_time
-    from season;
-  )" >>
-      [this, &seasons](int id, std::string name, std::string startTimeStr,
-                       std::string endTimeStr) {
-        auto startTime = TimeUtils::Time::fromString(startTimeStr);
-        std::optional<TimeUtils::Time> endTime;
-        if (endTimeStr.length() != 0) {
-          endTime = TimeUtils::Time::fromString(endTimeStr);
-        }
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      rank,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata,
+      exists(select 1 from removed_records rr
+              where rr.season_id = rh.season_id
+                and rr.map = rh.map
+                and rr.run = rh.run
+                and rr.user_id = rh.user_id
+                and rr.record_date = rh.record_date) as removed
+    from record_history rh
+    where
+      (%s) and
+      map=? collate nocase and
+      %s and
+      user_id=?
+    order by season_id, map, run, record_date desc, id desc;
+  )",
+                          seasonPlaceholders, runPlaceholder);
 
-        seasons.push_back(Timerun::Season{id, name, startTime, endTime});
-      };
+  auto binder = _database->sql << query;
 
-  return seasons;
+  for (const auto &s : seasons) {
+    binder << s.id;
+  }
+
+  binder << StringUtils::toLowerCase(resolvedMap);
+  binder << runBinder;
+  binder << params.userId;
+
+  std::vector<Timerun::HistoricalRecord> records;
+
+  binder >> [&records](int32_t seasonId, const std::string &map,
+                       const std::string &runName, int32_t userId, int32_t time,
+                       int32_t rank, const std::string &checkpointsString,
+                       const std::string &recordDate,
+                       const std::string &playerName,
+                       const std::string &metadataString, int32_t removed) {
+    Timerun::HistoricalRecord historicalRecord;
+    historicalRecord.r = getRecordFromStandardQueryResult(
+        seasonId, map, runName, userId, time, checkpointsString, recordDate,
+        playerName, metadataString);
+    // 'rank' is null for records seeded from 'removed_records', which
+    // sqlite_modern_cpp reads as 0
+    historicalRecord.rank = rank;
+    historicalRecord.removed = removed != 0;
+    records.emplace_back(std::move(historicalRecord));
+  };
+
+  return records;
+}
+
+std::vector<Timerun::BestSegmentDetails>
+TimerunRepository::getBestSegmentDetails(
+    const Timerun::BestSegmentsParams &params) {
+  const auto seasons = getSeasonsForName(params.season, false);
+
+  if (seasons.empty()) {
+    throw std::runtime_error(
+        StringUtils::format("No season matches name `%s`", params.season));
+  }
+
+  const std::string resolvedMap =
+      resolveMapName(params.map, params.exactMap, "best-segments");
+  const std::string resolvedRun =
+      resolveSegmentRunName(resolvedMap, params.run, "best-segments");
+  const std::string seasonPredicate = createSeasonPredicate(seasons);
+
+  const std::string baseQuery = params.global ? R"(
+    select
+      season_id,
+      map,
+      run,
+      segment,
+      time,
+      user_id,
+      player_name,
+      record_date,
+      0 as rank
+    from best_segments
+    where
+      (%s) and
+      map=? and
+      run_sanitized=?
+    order by season_id, segment asc;
+  )"
+                                              : R"(
+    select
+      pbs.season_id,
+      pbs.map,
+      pbs.run,
+      pbs.segment,
+      pbs.time,
+      pbs.user_id,
+      pbs.player_name,
+      pbs.record_date,
+      (select count(*) + 1
+         from player_best_segments pbs2
+        where pbs2.season_id = pbs.season_id
+          and pbs2.map = pbs.map
+          and pbs2.run = pbs.run
+          and pbs2.segment = pbs.segment
+          and pbs2.time < pbs.time) as rank
+    from player_best_segments pbs
+    where
+      (%s) and
+      pbs.map=? and
+      pbs.run_sanitized=? and
+      pbs.user_id=?
+    order by pbs.season_id, pbs.segment asc;
+  )";
+
+  auto binder = _database->sql
+                << StringUtils::format(baseQuery, seasonPredicate);
+
+  for (const auto &season : seasons) {
+    binder << season.id;
+  }
+
+  binder << StringUtils::toLowerCase(resolvedMap)
+         << StringUtils::sanitize(resolvedRun, true);
+
+  if (!params.global) {
+    binder << params.userId;
+  }
+
+  std::vector<Timerun::BestSegmentDetails> segments;
+
+  binder >> [&segments](int32_t seasonId, const std::string &map,
+                        const std::string &run, int32_t segment, int32_t time,
+                        int32_t userId, const std::string &playerName,
+                        const std::string &recordDate, int32_t rank) {
+    Timerun::BestSegmentDetails details;
+    details.seasonId = seasonId;
+    details.map = map;
+    details.run = run;
+    details.segment = segment;
+    details.time = time;
+    details.userId = userId;
+    details.playerName = playerName;
+    details.recordDate = TimeUtils::Time::fromString(recordDate);
+    details.rank = rank;
+
+    segments.push_back(std::move(details));
+  };
+
+  return segments;
+}
+
+std::vector<Timerun::BestSegmentHistoryEntry>
+TimerunRepository::getBestSegmentHistory(
+    const Timerun::BestSegmentHistoryParams &params) {
+  const auto seasons = getSeasonsForName(params.season, false);
+
+  if (seasons.empty()) {
+    throw std::runtime_error(
+        StringUtils::format("No season matches name `%s`", params.season));
+  }
+
+  const std::string resolvedMap =
+      resolveMapName(params.map, params.exactMap, "best-segments-history");
+  const std::string resolvedRun =
+      resolveSegmentRunName(resolvedMap, params.run, "best-segments-history");
+  const std::string seasonPredicate = createSeasonPredicate(seasons);
+
+  auto binder = _database->sql << StringUtils::format(R"(
+    select
+      h.season_id,
+      h.map,
+      h.run,
+      h.segment,
+      h.time,
+      h.rank,
+      h.player_name,
+      h.record_date,
+      (
+        exists (select 1 from removed_records rr
+                where
+                  rr.season_id = h.season_id and
+                  rr.map = h.map and
+                  rr.run = h.run and
+                  rr.user_id = h.user_id and
+                  rr.record_date = h.record_date)
+        or
+        exists (select 1 from removed_segments rs
+                where
+                  rs.season_id = h.season_id and
+                  rs.map = h.map and
+                  rs.run = h.run and
+                  rs.user_id = h.user_id and
+                  rs.segment = h.segment and
+                  rs.record_date = h.record_date)
+      ) as removed
+    from player_best_segments_history h
+    where
+      (%s) and
+      h.map=? and
+      h.run_sanitized=? and
+      h.user_id=? and
+      h.segment=?
+    order by h.season_id, h.record_date desc, h.id desc;
+  )",
+                                                      seasonPredicate);
+
+  for (const auto &season : seasons) {
+    binder << season.id;
+  }
+
+  binder << StringUtils::toLowerCase(resolvedMap)
+         << StringUtils::sanitize(resolvedRun, true) << params.userId
+         << params.segment;
+
+  std::vector<Timerun::BestSegmentHistoryEntry> entries;
+
+  binder >> [&entries](int32_t seasonId, const std::string &map,
+                       const std::string &run, int32_t segment, int32_t time,
+                       int32_t rank, const std::string &playerName,
+                       const std::string &recordDate, int32_t removed) {
+    entries.push_back(Timerun::BestSegmentHistoryEntry{
+        seasonId, map, run, segment, time, rank, playerName,
+        TimeUtils::Time::fromString(recordDate), removed != 0});
+  };
+
+  return entries;
+}
+
+std::optional<Timerun::BestSegmentDetails>
+TimerunRepository::getBestSegmentRow(int32_t seasonId, const std::string &map,
+                                     const std::string &run, int32_t userId,
+                                     int32_t segment) {
+  auto binder = _database->sql << R"(
+    select map, run, time, record_date, player_name, metadata
+    from player_best_segments
+    where season_id=? and map=? and run_sanitized=?
+      and user_id=? and segment=?;
+  )" << seasonId << StringUtils::toLowerCase(map)
+                               << StringUtils::sanitize(run, true) << userId
+                               << segment;
+
+  std::optional<Timerun::BestSegmentDetails> result;
+
+  binder >> [&result, seasonId, userId, segment](
+                const std::string &mapName, const std::string &runName,
+                int32_t time, const std::string &recordDate,
+                const std::string &playerName, const std::string &metadata) {
+    result =
+        Timerun::BestSegmentDetails{seasonId,
+                                    mapName,
+                                    runName,
+                                    segment,
+                                    time,
+                                    userId,
+                                    playerName,
+                                    TimeUtils::Time::fromString(recordDate),
+                                    deserializeMetadata(metadata)};
+  };
+
+  return result;
+}
+
+std::vector<Timerun::Season> TimerunRepository::getSeasons() {
+  auto binder = _database->sql
+                << R"(select id, name, start_time, end_time from season;)";
+
+  return getSeasonsFromQuery(binder);
 }
 
 void TimerunRepository::deleteSeason(const std::string &name) {
@@ -791,12 +1599,1078 @@ void TimerunRepository::deleteSeason(const std::string &name) {
     throw std::runtime_error("Cannot delete default season.");
   }
 
-  _database->sql << "delete from record where season_id=?;" << id;
+  constexpr std::array<const char *, 7> purgedTables = {
+      "record",
+      "record_history",
+      "removed_records",
+      "best_segments",
+      "player_best_segments",
+      "player_best_segments_history",
+      "removed_segments",
+  };
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  // delete season is a destructive operation - we purge all records from all
+  // tables that match the season ID, leaving nothing behind
+  for (const auto &table : purgedTables) {
+    _database->sql << StringUtils::format("delete from %s where season_id=?;",
+                                          table)
+                   << id;
+  }
+
+  // all tables purged, finally delete the actual season
   _database->sql << "delete from season where id=?" << id;
+
+  txn.commit();
 }
 
-// TODO: this shares a lot of logic with 'getRecords',
-// should maybe extract some of it to separate functions
+std::vector<Timerun::Record>
+TimerunRepository::removeRecord(const Timerun::RemoveRecordParams &params,
+                                const TimeUtils::Time &removedAt) {
+  // If a record is present in multiple seasons, and the caller did not specify
+  // the season to target, we find the record on the overall season,
+  // and cascade the removal to every other season that contains that
+  // specific record, as identified by the record date. If season is explicitly
+  // targeted, we only remove the record from that season.
+  const bool cascade = params.season.empty();
+
+  // resolve the targeted season name -> id
+  int32_t targetSeasonId = 0;
+
+  if (cascade) {
+    targetSeasonId = Timerun::DEFAULT_SEASON_ID;
+  } else {
+    targetSeasonId = resolveSeasonForRemoval(params.season, "remove-record");
+  }
+
+  const std::string resolvedMap = StringUtils::sanitize(params.map, true);
+
+  // if we don't get an exact match, we always fail, but give suggestions
+  // for partial matches to the user regardless
+  if (getMapsForName(resolvedMap, true).empty()) {
+    const auto maps = getMapsForName(resolvedMap, false);
+
+    // this is always a partial match, so saying "no map found matching..."
+    // is correct - we didn't find the exact map we were looking for
+    if (maps.size() <= 1) {
+      throw std::runtime_error(StringUtils::format(
+          "^3remove-record: ^7no map found matching ^3'%s'^7.", params.map));
+    }
+
+    throw std::runtime_error(
+        buildMatchSuggestionsError("remove-record", "map", params.map, maps));
+  }
+
+  const std::string resolvedRun = StringUtils::sanitize(params.run, true);
+
+  if (getRunsForName(resolvedMap, resolvedRun, true, true).empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3remove-record: ^7no run found matching ^3'%s'^7 on map ^3'%s'^7.",
+        params.run, params.map));
+  }
+
+  // fetch the record(s) for the targeted season
+  const std::string basePredicate =
+      "map=? collate nocase and lsanitize(run)=? collate nocase and "
+      "user_id=?";
+
+  std::vector<Timerun::Record> targetRecords;
+  {
+    auto binder = _database->sql
+                  << StringUtils::format(
+                         "select %s from record where season_id=? and %s;",
+                         _defaultRecordFieldsStr, basePredicate)
+                  << targetSeasonId << resolvedMap << resolvedRun
+                  << params.userId;
+    targetRecords = getRecordsFromQuery(binder);
+  }
+
+  if (targetRecords.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3remove-record: ^7no record found for ^3'%s'^7 by user ID ^3'%i'^7.",
+        params.run, params.userId));
+  }
+
+  // expand to the set of season ids we will remove from
+  std::vector<int> seasonIds;
+
+  if (cascade) {
+    // the targeted row is the Default season copy; find every other season
+    // that holds a copy of the same completion (same record_date)
+    const auto dates = Container::map(targetRecords, [](const auto &r) {
+      return r.recordDate.toDateTimeString();
+    });
+
+    auto binder = _database->sql
+                  << StringUtils::format(
+                         "select distinct season_id from record "
+                         "where %s and record_date in (%s);",
+                         basePredicate,
+                         DatabaseV2::createPlaceholderString(dates))
+                  << resolvedMap << resolvedRun << params.userId;
+
+    for (const auto &date : dates) {
+      binder << date;
+    }
+
+    binder >> [&seasonIds](int seasonId) { seasonIds.push_back(seasonId); };
+  } else {
+    seasonIds.push_back(targetSeasonId);
+  }
+
+  // final predicate shared by insert-select / remove
+  const std::string predicate = StringUtils::format(
+      "season_id in (%s) and %s",
+      DatabaseV2::createPlaceholderString(seasonIds), basePredicate);
+
+  const std::string archiveQuery = StringUtils::format(
+      R"(
+    insert into removed_records (
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata,
+      removed_by,
+      removed_at,
+      reason
+    )
+    select
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata,
+      ?,
+      ?,
+      ?
+    from record
+    where %s
+  )",
+      predicate);
+
+  const std::string removeQuery = StringUtils::format(
+      R"(
+    delete from record
+    where %s
+  )",
+      predicate);
+
+  const auto bind = [&seasonIds, &resolvedMap, &resolvedRun,
+                     &params](auto &binder) {
+    for (const auto &seasonId : seasonIds) {
+      binder << seasonId;
+    }
+    binder << resolvedMap << resolvedRun << params.userId;
+  };
+
+  // fetch all records that are about to be removed, so the result
+  // reflects cascaded seasons too, not just the targeted season
+  std::vector<Timerun::Record> removedRecords;
+  {
+    auto binder = _database->sql
+                  << StringUtils::format("select %s from record where %s;",
+                                         _defaultRecordFieldsStr, predicate);
+    bind(binder);
+    removedRecords = getRecordsFromQuery(binder);
+  }
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  auto archiveBinder = _database->sql << archiveQuery;
+  archiveBinder << params.removedBy << removedAt.toDateTimeString();
+
+  if (params.reason.has_value()) {
+    archiveBinder << params.reason.value();
+  } else {
+    archiveBinder << nullptr;
+  }
+
+  bind(archiveBinder);
+  archiveBinder++; // execute the archive now, inside the transaction
+
+  auto removeBinder = _database->sql << removeQuery;
+  bind(removeBinder);
+  removeBinder++; // execute the removal now, inside the transaction
+
+  // void the personal splits held by each removed run and re-derive the
+  // global rows from the survivors
+  AffectedSegments affectedSegments;
+
+  for (const auto &record : removedRecords) {
+    voidBestSegments(affectedSegments, record.seasonId, record.map, record.run,
+                     record.userId, record.recordDate);
+  }
+
+  recomputeAffectedSegments(affectedSegments);
+
+  txn.commit();
+
+  return removedRecords;
+}
+
+Timerun::RestoreRecordResult
+TimerunRepository::restoreRecord(const Timerun::RestoreRecordParams &params,
+                                 const TimeUtils::Time &restoredAt) {
+  // load the removed record the caller is targeting
+  std::vector<Timerun::RemovedRecord> removedRecords;
+  {
+    auto binder = _database->sql << R"(
+        select
+          id,
+          season_id,
+          map,
+          run,
+          user_id,
+          time,
+          checkpoints,
+          record_date,
+          player_name,
+          metadata,
+          removed_by,
+          removed_at,
+          reason
+        from removed_records
+        where id=?;
+      )" << params.recordId;
+    removedRecords = getRemovedRecordsFromQuery(binder);
+  }
+
+  if (removedRecords.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3restore-record: ^7no removed record found with ID ^3%i^7.",
+        params.recordId));
+  }
+
+  // the targeted record is a single season copy of a completion; find every
+  // other season copy of the same completion so the restoration cascades
+  const auto &base = removedRecords[0].record;
+  const std::string resolvedRun = StringUtils::sanitize(base.run, true);
+
+  {
+    auto binder = _database->sql << R"(
+        select
+          id,
+          season_id,
+          map,
+          run,
+          user_id,
+          time,
+          checkpoints,
+          record_date,
+          player_name,
+          metadata,
+          removed_by,
+          removed_at,
+          reason
+        from removed_records
+        where map=? collate nocase and lsanitize(run)=? collate nocase
+          and user_id=? and record_date=?
+        order by season_id;
+      )" << base.map << resolvedRun
+                                 << base.userId
+                                 << base.recordDate.toDateTimeString();
+    removedRecords = getRemovedRecordsFromQuery(binder);
+  }
+
+  // non-admins can only restore the records they removed themselves; any
+  // other season copies of the completion are skipped and stay archived
+  std::vector<Timerun::RemovedRecord> restorable;
+  std::vector<Timerun::RemovedRecord> skipped;
+
+  for (auto &removedRecord : removedRecords) {
+    if (params.isAdmin || removedRecord.removedBy == params.callerId) {
+      restorable.emplace_back(std::move(removedRecord));
+    } else {
+      skipped.emplace_back(std::move(removedRecord));
+    }
+  }
+
+  if (restorable.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3restore-record: ^7you do not have permission to restore %s.",
+        skipped.size() == 1 ? "this record" : "these records"));
+  }
+
+  Timerun::RestoreRecordResult result;
+  // the cascade set is the total number of records this restore targets
+  // 'removedRecords' still holds all of them, the split only moves them out
+  result.numTargeted = static_cast<int32_t>(removedRecords.size());
+  result.skipped = std::move(skipped);
+
+  // find the record currently occupying a given slot, if any
+  const auto findOccupant = [this](const Timerun::Record &record) {
+    const std::string run = StringUtils::sanitize(record.run, true);
+
+    std::vector<Timerun::Record> existing;
+    {
+      auto binder = _database->sql
+                    << StringUtils::format(
+                           "select %s from record where season_id=? and "
+                           "map=? collate nocase and lsanitize(run)=? "
+                           "collate nocase and user_id=?;",
+                           _defaultRecordFieldsStr)
+                    << record.seasonId << record.map << run << record.userId;
+      existing = getRecordsFromQuery(binder);
+    }
+
+    if (existing.empty()) {
+      return std::optional<Timerun::Record>{};
+    }
+
+    return std::optional<Timerun::Record>{std::move(existing[0])};
+  };
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  // detect all conflicts up front; if any exist and we're not forcing the
+  // restore, we abort without touching anything, so the same record ID can
+  // be used to retry the restore with --force
+  std::vector<Timerun::RestoreConflict> conflicts;
+
+  for (auto &removedRecord : restorable) {
+    const auto &record = removedRecord.record;
+    auto occupant = findOccupant(record);
+
+    if (occupant.has_value()) {
+      conflicts.emplace_back(
+          Timerun::RestoreConflict{std::move(*occupant), record});
+    }
+  }
+
+  if (!conflicts.empty() && !params.force) {
+    result.conflicts = std::move(conflicts);
+    return result;
+  }
+
+  AffectedSegments affectedSegments;
+
+  for (auto &removedRecord : restorable) {
+    const auto &record = removedRecord.record;
+    const std::string run = StringUtils::sanitize(record.run, true);
+    auto occupant = findOccupant(record);
+
+    if (occupant.has_value()) {
+      // void the personal splits the occupant held and remember the affected
+      // global rows
+      voidBestSegments(affectedSegments, occupant->seasonId, occupant->map,
+                       occupant->run, occupant->userId, occupant->recordDate);
+
+      // force: archive the occupant in place of the restored record
+      _database->sql
+          << R"(
+        insert into removed_records (
+          season_id,
+          map,
+          run,
+          user_id,
+          time,
+          checkpoints,
+          record_date,
+          player_name,
+          metadata,
+          removed_by,
+          removed_at,
+          reason
+        )
+        select
+          season_id,
+          map,
+          run,
+          user_id,
+          time,
+          checkpoints,
+          record_date,
+          player_name,
+          metadata,
+          ?,
+          ?,
+          ?
+        from record
+        where season_id=? and map=? collate nocase and lsanitize(run)=?
+          collate nocase and user_id=?;
+      )" << params.callerId
+          << restoredAt.toDateTimeString()
+          << "Automatically removed by 'restore-record' (conflict resolution)"
+          << record.seasonId << record.map << run << record.userId;
+
+      // free up the slot for the restored record
+      _database->sql << R"(
+        delete from record
+        where season_id=? and map=? collate nocase and lsanitize(run)=?
+          collate nocase and user_id=?;
+      )" << record.seasonId
+                     << record.map << run << record.userId;
+
+      result.swapped.emplace_back(std::move(*occupant));
+    }
+
+    // restore the record into 'record'
+    _database->sql << R"(
+      insert into record (
+        season_id,
+        map,
+        run,
+        user_id,
+        time,
+        checkpoints,
+        record_date,
+        player_name,
+        metadata
+      ) values (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
+      );
+    )" << record.seasonId
+                   << record.map << record.run << record.userId << record.time
+                   << StringUtils::join(record.checkpoints, ",")
+                   << record.recordDate.toDateTimeString() << record.playerName
+                   << serializeMetadata(record.metadata);
+
+    // remove the archived copy
+    _database->sql << "delete from removed_records where id=?;"
+                   << removedRecord.id;
+
+    // re-derive the restored run's splits, excluding independently removed
+    // segments and without appending to the progression
+    applyBestSegments(record, /*appendHistory=*/false,
+                      /*skipRemovedSegments=*/true);
+
+    result.restored.emplace_back(record);
+  }
+
+  recomputeAffectedSegments(affectedSegments);
+
+  txn.commit();
+
+  return result;
+}
+
+Timerun::RemovedRecordsPage TimerunRepository::getRemovedRecords(
+    const Timerun::ListRemovedRecordsParams &params) {
+  std::vector<Timerun::Season> seasons;
+
+  if (!params.season.empty()) {
+    seasons = getSeasonsForName(params.season, false);
+
+    if (seasons.empty()) {
+      throw std::runtime_error(
+          StringUtils::format("No season matches name '%s'", params.season));
+    }
+  }
+
+  std::vector<std::string> whereClauses;
+
+  if (!params.season.empty()) {
+    whereClauses.emplace_back("(" + createSeasonPredicate(seasons) + ")");
+  }
+
+  if (!params.map.empty()) {
+    whereClauses.emplace_back("map like ? collate nocase");
+  }
+
+  if (!params.run.empty()) {
+    whereClauses.emplace_back("lsanitize(run) like ? collate nocase");
+  }
+
+  if (params.userId.has_value()) {
+    whereClauses.emplace_back("user_id=?");
+  }
+
+  if (params.removedBy.has_value()) {
+    whereClauses.emplace_back("removed_by=?");
+  }
+
+  const std::string whereString =
+      whereClauses.empty()
+          ? ""
+          : " where " + StringUtils::join(whereClauses, " and ");
+
+  const auto bindFilters = [&params, &seasons](auto &binder) {
+    if (!params.season.empty()) {
+      for (const auto &season : seasons) {
+        binder << season.id;
+      }
+    }
+
+    if (!params.map.empty()) {
+      binder << "%" + params.map + "%";
+    }
+
+    if (!params.run.empty()) {
+      binder << "%" + params.run + "%";
+    }
+
+    if (params.userId.has_value()) {
+      binder << params.userId.value();
+    }
+
+    if (params.removedBy.has_value()) {
+      binder << params.removedBy.value();
+    }
+  };
+
+  const std::string query = StringUtils::format(R"(
+    select
+      id,
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata,
+      removed_by,
+      removed_at,
+      reason
+    from removed_records%s
+    order by removed_at desc, id desc;
+  )",
+                                                whereString);
+
+  auto binder = _database->sql << query;
+  bindFilters(binder);
+
+  std::vector<Timerun::RemovedRecord> records =
+      getRemovedRecordsFromQuery(binder);
+
+  // group the season copies of the same completion into a single entry,
+  // unless a season was explicitly targeted, in which case each record is
+  // listed on its own. rows are ordered by 'removed_at' desc, so the first
+  // time a group key appears also gives the most recently removed first.
+  std::vector<Timerun::RemovedRecordEntry> entries;
+
+  if (params.season.empty()) {
+    std::map<std::tuple<std::string, std::string, int32_t, std::string>, size_t>
+        groupIndex;
+
+    for (auto &record : records) {
+      const auto key = std::make_tuple(
+          record.record.map, record.record.run, record.record.userId,
+          record.record.recordDate.toDateTimeString());
+
+      const auto [it, inserted] = groupIndex.emplace(key, entries.size());
+
+      if (inserted) {
+        entries.emplace_back();
+      }
+
+      entries[it->second].records.emplace_back(std::move(record));
+    }
+  } else {
+    entries.reserve(records.size());
+
+    for (auto &record : records) {
+      entries.emplace_back();
+      entries.back().records.emplace_back(std::move(record));
+    }
+  }
+
+  // sort the season copies within each entry by season id, so the Default
+  // season is always first and 'entry.records[0]' is the representative
+  // "base" record for all the copies of a given record
+  for (auto &entry : entries) {
+    std::sort(entry.records.begin(), entry.records.end(),
+              [](const auto &a, const auto &b) {
+                return a.record.seasonId < b.record.seasonId;
+              });
+  }
+
+  // cap the requested page so we never return an empty page,
+  // and instead return the last page of entries
+  const auto totalCount = static_cast<int32_t>(entries.size());
+  const int32_t pageSize = std::max(params.pageSize, 1);
+  const int32_t numPages = std::max(1, (totalCount + pageSize - 1) / pageSize);
+  const int32_t page = std::clamp(params.page, 1, numPages);
+  const int32_t start = (page - 1) * pageSize;
+  const int32_t end =
+      std::min(start + pageSize, static_cast<int32_t>(entries.size()));
+
+  Timerun::RemovedRecordsPage result;
+  result.page = page;
+  result.numPages = numPages;
+  result.entries.insert(result.entries.end(),
+                        std::make_move_iterator(entries.begin() + start),
+                        std::make_move_iterator(entries.begin() + end));
+
+  return result;
+}
+
+std::vector<Timerun::RemovedSegment>
+TimerunRepository::removeSegment(const Timerun::RemoveSegmentParams &params,
+                                 const TimeUtils::Time &removedAt) {
+  const std::string resolvedMap =
+      resolveMapName(params.map, params.exactMap, "remove-segment");
+  const std::string resolvedRun =
+      resolveSegmentRunName(resolvedMap, params.run, "remove-segment");
+
+  int32_t targetSeasonId = Timerun::DEFAULT_SEASON_ID;
+
+  if (!params.season.empty()) {
+    targetSeasonId = resolveSeasonForRemoval(params.season, "remove-segment");
+  }
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  // the default-season row anchors a no-season cascade; an explicit season
+  // targets only that season's row
+  const auto target = getBestSegmentRow(
+      targetSeasonId, resolvedMap, resolvedRun, params.userId, params.segment);
+
+  if (!target.has_value()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3remove-segment: ^7no segment ^3%i^7 found for user ID ^3%i^7 on "
+        "^3'%s'^7 of run ^3'%s'^7.",
+        params.segment, params.userId, resolvedMap, resolvedRun));
+  }
+
+  std::vector<int32_t> seasonIds;
+
+  if (params.season.empty()) {
+    // cascade to every season holding a copy of this same split value
+    _database->sql << R"(
+      select distinct season_id from player_best_segments
+      where map=? and run_sanitized=?
+        and user_id=? and segment=? and record_date=?
+      order by season_id;
+    )" << resolvedMap
+                   << StringUtils::sanitize(resolvedRun, true) << params.userId
+                   << params.segment << target->recordDate.toDateTimeString() >>
+        [&seasonIds](int32_t seasonId) { seasonIds.push_back(seasonId); };
+  } else {
+    seasonIds.push_back(targetSeasonId);
+  }
+
+  std::vector<Timerun::RemovedSegment> removed;
+  AffectedSegments affectedSegments;
+
+  for (const int32_t seasonId : seasonIds) {
+    const auto row = getBestSegmentRow(seasonId, resolvedMap, resolvedRun,
+                                       params.userId, params.segment);
+
+    if (!row.has_value()) {
+      if (params.season.empty()) {
+        continue;
+      }
+
+      throw std::runtime_error(StringUtils::format(
+          "^3remove-segment: ^7no segment ^3%i^7 found for user ID ^3%i^7.",
+          params.segment, params.userId));
+    }
+
+    {
+      auto binder = _database->sql << R"(
+        insert into removed_segments (
+          season_id, map, run, run_sanitized, user_id, segment, time,
+          record_date, player_name, metadata, removed_by, removed_at, reason
+        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+      )";
+
+      binder << row->seasonId << row->map << row->run
+             << StringUtils::sanitize(row->run, true) << row->userId
+             << row->segment << row->time << row->recordDate.toDateTimeString()
+             << row->playerName << serializeMetadata(row->metadata)
+             << params.removedBy << removedAt.toDateTimeString();
+
+      if (params.reason.has_value()) {
+        binder << params.reason.value();
+      } else {
+        binder << nullptr;
+      }
+
+      binder++;
+    }
+
+    int32_t id = 0;
+    _database->sql << "select last_insert_rowid();" >> id;
+
+    _database->sql << R"(
+      delete from player_best_segments
+      where season_id=? and map=? and run_sanitized=?
+        and user_id=? and segment=?;
+    )" << row->seasonId
+                   << row->map << StringUtils::sanitize(row->run, true)
+                   << row->userId << row->segment;
+
+    Timerun::RemovedSegment archived;
+    archived.id = id;
+    archived.seasonId = row->seasonId;
+    archived.map = row->map;
+    archived.run = row->run;
+    archived.userId = row->userId;
+    archived.segment = row->segment;
+    archived.time = row->time;
+    archived.recordDate = row->recordDate;
+    archived.playerName = row->playerName;
+    archived.metadata = row->metadata;
+    archived.removedBy = params.removedBy;
+    archived.removedAt = removedAt;
+    archived.reason = params.reason;
+
+    removed.emplace_back(std::move(archived));
+
+    affectedSegments[std::make_tuple(row->seasonId, row->map, row->run)].insert(
+        row->segment);
+  }
+
+  if (removed.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3remove-segment: ^7no segment ^3%i^7 found for user ID ^3%i^7.",
+        params.segment, params.userId));
+  }
+
+  recomputeAffectedSegments(affectedSegments);
+
+  txn.commit();
+
+  return removed;
+}
+
+Timerun::RemovedSegmentsPage TimerunRepository::getRemovedSegments(
+    const Timerun::ListRemovedSegmentsParams &params) {
+  std::vector<Timerun::Season> seasons;
+
+  if (!params.season.empty()) {
+    seasons = getSeasonsForName(params.season, false);
+
+    if (seasons.empty()) {
+      throw std::runtime_error(
+          StringUtils::format("No season matches name '%s'", params.season));
+    }
+  }
+
+  std::vector<std::string> whereClauses;
+
+  if (!params.season.empty()) {
+    whereClauses.emplace_back("(" + createSeasonPredicate(seasons) + ")");
+  }
+
+  if (!params.map.empty()) {
+    whereClauses.emplace_back("map like ? collate nocase");
+  }
+
+  if (!params.run.empty()) {
+    whereClauses.emplace_back("run_sanitized like ?");
+  }
+
+  if (params.userId.has_value()) {
+    whereClauses.emplace_back("user_id=?");
+  }
+
+  if (params.removedBy.has_value()) {
+    whereClauses.emplace_back("removed_by=?");
+  }
+
+  if (params.segment.has_value()) {
+    whereClauses.emplace_back("segment=?");
+  }
+
+  const std::string whereString =
+      whereClauses.empty()
+          ? ""
+          : " where " + StringUtils::join(whereClauses, " and ");
+
+  auto binder = _database->sql << StringUtils::format(R"(
+    select
+      id,
+      season_id,
+      map,
+      run,
+      user_id,
+      segment,
+      time,
+      record_date,
+      player_name,
+      metadata,
+      removed_by,
+      removed_at,
+      reason
+    from removed_segments%s
+    order by removed_at desc, id desc;
+  )",
+                                                      whereString);
+
+  if (!params.season.empty()) {
+    for (const auto &season : seasons) {
+      binder << season.id;
+    }
+  }
+
+  if (!params.map.empty()) {
+    binder << "%" + params.map + "%";
+  }
+
+  if (!params.run.empty()) {
+    binder << "%" + StringUtils::sanitize(params.run, true) + "%";
+  }
+
+  if (params.userId.has_value()) {
+    binder << params.userId.value();
+  }
+
+  if (params.removedBy.has_value()) {
+    binder << params.removedBy.value();
+  }
+
+  if (params.segment.has_value()) {
+    binder << params.segment.value();
+  }
+
+  auto segments = getRemovedSegmentsFromQuery(binder);
+
+  std::vector<Timerun::RemovedSegmentEntry> entries;
+
+  if (params.season.empty()) {
+    std::map<
+        std::tuple<std::string, std::string, int32_t, int32_t, std::string>,
+        size_t>
+        groupIndex;
+
+    for (auto &segment : segments) {
+      const auto key = std::make_tuple(segment.map, segment.run, segment.userId,
+                                       segment.segment,
+                                       segment.recordDate.toDateTimeString());
+      const auto [it, inserted] = groupIndex.emplace(key, entries.size());
+
+      if (inserted) {
+        entries.emplace_back();
+      }
+
+      entries[it->second].segments.emplace_back(std::move(segment));
+    }
+  } else {
+    entries.reserve(segments.size());
+
+    for (auto &segment : segments) {
+      entries.emplace_back();
+      entries.back().segments.emplace_back(std::move(segment));
+    }
+  }
+
+  // sort the season copies within each entry by season id, so the Default
+  // season is always first and 'entry.segments[0]' is the representative
+  // base segment for the group
+  for (auto &entry : entries) {
+    std::sort(
+        entry.segments.begin(), entry.segments.end(),
+        [](const auto &a, const auto &b) { return a.seasonId < b.seasonId; });
+  }
+
+  const auto totalCount = static_cast<int32_t>(entries.size());
+  const int32_t pageSize = std::max(params.pageSize, 1);
+  const int32_t numPages = std::max(1, (totalCount + pageSize - 1) / pageSize);
+  const int32_t page = std::clamp(params.page, 1, numPages);
+  const int32_t start = (page - 1) * pageSize;
+  const int32_t end = std::min(start + pageSize, totalCount);
+
+  Timerun::RemovedSegmentsPage result;
+  result.page = page;
+  result.numPages = numPages;
+  result.entries.insert(result.entries.end(),
+                        std::make_move_iterator(entries.begin() + start),
+                        std::make_move_iterator(entries.begin() + end));
+
+  return result;
+}
+
+Timerun::RestoreSegmentResult
+TimerunRepository::restoreSegment(const Timerun::RestoreSegmentParams &params,
+                                  const TimeUtils::Time &restoredAt) {
+  std::vector<Timerun::RemovedSegment> removedSegments;
+  {
+    auto binder = _database->sql << R"(
+      select
+        id, season_id, map, run, user_id, segment, time, record_date,
+        player_name, metadata, removed_by, removed_at, reason
+      from removed_segments
+      where id=?;
+    )" << params.segmentId;
+    removedSegments = getRemovedSegmentsFromQuery(binder);
+  }
+
+  if (removedSegments.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3restore-segment: ^7no removed segment found with ID ^3%i^7.",
+        params.segmentId));
+  }
+
+  const auto base = removedSegments[0];
+
+  // only a default-season copy cascades to every season holding the same
+  // split value (same source run date); targeting a specific season restores
+  // only that season's copy
+  if (base.seasonId == Timerun::DEFAULT_SEASON_ID) {
+    auto binder = _database->sql << R"(
+      select
+        id, season_id, map, run, user_id, segment, time, record_date,
+        player_name, metadata, removed_by, removed_at, reason
+      from removed_segments
+      where map=? and run_sanitized=?
+        and user_id=? and segment=? and record_date=?
+      order by season_id;
+    )" << base.map << StringUtils::sanitize(base.run, true)
+                                 << base.userId << base.segment
+                                 << base.recordDate.toDateTimeString();
+    removedSegments = getRemovedSegmentsFromQuery(binder);
+  }
+
+  // non-admins can only restore the splits they removed themselves,
+  // any other season copies stay archived
+  std::vector<Timerun::RemovedSegment> restorable;
+  std::vector<Timerun::RemovedSegment> skipped;
+
+  for (auto &removed : removedSegments) {
+    if (params.isAdmin || removed.removedBy == params.callerId) {
+      restorable.emplace_back(std::move(removed));
+    } else {
+      skipped.emplace_back(std::move(removed));
+    }
+  }
+
+  if (restorable.empty()) {
+    throw std::runtime_error(StringUtils::format(
+        "^3restore-segment: ^7you do not have permission to restore %s.",
+        skipped.size() == 1 ? "this segment" : "these segments"));
+  }
+
+  // a segment cannot be restored while its source run is archived. only
+  // copies that are actually being restored are checked: a skipped copy is
+  // left archived for an admin to handle and must not block this restore
+  for (const auto &removed : restorable) {
+    int32_t blocked = 0;
+
+    _database->sql << R"(
+      select exists(select 1 from removed_records
+        where season_id=? and map=? collate nocase
+          and run=? collate nocase
+          and user_id=? and record_date=?);
+    )" << removed.seasonId
+                   << removed.map << removed.run << removed.userId
+                   << removed.recordDate.toDateTimeString() >>
+        blocked;
+
+    if (blocked != 0) {
+      throw std::runtime_error(StringUtils::format(
+          "^3restore-segment: ^7the run that set segment ^3%i^7 is still "
+          "removed. Restore the record first.",
+          removed.segment));
+    }
+  }
+
+  Timerun::RestoreSegmentResult result;
+  result.numTargeted = static_cast<int32_t>(removedSegments.size());
+  result.skipped = std::move(skipped);
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  // detect all conflicts up front; if any exist and we're not forcing the
+  // restore, abort without touching anything, so the same archive ID can be
+  // used to retry the restore with --force
+  std::vector<Timerun::RestoreSegmentConflict> conflicts;
+
+  for (const auto &removed : restorable) {
+    auto occupant =
+        getBestSegmentRow(removed.seasonId, removed.map, removed.run,
+                          removed.userId, removed.segment);
+
+    if (occupant.has_value()) {
+      conflicts.emplace_back(
+          Timerun::RestoreSegmentConflict{removed, *occupant});
+    }
+  }
+
+  if (!conflicts.empty() && !params.force) {
+    result.conflicts = std::move(conflicts);
+    return result;
+  }
+
+  AffectedSegments affectedSegments;
+
+  for (auto &removed : restorable) {
+    auto occupant =
+        getBestSegmentRow(removed.seasonId, removed.map, removed.run,
+                          removed.userId, removed.segment);
+
+    if (occupant.has_value()) {
+      // force: archive the occupant in place of the restored split
+      {
+        auto binder = _database->sql << R"(
+          insert into removed_segments (
+            season_id, map, run, run_sanitized, user_id, segment, time,
+            record_date, player_name, metadata, removed_by, removed_at, reason
+          ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        )";
+
+        binder << occupant->seasonId << occupant->map << occupant->run
+               << StringUtils::sanitize(occupant->run, true) << occupant->userId
+               << occupant->segment << occupant->time
+               << occupant->recordDate.toDateTimeString()
+               << occupant->playerName << serializeMetadata(occupant->metadata)
+               << params.callerId << restoredAt.toDateTimeString()
+               << std::string("Automatically removed by 'restore-segment' "
+                              "(conflict resolution)");
+        binder++;
+      }
+
+      _database->sql << R"(
+        delete from player_best_segments
+        where season_id=? and map=? and run_sanitized=?
+          and user_id=? and segment=?;
+      )" << occupant->seasonId
+                     << occupant->map
+                     << StringUtils::sanitize(occupant->run, true)
+                     << occupant->userId << occupant->segment;
+
+      result.swapped.emplace_back(std::move(*occupant));
+    }
+
+    // install the archived split
+    _database->sql << R"(
+      insert into player_best_segments (
+        season_id, map, run, run_sanitized, user_id, segment, time,
+        record_date, player_name, metadata
+      ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    )" << removed.seasonId
+                   << removed.map << removed.run
+                   << StringUtils::sanitize(removed.run, true) << removed.userId
+                   << removed.segment << removed.time
+                   << removed.recordDate.toDateTimeString()
+                   << removed.playerName << serializeMetadata(removed.metadata);
+
+    _database->sql << "delete from removed_segments where id=?;" << removed.id;
+
+    affectedSegments[std::make_tuple(removed.seasonId, removed.map,
+                                     removed.run)]
+        .insert(removed.segment);
+
+    result.restored.emplace_back(removed);
+  }
+
+  recomputeAffectedSegments(affectedSegments);
+
+  txn.commit();
+
+  return result;
+}
+
 std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
     const Timerun::ListCheckpointsParams &params) {
   std::vector<Timerun::Checkpoints> checkpoints;
@@ -810,47 +2684,13 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
   }
 
   const std::string map = params.map;
-  const auto maps = getMapsForName(map, params.exactMap);
-
-  if (maps.size() > 1) {
-    bool exactMapFound = false;
-
-    for (const auto &m : maps) {
-      if (m == map) {
-        exactMapFound = true;
-        break;
-      }
-    }
-
-    if (!exactMapFound) {
-      std::string error = StringUtils::format(
-          "^3records: ^7found %d maps matching ^3%s^7\n", maps.size(), map);
-
-      const int perRow = 3;
-      int i = 0;
-      for (const auto &m : maps) {
-        if (i != 0 && i % perRow == 0) {
-          error += "\n";
-        }
-
-        error += StringUtils::format("%-22s", m);
-        ++i;
-      }
-
-      throw std::runtime_error(error);
-    }
-  }
+  const std::string resolvedMap =
+      resolveMapName(map, params.exactMap, "records");
 
   const std::string runPlaceHolder = "and lsanitize(run) like ?";
+  const std::string runBinder = resolveRunName(resolvedMap, params.run, true);
 
-  const auto runs =
-      getRunsForName(maps.empty() ? map : maps[0], params.run, true, true);
-  const std::string runBinder =
-      runs.size() == 1 ? runs[0] : "%" + params.run + "%";
-
-  const std::string seasonPlaceholders = StringUtils::join(
-      Container::map(seasons, [](const auto &) { return "season_id=?"; }),
-      " or ");
+  const std::string seasonPlaceholders = createSeasonPredicate(seasons);
 
   std::string query = StringUtils::format(R"(
     select *
@@ -876,7 +2716,7 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(
     binder << s.id;
   }
 
-  binder << StringUtils::toLowerCase(maps.empty() ? map : maps[0]);
+  binder << StringUtils::toLowerCase(resolvedMap);
   binder << runBinder;
   binder << params.rank;
 
@@ -939,25 +2779,366 @@ void TimerunRepository::tryToMigrateRecords() {
                     std::string run, int userId, std::string playerName) {
         Timerun::Record r{};
         r.seasonId = 1;
-        r.map = map;
-        r.run = run;
+        r.map = std::move(map);
+        r.run = std::move(run);
         r.time = time;
         r.recordDate = TimeUtils::Time::fromInt(recordDate);
         r.userId = userId;
-        r.playerName = playerName;
+        r.playerName = std::move(playerName);
         r.checkpoints = std::vector<int>(MAX_TIMERUN_CHECKPOINTS,
                                          TIMERUN_CHECKPOINT_NOT_SET);
         r.metadata = {{"mod_version", "unknown(imported)"}};
-        oldRecords.push_back(r);
+        oldRecords.push_back(std::move(r));
       };
 
-  _database->sql << "begin;";
+  DatabaseV2::TransactionGuard txn(*_database);
 
   for (const auto &r : oldRecords) {
-    insertRecord(r);
+    insertRecordRow(r);
   }
 
-  _database->sql << "commit;";
+  txn.commit();
+}
+
+void TimerunRepository::seedRecordHistory() {
+  // this must run after tryToMigrateRecords(), which imports the legacy
+  // 'records' table into 'record'. as a plain migration statement it would run
+  // during applyMigrations(), before that import, and seed an empty table
+  int32_t haveHistory = 0;
+
+  _database->sql << "select exists(select 1 from record_history)" >>
+      haveHistory;
+
+  // history already seeded
+  if (haveHistory > 0) {
+    return;
+  }
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  _database->sql << StringUtils::format(R"(
+    insert into record_history (
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      rank,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata
+    )
+    select
+      r.season_id,
+      r.map,
+      r.run,
+      r.user_id,
+      r.time,
+%s,
+      r.checkpoints,
+      r.record_date,
+      r.player_name,
+      r.metadata
+    from record r
+    where not exists (
+      select 1 from record_history h
+       where h.season_id = r.season_id
+         and h.map = r.map
+         and h.run = r.run
+         and h.user_id = r.user_id
+         and h.record_date = r.record_date
+    );
+  )",
+                                        RECORD_RANK_SQL);
+
+  _database->sql << R"(
+    insert into record_history (
+      season_id, map, run, user_id, time, rank,
+      checkpoints, record_date, player_name, metadata
+    )
+    select
+      rr.season_id, rr.map, rr.run, rr.user_id, rr.time,
+      null,
+      rr.checkpoints, rr.record_date, rr.player_name, rr.metadata
+    from removed_records rr
+    where not exists (
+      select 1 from record_history h
+       where h.season_id = rr.season_id
+         and h.map = rr.map
+         and h.run = rr.run
+         and h.user_id = rr.user_id
+         and h.record_date = rr.record_date
+    );
+  )";
+
+  txn.commit();
+}
+
+void TimerunRepository::seedBestSegments() {
+  // Guarded by an "is the table empty?" check, the same sentinel the other
+  // seeds use: the best segments are derived, and a server whose runs have no
+  // checkpoints simply has nothing to seed, so re-deriving is a no-op there.
+  // The tables only stay empty until the first checkpointed completion lands,
+  // after which this skips forever.
+  //
+  // Seeds the personal and global tables and the initial history rows, from
+  // 'record_history' minus removed runs ('removed_records') minus individually
+  // removed splits ('removed_segments').
+  int32_t haveBest = 0;
+
+  _database->sql << "select exists(select 1 from player_best_segments);" >>
+      haveBest;
+
+  if (haveBest > 0) {
+    return;
+  }
+
+  // Per-player bests, keyed by (season_id, map, run, user_id), each holding a
+  // map of segment index -> the fastest time seen for that segment and the run
+  // that set it. Held in memory while we scan history, so the tables are never
+  // read and written through the same open cursor. Removed runs and removed
+  // splits never contribute - history is immutable, so removal is a filter here
+  // rather than a mutation.
+  struct SegmentBest {
+    int32_t time;
+    std::string recordDate;
+    std::string playerName;
+    // serialized metadata of the run that set the split, so removals can be
+    // audited against the mod version that produced it
+    std::string metadata;
+  };
+
+  using PlayerKey = std::tuple<int32_t, std::string, std::string, int32_t>;
+  std::map<PlayerKey, std::map<int32_t, SegmentBest>> personal;
+
+  // Splits removed standalone are excluded per segment. Whole removed runs are
+  // filtered out of the history scan below through 'removed_records'; this
+  // covers the other archive, so a rebuild cannot re-admit a voided split.
+  using RemovedSegmentKey = std::tuple<int32_t, std::string, std::string,
+                                       int32_t, std::string, int32_t>;
+  std::set<RemovedSegmentKey> removedSegments;
+
+  _database->sql << R"(
+    select season_id, map, run, user_id, record_date, segment
+    from removed_segments;
+  )" >>
+      [&removedSegments](int32_t seasonId, std::string map, std::string run,
+                         int32_t userId, std::string recordDate,
+                         int32_t segment) {
+        removedSegments.emplace(seasonId, std::move(map), std::move(run),
+                                userId, std::move(recordDate), segment);
+      };
+
+  _database->sql << R"(
+    select
+      h.season_id,
+      h.map,
+      h.run,
+      h.user_id,
+      h.checkpoints,
+      h.time,
+      h.record_date,
+      h.player_name,
+      h.metadata
+    from record_history h
+    where not exists (
+      select 1 from removed_records rr
+      where rr.season_id = h.season_id
+        and rr.map = h.map
+        and rr.run = h.run
+        and rr.user_id = h.user_id
+        and rr.record_date = h.record_date
+    );
+  )" >>
+      [&personal, &removedSegments](
+          int32_t seasonId, std::string map, std::string run, int32_t userId,
+          const std::string &checkpointsString, int32_t completionTime,
+          const std::string &recordDate, const std::string &playerName,
+          const std::string &metadata) {
+        const auto segments = TimerunSegments::computeSegmentTimes(
+            parseCheckpoints(checkpointsString), completionTime);
+
+        // a run with no usable checkpoint data contributes no segments - bail
+        // before touching 'personal', since operator[] would otherwise create
+        // an entry for it, and the fold would then write rows with no segments
+        if (segments.empty()) {
+          return;
+        }
+
+        auto &playerSegments =
+            personal[std::make_tuple(seasonId, map, run, userId)];
+
+        for (size_t i = 0; i < segments.size(); ++i) {
+          // 1-based: segment i is the leg ending at checkpoint i, and the
+          // finish is the last segment
+          const auto segment = static_cast<int32_t>(i) + 1;
+
+          // a leg that could not be measured has no meaningful best
+          if (segments[i] <= 0) {
+            continue;
+          }
+
+          // a split removed standalone never contributes, whatever the run
+          // that set it
+          if (removedSegments.find(RemovedSegmentKey{seasonId, map, run, userId,
+                                                     recordDate, segment}) !=
+              removedSegments.end()) {
+            continue;
+          }
+
+          const auto it = playerSegments.find(segment);
+
+          // lower time wins; ties break to the earlier record date, so the
+          // source run is deterministic
+          if (it == playerSegments.end() || segments[i] < it->second.time ||
+              (segments[i] == it->second.time &&
+               recordDate < it->second.recordDate)) {
+            playerSegments[segment] = {segments[i], recordDate, playerName,
+                                       metadata};
+          }
+        }
+      };
+
+  // The global best is a materialised min over the per-player bests: for each
+  // segment, whichever player holds the fastest time, breaking ties by the
+  // earlier record date and then the lower user ID.
+  struct GlobalBest {
+    int32_t time;
+    int32_t userId;
+    std::string recordDate;
+    std::string playerName;
+  };
+
+  using RunKey = std::tuple<int32_t, std::string, std::string>;
+  std::map<RunKey, std::map<int32_t, GlobalBest>> global;
+
+  for (const auto &[playerKey, playerSegments] : personal) {
+    const auto &[seasonId, map, run, userId] = playerKey;
+    auto &runSegments = global[std::make_tuple(seasonId, map, run)];
+
+    for (const auto &[segment, best] : playerSegments) {
+      const auto it = runSegments.find(segment);
+      const bool better =
+          it == runSegments.end() || best.time < it->second.time ||
+          (best.time == it->second.time &&
+           std::tie(best.recordDate, userId) <
+               std::tie(it->second.recordDate, it->second.userId));
+
+      if (better) {
+        runSegments[segment] = {best.time, userId, best.recordDate,
+                                best.playerName};
+      }
+    }
+  }
+
+  DatabaseV2::TransactionGuard txn(*_database);
+
+  for (const auto &[key, segments] : personal) {
+    const auto &[seasonId, map, run, userId] = key;
+    // the raw run is the identity and stays displayed; the sanitized copy is
+    // what queries match on (color codes stripped, lowercased)
+    const auto runSanitized = StringUtils::sanitize(run, true);
+
+    for (const auto &[segment, best] : segments) {
+      _database->sql << R"(
+        insert into player_best_segments (
+          season_id,
+          map,
+          run,
+          run_sanitized,
+          user_id,
+          segment,
+          time,
+          record_date,
+          player_name,
+          metadata
+        ) values (
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?
+        );
+      )" << seasonId << map
+                     << run << runSanitized << userId << segment << best.time
+                     << best.recordDate << best.playerName << best.metadata;
+
+      // the initial bests become the initial history rows, so the progression
+      // starts from what the live tables started from. seeded rows are
+      // unranked: the rank they held is not known retroactively, and the first
+      // live improvement records the rank it beat
+      _database->sql << R"(
+        insert into player_best_segments_history (
+          season_id,
+          map,
+          run,
+          run_sanitized,
+          user_id,
+          segment,
+          time,
+          rank,
+          record_date,
+          player_name,
+          metadata
+        ) values (
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          null,
+          ?,
+          ?,
+          ?
+        );
+      )" << seasonId << map
+                     << run << runSanitized << userId << segment << best.time
+                     << best.recordDate << best.playerName << best.metadata;
+    }
+  }
+
+  for (const auto &[key, segments] : global) {
+    const auto &[seasonId, map, run] = key;
+    const auto runSanitized = StringUtils::sanitize(run, true);
+
+    for (const auto &[segment, best] : segments) {
+      _database->sql << R"(
+        insert into best_segments (
+          season_id,
+          map,
+          run,
+          run_sanitized,
+          segment,
+          time,
+          user_id,
+          record_date,
+          player_name
+        ) values (
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?,
+          ?
+        );
+      )" << seasonId << map
+                     << run << runSanitized << segment << best.time
+                     << best.userId << best.recordDate << best.playerName;
+    }
+  }
+
+  txn.commit();
 }
 
 void TimerunRepository::migrate() {
@@ -1003,21 +3184,183 @@ void TimerunRepository::migrate() {
        "create index idx_season_id_map on record(season_id, map);",
        "create index idx_season_id_map_run on record(season_id, map, run);",
        "create index idx_season_id_map_run_user_id on record(season_id, map, run, user_id);"});
+
+  _database->addMigration(
+      // clang-format off
+      "removed_records",
+      {R"(
+          create table removed_records (
+            id integer primary key autoincrement,
+            season_id integer not null,
+            map text not null,
+            run text not null,
+            user_id int not null,
+            time int not null,
+            checkpoints text not null,
+            record_date timestamp not null,
+            player_name text not null,
+            metadata text not null default '',
+            removed_by int not null,
+            removed_at timestamp not null,
+            reason text null
+          );
+        )",
+       "create index idx_removed_records_user_id on removed_records(user_id);"});
+  // clang-format on
+
+  _database->addMigration(
+      "record_history",
+      {R"(
+        create table record_history (
+          id integer primary key autoincrement,
+          season_id integer not null,
+          map text not null,
+          run text not null,
+          user_id int not null,
+          time int not null,
+          rank int null,
+          checkpoints text not null,
+          record_date timestamp not null,
+          player_name text not null,
+          metadata text not null default '',
+          foreign key (season_id) references season(id)
+        );
+      )",
+       R"(create index idx_record_history_user on record_history(user_id, season_id, map, run, record_date);)",
+       R"(create index idx_record_history_lookup on record_history(season_id, map, run, record_date);)"});
+
+  _database->addMigration(
+      // clang-format off
+      "best_segments",
+      {R"(
+        create table player_best_segments (
+          season_id integer not null,
+          map text not null,
+          run text not null,
+          run_sanitized text not null default '',
+          user_id int not null,
+          segment integer not null,
+          time int not null,
+          record_date timestamp not null,
+          player_name text not null,
+          metadata text not null default '',
+          primary key (season_id, map, run, user_id, segment),
+          foreign key (season_id) references season(id)
+        );
+      )",
+       R"(
+        create table player_best_segments_history (
+          id integer primary key autoincrement,
+          season_id integer not null,
+          map text not null,
+          run text not null,
+          run_sanitized text not null default '',
+          user_id int not null,
+          segment integer not null,
+          time int not null,
+          rank integer null,
+          record_date timestamp not null,
+          player_name text not null,
+          metadata text not null default ''
+        );
+      )",
+       R"(
+        create index idx_player_best_segments_global
+          on player_best_segments(season_id, map, run, segment, time, record_date, user_id);
+      )",
+       R"(
+        create index idx_player_best_segments_user
+          on player_best_segments(season_id, map, user_id, run_sanitized, segment, time, run);
+      )",
+       R"(
+        create index idx_player_best_segments_history_listing
+          on player_best_segments_history(user_id, map, run_sanitized, segment, season_id, record_date desc, id desc);
+      )",
+       R"(
+        create index idx_player_best_segments_history_lookup
+          on player_best_segments_history(season_id, map, run, segment, record_date);
+      )",
+       R"(
+        create table best_segments (
+          season_id integer not null,
+          map text not null,
+          run text not null,
+          run_sanitized text not null default '',
+          segment integer not null,
+          time int not null,
+          user_id int not null,
+          record_date timestamp not null,
+          player_name text not null,
+          primary key (season_id, map, run, segment),
+          foreign key (season_id) references season(id)
+        );
+      )",
+       R"(
+        create table removed_segments (
+          id integer primary key autoincrement,
+          season_id integer not null,
+          map text not null,
+          run text not null,
+          run_sanitized text not null default '',
+          user_id int not null,
+          segment integer not null,
+          time int not null,
+          record_date timestamp not null,
+          player_name text not null,
+          metadata text not null default '',
+          removed_by int not null,
+          removed_at timestamp not null,
+          reason text null
+        );
+      )",
+       R"(
+        create unique index idx_removed_segments_identity
+          on removed_segments(season_id, map, run, user_id, record_date, segment);
+      )",
+       R"(
+        create index idx_removed_segments_user_id on removed_segments(user_id);
+      )"});
   // clang-format on
 
   _database->applyMigrations();
 
   tryToMigrateRecords();
+  seedRecordHistory();
+  seedBestSegments();
 }
 
 std::string TimerunRepository::serializeMetadata(
-    std::map<std::string, std::string> metadata) {
+    const std::map<std::string, std::string> &metadata) {
   std::string result;
-  for (const auto &kvp : metadata) {
-    // NOTE: we're not escaping = so if payload contains = this will fail...
-    result += kvp.first + "=" + kvp.second;
+
+  for (const auto &[key, value] : metadata) {
+    if (!result.empty()) {
+      result += ',';
+    }
+
+    result += key;
+    result += '=';
+    result += value;
   }
+
   return result;
+}
+
+std::map<std::string, std::string>
+TimerunRepository::deserializeMetadata(const std::string &metadataStr) {
+  std::map<std::string, std::string> metadata;
+
+  for (const auto &kvp : StringUtils::split(metadataStr, ",")) {
+    const auto pos = kvp.find('=');
+
+    if (pos == std::string::npos) {
+      continue;
+    }
+
+    metadata[kvp.substr(0, pos)] = kvp.substr(pos + 1);
+  }
+
+  return metadata;
 }
 
 std::vector<Timerun::Record>
@@ -1028,11 +3371,79 @@ TimerunRepository::getRecordsFromQuery(sqlite::database_binder &binder) {
                        std::string recordDate, std::string playerName,
                        std::string metadataString) {
     auto record = getRecordFromStandardQueryResult(
-        seasonId, map, runName, userId, time, checkpointsString, recordDate,
-        playerName, metadataString);
+        seasonId, std::move(map), std::move(runName), userId, time,
+        std::move(checkpointsString), std::move(recordDate),
+        std::move(playerName), std::move(metadataString));
 
-    records.push_back(record);
+    records.push_back(std::move(record));
   };
+
   return records;
+}
+
+std::vector<Timerun::RemovedRecord>
+TimerunRepository::getRemovedRecordsFromQuery(sqlite::database_binder &binder) {
+  std::vector<Timerun::RemovedRecord> records;
+
+  binder >> [&records](int32_t id, int32_t seasonId, std::string map,
+                       std::string run, int32_t userId, int32_t time,
+                       std::string checkpointsString, std::string recordDate,
+                       std::string playerName, std::string metadataString,
+                       int32_t removedBy, const std::string &removedAt,
+                       std::unique_ptr<std::string> reason) {
+    Timerun::RemovedRecord removedRecord;
+
+    removedRecord.id = id;
+    removedRecord.record = getRecordFromStandardQueryResult(
+        seasonId, std::move(map), std::move(run), userId, time,
+        std::move(checkpointsString), std::move(recordDate),
+        std::move(playerName), std::move(metadataString));
+    removedRecord.removedBy = removedBy;
+    removedRecord.removedAt = TimeUtils::Time::fromString(removedAt);
+
+    if (reason) {
+      removedRecord.reason = *reason;
+    }
+
+    records.emplace_back(std::move(removedRecord));
+  };
+
+  return records;
+}
+
+std::vector<Timerun::RemovedSegment>
+TimerunRepository::getRemovedSegmentsFromQuery(
+    sqlite::database_binder &binder) {
+  std::vector<Timerun::RemovedSegment> segments;
+
+  binder >> [&segments](int32_t id, int32_t seasonId, std::string map,
+                        std::string run, int32_t userId, int32_t segment,
+                        int32_t time, const std::string &recordDate,
+                        std::string playerName, const std::string &metadata,
+                        int32_t removedBy, const std::string &removedAt,
+                        std::unique_ptr<std::string> reason) {
+    Timerun::RemovedSegment removed;
+
+    removed.id = id;
+    removed.seasonId = seasonId;
+    removed.map = std::move(map);
+    removed.run = std::move(run);
+    removed.userId = userId;
+    removed.segment = segment;
+    removed.time = time;
+    removed.recordDate = TimeUtils::Time::fromString(recordDate);
+    removed.playerName = std::move(playerName);
+    removed.metadata = deserializeMetadata(metadata);
+    removed.removedBy = removedBy;
+    removed.removedAt = TimeUtils::Time::fromString(removedAt);
+
+    if (reason) {
+      removed.reason = *reason;
+    }
+
+    segments.emplace_back(std::move(removed));
+  };
+
+  return segments;
 }
 } // namespace ETJump

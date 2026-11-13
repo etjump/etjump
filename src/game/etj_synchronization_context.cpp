@@ -33,7 +33,7 @@ void ETJump::SynchronizationContext::startWorkerThreads(unsigned numThreads) {
 
   _running = true;
 
-  for (int i = 0; i < numThreads; ++i) {
+  for (size_t i = 0; i < numThreads; ++i) {
     auto t = std::thread([this] { worker(); });
 
     _threads.push_back(std::move(t));

@@ -44,9 +44,6 @@ inline constexpr int PRONE_TIME = 500;
 
 inline constexpr int MAX_STEP_CHANGE = 32;
 
-inline constexpr int MAX_VERTS_ON_POLY = 10;
-inline constexpr int MAX_MARK_POLYS = 256; // JPW NERVE was 1024
-
 inline constexpr int TEAMCHAT_WIDTH = 200;
 inline constexpr int TEAMCHAT_HEIGHT = 64;
 
@@ -368,18 +365,6 @@ typedef struct centity_s {
 
 // local entities are created as a result of events or predicted actions,
 // and live independantly from all server transmitted entities
-
-typedef struct markPoly_s {
-  struct markPoly_s *prevMark, *nextMark;
-  int time;
-  qhandle_t markShader;
-  qboolean alphaFade; // fade alpha instead of rgb
-  float color[4];
-  poly_t poly;
-  polyVert_t verts[MAX_VERTS_ON_POLY];
-
-  int duration; // Ridah
-} markPoly_t;
 
 //----(SA)	moved in from cg_view.c
 typedef enum {
@@ -842,9 +827,6 @@ typedef struct {
   // view rendering
   refdef_t refdef;
   vec3_t refdefViewAngles; // will be converted to refdef.viewaxis
-
-  // for etj_smoothAngles, used in place of ps.delta_angles
-  int refdefDeltaAngles[3];
 
   // zoom key
   qboolean zoomed;
@@ -1399,14 +1381,6 @@ typedef struct {
   // JPW NERVE
   qhandle_t fleshSmokePuffShader; // JPW NERVE for bullet hit flesh
                                   // smoke puffs
-  qhandle_t nerveTestShader;
-  qhandle_t idTestShader;
-  qhandle_t hud1Shader;
-  qhandle_t hud2Shader;
-  qhandle_t hud3Shader;
-  qhandle_t hud4Shader;
-  qhandle_t hud5Shader;
-  // jpw
   qhandle_t smokePuffShader;
   qhandle_t smokePuffRageProShader;
   qhandle_t shotgunSmokePuffShader;
@@ -1954,7 +1928,6 @@ typedef struct {
   gametype_t gametype;
   int antilag;
 
-  int shared;
   int pmove_msec;
   int cheats;
 #ifdef ALLOW_GSYNC
@@ -2158,7 +2131,6 @@ extern cg_t cg;
 extern centity_t cg_entities[MAX_GENTITIES];
 extern weaponInfo_t cg_weapons[MAX_WEAPONS];
 extern itemInfo_t cg_items[MAX_ITEMS];
-extern markPoly_t cg_markPolys[MAX_MARK_POLYS];
 
 extern vmCvar_t cg_centertime;
 extern vmCvar_t cg_runpitch;
@@ -2563,6 +2535,7 @@ extern vmCvar_t etj_checkpointsSize;
 extern vmCvar_t etj_checkpointsShadow;
 extern vmCvar_t etj_checkpointsStyle;
 extern vmCvar_t etj_checkpointsCount;
+extern vmCvar_t etj_checkpointsShowGold;
 
 extern vmCvar_t etj_checkpointsPopup;
 extern vmCvar_t etj_checkpointsPopupX;
@@ -2606,8 +2579,6 @@ extern vmCvar_t etj_explosivesShake;
 extern vmCvar_t etj_realFov;
 extern vmCvar_t etj_stretchCgaz;
 extern vmCvar_t etj_noActivateLean;
-
-extern vmCvar_t shared;
 
 extern vmCvar_t etj_drawObWatcher;
 extern vmCvar_t etj_obWatcherX;
@@ -2788,6 +2759,7 @@ extern vmCvar_t etj_drawRecordingStatus;
 extern vmCvar_t etj_recordingStatusX;
 extern vmCvar_t etj_recordingStatusY;
 
+extern vmCvar_t etj_lerpPmove;
 extern vmCvar_t etj_smoothAngles;
 extern vmCvar_t etj_autoSprint;
 
@@ -2809,6 +2781,18 @@ extern vmCvar_t etj_ccMenu_autoClose;
 extern vmCvar_t etj_ccMenu_width;
 extern vmCvar_t etj_ccMenu_browseWithOpen;
 extern vmCvar_t etj_ccMenu_showEmptyPages;
+
+extern vmCvar_t etj_drawYaw;
+extern vmCvar_t etj_yawX;
+extern vmCvar_t etj_yawY;
+extern vmCvar_t etj_yawColor;
+extern vmCvar_t etj_yawShadow;
+extern vmCvar_t etj_yawSize;
+extern vmCvar_t etj_yawWidth;
+
+extern vmCvar_t etj_drawFallDamageDetector;
+extern vmCvar_t etj_fallDamageDetectorX;
+extern vmCvar_t etj_fallDamageDetectorY;
 
 //
 // cg_main.c
@@ -2835,7 +2819,6 @@ void CG_UpdateCvars(void);
 
 int CG_CrosshairPlayer(void);
 int CG_LastAttacker(void);
-void CG_LoadMenus(const char *menuFile);
 void CG_KeyEvent(int key, qboolean down);
 void CG_MouseEvent(int x, int y);
 void CG_EventHandling(int type, qboolean fForced);
@@ -2987,8 +2970,6 @@ void CG_DrawTopBottom_NoScale(float x, float y, float w, float h, float size);
 //
 // cg_draw.c, cg_newDraw.c
 //
-extern char cg_fxflags; // JPW NERVE
-
 void CG_InitStatsDebug(void);
 void CG_StatsDebugAddText(const char *text);
 
@@ -3140,6 +3121,8 @@ qboolean CG_AddLinkedEntity(centity_t *cent, qboolean ignoreframe, int atTime);
 void CG_PositionEntityOnTag(refEntity_t *entity, const refEntity_t *parent,
                             const char *tagName, int startIndex,
                             vec3_t *offset);
+// 'spawnTime' is the start time of the portal spawn animation
+void CG_DrawPortalGate(const entityState_t *es, int spawnTime);
 void CG_PositionRotatedEntityOnTag(refEntity_t *entity,
                                    const refEntity_t *parent,
                                    const char *tagName);
@@ -3218,9 +3201,7 @@ void portalTrail(const vec3_t start, const vec3_t end, const vec3_t color);
 //
 // cg_marks.c
 //
-void CG_InitMarkPolys(void);
-void CG_AddMarks(void);
-void CG_ImpactMark(qhandle_t markShader, vec3_t origin, vec4_t projection,
+void CG_ImpactMark(qhandle_t markShader, const vec3_t origin, vec4_t projection,
                    float radius, float orientation, float r, float g, float b,
                    float a, int lifeTime);
 
@@ -3822,7 +3803,6 @@ void trap_SendMoveSpeedsToGame(int entnum, char *movespeeds);
 void trap_UI_Popup(int arg0);
 
 // NERVE - SMF
-qhandle_t getTestShader(void); // JPW NERVE shhh
 void trap_UI_ClosePopup(const char *arg0);
 void trap_Key_GetBindingBuf(int keynum, char *buf, int buflen);
 void trap_Key_SetBinding(int keynum, const char *binding);
@@ -4198,7 +4178,8 @@ const char *G_SHA1(const char *str);
 void ETJump_DrawDrawables();
 void ETJump_ClearDrawables();
 
-void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
+void ETJump_LerpColors(const vec4_t *from, const vec4_t *to, vec4_t *color,
+                       float step);
 void ETJump_AdjustPosition(float *x);
 float ETJump_AdjustPosition(float x);
 void ETJump_EnableWidthScale(bool enable);

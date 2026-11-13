@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "etj_fatal_error_shared.h"
 #include "etj_file.h"
 #include "etj_local.h"
 #include "etj_game.h"
@@ -278,31 +279,7 @@ void OnGameInit() {
   ETJump::Log::processMessages();
 }
 
-void OnGameShutdown() {
-  WriteSessionData();
-  //    ETJump::database->ExecuteQueuedOperations();
-  // these may be null, e.g. when G_Alloc or stack unwinding fails
-  // after engine calls longjmp on errors
-  if (ETJump::database != nullptr) {
-    ETJump::database->CloseDatabase();
-  }
-
-  if (game.mapStatistics != nullptr) {
-    game.mapStatistics->saveChanges();
-  }
-
-  if (game.tokens != nullptr) {
-    ETJump::Tokens::reset();
-  }
-
-  if (game.timerunV2) {
-    game.timerunV2->shutdown();
-  }
-
-  if (game.chatReplay) {
-    game.chatReplay->writeChatsToFile();
-  }
-
+static void resetGameSystems() {
   game.levels = nullptr;
   game.commands = nullptr;
   game.customMapVotes = nullptr;
@@ -316,6 +293,41 @@ void OnGameShutdown() {
   game.worldspawn = nullptr;
 
   ETJump::Log::processMessages();
+}
+
+void OnGameShutdown() {
+  // every step runs even if an earlier one fails, e.g. the timerun worker
+  // threads must be stopped, the first error is rethrown afterwards, and the
+  // systems may be null, as the game might not have finished initializing
+  // (a fatal error during GAME_INIT, see GameFailure), or the engine shuts it
+  // down while handling an error of its own raised inside a syscall
+  ETJump::runEachStep([] { WriteSessionData(); },
+                      [] {
+                        if (ETJump::database != nullptr) {
+                          ETJump::database->CloseDatabase();
+                        }
+                      },
+                      [] {
+                        if (game.mapStatistics != nullptr) {
+                          game.mapStatistics->saveChanges();
+                        }
+                      },
+                      [] {
+                        if (game.tokens != nullptr) {
+                          ETJump::Tokens::reset();
+                        }
+                      },
+                      [] {
+                        if (game.timerunV2) {
+                          game.timerunV2->shutdown();
+                        }
+                      },
+                      [] {
+                        if (game.chatReplay) {
+                          game.chatReplay->writeChatsToFile();
+                        }
+                      },
+                      [] { resetGameSystems(); });
 }
 
 qboolean OnConnectedClientCommand(gentity_t *ent) {

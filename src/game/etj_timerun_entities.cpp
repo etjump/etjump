@@ -61,6 +61,12 @@ bool TimerunEntity::canActivate(gentity_t *activator) {
   return true;
 }
 
+void TimerunEntity::resetTimerunIndices() {
+  runIndices.clear();
+  cleanNames.clear();
+  names.clear();
+}
+
 int TimerunEntity::getOrSetTimerunIndex(const std::string &runName) {
   if (runIndices.count(runName) == 0) {
     runIndices[runName] = level.timerunNamesCount++;

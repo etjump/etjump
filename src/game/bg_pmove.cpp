@@ -12,6 +12,7 @@
 
 #include "bg_local.h"
 #include "etj_string_utilities.h"
+#include "etj_worldspawn_shared.h"
 
 #ifdef CGAMEDLL
   #define PM_Cheats cgs.cheats
@@ -690,14 +691,11 @@ static qboolean PM_CheckJump(void) {
     if (ETJump::hasJustStoodUp()) {
       return qfalse;
     }
-    if (pm->shared & BG_LEVEL_NO_JUMPDELAY) {
-      if (pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY) {
-        return qfalse;
-      }
-    } else {
-      if (!(pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)) {
-        return qfalse;
-      }
+
+    if (pm->pmext->sharedWSKeys.noJumpDelay
+            ? (pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)
+            : !(pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)) {
+      return qfalse;
     }
   }
 
@@ -812,20 +810,11 @@ static qboolean PM_CheckProne(void) {
   pm->trace(&trace, pm->ps->origin, pm->ps->mins, pm->ps->maxs, pm->ps->origin,
             pm->ps->clientNum, CONTENTS_NOPRONE);
 
-  if (!PM_Cheats) {
-    if (pm->shared & BG_LEVEL_NO_PRONE) {
-      if (trace.fraction == 1.0f) {
-        pm->ps->eFlags &= ~EF_PRONE;
-        pm->ps->eFlags &= ~EF_PRONE_MOVING;
-        return qfalse;
-      }
-    } else {
-      if (trace.fraction != 1.0f) {
-        pm->ps->eFlags &= ~EF_PRONE;
-        pm->ps->eFlags &= ~EF_PRONE_MOVING;
-        return qfalse;
-      }
-    }
+  if (!PM_Cheats && !ETJump::WorldspawnShared::areaAllowsAction(
+                        pm->pmext->sharedWSKeys.noProne, trace)) {
+    pm->ps->eFlags &= ~EF_PRONE;
+    pm->ps->eFlags &= ~EF_PRONE_MOVING;
+    return qfalse;
   }
 
   if (!(pm->ps->eFlags & EF_PRONE)) {
@@ -1333,7 +1322,7 @@ static void PM_WalkMove(void) {
   float fmove, smove;
   vec3_t wishdir;
   float wishspeed;
-  float scale, scaleAlt;
+  float scale;
   usercmd_t cmd;
   float accelerate;
   float vel;
@@ -1610,34 +1599,34 @@ Creates a local entity event to play the sound
 =============
 */
 static void PM_CheckFallDamage(const float delta) {
-  if (delta > 77) {
+  if (delta > DELTA_FALL_NDIE) {
     PM_AddEventExt(EV_FALL_NDIE, PM_FootstepForSurface());
-  } else if (delta > 67) {
+  } else if (delta > DELTA_FALL_DMG_50) {
     pm->ps->pm_time = 1000;
     pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
     PM_AddEventExt(EV_FALL_DMG_50, PM_FootstepForSurface());
-  } else if (delta > 58) {
+  } else if (delta > DELTA_FALL_DMG_25) {
     // this is a pain grunt, so don't play it if dead
     if (pm->ps->stats[STAT_HEALTH] > 0) {
       pm->ps->pm_time = 250;
       pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
       PM_AddEventExt(EV_FALL_DMG_25, PM_FootstepForSurface());
     }
-  } else if (delta > 48) {
+  } else if (delta > DELTA_FALL_DMG_15) {
     // this is a pain grunt, so don't play it if dead
     if (pm->ps->stats[STAT_HEALTH] > 0) {
       pm->ps->pm_time = 1000;
       pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
       PM_AddEventExt(EV_FALL_DMG_15, PM_FootstepForSurface());
     }
-  } else if (delta > 38.75) {
+  } else if (delta > DELTA_FALL_DMG_10) {
     // this is a pain grunt, so don't play it if dead
     if (pm->ps->stats[STAT_HEALTH] > 0) {
       pm->ps->pm_time = 1000;
       pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
       PM_AddEventExt(EV_FALL_DMG_10, PM_FootstepForSurface());
     }
-  } else if (delta > 7) {
+  } else if (delta > DELTA_FALL_SHORT) {
     PM_AddEventExt(EV_FALL_SHORT, PM_FootstepForSurface());
   }
   // ETJump uphill step sounds
@@ -1648,7 +1637,7 @@ static void PM_CheckFallDamage(const float delta) {
   // rain - when falling damage happens, velocity is cleared, but
   // this needs to happen in pmove, not g_active!  (prediction will be
   // wrong, otherwise.)
-  if (delta > 38.75) {
+  if (delta > DELTA_FALL_DMG_10) {
     VectorClear(pm->ps->velocity);
   }
 }
@@ -1716,9 +1705,11 @@ static void PM_CrashLand(void) {
   // Aciz: moved fall damage and stepsound handling into
   // PM_CheckFallDamage to avoid very messy code when checking whether
   // nofalldamage is enabled/disabled.
-  if (pm->shared & BG_LEVEL_NO_FALLDAMAGE_FORCE) {
+  if (pm->pmext->sharedWSKeys.noFallDamage ==
+      ETJump::NoFallDamageOpts::FORCE_ON) {
     PM_AddCushionFootstep(delta);
-  } else if (pm->shared & BG_LEVEL_NO_FALLDAMAGE) {
+  } else if (pm->pmext->sharedWSKeys.noFallDamage ==
+             ETJump::NoFallDamageOpts::ON) {
     if (pml.groundTrace.surfaceFlags & SURF_NODAMAGE) {
       PM_CheckFallDamage(delta);
     } else {
@@ -1829,32 +1820,29 @@ static void PM_GroundTraceMissed(void) {
 }
 
 namespace ETJump {
-// this is rather verbose but I wanted to make this easy to read,
-// rather than making it as concise as possible
-static bool disableOverbounce(const trace_t &trace) {
+// TODO: this also exists in etj_overbounce_shared.cpp, should consolidate them
+static bool surfaceAllowsOverbounce(const trace_t &trace) {
   const bool onPlayer = trace.entityNum >= 0 && trace.entityNum < MAX_CLIENTS;
 
   if (onPlayer) {
-    if (pm->shared & BG_LEVEL_BODY_OB_NEVER) {
-      return true;
-    }
-
-    if (pm->shared & BG_LEVEL_BODY_OB_ALWAYS) {
+    if (pm->pmext->sharedWSKeys.overbouncePlayers ==
+        OverbouncePlayersOpts::FORCE_OFF) {
       return false;
     }
-  }
 
-  if (pm->shared & BG_LEVEL_NO_OVERBOUNCE) {
-    if (!(trace.surfaceFlags & SURF_OVERBOUNCE)) {
-      return true;
-    }
-  } else {
-    if (trace.surfaceFlags & SURF_OVERBOUNCE) {
+    if (pm->pmext->sharedWSKeys.overbouncePlayers ==
+        OverbouncePlayersOpts::FORCE_ON) {
       return true;
     }
   }
 
-  return false;
+  if (pm->pmext->sharedWSKeys.noOverbounce
+          ? !(trace.surfaceFlags & SURF_OVERBOUNCE)
+          : (trace.surfaceFlags & SURF_OVERBOUNCE)) {
+    return false;
+  }
+
+  return true;
 }
 } // namespace ETJump
 
@@ -1880,7 +1868,7 @@ static void PM_GroundTrace(void) {
   PM_TraceAllLegs(&trace, &pm->pmext->proneLegsOffset, pm->ps->origin, point);
   pml.groundTrace = trace;
 
-  if (pm->shared & BG_LEVEL_NO_WALLBUG) {
+  if (pm->pmext->sharedWSKeys.noWallbug) {
     if (trace.allsolid && pm->ps->pm_type != PM_NOCLIP) {
       VectorClear(pm->ps->velocity);
     }
@@ -1954,7 +1942,7 @@ static void PM_GroundTrace(void) {
 
     PM_CrashLand();
 
-    if (ETJump::disableOverbounce(trace)) {
+    if (!ETJump::surfaceAllowsOverbounce(trace)) {
       PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal,
                       pm->ps->velocity, OVERCLIP);
     }
@@ -1972,7 +1960,7 @@ static void PM_GroundTrace(void) {
   pm->ps->groundEntityNum = trace.entityNum;
 
   // prevent sticky overbounces
-  if (ETJump::disableOverbounce(trace) && trace.plane.normal[2] == 1) {
+  if (!ETJump::surfaceAllowsOverbounce(trace) && trace.plane.normal[2] == 1) {
     pm->ps->velocity[2] = 0;
 
     // axial surfaces only
@@ -4330,16 +4318,8 @@ static void PM_Weapon(void) {
       vec3_t kvel;
       float mass = 200;
 
-      if (DotProduct(pml.forward, pm->ps->velocity) > 0) {
-        VectorScale(pml.forward, -1.f * (fwdmove_knockback / mass),
-                    kvel); // -1 as we get knocked
-                           // backwards
-      } else {
-        VectorScale(pml.forward, -1.f * (fwdmove_knockback / mass),
-                    kvel); // -1 as we get knocked
-                           // backwards
-      }
-
+      // -1 as we get knocked backwards
+      VectorScale(pml.forward, -1.0f * (fwdmove_knockback / mass), kvel);
       VectorAdd(pm->ps->velocity, kvel, pm->ps->velocity);
 
       if (!pm->ps->pm_time) {

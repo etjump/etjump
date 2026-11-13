@@ -646,8 +646,6 @@ void _VectorMA(const vec3_t veca, float scale, const vec3_t vecb, vec3_t vecc);
 unsigned ColorBytes3(float r, float g, float b);
 unsigned ColorBytes4(float r, float g, float b, float a);
 
-float NormalizeColor(const vec3_t in, vec3_t out);
-
 float RadiusFromBounds(const vec3_t mins, const vec3_t maxs);
 void ClearBounds(vec3_t mins, vec3_t maxs);
 void AddPointToBounds(const vec3_t v, vec3_t mins, vec3_t maxs);
@@ -740,8 +738,6 @@ float DistanceFromVectorSquared(vec3_t p, vec3_t lp1, vec3_t lp2);
 
 //=============================================
 
-float Com_Clamp(float min, float max, float value);
-
 char *COM_SkipPath(char *pathname);
 void COM_FixPath(char *pathname);
 void COM_StripExtension(const char *in, char *out);
@@ -754,7 +750,6 @@ void COM_SetCurrentParseLine(int line);
 int COM_GetCurrentParseLine(void);
 char *COM_Parse(const char **data_p);
 char *COM_ParseExt(const char **data_p, qboolean allowLineBreak);
-int COM_Compress(char *data_p);
 void COM_ParseError(const char *format, ...);
 void COM_ParseWarning(const char *format, ...);
 int Com_ParseInfos(char *buf, int max, char infos[][MAX_INFO_STRING]);

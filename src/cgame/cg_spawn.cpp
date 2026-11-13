@@ -67,8 +67,8 @@ qboolean CG_SpawnVector2D(const char *key, const char *defaultString,
   return present;
 }
 
-void SP_path_corner_2(void) {
-  char *targetname;
+static void SP_path_corner_2() {
+  char *targetname = nullptr;
   vec3_t origin;
 
   CG_SpawnString("targetname", "", &targetname);
@@ -76,12 +76,10 @@ void SP_path_corner_2(void) {
 
   if (!*targetname) {
     CG_Error("path_corner_2 with no targetname at %s\n", vtos(origin));
-    return;
   }
 
   if (numPathCorners >= MAX_PATH_CORNERS) {
     CG_Error("Maximum path_corners hit\n");
-    return;
   }
 
   BG_AddPathCorner(targetname, origin);

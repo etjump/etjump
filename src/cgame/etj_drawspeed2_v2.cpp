@@ -191,9 +191,9 @@ bool DrawSpeed2::beforeRender() {
   }
 
   if (accelColorStyle == AccelColorV2::Style::SIMPLE ||
-      accelColorStyle == AccelColorV2::Style::ADVANCED &&
-          AccelColorV2::lowSpeedOnGround(currentSpeed,
-                                         s.pm.ps->groundEntityNum)) {
+      (accelColorStyle == AccelColorV2::Style::ADVANCED &&
+       AccelColorV2::lowSpeedOnGround(currentSpeed,
+                                      s.pm.ps->groundEntityNum))) {
     storedSpeeds.push_back({lastUpdateTime, currentSpeed});
     AccelColorV2::popOldStoredSpeeds(storedSpeeds, lastUpdateTime);
   } else if (!storedSpeeds.empty()) {

@@ -152,7 +152,7 @@ void SavePos::writeSaveposFile(SavePosData &data) {
 
   position["stance"] = static_cast<int>(data.pos.stance);
 
-  root["position"] = position;
+  root["position"] = std::move(position);
 
   timerunInfo["runName"] = data.timerunInfo.runName;
   timerunInfo["currentRunTimer"] = data.timerunInfo.currentRunTimer;
@@ -175,7 +175,7 @@ void SavePos::writeSaveposFile(SavePosData &data) {
     timerunInfo["checkpointIndicesHit"].append(checkpoint).asInt();
   }
 
-  root["timerunInfo"] = timerunInfo;
+  root["timerunInfo"] = std::move(timerunInfo);
 
   const std::string filename = "savepos/" + data.name + ".dat";
 

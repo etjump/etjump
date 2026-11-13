@@ -1131,7 +1131,7 @@ void objective_Register(gentity_t *self) {
   // set current # spawntargets
   level.numspawntargets = numobjectives;
   trap_GetConfigstring(CS_MULTI_INFO, cs, sizeof(cs));
-  sprintf(numspawntargets, "%d", numobjectives);
+  Com_sprintf(numspawntargets, sizeof(numspawntargets), "%d", numobjectives);
   Info_SetValueForKey(cs, "numspawntargets", numspawntargets);
   trap_SetConfigstring(CS_MULTI_INFO, cs);
 }
