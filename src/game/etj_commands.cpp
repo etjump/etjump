@@ -4315,7 +4315,7 @@ bool Commands::List(gentity_t *ent) {
       continue;
     }
 
-    helpMsg += va("%-20s ", it->first.c_str());
+    helpMsg += va("%-28s ", it->first.c_str());
     if (i != 0 && i % 3 == 0) {
       helpMsg += "\n";
     }
