@@ -1140,12 +1140,7 @@ void G_PrintClientSpammyCenterPrint(int entityNum, const char *text) {
 team_t G_GetTeamFromEntity(gentity_t *ent) {
   switch (ent->s.eType) {
     case ET_PLAYER:
-      if (ent->client) {
-        return (ent->client->sess.sessionTeam);
-      } else {
-        return (TEAM_FREE);
-      }
-      break;
+      return ent->client ? ent->client->sess.sessionTeam : TEAM_FREE;
     case ET_MISSILE:
     case ET_GENERAL:
       switch (ent->methodOfDeath) {
@@ -1172,7 +1167,6 @@ team_t G_GetTeamFromEntity(gentity_t *ent) {
       break;
     case ET_CONSTRUCTIBLE:
       return static_cast<team_t>(ent->s.teamNum);
-      break;
     case ET_MG42_BARREL: // zinx - fix for #470
       return G_GetTeamFromEntity(&g_entities[ent->r.ownerNum]);
 

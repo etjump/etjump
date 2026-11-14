@@ -286,7 +286,6 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
     // Zero: changed to 20 instead of 6
     if (i >= MAX_FIRETEAM_USERS) {
       G_ClientPrintAndReturn(entityNum, "Too many players already on this Fireteam");
-      return;
     }
 
     if (ft->joinOrder[i] == -1) {
