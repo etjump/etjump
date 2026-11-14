@@ -1322,7 +1322,7 @@ gitem_t bg_itemlist[] = {
    "models/multiplayer/kar98/v_kar98.md3",
    "models/multiplayer/mauser/kar98_pickup.md3"
    },
-   
+
    "icons/iconw_kar98_1",	// icon
    "icons/ammo3",			// ammo icon*/
     {"models/multiplayer/kar98/kar98_3rd.md3", "models/multiplayer/kar98/v_kar98.md3",
@@ -3132,7 +3132,7 @@ void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result, qb
 
       break;
     default:
-      Com_Error(ERR_DROP, "BG_EvaluateTrajectory: unknown trType: %i", tr->trTime);
+      Com_Error(ERR_DROP, "%s: unknown trType: %i", __func__, tr->trType);
   }
 }
 
@@ -3211,10 +3211,7 @@ void BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int atTime, vec3_t resul
       VectorClear(result);
       break;
     default:
-      Com_Error(ERR_DROP,
-                "BG_EvaluateTrajectoryDelta: unknown "
-                "trType: %i",
-                tr->trTime);
+      Com_Error(ERR_DROP, "%s: unknown trType: %i", __func__, tr->trType);
   }
 }
 
