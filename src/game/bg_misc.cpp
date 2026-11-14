@@ -2200,19 +2200,10 @@ int BG_AkimboSidearm(int weaponNum) {
   switch (weaponNum) {
     case WP_AKIMBO_COLT:
       return WP_COLT;
-      break;
-    case WP_AKIMBO_SILENCEDCOLT:
-      return WP_COLT;
-      break;
     case WP_AKIMBO_LUGER:
       return WP_LUGER;
-      break;
-    case WP_AKIMBO_SILENCEDLUGER:
-      return WP_LUGER;
-      break;
     default:
       return WP_NONE;
-      break;
   }
 }
 
@@ -3142,7 +3133,6 @@ void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result, qb
       break;
     default:
       Com_Error(ERR_DROP, "BG_EvaluateTrajectory: unknown trType: %i", tr->trTime);
-      break;
   }
 }
 
@@ -3225,7 +3215,6 @@ void BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int atTime, vec3_t resul
                 "BG_EvaluateTrajectoryDelta: unknown "
                 "trType: %i",
                 tr->trTime);
-      break;
   }
 }
 

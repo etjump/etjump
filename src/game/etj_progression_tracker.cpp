@@ -53,7 +53,6 @@ void ProgressionTrackers::updateTracker(std::vector<ProgressionTrackerParser::In
               "greater than maximum "
               "number of trackers indices (%d)",
               pair.index + 1, MAX_PROGRESSION_TRACKERS);
-      return;
     }
 
     tracker[pair.index] = pair.value;
