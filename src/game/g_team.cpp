@@ -740,7 +740,6 @@ gentity_t *SelectRandomTeamSpawnPoint(const team_t team, int spawnObjective) {
 
   if ((!level.numspawntargets)) {
     G_Error("No spawnpoints found\n");
-    return nullptr;
   }
 
   int i = 0;

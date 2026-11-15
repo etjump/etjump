@@ -298,8 +298,6 @@ bool Levels::ReadFromConfig() {
     file = std::unique_ptr<char[]>(new char[len + 1]);
   } catch (...) {
     G_Error("Failed to allocate memory to parse level config.");
-    trap_FS_FCloseFile(f);
-    return false;
   }
 
   trap_FS_Read(file.get(), len, f);
@@ -338,9 +336,7 @@ bool Levels::ReadFromConfig() {
       try {
         tempLevel = std::make_shared<Level>(0, "", "", "");
       } catch (...) {
-        G_Error("Failed to allocate memory for "
-                "a level.");
-        return false;
+        G_Error("Failed to allocate memory for a level.");
       }
 
       levelOpen = true;
