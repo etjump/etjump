@@ -4241,16 +4241,23 @@ void FireWeapon(gentity_t *ent) {
       break;
 
     // Feen: PGM
-    case WP_PORTAL_GUN:
+    case WP_PORTAL_GUN: {
       if (timerunStartThisFrame(ent)) {
         break;
       }
 
-      ETJump::Portalgun::fire(ent,
-                              ent->client->wbuttons & WBUTTON_ATTACK2 ? ETJump::Portal::Type::PORTAL_RED
-                                                                      : ETJump::Portal::Type::PORTAL_BLUE,
-                              muzzleEffect);
+      // 'client->wbuttons' is only updated at the end of 'ClientThink_real', so during 'ClientEvents' it still holds
+      // the previous user command's 'wbuttons'. That is the command we want for a delayed shot, which fires after the
+      // button has already been released, but the current command is needed when the shot fires on the very first
+      // command of a button press (possible when 'weaponstate' is still 'WEAPON_FIRING' after the refire cooldown).
+      // Check both to get the portal type right in either case.
+      const int32_t wbuttons = ent->client->wbuttons | ent->client->pers.cmd.wbuttons;
+
+      ETJump::Portalgun::fire(
+        ent, wbuttons & WBUTTON_ATTACK2 ? ETJump::Portal::Type::PORTAL_RED : ETJump::Portal::Type::PORTAL_BLUE,
+        muzzleEffect);
       break;
+    }
 
     default:
       break;
