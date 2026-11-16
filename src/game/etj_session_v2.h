@@ -106,13 +106,14 @@ private:
   void getExpiringBansForSession();
   void removeExpiredBans();
 
-  void updateHWID(int clientNum, int userID) const;
-  void updateLastKnownIP(int clientNum, int userID) const;
+  void updateHWID(int32_t userID, const std::vector<std::string> &hwid, int32_t platform) const;
+  void updateLastKnownIP(int32_t userID, const std::string &ipv4, const std::string &ipv6) const;
   void updateLastSeen(int32_t clientNum);
 
   [[nodiscard]] std::string getIP(int32_t clientNum) const;
   void checkIPBan(int clientNum) const;
-  [[nodiscard]] bool isBanned(int clientNum, int userID, const std::string &legacyGuid = "") const;
+  [[nodiscard]] bool isBanned(const std::string &guid, const std::vector<std::string> &hwid, int32_t userID,
+                              const std::string &legacyGuid = "") const;
   void dropBannedClient(int clientNum) const;
 
   void printGreeting(int32_t clientNum) const;

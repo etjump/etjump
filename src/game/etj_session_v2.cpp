@@ -151,7 +151,7 @@ void SessionV2::onAuthSuccess(const int32_t clientNum) {
 
   sc->postTask(
     [this, clientNum, guid] {
-      const auto user = repository->getUserData(clients[clientNum].guid);
+      const auto user = repository->getUserData(guid);
 
       // this should never happen, because we have authenticated already
       if (user.id == 0) {
@@ -288,11 +288,15 @@ bool SessionV2::authenticate(const gentity_t *ent) {
   clients[clientNum].guid = Crypto::sha2(guidBuf);
   clients[clientNum].hwid = hwid;
 
-  const std::string func = __func__;
+  const std::string func  = __func__;
+  const std::string &guid = clients[clientNum].guid;
+  const int32_t platform  = clients[clientNum].platform;
+  const std::string &ipv4 = clients[clientNum].ipv4;
+  const std::string &ipv6 = clients[clientNum].ipv6;
 
   sc->postTask(
-    [this, clientNum] {
-      const auto user = repository->getUserData(clients[clientNum].guid);
+    [this, clientNum, guid, hwid, platform, ipv4, ipv6] {
+      const auto user = repository->getUserData(guid);
 
       if (user.guid.empty()) {
         // user.id will be 0 here as it returns an empty user
@@ -300,16 +304,16 @@ bool SessionV2::authenticate(const gentity_t *ent) {
       }
 
       // check after user data is successfully fetched so we have valid GUID
-      if (isBanned(clientNum, user.id)) {
+      if (isBanned(guid, hwid, user.id)) {
         return std::make_unique<AuthenticationResult>(0, true);
       }
 
-      updateHWID(clientNum, user.id);
-      updateLastKnownIP(clientNum, user.id);
+      updateHWID(user.id, hwid, platform);
+      updateLastKnownIP(user.id, ipv4, ipv6);
 
       return std::make_unique<AuthenticationResult>(user.id, false);
     },
-    [this, clientNum, cleanName, func](std::unique_ptr<SynchronizationContext::ResultBase> userData) {
+    [this, clientNum, cleanName, func, guid](std::unique_ptr<SynchronizationContext::ResultBase> userData) {
       const auto result = dynamic_cast<AuthenticationResult *>(userData.get());
 
       if (result == nullptr) {
@@ -323,7 +327,7 @@ bool SessionV2::authenticate(const gentity_t *ent) {
 
       if (result->userID == 0) {
         logger->info("Client %i %s with GUID %s not found in the database, sending migration request", clientNum,
-                     cleanName, clients[clientNum].guid);
+                     cleanName, guid);
 
         Printer::command(clientNum, Constants::Authentication::GUID_MIGRATE_REQUEST);
       } else {
@@ -366,8 +370,15 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
   trap_Argv(2, typeBuf, sizeof(typeBuf));
   const auto migrationType = static_cast<Constants::Authentication::MigrationType>(Q_atoi(typeBuf));
 
+  const auto &client                   = clients[clientNum];
+  const std::string &guid              = client.guid;
+  const std::vector<std::string> &hwid = client.hwid;
+  const int32_t platform               = client.platform;
+  const std::string &ipv4              = client.ipv4;
+  const std::string &ipv6              = client.ipv6;
+
   sc->postTask(
-    [this, oldGuid, clientNum, migrationType] {
+    [this, oldGuid, clientNum, migrationType, guid, hwid, platform, ipv4, ipv6] {
       const auto legacyAuth = repository->getLegacyAuthData(oldGuid);
       const auto user       = repository->getUserData(legacyAuth.userID);
 
@@ -378,7 +389,7 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
         return std::make_unique<GuidMigrationResult>(user.id, false, "");
       }
 
-      if (isBanned(clientNum, user.id, oldGuid)) {
+      if (isBanned(guid, hwid, user.id, oldGuid)) {
         return std::make_unique<GuidMigrationResult>(user.id, true, "");
       }
 
@@ -391,11 +402,11 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
           "Note that this will delete the data associated with your current GUID.\n");
       }
 
-      repository->migrateGuid(user.id, clients[clientNum].guid);
+      repository->migrateGuid(user.id, guid);
 
       // update HWID + last know IP, since we didn't do this during auth
-      updateHWID(clientNum, user.id);
-      updateLastKnownIP(clientNum, user.id);
+      updateHWID(user.id, hwid, platform);
+      updateLastKnownIP(user.id, ipv4, ipv6);
 
       return std::make_unique<GuidMigrationResult>(user.id, false, "Successfully migrated old GUID.\n");
     },
@@ -428,13 +439,15 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
 }
 
 void SessionV2::addNewUser(const int32_t clientNum) {
-  const std::string name = (g_entities + clientNum)->client->pers.netname;
-  const std::string guid = clients[clientNum].guid;
-  const std::string ipv4 = clients[clientNum].ipv4;
-  const std::string ipv6 = clients[clientNum].ipv6;
+  const std::string &name              = (g_entities + clientNum)->client->pers.netname;
+  const std::string &guid              = clients[clientNum].guid;
+  const std::string &ipv4              = clients[clientNum].ipv4;
+  const std::string &ipv6              = clients[clientNum].ipv6;
+  const std::vector<std::string> &hwid = clients[clientNum].hwid;
+  const int32_t platform               = clients[clientNum].platform;
 
   sc->postTask(
-    [this, clientNum, name, guid, ipv4, ipv6] {
+    [this, clientNum, name, guid, ipv4, ipv6, hwid, platform] {
       UserModels::User user{};
       user.name = name;
       user.guid = guid;
@@ -452,8 +465,8 @@ void SessionV2::addNewUser(const int32_t clientNum) {
         throw std::runtime_error(StringUtils::format("Failed to get user id for GUID '%s'.", guid));
       }
 
-      updateHWID(clientNum, userID);
-      updateLastKnownIP(clientNum, userID);
+      updateHWID(userID, hwid, platform);
+      updateLastKnownIP(userID, ipv4, ipv6);
 
       return std::make_unique<AddUserResult>(userID, "Successfully added new user to the database.");
     },
@@ -473,21 +486,20 @@ void SessionV2::addNewUser(const int32_t clientNum) {
 }
 
 // NOTE: this performs database operations, don't call this on the main thread!
-void SessionV2::updateHWID(const int clientNum, const int userID) const {
+void SessionV2::updateHWID(const int userID, const std::vector<std::string> &hwid, const int32_t platform) const {
   // if we're allowing invalid HWIDs, don't add them to the database!
   if (g_allowInvalidHWID.integer) {
-    for (const auto &hwid : clients[clientNum].hwid) {
-      if (StringUtils::startsWith(hwid, "NOHWID_")) {
+    for (const auto &id : hwid) {
+      if (StringUtils::startsWith(id, "NOHWID_")) {
         return;
       }
     }
   }
 
-  const int platform = clients[clientNum].platform;
   // since we're potentially updating HWID, we only need to check
   // the existing ones for the users current platform
   const auto userHWIDs          = repository->getHWIDsForUsersPlatform(userID, platform);
-  const std::string currentHWID = StringUtils::join(clients[clientNum].hwid, ",");
+  const std::string currentHWID = StringUtils::join(hwid, ",");
 
   const auto addHWID = [&] {
     UserModels::UserHWID hwid{};
@@ -513,14 +525,14 @@ void SessionV2::updateHWID(const int clientNum, const int userID) const {
 }
 
 // NOTE: this performs database operations, don't call this on the main thread!
-void SessionV2::updateLastKnownIP(const int clientNum, const int userID) const {
+void SessionV2::updateLastKnownIP(const int32_t userID, const std::string &ipv4, const std::string &ipv6) const {
   // a client connects using either IPv4 or IPv6,
   // so only one of these is filled during a session
   // TODO: do we want to exclude 'localhost' here?
-  if (!clients[clientNum].ipv4.empty()) {
-    repository->updateIPv4(userID, clients[clientNum].ipv4);
+  if (!ipv4.empty()) {
+    repository->updateIPv4(userID, ipv4);
   } else {
-    repository->updateIPv6(userID, clients[clientNum].ipv6);
+    repository->updateIPv6(userID, ipv6);
   }
 }
 
@@ -1526,9 +1538,10 @@ void SessionV2::checkIPBan(const int clientNum) const {
 }
 
 // NOTE: this performs database operations, don't call this on the main thread!
-bool SessionV2::isBanned(const int clientNum, const int userID, const std::string &legacyGuid) const {
+bool SessionV2::isBanned(const std::string &guid, const std::vector<std::string> &hwid, const int32_t userID,
+                         const std::string &legacyGuid) const {
   const auto bans            = repository->getBanData();
-  const std::string userHwid = StringUtils::join(clients[clientNum].hwid, ",");
+  const std::string userHwid = StringUtils::join(hwid, ",");
 
   UserModels::LegacyAuth legacyAuth{};
   std::vector<std::string> legacyAuthHWIDs{};
@@ -1542,7 +1555,7 @@ bool SessionV2::isBanned(const int clientNum, const int userID, const std::strin
   }
 
   for (const auto &ban : bans) {
-    if (clients[clientNum].guid == ban.guid) {
+    if (guid == ban.guid) {
       return true;
     }
 
