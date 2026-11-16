@@ -36,17 +36,32 @@
   #include "../game/etj_filesystem.h"
   #include "../game/etj_shared.h"
   #include "../game/etj_string_utilities.h"
+  #include "../game/etj_time_utilities.h"
   #include "../game/etj_toml_utilities.h"
 
 namespace ETJump {
 inline constexpr char MIGRATE_CMD[] = "migrateGuid";
 
+namespace {
+// returns an empty string if the GUID cannot be read, e.g. because the
+// 'GUID' table or the requested key is missing, or the value has a wrong type
+template <typename T> std::string findGuid(const T &root, const char *key) {
+  try {
+    if (!root.is_table() || !root.contains("GUID") || !root.at("GUID").is_table()) {
+      return "";
+    }
+
+    return toml::find<std::optional<std::string>>(root.at("GUID"), key).value_or("");
+  } catch (const std::exception &) {
+    return "";
+  }
+}
+} // namespace
+
 ClientAuth::ClientAuth(const std::shared_ptr<ClientCommandsHandler> &serverCommands,
                        const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
   : serverCommands(serverCommands), consoleCommands(consoleCommands) {
-  if (!FileSystem::exists(AUTH_FILE)) {
-    createAuthFile();
-  }
+  ensureAuthFile();
 
   if (FileSystem::exists(GUID_FILE_OLD) && getGuid(GUIDVersion::GUID_V1).empty()) {
     migrateOldGuid();
@@ -89,6 +104,10 @@ void ClientAuth::authResponse() {
     return;
   }
 
+  // the auth file might have been deleted or corrupted at runtime,
+  // so make sure we have a usable GUID before responding
+  ensureAuthFile();
+
   const std::string guid              = getGuid(GUIDVersion::GUID_V2);
   const int os                        = getOS();
   const std::vector<std::string> hwid = getHwid();
@@ -119,13 +138,9 @@ void ClientAuth::manualMigration(const Constants::Authentication::MigrationType 
     return;
   }
 
-  // user manually deleted their auth file on runtime...
-  if (!FileSystem::exists(AUTH_FILE)) {
-    CG_Printf(
-      "Authentication file ^3'etjump/%s' ^7not found. Make sure the file exists, or reconnect to create a new one.\n",
-      AUTH_FILE);
-    return;
-  }
+  // the user might have deleted the auth file at runtime,
+  // or it might be unusable, so make sure we have a valid file
+  ensureAuthFile();
 
   // TODO: this should probably parse 'etguid.dat' again,
   //  so the user doesn't need to manually edit 'auth.dat'
@@ -177,30 +192,77 @@ std::string ClientAuth::getGuid(const GUIDVersion version) {
     return "";
   }
 
-  if (!root.contains("GUID")) {
-    CG_Printf("Unable to get GUID: auth file 'etjump/%s' does not contain a 'GUID' table.\n"
-              "Using temporary GUID.\n",
-              AUTH_FILE);
-    return "";
+  return findGuid(root, version == GUIDVersion::GUID_V2 ? "v2" : "v1");
+}
+
+// Makes sure the auth file exists and contains a usable GUID. A file that exists but cannot be used is recreated,
+// or repaired in place if it's valid TOML, so that a corrupted or unsupported file doesn't leave the client
+// permanently without a GUID.
+void ClientAuth::ensureAuthFile() {
+  if (!FileSystem::exists(AUTH_FILE)) {
+    createAuthFile();
+    return;
   }
 
-  const auto guid =
-    toml::find<std::optional<std::string>>(root.at("GUID"), version == GUIDVersion::GUID_V2 ? "v2" : "v1");
+  // The backup is best-effort: if it fails, we still recreate the file, since an unusable auth file leaves the
+  // client permanently without a GUID. A failure here usually means the recreation will fail as well, leaving
+  // the original file untouched.
+  const auto backupAuthFile = []() {
+    const TimeUtils::Time now = TimeUtils::getCurrentTime(true);
+    const std::string backup  = StringUtils::format("%s.bak-%s-%02i%02i%02i", AUTH_FILE, now.date.toDateString(),
+                                                    now.clock.hours, now.clock.min, now.clock.sec);
 
-  return guid.value_or("");
+    if (FileSystem::safeCopy(AUTH_FILE, backup)) {
+      CG_Printf("Backed up old auth file to '%s'\n", backup.c_str());
+    }
+  };
+
+  toml::ordered_value root;
+  std::string err;
+
+  if (!TOMLUtils::readFile(AUTH_FILE, root, &err)) {
+    CG_Printf("%s\n", err.c_str());
+    CG_Printf("Recreating auth file ^3'%s' ^7with a new GUID.\n", AUTH_FILE);
+
+    // keep a copy of the broken file in case it can be recovered manually
+    backupAuthFile();
+    createAuthFile();
+    return;
+  }
+
+  if (!findGuid(root, "v2").empty()) {
+    return;
+  }
+
+  CG_Printf("Auth file ^3'%s' ^7does not contain a valid GUID, generating a new one.\n", AUTH_FILE);
+
+  try {
+    if (!root["GUID"].is_table()) {
+      root["GUID"] = toml::ordered_value(toml::table{});
+    }
+
+    // repair the file in place, preserving any other data (e.g. the old GUID)
+    root["GUID"]["v2"] = toml::ordered_value(generateGuid());
+  } catch (const std::exception &e) {
+    CG_Printf("Failed to repair auth file: %s\nRecreating it.\n", e.what());
+
+    backupAuthFile();
+    createAuthFile();
+    return;
+  }
+
+  if (!TOMLUtils::writeFile(AUTH_FILE, root, &err)) {
+    CG_Printf("%s\nUsing temporary GUID.\n", err.c_str());
+  }
 }
 
 void ClientAuth::createAuthFile() {
   toml::ordered_value root;
   toml::ordered_value auth;
 
-  char buf[UUID4_LEN]{};
-  uuid4_init();
-  uuid4_generate(buf);
-
   // we don't know if the old GUID exists yet, so leave this empty
   auth["v1"] = toml::ordered_value("");
-  auth["v2"] = toml::ordered_value(StringUtils::toUpperCase(buf));
+  auth["v2"] = toml::ordered_value(generateGuid());
 
   root["GUID"] = auth;
 
@@ -209,6 +271,14 @@ void ClientAuth::createAuthFile() {
   if (!TOMLUtils::writeFile(AUTH_FILE, root, &err)) {
     CG_Printf("%s\nUsing temporary GUID.\n", err.c_str());
   }
+}
+
+std::string ClientAuth::generateGuid() {
+  char buf[UUID4_LEN]{};
+  uuid4_init();
+  uuid4_generate(buf);
+
+  return StringUtils::toUpperCase(buf);
 }
 
 void ClientAuth::migrateOldGuid() {
@@ -236,7 +306,16 @@ void ClientAuth::migrateOldGuid() {
     return;
   }
 
-  root["GUID"]["v1"] = contents;
+  try {
+    if (!root["GUID"].is_table()) {
+      root["GUID"] = toml::ordered_value(toml::table{});
+    }
+
+    root["GUID"]["v1"] = contents;
+  } catch (const std::exception &e) {
+    CG_Printf(failMsg.c_str(), e.what());
+    return;
+  }
 
   if (!TOMLUtils::writeFile(AUTH_FILE, root, &err)) {
     CG_Printf(failMsg.c_str(), err.c_str());

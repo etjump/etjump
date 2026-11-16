@@ -59,8 +59,10 @@ private:
   static int getOS();
   static std::vector<std::string> getHwid();
 
+  static void ensureAuthFile();
   static void createAuthFile();
   static void migrateOldGuid();
+  static std::string generateGuid();
 
   std::shared_ptr<ClientCommandsHandler> serverCommands;
   std::shared_ptr<ClientCommandsHandler> consoleCommands;
