@@ -386,20 +386,28 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
       // an old GUID that has never been registered on the server,
       // and is also visiting for the first time (new GUID not in the db)
       if (user.id == 0) {
-        return std::make_unique<GuidMigrationResult>(user.id, false, "");
+        return std::make_unique<GuidMigrationResult>(user.id, false, false, "");
       }
 
       if (isBanned(guid, hwid, user.id, oldGuid)) {
-        return std::make_unique<GuidMigrationResult>(user.id, true, "");
+        return std::make_unique<GuidMigrationResult>(user.id, false, true, "");
+      }
+
+      // the account is already associated with the GUID we're currently using,
+      // so there is nothing to migrate
+      if (!guid.empty() && user.guid == guid) {
+        return std::make_unique<GuidMigrationResult>(
+          user.id, false, false, "Your current GUID is already linked to your old GUID. Nothing to do.\n");
       }
 
       // forced manual migration overrides the GUID in the database,
       // otherwise we only perform migration if the GUID in database is empty
       if (migrationType != Constants::Authentication::MigrationType::MANUAL_FORCE && !user.guid.empty()) {
         return std::make_unique<GuidMigrationResult>(
-          user.id, false,
-          "Already authenticated with new GUID. You may force a migration with 'migrateGuid -f'.\n"
-          "Note that this will delete the data associated with your current GUID.\n");
+          user.id, false, false,
+          "Your old GUID is already linked to a different GUID on this server.\n"
+          "Run 'migrateGuid -f' to link it to your current GUID instead.\n"
+          "Warning: this discards the data associated with your current GUID and cannot be undone.\n");
       }
 
       repository->migrateGuid(user.id, guid);
@@ -408,10 +416,12 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
       updateHWID(user.id, hwid, platform);
       updateLastKnownIP(user.id, ipv4, ipv6);
 
-      return std::make_unique<GuidMigrationResult>(user.id, false, "Successfully migrated old GUID.\n");
+      return std::make_unique<GuidMigrationResult>(
+        user.id, true, false,
+        "Old GUID migrated successfully. Your old user data is now linked to your current GUID.\n");
     },
     [this, clientNum, cleanName](std::unique_ptr<SynchronizationContext::ResultBase> legacyAuthData) {
-      const auto result = dynamic_cast<GuidMigrationResult *>(legacyAuthData.get());
+      const auto *const result = dynamic_cast<GuidMigrationResult *>(legacyAuthData.get());
 
       if (result == nullptr) {
         throw std::runtime_error("GuidMigrationResults is null.");
@@ -424,14 +434,23 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
 
       if (result->userID == 0) {
         addNewUser(clientNum);
-      } else {
+        return;
+      }
+
+      if (result->migrated) {
         logger->info("GUID migration successfully performed for client %i %s.", clientNum, cleanName);
-        Printer::console(clientNum, result->message);
+      } else {
+        logger->info("No GUID migration performed for client %i %s.", clientNum, cleanName);
+      }
+
+      Printer::console(clientNum, result->message);
+
+      if (result->migrated) {
         onAuthSuccess(clientNum);
       }
     },
     [this, clientNum, cleanName](const std::runtime_error &e) {
-      Printer::console(clientNum, StringUtils::format("Failed to migrate GUID: %s\n", e.what()));
+      Printer::console(clientNum, StringUtils::format("GUID migration failed: %s\n", e.what()));
       logger->error("GUID migration failed for client %i %s: %s", clientNum, cleanName, e.what());
     });
 
@@ -471,7 +490,7 @@ void SessionV2::addNewUser(const int32_t clientNum) {
       return std::make_unique<AddUserResult>(userID, "Successfully added new user to the database.");
     },
     [this, clientNum](std::unique_ptr<SynchronizationContext::ResultBase> addUserResult) {
-      const auto result = dynamic_cast<AddUserResult *>(addUserResult.get());
+      const auto *const result = dynamic_cast<AddUserResult *>(addUserResult.get());
 
       if (result == nullptr) {
         throw std::runtime_error("AddUserResult is null.");
@@ -480,8 +499,10 @@ void SessionV2::addNewUser(const int32_t clientNum) {
       logger->info(result->message);
       onAuthSuccess(clientNum);
     },
-    [this](const std::runtime_error &e) {
+    [this, clientNum](const std::runtime_error &e) {
       logger->error("Failed to add new user: %s", e.what());
+      Printer::console(clientNum, "Failed to register your GUID with the server. Try reconnecting. "
+                                  "If the problem persists, please report this to the developers.\n");
     });
 }
 

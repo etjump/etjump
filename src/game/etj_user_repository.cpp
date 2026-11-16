@@ -302,7 +302,8 @@ void UserRepository::migrateGuid(const int oldID, const std::string &newGUID) co
       userID;
 
     if (userID == oldID) {
-      throw std::runtime_error("Current GUID is already associated with your current user ID");
+      // the account is already using this GUID, so there is nothing to migrate
+      return;
     }
 
     // TODO: this should probably also erase timerun records for the user?

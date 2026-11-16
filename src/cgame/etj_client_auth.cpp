@@ -133,18 +133,20 @@ void ClientAuth::migrationResponse() {
 }
 
 void ClientAuth::manualMigration(const Constants::Authentication::MigrationType type) {
-  if (!FileSystem::exists(GUID_FILE_OLD)) {
-    CG_Printf("Old GUID file not found. Make sure ^3'%s' ^7is present in ^3'etjump' ^7directory.\n", GUID_FILE_OLD);
-    return;
-  }
-
   // the user might have deleted the auth file at runtime,
   // or it might be unusable, so make sure we have a valid file
   ensureAuthFile();
 
-  // TODO: this should probably parse 'etguid.dat' again,
-  //  so the user doesn't need to manually edit 'auth.dat'
-  //  if they are performing a forced re-migration
+  const bool oldGuidFileExists = FileSystem::exists(GUID_FILE_OLD);
+
+  // a forced migration always re-reads the old GUID file, so that a swapped
+  // 'etguid.dat' is used instead of whatever was migrated last time
+  if (type == Constants::Authentication::MigrationType::MANUAL_FORCE && oldGuidFileExists) {
+    if (!migrateOldGuid()) {
+      return;
+    }
+  }
+
   std::string oldGuid = getGuid(GUIDVersion::GUID_V1);
 
   // normally the GUID shouldn't be empty here since we auto-migrate on init,
@@ -152,21 +154,26 @@ void ClientAuth::manualMigration(const Constants::Authentication::MigrationType 
   // 1. the old GUID wasn't present on init, but the user later dropped in
   //    the file to 'etjump' directory during runtime
   // 2. the user manually edited the auth file and erased the old GUID string
-  if (!oldGuid.empty()) {
-    trap_SendClientCommand(
-      va("%s %s %i", Constants::Authentication::GUID_MIGRATE, Crypto::sha1(oldGuid).c_str(), static_cast<int>(type)));
-  } else {
-    migrateOldGuid();
+  if (oldGuid.empty()) {
+    if (!oldGuidFileExists) {
+      CG_Printf("Old GUID file not found. Make sure ^3'%s' ^7is present in ^3'etjump' ^7directory.\n", GUID_FILE_OLD);
+      return;
+    }
+
+    if (!migrateOldGuid()) {
+      return;
+    }
+
     oldGuid = getGuid(GUIDVersion::GUID_V1);
 
-    // parsing failed
     if (oldGuid.empty()) {
-      CG_Printf("Failed to perform GUID migration.\n");
-    } else {
-      trap_SendClientCommand(
-        va("%s %s %i", Constants::Authentication::GUID_MIGRATE, Crypto::sha1(oldGuid).c_str(), static_cast<int>(type)));
+      CG_Printf("GUID migration failed: could not read a valid old GUID from '%s'.\n", GUID_FILE_OLD);
+      return;
     }
   }
+
+  trap_SendClientCommand(
+    va("%s %s %i", Constants::Authentication::GUID_MIGRATE, Crypto::sha1(oldGuid).c_str(), static_cast<int>(type)));
 }
 
 int ClientAuth::getOS() {
@@ -281,21 +288,21 @@ std::string ClientAuth::generateGuid() {
   return StringUtils::toUpperCase(buf);
 }
 
-void ClientAuth::migrateOldGuid() {
+bool ClientAuth::migrateOldGuid() {
   std::string contents{};
-  const std::string failMsg = "Unable to migrate old GUID to a new file:\n%s\n";
+  const std::string failMsg = "Failed to import the old GUID into the auth file:\n%s\n";
 
   try {
     const File guidFile(GUID_FILE_OLD);
     contents = guidFile.readString();
   } catch (const File::FileIOException &e) {
     CG_Printf(failMsg.c_str(), e.what());
-    return;
+    return false;
   }
 
   if (contents.empty()) {
     CG_Printf(failMsg.c_str(), "Empty GUID file.");
-    return;
+    return false;
   }
 
   toml::ordered_value root;
@@ -303,7 +310,7 @@ void ClientAuth::migrateOldGuid() {
 
   if (!TOMLUtils::readFile(AUTH_FILE, root, &err)) {
     CG_Printf(failMsg.c_str(), err.c_str());
-    return;
+    return false;
   }
 
   try {
@@ -314,12 +321,15 @@ void ClientAuth::migrateOldGuid() {
     root["GUID"]["v1"] = contents;
   } catch (const std::exception &e) {
     CG_Printf(failMsg.c_str(), e.what());
-    return;
+    return false;
   }
 
   if (!TOMLUtils::writeFile(AUTH_FILE, root, &err)) {
     CG_Printf(failMsg.c_str(), err.c_str());
+    return false;
   }
+
+  return true;
 }
 } // namespace ETJump
 #endif

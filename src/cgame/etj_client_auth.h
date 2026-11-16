@@ -61,7 +61,7 @@ private:
 
   static void ensureAuthFile();
   static void createAuthFile();
-  static void migrateOldGuid();
+  static bool migrateOldGuid();
   static std::string generateGuid();
 
   std::shared_ptr<ClientCommandsHandler> serverCommands;
